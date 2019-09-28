@@ -1,0 +1,163 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert MR % 4 == 0
+$ABC = "0123456789ABCDEFGHIJK"
+#include <assert.h>
+
+#include <xmmintrin.h>
+
+#include <xnnpack/spmm.h>
+
+
+void xnn_f32_spmm_ukernel_${MR}x${NR}__sse${"_unroll" + str(UNROLL) if UNROLL > 1 else ""}(
+    uint32_t m,
+    uint32_t n,
+    const float*restrict a,
+    const float*restrict weights,
+    const int32_t*restrict widx_dmap,
+    const uint32_t*restrict nidx_nnzmap,
+    float*restrict c,
+    const union xnn_f32_output_params params[restrict static 1])
+{
+  assert(m != 0);
+
+  const __m128 vmin = _mm_load_ps(params->sse.min);
+  const __m128 vmax = _mm_load_ps(params->sse.max);
+  size_t i = m;
+  while XNN_LIKELY(i >= ${MR}) {
+    const float*restrict w = weights;
+    const int32_t* dmap = widx_dmap;
+    const uint32_t* nnzmap = nidx_nnzmap;
+    size_t j = n;
+    do {
+      uint32_t nnz = *nnzmap++;
+      $if UNROLL > 1:
+        __m128 vacc0123x0 = _mm_load1_ps(w);
+        w += 1;
+        $for K in range(1, UNROLL):
+          __m128 vacc0123x${K} = _mm_setzero_ps();
+        $for M in range(4, MR, 4):
+          __m128 vacc${ABC[M:M+4]}x0 = vacc0123x0;
+          $for K in range(1, UNROLL):
+            __m128 vacc${ABC[M:M+4]}x${K} = _mm_setzero_ps();
+        for (; nnz >= ${UNROLL}; nnz -= ${UNROLL}) {
+          $for K in range(UNROLL):
+            const intptr_t diff${K} = dmap[${K}];
+          dmap += ${UNROLL};
+          $for K in range(UNROLL):
+            const __m128 va0123x${K} = _mm_loadu_ps(a);
+            $for M in range(4, MR, 4):
+              const __m128 va${ABC[M:M+4]}x${K} = _mm_loadu_ps(a + ${M});
+            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff${K});
+            const __m128 vb${K} = _mm_load1_ps(w);
+            w += 1;
+            $for M in range(0, MR, 4):
+              vacc${ABC[M:M+4]}x${K} = _mm_add_ps(vacc${ABC[M:M+4]}x${K}, _mm_mul_ps(va${ABC[M:M+4]}x${K}, vb${K}));
+        }
+        $for M in range(0, MR, 4):
+          __m128 vacc${ABC[M:M+4]} = vacc${ABC[M:M+4]}x0;
+        $for K in range(1, UNROLL):
+          $for M in range(0, MR, 4):
+            vacc${ABC[M:M+4]} = _mm_add_ps(vacc${ABC[M:M+4]}, vacc${ABC[M:M+4]}x${K});
+      $else:
+        __m128 vacc0123 = _mm_load1_ps(w); w += 1;
+        $for M in range(4, MR, 4):
+          __m128 vacc${ABC[M:M+4]} = vacc0123;
+      if XNN_LIKELY(nnz != 0) {
+        do {
+          const intptr_t diff = *dmap++;
+          const __m128 va0123 = _mm_loadu_ps(a);
+          $for M in range(4, MR, 4):
+            const __m128 va${ABC[M:M+4]} = _mm_loadu_ps(a + ${M});
+          a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+          const __m128 vb = _mm_load1_ps(w); w += 1;
+          $for M in range(0, MR, 4):
+            vacc${ABC[M:M+4]} = _mm_add_ps(vacc${ABC[M:M+4]}, _mm_mul_ps(va${ABC[M:M+4]}, vb));
+        } while (--nnz != 0);
+      }
+      $for M in range(0, MR, 4):
+        __m128 vout${ABC[M:M+4]} = _mm_min_ps(vacc${ABC[M:M+4]}, vmax);
+      $for M in range(0, MR, 4):
+        vout${ABC[M:M+4]} = _mm_max_ps(vout${ABC[M:M+4]}, vmin);
+      _mm_storeu_ps(c, vout0123);
+      $for M in range(4, MR, 4):
+        _mm_storeu_ps(c + ${M}, vout${ABC[M:M+4]});
+      c += ${NR} * m;
+    } while (--j != 0);
+    c -= m * n;
+    c += ${MR};
+    a += ${MR};
+    i -= ${MR};
+  }
+  if XNN_UNLIKELY(i != 0) {
+    $for LOG2M in reversed(range((MR - 1).bit_length())):
+      $SUBMR = 1 << LOG2M
+      if (i & ${SUBMR}) {
+        const float*restrict w = weights;
+        const int32_t* dmap = widx_dmap;
+        const uint32_t* nnzmap = nidx_nnzmap;
+        size_t j = n;
+        do {
+          uint32_t nnz = *nnzmap++;
+          $if SUBMR == 1:
+            __m128 vacc0 = _mm_load_ss(w); w += 1;
+          $elif SUBMR == 2:
+            __m128 vacc01 = _mm_load_ss(w); w += 1;
+            vacc01 = _mm_unpacklo_ps(vacc01, vacc01);
+          $else:
+            __m128 vacc0123 = _mm_load1_ps(w); w += 1;
+          $for M in range(4, SUBMR, 4):
+            __m128 vacc${ABC[M:M+4]} = vacc0123;
+          if XNN_LIKELY(nnz != 0) {
+            do {
+              const intptr_t diff = *dmap++;
+              $if SUBMR >= 4:
+                const __m128 va0123 = _mm_loadu_ps(a);
+              $elif SUBMR == 2:
+                const __m128 va01 = _mm_loadl_pi(_mm_undefined_ps(), (const __m64*) a);
+              $elif SUBMR == 1:
+                const __m128 va0 = _mm_load_ss(a);
+              $for M in range(4, SUBMR, 4):
+                const __m128 va${ABC[M:M+4]} = _mm_loadu_ps(a + ${M});
+              a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+              $if SUBMR >= 4:
+                const __m128 vb = _mm_load1_ps(w); w += 1;
+              $elif SUBMR == 2:
+                __m128 vb = _mm_load_ss(w); w += 1;
+                vb = _mm_unpacklo_ps(vb, vb);
+              $else:
+                const __m128 vb = _mm_load_ss(w); w += 1;
+              $if SUBMR == 1:
+                vacc${ABC[0]} = _mm_add_ss(vacc${ABC[0]}, _mm_mul_ss(va${ABC[0]}, vb));
+              $else:
+                $for M in range(0, SUBMR, 4):
+                  vacc${ABC[M:min(M+4,SUBMR)]} = _mm_add_ps(vacc${ABC[M:min(M+4,SUBMR)]}, _mm_mul_ps(va${ABC[M:min(M+4,SUBMR)]}, vb));
+            } while (--nnz != 0);
+          }
+          $if SUBMR == 1:
+            __m128 vout${ABC[0]} = _mm_min_ss(vacc${ABC[0]}, vmax);
+            vout${ABC[0]} = _mm_max_ss(vout${ABC[0]}, vmin);
+          $else:
+            $for M in range(0, SUBMR, 4):
+              __m128 vout${ABC[M:min(M+4,SUBMR)]} = _mm_min_ps(vacc${ABC[M:min(M+4,SUBMR)]}, vmax);
+            $for M in range(0, SUBMR, 4):
+              vout${ABC[M:min(M+4,SUBMR)]} = _mm_max_ps(vout${ABC[M:min(M+4,SUBMR)]}, vmin);
+          $if SUBMR >= 4:
+            _mm_storeu_ps(c, vout0123);
+          $elif SUBMR == 2:
+            _mm_storel_pi((__m64*) c, vout01);
+          $elif SUBMR == 1:
+            _mm_store_ss(c, vout0);
+          $for M in range(4, SUBMR, 4):
+            _mm_storeu_ps(c + ${M}, vout${ABC[M:M+4]});
+          c += ${NR} * m;
+        } while (--j != 0);
+        c -= m * n;
+        c += ${SUBMR};
+        a += ${SUBMR};
+      }
+  }
+}

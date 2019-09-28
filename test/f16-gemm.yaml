@@ -1,0 +1,17 @@
+# Copyright 2019 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f16_gemm_ukernel_4x8__neonfp16arith_ld64
+  k-block: 4
+  fused-nc: true
+  arch:
+  - aarch64
+- name: xnn_f16_gemm_ukernel_6x8__neonfp16arith_ld64
+  k-block: 4
+  arch:
+  - aarch64
+- name: xnn_f16_gemm_ukernel_8x8__neonfp16arith_ld64
+  k-block: 4
+  arch:
+  - aarch64

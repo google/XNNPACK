@@ -1,0 +1,137 @@
+/*
+ * Copyright 2019 Google LLC
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+$assert CR > 0
+$ABC = "0123456789ABCDEFGHIJKLMN"
+#include <assert.h>
+
+#include <xnnpack/math.h>
+#include <xnnpack/vmulcaddc.h>
+
+
+void xnn_f32_vmulcaddc_ukernel_c${CR}__scalar_x${MR}(
+    size_t m,
+    size_t channels,
+    const float*restrict x,
+    size_t x_stride,
+    const float*restrict weights,
+    float*restrict y,
+    size_t y_stride,
+    const union xnn_f32_output_params params[restrict static 1])
+{
+  assert(m != 0);
+  assert(channels != 0);
+  assert(channels % sizeof(float) == 0);
+
+  const size_t x_increment = x_stride * ${MR} - (channels & -(${CR} * sizeof(float)));
+  const size_t y_increment = y_stride * ${MR} - channels;
+
+  const float* x0 = x;
+  float* y0 = y;
+  $for M in range(1, MR):
+    const float* x${M} = (const float*) ((uintptr_t) x${M-1} + x_stride);
+    float* y${M} = (float*) ((uintptr_t) y${M-1} + y_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(m <= ${M}) {
+        x${M} = x${M-1};
+        y${M} = y${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(m < ${M+1}) {
+        x${M} = x${M-1};
+        y${M} = y${M-1};
+      }
+
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
+  do {
+    const float* w = weights;
+    size_t c = channels;
+    for (; c >= ${CR} * sizeof(float); c -= ${CR} * sizeof(float)) {
+      $for C in range(CR):
+        const float vscale${ABC[C]} = w[${C}];
+
+      $for M in range(MR):
+        $for C in range(CR):
+          const float vx${M}x${ABC[C]} = x${M}[${C}];
+        x${M} += ${CR};
+
+      $for C in range(CR):
+        const float vbias${ABC[C]} = w[${C + CR}];
+
+      $for M in range(MR):
+        $for C in range(CR):
+          float vacc${M}x${ABC[C]} = vx${M}x${ABC[C]} * vscale${ABC[C]} + vbias${ABC[C]};
+
+      $for M in range(MR):
+        $for C in range(CR):
+          vacc${M}x${ABC[C]} = math_max_f32(vacc${M}x${ABC[C]}, vmin);
+
+      $for M in range(MR):
+        $for C in range(CR):
+          vacc${M}x${ABC[C]} = math_min_f32(vacc${M}x${ABC[C]}, vmax);
+
+      $for M in range(MR):
+        $for C in range(CR):
+          y${M}[${C}] = vacc${M}x${ABC[C]};
+        y${M} += ${CR};
+
+      w += ${CR * 2};
+    }
+    if XNN_UNLIKELY(c != 0) {
+      $for C in range(CR):
+        const float vscale${ABC[C]} = w[${C}];
+
+      $for M in range(MR):
+        $for C in range(CR):
+          const float vx${M}x${ABC[C]} = x${M}[${C}];
+        x${M} += ${CR};
+
+      $for C in range(CR):
+        const float vbias${ABC[C]} = w[${C + CR}];
+
+      $for M in range(MR):
+        $for C in range(CR):
+          float vacc${M}x${ABC[C]} = vx${M}x${ABC[C]} * vscale${ABC[C]} + vbias${ABC[C]};
+
+      $for M in range(MR):
+        $for C in range(CR):
+          vacc${M}x${ABC[C]} = math_max_f32(vacc${M}x${ABC[C]}, vmin);
+
+      $for M in range(MR):
+        $for C in range(CR):
+          vacc${M}x${ABC[C]} = math_min_f32(vacc${M}x${ABC[C]}, vmax);
+
+      w += ${CR * 2};
+
+      $for LOG2C in reversed(range(CR.bit_length() - 1)):
+        if (c & ${1 << LOG2C}) {
+          $for M in range(MR):
+            $for C in range(1 << LOG2C):
+              c${M}[${C}] = vacc${M}x${C};
+            $if LOG2C != 0:
+              $for C in range(1 << (LOG2C - 1)):
+                vacc${M}${C} = vacc${M}x${C + (1 << LOG2C)};
+              c${M} += ${1 << LOG2C};
+        }
+    }
+    $for M in range(MR):
+      x${M} = (const float*) ((uintptr_t) x${M} + x_increment);
+      y${M} = (float*) ((uintptr_t) y${M} + y_increment);
+      $if M % 2 == 1:
+        if XNN_UNPREDICTABLE(m < ${MR + M+1}) {
+          x${M} = x${M-1};
+          y${M} = y${M-1};
+        }
+      $elif M != 0:
+        if XNN_UNPREDICTABLE(m <= ${MR + M}) {
+          x${M} = x${M-1};
+          y${M} = y${M-1};
+        }
+    m = doz(m, ${MR});
+  } while (m != 0);
+}

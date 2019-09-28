@@ -1,0 +1,164 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR % 8 == 0
+$ABC = "0123456789ABCDEFGHIJKLMN"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/gemm.h>
+
+
+void xnn_f16_gemm_ukernel_${MR}x${NR}__neonfp16arith_ld64(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const void* restrict a,
+    size_t a_stride,
+    const void* restrict w,
+    void* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const struct xnn_f16_output_params params[restrict static 1])
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(__fp16) == 0);
+
+  const __fp16* a0 = a;
+  __fp16* c0 = c;
+  $for M in range(1, MR):
+    const __fp16* a${M} = (const __fp16*) ((uintptr_t) a${M-1} + a_stride);
+    __fp16* c${M} = (__fp16*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+
+  do {
+    $for N in range(0, NR, 8):
+      float16x8_t vacc0x${ABC[N:N+8]} = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+    $for M in range(1, MR):
+      $for N in range(0, NR, 8):
+        float16x8_t vacc${M}x${ABC[N:N+8]} = vacc0x${ABC[N:N+8]};
+
+    size_t k = kc;
+    while (k >= 4 * sizeof(__fp16)) {
+      $for M in range(MR):
+        const float16x4_t va${M} = vld1_f16(a${M}); a${M} += 4;
+
+      $for L in range(4):
+        $for N in range(0, NR, 8):
+          const float16x8_t vb${ABC[N:N+8]}c${L} = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+
+        #if defined(__aarch64__)
+            $for M in range(MR):
+              vacc${M}x${ABC[N:N+8]} = vfmaq_lane_f16(vacc${M}x${ABC[N:N+8]}, vb${ABC[N:N+8]}c${L}, va${M}, ${L});
+        #else
+          $for M in range(MR):
+            const float16x8_t va${M}c${L} = vdupq_lane_f16(va${M}, ${L});
+
+          $for N in range(0, NR, 8):
+            $for M in range(MR):
+              vacc${M}x${ABC[N:N+8]} = vfmaq_f16(vacc${M}x${ABC[N:N+8]}, va${M}c${L}, vb${ABC[N:N+8]}c${L});
+        #endif
+
+      k -= 4 * sizeof(__fp16);
+    }
+    if XNN_UNLIKELY(k != 0) {
+      do {
+        $for M in range(MR):
+          const float16x8_t va${M} = vld1q_dup_f16(a${M}); a${M} += 1;
+
+        $for N in range(0, NR, 8):
+          const float16x8_t vb${ABC[N:N+8]} = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+
+        $for N in range(0, NR, 8):
+          $for M in range(MR):
+            vacc${M}x${ABC[N:N+8]} = vfmaq_f16(vacc${M}x${ABC[N:N+8]}, va${M}, vb${ABC[N:N+8]});
+
+        k -= sizeof(__fp16);
+      } while (k != 0);
+    }
+
+    const float16x8_t vscale = vld1q_dup_f16((const __fp16*) &params->scale);
+    $for N in range(0, NR, 8):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+8]} = vmulq_f16(vacc${M}x${ABC[N:N+8]}, vscale);
+
+    const float16x8_t vmax = vld1q_dup_f16((const __fp16*) &params->max);
+    $for N in range(0, NR, 8):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+8]} = vminq_f16(vacc${M}x${ABC[N:N+8]}, vmax);
+
+    const float16x8_t vmin = vld1q_dup_f16((const __fp16*) &params->min);
+    $for N in range(0, NR, 8):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+8]} = vmaxq_f16(vacc${M}x${ABC[N:N+8]}, vmin);
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in range(MR):
+        vst1q_f16(c${M}, vacc${M}x${ABC[0:8]});
+        $for N in range(8, NR, 8):
+          vst1q_f16(c${M} + ${N}, vacc${M}x${ABC[N:N+8]});
+        c${M} = (__fp16*) ((uintptr_t) c${M} + cn_stride);
+
+      $for M in range(MR):
+        a${M} = (const __fp16*) ((uintptr_t) a${M} - kc);
+
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(NR.bit_length())):
+        $if NR != 1 << LOG2N:
+          if (nc & ${1 << LOG2N}) {
+            $if LOG2N >= 3:
+              $for N in range(0, 1 << LOG2N, 8):
+                $for M in range(MR):
+                  vst1q_f16(c${M}, vacc${M}x${ABC[N:N+8]}); c${M} += 8;
+
+              $for M in range(MR):
+                $for N in range(0, 1 << (LOG2N - 1), 4):
+                  vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
+            $elif LOG2N == 2:
+              $for M in range(MR):
+                vst1_f16(c${M}, vacc${M}x${ABC[0:4]}); c${M} += 4;
+
+              $for M in range(MR):
+                vacc${M}x${ABC[0:4]} = vget_high_f32(vacc${M}x${ABC[0:8]});
+            $elif LOG2N == 1:
+              $for M in range(MR):
+                vst1_lane_u32(__builtin_assume_aligned(c${M}, 1), vreinterpret_u32_f16(vacc${M}x${ABC[0:4]}), 0); c${M} += 2;
+
+              $for M in range(MR):
+                vacc${M}x${ABC[0:4]} = vext_f16(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]}, 2);
+            $elif LOG2N == 0:
+              $for M in range(MR):
+                vst1_lane_f16(c${M}, vacc${M}x${ABC[0:4]}, 0);
+          }
+        $if LOG2N == 3:
+          $for M in range(MR):
+            float16x4_t vacc${M}x${ABC[0:4]} = vget_low_f32(vacc${M}x${ABC[0:8]});
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

@@ -1,0 +1,110 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CR % 4 == 0
+$assert MR >= 2
+$assert AR >= 1
+$ABC = "0123456789ABCDEF"
+$VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/dwconv.h>
+
+
+void xnn_f32_dwconv_ukernel_up${CR}x${MR}__${"neonfma" if FMA else "neon"}(
+    size_t channels,
+    size_t output_width,
+    const float** input,
+    const float* weights,
+    float* output,
+    size_t input_stride,
+    size_t output_increment,
+    const union xnn_f32_output_params params[restrict static 1])
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+  do {
+    $for M in range(MR):
+      const float* i${M} = input[${M}];
+    input = (const float**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const float* w = weights;
+    for (; c >= ${CR}; c -= ${CR}) {
+      $for C in range(0, CR, 4):
+        float32x4_t vacc${ABC[C:C+4]}p0 = vld1q_f32(w); w += 4;
+
+      $for M in range(MR):
+
+        $for C in range(0, CR, 4):
+          const float32x4_t vi${M}x${ABC[C:C+4]} = vld1q_f32(i${M}); i${M} += 4;
+        $for C in range(0, CR, 4):
+          const float32x4_t vk${M}x${ABC[C:C+4]} = vld1q_f32(w); w += 4;
+        $for C in range(0, CR, 4):
+          $if 1 <= M < AR:
+            float32x4_t vacc${ABC[C:C+4]}p${M} = vmulq_f32(vi${M}x${ABC[C:C+4]}, vk${M}x${ABC[C:C+4]});
+          $else:
+            vacc${ABC[C:C+4]}p${M % AR} = ${VMULADDQ_F32}(vacc${ABC[C:C+4]}p${M % AR}, vi${M}x${ABC[C:C+4]}, vk${M}x${ABC[C:C+4]});
+
+      $STEPA = 1
+      $while STEPA < AR:
+        $for A in range(0, AR, STEPA * 2):
+          $if A + STEPA < AR:
+            for C in range(0, CR, 4):
+              vacc${ABC[C:C+4]}p${A} = vaddq_f32(vacc${ABC[C:C+4]}p${A}, vacc${ABC[C:C+4]}p${A + STEPA});
+        $STEPA *= 2
+
+      $for C in range(0, CR, 4):
+        float32x4_t vacc${ABC[C:C+4]} = vmaxq_f32(vacc${ABC[C:C+4]}p0, vmin);
+      $for C in range(0, CR, 4):
+        vacc${ABC[C:C+4]} = vminq_f32(vacc${ABC[C:C+4]}, vmax);
+
+      $for C in range(0, CR, 4):
+        vst1q_f32(output, vacc${ABC[C:C+4]}); output += 4;
+    }
+    if XNN_UNLIKELY(c != 0) {
+      $for C in range(0, CR, 4):
+        float32x4_t vacc${ABC[C:C+4]} = vld1q_f32(w); w += 4;
+
+      $for M in range(MR):
+
+        $for C in range(0, CR, 4):
+          const float32x4_t vi${M}x${ABC[C:C+4]} = vld1q_f32(i${M}); i${M} += 4;
+        $for C in range(0, CR, 4):
+          const float32x4_t vk${M}x${ABC[C:C+4]} = vld1q_f32(w); w += 4;
+        $for C in range(0, CR, 4):
+          vacc${ABC[C:C+4]} = ${VMULADDQ_F32}(vacc${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]}, vk${M}x${ABC[C:C+4]});
+
+      $for C in range(0, CR, 4):
+        vacc${ABC[C:C+4]} = vmaxq_f32(vacc${ABC[C:C+4]}, vmin);
+      $for C in range(0, CR, 4):
+        vacc${ABC[C:C+4]} = vminq_f32(vacc${ABC[C:C+4]}, vmax);
+
+      $for LOG2C in reversed(range(CR.bit_length())):
+        $if CR != 1 << LOG2C:
+          if (c & ${1 << LOG2C}) {
+            $if LOG2C >= 2:
+              $for C in range(0, 1 << LOG2C, 4):
+                  vst1q_f32(output, vacc${ABC[C:C+4]}); output += 4;
+              $for C in range(0, 1 << (LOG2C - 1), 4):
+                vacc${ABC[C:C+4]} = vacc${ABC[C + (1 << LOG2C):C + (1 << LOG2C)+4]};
+            $elif LOG2C == 1:
+              vst1_f32(output, vacc${ABC[0:2]}); output += 2;
+              vacc${ABC[0:2]} = vget_high_f32(vacc${ABC[0:4]});
+            $elif LOG2C == 0:
+              vst1_lane_f32(output, vacc${ABC[0:2]}, 0); output += 1;
+          }
+        $if LOG2C == 2:
+          float32x2_t vacc${ABC[0:2]} = vget_low_f32(vacc${ABC[0:4]});
+    }
+
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}

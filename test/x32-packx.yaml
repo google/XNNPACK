@@ -1,0 +1,16 @@
+# Copyright 2019 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_x32_packx_ukernel_4x__neon_st4
+  k-block: 4
+- name: xnn_x32_packx_ukernel_4x__sse
+  k-block: 4
+- name: xnn_x32_packx_ukernel_4x__psimd
+  k-block: 4
+- name: xnn_x32_packx_ukernel_2x__scalar
+  k-block: 1
+- name: xnn_x32_packx_ukernel_3x__scalar
+  k-block: 1
+- name: xnn_x32_packx_ukernel_4x__scalar
+  k-block: 1

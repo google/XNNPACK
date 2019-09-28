@@ -1,0 +1,91 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CR == 4
+$assert MR >= 2
+$assert AR >= 1
+#include <assert.h>
+
+#include <xmmintrin.h>
+
+#include <xnnpack/dwconv.h>
+
+
+void xnn_f32_dwconv_ukernel_up${CR}x${MR}__sse(
+    size_t channels,
+    size_t output_width,
+    const float** input,
+    const float* weights,
+    float* output,
+    size_t input_stride,
+    size_t output_increment,
+    const union xnn_f32_output_params params[restrict static 1])
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  const __m128 vmax = _mm_load_ps(params->sse.max);
+  const __m128 vmin = _mm_load_ps(params->sse.min);
+  do {
+    $for M in range(MR):
+      const float* i${M} = input[${M}];
+    input = (const float**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const float* w = weights;
+    for (; c >= 4; c -= 4) {
+      __m128 vacc0 = _mm_load_ps(w);
+      $for M in range(MR):
+
+        const __m128 vi${M} = _mm_loadu_ps(i${M});
+        const __m128 vk${M} = _mm_load_ps(w + ${(M+1) * CR});
+        $if 1 <= M < AR:
+          __m128 vacc${M} = _mm_mul_ps(vi${M}, vk${M});
+        $else:
+          vacc${M % AR} = _mm_add_ps(vacc${M % AR}, _mm_mul_ps(vi${M}, vk${M}));
+        i${M} += ${CR};
+
+      w += ${(MR + 1) * CR};
+
+      $STEPA = 1
+      $while STEPA < AR:
+        $for A in range(0, AR, STEPA * 2):
+          $if A + STEPA < AR:
+            vacc${A} = _mm_add_ps(vacc${A}, vacc${A + STEPA});
+        $STEPA *= 2
+
+      vacc0 = _mm_max_ps(vacc0, vmin);
+      vacc0 = _mm_min_ps(vacc0, vmax);
+
+      _mm_storeu_ps(output, vacc0);
+      output += ${CR};
+    }
+    if XNN_UNLIKELY(c != 0) {
+      __m128 vacc = _mm_load_ps(w);
+      $for M in range(MR):
+
+        const __m128 vi${M} = _mm_loadu_ps(i${M});
+        const __m128 vk${M} = _mm_load_ps(w + ${(M+1) * CR});
+        vacc = _mm_add_ps(vacc, _mm_mul_ps(vi${M}, vk${M}));
+
+      w += ${(MR + 1) * CR};
+
+      vacc = _mm_max_ps(vacc, vmin);
+      vacc = _mm_min_ps(vacc, vmax);
+
+      if (c & 2) {
+        _mm_storel_pi((__m64*) output, vacc);
+        vacc = _mm_movehl_ps(vacc, vacc);
+        output += 2;
+      }
+      if (c & 1) {
+        _mm_store_ss(output, vacc);
+        output += 1;
+      }
+    }
+
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}

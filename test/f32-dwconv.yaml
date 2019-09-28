@@ -1,0 +1,18 @@
+# Copyright 2019 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma
+- name: xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
+  pipelined: true
+- name: xnn_f32_dwconv_ukernel_up4x9__neonfma
+- name: xnn_f32_dwconv_ukernel_up4x9__neon
+- name: xnn_f32_dwconv_ukernel_up4x25__sse
+- name: xnn_f32_dwconv_ukernel_up4x9__sse
+- name: xnn_f32_dwconv_ukernel_up4x4__sse
+- name: xnn_f32_dwconv_ukernel_up4x25__psimd
+- name: xnn_f32_dwconv_ukernel_up4x9__psimd
+- name: xnn_f32_dwconv_ukernel_up4x4__psimd
+- name: xnn_f32_dwconv_ukernel_up1x4__scalar
+- name: xnn_f32_dwconv_ukernel_up1x9__scalar
+- name: xnn_f32_dwconv_ukernel_up1x25__scalar

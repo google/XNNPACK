@@ -1,0 +1,109 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$ABC = "0123456789ABCDEFGHIJK"
+#include <assert.h>
+
+#include <xnnpack/math.h>
+#include <xnnpack/spmm.h>
+
+
+void xnn_f32_spmm_ukernel_${MR}x${NR}__scalar_pipelined(
+    uint32_t m,
+    uint32_t n,
+    const float*restrict a,
+    const float*restrict weights,
+    const int32_t*restrict widx_dmap,
+    const uint32_t*restrict nidx_nnzmap,
+    float*restrict c,
+    const union xnn_f32_output_params params[restrict static 1])
+{
+  assert(m != 0);
+
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
+  size_t i = m;
+  while XNN_LIKELY(i >= ${MR}) {
+    const float*restrict w = weights;
+    const int32_t* dmap = widx_dmap;
+    const uint32_t* nnzmap = nidx_nnzmap;
+    float vw = *w++;
+    intptr_t diff = *dmap++;
+    $for M in range(MR):
+      float va${ABC[M]} = a[${M}];
+    size_t j = n;
+    do {
+      uint32_t nnz = *nnzmap++;
+      $for M in range(MR):
+        float vacc${ABC[M]} = vw;
+      vw = *w++;
+      if XNN_LIKELY(nnz != 0) {
+        do {
+          $for M in range(MR):
+            vacc${ABC[M]} += va${ABC[M]} * vw;
+          a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+
+          diff = *dmap++;
+          vw = *w++;
+          $for M in range(MR):
+            va${ABC[M]} = a[${M}];
+        } while (--nnz != 0);
+      }
+      $for M in range(MR):
+        float vout${ABC[M]} = math_min_f32(vacc${ABC[M]}, vmax);
+      $for M in range(MR):
+        vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
+      $for M in range(MR):
+        c[${M}] = vout${ABC[M]};
+      c += m;
+    } while (--j != 0);
+    c -= m * n;
+    c += ${MR};
+    a += ${MR};
+    i -= ${MR};
+  }
+  if XNN_UNLIKELY(i != 0) {
+    $for LOG2M in reversed(range((MR - 1).bit_length())):
+      $SUBMR = 1 << LOG2M
+      if (i & ${SUBMR}) {
+        const float*restrict w = weights;
+        const int32_t* dmap = widx_dmap;
+        const uint32_t* nnzmap = nidx_nnzmap;
+        float vw = *w++;
+        intptr_t diff = *dmap++;
+        $for M in range(SUBMR):
+          float va${ABC[M]} = a[${M}];
+        size_t j = n;
+        do {
+          uint32_t nnz = *nnzmap++;
+          $for M in range(SUBMR):
+            float vacc${ABC[M]} = vw;
+          vw = *w++;
+          if XNN_LIKELY(nnz != 0) {
+            do {
+              $for M in range(SUBMR):
+                vacc${ABC[M]} += va${ABC[M]} * vw;
+              a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+
+              diff = *dmap++;
+              vw = *w++;
+              $for M in range(SUBMR):
+                va${ABC[M]} = a[${M}];
+            } while (--nnz != 0);
+          }
+          $for M in range(SUBMR):
+            float vout${ABC[M]} = math_min_f32(vacc${ABC[M]}, vmax);
+          $for M in range(SUBMR):
+            vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
+          $for M in range(SUBMR):
+            c[${M}] = vout${ABC[M]};
+          c += m;
+        } while (--j != 0);
+        c -= m * n;
+        c += ${SUBMR};
+        a += ${SUBMR};
+      }
+  }
+}
