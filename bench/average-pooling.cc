@@ -16,6 +16,7 @@
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
+#include "bench/utils.h"
 
 
 static void average_pooling_q8(benchmark::State& state, const char* net) {
@@ -84,6 +85,8 @@ static void average_pooling_q8(benchmark::State& state, const char* net) {
     return;
   }
   pooling_op = nullptr;
+
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *

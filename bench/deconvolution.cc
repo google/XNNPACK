@@ -15,9 +15,6 @@
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
-
-#include "bench/utils.h"
-
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"
@@ -26,6 +23,7 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE */
+#include "bench/utils.h"
 
 
 void xnnpack_deconvolution_q8(benchmark::State& state, const char* net) {
@@ -137,7 +135,8 @@ void xnnpack_deconvolution_q8(benchmark::State& state, const char* net) {
     deconvolution_op = nullptr;
   }
 
-  state.counters["OPS"] = benchmark::Counter(
+    state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+    state.counters["OPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 *
       batch_size * input_width * input_width *
       groups * group_input_channels * group_output_channels *

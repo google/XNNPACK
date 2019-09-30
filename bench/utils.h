@@ -13,7 +13,7 @@ namespace utils {
 
 uint32_t wipeCache();
 uint32_t prefetchToL1(const void* ptr, size_t size);
-uint64_t GetCurrentCpuFrequency(void);  // Return clockrate of current cpu
+uint64_t GetCurrentCpuFrequency();  // Return clockrate of current cpu
 
 template <class T>
 inline T divideRoundUp(T x, T q) {

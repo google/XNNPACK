@@ -12,6 +12,7 @@
 #include <cpuinfo.h>
 
 #include <benchmark/benchmark.h>
+#include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/params.h>
 #include <xnnpack/rmax.h>
@@ -35,7 +36,9 @@ static void f32_rmax(
     f32_rmax(n * sizeof(float), x.data(), &y);
   }
 
-  state.counters["elements"] =
+    state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+
+    state.counters["elements"] =
     benchmark::Counter(uint64_t(state.iterations()) * n, benchmark::Counter::kIsRate);
 
   state.counters["bytes"] =

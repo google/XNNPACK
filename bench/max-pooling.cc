@@ -16,6 +16,7 @@
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
+#include "bench/utils.h"
 
 
 void max_pooling_u8(benchmark::State& state, const char* net) {
@@ -84,6 +85,7 @@ void max_pooling_u8(benchmark::State& state, const char* net) {
   }
   pooling_op = nullptr;
 
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
       batch_size * (input_height * input_width + output_height * output_width) * channels * sizeof(uint8_t),
@@ -156,6 +158,7 @@ void max_pooling_f32(benchmark::State& state, const char* net) {
   }
   pooling_op = nullptr;
 
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
       batch_size * (input_height * input_width + output_height * output_width) * channels * sizeof(float),

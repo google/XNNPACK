@@ -63,12 +63,12 @@ uint32_t wipeCache() {
 }
 
 // Return clockrate in Hz
-uint64_t GetCurrentCpuFrequency(void) {
+uint64_t GetCurrentCpuFrequency() {
 #ifdef __linux__
   int freq = 0;
   char cpuinfo_name[512];
   int cpu = sched_getcpu();
-  sprintf(cpuinfo_name,
+  snprintf(cpuinfo_name, sizeof(cpuinfo_name),
     "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_cur_freq", cpu);
 
   FILE* f = fopen(cpuinfo_name, "r");

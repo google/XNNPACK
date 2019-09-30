@@ -11,14 +11,14 @@
 #include <vector>
 
 #include <cpuinfo.h>
-#include "bench/utils.h"
+
+#include <benchmark/benchmark.h>
 #include "bench/gemm.h"
+#include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
 #include <xnnpack/spmm.h>
-
-#include <benchmark/benchmark.h>
 
 
 static void SpMMBenchmark(benchmark::State& state,

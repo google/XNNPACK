@@ -15,16 +15,15 @@
 
 #include <cpuinfo.h>
 
+#include <benchmark/benchmark.h>
 #include "third_party/FP16/include/fp16/fp16.h"
-#include "bench/utils.h"
 #include "bench/gemm.h"
+#include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/gemm.h>
-#include <xnnpack/params.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
-
-#include <benchmark/benchmark.h>
 
 
 static void GEMMBenchmark(benchmark::State& state,

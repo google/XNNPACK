@@ -13,6 +13,7 @@
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
+#include "bench/utils.h"
 
 
 static void sigmoid_q8(benchmark::State& state) {
@@ -69,6 +70,8 @@ static void sigmoid_q8(benchmark::State& state) {
     state.SkipWithError("failed to delete Sigmoid operator");
     return;
   }
+
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 
   const size_t elements_per_iteration = batch_size * channels;
   state.counters["elements"] =

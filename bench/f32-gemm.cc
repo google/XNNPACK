@@ -17,18 +17,17 @@
 
 #include <cpuinfo.h>
 
-#include "bench/utils.h"
+#include <benchmark/benchmark.h>
+#include "tensorflow/lite/experimental/ruy/ruy.h"
 #include "bench/gemm.h"
+#include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/gemm.h>
-#include <xnnpack/packx.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/packx.h>
 #include <xnnpack/params.h>
 #include <xnnpack/ppmm.h>
 #include <xnnpack/requantization.h>
-
-#include <benchmark/benchmark.h>
-#include "tensorflow/lite/experimental/ruy/ruy.h"
 
 
 static void GEMMBenchmark(benchmark::State& state,

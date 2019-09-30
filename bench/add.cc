@@ -15,6 +15,7 @@
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
+#include "bench/utils.h"
 
 
 static void add_nc_q8(benchmark::State& state) {
@@ -73,6 +74,8 @@ static void add_nc_q8(benchmark::State& state) {
     state.SkipWithError("failed to delete Q8 Add operator");
     return;
   }
+
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 
   const size_t elements_per_iteration = batch_size * channels;
   state.counters["elements"] =
@@ -137,6 +140,8 @@ static void add_nc_q8_inplace(benchmark::State& state) {
     state.SkipWithError("failed to delete Q8 Add operator");
     return;
   }
+
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 
   const size_t elements_per_iteration = batch_size * channels;
   state.counters["elements"] =

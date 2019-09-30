@@ -16,17 +16,17 @@
 #include <vector>
 
 #include <cpuinfo.h>
-#include "bench/utils.h"
-#include "bench/gemm.h"
-#include <xnnpack/AlignedAllocator.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/params.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/requantization.h>
 
 #include <benchmark/benchmark.h>
 #include "third_party/gemmlowp/public/gemmlowp.h"
 #include "tensorflow/lite/experimental/ruy/ruy.h"
+#include "bench/gemm.h"
+#include "bench/utils.h"
+#include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/gemm.h>
+#include <xnnpack/pack.h>
+#include <xnnpack/params.h>
+#include <xnnpack/requantization.h>
 
 
 static void GEMMBenchmark(benchmark::State& state,
@@ -97,6 +97,7 @@ static void GEMMBenchmark(benchmark::State& state,
     }
   }
 
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
   state.counters["OPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
@@ -185,6 +186,7 @@ static void GemmlowpBenchmark(benchmark::State& state, uint32_t threads)
         &threadingContext, AM, BM, &CM, 127, 127, outputPipeline);
   }
 
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
   state.counters["OPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
@@ -271,6 +273,7 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
     ruy::Mul<ruy::kAllPaths>(ruy_a, ruy_b, spec, &context, &ruy_c);
   }
 
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
   state.counters["OPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }

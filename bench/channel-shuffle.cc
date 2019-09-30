@@ -15,6 +15,7 @@
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
+#include "bench/utils.h"
 
 
 static void channel_shuffle_x8(benchmark::State& state, const char* net) {
@@ -70,6 +71,8 @@ static void channel_shuffle_x8(benchmark::State& state, const char* net) {
     state.SkipWithError("failed to delete X8 Channel Shuffle operator");
     return;
   }
+
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 
   const size_t elements_per_iteration = batch_size * groups * group_channels;
   state.counters["elements"] =
@@ -133,6 +136,8 @@ static void channel_shuffle_x32(benchmark::State& state, const char* net) {
     state.SkipWithError("failed to delete X32 Channel Shuffle operator");
     return;
   }
+
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 
   const size_t elements_per_iteration = batch_size * groups * group_channels;
   state.counters["elements"] =

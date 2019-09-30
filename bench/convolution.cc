@@ -18,10 +18,14 @@
 #include <cpuinfo.h>
 #include <xnnpack.h>
 
+#ifdef BENCHMARK_ARM_COMPUTE_LIBRARY
+#include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/CPP/CPPScheduler.h"
+#include "arm_compute/runtime/NEON/functions/NEDepthwiseConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#endif  // BENCHMARK_ARM_COMPUTE_LIBRARY
 #include <benchmark/benchmark.h>
-
-#include "bench/utils.h"
-
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"
@@ -31,14 +35,7 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
-
-#ifdef BENCHMARK_ARM_COMPUTE_LIBRARY
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/CPP/CPPScheduler.h"
-#include "arm_compute/runtime/NEON/functions/NEDepthwiseConvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
-#endif  // BENCHMARK_ARM_COMPUTE_LIBRARY
+#include "bench/utils.h"
 
 
 void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
@@ -150,6 +147,7 @@ void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
     convolution_op = nullptr;
   }
 
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
   state.counters["OPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 *
       batch_size * output_height * output_width *

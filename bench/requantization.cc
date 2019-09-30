@@ -14,11 +14,11 @@
 #include <vector>
 
 #include <cpuinfo.h>
-#include <xnnpack/AlignedAllocator.h>
-#include <xnnpack/requantization-stubs.h>
 
 #include <benchmark/benchmark.h>
-
+#include "bench/utils.h"
+#include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/requantization-stubs.h>
 
 inline uint32_t divideRoundUp(uint32_t x, uint32_t q)
 {
