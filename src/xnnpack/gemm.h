@@ -185,5 +185,5 @@ DECLARE_Q8_GEMM_UKERNEL_FUNCTION(xnn_q8_gemm_ukernel_8x8__neon)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

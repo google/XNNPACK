@@ -1,9 +1,7 @@
-/*
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
@@ -18,7 +16,7 @@ void xnn_x32_unpool_ukernel__scalar(
     const uint32_t* index,
     uint32_t** output)
 {
-  /* Pre-initialize outputs with constant */
+  // Pre-initialize outputs with constant.
   uint32_t** os = output;
   do {
     uint32_t* o = *os++;
@@ -28,7 +26,7 @@ void xnn_x32_unpool_ukernel__scalar(
     } while (--k != 0);
   } while (--p != 0);
 
-  /* Copy indexed elements to output */
+  // Copy indexed elements to output.
   size_t offset = 0;
   do {
     const uint32_t i = *index++;

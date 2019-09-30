@@ -40,5 +40,5 @@ DECLARE_U8_LUT32NORM_UKERNEL_FUNCTION(xnn_u8_lut32norm_ukernel__scalar)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

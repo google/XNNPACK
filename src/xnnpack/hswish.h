@@ -31,5 +31,5 @@ DECLARE_F32_HSWISH_UKERNEL_FUNCTION(xnn_f32_hswish_ukernel__scalar)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

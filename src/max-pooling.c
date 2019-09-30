@@ -493,7 +493,7 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f32(
   const size_t pooling_size = pooling_height * pooling_width;
   const size_t output_height = max_pooling_op->output_height;
   const size_t output_width = max_pooling_op->output_width;
-  /* Micro-kernel may read up to (mr - 1) elements after the end of indirection buffer */
+  // Micro-kernel may read up to (mr - 1) elements after the end of indirection buffer.
   const uint32_t mr = xnn_params.f32.maxpool.mr;
 
   const size_t step_width =

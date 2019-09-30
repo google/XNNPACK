@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <arm_neon.h>
 
@@ -37,7 +35,7 @@ void xnn_q8_vadd_ukernel__neon(
     const uint8x16_t va23 = vld1q_u8(a); a += 16;
     const uint8x16_t vb23 = vld1q_u8(b); b += 16;
 
-    /* Subtract zero point */
+    // Subtract zero point.
     const int16x8_t vxa0 = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(va01), va_zero_point));
     const int16x8_t vxb0 = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(vb01), vb_zero_point));
     const int16x8_t vxa1 = vreinterpretq_s16_u16(vsubl_u8(vget_high_u8(va01), va_zero_point));
@@ -47,7 +45,7 @@ void xnn_q8_vadd_ukernel__neon(
     const int16x8_t vxa3 = vreinterpretq_s16_u16(vsubl_u8(vget_high_u8(va23), va_zero_point));
     const int16x8_t vxb3 = vreinterpretq_s16_u16(vsubl_u8(vget_high_u8(vb23), vb_zero_point));
 
-    /* Multiply by factors and accumulate products */
+    // Multiply by factors and accumulate products.
     int32x4_t vacc0_lo = vmulq_s32(vmovl_s16(vget_low_s16(vxa0)), va_multiplier);
     int32x4_t vacc1_lo = vmulq_s32(vmovl_s16(vget_low_s16(vxa1)), va_multiplier);
     int32x4_t vacc2_lo = vmulq_s32(vmovl_s16(vget_low_s16(vxa2)), va_multiplier);
@@ -66,7 +64,7 @@ void xnn_q8_vadd_ukernel__neon(
     vacc2_hi = vmlaq_s32(vacc2_hi, vmovl_high_s16(vxb2), vb_multiplier);
     vacc3_hi = vmlaq_s32(vacc3_hi, vmovl_high_s16(vxb3), vb_multiplier);
 
-    /* Shift right and round */
+    // Shift right and round.
     vacc0_lo = vsraq_n_s32(vacc0_lo, vbicq_s32(vacc0_lo, vzero_shift_mask), 31);
     vacc1_lo = vsraq_n_s32(vacc1_lo, vbicq_s32(vacc1_lo, vzero_shift_mask), 31);
     vacc2_lo = vsraq_n_s32(vacc2_lo, vbicq_s32(vacc2_lo, vzero_shift_mask), 31);
@@ -85,7 +83,7 @@ void xnn_q8_vadd_ukernel__neon(
     vacc2_hi = vrshlq_s32(vacc2_hi, vright_shift);
     vacc3_hi = vrshlq_s32(vacc3_hi, vright_shift);
 
-    /* Pack, saturate, and add output zero point */
+    // Pack, saturate, and add output zero point.
     const int16x8_t vacc0 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0_lo), vacc0_hi), vy_zero_point);
     const int16x8_t vacc1 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc1_lo), vacc1_hi), vy_zero_point);
     const int16x8_t vacc2 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc2_lo), vacc2_hi), vy_zero_point);
@@ -107,13 +105,13 @@ void xnn_q8_vadd_ukernel__neon(
     const uint8x16_t va01 = vld1q_u8(a); a += 16;
     const uint8x16_t vb01 = vld1q_u8(b); b += 16;
 
-    /* Subtract zero point */
+    // Subtract zero point.
     const int16x8_t vxa0 = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(va01), va_zero_point));
     const int16x8_t vxb0 = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(vb01), vb_zero_point));
     const int16x8_t vxa1 = vreinterpretq_s16_u16(vsubl_u8(vget_high_u8(va01), va_zero_point));
     const int16x8_t vxb1 = vreinterpretq_s16_u16(vsubl_u8(vget_high_u8(vb01), vb_zero_point));
 
-    /* Multiply by factors and accumulate products */
+    // Multiply by factors and accumulate products.
     int32x4_t vacc0_lo = vmulq_s32(vmovl_s16(vget_low_s16(vxa0)), va_multiplier);
     int32x4_t vacc1_lo = vmulq_s32(vmovl_s16(vget_low_s16(vxa1)), va_multiplier);
     int32x4_t vacc0_hi = vmulq_s32(vmovl_s16(vget_high_s16(vxa0)), va_multiplier);
@@ -127,7 +125,7 @@ void xnn_q8_vadd_ukernel__neon(
     vacc0_hi = vmlaq_s32(vacc0_hi, vmovl_s16(vget_high_s16(vxb0)), vb_multiplier);
     vacc1_hi = vmlaq_s32(vacc1_hi, vmovl_s16(vget_high_s16(vxb1)), vb_multiplier);
 
-    /* Shift right and round */
+    // Shift right and round.
     vacc0_lo = vsraq_n_s32(vacc0_lo, vbicq_s32(vacc0_lo, vzero_shift_mask), 31);
     vacc1_lo = vsraq_n_s32(vacc1_lo, vbicq_s32(vacc1_lo, vzero_shift_mask), 31);
     vacc0_hi = vsraq_n_s32(vacc0_hi, vbicq_s32(vacc0_hi, vzero_shift_mask), 31);
@@ -138,7 +136,7 @@ void xnn_q8_vadd_ukernel__neon(
     vacc0_hi = vrshlq_s32(vacc0_hi, vright_shift);
     vacc1_hi = vrshlq_s32(vacc1_hi, vright_shift);
 
-    /* Pack, saturate, and add output zero point */
+    // Pack, saturate, and add output zero point.
     const int16x8_t vacc0 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0_lo), vqmovn_s32(vacc0_hi)), vy_zero_point);
     const int16x8_t vacc1 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc1_lo), vqmovn_s32(vacc1_hi)), vy_zero_point);
 
@@ -153,11 +151,11 @@ void xnn_q8_vadd_ukernel__neon(
     const uint8x8_t va = vld1_u8(a); a += 8;
     const uint8x8_t vb = vld1_u8(b); b += 8;
 
-    /* Subtract zero point */
+    // Subtract zero point.
     const int16x8_t vxa = vreinterpretq_s16_u16(vsubl_u8(va, va_zero_point));
     const int16x8_t vxb = vreinterpretq_s16_u16(vsubl_u8(vb, vb_zero_point));
 
-    /* Multiply by factors and accumulate products */
+    // Multiply by factors and accumulate products.
     int32x4_t vacc_lo = vmulq_s32(vmovl_s16(vget_low_s16(vxa)), va_multiplier);
 #ifdef __aarch64__
     int32x4_t vacc_hi = vmulq_s32(vmovl_high_s16(vxa), va_multiplier);
@@ -172,14 +170,14 @@ void xnn_q8_vadd_ukernel__neon(
     vacc_hi = vmlaq_s32(vacc_hi, vmovl_s16(vget_high_s16(vxb)), vb_multiplier);
 #endif
 
-    /* Shift right and round */
+    // Shift right and round.
     vacc_lo = vsraq_n_s32(vacc_lo, vbicq_s32(vacc_lo, vzero_shift_mask), 31);
     vacc_hi = vsraq_n_s32(vacc_hi, vbicq_s32(vacc_hi, vzero_shift_mask), 31);
 
     vacc_lo = vrshlq_s32(vacc_lo, vright_shift);
     vacc_hi = vrshlq_s32(vacc_hi, vright_shift);
 
-    /* Pack, saturate, and add output zero point */
+    // Pack, saturate, and add output zero point.
 #ifdef __aarch64__
     const int16x8_t vacc = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc_lo), vacc_hi), vy_zero_point);
 #else
@@ -196,11 +194,11 @@ void xnn_q8_vadd_ukernel__neon(
     const uint8x8_t va = vld1_u8(a);
     const uint8x8_t vb = vld1_u8(b);
 
-    /* Subtract zero point */
+    // Subtract zero point.
     const int16x8_t vxa = vreinterpretq_s16_u16(vsubl_u8(va, va_zero_point));
     const int16x8_t vxb = vreinterpretq_s16_u16(vsubl_u8(vb, vb_zero_point));
 
-    /* Multiply by factors and accumulate products */
+    // Multiply by factors and accumulate products.
     int32x4_t vacc_lo = vmulq_s32(vmovl_s16(vget_low_s16(vxa)), va_multiplier);
 #ifdef __aarch64__
     int32x4_t vacc_hi = vmulq_s32(vmovl_high_s16(vxa), va_multiplier);
@@ -215,14 +213,14 @@ void xnn_q8_vadd_ukernel__neon(
     vacc_hi = vmlaq_s32(vacc_hi, vmovl_s16(vget_high_s16(vxb)), vb_multiplier);
 #endif
 
-    /* Shift right and round */
+    // Shift right and round.
     vacc_lo = vsraq_n_s32(vacc_lo, vbicq_s32(vacc_lo, vzero_shift_mask), 31);
     vacc_hi = vsraq_n_s32(vacc_hi, vbicq_s32(vacc_hi, vzero_shift_mask), 31);
 
     vacc_lo = vrshlq_s32(vacc_lo, vright_shift);
     vacc_hi = vrshlq_s32(vacc_hi, vright_shift);
 
-    /* Pack, saturate, and add output zero point */
+    // Pack, saturate, and add output zero point.
 #ifdef __aarch64__
     const int16x8_t vacc = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc_lo), vacc_hi), vy_zero_point);
 #else

@@ -1,9 +1,7 @@
-/*
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
@@ -26,28 +24,28 @@ void xnn_x32_zip_x3_ukernel__psimd(
   uint32_t* o = (uint32_t*) output;
 
   while (n >= 16) {
-    /* vx = ( x3, x2, x1, x0 ) */
+    // vx = ( x3, x2, x1, x0 )
     const psimd_u32 vx = psimd_load_u32(x);
     x += 4;
-    /* vy = ( y3, y2, y1, y0 ) */
+    // vy = ( y3, y2, y1, y0 )
     const psimd_u32 vy = psimd_load_u32(y);
     y += 4;
-    /* vz = ( z3, z2, z1, z0 ) */
+    // vz = ( z3, z2, z1, z0 )
     const psimd_u32 vz = psimd_load_u32(z);
     z += 4;
 
-    /* vxy = ( y2, y0, x2, x0 ) */
+    // vxy = ( y2, y0, x2, x0 )
     const psimd_u32 vxy = psimd_concat_even_u32(vx, vy);
-    /* vyz = ( z3, z1, y3, y1 ) */
+    // vyz = ( z3, z1, y3, y1 )
     const psimd_u32 vyz = psimd_concat_odd_u32(vy, vz);
-    /* vzx = ( x3, x1, z2, z0 ) */
+    // vzx = ( x3, x1, z2, z0 )
     const psimd_u32 vzx = __builtin_shufflevector(vz, vx, 0, 2, 4+1, 4+3);
 
-    /* vxyz0 = ( x1, z0, y0, x0 ) */
+    // vxyz0 = ( x1, z0, y0, x0 )
     const psimd_u32 vxyz0 = psimd_concat_even_u32(vxy, vzx);
-    /* vxyz1 = ( y2, x2, z1, y1 ) */
+    // vxyz1 = ( y2, x2, z1, y1 )
     const psimd_u32 vxyz1 = __builtin_shufflevector(vyz, vxy, 0, 2, 4+1, 4+3);
-    /* vxyz2 = ( z3, y3, x3, z2 ) */
+    // vxyz2 = ( z3, y3, x3, z2 )
     const psimd_u32 vxyz2 = psimd_concat_odd_u32(vzx, vyz);
 
     psimd_store_u32(o, vxyz0);

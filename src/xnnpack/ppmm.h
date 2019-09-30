@@ -41,5 +41,5 @@ DECLARE_F32_PPMM_UKERNEL_FUNCTION(xnn_f32_ppmm_ukernel_8x8__neonfma)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

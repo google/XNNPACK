@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
@@ -18,24 +16,19 @@
 
 static inline __m128i sse_reduce4_i32(__m128i x, __m128i y, __m128i z, __m128i w) {
 #if defined(__SSSE3__) && !defined(__ANDROID__)
-  /* xxyy = ( y2 + y3, y0 + y1, x2 + x3, x0 + x1 ) */
+  // xxyy = ( y2 + y3, y0 + y1, x2 + x3, x0 + x1 )
   const __m128i xxyy = _mm_hadd_epi32(x, y);
-  /* zzww = ( w2 + w3, w0 + w1, z2 + z3, z0 + z1 ) */
+  // zzww = ( w2 + w3, w0 + w1, z2 + z3, z0 + z1 )
   const __m128i zzww = _mm_hadd_epi32(z, w);
-  /* xyzw = ( w0 + w1 + w2 + w3, y0 + y1 + y2 + y3, z0 + z1 + z2 + z3, x0 + x1 +
-   * x2 + x3 ) */
+  // xyzw = ( w0 + w1 + w2 + w3, y0 + y1 + y2 + y3, z0 + z1 + z2 + z3, x0 + x1 + x2 + x3 )
   return _mm_hadd_epi32(xxyy, zzww);
 #else
-  /* xzxz = ( z1 + z3, x1 + x3, z0 + z2, x0 + x2 ) */
-  const __m128i xzxz =
-      _mm_add_epi32(_mm_unpacklo_epi32(x, z), _mm_unpackhi_epi32(x, z));
-  /* ywyw = ( w1 + w3, y1 + y3, w0 + w2, y0 + y2 ) */
-  const __m128i ywyw =
-      _mm_add_epi32(_mm_unpacklo_epi32(y, w), _mm_unpackhi_epi32(y, w));
-  /* xyzw = ( w0 + w2 + w1 + w3, y0 + y2 + y1 + y3, z0 + z2 + z1 + z3, x0 + x2 +
-   * x1 + x3 ) */
-  return _mm_add_epi32(
-      _mm_unpacklo_epi32(xzxz, ywyw), _mm_unpackhi_epi32(xzxz, ywyw));
+  // xzxz = ( z1 + z3, x1 + x3, z0 + z2, x0 + x2 )
+  const __m128i xzxz = _mm_add_epi32(_mm_unpacklo_epi32(x, z), _mm_unpackhi_epi32(x, z));
+  // ywyw = ( w1 + w3, y1 + y3, w0 + w2, y0 + y2 )
+  const __m128i ywyw = _mm_add_epi32(_mm_unpacklo_epi32(y, w), _mm_unpackhi_epi32(y, w));
+  // xyzw = ( w0 + w2 + w1 + w3, y0 + y2 + y1 + y3, z0 + z2 + z1 + z3, x0 + x2 + x1 + x3 )
+  return _mm_add_epi32(_mm_unpacklo_epi32(xzxz, ywyw), _mm_unpackhi_epi32(xzxz, ywyw));
 #endif
 }
 

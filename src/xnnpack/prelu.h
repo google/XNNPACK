@@ -34,5 +34,5 @@ DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel_x4__sse)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

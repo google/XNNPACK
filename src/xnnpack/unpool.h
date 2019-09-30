@@ -30,5 +30,5 @@ DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__scalar)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

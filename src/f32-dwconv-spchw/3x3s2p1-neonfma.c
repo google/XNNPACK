@@ -33,7 +33,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
   const size_t input_width_increment = input_width_stride * 2 - n / 8 * input_tuple_stride * 2;
   const size_t output_width_increment = output_width_stride - n / 8 * output_tuple_stride;
 
-  /* No vertical padding */
+  // No vertical padding.
   const float* i0 = input;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
@@ -49,7 +49,6 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
 
     size_t k = n;
     for (; k >= 8; k -= 8) {
-      // bias
       float32x4_t vo468Ap0 = vdupq_laneq_f32(vw0123, 0);
 
       const float32x4_t vi0x4567 = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
@@ -86,12 +85,12 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
       vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi1x3579, vw4567, 0);
       vo468Ap2 = vfmaq_laneq_f32(vo468Ap2, vi2x3579, vw4567, 3);
 
-      // do multiplication by right filter tap
+      // Do multiplication by right filter tap.
       vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x579B, vw0123, 3);
       vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi1x579B, vw4567, 2);
       vo468Ap2 = vfmaq_lane_f32 (vo468Ap2, vi2x579B, vw89, 1);
 
-      // add up across rows to get the final outputs
+      // Add up across rows to get the final outputs.
       float32x4_t vo = vaddq_f32(vo468Ap0, vo468Ap1);
       vo = vaddq_f32(vo, vo468Ap2);
 
@@ -100,10 +99,9 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
 
       vst1q_f32(output, vo); output = (float*) ((uintptr_t) output + output_tuple_stride);
     }
-    /* Last block has 0-7 pixels to process */
+    // Last block has 0-7 pixels to process.
     assert(k < 8);
     if XNN_LIKELY(k != 0) {
-      // bias
       float32x4_t vo468Ap0 = vdupq_laneq_f32(vw0123, 0);
 
       const float32x4_t vi0x4567 = vld1q_f32(i0);

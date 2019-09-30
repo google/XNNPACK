@@ -1,9 +1,7 @@
-/*
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
@@ -36,19 +34,19 @@ void xnn_x32_pad_x2__scalar(
     y1 = y0;
   }
 
-  /* Pre-pad input channels */
+  // Pre-pad input channels.
   for (; l != 0; l -= 4) {
     *y0++ = c;
     *y1++ = c;
   }
 
-  /* Copy input channels */
+  // Copy input channels.
   for (; n != 0; n -= 4) {
     *y0++ = *x0++;
     *y1++ = *x1++;
   }
 
-  /* Post-pad input channels */
+  // Post-pad input channels.
   for (; r != 0; r -= 4) {
     *y0++ = c;
     *y1++ = c;

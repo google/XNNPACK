@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 #include <stdint.h>
@@ -17,12 +15,10 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-/*
- * The requantization implementation below is adapted from Google's gemmlowp
- * library. It is only used in XNNPACK unit tests and comparative benchmarks,
- * but not the library itself.
- */
-
+// The requantization implementation below is adapted from Google's gemmlowp
+// library. It is only used in XNNPACK unit tests and comparative benchmarks,
+// but not the library itself.
+//
 // Copyright 2015 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,7 +48,7 @@ void xnn_requantize_gemmlowp__neon(
 
   const uint32_t scale_bits = fp32_to_bits(scale);
 
-  /* Compute requantization parameters */
+  // Compute requantization parameters.
   const uint32_t multiplier = ((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7;
   const int32_t exponent = (fp32_to_bits(scale) >> 23) - 127 - 23 - 7;
   const int32_t shift = -(32 /* using high 32 bits in VQRDMUL */ - 1 /* doubling in VQRDMUL */ + exponent);

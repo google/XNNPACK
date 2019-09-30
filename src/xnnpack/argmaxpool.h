@@ -56,5 +56,5 @@ DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_mp9
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

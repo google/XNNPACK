@@ -33,7 +33,7 @@ void xnn_f32_dwconv_spchw_ukernel_5x5s2p2__neonfma(
   const size_t input_width_increment_single = input_width_stride * 2 - input_tuple_stride * ( (n - 1) / 4 + 1);
   const size_t output_width_increment_single = output_width_stride - (n + 1) / 8 * output_tuple_stride;
 
-  /* No vertical padding */
+  // No vertical padding.
   const float* i0 = input;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);

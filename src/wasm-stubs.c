@@ -16,4 +16,4 @@ uint32_t xnn_stub_wasm_f32_sub(uint32_t a, uint32_t b) {
 uint32_t xnn_stub_wasm_f32_min(uint32_t a, uint32_t b) {
   return fp32_to_bits(__builtin_wasm_min_f32(fp32_from_bits(a), fp32_from_bits(b)));
 }
-#endif /* CPUINFO_ARCH_WASM || CPUINFO_ARCH_WASMSIMD */
+#endif  // CPUINFO_ARCH_WASM || CPUINFO_ARCH_WASMSIMD

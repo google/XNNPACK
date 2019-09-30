@@ -33,7 +33,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__sse(
   const size_t input_width_increment = input_width_stride * 2 - n / 8 * input_tuple_stride * 2;
   const size_t output_width_increment = output_width_stride - n / 8 * output_tuple_stride;
 
-  /* No vertical padding */
+  // No vertical padding.
   const float* i0 = input;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
@@ -112,7 +112,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__sse(
       _mm_storeu_ps(output, vo);
       output = (float*) ((uintptr_t) output + output_tuple_stride);
     }
-    /* Last block has 0-7 pixels to process */
+    // Last block has 0-7 pixels to process.
     assert(k < 8);
     if XNN_LIKELY(k != 0) {
       __m128 vo8ACEp0 = vbias;

@@ -32,5 +32,5 @@ DECLARE_X32_PACKX_UKERNEL_FUNCTION(xnn_x32_packx_ukernel_4x__sse)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

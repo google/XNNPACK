@@ -35,5 +35,5 @@ DECLARE_PAD_UKERNEL_FUNCTION(xnn_x32_pad_x2__sse2)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

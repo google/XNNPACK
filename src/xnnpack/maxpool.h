@@ -52,5 +52,5 @@ DECLARE_U8_MAXPOOL_UKERNEL_FUNCTION(xnn_u8_maxpool_ukernel_9p8q__scalar)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

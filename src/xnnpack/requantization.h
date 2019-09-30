@@ -34,15 +34,15 @@ static inline union xnn_q8_gemm_params xnn_compute_scalar_q8_gemm_params(
   uint8_t output_min,
   uint8_t output_max)
 {
-  /* Compute requantization parameters */
+  // Compute requantization parameters
   const uint32_t scale_bits = fp32_to_bits(scale);
 
-  /* Multiplier is in [0x40000000, 0x7FFFFF80] range */
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
   assert(multiplier >= INT32_C(0x40000000));
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
-  /* Shift is in [0, 31] range */
+  // Shift is in [0, 31] range.
   const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
   assert(shift >= 0);
   assert(shift < 32);
@@ -73,15 +73,15 @@ static inline union xnn_q8_gemm_params xnn_compute_q8_gemm_params(
   uint8_t output_min,
   uint8_t output_max)
 {
-  /* Compute requantization parameters */
+  // Compute requantization parameters.
   const uint32_t scale_bits = fp32_to_bits(scale);
 
-  /* Multiplier is in [0x40000000, 0x7FFFFF80] range */
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
   assert(multiplier >= INT32_C(0x40000000));
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
-  /* Shift is in [0, 31] range */
+  // Shift is in [0, 31] range.
   const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
   assert(shift >= 0);
   assert(shift < 32);
@@ -150,17 +150,17 @@ static inline union xnn_q8_avgpool_params xnn_compute_q8_avgpool_params(
   uint8_t output_min,
   uint8_t output_max)
 {
-  /* Compute requantization parameters */
+  // Compute requantization parameters.
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
   const uint32_t scale_bits = fp32_to_bits(scale);
 
-  /* Multiplier is in [0x00800000, 0x00FFFFFF] range */
+  // Multiplier is in [0x00800000, 0x00FFFFFF] range.
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
   assert(multiplier >= INT32_C(0x00800000));
   assert(multiplier <= INT32_C(0x00FFFFFF));
 
-  /* Shift is in [16, 55] range */
+  // Shift is in [16, 55] range.
   const int32_t shift = 127 + 23 - (scale_bits >> 23);
   assert(shift >= 16);
   assert(shift < 64);
@@ -218,17 +218,17 @@ static inline union xnn_q8_avgpool_params xnn_compute_scalar_q8_avgpool_params(
   uint8_t output_min,
   uint8_t output_max)
 {
-  /* Compute requantization parameters */
+  // Compute requantization parameters.
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
   const uint32_t scale_bits = fp32_to_bits(scale);
 
-  /* Multiplier is in [0x00800000, 0x00FFFFFF] range */
+  // Multiplier is in [0x00800000, 0x00FFFFFF] range.
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
   assert(multiplier >= INT32_C(0x00800000));
   assert(multiplier <= INT32_C(0x00FFFFFF));
 
-  /* Shift is in [16, 55] range */
+  // Shift is in [16, 55] range.
   const int32_t shift = 127 + 23 - (scale_bits >> 23);
   assert(shift >= 16);
   assert(shift < 64);
@@ -1023,20 +1023,20 @@ static inline union xnn_q8_add_params xnn_compute_q8_add_params(
   assert(a_output_scale < 0x1.0p+8f);
   assert(b_output_scale < 0x1.0p+8f);
 
-  /* Compute requantization parameters */
+  // Compute requantization parameters.
   const float max_output_scale = a_output_scale > b_output_scale ? a_output_scale : b_output_scale;
   assert(max_output_scale >= 0x1.0p-14f);
   assert(max_output_scale < 0x1.0p+8f);
   const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
-  /* Shift is in [13, 31] range */
+  // Shift is in [13, 31] range.
   const uint32_t shift = (uint32_t) (21 - max_scale_exponent);
   assert(shift < 32);
   assert(shift >= 13);
 
   const float scale_multiplier = fp32_from_bits((uint32_t) (21 - max_scale_exponent + 127) << 23);
 
-  /* Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range */
+  // Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range.
   const uint32_t a_multiplier = (uint32_t) (int32_t) __builtin_lrintf(a_output_scale * scale_multiplier);
   const uint32_t b_multiplier = (uint32_t) (int32_t) __builtin_lrintf(b_output_scale * scale_multiplier);
   assert((a_multiplier > b_multiplier ? a_multiplier : b_multiplier) >= UINT32_C(0x00200000));
@@ -1112,18 +1112,18 @@ static inline union xnn_q8_add_params xnn_compute_scalar_q8_add_params(
   assert(a_output_scale < 0x1.0p+8f);
   assert(b_output_scale < 0x1.0p+8f);
 
-  /* Compute requantization parameters */
+  // Compute requantization parameters.
   const float max_output_scale = a_output_scale > b_output_scale ? a_output_scale : b_output_scale;
   assert(max_output_scale >= 0x1.0p-10f);
   assert(max_output_scale < 0x1.0p+8f);
   const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
-  /* Shift is in [13, 31] range */
+  // Shift is in [13, 31] range.
   const uint32_t shift = (uint32_t) (21 - max_scale_exponent);
   assert(shift < 32);
   assert(shift >= 13);
 
-  /* Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range */
+  // Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range.
   const uint32_t a_multiplier = (uint32_t) (int32_t) __builtin_lrintf(fp32_from_bits(fp32_to_bits(a_output_scale) + (shift << 23)));
   const uint32_t b_multiplier = (uint32_t) (int32_t) __builtin_lrintf(fp32_from_bits(fp32_to_bits(b_output_scale) + (shift << 23)));
   assert((a_multiplier > b_multiplier ? a_multiplier : b_multiplier) >= UINT32_C(0x00200000));
@@ -1152,17 +1152,17 @@ static inline union xnn_q31_requantization_params xnn_compute_scalar_requantizat
   uint8_t min,
   uint8_t max)
 {
-  /* Compute requantization parameters */
+  // Compute requantization parameters.
   assert(scale < 1.0f);
   assert(scale >= 0x1.0p-32f);
   const uint32_t scale_bits = fp32_to_bits(scale);
 
-  /* Multiplier is in [0x40000000, 0x7FFFFF80] range */
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
   assert(multiplier >= INT32_C(0x40000000));
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
-  /* Shift is in [0, 31] range */
+  // Shift is in [0, 31] range.
   const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
   assert(shift >= 0);
   assert(shift < 32);
@@ -1186,15 +1186,15 @@ static inline union xnn_q31_requantization_params xnn_compute_requantization_par
   uint8_t min,
   uint8_t max)
 {
-  /* Compute requantization parameters */
+  // Compute requantization parameters.
   const uint32_t scale_bits = fp32_to_bits(scale);
 
-  /* Multiplier is in [0x40000000, 0x7FFFFF80] range */
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
   assert(multiplier >= INT32_C(0x40000000));
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
-  /* Shift is in [0, 31] range */
+  // Shift is in [0, 31] range.
   const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
   assert(shift >= 0);
   assert(shift < 32);
@@ -1286,16 +1286,16 @@ static inline uint8_t xnn_add_quantize(
   uint8_t a, uint8_t b,
   union xnn_q8_add_params params)
 {
-  /* Multiply by factors and accumulate products */
+  // Multiply by factors and accumulate products.
   int32_t acc = params.scalar.zero_point_product +
     (int32_t) ((uint32_t) a * params.scalar.a_multiplier) +
     (int32_t) ((uint32_t) b * params.scalar.b_multiplier);
 
-  /* Shift right and round */
+  // Shift right and round.
   const int32_t rem = (acc & params.scalar.remainder_mask) - (int32_t) (acc < 0);
   acc = asr_s32(acc, params.scalar.shift) + (int32_t) (rem > params.scalar.remainder_threshold);
 
-  /* Clamp and add output zero point */
+  // Clamp and add output zero point.
   int32_t y = acc + params.scalar.y_zero_point;
   if (y >= params.scalar.y_max) {
     y = params.scalar.y_max;

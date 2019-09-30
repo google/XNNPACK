@@ -53,5 +53,5 @@ XNN_INTERNAL void xnn_indirection_init_unpool2d(
   uint32_t log2_element_size);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

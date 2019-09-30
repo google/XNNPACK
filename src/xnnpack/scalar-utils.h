@@ -32,7 +32,7 @@
   #if __GNUC__ >= 8
     #define XNN_IGNORE_SHIFT_BASE_UB __attribute__((__no_sanitize__("shift-base")))
   #elif __GNUC__ == 4 && __GNUC_MINOR__ >= 9 || __GNUC__ > 4
-    /* 4.9 <= gcc < 8 support ubsan, but doesn't support no_sanitize attribute */
+    // 4.9 <= gcc < 8 support ubsan, but doesn't support no_sanitize attribute
     #define XNN_IGNORE_SHIFT_BASE_UB
     #ifndef XNN_USE_SHIFT_BASE_UB_WORKAROUND
       #define XNN_USE_SHIFT_BASE_UB_WORKAROUND 1
@@ -82,28 +82,22 @@ inline static uint8_t scalar_requantize_precise(
   assert(shift >= 24);
   assert(shift < 56);
 
-  /*
-   * Compute absolute value of input as unsigned 32-bit int.
-   * All further computations will work with unsigned values to avoid undefined behaviour on signed operations.
-   */
+  // Compute absolute value of input as unsigned 32-bit int.
+  // All further computations will work with unsigned values to avoid undefined behaviour on signed operations.
   const uint32_t abs_value = (value >= 0) ? (uint32_t) value : -(uint32_t) value;
 
-  /* Compute full 64-bit product of 32-bit factors */
+  // Compute full 64-bit product of 32-bit factors
   const uint64_t product = (uint64_t) abs_value * (uint64_t) multiplier;
 
-  /*
-   * Shift the full 64-bit product right with rounding.
-   * Rounding is performed towards closest integer, with midpoints rounded up (same as away from zero).
-   */
+  // Shift the full 64-bit product right with rounding.
+  // Rounding is performed towards closest integer, with midpoints rounded up (same as away from zero).
   const uint64_t rounding = UINT64_C(1) << (shift - 1);
   const uint32_t abs_scaled_value = (uint32_t) ((product + rounding) >> shift);
 
-  /*
-   * Copy the sign of input to scaled absolute input value.
-   */
+  // Copy the sign of input to scaled absolute input value.
   const int32_t scaled_value = (int32_t) (value >= 0 ? abs_scaled_value : -abs_scaled_value);
 
-  /* Clamp scaled value with zero point between smin and smax */
+  // Clamp scaled value with zero point between smin and smax.
   int32_t clamped_value = scaled_value;
   const int32_t smin = (int32_t) (uint32_t) qmin - (int32_t) (uint32_t) zero_point;
   if (clamped_value < smin) {
@@ -114,7 +108,7 @@ inline static uint8_t scalar_requantize_precise(
     clamped_value = smax;
   }
 
-  /* Add zero point to clamped value */
+  // Add zero point to clamped value.
   const int32_t biased_value = clamped_value + (int32_t) (uint32_t) zero_point;
 
   return biased_value;

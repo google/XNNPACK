@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 #include <stdint.h>
@@ -33,13 +31,13 @@ void xnn_requantize_gemmlowp__scalar(
 
   const uint32_t scale_bits = fp32_to_bits(scale);
 
-  /* Compute requantization parameters */
+  // Compute requantization parameters.
   const uint32_t multiplier = ((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7;
   const int32_t exponent = (fp32_to_bits(scale) >> 23) - 127 - 23 - 7;
   const int32_t shift = -(32 /* using high 32 bits in VQRDMUL */ - 1 /* doubling in VQRDMUL */ + exponent);
 
-  const int32_t smin = (int32_t)(uint32_t) qmin;
-  const int32_t smax = (int32_t)(uint32_t) qmax;
+  const int32_t smin = (int32_t) (uint32_t) qmin;
+  const int32_t smax = (int32_t) (uint32_t) qmax;
   for (; n != 0; n -= 4) {
     const int32_t x = input[0];
     const int32_t y = input[1];
@@ -57,13 +55,13 @@ void xnn_requantize_gemmlowp__scalar(
     const int32_t z_scaled = gemmlowp_scalar_rdivbypo2_s32(z_product, shift);
     const int32_t w_scaled = gemmlowp_scalar_rdivbypo2_s32(w_product, shift);
 
-    /* Add zero point to scaled value */
+    // Add zero point to scaled value.
     const int32_t x_biased = x_scaled + zero_point;
     const int32_t y_biased = y_scaled + zero_point;
     const int32_t z_biased = z_scaled + zero_point;
     const int32_t w_biased = w_scaled + zero_point;
 
-    /* Clamp scaled value with zero point between smin and smax */
+    // Clamp scaled value with zero point between smin and smax.
     const int32_t x_clamped = x_biased < smin ? smin : x_biased > smax ? smax : x_biased;
     const int32_t y_clamped = y_biased < smin ? smin : y_biased > smax ? smax : y_biased;
     const int32_t z_clamped = z_biased < smin ? smin : z_biased > smax ? smax : z_biased;

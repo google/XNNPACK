@@ -92,5 +92,5 @@ DECLARE_Q8_AVGPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_q8_avgpool_ukernel_up9__sse2)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

@@ -1,9 +1,7 @@
-/*
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
@@ -33,7 +31,8 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
   const uint8_t* i6 = (const uint8_t*) ((uintptr_t) i5 + input_stride);
   const size_t input_increment = 7 * input_stride - n;
 
-  /* First pass */ {
+  // First pass.
+  {
     const int32_t vbias = params->scalar.bias;
 
     int32_t* b = buffer;
@@ -60,7 +59,7 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
       *b++ = vacc;
     } while (--k != 0);
   }
-  /* Intermediate passes */
+  // Intermediate passes.
   for (m -= 7; m > 7; m -= 7) {
     i0 = (const uint8_t*) ((uintptr_t) i0 + input_increment);
     i1 = (const uint8_t*) ((uintptr_t) i1 + input_increment);
@@ -94,7 +93,8 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
     } while (--k != 0);
   }
 
-  /* Last pass */ {
+  // Last pass.
+  {
     const int32_t vmultiplier = params->scalar.multiplier;
     const int64_t vrounding = params->scalar.rounding;
     const uint32_t vshift = params->scalar.right_shift;

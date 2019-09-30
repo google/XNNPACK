@@ -1,9 +1,7 @@
-/*
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
@@ -39,7 +37,7 @@ void xnn_x32_pad_x2__psimd(
   }
   const psimd_u32 vc = psimd_splat_u32(c);
 
-  /* Pre-pad input channels */
+  // Pre-pad input channels.
   for (; l >= 16; l -= 16) {
     psimd_store_u32(y0, vc); y0 += 4;
     psimd_store_u32(y1, vc); y1 += 4;
@@ -53,7 +51,7 @@ void xnn_x32_pad_x2__psimd(
     psimd_store1_u32(y1, vc); y1 += 1;
   }
 
-  /* Copy input channels */
+  // Copy input channels.
   for (; n >= 16; n -= 16) {
     const psimd_u32 vt0 = psimd_load_u32(x0); x0 += 4;
     const psimd_u32 vt1 = psimd_load_u32(x1); x1 += 4;
@@ -75,7 +73,7 @@ void xnn_x32_pad_x2__psimd(
     }
   }
 
-  /* Post-pad input channels */
+  // Post-pad input channels.
   for (; r >= 16; r -= 16) {
     psimd_store_u32(y0, vc); y0 += 4;
     psimd_store_u32(y1, vc); y1 += 4;

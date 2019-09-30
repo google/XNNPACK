@@ -31,5 +31,5 @@ DECLARE_F32_VMUL_UKERNEL_FUNCTION(xnn_f32_vmul_ukernel__sse)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

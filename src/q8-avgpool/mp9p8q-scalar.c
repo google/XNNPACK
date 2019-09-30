@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
@@ -38,7 +36,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
   const int32_t voutput_max = params->scalar.output_max_less_zero_point;
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
   do {
-    /* First pass */ {
+    // First pass.
+    {
       const uint8_t* i0 = *input++;
       const uint8_t* i1 = *input++;
       const uint8_t* i2 = *input++;
@@ -76,7 +75,7 @@ void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
     }
 
     size_t m = ks;
-    /* Intermediate passes */
+    // Intermediate passes.
     for (m -= 9; m > 8; m -= 8) {
       const uint8_t* i0 = *input++;
       const uint8_t* i1 = *input++;
@@ -114,7 +113,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
       } while (--k != 0);
     }
 
-    /* Last pass */ {
+    // Last pass.
+    {
       const uint8_t* i0 = input[0];
       const uint8_t* i1 = input[1];
       const uint8_t* i2 = input[2];

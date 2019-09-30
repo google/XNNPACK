@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <arm_neon.h>
 
@@ -31,7 +29,7 @@ void xnn_q8_dwconv_ukernel_up8x9__neon(
   const uint8x8_t voutput_max = vld1_dup_u8(&params->neon.output_max);
 
 #ifdef __aarch64__
-  /* Larger number of registers on AArch64 make it possible to process few pixels at a time */
+  // Larger number of registers on AArch64 make it possible to process few pixels at a time.
   if (input_stride == 3 * sizeof(void*)) {
     for (; output_width >= 3; output_width -= 3) {
       const uint8_t* i00 = input[ 0];

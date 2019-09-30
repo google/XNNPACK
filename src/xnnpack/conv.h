@@ -59,5 +59,5 @@ DECLARE_F32_CONV_HWC2SPCHW_UKERNEL_FUNCTION(xnn_f32_conv_hwc2spchw_ukernel_3x3s2
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

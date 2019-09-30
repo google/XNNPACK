@@ -56,5 +56,5 @@ DECLARE_F32_PAVGPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_ukernel_up9__sse)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

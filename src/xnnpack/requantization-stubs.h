@@ -65,5 +65,5 @@ DECLARE_REQUANTIZATION_FUNCTION(xnn_requantize_gemmlowp__sse4)
 DECLARE_REQUANTIZATION_FUNCTION(xnn_requantize_gemmlowp__neon)
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

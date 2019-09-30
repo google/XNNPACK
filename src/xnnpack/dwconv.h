@@ -84,5 +84,5 @@ DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_3x3s2p1__
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

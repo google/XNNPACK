@@ -35,5 +35,5 @@ DECLARE_F32_VMULCADDC_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_ukernel_c4__sse_x2)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

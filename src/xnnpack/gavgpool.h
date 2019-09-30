@@ -95,5 +95,5 @@ DECLARE_F32_GAVGPOOL_SPCHW_UKERNEL_FUNCTION(xnn_f32_gavgpool_spchw_ukernel__sse_
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

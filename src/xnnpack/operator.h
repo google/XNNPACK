@@ -155,7 +155,7 @@ struct subconvolution_params {
   size_t slice_height;
   size_t indirection_y_stride;
   size_t indirection_x_stride;
-  /* kernel_size * mr * sizeof(void*) */
+  // scaled_kernel_size := kernel_size * mr * sizeof(void*).
   size_t scaled_kernel_size;
 };
 

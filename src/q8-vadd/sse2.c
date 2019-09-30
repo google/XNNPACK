@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <immintrin.h>
 
@@ -41,7 +39,7 @@ void xnn_q8_vadd_ukernel__sse2(
     const __m128i vxa = _mm_unpacklo_epi8(va, vzero);
     const __m128i vxb = _mm_unpacklo_epi8(vb, vzero);
 
-    /* Multiply by factors */
+    // Multiply by factors.
     const __m128i va_product_lo = _mm_mullo_epi16(vxa, va_multiplier_lo);
     const __m128i va_product_hi =
       _mm_add_epi16(_mm_mulhi_epu16(vxa, va_multiplier_lo), _mm_mullo_epi16(vxa, va_multiplier_hi));
@@ -50,14 +48,14 @@ void xnn_q8_vadd_ukernel__sse2(
     const __m128i vb_product_hi =
       _mm_add_epi16(_mm_mulhi_epu16(vxb, vb_multiplier_lo), _mm_mullo_epi16(vxb, vb_multiplier_hi));
 
-    /* Accumulate products */
+    // Accumulate products.
     __m128i vacc_lo = _mm_add_epi32(vzero_point_product, _mm_unpacklo_epi16(va_product_lo, va_product_hi));
     __m128i vacc_hi = _mm_add_epi32(vzero_point_product, _mm_unpackhi_epi16(va_product_lo, va_product_hi));
 
     vacc_lo = _mm_add_epi32(vacc_lo, _mm_unpacklo_epi16(vb_product_lo, vb_product_hi));
     vacc_hi = _mm_add_epi32(vacc_hi, _mm_unpackhi_epi16(vb_product_lo, vb_product_hi));
 
-    /* Shift right and round */
+    // Shift right and round.
     const __m128i vrem_lo =
       _mm_add_epi32(_mm_and_si128(vacc_lo, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vacc_lo));
     const __m128i vrem_hi =
@@ -66,7 +64,7 @@ void xnn_q8_vadd_ukernel__sse2(
     vacc_lo = _mm_sub_epi32(_mm_sra_epi32(vacc_lo, vshift), _mm_cmpgt_epi32(vrem_lo, vremainder_threshold));
     vacc_hi = _mm_sub_epi32(_mm_sra_epi32(vacc_hi, vshift), _mm_cmpgt_epi32(vrem_hi, vremainder_threshold));
 
-    /* Pack, saturate, and add output zero point */
+    // Pack, saturate, and add output zero point.
     const __m128i vy_zero_point = _mm_load_si128((const __m128i*) params->sse2.y_zero_point);
     const __m128i vacc = _mm_adds_epi16(_mm_packs_epi32(vacc_lo, vacc_hi), vy_zero_point);
     __m128i vy = _mm_packus_epi16(vacc, vacc);
@@ -83,7 +81,7 @@ void xnn_q8_vadd_ukernel__sse2(
     const __m128i vxa = _mm_unpacklo_epi8(va, vzero);
     const __m128i vxb = _mm_unpacklo_epi8(vb, vzero);
 
-    /* Multiply by factors */
+    // Multiply by factors.
     const __m128i va_product_lo = _mm_mullo_epi16(vxa, va_multiplier_lo);
     const __m128i va_product_hi =
       _mm_add_epi16(_mm_mulhi_epu16(vxa, va_multiplier_lo), _mm_mullo_epi16(vxa, va_multiplier_hi));
@@ -92,14 +90,14 @@ void xnn_q8_vadd_ukernel__sse2(
     const __m128i vb_product_hi =
       _mm_add_epi16(_mm_mulhi_epu16(vxb, vb_multiplier_lo), _mm_mullo_epi16(vxb, vb_multiplier_hi));
 
-    /* Accumulate products */
+    // Accumulate products.
     __m128i vacc_lo = _mm_add_epi32(vzero_point_product, _mm_unpacklo_epi16(va_product_lo, va_product_hi));
     __m128i vacc_hi = _mm_add_epi32(vzero_point_product, _mm_unpackhi_epi16(va_product_lo, va_product_hi));
 
     vacc_lo = _mm_add_epi32(vacc_lo, _mm_unpacklo_epi16(vb_product_lo, vb_product_hi));
     vacc_hi = _mm_add_epi32(vacc_hi, _mm_unpackhi_epi16(vb_product_lo, vb_product_hi));
 
-    /* Shift right and round */
+    // Shift right and round.
     const __m128i vrem_lo =
       _mm_add_epi32(_mm_and_si128(vacc_lo, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vacc_lo));
     const __m128i vrem_hi =
@@ -108,7 +106,7 @@ void xnn_q8_vadd_ukernel__sse2(
     vacc_lo = _mm_sub_epi32(_mm_sra_epi32(vacc_lo, vshift), _mm_cmpgt_epi32(vrem_lo, vremainder_threshold));
     vacc_hi = _mm_sub_epi32(_mm_sra_epi32(vacc_hi, vshift), _mm_cmpgt_epi32(vrem_hi, vremainder_threshold));
 
-    /* Pack, saturate, and add output zero point */
+    // Pack, saturate, and add output zero point.
     const __m128i vy_zero_point = _mm_load_si128((const __m128i*) params->sse2.y_zero_point);
     const __m128i vacc = _mm_adds_epi16(_mm_packs_epi32(vacc_lo, vacc_hi), vy_zero_point);
     __m128i vy = _mm_packus_epi16(vacc, vacc);

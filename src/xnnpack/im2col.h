@@ -33,5 +33,5 @@ XNN_INTERNAL void xnn_im2col_conv2d(
   void* output);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 #include <stdint.h>
@@ -30,15 +28,15 @@ void xnn_requantize_q31__ssse3(
   assert(scale < 1.0f);
   assert(scale >= 0x1.0p-32f);
 
-  /* Compute requantization parameters */
+  // Compute requantization parameters.
   const uint32_t scale_bits = fp32_to_bits(scale);
 
-  /* Multiplier is in [0x40000000, 0x7FFFFF80] range */
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
   assert(multiplier >= INT32_C(0x40000000));
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
-  /* Shift is in [0, 31] range */
+  // Shift is in [0, 31] range.
   const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
   assert(shift >= 0);
   assert(shift < 32);
@@ -160,29 +158,27 @@ void xnn_requantize_q31__ssse3(
     const __m128i xyzw_packed = _mm_packus_epi16(xy_packed, zw_packed);
     const __m128i xyzw_clamped = _mm_max_epu8(_mm_min_epu8(xyzw_packed, vqmax), vqmin);
 
-    /*
-     * 16x PSHUFD
-     * 4x SHUFPS
-     * 8x PMULUDQ
-     * 8x PXOR (setzero)
-     * 8x PXOR
-     * 4x PAND
-     * 8x PADDQ
-     * 4x PADDD
-     * 2x PADDW
-     * 8x PSUBQ
-     * 4x PSUBD
-     * 8x PSRLQ (immediate)
-     * 4x PSRAD (register)
-     * 12x PCMPGTD
-     * 4x PABSD
-     * 2x PACKSSDW
-     * 1x PACKUSWB
-     * 1x PMAXUB
-     * 1x PMINUB
-     * ---------------------
-     * 107 instructions total
-     */
+    // 16x PSHUFD
+    // 4x SHUFPS
+    // 8x PMULUDQ
+    // 8x PXOR (setzero)
+    // 8x PXOR
+    // 4x PAND
+    // 8x PADDQ
+    // 4x PADDD
+    // 2x PADDW
+    // 8x PSUBQ
+    // 4x PSUBD
+    // 8x PSRLQ (immediate)
+    // 4x PSRAD (register)
+    // 12x PCMPGTD
+    // 4x PABSD
+    // 2x PACKSSDW
+    // 1x PACKUSWB
+    // 1x PMAXUB
+    // 1x PMINUB
+    // ---------------------
+    // 107 instructions total
 
     _mm_storeu_si128((__m128i*) output, xyzw_clamped);
     output += 16;

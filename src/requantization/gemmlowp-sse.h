@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #pragma once
 
@@ -14,12 +12,10 @@
 
 #include <immintrin.h>
 
-/*
- * The code below is adapted from Google's gemmlowp library.
- * It is only used in XNNPACK unit tests and comparative benchmarks,
- * but not the library itself.
- */
-
+// The code below is adapted from Google's gemmlowp library.
+// It is only used in XNNPACK unit tests and comparative benchmarks,
+// but not the library itself.
+//
 // Copyright 2015 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,12 +55,12 @@ static inline __m128i gemmlowp_sse_mul_s32(__m128i a, __m128i b) {
 #ifdef __SSSE3__
   a_neg = _mm_abs_epi32(a); // negate a and b
   b_neg = _mm_abs_epi32(b); // negate a and b
-#else /* pre-SSSE3 */
+#else  // pre-SSSE3
   const __m128i a_neg_mask = _mm_cmplt_epi32(a, zero);
   a_neg = _mm_sub_epi32(_mm_xor_si128(a, a_neg_mask), a_neg_mask);
   const __m128i b_neg_mask = _mm_cmplt_epi32(b, zero);
   b_neg = _mm_sub_epi32(_mm_xor_si128(b, b_neg_mask), b_neg_mask);
-#endif /* pre-SSSE3 */
+#endif  // pre-SSSE3
   mul_us = _mm_mul_epu32(a_neg, b_neg); // uses 0 and 2nd data lanes, (abs), the
                                         // multiplication gives 64 bit result
   mul_us_neg = _mm_sub_epi64(zero, mul_us);

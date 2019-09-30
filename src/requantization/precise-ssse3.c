@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 #include <stdint.h>
@@ -103,22 +101,20 @@ void xnn_requantize_precise__ssse3(
     const __m128i xyzw_packed = _mm_packus_epi16(xy_packed, zw_packed);
     const __m128i xyzw_clamped = _mm_max_epu8(_mm_min_epu8(xyzw_packed, vqmax), vqmin);
 
-    /*
-     * 4x PABSD
-     * 8x PSHUFD
-     * 8x PMULUDQ
-     * 8x PSRLQ
-     * 8x PADDQ
-     * 4x SHUFPS
-     * 4x PSIGND
-     * 2x PACKSSDW
-     * 1x PACKUSWB
-     * 2x PADDW
-     * 1x PMAXUB
-     * 1x PMINUB
-     * ---------------------
-     * 51 instructions total
-     */
+    // 4x PABSD
+    // 8x PSHUFD
+    // 8x PMULUDQ
+    // 8x PSRLQ
+    // 8x PADDQ
+    // 4x SHUFPS
+    // 4x PSIGND
+    // 2x PACKSSDW
+    // 1x PACKUSWB
+    // 2x PADDW
+    // 1x PMAXUB
+    // 1x PMINUB
+    // ---------------------
+    // 51 instructions total
 
     _mm_storeu_si128((__m128i*) output, xyzw_clamped);
     output += 16;

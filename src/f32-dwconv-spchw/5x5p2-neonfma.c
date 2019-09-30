@@ -32,7 +32,7 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma(
   const size_t input_width_increment_single = input_width_stride - round_up_po2(n, 4) / 4 * input_tuple_stride;
   const size_t output_width_increment_single = output_width_stride - (n - 1) / 4 * output_tuple_stride;
 
-  /* No vertical padding */
+  // No vertical padding.
   const float* i0 = input;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
@@ -146,7 +146,7 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma(
 
       vst1q_f32(output0, vo0); output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
     }
-    /* Always process the last block of 5..8 pixels */
+    // Always process the last block of 5..8 pixels.
     if XNN_LIKELY(k > 4)
     {
       float32x4_t vo4567p00 = vdupq_laneq_f32(vw0123, 0);

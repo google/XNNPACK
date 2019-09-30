@@ -1,12 +1,10 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 #include <stdint.h>
@@ -128,39 +126,37 @@ void xnn_requantize_precise__neon(
 
     const uint8x16_t xyzw_clamped = vmaxq_u8(vminq_u8(xyzw_packed, vqmax), vqmin);
 
-    /*
-     * AArch32 version:
-     *   4x VCLT.S32 Qd, Qm, #0
-     *   8x VMULL.S32 Qd, Dm, Dn
-     *   8x VADDW.S32 Qd, Qm, Dn
-     *   8x VRSHL.S32 Qd, Qm, Qn
-     *   8x VMOVN.S64 Dd, Qm
-     *   4x VQMOVN.S32 Dd, Qm
-     *   2x VADD.S16 Qd, Qm, Qn
-     *   2x VQMOVUN.S16 Dd, Qm
-     *   1x VMAX.U8 Qd, Qm, Qn
-     *   1x VMIN.U8 Qd, Qm, Qn
-     * ---------------------
-     * 46 instructions total
-     *
-     * AArch64 version:
-     *   4x CMLT Vd.4S, Vn.4S, #0
-     *   4x SMULL Vd.2D, Vn.2S, Vm.2S
-     *   4x SMULL2 Vd.2D, Vn.4S, Vm.4S
-     *   4x SADDW Vd.2D, Vn.2D, Vm.2S
-     *   4x SADDW2 Vd.2D, Vn.2D, Vm.4S
-     *   8x SRSHL Vd.2D, Vn.2D, Vm.2D
-     *   4x UZP1 Vd.4S, Vn.4S, Vm.4S
-     *   2x SQXTN Vd.4H, Vn.4S
-     *   2x SQXTN2 Vd.8H, Vn.4S
-     *   2x ADD Vd.8H, Vn.8H, Vm.8H
-     *   1x SQXTUN Vd.8B, Vn.8H
-     *   1x SQXTUN2 Vd.16B, Vn.8H
-     *   1x UMIN Vd.16B, Vn.16B, Vm.16B
-     *   1x UMAX Vd.16B, Vn.16B, Vm.16B
-     * ---------------------
-     * 42 instructions total
-     */
+    // AArch32 version:
+    //   4x VCLT.S32 Qd, Qm, #0
+    //   8x VMULL.S32 Qd, Dm, Dn
+    //   8x VADDW.S32 Qd, Qm, Dn
+    //   8x VRSHL.S32 Qd, Qm, Qn
+    //   8x VMOVN.S64 Dd, Qm
+    //   4x VQMOVN.S32 Dd, Qm
+    //   2x VADD.S16 Qd, Qm, Qn
+    //   2x VQMOVUN.S16 Dd, Qm
+    //   1x VMAX.U8 Qd, Qm, Qn
+    //   1x VMIN.U8 Qd, Qm, Qn
+    // ---------------------
+    // 46 instructions total
+    //
+    // AArch64 version:
+    //   4x CMLT Vd.4S, Vn.4S, #0
+    //   4x SMULL Vd.2D, Vn.2S, Vm.2S
+    //   4x SMULL2 Vd.2D, Vn.4S, Vm.4S
+    //   4x SADDW Vd.2D, Vn.2D, Vm.2S
+    //   4x SADDW2 Vd.2D, Vn.2D, Vm.4S
+    //   8x SRSHL Vd.2D, Vn.2D, Vm.2D
+    //   4x UZP1 Vd.4S, Vn.4S, Vm.4S
+    //   2x SQXTN Vd.4H, Vn.4S
+    //   2x SQXTN2 Vd.8H, Vn.4S
+    //   2x ADD Vd.8H, Vn.8H, Vm.8H
+    //   1x SQXTUN Vd.8B, Vn.8H
+    //   1x SQXTUN2 Vd.16B, Vn.8H
+    //   1x UMIN Vd.16B, Vn.16B, Vm.16B
+    //   1x UMAX Vd.16B, Vn.16B, Vm.16B
+    // ---------------------
+    // 42 instructions total
 
     vst1q_u8(output, xyzw_clamped);
     output += 16;

@@ -47,5 +47,5 @@ DECLARE_Q8_VADD_UKERNEL_FUNCTION(xnn_q8_vadd_ukernel__sse2)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

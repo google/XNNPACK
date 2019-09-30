@@ -1,9 +1,7 @@
-/*
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
@@ -35,18 +33,18 @@ void xnn_q8_vadd_ukernel__scalar(
     const int32_t va = (int32_t) (uint32_t) *a++;
     const int32_t vb = (int32_t) (uint32_t) *b++;
 
-    /* Multiply by factors */
+    // Multiply by factors.
     const int32_t va_product = va * va_multiplier;
     const int32_t vb_product = vb * vb_multiplier;
 
-    /* Accumulate products */
+    // Accumulate products.
     const int32_t vacc = vzero_point_product + va_product + vb_product;
 
-    /* Shift right and round */
+    // Shift right and round.
     const int32_t vremainder = (vacc & vremainder_mask) - (int32_t) (vacc < 0);
     int32_t vy = asr_s32(vacc, vshift) + (int32_t) (vremainder > vremainder_threshold);
 
-    /* Pack, saturate, and add output zero point */
+    // Pack, saturate, and add output zero point.
     vy += vy_zero_point;
     vy = vy < vy_min ? vy_min : vy;
     vy = vy > vy_max ? vy_max : vy;

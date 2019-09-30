@@ -1,24 +1,19 @@
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * All rights reserved.
- *
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright (c) Facebook, Inc. and its affiliates.
+// All rights reserved.
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #pragma once
 
 #include <stdint.h>
 #include <limits.h>
 
-/*
- * The code below is adapted from Google's gemmlowp library.
- * It is only used in XNNPACK unit tests and comparative benchmarks,
- * but not the library itself.
- */
-
+// The code below is adapted from Google's gemmlowp library.
+// It is only used in XNNPACK unit tests and comparative benchmarks, but not the library itself.
+//
 // Copyright 2015 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");

@@ -1,9 +1,7 @@
-/*
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
@@ -39,7 +37,7 @@ void xnn_x32_pad_x2__neon(
   }
   const uint32x4_t vc = vmovq_n_u32(c);
 
-  /* Pre-pad input channels */
+  // Pre-pad input channels.
   for (; l >= 16; l -= 16) {
     vst1q_u32(y0, vc); y0 += 4;
     vst1q_u32(y1, vc); y1 += 4;
@@ -53,7 +51,7 @@ void xnn_x32_pad_x2__neon(
     vst1q_lane_u32(y1, vc, 0); y1 += 1;
   }
 
-  /* Copy input channels */
+  // Copy input channels.
   for (; n >= 16; n -= 16) {
     const uint32x4_t vt0 = vld1q_u32(x0); x0 += 4;
     const uint32x4_t vt1 = vld1q_u32(x1); x1 += 4;
@@ -77,7 +75,7 @@ void xnn_x32_pad_x2__neon(
     }
   }
 
-  /* Post-pad input channels */
+  // Post-pad input channels.
   for (; r >= 16; r -= 16) {
     vst1q_u32(y0, vc); y0 += 4;
     vst1q_u32(y1, vc); y1 += 4;

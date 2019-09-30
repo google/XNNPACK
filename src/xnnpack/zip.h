@@ -82,5 +82,5 @@ DECLARE_X32_ZIPV_UKERNEL_FUNCTION(xnn_x32_zip_xm_ukernel__sse2)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

@@ -62,5 +62,5 @@ DECLARE_F32_SPMM_UKERNEL_FUNCTION(xnn_f32_spmm_ukernel_8x1__sse)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif

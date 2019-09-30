@@ -1,9 +1,7 @@
-/*
- * Copyright 2019 Google LLC
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree.
- */
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
@@ -39,7 +37,7 @@ void xnn_x32_pad_x2__sse2(
   }
   const __m128i vc = _mm_set1_epi32((int) c);
 
-  /* Pre-pad input channels */
+  // Pre-pad input channels.
   for (; l >= 16; l -= 16) {
     _mm_storeu_si128((__m128i*) y0, vc); y0 += 4;
     _mm_storeu_si128((__m128i*) y1, vc); y1 += 4;
@@ -53,7 +51,7 @@ void xnn_x32_pad_x2__sse2(
     *((uint32_t*) y1) = (uint32_t) _mm_cvtsi128_si32(vc); y1 += 1;
   }
 
-  /* Copy input channels */
+  // Copy input channels.
   for (; n >= 16; n -= 16) {
     const __m128i vt0 = _mm_loadu_si128((const __m128i*) x0); x0 += 4;
     const __m128i vt1 = _mm_loadu_si128((const __m128i*) x1); x1 += 4;
@@ -75,7 +73,7 @@ void xnn_x32_pad_x2__sse2(
     }
   }
 
-  /* Post-pad input channels */
+  // Post-pad input channels.
   for (; r >= 16; r -= 16) {
     _mm_storeu_si128((__m128i*) y0, vc); y0 += 4;
     _mm_storeu_si128((__m128i*) y1, vc); y1 += 4;

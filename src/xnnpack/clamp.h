@@ -45,5 +45,5 @@ DECLARE_U8_CLAMP_UKERNEL_FUNCTION(xnn_u8_clamp_ukernel__scalar)
 
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // extern "C"
 #endif
