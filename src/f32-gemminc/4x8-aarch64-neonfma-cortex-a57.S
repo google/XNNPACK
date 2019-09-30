@@ -59,10 +59,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a57
         # Load params pointer
         LDR x8, [sp, 16]
 
-        # Load params values
-        LD1R {v4.4s}, [x8], 4
-        LD1R {v5.4s}, [x8]
-        SUB x8, x8, 4
+        # Load clamping_params values
+        LD2R {v4.4s, v5.4s}, [x8]
 
         # Save d8-d15 on stack
         STP  d8,  d9, [sp, -64]!
@@ -277,13 +275,14 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a57
 
         FMLA v16.4s, v14.4s, v4.s[3]
         FMLA v17.4s, v15.4s, v4.s[3]
-        LD1R {v4.4s}, [x8], 4
         FMLA v18.4s, v14.4s, v5.s[3]
         FMLA v19.4s, v15.4s, v5.s[3]
-        LD1R {v5.4s}, [x8]
+
+        # Load clamping_params values
+        LD2R {v4.4s, v5.4s}, [x8]
+
         FMLA v28.4s, v14.4s, v6.s[3]
         FMLA v29.4s, v15.4s, v6.s[3]
-        SUB x8, x8, 4
         FMLA v30.4s, v14.4s, v7.s[3]
         FMLA v31.4s, v15.4s, v7.s[3]
 

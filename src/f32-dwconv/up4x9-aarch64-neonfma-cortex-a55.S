@@ -22,10 +22,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
         STP d12, d13, [sp, 32]
         STP d14, d15, [sp, 48]
 
-        # v30.4S = vmax
-        LD1R {v30.4S}, [x7], 4
-        # v31.4S = vmin
-        LD1R {v31.4S}, [x7]
+        # Load clamping_params values
+        LD2R {v30.4s, v31.4s}, [x7]
 
 0:
         #  x7 := i0
