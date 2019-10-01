@@ -3,16 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/avgpool.h>
 
+#include <xnnpack/avgpool.h>
 #include "avgpool-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_AVGPOOL_UP9__NEON, kc_eq_4_fulltile) {
     TEST_REQUIRES_ARM_NEON;
     auto tester = AvgPoolMicrokernelTester()
@@ -942,10 +942,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_AVGPOOL_UP9__SSE2, kc_eq_4_fulltile) {
     TEST_REQUIRES_X86_SSE2;
     auto tester = AvgPoolMicrokernelTester()
@@ -1875,10 +1875,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   TEST(F32_AVGPOOL_UP9__PSIMD, kc_eq_4_fulltile) {
     TEST_REQUIRES_PSIMD;
     auto tester = AvgPoolMicrokernelTester()
@@ -2808,7 +2808,7 @@
       }
     }
   }
-#endif  // !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 
 TEST(F32_AVGPOOL_UP9__SCALAR, kc_eq_1_fulltile) {

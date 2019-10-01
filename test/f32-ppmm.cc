@@ -11,18 +11,18 @@
 //   Generator: tools/generate-gemm-test.py
 
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/isa-checks.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/ppmm.h>
-#include <xnnpack/isa-checks.h>
-
 #include "gemm-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_PPMM_4X8__NEON, k_eq_1) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -357,10 +357,10 @@
       .cm_stride(11)
       .Test(xnn_f32_ppmm_ukernel_4x8__neon);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_PPMM_4X8__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -695,10 +695,10 @@
       .cm_stride(11)
       .Test(xnn_f32_ppmm_ukernel_4x8__neonfma);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_PPMM_8X8__NEON, k_eq_1) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -1033,10 +1033,10 @@
       .cm_stride(11)
       .Test(xnn_f32_ppmm_ukernel_8x8__neon);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_PPMM_8X8__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -1371,10 +1371,10 @@
       .cm_stride(11)
       .Test(xnn_f32_ppmm_ukernel_8x8__neonfma);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_PPMM_4X8__SSE, k_eq_1) {
     TEST_REQUIRES_X86_SSE;
     GemmMicrokernelTester()
@@ -1709,10 +1709,10 @@
       .cm_stride(11)
       .Test(xnn_f32_ppmm_ukernel_4x8__sse);
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_PPMM_4X8__PSIMD, k_eq_1) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -2047,7 +2047,7 @@
       .cm_stride(11)
       .Test(xnn_f32_ppmm_ukernel_4x8__psimd, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
 TEST(F32_PPMM_4X2__SCALAR, k_eq_1) {

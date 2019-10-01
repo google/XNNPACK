@@ -12,7 +12,7 @@
   #include <malloc.h>
 #endif
 
-#include <cpuinfo.h>
+#include <xnnpack/common.h>
 
 extern int posix_memalign(void **memptr, size_t alignment, size_t size);
 
@@ -22,7 +22,7 @@ extern int posix_memalign(void **memptr, size_t alignment, size_t size);
 
 inline static void* xnn_allocate_memory(size_t memory_size) {
   void* memory_ptr = NULL;
-#if CPUINFO_ARCH_ASMJS || CPUINFO_ARCH_WASM
+#if XNN_ARCH_ASMJS || XNN_ARCH_WASM
   memory_ptr = malloc(memory_size);
 #elif defined(__ANDROID__)
   memory_ptr = memalign(XNN_ALLOCATION_ALIGNMENT, memory_size);

@@ -3,16 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/vmul.h>
 
+#include <xnnpack/vmul.h>
 #include "vmul-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_VMUL__SSE, n_eq_4) {
     TEST_REQUIRES_X86_SSE;
     VMulMicrokernelTester()
@@ -116,10 +116,10 @@
         .Test(xnn_f32_vmul_ukernel__sse);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   TEST(F32_VMUL__PSIMD, n_eq_4) {
     TEST_REQUIRES_PSIMD;
     VMulMicrokernelTester()
@@ -223,7 +223,7 @@
         .Test(xnn_f32_vmul_ukernel__psimd, VMulMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 
 TEST(F32_VMUL__SCALAR, n_eq_1) {

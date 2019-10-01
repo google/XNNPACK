@@ -3,16 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
-#include <xnnpack/conv.h>
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
+#include <xnnpack/conv.h>
 #include "conv-hwc2spchw-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_CONV_HWC2SPCHW_3X3S2P1C3X4__NEONFMA_2X2, input_width_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     ConvHWC2SpCHWMicrokernelTester()
@@ -290,4 +290,4 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64

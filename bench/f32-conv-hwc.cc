@@ -17,6 +17,7 @@
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/conv.h>
+#include <xnnpack/common.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
@@ -108,7 +109,7 @@ static void DConv3X3S2P1Benchmark(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   static void f32_conv_hwc_3x3s2p1c3x8__neonfma_2x2(benchmark::State& state, const char* net) {
     DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neonfma_2x2, 8);
   }

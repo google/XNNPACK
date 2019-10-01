@@ -11,18 +11,18 @@
 //   Generator: tools/generate-gemm-test.py
 
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/isa-checks.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/ppmm.h>
-#include <xnnpack/isa-checks.h>
-
 #include "gemm-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_1X8__AARCH64_NEONFMA_CORTEX_A57, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -520,10 +520,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_1x8__aarch64_neonfma_cortex_a57);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_1X8__AARCH64_NEONFMA_CORTEX_A75, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -1021,10 +1021,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_1x8__aarch64_neonfma_cortex_a75);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X8__AARCH64_NEONFMA_CORTEX_A57, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -1522,10 +1522,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a57);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X8__AARCH64_NEONFMA_CORTEX_A75, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -2023,10 +2023,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a75);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_5X8__AARCH64_NEONFMA_CORTEX_A75, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -2524,10 +2524,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_5x8__aarch64_neonfma_cortex_a75);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A57, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -3025,10 +3025,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a57);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A73, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -3526,10 +3526,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a73);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A75, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -4027,10 +4027,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a75);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_1X12__AARCH64_NEONFMA_CORTEX_A53, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -4528,10 +4528,10 @@
       .cm_stride(17)
       .Test(xnn_f32_gemminc_ukernel_1x12__aarch64_neonfma_cortex_a53);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X12__AARCH64_NEONFMA_CORTEX_A53, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -5029,10 +5029,10 @@
       .cm_stride(17)
       .Test(xnn_f32_gemminc_ukernel_4x12__aarch64_neonfma_cortex_a53);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X8__AARCH64_NEONFMA_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -5485,10 +5485,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X8__AARCH64_NEONFMA_LD128, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -5941,10 +5941,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_ld128);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -6397,10 +6397,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_LD128, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -6853,10 +6853,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ld128);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X12__NEON_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -7309,10 +7309,10 @@
       .cm_stride(17)
       .Test(xnn_f32_gemminc_ukernel_4x12__neon_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_1X8__NEON_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -7765,10 +7765,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_1x8__neon_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X8__NEON_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -8221,10 +8221,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__neon_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X8__NEON_LD128, k_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -8677,10 +8677,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__neon_ld128);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_5X8__NEON_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -9133,10 +9133,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_5x8__neon_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_6X8__NEON_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -9589,10 +9589,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_6x8__neon_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_1X8__NEONFMA_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -10045,10 +10045,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_1x8__neonfma_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X12__NEONFMA_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -10501,10 +10501,10 @@
       .cm_stride(17)
       .Test(xnn_f32_gemminc_ukernel_4x12__neonfma_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X8__NEONFMA_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -10957,10 +10957,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__neonfma_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_4X8__NEONFMA_LD128, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -11413,10 +11413,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__neonfma_ld128);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_5X8__NEONFMA_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -11869,10 +11869,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_5x8__neonfma_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_GEMMINC_6X8__NEONFMA_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     GemmMicrokernelTester()
@@ -12325,10 +12325,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_6x8__neonfma_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_GEMMINC_1X8__SSE_LOAD1, k_eq_1) {
     TEST_REQUIRES_X86_SSE;
     GemmMicrokernelTester()
@@ -12679,10 +12679,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_1x8__sse_load1);
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_GEMMINC_4X8__SSE_LOAD1, k_eq_1) {
     TEST_REQUIRES_X86_SSE;
     GemmMicrokernelTester()
@@ -13033,10 +13033,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__sse_load1);
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_GEMMINC_1X8__SSE_DUP, k_eq_4) {
     TEST_REQUIRES_X86_SSE;
     GemmMicrokernelTester()
@@ -13489,10 +13489,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_1x8__sse_dup);
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_GEMMINC_4X8__SSE_DUP, k_eq_4) {
     TEST_REQUIRES_X86_SSE;
     GemmMicrokernelTester()
@@ -13945,10 +13945,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__sse_dup);
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_GEMMINC_1X8S4__SSE, k_eq_4) {
     TEST_REQUIRES_X86_SSE;
     GemmMicrokernelTester()
@@ -14401,10 +14401,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_1x8s4__sse);
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_GEMMINC_4X8S4__SSE, k_eq_4) {
     TEST_REQUIRES_X86_SSE;
     GemmMicrokernelTester()
@@ -14857,10 +14857,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8s4__sse);
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_GEMMINC_1X8__PSIMD_LOADSPLAT, k_eq_1) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -15211,10 +15211,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_1x8__psimd_loadsplat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_GEMMINC_4X8__PSIMD_LOADSPLAT, k_eq_1) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -15565,10 +15565,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__psimd_loadsplat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_GEMMINC_6X8__PSIMD_LOADSPLAT, k_eq_1) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -15919,10 +15919,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_6x8__psimd_loadsplat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_GEMMINC_1X8__PSIMD_SPLAT, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -16375,10 +16375,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_1x8__psimd_splat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_GEMMINC_4X8__PSIMD_SPLAT, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -16831,10 +16831,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8__psimd_splat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_GEMMINC_6X8__PSIMD_SPLAT, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -17287,10 +17287,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_6x8__psimd_splat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_GEMMINC_1X8S4__PSIMD, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -17743,10 +17743,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_1x8s4__psimd, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_GEMMINC_4X8S4__PSIMD, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -18199,10 +18199,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_4x8s4__psimd, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_GEMMINC_6X8S4__PSIMD, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -18655,7 +18655,7 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_ukernel_6x8s4__psimd, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
 TEST(F32_GEMMINC_1X4__SCALAR, k_eq_1) {

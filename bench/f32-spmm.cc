@@ -16,6 +16,7 @@
 #include "bench/gemm.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
 #include <xnnpack/spmm.h>
@@ -158,7 +159,7 @@ static void SpMMBenchmark(benchmark::State& state,
 }
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   static void spmm80_4x1__neonfma(benchmark::State& state, const char* net) {
     SpMMBenchmark(state, xnn_f32_spmm_ukernel_4x1__neonfma, 4, 1, 0.8f);
   }
@@ -247,9 +248,9 @@ static void SpMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(spmm80_4x1__neonfma_pipelined)
   BENCHMARK_GEMM(spmm80_8x1__neonfma_pipelined)
   BENCHMARK_GEMM(spmm80_16x1__neonfma_pipelined)
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void spmm80_4x1__sse(benchmark::State& state, const char* net) {
     SpMMBenchmark(state, xnn_f32_spmm_ukernel_4x1__sse, 4, 1, 0.8f);
   }
@@ -260,7 +261,7 @@ static void SpMMBenchmark(benchmark::State& state,
 
   BENCHMARK_GEMM(spmm80_4x1__sse)
   BENCHMARK_GEMM(spmm80_8x1__sse)
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 static void spmm80_1x1__scalar(benchmark::State& state, const char* net) {
   SpMMBenchmark(state, xnn_f32_spmm_ukernel_1x1__scalar, 1, 1, 0.8f);

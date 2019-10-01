@@ -12,8 +12,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <cpuinfo.h>
-
 #include <xnnpack/common.h>
 
 #define XNN_INTERNAL_EXTRA_BYTES 32
@@ -29,12 +27,12 @@ union xnn_f32_output_params {
     float max;
     float min;
   } scalar;
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float max[4];
     XNN_ALIGN(16) float min[4];
   } sse;
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f32_spchw_params {
@@ -42,7 +40,7 @@ union xnn_f32_spchw_params {
     float max;
     float min;
   } scalar;
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     XNN_ALIGN(16) uint32_t mask_even[4]; // used by stride 2 kernels
     XNN_ALIGN(16) uint32_t mask_odd[4];  // used by stride 2 kernels
@@ -50,8 +48,8 @@ union xnn_f32_spchw_params {
     float min;
     float max;
   } neon;
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) uint32_t mask_even[4]; // used by stride 2 kernels
     XNN_ALIGN(16) uint32_t mask_odd[4];  // used by stride 2 kernels
@@ -59,7 +57,7 @@ union xnn_f32_spchw_params {
     XNN_ALIGN(16) float max[4];
     XNN_ALIGN(16) float min[4];
   } sse;
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_u8_output_params {
@@ -67,18 +65,18 @@ union xnn_u8_output_params {
     int32_t max;
     int32_t min;
   } scalar;
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint8_t max;
     uint8_t min;
   } neon;
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) uint8_t max[16];
     XNN_ALIGN(16) uint8_t min[16];
   } sse2;
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f32_avgpool_params {
@@ -87,20 +85,20 @@ union xnn_f32_avgpool_params {
     float output_min;
     float output_max;
   } scalar;
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float multiplier[4];
     XNN_ALIGN(16) float output_max[4];
     XNN_ALIGN(16) float output_min[4];
   } sse2;
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     XNN_ALIGN(16) float multiplier;
     XNN_ALIGN(16) float output_max;
     XNN_ALIGN(16) float output_min;
   } neon;
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
 
 union xnn_f32_gavgpool_params {
@@ -109,22 +107,22 @@ union xnn_f32_gavgpool_params {
     float output_min;
     float output_max;
   } scalar;
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float multiplier[4];
     XNN_ALIGN(16) float output_max[4];
     XNN_ALIGN(16) float output_min[4];
     XNN_ALIGN(16) uint32_t mask[4];
   } sse;
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     XNN_ALIGN(16) float multiplier;
     XNN_ALIGN(16) float output_max;
     XNN_ALIGN(16) float output_min;
     XNN_ALIGN(16) uint32_t mask[4];
   } neon;
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64 */
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
 };
 
 union xnn_f32_hswish_params {
@@ -133,13 +131,13 @@ union xnn_f32_hswish_params {
     float half;
     float one;
   } scalar;
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float sixth[4];
     XNN_ALIGN(16) float half[4];
     XNN_ALIGN(16) float one[4];
   } sse;
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_q8_gemm_params {
@@ -154,7 +152,7 @@ union xnn_q8_gemm_params {
     int32_t output_max_less_zero_point;
     int32_t output_zero_point;
   } scalar;
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int16_t kernel_zero_point;
     int16_t input_zero_point;
@@ -164,8 +162,8 @@ union xnn_q8_gemm_params {
     uint8_t output_max;
     uint8_t output_min;
   } neon;
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) int16_t kernel_zero_point[8];
     XNN_ALIGN(16) int16_t input_zero_point[8];
@@ -178,7 +176,7 @@ union xnn_q8_gemm_params {
     XNN_ALIGN(16) uint8_t output_max[16];
     XNN_ALIGN(16) uint8_t output_min[16];
   } sse2;
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_q8_add_params {
@@ -193,7 +191,7 @@ union xnn_q8_add_params {
     int32_t y_max;
     int32_t y_min;
   } scalar;
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint8_t a_zero_point;
     uint8_t b_zero_point;
@@ -204,8 +202,8 @@ union xnn_q8_add_params {
     uint8_t y_max;
     uint8_t y_min;
   } neon;
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) int32_t zero_point_product[4];
     XNN_ALIGN(16) uint16_t a_multiplier_lo[8];
@@ -221,7 +219,7 @@ union xnn_q8_add_params {
     uint32_t a_multiplier;
     uint32_t b_multiplier;
   } sse2;
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_q8_avgpool_params {
@@ -234,7 +232,7 @@ union xnn_q8_avgpool_params {
     int32_t output_max_less_zero_point;
     int32_t output_zero_point;
   } scalar;
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int32_t bias;
     int32_t multiplier;
@@ -243,8 +241,8 @@ union xnn_q8_avgpool_params {
     uint8_t output_max;
     uint8_t output_min;
   } neon;
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) int32_t bias[4];
     XNN_ALIGN(16) uint32_t multiplier[4];
@@ -254,7 +252,7 @@ union xnn_q8_avgpool_params {
     XNN_ALIGN(16) uint8_t output_max[16];
     XNN_ALIGN(16) uint8_t output_min[16];
   } sse2;
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_fp32_requantization_params {
@@ -330,7 +328,7 @@ union xnn_q31_requantization_params {
     int32_t max_less_zero_point;
     int32_t zero_point;
   } scalar;
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int32_t multiplier;
     int32_t right_shift;
@@ -338,8 +336,8 @@ union xnn_q31_requantization_params {
     uint8_t max;
     uint8_t min;
   } neon;
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) uint32_t multiplier[4];
     XNN_ALIGN(16) uint64_t rounding[2];
@@ -350,7 +348,7 @@ union xnn_q31_requantization_params {
     XNN_ALIGN(16) uint8_t max[16];
     XNN_ALIGN(16) uint8_t min[16];
   } sse2;
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_requantization_params {

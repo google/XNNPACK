@@ -6,16 +6,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/gavgpool.h>
 
+#include <xnnpack/gavgpool.h>
 #include "gavgpool-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(Q8_GAVGPOOL_UP7__NEON, n_eq_8_fulltile) {
     TEST_REQUIRES_ARM_NEON;
     GAvgPoolMicrokernelTester()
@@ -775,9 +775,9 @@
       } 
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(Q8_GAVGPOOL_UP7__SSE2, n_eq_8_fulltile) {
     TEST_REQUIRES_X86_SSE2;
     GAvgPoolMicrokernelTester()
@@ -1537,7 +1537,7 @@
       } 
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 TEST(Q8_GAVGPOOL_UP7__SCALAR, n_eq_1_fulltile) {
   GAvgPoolMicrokernelTester()

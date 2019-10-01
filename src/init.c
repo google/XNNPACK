@@ -18,6 +18,7 @@
 #include <xnnpack/argmaxpool.h>
 #include <xnnpack/avgpool.h>
 #include <xnnpack/clamp.h>
+#include <xnnpack/common.h>
 #include <xnnpack/conv.h>
 #include <xnnpack/dwconv.h>
 #include <xnnpack/gavgpool.h>
@@ -48,15 +49,15 @@ struct xnn_parameters xnn_params = {
   .initialized = false
 };
 
-#if CPUINFO_ARCH_PNACL || CPUINFO_ARCH_ASMJS || CPUINFO_ARCH_WASM || CPUINFO_ARCH_WASMSIMD
+#if XNN_ARCH_PNACL || XNN_ARCH_ASMJS || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   extern uint32_t xnn_stub_wasm_f32_sub(uint32_t a, uint32_t b);
 #endif
-#if CPUINFO_ARCH_PNACL || CPUINFO_ARCH_WASM || CPUINFO_ARCH_WASMSIMD
+#if XNN_ARCH_PNACL || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   extern uint32_t xnn_stub_wasm_f32_min(uint32_t a, uint32_t b);
 #endif
 
 static void init(void) {
-#if CPUINFO_ARCH_ARM
+#if XNN_ARCH_ARM
   if (!cpuinfo_has_arm_neon()) {
     xnn_log_error("XNNPACK initialization failed: NEON is not supported");
     return;
@@ -206,7 +207,7 @@ static void init(void) {
     .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__neon,
   };
 
-#elif CPUINFO_ARCH_ARM64
+#elif XNN_ARCH_ARM64
 
   /**************************** Q8 micro-kernels ****************************/
   xnn_params.q8.gemm = (struct gemm_parameters) {
@@ -485,7 +486,7 @@ static void init(void) {
     .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__neon,
   };
 
-#elif CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
   if (!cpuinfo_has_x86_sse2()) {
     xnn_log_error("XNNPACK initialization failed: SSE2 is not supported");
     return;
@@ -649,7 +650,7 @@ static void init(void) {
     .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__sse2,
   };
 
-#elif CPUINFO_ARCH_PNACL || CPUINFO_ARCH_WASMSIMD
+#elif XNN_ARCH_PNACL || XNN_ARCH_WASMSIMD
   /**************************** Q8 micro-kernels ****************************/
   xnn_params.q8.gemm = (struct gemm_parameters) {
     .gemm = (xnn_gemm_ukernel_function) xnn_q8_gemm_ukernel_2x2__scalar,
@@ -786,7 +787,7 @@ static void init(void) {
     .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__psimd,
   };
 
-#elif CPUINFO_ARCH_WASM || CPUINFO_ARCH_ASMJS
+#elif XNN_ARCH_WASM || XNN_ARCH_ASMJS
   // Unlike most other architectures, on x86/x86-64 when floating-point instructions
   // have no NaN arguments, but produce NaN output, the output NaN has sign bit set.
   // We use it to distinguish x86/x86-64 from other architectures, by doing subtraction

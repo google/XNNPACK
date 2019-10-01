@@ -6,16 +6,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/avgpool.h>
 
+#include <xnnpack/avgpool.h>
 #include "avgpool-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(Q8_AVGPOOL_UP9__NEON, kc_eq_8_fulltile) {
     TEST_REQUIRES_ARM_NEON;
     auto tester = AvgPoolMicrokernelTester()
@@ -1117,9 +1117,9 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(Q8_AVGPOOL_UP9__SSE2, kc_eq_8_fulltile) {
     TEST_REQUIRES_X86_SSE2;
     auto tester = AvgPoolMicrokernelTester()
@@ -2221,7 +2221,7 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 TEST(Q8_AVGPOOL_UP9__SCALAR, kc_eq_1_fulltile) {
   auto tester = AvgPoolMicrokernelTester()

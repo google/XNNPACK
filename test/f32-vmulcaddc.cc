@@ -8,16 +8,16 @@
 //   Generator: tools/generate-vmulcaddc-test.py
 
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
-#include <xnnpack/vmulcaddc.h>
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
+#include <xnnpack/vmulcaddc.h>
 #include "vmulcaddc-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_VMULCADDC_C4__NEONFMA_X2, c_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     VMulCAddCMicrokernelTester()
@@ -155,10 +155,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_VMULCADDC_C4__NEON_X2, c_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     VMulCAddCMicrokernelTester()
@@ -296,10 +296,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_VMULCADDC_C4__SSE_X2, c_eq_4) {
     TEST_REQUIRES_X86_SSE;
     VMulCAddCMicrokernelTester()
@@ -437,10 +437,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_VMULCADDC_C4__PSIMD_X2, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     VMulCAddCMicrokernelTester()
@@ -578,7 +578,7 @@
       }
     }
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
 TEST(F32_VMULCADDC_C1__SCALAR_X2, c_eq_1) {

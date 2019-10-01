@@ -11,18 +11,18 @@
 //   Generator: tools/generate-gemm-test.py
 
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/isa-checks.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/ppmm.h>
-#include <xnnpack/isa-checks.h>
-
 #include "gemm-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(Q8_GEMM_4X8__NEON, k_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -524,10 +524,10 @@
         .Test(xnn_q8_gemm_ukernel_4x8__neon);
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(Q8_GEMM_8X8__NEON, k_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -1029,10 +1029,10 @@
         .Test(xnn_q8_gemm_ukernel_8x8__neon);
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(Q8_GEMM_2X4C8__SSE2, k_eq_8) {
     TEST_REQUIRES_X86_SSE2;
     GemmMicrokernelTester()
@@ -1534,10 +1534,10 @@
         .Test(xnn_q8_gemm_ukernel_2x4c8__sse2);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(Q8_GEMM_4X4C2__SSE2, k_eq_8) {
     TEST_REQUIRES_X86_SSE2;
     GemmMicrokernelTester()
@@ -2039,7 +2039,7 @@
         .Test(xnn_q8_gemm_ukernel_4x4c2__sse2);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 TEST(Q8_GEMM_2X2__SCALAR, k_eq_1) {

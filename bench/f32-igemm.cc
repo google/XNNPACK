@@ -16,6 +16,7 @@
 #include "bench/conv.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/indirection.h>
 #include <xnnpack/operator.h>
@@ -149,7 +150,7 @@ static void IGEMMBenchmark(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void f32_igemm_4x2__neon_ld64(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x2__neon_ld64, 4, 2, 1, 1);
   }
@@ -212,7 +213,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_6x8__neonfma_ld64)
 #endif
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   static void f32_igemm_1x12__aarch64_neonfma_cortex_a53(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53, 1, 12, 1, 1);
   }
@@ -258,9 +259,9 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_6x8__aarch64_neonfma_cortex_a57)
   BENCHMARK_CONV(f32_igemm_6x8__aarch64_neonfma_cortex_a73)
   BENCHMARK_CONV(f32_igemm_6x8__aarch64_neonfma_cortex_a75)
-#endif  /* CPUINFO_ARCH_ARM64 */
+#endif  /* XNN_ARCH_ARM64 */
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void f32_igemm_1x8__sse_load1(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__sse_load1, 1, 8, 1, 1);
   }
@@ -291,9 +292,9 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_4x8__sse_dup)
   BENCHMARK_CONV(f32_igemm_1x8s4__sse)
   BENCHMARK_CONV(f32_igemm_4x8s4__sse)
-#endif  /* CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64 */
+#endif  /* XNN_ARCH_X86 || XNN_ARCH_X86_64 */
 
-#if !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   static void f32_igemm_1x8__psimd_loadsplat(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__psimd_loadsplat, 1, 8, 1, 1);
   }
@@ -341,7 +342,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_1x8s4__psimd)
   BENCHMARK_CONV(f32_igemm_4x8s4__psimd)
   BENCHMARK_CONV(f32_igemm_6x8s4__psimd)
-#endif /* !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS */
+#endif /* !XNN_ARCH_WASM && !XNN_ARCH_ASMJS */
 
 static void f32_igemm_1x4__scalar(benchmark::State& state, const char* net) {
   IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x4__scalar, 1, 4, 1, 1);

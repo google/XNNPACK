@@ -3,16 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/maxpool.h>
 
+#include <xnnpack/maxpool.h>
 #include "maxpool-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(SMAXPOOL_9P8Q__SSE, kc_eq_4_unipass_fulltile) {
     TEST_REQUIRES_X86_SSE;
     auto tester = MaxPoolMicrokernelTester()
@@ -1214,10 +1214,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   TEST(SMAXPOOL_9P8Q__PSIMD, kc_eq_4_unipass_fulltile) {
     TEST_REQUIRES_PSIMD;
     auto tester = MaxPoolMicrokernelTester()
@@ -2419,7 +2419,7 @@
       }
     }
   }
-#endif  // !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 
 TEST(SMAXPOOL_9P8Q__SCALAR, kc_eq_1_unipass_fulltile) {

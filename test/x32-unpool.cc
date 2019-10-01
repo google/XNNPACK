@@ -5,13 +5,14 @@
 
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/unpool.h>
 
+#include <xnnpack/unpool.h>
 #include "unpool-microkernel-tester.h"
 
 
-#if !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   TEST(X32_UNPOOL__PSIMD, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     UnpoolMicrokernelTester()
@@ -83,7 +84,7 @@
         .Test(xnn_x32_unpool_ukernel__psimd);
     }
   }
-#endif  // !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 
 TEST(X32_UNPOOL__SCALAR, c_eq_1) {

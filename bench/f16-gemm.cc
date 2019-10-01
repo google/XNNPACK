@@ -20,6 +20,7 @@
 #include "bench/gemm.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
@@ -99,7 +100,7 @@ static void GEMMBenchmark(benchmark::State& state,
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   static void hgemm_4x8__neonfp16arith_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_f16_gemm_ukernel_4x8__neonfp16arith_ld64, 4, 8, 1);
   }

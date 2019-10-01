@@ -40,10 +40,10 @@ def remove_duplicate_newlines(text):
 
 
 ARCH_TO_MACRO_MAP = {
-  "aarch32": "CPUINFO_ARCH_ARM",
-  "aarch64": "CPUINFO_ARCH_ARM64",
-  "x86": "CPUINFO_ARCH_X86",
-  "x86-64": "CPUINFO_ARCH_X86_64",
+  "aarch32": "XNN_ARCH_ARM",
+  "aarch64": "XNN_ARCH_ARM64",
+  "x86": "XNN_ARCH_X86",
+  "x86-64": "XNN_ARCH_X86_64",
 }
 
 ISA_TO_ARCH_MAP = {
@@ -875,14 +875,14 @@ def main(args):
 //   Generator: {generator}
 
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/isa-checks.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/ppmm.h>
-#include <xnnpack/isa-checks.h>
-
 #include "gemm-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
@@ -905,7 +905,7 @@ def main(args):
         tests += indent(test_case) + "\n"
         tests += "#endif  // %s\n" % guard_macro
       elif isa == "psimd":
-        guard_macro = "!CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM"
+        guard_macro = "!XNN_ARCH_ASMJS && !XNN_ARCH_WASM"
         tests += "#if %s\n" % guard_macro
         tests += indent(test_case) + "\n"
         tests += "#endif  // %s\n" % guard_macro

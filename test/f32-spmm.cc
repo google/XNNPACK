@@ -8,16 +8,16 @@
 //   Generator: tools/generate-spmm-test.py
 
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
-#include <xnnpack/spmm.h>
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
+#include <xnnpack/spmm.h>
 #include "spmm-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_4X1__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -179,10 +179,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_4X2__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -389,10 +389,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_4X4__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -599,10 +599,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_4X1__NEONFMA_PIPELINED, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -764,10 +764,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_4X1__NEONFMA_UNROLL2, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -957,10 +957,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_8X1__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -1122,10 +1122,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_8X2__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -1332,10 +1332,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_8X4__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -1542,10 +1542,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_8X1__NEONFMA_PIPELINED, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -1707,10 +1707,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_8X1__NEONFMA_UNROLL2, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -1900,10 +1900,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_12X1__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -2065,10 +2065,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_12X2__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -2275,10 +2275,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_12X4__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -2485,10 +2485,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_16X1__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -2650,10 +2650,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_16X2__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -2860,10 +2860,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_16X4__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -3070,10 +3070,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_16X1__NEONFMA_PIPELINED, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -3235,10 +3235,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_SPMM_16X1__NEONFMA_UNROLL2, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -3428,10 +3428,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_SPMM_4X1__SSE, k_eq_1) {
     TEST_REQUIRES_X86_SSE;
     SpMMMicrokernelTester()
@@ -3593,10 +3593,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_SPMM_8X1__SSE, k_eq_1) {
     TEST_REQUIRES_X86_SSE;
     SpMMMicrokernelTester()
@@ -3758,7 +3758,7 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 TEST(F32_SPMM_1X1__SCALAR, k_eq_1) {

@@ -5,13 +5,14 @@
 
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/pad.h>
 
+#include <xnnpack/pad.h>
 #include "pad-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(X32_PAD_X2__NEON, fulltile_copy_n_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     PadMicrokernelTester()
@@ -201,10 +202,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(X32_PAD_X2__SSE2, fulltile_copy_n_eq_4) {
     TEST_REQUIRES_X86_SSE2;
     PadMicrokernelTester()
@@ -394,10 +395,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   TEST(X32_PAD_X2__PSIMD, fulltile_copy_n_eq_4) {
     TEST_REQUIRES_PSIMD;
     PadMicrokernelTester()
@@ -587,7 +588,7 @@
       }
     }
   }
-#endif  // !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 
 TEST(X32_PAD_X2__SCALAR, fulltile_copy_n_eq_1) {

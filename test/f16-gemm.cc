@@ -11,18 +11,18 @@
 //   Generator: tools/generate-gemm-test.py
 
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/isa-checks.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/ppmm.h>
-#include <xnnpack/isa-checks.h>
-
 #include "gemm-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F16_GEMM_4X8__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -475,10 +475,10 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_ukernel_4x8__neonfp16arith_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F16_GEMM_6X8__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -931,10 +931,10 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_ukernel_6x8__neonfp16arith_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F16_GEMM_8X8__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -1387,4 +1387,4 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_ukernel_8x8__neonfp16arith_ld64);
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64

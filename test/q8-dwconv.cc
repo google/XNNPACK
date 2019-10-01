@@ -11,16 +11,16 @@
 //   Generator: tools/generate-dwconv-test.py
 
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
-#include <xnnpack/dwconv.h>
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
+#include <xnnpack/dwconv.h>
 #include "dwconv-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM
+#if XNN_ARCH_ARM
   TEST(Q8_DWCONV_UP8X9__AARCH32_NEON, c_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     DWConvMicrokernelTester()
@@ -204,10 +204,10 @@
         .Test(xnn_q8_dwconv_ukernel_up8x9__aarch32_neon);
     }
   }
-#endif  // CPUINFO_ARCH_ARM
+#endif  // XNN_ARCH_ARM
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(Q8_DWCONV_UP8X9__NEON, c_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     DWConvMicrokernelTester()
@@ -391,10 +391,10 @@
         .Test(xnn_q8_dwconv_ukernel_up8x9__neon);
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(Q8_DWCONV_UP8X9__SSE2, c_eq_8) {
     TEST_REQUIRES_X86_SSE2;
     DWConvMicrokernelTester()
@@ -578,7 +578,7 @@
         .Test(xnn_q8_dwconv_ukernel_up8x9__sse2);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 TEST(Q8_DWCONV_UP1X9__SCALAR, c_eq_1) {

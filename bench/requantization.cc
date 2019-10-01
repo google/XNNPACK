@@ -18,6 +18,7 @@
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/requantization-stubs.h>
 
 inline uint32_t divideRoundUp(uint32_t x, uint32_t q)
@@ -151,7 +152,7 @@ BENCHMARK_F(Requantization, fp32__psimd)(benchmark::State& state)
   }
 }
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 BENCHMARK_F(Requantization, precise__neon)(benchmark::State& state)
 {
   for (auto _ : state) {
@@ -185,7 +186,7 @@ BENCHMARK_F(Requantization, gemmlowp__neon)(benchmark::State& state)
 }
 #endif
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
 BENCHMARK_F(Requantization, precise__sse2)(benchmark::State& state)
 {
   for (auto _ : state) {

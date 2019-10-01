@@ -8,16 +8,16 @@
 //   Generator: tools/generate-pack-test.py
 
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
-#include <xnnpack/packx.h>
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
+#include <xnnpack/packx.h>
 #include "pack-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(X32_PACKX_4X__NEON_ST4, k_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     PackMicrokernelTester()
@@ -121,10 +121,10 @@
         .Test(xnn_x32_packx_ukernel_4x__neon_st4);
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(X32_PACKX_4X__SSE, k_eq_4) {
     TEST_REQUIRES_X86_SSE;
     PackMicrokernelTester()
@@ -228,10 +228,10 @@
         .Test(xnn_x32_packx_ukernel_4x__sse);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(X32_PACKX_4X__PSIMD, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     PackMicrokernelTester()
@@ -335,7 +335,7 @@
         .Test(xnn_x32_packx_ukernel_4x__psimd);
     }
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
 TEST(X32_PACKX_2X__SCALAR, k_eq_1) {

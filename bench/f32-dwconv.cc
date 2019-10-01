@@ -16,6 +16,7 @@
 #include "bench/dwconv.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/dwconv.h>
 #include <xnnpack/indirection.h>
 #include <xnnpack/operator.h>
@@ -147,7 +148,7 @@ static void DWConvBenchmark(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   static void f32_dwconv_4x9__aarch64_neonfma(benchmark::State& state, const char* net) {
     DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up4x9__neon, 4, 9);
   }
@@ -158,10 +159,10 @@ static void DWConvBenchmark(benchmark::State& state,
 
   BENCHMARK_DWCONV(f32_dwconv_4x9__aarch64_neonfma)
   BENCHMARK_DWCONV(f32_dwconv_4x9__aarch64_neonfma_cortex_a55)
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void f32_dwconv_4x9__neon(benchmark::State& state, const char* net) {
     DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up4x9__neon, 4, 9);
   }
@@ -177,10 +178,10 @@ static void DWConvBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(f32_dwconv_4x9__neon)
   BENCHMARK_DWCONV(f32_dwconv_4x9__neonfma)
   BENCHMARK_DWCONV(f32_dwconv_8x9__neonfma)
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void f32_dwconv_4x4__sse(benchmark::State& state, const char* net) {
     DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up4x4__sse, 4, 4);
   }
@@ -196,10 +197,10 @@ static void DWConvBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(f32_dwconv_4x4__sse)
   BENCHMARK_DWCONV(f32_dwconv_4x9__sse)
   BENCHMARK_DWCONV(f32_dwconv_4x25__sse)
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   static void f32_dwconv_4x4__psimd(benchmark::State& state, const char* net) {
     DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up4x4__psimd, 4, 4);
   }
@@ -215,7 +216,7 @@ static void DWConvBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(f32_dwconv_4x4__psimd)
   BENCHMARK_DWCONV(f32_dwconv_4x9__psimd)
   BENCHMARK_DWCONV(f32_dwconv_4x25__psimd)
-#endif  // !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 
 static void f32_dwconv_1x4__scalar(benchmark::State& state, const char* net) {

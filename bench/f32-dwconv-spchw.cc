@@ -16,6 +16,7 @@
 #include "bench/dwconv.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/dwconv.h>
 #include <xnnpack/indirection.h>
 #include <xnnpack/operator.h>
@@ -258,7 +259,7 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   static void CHW_3x3p1__neonfma(benchmark::State& state, const char* net) {
     DWConvCHWBenchmark(state, xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma, 4, 4, 3, 3, 1, 1);
   }
@@ -299,10 +300,10 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(HWo4C4_5x5p2__neonfma)
   BENCHMARK_DWCONV(HWo4C4_3x3s2p1__neonfma)
   BENCHMARK_DWCONV(HWo4C4_5x5s2p2__neonfma)
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void CHW_3x3p1__sse(benchmark::State& state, const char* net) {
     DWConvCHWBenchmark(state, xnn_f32_dwconv_spchw_ukernel_3x3p1__sse, 4, 4, 3, 3, 1, 1);
   }
@@ -323,7 +324,7 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(CHW_3x3s2p1__sse)
   BENCHMARK_DWCONV(HWo4C4_3x3p1__sse)
   BENCHMARK_DWCONV(HWo4C4_3x3s2p1__sse)
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

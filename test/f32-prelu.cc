@@ -3,16 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/prelu.h>
 
+#include <xnnpack/prelu.h>
 #include "prelu-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_PRELU_X4__SSE2, fulltile_n_eq_4) {
     TEST_REQUIRES_X86_SSE2;
     PReLUMicrokernelTester()
@@ -181,10 +181,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   TEST(F32_PRELU_X4__PSIMD, fulltile_n_eq_4) {
     TEST_REQUIRES_PSIMD;
     PReLUMicrokernelTester()
@@ -353,7 +353,7 @@
       }
     }
   }
-#endif  // !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 
 TEST(F32_PRELU_X4__SCALAR, fulltile_n_eq_1) {

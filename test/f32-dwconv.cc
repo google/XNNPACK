@@ -11,16 +11,16 @@
 //   Generator: tools/generate-dwconv-test.py
 
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
-#include <xnnpack/dwconv.h>
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
+#include <xnnpack/dwconv.h>
 #include "dwconv-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_DWCONV_UP4X9__AARCH64_NEONFMA, c_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvMicrokernelTester()
@@ -176,10 +176,10 @@
         .Test(xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma);
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_DWCONV_UP4X9__AARCH64_NEONFMA_CORTEX_A55, c_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvMicrokernelTester()
@@ -344,10 +344,10 @@
         .Test(xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55);
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_DWCONV_UP4X9__NEONFMA, c_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvMicrokernelTester()
@@ -503,10 +503,10 @@
         .Test(xnn_f32_dwconv_ukernel_up4x9__neonfma);
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_DWCONV_UP4X9__NEON, c_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     DWConvMicrokernelTester()
@@ -662,10 +662,10 @@
         .Test(xnn_f32_dwconv_ukernel_up4x9__neon);
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_DWCONV_UP4X25__SSE, c_eq_4) {
     TEST_REQUIRES_X86_SSE;
     DWConvMicrokernelTester()
@@ -821,10 +821,10 @@
         .Test(xnn_f32_dwconv_ukernel_up4x25__sse);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_DWCONV_UP4X9__SSE, c_eq_4) {
     TEST_REQUIRES_X86_SSE;
     DWConvMicrokernelTester()
@@ -980,10 +980,10 @@
         .Test(xnn_f32_dwconv_ukernel_up4x9__sse);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_DWCONV_UP4X4__SSE, c_eq_4) {
     TEST_REQUIRES_X86_SSE;
     DWConvMicrokernelTester()
@@ -1139,10 +1139,10 @@
         .Test(xnn_f32_dwconv_ukernel_up4x4__sse);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_DWCONV_UP4X25__PSIMD, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -1298,10 +1298,10 @@
         .Test(xnn_f32_dwconv_ukernel_up4x25__psimd, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_DWCONV_UP4X9__PSIMD, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -1457,10 +1457,10 @@
         .Test(xnn_f32_dwconv_ukernel_up4x9__psimd, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
-#if !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
   TEST(F32_DWCONV_UP4X4__PSIMD, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -1616,7 +1616,7 @@
         .Test(xnn_f32_dwconv_ukernel_up4x4__psimd, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !CPUINFO_ARCH_ASMJS && !CPUINFO_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
 TEST(F32_DWCONV_UP1X4__SCALAR, c_eq_1) {

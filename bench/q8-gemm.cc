@@ -23,6 +23,7 @@
 #include "bench/gemm.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
@@ -284,7 +285,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 }
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void q8gemm_4x8__neon(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_q8_gemm_ukernel_4x8__neon, 4, 8, 1);
   }
@@ -297,7 +298,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(q8gemm_8x8__neon)
 #endif
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void q8gemm_4x4c2__sse2(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_q8_gemm_ukernel_4x4c2__sse2, 4, 4, 2);
   }

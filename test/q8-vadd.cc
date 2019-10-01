@@ -6,16 +6,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/vadd.h>
 
+#include <xnnpack/vadd.h>
 #include "vadd-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(Q8_VADD__SSE2, n_eq_8) {
     TEST_REQUIRES_X86_SSE2;
     VAddMicrokernelTester()
@@ -183,9 +183,9 @@
         .Test(xnn_q8_vadd_ukernel__sse2);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(Q8_VADD__NEON, n_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     VAddMicrokernelTester()
@@ -353,7 +353,7 @@
         .Test(xnn_q8_vadd_ukernel__neon);
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 TEST(Q8_VADD__SCALAR, n_eq_1) {
   VAddMicrokernelTester()

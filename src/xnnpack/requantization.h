@@ -22,6 +22,7 @@
 
 #include <fp16.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/params.h>
 #include <xnnpack/scalar-utils.h>
 
@@ -87,7 +88,7 @@ static inline union xnn_q8_gemm_params xnn_compute_q8_gemm_params(
   assert(shift < 32);
 
   union xnn_q8_gemm_params params;
-  #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
     for (uint32_t i = 0; i < 8; i++) {
@@ -117,7 +118,7 @@ static inline union xnn_q8_gemm_params xnn_compute_q8_gemm_params(
       params.sse2.output_max[i] = output_max;
       params.sse2.output_min[i] = output_min;
     }
-  #elif CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.input_zero_point = (int16_t) (uint16_t) input_zero_point;
     params.neon.kernel_zero_point = (int16_t) (uint16_t) kernel_zero_point;
     params.neon.multiplier = multiplier;
@@ -166,7 +167,7 @@ static inline union xnn_q8_avgpool_params xnn_compute_q8_avgpool_params(
   assert(shift < 64);
 
   union xnn_q8_avgpool_params params;
-  #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t right_shift = (uint32_t) shift;
     const uint64_t rounding = UINT64_C(1) << (right_shift - 1);
     params.sse2.bias[0] = bias;
@@ -188,7 +189,7 @@ static inline union xnn_q8_avgpool_params xnn_compute_q8_avgpool_params(
       params.sse2.output_max[i] = output_max;
       params.sse2.output_min[i] = output_min;
     }
-  #elif CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.bias = bias;
     params.neon.multiplier = multiplier;
     params.neon.left_shift = (int64_t) -shift;
@@ -252,7 +253,7 @@ static inline void xnn_update_f32_avgpool_params(
   union xnn_f32_avgpool_params* params,
   float multiplier)
 {
-  #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 4; i++) {
       params->sse2.multiplier[i] = multiplier;
     }
@@ -267,7 +268,7 @@ static inline union xnn_f32_avgpool_params xnn_compute_f32_avgpool_params(
   float output_max)
 {
   union xnn_f32_avgpool_params params;
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   for (uint32_t i = 0; i < 4; i++) {
     params.sse2.multiplier[i] = multiplier;
     params.sse2.output_min[i] = output_min;
@@ -288,7 +289,7 @@ static inline union xnn_f32_gavgpool_params xnn_compute_f32_gavgpool_params(
   uint32_t width)
 {
   union xnn_f32_gavgpool_params params;
-  #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 4; i++) {
       params.sse.multiplier[i] = multiplier;
       params.sse.output_min[i] = output_min;
@@ -320,7 +321,7 @@ static inline union xnn_f32_gavgpool_params xnn_compute_f32_gavgpool_params(
       params.sse.mask[3] = 0;
       break;
   }
-#elif CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     switch (width % 4) {
       case 0:
         params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
@@ -363,7 +364,7 @@ static inline void xnn_update_f32_gavgpool_params(
   float multiplier,
   uint32_t width)
 {
-  #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 4; i++) {
       params->sse.multiplier[i] = multiplier;
     }
@@ -393,7 +394,7 @@ static inline void xnn_update_f32_gavgpool_params(
         params->sse.mask[3] = 0;
         break;
     }
-  #elif CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params->neon.multiplier = multiplier;
     switch (width % 4) {
       case 0:
@@ -454,7 +455,7 @@ static inline union xnn_f32_output_params xnn_compute_f32_output_params(
   float output_max)
 {
   union xnn_f32_output_params params;
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   for (uint32_t i = 0; i < 4; i++) {
     params.sse.min[i] = output_min;
     params.sse.max[i] = output_max;
@@ -479,7 +480,7 @@ static inline union xnn_f32_output_params xnn_compute_scalar_f32_output_params(
 static inline union xnn_f32_hswish_params xnn_compute_f32_hswish_params(void)
 {
   union xnn_f32_hswish_params params;
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   for (uint32_t i = 0; i < 4; i++) {
     params.sse.sixth[i] = 0x1.555556p-3f;
     params.sse.half[i] = 0.5f;
@@ -508,7 +509,7 @@ static inline union xnn_f32_spchw_params xnn_compute_f32_spchw_params(
   float output_max)
 {
   union xnn_f32_spchw_params params;
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   switch (width % 4) {
     case 0:
       params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
@@ -621,7 +622,7 @@ static inline union xnn_f32_spchw_params xnn_compute_f32_spchw_params(
     params.sse.max[i] = output_max;
     params.sse.min[i] = output_min;
   }
-#elif CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#elif XNN_ARCH_ARM || XNN_ARCH_ARM64
   switch (width % 4) {
     case 0:
       params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
@@ -743,7 +744,7 @@ static inline void xnn_update_f32_spchw_params(
   union xnn_f32_spchw_params* params,
   uint32_t width)
 {
-  #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     switch (width % 4) {
       case 0:
         params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
@@ -852,7 +853,7 @@ static inline void xnn_update_f32_spchw_params(
         params->sse.mask_odd[3] = 0;
         break;
     }
-  #elif CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     switch (width % 4) {
       case 0:
         params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
@@ -982,12 +983,12 @@ static inline union xnn_u8_output_params xnn_compute_u8_output_params(
   assert(output_min < output_max);
 
   union xnn_u8_output_params params;
-  #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 16; i++) {
       params.sse2.max[i] = output_max;
       params.sse2.min[i] = output_min;
     }
-  #elif CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.max = output_max;
     params.neon.min = output_min;
   #else
@@ -1044,7 +1045,7 @@ static inline union xnn_q8_add_params xnn_compute_q8_add_params(
   assert(b_multiplier < UINT32_C(0x00400000));
 
   union xnn_q8_add_params params;
-  #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
     const int32_t zero_point_product =
@@ -1072,7 +1073,7 @@ static inline union xnn_q8_add_params xnn_compute_q8_add_params(
       params.sse2.y_max[i] = output_max;
       params.sse2.y_min[i] = output_min;
     }
-  #elif CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.a_zero_point = a_zero_point;
     params.neon.b_zero_point = b_zero_point;
     params.neon.y_zero_point = (int16_t) (uint16_t) output_zero_point;
@@ -1200,7 +1201,7 @@ static inline union xnn_q31_requantization_params xnn_compute_requantization_par
   assert(shift < 32);
 
   union xnn_q31_requantization_params params;
-  #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
     params.sse2.multiplier[0] = multiplier;
@@ -1226,7 +1227,7 @@ static inline union xnn_q31_requantization_params xnn_compute_requantization_par
       params.sse2.max[i] = max;
       params.sse2.min[i] = min;
     }
-  #elif CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.multiplier = multiplier;
     params.neon.right_shift = -shift;
     params.neon.zero_point = (int16_t) (uint16_t) zero_point;

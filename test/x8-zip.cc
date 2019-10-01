@@ -6,16 +6,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/zip.h>
 
+#include <xnnpack/zip.h>
 #include "zip-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(X8_ZIP_X2__NEON, n_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     ZipMicrokernelTester()
@@ -237,9 +237,9 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(X8_ZIP_X2__SSE2, n_eq_16) {
     TEST_REQUIRES_X86_SSE2;
     ZipMicrokernelTester()
@@ -489,7 +489,7 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 TEST(X8_ZIP_X2__SCALAR, n_eq_1) {
   ZipMicrokernelTester()

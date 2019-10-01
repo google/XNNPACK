@@ -16,6 +16,7 @@
 #include "bench/conv.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/im2col.h>
 #include <xnnpack/pack.h>
@@ -133,21 +134,21 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
 }
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   static void sgemm_4x8__aarch64_neonfma_cortex_a75(benchmark::State& state, const char* net) {
     Im2ColGEMMBenchmark(state, xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75, 4, 8, 1, 1);
   }
 
   BENCHMARK_CONV(sgemm_4x8__aarch64_neonfma_cortex_a75)
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
-#if !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   static void sgemm_6x8__psimd_loadsplat(benchmark::State& state, const char* net) {
     Im2ColGEMMBenchmark(state, xnn_f32_gemm_ukernel_6x8__psimd_loadsplat, 6, 8, 1, 1);
   }
 
   BENCHMARK_CONV(sgemm_6x8__psimd_loadsplat)
-#endif  // !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 static void sgemm_2x4__scalar(benchmark::State& state, const char* net) {
   Im2ColGEMMBenchmark(state, xnn_f32_gemm_ukernel_2x4__scalar, 2, 4, 1, 1);

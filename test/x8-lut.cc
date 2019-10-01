@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 
 #include <xnnpack/lut.h>
-
 #include "lut-microkernel-tester.h"
 
 

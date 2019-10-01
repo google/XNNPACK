@@ -10,8 +10,10 @@
 
 #include <cpuinfo.h>
 
+#include <xnnpack/common.h>
 
-#if CPUINFO_ARCH_PNACL || CPUINFO_ARCH_WASMSIMD
+
+#if XNN_ARCH_PNACL || XNN_ARCH_WASMSIMD
   #define TEST_REQUIRES_PSIMD
 #else
   #define TEST_REQUIRES_PSIMD \

@@ -14,6 +14,7 @@
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/params.h>
 #include <xnnpack/rmax.h>
 
@@ -45,7 +46,7 @@ static void f32_rmax(
     benchmark::Counter(uint64_t(state.iterations()) * n * sizeof(float), benchmark::Counter::kIsRate);
 }
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rmax, sse, xnn_f32_rmax_ukernel__sse)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
@@ -60,14 +61,14 @@ static void f32_rmax(
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(f32_rmax, neon, xnn_f32_rmax_ukernel__neon)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 BENCHMARK_CAPTURE(f32_rmax, scalar, xnn_f32_rmax_ukernel__scalar)
   ->RangeMultiplier(10)
   ->Range(1000, 100000000)

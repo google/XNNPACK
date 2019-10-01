@@ -6,16 +6,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-#include <xnnpack/rmax.h>
 
+#include <xnnpack/rmax.h>
 #include "rmax-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(U8RMAX__NEON, n_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t n = 1; n < 16; n++) {
@@ -49,9 +49,9 @@
         .Test(xnn_u8_rmax_ukernel__neon);
     }
   }
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(U8RMAX__SSE2, n_lt_16) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t n = 1; n < 16; n++) {
@@ -85,7 +85,7 @@
         .Test(xnn_u8_rmax_ukernel__sse2);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 TEST(U8RMAX__SCALAR, n_lt_2) {
   for (size_t n = 1; n < 2; n++) {

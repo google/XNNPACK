@@ -3,16 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cpuinfo.h>
 #include <gtest/gtest.h>
 
-#include <xnnpack/dwconv.h>
+#include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
+#include <xnnpack/dwconv.h>
 #include "dwconv-spchw-microkernel-tester.h"
 
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_DWCONV_SPCHW_3X3P1__SSE, input_width_eq_4) {
     TEST_REQUIRES_X86_SSE;
     DWConvSpCHWMicrokernelTester()
@@ -180,9 +180,9 @@
         .Test(xnn_f32_dwconv_spchw_ukernel_3x3p1__sse);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_DWCONV_SPCHW_3X3S2P1__SSE, input_width_eq_4) {
     TEST_REQUIRES_X86_SSE;
     DWConvSpCHWMicrokernelTester()
@@ -360,10 +360,10 @@
         .Test(xnn_f32_dwconv_spchw_ukernel_3x3s2p1__sse);
     }
   }
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_DWCONV_SPCHW_3X3P1__NEONFMA, input_width_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvSpCHWMicrokernelTester()
@@ -531,10 +531,10 @@
         .Test(xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma);
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_DWCONV_SPCHW_3X3S2P1__NEONFMA, input_width_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvSpCHWMicrokernelTester()
@@ -712,10 +712,10 @@
         .Test(xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma);
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_DWCONV_SPCHW_5X5P2__NEONFMA, input_width_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvSpCHWMicrokernelTester()
@@ -885,10 +885,10 @@
       }
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   TEST(F32_DWCONV_SPCHW_5X5S2P2__NEONFMA, input_width_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvSpCHWMicrokernelTester()
@@ -1066,4 +1066,4 @@
         .Test(xnn_f32_dwconv_spchw_ukernel_5x5s2p2__neonfma);
     }
   }
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64

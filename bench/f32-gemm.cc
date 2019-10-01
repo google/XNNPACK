@@ -22,6 +22,7 @@
 #include "bench/gemm.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/packx.h>
@@ -330,7 +331,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 }
 
 
-#if CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM64
   static void sgemm_1x12__aarch64_neonfma_cortex_a53(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53, 1, 12, 1, 1);
   }
@@ -388,9 +389,9 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(sgemm_6x8__aarch64_neonfma_cortex_a75)
   BENCHMARK_GEMM(sgemm_6x8__aarch64_neonfma_ld64)
   BENCHMARK_GEMM(sgemm_6x8__aarch64_neonfma_ld128)
-#endif  // CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
-#if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void sgemm_4x12__neon_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_f32_gemm_ukernel_4x12__neon_ld64, 4, 12, 1, 1);
   }
@@ -462,9 +463,9 @@ static void ruy_st(benchmark::State& state, const char* net)
 
   BENCHMARK_GEMM(sppmm_4x8_unipass__neonfma)
   BENCHMARK_GEMM(sppmm_4x8_twopass__neonfma)
-#endif  // CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void sgemm_1x8__sse_load1(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_f32_gemm_ukernel_1x8__sse_load1, 1, 8, 1, 1);
   }
@@ -505,9 +506,9 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(sgemm_4x8s4__sse)
   BENCHMARK_GEMM(sppmm_4x8_unipass__sse)
   BENCHMARK_GEMM(sppmm_4x8_twopass__sse)
-#endif  // CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   static void sgemm_4x8__psimd_loadsplat(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_f32_gemm_ukernel_4x8__psimd_loadsplat, 4, 8, 1, 1);
   }
@@ -548,7 +549,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(sgemm_6x8s4__psimd)
   BENCHMARK_GEMM(sppmm_4x8_unipass__psimd)
   BENCHMARK_GEMM(sppmm_4x8_twopass__psimd)
-#endif  // !CPUINFO_ARCH_WASM && !CPUINFO_ARCH_ASMJS
+#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 static void sgemm_1x4__scalar(benchmark::State& state, const char* net) {
   GEMMBenchmark(state, xnn_f32_gemm_ukernel_1x4__scalar, 1, 4, 1, 1);
