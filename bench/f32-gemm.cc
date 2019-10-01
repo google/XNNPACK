@@ -18,7 +18,9 @@
 #include <cpuinfo.h>
 
 #include <benchmark/benchmark.h>
+#ifdef BENCHMARK_RUY
 #include "tensorflow/lite/experimental/ruy/ruy.h"
+#endif  // BENCHMARK_RUY
 #include "bench/gemm.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
@@ -248,6 +250,7 @@ static void PPMM2PBenchmark(benchmark::State& state,
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
 
+#ifdef BENCHMARK_RUY
 static void RuyBenchmark(benchmark::State& state, uint32_t threads)
 {
   std::random_device random_device;
@@ -329,6 +332,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 {
   RuyBenchmark(state, 1);
 }
+#endif  // BENCHMARK_RUY
 
 
 #if XNN_ARCH_ARM64
@@ -610,7 +614,9 @@ BENCHMARK_GEMM(sppmm_4x4_twopass__scalar)
 BENCHMARK_GEMM(sppmm_3x3_twopass__scalar)
 
 
+#ifdef BENCHMARK_RUY
 BENCHMARK_GEMM(ruy_st)
+#endif  // BENCHMARK_RUY
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

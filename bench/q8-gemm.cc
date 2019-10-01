@@ -18,8 +18,12 @@
 #include <cpuinfo.h>
 
 #include <benchmark/benchmark.h>
-#include "third_party/gemmlowp/public/gemmlowp.h"
+#ifdef BENCHMARK_GEMMLOWP
+#include "gemmlowp/public/gemmlowp.h"
+#endif  // BENCHMARK_GEMMLOWP
+#ifdef BENCHMARK_RUY
 #include "tensorflow/lite/experimental/ruy/ruy.h"
+#endif  // BENCHMARK_RUY
 #include "bench/gemm.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
@@ -103,6 +107,7 @@ static void GEMMBenchmark(benchmark::State& state,
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
 
+#ifdef BENCHMARK_GEMMLOWP
 struct GemmlowpOutputPipeline {
   typedef gemmlowp::VectorMap<const int32_t, gemmlowp::VectorShape::Col> ColVectorMap;
   typedef std::tuple<
@@ -196,7 +201,10 @@ static void gemmlowp_st(benchmark::State& state, const char* net)
 {
   GemmlowpBenchmark(state, 1);
 }
+#endif  // BENCHMARK_GEMMLOWP
 
+
+#ifdef BENCHMARK_RUY
 static void RuyBenchmark(benchmark::State& state, size_t threads)
 {
   const size_t mc = state.range(0);
@@ -283,6 +291,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 {
   RuyBenchmark(state, 1);
 }
+#endif  // BENCHMARK_RUY
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -311,10 +320,13 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(q8gemm_2x4c8__sse2)
 #endif
 
-BENCHMARK_GEMM(gemmlowp_st)
+#ifdef BENCHMARK_RUY
 BENCHMARK_GEMM(ruy_st)
+#endif  // BENCHMARK_RUY
+#ifdef BENCHMARK_GEMMLOWP
+BENCHMARK_GEMM(gemmlowp_st)
+#endif  // BENCHMARK_GEMMLOWP
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
-
