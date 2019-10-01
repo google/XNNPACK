@@ -61,7 +61,7 @@ static void GEMMBenchmark(benchmark::State& state,
   const size_t w_elements = nc_stride * kc_stride + nc_stride;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);
@@ -132,7 +132,7 @@ static void PPMM1PBenchmark(benchmark::State& state,
   const size_t w_elements = nc_stride * kc + nc_stride;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);
@@ -205,7 +205,7 @@ static void PPMM2PBenchmark(benchmark::State& state,
   const size_t w_elements = nc_stride * kc + nc_stride;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);
@@ -259,7 +259,7 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
   const size_t kc = state.range(2);
 
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (nc * (mc + kc + 1)));
 
   std::vector<float> a(mc * kc);

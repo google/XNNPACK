@@ -91,7 +91,7 @@ static void DWConvCHWBenchmark(benchmark::State& state,
   const size_t w_elements = (kernel_size + 1) * channels;
   const size_t o_elements = output_size * channels;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + o_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> packed_weights(w_elements * num_buffers);
@@ -208,7 +208,7 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
   const size_t w_elements = (kernel_size + 1) * channels;
   const size_t o_elements = output_height * benchmark::utils::roundUp<size_t>(output_width, ot) * channels;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + o_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> packed_weights(w_elements * num_buffers);

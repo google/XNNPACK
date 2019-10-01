@@ -61,7 +61,7 @@ static void GEMMBenchmark(benchmark::State& state,
   const size_t w_elements = kc_stride * nc_stride + nc_stride * sizeof(int32_t) / sizeof(uint8_t);
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(uint8_t) * (w_elements + c_elements));
 
   std::vector<uint8_t, AlignedAllocator<uint8_t, 32>> w(w_elements * num_buffers);
@@ -159,7 +159,7 @@ static void GemmlowpBenchmark(benchmark::State& state, uint32_t threads)
   const size_t bElements = nc;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       kElements * sizeof(uint8_t) + bElements * sizeof(int32_t) + c_elements * sizeof(uint8_t));
 
   std::vector<uint8_t> k(kElements * num_buffers);
@@ -209,7 +209,7 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
   auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
 
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       nc * (sizeof(uint8_t) * (mc + kc) + sizeof(int32_t)));
 
   std::vector<uint8_t> a(mc * kc);

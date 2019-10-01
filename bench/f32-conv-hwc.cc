@@ -60,7 +60,7 @@ static void DConv3X3S2P1Benchmark(benchmark::State& state,
     benchmark::utils::roundUp<size_t>(output_channels, output_channels_tile);
   const size_t output_elements = output_height * output_width * output_channels;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (weights_elements + output_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> packed_weights(weights_elements * num_buffers);

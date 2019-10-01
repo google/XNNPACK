@@ -76,7 +76,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   const size_t i_elements = mc_stride * kernel_size;
   const size_t c_elements = output_height * output_width * output_pixel_stride;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements) + sizeof(void*) * i_elements);
 
   std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);

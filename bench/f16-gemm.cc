@@ -58,7 +58,7 @@ static void GEMMBenchmark(benchmark::State& state,
   const size_t w_elements = nc_stride * kc_stride + nc_stride;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(uint16_t) * (w_elements + c_elements));
 
   std::vector<uint16_t, AlignedAllocator<uint16_t, 32>> w(w_elements * num_buffers);

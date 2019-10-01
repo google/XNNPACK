@@ -70,7 +70,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
   const size_t w_elements = (kernel_size * kc_stride + 1) * nc_stride;
   const size_t c_elements = output_size * group_output_channels;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);

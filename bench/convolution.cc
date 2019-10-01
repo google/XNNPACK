@@ -87,7 +87,7 @@ void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
     return;
   }
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(uint8_t) * kernel.size() + sizeof(int32_t) * bias.size() + sizeof(uint8_t) * output_elements);
   std::vector<uint8_t> output(output_elements * num_buffers);
 
@@ -204,7 +204,7 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
     return;
   }
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (kernel.size() + bias.size() + output_elements));
   std::vector<float> output(output_elements * num_buffers);
 

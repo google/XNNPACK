@@ -79,7 +79,7 @@ static void DWConvBenchmark(benchmark::State& state,
   const size_t i_elements = output_height * step_height;
   const size_t c_elements = output_size * channels;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements) + sizeof(void*) * i_elements);
 
   std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);

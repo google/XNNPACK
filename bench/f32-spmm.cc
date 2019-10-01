@@ -54,7 +54,7 @@ static void SpMMBenchmark(benchmark::State& state,
   const size_t dmap_elements = num_nonzeroes / nr;
   const size_t nmap_elements = nc;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(cpuinfo_get_max_cache_size(),
+    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements) + sizeof(uint32_t) * (dmap_elements + nmap_elements));
 
   // Micro-kernel can access one element beyond w and dmap for software pipelining.

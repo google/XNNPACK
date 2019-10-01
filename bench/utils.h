@@ -13,7 +13,13 @@ namespace utils {
 
 uint32_t wipeCache();
 uint32_t prefetchToL1(const void* ptr, size_t size);
-uint64_t GetCurrentCpuFrequency();  // Return clockrate of current cpu
+
+// Return clock rate, in Hz, for the currently used logical processor.
+uint64_t GetCurrentCpuFrequency();
+
+// Return maximum (across all cores/clusters/sockets) last level cache size.
+// Can overestimate, but not underestimate LLC size.
+size_t GetMaxCacheSize();
 
 template <class T>
 inline T divideRoundUp(T x, T q) {
