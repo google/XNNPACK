@@ -55,7 +55,11 @@ void xnn_f32_gemm_ukernel_1x8s4__psimd(
       vacc0x0123 = psimd_qfma_f32(vacc0x0123, va0, vb0123c0);
       vacc0x4567 = psimd_qfma_f32(vacc0x4567, va0, vb4567c0);
 
+      #ifdef __clang__
       va0 = __builtin_shufflevector(va0, va0, 1, 2, 3, 0);
+      #else
+      va0 = __builtin_shuffle(va0, va0, (psimd_s32) { 1, 2, 3, 0 });
+      #endif
 
       const psimd_f32 vb0123c1 = psimd_load_f32(w + 8);
       const psimd_f32 vb4567c1 = psimd_load_f32(w + 12);
@@ -63,7 +67,11 @@ void xnn_f32_gemm_ukernel_1x8s4__psimd(
       vacc0x0123 = psimd_qfma_f32(vacc0x0123, va0, vb0123c1);
       vacc0x4567 = psimd_qfma_f32(vacc0x4567, va0, vb4567c1);
 
+      #ifdef __clang__
       va0 = __builtin_shufflevector(va0, va0, 1, 2, 3, 0);
+      #else
+      va0 = __builtin_shuffle(va0, va0, (psimd_s32) { 1, 2, 3, 0 });
+      #endif
 
       const psimd_f32 vb0123c2 = psimd_load_f32(w + 16);
       const psimd_f32 vb4567c2 = psimd_load_f32(w + 20);
@@ -71,7 +79,11 @@ void xnn_f32_gemm_ukernel_1x8s4__psimd(
       vacc0x0123 = psimd_qfma_f32(vacc0x0123, va0, vb0123c2);
       vacc0x4567 = psimd_qfma_f32(vacc0x4567, va0, vb4567c2);
 
+      #ifdef __clang__
       va0 = __builtin_shufflevector(va0, va0, 1, 2, 3, 0);
+      #else
+      va0 = __builtin_shuffle(va0, va0, (psimd_s32) { 1, 2, 3, 0 });
+      #endif
 
       const psimd_f32 vb0123c3 = psimd_load_f32(w + 24);
       const psimd_f32 vb4567c3 = psimd_load_f32(w + 28);

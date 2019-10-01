@@ -39,12 +39,20 @@ void xnn_x32_zip_x3_ukernel__psimd(
     // vyz = ( z3, z1, y3, y1 )
     const psimd_u32 vyz = psimd_concat_odd_u32(vy, vz);
     // vzx = ( x3, x1, z2, z0 )
+    #ifdef __clang__
     const psimd_u32 vzx = __builtin_shufflevector(vz, vx, 0, 2, 4+1, 4+3);
+    #else
+    const psimd_u32 vzx = __builtin_shuffle(vz, vx, (psimd_s32) { 0, 2, 4+1, 4+3 });
+    #endif
 
     // vxyz0 = ( x1, z0, y0, x0 )
     const psimd_u32 vxyz0 = psimd_concat_even_u32(vxy, vzx);
     // vxyz1 = ( y2, x2, z1, y1 )
+    #ifdef __clang__
     const psimd_u32 vxyz1 = __builtin_shufflevector(vyz, vxy, 0, 2, 4+1, 4+3);
+    #else
+    const psimd_u32 vxyz1 = __builtin_shuffle(vyz, vxy, (psimd_s32) { 0, 2, 4+1, 4+3 });
+    #endif
     // vxyz2 = ( z3, y3, x3, z2 )
     const psimd_u32 vxyz2 = psimd_concat_odd_u32(vzx, vyz);
 

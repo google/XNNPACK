@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
@@ -136,7 +137,7 @@ class PReLUMicrokernelTester {
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < n(); i++) {
-        y_ref[i] = signbit(x_data[i]) ? x_data[i] * w[i] : x_data[i];
+        y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * w[i] : x_data[i];
       }
 
       // Compute clamping parameters.

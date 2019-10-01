@@ -119,10 +119,10 @@ void xnn_f32_prelu_ukernel_x4__sse(
     const __m128i vacc2 = _mm_or_si128(_mm_andnot_si128(vmask2, _mm_castps_si128(vx2)), _mm_and_si128(vmask2, _mm_castps_si128(vwx2)));
     const __m128i vacc3 = _mm_or_si128(_mm_andnot_si128(vmask3, _mm_castps_si128(vx3)), _mm_and_si128(vmask3, _mm_castps_si128(vwx3)));
 
-    __m128 vy0 = _mm_min_ps(_mm_max_ps(vacc0, vy_min), vy_max);
-    __m128 vy1 = _mm_min_ps(_mm_max_ps(vacc1, vy_min), vy_max);
-    __m128 vy2 = _mm_min_ps(_mm_max_ps(vacc2, vy_min), vy_max);
-    __m128 vy3 = _mm_min_ps(_mm_max_ps(vacc3, vy_min), vy_max);
+    __m128 vy0 = _mm_min_ps(_mm_max_ps(_mm_castsi128_ps(vacc0), vy_min), vy_max);
+    __m128 vy1 = _mm_min_ps(_mm_max_ps(_mm_castsi128_ps(vacc1), vy_min), vy_max);
+    __m128 vy2 = _mm_min_ps(_mm_max_ps(_mm_castsi128_ps(vacc2), vy_min), vy_max);
+    __m128 vy3 = _mm_min_ps(_mm_max_ps(_mm_castsi128_ps(vacc3), vy_min), vy_max);
 
     if (n & 2 * sizeof(float)) {
       _mm_storel_pi((__m64*) y0, vy0);

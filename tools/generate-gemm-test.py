@@ -876,7 +876,7 @@ def main(args):
 
 
 #include <cpuinfo.h>
-#include "testing/base/public/gunit.h"
+#include <gtest/gtest.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>

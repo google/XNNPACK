@@ -469,7 +469,7 @@ def main(args):
 
 
 #include <cpuinfo.h>
-#include "testing/base/public/gunit.h"
+#include <gtest/gtest.h>
 
 #include <xnnpack/spmm.h>
 #include <xnnpack/isa-checks.h>

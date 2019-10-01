@@ -34,8 +34,12 @@
 #endif
 
 // TODO - __builtin_expect_with_probability for GCC 9+
-#if defined(__clang__) && (__has_builtin(__builtin_unpredictable))
-  #define XNN_UNPREDICTABLE(condition) (__builtin_unpredictable(!!(condition)))
+#if defined(__clang__)
+  #if __has_builtin(__builtin_unpredictable)
+    #define XNN_UNPREDICTABLE(condition) (__builtin_unpredictable(!!(condition)))
+  #else
+    #define XNN_UNPREDICTABLE(condition) (!!(condition))
+  #endif
 #else
   #define XNN_UNPREDICTABLE(condition) (!!(condition))
 #endif

@@ -16,7 +16,7 @@
 #include <cpuinfo.h>
 
 #include <benchmark/benchmark.h>
-#include "third_party/FP16/include/fp16/fp16.h"
+#include <fp16/fp16.h>
 #include "bench/gemm.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>

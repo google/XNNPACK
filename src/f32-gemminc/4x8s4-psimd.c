@@ -93,10 +93,17 @@ void xnn_f32_gemminc_ukernel_4x8s4__psimd(
       vacc2x4567 = psimd_qfma_f32(vacc2x4567, va2, vb4567c0);
       vacc3x4567 = psimd_qfma_f32(vacc3x4567, va3, vb4567c0);
 
+      #ifdef __clang__
       va0 = __builtin_shufflevector(va0, va0, 1, 2, 3, 0);
       va1 = __builtin_shufflevector(va1, va1, 1, 2, 3, 0);
       va2 = __builtin_shufflevector(va2, va2, 1, 2, 3, 0);
       va3 = __builtin_shufflevector(va3, va3, 1, 2, 3, 0);
+      #else
+      va0 = __builtin_shuffle(va0, va0, (psimd_s32) { 1, 2, 3, 0 });
+      va1 = __builtin_shuffle(va1, va1, (psimd_s32) { 1, 2, 3, 0 });
+      va2 = __builtin_shuffle(va2, va2, (psimd_s32) { 1, 2, 3, 0 });
+      va3 = __builtin_shuffle(va3, va3, (psimd_s32) { 1, 2, 3, 0 });
+      #endif
 
       const psimd_f32 vb0123c1 = psimd_load_f32(w + 8);
       const psimd_f32 vb4567c1 = psimd_load_f32(w + 12);
@@ -110,10 +117,17 @@ void xnn_f32_gemminc_ukernel_4x8s4__psimd(
       vacc2x4567 = psimd_qfma_f32(vacc2x4567, va2, vb4567c1);
       vacc3x4567 = psimd_qfma_f32(vacc3x4567, va3, vb4567c1);
 
+      #ifdef __clang__
       va0 = __builtin_shufflevector(va0, va0, 1, 2, 3, 0);
       va1 = __builtin_shufflevector(va1, va1, 1, 2, 3, 0);
       va2 = __builtin_shufflevector(va2, va2, 1, 2, 3, 0);
       va3 = __builtin_shufflevector(va3, va3, 1, 2, 3, 0);
+      #else
+      va0 = __builtin_shuffle(va0, va0, (psimd_s32) { 1, 2, 3, 0 });
+      va1 = __builtin_shuffle(va1, va1, (psimd_s32) { 1, 2, 3, 0 });
+      va2 = __builtin_shuffle(va2, va2, (psimd_s32) { 1, 2, 3, 0 });
+      va3 = __builtin_shuffle(va3, va3, (psimd_s32) { 1, 2, 3, 0 });
+      #endif
 
       const psimd_f32 vb0123c2 = psimd_load_f32(w + 16);
       const psimd_f32 vb4567c2 = psimd_load_f32(w + 20);
@@ -127,10 +141,17 @@ void xnn_f32_gemminc_ukernel_4x8s4__psimd(
       vacc2x4567 = psimd_qfma_f32(vacc2x4567, va2, vb4567c2);
       vacc3x4567 = psimd_qfma_f32(vacc3x4567, va3, vb4567c2);
 
+      #ifdef __clang__
       va0 = __builtin_shufflevector(va0, va0, 1, 2, 3, 0);
       va1 = __builtin_shufflevector(va1, va1, 1, 2, 3, 0);
       va2 = __builtin_shufflevector(va2, va2, 1, 2, 3, 0);
       va3 = __builtin_shufflevector(va3, va3, 1, 2, 3, 0);
+      #else
+      va0 = __builtin_shuffle(va0, va0, (psimd_s32) { 1, 2, 3, 0 });
+      va1 = __builtin_shuffle(va1, va1, (psimd_s32) { 1, 2, 3, 0 });
+      va2 = __builtin_shuffle(va2, va2, (psimd_s32) { 1, 2, 3, 0 });
+      va3 = __builtin_shuffle(va3, va3, (psimd_s32) { 1, 2, 3, 0 });
+      #endif
 
       const psimd_f32 vb0123c3 = psimd_load_f32(w + 24);
       const psimd_f32 vb4567c3 = psimd_load_f32(w + 28);

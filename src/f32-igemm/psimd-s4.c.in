@@ -85,8 +85,13 @@ void xnn_f32_igemm_ukernel_${MR}x${NR}s4__psimd(
               vacc${M}x${ABC[N:N+4]} = psimd_qfma_f32(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]}c${L});
 
           $if L + 1 != 4:
+            #ifdef __clang__
             $for M in range(MR):
               va${M} = __builtin_shufflevector(va${M}, va${M}, 1, 2, 3, 0);
+            #else
+            $for M in range(MR):
+              va${M} = __builtin_shuffle(va${M}, va${M}, (psimd_s32) { 1, 2, 3, 0 });
+            #endif
 
         w += ${4 * NR};
         k -= 4 * sizeof(float);

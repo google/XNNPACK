@@ -303,7 +303,7 @@ class DWConvSpCHWMicrokernelTester {
       // Verify that remainder of the last tile left unchanged.
       if (output_width() % output_tuple_size() != 0) {
         for (size_t i = output.size() - output_tuple_size() + output_width() % output_tuple_size(); i < output.size(); i++) {
-          ASSERT_TRUE(isnan(output[i]))
+          ASSERT_TRUE(std::isnan(output[i]))
             << "i = " << i << ", output = " << output[i];
         }
       }
