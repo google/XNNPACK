@@ -14,8 +14,6 @@
 
 #include <xnnpack/common.h>
 
-#define XNN_INTERNAL_EXTRA_BYTES 32
-
 struct xnn_f16_output_params {
   uint16_t scale;
   uint16_t max;
