@@ -7,8 +7,6 @@
 
 #include "global-average-pooling-spnchw-operator-tester.h"
 
-#include <xnnpack/params.h>
-
 
 TEST(GLOBAL_AVERAGE_POOLING_SPNCHW_OP_F32, single_channel) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());

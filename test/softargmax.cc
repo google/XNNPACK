@@ -10,8 +10,6 @@
 
 #include "softargmax-operator-tester.h"
 
-#include <xnnpack/params.h>
-
 
 TEST(SOFTARGMAX_OP, single_class) {
   SoftArgMaxOperatorTester()

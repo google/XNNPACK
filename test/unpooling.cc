@@ -7,8 +7,6 @@
 
 #include "unpooling-operator-tester.h"
 
-#include <xnnpack/params.h>
-
 
 TEST(UNPOOLING_OP_X32, unit_height_horizontal_pool) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());

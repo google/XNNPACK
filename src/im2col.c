@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <xnnpack/im2col.h>
