@@ -243,8 +243,8 @@ class FullyConnectedOperatorTester {
       }
 
       // Compute clamping parameters.
-      const int32_t accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
-      const int32_t accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
 
       const float output_min = accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
       const float output_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
