@@ -25,10 +25,10 @@
 # d8-d15 need to be preserved if used.
 # x19-30 need to be preserved if used.
 
-# A pointers
+# A pointer
 # x3  a0
 
-# C pointers
+# C pointer
 # x6  c0
 
 # Vector register usage and GPR shadows
@@ -57,9 +57,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x12__aarch64_neonfma_cortex_a53
         PRFM PLDL1KEEP, [x5]
         PRFM PLDL1KEEP, [x5, 64]
         PRFM PLDL1KEEP, [x5, 128]
-        PRFM PLDL1KEEP, [x5, 192]
-        PRFM PLDL1KEEP, [x5, 256]
-        PRFM PLDL1KEEP, [x5, 320]
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
@@ -67,7 +64,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # Prologue - loads for first group of 6 fma
 
-        # Read first block of 4 A.
+        # Read first block of 1 A.
         LDR d0, [x3], 8     // a0
 
         LDR d2, [x5]       // vb0x0123
@@ -103,18 +100,17 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x12__aarch64_neonfma_cortex_a53
         LDR d1, [x3], 8          // a0
         INS v3.d[1], x10
         FMLA v20.4s, v2.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 192]
+        PRFM PLDL1KEEP, [x5, 96]
 
         # BLOCK 1
         INS v4.d[1], x16
         FMLA v21.4s, v3.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 256]
+        PRFM PLDL1KEEP, [x5, 128]
 
         # BLOCK 2
         LDR d23, [x5]       // vb0x0123
         INS v5.d[1], x17
         LDR x7, [x5, 8]
-        PRFM PLDL1KEEP, [x5, 320]
         FMLA v22.4s, v4.4s, v0.s[0]
 
         # BLOCK 3
@@ -197,18 +193,17 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x12__aarch64_neonfma_cortex_a53
         LDR d1, [x3], 8          // a0
         INS v3.d[1], x10
         FMLA v20.4s, v2.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 192]
+        PRFM PLDL1KEEP, [x5, 96]
 
         # BLOCK 1
         INS v4.d[1], x16
         FMLA v21.4s, v3.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 256]
+        PRFM PLDL1KEEP, [x5, 128]
 
         # BLOCK 2
         LDR d23, [x5]       // vb0x0123
         INS v5.d[1], x17
         LDR x7, [x5, 8]
-        PRFM PLDL1KEEP, [x5, 320]
         FMLA v22.4s, v4.4s, v0.s[0]
 
         # BLOCK 3
@@ -297,7 +292,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x12__aarch64_neonfma_cortex_a53
 
 5:
         # Remainder - 2 floats of A (8 bytes)
-        # Read first block of 4 A.
+        # Read first block of 1 A.
         LDR d0, [x3], 8   // a0
         LD1 {v2.16b, v3.16b, v4.16b}, [x5], 48
         LD1 {v5.16b, v6.16b, v7.16b}, [x5], 48
