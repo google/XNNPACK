@@ -40,7 +40,7 @@ static void SpMMBenchmark(benchmark::State& state,
 
   // if using blocks, generate the reduced matrix first and then extrude along
   // the block dimension (n), to get the full matrix
-  int ncols = nc / nr + nc % nr;
+  size_t ncols = nc / nr + nc % nr;
   std::vector<float> b(ncols * kc);
   std::vector<float> bias(nc);
   std::vector<float> w;
