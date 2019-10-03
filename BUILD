@@ -724,8 +724,6 @@ cc_library(
     hdrs = ["include/xnnpack.h"],
     includes = ["include"],
     linkstatic = True,
-    # XNNPACK API is unstable and can break without notice.
-    # End users are encouraged to use this package through a TFLite delegate.
     visibility = xnnpack_visibility(),
     deps = [
         ":operator_run",
@@ -1521,13 +1519,13 @@ config_setting(
 
 config_setting(
     name = "emscripten",
-    values = {"crosstool_top": "//external:android/emscripten"},
+    values = {"crosstool_top": "//toolchain/emscripten"},
 )
 
 config_setting(
     name = "emscripten_wasm",
     values = {
-        "crosstool_top": "//external:android/emscripten",
+        "crosstool_top": "//toolchain/emscripten",
         "cpu": "wasm",
     },
 )
@@ -1535,7 +1533,7 @@ config_setting(
 config_setting(
     name = "emscripten_wasmsimd",
     values = {
-        "crosstool_top": "//external:android/emscripten",
+        "crosstool_top": "//toolchain/emscripten",
         "cpu": "wasm",
         "features": "wasmsimd",
     },
@@ -1544,7 +1542,7 @@ config_setting(
 config_setting(
     name = "emscripten_asmjs",
     values = {
-        "crosstool_top": "//external:android/emscripten",
+        "crosstool_top": "//toolchain/emscripten",
         "cpu": "asmjs",
     },
 )

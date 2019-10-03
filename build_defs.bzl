@@ -8,7 +8,7 @@ def xnnpack_visibility():
     All other targets have private visibility, and can not have external
     dependencies.
     """
-    return []
+    return ["//visibility:public"]
 
 def xnnpack_min_size_copts():
     """Compiler flags for size-optimized builds."""
