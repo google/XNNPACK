@@ -1481,6 +1481,13 @@ config_setting(
 )
 
 config_setting(
+    name = "linux_aarch64",
+    values = {
+        "cpu": "aarch64",
+    },
+)
+
+config_setting(
     name = "android",
     values = {"crosstool_top": "//external:android/crosstool"},
 )

@@ -4,7 +4,7 @@ XNNPACK is a highly optimized library of floating-point neural network inference
 
 ## Supported Architectures
 
-- ARM64 on Android
+- ARM64 on Android and Linux
 - ARM on Android
 - WebAssembly MVP
 - WebAssembly SIMD (experimental)
