@@ -23,6 +23,7 @@ XNNPACK implements the following neural network operators:
 - Add (tensors of same shape)
 - Global Average Pooling
 - Channel Shuffle
+- Fully Connected
 - Clamp (includes ReLU and ReLU6)
 - HardSwish
 - PReLU
