@@ -905,6 +905,41 @@ xnnpack_benchmark(
     deps = OPERATOR_BENCHMARK_DEPS,
 )
 
+############################# End-to-end benchmarks ############################
+
+cc_library(
+    name = "mobilenet_v1",
+    srcs = ["models/mobilenet-v1.cc"],
+    hdrs = ["models/models.h"],
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
+    name = "mobilenet_v2",
+    srcs = ["models/mobilenet-v2.cc"],
+    hdrs = ["models/models.h"],
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "end2end_bench",
+    srcs = ["bench/end2end.cc"],
+    deps = [
+        ":XNNPACK",
+        ":mobilenet_v1",
+        ":mobilenet_v2",
+        "@pthreadpool",
+    ],
+)
+
 ######################### Unit tests for micro-kernels #########################
 
 xnnpack_unit_test(
