@@ -13,7 +13,7 @@
 #include <clog.h>
 
 #ifndef XNN_LOG_LEVEL
-#define XNN_LOG_LEVEL CLOG_DEBUG
+  #error "Undefined XNN_LOG_LEVEL"
 #endif
 
 CLOG_DEFINE_LOG_DEBUG(xnn_log_debug, "XNNPACK", XNN_LOG_LEVEL);

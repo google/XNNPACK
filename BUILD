@@ -486,7 +486,6 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/compute.h",
     "src/xnnpack/im2col.h",
     "src/xnnpack/indirection.h",
-    "src/xnnpack/log.h",
     "src/xnnpack/operator.h",
     "src/xnnpack/pack.h",
     "src/xnnpack/requantization.h",
@@ -513,6 +512,19 @@ WEIGHTS_PACK_HDRS = [
     "src/xnnpack/pack.h",
     "src/xnnpack/operator.h",
     "src/xnnpack/compute.h",
+]
+
+LOGGING_COPTS = select({
+    # No logging in optimized mode
+    ":optimized_build": ["-DXNN_LOG_LEVEL=0"],
+    # Full logging in debug mode
+    ":debug_build": ["-DXNN_LOG_LEVEL=5"],
+    # Error-only logging in default (fastbuild) mode
+    "//conditions:default": ["-DXNN_LOG_LEVEL=2"],
+})
+
+LOGGING_HDRS = [
+    "src/xnnpack/log.h",
 ]
 
 xnnpack_cc_library(
@@ -667,8 +679,8 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "operator_run",
     srcs = ["src/operator-run.c"],
-    hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts() + [
+    hdrs = INTERNAL_HDRS + LOGGING_HDRS,
+    copts = xnnpack_std_copts() + LOGGING_COPTS + [
         # Wrappers for multi-pass microkernels use VLAs for temporary buffers.
         "-Wno-vla",
     ],
@@ -698,7 +710,7 @@ cc_library(
         ":emscripten_wasm": ["src/wasm-stubs.c"],
         "//conditions:default": [],
     }),
-    copts = xnnpack_std_copts() + [
+    copts = xnnpack_std_copts() + LOGGING_COPTS + [
         "-Isrc",
         "-Iinclude",
     ] + select({
@@ -706,7 +718,7 @@ cc_library(
         "//conditions:default": xnnpack_min_size_copts(),
     }),
     linkstatic = True,
-    textual_hdrs = INTERNAL_HDRS,
+    textual_hdrs = INTERNAL_HDRS + LOGGING_HDRS,
     deps = [
         ":enable_assembly",
         ":indirection",
@@ -1595,7 +1607,6 @@ config_setting(
     values = {
         "compilation_mode": "dbg",
     },
-    visibility = ["//visibility:public"],
 )
 
 # Builds with -c dbg
@@ -1604,7 +1615,6 @@ config_setting(
     values = {
         "compilation_mode": "opt",
     },
-    visibility = ["//visibility:public"],
 )
 
 # Enables usage of assembly kernels.
