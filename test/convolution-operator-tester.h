@@ -542,7 +542,7 @@ class ConvolutionOperatorTester {
           kernel_zero_point, 1.0f /* kernel scale */,
           kernel.data(), bias.data(),
           output_zero_point, output_scale, qmin(), qmax(),
-          depthwise_layout() ? XNN_CONVOLUTION_FLAG_DEPTHWISE : 0,
+          depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0,
           &convolution_op));
 
       // Smart pointer to automatically delete convolution_op.
@@ -692,7 +692,7 @@ class ConvolutionOperatorTester {
           input_pixel_stride(), output_pixel_stride(),
           kernel.data(), bias.data(),
           output_min, output_max,
-          depthwise_layout() ? XNN_CONVOLUTION_FLAG_DEPTHWISE : 0,
+          depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0,
           &convolution_op));
 
       // Smart pointer to automatically delete convolution_op.

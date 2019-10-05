@@ -129,7 +129,7 @@ enum xnn_status xnn_create_convolution2d_spnchw_f32(
     goto error;
   }
 
-  if ((flags & XNN_CONVOLUTION_FLAG_DEPTHWISE) != 0 && group_input_channels != 1) {
+  if ((flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) != 0 && group_input_channels != 1) {
     xnn_log_error(
       "failed to create Depthwise Convolution operator with %zu input channels per group: "
       "Depthwise Convolution must have exactly 1 input channel per group",

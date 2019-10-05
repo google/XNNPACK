@@ -181,7 +181,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
     goto error;
   }
 
-  if ((flags & XNN_CONVOLUTION_FLAG_DEPTHWISE) != 0 && group_input_channels != 1) {
+  if ((flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) != 0 && group_input_channels != 1) {
     xnn_log_error(
       "failed to create Depthwise Convolution operator with %zu input channels per group: "
       "Depthwise Convolution must have exactly 1 input channel per group",
@@ -269,7 +269,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
         goto error;
       }
 
-      if (flags & XNN_CONVOLUTION_FLAG_DEPTHWISE) {
+      if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
         xnn_pack_q8_dwconv_hwg_w(
           kernel_height, kernel_width,
           groups, dwconv_parameters->cr,
@@ -324,7 +324,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
           };
           break;
         case xnn_ukernel_type_igemm:
-          if (flags & XNN_CONVOLUTION_FLAG_DEPTHWISE) {
+          if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
             xnn_pack_q8_conv_kgo_w(
                 groups, group_output_channels, kernel_size,
                 nr, kr,
@@ -518,7 +518,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     goto error;
   }
 
-  if ((flags & XNN_CONVOLUTION_FLAG_DEPTHWISE) != 0 && group_input_channels != 1) {
+  if ((flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) != 0 && group_input_channels != 1) {
     xnn_log_error(
       "failed to create Depthwise Convolution operator with %zu input channels per group: "
       "Depthwise Convolution must have exactly 1 input channel per group",
@@ -618,7 +618,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
         goto error;
       }
 
-      if (flags & XNN_CONVOLUTION_FLAG_DEPTHWISE) {
+      if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
         xnn_pack_f32_dwconv_hwg_w(
           kernel_height, kernel_width,
           groups, dwconv_parameters->cr,
@@ -671,7 +671,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
           };
           break;
         case xnn_ukernel_type_igemm:
-          if (flags & XNN_CONVOLUTION_FLAG_DEPTHWISE) {
+          if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
             xnn_pack_f32_conv_kgo_w(
               groups, group_output_channels, kernel_size,
               nr, kr,

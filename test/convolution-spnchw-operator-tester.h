@@ -488,7 +488,7 @@ class ConvolutionSpNCHWOperatorTester {
         groups(), group_input_channels(), group_output_channels(),
         kernel.data(), bias.data(),
         output_min, output_max,
-        (depthwise_layout() ? XNN_CONVOLUTION_FLAG_DEPTHWISE : 0) | (nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
+        (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
         &convolution_op);
       if (status == xnn_status_unsupported_parameter) {
         GTEST_SKIP();

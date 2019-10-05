@@ -25,7 +25,7 @@ extern "C" {
 #define XNN_EXTRA_BYTES 16
 
 // The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
-#define XNN_CONVOLUTION_FLAG_DEPTHWISE 0x00000001
+#define XNN_FLAG_DEPTHWISE_CONVOLUTION 0x00000001
 
 // The operator assumes NHWC layout for the input, regardless of the output layout.
 #define XNN_FLAG_INPUT_NHWC 0x00000002
