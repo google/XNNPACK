@@ -117,6 +117,7 @@ def xnnpack_cc_library(
             "//conditions:default": [],
         }),
         linkstatic = True,
+        includes = ["include", "src"],
         linkopts = select({
             ":linux_k8": ["-lpthread"],
             ":linux_aarch64": ["-lpthread"],
@@ -160,6 +161,7 @@ def xnnpack_aggregate_library(
             ":emscripten_wasm": wasm_deps,
             ":emscripten_wasmsimd": wasmsimd_deps,
             ":emscripten_asmjs": [],
+            "//conditions:default": aarch64_deps,
         }),
     )
 

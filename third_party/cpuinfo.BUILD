@@ -56,7 +56,7 @@ MACH_SRCS = [
 ]
 
 EMSCRIPTEN_SRCS = [
-    "src/emscripten/init.c",
+    # "src/emscripten/init.c",
 ]
 
 PNACL_SRCS = [
@@ -106,6 +106,7 @@ cc_library(
         ":android_x86": COMMON_SRCS + X86_SRCS + LINUX_SRCS + LINUX_X86_SRCS,
         ":android_x86_64": COMMON_SRCS + X86_SRCS + LINUX_SRCS + LINUX_X86_SRCS,
         ":emscripten_wasm": COMMON_SRCS + EMSCRIPTEN_SRCS,
+        "//conditions:default": COMMON_SRCS + X86_SRCS,
     }),
     copts = C99OPTS + [
         "-Iexternal/cpuinfo/include",
