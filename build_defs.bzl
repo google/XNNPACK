@@ -118,6 +118,7 @@ def xnnpack_cc_library(
             ":optimized_build": optimized_copts,
             "//conditions:default": [],
         }),
+        includes = ["include", "src"],
         linkstatic = True,
         linkopts = select({
             ":linux_k8": ["-lpthread"],
