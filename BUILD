@@ -701,15 +701,13 @@ cc_library(
     }),
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS + [
         "src/init.c",
         "src/operator-delete.c",
-    ] + select({
-        ":emscripten_wasm": ["src/wasm-stubs.c"],
-        "//conditions:default": [],
-    }),
+    ],
+    hdrs = INTERNAL_HDRS + LOGGING_HDRS,
     copts = xnnpack_std_copts() + LOGGING_COPTS + [
         "-Isrc",
         "-Iinclude",
@@ -717,8 +715,8 @@ cc_library(
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
     }),
-    linkstatic = True,
-    textual_hdrs = INTERNAL_HDRS + LOGGING_HDRS,
+    wasm_srcs = ["src/wasm-stubs.c"],
+    wasmsimd_srcs = ["src/wasm-stubs.c"],
     deps = [
         ":enable_assembly",
         ":indirection",
@@ -746,12 +744,11 @@ cc_library(
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "bench_utils",
     srcs = ["bench/utils.cc"],
     hdrs = ["bench/utils.h"],
     copts = ["-Wno-unused-result"],
-    linkstatic = True,
     deps = ["@cpuinfo"],
 )
 

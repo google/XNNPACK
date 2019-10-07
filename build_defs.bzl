@@ -60,17 +60,23 @@ def xnnpack_cc_library(
         x86_srcs = [],
         aarch32_srcs = [],
         aarch64_srcs = [],
+        asmjs_srcs = [],
+        wasm_srcs = [],
+        wasmsimd_srcs = [],
         copts = [],
         x86_copts = [],
         aarch32_copts = [],
         aarch64_copts = [],
+        asmjs_copts = [],
+        wasm_copts = [],
+        wasmsimd_copts = [],
         optimized_copts = ["-O2"],
         hdrs = [],
         deps = []):
-    """C/C++/assembly library with architecture-specific sources.
+    """C/C++/assembly library with architecture-specific configuration.
 
     Define a static library with architecture- and instruction-specific
-    source files.
+    source files and/or compiler flags.
 
     Args:
       name: The name of the library target to define.
@@ -78,12 +84,19 @@ def xnnpack_cc_library(
       x86_srcs: The list of x86-specific source files.
       aarch32_srcs: The list of AArch32-specific source files.
       aarch64_srcs: The list of AArch64-specific source files.
+      asmjs_srcs: The list of Asm.js-specific source files.
+      wasm_srcs: The list of WebAssembly/MVP-specific source files.
+      wasmsimd_srcs: The list of WebAssembly/SIMD-specific source files.
       copts: The list of compiler flags to use in all builds. -I flags for
              include/ and src/ directories of XNNPACK are always prepended
              before these user-specified flags.
       x86_copts: The list of compiler flags to use in x86 builds.
       aarch32_copts: The list of compiler flags to use in AArch32 builds.
       aarch64_copts: The list of compiler flags to use in AArch64 builds.
+      asmjs_copts: The list of compiler flags to use in Asm.js builds.
+      wasm_copts: The list of compiler flags to use in WebAssembly/MVP builds.
+      wasmsimd_copts: The list of compiler flags to use in WebAssembly/SIMD
+                      builds.
       optimized_copts: The list of compiler flags to use in optimized builds.
                        Defaults to -O2.
       hdrs: The list of header files published by this library to be textually
@@ -100,6 +113,9 @@ def xnnpack_cc_library(
             ":android_arm64": aarch64_srcs,
             ":android_x86": x86_srcs,
             ":android_x86_64": x86_srcs,
+            ":emscripten_asmjs": asmjs_srcs,
+            ":emscripten_wasm": wasm_srcs,
+            ":emscripten_wasmsimd": wasmsimd_srcs,
             "//conditions:default": [],
         }),
         copts = [
@@ -113,6 +129,9 @@ def xnnpack_cc_library(
             ":android_arm64": aarch64_copts,
             ":android_x86": x86_copts,
             ":android_x86_64": x86_copts,
+            ":emscripten_asmjs": asmjs_copts,
+            ":emscripten_wasm": wasm_copts,
+            ":emscripten_wasmsimd": wasmsimd_copts,
             "//conditions:default": [],
         }) + select({
             ":optimized_build": optimized_copts,
