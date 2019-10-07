@@ -1583,13 +1583,13 @@ config_setting(
 
 config_setting(
     name = "emscripten",
-    values = {"crosstool_top": "//toolchain/emscripten"},
+    values = {"crosstool_top": "//toolchain:emscripten"},
 )
 
 config_setting(
     name = "emscripten_wasm",
     values = {
-        "crosstool_top": "//toolchain/emscripten",
+        "crosstool_top": "//toolchain:emscripten",
         "cpu": "wasm",
     },
 )
@@ -1597,7 +1597,7 @@ config_setting(
 config_setting(
     name = "emscripten_wasmsimd",
     values = {
-        "crosstool_top": "//toolchain/emscripten",
+        "crosstool_top": "//toolchain:emscripten",
         "cpu": "wasm",
         "features": "wasmsimd",
     },
@@ -1606,7 +1606,7 @@ config_setting(
 config_setting(
     name = "emscripten_asmjs",
     values = {
-        "crosstool_top": "//toolchain/emscripten",
+        "crosstool_top": "//toolchain:emscripten",
         "cpu": "asmjs",
     },
 )
