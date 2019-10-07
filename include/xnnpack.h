@@ -18,21 +18,21 @@
 extern "C" {
 #endif
 
-// The number of bytes XNNPACK may read beyond array bounds.
-// The caller must allocate at this this many extra bytes after the tensor data passed to XNNPACK.
-//
-// Note: XNNPACK reads, but never writes beyond array bounds.
+/// The number of bytes XNNPACK may read beyond array bounds.
+/// The caller must allocate at this this many extra bytes after the tensor data passed to XNNPACK.
+///
+/// Note: XNNPACK reads, but never writes beyond array bounds.
 #define XNN_EXTRA_BYTES 16
 
-// The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
+/// The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
 #define XNN_FLAG_DEPTHWISE_CONVOLUTION 0x00000001
 
-// The operator assumes NHWC layout for the input, regardless of the output layout.
+/// The operator assumes NHWC layout for the input, regardless of the output layout.
 #define XNN_FLAG_INPUT_NHWC 0x00000002
 
-// Status code for any XNNPACK function call.
+/// Status code for any XNNPACK function call.
 enum xnn_status {
-  // The call succeeded, and all output arguments now contain valid data.
+  /// The call succeeded, and all output arguments now contain valid data.
   xnn_status_success = 0,
   xnn_status_uninitialized = 1,
   xnn_status_invalid_parameter = 2,
@@ -42,8 +42,24 @@ enum xnn_status {
   xnn_status_out_of_memory = 6,
 };
 
+/// Initialize XNNPACK library.
+///
+/// XNNPACK must be successfully initialized before use.
+/// During initialization, XNNPACK populates internal structures depending on host processor. It can be time-consuming.
+///
+/// @retval xnn_status_success - XNNPACK is succesfully initialized and ready to use.
+/// @retval xnn_status_out_of_memory - initialization failed due to out-of-memory condition.
+/// @retval xnn_status_unsupported_hardware - initialization failed because the host processor does not satisfy the
+///                                           minimum hardware requirements for XNNPACK. E.g. this may happen on x86
+///                                           processors without SSE2 extension, or on 32-bit ARM processors without
+///                                           the NEON SIMD extension.
 enum xnn_status xnn_initialize(void);
 
+/// Deinitialize XNNPACK library.
+///
+/// To avoid memory and resource leaks, users must call xnn_deinitialize once for each successful xnn_initialize call.
+///
+/// @retval xnn_status_success - deinitialization call succeeded.
 enum xnn_status xnn_deinitialize(void);
 
 typedef struct xnn_operator* xnn_operator_t;
