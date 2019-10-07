@@ -910,7 +910,6 @@ class GemmMicrokernelTester {
  private:
   size_t mr_{1};
   size_t nr_{1};
-  size_t np_{1};
   size_t kr_{1};
   size_t sr_{1};
   size_t m_{1};
