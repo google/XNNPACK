@@ -12,7 +12,9 @@
 
 #include <pthread.h>
 
-#include <cpuinfo.h>
+#ifndef __EMSCRIPTEN__
+  #include <cpuinfo.h>
+#endif
 
 #include <xnnpack.h>
 #include <xnnpack/argmaxpool.h>
@@ -953,9 +955,11 @@ static void init(void) {
 }
 
 enum xnn_status xnn_initialize(void) {
-  if (!cpuinfo_initialize()) {
-    return xnn_status_out_of_memory;
-  }
+  #ifndef __EMSCRIPTEN__
+    if (!cpuinfo_initialize()) {
+      return xnn_status_out_of_memory;
+    }
+  #endif
   pthread_once(&init_guard, &init);
   if (xnn_params.initialized) {
     return xnn_status_success;
@@ -965,6 +969,8 @@ enum xnn_status xnn_initialize(void) {
 }
 
 enum xnn_status xnn_deinitialize(void) {
-  cpuinfo_deinitialize();
+  #ifndef __EMSCRIPTEN__
+    cpuinfo_deinitialize();
+  #endif
   return xnn_status_success;
 }

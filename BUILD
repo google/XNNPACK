@@ -726,9 +726,11 @@ cc_library(
         "@FP16",
         "@FXdiv",
         "@clog",
-        "@cpuinfo",
         "@pthreadpool",
-    ],
+    ] + select({
+        ":emscripten": [],
+        "//conditions:default": ["@cpuinfo"],
+    }),
 )
 
 cc_library(

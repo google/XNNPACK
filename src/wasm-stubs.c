@@ -5,8 +5,9 @@
 
 #include <stdint.h>
 
-#include <cpuinfo.h>
 #include <fp16.h>
+
+#include <xnnpack/common.h>
 
 uint32_t xnn_stub_wasm_f32_sub(uint32_t a, uint32_t b) {
   return fp32_to_bits(fp32_from_bits(a) - fp32_from_bits(b));
