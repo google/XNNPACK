@@ -1572,6 +1572,14 @@ config_setting(
 )
 
 config_setting(
+    name = "macos_x86_64",
+    values = {
+        "apple_platform_type": "macos",
+        "cpu": "darwin",
+    },
+)
+
+config_setting(
     name = "emscripten",
     values = {"crosstool_top": "//toolchain/emscripten"},
 )

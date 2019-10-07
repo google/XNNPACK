@@ -95,6 +95,7 @@ def xnnpack_cc_library(
         srcs = srcs + select({
             ":linux_k8": x86_srcs,
             ":linux_aarch64": aarch64_srcs,
+            ":macos_x86_64": x86_srcs,
             ":android_armv7": aarch32_srcs,
             ":android_arm64": aarch64_srcs,
             ":android_x86": x86_srcs,
@@ -107,6 +108,7 @@ def xnnpack_cc_library(
         ] + copts + select({
             ":linux_k8": x86_copts,
             ":linux_aarch64": aarch64_copts,
+            ":macos_x86_64": x86_copts,
             ":android_armv7": aarch32_copts,
             ":android_arm64": aarch64_copts,
             ":android_x86": x86_copts,
@@ -153,6 +155,7 @@ def xnnpack_aggregate_library(
         deps = generic_deps + select({
             ":linux_k8": x86_deps,
             ":linux_aarch64": aarch64_deps,
+            ":macos_x86_64": x86_deps,
             ":android_armv7": aarch32_deps,
             ":android_arm64": aarch64_deps,
             ":android_x86": x86_deps,
