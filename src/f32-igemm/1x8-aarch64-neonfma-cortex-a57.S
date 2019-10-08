@@ -22,10 +22,10 @@
 # d8-d15 need to be preserved if used.
 # x19-30 need to be preserved if used.
 
-# A pointers
-# x20 a0
+# A pointer
+# x8  a0
 
-# C pointers
+# C pointer
 # x6  c0
 
 # A57 based on A75 but with PRFM removed from main loop
@@ -41,24 +41,25 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
         # Load clamping_params values
         LD2R {v30.4s, v31.4s}, [x8]
 
-        # Save x20,x21 on stack
-        STP x20, x21, [sp, -16]!
-
 0:
         # Load initial bias from w into accumulators
         LDP q16, q17, [x5], 32
         MOVI v18.4s, 0  // second set of C for pipelining FMLA
+        PRFM PLDL1KEEP, [x5]
         MOVI v19.4s, 0
+        PRFM PLDL1KEEP, [x5, 64]
+        PRFM PLDL1KEEP, [x5, 128]
+        PRFM PLDL1KEEP, [x5, 192]
 
         MOV x9, x3  // p = ks
 
 1:
         # Load next A pointer
-        LDR x20, [x4], 8
+        LDR x8, [x4], 8
 
-        CMP x20, x12            // if a0 == zero
-        ADD x20, x20, x11       // a0 += a_offset
-        CSEL x20, x12, x20, EQ  //   a0 = zero, else += a0 + a_offset
+        CMP x8, x12           // if a0 == zero
+        ADD x8, x8, x11       // a0 += a_offset
+        CSEL x8, x12, x8, EQ  //   a0 = zero, else += a0 + a_offset
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS x0, x2, 32  // k = kc - 32    // k = kc
@@ -70,7 +71,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
         LDP q22, q23, [x5], 32
         LDP q24, q25, [x5], 32
         LDP q26, q27, [x5], 32
-        LDR q0, [x20], 16
+        LDR q0, [x8], 16
 
         # Is there at least 8.  yes do main loop
         SUBS x0, x0, 32
@@ -80,7 +81,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
 2:
         # First block of 4.  FMA for first 4, loads for 2nd block of 4.
         FMLA v16.4s, v20.4s, v0.s[0]
-        LDR q1, [x20], 16
+        LDR q1, [x8], 16
         FMLA v17.4s, v21.4s, v0.s[0]
         LDP q20, q21, [x5], 32
         FMLA v18.4s, v22.4s, v0.s[1]
@@ -95,7 +96,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
 
         # Second block of 4.  FMA for second 4, loads for 1st block of 4.
         FMLA v16.4s, v20.4s, v1.s[0]
-        LDR q0, [x20], 16
+        LDR q0, [x8], 16
         FMLA v17.4s, v21.4s, v1.s[0]
         LDP q20, q21, [x5], 32
         FMLA v18.4s, v22.4s, v1.s[1]
@@ -115,7 +116,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
 
         # First block of 4.  FMA for first 4, loads for 2nd block of 4.
         FMLA v16.4s, v20.4s, v0.s[0]
-        LDR q1, [x20], 16
+        LDR q1, [x8], 16
         FMLA v17.4s, v21.4s, v0.s[0]
         LDP q20, q21, [x5], 32
         FMLA v18.4s, v22.4s, v0.s[1]
@@ -173,14 +174,12 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
         SUBS x1, x1, 8
         B.HI 0b
 
-        # Restore x20,x21 from stack
-        LDP x20, x21, [sp], 16
         RET
 
 6:
         # Remainder- 4 floats of A (16 bytes)
         LDP q20, q21, [x5], 32
-        LDR q0, [x20], 16
+        LDR q0, [x8], 16
         FMLA v16.4s, v20.4s, v0.s[0]
         FMLA v17.4s, v21.4s, v0.s[0]
         LDP q22, q23, [x5], 32
@@ -197,7 +196,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
 7:
         # Remainder- 2 floats of A (8 bytes)
         LDP q20, q21, [x5], 32
-        LDR d0, [x20], 8
+        LDR d0, [x8], 8
         FMLA v16.4s, v20.4s, v0.s[0]
         FMLA v17.4s, v21.4s, v0.s[0]
         LDP q22, q23, [x5], 32
@@ -208,7 +207,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
 9:
         # Remainder- 1 float of A (4 bytes)
         LDP q20, q21, [x5], 32
-        LDR s0, [x20], 4
+        LDR s0, [x8], 4
         FMLA v16.4s, v20.4s, v0.s[0]
         FMLA v17.4s, v21.4s, v0.s[0]
         B 5b
@@ -228,8 +227,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
         TBZ x1, 0, 13f
         STR s16, [x6], 4
 13:
-        # Restore x20,x21 from stack
-        LDP x20, x21, [sp], 16
         RET
 
 END_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57

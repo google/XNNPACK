@@ -22,10 +22,10 @@
 # d8-d15 need to be preserved if used.
 # x19-30 need to be preserved if used.
 
-# A pointers
-# x20 a0
+# A pointer
+# x8  a0
 
-# C pointers
+# C pointer
 # x6  c0
 
 # Vector register usage and GPR shadows
@@ -48,8 +48,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         # Load clamping_params values
         LD2R {v30.4s, v31.4s}, [x8]
 
-        # Save x20,x21 on stack
-        STP x20, x21, [sp, -16]!
 0:
         # Load initial bias from w into accumulators
         LD1 {v20.16b, v21.16b, v22.16b}, [x5], 48
@@ -65,11 +63,11 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
 1:
         # Load next A pointer
-        LDR x20, [x4], 8
+        LDR x8, [x4], 8
 
-        CMP x20, x12            // if a0 == zero
-        ADD x20, x20, x11       // a0 += a_offset
-        CSEL x20, x12, x20, EQ  //   a0 = zero, else += a0 + a_offset
+        CMP x8, x12           // if a0 == zero
+        ADD x8, x8, x11       // a0 += a_offset
+        CSEL x8, x12, x8, EQ  //   a0 = zero, else += a0 + a_offset
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
@@ -77,8 +75,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # Prologue - loads for first group of 6 fma
 
-        # Read first block of 4 A.
-        LDR d0, [x20], 8    // a0
+        # Read first block of 1 A.
+        LDR d0, [x8], 8    // a0
 
         LDR d2, [x5]        // vb0x0123
         LDR x14, [x5, 8]
@@ -110,7 +108,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         # A is loaded for 2nd group into v1
 
         # BLOCK 0
-        LDR d1, [x20], 8         // a0
+        LDR d1, [x8], 8         // a0
         INS v3.d[1], x15
         FMLA v20.4s, v2.4s, v0.s[0]
         PRFM PLDL1KEEP, [x5, 192]
@@ -157,7 +155,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         # A is loaded for 1st group into v0
 
         # BLOCK 0
-        LDR d0, [x20], 8         // a0
+        LDR d0, [x8], 8         // a0
         INS v24.d[1], x15
         FMLA v20.4s, v23.4s, v1.s[0]
 
@@ -204,7 +202,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         # First block same as main loop.  Second block has no loads.
 3:
         # BLOCK 0
-        LDR d1, [x20], 8         // a0
+        LDR d1, [x8], 8         // a0
         INS v3.d[1], x15
         FMLA v20.4s, v2.4s, v0.s[0]
         PRFM PLDL1KEEP, [x5, 192]
@@ -309,14 +307,12 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         SUBS x1, x1, 12
         B.HI 0b
 
-        # Restore x20,x21 from stack
-        LDP x20, x21, [sp], 16
         RET
 
 6:
         # Remainder - 2 floats of A (8 bytes)
-        # Read first block of 4 A.
-        LDR d0, [x20], 8  // a0
+        # Read first block of 1 A.
+        LDR d0, [x8], 8  // a0
         LD1 {v2.16b, v3.16b, v4.16b}, [x5], 48
         LD1 {v5.16b, v6.16b, v7.16b}, [x5], 48
 
@@ -333,7 +329,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         TBZ x0, 2, 5b
 7:
         # Remainder - 1 float of A (4 bytes)
-        LDR s0, [x20], 4  // a0
+        LDR s0, [x8], 4  // a0
         LD1 {v2.16b, v3.16b, v4.16b}, [x5], 48
 
         FMLA v20.4s, v2.4s, v0.s[0]
@@ -362,8 +358,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         TBZ x1, 0, 12f
         STR s20, [x6]
 12:
-        # Restore x20,x21 from stack
-        LDP x20, x21, [sp], 16
         RET
 
 END_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
