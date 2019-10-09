@@ -340,8 +340,7 @@ static void init(void) {
     .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__neonfma_ld64,
     .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__neonfma_ld64,
     .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neonfma_ld64,
-    // TODO(b/140592595): xnn_f32_igemm_ukernel_1x8__neonfma_ld64
-    .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+    .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neonfma_ld64,
     .mr = 4,
     .nr = 8,
   };

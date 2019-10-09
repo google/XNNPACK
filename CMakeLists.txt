@@ -354,6 +354,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/x8-zip/xm-neon.c)
 
 SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
+  src/f32-igemm/1x8-neonfma-ld64.c
   src/f32-igemm/4x12-neonfma-ld64.c
   src/f32-igemm/4x2-neonfma-ld64.c
   src/f32-igemm/4x4-neonfma-ld64.c

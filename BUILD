@@ -260,6 +260,7 @@ NEON_UKERNELS = [
 ]
 
 NEONFMA_UKERNELS = [
+    "src/f32-igemm/1x8-neonfma-ld64.c",
     "src/f32-igemm/4x12-neonfma-ld64.c",
     "src/f32-igemm/4x2-neonfma-ld64.c",
     "src/f32-igemm/4x4-neonfma-ld64.c",
