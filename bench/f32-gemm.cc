@@ -335,7 +335,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 #endif  // BENCHMARK_RUY
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void sgemm_1x12__aarch64_neonfma_cortex_a53(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53, 1, 12, 1, 1);
   }

@@ -783,7 +783,10 @@ xnnpack_benchmark(
         "bench/conv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    deps = MICROKERNEL_BENCHMARK_DEPS + [":indirection"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":enable_assembly",
+        ":indirection",
+    ],
 )
 
 xnnpack_benchmark(
@@ -825,7 +828,9 @@ xnnpack_benchmark(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     copts = ["-Wno-unused-function"] + xnnpack_optional_ruy_copts(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_ruy_deps(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_ruy_deps() + [
+        ":enable_assembly",
+    ],
 )
 
 xnnpack_benchmark(

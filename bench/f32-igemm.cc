@@ -213,7 +213,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_6x8__neonfma_ld64)
 #endif
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void f32_igemm_1x12__aarch64_neonfma_cortex_a53(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53, 1, 12, 1, 1);
   }
