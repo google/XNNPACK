@@ -30,6 +30,17 @@ XNNPACK implements the following neural network operators:
 
 All operators in XNNPACK support NHWC layout, but additionally allow custom stride along the **C**hannel dimension. Thus, operators can consume a subset of channels in the input tensor, and produce a subset of channels in the output tensor, providing a zero-cost Channel Split and Channel Concatenation operations.
 
+## Performance
+
+The table below presents single-threaded performance of XNNPACK library on two generations of MobileNet models and three generations of Pixel phones.
+
+| Model              | Pixel, ms | Pixel 2, ms | Pixel 3a, ms |
+| ------------------ | :-------: | :---------: | :----------: |
+| MobileNet v1 1.0X  |    81     |      93     |      88      |
+| MobileNet v2 1.0X  |    48     |      58     |      54      |
+
+Benchmarked on October 9, 2019 with `end2end_bench --benchmark_min_time=5` on an Android/ARM64 build (`bazel build -c opt --config android_arm64 :end2end_bench`) and neural network models with randomized weights and inputs.
+
 ## Publications
 
 - Marat Dukhan "The Indirect Convolution Algorithm". Presented on [Efficient Deep Learning for Compute Vision (ECV) 2019](https://sites.google.com/corp/view/ecv2019/) workshop ([slides](https://drive.google.com/file/d/1ZayB3By5ZxxQIRtN7UDq_JvPg1IYd3Ac/view), [paper on ArXiv](https://arxiv.org/abs/1907.02129)).
