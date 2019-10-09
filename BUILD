@@ -1613,7 +1613,7 @@ config_setting(
     },
 )
 
-# Builds with -c opt
+# Builds with -c dbg
 config_setting(
     name = "debug_build",
     values = {
@@ -1621,7 +1621,7 @@ config_setting(
     },
 )
 
-# Builds with -c dbg
+# Builds with -c opt
 config_setting(
     name = "optimized_build",
     values = {
