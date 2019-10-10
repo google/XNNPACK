@@ -498,6 +498,7 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-dwconv/up4x9-aarch64-neonfma-cortex-a55.S
   src/f32-dwconv/up4x9-aarch64-neonfma.S
   src/f32-gemm/1x12-aarch64-neonfma-cortex-a53.S
+  src/f32-gemm/1x8-aarch64-neonfma-cortex-a53.S
   src/f32-gemm/1x8-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/1x8-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/4x12-aarch64-neonfma-cortex-a53.S
@@ -512,6 +513,7 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-gemm/6x8-aarch64-neonfma-ld128.S
   src/f32-gemm/6x8-aarch64-neonfma-ld64.S
   src/f32-gemminc/1x12-aarch64-neonfma-cortex-a53.S
+  src/f32-gemminc/1x8-aarch64-neonfma-cortex-a53.S
   src/f32-gemminc/1x8-aarch64-neonfma-cortex-a57.S
   src/f32-gemminc/1x8-aarch64-neonfma-cortex-a75.S
   src/f32-gemminc/4x12-aarch64-neonfma-cortex-a53.S
@@ -526,6 +528,7 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-gemminc/6x8-aarch64-neonfma-ld128.S
   src/f32-gemminc/6x8-aarch64-neonfma-ld64.S
   src/f32-igemm/1x12-aarch64-neonfma-cortex-a53.S
+  src/f32-igemm/1x8-aarch64-neonfma-cortex-a53.S
   src/f32-igemm/1x8-aarch64-neonfma-cortex-a57.S
   src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S
   src/f32-igemm/4x12-aarch64-neonfma-cortex-a53.S

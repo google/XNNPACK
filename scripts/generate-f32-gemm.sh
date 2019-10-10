@@ -12,6 +12,7 @@ tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D INC=0 -o src/f32-gemm/4x
 
 ############################### AArch64 assembly ##############################
 tools/xngen src/f32-gemm/1x12-aarch64-neonfma-cortex-a53.S.in -D INC=0 -o src/f32-gemm/1x12-aarch64-neonfma-cortex-a53.S
+tools/xngen src/f32-gemm/1x8-aarch64-neonfma-cortex-a53.S.in  -D INC=0 -o src/f32-gemm/1x8-aarch64-neonfma-cortex-a53.S
 tools/xngen src/f32-gemm/1x8-aarch64-neonfma-cortex-a57.S.in  -D INC=0 -o src/f32-gemm/1x8-aarch64-neonfma-cortex-a57.S
 tools/xngen src/f32-gemm/1x8-aarch64-neonfma-cortex-a75.S.in  -D INC=0 -o src/f32-gemm/1x8-aarch64-neonfma-cortex-a75.S
 tools/xngen src/f32-gemm/4x12-aarch64-neonfma-cortex-a53.S.in -D INC=0 -o src/f32-gemm/4x12-aarch64-neonfma-cortex-a53.S
