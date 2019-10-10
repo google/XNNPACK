@@ -701,7 +701,7 @@ cc_library(
     defines = select({
         ":xnn_enable_assembly_explicit_true": ["XNN_ENABLE_ASSEMBLY=1"],
         ":xnn_enable_assembly_explicit_false": ["XNN_ENABLE_ASSEMBLY=0"],
-        "//conditions:default": [],
+        "//conditions:default": ["XNN_ENABLE_ASSEMBLY=1"],
     }),
 )
 
