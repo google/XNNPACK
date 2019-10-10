@@ -708,7 +708,6 @@ cc_library(
 xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS + [
-        "src/init.c",
         "src/operator-delete.c",
     ],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
@@ -722,11 +721,35 @@ xnnpack_cc_library(
     wasm_srcs = ["src/wasm-stubs.c"],
     wasmsimd_srcs = ["src/wasm-stubs.c"],
     deps = [
-        ":enable_assembly",
         ":indirection",
-        ":ukernels",
         "@FP16",
         "@FXdiv",
+        "@clog",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
+    name = "XNNPACK",
+    srcs = [
+        "src/init.c",
+    ],
+    copts = xnnpack_std_copts() + LOGGING_COPTS + [
+        "-Isrc",
+        "-Iinclude",
+    ] + select({
+        ":debug_build": [],
+        "//conditions:default": xnnpack_min_size_copts(),
+    }),
+    includes = ["include"],
+    linkstatic = True,
+    textual_hdrs = ["include/xnnpack.h"],
+    visibility = xnnpack_visibility(),
+    deps = [
+        ":enable_assembly",
+        ":ukernels",
+        ":operator_run",
+        ":operators",
         "@clog",
         "@pthreadpool",
     ] + select({
@@ -736,16 +759,38 @@ xnnpack_cc_library(
 )
 
 cc_library(
-    name = "XNNPACK",
-    hdrs = ["include/xnnpack.h"],
+    name = "xnnpack_operators_nhwc_f32",
+    srcs = [
+        "src/init.c",
+    ],
+    copts = xnnpack_std_copts() + LOGGING_COPTS + [
+        "-Isrc",
+        "-Iinclude",
+    ] + select({
+        ":debug_build": [],
+        "//conditions:default": xnnpack_min_size_copts(),
+    }),
+    defines = [
+        "XNN_NO_Q8_OPERATORS",
+        "XNN_NO_U8_OPERATORS",
+        "XNN_NO_X8_OPERATORS",
+        "XNN_NO_SPNCHW_OPERATORS",
+    ],
     includes = ["include"],
     linkstatic = True,
+    textual_hdrs = ["include/xnnpack.h"],
     visibility = xnnpack_visibility(),
     deps = [
+        ":enable_assembly",
+        ":ukernels",
         ":operator_run",
         ":operators",
+        "@clog",
         "@pthreadpool",
-    ],
+    ] + select({
+        ":emscripten": [],
+        "//conditions:default": ["@cpuinfo"],
+    }),
 )
 
 xnnpack_cc_library(
@@ -1350,7 +1395,7 @@ xnnpack_unit_test(
 xnnpack_binary(
     name = "size_test",
     srcs = ["test/size.c"],
-    deps = [":XNNPACK"],
+    deps = [":xnnpack_operators_nhwc_f32"],
 )
 
 ########################### Unit tests for operators ###########################

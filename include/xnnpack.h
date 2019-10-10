@@ -319,6 +319,8 @@ enum xnn_status xnn_setup_prelu_nc_f32(
     float* output,
     pthreadpool_t threadpool);
 
+#ifndef XNN_NO_SPNCHW_OPERATORS
+
 enum xnn_status xnn_create_convolution2d_spnchw_f32(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
@@ -366,6 +368,8 @@ enum xnn_status xnn_setup_global_average_pooling_spnchw_f32(
     const float* input,
     float* output,
     pthreadpool_t threadpool);
+
+#endif  // XNN_NO_SPNCHW_OPERATORS
 
 #endif  // XNN_NO_F32_OPERATORS
 
