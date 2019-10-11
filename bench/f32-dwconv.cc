@@ -148,7 +148,7 @@ static void DWConvBenchmark(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void f32_dwconv_4x9__aarch64_neonfma(benchmark::State& state, const char* net) {
     DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up4x9__neon, 4, 9);
   }

@@ -22,6 +22,7 @@ OPERATOR_BENCHMARK_DEPS = [
 MICROKERNEL_BENCHMARK_DEPS = [
     ":ukernels",
     ":bench_utils",
+    ":enable_assembly",
     "@cpuinfo",
     "@FP16",
     "@pthreadpool",
@@ -29,6 +30,7 @@ MICROKERNEL_BENCHMARK_DEPS = [
 
 MICROKERNEL_TEST_DEPS = [
     ":ukernels",
+    ":enable_assembly",
     "@cpuinfo",
     "@FP16",
     "@pthreadpool",
@@ -801,7 +803,7 @@ xnnpack_cc_library(
     deps = ["@cpuinfo"],
 )
 
-######################### Unit tests for micro-kernels #########################
+######################### Benchmarks for micro-kernels #########################
 
 xnnpack_benchmark(
     name = "q8_gemm_bench",
@@ -832,10 +834,7 @@ xnnpack_benchmark(
         "bench/conv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":enable_assembly",
-        ":indirection",
-    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":indirection"],
 )
 
 xnnpack_benchmark(
@@ -877,9 +876,7 @@ xnnpack_benchmark(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     copts = ["-Wno-unused-function"] + xnnpack_optional_ruy_copts(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_ruy_deps() + [
-        ":enable_assembly",
-    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_ruy_deps(),
 )
 
 xnnpack_benchmark(

@@ -179,7 +179,7 @@
 #endif  // XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(F32_DWCONV_UP4X9__AARCH64_NEONFMA_CORTEX_A55, c_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvMicrokernelTester()
@@ -344,7 +344,7 @@
         .Test(xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55);
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

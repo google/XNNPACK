@@ -134,7 +134,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
 }
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void sgemm_4x8__aarch64_neonfma_cortex_a75(benchmark::State& state, const char* net) {
     Im2ColGEMMBenchmark(state, xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75, 4, 8, 1, 1);
   }

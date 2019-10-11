@@ -890,6 +890,7 @@ def main(args):
       name = ukernel_spec["name"]
       k_block = int(ukernel_spec["k-block"])
       pipelined = bool(ukernel_spec.get("pipelined", False))
+      assembly = bool(ukernel_spec.get("assembly", False))
       mr, nr, kr, sr, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
@@ -901,6 +902,8 @@ def main(args):
       tests += "\n\n"
       if arch:
         guard_macro = " || ".join(map(ARCH_TO_MACRO_MAP.get, arch))
+        if assembly:
+          guard_macro += " && XNN_ENABLE_ASSEMBLY"
         tests += "#if %s\n" % guard_macro
         tests += indent(test_case) + "\n"
         tests += "#endif  // %s\n" % guard_macro
