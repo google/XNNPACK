@@ -299,7 +299,6 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-avgpool/up9-neon.c
   src/f32-clamp/neon.c
   src/f32-igemm/1x8-neon-ld64.c
-  src/f32-igemm/4x12-neon-ld64.c
   src/f32-igemm/4x2-neon-ld64.c
   src/f32-igemm/4x4-neon-ld64.c
   src/f32-igemm/4x8-neon-ld128.c
@@ -310,14 +309,12 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-gavgpool/mp7p7q-neon.c
   src/f32-gavgpool/up7-neon.c
   src/f32-gemm/1x8-neon-ld64.c
-  src/f32-gemm/4x12-neon-ld64.c
   src/f32-gemm/4x2-neon-ld64.c
   src/f32-gemm/4x8-neon-ld128.c
   src/f32-gemm/4x8-neon-ld64.c
   src/f32-gemm/5x8-neon-ld64.c
   src/f32-gemm/6x8-neon-ld64.c
   src/f32-gemminc/1x8-neon-ld64.c
-  src/f32-gemminc/4x12-neon-ld64.c
   src/f32-gemminc/4x8-neon-ld128.c
   src/f32-gemminc/4x8-neon-ld64.c
   src/f32-gemminc/5x8-neon-ld64.c
@@ -355,7 +352,6 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
 
 SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-igemm/1x8-neonfma-ld64.c
-  src/f32-igemm/4x12-neonfma-ld64.c
   src/f32-igemm/4x2-neonfma-ld64.c
   src/f32-igemm/4x4-neonfma-ld64.c
   src/f32-igemm/4x8-neonfma-ld128.c
@@ -364,14 +360,12 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-dwconv/up4x9-neonfma.c
   src/f32-dwconv/up8x9-neonfma.c
   src/f32-gemm/1x8-neonfma-ld64.c
-  src/f32-gemm/4x12-neonfma-ld64.c
   src/f32-gemm/4x2-neonfma-ld64.c
   src/f32-gemm/4x8-neonfma-ld128.c
   src/f32-gemm/4x8-neonfma-ld64.c
   src/f32-gemm/5x8-neonfma-ld64.c
   src/f32-gemm/6x8-neonfma-ld64.c
   src/f32-gemminc/1x8-neonfma-ld64.c
-  src/f32-gemminc/4x12-neonfma-ld64.c
   src/f32-gemminc/4x8-neonfma-ld128.c
   src/f32-gemminc/4x8-neonfma-ld64.c
   src/f32-gemminc/5x8-neonfma-ld64.c

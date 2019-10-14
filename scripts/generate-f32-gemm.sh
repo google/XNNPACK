@@ -30,8 +30,6 @@ tools/xngen src/f32-gemm/6x8-aarch64-neonfma-ld128.S.in       -D INC=0 -o src/f3
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/1x8-neonfma-ld64.c
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=12 -D FMA=0 -D INC=0 -o src/f32-gemm/4x12-neon-ld64.c
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=12 -D FMA=1 -D INC=0 -o src/f32-gemm/4x12-neonfma-ld64.c
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/4x8-neon-ld64.c
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/4x8-neonfma-ld64.c
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=5 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/5x8-neon-ld64.c

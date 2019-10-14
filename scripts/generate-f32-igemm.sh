@@ -14,8 +14,6 @@ tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -o src/f32-igemm/4x4-scala
 ### LD64 micro-kernels
 tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=1 -D NR=8  -D FMA=0 -o src/f32-igemm/1x8-neon-ld64.c
 tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=1 -D NR=8  -D FMA=1 -o src/f32-igemm/1x8-neonfma-ld64.c
-tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=4 -D NR=12 -D FMA=0 -o src/f32-igemm/4x12-neon-ld64.c
-tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=4 -D NR=12 -D FMA=1 -o src/f32-igemm/4x12-neonfma-ld64.c
 tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=4 -D NR=4  -D FMA=0 -o src/f32-igemm/4x4-neon-ld64.c
 tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=4 -D NR=4  -D FMA=1 -o src/f32-igemm/4x4-neonfma-ld64.c
 tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=4 -D NR=8  -D FMA=0 -o src/f32-igemm/4x8-neon-ld64.c
