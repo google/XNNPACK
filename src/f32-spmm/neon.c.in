@@ -24,8 +24,7 @@ void xnn_f32_spmm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"_unroll
 {
   assert(m != 0);
 
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
   size_t i = m;
   while XNN_LIKELY(i >= ${MR}) {
     const float*restrict w = weights;
@@ -77,9 +76,9 @@ void xnn_f32_spmm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"_unroll
         } while (--nnz != 0);
       }
       $for M in range(0, MR, 4):
-        float32x4_t vout${ABC[M:M+4]} = vminq_f32(vacc${ABC[M:M+4]}, vmax);
+        float32x4_t vout${ABC[M:M+4]} = vminq_f32(vacc${ABC[M:M+4]}, voutput_clamp.val[0]);
       $for M in range(0, MR, 4):
-        vout${ABC[M:M+4]} = vmaxq_f32(vout${ABC[M:M+4]}, vmin);
+        vout${ABC[M:M+4]} = vmaxq_f32(vout${ABC[M:M+4]}, voutput_clamp.val[1]);
       vst1q_f32(c, vout0123);
       $for M in range(4, MR, 4):
         vst1q_f32(c + ${M}, vout${ABC[M:M+4]});
@@ -130,17 +129,17 @@ void xnn_f32_spmm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"_unroll
             } while (--nnz != 0);
           }
           $if SUBMR <= 2:
-            float32x2_t vout${ABC[0:SUBMR]} = vmin_f32(vacc${ABC[0:SUBMR]}, vget_low_f32(vmax));
-            vout${ABC[0:SUBMR]} = vmax_f32(vout${ABC[0:SUBMR]}, vget_low_f32(vmin));
+            float32x2_t vout${ABC[0:SUBMR]} = vmin_f32(vacc${ABC[0:SUBMR]}, vget_low_f32(voutput_clamp.val[0]));
+            vout${ABC[0:SUBMR]} = vmax_f32(vout${ABC[0:SUBMR]}, vget_low_f32(voutput_clamp.val[1]));
             $if SUBMR == 1:
               vst1_lane_f32(c, vout${ABC[0]}, 0);
             $else:
               vst1_f32(c, vout${ABC[0:SUBMR]});
           $else:
             $for M in range(0, SUBMR, 4):
-              float32x4_t vout${ABC[M:M+4]} = vminq_f32(vacc${ABC[M:M+4]}, vmax);
+              float32x4_t vout${ABC[M:M+4]} = vminq_f32(vacc${ABC[M:M+4]}, voutput_clamp.val[0]);
             $for M in range(0, SUBMR, 4):
-              vout${ABC[M:M+4]} = vmaxq_f32(vout${ABC[M:M+4]}, vmin);
+              vout${ABC[M:M+4]} = vmaxq_f32(vout${ABC[M:M+4]}, voutput_clamp.val[1]);
             vst1q_f32(c, vout0123);
             $for M in range(4, SUBMR, 4):
               vst1q_f32(c + ${M}, vout${ABC[M:M+4]});

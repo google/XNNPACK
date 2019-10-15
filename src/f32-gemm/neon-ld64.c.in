@@ -110,15 +110,14 @@ void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__${"neonfma" if FMA
           $else:
             vacc${M}x${ABC[N:N+4]} = vmlaq_f32(vacc${M}x${ABC[N:N+4]}, va${M},   vb${ABC[N:N+4]});
     }
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+4]} = vminq_f32(vacc${M}x${ABC[N:N+4]}, vmax);
+        vacc${M}x${ABC[N:N+4]} = vminq_f32(vacc${M}x${ABC[N:N+4]}, voutput_clamp.val[0]);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
-        vacc${M}x${ABC[N:N+4]} = vmaxq_f32(vacc${M}x${ABC[N:N+4]}, vmin);
+        vacc${M}x${ABC[N:N+4]} = vmaxq_f32(vacc${M}x${ABC[N:N+4]}, voutput_clamp.val[1]);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):

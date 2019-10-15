@@ -46,8 +46,7 @@ void xnn_f32_vmulcaddc_ukernel_c${CR}__${"neonfma" if FMA else "neon"}_x${MR}(
         y${M} = y${M-1};
       }
 
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
   do {
     const float* w = weights;
     size_t c = channels;
@@ -78,11 +77,11 @@ void xnn_f32_vmulcaddc_ukernel_c${CR}__${"neonfma" if FMA else "neon"}_x${MR}(
 
       $for M in range(MR):
         $for C in range(0, CR, 4):
-          vacc${M}x${ABC[C:C+4]} = vmaxq_f32(vacc${M}x${ABC[C:C+4]}, vmin);
+          vacc${M}x${ABC[C:C+4]} = vmaxq_f32(vacc${M}x${ABC[C:C+4]}, voutput_clamp.val[1]);
 
       $for M in range(MR):
         $for C in range(0, CR, 4):
-          vacc${M}x${ABC[C:C+4]} = vminq_f32(vacc${M}x${ABC[C:C+4]}, vmax);
+          vacc${M}x${ABC[C:C+4]} = vminq_f32(vacc${M}x${ABC[C:C+4]}, voutput_clamp.val[0]);
 
       $for M in range(MR):
         $for C in range(0, CR, 4):
@@ -115,11 +114,11 @@ void xnn_f32_vmulcaddc_ukernel_c${CR}__${"neonfma" if FMA else "neon"}_x${MR}(
 
       $for M in range(MR):
         $for C in range(0, CR, 4):
-          vacc${M}x${ABC[C:C+4]} = vmaxq_f32(vacc${M}x${ABC[C:C+4]}, vmin);
+          vacc${M}x${ABC[C:C+4]} = vmaxq_f32(vacc${M}x${ABC[C:C+4]}, voutput_clamp.val[1]);
 
       $for M in range(MR):
         $for C in range(0, CR, 4):
-          vacc${M}x${ABC[C:C+4]} = vminq_f32(vacc${M}x${ABC[C:C+4]}, vmax);
+          vacc${M}x${ABC[C:C+4]} = vminq_f32(vacc${M}x${ABC[C:C+4]}, voutput_clamp.val[0]);
 
       $for LOG2C in reversed(range(CR.bit_length())):
         $if CR != 1 << LOG2C:

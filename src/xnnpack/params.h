@@ -43,8 +43,8 @@ union xnn_f32_spchw_params {
     XNN_ALIGN(16) uint32_t mask_even[4]; // used by stride 2 kernels
     XNN_ALIGN(16) uint32_t mask_odd[4];  // used by stride 2 kernels
     XNN_ALIGN(16) uint32_t mask[4]; // used by stride 1 kernels
-    float min;
     float max;
+    float min;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -80,8 +80,8 @@ union xnn_u8_output_params {
 union xnn_f32_avgpool_params {
   struct {
     float multiplier;
-    float output_min;
     float output_max;
+    float output_min;
   } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -92,9 +92,9 @@ union xnn_f32_avgpool_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    XNN_ALIGN(16) float multiplier;
-    XNN_ALIGN(16) float output_max;
-    XNN_ALIGN(16) float output_min;
+    float multiplier;
+    float output_max;
+    float output_min;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
@@ -102,8 +102,8 @@ union xnn_f32_avgpool_params {
 union xnn_f32_gavgpool_params {
   struct {
     float multiplier;
-    float output_min;
     float output_max;
+    float output_min;
   } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -115,9 +115,9 @@ union xnn_f32_gavgpool_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    XNN_ALIGN(16) float multiplier;
-    XNN_ALIGN(16) float output_max;
-    XNN_ALIGN(16) float output_min;
+    float multiplier;
+    float output_max;
+    float output_min;
     XNN_ALIGN(16) uint32_t mask[4];
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */

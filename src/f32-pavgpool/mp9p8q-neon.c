@@ -27,9 +27,7 @@ void xnn_f32_pavgpool_ukernel_mp9p8q__neon(
   assert(ks > 9);
   assert(kc != 0);
 
-  const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
-
+  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
   do {
     {
       const float* i0 = *input++;
@@ -160,8 +158,8 @@ void xnn_f32_pavgpool_ukernel_mp9p8q__neon(
         const float32x4_t vsum = vaddq_f32(vsum2345, vsum0167a);
 
         float32x4_t vout = vmulq_f32(vsum, vmultiplier);
-        vout = vmaxq_f32(vout, voutput_min);
-        vout = vminq_f32(vout, voutput_max);
+        vout = vmaxq_f32(vout, voutput_clamp.val[1]);
+        vout = vminq_f32(vout, voutput_clamp.val[0]);
 
         vst1q_f32(output, vout); output += 4;
 
@@ -188,8 +186,8 @@ void xnn_f32_pavgpool_ukernel_mp9p8q__neon(
         const float32x4_t vsum = vaddq_f32(vsum2345, vsum0167a);
 
         float32x4_t vout = vmulq_f32(vsum, vmultiplier);
-        vout = vmaxq_f32(vout, voutput_min);
-        vout = vminq_f32(vout, voutput_max);
+        vout = vmaxq_f32(vout, voutput_clamp.val[1]);
+        vout = vminq_f32(vout, voutput_clamp.val[0]);
 
         float32x2_t vout_lo = vget_low_f32(vout);
         if (k & 2) {

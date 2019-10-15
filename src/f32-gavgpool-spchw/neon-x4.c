@@ -29,8 +29,7 @@ void xnn_f32_gavgpool_spchw_ukernel__neon_x4(
 
   const uint32x4_t vmask = vld1q_u32(params->neon.mask);
   const float32x4_t vmultiplier = vld1q_dup_f32(&params->neon.multiplier);
-  const float32x4_t voutput_min = vld1q_dup_f32(&params->neon.output_min);
-  const float32x4_t voutput_max = vld1q_dup_f32(&params->neon.output_max);
+  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->neon.output_max);
 
   while (channels >= 4) {
     float32x4_t vsum0 = vmovq_n_f32(0.0f);
@@ -85,8 +84,8 @@ void xnn_f32_gavgpool_spchw_ukernel__neon_x4(
 
     float32x4_t vout = vmulq_f32(vsum, vmultiplier);
 
-    vout = vmaxq_f32(vout, voutput_min);
-    vout = vminq_f32(vout, voutput_max);
+    vout = vminq_f32(vout, voutput_clamp.val[0]);
+    vout = vmaxq_f32(vout, voutput_clamp.val[1]);
 
     vst1q_f32(output, vout); output += 4;
     i0 = i3;
@@ -116,8 +115,8 @@ void xnn_f32_gavgpool_spchw_ukernel__neon_x4(
 
     float32x2_t vout = vmul_f32(vsum, vget_low_f32(vmultiplier));
 
-    vout = vmax_f32(vout, vget_low_f32(voutput_min));
-    vout = vmin_f32(vout, vget_low_f32(voutput_max));
+    vout = vmin_f32(vout, vget_low_f32(voutput_clamp.val[0]));
+    vout = vmax_f32(vout, vget_low_f32(voutput_clamp.val[1]));
 
     vst1_lane_f32(output, vout, 0); output += 1;
     channels -= 1;

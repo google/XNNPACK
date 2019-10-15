@@ -49,8 +49,7 @@ void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__neonfma_2x2(
     i0 = zero;
   }
 
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
 
   for (size_t output_y = output_y_start; output_y < output_y_end; output_y += 2) {
     const size_t input_y2 = output_y * 2 + 2 - input_padding_top;
@@ -322,15 +321,15 @@ void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__neonfma_2x2(
         vi3x0 = vi3x3;
         vi4x0 = vi4x3;
 
-        vo0x0 = vmaxq_f32(vo0x0, vmin);
-        vo1x0 = vmaxq_f32(vo1x0, vmin);
-        vo0x1 = vmaxq_f32(vo0x1, vmin);
-        vo1x1 = vmaxq_f32(vo1x1, vmin);
+        vo0x0 = vmaxq_f32(vo0x0, voutput_clamp.val[1]);
+        vo1x0 = vmaxq_f32(vo1x0, voutput_clamp.val[1]);
+        vo0x1 = vmaxq_f32(vo0x1, voutput_clamp.val[1]);
+        vo1x1 = vmaxq_f32(vo1x1, voutput_clamp.val[1]);
 
-        vo0x0 = vminq_f32(vo0x0, vmax);
-        vo1x0 = vminq_f32(vo1x0, vmax);
-        vo0x1 = vminq_f32(vo0x1, vmax);
-        vo1x1 = vminq_f32(vo1x1, vmax);
+        vo0x0 = vminq_f32(vo0x0, voutput_clamp.val[0]);
+        vo1x0 = vminq_f32(vo1x0, voutput_clamp.val[0]);
+        vo0x1 = vminq_f32(vo0x1, voutput_clamp.val[0]);
+        vo1x1 = vminq_f32(vo1x1, voutput_clamp.val[0]);
 
         const float32x4_t vo0c01 = vzip1q_f32(vo0x0, vo0x1);
         const float32x4_t vo0c23 = vzip2q_f32(vo0x0, vo0x1);
@@ -581,15 +580,15 @@ void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__neonfma_2x2(
           vo1x0 = vfmaq_laneq_f32(vo1x0, vk22c2, vi4x2, 1);
         }
 
-        vo0x0 = vmaxq_f32(vo0x0, vmin);
-        vo1x0 = vmaxq_f32(vo1x0, vmin);
-        vo0x1 = vmaxq_f32(vo0x1, vmin);
-        vo1x1 = vmaxq_f32(vo1x1, vmin);
+        vo0x0 = vmaxq_f32(vo0x0, voutput_clamp.val[1]);
+        vo1x0 = vmaxq_f32(vo1x0, voutput_clamp.val[1]);
+        vo0x1 = vmaxq_f32(vo0x1, voutput_clamp.val[1]);
+        vo1x1 = vmaxq_f32(vo1x1, voutput_clamp.val[1]);
 
-        vo0x0 = vminq_f32(vo0x0, vmax);
-        vo1x0 = vminq_f32(vo1x0, vmax);
-        vo0x1 = vminq_f32(vo0x1, vmax);
-        vo1x1 = vminq_f32(vo1x1, vmax);
+        vo0x0 = vminq_f32(vo0x0, voutput_clamp.val[0]);
+        vo1x0 = vminq_f32(vo1x0, voutput_clamp.val[0]);
+        vo0x1 = vminq_f32(vo0x1, voutput_clamp.val[0]);
+        vo1x1 = vminq_f32(vo1x1, voutput_clamp.val[0]);
 
         if (iw == 3) {
           // Exactly 2 output width elements remaining

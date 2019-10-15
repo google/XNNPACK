@@ -27,8 +27,7 @@ void xnn_f32_dwconv_spchw_ukernel_5x5s2p2__neonfma(
 
   const uint32x4_t vmask_even = vld1q_u32(params->neon.mask_even);
   const uint32x4_t vmask_odd = vld1q_u32(params->neon.mask_odd);
-  const float32x4_t vmax = vld1q_dup_f32(&params->neon.max);
-  const float32x4_t vmin = vld1q_dup_f32(&params->neon.min);
+  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->neon.max);
 
   const size_t input_width_increment_single = input_width_stride * 2 - input_tuple_stride * ( (n - 1) / 4 + 1);
   const size_t output_width_increment_single = output_width_stride - (n + 1) / 8 * output_tuple_stride;
@@ -209,8 +208,8 @@ void xnn_f32_dwconv_spchw_ukernel_5x5s2p2__neonfma(
 
       float32x4_t vo0 = vaddq_f32(vo468Ap00, vo468Ap01);
 
-      vo0 = vmaxq_f32(vo0, vmin);
-      vo0 = vminq_f32(vo0, vmax);
+      vo0 = vmaxq_f32(vo0, voutput_clamp.val[1]);
+      vo0 = vminq_f32(vo0, voutput_clamp.val[0]);
 
       size_t k_tmp = (k + 1) / 2;
       if XNN_LIKELY(k_tmp >= 4) {

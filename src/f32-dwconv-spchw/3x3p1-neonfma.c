@@ -26,8 +26,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
   assert(n != 0);
 
   const uint32x4_t vmask = vld1q_u32(params->neon.mask);
-  const float32x4_t vmax = vld1q_dup_f32(&params->neon.max);
-  const float32x4_t vmin = vld1q_dup_f32(&params->neon.min);
+  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->neon.max);
 
   const size_t input_width_increment = 3 * input_width_stride - round_up_po2(n, 4) / 4 * input_tuple_stride;
   const size_t output_width_increment = 3 * output_width_stride - (n - 1) / 4 * output_tuple_stride;
@@ -137,12 +136,12 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
       float32x4_t vo1 = vo4567p01;
       float32x4_t vo2 = vo4567p02;
 
-      vo0 = vmaxq_f32(vo0, vmin);
-      vo0 = vminq_f32(vo0, vmax);
-      vo1 = vmaxq_f32(vo1, vmin);
-      vo1 = vminq_f32(vo1, vmax);
-      vo2 = vmaxq_f32(vo2, vmin);
-      vo2 = vminq_f32(vo2, vmax);
+      vo0 = vmaxq_f32(vo0, voutput_clamp.val[1]);
+      vo0 = vminq_f32(vo0, voutput_clamp.val[0]);
+      vo1 = vmaxq_f32(vo1, voutput_clamp.val[1]);
+      vo1 = vminq_f32(vo1, voutput_clamp.val[0]);
+      vo2 = vmaxq_f32(vo2, voutput_clamp.val[1]);
+      vo2 = vminq_f32(vo2, voutput_clamp.val[0]);
 
       vst1q_f32(output0, vo0); output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
       vst1q_f32(output1, vo1); output1 = (float*) ((uintptr_t) output1 + output_tuple_stride);
@@ -215,12 +214,12 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
       float32x4_t vo1 = vo4567p01;
       float32x4_t vo2 = vo4567p02;
 
-      vo0 = vmaxq_f32(vo0, vmin);
-      vo0 = vminq_f32(vo0, vmax);
-      vo1 = vmaxq_f32(vo1, vmin);
-      vo1 = vminq_f32(vo1, vmax);
-      vo2 = vmaxq_f32(vo2, vmin);
-      vo2 = vminq_f32(vo2, vmax);
+      vo0 = vmaxq_f32(vo0, voutput_clamp.val[1]);
+      vo0 = vminq_f32(vo0, voutput_clamp.val[0]);
+      vo1 = vmaxq_f32(vo1, voutput_clamp.val[1]);
+      vo1 = vminq_f32(vo1, voutput_clamp.val[0]);
+      vo2 = vmaxq_f32(vo2, voutput_clamp.val[1]);
+      vo2 = vminq_f32(vo2, voutput_clamp.val[0]);
 
       if XNN_LIKELY(k & 4) {
         vst1q_f32(output0, vo0);
@@ -307,8 +306,8 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
       float32x4_t vo = vaddq_f32(vo4567p0, vo4567p1);
       vo = vaddq_f32(vo, vo4567p2);
 
-      vo = vmaxq_f32(vo, vmin);
-      vo = vminq_f32(vo, vmax);
+      vo = vmaxq_f32(vo, voutput_clamp.val[1]);
+      vo = vminq_f32(vo, voutput_clamp.val[0]);
 
       vst1q_f32(output0, vo); output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
     }
@@ -346,8 +345,8 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
       float32x4_t vo = vaddq_f32(vo4567p0, vo4567p1);
       vo = vaddq_f32(vo, vo4567p2);
 
-      vo = vmaxq_f32(vo, vmin);
-      vo = vminq_f32(vo, vmax);
+      vo = vmaxq_f32(vo, voutput_clamp.val[1]);
+      vo = vminq_f32(vo, voutput_clamp.val[0]);
 
       if XNN_LIKELY(k & 4) {
         vst1q_f32(output0, vo);
