@@ -151,58 +151,58 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a57
         FMLA v24.4s, v12.4s,  v2.s[0]
         FMLA v26.4s, v12.4s,  v3.s[0]
         FMLA v28.4s, v12.4s,  v4.s[0]
+        LDR   q6,  [x3], 16            // Load next 6 A
         FMLA v30.4s, v12.4s,  v5.s[0]
         FMLA v21.4s, v13.4s,  v0.s[0]
+        LDR   q7,  [x9], 16
         FMLA v23.4s, v13.4s,  v1.s[0]
         FMLA v25.4s, v13.4s,  v2.s[0]
+        LDR   q8, [x10], 16
         FMLA v27.4s, v13.4s,  v3.s[0]
         FMLA v29.4s, v13.4s,  v4.s[0]
-
+        LDR   q9, [x11], 16
         FMLA v31.4s, v13.4s,  v5.s[0]
+
         FMLA v20.4s, v14.4s,  v0.s[1]
+        LDR   q10, [x12], 16
         FMLA v22.4s, v14.4s,  v1.s[1]
         FMLA v24.4s, v14.4s,  v2.s[1]
+        LDR  q11,  [x4], 16
         FMLA v26.4s, v14.4s,  v3.s[1]
         FMLA v28.4s, v14.4s,  v4.s[1]
+        LDP  q12,  q13, [x5], 32       // Load 4 B
         FMLA v30.4s, v14.4s,  v5.s[1]
         FMLA v21.4s, v15.4s,  v0.s[1]
         FMLA v23.4s, v15.4s,  v1.s[1]
         FMLA v25.4s, v15.4s,  v2.s[1]
-        LDR   q6,  [x3], 16            // Load next 6 A
         FMLA v27.4s, v15.4s,  v3.s[1]
         FMLA v29.4s, v15.4s,  v4.s[1]
         FMLA v31.4s, v15.4s,  v5.s[1]
-        LDR   q7,  [x9], 16
+        LDP  q14,  q15, [x5], 32
 
         FMLA v20.4s, v16.4s,  v0.s[2]
         FMLA v22.4s, v16.4s,  v1.s[2]
         FMLA v24.4s, v16.4s,  v2.s[2]
-        LDR   q8, [x10], 16
         FMLA v26.4s, v16.4s,  v3.s[2]
         FMLA v28.4s, v16.4s,  v4.s[2]
         FMLA v30.4s, v16.4s,  v5.s[2]
-        LDR   q9, [x11], 16
         FMLA v21.4s, v17.4s,  v0.s[2]
         FMLA v23.4s, v17.4s,  v1.s[2]
         FMLA v25.4s, v17.4s,  v2.s[2]
-        LDR   q10, [x12], 16
         FMLA v27.4s, v17.4s,  v3.s[2]
         FMLA v29.4s, v17.4s,  v4.s[2]
         FMLA v31.4s, v17.4s,  v5.s[2]
-        LDR  q11,  [x4], 16
+        LDP  q16,  q17, [x5], 32
 
         FMLA v20.4s, v18.4s,  v0.s[3]
         FMLA v22.4s, v18.4s,  v1.s[3]
         FMLA v24.4s, v18.4s,  v2.s[3]
-        LDP  q12,  q13, [x5], 32       // Load 4 B
         FMLA v26.4s, v18.4s,  v3.s[3]
         FMLA v28.4s, v18.4s,  v4.s[3]
         FMLA v30.4s, v18.4s,  v5.s[3]
-        LDP  q14,  q15, [x5], 32
         FMLA v21.4s, v19.4s,  v0.s[3]
         FMLA v23.4s, v19.4s,  v1.s[3]
         FMLA v25.4s, v19.4s,  v2.s[3]
-        LDP  q16,  q17, [x5], 32
         FMLA v27.4s, v19.4s,  v3.s[3]
         FMLA v29.4s, v19.4s,  v4.s[3]
         FMLA v31.4s, v19.4s,  v5.s[3]
@@ -212,32 +212,32 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a57
         FMLA v20.4s, v12.4s,  v6.s[0]
         FMLA v22.4s, v12.4s,  v7.s[0]
         FMLA v24.4s, v12.4s,  v8.s[0]
-        LDR   q0,  [x3], 16           // Load next 6 A
         FMLA v26.4s, v12.4s,  v9.s[0]
+        LDR   q0,  [x3], 16           // Load next 6 A
         FMLA v28.4s, v12.4s, v10.s[0]
         FMLA v30.4s, v12.4s, v11.s[0]
         LDR   q1,  [x9], 16
         FMLA v21.4s, v13.4s,  v6.s[0]
         FMLA v23.4s, v13.4s,  v7.s[0]
-        FMLA v25.4s, v13.4s,  v8.s[0]
         LDR   q2, [x10], 16
+        FMLA v25.4s, v13.4s,  v8.s[0]
         FMLA v27.4s, v13.4s,  v9.s[0]
+        LDR   q3, [x11], 16
         FMLA v29.4s, v13.4s, v10.s[0]
         FMLA v31.4s, v13.4s, v11.s[0]
-        LDR   q3, [x11], 16
+        LDR   q4, [x12], 16
 
         FMLA v20.4s, v14.4s,  v6.s[1]
         FMLA v22.4s, v14.4s,  v7.s[1]
+        LDR   q5,  [x4], 16
         FMLA v24.4s, v14.4s,  v8.s[1]
-        LDR   q4, [x12], 16
         FMLA v26.4s, v14.4s,  v9.s[1]
+        LDP  q12,  q13, [x5], 32       // Load next 3 B (not last)
         FMLA v28.4s, v14.4s, v10.s[1]
         FMLA v30.4s, v14.4s, v11.s[1]
-        LDR   q5,  [x4], 16
         FMLA v21.4s, v15.4s,  v6.s[1]
         FMLA v23.4s, v15.4s,  v7.s[1]
         FMLA v25.4s, v15.4s,  v8.s[1]
-        LDP  q12,  q13, [x5], 32       // Load next 3 B (not last)
         FMLA v27.4s, v15.4s,  v9.s[1]
         FMLA v29.4s, v15.4s, v10.s[1]
         FMLA v31.4s, v15.4s, v11.s[1]
@@ -259,7 +259,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a57
 
         FMLA v20.4s, v18.4s,  v6.s[3]
         FMLA v22.4s, v18.4s,  v7.s[3]
-        SUBS x0, x0, 32
         FMLA v24.4s, v18.4s,  v8.s[3]
         FMLA v26.4s, v18.4s,  v9.s[3]
         FMLA v28.4s, v18.4s, v10.s[3]
@@ -268,6 +267,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a57
         FMLA v23.4s, v19.4s,  v7.s[3]
         FMLA v25.4s, v19.4s,  v8.s[3]
         FMLA v27.4s, v19.4s,  v9.s[3]
+        SUBS x0, x0, 32
         FMLA v29.4s, v19.4s, v10.s[3]
         FMLA v31.4s, v19.4s, v11.s[3]
         B.HS 1b
@@ -283,58 +283,58 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a57
         FMLA v24.4s, v12.4s,  v2.s[0]
         FMLA v26.4s, v12.4s,  v3.s[0]
         FMLA v28.4s, v12.4s,  v4.s[0]
+        LDR   q6,  [x3], 16            // Load next 6 A
         FMLA v30.4s, v12.4s,  v5.s[0]
         FMLA v21.4s, v13.4s,  v0.s[0]
+        LDR   q7,  [x9], 16
         FMLA v23.4s, v13.4s,  v1.s[0]
         FMLA v25.4s, v13.4s,  v2.s[0]
+        LDR   q8, [x10], 16
         FMLA v27.4s, v13.4s,  v3.s[0]
         FMLA v29.4s, v13.4s,  v4.s[0]
-
+        LDR   q9, [x11], 16
         FMLA v31.4s, v13.4s,  v5.s[0]
+
         FMLA v20.4s, v14.4s,  v0.s[1]
+        LDR   q10, [x12], 16
         FMLA v22.4s, v14.4s,  v1.s[1]
         FMLA v24.4s, v14.4s,  v2.s[1]
+        LDR  q11,  [x4], 16
         FMLA v26.4s, v14.4s,  v3.s[1]
         FMLA v28.4s, v14.4s,  v4.s[1]
+        LDP  q12,  q13, [x5], 32       // Load 4 B
         FMLA v30.4s, v14.4s,  v5.s[1]
         FMLA v21.4s, v15.4s,  v0.s[1]
         FMLA v23.4s, v15.4s,  v1.s[1]
         FMLA v25.4s, v15.4s,  v2.s[1]
-        LDR   q6,  [x3], 16            // Load next 6 A
         FMLA v27.4s, v15.4s,  v3.s[1]
         FMLA v29.4s, v15.4s,  v4.s[1]
         FMLA v31.4s, v15.4s,  v5.s[1]
-        LDR   q7,  [x9], 16
+        LDP  q14,  q15, [x5], 32
 
         FMLA v20.4s, v16.4s,  v0.s[2]
         FMLA v22.4s, v16.4s,  v1.s[2]
         FMLA v24.4s, v16.4s,  v2.s[2]
-        LDR   q8, [x10], 16
         FMLA v26.4s, v16.4s,  v3.s[2]
         FMLA v28.4s, v16.4s,  v4.s[2]
         FMLA v30.4s, v16.4s,  v5.s[2]
-        LDR   q9, [x11], 16
         FMLA v21.4s, v17.4s,  v0.s[2]
         FMLA v23.4s, v17.4s,  v1.s[2]
         FMLA v25.4s, v17.4s,  v2.s[2]
-        LDR   q10, [x12], 16
         FMLA v27.4s, v17.4s,  v3.s[2]
         FMLA v29.4s, v17.4s,  v4.s[2]
         FMLA v31.4s, v17.4s,  v5.s[2]
-        LDR  q11,  [x4], 16
+        LDP  q16,  q17, [x5], 32
 
         FMLA v20.4s, v18.4s,  v0.s[3]
         FMLA v22.4s, v18.4s,  v1.s[3]
         FMLA v24.4s, v18.4s,  v2.s[3]
-        LDP  q12,  q13, [x5], 32       // Load 4 B
         FMLA v26.4s, v18.4s,  v3.s[3]
         FMLA v28.4s, v18.4s,  v4.s[3]
         FMLA v30.4s, v18.4s,  v5.s[3]
-        LDP  q14,  q15, [x5], 32
         FMLA v21.4s, v19.4s,  v0.s[3]
         FMLA v23.4s, v19.4s,  v1.s[3]
         FMLA v25.4s, v19.4s,  v2.s[3]
-        LDP  q16,  q17, [x5], 32
         FMLA v27.4s, v19.4s,  v3.s[3]
         FMLA v29.4s, v19.4s,  v4.s[3]
         FMLA v31.4s, v19.4s,  v5.s[3]
