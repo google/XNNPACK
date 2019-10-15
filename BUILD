@@ -28,6 +28,13 @@ MICROKERNEL_BENCHMARK_DEPS = [
     "@pthreadpool",
 ]
 
+ACCURACY_EVAL_DEPS = [
+    ":XNNPACK",
+    ":ukernels",
+    "@FP16",
+    "@pthreadpool",
+]
+
 MICROKERNEL_TEST_DEPS = [
     ":ukernels",
     ":enable_assembly",
@@ -396,8 +403,17 @@ AVX_UKERNELS = [
     "src/f32-rmax/avx.c",
 ]
 
+AVX2_UKERNELS = [
+    "src/math/exp-avx2-p5.c",
+    "src/math/exp-avx2-perm-p3.c",
+    "src/math/exp-avx2-perm-p4.c",
+]
+
 AVX512F_UKERNELS = [
     "src/f32-rmax/avx512f.c",
+    "src/math/exp-avx512f-p5-scalef.c",
+    "src/math/exp-avx512f-p5.c",
+    "src/math/exp-avx512f-perm-p3.c",
 ]
 
 AARCH32_ASM_UKERNELS = [
@@ -486,10 +502,15 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/compute.h",
     "src/xnnpack/im2col.h",
     "src/xnnpack/indirection.h",
+    "src/xnnpack/math-stubs.h",
     "src/xnnpack/operator.h",
     "src/xnnpack/pack.h",
-    "src/xnnpack/requantization.h",
     "src/xnnpack/requantization-stubs.h",
+    "src/xnnpack/requantization.h",
+]
+
+ACCURACY_EVAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
+    "src/xnnpack/math-stubs.h",
 ]
 
 MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS + [
@@ -612,6 +633,18 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "avx2_ukernels",
+    hdrs = INTERNAL_HDRS,
+    copts = xnnpack_std_copts(),
+    x86_copts = [
+        "-mfma",
+        "-mavx2",
+    ],
+    x86_srcs = AVX2_UKERNELS,
+    deps = ["@FP16"],
+)
+
+xnnpack_cc_library(
     name = "avx512f_ukernels",
     hdrs = INTERNAL_HDRS,
     copts = xnnpack_std_copts(),
@@ -650,6 +683,7 @@ xnnpack_aggregate_library(
         ":psimd_ukernels",
         ":sse2_ukernels",
         ":avx_ukernels",
+        ":avx2_ukernels",
         ":avx512f_ukernels",
     ],
 )
@@ -994,6 +1028,17 @@ xnnpack_benchmark(
         ":mobilenet_v2",
         "@pthreadpool",
     ],
+)
+
+#################### Accuracy evaluation for math functions ####################
+
+xnnpack_benchmark(
+    name = "f32_exp_eval",
+    srcs = [
+        "eval/f32-exp.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + ACCURACY_EVAL_HDRS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 ######################### Unit tests for micro-kernels #########################
