@@ -51,6 +51,7 @@ void xnn_f32_spmm_ukernel_16x1__neonfma_unroll2(
         const float32x4_t va4567x0 = vld1q_f32(a + 4);
         const float32x4_t va89ABx0 = vld1q_f32(a + 8);
         const float32x4_t vaCDEFx0 = vld1q_f32(a + 12);
+        __builtin_prefetch(a + 16);
         a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff0);
         const float32x4_t vb0 = vld1q_dup_f32(w); w += 1;
         vacc0123x0 = vfmaq_f32(vacc0123x0, va0123x0, vb0);
@@ -61,6 +62,7 @@ void xnn_f32_spmm_ukernel_16x1__neonfma_unroll2(
         const float32x4_t va4567x1 = vld1q_f32(a + 4);
         const float32x4_t va89ABx1 = vld1q_f32(a + 8);
         const float32x4_t vaCDEFx1 = vld1q_f32(a + 12);
+        __builtin_prefetch(a + 16);
         a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff1);
         const float32x4_t vb1 = vld1q_dup_f32(w); w += 1;
         vacc0123x1 = vfmaq_f32(vacc0123x1, va0123x1, vb1);
@@ -83,6 +85,7 @@ void xnn_f32_spmm_ukernel_16x1__neonfma_unroll2(
           const float32x4_t va4567 = vld1q_f32(a + 4);
           const float32x4_t va89AB = vld1q_f32(a + 8);
           const float32x4_t vaCDEF = vld1q_f32(a + 12);
+          __builtin_prefetch(a + 16);
           a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
           const float32x4_t vb = vld1q_dup_f32(w); w += 1;
           vacc0123 = vfmaq_f32(vacc0123, va0123, vb);

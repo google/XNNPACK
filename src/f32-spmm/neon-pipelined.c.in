@@ -35,6 +35,8 @@ void xnn_f32_spmm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_pipelined
     float32x4_t va0123 = vld1q_f32(a);
     $for M in range(4, MR, 4):
       float32x4_t va${ABC[M:M+4]} = vld1q_f32(a + ${M});
+    $if MR == 16:
+      __builtin_prefetch(a + 16);
     size_t j = n;
     do {
       uint32_t nnz = *nnzmap++;
@@ -52,6 +54,8 @@ void xnn_f32_spmm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_pipelined
           va0123 = vld1q_f32(a);
           $for M in range(4, MR, 4):
             va${ABC[M:M+4]} = vld1q_f32(a + ${M});
+          $if MR == 16:
+            __builtin_prefetch(a + 16);
         } while (--nnz != 0);
       }
       $for M in range(0, MR, 4):

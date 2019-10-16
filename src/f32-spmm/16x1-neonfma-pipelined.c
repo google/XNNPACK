@@ -38,6 +38,7 @@ void xnn_f32_spmm_ukernel_16x1__neonfma_pipelined(
     float32x4_t va4567 = vld1q_f32(a + 4);
     float32x4_t va89AB = vld1q_f32(a + 8);
     float32x4_t vaCDEF = vld1q_f32(a + 12);
+    __builtin_prefetch(a + 16);
     size_t j = n;
     do {
       uint32_t nnz = *nnzmap++;
@@ -60,6 +61,7 @@ void xnn_f32_spmm_ukernel_16x1__neonfma_pipelined(
           va4567 = vld1q_f32(a + 4);
           va89AB = vld1q_f32(a + 8);
           vaCDEF = vld1q_f32(a + 12);
+          __builtin_prefetch(a + 16);
         } while (--nnz != 0);
       }
       float32x4_t vout0123 = vminq_f32(vacc0123, voutput_clamp.val[0]);

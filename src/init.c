@@ -454,7 +454,7 @@ static void init(void) {
     };
     #ifndef XNN_NO_SPNCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_16x1__neonfma,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_16x1__neonfma_pipelined,
         .mr = 16,
         .nr = 1,
       };
