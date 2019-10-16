@@ -86,6 +86,7 @@ SCALAR_UKERNELS = [
     "src/f32-dwconv/up1x4-scalar.c",
     "src/f32-dwconv/up1x9-scalar.c",
     "src/f32-dwconv-spchw/3x3p1-scalar.c",
+    "src/f32-dwconv-spchw/3x3s2p1-scalar.c",
     "src/f32-gavgpool/mp7p7q-scalar.c",
     "src/f32-gavgpool/up7-scalar.c",
     "src/f32-gemm/1x4-scalar.c",
