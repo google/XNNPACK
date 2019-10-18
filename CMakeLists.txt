@@ -488,7 +488,8 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
 SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/exp-avx2-p5.c
   src/math/exp-avx2-perm-p3.c
-  src/math/exp-avx2-perm-p4.c)
+  src/math/exp-avx2-perm-p4.c
+  src/math/expminus-avx2-p5.c)
 
 SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-rmax/avx512f.c

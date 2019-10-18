@@ -30,6 +30,8 @@ DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__avx512f_p5)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__avx512f_p5_scalef)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__avx512f_perm_p3)
 
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_expminus__avx2_p5)
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
