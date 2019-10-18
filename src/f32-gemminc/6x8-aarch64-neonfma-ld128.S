@@ -129,6 +129,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ld128
         B.LO 2f
 
         # Main loop - 4 floats of A (16 bytes)
+        # 48 FMA + 6 LD128 A + 4 LDP B
 1:
         LDR   q0,  [x3], 16
         LDP  q12,  q13, [x5], 32

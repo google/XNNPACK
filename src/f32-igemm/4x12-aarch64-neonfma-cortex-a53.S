@@ -35,14 +35,14 @@
 # x7  c3 / cm_stride
 
 # Vector register usage and GPR shadows
-# a0  v0           first set of A
-# a1  v0[1]        x13
-# a2  v1
-# a3  v1[1]        x8
-# a0  v2           second set of A
-# a1  v2[1]        x13
-# a2  v3
-# a3  v3[1]        x8
+# A0  v0           first set of A
+# A1  v0[1]        x13
+# A2  v1
+# A3  v1[1]        x8
+# A0  v2           second set of A
+# A1  v2[1]        x13
+# A2  v3
+# A3  v3[1]        x8
 # B   v4  v5  v6   x14 x15 x16  first set of B
 # B   v7  v8  v9   x17 x18 x19
 # B  v14 v15 v16   x14 x15 x16  second set of B (same x as first set)
