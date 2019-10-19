@@ -30,14 +30,9 @@
 # C pointer
 # x6  c0
 
-# Vector register usage and GPR shadows
-# a0  v0           first set of A
-# a0  v1           second set of A
-# B   v2  v3     x7 x10  first set of B
-# B   v5  v6    x17 x18
-# B  v23 v24     x7 x10  second set of B (same x as first set)
-# B  v17 v18    x17 x18
-# C  v20 v21
+# Clamp v4 v5
+
+# A53 based on A57/A75 but with LD64
 
 BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a53
 
@@ -45,201 +40,132 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a53
         LDP x14, x8, [sp]
 
         # Load clamping_params values
-        LD2R {v30.4s, v31.4s}, [x8]
-
+        LD2R {v4.4s, v5.4s}, [x8]
 0:
         # Load initial bias from w into accumulators
-        LD1 {v20.16b, v21.16b}, [x5], 32
+        LDP q16, q17, [x5], 32
 
+        MOVI v18.4s, 0  // second set of C for pipelining FMLA
         PRFM PLDL1KEEP, [x5]
+        MOVI v19.4s, 0
         PRFM PLDL1KEEP, [x5, 64]
         PRFM PLDL1KEEP, [x5, 128]
         PRFM PLDL1KEEP, [x5, 192]
 
-        # Is there at least 4 floats (16 bytes) for prologue + epilogue?
-        SUBS x0, x2, 16  // k = kc - 16
+        # Is there at least 8 floats (32 bytes) for prologue + epilogue?
+        SUBS x0, x2, 32  // k = kc - 32
+
         B.LO 3f
 
-        # Prologue - loads for first group of 6 fma
+        # 16 prologue
+        # Read first block of 1 A and B.
+        LDP q20, q21, [x5], 32
+        LDP q22, q23, [x5], 32
+        LDP q24, q25, [x5], 32
+        LDP q26, q27, [x5], 32
+        LDR q0, [x3], 16
 
-        # Read first block of 1 A.
-        LDR d0, [x3], 8     // a0
-
-        LDR d2, [x5]       // vb0x0123
-        LDR x7, [x5, 8]
-
-        LDR d3, [x5, 16]   // vb0x4567
-        LDR x10, [x5, 24]
-
-        LDR d5, [x5, 32]   // vb1x0123
-        LDR x17, [x5, 40]
-
-        LDR d6, [x5, 48]   // vb1x4567
-        LDR x18, [x5, 56]
-
-        INS v2.d[1], x7
-        ADD x5, x5, 64
-
-        # Is there at least 4 floats (16 bytes) for main loop?
-        SUBS x0, x0, 16
+        # Is there at least 32.  yes do main loop
+        SUBS x0, x0, 32
         B.LO 2f
 
-        # Main loop - 4 floats of A (16 bytes)
+        # Main loop - 8 floats of A (32 bytes)
 1:
-        # First group of 4 fma.
-        # A is loaded for 2nd group into v1
+        # First block of 4.  FMA for first 4, loads for 2nd block of 4.
+        FMLA v16.4s, v20.4s, v0.s[0]
+        LDR q1, [x3], 16
+        FMLA v17.4s, v21.4s, v0.s[0]
+        LDR q20, [x5], 16
+        FMLA v18.4s, v22.4s, v0.s[1]
+        LDR q21, [x5], 16
+        FMLA v19.4s, v23.4s, v0.s[1]
+        LDR q22, [x5], 16
+        FMLA v16.4s, v24.4s, v0.s[2]
+        LDR q23, [x5], 16
+        FMLA v17.4s, v25.4s, v0.s[2]
+        LDR q24, [x5], 16
+        FMLA v18.4s, v26.4s, v0.s[3]
+        LDR q25, [x5], 16
+        FMLA v19.4s, v27.4s, v0.s[3]
+        LDR q26, [x5], 16
+        LDR q27, [x5], 16
 
-        # BLOCK 0
-        LDR d1, [x3], 8          // a0
-        INS v3.d[1], x10
-        FMLA v20.4s, v2.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 64]
-
-        # BLOCK 1
-        FMLA v21.4s, v3.4s, v0.s[0]
-
-        # BLOCK 2
-        LDR d23, [x5]       // vb0x0123
-        INS v5.d[1], x17
-        LDR x7, [x5, 8]
-
-        # BLOCK 3
-        LDR d24, [x5, 16]   // vb0x4567
-        INS v6.d[1], x18
-        LDR x10, [x5, 24]
-
-        # BLOCK 4
-        FMLA v20.4s, v5.4s, v0.s[1]
-
-        # BLOCK 5
-        LDR d17, [x5, 32]   // vb1x0123
-        LDR x17, [x5, 40]
-        FMLA v21.4s, v6.4s, v0.s[1]
-
-        # BLOCK 6
-        LDR d18, [x5, 48]   // vb1x4567
-        LDR x18, [x5, 56]
-
-        # BLOCK 7
-        INS v23.d[1], x7   // v23 was loaded in block 2
-
-        # Second group of 6 fma.
-        # A is loaded for 1st group into v0
-
-        # BLOCK 0
-        LDR d0, [x3], 8          // a0
-        INS v24.d[1], x10
-        FMLA v20.4s, v23.4s, v1.s[0]
-
-        # BLOCK 1
-        FMLA v21.4s, v24.4s, v1.s[0]
-
-        # BLOCK 2
-        LDR d2, [x5, 64]        // vb0x0123
-        INS v17.d[1], x17
-        LDR x7, [x5, 72]
-
-        # BLOCK 3
-        LDR d3, [x5, 80]    // vb0x4567
-        INS v18.d[1], x18
-        LDR x10, [x5, 88]
-
-        # BLOCK 4
-        FMLA v20.4s, v17.4s, v1.s[1]
-
-        # BLOCK 5
-        LDR d5, [x5, 96]   // vb1x0123
-        LDR x17, [x5, 104]
-        FMLA v21.4s, v18.4s, v1.s[1]
-
-        # BLOCK 6
-        LDR d6, [x5, 112]   // vb1x4567
-        LDR x18, [x5, 120]
-        SUBS x0, x0, 16
-
-        # BLOCK 7
-        INS v2.d[1], x7
-        ADD x5, x5, 128
+        # Second block of 4.  FMA for second 4, loads for 1st block of 4.
+        FMLA v16.4s, v20.4s, v1.s[0]
+        LDR q0, [x3], 16
+        FMLA v17.4s, v21.4s, v1.s[0]
+        LDR q20, [x5], 16
+        FMLA v18.4s, v22.4s, v1.s[1]
+        LDR q21, [x5], 16
+        FMLA v19.4s, v23.4s, v1.s[1]
+        LDR q22, [x5], 16
+        FMLA v16.4s, v24.4s, v1.s[2]
+        LDR q23, [x5], 16
+        FMLA v17.4s, v25.4s, v1.s[2]
+        LDR q24, [x5], 16
+        FMLA v18.4s, v26.4s, v1.s[3]
+        LDR q25, [x5], 16
+        FMLA v19.4s, v27.4s, v1.s[3]
+        LDR q26, [x5], 16
+        SUBS x0, x0, 32
+        LDR q27, [x5], 16
         B.HS 1b
 
-        # Epilogue
-        # First block same as main loop.  Second block has no loads.
 2:
-        # BLOCK 0
-        LDR d1, [x3], 8          // a0
-        INS v3.d[1], x10
-        FMLA v20.4s, v2.4s, v0.s[0]
+        # Epilogue
 
-        # BLOCK 1
-        FMLA v21.4s, v3.4s, v0.s[0]
+        # First block of 4.  FMA for first 4, loads for 2nd block of 4.
+        FMLA v16.4s, v20.4s, v0.s[0]
+        LDR q1, [x3], 16
+        FMLA v17.4s, v21.4s, v0.s[0]
+        LDR q20, [x5], 16
+        FMLA v18.4s, v22.4s, v0.s[1]
+        LDR q21, [x5], 16
+        FMLA v19.4s, v23.4s, v0.s[1]
+        LDR q22, [x5], 16
+        FMLA v16.4s, v24.4s, v0.s[2]
+        LDR q23, [x5], 16
+        FMLA v17.4s, v25.4s, v0.s[2]
+        LDR q24, [x5], 16
+        FMLA v18.4s, v26.4s, v0.s[3]
+        LDR q25, [x5], 16
+        FMLA v19.4s, v27.4s, v0.s[3]
+        LDR q26, [x5], 16
 
-        # BLOCK 2
-        LDR d23, [x5]       // vb0x0123
-        INS v5.d[1], x17
-        LDR x7, [x5, 8]
+        # Second block of 4.  no loads
+        FMLA v16.4s, v20.4s, v1.s[0]
+        LDR q27, [x5], 16
+        FMLA v17.4s, v21.4s, v1.s[0]
+        FMLA v18.4s, v22.4s, v1.s[1]
+        FMLA v19.4s, v23.4s, v1.s[1]
+        FMLA v16.4s, v24.4s, v1.s[2]
+        FMLA v17.4s, v25.4s, v1.s[2]
+        FMLA v18.4s, v26.4s, v1.s[3]
+        FMLA v19.4s, v27.4s, v1.s[3]
 
-        # BLOCK 3
-        LDR d24, [x5, 16]   // vb0x4567
-        INS v6.d[1], x18
-        LDR x10, [x5, 24]
-
-        # BLOCK 4
-        FMLA v20.4s, v5.4s, v0.s[1]
-
-        # BLOCK 5
-        LDR d17, [x5, 32]   // vb1x0123
-        LDR x17, [x5, 40]
-        FMLA v21.4s, v6.4s, v0.s[1]
-
-        # BLOCK 6
-        LDR d18, [x5, 48]   // vb1x4567
-        LDR x18, [x5, 56]
-
-        # BLOCK 7
-        INS v23.d[1], x7   // v23 was loaded in block 2
-        ADD x5, x5, 64
-
-        # Second group of 6 fma.  8 blocks of 4 cycles.
-        # Epilogue version does no loads
-
-        # BLOCK 0
-        INS v24.d[1], x10
-        FMLA v20.4s, v23.4s, v1.s[0]
-
-        # BLOCK 1
-        FMLA v21.4s, v24.4s, v1.s[0]
-
-        # BLOCK 2
-        INS v17.d[1], x17
-
-        # BLOCK 3
-        INS v18.d[1], x18
-
-        # BLOCK 4
-        FMLA v20.4s, v17.4s, v1.s[1]
-
-        # BLOCK 5
-        FMLA v21.4s, v18.4s, v1.s[1]
-
-        # BLOCK 7
 3:
+        # Is there a remainder?- 4 floats of A (16 bytes)
+        TBNZ x0, 4, 5f
         # Is there a remainder?- 2 floats of A (8 bytes)
-        TBNZ x0, 3, 5f
+        TBNZ x0, 3, 6f
         # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ x0, 2, 6f
+        TBNZ x0, 2, 8f
 
 4:
+        FADD v16.4s, v16.4s, v18.4s
+        FADD v17.4s, v17.4s, v19.4s
+
         # Clamp
-        FMIN v20.4s, v20.4s, v30.4s
-        FMIN v21.4s, v21.4s, v30.4s
-        FMAX v20.4s, v20.4s, v31.4s
-        FMAX v21.4s, v21.4s, v31.4s
+        FMIN v16.4s, v16.4s, v4.4s
+        FMIN v17.4s, v17.4s, v4.4s
+        FMAX v16.4s, v16.4s, v5.4s
+        FMAX v17.4s, v17.4s, v5.4s
 
         # Store full 1 x 8
         CMP x1, 8
-        B.LO 7f
+        B.LO 9f
 
-        STP q20, q21, [x6]
+        STP q16, q17, [x6]
         ADD x6, x6, x14
 
         SUB  x3,  x3, x2 // a0 -= kc
@@ -250,44 +176,63 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a53
         RET
 
 5:
-        # Remainder - 2 floats of A (8 bytes)
-        # Read first block of 1 A.
-        LDR d0, [x3], 8   // a0
-        LD1 {v2.16b, v3.16b}, [x5], 32
-        LD1 {v5.16b, v6.16b}, [x5], 32
+        # Remainder- 4 floats of A (16 bytes)
+        LDR q20, [x5], 16
+        LDR q21, [x5], 16
+        LDR q0, [x3], 16
+        FMLA v16.4s, v20.4s, v0.s[0]
+        FMLA v17.4s, v21.4s, v0.s[0]
+        LDR q22, [x5], 16
+        LDR q23, [x5], 16
+        LDR q24, [x5], 16
+        LDR q25, [x5], 16
+        LDR q26, [x5], 16
+        LDR q27, [x5], 16
+        FMLA v18.4s, v22.4s, v0.s[1]
+        FMLA v19.4s, v23.4s, v0.s[1]
+        FMLA v16.4s, v24.4s, v0.s[2]
+        FMLA v17.4s, v25.4s, v0.s[2]
+        FMLA v18.4s, v26.4s, v0.s[3]
+        FMLA v19.4s, v27.4s, v0.s[3]
 
-        # First block of 2 B
-        FMLA v20.4s, v2.4s, v0.s[0]
-        FMLA v21.4s, v3.4s, v0.s[0]
-
-        # Second block of 2 B
-        FMLA v20.4s, v5.4s, v0.s[1]
-        FMLA v21.4s, v6.4s, v0.s[1]
-
-        TBZ x0, 2, 4b
+        TBZ x0, 3, 7f
 6:
-        # Remainder - 1 float of A (4 bytes)
-        LDR s0, [x3], 4   // a0
-        LD1 {v2.16b, v3.16b}, [x5], 32
-
-        FMLA v20.4s, v2.4s, v0.s[0]
-        FMLA v21.4s, v3.4s, v0.s[0]
+        # Remainder- 2 floats of A (8 bytes)
+        LDR q20, [x5], 16
+        LDR q21, [x5], 16
+        LDR d0, [x3], 8
+        FMLA v16.4s, v20.4s, v0.s[0]
+        FMLA v17.4s, v21.4s, v0.s[0]
+        LDR q22, [x5], 16
+        LDR q23, [x5], 16
+        FMLA v18.4s, v22.4s, v0.s[1]
+        FMLA v19.4s, v23.4s, v0.s[1]
+7:
+        TBZ x0, 2, 4b
+8:
+        # Remainder- 1 float of A (4 bytes)
+        LDR q20, [x5], 16
+        LDR q21, [x5], 16
+        LDR s0, [x3], 4
+        FMLA v16.4s, v20.4s, v0.s[0]
+        FMLA v17.4s, v21.4s, v0.s[0]
         B 4b
 
-7:
-        TBZ x1, 2, 8f
-        STR q20, [x6], 16
-        MOV v20.16b, v21.16b
-
-8:
-        TBZ x1, 1, 9f
-        STR d20, [x6], 8
-        DUP d20, v20.d[1]
-
+        # Store odd channels
 9:
-        TBZ x1, 0, 10f
-        STR s20, [x6]
+        TBZ x1, 2, 10f
+        STR q16, [x6], 16
+        MOV v16.16b, v17.16b
+
 10:
+        TBZ x1, 1, 11f
+        STR d16, [x6], 8
+        DUP d16, v16.d[1]
+
+11:
+        TBZ x1, 0, 12f
+        STR s16, [x6]
+12:
         RET
 
 END_FUNCTION xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a53
