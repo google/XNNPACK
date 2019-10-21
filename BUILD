@@ -404,6 +404,7 @@ SSE2_UKERNELS = [
 
 AVX_UKERNELS = [
     "src/f32-rmax/avx.c",
+    "src/f32-vscale/avx-unroll32.c",
 ]
 
 AVX2_UKERNELS = [
@@ -420,6 +421,7 @@ AVX512F_UKERNELS = [
     "src/f32-raddexpminusmax/avx512f-p5-scalef-unroll128.c",
     "src/f32-raddstoreexpminusmax/avx512f-p5-scalef-unroll128.c",
     "src/f32-rmax/avx512f.c",
+    "src/f32-vscale/avx512f-unroll64.c",
     "src/f32-vscaleexpminusmax/avx512f-p5-scalef-unroll128.c",
     "src/math/exp-avx512f-p5-scalef.c",
     "src/math/exp-avx512f-p5.c",
@@ -504,6 +506,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vadd.h",
     "src/xnnpack/vmul.h",
     "src/xnnpack/vmulcaddc.h",
+    "src/xnnpack/vscale.h",
     "src/xnnpack/vscaleexpminusmax.h",
     "src/xnnpack/vsub.h",
     "src/xnnpack/zip.h",
@@ -1313,6 +1316,15 @@ xnnpack_unit_test(
         "test/vmulcaddc-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vscale_test",
+    srcs = [
+        "test/f32-vscale.cc",
+        "test/vscale-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
 

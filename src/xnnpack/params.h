@@ -1118,13 +1118,6 @@ typedef void (*xnn_f32_prelu_ukernel_function)(
     size_t y_stride,
     const union xnn_f32_output_params* params);
 
-typedef void (*xnn_f32_vscaleexpminusmax_ukernel_function)(
-    size_t n,
-    const float* input,
-    float* output,
-    float max,
-    float scale);
-
 typedef void (*xnn_f32_raddexpminusmax_ukernel_function)(
     size_t n,
     const float* input,
@@ -1137,6 +1130,19 @@ typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_function)(
     float* output,
     float* sum,
     float max);
+
+typedef void (*xnn_f32_vscaleexpminusmax_ukernel_function)(
+    size_t n,
+    const float* input,
+    float* output,
+    float max,
+    float scale);
+
+typedef void (*xnn_f32_vscale_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y,
+    float c);
 
 
 struct gemm_parameters {
