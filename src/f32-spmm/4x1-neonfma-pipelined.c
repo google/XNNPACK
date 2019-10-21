@@ -26,7 +26,8 @@ void xnn_f32_spmm_ukernel_4x1__neonfma_pipelined(
 {
   assert(m != 0);
 
-  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
   size_t i = m;
   while XNN_LIKELY(i >= 4) {
     const float*restrict w = weights;
@@ -50,8 +51,8 @@ void xnn_f32_spmm_ukernel_4x1__neonfma_pipelined(
           va0123 = vld1q_f32(a);
         } while (--nnz != 0);
       }
-      float32x4_t vout0123 = vminq_f32(vacc0123, voutput_clamp.val[0]);
-      vout0123 = vmaxq_f32(vout0123, voutput_clamp.val[1]);
+      float32x4_t vout0123 = vminq_f32(vacc0123, vmax);
+      vout0123 = vmaxq_f32(vout0123, vmin);
       vst1q_f32(c, vout0123);
       c += m;
     } while (--j != 0);
@@ -78,8 +79,8 @@ void xnn_f32_spmm_ukernel_4x1__neonfma_pipelined(
             vacc01 = vfma_f32(vacc01, va01, vb);
           } while (--nnz != 0);
         }
-        float32x2_t vout01 = vmin_f32(vacc01, vget_low_f32(voutput_clamp.val[0]));
-        vout01 = vmax_f32(vout01, vget_low_f32(voutput_clamp.val[1]));
+        float32x2_t vout01 = vmin_f32(vacc01, vget_low_f32(vmax));
+        vout01 = vmax_f32(vout01, vget_low_f32(vmin));
         vst1_f32(c, vout01);
         c += m;
       } while (--j != 0);
@@ -104,8 +105,8 @@ void xnn_f32_spmm_ukernel_4x1__neonfma_pipelined(
             vacc0 = vfma_f32(vacc0, va0, vb);
           } while (--nnz != 0);
         }
-        float32x2_t vout0 = vmin_f32(vacc0, vget_low_f32(voutput_clamp.val[0]));
-        vout0 = vmax_f32(vout0, vget_low_f32(voutput_clamp.val[1]));
+        float32x2_t vout0 = vmin_f32(vacc0, vget_low_f32(vmax));
+        vout0 = vmax_f32(vout0, vget_low_f32(vmin));
         vst1_lane_f32(c, vout0, 0);
         c += m;
       } while (--j != 0);

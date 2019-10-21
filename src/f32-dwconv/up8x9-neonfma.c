@@ -27,7 +27,8 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
+  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
   do {
     const float* i0 = input[0];
     const float* i1 = input[1];
@@ -111,10 +112,10 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
       vacc4567p0 = vfmaq_f32(vacc4567p0, vi8x4567, vk8x4567);
 
 
-      float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, voutput_clamp.val[1]);
-      float32x4_t vacc4567 = vmaxq_f32(vacc4567p0, voutput_clamp.val[1]);
-      vacc0123 = vminq_f32(vacc0123, voutput_clamp.val[0]);
-      vacc4567 = vminq_f32(vacc4567, voutput_clamp.val[0]);
+      float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, vmin);
+      float32x4_t vacc4567 = vmaxq_f32(vacc4567p0, vmin);
+      vacc0123 = vminq_f32(vacc0123, vmax);
+      vacc4567 = vminq_f32(vacc4567, vmax);
 
       vst1q_f32(output, vacc0123); output += 4;
       vst1q_f32(output, vacc4567); output += 4;
@@ -187,10 +188,10 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
       vacc0123 = vfmaq_f32(vacc0123, vi8x0123, vk8x0123);
       vacc4567 = vfmaq_f32(vacc4567, vi8x4567, vk8x4567);
 
-      vacc0123 = vmaxq_f32(vacc0123, voutput_clamp.val[1]);
-      vacc4567 = vmaxq_f32(vacc4567, voutput_clamp.val[1]);
-      vacc0123 = vminq_f32(vacc0123, voutput_clamp.val[0]);
-      vacc4567 = vminq_f32(vacc4567, voutput_clamp.val[0]);
+      vacc0123 = vmaxq_f32(vacc0123, vmin);
+      vacc4567 = vmaxq_f32(vacc4567, vmin);
+      vacc0123 = vminq_f32(vacc0123, vmax);
+      vacc4567 = vminq_f32(vacc4567, vmax);
 
       if (c & 4) {
         vst1q_f32(output, vacc0123); output += 4;

@@ -26,7 +26,8 @@ void xnn_f32_spmm_ukernel_8x4__neonfma(
 {
   assert(m != 0);
 
-  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
   size_t i = m;
   while XNN_LIKELY(i >= 8) {
     const float*restrict w = weights;
@@ -61,23 +62,23 @@ void xnn_f32_spmm_ukernel_8x4__neonfma(
           vacc4567c3 = vfmaq_laneq_f32(vacc4567c3, va4567, vb, 3);
         } while (--nnz != 0);
       }
-      float32x4_t vout0123c0 = vminq_f32(vacc0123c0, voutput_clamp.val[0]);
-      float32x4_t vout4567c0 = vminq_f32(vacc4567c0, voutput_clamp.val[0]);
-      float32x4_t vout0123c1 = vminq_f32(vacc0123c1, voutput_clamp.val[0]);
-      float32x4_t vout4567c1 = vminq_f32(vacc4567c1, voutput_clamp.val[0]);
-      float32x4_t vout0123c2 = vminq_f32(vacc0123c2, voutput_clamp.val[0]);
-      float32x4_t vout4567c2 = vminq_f32(vacc4567c2, voutput_clamp.val[0]);
-      float32x4_t vout0123c3 = vminq_f32(vacc0123c3, voutput_clamp.val[0]);
-      float32x4_t vout4567c3 = vminq_f32(vacc4567c3, voutput_clamp.val[0]);
+      float32x4_t vout0123c0 = vminq_f32(vacc0123c0, vmax);
+      float32x4_t vout4567c0 = vminq_f32(vacc4567c0, vmax);
+      float32x4_t vout0123c1 = vminq_f32(vacc0123c1, vmax);
+      float32x4_t vout4567c1 = vminq_f32(vacc4567c1, vmax);
+      float32x4_t vout0123c2 = vminq_f32(vacc0123c2, vmax);
+      float32x4_t vout4567c2 = vminq_f32(vacc4567c2, vmax);
+      float32x4_t vout0123c3 = vminq_f32(vacc0123c3, vmax);
+      float32x4_t vout4567c3 = vminq_f32(vacc4567c3, vmax);
 
-      vout0123c0 = vmaxq_f32(vout0123c0, voutput_clamp.val[1]);
-      vout4567c0 = vmaxq_f32(vout4567c0, voutput_clamp.val[1]);
-      vout0123c1 = vmaxq_f32(vout0123c1, voutput_clamp.val[1]);
-      vout4567c1 = vmaxq_f32(vout4567c1, voutput_clamp.val[1]);
-      vout0123c2 = vmaxq_f32(vout0123c2, voutput_clamp.val[1]);
-      vout4567c2 = vmaxq_f32(vout4567c2, voutput_clamp.val[1]);
-      vout0123c3 = vmaxq_f32(vout0123c3, voutput_clamp.val[1]);
-      vout4567c3 = vmaxq_f32(vout4567c3, voutput_clamp.val[1]);
+      vout0123c0 = vmaxq_f32(vout0123c0, vmin);
+      vout4567c0 = vmaxq_f32(vout4567c0, vmin);
+      vout0123c1 = vmaxq_f32(vout0123c1, vmin);
+      vout4567c1 = vmaxq_f32(vout4567c1, vmin);
+      vout0123c2 = vmaxq_f32(vout0123c2, vmin);
+      vout4567c2 = vmaxq_f32(vout4567c2, vmin);
+      vout0123c3 = vmaxq_f32(vout0123c3, vmin);
+      vout4567c3 = vmaxq_f32(vout4567c3, vmin);
 
       vst1q_f32(c + 0 * m + 0, vout0123c0);
       vst1q_f32(c + 0 * m + 4, vout4567c0);
@@ -108,11 +109,11 @@ void xnn_f32_spmm_ukernel_8x4__neonfma(
             vacc4567 = vfmaq_f32(vacc4567, va4567, vb);
           } while (--nnz != 0);
         }
-        float32x4_t vout0123 = vminq_f32(vacc0123, voutput_clamp.val[0]);
-        float32x4_t vout4567 = vminq_f32(vacc4567, voutput_clamp.val[0]);
+        float32x4_t vout0123 = vminq_f32(vacc0123, vmax);
+        float32x4_t vout4567 = vminq_f32(vacc4567, vmax);
 
-        vout0123 = vmaxq_f32(vout0123, voutput_clamp.val[1]);
-        vout4567 = vmaxq_f32(vout4567, voutput_clamp.val[1]);
+        vout0123 = vmaxq_f32(vout0123, vmin);
+        vout4567 = vmaxq_f32(vout4567, vmin);
 
         vst1q_f32(c + 0, vout0123);
         vst1q_f32(c + 4, vout4567);
@@ -150,15 +151,15 @@ void xnn_f32_spmm_ukernel_8x4__neonfma(
             vacc0123c3 = vfmaq_laneq_f32(vacc0123c3, va0123, vb, 3);
           } while (--nnz != 0);
         }
-        float32x4_t vout0123c0 = vminq_f32(vacc0123c0, voutput_clamp.val[0]);
-        float32x4_t vout0123c1 = vminq_f32(vacc0123c1, voutput_clamp.val[0]);
-        float32x4_t vout0123c2 = vminq_f32(vacc0123c2, voutput_clamp.val[0]);
-        float32x4_t vout0123c3 = vminq_f32(vacc0123c3, voutput_clamp.val[0]);
+        float32x4_t vout0123c0 = vminq_f32(vacc0123c0, vmax);
+        float32x4_t vout0123c1 = vminq_f32(vacc0123c1, vmax);
+        float32x4_t vout0123c2 = vminq_f32(vacc0123c2, vmax);
+        float32x4_t vout0123c3 = vminq_f32(vacc0123c3, vmax);
 
-        vout0123c0 = vmaxq_f32(vout0123c0, voutput_clamp.val[1]);
-        vout0123c1 = vmaxq_f32(vout0123c1, voutput_clamp.val[1]);
-        vout0123c2 = vmaxq_f32(vout0123c2, voutput_clamp.val[1]);
-        vout0123c3 = vmaxq_f32(vout0123c3, voutput_clamp.val[1]);
+        vout0123c0 = vmaxq_f32(vout0123c0, vmin);
+        vout0123c1 = vmaxq_f32(vout0123c1, vmin);
+        vout0123c2 = vmaxq_f32(vout0123c2, vmin);
+        vout0123c3 = vmaxq_f32(vout0123c3, vmin);
 
         vst1q_f32(c + 0 * m + 0, vout0123c0);
         vst1q_f32(c + 1 * m + 0, vout0123c1);
@@ -182,9 +183,9 @@ void xnn_f32_spmm_ukernel_8x4__neonfma(
               vacc0123 = vfmaq_f32(vacc0123, va0123, vb);
             } while (--nnz != 0);
           }
-          float32x4_t vout0123 = vminq_f32(vacc0123, voutput_clamp.val[0]);
+          float32x4_t vout0123 = vminq_f32(vacc0123, vmax);
 
-          vout0123 = vmaxq_f32(vout0123, voutput_clamp.val[1]);
+          vout0123 = vmaxq_f32(vout0123, vmin);
 
           vst1q_f32(c + 0, vout0123);
           c += m;
@@ -219,15 +220,15 @@ void xnn_f32_spmm_ukernel_8x4__neonfma(
             vacc01c3 = vfma_laneq_f32(vacc01c3, va01, vb, 3);
           } while (--nnz != 0);
         }
-        float32x2_t vout01c0 = vmin_f32(vacc01c0, vget_low_f32(voutput_clamp.val[0]));
-        float32x2_t vout01c1 = vmin_f32(vacc01c1, vget_low_f32(voutput_clamp.val[0]));
-        float32x2_t vout01c2 = vmin_f32(vacc01c2, vget_low_f32(voutput_clamp.val[0]));
-        float32x2_t vout01c3 = vmin_f32(vacc01c3, vget_low_f32(voutput_clamp.val[0]));
+        float32x2_t vout01c0 = vmin_f32(vacc01c0, vget_low_f32(vmax));
+        float32x2_t vout01c1 = vmin_f32(vacc01c1, vget_low_f32(vmax));
+        float32x2_t vout01c2 = vmin_f32(vacc01c2, vget_low_f32(vmax));
+        float32x2_t vout01c3 = vmin_f32(vacc01c3, vget_low_f32(vmax));
 
-        vout01c0 = vmax_f32(vout01c0, vget_low_f32(voutput_clamp.val[1]));
-        vout01c1 = vmax_f32(vout01c1, vget_low_f32(voutput_clamp.val[1]));
-        vout01c2 = vmax_f32(vout01c2, vget_low_f32(voutput_clamp.val[1]));
-        vout01c3 = vmax_f32(vout01c3, vget_low_f32(voutput_clamp.val[1]));
+        vout01c0 = vmax_f32(vout01c0, vget_low_f32(vmin));
+        vout01c1 = vmax_f32(vout01c1, vget_low_f32(vmin));
+        vout01c2 = vmax_f32(vout01c2, vget_low_f32(vmin));
+        vout01c3 = vmax_f32(vout01c3, vget_low_f32(vmin));
 
         vst1_f32(c + 0 * m + 0, vout01c0);
         vst1_f32(c + 1 * m + 0, vout01c1);
@@ -251,8 +252,8 @@ void xnn_f32_spmm_ukernel_8x4__neonfma(
               vacc01 = vfma_f32(vacc01, va01, vb);
             } while (--nnz != 0);
           }
-          float32x2_t vout01 = vmin_f32(vacc01, vget_low_f32(voutput_clamp.val[0]));
-          vout01 = vmax_f32(vout01, vget_low_f32(voutput_clamp.val[1]));
+          float32x2_t vout01 = vmin_f32(vacc01, vget_low_f32(vmax));
+          vout01 = vmax_f32(vout01, vget_low_f32(vmin));
 
           vst1_f32(c, vout01);
           c += m;
@@ -287,15 +288,15 @@ void xnn_f32_spmm_ukernel_8x4__neonfma(
             vacc0c3 = vfma_laneq_f32(vacc0c3, va0, vb, 3);
           } while (--nnz != 0);
         }
-        float32x2_t vout0c0 = vmin_f32(vacc0c0, vget_low_f32(voutput_clamp.val[0]));
-        float32x2_t vout0c1 = vmin_f32(vacc0c1, vget_low_f32(voutput_clamp.val[0]));
-        float32x2_t vout0c2 = vmin_f32(vacc0c2, vget_low_f32(voutput_clamp.val[0]));
-        float32x2_t vout0c3 = vmin_f32(vacc0c3, vget_low_f32(voutput_clamp.val[0]));
+        float32x2_t vout0c0 = vmin_f32(vacc0c0, vget_low_f32(vmax));
+        float32x2_t vout0c1 = vmin_f32(vacc0c1, vget_low_f32(vmax));
+        float32x2_t vout0c2 = vmin_f32(vacc0c2, vget_low_f32(vmax));
+        float32x2_t vout0c3 = vmin_f32(vacc0c3, vget_low_f32(vmax));
 
-        vout0c0 = vmax_f32(vout0c0, vget_low_f32(voutput_clamp.val[1]));
-        vout0c1 = vmax_f32(vout0c1, vget_low_f32(voutput_clamp.val[1]));
-        vout0c2 = vmax_f32(vout0c2, vget_low_f32(voutput_clamp.val[1]));
-        vout0c3 = vmax_f32(vout0c3, vget_low_f32(voutput_clamp.val[1]));
+        vout0c0 = vmax_f32(vout0c0, vget_low_f32(vmin));
+        vout0c1 = vmax_f32(vout0c1, vget_low_f32(vmin));
+        vout0c2 = vmax_f32(vout0c2, vget_low_f32(vmin));
+        vout0c3 = vmax_f32(vout0c3, vget_low_f32(vmin));
 
         vst1_lane_f32(c + 0 * m + 0, vout0c0, 0);
         vst1_lane_f32(c + 1 * m + 0, vout0c1, 0);
@@ -319,8 +320,8 @@ void xnn_f32_spmm_ukernel_8x4__neonfma(
               vacc0 = vfma_f32(vacc0, va0, vb);
             } while (--nnz != 0);
           }
-          float32x2_t vout0 = vmin_f32(vacc0, vget_low_f32(voutput_clamp.val[0]));
-          vout0 = vmax_f32(vout0, vget_low_f32(voutput_clamp.val[1]));
+          float32x2_t vout0 = vmin_f32(vacc0, vget_low_f32(vmax));
+          vout0 = vmax_f32(vout0, vget_low_f32(vmin));
 
           vst1_lane_f32(c, vout0, 1);
           c += m;

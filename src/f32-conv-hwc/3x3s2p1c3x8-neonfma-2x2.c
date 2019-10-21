@@ -49,7 +49,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neonfma_2x2(
     i0 = zero;
   }
 
-  const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
 
   for (size_t output_y = output_y_start; output_y < output_y_end; output_y += 2) {
     const size_t input_y2 = output_y * 2 + 2 - input_padding_top;
@@ -468,25 +469,25 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neonfma_2x2(
         vi3x0 = vi3x3;
         vi4x0 = vi4x3;
 
-        vo0x0c0123 = vmaxq_f32(vo0x0c0123, voutput_clamp.val[1]);
-        vo1x0c0123 = vmaxq_f32(vo1x0c0123, voutput_clamp.val[1]);
-        vo0x0c4567 = vmaxq_f32(vo0x0c4567, voutput_clamp.val[1]);
-        vo1x0c4567 = vmaxq_f32(vo1x0c4567, voutput_clamp.val[1]);
+        vo0x0c0123 = vmaxq_f32(vo0x0c0123, vmin);
+        vo1x0c0123 = vmaxq_f32(vo1x0c0123, vmin);
+        vo0x0c4567 = vmaxq_f32(vo0x0c4567, vmin);
+        vo1x0c4567 = vmaxq_f32(vo1x0c4567, vmin);
 
-        vo0x1c0123 = vmaxq_f32(vo0x1c0123, voutput_clamp.val[1]);
-        vo1x1c0123 = vmaxq_f32(vo1x1c0123, voutput_clamp.val[1]);
-        vo0x1c4567 = vmaxq_f32(vo0x1c4567, voutput_clamp.val[1]);
-        vo1x1c4567 = vmaxq_f32(vo1x1c4567, voutput_clamp.val[1]);
+        vo0x1c0123 = vmaxq_f32(vo0x1c0123, vmin);
+        vo1x1c0123 = vmaxq_f32(vo1x1c0123, vmin);
+        vo0x1c4567 = vmaxq_f32(vo0x1c4567, vmin);
+        vo1x1c4567 = vmaxq_f32(vo1x1c4567, vmin);
 
-        vo0x0c0123 = vminq_f32(vo0x0c0123, voutput_clamp.val[0]);
-        vo1x0c0123 = vminq_f32(vo1x0c0123, voutput_clamp.val[0]);
-        vo0x0c4567 = vminq_f32(vo0x0c4567, voutput_clamp.val[0]);
-        vo1x0c4567 = vminq_f32(vo1x0c4567, voutput_clamp.val[0]);
+        vo0x0c0123 = vminq_f32(vo0x0c0123, vmax);
+        vo1x0c0123 = vminq_f32(vo1x0c0123, vmax);
+        vo0x0c4567 = vminq_f32(vo0x0c4567, vmax);
+        vo1x0c4567 = vminq_f32(vo1x0c4567, vmax);
 
-        vo0x1c0123 = vminq_f32(vo0x1c0123, voutput_clamp.val[0]);
-        vo1x1c0123 = vminq_f32(vo1x1c0123, voutput_clamp.val[0]);
-        vo0x1c4567 = vminq_f32(vo0x1c4567, voutput_clamp.val[0]);
-        vo1x1c4567 = vminq_f32(vo1x1c4567, voutput_clamp.val[0]);
+        vo0x1c0123 = vminq_f32(vo0x1c0123, vmax);
+        vo1x1c0123 = vminq_f32(vo1x1c0123, vmax);
+        vo0x1c4567 = vminq_f32(vo0x1c4567, vmax);
+        vo1x1c4567 = vminq_f32(vo1x1c4567, vmax);
 
         if XNN_LIKELY(c >= 8) {
           vst1q_f32(o1, vo1x0c0123);
@@ -914,25 +915,25 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neonfma_2x2(
           vo1x0c4567 = vfmaq_laneq_f32(vo1x0c4567, vk22c2x4567, vi4x2, 1);
         }
 
-        vo0x0c0123 = vmaxq_f32(vo0x0c0123, voutput_clamp.val[1]);
-        vo1x0c0123 = vmaxq_f32(vo1x0c0123, voutput_clamp.val[1]);
-        vo0x0c4567 = vmaxq_f32(vo0x0c4567, voutput_clamp.val[1]);
-        vo1x0c4567 = vmaxq_f32(vo1x0c4567, voutput_clamp.val[1]);
+        vo0x0c0123 = vmaxq_f32(vo0x0c0123, vmin);
+        vo1x0c0123 = vmaxq_f32(vo1x0c0123, vmin);
+        vo0x0c4567 = vmaxq_f32(vo0x0c4567, vmin);
+        vo1x0c4567 = vmaxq_f32(vo1x0c4567, vmin);
 
-        vo0x1c0123 = vmaxq_f32(vo0x1c0123, voutput_clamp.val[1]);
-        vo1x1c0123 = vmaxq_f32(vo1x1c0123, voutput_clamp.val[1]);
-        vo0x1c4567 = vmaxq_f32(vo0x1c4567, voutput_clamp.val[1]);
-        vo1x1c4567 = vmaxq_f32(vo1x1c4567, voutput_clamp.val[1]);
+        vo0x1c0123 = vmaxq_f32(vo0x1c0123, vmin);
+        vo1x1c0123 = vmaxq_f32(vo1x1c0123, vmin);
+        vo0x1c4567 = vmaxq_f32(vo0x1c4567, vmin);
+        vo1x1c4567 = vmaxq_f32(vo1x1c4567, vmin);
 
-        vo0x0c0123 = vminq_f32(vo0x0c0123, voutput_clamp.val[0]);
-        vo1x0c0123 = vminq_f32(vo1x0c0123, voutput_clamp.val[0]);
-        vo0x0c4567 = vminq_f32(vo0x0c4567, voutput_clamp.val[0]);
-        vo1x0c4567 = vminq_f32(vo1x0c4567, voutput_clamp.val[0]);
+        vo0x0c0123 = vminq_f32(vo0x0c0123, vmax);
+        vo1x0c0123 = vminq_f32(vo1x0c0123, vmax);
+        vo0x0c4567 = vminq_f32(vo0x0c4567, vmax);
+        vo1x0c4567 = vminq_f32(vo1x0c4567, vmax);
 
-        vo0x1c0123 = vminq_f32(vo0x1c0123, voutput_clamp.val[0]);
-        vo1x1c0123 = vminq_f32(vo1x1c0123, voutput_clamp.val[0]);
-        vo0x1c4567 = vminq_f32(vo0x1c4567, voutput_clamp.val[0]);
-        vo1x1c4567 = vminq_f32(vo1x1c4567, voutput_clamp.val[0]);
+        vo0x1c0123 = vminq_f32(vo0x1c0123, vmax);
+        vo1x1c0123 = vminq_f32(vo1x1c0123, vmax);
+        vo0x1c4567 = vminq_f32(vo0x1c4567, vmax);
+        vo1x1c4567 = vminq_f32(vo1x1c4567, vmax);
 
         iw += 1;
         if XNN_LIKELY(c >= 8) {
