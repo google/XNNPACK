@@ -14,6 +14,9 @@ namespace utils {
 uint32_t wipeCache();
 uint32_t prefetchToL1(const void* ptr, size_t size);
 
+// Disable support for denormalized numbers in floating-point units.
+void DisableDenormals();
+
 // Return clock rate, in Hz, for the currently used logical processor.
 uint64_t GetCurrentCpuFrequency();
 

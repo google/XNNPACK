@@ -941,6 +941,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_softargmax_bench",
+    srcs = [
+        "bench/f32-softargmax.cc",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    copts = ["-Wno-unused-function"],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_im2col_gemm_bench",
     srcs = [
         "bench/f32-im2col-gemm.cc",

@@ -8,6 +8,9 @@
 #ifdef __ANDROID__
   #include <malloc.h>
 #endif
+#if defined(__SSE__) || defined(__x86_64__)
+  #include <xmmintrin.h>
+#endif
 
 #include <cstdio>
 #include <cstdlib>
@@ -62,6 +65,27 @@ uint32_t prefetchToL1(const void* ptr, size_t size) {
 uint32_t wipeCache() {
   pthread_once(&wipeBufferGuard, &initWipeBuffer);
   return prefetchToL1(wipe_buffer, wipe_buffer_size);
+}
+
+void DisableDenormals() {
+#if defined(__SSE__) || defined(__x86_64__)
+  _mm_setcsr(_mm_getcsr() | 0x8040);
+#elif defined(__arm__) && defined(__ARM_FP) && (__ARM_FP != 0)
+  uint32_t fpscr;
+  __asm__ __volatile__(
+      "VMRS %[fpscr], fpscr\n"
+      "ORR %[fpscr], #0x1000000\n"
+      "VMSR fpscr, %[fpscr]\n"
+    : [fpscr] "=r" (fpscr));
+#elif defined(__aarch64__)
+  uint64_t fpcr;
+  __asm__ __volatile__(
+      "MRS %[fpcr], fpcr\n"
+      "ORR %w[fpcr], %w[fpcr], 0x1000000\n"
+      "ORR %w[fpcr], %w[fpcr], 0x80000\n"
+      "MSR fpcr, %[fpcr]\n"
+    : [fpcr] "=r" (fpcr));
+#endif
 }
 
 // Return clockrate in Hz
