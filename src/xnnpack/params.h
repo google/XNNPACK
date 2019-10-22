@@ -40,20 +40,20 @@ union xnn_f32_spchw_params {
   } scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
+    float min;
+    float max;
     XNN_ALIGN(16) uint32_t mask_even[4]; // used by stride 2 kernels
     XNN_ALIGN(16) uint32_t mask_odd[4];  // used by stride 2 kernels
     XNN_ALIGN(16) uint32_t mask[4]; // used by stride 1 kernels
-    float min;
-    float max;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
+    XNN_ALIGN(16) float max[4];
+    XNN_ALIGN(16) float min[4];
     XNN_ALIGN(16) uint32_t mask_even[4]; // used by stride 2 kernels
     XNN_ALIGN(16) uint32_t mask_odd[4];  // used by stride 2 kernels
     XNN_ALIGN(16) uint32_t mask[4]; // used by stride 1 kernels
-    XNN_ALIGN(16) float max[4];
-    XNN_ALIGN(16) float min[4];
   } sse;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };

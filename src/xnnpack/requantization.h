@@ -429,234 +429,50 @@ static inline union xnn_f32_spchw_params xnn_compute_f32_spchw_params(
   float output_max)
 {
   union xnn_f32_spchw_params params;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  switch (width % 4) {
-    case 0:
-      params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[3] = UINT32_C(0xFFFFFFFF);
-      break;
-    case 1:
-      params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[1] = 0;
-      params.sse.mask[2] = 0;
-      params.sse.mask[3] = 0;
-      break;
-    case 2:
-      params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[2] = 0;
-      params.sse.mask[3] = 0;
-      break;
-    case 3:
-      params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[3] = 0;
-      break;
-  }
-  switch (width % 8) {
-    case 0:
-      params.sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[3] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[3] = UINT32_C(0xFFFFFFFF);
-      break;
-    case 1:
-      params.sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[1] = 0;
-      params.sse.mask_even[2] = 0;
-      params.sse.mask_even[3] = 0;
-      params.sse.mask_odd[0] = 0;
-      params.sse.mask_odd[1] = 0;
-      params.sse.mask_odd[2] = 0;
-      params.sse.mask_odd[3] = 0;
-      break;
-    case 2:
-      params.sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[1] = 0;
-      params.sse.mask_even[2] = 0;
-      params.sse.mask_even[3] = 0;
-      params.sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[1] = 0;
-      params.sse.mask_odd[2] = 0;
-      params.sse.mask_odd[3] = 0;
-      break;
-    case 3:
-      params.sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[2] = 0;
-      params.sse.mask_even[3] = 0;
-      params.sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[1] = 0;
-      params.sse.mask_odd[2] = 0;
-      params.sse.mask_odd[3] = 0;
-      break;
-    case 4:
-      params.sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[2] = 0;
-      params.sse.mask_even[3] = 0;
-      params.sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[2] = 0;
-      params.sse.mask_odd[3] = 0;
-      break;
-    case 5:
-      params.sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[3] = 0;
-      params.sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[2] = 0;
-      params.sse.mask_odd[3] = 0;
-      break;
-    case 6:
-      params.sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[3] = 0;
-      params.sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[3] = 0;
-      break;
-    case 7:
-      params.sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_even[3] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask_odd[3] = 0;
-      break;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params.sse.max[i] = output_max;
-    params.sse.min[i] = output_min;
-  }
-#elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-  switch (width % 4) {
-    case 0:
-      params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask[2] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask[3] = UINT32_C(0xFFFFFFFF);
-      break;
-    case 1:
-      params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask[1] = 0;
-      params.neon.mask[2] = 0;
-      params.neon.mask[3] = 0;
-      break;
-    case 2:
-      params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask[2] = 0;
-      params.neon.mask[3] = 0;
-      break;
-    case 3:
-      params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask[2] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask[3] = 0;
-      break;
-  }
-  switch (width % 8) {
-    case 0:
-      params.neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[2] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[3] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[3] = UINT32_C(0xFFFFFFFF);
-      break;
-    case 1:
-      params.neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[1] = 0;
-      params.neon.mask_even[2] = 0;
-      params.neon.mask_even[3] = 0;
-      params.neon.mask_odd[0] = 0;
-      params.neon.mask_odd[1] = 0;
-      params.neon.mask_odd[2] = 0;
-      params.neon.mask_odd[3] = 0;
-      break;
-    case 2:
-      params.neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[1] = 0;
-      params.neon.mask_even[2] = 0;
-      params.neon.mask_even[3] = 0;
-      params.neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[1] = 0;
-      params.neon.mask_odd[2] = 0;
-      params.neon.mask_odd[3] = 0;
-      break;
-    case 3:
-      params.neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[2] = 0;
-      params.neon.mask_even[3] = 0;
-      params.neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[1] = 0;
-      params.neon.mask_odd[2] = 0;
-      params.neon.mask_odd[3] = 0;
-      break;
-    case 4:
-      params.neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[2] = 0;
-      params.neon.mask_even[3] = 0;
-      params.neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[2] = 0;
-      params.neon.mask_odd[3] = 0;
-      break;
-    case 5:
-      params.neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[2] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[3] = 0;
-      params.neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[2] = 0;
-      params.neon.mask_odd[3] = 0;
-      break;
-    case 6:
-      params.neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[2] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[3] = 0;
-      params.neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[3] = 0;
-      break;
-    case 7:
-      params.neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[2] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_even[3] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-      params.neon.mask_odd[3] = 0;
-      break;
-  }
-  params.neon.max = output_max;
-  params.neon.min = output_min;
-#else
-  params.scalar.max = output_max;
-  params.scalar.min = output_min;
-#endif
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse.max[i] = output_max;
+      params.sse.min[i] = output_min;
+    }
+
+    const uint32_t w4 = (width - 1) & 3;
+    params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
+    params.sse.mask[1] = -(uint32_t) (w4 >= 1);
+    params.sse.mask[2] = -(uint32_t) (w4 >= 2);
+    params.sse.mask[3] = -(uint32_t) (w4 >= 3);
+
+    const uint32_t w8 = (width - 1) & 7;
+    params.sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
+    params.sse.mask_even[1] = -(uint32_t) (w8 >= 2);
+    params.sse.mask_even[2] = -(uint32_t) (w8 >= 4);
+    params.sse.mask_even[3] = -(uint32_t) (w8 >= 6);
+    params.sse.mask_odd[0] = -(uint32_t) (w8 >= 1);
+    params.sse.mask_odd[1] = -(uint32_t) (w8 >= 3);
+    params.sse.mask_odd[2] = -(uint32_t) (w8 >= 5);
+    params.sse.mask_odd[3] = -(uint32_t) (w8 >= 7);
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
+    params.neon.max = output_max;
+    params.neon.min = output_min;
+
+    const uint32_t w4 = (width - 1) & 3;
+    params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
+    params.neon.mask[1] = -(uint32_t) (w4 >= 1);
+    params.neon.mask[2] = -(uint32_t) (w4 >= 2);
+    params.neon.mask[3] = -(uint32_t) (w4 >= 3);
+
+    const uint32_t w8 = (width - 1) & 7;
+    params.neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
+    params.neon.mask_even[1] = -(uint32_t) (w8 >= 2);
+    params.neon.mask_even[2] = -(uint32_t) (w8 >= 4);
+    params.neon.mask_even[3] = -(uint32_t) (w8 >= 6);
+    params.neon.mask_odd[0] = -(uint32_t) (w8 >= 1);
+    params.neon.mask_odd[1] = -(uint32_t) (w8 >= 3);
+    params.neon.mask_odd[2] = -(uint32_t) (w8 >= 5);
+    params.neon.mask_odd[3] = -(uint32_t) (w8 >= 7);
+  #else
+    params.scalar.max = output_max;
+    params.scalar.min = output_min;
+  #endif
   return params;
 }
 
@@ -665,223 +481,37 @@ static inline void xnn_update_f32_spchw_params(
   uint32_t width)
 {
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    switch (width % 4) {
-      case 0:
-        params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[3] = UINT32_C(0xFFFFFFFF);
-        break;
-      case 1:
-        params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[1] = 0;
-        params->sse.mask[2] = 0;
-        params->sse.mask[3] = 0;
-        break;
-      case 2:
-        params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[2] = 0;
-        params->sse.mask[3] = 0;
-        break;
-      case 3:
-        params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[3] = 0;
-        break;
-    }
-    switch (width % 8) {
-      case 0:
-        params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[3] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[3] = UINT32_C(0xFFFFFFFF);
-        break;
-      case 1:
-        params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[1] = 0;
-        params->sse.mask_even[2] = 0;
-        params->sse.mask_even[3] = 0;
-        params->sse.mask_odd[0] = 0;
-        params->sse.mask_odd[1] = 0;
-        params->sse.mask_odd[2] = 0;
-        params->sse.mask_odd[3] = 0;
-        break;
-      case 2:
-        params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[1] = 0;
-        params->sse.mask_even[2] = 0;
-        params->sse.mask_even[3] = 0;
-        params->sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[1] = 0;
-        params->sse.mask_odd[2] = 0;
-        params->sse.mask_odd[3] = 0;
-        break;
-      case 3:
-        params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[2] = 0;
-        params->sse.mask_even[3] = 0;
-        params->sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[1] = 0;
-        params->sse.mask_odd[2] = 0;
-        params->sse.mask_odd[3] = 0;
-        break;
-      case 4:
-        params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[2] = 0;
-        params->sse.mask_even[3] = 0;
-        params->sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[2] = 0;
-        params->sse.mask_odd[3] = 0;
-        break;
-      case 5:
-        params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[3] = 0;
-        params->sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[2] = 0;
-        params->sse.mask_odd[3] = 0;
-        break;
-      case 6:
-        params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[3] = 0;
-        params->sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[3] = 0;
-        break;
-      case 7:
-        params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_even[3] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask_odd[3] = 0;
-        break;
-    }
+    const uint32_t w4 = (width - 1) & 3;
+    params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
+    params->sse.mask[1] = -(uint32_t) (w4 >= 1);
+    params->sse.mask[2] = -(uint32_t) (w4 >= 2);
+    params->sse.mask[3] = -(uint32_t) (w4 >= 3);
+
+    const uint32_t w8 = (width - 1) & 7;
+    params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
+    params->sse.mask_even[1] = -(uint32_t) (w8 >= 2);
+    params->sse.mask_even[2] = -(uint32_t) (w8 >= 4);
+    params->sse.mask_even[3] = -(uint32_t) (w8 >= 6);
+    params->sse.mask_odd[0] = -(uint32_t) (w8 >= 1);
+    params->sse.mask_odd[1] = -(uint32_t) (w8 >= 3);
+    params->sse.mask_odd[2] = -(uint32_t) (w8 >= 5);
+    params->sse.mask_odd[3] = -(uint32_t) (w8 >= 7);
   #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-    switch (width % 4) {
-      case 0:
-        params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[3] = UINT32_C(0xFFFFFFFF);
-        break;
-      case 1:
-        params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[1] = 0;
-        params->neon.mask[2] = 0;
-        params->neon.mask[3] = 0;
-        break;
-      case 2:
-        params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[2] = 0;
-        params->neon.mask[3] = 0;
-        break;
-      case 3:
-        params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[3] = 0;
-        break;
-    }
-    switch (width % 8) {
-      case 0:
-        params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[3] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[3] = UINT32_C(0xFFFFFFFF);
-        break;
-      case 1:
-        params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[1] = 0;
-        params->neon.mask_even[2] = 0;
-        params->neon.mask_even[3] = 0;
-        params->neon.mask_odd[0] = 0;
-        params->neon.mask_odd[1] = 0;
-        params->neon.mask_odd[2] = 0;
-        params->neon.mask_odd[3] = 0;
-        break;
-      case 2:
-        params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[1] = 0;
-        params->neon.mask_even[2] = 0;
-        params->neon.mask_even[3] = 0;
-        params->neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[1] = 0;
-        params->neon.mask_odd[2] = 0;
-        params->neon.mask_odd[3] = 0;
-        break;
-      case 3:
-        params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[2] = 0;
-        params->neon.mask_even[3] = 0;
-        params->neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[1] = 0;
-        params->neon.mask_odd[2] = 0;
-        params->neon.mask_odd[3] = 0;
-        break;
-      case 4:
-        params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[2] = 0;
-        params->neon.mask_even[3] = 0;
-        params->neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[2] = 0;
-        params->neon.mask_odd[3] = 0;
-        break;
-      case 5:
-        params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[3] = 0;
-        params->neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[2] = 0;
-        params->neon.mask_odd[3] = 0;
-        break;
-      case 6:
-        params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[3] = 0;
-        params->neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[3] = 0;
-        break;
-      case 7:
-        params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_even[3] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask_odd[3] = 0;
-        break;
-    }
+    const uint32_t w4 = (width - 1) & 3;
+    params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
+    params->neon.mask[1] = -(uint32_t) (w4 >= 1);
+    params->neon.mask[2] = -(uint32_t) (w4 >= 2);
+    params->neon.mask[3] = -(uint32_t) (w4 >= 3);
+
+    const uint32_t w8 = (width - 1) & 7;
+    params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
+    params->neon.mask_even[1] = -(uint32_t) (w8 >= 2);
+    params->neon.mask_even[2] = -(uint32_t) (w8 >= 4);
+    params->neon.mask_even[3] = -(uint32_t) (w8 >= 6);
+    params->neon.mask_odd[0] = -(uint32_t) (w8 >= 1);
+    params->neon.mask_odd[1] = -(uint32_t) (w8 >= 3);
+    params->neon.mask_odd[2] = -(uint32_t) (w8 >= 5);
+    params->neon.mask_odd[3] = -(uint32_t) (w8 >= 7);
   #endif
 }
 
