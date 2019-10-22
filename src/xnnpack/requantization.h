@@ -295,62 +295,22 @@ static inline union xnn_f32_gavgpool_params xnn_compute_f32_gavgpool_params(
       params.sse.output_min[i] = output_min;
       params.sse.output_max[i] = output_max;
     }
-  switch (width % 4) {
-    case 0:
-      params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[3] = UINT32_C(0xFFFFFFFF);
-      break;
-    case 1:
-      params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[1] = 0;
-      params.sse.mask[2] = 0;
-      params.sse.mask[3] = 0;
-      break;
-    case 2:
-      params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[2] = 0;
-      params.sse.mask[3] = 0;
-      break;
-    case 3:
-      params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[1] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[2] = UINT32_C(0xFFFFFFFF);
-      params.sse.mask[3] = 0;
-      break;
-  }
-#elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-    switch (width % 4) {
-      case 0:
-        params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params.neon.mask[1] = UINT32_C(0xFFFFFFFF);
-        params.neon.mask[2] = UINT32_C(0xFFFFFFFF);
-        params.neon.mask[3] = UINT32_C(0xFFFFFFFF);
-        break;
-      case 1:
-        params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params.neon.mask[1] = 0;
-        params.neon.mask[2] = 0;
-        params.neon.mask[3] = 0;
-        break;
-      case 2:
-        params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params.neon.mask[1] = UINT32_C(0xFFFFFFFF);
-        params.neon.mask[2] = 0;
-        params.neon.mask[3] = 0;
-        break;
-      case 3:
-        params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params.neon.mask[1] = UINT32_C(0xFFFFFFFF);
-        params.neon.mask[2] = UINT32_C(0xFFFFFFFF);
-        params.neon.mask[3] = 0;
-        break;
-    }
+
+    const uint32_t w = (width - 1) & 3;
+    params.sse.mask[0] = UINT32_C(0xFFFFFFFF);
+    params.sse.mask[1] = -(uint32_t) (w >= 1);
+    params.sse.mask[2] = -(uint32_t) (w >= 2);
+    params.sse.mask[3] = -(uint32_t) (w >= 3);
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.multiplier = multiplier;
     params.neon.output_min = output_min;
     params.neon.output_max = output_max;
+
+    const uint32_t w = (width - 1) & 3;
+    params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
+    params.neon.mask[1] = -(uint32_t) (w >= 1);
+    params.neon.mask[2] = -(uint32_t) (w >= 2);
+    params.neon.mask[3] = -(uint32_t) (w >= 3);
   #else
     params.scalar.multiplier = multiplier;
     params.scalar.output_min = output_min;
@@ -368,60 +328,20 @@ static inline void xnn_update_f32_gavgpool_params(
     for (uint32_t i = 0; i < 4; i++) {
       params->sse.multiplier[i] = multiplier;
     }
-    switch (width % 4) {
-      case 0:
-        params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[3] = UINT32_C(0xFFFFFFFF);
-        break;
-      case 1:
-        params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[1] = 0;
-        params->sse.mask[2] = 0;
-        params->sse.mask[3] = 0;
-        break;
-      case 2:
-        params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[2] = 0;
-        params->sse.mask[3] = 0;
-        break;
-      case 3:
-        params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[2] = UINT32_C(0xFFFFFFFF);
-        params->sse.mask[3] = 0;
-        break;
-    }
+
+    const uint32_t w = (width - 1) & 3;
+    params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
+    params->sse.mask[1] = -(uint32_t) (w >= 1);
+    params->sse.mask[2] = -(uint32_t) (w >= 2);
+    params->sse.mask[3] = -(uint32_t) (w >= 3);
   #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params->neon.multiplier = multiplier;
-    switch (width % 4) {
-      case 0:
-        params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[3] = UINT32_C(0xFFFFFFFF);
-        break;
-      case 1:
-        params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[1] = 0;
-        params->neon.mask[2] = 0;
-        params->neon.mask[3] = 0;
-        break;
-      case 2:
-        params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[2] = 0;
-        params->neon.mask[3] = 0;
-        break;
-      case 3:
-        params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[1] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[2] = UINT32_C(0xFFFFFFFF);
-        params->neon.mask[3] = 0;
-        break;
-    }
+
+    const uint32_t w = (width - 1) & 3;
+    params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
+    params->neon.mask[1] = -(uint32_t) (w >= 1);
+    params->neon.mask[2] = -(uint32_t) (w >= 2);
+    params->neon.mask[3] = -(uint32_t) (w >= 3);
   #endif
 }
 
