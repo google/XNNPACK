@@ -47,7 +47,7 @@
 # A3   v3
 # A4   v4
 # A5   v5
-# B   v12 v13 v14 v15
+# B   v16 v17 v18 v19
 # C   v20 v21
 # C   v22 v23
 # C   v24 v25
@@ -56,33 +56,29 @@
 # C   v30 v31
 # Clamp v6 v7
 # unused A   v8 v9 v10 v11
-# unused B   v16 v17 v18 v19
+# unused B   v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64
 
-        # Clamp A and C pointers / Save d8-d15 on stack
-        STP  d8,  d9, [sp, -64]!
+        # Clamp A and C pointers
         ADD x9, x3, x4           // a1 = a0 + a_stride
         ADD x16, x6, x7          // c1 = c0 + cm_stride
         CMP x0, 2                // if mr < 2
         CSEL x9, x3, x9, LO      //   a1 = a0
         CSEL x16, x6, x16, LO    //   c1 = c0
 
-        STP d10, d11, [sp, 16]
         ADD x10, x9, x4          // a2 = a1 + a_stride
         ADD x17, x16, x7         // c2 = c1 + cm_stride
                                  // if mr <= 2
         CSEL x10, x9, x10, LS    //   a2 = a1
         CSEL x17, x16, x17, LS   //   c2 = c1
 
-        STP d12, d13, [sp, 32]
         ADD x11, x10, x4         // a3 = a2 + a_stride
         ADD x18, x17, x7         // c3 = c2 + cm_stride
         CMP x0, 4                // if mr < 4
         CSEL x11, x10, x11, LO   //   a3 = a2
         CSEL x18, x17, x18, LO   //   c3 = c2
 
-        STP d14, d15, [sp, 48]
         ADD x12, x11, x4         // a4 = a3 + a_stride
         ADD x13, x18, x7         // c4 = c3 + cm_stride
                                  // if mr <= 5
@@ -90,7 +86,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64
         CSEL x13, x18, x13, LS   //   c4 = c3
 
         # Load params pointer
-        LDR x8, [sp, 72]
+        LDR x8, [sp, 8]
 
         ADD x4, x12, x4          // a5 = a4 + a_stride
         ADD x7, x13, x7          // c5 = c4 + cm_stride
@@ -102,7 +98,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64
         LD2R {v6.4s, v7.4s}, [x8]
 
         # Load cn_stride
-        LDR x14, [sp, 64]
+        LDR x14, [sp]
 
 0:
         # Load initial bias from w into accumulators
@@ -136,39 +132,39 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64
         # 24 FMA + 6 LD64 A + 2 LDP B
 1:
         LDR   d0,  [x3], 8
-        LDP  q12,  q13, [x5], 32
+        LDP  q16,  q17, [x5], 32
         LDR   d1,  [x9], 8
         LDR   d2, [x10], 8
         LDR   d3, [x11], 8
         LDR   d4, [x12], 8
         LDR   d5,  [x4], 8
-        FMLA v20.4s, v12.4s,  v0.s[0]
-        FMLA v22.4s, v12.4s,  v1.s[0]
-        FMLA v24.4s, v12.4s,  v2.s[0]
-        FMLA v26.4s, v12.4s,  v3.s[0]
-        LDP  q14,  q15, [x5], 32
-        FMLA v28.4s, v12.4s,  v4.s[0]
-        FMLA v30.4s, v12.4s,  v5.s[0]
-        FMLA v21.4s, v13.4s,  v0.s[0]
-        FMLA v23.4s, v13.4s,  v1.s[0]
-        FMLA v25.4s, v13.4s,  v2.s[0]
-        FMLA v27.4s, v13.4s,  v3.s[0]
-        FMLA v29.4s, v13.4s,  v4.s[0]
-        FMLA v31.4s, v13.4s,  v5.s[0]
+        FMLA v20.4s, v16.4s,  v0.s[0]
+        FMLA v22.4s, v16.4s,  v1.s[0]
+        FMLA v24.4s, v16.4s,  v2.s[0]
+        FMLA v26.4s, v16.4s,  v3.s[0]
+        LDP  q18,  q19, [x5], 32
+        FMLA v28.4s, v16.4s,  v4.s[0]
+        FMLA v30.4s, v16.4s,  v5.s[0]
+        FMLA v21.4s, v17.4s,  v0.s[0]
+        FMLA v23.4s, v17.4s,  v1.s[0]
+        FMLA v25.4s, v17.4s,  v2.s[0]
+        FMLA v27.4s, v17.4s,  v3.s[0]
+        FMLA v29.4s, v17.4s,  v4.s[0]
+        FMLA v31.4s, v17.4s,  v5.s[0]
 
-        FMLA v20.4s, v14.4s,  v0.s[1]
-        FMLA v22.4s, v14.4s,  v1.s[1]
-        FMLA v24.4s, v14.4s,  v2.s[1]
-        FMLA v26.4s, v14.4s,  v3.s[1]
-        FMLA v28.4s, v14.4s,  v4.s[1]
-        FMLA v30.4s, v14.4s,  v5.s[1]
-        FMLA v21.4s, v15.4s,  v0.s[1]
-        FMLA v23.4s, v15.4s,  v1.s[1]
-        FMLA v25.4s, v15.4s,  v2.s[1]
-        FMLA v27.4s, v15.4s,  v3.s[1]
+        FMLA v20.4s, v18.4s,  v0.s[1]
+        FMLA v22.4s, v18.4s,  v1.s[1]
+        FMLA v24.4s, v18.4s,  v2.s[1]
+        FMLA v26.4s, v18.4s,  v3.s[1]
+        FMLA v28.4s, v18.4s,  v4.s[1]
+        FMLA v30.4s, v18.4s,  v5.s[1]
+        FMLA v21.4s, v19.4s,  v0.s[1]
+        FMLA v23.4s, v19.4s,  v1.s[1]
+        FMLA v25.4s, v19.4s,  v2.s[1]
+        FMLA v27.4s, v19.4s,  v3.s[1]
         SUBS x0, x0, 8
-        FMLA v29.4s, v15.4s,  v4.s[1]
-        FMLA v31.4s, v15.4s,  v5.s[1]
+        FMLA v29.4s, v19.4s,  v4.s[1]
+        FMLA v31.4s, v19.4s,  v5.s[1]
         B.HS 1b
 
 2:
@@ -227,34 +223,29 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64
         SUBS x1, x1, 8
         B.HI 0b
 
-        # Restore d8-d15 from stack
-        LDP d14, d15, [sp, 48]
-        LDP d12, d13, [sp, 32]
-        LDP d10, d11, [sp, 16]
-        LDP  d8,  d9, [sp], 64
         RET
 
 4:
         # Remainder- 1 floats of A (4 bytes)
         LDR   s0,  [x3], 4
-        LDP  q12,  q13, [x5], 32
+        LDP  q16,  q17, [x5], 32
         LDR   s1,  [x9], 4
         LDR   s2, [x10], 4
         LDR   s3, [x11], 4
         LDR   s4, [x12], 4
         LDR   s5,  [x4], 4
-        FMLA v20.4s, v12.4s,  v0.s[0]
-        FMLA v22.4s, v12.4s,  v1.s[0]
-        FMLA v24.4s, v12.4s,  v2.s[0]
-        FMLA v26.4s, v12.4s,  v3.s[0]
-        FMLA v28.4s, v12.4s,  v4.s[0]
-        FMLA v30.4s, v12.4s,  v5.s[0]
-        FMLA v21.4s, v13.4s,  v0.s[0]
-        FMLA v23.4s, v13.4s,  v1.s[0]
-        FMLA v25.4s, v13.4s,  v2.s[0]
-        FMLA v27.4s, v13.4s,  v3.s[0]
-        FMLA v29.4s, v13.4s,  v4.s[0]
-        FMLA v31.4s, v13.4s,  v5.s[0]
+        FMLA v20.4s, v16.4s,  v0.s[0]
+        FMLA v22.4s, v16.4s,  v1.s[0]
+        FMLA v24.4s, v16.4s,  v2.s[0]
+        FMLA v26.4s, v16.4s,  v3.s[0]
+        FMLA v28.4s, v16.4s,  v4.s[0]
+        FMLA v30.4s, v16.4s,  v5.s[0]
+        FMLA v21.4s, v17.4s,  v0.s[0]
+        FMLA v23.4s, v17.4s,  v1.s[0]
+        FMLA v25.4s, v17.4s,  v2.s[0]
+        FMLA v27.4s, v17.4s,  v3.s[0]
+        FMLA v29.4s, v17.4s,  v4.s[0]
+        FMLA v31.4s, v17.4s,  v5.s[0]
         B 3b
 
         # Store odd width
@@ -297,11 +288,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64
         STR s28, [x13]
         STR s30,  [x7]
 8:
-        # Restore d8-d15 from stack
-        LDP d14, d15, [sp, 48]
-        LDP d12, d13, [sp, 32]
-        LDP d10, d11, [sp, 16]
-        LDP  d8,  d9, [sp], 64
         RET
 
 END_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma__ld64
