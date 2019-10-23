@@ -263,6 +263,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
 
   const uint32_t nr = xnn_params.f32.gemm.nr;
   const uint32_t kr = UINT32_C(1) << xnn_params.f32.gemm.log2_kr;
+  const uint32_t sr = UINT32_C(1) << xnn_params.f32.gemm.log2_sr;
 
   const uint32_t n_stride = round_up(output_channels, nr);
   const uint32_t k_stride = round_up_po2(input_channels, kr);
@@ -277,7 +278,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
 
   xnn_pack_f32_gemm_goi_w(
     1, output_channels, input_channels,
-    nr, kr, 1 /* sr */,
+    nr, kr, sr,
     kernel, bias,
     fully_connected_op->packed_weights);
 
