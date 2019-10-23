@@ -25,14 +25,14 @@ static void ThreePassSoftargmaxWithRecomputing(
 {
   const size_t n = state.range(0);
   const size_t cache_line_size_max = 128;
-  const size_t packed_n = benchmark::utils::roundUp(n, cache_line_size_max / sizeof(float));
+  const size_t packed_n = benchmark::utils::RoundUp(n, cache_line_size_max / sizeof(float));
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), rng);
 
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
   std::vector<float> x(n);
   std::vector<float> y(packed_n * num_buffers);
 
@@ -42,7 +42,7 @@ static void ThreePassSoftargmaxWithRecomputing(
 
   size_t buffer_index = 0;
   for (auto _ : state) {
-    benchmark::utils::prefetchToL1(x.data(), x.size() * sizeof(float));
+    benchmark::utils::PrefetchToL1(x.data(), x.size() * sizeof(float));
     if (++buffer_index == num_buffers) {
       buffer_index = 0;
     }
@@ -72,14 +72,14 @@ static void ThreePassSoftargmaxWithReloading(
 {
   const size_t n = state.range(0);
   const size_t cache_line_size_max = 128;
-  const size_t packed_n = benchmark::utils::roundUp(n, cache_line_size_max / sizeof(float));
+  const size_t packed_n = benchmark::utils::RoundUp(n, cache_line_size_max / sizeof(float));
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), rng);
 
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
   std::vector<float> x(n);
   std::vector<float> y(packed_n * num_buffers);
 
@@ -89,7 +89,7 @@ static void ThreePassSoftargmaxWithReloading(
 
   size_t buffer_index = 0;
   for (auto _ : state) {
-    benchmark::utils::prefetchToL1(x.data(), x.size() * sizeof(float));
+    benchmark::utils::PrefetchToL1(x.data(), x.size() * sizeof(float));
     if (++buffer_index == num_buffers) {
       buffer_index = 0;
     }

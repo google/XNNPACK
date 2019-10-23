@@ -11,8 +11,8 @@
 namespace benchmark {
 namespace utils {
 
-uint32_t wipeCache();
-uint32_t prefetchToL1(const void* ptr, size_t size);
+uint32_t WipeCache();
+uint32_t PrefetchToL1(const void* ptr, size_t size);
 
 // Disable support for denormalized numbers in floating-point units.
 void DisableDenormals();
@@ -25,17 +25,17 @@ uint64_t GetCurrentCpuFrequency();
 size_t GetMaxCacheSize();
 
 template <class T>
-inline T divideRoundUp(T x, T q) {
+inline T DivideRoundUp(T x, T q) {
   return x / q + T(x % q != 0);
 }
 
 template <class T>
-inline T roundUp(T x, T q) {
-  return q * divideRoundUp(x, q);
+inline T RoundUp(T x, T q) {
+  return q * DivideRoundUp(x, q);
 }
 
 template <class T>
-inline T doz(T a, T b) {
+inline T Doz(T a, T b) {
   return a >= b ? a - b : T(0);
 }
 

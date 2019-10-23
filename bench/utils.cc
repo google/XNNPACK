@@ -24,9 +24,9 @@
 static void* wipe_buffer = nullptr;
 static size_t wipe_buffer_size = 0;
 
-static pthread_once_t wipeBufferGuard = PTHREAD_ONCE_INIT;
+static pthread_once_t wipe_buffer_guard = PTHREAD_ONCE_INIT;
 
-static void initWipeBuffer() {
+static void InitWipeBuffer() {
   // Default: the largest know cache size (128 MB Intel Crystalwell L4 cache).
   wipe_buffer_size = 128 * 1024 * 1024;
   if (cpuinfo_initialize()) {
@@ -46,7 +46,7 @@ static void initWipeBuffer() {
 namespace benchmark {
 namespace utils {
 
-uint32_t prefetchToL1(const void* ptr, size_t size) {
+uint32_t PrefetchToL1(const void* ptr, size_t size) {
   uint32_t step = 16;
   if (cpuinfo_initialize()) {
     step = cpuinfo_get_l1d_cache(0)->line_size;
@@ -62,9 +62,9 @@ uint32_t prefetchToL1(const void* ptr, size_t size) {
   return sum;
 }
 
-uint32_t wipeCache() {
-  pthread_once(&wipeBufferGuard, &initWipeBuffer);
-  return prefetchToL1(wipe_buffer, wipe_buffer_size);
+uint32_t WipeCache() {
+  pthread_once(&wipe_buffer_guard, &InitWipeBuffer);
+  return PrefetchToL1(wipe_buffer, wipe_buffer_size);
 }
 
 void DisableDenormals() {

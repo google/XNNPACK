@@ -57,8 +57,8 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
   const size_t output_size = output_height * output_width;
 
-  const size_t nc_stride = benchmark::utils::roundUp<size_t>(group_output_channels, nr);
-  const size_t kc_stride = benchmark::utils::roundUp<size_t>(group_input_channels, kr);
+  const size_t nc_stride = benchmark::utils::RoundUp<size_t>(group_output_channels, nr);
+  const size_t kc_stride = benchmark::utils::RoundUp<size_t>(group_input_channels, kr);
 
   std::vector<float> a(input_height * input_width * group_input_channels);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
@@ -70,7 +70,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
   const size_t w_elements = (kernel_size * kc_stride + 1) * nc_stride;
   const size_t c_elements = output_size * group_output_channels;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);
@@ -92,7 +92,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::prefetchToL1(a.data(), a.size() * sizeof(float));
+    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(float));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 

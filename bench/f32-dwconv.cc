@@ -64,7 +64,7 @@ static void DWConvBenchmark(benchmark::State& state,
   const size_t step_width = dilation == 1 ? subsampling : kernel_width;
   const size_t step_height = kernel_size + (output_width * step_width - 1) * kernel_height;
 
-  const size_t c_stride = benchmark::utils::roundUp<size_t>(channels, cr);
+  const size_t c_stride = benchmark::utils::RoundUp<size_t>(channels, cr);
 
   std::vector<float> a(channels * input_height * input_width);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
@@ -79,7 +79,7 @@ static void DWConvBenchmark(benchmark::State& state,
   const size_t i_elements = output_height * step_height;
   const size_t c_elements = output_size * channels;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements) + sizeof(void*) * i_elements);
 
   std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);
@@ -124,7 +124,7 @@ static void DWConvBenchmark(benchmark::State& state,
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::prefetchToL1(a.data(), a.size() * sizeof(float));
+    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(float));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 

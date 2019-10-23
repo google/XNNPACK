@@ -57,10 +57,10 @@ static void DConv3X3S2P1Benchmark(benchmark::State& state,
   std::vector<float, AlignedAllocator<float, 32>> zero(input_channels * input_width + XNN_EXTRA_BYTES / sizeof(float));
 
   const size_t weights_elements = (kernel_size * kernel_size * input_channels + 1) *
-    benchmark::utils::roundUp<size_t>(output_channels, output_channels_tile);
+    benchmark::utils::RoundUp<size_t>(output_channels, output_channels_tile);
   const size_t output_elements = output_height * output_width * output_channels;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (weights_elements + output_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> packed_weights(weights_elements * num_buffers);
@@ -84,7 +84,7 @@ static void DConv3X3S2P1Benchmark(benchmark::State& state,
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::prefetchToL1(input.data(), input.size() * sizeof(float));
+    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(float));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 

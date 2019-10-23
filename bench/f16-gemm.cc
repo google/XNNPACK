@@ -40,8 +40,8 @@ static void GEMMBenchmark(benchmark::State& state,
   const size_t nc = state.range(1);
   const size_t kc = state.range(2);
 
-  const size_t nc_stride = benchmark::utils::roundUp(nc, nr);
-  const size_t kc_stride = benchmark::utils::roundUp(kc, kr);
+  const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
+  const size_t kc_stride = benchmark::utils::RoundUp(kc, kr);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -58,7 +58,7 @@ static void GEMMBenchmark(benchmark::State& state,
   const size_t w_elements = nc_stride * kc_stride + nc_stride;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(uint16_t) * (w_elements + c_elements));
 
   std::vector<uint16_t, AlignedAllocator<uint16_t, 32>> w(w_elements * num_buffers);
@@ -77,7 +77,7 @@ static void GEMMBenchmark(benchmark::State& state,
     // - W is not in cache (for any cache level)
     // - C is not in cache (for any cache level)
     state.PauseTiming();
-    benchmark::utils::prefetchToL1(a.data(), a.size() * sizeof(uint16_t));
+    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(uint16_t));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 

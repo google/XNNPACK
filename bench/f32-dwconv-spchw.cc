@@ -91,7 +91,7 @@ static void DWConvCHWBenchmark(benchmark::State& state,
   const size_t w_elements = (kernel_size + 1) * channels;
   const size_t o_elements = output_size * channels;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + o_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> packed_weights(w_elements * num_buffers);
@@ -115,7 +115,7 @@ static void DWConvCHWBenchmark(benchmark::State& state,
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::prefetchToL1(input.data(), input.size() * sizeof(float));
+    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(float));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
@@ -198,7 +198,7 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
   const size_t kernel_size = kernel_height * kernel_width;
   const size_t output_size = output_height * output_width;
 
-  std::vector<float> input(input_height * benchmark::utils::roundUp<size_t>(input_width, it) * channels);
+  std::vector<float> input(input_height * benchmark::utils::RoundUp<size_t>(input_width, it) * channels);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   std::vector<float> bias(channels);
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
@@ -206,9 +206,9 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
 
   const size_t w_elements = (kernel_size + 1) * channels;
-  const size_t o_elements = output_height * benchmark::utils::roundUp<size_t>(output_width, ot) * channels;
+  const size_t o_elements = output_height * benchmark::utils::RoundUp<size_t>(output_width, ot) * channels;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + o_elements));
 
   std::vector<float, AlignedAllocator<float, 32>> packed_weights(w_elements * num_buffers);
@@ -232,7 +232,7 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::prefetchToL1(input.data(), input.size() * sizeof(float));
+    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(float));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
@@ -243,8 +243,8 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
         packed_weights.data() + channel * (kernel_size + 1) + buffer_index * w_elements,
         output.data() + channel * ot + buffer_index * o_elements,
         it * channels * sizeof(float), ot * channels * sizeof(float),
-        benchmark::utils::roundUp<size_t>(input_width, it) * channels * sizeof(float),
-        benchmark::utils::roundUp<size_t>(output_width, ot) * channels * sizeof(float),
+        benchmark::utils::RoundUp<size_t>(input_width, it) * channels * sizeof(float),
+        benchmark::utils::RoundUp<size_t>(output_width, ot) * channels * sizeof(float),
         &output_params);
     }
   }

@@ -54,7 +54,7 @@ static void SpMMBenchmark(benchmark::State& state,
   const size_t dmap_elements = num_nonzeroes / nr;
   const size_t nmap_elements = nc;
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements) + sizeof(uint32_t) * (dmap_elements + nmap_elements));
 
   // Micro-kernel can access one element beyond w and dmap for software pipelining.
@@ -137,7 +137,7 @@ static void SpMMBenchmark(benchmark::State& state,
     // - W, Kmap, and Nmap is not in cache (for any cache level)
     // - C is not in cache (for any cache level)
     state.PauseTiming();
-    benchmark::utils::prefetchToL1(a.data(), a.size() * sizeof(float));
+    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(float));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 

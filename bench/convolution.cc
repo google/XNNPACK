@@ -86,7 +86,7 @@ void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
     return;
   }
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(uint8_t) * kernel.size() + sizeof(int32_t) * bias.size() + sizeof(uint8_t) * output_elements);
   std::vector<uint8_t> output(output_elements * num_buffers);
 
@@ -125,7 +125,7 @@ void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::prefetchToL1(input.data(), input.size() * sizeof(uint8_t));
+    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(uint8_t));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
@@ -203,7 +203,7 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
     return;
   }
   const size_t num_buffers = 1 +
-    benchmark::utils::divideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (kernel.size() + bias.size() + output_elements));
   std::vector<float> output(output_elements * num_buffers);
 
@@ -240,7 +240,7 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::prefetchToL1(input.data(), input.size() * sizeof(float));
+    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(float));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
@@ -455,8 +455,8 @@ void tflite_convolution_f32(benchmark::State& state, const char* net) {
 
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::wipeCache();
-    benchmark::utils::prefetchToL1(
+    benchmark::utils::WipeCache();
+    benchmark::utils::PrefetchToL1(
       interpreter->typed_tensor<float>(0),
       batch_size * groups * group_input_channels * input_height * input_width * sizeof(float));
     state.ResumeTiming();
@@ -760,8 +760,8 @@ void armcl_convolution_f32(benchmark::State& state, const char* net) {
 
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::wipeCache();
-    benchmark::utils::prefetchToL1(
+    benchmark::utils::WipeCache();
+    benchmark::utils::PrefetchToL1(
       input_tensor.buffer(),
       batch_size * groups * group_input_channels * input_height * input_width * sizeof(float));
     state.ResumeTiming();
