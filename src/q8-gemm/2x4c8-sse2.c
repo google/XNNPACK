@@ -149,7 +149,7 @@ void xnn_q8_gemm_ukernel_2x4c8__sse2(
     const __m128i vq31prod1x0123 = _mm_shuffle_epi32(vq31prod1x0213, _MM_SHUFFLE(3, 1, 2, 0));
 
     const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->sse2.remainder_mask);
-    
+
     const __m128i vrem0x0123 =
       _mm_add_epi32(_mm_and_si128(vq31prod0x0123, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vq31prod0x0123));
     const __m128i vrem1x0123 =
@@ -158,9 +158,9 @@ void xnn_q8_gemm_ukernel_2x4c8__sse2(
     const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->sse2.remainder_threshold);
     const __m128i vshift = _mm_load_si128((const __m128i*) params->sse2.shift);
 
-    vacc0x0123 = 
+    vacc0x0123 =
       _mm_sub_epi32(_mm_sra_epi32(vq31prod0x0123, vshift), _mm_cmpgt_epi32(vrem0x0123, vremainder_threshold));
-    vacc1x0123 = 
+    vacc1x0123 =
       _mm_sub_epi32(_mm_sra_epi32(vq31prod1x0123, vshift), _mm_cmpgt_epi32(vrem1x0123, vremainder_threshold));
 
     const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);

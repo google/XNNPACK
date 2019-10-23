@@ -412,7 +412,7 @@ class AveragePoolingOperatorTester {
                 const size_t iy = oy * stride_height() + py - padding_top();
                 for (size_t px = 0; px < pooling_width(); px++) {
                   const size_t ix = ox * stride_width() + px - padding_left();
-                  if (ix < input_width() && iy < input_height()) {                  
+                  if (ix < input_width() && iy < input_height()) {
                     acc += double(int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c]) - int32_t(input_zero_point()));
                   }
                 }
@@ -491,12 +491,12 @@ class AveragePoolingOperatorTester {
           for (size_t ox = 0; ox < output_width(); ox++) {
             for (size_t c = 0; c < channels(); c++) {
               float acc = 0.0f;
-              int32_t n = 0; 
+              int32_t n = 0;
               for (size_t py = 0; py < pooling_height(); py++) {
                 const size_t iy = oy * stride_height() + py - padding_top();
                 for (size_t px = 0; px < pooling_width(); px++) {
                   const size_t ix = ox * stride_width() + px - padding_left();
-                  if (ix < input_width() && iy < input_height()) {                  
+                  if (ix < input_width() && iy < input_height()) {
                     acc += input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c];
                     n += 1;
                   }
@@ -597,7 +597,7 @@ class AveragePoolingOperatorTester {
                 const size_t iy = oy * stride_height() + py - padding_top();
                 for (size_t px = 0; px < pooling_width(); px++) {
                   const size_t ix = ox * stride_width() + px - padding_left();
-                  if (ix < input_width() && iy < input_height()) {                  
+                  if (ix < input_width() && iy < input_height()) {
                     acc += double(int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c]) - int32_t(input_zero_point()));
                   }
                 }
@@ -667,7 +667,7 @@ class AveragePoolingOperatorTester {
                 const size_t iy = oy * stride_height() + py - padding_top();
                 for (size_t px = 0; px < pooling_width(); px++) {
                   const size_t ix = ox * stride_width() + px - padding_left();
-                  if (ix < next_input_width() && iy < next_input_height()) {                  
+                  if (ix < next_input_width() && iy < next_input_height()) {
                     acc += double(int32_t(input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + c]) - int32_t(input_zero_point()));
                   }
                 }
@@ -742,7 +742,7 @@ class AveragePoolingOperatorTester {
                 const size_t iy = oy * stride_height() + py - padding_top();
                 for (size_t px = 0; px < pooling_width(); px++) {
                   const size_t ix = ox * stride_width() + px - padding_left();
-                  if (ix < input_width() && iy < input_height()) {                  
+                  if (ix < input_width() && iy < input_height()) {
                     acc += input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c];
                     n += 1;
                   }
@@ -825,7 +825,7 @@ class AveragePoolingOperatorTester {
                 const size_t iy = oy * stride_height() + py - padding_top();
                 for (size_t px = 0; px < pooling_width(); px++) {
                   const size_t ix = ox * stride_width() + px - padding_left();
-                  if (ix < next_input_width() && iy < next_input_height()) {                  
+                  if (ix < next_input_width() && iy < next_input_height()) {
                     acc += input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + c];
                     n += 1;
                   }

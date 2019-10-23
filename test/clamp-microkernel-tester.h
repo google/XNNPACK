@@ -103,7 +103,6 @@ class ClampMicrokernelTester {
           output_params = xnn_compute_scalar_u8_output_params(qmin(), qmax());
           break;
       }
-          
 
       // Compute reference results.
       for (size_t i = 0; i < n(); i++) {

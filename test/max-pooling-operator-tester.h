@@ -414,7 +414,7 @@ class MaxPoolingOperatorTester {
                 const size_t iy = oy * stride_height() + py * dilation_height() - padding_top();
                 for (size_t px = 0; px < pooling_width(); px++) {
                   const size_t ix = ox * stride_width() + px * dilation_width() - padding_left();
-                  if (ix < input_width() && iy < input_height()) {                  
+                  if (ix < input_width() && iy < input_height()) {
                     max_value = std::max(max_value,
                       input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c]);
                   }

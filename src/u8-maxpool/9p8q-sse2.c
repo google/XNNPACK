@@ -133,7 +133,7 @@ void xnn_u8_maxpool_ukernel_9p8q__sse2(
         }
       }
     }
-    
+
     for (ptrdiff_t m = (ptrdiff_t) ks - 9; m > 0; m -= 8) {
       const uint8_t* i0 = *input++;
       const uint8_t* i1 = *input++;

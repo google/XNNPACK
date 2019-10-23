@@ -622,7 +622,7 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x2(
               vst1_f32((float*) ((uintptr_t) o0_tmp + output_width_stride), vo0x1_lo);
               vo0x1_lo = vget_high_f32(vo0x1);
             }
-      
+
             vst1_f32(o1_tmp, vo1x0_lo); o1_tmp += 2;
             vo1x0_lo = vget_high_f32(vo1x0);
             vst1_f32(o0_tmp, vo0x0_lo); o0_tmp += 2;

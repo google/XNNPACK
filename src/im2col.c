@@ -35,7 +35,7 @@ void xnn_im2col_conv2d(
           for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
             const size_t input_x = output_x * subsampling_width + kernel_x * dilation_width - input_padding_left;
             if (input_x < output_width) {
-              memcpy(output, 
+              memcpy(output,
                 (const void*) ((uintptr_t) input + (input_y * input_width + input_x) * input_pixel_stride_in_bytes),
                 group_input_channels_in_bytes);
             } else {
