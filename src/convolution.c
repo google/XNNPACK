@@ -191,37 +191,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
 
   status = xnn_status_unsupported_parameter;
 
-  const uint32_t effective_kernel_height = (kernel_height - 1) * dilation_height + 1;
-  const uint32_t effective_kernel_width = (kernel_width - 1) * dilation_width + 1;
-
-  if (input_padding_top >= effective_kernel_height) {
-    xnn_log_info(
-      "inefficiency in Convolution operator with %" PRIu32 "x%" PRIu32 " effective kernel and %" PRIu32 "+%" PRIu32 " height padding: "
-      "input top padding is greater or equal to effective kernel height",
-      effective_kernel_width, effective_kernel_height, input_padding_top, input_padding_bottom);
-  }
-
-  if (input_padding_bottom >= effective_kernel_height) {
-    xnn_log_info(
-      "inefficiency in Convolution operator with %" PRIu32 "x%" PRIu32 " effective kernel and %" PRIu32 "+%" PRIu32 " height padding: "
-      "input bottom padding is greater or equal to effective kernel height",
-      effective_kernel_width, effective_kernel_height, input_padding_top, input_padding_bottom);
-  }
-
-  if (input_padding_right >= effective_kernel_width) {
-    xnn_log_info(
-      "inefficiency in Convolution operator with %" PRIu32 "x%" PRIu32 " effective kernel and %" PRIu32 "+%" PRIu32 " width padding: "
-      "input right padding is greater or equal to effective kernel width",
-      effective_kernel_width, effective_kernel_height, input_padding_left, input_padding_right);
-  }
-
-  if (input_padding_left >= effective_kernel_width) {
-    xnn_log_info(
-      "inefficiency in Convolution operator with %" PRIu32 "x%" PRIu32 " effective kernel and %" PRIu32 "+%" PRIu32 " width padding: "
-      "input left padding is greater or equal to effective kernel width",
-      effective_kernel_width, effective_kernel_height, input_padding_left, input_padding_right);
-  }
-
   const float convolution_scale = input_scale * kernel_scale / output_scale;
   if (convolution_scale >= 1.0f) {
     xnn_log_error(
@@ -524,37 +493,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
       "Depthwise Convolution must have exactly 1 input channel per group",
       group_input_channels);
     goto error;
-  }
-
-  const uint32_t effective_kernel_height = (kernel_height - 1) * dilation_height + 1;
-  const uint32_t effective_kernel_width = (kernel_width - 1) * dilation_width + 1;
-
-  if (input_padding_top >= effective_kernel_height) {
-    xnn_log_info(
-      "inefficiency in Convolution operator with %" PRIu32 "x%" PRIu32 " effective kernel and %" PRIu32 "+%" PRIu32 " height padding: "
-      "input top padding is greater or equal to effective kernel height",
-      effective_kernel_width, effective_kernel_height, input_padding_top, input_padding_bottom);
-  }
-
-  if (input_padding_bottom >= effective_kernel_height) {
-    xnn_log_info(
-      "inefficiency in Convolution operator with %" PRIu32 "x%" PRIu32 " effective kernel and %" PRIu32 "+%" PRIu32 " height padding: "
-      "input bottom padding is greater or equal to effective kernel height",
-      effective_kernel_width, effective_kernel_height, input_padding_top, input_padding_bottom);
-  }
-
-  if (input_padding_right >= effective_kernel_width) {
-    xnn_log_info(
-      "inefficiency in Convolution operator with %" PRIu32 "x%" PRIu32 " effective kernel and %" PRIu32 "+%" PRIu32 " width padding: "
-      "input right padding is greater or equal to effective kernel width",
-      effective_kernel_width, effective_kernel_height, input_padding_left, input_padding_right);
-  }
-
-  if (input_padding_left >= effective_kernel_width) {
-    xnn_log_info(
-      "inefficiency in Convolution operator with %" PRIu32 "x%" PRIu32 " effective kernel and %" PRIu32 "+%" PRIu32 " width padding: "
-      "input left padding is greater or equal to effective kernel width",
-      effective_kernel_width, effective_kernel_height, input_padding_left, input_padding_right);
   }
 
   status = xnn_status_out_of_memory;
