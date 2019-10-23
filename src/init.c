@@ -747,23 +747,21 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     if (is_wasm_x86) {
       xnn_params.f32.gemm = (struct gemm_parameters) {
-        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8s4__psimd,
-        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8s4__psimd,
-        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8s4__psimd,
-        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8s4__psimd,
+        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__psimd_splat,
+        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__psimd_splat,
+        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__psimd_splat,
+        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__psimd_splat,
         .mr = 4,
         .nr = 8,
-        .log2_sr = 2,
       };
     } else {
       xnn_params.f32.gemm = (struct gemm_parameters) {
-        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8s4__psimd,
-        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8s4__psimd,
-        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_igemm_ukernel_1x8s4__psimd,
-        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8s4__psimd,
+        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__psimd_splat,
+        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__psimd_splat,
+        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__psimd_splat,
+        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__psimd_splat,
         .mr = 6,
         .nr = 8,
-        .log2_sr = 2,
       };
     }
     xnn_params.f32.gemm2 = (struct gemm_parameters) {
