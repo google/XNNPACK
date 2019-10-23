@@ -415,6 +415,7 @@ AVX2_UKERNELS = [
     "src/math/exp-avx2-perm-p3.c",
     "src/math/exp-avx2-perm-p4.c",
     "src/math/expminus-avx2-p5.c",
+    "src/math/extexp-avx2-p5.c",
 ]
 
 AVX512F_UKERNELS = [
@@ -426,6 +427,7 @@ AVX512F_UKERNELS = [
     "src/math/exp-avx512f-p5-scalef.c",
     "src/math/exp-avx512f-p5.c",
     "src/math/exp-avx512f-perm-p3.c",
+    "src/math/extexp-avx512f-p5.c",
 ]
 
 AARCH32_ASM_UKERNELS = [
@@ -1070,6 +1072,15 @@ xnnpack_benchmark(
     name = "f32_expminus_eval",
     srcs = [
         "eval/f32-expminus.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + ACCURACY_EVAL_HDRS,
+    deps = ACCURACY_EVAL_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_extexp_eval",
+    srcs = [
+        "eval/f32-extexp.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS,
