@@ -78,6 +78,7 @@ SCALAR_UKERNELS = [
     "src/f32-avgpool/mp9p8q-scalar.c",
     "src/f32-avgpool/up9-scalar.c",
     "src/f32-clamp/scalar.c",
+    "src/f32-conv-hwc2spchw/3x3s2p1c3x4-scalar-1x1.c",
     "src/f32-igemm/1x4-scalar.c",
     "src/f32-igemm/2x4-scalar.c",
     "src/f32-igemm/4x2-scalar.c",
@@ -887,6 +888,17 @@ xnnpack_benchmark(
     name = "f32_conv_hwc_bench",
     srcs = [
         "bench/f32-conv-hwc.cc",
+        "bench/dconv.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
+    copts = ["-Wno-unused-function"],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_conv_hwc2spchw_bench",
+    srcs = [
+        "bench/f32-conv-hwc2spchw.cc",
         "bench/dconv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
