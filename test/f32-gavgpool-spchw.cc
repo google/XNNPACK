@@ -209,15 +209,16 @@
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, elements_eq_1) {
+
+TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, elements_eq_4) {
   GAvgPoolSpCHWMicrokernelTester()
-    .elements(1)
+    .elements(4)
     .channels(1)
     .Test(xnn_f32_gavgpool_spchw_ukernel__scalar_x1, GAvgPoolSpCHWMicrokernelTester::Variant::Scalar);
 }
 
-TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, elements_gt_1) {
-  for (size_t elements = 2; elements < 8; elements++) {
+TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, elements_div_4) {
+  for (size_t elements = 8; elements < 32; elements += 4) {
     GAvgPoolSpCHWMicrokernelTester()
       .elements(elements)
       .channels(1)
@@ -225,30 +226,26 @@ TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, elements_gt_1) {
   }
 }
 
-TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, channels_lt_4) {
-  for (size_t channels = 1; channels < 4; channels++) {
-    for (size_t elements = 1; elements < 16; elements += 3) {
-      GAvgPoolSpCHWMicrokernelTester()
-        .elements(elements)
-        .channels(channels)
-        .Test(xnn_f32_gavgpool_spchw_ukernel__scalar_x1, GAvgPoolSpCHWMicrokernelTester::Variant::Scalar);
-    }
+TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, elements_lt_4) {
+  for (size_t elements = 1; elements < 4; elements++) {
+    GAvgPoolSpCHWMicrokernelTester()
+      .elements(elements)
+      .channels(1)
+      .Test(xnn_f32_gavgpool_spchw_ukernel__scalar_x1, GAvgPoolSpCHWMicrokernelTester::Variant::Scalar);
   }
 }
 
-TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, channels_gt_4) {
-  for (size_t channels = 5; channels < 8; channels++) {
-    for (size_t elements = 1; elements < 16; elements += 3) {
-      GAvgPoolSpCHWMicrokernelTester()
-        .elements(elements)
-        .channels(channels)
-        .Test(xnn_f32_gavgpool_spchw_ukernel__scalar_x1, GAvgPoolSpCHWMicrokernelTester::Variant::Scalar);
-    }
+TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, elements_gt_4) {
+  for (size_t elements = 5; elements < 8; elements++) {
+    GAvgPoolSpCHWMicrokernelTester()
+      .elements(elements)
+      .channels(1)
+      .Test(xnn_f32_gavgpool_spchw_ukernel__scalar_x1, GAvgPoolSpCHWMicrokernelTester::Variant::Scalar);
   }
 }
 
-TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, channels_div_4) {
-  for (size_t channels = 8; channels <= 16; channels += 4) {
+TEST(F32_GAVGPOOL_SPCHW__SCALAR_X1, channels_gt_1) {
+  for (size_t channels = 2; channels < 5; channels++) {
     for (size_t elements = 1; elements < 16; elements += 3) {
       GAvgPoolSpCHWMicrokernelTester()
         .elements(elements)
