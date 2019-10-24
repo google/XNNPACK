@@ -22,11 +22,15 @@
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a73
+- name: xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
+  k-block: 8
+  pipelined: false
+  assembly: true
+- name: xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a57
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a57
+- name: xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a73
   k-block: 8
   pipelined: true
   assembly: true
