@@ -279,20 +279,12 @@ static void spmm80_8x1__scalar(benchmark::State& state, const char* net) {
   SpMMBenchmark(state, xnn_f32_spmm_ukernel_8x1__scalar, 8, 1, 0.8f);
 }
 
-static void spmm80_1x1__scalar_unroll2(benchmark::State& state, const char* net) {
-  SpMMBenchmark(state, xnn_f32_spmm_ukernel_1x1__scalar_unroll2, 1, 1, 0.8f);
+static void spmm80_8x2__scalar(benchmark::State& state, const char* net) {
+  SpMMBenchmark(state, xnn_f32_spmm_ukernel_8x2__scalar, 8, 2, 0.8f);
 }
 
-static void spmm80_2x1__scalar_unroll2(benchmark::State& state, const char* net) {
-  SpMMBenchmark(state, xnn_f32_spmm_ukernel_2x1__scalar_unroll2, 2, 1, 0.8f);
-}
-
-static void spmm80_4x1__scalar_unroll2(benchmark::State& state, const char* net) {
-  SpMMBenchmark(state, xnn_f32_spmm_ukernel_4x1__scalar_unroll2, 4, 1, 0.8f);
-}
-
-static void spmm80_8x1__scalar_unroll2(benchmark::State& state, const char* net) {
-  SpMMBenchmark(state, xnn_f32_spmm_ukernel_8x1__scalar_unroll2, 8, 1, 0.8f);
+static void spmm80_8x4__scalar(benchmark::State& state, const char* net) {
+  SpMMBenchmark(state, xnn_f32_spmm_ukernel_8x4__scalar, 8, 4, 0.8f);
 }
 
 static void spmm80_1x1__scalar_pipelined(benchmark::State& state, const char* net) {
@@ -315,10 +307,8 @@ BENCHMARK_GEMM(spmm80_1x1__scalar)
 BENCHMARK_GEMM(spmm80_2x1__scalar)
 BENCHMARK_GEMM(spmm80_4x1__scalar)
 BENCHMARK_GEMM(spmm80_8x1__scalar)
-BENCHMARK_GEMM(spmm80_1x1__scalar_unroll2)
-BENCHMARK_GEMM(spmm80_2x1__scalar_unroll2)
-BENCHMARK_GEMM(spmm80_4x1__scalar_unroll2)
-BENCHMARK_GEMM(spmm80_8x1__scalar_unroll2)
+BENCHMARK_GEMM(spmm80_8x2__scalar)
+BENCHMARK_GEMM(spmm80_8x4__scalar)
 BENCHMARK_GEMM(spmm80_1x1__scalar_pipelined)
 BENCHMARK_GEMM(spmm80_2x1__scalar_pipelined)
 BENCHMARK_GEMM(spmm80_4x1__scalar_pipelined)

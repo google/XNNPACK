@@ -198,17 +198,15 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-prelu/x4-scalar.c
   src/f32-rmax/scalar.c
   src/f32-spmm/1x1-scalar-pipelined.c
-  src/f32-spmm/1x1-scalar-unroll2.c
   src/f32-spmm/1x1-scalar.c
   src/f32-spmm/2x1-scalar-pipelined.c
-  src/f32-spmm/2x1-scalar-unroll2.c
   src/f32-spmm/2x1-scalar.c
   src/f32-spmm/4x1-scalar-pipelined.c
-  src/f32-spmm/4x1-scalar-unroll2.c
   src/f32-spmm/4x1-scalar.c
   src/f32-spmm/8x1-scalar-pipelined.c
-  src/f32-spmm/8x1-scalar-unroll2.c
   src/f32-spmm/8x1-scalar.c
+  src/f32-spmm/8x2-scalar.c
+  src/f32-spmm/8x4-scalar.c
   src/f32-vadd/scalar.c
   src/f32-vmul/scalar.c
   src/f32-vmulcaddc/c1-scalar-x2.c

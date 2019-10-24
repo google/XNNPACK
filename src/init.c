@@ -1003,6 +1003,16 @@ static void init(void) {
         .mr = 8,
         .nr = 1,
       };
+      xnn_params.f32.spmm2 = (struct spmm_parameters) {
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_8x2__scalar,
+        .mr = 8,
+        .nr = 2,
+      };
+      xnn_params.f32.spmm4 = (struct spmm_parameters) {
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_8x4__scalar,
+        .mr = 8,
+        .nr = 4,
+      };
       xnn_params.f32.hwc2spchw_dconv3x3c3s2 = (struct hwc2spchw_dconv_parameters) {
         .ukernel_with_symm_padding =
           (xnn_conv_hwc2spchw_ukernel_function) xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1,

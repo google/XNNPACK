@@ -30,56 +30,64 @@ void xnn_f32_spmm_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if UNROLL
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
     size_t j = n;
-    do {
+    while (j >= ${NR}) {
       uint32_t nnz = *nnzmap++;
-      $if UNROLL > 1:
-        float vacc0x0 = *w++;
-        $for K in range(1, UNROLL):
-          float vacc0x${K} = 0.0f;
+      $for N in range(0, NR, 1):
+        float vacc0x${N} = *w++;
         $for M in range(1, MR):
-          float vacc${ABC[M]}x0 = vacc0x0;
-          $for K in range(1, UNROLL):
-            float vacc${ABC[M]}x${K} = 0.0f;
-        for (; nnz >= ${UNROLL}; nnz -= ${UNROLL}) {
-          $for K in range(UNROLL):
-            const intptr_t diff${K} = dmap[${K}];
-          dmap += ${UNROLL};
-          $for K in range(UNROLL):
-            $for M in range(MR):
-              const float va${ABC[M]}x${K} = a[${M}];
-            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff${K});
-            const float vb${K} = *w++;
-            $for M in range(0, MR):
-              vacc${ABC[M]}x${K} += va${ABC[M]}x${K} * vb${K};
-        }
-        $for M in range(MR):
-          float vacc${ABC[M]} = vacc${ABC[M]}x0;
-        $for K in range(1, UNROLL):
-          $for M in range(MR):
-            vacc${ABC[M]} += vacc${ABC[M]}x${K};
-      $else:
-        float vacc0 = *w++;
-        $for M in range(1, MR):
-          float vacc${ABC[M]} = vacc0;
+          float vacc${ABC[M]}x${N} = vacc0x${N};
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;
           $for M in range(MR):
             const float va${ABC[M]} = a[${M}];
           a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-          const float vb = *w++;
-          $for M in range(MR):
-            vacc${ABC[M]} += va${ABC[M]} * vb;
+          $for N in range(0, NR, 1):
+            const float vb${N} = *w++;
+          $for N in range(0, NR, 1):
+            $for M in range(MR):
+              vacc${ABC[M]}x${N} += va${ABC[M]} * vb${N};
         } while (--nnz != 0);
       }
-      $for M in range(MR):
-        float vout${ABC[M]} = math_min_f32(vacc${ABC[M]}, vmax);
-      $for M in range(MR):
-        vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
-      $for M in range(MR):
-        c[${M}] = vout${ABC[M]};
-      c += m;
-    } while (--j != 0);
+      $for N in range(NR):
+        $for M in range(MR):
+          float vout${ABC[M]}x${N} = math_min_f32(vacc${ABC[M]}x${N}, vmax);
+      $for N in range(NR):
+        $for M in range(MR):
+          vout${ABC[M]}x${N} = math_max_f32(vout${ABC[M]}x${N}, vmin);
+      $for N in range(NR):
+        $for M in range(MR):
+          c[${N} * m + ${M}] = vout${ABC[M]}x${N};
+      c += ${NR} * m;
+      j -= ${NR};
+    }
+    if XNN_UNLIKELY(j != 0) {
+      do {
+        uint32_t nnz = *nnzmap++;
+        float vacc0 = *w++;
+        $for M in range(1, MR):
+          float vacc${ABC[M]} = vacc0;
+        if XNN_LIKELY(nnz != 0) {
+          do {
+            const intptr_t diff = *dmap++;
+            $for M in range(MR):
+              const float va${ABC[M]} = a[${M}];
+            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+            const float vb = *w++;
+            $for M in range(MR):
+              vacc${ABC[M]} += va${ABC[M]} * vb;
+          } while (--nnz != 0);
+        }
+        $for M in range(MR):
+          float vout${ABC[M]} = math_min_f32(vacc${ABC[M]}, vmax);
+        $for M in range(MR):
+          vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
+        $for M in range(MR):
+          c[${M}] = vout${ABC[M]};
+        c += m;
+        j -= 1;
+      } while (j != 0);
+    }
     c -= m * n;
     c += ${MR};
     a += ${MR};
@@ -93,56 +101,64 @@ void xnn_f32_spmm_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if UNROLL
         const int32_t* dmap = widx_dmap;
         const uint32_t* nnzmap = nidx_nnzmap;
         size_t j = n;
-        do {
+        while (j >= ${NR}) {
           uint32_t nnz = *nnzmap++;
-          $if UNROLL > 1:
-            float vacc0x0 = *w++;
-            $for K in range(1, UNROLL):
-              float vacc0x${K} = 0.0f;
+          $for N in range(0, NR, 1):
+            float vacc0x${N} = *w++;
             $for M in range(1, SUBMR):
-              float vacc${ABC[M]}x0 = vacc0x0;
-              $for K in range(1, UNROLL):
-                float vacc${ABC[M]}x${K} = 0.0f;
-            for (; nnz >= ${UNROLL}; nnz -= ${UNROLL}) {
-              $for K in range(UNROLL):
-                const intptr_t diff${K} = dmap[${K}];
-              dmap += ${UNROLL};
-              $for K in range(UNROLL):
-                $for M in range(SUBMR):
-                  const float va${ABC[M]}x${K} = a[${M}];
-                a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff${K});
-                const float vb${K} = *w++;
-                $for M in range(0, SUBMR):
-                  vacc${ABC[M]}x${K} += va${ABC[M]}x${K} * vb${K};
-            }
-            $for M in range(SUBMR):
-              float vacc${ABC[M]} = vacc${ABC[M]}x0;
-            $for K in range(1, UNROLL):
-              $for M in range(SUBMR):
-                vacc${ABC[M]} += vacc${ABC[M]}x${K};
-          $else:
-            float vacc0 = *w++;
-            $for M in range(1, SUBMR):
-              float vacc${ABC[M]} = vacc0;
+              float vacc${ABC[M]}x${N} = vacc0x${N};
           if XNN_LIKELY(nnz != 0) {
             do {
               const intptr_t diff = *dmap++;
               $for M in range(SUBMR):
                 const float va${ABC[M]} = a[${M}];
               a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-              const float vb = *w++;
-              $for M in range(SUBMR):
-                vacc${ABC[M]} += va${ABC[M]} * vb;
+              $for N in range(0, NR, 1):
+                const float vb${N} = *w++;
+              $for N in range(0, NR, 1):
+                $for M in range(SUBMR):
+                  vacc${ABC[M]}x${N} += va${ABC[M]} * vb${N};
             } while (--nnz != 0);
           }
-          $for M in range(SUBMR):
-            float vout${ABC[M]} = math_min_f32(vacc${ABC[M]}, vmax);
-          $for M in range(SUBMR):
-            vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
-          $for M in range(SUBMR):
-            c[${M}] = vout${ABC[M]};
-          c += m;
-        } while (--j != 0);
+          $for N in range(0, NR, 1):
+            $for M in range(SUBMR):
+              float vout${ABC[M]}x${N} = math_min_f32(vacc${ABC[M]}x${N}, vmax);
+          $for N in range(0, NR, 1):
+            $for M in range(SUBMR):
+              vout${ABC[M]}x${N} = math_max_f32(vout${ABC[M]}x${N}, vmin);
+          $for N in range(0, NR, 1):
+            $for M in range(SUBMR):
+              c[${N} * m + ${M}] = vout${ABC[M]}x${N};
+          c += ${NR} * m;
+          j -= ${NR};
+        }
+        if XNN_UNLIKELY(j != 0) {
+          do {
+            uint32_t nnz = *nnzmap++;
+            float vacc0 = *w++;
+            $for M in range(1, SUBMR):
+              float vacc${ABC[M]} = vacc0;
+            if XNN_LIKELY(nnz != 0) {
+              do {
+                const intptr_t diff = *dmap++;
+                $for M in range(SUBMR):
+                  const float va${ABC[M]} = a[${M}];
+                a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+                const float vb = *w++;
+                $for M in range(SUBMR):
+                  vacc${ABC[M]} += va${ABC[M]} * vb;
+              } while (--nnz != 0);
+            }
+            $for M in range(SUBMR):
+              float vout${ABC[M]} = math_min_f32(vacc${ABC[M]}, vmax);
+            $for M in range(SUBMR):
+              vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
+            $for M in range(SUBMR):
+              c[${M}] = vout${ABC[M]};
+            c += m;
+            j -= 1;
+          } while (j != 0);
+        }
         c -= m * n;
         c += ${SUBMR};
         a += ${SUBMR};

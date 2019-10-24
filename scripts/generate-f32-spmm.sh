@@ -10,11 +10,8 @@ tools/xngen src/f32-spmm/scalar.c.in -D MR=1 -D NR=1 -D UNROLL=1 -o src/f32-spmm
 tools/xngen src/f32-spmm/scalar.c.in -D MR=2 -D NR=1 -D UNROLL=1 -o src/f32-spmm/2x1-scalar.c
 tools/xngen src/f32-spmm/scalar.c.in -D MR=4 -D NR=1 -D UNROLL=1 -o src/f32-spmm/4x1-scalar.c
 tools/xngen src/f32-spmm/scalar.c.in -D MR=8 -D NR=1 -D UNROLL=1 -o src/f32-spmm/8x1-scalar.c
-### Microkernels with 2X unrolling
-tools/xngen src/f32-spmm/scalar.c.in -D MR=1 -D NR=1 -D UNROLL=2 -o src/f32-spmm/1x1-scalar-unroll2.c
-tools/xngen src/f32-spmm/scalar.c.in -D MR=2 -D NR=1 -D UNROLL=2 -o src/f32-spmm/2x1-scalar-unroll2.c
-tools/xngen src/f32-spmm/scalar.c.in -D MR=4 -D NR=1 -D UNROLL=2 -o src/f32-spmm/4x1-scalar-unroll2.c
-tools/xngen src/f32-spmm/scalar.c.in -D MR=8 -D NR=1 -D UNROLL=2 -o src/f32-spmm/8x1-scalar-unroll2.c
+tools/xngen src/f32-spmm/scalar.c.in -D MR=8 -D NR=2 -D UNROLL=1 -o src/f32-spmm/8x2-scalar.c
+tools/xngen src/f32-spmm/scalar.c.in -D MR=8 -D NR=4 -D UNROLL=1 -o src/f32-spmm/8x4-scalar.c
 ### Microkernels with software pipelining
 tools/xngen src/f32-spmm/scalar-pipelined.c.in -D MR=1 -D NR=1 -o src/f32-spmm/1x1-scalar-pipelined.c
 tools/xngen src/f32-spmm/scalar-pipelined.c.in -D MR=2 -D NR=1 -o src/f32-spmm/2x1-scalar-pipelined.c
