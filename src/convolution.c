@@ -36,6 +36,13 @@ static inline size_t compute_output_dimension(
   return doz(padded_input_dimension, effective_kernel_dimension) / subsampling_dimension + 1;
 }
 
+static inline size_t compute_output_dimension_with_tf_same_padding(
+    size_t input_dimension,
+    size_t subsampling_dimension)
+{
+  return divide_round_up(input_dimension, subsampling_dimension);
+}
+
 static const struct dwconv_parameters* find_dwigemm_ukernel(
     size_t kernel_size,
     const struct dwconv_parameters* ukernel,
@@ -189,6 +196,17 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
     goto error;
   }
 
+  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
+  if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
+    if (any_padding) {
+      xnn_log_error(
+        "failed to create Convolution operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "TensorFlow SAME padding can't be combined with explicit padding specification",
+        input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+      goto error;
+    }
+  }
+
   status = xnn_status_unsupported_parameter;
 
   const float convolution_scale = input_scale * kernel_scale / output_scale;
@@ -212,7 +230,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
 
   enum xnn_ukernel_type ukernel_type = xnn_ukernel_type_none;
   const struct dwconv_parameters* dwconv_parameters = NULL;
-  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   if (group_input_channels == 1 && group_output_channels == 1 && groups > 1 &&
       (dwconv_parameters = find_dwigemm_ukernel(kernel_size, xnn_params.q8.dwconv, XNN_MAX_Q8_DWCONV_UKERNELS)) != NULL)
   {
@@ -324,7 +341,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
       XNN_UNREACHABLE;
   }
 
-  if (any_padding) {
+  const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && kernel_size != 1;
+  if (any_padding || tf_same_padding) {
     void* zero_buffer = xnn_allocate_memory(zero_size);
     if (zero_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for zero padding", zero_size);
@@ -360,6 +378,9 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
 
   convolution_op->type = xnn_operator_type_convolution_q8;
   convolution_op->ukernel.type = ukernel_type;
+  if (tf_same_padding) {
+    convolution_op->flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+  }
 
   convolution_op->state = xnn_run_state_invalid;
 
@@ -495,6 +516,17 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     goto error;
   }
 
+  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
+  if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
+    if (any_padding) {
+      xnn_log_error(
+        "failed to create Convolution operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "TensorFlow SAME padding can't be combined with explicit padding specification",
+        input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+      goto error;
+    }
+  }
+
   status = xnn_status_out_of_memory;
 
   convolution_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
@@ -507,7 +539,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
 
   enum xnn_ukernel_type ukernel_type = xnn_ukernel_type_none;
   const struct dwconv_parameters* dwconv_parameters = NULL;
-  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
   if (group_input_channels == 1 && group_output_channels == 1 && kernel_size == 1 && unit_subsampling && !any_padding) {
     ukernel_type = xnn_ukernel_type_vmulcaddc;
@@ -639,7 +670,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
       XNN_UNREACHABLE;
   }
 
-  if (any_padding) {
+  const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && kernel_size != 1;
+  if (any_padding || tf_same_padding) {
     void* zero_buffer = xnn_allocate_zero_memory(zero_size);
     if (zero_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for zero padding", zero_size);
@@ -669,6 +701,9 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
 
   convolution_op->type = xnn_operator_type_convolution_f32;
   convolution_op->ukernel.type = ukernel_type;
+  if (tf_same_padding) {
+    convolution_op->flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+  }
 
   convolution_op->state = xnn_run_state_invalid;
 
@@ -718,16 +753,34 @@ static enum xnn_status setup_convolution2d_nhwc(
   convolution_op->input_width = input_width;
   convolution_op->input = input;
 
-  convolution_op->output_height = compute_output_dimension(
-      convolution_op->padding_top + input_height + convolution_op->padding_bottom,
-      convolution_op->kernel_height,
-      convolution_op->dilation_height,
-      convolution_op->stride_height);
-  convolution_op->output_width = compute_output_dimension(
-      convolution_op->padding_left + input_width + convolution_op->padding_right,
-      convolution_op->kernel_width,
-      convolution_op->dilation_width,
-      convolution_op->stride_width);
+  if (convolution_op->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
+    convolution_op->output_height = compute_output_dimension_with_tf_same_padding(
+        input_height, convolution_op->stride_height);
+    convolution_op->output_width = compute_output_dimension_with_tf_same_padding(
+        input_width, convolution_op->stride_width);
+
+    const uint32_t effective_kernel_height = (convolution_op->kernel_height - 1) * convolution_op->dilation_height + 1;
+    const uint32_t effective_kernel_width = (convolution_op->kernel_width - 1) * convolution_op->dilation_width + 1;
+    const uint32_t total_padding_height =
+      (convolution_op->output_height - 1) * convolution_op->stride_height + effective_kernel_height - input_height;
+    const uint32_t total_padding_width =
+      (convolution_op->output_width - 1) * convolution_op->stride_width + effective_kernel_width - input_width;
+    convolution_op->padding_top = total_padding_height / 2;
+    convolution_op->padding_left = total_padding_width / 2;
+    convolution_op->padding_bottom = total_padding_height - convolution_op->padding_top;
+    convolution_op->padding_right = total_padding_width - convolution_op->padding_left;
+  } else {
+    convolution_op->output_height = compute_output_dimension(
+        convolution_op->padding_top + input_height + convolution_op->padding_bottom,
+        convolution_op->kernel_height,
+        convolution_op->dilation_height,
+        convolution_op->stride_height);
+    convolution_op->output_width = compute_output_dimension(
+        convolution_op->padding_left + input_width + convolution_op->padding_right,
+        convolution_op->kernel_width,
+        convolution_op->dilation_width,
+        convolution_op->stride_width);
+  }
   convolution_op->output = output;
 
   switch (convolution_op->ukernel.type) {

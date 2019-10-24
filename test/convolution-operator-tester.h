@@ -24,7 +24,23 @@
 
 class ConvolutionOperatorTester {
  public:
+  inline ConvolutionOperatorTester& padding_tf_same(bool padding_same) {
+    if (padding_same) {
+      assert(padding_top() == 0);
+      assert(padding_left() == 0);
+      assert(padding_bottom() == 0);
+      assert(padding_right() == 0);
+    }
+    this->padding_tf_same_ = padding_same;
+    return *this;
+  }
+
+  inline bool padding_tf_same() const {
+    return this->padding_tf_same_;
+  }
+
   inline ConvolutionOperatorTester& padding(uint32_t padding) {
+    assert(!padding_tf_same());
     this->padding_top_ = padding;
     this->padding_right_ = padding;
     this->padding_bottom_ = padding;
@@ -33,6 +49,7 @@ class ConvolutionOperatorTester {
   }
 
   inline ConvolutionOperatorTester& padding(uint32_t padding_height, uint32_t padding_width) {
+    assert(!padding_tf_same());
     this->padding_top_ = padding_height;
     this->padding_right_ = padding_width;
     this->padding_bottom_ = padding_height;
@@ -41,51 +58,81 @@ class ConvolutionOperatorTester {
   }
 
   inline ConvolutionOperatorTester& padding_height(uint32_t padding_height) {
+    assert(!padding_tf_same());
     this->padding_top_ = padding_height;
     this->padding_bottom_ = padding_height;
     return *this;
   }
 
   inline ConvolutionOperatorTester& padding_width(uint32_t padding_width) {
+    assert(!padding_tf_same());
     this->padding_right_ = padding_width;
     this->padding_left_ = padding_width;
     return *this;
   }
 
   inline ConvolutionOperatorTester& padding_top(uint32_t padding_top) {
+    assert(!padding_tf_same());
     this->padding_top_ = padding_top;
     return *this;
   }
 
   inline uint32_t padding_top() const {
-    return this->padding_top_;
-  }
-
-  inline ConvolutionOperatorTester& padding_right(uint32_t padding_right) {
-    this->padding_right_ = padding_right;
-    return *this;
-  }
-
-  inline uint32_t padding_right() const {
-    return this->padding_right_;
-  }
-
-  inline ConvolutionOperatorTester& padding_bottom(uint32_t padding_bottom) {
-    this->padding_bottom_ = padding_bottom;
-    return *this;
-  }
-
-  inline uint32_t padding_bottom() const {
-    return this->padding_bottom_;
+    if (padding_tf_same()) {
+      const uint32_t total_padding_height =
+        (output_height() - 1) * subsampling_height() + dilated_kernel_height() - input_height();
+      return total_padding_height / 2;
+    } else {
+      return this->padding_top_;
+    }
   }
 
   inline ConvolutionOperatorTester& padding_left(uint32_t padding_left) {
+    assert(!padding_tf_same());
     this->padding_left_ = padding_left;
     return *this;
   }
 
   inline uint32_t padding_left() const {
-    return this->padding_left_;
+    if (padding_tf_same()) {
+      const uint32_t total_padding_width =
+        (output_width() - 1) * subsampling_width() + dilated_kernel_width() - input_width();
+      return total_padding_width / 2;
+    } else {
+      return this->padding_left_;
+    }
+  }
+
+  inline ConvolutionOperatorTester& padding_bottom(uint32_t padding_bottom) {
+    assert(!padding_tf_same());
+    this->padding_bottom_ = padding_bottom;
+    return *this;
+  }
+
+  inline uint32_t padding_bottom() const {
+    if (padding_tf_same()) {
+      const uint32_t total_padding_height =
+        (output_height() - 1) * subsampling_height() + dilated_kernel_height() - input_height();
+      return total_padding_height - total_padding_height / 2;
+    } else {
+      return this->padding_bottom_;
+    }
+  }
+
+  inline ConvolutionOperatorTester& padding_right(uint32_t padding_right) {
+    assert(!padding_tf_same());
+    this->padding_right_ = padding_right;
+    return *this;
+  }
+
+  inline uint32_t padding_right() const {
+    if (padding_tf_same()) {
+      const uint32_t total_padding_width =
+        (output_width() - 1) * subsampling_width() + dilated_kernel_width() - input_width();
+      return total_padding_width - total_padding_width / 2;
+    } else {
+      return this->padding_right_;
+    }
   }
 
   inline ConvolutionOperatorTester& input_size(uint32_t input_height, uint32_t input_width) {
@@ -300,20 +347,28 @@ class ConvolutionOperatorTester {
   }
 
   inline size_t output_height() const {
-    const size_t padded_input_height = padding_top() + input_height() + padding_bottom();
-    if (padded_input_height <= dilated_kernel_height()) {
-      return 1;
+    if (padding_tf_same()) {
+      return (input_height() + subsampling_height() - 1) / subsampling_height();
     } else {
-      return (padded_input_height - dilated_kernel_height()) / subsampling_height() + 1;
+      const size_t padded_input_height = padding_top() + input_height() + padding_bottom();
+      if (padded_input_height <= dilated_kernel_height()) {
+        return 1;
+      } else {
+        return (padded_input_height - dilated_kernel_height()) / subsampling_height() + 1;
+      }
     }
   }
 
   inline size_t output_width() const {
-    const size_t padded_input_width = padding_left() + input_width() + padding_right();
-    if (padded_input_width <= dilated_kernel_width()) {
-      return 1;
+    if (padding_tf_same()) {
+      return (input_width() + subsampling_width() - 1) / subsampling_width();
     } else {
-      return (padded_input_width - dilated_kernel_width()) / subsampling_width() + 1;
+      const size_t padded_input_width = padding_left() + input_width() + padding_right();
+      if (padded_input_width <= dilated_kernel_width()) {
+        return 1;
+      } else {
+        return (padded_input_width - dilated_kernel_width()) / subsampling_width() + 1;
+      }
     }
   }
 
@@ -532,7 +587,8 @@ class ConvolutionOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_convolution2d_nhwc_q8(
-          padding_top(), padding_right(), padding_bottom(), padding_left(),
+          padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
+          padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
           kernel_height(), kernel_width(),
           subsampling_height(), subsampling_width(),
           dilation_height(), dilation_width(),
@@ -542,7 +598,7 @@ class ConvolutionOperatorTester {
           kernel_zero_point, 1.0f /* kernel scale */,
           kernel.data(), bias.data(),
           output_zero_point, output_scale, qmin(), qmax(),
-          depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0,
+          (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
           &convolution_op));
 
       // Smart pointer to automatically delete convolution_op.
@@ -684,7 +740,8 @@ class ConvolutionOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_convolution2d_nhwc_f32(
-          padding_top(), padding_right(), padding_bottom(), padding_left(),
+          padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
+          padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
           kernel_height(), kernel_width(),
           subsampling_height(), subsampling_width(),
           dilation_height(), dilation_width(),
@@ -692,7 +749,7 @@ class ConvolutionOperatorTester {
           input_pixel_stride(), output_pixel_stride(),
           kernel.data(), bias.data(),
           output_min, output_max,
-          depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0,
+          (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
           &convolution_op));
 
       // Smart pointer to automatically delete convolution_op.
@@ -1158,6 +1215,7 @@ class ConvolutionOperatorTester {
   uint32_t padding_right_{0};
   uint32_t padding_bottom_{0};
   uint32_t padding_left_{0};
+  bool padding_tf_same_{false};
   size_t input_height_{1};
   size_t input_width_{1};
   uint32_t groups_{1};

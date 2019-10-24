@@ -30,6 +30,9 @@ extern "C" {
 /// The operator assumes NHWC layout for the input, regardless of the output layout.
 #define XNN_FLAG_INPUT_NHWC 0x00000002
 
+/// Match "SAME" padding in TensorFlow. Exact padding values are computed dynamically depending on input size.
+#define XNN_FLAG_TENSORFLOW_SAME_PADDING 0x00000004
+
 /// Status code for any XNNPACK function call.
 enum xnn_status {
   /// The call succeeded, and all output arguments now contain valid data.

@@ -226,6 +226,7 @@ struct xnn_operator {
   void* lookup_table;
   void* pixelwise_buffer;
   struct subconvolution_params* subconvolution_buffer;
+  uint32_t flags;
 
   union {
     union xnn_f32_avgpool_params f32_avgpool_params;

@@ -405,7 +405,7 @@ TEST(CONVOLUTION_OP_Q8, grouped_3x3_with_batch) {
 
 TEST(CONVOLUTION_OP_Q8, 3x3s2) {
   ConvolutionOperatorTester()
-    .input_size(19, 21)
+    .input_size(14, 13)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -415,9 +415,25 @@ TEST(CONVOLUTION_OP_Q8, 3x3s2) {
     .TestQ8();
 }
 
+TEST(CONVOLUTION_OP_Q8, 3x3s2_with_tf_same_padding) {
+  for (size_t input_height = 13; input_height <= 14; input_height++) {
+    for (size_t input_width = 13; input_width <= 14; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(2)
+        .group_input_channels(27)
+        .group_output_channels(19)
+        .iterations(3)
+        .TestQ8();
+    }
+  }
+}
+
 TEST(CONVOLUTION_OP_Q8, 3x3s1x2) {
   ConvolutionOperatorTester()
-    .input_size(13, 13)
+    .input_size(14, 13)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(1, 2)
@@ -427,9 +443,25 @@ TEST(CONVOLUTION_OP_Q8, 3x3s1x2) {
     .TestQ8();
 }
 
+TEST(CONVOLUTION_OP_Q8, 3x3s1x2_with_tf_same_padding) {
+  for (size_t input_height = 13; input_height <= 14; input_height++) {
+    for (size_t input_width = 13; input_width <= 14; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(1, 2)
+        .group_input_channels(27)
+        .group_output_channels(19)
+        .iterations(3)
+        .TestQ8();
+    }
+  }
+}
+
 TEST(CONVOLUTION_OP_Q8, 3x3s2x1) {
   ConvolutionOperatorTester()
-    .input_size(13, 13)
+    .input_size(14, 13)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2, 1)
@@ -439,9 +471,25 @@ TEST(CONVOLUTION_OP_Q8, 3x3s2x1) {
     .TestQ8();
 }
 
+TEST(CONVOLUTION_OP_Q8, 3x3s2x1_with_tf_same_padding) {
+  for (size_t input_height = 13; input_height <= 14; input_height++) {
+    for (size_t input_width = 13; input_width <= 14; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(2, 1)
+        .group_input_channels(27)
+        .group_output_channels(19)
+        .iterations(3)
+        .TestQ8();
+    }
+  }
+}
+
 TEST(CONVOLUTION_OP_Q8, 3x3d2) {
   ConvolutionOperatorTester()
-    .input_size(13, 14)
+    .input_size(14, 13)
     .padding(2)
     .kernel_size(3, 3)
     .dilation(2)
@@ -453,7 +501,7 @@ TEST(CONVOLUTION_OP_Q8, 3x3d2) {
 
 TEST(CONVOLUTION_OP_Q8, 3x3d1x2) {
   ConvolutionOperatorTester()
-    .input_size(14, 15)
+    .input_size(14, 13)
     .padding(1, 2)
     .kernel_size(3, 3)
     .dilation(1, 2)
@@ -465,7 +513,7 @@ TEST(CONVOLUTION_OP_Q8, 3x3d1x2) {
 
 TEST(CONVOLUTION_OP_Q8, 3x3d2x1) {
   ConvolutionOperatorTester()
-    .input_size(15, 14)
+    .input_size(14, 13)
     .padding(2, 1)
     .kernel_size(3, 3)
     .dilation(2, 1)
@@ -496,6 +544,21 @@ TEST(CONVOLUTION_OP_Q8, depthwise_3x3s2) {
     .TestQ8();
 }
 
+TEST(CONVOLUTION_OP_Q8, depthwise_3x3s2_with_tf_same_padding) {
+  for (size_t input_height = 14; input_height <= 15; input_height++) {
+    for (size_t input_width = 14; input_width <= 15; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(2)
+        .groups(27)
+        .iterations(3)
+        .TestQ8();
+    }
+  }
+}
+
 TEST(CONVOLUTION_OP_Q8, depthwise_3x3s1x2) {
   ConvolutionOperatorTester()
     .input_size(15, 14)
@@ -507,6 +570,21 @@ TEST(CONVOLUTION_OP_Q8, depthwise_3x3s1x2) {
     .TestQ8();
 }
 
+TEST(CONVOLUTION_OP_Q8, depthwise_3x3s1x2_with_tf_same_padding) {
+  for (size_t input_height = 14; input_height <= 15; input_height++) {
+    for (size_t input_width = 14; input_width <= 15; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(1, 2)
+        .groups(27)
+        .iterations(3)
+        .TestQ8();
+    }
+  }
+}
+
 TEST(CONVOLUTION_OP_Q8, depthwise_3x3s2x1) {
   ConvolutionOperatorTester()
     .input_size(15, 14)
@@ -516,6 +594,21 @@ TEST(CONVOLUTION_OP_Q8, depthwise_3x3s2x1) {
     .groups(27)
     .iterations(3)
     .TestQ8();
+}
+
+TEST(CONVOLUTION_OP_Q8, depthwise_3x3s2x1_with_tf_same_padding) {
+  for (size_t input_height = 14; input_height <= 15; input_height++) {
+    for (size_t input_width = 14; input_width <= 15; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(2, 1)
+        .groups(27)
+        .iterations(3)
+        .TestQ8();
+    }
+  }
 }
 
 TEST(CONVOLUTION_OP_Q8, depthwise_3x3d2) {
@@ -593,6 +686,21 @@ TEST(DEPTHWISE_CONVOLUTION_OP_Q8, 3x3_with_depth_multiplier) {
     .group_output_channels(3)
     .iterations(3)
     .TestQ8();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_OP_Q8, 3x3s2_with_tf_same_padding) {
+  for (size_t input_height = 14; input_height <= 15; input_height++) {
+    for (size_t input_width = 14; input_width <= 15; input_width++) {
+      ConvolutionOperatorTester()
+        .depthwise_layout(true)
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .groups(24)
+        .iterations(3)
+        .TestQ8();
+    }
+  }
 }
 
 TEST(DEPTHWISE_CONVOLUTION_OP_Q8, 5x5) {
@@ -1400,7 +1508,7 @@ TEST(CONVOLUTION_OP_F32, grouped_3x3_with_batch) {
 
 TEST(CONVOLUTION_OP_F32, 3x3s2) {
   ConvolutionOperatorTester()
-    .input_size(19, 21)
+    .input_size(14, 13)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1410,9 +1518,25 @@ TEST(CONVOLUTION_OP_F32, 3x3s2) {
     .TestF32();
 }
 
+TEST(CONVOLUTION_OP_F32, 3x3s2_with_tf_same_padding) {
+  for (size_t input_height = 13; input_height <= 14; input_height++) {
+    for (size_t input_width = 13; input_width <= 14; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(2)
+        .group_input_channels(27)
+        .group_output_channels(19)
+        .iterations(3)
+        .TestF32();
+    }
+  }
+}
+
 TEST(CONVOLUTION_OP_F32, 3x3s1x2) {
   ConvolutionOperatorTester()
-    .input_size(13, 13)
+    .input_size(14, 13)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(1, 2)
@@ -1422,9 +1546,25 @@ TEST(CONVOLUTION_OP_F32, 3x3s1x2) {
     .TestF32();
 }
 
+TEST(CONVOLUTION_OP_F32, 3x3s1x2_with_tf_same_padding) {
+  for (size_t input_height = 13; input_height <= 14; input_height++) {
+    for (size_t input_width = 13; input_width <= 14; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(1, 2)
+        .group_input_channels(27)
+        .group_output_channels(19)
+        .iterations(3)
+        .TestF32();
+    }
+  }
+}
+
 TEST(CONVOLUTION_OP_F32, 3x3s2x1) {
   ConvolutionOperatorTester()
-    .input_size(13, 13)
+    .input_size(14, 13)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2, 1)
@@ -1432,6 +1572,22 @@ TEST(CONVOLUTION_OP_F32, 3x3s2x1) {
     .group_output_channels(19)
     .iterations(3)
     .TestF32();
+}
+
+TEST(CONVOLUTION_OP_F32, 3x3s2x1_with_tf_same_padding) {
+  for (size_t input_height = 13; input_height <= 14; input_height++) {
+    for (size_t input_width = 13; input_width <= 14; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(2, 1)
+        .group_input_channels(27)
+        .group_output_channels(19)
+        .iterations(3)
+        .TestF32();
+    }
+  }
 }
 
 TEST(CONVOLUTION_OP_F32, 3x3d2) {
@@ -1699,6 +1855,21 @@ TEST(CONVOLUTION_OP_F32, depthwise_3x3s2) {
     .TestF32();
 }
 
+TEST(CONVOLUTION_OP_F32, depthwise_3x3s2_with_tf_same_padding) {
+  for (size_t input_height = 14; input_height <= 15; input_height++) {
+    for (size_t input_width = 14; input_width <= 15; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(2)
+        .groups(27)
+        .iterations(3)
+        .TestF32();
+    }
+  }
+}
+
 TEST(CONVOLUTION_OP_F32, depthwise_3x3s1x2) {
   ConvolutionOperatorTester()
     .input_size(15, 14)
@@ -1710,6 +1881,21 @@ TEST(CONVOLUTION_OP_F32, depthwise_3x3s1x2) {
     .TestF32();
 }
 
+TEST(CONVOLUTION_OP_F32, depthwise_3x3s1x2_with_tf_same_padding) {
+  for (size_t input_height = 14; input_height <= 15; input_height++) {
+    for (size_t input_width = 14; input_width <= 15; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(1, 2)
+        .groups(27)
+        .iterations(3)
+        .TestF32();
+    }
+  }
+}
+
 TEST(CONVOLUTION_OP_F32, depthwise_3x3s2x1) {
   ConvolutionOperatorTester()
     .input_size(15, 14)
@@ -1719,6 +1905,21 @@ TEST(CONVOLUTION_OP_F32, depthwise_3x3s2x1) {
     .groups(27)
     .iterations(3)
     .TestF32();
+}
+
+TEST(CONVOLUTION_OP_F32, depthwise_3x3s2x1_with_tf_same_padding) {
+  for (size_t input_height = 14; input_height <= 15; input_height++) {
+    for (size_t input_width = 14; input_width <= 15; input_width++) {
+      ConvolutionOperatorTester()
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .subsampling(2, 1)
+        .groups(27)
+        .iterations(3)
+        .TestF32();
+    }
+  }
 }
 
 TEST(CONVOLUTION_OP_F32, depthwise_3x3d2) {
@@ -1895,6 +2096,21 @@ TEST(DEPTHWISE_CONVOLUTION_OP_F32, 3x3_with_depth_multiplier) {
     .group_output_channels(3)
     .iterations(3)
     .TestF32();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_OP_F32, 3x3s2_with_tf_same_padding) {
+  for (size_t input_height = 14; input_height <= 15; input_height++) {
+    for (size_t input_width = 14; input_width <= 15; input_width++) {
+      ConvolutionOperatorTester()
+        .depthwise_layout(true)
+        .input_size(input_height, input_width)
+        .padding_tf_same(true)
+        .kernel_size(3, 3)
+        .groups(24)
+        .iterations(3)
+        .TestF32();
+    }
+  }
 }
 
 TEST(DEPTHWISE_CONVOLUTION_OP_F32, 5x5) {
