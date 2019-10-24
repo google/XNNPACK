@@ -1003,6 +1003,29 @@ static void init(void) {
         .mr = 4,
         .nr = 1,
       };
+      xnn_params.f32.hwc2spchw_dconv3x3c3s2 = (struct hwc2spchw_dconv_parameters) {
+        .ukernel_with_symm_padding =
+          (xnn_conv_hwc2spchw_ukernel_function) xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1,
+        .output_channel_tile = 4,
+        .output_height_tile = 1,
+        .output_width_tile = 1,
+      };
+      xnn_params.f32.spchw_dwconv3x3 = (struct spchw_dwconv_parameters) {
+        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_3x3p1__scalar,
+        .input_width_tile = 1,
+        .output_width_tile = 1,
+        .output_height_tile = 1,
+      };
+      xnn_params.f32.spchw_dwconv3x3s2 = (struct spchw_dwconv_parameters) {
+        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_3x3s2p1__scalar,
+        .input_width_tile = 1,
+        .output_width_tile = 1,
+        .output_height_tile = 1,
+      };
+      xnn_params.f32.spchw_gavgpool = (struct spchw_gavgpool_parameters) {
+        .ukernel = (xnn_gavgpool_spchw_ukernel_function) xnn_f32_gavgpool_spchw_ukernel__scalar_x1,
+        .channel_tile = 1,
+      };
     #endif  // XNN_NO_SPNCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 

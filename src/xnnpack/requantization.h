@@ -342,6 +342,8 @@ static inline void xnn_update_f32_gavgpool_params(
     params->neon.mask[1] = -(uint32_t) (w >= 1);
     params->neon.mask[2] = -(uint32_t) (w >= 2);
     params->neon.mask[3] = -(uint32_t) (w >= 3);
+  #else
+    params->scalar.multiplier = multiplier;
   #endif
 }
 
