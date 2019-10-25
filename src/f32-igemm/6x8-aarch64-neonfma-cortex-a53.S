@@ -38,15 +38,14 @@
 # x13 c4
 #  x7 c5
 
-# Vector register usage and GPR shadows
-# A0   v0  v6
-# A1   v1  v7
-# A2   v2  v8
-# A3   v3  v9
-# A4   v4 v10
-# A5   v5 v11
-# B   v12 v13 v14 v15
-# B   v16 v17 v18 v19   x26 x27 x28 x29
+# Vector register usage
+# A0  v0
+# A1  v0[1]
+# A2  v1
+# A3  v1[1]
+# A4  v2
+# A5  v2[1]
+# B   v16 v17 v18 v19
 # C   v20 v21
 # C   v22 v23
 # C   v24 v25
@@ -54,43 +53,41 @@
 # C   v28 v29
 # C   v30 v31
 # Clamp v6 v7
+# unused A   v3 v4 v5 v8 v9 v10 v11
+# unused B   v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
 
-        # Clamp C pointers / Save d8-d15 on stack
-        STP  d8,  d9, [sp, -96]!
+        # Clamp C pointers
         ADD x16, x6, x7          // c1 = c0 + cm_stride
         CMP x0, 2                // if mr < 2
         CSEL x16, x6, x16, LO    //   c1 = c0
 
-        STP d10, d11, [sp, 16]
         ADD x17, x16, x7         // c2 = c1 + cm_stride
                                  // if mr <= 2
         CSEL x17, x16, x17, LS   //   c2 = c1
 
-        STP d12, d13, [sp, 32]
         ADD x18, x17, x7         // c3 = c2 + cm_stride
         CMP x0, 4                // if mr < 4
         CSEL x18, x17, x18, LO   //   c3 = c2
 
-        STP d14, d15, [sp, 48]
         ADD x13, x18, x7         // c4 = c3 + cm_stride
                                  // if mr <= 5
         CSEL x13, x18, x13, LS   //   c4 = c3
 
         # Save x20,x21,x22,x23 on stack
-        STP x20, x21, [sp, 64]
-        STP x22, x23, [sp, 80]
+        STP x20, x21, [sp, -32]!
+        STP x22, x23, [sp, 16]
 
         ADD x7, x13, x7          // c5 = c4 + cm_stride
         CMP x0, 6                // if mr < 6
         CSEL x7, x13, x7, LO     //   c5 = c4
 
         # Load cn_stride, a_offset
-        LDP x10, x11, [sp, 96]
+        LDP x10, x11, [sp, 32]
 
         # Load zero, clamping params pointer
-        LDP x12, x8, [sp, 112]
+        LDP x12, x8, [sp, 48]
 
         # Load clamping_params values
         LD2R {v6.4s, v7.4s}, [x8]
@@ -242,14 +239,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         B.HI 0b
 
         # Restore x20,x21,x22,x23 from stack
-        LDP x22, x23, [sp, 80]
-        LDP x20, x21, [sp, 64]
-
-        # Restore d8-d15 from stack
-        LDP d14, d15, [sp, 48]
-        LDP d12, d13, [sp, 32]
-        LDP d10, d11, [sp, 16]
-        LDP  d8,  d9, [sp], 96
+        LDP x22, x23, [sp, 16]
+        LDP x20, x21, [sp], 32
         RET
 
 5:
@@ -316,14 +307,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         STR s20,  [x6]
 11:
         # Restore x20,x21,x22,x23 from stack
-        LDP x22, x23, [sp, 80]
-        LDP x20, x21, [sp, 64]
-
-        # Restore d8-d15 from stack
-        LDP d14, d15, [sp, 48]
-        LDP d12, d13, [sp, 32]
-        LDP d10, d11, [sp, 16]
-        LDP  d8,  d9, [sp], 96
+        LDP x22, x23, [sp, 16]
+        LDP x20, x21, [sp], 32
         RET
 
 END_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53

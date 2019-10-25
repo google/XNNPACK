@@ -55,7 +55,7 @@
 # C   v28 v29
 # C   v30 v31
 # Clamp v6 v7
-# unused A   v8 v9 v10 v11
+# unused A   v3, v4, v5, v8 v9 v10 v11
 # unused B   v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a53
