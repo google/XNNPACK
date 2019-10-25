@@ -103,6 +103,7 @@ struct xnn_ukernel_dwconv2d {
 
 struct xnn_ukernel_gemm {
   xnn_gemm_ukernel_function default_function;
+  xnn_gemm_ukernel_function little_function;
   xnn_gemm_ukernel_function mr1_function;
   uint8_t mr;
   uint8_t nr;

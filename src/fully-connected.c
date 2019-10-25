@@ -7,11 +7,12 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
+#include <sched.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include <math.h>
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
@@ -22,6 +23,11 @@
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
 
+bool cpu_is_little()
+{
+    int cpu = sched_getcpu();
+    return cpu < 4;  // Consider first 4 cores little.
+}
 
 enum xnn_status xnn_create_fully_connected_nc_q8(
     size_t input_channels,
@@ -294,6 +300,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   fully_connected_op->ukernel.type = xnn_ukernel_type_gemm;
   fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
     .default_function = xnn_params.f32.gemm.gemm,
+    .little_function = xnn_params.f32.gemm.gemm_little,
     .mr1_function = xnn_params.f32.gemm.gemm1,
     .mr = xnn_params.f32.gemm.mr,
     .nr = nr,
@@ -350,6 +357,10 @@ static enum xnn_status setup_fully_connected_nc(
   const uint32_t nr = fully_connected_op->ukernel.gemm.nr;
 
   xnn_gemm_ukernel_function gemm_ukernel = fully_connected_op->ukernel.gemm.default_function;
+
+  if (cpu_is_little() && fully_connected_op->ukernel.gemm.little_function != NULL) {
+    gemm_ukernel = fully_connected_op->ukernel.gemm.little_function;
+  }
   if (batch_size == 1 && fully_connected_op->ukernel.gemm.mr1_function != NULL) {
     gemm_ukernel = fully_connected_op->ukernel.gemm.mr1_function;
     mr = 1;

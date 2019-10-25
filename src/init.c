@@ -281,6 +281,8 @@ static void init(void) {
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
             .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
             .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+            .gemm_little = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53,
+            .igemm_little = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53,
             .mr = 4,
             .nr = 8,
           };
@@ -291,17 +293,21 @@ static void init(void) {
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a57,
             .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
             .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
+            .gemm_little = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
+            .igemm_little = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
             .mr = 6,
             .nr = 8,
           };
           break;
         case cpuinfo_uarch_cortex_a72:
-        case cpuinfo_uarch_cortex_a76:
+        case cpuinfo_uarch_cortex_a76:  // TODO: use a55 kernel for little
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
             .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
             .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+            .gemm_little = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53,
+            .igemm_little = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53,
             .mr = 4,
             .nr = 8,
           };
@@ -310,12 +316,14 @@ static void init(void) {
         case cpuinfo_uarch_mongoose_m1:
         case cpuinfo_uarch_mongoose_m2:
         case cpuinfo_uarch_meerkat_m3:
-        case (cpuinfo_uarch_meerkat_m3 + 1):
+        case (cpuinfo_uarch_meerkat_m3 + 1):  // TODO: use a55 kernel for little
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75,
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75,
             .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
             .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+            .gemm_little = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
+            .igemm_little = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
             .mr = 6,
             .nr = 8,
           };
@@ -327,6 +335,8 @@ static void init(void) {
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53,
             .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53,
             .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53,
+            .gemm_little = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x12__aarch64_neonfma_cortex_a53,
+            .igemm_little = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53,
             .mr = 4,
             .nr = 12,
           };
@@ -337,6 +347,8 @@ static void init(void) {
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a73,
             .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
             .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+            .gemm_little = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
+            .igemm_little = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
             .mr = 6,
             .nr = 8,
           };
@@ -347,6 +359,8 @@ static void init(void) {
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_ld64,
             .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
             .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+            .gemm_little = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
+            .igemm_little = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
             .mr = 6,
             .nr = 8,
           };
@@ -358,6 +372,8 @@ static void init(void) {
         .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_ld64,
         .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neonfma_ld64,
         .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neonfma_ld64,
+        .gemm_little = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__neonfma_ld64,
+        .igemm_little = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_ld64,
         .mr = 6,
         .nr = 8,
       };

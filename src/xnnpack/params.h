@@ -1151,6 +1151,9 @@ struct gemm_parameters {
   // Optional GEMM and IGEMM micro-kernels with MR=1 and the same NR and KR parameters.
   xnn_gemm_ukernel_function gemm1;
   xnn_igemm_ukernel_function igemm1;
+  // Optional GEMM and IGEMM micro-kernels for little cores.
+  xnn_gemm_ukernel_function gemm_little;
+  xnn_igemm_ukernel_function igemm_little;
   uint8_t mr;
   uint8_t nr;
   uint8_t log2_kr;
