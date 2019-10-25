@@ -516,11 +516,15 @@ static inline void xnn_pack_f32_deconv_goki_w(
   size_t sw,
   size_t nr,
   size_t kr,
+  size_t sr,
   const float* k,
   const float* b,
   float* packed_w,
   struct subconvolution_params* params)
 {
+  const size_t skr = sr * kr;
+  const size_t skc = round_down_po2(kc, skr);
+  const size_t sr_mask = (sr - 1) * kr;
   for (size_t i = 0; i < g; i++) {
     for (size_t oy = 0; oy < sh; oy++) {
       for (size_t ox = 0; ox < sw; ox++) {
@@ -535,7 +539,17 @@ static inline void xnn_pack_f32_deconv_goki_w(
           packed_w += nr - nr_block_size;
           for (size_t ky = oy; ky < kh; ky += sh) {
             for (size_t kx = ox; kx < kw; kx += sw) {
-              for (size_t kr_block_start = 0; kr_block_start < kc; kr_block_start += kr) {
+              for (size_t kr_block_start = 0; kr_block_start < skc; kr_block_start += kr) {
+                for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+                  for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
+                    *packed_w++ =
+                      k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & sr_mask) + kr_block_offset];
+                  }
+                }
+                packed_w += (nr - nr_block_size) * kr;
+              }
+
+              for (size_t kr_block_start = skc; kr_block_start < kc; kr_block_start += kr) {
                 const size_t kr_block_size = min(kc - kr_block_start, kr);
                 for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
                   for (size_t kr_block_offset = 0; kr_block_offset < kr_block_size; kr_block_offset++) {

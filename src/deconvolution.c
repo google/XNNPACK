@@ -496,7 +496,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
       xnn_pack_f32_deconv_goki_w(
         groups, group_output_channels, kernel_height, kernel_width, group_input_channels,
         stride_height, stride_width,
-        nr, kr,
+        nr, kr, sr,
         kernel, bias, deconvolution_op->packed_weights, deconvolution_op->subconvolution_buffer);
       break;
     default:
