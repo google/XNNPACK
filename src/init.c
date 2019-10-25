@@ -756,12 +756,13 @@ static void init(void) {
       };
     } else {
       xnn_params.f32.gemm = (struct gemm_parameters) {
-        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__psimd_splat,
-        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__psimd_splat,
-        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__psimd_splat,
-        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__psimd_splat,
+        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8s4__psimd,
+        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8s4__psimd,
+        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_igemm_ukernel_1x8s4__psimd,
+        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8s4__psimd,
         .mr = 6,
         .nr = 8,
+        .log2_sr = 2,
       };
     }
     xnn_params.f32.gemm2 = (struct gemm_parameters) {
