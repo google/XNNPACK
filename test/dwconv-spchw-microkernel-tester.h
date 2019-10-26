@@ -23,8 +23,8 @@
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/math.h>
 #include <xnnpack/pack.h>
-#include <xnnpack/params.h>
 #include <xnnpack/params-init.h>
+#include <xnnpack/params.h>
 
 
 class DWConvSpCHWMicrokernelTester {

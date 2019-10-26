@@ -21,8 +21,8 @@
 #include <xnnpack/indirection.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
-#include <xnnpack/params.h>
 #include <xnnpack/params-init.h>
+#include <xnnpack/params.h>
 
 
 static void DWConvBenchmark(benchmark::State& state,
