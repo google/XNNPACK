@@ -23,16 +23,16 @@
 # x19-30 need to be preserved if used.
 
 # A pointers
-# x14 a0
-# x15 a1
-# x20 a2
-# x21 a3
+# x13 a0
+# x14 a1
+# x15 a2
+#  x8 a3
 
 # C pointers
 #  x6 c0
 # x16 c1
 # x17 c2
-# x7  c3
+#  x7 c3
 
 # Vector register usage
 # A0  v0
@@ -64,15 +64,11 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         CMP x0, 4                // if mr < 4
         CSEL x7, x17, x7, LO   //   c3 = c2
 
-        # Save x20,x21,x22,x23 on stack
-        STP x20, x21, [sp, -32]!
-        STP x22, x23, [sp, 16]
-
         # Load cn_stride, a_offset
-        LDP x10, x11, [sp, 32]
+        LDP x10, x11, [sp]
 
         # Load zero, clamping params pointer
-        LDP x12, x8, [sp, 48]
+        LDP x12, x8, [sp, 16]
 
         # Load clamping_params values
         LD2R {v6.4s, v7.4s}, [x8]
@@ -94,21 +90,21 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
 
 1:
         # Load next 4 A pointers
-        LDP x14, x15, [x4], 16
-        LDP x20, x21, [x4], 16
+        LDP x13, x14, [x4], 16
+        LDP x15, x8, [x4], 16
 
-        CMP x14, x12            // if a0 == zero
-        ADD x14, x14, x11       // a0 += a_offset
-        CSEL x14, x12, x14, EQ  //   a0 = zero, else += a0 + a_offset
-        CMP x15, x12            // if a1 == zero
-        ADD x15, x15, x11       // a1 += a_offset
-        CSEL x15, x12, x15, EQ  //   a1 = zero, else += a1 + a_offset
-        CMP x20, x12            // if a2 == zero
-        ADD x20, x20, x11       // a2 += a_offset
-        CSEL x20, x12, x20, EQ  //   a2 = zero, else += a2 + a_offset
-        CMP x21, x12            // if a3 == zero
-        ADD x21, x21, x11       // a3 += a_offset
-        CSEL x21, x12, x21, EQ  //   a3 = zero, else += a3 + a_offset
+        CMP x13, x12            // if a0 == zero
+        ADD x13, x13, x11       // a0 += a_offset
+        CSEL x13, x12, x13, EQ  //   a0 = zero, else += a0 + a_offset
+        CMP x14, x12            // if a1 == zero
+        ADD x14, x14, x11       // a1 += a_offset
+        CSEL x14, x12, x14, EQ  //   a1 = zero, else += a1 + a_offset
+        CMP x15, x12            // if a2 == zero
+        ADD x15, x15, x11       // a2 += a_offset
+        CSEL x15, x12, x15, EQ  //   a2 = zero, else += a2 + a_offset
+        CMP x8, x12            // if a3 == zero
+        ADD x8, x8, x11       // a3 += a_offset
+        CSEL x8, x12, x8, EQ  //   a3 = zero, else += a3 + a_offset
 
         # Is there at least 2 floats (8 bytes) for main loop?
         SUBS x0, x2, 8  // k = kc - 8
@@ -117,11 +113,11 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         # Main loop - 2 floats of A (8 bytes)
         # 16 FMA + 4 LD64 A + 2 LDP B
 2:
-        LDR   d0,  [x14], 8
+        LDR   d0,  [x13], 8
         LDP  q16,  q17, [x5], 32
-        LD1   {v0.d}[1], [x15], 8
-        LDR   d1, [x20], 8
-        LD1   {v1.d}[1], [x21], 8
+        LD1   {v0.d}[1], [x14], 8
+        LDR   d1, [x15], 8
+        LD1   {v1.d}[1], [x8], 8
 
         FMLA v20.4s, v16.4s,  v0.s[0]
         FMLA v22.4s, v16.4s,  v0.s[2]
@@ -188,19 +184,15 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         # nc loop
         SUBS x1, x1, 8
         B.HI 0b
-
-        # Restore x20,x21,x22,x23 from stack
-        LDP x22, x23, [sp, 16]
-        LDP x20, x21, [sp], 32
         RET
 
 5:
         # Remainder- 1 floats of A (4 bytes)
-        LDR   s0,  [x14], 4
+        LDR   s0,  [x13], 4
         LDP  q16,  q17, [x5], 32
-        LD1   {v0.s}[2], [x15], 4
-        LDR   s1, [x20], 4
-        LD1   {v1.s}[2], [x21], 4
+        LD1   {v0.s}[2], [x14], 4
+        LDR   s1, [x15], 4
+        LD1   {v1.s}[2], [x8], 4
 
         FMLA v20.4s, v16.4s,  v0.s[0]
         FMLA v22.4s, v16.4s,  v0.s[2]
@@ -241,9 +233,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         STR s22, [x16]
         STR s20,  [x6]
 11:
-        # Restore x20,x21,x22,x23 from stack
-        LDP x22, x23, [sp, 16]
-        LDP x20, x21, [sp], 32
         RET
 
 END_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
