@@ -408,8 +408,10 @@ AVX_UKERNELS = [
 
 AVX2_UKERNELS = [
     "src/f32-raddexpminusmax/avx2-p5-unroll64.c",
+    "src/f32-raddextexp/avx2-p5-unroll64.c",
     "src/f32-raddstoreexpminusmax/avx2-p5-unroll64.c",
     "src/f32-vscaleexpminusmax/avx2-p5-unroll64.c",
+    "src/f32-vscaleextexp/avx2-p5-unroll64.c",
     "src/math/exp-avx2-p5.c",
     "src/math/exp-avx2-perm-p3.c",
     "src/math/exp-avx2-perm-p4.c",
@@ -419,10 +421,12 @@ AVX2_UKERNELS = [
 
 AVX512F_UKERNELS = [
     "src/f32-raddexpminusmax/avx512f-p5-scalef-unroll128.c",
+    "src/f32-raddextexp/avx512f-p5-scalef-unroll128.c",
     "src/f32-raddstoreexpminusmax/avx512f-p5-scalef-unroll128.c",
     "src/f32-rmax/avx512f.c",
     "src/f32-vscale/avx512f-unroll64.c",
     "src/f32-vscaleexpminusmax/avx512f-p5-scalef-unroll128.c",
+    "src/f32-vscaleextexp/avx512f-p5-scalef-unroll128.c",
     "src/math/exp-avx512f-p5-scalef.c",
     "src/math/exp-avx512f-p5.c",
     "src/math/exp-avx512f-perm-p3.c",
@@ -505,6 +509,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/ppmm.h",
     "src/xnnpack/prelu.h",
     "src/xnnpack/raddexpminusmax.h",
+    "src/xnnpack/raddextexp.h",
     "src/xnnpack/raddstoreexpminusmax.h",
     "src/xnnpack/rmax.h",
     "src/xnnpack/scalar-utils.h",
@@ -515,6 +520,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vmulcaddc.h",
     "src/xnnpack/vscale.h",
     "src/xnnpack/vscaleexpminusmax.h",
+    "src/xnnpack/vscaleextexp.h",
     "src/xnnpack/vsub.h",
     "src/xnnpack/zip.h",
 ]
@@ -1291,6 +1297,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_raddextexp_test",
+    srcs = [
+        "test/f32-raddextexp.cc",
+        "test/raddextexp-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_raddstoreexpminusmax_test",
     srcs = [
         "test/f32-raddstoreexpminusmax.cc",
@@ -1360,6 +1375,15 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vscaleexpminusmax.cc",
         "test/vscaleexpminusmax-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vscaleextexp_test",
+    srcs = [
+        "test/f32-vscaleextexp.cc",
+        "test/vscaleextexp-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

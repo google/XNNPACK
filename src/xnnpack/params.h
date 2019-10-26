@@ -1144,6 +1144,20 @@ typedef void (*xnn_f32_vscale_ukernel_function)(
     float* y,
     float c);
 
+// Reduce-Add Extended ("mantissa" + "exponent") Exponentials
+typedef void (*xnn_f32_raddextexp_ukernel_function)(
+    size_t n,
+    const float* input,
+    float* sum);
+
+// Vector Scale Extended ("mantissa" + "exponent") Exponentials
+typedef void (*xnn_f32_vscaleextexp_ukernel_function)(
+    size_t n,
+    const float* input,
+    float* output,
+    float scale_mantissa,
+    float scale_exponent);
+
 
 struct gemm_parameters {
   xnn_gemm_ukernel_function gemm;
