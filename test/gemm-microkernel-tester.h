@@ -23,8 +23,9 @@
 
 #include <xnnpack.h>
 #include <xnnpack/AlignedAllocator.h>
-#include <xnnpack/params.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/params-init.h>
+#include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
 
 
@@ -265,18 +266,18 @@ class GemmMicrokernelTester {
       union xnn_q8_gemm_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_compute_q8_gemm_params(
+          quantization_params = xnn_init_q8_gemm_params(
             a_zero_point(), b_zero_point(),
             requantization_scale, c_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_compute_scalar_q8_gemm_params(
+          quantization_params = xnn_init_scalar_q8_gemm_params(
             a_zero_point(), b_zero_point(),
             requantization_scale, c_zero_point, qmin(), qmax());
           break;
       }
       const union xnn_q31_requantization_params scalar_requantization_params =
-        xnn_compute_scalar_requantization_params(
+        xnn_init_scalar_requantization_params(
           requantization_scale, c_zero_point, qmin(), qmax());
 
       gemm(
@@ -395,18 +396,18 @@ class GemmMicrokernelTester {
       union xnn_q8_gemm_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_compute_q8_gemm_params(
+          quantization_params = xnn_init_q8_gemm_params(
             a_zero_point(), b_zero_point(),
             requantization_scale, c_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_compute_scalar_q8_gemm_params(
+          quantization_params = xnn_init_scalar_q8_gemm_params(
             a_zero_point(), b_zero_point(),
             requantization_scale, c_zero_point, qmin(), qmax());
           break;
       }
       const union xnn_q31_requantization_params scalar_requantization_params =
-        xnn_compute_scalar_requantization_params(
+        xnn_init_scalar_requantization_params(
           requantization_scale, c_zero_point, qmin(), qmax());
 
       const uint8_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
@@ -570,10 +571,10 @@ class GemmMicrokernelTester {
       xnn_f32_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_compute_f32_output_params(c_min, c_max);
+          output_params = xnn_init_f32_output_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_compute_scalar_f32_output_params(c_min, c_max);
+          output_params = xnn_init_scalar_f32_output_params(c_min, c_max);
           break;
       }
 
@@ -649,10 +650,10 @@ class GemmMicrokernelTester {
       xnn_f32_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_compute_f32_output_params(c_min, c_max);
+          output_params = xnn_init_f32_output_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_compute_scalar_f32_output_params(c_min, c_max);
+          output_params = xnn_init_scalar_f32_output_params(c_min, c_max);
           break;
       }
 
@@ -740,10 +741,10 @@ class GemmMicrokernelTester {
       xnn_f32_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_compute_f32_output_params(c_min, c_max);
+          output_params = xnn_init_f32_output_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_compute_scalar_f32_output_params(c_min, c_max);
+          output_params = xnn_init_scalar_f32_output_params(c_min, c_max);
           break;
       }
 
@@ -869,10 +870,10 @@ class GemmMicrokernelTester {
       xnn_f32_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_compute_f32_output_params(c_min, c_max);
+          output_params = xnn_init_f32_output_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_compute_scalar_f32_output_params(c_min, c_max);
+          output_params = xnn_init_scalar_f32_output_params(c_min, c_max);
           break;
       }
 

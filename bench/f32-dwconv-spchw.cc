@@ -21,7 +21,8 @@
 #include <xnnpack/indirection.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
-#include <xnnpack/requantization.h>
+#include <xnnpack/params-init.h>
+#include <xnnpack/params.h>
 
 
 static void DWConvCHWBenchmark(benchmark::State& state,
@@ -110,7 +111,7 @@ static void DWConvCHWBenchmark(benchmark::State& state,
   std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_f32_spchw_params output_params =
-    xnn_compute_f32_spchw_params(input_width, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+    xnn_init_f32_spchw_params(input_width, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -227,7 +228,7 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
   std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_f32_spchw_params output_params =
-    xnn_compute_f32_spchw_params(input_width, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+    xnn_init_f32_spchw_params(input_width, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {

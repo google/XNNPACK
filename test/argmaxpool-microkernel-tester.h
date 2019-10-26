@@ -18,7 +18,7 @@
 #include <xnnpack.h>
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/params.h>
-#include <xnnpack/requantization.h>
+#include <xnnpack/params-init.h>
 
 
 class ArgmaxPoolMicrokernelTester {
@@ -216,10 +216,10 @@ class ArgmaxPoolMicrokernelTester {
       xnn_f32_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_compute_f32_output_params(y_min, y_max);
+          output_params = xnn_init_f32_output_params(y_min, y_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_compute_scalar_f32_output_params(y_min, y_max);
+          output_params = xnn_init_scalar_f32_output_params(y_min, y_max);
           break;
       }
 
@@ -309,10 +309,10 @@ class ArgmaxPoolMicrokernelTester {
       xnn_f32_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_compute_f32_output_params(y_min, y_max);
+          output_params = xnn_init_f32_output_params(y_min, y_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_compute_scalar_f32_output_params(y_min, y_max);
+          output_params = xnn_init_scalar_f32_output_params(y_min, y_max);
           break;
       }
 

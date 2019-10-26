@@ -20,8 +20,8 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/im2col.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
-#include <xnnpack/requantization.h>
 
 
 static void Im2ColGEMMBenchmark(benchmark::State& state,
@@ -87,7 +87,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
   std::fill(c.begin(), c.end(), std::nanf(""));
 
   xnn_f32_output_params output_params =
-    xnn_compute_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+    xnn_init_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {

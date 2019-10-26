@@ -14,9 +14,9 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/requantization.h>
 #include <xnnpack/log.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 
 
@@ -133,7 +133,7 @@ enum xnn_status xnn_create_add_nc_q8(
   add_op->input2_pixel_stride = b_stride;
   add_op->output_pixel_stride = sum_stride;
   add_op->q8_add_params =
-    xnn_compute_q8_add_params(
+    xnn_init_q8_add_params(
       a_zero_point, b_zero_point, sum_zero_point,
       a_scale / sum_scale, b_scale / sum_scale,
       sum_min, sum_max);
@@ -232,7 +232,7 @@ enum xnn_status xnn_create_add_nc_f32(
   add_op->input_pixel_stride = a_stride;
   add_op->input2_pixel_stride = b_stride;
   add_op->output_pixel_stride = sum_stride;
-  add_op->f32_output_params = xnn_compute_f32_output_params(sum_min, sum_max);
+  add_op->f32_output_params = xnn_init_f32_output_params(sum_min, sum_max);
 
   add_op->type = xnn_operator_type_add_f32;
   add_op->ukernel.type = xnn_ukernel_type_add;

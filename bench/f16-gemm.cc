@@ -24,7 +24,7 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
-#include <xnnpack/requantization.h>
+#include <xnnpack/params-init.h>
 
 
 static void GEMMBenchmark(benchmark::State& state,

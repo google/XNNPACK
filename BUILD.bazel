@@ -534,6 +534,7 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/math-stubs.h",
     "src/xnnpack/operator.h",
     "src/xnnpack/pack.h",
+    "src/xnnpack/params-init.h",
     "src/xnnpack/requantization-stubs.h",
     "src/xnnpack/requantization.h",
 ]
@@ -543,12 +544,13 @@ ACCURACY_EVAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
 ]
 
 MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS + [
-    "src/xnnpack/requantization.h",
+    "src/xnnpack/params-init.h",
     "include/xnnpack.h",
 ]
 
 MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/isa-checks.h",
+    "src/xnnpack/params-init.h",
     "src/xnnpack/requantization.h",
     "include/xnnpack.h",
 ]

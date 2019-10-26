@@ -17,7 +17,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/params.h>
-#include <xnnpack/requantization.h>
+#include <xnnpack/params-init.h>
 
 
 class HSwishMicrokernelTester {
@@ -76,10 +76,10 @@ class HSwishMicrokernelTester {
       union xnn_f32_hswish_params params = { };
       switch (variant) {
         case Variant::Native:
-          params = xnn_compute_f32_hswish_params();
+          params = xnn_init_f32_hswish_params();
           break;
         case Variant::Scalar:
-          params = xnn_compute_scalar_f32_hswish_params();
+          params = xnn_init_scalar_f32_hswish_params();
           break;
       }
 

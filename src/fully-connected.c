@@ -15,11 +15,11 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/requantization.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
+#include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 
 
@@ -158,7 +158,7 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
   fully_connected_op->kernel_zero_point = kernel_zero_point;
 
   fully_connected_op->q8_gemm_params =
-    xnn_compute_q8_gemm_params(
+    xnn_init_q8_gemm_params(
       input_zero_point, kernel_zero_point,
       requantization_scale, output_zero_point, output_min, output_max);
 
@@ -287,7 +287,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   fully_connected_op->input_pixel_stride = input_stride;
   fully_connected_op->output_pixel_stride = output_stride;
 
-  fully_connected_op->f32_output_params = xnn_compute_f32_output_params(output_min, output_max);
+  fully_connected_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
 
   fully_connected_op->type = xnn_operator_type_fully_connected_f32;
 

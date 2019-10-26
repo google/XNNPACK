@@ -18,6 +18,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/params.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/indirection.h>
 
 
@@ -148,7 +149,7 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->input_pixel_stride = input_pixel_stride;
   argmax_pooling_op->output_pixel_stride = output_pixel_stride;
 
-  argmax_pooling_op->f32_output_params = xnn_compute_f32_output_params(output_min, output_max);
+  argmax_pooling_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
 
   argmax_pooling_op->type = xnn_operator_type_argmax_pooling_f32;
   argmax_pooling_op->ukernel.type = xnn_ukernel_type_argmax_pooling;

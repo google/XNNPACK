@@ -9,9 +9,10 @@
 #include <stdlib.h>
 
 #include <xnnpack.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/requantization.h>
 #include <xnnpack/log.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/params-init.h>
+#include <xnnpack/params.h>
 
 
 enum xnn_status xnn_create_hardswish_nc_f32(
@@ -64,7 +65,7 @@ enum xnn_status xnn_create_hardswish_nc_f32(
   hardswish_op->channels = channels;
   hardswish_op->input_pixel_stride = input_stride;
   hardswish_op->output_pixel_stride = output_stride;
-  hardswish_op->f32_hswish_params = xnn_compute_f32_hswish_params();
+  hardswish_op->f32_hswish_params = xnn_init_f32_hswish_params();
 
   hardswish_op->type = xnn_operator_type_hswish_f32;
   hardswish_op->ukernel.type = xnn_ukernel_type_hswish;

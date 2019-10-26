@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <xnnpack.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
 
@@ -170,20 +171,20 @@ class VAddMicrokernelTester {
       xnn_q8_add_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_compute_q8_add_params(
+          quantization_params = xnn_init_q8_add_params(
             a_zero_point(), b_zero_point(), y_zero_point(),
             a_scale() / y_scale(), b_scale() / y_scale(),
             qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_compute_scalar_q8_add_params(
+          quantization_params = xnn_init_scalar_q8_add_params(
             a_zero_point(), b_zero_point(), y_zero_point(),
             a_scale() / y_scale(), b_scale() / y_scale(),
             qmin(), qmax());
           break;
       }
       const xnn_q8_add_params scalar_quantization_params =
-          xnn_compute_scalar_q8_add_params(
+          xnn_init_scalar_q8_add_params(
             a_zero_point(), b_zero_point(), y_zero_point(),
             a_scale() / y_scale(), b_scale() / y_scale(),
             qmin(), qmax());
@@ -255,10 +256,10 @@ class VAddMicrokernelTester {
       xnn_f32_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_compute_f32_output_params(y_min, y_max);
+          output_params = xnn_init_f32_output_params(y_min, y_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_compute_scalar_f32_output_params(y_min, y_max);
+          output_params = xnn_init_scalar_f32_output_params(y_min, y_max);
           break;
       }
 

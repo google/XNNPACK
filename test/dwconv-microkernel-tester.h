@@ -22,6 +22,7 @@
 #include <xnnpack.h>
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
 
@@ -210,18 +211,18 @@ class DWConvMicrokernelTester {
       union xnn_q8_gemm_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_compute_q8_gemm_params(
+          quantization_params = xnn_init_q8_gemm_params(
             input_zero_point(), kernel_zero_point(),
             requantization_scale, output_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_compute_scalar_q8_gemm_params(
+          quantization_params = xnn_init_scalar_q8_gemm_params(
             input_zero_point(), kernel_zero_point(),
             requantization_scale, output_zero_point, qmin(), qmax());
           break;
       }
       const union xnn_q31_requantization_params scalar_requantization_params =
-        xnn_compute_scalar_requantization_params(
+        xnn_init_scalar_requantization_params(
           requantization_scale, output_zero_point, qmin(), qmax());
 
       // Renormalize reference results.
@@ -304,10 +305,10 @@ class DWConvMicrokernelTester {
       xnn_f32_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_compute_f32_output_params(output_min, output_max);
+          output_params = xnn_init_f32_output_params(output_min, output_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_compute_scalar_f32_output_params(output_min, output_max);
+          output_params = xnn_init_scalar_f32_output_params(output_min, output_max);
           break;
       }
 

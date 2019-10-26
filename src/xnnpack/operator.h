@@ -13,7 +13,7 @@
 
 #include <pthreadpool.h>
 
-#include <xnnpack/requantization.h>
+#include <xnnpack/params.h>
 #include <xnnpack/compute.h>
 
 

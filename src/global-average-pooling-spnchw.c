@@ -11,9 +11,9 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/requantization.h>
 #include <xnnpack/log.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 
 
@@ -78,8 +78,7 @@ enum xnn_status xnn_create_global_average_pooling_spnchw_f32(
   }
 
   global_average_pooling_op->channels = channels;
-  global_average_pooling_op->f32_gavgpool_params =
-    xnn_compute_f32_gavgpool_params(nanf(""), output_min, output_max, 0);
+  global_average_pooling_op->f32_gavgpool_params = xnn_init_f32_gavgpool_params(nanf(""), output_min, output_max, 0);
 
   global_average_pooling_op->type = xnn_operator_type_global_average_pooling_spnchw_f32;
   global_average_pooling_op->ukernel.type = xnn_ukernel_type_global_average_pooling;

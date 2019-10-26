@@ -16,11 +16,11 @@
 #include "bench/dconv.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
-#include <xnnpack/conv.h>
 #include <xnnpack/common.h>
+#include <xnnpack/conv.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
-#include <xnnpack/requantization.h>
 
 
 static void DConvHWC2SpCHW3X3S2P1Benchmark(benchmark::State& state,
@@ -79,7 +79,7 @@ static void DConvHWC2SpCHW3X3S2P1Benchmark(benchmark::State& state,
   std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_f32_output_params output_params =
-    xnn_compute_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+    xnn_init_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {

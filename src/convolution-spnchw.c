@@ -13,14 +13,15 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/log.h>
 #include <xnnpack/common.h>
 #include <xnnpack/compute.h>
-#include <xnnpack/math.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/params.h>
 #include <xnnpack/indirection.h>
+#include <xnnpack/log.h>
+#include <xnnpack/math.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/pack.h>
+#include <xnnpack/params-init.h>
+#include <xnnpack/params.h>
 
 
 static inline size_t compute_output_dimension(
@@ -426,9 +427,9 @@ enum xnn_status xnn_create_convolution2d_spnchw_f32(
   convolution_op->group_output_channels = group_output_channels;
 
   if (ukernel_type == xnn_ukernel_type_dwconv) {
-    convolution_op->f32_spchw_params = xnn_compute_f32_spchw_params(0, output_min, output_max);
+    convolution_op->f32_spchw_params = xnn_init_f32_spchw_params(0, output_min, output_max);
   } else {
-    convolution_op->f32_output_params = xnn_compute_f32_output_params(output_min, output_max);
+    convolution_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
   }
 
   convolution_op->type = xnn_operator_type_convolution_spnchw_f32;

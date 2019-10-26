@@ -28,9 +28,9 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/packx.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 #include <xnnpack/ppmm.h>
-#include <xnnpack/requantization.h>
 
 
 static void GEMMBenchmark(benchmark::State& state,
@@ -73,7 +73,7 @@ static void GEMMBenchmark(benchmark::State& state,
   std::fill(c.begin(), c.end(), std::nanf(""));
 
   xnn_f32_output_params output_params =
-    xnn_compute_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+    xnn_init_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -144,7 +144,7 @@ static void PPMM1PBenchmark(benchmark::State& state,
   std::fill(c.begin(), c.end(), std::nanf(""));
 
   xnn_f32_output_params output_params =
-    xnn_compute_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+    xnn_init_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -217,7 +217,7 @@ static void PPMM2PBenchmark(benchmark::State& state,
   std::fill(c.begin(), c.end(), std::nanf(""));
 
   xnn_f32_output_params output_params =
-    xnn_compute_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+    xnn_init_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {

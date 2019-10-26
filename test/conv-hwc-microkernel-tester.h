@@ -20,7 +20,7 @@
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
-#include <xnnpack/requantization.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack.h>
 
 
@@ -362,10 +362,10 @@ public:
       xnn_f32_output_params output_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_compute_f32_output_params(output_min, output_max);
+          output_params = xnn_init_f32_output_params(output_min, output_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_compute_scalar_f32_output_params(output_min, output_max);
+          output_params = xnn_init_scalar_f32_output_params(output_min, output_max);
           break;
       }
 

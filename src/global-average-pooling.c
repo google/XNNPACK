@@ -14,9 +14,9 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/requantization.h>
 #include <xnnpack/log.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 
 
@@ -221,8 +221,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
   global_average_pooling_op->channels = channels;
   global_average_pooling_op->input_pixel_stride = input_stride;
   global_average_pooling_op->output_pixel_stride = output_stride;
-  global_average_pooling_op->f32_avgpool_params =
-    xnn_compute_f32_avgpool_params(nanf(""), output_min, output_max);
+  global_average_pooling_op->f32_avgpool_params = xnn_init_f32_avgpool_params(nanf(""), output_min, output_max);
 
   global_average_pooling_op->type = xnn_operator_type_global_average_pooling_f32;
   global_average_pooling_op->ukernel.type = xnn_ukernel_type_global_average_pooling;
@@ -272,7 +271,7 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_q8(
   global_average_pooling_op->output = output;
 
   global_average_pooling_op->q8_avgpool_params =
-    xnn_compute_q8_avgpool_params(
+    xnn_init_q8_avgpool_params(
       -(int32_t) width * (int32_t) (uint32_t) global_average_pooling_op->input_zero_point,
       global_average_pooling_op->input_scale / (global_average_pooling_op->output_scale * (float) width),
       global_average_pooling_op->output_zero_point,

@@ -16,14 +16,15 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/log.h>
 #include <xnnpack/common.h>
 #include <xnnpack/compute.h>
-#include <xnnpack/math.h>
-#include <xnnpack/pack.h>
-#include <xnnpack/params.h>
 #include <xnnpack/indirection.h>
+#include <xnnpack/log.h>
+#include <xnnpack/math.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/pack.h>
+#include <xnnpack/params-init.h>
+#include <xnnpack/params.h>
 
 
 static inline size_t compute_output_dimension(
@@ -372,7 +373,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
   convolution_op->kernel_zero_point = kernel_zero_point;
 
   convolution_op->q8_gemm_params =
-    xnn_compute_q8_gemm_params(
+    xnn_init_q8_gemm_params(
       input_zero_point, kernel_zero_point,
       convolution_scale, output_zero_point, output_min, output_max);
 
@@ -697,7 +698,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   convolution_op->input_pixel_stride = input_pixel_stride;
   convolution_op->output_pixel_stride = output_pixel_stride;
 
-  convolution_op->f32_output_params = xnn_compute_f32_output_params(output_min, output_max);
+  convolution_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
 
   convolution_op->type = xnn_operator_type_convolution_f32;
   convolution_op->ukernel.type = ukernel_type;

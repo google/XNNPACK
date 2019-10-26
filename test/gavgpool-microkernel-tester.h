@@ -22,6 +22,7 @@
 #include <xnnpack.h>
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/params.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/requantization.h>
 
 
@@ -163,20 +164,20 @@ class GAvgPoolMicrokernelTester {
       union xnn_q8_avgpool_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_compute_q8_avgpool_params(
+          quantization_params = xnn_init_q8_avgpool_params(
             -int32_t(x_zero_point()) * int32_t(m()),
             x_scale() / (y_scale() * float(m())),
             y_zero_point(), qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_compute_scalar_q8_avgpool_params(
+          quantization_params = xnn_init_scalar_q8_avgpool_params(
             -int32_t(x_zero_point()) * int32_t(m()),
             x_scale() / (y_scale() * float(m())),
             y_zero_point(), qmin(), qmax());
           break;
       }
       const union xnn_q8_avgpool_params scalar_quantization_params =
-        xnn_compute_scalar_q8_avgpool_params(
+        xnn_init_scalar_q8_avgpool_params(
           -int32_t(x_zero_point()) * int32_t(m()),
           x_scale() / (y_scale() * float(m())),
           y_zero_point(), qmin(), qmax());
@@ -235,20 +236,20 @@ class GAvgPoolMicrokernelTester {
       union xnn_q8_avgpool_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_compute_q8_avgpool_params(
+          quantization_params = xnn_init_q8_avgpool_params(
             -int32_t(x_zero_point()) * int32_t(m()),
             x_scale() / (y_scale() * float(m())),
             y_zero_point(), qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_compute_scalar_q8_avgpool_params(
+          quantization_params = xnn_init_scalar_q8_avgpool_params(
             -int32_t(x_zero_point()) * int32_t(m()),
             x_scale() / (y_scale() * float(m())),
             y_zero_point(), qmin(), qmax());
           break;
       }
       const union xnn_q8_avgpool_params scalar_quantization_params =
-        xnn_compute_scalar_q8_avgpool_params(
+        xnn_init_scalar_q8_avgpool_params(
           -int32_t(x_zero_point()) * int32_t(m()),
           x_scale() / (y_scale() * float(m())),
           y_zero_point(), qmin(), qmax());
@@ -329,11 +330,11 @@ class GAvgPoolMicrokernelTester {
       union xnn_f32_avgpool_params params = { };
       switch (variant) {
         case Variant::Native:
-          params = xnn_compute_f32_avgpool_params(
+          params = xnn_init_f32_avgpool_params(
             1.0f / float(m()), y_min, y_max);
           break;
         case Variant::Scalar:
-          params = xnn_compute_scalar_f32_avgpool_params(
+          params = xnn_init_scalar_f32_avgpool_params(
             1.0f / float(m()), y_min, y_max);
           break;
       }
@@ -391,11 +392,11 @@ class GAvgPoolMicrokernelTester {
       union xnn_f32_avgpool_params params = { };
       switch (variant) {
         case Variant::Native:
-          params = xnn_compute_f32_avgpool_params(
+          params = xnn_init_f32_avgpool_params(
             1.0f / float(m()), y_min, y_max);
           break;
         case Variant::Scalar:
-          params = xnn_compute_scalar_f32_avgpool_params(
+          params = xnn_init_scalar_f32_avgpool_params(
             1.0f / float(m()), y_min, y_max);
           break;
       }

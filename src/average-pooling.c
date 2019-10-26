@@ -21,6 +21,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/params.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/indirection.h>
 
 
@@ -192,7 +193,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
   // Number of rows read in the micro-kernel.
   const size_t nrows = round_up(doz(pooling_size, mr), qr) + mr;
   average_pooling_op->q8_avgpool_params =
-    xnn_compute_q8_avgpool_params(
+    xnn_init_q8_avgpool_params(
       (int32_t) -((uint32_t) input_zero_point * (uint32_t) nrows),
       input_scale / (output_scale * (float) pooling_size),
       output_zero_point, output_min, output_max);
@@ -340,12 +341,12 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   average_pooling_op->type = xnn_operator_type_average_pooling_f32;
   if (any_padding) {
     average_pooling_op->f32_output_params =
-      xnn_compute_f32_output_params(output_min, output_max);
+      xnn_init_f32_output_params(output_min, output_max);
 
     average_pooling_op->ukernel.type = xnn_ukernel_type_pixelwise_average_pooling;
   } else {
     average_pooling_op->f32_avgpool_params =
-      xnn_compute_f32_avgpool_params(1.0f / (float) pooling_size, output_min, output_max);
+      xnn_init_f32_avgpool_params(1.0f / (float) pooling_size, output_min, output_max);
 
     average_pooling_op->ukernel.type = xnn_ukernel_type_average_pooling;
   }

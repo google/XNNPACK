@@ -30,8 +30,8 @@
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
-#include <xnnpack/requantization.h>
 
 
 static void GEMMBenchmark(benchmark::State& state,
@@ -75,7 +75,7 @@ static void GEMMBenchmark(benchmark::State& state,
   std::fill(c.begin(), c.end(), 0xA5);
 
   union xnn_q8_gemm_params quantizationParams =
-    xnn_compute_q8_gemm_params(127, 127, 0.75f, 127, 1, 254);
+    xnn_init_q8_gemm_params(127, 127, 0.75f, 127, 1, 254);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

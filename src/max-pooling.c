@@ -16,12 +16,13 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/operator.h>
-#include <xnnpack/log.h>
 #include <xnnpack/common.h>
-#include <xnnpack/math.h>
-#include <xnnpack/params.h>
 #include <xnnpack/indirection.h>
+#include <xnnpack/log.h>
+#include <xnnpack/math.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/params-init.h>
+#include <xnnpack/params.h>
 
 
 static inline size_t compute_output_dimension(
@@ -148,7 +149,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
   max_pooling_op->input_pixel_stride = input_pixel_stride;
   max_pooling_op->output_pixel_stride = output_pixel_stride;
 
-  max_pooling_op->u8_output_params = xnn_compute_u8_output_params(output_min, output_max);
+  max_pooling_op->u8_output_params = xnn_init_u8_output_params(output_min, output_max);
 
   max_pooling_op->type = xnn_operator_type_max_pooling_u8;
   max_pooling_op->ukernel.type = xnn_ukernel_type_max_pooling;
@@ -289,7 +290,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
   max_pooling_op->input_pixel_stride = input_pixel_stride;
   max_pooling_op->output_pixel_stride = output_pixel_stride;
 
-  max_pooling_op->f32_output_params = xnn_compute_f32_output_params(output_min, output_max);
+  max_pooling_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
 
   max_pooling_op->type = xnn_operator_type_max_pooling_f32;
   max_pooling_op->ukernel.type = xnn_ukernel_type_max_pooling;

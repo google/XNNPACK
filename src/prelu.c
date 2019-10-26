@@ -11,8 +11,10 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/operator.h>
 #include <xnnpack/log.h>
+#include <xnnpack/operator.h>
+#include <xnnpack/params-init.h>
+#include <xnnpack/params.h>
 
 
 enum xnn_status xnn_create_prelu_nc_f32(
@@ -84,7 +86,7 @@ enum xnn_status xnn_create_prelu_nc_f32(
   prelu_op->channels = channels;
   prelu_op->input_pixel_stride = input_stride;
   prelu_op->output_pixel_stride = output_stride;
-  prelu_op->f32_output_params = xnn_compute_f32_output_params(output_min, output_max);
+  prelu_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
 
   prelu_op->type = xnn_operator_type_prelu_f32;
   prelu_op->ukernel.type = xnn_ukernel_type_prelu;
