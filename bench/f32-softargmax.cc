@@ -9,15 +9,17 @@
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
 #include <xnnpack/raddexpminusmax.h>
+#include <xnnpack/raddextexp.h>
 #include <xnnpack/raddstoreexpminusmax.h>
 #include <xnnpack/rmax.h>
 #include <xnnpack/vscale.h>
 #include <xnnpack/vscaleexpminusmax.h>
+#include <xnnpack/vscaleextexp.h>
 
 #include <benchmark/benchmark.h>
 
 
-static void ThreePassSoftargmaxWithRecomputing(
+static void ThreePassSoftArgMaxWithRecomputing(
   benchmark::State& state,
   xnn_f32_rmax_ukernel_function rmax,
   xnn_f32_raddexpminusmax_ukernel_function raddexpminusmax,
@@ -60,11 +62,14 @@ static void ThreePassSoftargmaxWithRecomputing(
     state.SetIterationTime(elapsed_seconds.count());
   }
 
-  state.SetItemsProcessed(uint64_t(state.iterations()) * n);
-  state.SetBytesProcessed(uint64_t(state.iterations()) * 2 * sizeof(float) * n);
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  state.counters["elements"] =
+    benchmark::Counter(uint64_t(state.iterations()) * n, benchmark::Counter::kIsRate);
+  state.counters["bytes"] =
+    benchmark::Counter(uint64_t(state.iterations()) * 2 * sizeof(float) * n, benchmark::Counter::kIsRate);
 }
 
-static void ThreePassSoftargmaxWithReloading(
+static void ThreePassSoftArgMaxWithReloading(
   benchmark::State& state,
   xnn_f32_rmax_ukernel_function rmax,
   xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax,
@@ -107,8 +112,58 @@ static void ThreePassSoftargmaxWithReloading(
     state.SetIterationTime(elapsed_seconds.count());
   }
 
-  state.SetItemsProcessed(uint64_t(state.iterations()) * n);
-  state.SetBytesProcessed(uint64_t(state.iterations()) * 2 * sizeof(float) * n);
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  state.counters["elements"] =
+    benchmark::Counter(uint64_t(state.iterations()) * n, benchmark::Counter::kIsRate);
+  state.counters["bytes"] =
+    benchmark::Counter(uint64_t(state.iterations()) * 2 * sizeof(float) * n, benchmark::Counter::kIsRate);
+}
+
+static void TwoPassSoftArgMax(
+  benchmark::State& state,
+  xnn_f32_raddextexp_ukernel_function raddextexp,
+  xnn_f32_vscaleextexp_ukernel_function vscaleextexp)
+{
+  const size_t n = state.range(0);
+  const size_t cache_line_size_max = 128;
+  const size_t packed_n = benchmark::utils::RoundUp(n, cache_line_size_max / sizeof(float));
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1000.0f, 1000.0f), rng);
+
+  const size_t num_buffers = 1 +
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
+  std::vector<float> x(n);
+  std::vector<float> y(packed_n * num_buffers);
+
+  std::generate(x.begin(), x.end(), std::ref(f32rng));
+
+  benchmark::utils::DisableDenormals();
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    benchmark::utils::PrefetchToL1(x.data(), x.size() * sizeof(float));
+    if (++buffer_index == num_buffers) {
+      buffer_index = 0;
+    }
+
+    const auto start = std::chrono::high_resolution_clock::now();
+    float scale[2];
+    raddextexp(n * sizeof(float), x.data(), scale);
+    vscaleextexp(n * sizeof(float), x.data(), y.data() + packed_n * buffer_index, 1.0f / scale[0], -scale[1]);
+    const auto end = std::chrono::high_resolution_clock::now();
+
+    const auto elapsed_seconds =
+      std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+    state.SetIterationTime(elapsed_seconds.count());
+  }
+
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  state.counters["elements"] =
+    benchmark::Counter(uint64_t(state.iterations()) * n, benchmark::Counter::kIsRate);
+  state.counters["bytes"] =
+    benchmark::Counter(uint64_t(state.iterations()) * 2 * sizeof(float) * n, benchmark::Counter::kIsRate);
 }
 
 static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
@@ -119,17 +174,23 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(ThreePassSoftargmaxWithRecomputing, avx512f_p5_scalef_unroll128,
+  BENCHMARK_CAPTURE(TwoPassSoftArgMax, avx512f_p5_scalef_unroll128,
+    xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_unroll128, xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_unroll128)
+      ->Apply(CharacteristicArguments)->UseManualTime();
+  BENCHMARK_CAPTURE(ThreePassSoftArgMaxWithRecomputing, avx512f_p5_scalef_unroll128,
     xnn_f32_rmax_ukernel__avx512f, xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_unroll128, xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_unroll128)
       ->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftargmaxWithReloading, avx512f_p5_scalef_unroll128,
+  BENCHMARK_CAPTURE(ThreePassSoftArgMaxWithReloading, avx512f_p5_scalef_unroll128,
     xnn_f32_rmax_ukernel__avx512f, xnn_f32_raddstoreexpminusmax_ukernel__avx512f_p5_scalef_unroll128, xnn_f32_vscale_ukernel__avx512f_unroll64)
       ->Apply(CharacteristicArguments)->UseManualTime();
 
-  BENCHMARK_CAPTURE(ThreePassSoftargmaxWithRecomputing, avx2_p5_unroll64,
+  BENCHMARK_CAPTURE(TwoPassSoftArgMax, avx2_p5_unroll64,
+    xnn_f32_raddextexp_ukernel__avx2_p5_unroll64, xnn_f32_vscaleextexp_ukernel__avx2_p5_unroll64)
+      ->Apply(CharacteristicArguments)->UseManualTime();
+  BENCHMARK_CAPTURE(ThreePassSoftArgMaxWithRecomputing, avx2_p5_unroll64,
     xnn_f32_rmax_ukernel__avx, xnn_f32_raddexpminusmax_ukernel__avx2_p5_unroll64, xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_unroll64)
       ->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftargmaxWithReloading, avx2_p5_unroll64,
+  BENCHMARK_CAPTURE(ThreePassSoftArgMaxWithReloading, avx2_p5_unroll64,
     xnn_f32_rmax_ukernel__avx, xnn_f32_raddstoreexpminusmax_ukernel__avx2_p5_unroll64, xnn_f32_vscale_ukernel__avx_unroll32)
       ->Apply(CharacteristicArguments)->UseManualTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
