@@ -42,13 +42,14 @@
 #  x7 c5
 
 # Vector register usage
-# A0  v0
-# A1  v0[1]
-# A2  v1
-# A3  v1[1]
-# A4  v2
-# A5  v2[1]
-# B   v16 v17 v18 v19
+# A0  v0     v3
+# A1  v0[1]  v3[1]
+# A2  v1     v4
+# A3  v1[1]  v4[1]
+# A4  v2     v5
+# A5  v2[1]  v5[1]
+# B   v12 v13 v14 v15 second set of B
+# B   v16 v17 v18 v19 first set
 # C   v20 v21
 # C   v22 v23
 # C   v24 v25
@@ -57,7 +58,6 @@
 # C   v30 v31
 # Clamp v6 v7
 # unused A   v8 v9 v10 v11
-# unused B   v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
 
@@ -101,6 +101,10 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         # Load cn_stride
         LDR x14, [sp]
 
+        // Save d12-d15 on stack
+        STP d12, d13, [sp, -32]!
+        STP d14, d15, [sp, 16]
+
 0:
         # Load initial accumulators
         LDP q20, q21, [x15], 32
@@ -120,53 +124,96 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         PRFM PLDL1KEEP, [x12]
         PRFM PLDL1KEEP,  [x4]
 
-        # Is there at least 2 floats (8 bytes) for main loop?
-        SUBS x0, x2, 8  // k = kc - 8
+        # Is there at least 4 floats (16 bytes) for main loop?
+        SUBS x0, x2, 16  // k = kc - 16
         B.LO 2f
 
         # Main loop - 2 floats of A (8 bytes)
-        # 24 FMA + 6 LD64 A + 2 LDP B
+        # 48 FMA + 12 LD64 A + 4 LDP B
 1:
+        # First group of 24 FMA
         LDR   d0,  [x3], 8
-        LDP  q16,  q17, [x5], 32
+        LDR  q16, [x5], 16
         LD1   {v0.d}[1], [x9], 8
-        LDR   d1, [x10], 8
-        LD1   {v1.d}[1], [x11], 8
-        LDR   d2, [x12], 8
-        LD1   {v2.d}[1], [x4], 8
-
         FMLA v20.4s, v16.4s,  v0.s[0]
+        LDR   d1, [x10], 8
         FMLA v22.4s, v16.4s,  v0.s[2]
+        LD1   {v1.d}[1], [x11], 8
         FMLA v24.4s, v16.4s,  v1.s[0]
+        LDR   d2, [x12], 8
         FMLA v26.4s, v16.4s,  v1.s[2]
-        LDP  q18,  q19, [x5], 32
+        LD1   {v2.d}[1], [x4], 8
         FMLA v28.4s, v16.4s,  v2.s[0]
+        LDR  q17, [x5], 16
         FMLA v30.4s, v16.4s,  v2.s[2]
+        LDR  q18, [x5], 16
+
         FMLA v21.4s, v17.4s,  v0.s[0]
+        LDR  q19, [x5], 16
         FMLA v23.4s, v17.4s,  v0.s[2]
+        LDR  q12, [x5], 16
         FMLA v25.4s, v17.4s,  v1.s[0]
+        LDR  q13, [x5], 16
         FMLA v27.4s, v17.4s,  v1.s[2]
+        LDR  q14, [x5], 16
         FMLA v29.4s, v17.4s,  v2.s[0]
+        LDR  q15, [x5], 16
         FMLA v31.4s, v17.4s,  v2.s[2]
+        LDR   d3,  [x3], 8
 
         FMLA v20.4s, v18.4s,  v0.s[1]
+        LD1   {v3.d}[1], [x9], 8
         FMLA v22.4s, v18.4s,  v0.s[3]
+        LDR   d4, [x10], 8
         FMLA v24.4s, v18.4s,  v1.s[1]
+        LD1   {v4.d}[1], [x11], 8
         FMLA v26.4s, v18.4s,  v1.s[3]
+        LDR   d5, [x12], 8
         FMLA v28.4s, v18.4s,  v2.s[1]
+        LD1   {v5.d}[1], [x4], 8
         FMLA v30.4s, v18.4s,  v2.s[3]
         FMLA v21.4s, v19.4s,  v0.s[1]
         FMLA v23.4s, v19.4s,  v0.s[3]
         FMLA v25.4s, v19.4s,  v1.s[1]
         FMLA v27.4s, v19.4s,  v1.s[3]
-        SUBS x0, x0, 8
         FMLA v29.4s, v19.4s,  v2.s[1]
         FMLA v31.4s, v19.4s,  v2.s[3]
+
+        # Second group of 24 FMA
+        FMLA v20.4s, v12.4s,  v3.s[0]
+        FMLA v22.4s, v12.4s,  v3.s[2]
+        FMLA v24.4s, v12.4s,  v4.s[0]
+        FMLA v26.4s, v12.4s,  v4.s[2]
+        FMLA v28.4s, v12.4s,  v5.s[0]
+        FMLA v30.4s, v12.4s,  v5.s[2]
+        FMLA v21.4s, v13.4s,  v3.s[0]
+        FMLA v23.4s, v13.4s,  v3.s[2]
+        FMLA v25.4s, v13.4s,  v4.s[0]
+        FMLA v27.4s, v13.4s,  v4.s[2]
+        FMLA v29.4s, v13.4s,  v5.s[0]
+        FMLA v31.4s, v13.4s,  v5.s[2]
+
+        FMLA v20.4s, v14.4s,  v3.s[1]
+        FMLA v22.4s, v14.4s,  v3.s[3]
+        FMLA v24.4s, v14.4s,  v4.s[1]
+        FMLA v26.4s, v14.4s,  v4.s[3]
+        FMLA v28.4s, v14.4s,  v5.s[1]
+        FMLA v30.4s, v14.4s,  v5.s[3]
+        FMLA v21.4s, v15.4s,  v3.s[1]
+        FMLA v23.4s, v15.4s,  v3.s[3]
+        FMLA v25.4s, v15.4s,  v4.s[1]
+        FMLA v27.4s, v15.4s,  v4.s[3]
+        SUBS x0, x0, 16
+        FMLA v29.4s, v15.4s,  v5.s[1]
+        FMLA v31.4s, v15.4s,  v5.s[3]
+
         B.HS 1b
 
 2:
+        # Is there a remainder?- 2 floats of A (8 bytes)
+        TBNZ x0, 3, 4f
         # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ x0, 2, 4f
+        TBNZ x0, 2, 5f
 3:
         # Clamp
         FMIN v20.4s, v20.4s, v6.4s
@@ -196,7 +243,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
 
         # Store full 6 x 8
         CMP x1, 8
-        B.LO 5f
+        B.LO 6f
 
         STP q30, q31,  [x7]
         ADD x7, x7, x14
@@ -220,12 +267,59 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         SUBS x1, x1, 8
         B.HI 0b
 
+        // Restore d12-d15 from stack
+        LDP d14, d15, [sp, 16]
+        LDP d12, d13, [sp], 32
+
         RET
 
+        # Remainder- 2 floats of A (8 bytes)
 4:
+        LDR   d0,  [x3], 8
+        LDR  q16, [x5], 16
+        LDR  q17, [x5], 16
+        LD1   {v0.d}[1], [x9], 8
+        LDR   d1, [x10], 8
+        LD1   {v1.d}[1], [x11], 8
+        LDR   d2, [x12], 8
+        LD1   {v2.d}[1], [x4], 8
+
+        FMLA v20.4s, v16.4s,  v0.s[0]
+        LDR  q18, [x5], 16
+        LDR  q19, [x5], 16
+        FMLA v22.4s, v16.4s,  v0.s[2]
+        FMLA v24.4s, v16.4s,  v1.s[0]
+        FMLA v26.4s, v16.4s,  v1.s[2]
+        FMLA v28.4s, v16.4s,  v2.s[0]
+        FMLA v30.4s, v16.4s,  v2.s[2]
+        FMLA v21.4s, v17.4s,  v0.s[0]
+        FMLA v23.4s, v17.4s,  v0.s[2]
+        FMLA v25.4s, v17.4s,  v1.s[0]
+        FMLA v27.4s, v17.4s,  v1.s[2]
+        FMLA v29.4s, v17.4s,  v2.s[0]
+        FMLA v31.4s, v17.4s,  v2.s[2]
+
+        FMLA v20.4s, v18.4s,  v0.s[1]
+        FMLA v22.4s, v18.4s,  v0.s[3]
+        FMLA v24.4s, v18.4s,  v1.s[1]
+        FMLA v26.4s, v18.4s,  v1.s[3]
+        FMLA v28.4s, v18.4s,  v2.s[1]
+        FMLA v30.4s, v18.4s,  v2.s[3]
+        FMLA v21.4s, v19.4s,  v0.s[1]
+        FMLA v23.4s, v19.4s,  v0.s[3]
+        FMLA v25.4s, v19.4s,  v1.s[1]
+        FMLA v27.4s, v19.4s,  v1.s[3]
+        FMLA v29.4s, v19.4s,  v2.s[1]
+        FMLA v31.4s, v19.4s,  v2.s[3]
+
+        # Is there a remainder?- 1 floats of A (4 bytes)
+        TBZ x0, 2, 3b
+
+5:
         # Remainder- 1 floats of A (4 bytes)
         LDR   s0,  [x3], 4
-        LDP  q16,  q17, [x5], 32
+        LDR  q16, [x5], 16
+        LDR  q17, [x5], 16
         LD1   {v0.s}[2], [x9], 4
         LDR   s1, [x10], 4
         LD1   {v1.s}[2], [x11], 4
@@ -247,8 +341,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         B 3b
 
         # Store odd width
-5:
-        TBZ x1, 2, 6f
+6:
+        TBZ x1, 2, 7f
         STR q30,  [x7], 16
         MOV v30.16b, v31.16b
         STR q28, [x13], 16
@@ -262,8 +356,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         STR q20,  [x6], 16
         MOV v20.16b, v21.16b
 
-6:
-        TBZ x1, 1, 7f
+7:
+        TBZ x1, 1, 8f
         STR d30,  [x7], 8
         DUP d30, v30.d[1]
         STR d28, [x13], 8
@@ -277,15 +371,18 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         STR d20,  [x6], 8
         DUP d20, v20.d[1]
 
-7:
-        TBZ x1, 0, 8f
+8:
+        TBZ x1, 0, 9f
         STR s30,  [x7]
         STR s28, [x13]
         STR s26, [x18]
         STR s24, [x17]
         STR s22, [x16]
         STR s20,  [x6]
-8:
+9:
+        // Restore d12-d15 from stack
+        LDP d14, d15, [sp, 16]
+        LDP d12, d13, [sp], 32
         RET
 
 END_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
