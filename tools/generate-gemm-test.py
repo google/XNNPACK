@@ -14,6 +14,7 @@ import yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from primes import next_prime
 import xngen
+import xnncommon
 
 
 parser = argparse.ArgumentParser(description='XNNPACK generator')
@@ -22,51 +23,6 @@ parser.add_argument("-s", "--spec", metavar="FILE", required=True,
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
                     help='Output (C++ source) file')
 parser.set_defaults(defines=list())
-
-
-def indent(text):
-  return "\n".join(map(lambda t: "  " + t if t else t, text.splitlines()))
-
-
-def remove_duplicate_newlines(text):
-  filtered_lines = list()
-  last_newline = False
-  for line in text.splitlines():
-    is_newline = len(line.strip()) == 0
-    if not is_newline or not last_newline:
-      filtered_lines.append(line)
-    last_newline = is_newline
-  return "\n".join(filtered_lines)
-
-
-ARCH_TO_MACRO_MAP = {
-  "aarch32": "XNN_ARCH_ARM",
-  "aarch64": "XNN_ARCH_ARM64",
-  "x86": "XNN_ARCH_X86",
-  "x86-64": "XNN_ARCH_X86_64",
-}
-
-ISA_TO_ARCH_MAP = {
-  "neon": ["aarch32", "aarch64"],
-  "neonfma": ["aarch32", "aarch64"],
-  "neonfp16arith": ["aarch32", "aarch64"],
-  "sse": ["x86", "x86-64"],
-  "sse2": ["x86", "x86-64"],
-  "avx": ["x86", "x86-64"],
-  "avx512f": ["x86", "x86-64"],
-  "psimd": [],
-}
-
-ISA_TO_CHECK_MAP = {
-  "neon": "TEST_REQUIRES_ARM_NEON",
-  "neonfma": "TEST_REQUIRES_ARM_NEON_FMA",
-  "neonfp16arith": "TEST_REQUIRES_ARM_NEON_FP16_ARITH",
-  "sse": "TEST_REQUIRES_X86_SSE",
-  "sse2": "TEST_REQUIRES_X86_SSE2",
-  "avx": "TEST_REQUIRES_X86_AVX",
-  "avx512f": "TEST_REQUIRES_X86_AVX512F",
-  "psimd": "TEST_REQUIRES_PSIMD",
-}
 
 
 def split_ukernel_name(name):
@@ -84,15 +40,7 @@ def split_ukernel_name(name):
   else:
     kr = 1
   mr, nr = map(int, param_spec.split("x"))
-  arch = list()
-  isa = None
-  for target_part in target_name.split("_"):
-    if target_part in ARCH_TO_MACRO_MAP:
-      arch = [target_part]
-    elif target_part in ISA_TO_ARCH_MAP:
-      isa = target_part
-  if isa and not arch:
-    arch = ISA_TO_ARCH_MAP[isa]
+  arch, isa = xnncommon.parse_target_name(target_name)
   return mr, nr, kr, sr, arch, isa
 
 
@@ -848,7 +796,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr,
       "KBLOCK": k_block,
       "ADJKBLOCK": 2 * k_block if is_pipelined else k_block,
       "IS_PIPELINED": is_pipelined,
-      "ISA_CHECK": ISA_TO_CHECK_MAP.get(isa, ""),
+      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
     })
 
@@ -898,22 +846,7 @@ def main(args):
 
       test_case = generate_test_cases(
         name, mr, nr, kr, sr, k_block, pipelined, isa)
-      test_case = remove_duplicate_newlines(test_case)
-      tests += "\n\n"
-      if arch:
-        guard_macro = " || ".join(map(ARCH_TO_MACRO_MAP.get, arch))
-        if assembly:
-          guard_macro += " && XNN_ENABLE_ASSEMBLY"
-        tests += "#if %s\n" % guard_macro
-        tests += indent(test_case) + "\n"
-        tests += "#endif  // %s\n" % guard_macro
-      elif isa == "psimd":
-        guard_macro = "!XNN_ARCH_ASMJS && !XNN_ARCH_WASM"
-        tests += "#if %s\n" % guard_macro
-        tests += indent(test_case) + "\n"
-        tests += "#endif  // %s\n" % guard_macro
-      else:
-        tests += test_case
+      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
 
     with codecs.open(options.output, "w", encoding="utf-8") as output_file:
       output_file.write(tests)
