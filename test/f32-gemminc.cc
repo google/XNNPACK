@@ -3576,9 +3576,54 @@
     }
   }
 
-  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_lt_4) {
+  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t k = 1; k < 4; k++) {
+    GemmMicrokernelTester()
+      .mr(6)
+      .nr(8)
+      .kr(1)
+      .sr(1)
+      .m(6)
+      .n(8)
+      .k(8)
+      .Test(xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53);
+  }
+
+  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_eq_8_strided_a) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    GemmMicrokernelTester()
+      .mr(6)
+      .nr(8)
+      .kr(1)
+      .sr(1)
+      .m(6)
+      .n(8)
+      .k(8)
+      .a_stride(11)
+      .Test(xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53);
+  }
+
+  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_eq_8_subtile) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t m = 1; m <= 6; m++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(m)
+          .n(n)
+          .k(8)
+          .iterations(1)
+          .Test(xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53);
+      }
+    }
+  }
+
+  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_lt_8) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t k = 1; k < 8; k++) {
       GemmMicrokernelTester()
         .mr(6)
         .nr(8)
@@ -3591,9 +3636,9 @@
     }
   }
 
-  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_lt_4_strided_a) {
+  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_lt_8_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t k = 1; k < 4; k++) {
+    for (size_t k = 1; k < 8; k++) {
       GemmMicrokernelTester()
         .mr(6)
         .nr(8)
@@ -3602,14 +3647,14 @@
         .m(6)
         .n(8)
         .k(k)
-        .a_stride(7)
+        .a_stride(11)
         .Test(xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53);
     }
   }
 
-  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_lt_4_subtile) {
+  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_lt_8_subtile) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t k = 1; k < 4; k++) {
+    for (size_t k = 1; k < 8; k++) {
       for (uint32_t m = 1; m <= 6; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
           GemmMicrokernelTester()
@@ -3627,9 +3672,9 @@
     }
   }
 
-  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_gt_4) {
+  TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_gt_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t k = 5; k < 8; k++) {
+    for (size_t k = 9; k < 8; k++) {
       GemmMicrokernelTester()
         .mr(6)
         .nr(8)
@@ -3644,7 +3689,7 @@
 
   TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_gt_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t k = 5; k < 8; k++) {
+    for (size_t k = 9; k < 8; k++) {
       GemmMicrokernelTester()
         .mr(6)
         .nr(8)
@@ -3660,7 +3705,7 @@
 
   TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_gt_4_subtile) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t k = 5; k < 8; k++) {
+    for (size_t k = 9; k < 8; k++) {
       for (uint32_t m = 1; m <= 6; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
           GemmMicrokernelTester()
@@ -3680,7 +3725,7 @@
 
   TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_div_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t k = 8; k <= 40; k += 4) {
+    for (size_t k = 12; k <= 40; k += 4) {
       GemmMicrokernelTester()
         .mr(6)
         .nr(8)
@@ -3695,7 +3740,7 @@
 
   TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_div_4_strided_a) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t k = 8; k <= 40; k += 4) {
+    for (size_t k = 12; k <= 40; k += 4) {
       GemmMicrokernelTester()
         .mr(6)
         .nr(8)
@@ -3711,7 +3756,7 @@
 
   TEST(F32_GEMMINC_6X8__AARCH64_NEONFMA_CORTEX_A53, k_div_4_subtile) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t k = 8; k <= 40; k += 4) {
+    for (size_t k = 12; k <= 40; k += 4) {
       for (uint32_t m = 1; m <= 6; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
           GemmMicrokernelTester()
