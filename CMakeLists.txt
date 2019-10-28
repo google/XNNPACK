@@ -504,7 +504,8 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-vscaleextexp/avx512f-p5-scalef-unroll128.c
   src/math/exp-avx512f-p5-scalef.c
   src/math/exp-avx512f-p5.c
-  src/math/exp-avx512f-perm-p3.c)
+  src/math/exp-avx512f-perm-p3.c
+  src/math/exp-avx512f-perm2-p2.c)
 
 SET(XNNPACK_AARCH32_ASM_MICROKERNEL_SRCS
   src/q8-dwconv/up8x9-aarch32-neon.S)

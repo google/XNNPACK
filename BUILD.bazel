@@ -430,6 +430,7 @@ AVX512F_UKERNELS = [
     "src/math/exp-avx512f-p5-scalef.c",
     "src/math/exp-avx512f-p5.c",
     "src/math/exp-avx512f-perm-p3.c",
+    "src/math/exp-avx512f-perm2-p2.c",
     "src/math/extexp-avx512f-p5.c",
 ]
 

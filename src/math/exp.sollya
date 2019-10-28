@@ -80,6 +80,14 @@ P = fpminimax(exp(x), [|2,3|], [|SG...|], [lb; ub], relative, 1+x);
 print("Degree-3 P[exp(x)] with 1+x constraint on [-log(2)/32, log(2)/32] =", horner(P));
 print("relative error =", round(dirtyinfnorm(P / exp(x) - 1, [lb; ub]), single, RU));
 
+lb = round(-log(2)/64, single, RN);
+ub = round(log(2)/64, single, RN);
+print("-log(2)/64 =", lb);
+print("+log(2)/64 =", ub);
+P = fpminimax(exp(x), [|1,2|], [|SG...|], [lb; ub], relative, 1);
+print("Degree-2 P[exp(x)] with 1+x constraint on [-log(2)/64, log(2)/64] =", horner(P));
+print("relative error =", round(dirtyinfnorm(P / exp(x) - 1, [lb; ub]), single, RU));
+
 lb = round(-log(2)/128, single, RN);
 ub = round(log(2)/128, single, RN);
 print("-log(2)/128 =", lb);
