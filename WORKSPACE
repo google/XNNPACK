@@ -44,10 +44,10 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    strip_prefix = "pthreadpool-0e275fe56094626349c55a524ea8b71a85daa64b",
-    sha256 = "c2328fdf9e48ac9b928953bcbc442eb14402d393e4cfae0541581a3d39efca9d",
+    strip_prefix = "pthreadpool-7ad026703b3109907ad124025918da15cfd3f100",
+    sha256 = "96eb4256fc438b7b8cab40541d383efaf546fae7bad380c24ea601c326c5f685",
     urls = [
-        "https://github.com/Maratyszcza/pthreadpool/archive/0e275fe56094626349c55a524ea8b71a85daa64b.tar.gz",
+        "https://github.com/Maratyszcza/pthreadpool/archive/7ad026703b3109907ad124025918da15cfd3f100.tar.gz",
     ],
     build_file = "@//third_party:pthreadpool.BUILD",
 )
