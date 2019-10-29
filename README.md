@@ -47,4 +47,4 @@ Benchmarked on October 9, 2019 with `end2end_bench --benchmark_min_time=5` on an
 
 ## Acknowledgements
 
-XNNPACK is a based on [QNNPACK](https://github.com/pytorch/QNNPACK) library. However, unlike QNNPACK, XNNPACK focuses entirely on floating-point operators, and its API is no longer compatible with QNNPACK.
+XNNPACK is a based on [QNNPACK](https://github.com/pytorch/QNNPACK) library. Unlike QNNPACK, XNNPACK focuses entirely on floating-point operators, and its API is no longer compatible with QNNPACK.
