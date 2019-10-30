@@ -123,6 +123,18 @@ TEST(DECONVOLUTION_OP_Q8, 1x1_with_qmax) {
     .TestQ8();
 }
 
+TEST(DECONVOLUTION_OP_Q8, 1x1_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQ8();
+}
+
 /**************************** Future GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_OP_Q8, grouped_1x1) {
@@ -245,6 +257,19 @@ TEST(DECONVOLUTION_OP_Q8, grouped_1x1_with_qmax) {
     .TestQ8();
 }
 
+TEST(DECONVOLUTION_OP_Q8, grouped_1x1_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .groups(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQ8();
+}
+
 /**************************** Future GEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_OP_Q8, batched_1x1) {
@@ -363,6 +388,19 @@ TEST(DECONVOLUTION_OP_Q8, batched_1x1_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestQ8();
+}
+
+TEST(DECONVOLUTION_OP_Q8, batched_1x1_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
     .iterations(3)
     .TestQ8();
 }
@@ -494,6 +532,20 @@ TEST(DECONVOLUTION_OP_Q8, batched_grouped_1x1_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestQ8();
+}
+
+TEST(DECONVOLUTION_OP_Q8, batched_grouped_1x1_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .groups(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
     .iterations(3)
     .TestQ8();
 }
@@ -768,6 +820,19 @@ TEST(DECONVOLUTION_OP_Q8, 3x3_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestQ8();
+}
+
+TEST(DECONVOLUTION_OP_Q8, 3x3_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
     .iterations(3)
     .TestQ8();
 }
@@ -1065,6 +1130,20 @@ TEST(DECONVOLUTION_OP_Q8, grouped_3x3_with_qmax) {
     .TestQ8();
 }
 
+TEST(DECONVOLUTION_OP_Q8, grouped_3x3_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQ8();
+}
+
 /**************************** CONV path, batched ****************************/
 
 TEST(DECONVOLUTION_OP_Q8, batched_3x3) {
@@ -1354,6 +1433,20 @@ TEST(DECONVOLUTION_OP_Q8, batched_3x3_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestQ8();
+}
+
+TEST(DECONVOLUTION_OP_Q8, batched_3x3_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
     .iterations(3)
     .TestQ8();
 }
@@ -1670,6 +1763,21 @@ TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3_with_qmax) {
     .TestQ8();
 }
 
+TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQ8();
+}
+
 /**************************** CONV path, setup ****************************/
 
 TEST(DECONVOLUTION_OP_Q8, 3x3_setup_changing_batch) {
@@ -1980,6 +2088,20 @@ TEST(DECONVOLUTION_OP_Q8, 3x3s2_with_qmax) {
     .TestQ8();
 }
 
+TEST(DECONVOLUTION_OP_Q8, 3x3s2_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(10, 9)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQ8();
+}
+
 /**************************** SUBCONV2D path, grouped ****************************/
 
 TEST(DECONVOLUTION_OP_Q8, grouped_3x3s2) {
@@ -2260,6 +2382,21 @@ TEST(DECONVOLUTION_OP_Q8, grouped_3x3s2_with_qmax) {
     .TestQ8();
 }
 
+TEST(DECONVOLUTION_OP_Q8, grouped_3x3s2_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(10, 9)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQ8();
+}
+
 /**************************** SUBCONV2D path, batched ****************************/
 
 TEST(DECONVOLUTION_OP_Q8, batched_3x3s2) {
@@ -2536,6 +2673,21 @@ TEST(DECONVOLUTION_OP_Q8, batched_3x3s2_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestQ8();
+}
+
+TEST(DECONVOLUTION_OP_Q8, batched_3x3s2_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(10, 9)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
     .iterations(3)
     .TestQ8();
 }
@@ -2837,6 +2989,22 @@ TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3s2_with_qmax) {
     .TestQ8();
 }
 
+TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3s2_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(10, 9)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQ8();
+}
+
 /**************************** SUBCONV2D path, setup ****************************/
 
 TEST(DECONVOLUTION_OP_Q8, 3x3s2_setup_changing_batch) {
@@ -3000,6 +3168,18 @@ TEST(DECONVOLUTION_OP_F32, 1x1_with_qmax) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_OP_F32, 1x1_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** Future GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_OP_F32, grouped_1x1) {
@@ -3122,6 +3302,19 @@ TEST(DECONVOLUTION_OP_F32, grouped_1x1_with_qmax) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_OP_F32, grouped_1x1_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .groups(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** Future GEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_OP_F32, batched_1x1) {
@@ -3240,6 +3433,19 @@ TEST(DECONVOLUTION_OP_F32, batched_1x1_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_OP_F32, batched_1x1_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .iterations(3)
     .TestF32();
 }
@@ -3371,6 +3577,20 @@ TEST(DECONVOLUTION_OP_F32, batched_grouped_1x1_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_OP_F32, batched_grouped_1x1_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .groups(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .iterations(3)
     .TestF32();
 }
@@ -3645,6 +3865,19 @@ TEST(DECONVOLUTION_OP_F32, 3x3_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_OP_F32, 3x3_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .iterations(3)
     .TestF32();
 }
@@ -3942,6 +4175,20 @@ TEST(DECONVOLUTION_OP_F32, grouped_3x3_with_qmax) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_OP_F32, grouped_3x3_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** CONV path, batched ****************************/
 
 TEST(DECONVOLUTION_OP_F32, batched_3x3) {
@@ -4231,6 +4478,20 @@ TEST(DECONVOLUTION_OP_F32, batched_3x3_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_OP_F32, batched_3x3_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .iterations(3)
     .TestF32();
 }
@@ -4547,6 +4808,21 @@ TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3_with_qmax) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** CONV path, setup ****************************/
 
 TEST(DECONVOLUTION_OP_F32, 3x3_setup_changing_batch) {
@@ -4857,6 +5133,20 @@ TEST(DECONVOLUTION_OP_F32, 3x3s2_with_qmax) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_OP_F32, 3x3s2_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(10, 9)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** SUBCONV2D path, grouped ****************************/
 
 TEST(DECONVOLUTION_OP_F32, grouped_3x3s2) {
@@ -5137,6 +5427,21 @@ TEST(DECONVOLUTION_OP_F32, grouped_3x3s2_with_qmax) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_OP_F32, grouped_3x3s2_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .input_size(10, 9)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** SUBCONV2D path, batched ****************************/
 
 TEST(DECONVOLUTION_OP_F32, batched_3x3s2) {
@@ -5413,6 +5718,21 @@ TEST(DECONVOLUTION_OP_F32, batched_3x3s2_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_OP_F32, batched_3x3s2_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(10, 9)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .iterations(3)
     .TestF32();
 }
@@ -5710,6 +6030,22 @@ TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3s2_with_qmax) {
     .group_input_channels(17)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .qmin(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3s2_without_bias) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  DeconvolutionOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(10, 9)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
     .iterations(3)
     .TestF32();
 }

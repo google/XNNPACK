@@ -409,6 +409,15 @@ class DeconvolutionOperatorTester {
     return this->qmax_;
   }
 
+  inline DeconvolutionOperatorTester& has_bias(bool has_bias) {
+    this->has_bias_ = has_bias;
+    return *this;
+  }
+
+  inline bool has_bias() const {
+    return this->has_bias_;
+  }
+
   inline DeconvolutionOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -442,17 +451,21 @@ class DeconvolutionOperatorTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       // Compute reference results, without renormalization.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t oy = 0; oy < output_height(); oy++) {
-          for (size_t ox = 0; ox < output_width(); ox++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                  bias[g * group_output_channels() + oc];
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
+                    bias[g * group_output_channels() + oc];
+                }
               }
             }
           }
         }
+      } else {
+        std::fill(accumulators.begin(), accumulators.end(), 0);
       }
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t oy = 0; oy < output_height(); oy++) {
@@ -512,7 +525,7 @@ class DeconvolutionOperatorTester {
           input_pixel_stride(), output_pixel_stride(),
           input_zero_point, 1.0f /* input scale */,
           kernel_zero_point, 1.0f /* kernel scale */,
-          kernel.data(), bias.data(),
+          kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
           0, &deconvolution_op));
 
@@ -572,17 +585,21 @@ class DeconvolutionOperatorTester {
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
       // Compute reference results, without clamping.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t oy = 0; oy < output_height(); oy++) {
-          for (size_t ox = 0; ox < output_width(); ox++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                  bias[g * group_output_channels() + oc];
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
+                    bias[g * group_output_channels() + oc];
+                }
               }
             }
           }
         }
+      } else {
+        std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       }
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t oy = 0; oy < output_height(); oy++) {
@@ -637,7 +654,7 @@ class DeconvolutionOperatorTester {
           dilation_height(), dilation_width(),
           groups(), group_input_channels(), group_output_channels(),
           input_pixel_stride(), output_pixel_stride(),
-          kernel.data(), bias.data(),
+          kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           0, &deconvolution_op));
 
@@ -706,17 +723,21 @@ class DeconvolutionOperatorTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       // Compute reference results, without renormalization.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t oy = 0; oy < output_height(); oy++) {
-          for (size_t ox = 0; ox < output_width(); ox++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                  bias[g * group_output_channels() + oc];
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
+                    bias[g * group_output_channels() + oc];
+                }
               }
             }
           }
         }
+      } else {
+        std::fill(accumulators.begin(), accumulators.end(), 0);
       }
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t oy = 0; oy < output_height(); oy++) {
@@ -776,7 +797,7 @@ class DeconvolutionOperatorTester {
           input_pixel_stride(), output_pixel_stride(),
           input_zero_point, 1.0f /* input scale */,
           kernel_zero_point, 1.0f /* kernel scale */,
-          kernel.data(), bias.data(),
+          kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
           0, &deconvolution_op));
 
@@ -819,17 +840,21 @@ class DeconvolutionOperatorTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       // Compute reference results for the second run, including renormalization.
-      for (size_t i = 0; i < next_batch_size(); i++) {
-        for (size_t oy = 0; oy < next_output_height(); oy++) {
-          for (size_t ox = 0; ox < next_output_width(); ox++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                next_accumulators[(((i * next_output_height() + oy) * next_output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                  bias[g * group_output_channels() + oc];
+      if (has_bias()) {
+        for (size_t i = 0; i < next_batch_size(); i++) {
+          for (size_t oy = 0; oy < next_output_height(); oy++) {
+            for (size_t ox = 0; ox < next_output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  next_accumulators[(((i * next_output_height() + oy) * next_output_width() + ox) * groups() + g) * group_output_channels() + oc] =
+                    bias[g * group_output_channels() + oc];
+                }
               }
             }
           }
         }
+      } else {
+        std::fill(next_accumulators.begin(), next_accumulators.end(), 0);
       }
       for (size_t i = 0; i < next_batch_size(); i++) {
         for (size_t oy = 0; oy < next_output_height(); oy++) {
@@ -920,17 +945,21 @@ class DeconvolutionOperatorTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t oy = 0; oy < output_height(); oy++) {
-          for (size_t ox = 0; ox < output_width(); ox++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                  bias[g * group_output_channels() + oc];
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
+                    bias[g * group_output_channels() + oc];
+                }
               }
             }
           }
         }
+      } else {
+        std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       }
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t oy = 0; oy < output_height(); oy++) {
@@ -985,7 +1014,7 @@ class DeconvolutionOperatorTester {
           dilation_height(), dilation_width(),
           groups(), group_input_channels(), group_output_channels(),
           input_pixel_stride(), output_pixel_stride(),
-          kernel.data(), bias.data(),
+          kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           0, &deconvolution_op));
 
@@ -1028,17 +1057,21 @@ class DeconvolutionOperatorTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results for the second run, including clamping.
-      for (size_t i = 0; i < next_batch_size(); i++) {
-        for (size_t oy = 0; oy < next_output_height(); oy++) {
-          for (size_t ox = 0; ox < next_output_width(); ox++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                next_output_ref[(((i * next_output_height() + oy) * next_output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                  bias[g * group_output_channels() + oc];
+      if (has_bias()) {
+        for (size_t i = 0; i < next_batch_size(); i++) {
+          for (size_t oy = 0; oy < next_output_height(); oy++) {
+            for (size_t ox = 0; ox < next_output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  next_output_ref[(((i * next_output_height() + oy) * next_output_width() + ox) * groups() + g) * group_output_channels() + oc] =
+                    bias[g * group_output_channels() + oc];
+                }
               }
             }
           }
         }
+      } else {
+        std::fill(next_output_ref.begin(), next_output_ref.end(), 0.0f);
       }
       for (size_t i = 0; i < next_batch_size(); i++) {
         for (size_t oy = 0; oy < next_output_height(); oy++) {
@@ -1131,5 +1164,6 @@ class DeconvolutionOperatorTester {
   size_t next_batch_size_{0};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
+  bool has_bias_{true};
   size_t iterations_{1};
 };

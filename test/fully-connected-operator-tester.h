@@ -101,6 +101,15 @@ class FullyConnectedOperatorTester {
     return this->qmax_;
   }
 
+  inline FullyConnectedOperatorTester& has_bias(bool has_bias) {
+    this->has_bias_ = has_bias;
+    return *this;
+  }
+
+  inline bool has_bias() const {
+    return this->has_bias_;
+  }
+
   inline FullyConnectedOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -132,13 +141,16 @@ class FullyConnectedOperatorTester {
       std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
       std::fill(output.begin(), output.end(), 0xA5);
-      std::fill(accumulators.begin(), accumulators.end(), 0);
 
       // Compute reference results, without renormalization.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t oc = 0; oc < output_channels(); oc++) {
-          accumulators[i * output_channels() + oc] = bias[oc];
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oc = 0; oc < output_channels(); oc++) {
+            accumulators[i * output_channels() + oc] = bias[oc];
+          }
         }
+      } else {
+        std::fill(accumulators.begin(), accumulators.end(), 0);
       }
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t oc = 0; oc < output_channels(); oc++) {
@@ -175,7 +187,7 @@ class FullyConnectedOperatorTester {
           input_stride(), output_stride(),
           input_zero_point, 1.0f /* input scale */,
           kernel_zero_point, 1.0f /* kernel scale */,
-          kernel.data(), bias.data(),
+          kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
           0, &fully_connected_op));
 
@@ -228,10 +240,14 @@ class FullyConnectedOperatorTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without renormalization.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t oc = 0; oc < output_channels(); oc++) {
-          output_ref[i * output_channels() + oc] = bias[oc];
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oc = 0; oc < output_channels(); oc++) {
+            output_ref[i * output_channels() + oc] = bias[oc];
+          }
         }
+      } else {
+        std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       }
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t oc = 0; oc < output_channels(); oc++) {
@@ -262,7 +278,7 @@ class FullyConnectedOperatorTester {
         xnn_create_fully_connected_nc_f32(
           input_channels(), output_channels(),
           input_stride(), output_stride(),
-          kernel.data(), bias.data(),
+          kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           0, &fully_connected_op));
 
@@ -304,5 +320,6 @@ class FullyConnectedOperatorTester {
   size_t batch_size_{1};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
+  bool has_bias_{true};
   size_t iterations_{1};
 };

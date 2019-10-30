@@ -107,6 +107,17 @@ TEST(CONVOLUTION_SpNHWC_OP_F32, 1x1_with_qmax) {
     .TestF32();
 }
 
+TEST(CONVOLUTION_SpNHWC_OP_F32, 1x1_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** SPMM path, batched ****************************/
 
 TEST(CONVOLUTION_SpNHWC_OP_F32, batched_1x1) {
@@ -238,6 +249,18 @@ TEST(CONVOLUTION_SpNHWC_OP_F32, batched_1x1_with_qmax) {
     .TestF32();
 }
 
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_1x1_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** DConv 3x3c3s2 HWC->SpCHW path ****************************/
 
 TEST(CONVOLUTION_HWC2SpNHWC_OP_F32, 3x3c3s2) {
@@ -326,6 +349,20 @@ TEST(CONVOLUTION_HWC2SpNHWC_OP_F32, 3x3c3s2_with_qmax) {
     .group_output_channels(19)
     .nhwc_input(true)
     .qmax(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_HWC2SpNHWC_OP_F32, 3x3c3s2_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .input_size(27, 29)
+    .padding(1)
+    .kernel_size(3, 3)
+    .subsampling(2)
+    .group_input_channels(3)
+    .group_output_channels(19)
+    .nhwc_input(true)
     .iterations(3)
     .TestF32();
 }
@@ -443,6 +480,21 @@ TEST(CONVOLUTION_HWC2SpNHWC_OP_F32, batched_3x3c3s2_with_qmax) {
     .TestF32();
 }
 
+TEST(CONVOLUTION_HWC2SpNHWC_OP_F32, batched_3x3c3s2_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .padding(1)
+    .kernel_size(3, 3)
+    .subsampling(2)
+    .group_input_channels(3)
+    .group_output_channels(19)
+    .nhwc_input(true)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** DWCONV 3x3 path ****************************/
 
 TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_3x3) {
@@ -525,6 +577,17 @@ TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_3x3_with_qmax) {
     .padding_width(1)
     .groups(19)
     .qmax(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_3x3_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding_width(1)
+    .groups(19)
     .iterations(3)
     .TestF32();
 }
@@ -646,6 +709,18 @@ TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_3x3_with_qmax) {
     .TestF32();
 }
 
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_3x3_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding_width(1)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** DWCONV 3x3 stride-2 path ****************************/
 
 TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_3x3s2) {
@@ -735,6 +810,18 @@ TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_3x3s2_with_qmax) {
     .subsampling(2)
     .groups(19)
     .qmax(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_3x3s2_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding_width(1)
+    .subsampling(2)
+    .groups(19)
     .iterations(3)
     .TestF32();
 }
@@ -861,6 +948,19 @@ TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_3x3s2_with_qmax) {
     .subsampling(2)
     .groups(19)
     .qmax(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_3x3s2_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding_width(1)
+    .subsampling(2)
+    .groups(19)
     .iterations(3)
     .TestF32();
 }

@@ -359,6 +359,15 @@ class ConvolutionSpNCHWOperatorTester {
     return this->depthwise_layout_;
   }
 
+  inline ConvolutionSpNCHWOperatorTester& has_bias(bool has_bias) {
+    this->has_bias_ = has_bias;
+    return *this;
+  }
+
+  inline bool has_bias() const {
+    return this->has_bias_;
+  }
+
   inline ConvolutionSpNCHWOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -397,17 +406,21 @@ class ConvolutionSpNCHWOperatorTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t oy = 0; oy < output_height(); oy++) {
-          for (size_t ox = 0; ox < output_width(); ox++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] =
-                  bias[g * group_output_channels() + oc];
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] =
+                    bias[g * group_output_channels() + oc];
+                }
               }
             }
           }
         }
+      } else {
+        std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       }
       if (nhwc_input()) {
         for (size_t i = 0; i < batch_size(); i++) {
@@ -486,7 +499,7 @@ class ConvolutionSpNCHWOperatorTester {
         subsampling_height(), subsampling_width(),
         dilation_height(), dilation_width(),
         groups(), group_input_channels(), group_output_channels(),
-        kernel.data(), bias.data(),
+        kernel.data(), has_bias() ? bias.data() : nullptr,
         output_min, output_max,
         (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
         &convolution_op);
@@ -555,5 +568,6 @@ class ConvolutionSpNCHWOperatorTester {
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   bool depthwise_layout_{false};
+  bool has_bias_{true};
   size_t iterations_{1};
 };

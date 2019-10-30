@@ -280,8 +280,14 @@ enum xnn_status xnn_create_convolution2d_spnchw_f32(
       size_t first_ic = 0, last_ic = 0;
       bool first_nonzero = true;
       for (size_t ocb = 0; ocb < round_down_po2(group_output_channels, output_channels_block_size); ocb += output_channels_block_size) {
-        for (size_t oco = 0; oco < output_channels_block_size; oco++) {
-          *nonzero_values++ = bias[ocb + oco];
+        if XNN_LIKELY(bias != NULL) {
+          for (size_t oco = 0; oco < output_channels_block_size; oco++) {
+            *nonzero_values++ = bias[ocb + oco];
+          }
+        } else {
+          for (size_t oco = 0; oco < output_channels_block_size; oco++) {
+            *nonzero_values++ = 0.0f;
+          }
         }
         for (size_t ic = 0; ic < group_input_channels; ic++) {
           bool is_nonzero_block = false;
@@ -311,7 +317,11 @@ enum xnn_status xnn_create_convolution2d_spnchw_f32(
         output_channel_nonzeros += 1;
       }
       for (size_t oc = round_down_po2(group_output_channels, output_channels_block_size); oc < group_output_channels; oc++) {
-        *nonzero_values++ = bias[oc];
+        if XNN_LIKELY(bias != NULL) {
+          *nonzero_values++ = bias[oc];
+        } else {
+          *nonzero_values++ = 0.0f;
+        }
         for (size_t ic = 0; ic < group_input_channels; ic++) {
           const float weight = kernel[oc * group_input_channels + ic];
           if (weight != 0.0f) {
