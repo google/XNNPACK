@@ -1733,18 +1733,42 @@ xnnpack_unit_test(
 
 ############################# Build configurations #############################
 
+# Enables usage of assembly kernels.
 config_setting(
-    name = "linux_k8",
+    name = "xnn_enable_assembly_explicit_true",
+    define_values = {"xnn_enable_assembly": "true"},
+)
+
+# Disables usage of assembly kernels.
+config_setting(
+    name = "xnn_enable_assembly_explicit_false",
+    define_values = {"xnn_enable_assembly": "false"},
+)
+
+# Builds with -c dbg
+config_setting(
+    name = "debug_build",
     values = {
-        "cpu": "k8",
+        "compilation_mode": "dbg",
+    },
+)
+
+# Builds with -c opt
+config_setting(
+    name = "optimized_build",
+    values = {
+        "compilation_mode": "opt",
     },
 )
 
 config_setting(
+    name = "linux_k8",
+    values = {"cpu": "k8"},
+)
+
+config_setting(
     name = "linux_aarch64",
-    values = {
-        "cpu": "aarch64",
-    },
+    values = {"cpu": "aarch64"},
 )
 
 config_setting(
@@ -1820,32 +1844,4 @@ config_setting(
         "crosstool_top": "//toolchain:emscripten",
         "cpu": "asmjs",
     },
-)
-
-# Builds with -c dbg
-config_setting(
-    name = "debug_build",
-    values = {
-        "compilation_mode": "dbg",
-    },
-)
-
-# Builds with -c opt
-config_setting(
-    name = "optimized_build",
-    values = {
-        "compilation_mode": "opt",
-    },
-)
-
-# Enables usage of assembly kernels.
-config_setting(
-    name = "xnn_enable_assembly_explicit_true",
-    define_values = {"xnn_enable_assembly": "true"},
-)
-
-# Disables usage of assembly kernels.
-config_setting(
-    name = "xnn_enable_assembly_explicit_false",
-    define_values = {"xnn_enable_assembly": "false"},
 )
