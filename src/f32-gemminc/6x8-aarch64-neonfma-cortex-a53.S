@@ -57,7 +57,7 @@
 # C   v28 v29
 # C   v30 v31
 # Clamp v6 v7
-# unused A   v3, v4, v5, v8 v9 v10 v11
+# unused A   v8 v9 v10 v11
 
 BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
 
@@ -113,20 +113,31 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         LDP q26, q27, [x15], 32
         LDP q28, q29, [x15], 32
         LDP q30, q31, [x15], 32
-        PRFM PLDL1KEEP, [x5, 0]  // Prefetch B
-        PRFM PLDL1KEEP, [x5, 64]
+        PRFM PLDL1KEEP,  [x3,  0]  // Prefetch A
+        PRFM PLDL1KEEP,  [x3, 64]
+        PRFM PLDL1KEEP,  [x9,  0]
+        PRFM PLDL1KEEP,  [x9, 64]
+        PRFM PLDL1KEEP, [x10,  0]
+        PRFM PLDL1KEEP, [x10, 64]
+        PRFM PLDL1KEEP, [x11,  0]
+        PRFM PLDL1KEEP, [x11, 64]
+        PRFM PLDL1KEEP, [x12,  0]
+        PRFM PLDL1KEEP, [x12, 64]
+        PRFM PLDL1KEEP,  [x4,  0]
+        PRFM PLDL1KEEP,  [x4, 64]
+        PRFM PLDL1KEEP, [x5,   0]  // Prefetch B
+        PRFM PLDL1KEEP, [x5,  64]
         PRFM PLDL1KEEP, [x5, 128]
         PRFM PLDL1KEEP, [x5, 192]
-        PRFM PLDL1KEEP,  [x3]    // Prefetch A
-        PRFM PLDL1KEEP,  [x9]
-        PRFM PLDL1KEEP, [x10]
-        PRFM PLDL1KEEP, [x11]
-        PRFM PLDL1KEEP, [x12]
-        PRFM PLDL1KEEP,  [x4]
+        PRFM PLDL1KEEP, [x5, 256]
+        PRFM PLDL1KEEP, [x5, 320]
 
         # Is there at least 4 floats (16 bytes) for main loop?
         SUBS x0, x2, 16  // k = kc - 16
         B.LO 2f
+
+        # Additional prefetches for main loop
+
 
         # Main loop - 2 floats of A (8 bytes)
         # 48 FMA + 12 LD64 A + 4 LDP B
@@ -172,15 +183,23 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA v28.4s, v18.4s,  v2.s[1]
         LD1   {v5.d}[1], [x4], 8
         FMLA v30.4s, v18.4s,  v2.s[3]
+        PRFM PLDL1KEEP, [x3, 128]  // Prefetch A0
         FMLA v21.4s, v19.4s,  v0.s[1]
+        PRFM PLDL1KEEP, [x9, 128]  // Prefetch A1
         FMLA v23.4s, v19.4s,  v0.s[3]
+        PRFM PLDL1KEEP, [x10, 128]
         FMLA v25.4s, v19.4s,  v1.s[1]
+        PRFM PLDL1KEEP, [x11, 128]
         FMLA v27.4s, v19.4s,  v1.s[3]
+        PRFM PLDL1KEEP, [x12, 128]
         FMLA v29.4s, v19.4s,  v2.s[1]
+        PRFM PLDL1KEEP,  [x4, 128]
         FMLA v31.4s, v19.4s,  v2.s[3]
+        PRFM PLDL1KEEP, [x5, 256]  // Prefetch B
 
         # Second group of 24 FMA
         FMLA v20.4s, v12.4s,  v3.s[0]
+        PRFM PLDL1KEEP, [x5, 320]  // Prefetch B
         FMLA v22.4s, v12.4s,  v3.s[2]
         FMLA v24.4s, v12.4s,  v4.s[0]
         FMLA v26.4s, v12.4s,  v4.s[2]
