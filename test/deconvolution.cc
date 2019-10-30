@@ -118,7 +118,7 @@ TEST(DECONVOLUTION_OP_Q8, 1x1_with_qmax) {
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -252,7 +252,7 @@ TEST(DECONVOLUTION_OP_Q8, grouped_1x1_with_qmax) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -387,7 +387,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_1x1_with_qmax) {
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -531,7 +531,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_grouped_1x1_with_qmax) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -819,7 +819,7 @@ TEST(DECONVOLUTION_OP_Q8, 3x3_with_qmax) {
     .kernel_size(3, 3)
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -1125,7 +1125,7 @@ TEST(DECONVOLUTION_OP_Q8, grouped_3x3_with_qmax) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -1432,7 +1432,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_3x3_with_qmax) {
     .kernel_size(3, 3)
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -1758,7 +1758,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3_with_qmax) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -2083,7 +2083,7 @@ TEST(DECONVOLUTION_OP_Q8, 3x3s2_with_qmax) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -2377,7 +2377,7 @@ TEST(DECONVOLUTION_OP_Q8, grouped_3x3s2_with_qmax) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -2672,7 +2672,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_3x3s2_with_qmax) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -2984,7 +2984,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3s2_with_qmax) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestQ8();
 }
@@ -3163,7 +3163,7 @@ TEST(DECONVOLUTION_OP_F32, 1x1_with_qmax) {
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -3297,7 +3297,7 @@ TEST(DECONVOLUTION_OP_F32, grouped_1x1_with_qmax) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -3432,7 +3432,7 @@ TEST(DECONVOLUTION_OP_F32, batched_1x1_with_qmax) {
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -3576,7 +3576,7 @@ TEST(DECONVOLUTION_OP_F32, batched_grouped_1x1_with_qmax) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -3864,7 +3864,7 @@ TEST(DECONVOLUTION_OP_F32, 3x3_with_qmax) {
     .kernel_size(3, 3)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -4170,7 +4170,7 @@ TEST(DECONVOLUTION_OP_F32, grouped_3x3_with_qmax) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -4477,7 +4477,7 @@ TEST(DECONVOLUTION_OP_F32, batched_3x3_with_qmax) {
     .kernel_size(3, 3)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -4803,7 +4803,7 @@ TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3_with_qmax) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -5128,7 +5128,7 @@ TEST(DECONVOLUTION_OP_F32, 3x3s2_with_qmax) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -5422,7 +5422,7 @@ TEST(DECONVOLUTION_OP_F32, grouped_3x3s2_with_qmax) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -5717,7 +5717,7 @@ TEST(DECONVOLUTION_OP_F32, batched_3x3s2_with_qmax) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
@@ -6029,7 +6029,7 @@ TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3s2_with_qmax) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .qmin(128)
+    .qmax(128)
     .iterations(3)
     .TestF32();
 }
