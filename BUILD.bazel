@@ -1810,7 +1810,7 @@ config_setting(
     values = {
         "crosstool_top": "//toolchain:emscripten",
         "cpu": "wasm",
-        "features": "wasmsimd",
+        "features": "wasm_simd",
     },
 )
 
