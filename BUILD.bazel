@@ -1042,6 +1042,13 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "prelu_bench",
+    srcs = ["bench/prelu.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "softargmax_bench",
     srcs = ["bench/softargmax.cc"],
     deps = OPERATOR_BENCHMARK_DEPS,
