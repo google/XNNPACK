@@ -13,6 +13,7 @@
 
 #include <benchmark/benchmark.h>
 
+#include "bench/utils.h"
 #include "models/models.h"
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
@@ -21,7 +22,7 @@
 
 static void GEMMEnd2EndBenchmark(
   benchmark::State& state,
-  models::ExecutionPlanFactory model_factory, 
+  models::ExecutionPlanFactory model_factory,
   xnn_f32_gemm_ukernel_function gemm,
   xnn_f32_igemm_ukernel_function igemm,
   xnn_f32_gemm_ukernel_function gemm1,
@@ -60,6 +61,7 @@ static void GEMMEnd2EndBenchmark(
       }
     }
   }
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 }
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
