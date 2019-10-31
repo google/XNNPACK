@@ -1105,6 +1105,7 @@ xnnpack_benchmark(
     srcs = ["bench/end2end.cc"],
     deps = [
         ":XNNPACK",
+        ":bench_utils",
         ":mobilenet_v1",
         ":mobilenet_v2",
         "@pthreadpool",

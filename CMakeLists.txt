@@ -1328,7 +1328,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-e2e-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK benchmark)
+  TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK benchmark bench-utils)
 
   # ---[ Build operator-level microbenchmarks
   ADD_EXECUTABLE(add-bench bench/add.cc)

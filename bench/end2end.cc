@@ -13,6 +13,7 @@
 
 #include <benchmark/benchmark.h>
 
+#include "bench/utils.h"
 #include "models/models.h"
 
 
@@ -37,6 +38,7 @@ static void MobileNetV1(benchmark::State& state) {
       }
     }
   }
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 }
 
 static void MobileNetV2(benchmark::State& state) {
@@ -60,6 +62,7 @@ static void MobileNetV2(benchmark::State& state) {
       }
     }
   }
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 }
 
 BENCHMARK(MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
