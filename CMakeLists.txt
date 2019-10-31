@@ -482,7 +482,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/x8-zip/xm-sse2.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
-  src/f32-rmax/avx.c)
+  src/f32-rmax/avx.c
+  src/f32-vscale/avx-unroll32.c)
 
 SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/f32-raddexpminusmax/avx2-p5-unroll64.c
@@ -500,6 +501,7 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-raddextexp/avx512f-p5-scalef-unroll128.c
   src/f32-raddstoreexpminusmax/avx512f-p5-scalef-unroll128.c
   src/f32-rmax/avx512f.c
+  src/f32-vscale/avx512f-unroll64.c
   src/f32-vscaleexpminusmax/avx512f-p5-scalef-unroll128.c
   src/f32-vscaleextexp/avx512f-p5-scalef-unroll128.c
   src/math/exp-avx512f-p5-scalef.c
@@ -1056,7 +1058,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-raddextexp-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-raddextexp-test PRIVATE XNNPACK fp16 gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-raddextexp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-raddextexp-test f32-raddextexp-test)
 
   ADD_EXECUTABLE(f32-raddstoreexpminusmax-test test/f32-raddstoreexpminusmax.cc)
@@ -1128,7 +1130,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-vscaleextexp-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-vscaleextexp-test PRIVATE XNNPACK fp16 gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-vscaleextexp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vscaleextexp-test f32-vscaleextexp-test)
 
   ADD_EXECUTABLE(f32-vsub-test test/f32-vsub.cc)
