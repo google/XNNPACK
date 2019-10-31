@@ -1305,7 +1305,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(bench-utils PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(bench-utils PRIVATE cpuinfo)
 
-  # ---[ Build end-to-end microbenchmark
+  # ---[ Build end-to-end microbenchmarks
   ADD_EXECUTABLE(end2end-bench bench/end2end.cc models/mobilenet-v1.cc models/mobilenet-v2.cc)
   SET_TARGET_PROPERTIES(end2end-bench PROPERTIES
     CXX_STANDARD 11
@@ -1313,6 +1313,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark)
+
+  ADD_EXECUTABLE(f32-gemm-end2end-bench bench/end2end.cc models/mobilenet-v1.cc models/mobilenet-v2.cc)
+  SET_TARGET_PROPERTIES(f32-gemm-end2end-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-gemm-end2end-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(f32-gemm-end2end-bench PRIVATE XNNPACK benchmark)
 
   # ---[ Build operator-level microbenchmarks
   ADD_EXECUTABLE(add-bench bench/add.cc)

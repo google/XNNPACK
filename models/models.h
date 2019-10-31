@@ -13,6 +13,7 @@
 namespace models {
 
 typedef std::vector<std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>> ExecutionPlan;
+typedef ExecutionPlan (*ExecutionPlanFactory)(pthreadpool_t threadpool);
 
 ExecutionPlan MobileNetV1(pthreadpool_t threadpool);
 ExecutionPlan MobileNetV2(pthreadpool_t threadpool);
