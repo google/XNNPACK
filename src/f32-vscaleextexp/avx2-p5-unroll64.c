@@ -178,14 +178,14 @@ void xnn_f32_vscaleextexp_ukernel__avx2_p5_unroll64(
     // Convert exponents into scale factors:
     // - s = exp2(e) when e > -127.0
     // - s = 0.0 when e <= -127.0
-    const __m256 vs0 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve0, vmagic_bias)), 23));
-    const __m256 vs1 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve1, vmagic_bias)), 23));
-    const __m256 vs2 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve2, vmagic_bias)), 23));
-    const __m256 vs3 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve3, vmagic_bias)), 23));
-    const __m256 vs4 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve4, vmagic_bias)), 23));
-    const __m256 vs5 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve5, vmagic_bias)), 23));
-    const __m256 vs6 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve6, vmagic_bias)), 23));
-    const __m256 vs7 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve7, vmagic_bias)), 23));
+    const __m256 vs0 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve0, vmagic_bias)), 23));
+    const __m256 vs1 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve1, vmagic_bias)), 23));
+    const __m256 vs2 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve2, vmagic_bias)), 23));
+    const __m256 vs3 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve3, vmagic_bias)), 23));
+    const __m256 vs4 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve4, vmagic_bias)), 23));
+    const __m256 vs5 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve5, vmagic_bias)), 23));
+    const __m256 vs6 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve6, vmagic_bias)), 23));
+    const __m256 vs7 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve7, vmagic_bias)), 23));
 
     // Multiply "mantissa" by the scale factor.
     vf0 = _mm256_mul_ps(vf0, vs0);
@@ -237,7 +237,7 @@ void xnn_f32_vscaleextexp_ukernel__avx2_p5_unroll64(
     ve = _mm256_max_ps(ve, vmin_exponent);
 
     // Convert exponents into scale factors.
-    const __m256 vs = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve, vmagic_bias)), 23));
+    const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve, vmagic_bias)), 23));
 
     // Multiply "mantissa" by the scale factor.
     vf = _mm256_mul_ps(vf, vs);
@@ -276,7 +276,7 @@ void xnn_f32_vscaleextexp_ukernel__avx2_p5_unroll64(
     ve = _mm256_max_ps(ve, vmin_exponent);
 
     // Convert exponents into scale factors.
-    const __m256 vs = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve, vmagic_bias)), 23));
+    const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve, vmagic_bias)), 23));
 
     // Multiply "mantissa" by the scale factor.
     vf = _mm256_mul_ps(vf, vs);

@@ -180,18 +180,18 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_unroll64(
     // - s = 0.0 when delta_e <= -127.0
     //
     // Note: delta-exponents can not exceed 0.0, thus scale factors can not exceed 1.0.
-    const __m256 vaccs0 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce0, vmagic_bias)), 23));
-    const __m256 vaccs1 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce1, vmagic_bias)), 23));
-    const __m256 vaccs2 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce2, vmagic_bias)), 23));
-    const __m256 vaccs3 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce3, vmagic_bias)), 23));
-    const __m256 vs0 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e0, vmagic_bias)), 23));
-    const __m256 vs1 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e1, vmagic_bias)), 23));
-    const __m256 vs2 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e2, vmagic_bias)), 23));
-    const __m256 vs3 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e3, vmagic_bias)), 23));
-    const __m256 vs4 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e4, vmagic_bias)), 23));
-    const __m256 vs5 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e5, vmagic_bias)), 23));
-    const __m256 vs6 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e6, vmagic_bias)), 23));
-    const __m256 vs7 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e7, vmagic_bias)), 23));
+    const __m256 vaccs0 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce0, vmagic_bias)), 23));
+    const __m256 vaccs1 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce1, vmagic_bias)), 23));
+    const __m256 vaccs2 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce2, vmagic_bias)), 23));
+    const __m256 vaccs3 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce3, vmagic_bias)), 23));
+    const __m256 vs0 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e0, vmagic_bias)), 23));
+    const __m256 vs1 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e1, vmagic_bias)), 23));
+    const __m256 vs2 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e2, vmagic_bias)), 23));
+    const __m256 vs3 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e3, vmagic_bias)), 23));
+    const __m256 vs4 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e4, vmagic_bias)), 23));
+    const __m256 vs5 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e5, vmagic_bias)), 23));
+    const __m256 vs6 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e6, vmagic_bias)), 23));
+    const __m256 vs7 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e7, vmagic_bias)), 23));
 
     // Update accumulated "mantissa" and "exponent" values
     vaccv0 = _mm256_mul_ps(vaccv0, vaccs0);
@@ -219,10 +219,10 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_unroll64(
   const __m256 vdelta_acce1 = _mm256_max_ps(_mm256_sub_ps(vacce1, vmax_acce0123), vmin_exponent);
   const __m256 vdelta_acce2 = _mm256_max_ps(_mm256_sub_ps(vacce2, vmax_acce0123), vmin_exponent);
   const __m256 vdelta_acce3 = _mm256_max_ps(_mm256_sub_ps(vacce3, vmax_acce0123), vmin_exponent);
-  const __m256 vaccs0 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce0, vmagic_bias)), 23));
-  const __m256 vaccs1 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce1, vmagic_bias)), 23));
-  const __m256 vaccs2 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce2, vmagic_bias)), 23));
-  const __m256 vaccs3 = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce3, vmagic_bias)), 23));
+  const __m256 vaccs0 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce0, vmagic_bias)), 23));
+  const __m256 vaccs1 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce1, vmagic_bias)), 23));
+  const __m256 vaccs2 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce2, vmagic_bias)), 23));
+  const __m256 vaccs3 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce3, vmagic_bias)), 23));
   __m256 vaccv = _mm256_mul_ps(vaccv0, vaccs0);
   vaccv = _mm256_fmadd_ps(vaccv1, vaccs1, vaccv);
   vaccv = _mm256_fmadd_ps(vaccv2, vaccs2, vaccv);
@@ -257,8 +257,8 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_unroll64(
     const __m256 vdelta_e = _mm256_max_ps(_mm256_sub_ps(vn, vmax_e), vmin_exponent);
 
     // Convert exponents into scale factors.
-    const __m256 vaccs = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce, vmagic_bias)), 23));
-    const __m256 vs = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e, vmagic_bias)), 23));
+    const __m256 vaccs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce, vmagic_bias)), 23));
+    const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e, vmagic_bias)), 23));
     
     // Update accumulated "mantissa" and "exponent" values.
     vaccv = _mm256_mul_ps(vaccv, vaccs);
@@ -300,8 +300,8 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_unroll64(
     const __m256 vdelta_acce = _mm256_max_ps(_mm256_sub_ps(vacce, vmax_e), vmin_exponent);
 
     // Convert exponents into scale factors.
-    const __m256 vs = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e, vmagic_bias)), 23));
-    const __m256 vaccs = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce, vmagic_bias)), 23));
+    const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e, vmagic_bias)), 23));
+    const __m256 vaccs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce, vmagic_bias)), 23));
 
     // Update accumulated "mantissa" and "exponent" values.
     vaccv = _mm256_mul_ps(vaccv, vaccs);
@@ -315,7 +315,7 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_unroll64(
   vmax_acce = _mm256_max_ps(vmax_acce, _mm256_shuffle_ps(vmax_acce, vmax_acce, _MM_SHUFFLE(1, 0, 3, 2)));
   vmax_acce = _mm256_max_ps(vmax_acce, _mm256_shuffle_ps(vmax_acce, vmax_acce, _MM_SHUFFLE(2, 3, 0, 1)));
   const __m256 vdelta_acce = _mm256_max_ps(_mm256_sub_ps(vacce, vmax_acce), vmin_exponent);
-  const __m256 vaccs = _mm256_castps_si256(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce, vmagic_bias)), 23));
+  const __m256 vaccs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce, vmagic_bias)), 23));
   
   vaccv = _mm256_mul_ps(vaccv, vaccs);
   __m128 vaccv_sum = _mm_add_ps(_mm256_castps256_ps128(vaccv), _mm256_extractf128_ps(vaccv, 1));
