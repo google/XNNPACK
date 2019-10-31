@@ -99,14 +99,13 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         MOV v23.16b, v21.16b
         PRFM PLDL1KEEP, [x5, 0]  // Prefetch B
         MOV v24.16b, v20.16b
-        MOV v25.16b, v21.16b
         PRFM PLDL1KEEP, [x5, 64]
+        MOV v25.16b, v21.16b
+        PRFM PLDL1KEEP, [x5, 128]
         MOV v26.16b, v20.16b
         MOV v27.16b, v21.16b
-        PRFM PLDL1KEEP, [x5, 128]
         MOV v28.16b, v20.16b
         MOV v29.16b, v21.16b
-        PRFM PLDL1KEEP, [x5, 192]
         MOV v30.16b, v20.16b
         MOV v31.16b, v21.16b
 
@@ -144,30 +143,39 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         # Main loop - 2 floats of A (8 bytes)
         # 24 FMA + 6 LD64 A + 2 LDP B
 2:
-        LDR   d0,  [x14], 8
-        LDP  q16,  q17, [x5], 32
+        LDR   d0, [x14], 8
+        LDR  q16, [x5], 16
         LD1   {v0.d}[1], [x15], 8
-        LDR   d1, [x20], 8
-        LD1   {v1.d}[1], [x21], 8
-        LDR   d2, [x22], 8
-        LD1   {v2.d}[1], [x23], 8
-
         FMLA v20.4s, v16.4s,  v0.s[0]
+        LDR   d1, [x20], 8
         FMLA v22.4s, v16.4s,  v0.s[2]
+        LD1   {v1.d}[1], [x21], 8
         FMLA v24.4s, v16.4s,  v1.s[0]
+        LDR   d2, [x22], 8
         FMLA v26.4s, v16.4s,  v1.s[2]
-        LDP  q18,  q19, [x5], 32
+        LD1   {v2.d}[1], [x23], 8
         FMLA v28.4s, v16.4s,  v2.s[0]
+        LDR  q17, [x5], 16
         FMLA v30.4s, v16.4s,  v2.s[2]
+        LDR  q18, [x5], 16
+
         FMLA v21.4s, v17.4s,  v0.s[0]
+        LDR  q19, [x5], 16
         FMLA v23.4s, v17.4s,  v0.s[2]
+        PRFM PLDL1KEEP, [x5, 128]     // Prefetch B
         FMLA v25.4s, v17.4s,  v1.s[0]
+        PRFM PLDL1KEEP, [x14,  64]    // Prefetch A
         FMLA v27.4s, v17.4s,  v1.s[2]
+        PRFM PLDL1KEEP, [x15,  64]
         FMLA v29.4s, v17.4s,  v2.s[0]
+        PRFM PLDL1KEEP, [x20,  64]
         FMLA v31.4s, v17.4s,  v2.s[2]
+        PRFM PLDL1KEEP, [x21,  64]
 
         FMLA v20.4s, v18.4s,  v0.s[1]
+        PRFM PLDL1KEEP, [x22,  64]
         FMLA v22.4s, v18.4s,  v0.s[3]
+        PRFM PLDL1KEEP, [x23,  64]
         FMLA v24.4s, v18.4s,  v1.s[1]
         FMLA v26.4s, v18.4s,  v1.s[3]
         FMLA v28.4s, v18.4s,  v2.s[1]
@@ -246,7 +254,9 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
 5:
         # Remainder- 1 floats of A (4 bytes)
         LDR   s0,  [x14], 4
-        LDP  q16,  q17, [x5], 32
+        LDR  q16, [x5], 16
+        LDR  q17, [x5], 16
+
         LD1   {v0.s}[2], [x15], 4
         LDR   s1, [x20], 4
         LD1   {v1.s}[2], [x21], 4

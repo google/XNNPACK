@@ -136,9 +136,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         SUBS x0, x2, 16  // k = kc - 16
         B.LO 2f
 
-        # Additional prefetches for main loop
-
-
         # Main loop - 2 floats of A (8 bytes)
         # 48 FMA + 12 LD64 A + 4 LDP B
 1:
