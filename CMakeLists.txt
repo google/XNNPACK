@@ -1314,6 +1314,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-utils)
 
+  ADD_EXECUTABLE(f32-dwconv-e2e-bench bench/f32-dwconv-e2e.cc models/mobilenet-v1.cc models/mobilenet-v2.cc)
+  SET_TARGET_PROPERTIES(f32-dwconv-e2e-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-e2e-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(f32-dwconv-e2e-bench PRIVATE XNNPACK benchmark bench-utils)
+
   ADD_EXECUTABLE(f32-gemm-e2e-bench bench/f32-gemm-e2e.cc models/mobilenet-v1.cc models/mobilenet-v2.cc)
   SET_TARGET_PROPERTIES(f32-gemm-e2e-bench PROPERTIES
     CXX_STANDARD 11
