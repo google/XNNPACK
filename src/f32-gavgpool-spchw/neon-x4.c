@@ -57,10 +57,10 @@ void xnn_f32_gavgpool_spchw_ukernel__neon_x4(
       float32x4_t vi2 = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + n);
       float32x4_t vi3 = vld1q_f32(i3); i3 = (const float*) ((uintptr_t) i3 + n);
 
-      vi0 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi0)));
-      vi1 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi1)));
-      vi2 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi2)));
-      vi3 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi3)));
+      vi0 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi0)));
+      vi1 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi1)));
+      vi2 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi2)));
+      vi3 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi3)));
 
       vsum0 = vaddq_f32(vsum0, vi0);
       vsum1 = vaddq_f32(vsum1, vi1);
@@ -107,7 +107,7 @@ void xnn_f32_gavgpool_spchw_ukernel__neon_x4(
 
     if XNN_UNLIKELY(n != 0) {
       float32x4_t vi0 = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + n);
-      vi0 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi0)));
+      vi0 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi0)));
       vsum0 = vaddq_f32(vsum0, vi0);
     }
 
