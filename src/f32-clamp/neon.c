@@ -19,19 +19,28 @@ void xnn_f32_clamp_ukernel__neon(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
+#ifdef __aarch64__
   const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
+  const float32x4_t voutput_max = voutput_clamp.val[0];
+  const float32x4_t voutput_min = voutput_clamp.val[1];
+#else
+  const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
+#endif
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const float32x4_t vx = vld1q_f32(x); x += 4;
 
-    const float32x4_t vy = vminq_f32(vmaxq_f32(vx, voutput_clamp.val[1]), voutput_clamp.val[0]);
+    float32x4_t vy = vminq_f32(vx, voutput_max);
+    vy = vmaxq_f32(vy, voutput_min);
 
     vst1q_f32(y, vy); y += 4;
   }
   if (n != 0) {
     const float32x4_t vx = vld1q_f32(x);
 
-    const float32x4_t vy = vminq_f32(vmaxq_f32(vx, voutput_clamp.val[1]), voutput_clamp.val[0]);
+    float32x4_t vy = vminq_f32(vx, voutput_max);
+    vy = vmaxq_f32(vy, voutput_min);
 
     float32x2_t vy_lo = vget_low_f32(vy);
     if (n & 2 * sizeof(float)) {
