@@ -1308,7 +1308,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(bench-utils PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(bench-utils PRIVATE cpuinfo)
+  TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark cpuinfo)
 
   # ---[ Build end-to-end microbenchmarks
   ADD_EXECUTABLE(end2end-bench bench/end2end.cc models/mobilenet-v1.cc models/mobilenet-v2.cc)

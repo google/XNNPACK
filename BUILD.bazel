@@ -860,7 +860,10 @@ xnnpack_cc_library(
     srcs = ["bench/utils.cc"],
     hdrs = ["bench/utils.h"],
     copts = ["-Wno-unused-result"],
-    deps = ["@cpuinfo"],
+    deps = [
+        "@com_google_benchmark//:benchmark",
+        "@cpuinfo",
+    ],
 )
 
 ######################### Benchmarks for micro-kernels #########################

@@ -17,56 +17,47 @@
 #include "models/models.h"
 
 
-static void MobileNetV1(benchmark::State& state) {
+static void End2EndBenchmark(
+  benchmark::State& state,
+  models::ExecutionPlanFactory model_factory)
+{
   if (xnn_initialize() != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
   }
 
-  auto execution_plan = models::MobileNetV1(nullptr);
+  const size_t num_threads = state.range(0);
+  std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> threadpool(
+    pthreadpool_create(num_threads), pthreadpool_destroy);
+
+  auto execution_plan = model_factory(threadpool.get());
   if (execution_plan.empty()) {
-    state.SkipWithError("failed to create MobileNet v1");
+    state.SkipWithError("failed to create a model");
     return;
   }
 
   for (auto _ : state) {
     for (const std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>& op : execution_plan) {
-      xnn_status status = xnn_run_operator(op.get(), nullptr);
+      xnn_status status = xnn_run_operator(op.get(), threadpool.get());
       if (status != xnn_status_success) {
-        state.SkipWithError("failed to run MobileNet v1");
+        state.SkipWithError("failed to run a model");
         return;
       }
     }
   }
   state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+}
+
+static void MobileNetV1(benchmark::State& state) {
+  End2EndBenchmark(state, models::MobileNetV1);
 }
 
 static void MobileNetV2(benchmark::State& state) {
-  if (xnn_initialize() != xnn_status_success) {
-    state.SkipWithError("failed to initialize XNNPACK");
-    return;
-  }
-
-  auto execution_plan = models::MobileNetV2(nullptr);
-  if (execution_plan.empty()) {
-    state.SkipWithError("failed to create MobileNet v2");
-    return;
-  }
-
-  for (auto _ : state) {
-    for (const std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>& op : execution_plan) {
-      xnn_status status = xnn_run_operator(op.get(), nullptr);
-      if (status != xnn_status_success) {
-        state.SkipWithError("failed to run MobileNet v2");
-        return;
-      }
-    }
-  }
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  End2EndBenchmark(state, models::MobileNetV2);
 }
 
-BENCHMARK(MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(MobileNetV1)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(MobileNetV2)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

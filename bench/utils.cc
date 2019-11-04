@@ -227,5 +227,33 @@ size_t GetMaxCacheSize() {
   }
 }
 
+void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
+  benchmark->ArgName("T");
+
+  // Disabled thread pool (execution on the caller thread only).
+  benchmark->Arg(1);
+
+  if (cpuinfo_initialize()) {
+    // All cores except the little ones.
+    uint32_t max_cores = cpuinfo_get_cores_count();
+    if (cpuinfo_get_clusters_count() > 1) {
+      max_cores -= cpuinfo_get_cluster(cpuinfo_get_clusters_count() - 1)->core_count;
+    }
+    for (uint32_t t = 2; t <= max_cores; t++) {
+      benchmark->Arg(t);
+    }
+
+    // All cores (if more than one cluster).
+    if (cpuinfo_get_cores_count() > max_cores) {
+      benchmark->Arg(cpuinfo_get_cores_count());
+    }
+
+    // All cores + hyperthreads (only if hyperthreading supported).
+    if (cpuinfo_get_processors_count() > cpuinfo_get_cores_count()) {
+      benchmark->Arg(cpuinfo_get_processors_count());
+    }
+  }
+}
+
 }  // namespace utils
 }  // namespace benchmark

@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <benchmark/benchmark.h>
+
 namespace benchmark {
 namespace utils {
 
@@ -23,6 +25,9 @@ uint64_t GetCurrentCpuFrequency();
 // Return maximum (across all cores/clusters/sockets) last level cache size.
 // Can overestimate, but not underestimate LLC size.
 size_t GetMaxCacheSize();
+
+// Set multi-threading parameters appropriate for the processor.
+void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark);
 
 template <class T>
 inline T DivideRoundUp(T x, T q) {
