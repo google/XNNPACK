@@ -83,7 +83,6 @@ void xnnpack_deconvolution_q8(benchmark::State& state, const char* net) {
   for (xnn_operator_t& deconvolution_op : deconvolution_operators) {
     status = xnn_create_deconvolution2d_nhwc_q8(
         padding_top, padding_right, padding_bottom, padding_left,
-        0 /* height adjustment */, 0 /* width adjustment */,
         kernel_height, kernel_width,
         stride, stride,
         dilation, dilation,
@@ -104,6 +103,7 @@ void xnnpack_deconvolution_q8(benchmark::State& state, const char* net) {
     status = xnn_setup_deconvolution2d_nhwc_q8(
         deconvolution_operators[i],
         batch_size, input_height, input_width,
+        0 /* height adjustment */, 0 /* width adjustment */,
         input.data(), output.data() + i * output_elements,
         nullptr /* thread pool */);
     if (status != xnn_status_success) {
@@ -200,7 +200,6 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
   for (xnn_operator_t& deconvolution_op : deconvolution_operators) {
     status = xnn_create_deconvolution2d_nhwc_f32(
         padding_top, padding_right, padding_bottom, padding_left,
-        0 /* height adjustment */, 0 /* width adjustment */,
         kernel_height, kernel_width,
         stride, stride,
         dilation, dilation,
@@ -220,6 +219,7 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
     status = xnn_setup_deconvolution2d_nhwc_f32(
         deconvolution_operators[i],
         batch_size, input_height, input_width,
+        0 /* height adjustment */, 0 /* width adjustment */,
         input.data(), output.data() + i * output_elements,
         nullptr /* thread pool */);
     if (status != xnn_status_success) {

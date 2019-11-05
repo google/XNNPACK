@@ -517,7 +517,6 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_create_deconvolution2d_nhwc_q8(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
-          adjustment_height(), adjustment_width(),
           kernel_height(), kernel_width(),
           stride_height(), stride_width(),
           dilation_height(), dilation_width(),
@@ -536,6 +535,7 @@ class DeconvolutionOperatorTester {
         xnn_setup_deconvolution2d_nhwc_q8(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
+          adjustment_height(), adjustment_width(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 
@@ -648,7 +648,6 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_create_deconvolution2d_nhwc_f32(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
-          adjustment_height(), adjustment_width(),
           kernel_height(), kernel_width(),
           stride_height(), stride_width(),
           dilation_height(), dilation_width(),
@@ -665,6 +664,7 @@ class DeconvolutionOperatorTester {
         xnn_setup_deconvolution2d_nhwc_f32(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
+          adjustment_height(), adjustment_width(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 
@@ -789,7 +789,6 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_create_deconvolution2d_nhwc_q8(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
-          adjustment_height(), adjustment_width(),
           kernel_height(), kernel_width(),
           stride_height(), stride_width(),
           dilation_height(), dilation_width(),
@@ -808,6 +807,7 @@ class DeconvolutionOperatorTester {
         xnn_setup_deconvolution2d_nhwc_q8(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
+          adjustment_height(), adjustment_width(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 
@@ -893,6 +893,7 @@ class DeconvolutionOperatorTester {
         xnn_setup_deconvolution2d_nhwc_q8(
           deconvolution_op,
           next_batch_size(), next_input_height(), next_input_width(),
+          adjustment_height(), adjustment_width(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 
@@ -1008,7 +1009,6 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_create_deconvolution2d_nhwc_f32(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
-          adjustment_height(), adjustment_width(),
           kernel_height(), kernel_width(),
           stride_height(), stride_width(),
           dilation_height(), dilation_width(),
@@ -1025,6 +1025,7 @@ class DeconvolutionOperatorTester {
         xnn_setup_deconvolution2d_nhwc_f32(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
+          adjustment_height(), adjustment_width(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 
@@ -1109,6 +1110,7 @@ class DeconvolutionOperatorTester {
         xnn_setup_deconvolution2d_nhwc_f32(
           deconvolution_op,
           next_batch_size(), next_input_height(), next_input_width(),
+          adjustment_height(), adjustment_width(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 

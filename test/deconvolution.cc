@@ -640,6 +640,7 @@ TEST(DECONVOLUTION_OP_Q8, 3x3_varying_height_adjustment) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_height(adjustment_height + 1)
       .adjustment_height(adjustment_height)
       .kernel_size(3, 3)
       .group_input_channels(15)
@@ -655,6 +656,7 @@ TEST(DECONVOLUTION_OP_Q8, 3x3_varying_width_adjustment) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_width(adjustment_width + 1)
       .adjustment_width(adjustment_width)
       .kernel_size(3, 3)
       .group_input_channels(15)
@@ -932,6 +934,7 @@ TEST(DECONVOLUTION_OP_Q8, grouped_3x3_varying_height_adjustment) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_height(adjustment_height + 1)
       .adjustment_height(adjustment_height)
       .kernel_size(3, 3)
       .groups(2)
@@ -948,6 +951,7 @@ TEST(DECONVOLUTION_OP_Q8, grouped_3x3_varying_width_adjustment) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_width(adjustment_width + 1)
       .adjustment_width(adjustment_width)
       .kernel_size(3, 3)
       .groups(2)
@@ -1240,6 +1244,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_3x3_varying_height_adjustment) {
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_height(adjustment_height + 1)
       .adjustment_height(adjustment_height)
       .kernel_size(3, 3)
       .group_input_channels(15)
@@ -1256,6 +1261,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_3x3_varying_width_adjustment) {
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_width(adjustment_width + 1)
       .adjustment_width(adjustment_width)
       .kernel_size(3, 3)
       .group_input_channels(15)
@@ -1552,6 +1558,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3_varying_height_adjustment) {
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_height(adjustment_height + 1)
       .adjustment_height(adjustment_height)
       .kernel_size(3, 3)
       .groups(2)
@@ -1569,6 +1576,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3_varying_width_adjustment) {
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_width(adjustment_width + 1)
       .adjustment_width(adjustment_width)
       .kernel_size(3, 3)
       .groups(2)
@@ -1945,7 +1953,7 @@ TEST(DECONVOLUTION_OP_Q8, 3x3s2_varying_width_padding) {
 
 TEST(DECONVOLUTION_OP_Q8, 3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
+  for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .padding(1)
@@ -1961,7 +1969,7 @@ TEST(DECONVOLUTION_OP_Q8, 3x3s2_varying_height_adjustment) {
 
 TEST(DECONVOLUTION_OP_Q8, 3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
+  for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .padding(1)
@@ -2229,7 +2237,7 @@ TEST(DECONVOLUTION_OP_Q8, grouped_3x3s2_varying_width_padding) {
 
 TEST(DECONVOLUTION_OP_Q8, grouped_3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
+  for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .padding(1)
@@ -2246,7 +2254,7 @@ TEST(DECONVOLUTION_OP_Q8, grouped_3x3s2_varying_height_adjustment) {
 
 TEST(DECONVOLUTION_OP_Q8, grouped_3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
+  for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .padding(1)
@@ -2524,7 +2532,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_3x3s2_varying_width_padding) {
 
 TEST(DECONVOLUTION_OP_Q8, batched_3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
+  for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2541,7 +2549,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_3x3s2_varying_height_adjustment) {
 
 TEST(DECONVOLUTION_OP_Q8, batched_3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
+  for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2826,7 +2834,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3s2_varying_width_padding) {
 
 TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
+  for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2844,7 +2852,7 @@ TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3s2_varying_height_adjustment) {
 
 TEST(DECONVOLUTION_OP_Q8, batched_grouped_3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
+  for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3679,6 +3687,7 @@ TEST(DECONVOLUTION_OP_F32, 3x3_varying_height_adjustment) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_height(adjustment_height + 1)
       .adjustment_height(adjustment_height)
       .kernel_size(3, 3)
       .group_input_channels(15)
@@ -3694,6 +3703,7 @@ TEST(DECONVOLUTION_OP_F32, 3x3_varying_width_adjustment) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_width(adjustment_width + 1)
       .adjustment_width(adjustment_width)
       .kernel_size(3, 3)
       .group_input_channels(15)
@@ -3971,6 +3981,7 @@ TEST(DECONVOLUTION_OP_F32, grouped_3x3_varying_height_adjustment) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_height(adjustment_height + 1)
       .adjustment_height(adjustment_height)
       .kernel_size(3, 3)
       .groups(2)
@@ -3987,6 +3998,7 @@ TEST(DECONVOLUTION_OP_F32, grouped_3x3_varying_width_adjustment) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_width(adjustment_width + 1)
       .adjustment_width(adjustment_width)
       .kernel_size(3, 3)
       .groups(2)
@@ -4279,6 +4291,7 @@ TEST(DECONVOLUTION_OP_F32, batched_3x3_varying_height_adjustment) {
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_height(adjustment_height + 1)
       .adjustment_height(adjustment_height)
       .kernel_size(3, 3)
       .group_input_channels(15)
@@ -4295,6 +4308,7 @@ TEST(DECONVOLUTION_OP_F32, batched_3x3_varying_width_adjustment) {
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_width(adjustment_width + 1)
       .adjustment_width(adjustment_width)
       .kernel_size(3, 3)
       .group_input_channels(15)
@@ -4591,6 +4605,7 @@ TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3_varying_height_adjustment) {
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_height(adjustment_height + 1)
       .adjustment_height(adjustment_height)
       .kernel_size(3, 3)
       .groups(2)
@@ -4608,6 +4623,7 @@ TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3_varying_width_adjustment) {
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
+      .stride_width(adjustment_width + 1)
       .adjustment_width(adjustment_width)
       .kernel_size(3, 3)
       .groups(2)
@@ -4984,7 +5000,7 @@ TEST(DECONVOLUTION_OP_F32, 3x3s2_varying_width_padding) {
 
 TEST(DECONVOLUTION_OP_F32, 3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
+  for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .padding(1)
@@ -5000,7 +5016,7 @@ TEST(DECONVOLUTION_OP_F32, 3x3s2_varying_height_adjustment) {
 
 TEST(DECONVOLUTION_OP_F32, 3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
+  for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .padding(1)
@@ -5268,7 +5284,7 @@ TEST(DECONVOLUTION_OP_F32, grouped_3x3s2_varying_width_padding) {
 
 TEST(DECONVOLUTION_OP_F32, grouped_3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
+  for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .padding(1)
@@ -5285,7 +5301,7 @@ TEST(DECONVOLUTION_OP_F32, grouped_3x3s2_varying_height_adjustment) {
 
 TEST(DECONVOLUTION_OP_F32, grouped_3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
+  for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .padding(1)
@@ -5563,7 +5579,7 @@ TEST(DECONVOLUTION_OP_F32, batched_3x3s2_varying_width_padding) {
 
 TEST(DECONVOLUTION_OP_F32, batched_3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
+  for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -5580,7 +5596,7 @@ TEST(DECONVOLUTION_OP_F32, batched_3x3s2_varying_height_adjustment) {
 
 TEST(DECONVOLUTION_OP_F32, batched_3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
+  for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -5865,7 +5881,7 @@ TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3s2_varying_width_padding) {
 
 TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
+  for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -5883,7 +5899,7 @@ TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3s2_varying_height_adjustment) {
 
 TEST(DECONVOLUTION_OP_F32, batched_grouped_3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize());
-  for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
+  for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)

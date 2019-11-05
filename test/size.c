@@ -52,7 +52,6 @@ int main(int argc, char** argv) {
         0, 0,
         0, 0,
         0, 0,
-        0, 0,
         0, 0, 0,
         0, 0,
         NULL, NULL,
@@ -64,6 +63,7 @@ int main(int argc, char** argv) {
       xnn_setup_deconvolution2d_nhwc_f32(
         op,
         0, 0, 0,
+        0, 0,
         NULL, NULL,
         NULL);
       break;

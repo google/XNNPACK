@@ -165,8 +165,6 @@ struct xnn_operator {
   uint32_t padding_right;
   uint32_t padding_bottom;
   uint32_t padding_left;
-  uint32_t adjustment_height;
-  uint32_t adjustment_width;
   uint32_t kernel_height;
   uint32_t kernel_width;
   uint32_t stride_height;

@@ -43,8 +43,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
     uint32_t output_padding_right,
     uint32_t output_padding_bottom,
     uint32_t output_padding_left,
-    uint32_t adjustment_height,
-    uint32_t adjustment_width,
     uint32_t kernel_height,
     uint32_t kernel_width,
     uint32_t stride_height,
@@ -265,8 +263,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   deconvolution_op->padding_right = output_padding_right;
   deconvolution_op->padding_bottom = output_padding_bottom;
   deconvolution_op->padding_left = output_padding_left;
-  deconvolution_op->adjustment_height = adjustment_height;
-  deconvolution_op->adjustment_width = adjustment_width;
 
   deconvolution_op->kernel_height = kernel_height;
   deconvolution_op->kernel_width = kernel_width;
@@ -311,8 +307,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     uint32_t output_padding_right,
     uint32_t output_padding_bottom,
     uint32_t output_padding_left,
-    uint32_t adjustment_height,
-    uint32_t adjustment_width,
     uint32_t kernel_height,
     uint32_t kernel_width,
     uint32_t stride_height,
@@ -515,8 +509,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   deconvolution_op->padding_right = output_padding_right;
   deconvolution_op->padding_bottom = output_padding_bottom;
   deconvolution_op->padding_left = output_padding_left;
-  deconvolution_op->adjustment_height = adjustment_height;
-  deconvolution_op->adjustment_width = adjustment_width;
 
   deconvolution_op->kernel_height = kernel_height;
   deconvolution_op->kernel_width = kernel_width;
@@ -789,6 +781,8 @@ static enum xnn_status setup_deconvolution2d(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  uint32_t adjustment_height,
+  uint32_t adjustment_width,
   const void* input,
   void* output,
   uint32_t log2_input_element_size,
@@ -812,6 +806,22 @@ static enum xnn_status setup_deconvolution2d(
     return xnn_status_invalid_parameter;
   }
 
+  if (adjustment_height >= deconvolution_op->stride_height) {
+    xnn_log_error(
+      "failed to setup Deconvolution with %" PRIu32 " height adjustment: "
+      "height adjustment must be smaller than height stride (%" PRIu32 ")",
+      adjustment_height, deconvolution_op->stride_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (adjustment_width >= deconvolution_op->stride_width) {
+    xnn_log_error(
+      "failed to setup Deconvolution with %" PRIu32 " width adjustment: "
+      "width adjustment must be smaller than width stride (%" PRIu32 ")",
+      adjustment_width, deconvolution_op->stride_width);
+    return xnn_status_invalid_parameter;
+  }
+
   if (batch_size == 0) {
     deconvolution_op->state = xnn_run_state_skip;
     return xnn_status_success;
@@ -825,10 +835,10 @@ static enum xnn_status setup_deconvolution2d(
 
   const size_t output_height = deconvolution_op->output_height = compute_output_dimension(
     input_height, deconvolution_op->padding_top + deconvolution_op->padding_bottom,
-    deconvolution_op->adjustment_height, deconvolution_op->kernel_height, deconvolution_op->dilation_height, deconvolution_op->stride_height);
+    adjustment_height, deconvolution_op->kernel_height, deconvolution_op->dilation_height, deconvolution_op->stride_height);
   const size_t output_width = deconvolution_op->output_width = compute_output_dimension(
     input_width, deconvolution_op->padding_left + deconvolution_op->padding_right,
-    deconvolution_op->adjustment_width, deconvolution_op->kernel_width, deconvolution_op->dilation_width, deconvolution_op->stride_width);
+    adjustment_width, deconvolution_op->kernel_width, deconvolution_op->dilation_width, deconvolution_op->stride_width);
 
   switch (deconvolution_op->ukernel.type) {
     case xnn_ukernel_type_igemm:
@@ -857,6 +867,8 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_q8(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
+    uint32_t adjustment_height,
+    uint32_t adjustment_width,
     const uint8_t* input,
     uint8_t* output,
     pthreadpool_t threadpool)
@@ -869,6 +881,7 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_q8(
   return setup_deconvolution2d(
     deconvolution_op,
     batch_size, input_height, input_width,
+    adjustment_height, adjustment_width,
     input, output,
     0 /* log2(sizeof(input element)) = log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
@@ -883,6 +896,8 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_f32(
     size_t batch_size,
     size_t input_height,
     size_t input_width,
+    uint32_t adjustment_height,
+    uint32_t adjustment_width,
     const float* input,
     float* output,
     pthreadpool_t threadpool)
@@ -895,6 +910,7 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_f32(
   return setup_deconvolution2d(
     deconvolution_op,
     batch_size, input_height, input_width,
+    adjustment_height, adjustment_width,
     input, output,
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
