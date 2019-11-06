@@ -2,13 +2,14 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
-- name: xnn_f32_vmulcaddc_ukernel_c4__neonfma_x2
-  m-block: 2
-- name: xnn_f32_vmulcaddc_ukernel_c4__neon_x2
-  m-block: 2
-- name: xnn_f32_vmulcaddc_ukernel_c4__sse_x2
-  m-block: 2
-- name: xnn_f32_vmulcaddc_ukernel_c4__psimd_x2
-  m-block: 2
-- name: xnn_f32_vmulcaddc_ukernel_c1__scalar_x2
-  m-block: 2
+- name: xnn_f32_vmulcaddc_ukernel_c4__neonfma_2x
+- name: xnn_f32_vmulcaddc_ukernel_c8__neonfma_2x
+- name: xnn_f32_vmulcaddc_ukernel_c4__neon_2x
+- name: xnn_f32_vmulcaddc_ukernel_c8__neon_2x
+- name: xnn_f32_vmulcaddc_ukernel_c4__sse_2x
+- name: xnn_f32_vmulcaddc_ukernel_c8__sse_2x
+- name: xnn_f32_vmulcaddc_ukernel_c4__psimd_2x
+- name: xnn_f32_vmulcaddc_ukernel_c8__psimd_2x
+- name: xnn_f32_vmulcaddc_ukernel_c1__scalar_2x
+- name: xnn_f32_vmulcaddc_ukernel_c2__scalar_2x
+- name: xnn_f32_vmulcaddc_ukernel_c4__scalar_2x

@@ -15,31 +15,31 @@
 #include <xnnpack/vmulcaddc.h>
 
 
-void xnn_f32_vmulcaddc_ukernel_c4__neon_x2(
-    size_t m,
+void xnn_f32_vmulcaddc_ukernel_c4__neon_2x(
+    size_t rows,
     size_t channels,
-    const float*restrict x,
-    size_t x_stride,
+    const float*restrict input,
+    size_t input_stride,
     const float*restrict weights,
-    float*restrict y,
-    size_t y_stride,
+    float*restrict output,
+    size_t output_stride,
     const union xnn_f32_output_params params[restrict static 1])
 {
-  assert(m != 0);
+  assert(rows != 0);
   assert(channels != 0);
   assert(channels % sizeof(float) == 0);
 
-  const size_t x_increment = x_stride * 2 - channels;
-  const size_t y_increment = y_stride * 2 - channels;
-
-  const float* x0 = x;
-  float* y0 = y;
-  const float* x1 = (const float*) ((uintptr_t) x0 + x_stride);
-  float* y1 = (float*) ((uintptr_t) y0 + y_stride);
-  if XNN_UNPREDICTABLE(m < 2) {
-    x1 = x0;
-    y1 = y0;
+  const float* i0 = input;
+  float* o0 = output;
+  const float* i1 = (const float*) ((uintptr_t) i0 + input_stride);
+  float* o1 = (float*) ((uintptr_t) o0 + output_stride);
+  if XNN_UNPREDICTABLE(rows < 2) {
+    i1 = i0;
+    o1 = o0;
   }
+
+  const size_t input_increment = input_stride * 2 - channels;
+  const size_t output_increment = output_stride * 2 - channels;
 
   const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
   const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
@@ -49,11 +49,11 @@ void xnn_f32_vmulcaddc_ukernel_c4__neon_x2(
     for (; c >= 4 * sizeof(float); c -= 4 * sizeof(float)) {
       const float32x4_t vscale0123 = vld1q_f32(w); w += 4;
 
-      const float32x4_t vx0x0123 = vld1q_f32(x0); x0 += 4;
-      const float32x4_t vx1x0123 = vld1q_f32(x1); x1 += 4;
+      float32x4_t vacc0x0123 = vld1q_f32(i0); i0 += 4;
+      float32x4_t vacc1x0123 = vld1q_f32(i1); i1 += 4;
 
-      float32x4_t vacc0x0123 = vmulq_f32(vx0x0123, vscale0123);
-      float32x4_t vacc1x0123 = vmulq_f32(vx1x0123, vscale0123);
+      vacc0x0123 = vmulq_f32(vacc0x0123, vscale0123);
+      vacc1x0123 = vmulq_f32(vacc1x0123, vscale0123);
 
       const float32x4_t vbias0123 = vld1q_f32(w); w += 4;
 
@@ -66,19 +66,19 @@ void xnn_f32_vmulcaddc_ukernel_c4__neon_x2(
       vacc0x0123 = vminq_f32(vacc0x0123, vmax);
       vacc1x0123 = vminq_f32(vacc1x0123, vmax);
 
-      vst1q_f32(y0, vacc0x0123); y0 += 4;
-      vst1q_f32(y1, vacc1x0123); y1 += 4;
+      vst1q_f32(o0, vacc0x0123); o0 += 4;
+      vst1q_f32(o1, vacc1x0123); o1 += 4;
     }
     if XNN_UNLIKELY(c != 0) {
-      const float32x4_t vscale0123 = vld1q_f32(w); w += 4;
+      const float32x4_t vscale0123 = vld1q_f32(w);
 
-      const float32x4_t vx0x0123 = vld1q_f32(x0); x0 = (const float*) ((uintptr_t) x0 + c);
-      const float32x4_t vx1x0123 = vld1q_f32(x1); x1 = (const float*) ((uintptr_t) x1 + c);
+      float32x4_t vacc0x0123 = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + c);
+      float32x4_t vacc1x0123 = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + c);
 
-      float32x4_t vacc0x0123 = vmulq_f32(vx0x0123, vscale0123);
-      float32x4_t vacc1x0123 = vmulq_f32(vx1x0123, vscale0123);
+      vacc0x0123 = vmulq_f32(vacc0x0123, vscale0123);
+      vacc1x0123 = vmulq_f32(vacc1x0123, vscale0123);
 
-      const float32x4_t vbias0123 = vld1q_f32(w); w += 4;
+      const float32x4_t vbias0123 = vld1q_f32(w + 4);
 
       vacc0x0123 = vaddq_f32(vacc0x0123, vbias0123);
       vacc1x0123 = vaddq_f32(vacc1x0123, vbias0123);
@@ -92,25 +92,25 @@ void xnn_f32_vmulcaddc_ukernel_c4__neon_x2(
       float32x2_t vacc0x01 = vget_low_f32(vacc0x0123);
       float32x2_t vacc1x01 = vget_low_f32(vacc1x0123);
       if (c & (2 * sizeof(float))) {
-        vst1_f32(y0, vacc0x01); y0 += 2;
-        vst1_f32(y1, vacc1x01); y1 += 2;
+        vst1_f32(o0, vacc0x01); o0 += 2;
+        vst1_f32(o1, vacc1x01); o1 += 2;
 
         vacc0x01 = vget_high_f32(vacc0x0123);
         vacc1x01 = vget_high_f32(vacc1x0123);
       }
       if (c & (1 * sizeof(float))) {
-        vst1_lane_f32(y0, vacc0x01, 0); y0 += 1;
-        vst1_lane_f32(y1, vacc1x01, 0); y1 += 1;
+        vst1_lane_f32(o0, vacc0x01, 0); o0 += 1;
+        vst1_lane_f32(o1, vacc1x01, 0); o1 += 1;
       }
     }
-    x0 = (const float*) ((uintptr_t) x0 + x_increment);
-    y0 = (float*) ((uintptr_t) y0 + y_increment);
-    x1 = (const float*) ((uintptr_t) x1 + x_increment);
-    y1 = (float*) ((uintptr_t) y1 + y_increment);
-    if XNN_UNPREDICTABLE(m < 4) {
-      x1 = x0;
-      y1 = y0;
+    i0 = (const float*) ((uintptr_t) i0 + input_increment);
+    o0 = (float*) ((uintptr_t) o0 + output_increment);
+    i1 = (const float*) ((uintptr_t) i1 + input_increment);
+    o1 = (float*) ((uintptr_t) o1 + output_increment);
+    if XNN_UNPREDICTABLE(rows < 4) {
+      i1 = i0;
+      o1 = o0;
     }
-    m = doz(m, 2);
-  } while (m != 0);
+    rows = doz(rows, 2);
+  } while (rows != 0);
 }

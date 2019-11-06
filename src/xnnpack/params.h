@@ -1276,8 +1276,8 @@ struct pad_parameters {
 
 struct vmulcaddc_parameters {
   xnn_vmulcaddc_ukernel_function ukernel;
-  uint8_t cr;
-  uint8_t mr;
+  uint8_t channel_tile;
+  uint8_t row_tile;
 };
 
 #define XNN_MAX_Q8_DWCONV_UKERNELS 1

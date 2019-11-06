@@ -557,7 +557,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   switch (ukernel_type) {
     case xnn_ukernel_type_vmulcaddc:
     {
-      const uint32_t c_stride = round_up_po2(groups, xnn_params.f32.vmulcaddc.cr);
+      const uint32_t c_stride = round_up_po2(groups, xnn_params.f32.vmulcaddc.channel_tile);
       const size_t packed_weights_size = 2 * sizeof(float) * c_stride;
       convolution_op->packed_weights = xnn_allocate_memory(packed_weights_size);
       if (convolution_op->packed_weights == NULL) {
@@ -566,12 +566,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
       }
 
       xnn_pack_f32_vmulcaddc_w(
-        groups, xnn_params.f32.vmulcaddc.cr,
+        groups, xnn_params.f32.vmulcaddc.channel_tile,
         kernel, bias, convolution_op->packed_weights);
 
       convolution_op->ukernel.vmulcaddc = (struct xnn_ukernel_vmulcaddc) {
         .function = xnn_params.f32.vmulcaddc.ukernel,
-        .mr = xnn_params.f32.vmulcaddc.mr,
+        .mr = xnn_params.f32.vmulcaddc.row_tile,
       };
       break;
     }

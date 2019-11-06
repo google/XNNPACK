@@ -210,7 +210,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-spmm/8x4-scalar.c
   src/f32-vadd/scalar.c
   src/f32-vmul/scalar.c
-  src/f32-vmulcaddc/c1-scalar-x2.c
+  src/f32-vmulcaddc/c1-scalar-2x.c
+  src/f32-vmulcaddc/c2-scalar-2x.c
+  src/f32-vmulcaddc/c4-scalar-2x.c
   src/f32-vsub/scalar.c
   src/q8-avgpool/mp9p8q-scalar.c
   src/q8-avgpool/up9-scalar.c
@@ -288,7 +290,8 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-prelu/psimd-2x8.c
   src/f32-vadd/psimd.c
   src/f32-vmul/psimd.c
-  src/f32-vmulcaddc/c4-psimd-x2.c
+  src/f32-vmulcaddc/c4-psimd-2x.c
+  src/f32-vmulcaddc/c8-psimd-2x.c
   src/f32-vsub/psimd.c
   src/x32-packx/x4-psimd.c
   src/x32-pad/x2-psimd.c
@@ -331,7 +334,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-prelu/neon-2x4.c
   src/f32-prelu/neon-2x8.c
   src/f32-rmax/neon.c
-  src/f32-vmulcaddc/c4-neon-x2.c
+  src/f32-vmulcaddc/c4-neon-2x.c
+  src/f32-vmulcaddc/c8-neon-2x.c
   src/q8-avgpool/mp9p8q-neon.c
   src/q8-avgpool/up9-neon.c
   src/q8-igemm/4x8-neon.c
@@ -379,7 +383,8 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-hswish/neonfma.c
   src/f32-ppmm/4x8-neonfma.c
   src/f32-ppmm/8x8-neonfma.c
-  src/f32-vmulcaddc/c4-neonfma-x2.c)
+  src/f32-vmulcaddc/c4-neonfma-2x.c
+  src/f32-vmulcaddc/c8-neonfma-2x.c)
 
 SET(AARCH64_XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-conv-hwc/3x3s2p1c3x4-neonfma-2x2.c
@@ -454,7 +459,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-spmm/8x1-sse.c
   src/f32-vadd/sse.c
   src/f32-vmul/sse.c
-  src/f32-vmulcaddc/c4-sse-x2.c
+  src/f32-vmulcaddc/c4-sse-2x.c
+  src/f32-vmulcaddc/c8-sse-2x.c
   src/f32-vsub/sse.c
   src/x32-packx/x4-sse.c)
 

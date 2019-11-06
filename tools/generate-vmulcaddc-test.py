@@ -18,125 +18,141 @@ import xngen
 import xnncommon
 
 
-parser = argparse.ArgumentParser(description='XNNPACK generator')
+parser = argparse.ArgumentParser(
+  description='VMulCAddC microkernel test generator')
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Spec (YAML) file")
+                    help="Specification (YAML) file")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
                     help='Output (C++ source) file')
 parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_vmulcaddc_ukernel_c(\d+)__(.+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_vmulcaddc_ukernel_c(\d+)__(.+)_(\d+)x$", name)
   assert match is not None
-  cr = int(match.group(2))
+  channel_tile = int(match.group(2))
+  row_tile = int(match.group(4))
 
   arch, isa = xnncommon.parse_target_name(target_name=match.group(3))
-  return cr, arch, isa
+  return channel_tile, row_tile, arch, isa
 
 
-VMULCADDC_TEST_CODE = """\
-TEST(${TEST_NAME}, c_eq_${CBLOCK}) {
+VMULCADDC_TEST_TEMPLATE = """\
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   VMulCAddCMicrokernelTester()
-    .cr(${CR})
-    .c(${CBLOCK})
-    .m(${MBLOCK})
+    .channel_tile(${CHANNEL_TILE})
+    .channels(${CHANNEL_TILE})
+    .rows(${ROW_TILE})
     .Test(${", ".join(TEST_ARGS)});
 }
 
-$if CBLOCK > 1:
-  TEST(${TEST_NAME}, c_div_${CBLOCK}) {
+$if CHANNEL_TILE > 1:
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t c = ${CBLOCK * 2}; c < ${CBLOCK * 16}; c += ${CBLOCK * 3}) {
+    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*10}; channels += ${CHANNEL_TILE}) {
       VMulCAddCMicrokernelTester()
-        .cr(${CR})
-        .c(c)
-        .m(${MBLOCK})
+        .channel_tile(${CHANNEL_TILE})
+        .channels(channels)
+        .rows(${ROW_TILE})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-TEST(${TEST_NAME}, c_gt_${CBLOCK}) {
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+      VMulCAddCMicrokernelTester()
+        .channel_tile(${CHANNEL_TILE})
+        .channels(channels)
+        .rows(${ROW_TILE})
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t c = ${CBLOCK}; c < ${10 if CBLOCK == 1 else CBLOCK * 2}; c++) {
+  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
     VMulCAddCMicrokernelTester()
-      .cr(${CR})
-      .c(c)
-      .m(${MBLOCK})
+      .channel_tile(${CHANNEL_TILE})
+      .channels(channels)
+      .rows(${ROW_TILE})
       .Test(${", ".join(TEST_ARGS)});
   }
 }
 
-$if CBLOCK > 1:
-  TEST(${TEST_NAME}, c_lt_${CBLOCK}) {
+$if ROW_TILE > 1:
+  TEST(${TEST_NAME}, rows_lt_${ROW_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t c = 1; c < ${CBLOCK}; c++) {
-      VMulCAddCMicrokernelTester()
-        .cr(${CR})
-        .c(c)
-        .m(${MBLOCK})
-        .Test(${", ".join(TEST_ARGS)});
+    for (size_t rows = 1; rows < ${ROW_TILE}; rows++) {
+      for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+        VMulCAddCMicrokernelTester()
+          .channel_tile(${CHANNEL_TILE})
+          .channels(channels)
+          .rows(rows)
+          .Test(${", ".join(TEST_ARGS)});
+      }
     }
   }
 
-TEST(${TEST_NAME}, subtile) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t m = 1; m < ${MBLOCK}; m++) {
-    for (size_t c = 1; c <= ${CBLOCK * 5}; c += ${max(1, CBLOCK - 1)}) {
-      VMulCAddCMicrokernelTester()
-        .cr(${CR})
-        .c(c)
-        .m(m)
-        .Test(${", ".join(TEST_ARGS)});
+  TEST(${TEST_NAME}, rows_div_${ROW_TILE}) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t rows = ${ROW_TILE*2}; rows <= ${ROW_TILE*4}; rows += ${ROW_TILE}) {
+      for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+        VMulCAddCMicrokernelTester()
+          .channel_tile(${CHANNEL_TILE})
+          .channels(channels)
+          .rows(rows)
+          .Test(${", ".join(TEST_ARGS)});
+      }
     }
   }
-}
 
-TEST(${TEST_NAME}, multitile) {
+TEST(${TEST_NAME}, rows_gt_${ROW_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t m = ${MBLOCK + 1}; m < ${MBLOCK * 4}; m++) {
-    for (size_t c = 1; c <= ${CBLOCK * 5}; c += ${max(1, CBLOCK - 1)}) {
+  for (size_t rows = ${ROW_TILE+1}; rows < ${ROW_TILE*2}; rows++) {
+    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
       VMulCAddCMicrokernelTester()
-        .cr(${CR})
-        .c(c)
-        .m(m)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-}
-
-TEST(${TEST_NAME}, x_stride) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t m = 1; m < ${MBLOCK * 3}; m += ${max(1, MBLOCK - 1)}) {
-    for (size_t c = 1; c <= ${CBLOCK * 5}; c += ${max(1, CBLOCK - 1)}) {
-      VMulCAddCMicrokernelTester()
-        .cr(${CR})
-        .c(c)
-        .m(m)
-        .x_stride(${next_prime(CBLOCK * 5 + 1)})
+        .channel_tile(${CHANNEL_TILE})
+        .channels(channels)
+        .rows(rows)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 }
 
-TEST(${TEST_NAME}, y_stride) {
+TEST(${TEST_NAME}, input_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t m = 1; m < ${MBLOCK * 3}; m += ${max(1, MBLOCK - 1)}) {
-    for (size_t c = 1; c <= ${CBLOCK * 5}; c += ${max(1, CBLOCK - 1)}) {
+  for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
+    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
       VMulCAddCMicrokernelTester()
-        .cr(${CR})
-        .c(c)
-        .m(m)
-        .y_stride(${next_prime(CBLOCK * 5 + 1)})
+        .channel_tile(${CHANNEL_TILE})
+        .channels(channels)
+        .rows(rows)
+        .input_stride(${next_prime(CHANNEL_TILE*5+1)})
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+}
+
+TEST(${TEST_NAME}, output_stride) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
+    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+      VMulCAddCMicrokernelTester()
+        .channel_tile(${CHANNEL_TILE})
+        .channels(channels)
+        .rows(rows)
+        .output_stride(${next_prime(CHANNEL_TILE*5+1)})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -145,12 +161,12 @@ TEST(${TEST_NAME}, y_stride) {
 TEST(${TEST_NAME}, inplace) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t m = 1; m < ${MBLOCK * 3}; m += ${max(1, MBLOCK - 1)}) {
-    for (size_t c = 1; c <= ${CBLOCK * 5}; c += ${max(1, CBLOCK - 1)}) {
+  for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
+    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
       VMulCAddCMicrokernelTester()
-        .cr(${CR})
-        .c(c)
-        .m(m)
+        .channel_tile(${CHANNEL_TILE})
+        .channels(channels)
+        .rows(rows)
         .inplace(true)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -160,12 +176,12 @@ TEST(${TEST_NAME}, inplace) {
 TEST(${TEST_NAME}, qmin) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t m = 1; m < ${MBLOCK * 3}; m += ${max(1, MBLOCK - 1)}) {
-    for (size_t c = 1; c <= ${CBLOCK * 5}; c += ${max(1, CBLOCK - 1)}) {
+  for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
+    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
       VMulCAddCMicrokernelTester()
-        .cr(${CR})
-        .c(c)
-        .m(m)
+        .channel_tile(${CHANNEL_TILE})
+        .channels(channels)
+        .rows(rows)
         .qmin(128)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -175,12 +191,12 @@ TEST(${TEST_NAME}, qmin) {
 TEST(${TEST_NAME}, qmax) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t m = 1; m < ${MBLOCK * 3}; m += ${max(1, MBLOCK - 1)}) {
-    for (size_t c = 1; c <= ${CBLOCK * 5}; c += ${max(1, CBLOCK - 1)}) {
+  for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
+    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
       VMulCAddCMicrokernelTester()
-        .cr(${CR})
-        .c(c)
-        .m(m)
+        .channel_tile(${CHANNEL_TILE})
+        .channels(channels)
+        .rows(rows)
         .qmax(128)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -189,16 +205,15 @@ TEST(${TEST_NAME}, qmax) {
 """
 
 
-def generate_test_cases(ukernel, cr, c_block, m_block, isa):
+def generate_test_cases(ukernel, channel_tile, row_tile, isa):
   """Generates all tests cases for a VMULCADDC micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
-    cr: CR parameter of the DWCONV micro-kernel.
-    c_block: Number of C values processed per one iteration of the inner loop of
-             the micro-kernel.
-    m_block: Number of M values processed per one iteration of the outer loop of
-             the micro-kernel.
+    channel_tile: Number of channels processed per one iteration of the inner
+                  loop of the micro-kernel.
+    row_tile: Number of rows processed per one iteration of the outer loop of
+              the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
 
@@ -210,25 +225,23 @@ def generate_test_cases(ukernel, cr, c_block, m_block, isa):
   test_args = [ukernel]
   if not isa or isa == "psimd":
     test_args.append("VMulCAddCMicrokernelTester::Variant::Scalar")
-  return xngen.preprocess(VMULCADDC_TEST_CODE, {
+  return xngen.preprocess(VMULCADDC_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
       "DATATYPE": datatype,
-      "CR": cr,
-      "CBLOCK": c_block,
-      "MBLOCK": m_block,
+      "CHANNEL_TILE": channel_tile,
+      "ROW_TILE": row_tile,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
-      "sqrt": math.sqrt,
     })
 
 
 def main(args):
   options = parser.parse_args(args)
 
-  with codecs.open(options.spec, "r", encoding="utf-8") as spec_file:
-    spec_yaml = yaml.safe_load(spec_file)
-    if not isinstance(spec_yaml, list):
+  with codecs.open(options.spec, "r", encoding="utf-8") as spechannels_file:
+    spechannels_yaml = yaml.safe_load(spechannels_file)
+    if not isinstance(spechannels_yaml, list):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
@@ -251,15 +264,14 @@ def main(args):
 #include "vmulcaddc-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
-    for ukernel_spec in spec_yaml:
+    for ukernel_spec in spechannels_yaml:
       name = ukernel_spec["name"]
-      m_block = int(ukernel_spec["m-block"])
-      cr, arch, isa = split_ukernel_name(name)
+      channel_tile, row_tile, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, cr, cr, m_block, isa)
+      test_case = generate_test_cases(name, channel_tile, row_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     with codecs.open(options.output, "w", encoding="utf-8") as output_file:

@@ -29,55 +29,55 @@ class VMulCAddCMicrokernelTester {
     Scalar,
   };
 
-  inline VMulCAddCMicrokernelTester& cr(size_t cr) {
-    this->cr_ = cr;
+  inline VMulCAddCMicrokernelTester& channel_tile(size_t channel_tile) {
+    this->channel_tile_ = channel_tile;
     return *this;
   }
 
-  inline size_t cr() const {
-    return this->cr_;
+  inline size_t channel_tile() const {
+    return this->channel_tile_;
   }
 
-  inline VMulCAddCMicrokernelTester& c(size_t c) {
-    assert(c != 0);
-    this->c_ = c;
+  inline VMulCAddCMicrokernelTester& channels(size_t channels) {
+    assert(channels != 0);
+    this->channels_ = channels;
     return *this;
   }
 
-  inline size_t c() const {
-    return this->c_;
+  inline size_t channels() const {
+    return this->channels_;
   }
 
-  inline size_t packed_c() const {
-    return c() % cr() == 0 ? c() : (c() / cr() + 1) * cr();
+  inline size_t packed_channels() const {
+    return channels() % channel_tile() == 0 ? channels() : (channels() / channel_tile() + 1) * channel_tile();
   }
 
-  inline VMulCAddCMicrokernelTester& m(size_t m) {
-    assert(m != 0);
-    this->m_ = m;
+  inline VMulCAddCMicrokernelTester& rows(size_t rows) {
+    assert(rows != 0);
+    this->rows_ = rows;
     return *this;
   }
 
-  inline size_t m() const {
-    return this->m_;
+  inline size_t rows() const {
+    return this->rows_;
   }
 
-  inline VMulCAddCMicrokernelTester& x_stride(size_t x_stride) {
-    this->x_stride_ = x_stride;
+  inline VMulCAddCMicrokernelTester& input_stride(size_t input_stride) {
+    this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline size_t x_stride() const {
-    return this->x_stride_ == 0 ? c() : this->x_stride_;
+  inline size_t input_stride() const {
+    return this->input_stride_ == 0 ? channels() : this->input_stride_;
   }
 
-  inline VMulCAddCMicrokernelTester& y_stride(size_t y_stride) {
-    this->y_stride_ = y_stride;
+  inline VMulCAddCMicrokernelTester& output_stride(size_t output_stride) {
+    this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t y_stride() const {
-    return this->y_stride_ == 0 ? c() : this->y_stride_;
+  inline size_t output_stride() const {
+    return this->output_stride_ == 0 ? channels() : this->output_stride_;
   }
 
   inline VMulCAddCMicrokernelTester& inplace(bool inplace) {
@@ -122,15 +122,15 @@ class VMulCAddCMicrokernelTester {
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
 
     if (inplace()) {
-      ASSERT_EQ(x_stride(), y_stride());
+      ASSERT_EQ(input_stride(), output_stride());
     }
 
-    std::vector<float> x((m() - 1) * x_stride() + c() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> scale(c());
-    std::vector<float> bias(c());
-    std::vector<float, AlignedAllocator<float, 32>> packed_w(packed_c() * 2);
-    std::vector<float> y((m() - 1) * y_stride() + c() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<float> y_ref(m() * c());
+    std::vector<float> x((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> scale(channels());
+    std::vector<float> bias(channels());
+    std::vector<float, AlignedAllocator<float, 32>> packed_w(packed_channels() * 2);
+    std::vector<float> y((rows() - 1) * output_stride() + channels() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(rows() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(scale.begin(), scale.end(), std::ref(f32rng));
       std::generate(bias.begin(), bias.end(), std::ref(f32rng));
@@ -143,13 +143,13 @@ class VMulCAddCMicrokernelTester {
       const float* x_data = inplace() ? y.data() : x.data();
 
       std::fill(packed_w.begin(), packed_w.end(), nanf(""));
-      xnn_pack_f32_vmulcaddc_w(c(), cr(),
+      xnn_pack_f32_vmulcaddc_w(channels(), channel_tile(),
         scale.data(), bias.data(), packed_w.data());
 
       // Compute reference results.
-      for (size_t i = 0; i < m(); i++) {
-        for (size_t j = 0; j < c(); j++) {
-          y_ref[i * c() + j] = x_data[i * x_stride() + j] * scale[j] + bias[j];
+      for (size_t i = 0; i < rows(); i++) {
+        for (size_t j = 0; j < channels(); j++) {
+          y_ref[i * channels() + j] = x_data[i * input_stride() + j] * scale[j] + bias[j];
         }
       }
       const float accumulated_min = *std::min_element(y_ref.cbegin(), y_ref.cend());
@@ -173,29 +173,29 @@ class VMulCAddCMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      vmulcaddc(m(), c() * sizeof(float),
-        x_data, x_stride() * sizeof(float),
+      vmulcaddc(rows(), channels() * sizeof(float),
+        x_data, input_stride() * sizeof(float),
         packed_w.data(),
-        y.data(), y_stride() * sizeof(float),
+        y.data(), output_stride() * sizeof(float),
         &output_params);
 
       // Verify results.
-      for (size_t i = 0; i < m(); i++) {
-        for (size_t j = 0; j < c(); j++) {
-          ASSERT_NEAR(y[i * y_stride() + j], y_ref[i * c() + j], std::abs(y_ref[i * c() + j]) * 1.0e-6f)
-            << "at pixel " << i << " / " << m()
-            << ", channel = " << j << " / " << c();
+      for (size_t i = 0; i < rows(); i++) {
+        for (size_t j = 0; j < channels(); j++) {
+          ASSERT_NEAR(y[i * output_stride() + j], y_ref[i * channels() + j], std::abs(y_ref[i * channels() + j]) * 1.0e-6f)
+            << "at pixel " << i << " / " << rows()
+            << ", channel = " << j << " / " << channels();
         }
       }
     }
   }
 
  private:
-  size_t cr_{1};
-  size_t c_{1};
-  size_t m_{1};
-  size_t x_stride_{0};
-  size_t y_stride_{0};
+  size_t channel_tile_{1};
+  size_t channels_{1};
+  size_t rows_{1};
+  size_t input_stride_{0};
+  size_t output_stride_{0};
   bool inplace_{false};
   uint8_t qmin_{0};
   uint8_t qmax_{255};

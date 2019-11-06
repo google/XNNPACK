@@ -72,7 +72,7 @@ $if CHANNEL_TILE > 1:
 TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${CHANNEL_TILE*2}; channels++) {
+  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
     PReLUMicrokernelTester()
       .rows(${ROW_TILE})
       .channels(channels)

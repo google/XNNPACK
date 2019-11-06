@@ -199,9 +199,9 @@ static void init(void) {
     };
     xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__psimd;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
-      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__neon_x2,
-      .cr = 4,
-      .mr = 2,
+      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__neon_2x,
+      .channel_tile = 4,
+      .row_tile = 2,
     };
   #endif  // XNN_NO_F32_OPERATORS
 
@@ -450,9 +450,9 @@ static void init(void) {
     };
     xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__psimd;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
-      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__neonfma_x2,
-      .cr = 4,
-      .mr = 2,
+      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__neonfma_2x,
+      .channel_tile = 4,
+      .row_tile = 2,
     };
     #ifndef XNN_NO_SPNCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
@@ -644,9 +644,9 @@ static void init(void) {
     };
     xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__sse;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
-      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__sse_x2,
-      .cr = 4,
-      .mr = 2,
+      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__sse_2x,
+      .channel_tile = 4,
+      .row_tile = 2,
     };
     #ifndef XNN_NO_SPNCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
@@ -834,9 +834,9 @@ static void init(void) {
     };
     xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__psimd;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
-      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__psimd_x2,
-      .cr = 4,
-      .mr = 2,
+      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__psimd_2x,
+      .channel_tile = 4,
+      .row_tile = 2,
     };
   #endif  // XNN_NO_F32_OPERATORS
 
@@ -999,9 +999,9 @@ static void init(void) {
     };
     xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__scalar;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
-      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c1__scalar_x2,
-      .cr = 1,
-      .mr = 2,
+      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c1__scalar_2x,
+      .channel_tile = 1,
+      .row_tile = 2,
     };
     #ifndef XNN_NO_SPNCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
