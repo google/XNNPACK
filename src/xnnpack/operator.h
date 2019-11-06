@@ -186,7 +186,6 @@ struct xnn_operator {
   size_t input_pixel_stride;
   const void* input;
   const void** indirection_buffer;
-  void* a_sum;
 
   size_t input2_pixel_stride;
   const void* input2;

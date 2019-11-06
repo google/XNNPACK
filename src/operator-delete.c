@@ -28,7 +28,6 @@ enum xnn_status xnn_delete_operator(xnn_operator_t op)
 
   free(op->indirection_buffer);
   xnn_release_memory(op->packed_weights);
-  free(op->a_sum);
   xnn_release_memory(op->zero_buffer);
   free(op->pixelwise_buffer);
   free(op->subconvolution_buffer);
