@@ -193,8 +193,9 @@ static void init(void) {
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__neon;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__neon;
     xnn_params.f32.prelu = (struct prelu_parameters) {
-      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel_x4__psimd,
-      .mr = 4,
+      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__neon_2x8,
+      .row_tile = 2,
+      .channel_tile = 8,
     };
     xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__psimd;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
@@ -443,8 +444,9 @@ static void init(void) {
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__neon;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__neonfma;
     xnn_params.f32.prelu = (struct prelu_parameters) {
-      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel_x4__psimd,
-      .mr = 4,
+      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__neon_2x8,
+      .row_tile = 2,
+      .channel_tile = 8,
     };
     xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__psimd;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
@@ -636,8 +638,9 @@ static void init(void) {
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__sse;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__sse;
     xnn_params.f32.prelu = (struct prelu_parameters) {
-      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel_x4__sse,
-      .mr = 4,
+      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__sse2_2x8,
+      .row_tile = 2,
+      .channel_tile = 8,
     };
     xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__sse;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
@@ -825,8 +828,9 @@ static void init(void) {
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__psimd;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__psimd;
     xnn_params.f32.prelu = (struct prelu_parameters) {
-      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel_x4__psimd,
-      .mr = 4,
+      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__psimd_2x8,
+      .row_tile = 2,
+      .channel_tile = 8,
     };
     xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__psimd;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
@@ -989,8 +993,9 @@ static void init(void) {
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__scalar;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__scalar;
     xnn_params.f32.prelu = (struct prelu_parameters) {
-      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel_x4__scalar,
-      .mr = 4,
+      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__scalar_2x4,
+      .row_tile = 4,
+      .channel_tile = 4,
     };
     xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__scalar;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {

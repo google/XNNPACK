@@ -6,11 +6,11 @@
 # Description:
 #   XNNPACK - optimized floating-point neural network operators library
 
+load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_min_size_copts", "xnnpack_optional_armcl_copts", "xnnpack_optional_armcl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_copts", "xnnpack_unit_test", "xnnpack_visibility")
+
 licenses(["notice"])
 
 exports_files(["LICENSE"])
-
-load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_min_size_copts", "xnnpack_optional_armcl_copts", "xnnpack_optional_armcl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_copts", "xnnpack_unit_test", "xnnpack_visibility")
 
 OPERATOR_BENCHMARK_DEPS = [
     ":XNNPACK",
@@ -106,7 +106,8 @@ SCALAR_UKERNELS = [
     "src/f32-ppmm/3x3-scalar.c",
     "src/f32-ppmm/4x2-scalar.c",
     "src/f32-ppmm/4x4-scalar.c",
-    "src/f32-prelu/x4-scalar.c",
+    "src/f32-prelu/scalar-2x1.c",
+    "src/f32-prelu/scalar-2x4.c",
     "src/f32-rmax/scalar.c",
     "src/f32-spmm/1x1-scalar-pipelined.c",
     "src/f32-spmm/1x1-scalar.c",
@@ -195,7 +196,8 @@ PSIMD_UKERNELS = [
     "src/f32-pavgpool/mp9p8q-psimd.c",
     "src/f32-pavgpool/up9-psimd.c",
     "src/f32-ppmm/4x8-psimd.c",
-    "src/f32-prelu/x4-psimd.c",
+    "src/f32-prelu/psimd-2x4.c",
+    "src/f32-prelu/psimd-2x8.c",
     "src/f32-vadd/psimd.c",
     "src/f32-vmul/psimd.c",
     "src/f32-vmulcaddc/c4-psimd-x2.c",
@@ -214,12 +216,6 @@ NEON_UKERNELS = [
     "src/f32-avgpool/mp9p8q-neon.c",
     "src/f32-avgpool/up9-neon.c",
     "src/f32-clamp/neon.c",
-    "src/f32-igemm/1x8-neon-ld64.c",
-    "src/f32-igemm/4x2-neon-ld64.c",
-    "src/f32-igemm/4x4-neon-ld64.c",
-    "src/f32-igemm/4x8-neon-ld128.c",
-    "src/f32-igemm/4x8-neon-ld64.c",
-    "src/f32-igemm/6x8-neon-ld64.c",
     "src/f32-dwconv/up4x9-neon.c",
     "src/f32-gavgpool-spchw/neon-x4.c",
     "src/f32-gavgpool/mp7p7q-neon.c",
@@ -236,21 +232,29 @@ NEON_UKERNELS = [
     "src/f32-gemminc/5x8-neon-ld64.c",
     "src/f32-gemminc/6x8-neon-ld64.c",
     "src/f32-hswish/neon.c",
+    "src/f32-igemm/1x8-neon-ld64.c",
+    "src/f32-igemm/4x2-neon-ld64.c",
+    "src/f32-igemm/4x4-neon-ld64.c",
+    "src/f32-igemm/4x8-neon-ld128.c",
+    "src/f32-igemm/4x8-neon-ld64.c",
+    "src/f32-igemm/6x8-neon-ld64.c",
     "src/f32-pavgpool/mp9p8q-neon.c",
     "src/f32-pavgpool/up9-neon.c",
     "src/f32-ppmm/4x8-neon.c",
     "src/f32-ppmm/8x8-neon.c",
+    "src/f32-prelu/neon-2x4.c",
+    "src/f32-prelu/neon-2x8.c",
     "src/f32-rmax/neon.c",
     "src/f32-vmulcaddc/c4-neon-x2.c",
     "src/q8-avgpool/mp9p8q-neon.c",
     "src/q8-avgpool/up9-neon.c",
-    "src/q8-igemm/4x8-neon.c",
-    "src/q8-igemm/8x8-neon.c",
     "src/q8-dwconv/up8x9-neon.c",
     "src/q8-gavgpool/mp7p7q-neon.c",
     "src/q8-gavgpool/up7-neon.c",
     "src/q8-gemm/4x8-neon.c",
     "src/q8-gemm/8x8-neon.c",
+    "src/q8-igemm/4x8-neon.c",
+    "src/q8-igemm/8x8-neon.c",
     "src/q8-vadd/neon.c",
     "src/u8-clamp/neon.c",
     "src/u8-maxpool/9p8q-neon.c",
@@ -363,7 +367,6 @@ SSE_UKERNELS = [
     "src/f32-dwconv-spchw/3x3p1-sse.c",
     "src/f32-dwconv-spchw/3x3s2p1-sse.c",
     "src/f32-ppmm/4x8-sse.c",
-    "src/f32-prelu/x4-sse.c",
     "src/f32-rmax/sse.c",
     "src/f32-spmm/4x1-sse.c",
     "src/f32-spmm/8x1-sse.c",
@@ -378,6 +381,8 @@ SSE2_UKERNELS = [
     "src/f32-argmaxpool/mp9p8q-sse2.c",
     "src/f32-argmaxpool/up4-sse2.c",
     "src/f32-argmaxpool/up9-sse2.c",
+    "src/f32-prelu/sse2-2x4.c",
+    "src/f32-prelu/sse2-2x8.c",
     "src/q8-avgpool/mp9p8q-sse2.c",
     "src/q8-avgpool/up9-sse2.c",
     "src/q8-igemm/4x4c2-sse2.c",
@@ -399,6 +404,11 @@ SSE2_UKERNELS = [
     "src/x8-zip/x3-sse2.c",
     "src/x8-zip/x4-sse2.c",
     "src/x8-zip/xm-sse2.c",
+]
+
+SSE41_UKERNELS = [
+    "src/f32-prelu/sse41-2x4.c",
+    "src/f32-prelu/sse41-2x8.c",
 ]
 
 AVX_UKERNELS = [
@@ -656,6 +666,15 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "sse41_ukernels",
+    hdrs = INTERNAL_HDRS,
+    copts = xnnpack_std_copts(),
+    x86_copts = ["-msse4.1"],
+    x86_srcs = SSE41_UKERNELS,
+    deps = ["@FP16"],
+)
+
+xnnpack_cc_library(
     name = "avx_ukernels",
     hdrs = INTERNAL_HDRS,
     copts = xnnpack_std_copts(),
@@ -714,6 +733,7 @@ xnnpack_aggregate_library(
     x86_deps = [
         ":psimd_ukernels",
         ":sse2_ukernels",
+        ":sse41_ukernels",
         ":avx_ukernels",
         ":avx2_ukernels",
         ":avx512f_ukernels",

@@ -29,53 +29,53 @@ class PReLUMicrokernelTester {
     Scalar,
   };
 
-  inline PReLUMicrokernelTester& m(size_t m) {
-    assert(m != 0);
-    this->m_ = m;
+  inline PReLUMicrokernelTester& rows(size_t rows) {
+    assert(rows != 0);
+    this->rows_ = rows;
     return *this;
   }
 
-  inline size_t m() const {
-    return this->m_;
+  inline size_t rows() const {
+    return this->rows_;
   }
 
-  inline PReLUMicrokernelTester& n(size_t n) {
-    assert(n != 0);
-    this->n_ = n;
+  inline PReLUMicrokernelTester& channels(size_t channels) {
+    assert(channels != 0);
+    this->channels_ = channels;
     return *this;
   }
 
-  inline size_t n() const {
-    return this->n_;
+  inline size_t channels() const {
+    return this->channels_;
   }
 
-  inline PReLUMicrokernelTester& x_stride(size_t x_stride) {
-    assert(x_stride != 0);
-    this->x_stride_ = x_stride;
+  inline PReLUMicrokernelTester& input_stride(size_t input_stride) {
+    assert(input_stride != 0);
+    this->input_stride_ = input_stride;
     return *this;
   }
 
-  inline size_t x_stride() const {
-    if (this->x_stride_ == 0) {
-      return n();
+  inline size_t input_stride() const {
+    if (this->input_stride_ == 0) {
+      return channels();
     } else {
-      assert(this->x_stride_ >= n());
-      return this->x_stride_;
+      assert(this->input_stride_ >= channels());
+      return this->input_stride_;
     }
   }
 
-  inline PReLUMicrokernelTester& y_stride(size_t y_stride) {
-    assert(y_stride != 0);
-    this->y_stride_ = y_stride;
+  inline PReLUMicrokernelTester& output_stride(size_t output_stride) {
+    assert(output_stride != 0);
+    this->output_stride_ = output_stride;
     return *this;
   }
 
-  inline size_t y_stride() const {
-    if (this->y_stride_ == 0) {
-      return n();
+  inline size_t output_stride() const {
+    if (this->output_stride_ == 0) {
+      return channels();
     } else {
-      assert(this->y_stride_ >= n());
-      return this->y_stride_;
+      assert(this->output_stride_ >= channels());
+      return this->output_stride_;
     }
   }
 
@@ -121,10 +121,10 @@ class PReLUMicrokernelTester {
     auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
     auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), rng);
 
-    std::vector<float> x(n() + (m() - 1) * x_stride() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float, AlignedAllocator<float, 16>> w(n() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(n() + (m() - 1) * y_stride() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y_ref(n());
+    std::vector<float> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float, AlignedAllocator<float, 16>> w(channels() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(f32irng));
       std::generate(w.begin(), w.end(), std::ref(f32wrng));
@@ -136,7 +136,7 @@ class PReLUMicrokernelTester {
       const float* x_data = inplace() ? y.data() : x.data();
 
       // Compute reference results, without clamping.
-      for (size_t i = 0; i < n(); i++) {
+      for (size_t i = 0; i < channels(); i++) {
         y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * w[i] : x_data[i];
       }
 
@@ -166,29 +166,29 @@ class PReLUMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      prelu(m(), n() * sizeof(float),
-        x_data, x_stride() * sizeof(float),
+      prelu(rows(), channels() * sizeof(float),
+        x_data, input_stride() * sizeof(float),
         w.data(),
-        y.data(), y_stride() * sizeof(float),
+        y.data(), output_stride() * sizeof(float),
         &output_params);
 
       // Verify results.
-      for (size_t i = 0; i < n(); i++) {
+      for (size_t i = 0; i < channels(); i++) {
         ASSERT_LE(y[i], y_max)
-          << "at " << i << ", n = " << n();
+          << "at " << i << ", channels = " << channels();
         ASSERT_GE(y[i], y_min)
-          << "at " << i << ", n = " << n();
+          << "at " << i << ", channels = " << channels();
         ASSERT_NEAR(y[i], y_ref[i], 1.0e-6f * std::abs(y_ref[i]))
-          << "at " << i << ", n = " << n();
+          << "at " << i << ", channels = " << channels();
       }
     }
   }
 
  private:
-  size_t m_{1};
-  size_t n_{1};
-  size_t x_stride_{0};
-  size_t y_stride_{0};
+  size_t rows_{1};
+  size_t channels_{1};
+  size_t input_stride_{0};
+  size_t output_stride_{0};
   bool inplace_{false};
   uint8_t qmin_{0};
   uint8_t qmax_{255};

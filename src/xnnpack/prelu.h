@@ -18,19 +18,25 @@ extern "C" {
 
 #define DECLARE_F32_PRELU_UKERNEL_FUNCTION(fn_name)            \
   XNN_INTERNAL void fn_name(                                   \
-      size_t mr,                                               \
-      size_t n,                                                \
-      const float* x,                                          \
-      size_t x_stride,                                         \
-      const float* w,                                          \
-      float* y,                                                \
-      size_t y_stride,                                         \
-      const union xnn_f32_output_params* clamping_params);
+      size_t rows,                                             \
+      size_t channels,                                         \
+      const float* input,                                      \
+      size_t input_stride,                                     \
+      const float* weights,                                    \
+      float* output,                                           \
+      size_t output_stride,                                    \
+      const union xnn_f32_output_params* params);
 
-
-DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel_x4__psimd)
-DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel_x4__scalar)
-DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel_x4__sse)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__scalar_2x1)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__scalar_2x4)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__neon_2x4)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__neon_2x8)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__psimd_2x4)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__psimd_2x8)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__sse2_2x4)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__sse2_2x8)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__sse41_2x4)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__sse41_2x8)
 
 
 #ifdef __cplusplus

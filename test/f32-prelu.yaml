@@ -1,0 +1,14 @@
+# Copyright 2019 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f32_prelu_ukernel__neon_2x4
+- name: xnn_f32_prelu_ukernel__neon_2x8
+- name: xnn_f32_prelu_ukernel__sse2_2x4
+- name: xnn_f32_prelu_ukernel__sse2_2x8
+- name: xnn_f32_prelu_ukernel__sse41_2x4
+- name: xnn_f32_prelu_ukernel__sse41_2x8
+- name: xnn_f32_prelu_ukernel__psimd_2x4
+- name: xnn_f32_prelu_ukernel__psimd_2x8
+- name: xnn_f32_prelu_ukernel__scalar_2x1
+- name: xnn_f32_prelu_ukernel__scalar_2x4

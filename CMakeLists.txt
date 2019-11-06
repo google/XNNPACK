@@ -195,7 +195,8 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-ppmm/3x3-scalar.c
   src/f32-ppmm/4x2-scalar.c
   src/f32-ppmm/4x4-scalar.c
-  src/f32-prelu/x4-scalar.c
+  src/f32-prelu/scalar-2x1.c
+  src/f32-prelu/scalar-2x4.c
   src/f32-rmax/scalar.c
   src/f32-spmm/1x1-scalar-pipelined.c
   src/f32-spmm/1x1-scalar.c
@@ -283,7 +284,8 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-pavgpool/mp9p8q-psimd.c
   src/f32-pavgpool/up9-psimd.c
   src/f32-ppmm/4x8-psimd.c
-  src/f32-prelu/x4-psimd.c
+  src/f32-prelu/psimd-2x4.c
+  src/f32-prelu/psimd-2x8.c
   src/f32-vadd/psimd.c
   src/f32-vmul/psimd.c
   src/f32-vmulcaddc/c4-psimd-x2.c
@@ -326,6 +328,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-pavgpool/up9-neon.c
   src/f32-ppmm/4x8-neon.c
   src/f32-ppmm/8x8-neon.c
+  src/f32-prelu/neon-2x4.c
+  src/f32-prelu/neon-2x8.c
   src/f32-rmax/neon.c
   src/f32-vmulcaddc/c4-neon-x2.c
   src/q8-avgpool/mp9p8q-neon.c
@@ -445,7 +449,6 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-dwconv-spchw/3x3p1-sse.c
   src/f32-dwconv-spchw/3x3s2p1-sse.c
   src/f32-ppmm/4x8-sse.c
-  src/f32-prelu/x4-sse.c
   src/f32-rmax/sse.c
   src/f32-spmm/4x1-sse.c
   src/f32-spmm/8x1-sse.c
@@ -459,6 +462,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/mp9p8q-sse2.c
   src/f32-argmaxpool/up4-sse2.c
   src/f32-argmaxpool/up9-sse2.c
+  src/f32-prelu/sse2-2x4.c
+  src/f32-prelu/sse2-2x8.c
   src/q8-avgpool/mp9p8q-sse2.c
   src/q8-avgpool/up9-sse2.c
   src/q8-igemm/4x4c2-sse2.c
@@ -480,6 +485,10 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
   src/x8-zip/xm-sse2.c)
+
+SET(XNNPACK_SSE41_MICROKERNEL_SRCS
+  src/f32-prelu/sse41-2x4.c
+  src/f32-prelu/sse41-2x8.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-rmax/avx.c
@@ -580,6 +589,7 @@ ENDIF()
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i[3-6]86|x86_64)$" OR IOS_ARCH MATCHES "^(i386|x86_64)$")
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SSE_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SSE2_MICROKERNEL_SRCS})
+  LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SSE41_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AVX_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AVX2_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AVX512F_MICROKERNEL_SRCS})
@@ -615,6 +625,7 @@ ENDIF()
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i[3-6]86|x86_64)$" OR IOS_ARCH MATCHES "^(i386|x86_64)$")
   SET_PROPERTY(SOURCE ${XNNPACK_SSE_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -msse ")
   SET_PROPERTY(SOURCE ${XNNPACK_SSE2_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -msse2 ")
+  SET_PROPERTY(SOURCE ${XNNPACK_SSE41_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -msse4.1 ")
   SET_PROPERTY(SOURCE ${XNNPACK_AVX_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mavx ")
   SET_PROPERTY(SOURCE ${XNNPACK_AVX2_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfma -mavx2 ")
   SET_PROPERTY(SOURCE ${XNNPACK_AVX512F_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mavx512f ")

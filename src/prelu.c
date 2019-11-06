@@ -74,7 +74,7 @@ enum xnn_status xnn_create_prelu_nc_f32(
     goto error;
   }
 
-  const size_t packed_channels = round_up(channels, XNN_EXTRA_BYTES / sizeof(float));
+  const size_t packed_channels = round_up_po2(channels, XNN_EXTRA_BYTES / sizeof(float));
   prelu_op->packed_weights = xnn_allocate_memory(packed_channels * sizeof(float));
   if (prelu_op->packed_weights == NULL) {
     xnn_log_error("failed to allocate %zu bytes for packed slope data",
@@ -135,10 +135,21 @@ enum xnn_status xnn_setup_prelu_nc_f32(
     .ukernel = xnn_params.f32.prelu.ukernel,
     .params = prelu_op->f32_output_params,
   };
+
+  size_t batch_tile = batch_size;
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+  if (num_threads > 1) {
+    const size_t target_tiles_per_thread = 5;
+    const size_t max_batch_tile = divide_round_up(batch_size, num_threads * target_tiles_per_thread);
+    if (max_batch_tile < batch_tile) {
+      const uint32_t row_tile = xnn_params.f32.prelu.row_tile;
+      batch_tile = min(batch_tile, divide_round_up(batch_tile, max_batch_tile * row_tile) * row_tile);
+    }
+  }
   prelu_op->compute.type = xnn_parallelization_type_1d_tile_1d;
   prelu_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_prelu;
   prelu_op->compute.range[0] = batch_size;
-  prelu_op->compute.tile[0] = xnn_params.f32.prelu.mr;
+  prelu_op->compute.tile[0] = batch_tile;
   prelu_op->state = xnn_run_state_ready;
 
   return xnn_status_success;

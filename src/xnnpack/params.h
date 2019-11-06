@@ -1265,7 +1265,8 @@ struct zip_parameters {
 
 struct prelu_parameters {
   xnn_prelu_ukernel_function ukernel;
-  uint8_t mr;
+  uint16_t row_tile;
+  uint16_t channel_tile;
 };
 
 struct pad_parameters {
