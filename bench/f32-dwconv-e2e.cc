@@ -61,21 +61,6 @@ static void DWConvEnd2EndBenchmark(
   state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
 }
 
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up1x25__scalar)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up1x4__scalar)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up1x9__scalar)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x25__psimd)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x25__sse)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x4__psimd)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x4__sse)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x9__neon)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x9__neonfma)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x9__psimd)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x9__sse)
-DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up8x9__neonfma)
-
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void f32_dwconv_up4x9__aarch64_neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
@@ -103,9 +88,33 @@ DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up8x9__neonfm
       4 /* cr */, 9 /* mr */);
   }
 
+  static void f32_dwconv_up4x9__neon_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up4x9__neon_acc2,
+      4 /* cr */, 9 /* mr */);
+  }
+
+  static void f32_dwconv_up8x9__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up8x9__neon,
+      8 /* cr */, 9 /* mr */);
+  }
+
+  static void f32_dwconv_up8x9__neon_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up8x9__neon_acc2,
+      8 /* cr */, 9 /* mr */);
+  }
+
   static void f32_dwconv_up4x9__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up4x9__neonfma,
+      4 /* cr */, 9 /* mr */);
+  }
+
+  static void f32_dwconv_up4x9__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up4x9__neonfma_acc2,
       4 /* cr */, 9 /* mr */);
   }
 
@@ -115,14 +124,35 @@ DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up8x9__neonfm
       8 /* cr */, 9 /* mr */);
   }
 
+  static void f32_dwconv_up8x9__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up8x9__neonfma_acc2,
+      8 /* cr */, 9 /* mr */);
+  }
+
   BENCHMARK_CAPTURE(f32_dwconv_up4x9__neon, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_dwconv_up4x9__neon, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_dwconv_up4x9__neon_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up4x9__neon_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__neon, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__neon, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__neon_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__neon_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
   BENCHMARK_CAPTURE(f32_dwconv_up4x9__neonfma, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_dwconv_up4x9__neonfma, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
+  BENCHMARK_CAPTURE(f32_dwconv_up4x9__neonfma_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up4x9__neonfma_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
   BENCHMARK_CAPTURE(f32_dwconv_up8x9__neonfma, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_dwconv_up8x9__neonfma, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__neonfma_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__neonfma_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
@@ -133,8 +163,35 @@ DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up8x9__neonfm
       4 /* cr */, 9 /* mr */);
   }
 
+  static void f32_dwconv_up4x9__sse_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up4x9__sse_acc2,
+      4 /* cr */, 9 /* mr */);
+  }
+
+  static void f32_dwconv_up8x9__sse(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up8x9__sse,
+      8 /* cr */, 9 /* mr */);
+  }
+
+  static void f32_dwconv_up8x9__sse_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up8x9__sse_acc2,
+      8 /* cr */, 9 /* mr */);
+  }
+
   BENCHMARK_CAPTURE(f32_dwconv_up4x9__sse, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_dwconv_up4x9__sse, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_dwconv_up4x9__sse_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up4x9__sse_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__sse, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__sse, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__sse_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__sse_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
@@ -144,8 +201,35 @@ DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up8x9__neonfm
       4 /* cr */, 9 /* mr */);
   }
 
+  static void f32_dwconv_up4x9__psimd_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up4x9__psimd_acc2,
+      4 /* cr */, 9 /* mr */);
+  }
+
+  static void f32_dwconv_up8x9__psimd(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up8x9__psimd,
+      8 /* cr */, 9 /* mr */);
+  }
+
+  static void f32_dwconv_up8x9__psimd_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_ukernel_up8x9__psimd_acc2,
+      8 /* cr */, 9 /* mr */);
+  }
+
   BENCHMARK_CAPTURE(f32_dwconv_up4x9__psimd, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_dwconv_up4x9__psimd, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_dwconv_up4x9__psimd_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up4x9__psimd_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__psimd, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__psimd, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__psimd_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_dwconv_up8x9__psimd_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 #endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 static void f32_dwconv_up1x9__scalar(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -154,8 +238,35 @@ static void f32_dwconv_up1x9__scalar(benchmark::State& state, models::ExecutionP
       1 /* cr */, 9 /* mr */);
 }
 
+static void f32_dwconv_up1x9__scalar_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+  DWConvEnd2EndBenchmark(state, model,
+    xnn_f32_dwconv_ukernel_up1x9__scalar_acc2,
+      1 /* cr */, 9 /* mr */);
+}
+
+static void f32_dwconv_up2x9__scalar(benchmark::State& state, models::ExecutionPlanFactory model) {
+  DWConvEnd2EndBenchmark(state, model,
+    xnn_f32_dwconv_ukernel_up2x9__scalar,
+      2 /* cr */, 9 /* mr */);
+}
+
+static void f32_dwconv_up2x9__scalar_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+  DWConvEnd2EndBenchmark(state, model,
+    xnn_f32_dwconv_ukernel_up2x9__scalar_acc2,
+      2 /* cr */, 9 /* mr */);
+}
+
 BENCHMARK_CAPTURE(f32_dwconv_up1x9__scalar, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK_CAPTURE(f32_dwconv_up1x9__scalar, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_dwconv_up1x9__scalar_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK_CAPTURE(f32_dwconv_up1x9__scalar_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_dwconv_up2x9__scalar, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK_CAPTURE(f32_dwconv_up2x9__scalar, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_dwconv_up2x9__scalar_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK_CAPTURE(f32_dwconv_up2x9__scalar_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

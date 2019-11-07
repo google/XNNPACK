@@ -13,7 +13,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_ukernel_up1x4__scalar(
+void xnn_f32_dwconv_ukernel_up1x4__scalar_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -46,7 +46,7 @@ void xnn_f32_dwconv_ukernel_up1x4__scalar(
 
       const float vi1 = *i1++;
       const float vk1 = w[2];
-      vacc0p0 += vi1 * vk1;
+      float vacc0p1 = vi1 * vk1;
 
       const float vi2 = *i2++;
       const float vk2 = w[3];
@@ -54,10 +54,11 @@ void xnn_f32_dwconv_ukernel_up1x4__scalar(
 
       const float vi3 = *i3++;
       const float vk3 = w[4];
-      vacc0p0 += vi3 * vk3;
+      vacc0p1 += vi3 * vk3;
 
       w += 5;
 
+      vacc0p0 += vacc0p1;
 
       float vacc0 = math_max_f32(vacc0p0, vmin);
       vacc0 = math_min_f32(vacc0, vmax);

@@ -13,7 +13,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_ukernel_up1x4__scalar(
+void xnn_f32_dwconv_ukernel_up2x4__scalar(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -37,33 +37,81 @@ void xnn_f32_dwconv_ukernel_up1x4__scalar(
 
     size_t c = channels;
     const float* w = weights;
-    do {
+    for (; c >= 2; c -= 2) {
       float vacc0p0 = w[0];
+      float vacc1p0 = w[1];
+
+
+      const float vi0x0 = i0[0];
+      const float vi0x1 = i0[1];
+      i0 += 2;
+
+      const float vk0x0 = w[2];
+      vacc0p0 += vi0x0 * vk0x0;
+      const float vk0x1 = w[3];
+      vacc1p0 += vi0x1 * vk0x1;
+
+      const float vi1x0 = i1[0];
+      const float vi1x1 = i1[1];
+      i1 += 2;
+
+      const float vk1x0 = w[4];
+      vacc0p0 += vi1x0 * vk1x0;
+      const float vk1x1 = w[5];
+      vacc1p0 += vi1x1 * vk1x1;
+
+      const float vi2x0 = i2[0];
+      const float vi2x1 = i2[1];
+      i2 += 2;
+
+      const float vk2x0 = w[6];
+      vacc0p0 += vi2x0 * vk2x0;
+      const float vk2x1 = w[7];
+      vacc1p0 += vi2x1 * vk2x1;
+
+      const float vi3x0 = i3[0];
+      const float vi3x1 = i3[1];
+      i3 += 2;
+
+      const float vk3x0 = w[8];
+      vacc0p0 += vi3x0 * vk3x0;
+      const float vk3x1 = w[9];
+      vacc1p0 += vi3x1 * vk3x1;
+
+      w += 10;
+
+
+      float vacc0 = math_max_f32(vacc0p0, vmin);
+      float vacc1 = math_max_f32(vacc1p0, vmin);
+
+      vacc0 = math_min_f32(vacc0, vmax);
+      vacc1 = math_min_f32(vacc1, vmax);
+
+      output[0] = vacc0;
+      output[1] = vacc1;
+      output += 2;
+    }
+    for (; c >= 1; c -= 1) {
+      float vacc0p0 = *w++;
 
       const float vi0 = *i0++;
       const float vk0 = w[1];
       vacc0p0 += vi0 * vk0;
-
       const float vi1 = *i1++;
-      const float vk1 = w[2];
+      const float vk1 = w[3];
       vacc0p0 += vi1 * vk1;
-
       const float vi2 = *i2++;
-      const float vk2 = w[3];
+      const float vk2 = w[5];
       vacc0p0 += vi2 * vk2;
-
       const float vi3 = *i3++;
-      const float vk3 = w[4];
+      const float vk3 = w[7];
       vacc0p0 += vi3 * vk3;
-
-      w += 5;
 
 
       float vacc0 = math_max_f32(vacc0p0, vmin);
       vacc0 = math_min_f32(vacc0, vmax);
-
       *output++ = vacc0;
-    } while (--c != 0);
+    }
 
     output = (float*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);

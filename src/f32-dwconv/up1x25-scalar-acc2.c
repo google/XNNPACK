@@ -13,7 +13,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_ukernel_up1x25__scalar(
+void xnn_f32_dwconv_ukernel_up1x25__scalar_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -67,7 +67,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi1 = *i1++;
       const float vk1 = w[2];
-      vacc0p0 += vi1 * vk1;
+      float vacc0p1 = vi1 * vk1;
 
       const float vi2 = *i2++;
       const float vk2 = w[3];
@@ -75,7 +75,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi3 = *i3++;
       const float vk3 = w[4];
-      vacc0p0 += vi3 * vk3;
+      vacc0p1 += vi3 * vk3;
 
       const float vi4 = *i4++;
       const float vk4 = w[5];
@@ -83,7 +83,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi5 = *i5++;
       const float vk5 = w[6];
-      vacc0p0 += vi5 * vk5;
+      vacc0p1 += vi5 * vk5;
 
       const float vi6 = *i6++;
       const float vk6 = w[7];
@@ -91,7 +91,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi7 = *i7++;
       const float vk7 = w[8];
-      vacc0p0 += vi7 * vk7;
+      vacc0p1 += vi7 * vk7;
 
       const float vi8 = *i8++;
       const float vk8 = w[9];
@@ -99,7 +99,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi9 = *i9++;
       const float vk9 = w[10];
-      vacc0p0 += vi9 * vk9;
+      vacc0p1 += vi9 * vk9;
 
       const float vi10 = *i10++;
       const float vk10 = w[11];
@@ -107,7 +107,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi11 = *i11++;
       const float vk11 = w[12];
-      vacc0p0 += vi11 * vk11;
+      vacc0p1 += vi11 * vk11;
 
       const float vi12 = *i12++;
       const float vk12 = w[13];
@@ -115,7 +115,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi13 = *i13++;
       const float vk13 = w[14];
-      vacc0p0 += vi13 * vk13;
+      vacc0p1 += vi13 * vk13;
 
       const float vi14 = *i14++;
       const float vk14 = w[15];
@@ -123,7 +123,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi15 = *i15++;
       const float vk15 = w[16];
-      vacc0p0 += vi15 * vk15;
+      vacc0p1 += vi15 * vk15;
 
       const float vi16 = *i16++;
       const float vk16 = w[17];
@@ -131,7 +131,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi17 = *i17++;
       const float vk17 = w[18];
-      vacc0p0 += vi17 * vk17;
+      vacc0p1 += vi17 * vk17;
 
       const float vi18 = *i18++;
       const float vk18 = w[19];
@@ -139,7 +139,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi19 = *i19++;
       const float vk19 = w[20];
-      vacc0p0 += vi19 * vk19;
+      vacc0p1 += vi19 * vk19;
 
       const float vi20 = *i20++;
       const float vk20 = w[21];
@@ -147,7 +147,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi21 = *i21++;
       const float vk21 = w[22];
-      vacc0p0 += vi21 * vk21;
+      vacc0p1 += vi21 * vk21;
 
       const float vi22 = *i22++;
       const float vk22 = w[23];
@@ -155,7 +155,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       const float vi23 = *i23++;
       const float vk23 = w[24];
-      vacc0p0 += vi23 * vk23;
+      vacc0p1 += vi23 * vk23;
 
       const float vi24 = *i24++;
       const float vk24 = w[25];
@@ -163,6 +163,7 @@ void xnn_f32_dwconv_ukernel_up1x25__scalar(
 
       w += 26;
 
+      vacc0p0 += vacc0p1;
 
       float vacc0 = math_max_f32(vacc0p0, vmin);
       vacc0 = math_min_f32(vacc0, vmax);

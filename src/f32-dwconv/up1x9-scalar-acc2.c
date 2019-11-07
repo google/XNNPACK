@@ -13,7 +13,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_ukernel_up1x4__scalar(
+void xnn_f32_dwconv_ukernel_up1x9__scalar_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -33,6 +33,11 @@ void xnn_f32_dwconv_ukernel_up1x4__scalar(
     const float* i1 = input[1];
     const float* i2 = input[2];
     const float* i3 = input[3];
+    const float* i4 = input[4];
+    const float* i5 = input[5];
+    const float* i6 = input[6];
+    const float* i7 = input[7];
+    const float* i8 = input[8];
     input = (const float**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;
@@ -46,7 +51,7 @@ void xnn_f32_dwconv_ukernel_up1x4__scalar(
 
       const float vi1 = *i1++;
       const float vk1 = w[2];
-      vacc0p0 += vi1 * vk1;
+      float vacc0p1 = vi1 * vk1;
 
       const float vi2 = *i2++;
       const float vk2 = w[3];
@@ -54,10 +59,31 @@ void xnn_f32_dwconv_ukernel_up1x4__scalar(
 
       const float vi3 = *i3++;
       const float vk3 = w[4];
-      vacc0p0 += vi3 * vk3;
+      vacc0p1 += vi3 * vk3;
 
-      w += 5;
+      const float vi4 = *i4++;
+      const float vk4 = w[5];
+      vacc0p0 += vi4 * vk4;
 
+      const float vi5 = *i5++;
+      const float vk5 = w[6];
+      vacc0p1 += vi5 * vk5;
+
+      const float vi6 = *i6++;
+      const float vk6 = w[7];
+      vacc0p0 += vi6 * vk6;
+
+      const float vi7 = *i7++;
+      const float vk7 = w[8];
+      vacc0p1 += vi7 * vk7;
+
+      const float vi8 = *i8++;
+      const float vk8 = w[9];
+      vacc0p0 += vi8 * vk8;
+
+      w += 10;
+
+      vacc0p0 += vacc0p1;
 
       float vacc0 = math_max_f32(vacc0p0, vmin);
       vacc0 = math_min_f32(vacc0, vmax);

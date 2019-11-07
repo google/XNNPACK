@@ -14,7 +14,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_f32_dwconv_ukernel_up4x9__neonfma(
+void xnn_f32_dwconv_ukernel_up4x9__neonfma_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -54,7 +54,7 @@ void xnn_f32_dwconv_ukernel_up4x9__neonfma(
 
       const float32x4_t vi1x0123 = vld1q_f32(i1); i1 += 4;
       const float32x4_t vk1x0123 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi1x0123, vk1x0123);
+      float32x4_t vacc0123p1 = vmulq_f32(vi1x0123, vk1x0123);
 
       const float32x4_t vi2x0123 = vld1q_f32(i2); i2 += 4;
       const float32x4_t vk2x0123 = vld1q_f32(w); w += 4;
@@ -62,7 +62,7 @@ void xnn_f32_dwconv_ukernel_up4x9__neonfma(
 
       const float32x4_t vi3x0123 = vld1q_f32(i3); i3 += 4;
       const float32x4_t vk3x0123 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi3x0123, vk3x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi3x0123, vk3x0123);
 
       const float32x4_t vi4x0123 = vld1q_f32(i4); i4 += 4;
       const float32x4_t vk4x0123 = vld1q_f32(w); w += 4;
@@ -70,7 +70,7 @@ void xnn_f32_dwconv_ukernel_up4x9__neonfma(
 
       const float32x4_t vi5x0123 = vld1q_f32(i5); i5 += 4;
       const float32x4_t vk5x0123 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi5x0123, vk5x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi5x0123, vk5x0123);
 
       const float32x4_t vi6x0123 = vld1q_f32(i6); i6 += 4;
       const float32x4_t vk6x0123 = vld1q_f32(w); w += 4;
@@ -78,12 +78,14 @@ void xnn_f32_dwconv_ukernel_up4x9__neonfma(
 
       const float32x4_t vi7x0123 = vld1q_f32(i7); i7 += 4;
       const float32x4_t vk7x0123 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi7x0123, vk7x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi7x0123, vk7x0123);
 
       const float32x4_t vi8x0123 = vld1q_f32(i8); i8 += 4;
       const float32x4_t vk8x0123 = vld1q_f32(w); w += 4;
       vacc0123p0 = vfmaq_f32(vacc0123p0, vi8x0123, vk8x0123);
 
+      // Add up all accumulators to vacc0123p0
+      vacc0123p0 = vaddq_f32(vacc0123p0, vacc0123p1);
 
       float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, vmin);
       vacc0123 = vminq_f32(vacc0123, vmax);
@@ -100,7 +102,7 @@ void xnn_f32_dwconv_ukernel_up4x9__neonfma(
 
       const float32x4_t vi1x0123 = vld1q_f32(i1);
       const float32x4_t vk1x0123 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi1x0123, vk1x0123);
+      float32x4_t vacc0123p1 = vmulq_f32(vi1x0123, vk1x0123);
 
       const float32x4_t vi2x0123 = vld1q_f32(i2);
       const float32x4_t vk2x0123 = vld1q_f32(w); w += 4;
@@ -108,7 +110,7 @@ void xnn_f32_dwconv_ukernel_up4x9__neonfma(
 
       const float32x4_t vi3x0123 = vld1q_f32(i3);
       const float32x4_t vk3x0123 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi3x0123, vk3x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi3x0123, vk3x0123);
 
       const float32x4_t vi4x0123 = vld1q_f32(i4);
       const float32x4_t vk4x0123 = vld1q_f32(w); w += 4;
@@ -116,7 +118,7 @@ void xnn_f32_dwconv_ukernel_up4x9__neonfma(
 
       const float32x4_t vi5x0123 = vld1q_f32(i5);
       const float32x4_t vk5x0123 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi5x0123, vk5x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi5x0123, vk5x0123);
 
       const float32x4_t vi6x0123 = vld1q_f32(i6);
       const float32x4_t vk6x0123 = vld1q_f32(w); w += 4;
@@ -124,12 +126,14 @@ void xnn_f32_dwconv_ukernel_up4x9__neonfma(
 
       const float32x4_t vi7x0123 = vld1q_f32(i7);
       const float32x4_t vk7x0123 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi7x0123, vk7x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi7x0123, vk7x0123);
 
       const float32x4_t vi8x0123 = vld1q_f32(i8);
       const float32x4_t vk8x0123 = vld1q_f32(w); w += 4;
       vacc0123p0 = vfmaq_f32(vacc0123p0, vi8x0123, vk8x0123);
 
+      // Add up all accumulators to vacc0123p0
+      vacc0123p0 = vaddq_f32(vacc0123p0, vacc0123p1);
 
       float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, vmin);
       vacc0123 = vminq_f32(vacc0123, vmax);

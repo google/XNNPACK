@@ -3,16 +3,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert CR == 1
-$assert MR >= 2
-$assert AR >= 1
+$assert CHANNEL_TILE >= 1
+$assert KERNEL_TILE >= 2
+$assert ACCUMULATORS >= 1
+$ABC = "0123456789ABCDEF"
 #include <assert.h>
 
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_ukernel_up${CR}x${MR}__scalar(
+void xnn_f32_dwconv_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__scalar${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -28,37 +29,102 @@ void xnn_f32_dwconv_ukernel_up${CR}x${MR}__scalar(
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
   do {
-    $for M in range(MR):
-      const float* i${M} = input[${M}];
+    $for K in range(KERNEL_TILE):
+      const float* i${K} = input[${K}];
     input = (const float**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;
     const float* w = weights;
-    do {
-      float vacc0 = w[0];
-      $for M in range(MR):
+    $if CHANNEL_TILE > 1:
+      for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+        $for C in range(CHANNEL_TILE):
+          float vacc${C}p0 = w[${C}];
 
-        const float vi${M} = *i${M}++;
-        const float vk${M} = w[${M+1}];
-        $if 1 <= M < AR:
-          float vacc${M} = vi${M} * vk${M};
-        $else:
-          vacc${M % AR} += vi${M} * vk${M};
+        $for K in range(KERNEL_TILE):
 
-      w += ${MR + 1};
+          $for C in range(CHANNEL_TILE):
+            const float vi${K}x${C} = i${K}[${C}];
+          i${K} += ${CHANNEL_TILE};
 
-      $STEPA = 1
-      $while STEPA < AR:
-        $for A in range(0, AR, STEPA * 2):
-          $if A + STEPA < AR:
-            vacc${A} += vacc${A + STEPA};
-        $STEPA *= 2
+          $for C in range(CHANNEL_TILE):
+            const float vk${K}x${C} = w[${(K + 1) * CHANNEL_TILE + C}];
+            $if 1 <= K < ACCUMULATORS:
+              float vacc${C}p${K} = vi${K}x${C} * vk${K}x${C};
+            $else:
+              vacc${C}p${K % ACCUMULATORS} += vi${K}x${C} * vk${K}x${C};
 
-      vacc0 = math_max_f32(vacc0, vmin);
-      vacc0 = math_min_f32(vacc0, vmax);
+        w += ${(KERNEL_TILE + 1) * CHANNEL_TILE};
 
-      *output++ = vacc0;
-    } while (--c != 0);
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc${ABC[0:CHANNEL_TILE]}p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                $for C in range(CHANNEL_TILE):
+                  vacc${C}p${A} = vacc${C}p${A} + vacc${C}p${A + ACC_SLICE};
+            $ACC_SLICE *= 2
+
+        $for C in range(CHANNEL_TILE):
+          float vacc${C} = math_max_f32(vacc${C}p0, vmin);
+
+        $for C in range(CHANNEL_TILE):
+          vacc${C} = math_min_f32(vacc${C}, vmax);
+
+        $for C in range(CHANNEL_TILE):
+          output[${C}] = vacc${C};
+        output += ${CHANNEL_TILE};
+      }
+      for (; c >= 1; c -= 1) {
+        float vacc0p0 = *w++;
+
+        $for K in range(KERNEL_TILE):
+          const float vi${K} = *i${K}++;
+          const float vk${K} = w[${(K + 1) * CHANNEL_TILE - 1}];
+          $if 1 <= K < ACCUMULATORS:
+            float vacc0p${K} = vi${K} * vk${K};
+          $else:
+            vacc0p${K % ACCUMULATORS} += vi${K} * vk${K};
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc${ABC[0:CHANNEL_TILE]}p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc0p${A} = vacc0p${A} + vacc0p${A + ACC_SLICE};
+            $ACC_SLICE *= 2
+
+        float vacc0 = math_max_f32(vacc0p0, vmin);
+        vacc0 = math_min_f32(vacc0, vmax);
+        *output++ = vacc0;
+      }
+    $else:
+      do {
+        float vacc0p0 = w[0];
+        $for K in range(KERNEL_TILE):
+
+          const float vi${K} = *i${K}++;
+          const float vk${K} = w[${K+1}];
+          $if 1 <= K < ACCUMULATORS:
+            float vacc0p${K} = vi${K} * vk${K};
+          $else:
+            vacc0p${K % ACCUMULATORS} += vi${K} * vk${K};
+
+        w += ${KERNEL_TILE + 1};
+
+        $ACC_STEP = 1
+        $while ACC_STEP < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_STEP * 2):
+            $if A + ACC_STEP < ACCUMULATORS:
+              vacc0p${A} += vacc0p${A + ACC_STEP};
+          $ACC_STEP *= 2
+
+        float vacc0 = math_max_f32(vacc0p0, vmin);
+        vacc0 = math_min_f32(vacc0, vmax);
+
+        *output++ = vacc0;
+      } while (--c != 0);
 
     output = (float*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);

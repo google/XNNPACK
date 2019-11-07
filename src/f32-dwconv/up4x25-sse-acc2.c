@@ -14,7 +14,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_f32_dwconv_ukernel_up4x25__sse(
+void xnn_f32_dwconv_ukernel_up4x25__sse_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -73,7 +73,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i1 += 4;
 
       const __m128 vk1x0123 = _mm_load_ps(w + 8);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi1x0123, vk1x0123));
+      __m128 vacc0123p1 = _mm_mul_ps(vi1x0123, vk1x0123);
 
       const __m128 vi2x0123 = _mm_loadu_ps(i2);
       i2 += 4;
@@ -85,7 +85,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i3 += 4;
 
       const __m128 vk3x0123 = _mm_load_ps(w + 16);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi3x0123, vk3x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi3x0123, vk3x0123));
 
       const __m128 vi4x0123 = _mm_loadu_ps(i4);
       i4 += 4;
@@ -97,7 +97,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i5 += 4;
 
       const __m128 vk5x0123 = _mm_load_ps(w + 24);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi5x0123, vk5x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi5x0123, vk5x0123));
 
       const __m128 vi6x0123 = _mm_loadu_ps(i6);
       i6 += 4;
@@ -109,7 +109,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i7 += 4;
 
       const __m128 vk7x0123 = _mm_load_ps(w + 32);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi7x0123, vk7x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi7x0123, vk7x0123));
 
       const __m128 vi8x0123 = _mm_loadu_ps(i8);
       i8 += 4;
@@ -121,7 +121,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i9 += 4;
 
       const __m128 vk9x0123 = _mm_load_ps(w + 40);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi9x0123, vk9x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi9x0123, vk9x0123));
 
       const __m128 vi10x0123 = _mm_loadu_ps(i10);
       i10 += 4;
@@ -133,7 +133,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i11 += 4;
 
       const __m128 vk11x0123 = _mm_load_ps(w + 48);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi11x0123, vk11x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi11x0123, vk11x0123));
 
       const __m128 vi12x0123 = _mm_loadu_ps(i12);
       i12 += 4;
@@ -145,7 +145,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i13 += 4;
 
       const __m128 vk13x0123 = _mm_load_ps(w + 56);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi13x0123, vk13x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi13x0123, vk13x0123));
 
       const __m128 vi14x0123 = _mm_loadu_ps(i14);
       i14 += 4;
@@ -157,7 +157,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i15 += 4;
 
       const __m128 vk15x0123 = _mm_load_ps(w + 64);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi15x0123, vk15x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi15x0123, vk15x0123));
 
       const __m128 vi16x0123 = _mm_loadu_ps(i16);
       i16 += 4;
@@ -169,7 +169,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i17 += 4;
 
       const __m128 vk17x0123 = _mm_load_ps(w + 72);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi17x0123, vk17x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi17x0123, vk17x0123));
 
       const __m128 vi18x0123 = _mm_loadu_ps(i18);
       i18 += 4;
@@ -181,7 +181,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i19 += 4;
 
       const __m128 vk19x0123 = _mm_load_ps(w + 80);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi19x0123, vk19x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi19x0123, vk19x0123));
 
       const __m128 vi20x0123 = _mm_loadu_ps(i20);
       i20 += 4;
@@ -193,7 +193,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i21 += 4;
 
       const __m128 vk21x0123 = _mm_load_ps(w + 88);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi21x0123, vk21x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi21x0123, vk21x0123));
 
       const __m128 vi22x0123 = _mm_loadu_ps(i22);
       i22 += 4;
@@ -205,7 +205,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
       i23 += 4;
 
       const __m128 vk23x0123 = _mm_load_ps(w + 96);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi23x0123, vk23x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi23x0123, vk23x0123));
 
       const __m128 vi24x0123 = _mm_loadu_ps(i24);
       i24 += 4;
@@ -215,6 +215,8 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       w += 104;
 
+      // Add up all accumulators to vacc0123p0
+      vacc0123p0 = _mm_add_ps(vacc0123p0, vacc0123p1);
 
       __m128 vacc0123 = _mm_max_ps(vacc0123p0, vmin);
       vacc0123 = _mm_min_ps(vacc0123, vmax);
@@ -231,7 +233,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi1x0123 = _mm_loadu_ps(i1);
       const __m128 vk1x0123 = _mm_load_ps(w + 8);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi1x0123, vk1x0123));
+      __m128 vacc0123p1 = _mm_mul_ps(vi1x0123, vk1x0123);
 
       const __m128 vi2x0123 = _mm_loadu_ps(i2);
       const __m128 vk2x0123 = _mm_load_ps(w + 12);
@@ -239,7 +241,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi3x0123 = _mm_loadu_ps(i3);
       const __m128 vk3x0123 = _mm_load_ps(w + 16);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi3x0123, vk3x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi3x0123, vk3x0123));
 
       const __m128 vi4x0123 = _mm_loadu_ps(i4);
       const __m128 vk4x0123 = _mm_load_ps(w + 20);
@@ -247,7 +249,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi5x0123 = _mm_loadu_ps(i5);
       const __m128 vk5x0123 = _mm_load_ps(w + 24);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi5x0123, vk5x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi5x0123, vk5x0123));
 
       const __m128 vi6x0123 = _mm_loadu_ps(i6);
       const __m128 vk6x0123 = _mm_load_ps(w + 28);
@@ -255,7 +257,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi7x0123 = _mm_loadu_ps(i7);
       const __m128 vk7x0123 = _mm_load_ps(w + 32);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi7x0123, vk7x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi7x0123, vk7x0123));
 
       const __m128 vi8x0123 = _mm_loadu_ps(i8);
       const __m128 vk8x0123 = _mm_load_ps(w + 36);
@@ -263,7 +265,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi9x0123 = _mm_loadu_ps(i9);
       const __m128 vk9x0123 = _mm_load_ps(w + 40);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi9x0123, vk9x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi9x0123, vk9x0123));
 
       const __m128 vi10x0123 = _mm_loadu_ps(i10);
       const __m128 vk10x0123 = _mm_load_ps(w + 44);
@@ -271,7 +273,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi11x0123 = _mm_loadu_ps(i11);
       const __m128 vk11x0123 = _mm_load_ps(w + 48);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi11x0123, vk11x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi11x0123, vk11x0123));
 
       const __m128 vi12x0123 = _mm_loadu_ps(i12);
       const __m128 vk12x0123 = _mm_load_ps(w + 52);
@@ -279,7 +281,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi13x0123 = _mm_loadu_ps(i13);
       const __m128 vk13x0123 = _mm_load_ps(w + 56);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi13x0123, vk13x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi13x0123, vk13x0123));
 
       const __m128 vi14x0123 = _mm_loadu_ps(i14);
       const __m128 vk14x0123 = _mm_load_ps(w + 60);
@@ -287,7 +289,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi15x0123 = _mm_loadu_ps(i15);
       const __m128 vk15x0123 = _mm_load_ps(w + 64);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi15x0123, vk15x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi15x0123, vk15x0123));
 
       const __m128 vi16x0123 = _mm_loadu_ps(i16);
       const __m128 vk16x0123 = _mm_load_ps(w + 68);
@@ -295,7 +297,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi17x0123 = _mm_loadu_ps(i17);
       const __m128 vk17x0123 = _mm_load_ps(w + 72);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi17x0123, vk17x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi17x0123, vk17x0123));
 
       const __m128 vi18x0123 = _mm_loadu_ps(i18);
       const __m128 vk18x0123 = _mm_load_ps(w + 76);
@@ -303,7 +305,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi19x0123 = _mm_loadu_ps(i19);
       const __m128 vk19x0123 = _mm_load_ps(w + 80);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi19x0123, vk19x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi19x0123, vk19x0123));
 
       const __m128 vi20x0123 = _mm_loadu_ps(i20);
       const __m128 vk20x0123 = _mm_load_ps(w + 84);
@@ -311,7 +313,7 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi21x0123 = _mm_loadu_ps(i21);
       const __m128 vk21x0123 = _mm_load_ps(w + 88);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi21x0123, vk21x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi21x0123, vk21x0123));
 
       const __m128 vi22x0123 = _mm_loadu_ps(i22);
       const __m128 vk22x0123 = _mm_load_ps(w + 92);
@@ -319,12 +321,14 @@ void xnn_f32_dwconv_ukernel_up4x25__sse(
 
       const __m128 vi23x0123 = _mm_loadu_ps(i23);
       const __m128 vk23x0123 = _mm_load_ps(w + 96);
-      vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi23x0123, vk23x0123));
+      vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi23x0123, vk23x0123));
 
       const __m128 vi24x0123 = _mm_loadu_ps(i24);
       const __m128 vk24x0123 = _mm_load_ps(w + 100);
       vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi24x0123, vk24x0123));
 
+      // Add up all accumulators to vacc0123p0
+      vacc0123p0 = _mm_add_ps(vacc0123p0, vacc0123p1);
 
       __m128 vacc0123 = _mm_max_ps(vacc0123p0, vmin);
       vacc0123 = _mm_min_ps(vacc0123, vmax);

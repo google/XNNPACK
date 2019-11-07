@@ -14,7 +14,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_f32_dwconv_ukernel_up4x25__psimd(
+void xnn_f32_dwconv_ukernel_up4x25__psimd_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -73,7 +73,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i1 += 4;
 
       const psimd_f32 vk1x0123 = psimd_load_f32(w + 8);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi1x0123, vk1x0123);
+      psimd_f32 vacc0123p1 = psimd_mul_f32(vi1x0123, vk1x0123);
 
       const psimd_f32 vi2x0123 = psimd_load_f32(i2);
       i2 += 4;
@@ -85,7 +85,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i3 += 4;
 
       const psimd_f32 vk3x0123 = psimd_load_f32(w + 16);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi3x0123, vk3x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi3x0123, vk3x0123);
 
       const psimd_f32 vi4x0123 = psimd_load_f32(i4);
       i4 += 4;
@@ -97,7 +97,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i5 += 4;
 
       const psimd_f32 vk5x0123 = psimd_load_f32(w + 24);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi5x0123, vk5x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi5x0123, vk5x0123);
 
       const psimd_f32 vi6x0123 = psimd_load_f32(i6);
       i6 += 4;
@@ -109,7 +109,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i7 += 4;
 
       const psimd_f32 vk7x0123 = psimd_load_f32(w + 32);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi7x0123, vk7x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi7x0123, vk7x0123);
 
       const psimd_f32 vi8x0123 = psimd_load_f32(i8);
       i8 += 4;
@@ -121,7 +121,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i9 += 4;
 
       const psimd_f32 vk9x0123 = psimd_load_f32(w + 40);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi9x0123, vk9x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi9x0123, vk9x0123);
 
       const psimd_f32 vi10x0123 = psimd_load_f32(i10);
       i10 += 4;
@@ -133,7 +133,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i11 += 4;
 
       const psimd_f32 vk11x0123 = psimd_load_f32(w + 48);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi11x0123, vk11x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi11x0123, vk11x0123);
 
       const psimd_f32 vi12x0123 = psimd_load_f32(i12);
       i12 += 4;
@@ -145,7 +145,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i13 += 4;
 
       const psimd_f32 vk13x0123 = psimd_load_f32(w + 56);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi13x0123, vk13x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi13x0123, vk13x0123);
 
       const psimd_f32 vi14x0123 = psimd_load_f32(i14);
       i14 += 4;
@@ -157,7 +157,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i15 += 4;
 
       const psimd_f32 vk15x0123 = psimd_load_f32(w + 64);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi15x0123, vk15x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi15x0123, vk15x0123);
 
       const psimd_f32 vi16x0123 = psimd_load_f32(i16);
       i16 += 4;
@@ -169,7 +169,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i17 += 4;
 
       const psimd_f32 vk17x0123 = psimd_load_f32(w + 72);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi17x0123, vk17x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi17x0123, vk17x0123);
 
       const psimd_f32 vi18x0123 = psimd_load_f32(i18);
       i18 += 4;
@@ -181,7 +181,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i19 += 4;
 
       const psimd_f32 vk19x0123 = psimd_load_f32(w + 80);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi19x0123, vk19x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi19x0123, vk19x0123);
 
       const psimd_f32 vi20x0123 = psimd_load_f32(i20);
       i20 += 4;
@@ -193,7 +193,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i21 += 4;
 
       const psimd_f32 vk21x0123 = psimd_load_f32(w + 88);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi21x0123, vk21x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi21x0123, vk21x0123);
 
       const psimd_f32 vi22x0123 = psimd_load_f32(i22);
       i22 += 4;
@@ -205,7 +205,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
       i23 += 4;
 
       const psimd_f32 vk23x0123 = psimd_load_f32(w + 96);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi23x0123, vk23x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi23x0123, vk23x0123);
 
       const psimd_f32 vi24x0123 = psimd_load_f32(i24);
       i24 += 4;
@@ -215,6 +215,8 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       w += 104;
 
+      // Add up all accumulators to vacc0123p0
+      vacc0123p0 = psimd_add_f32(vacc0123p0, vacc0123p1);
 
       psimd_f32 vacc0123 = psimd_max_f32(vacc0123p0, vmin);
       vacc0123 = psimd_min_f32(vacc0123, vmax);
@@ -231,7 +233,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi1x0123 = psimd_load_f32(i1);
       const psimd_f32 vk1x0123 = psimd_load_f32(w + 8);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi1x0123, vk1x0123);
+      psimd_f32 vacc0123p1 = psimd_mul_f32(vi1x0123, vk1x0123);
 
       const psimd_f32 vi2x0123 = psimd_load_f32(i2);
       const psimd_f32 vk2x0123 = psimd_load_f32(w + 12);
@@ -239,7 +241,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi3x0123 = psimd_load_f32(i3);
       const psimd_f32 vk3x0123 = psimd_load_f32(w + 16);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi3x0123, vk3x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi3x0123, vk3x0123);
 
       const psimd_f32 vi4x0123 = psimd_load_f32(i4);
       const psimd_f32 vk4x0123 = psimd_load_f32(w + 20);
@@ -247,7 +249,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi5x0123 = psimd_load_f32(i5);
       const psimd_f32 vk5x0123 = psimd_load_f32(w + 24);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi5x0123, vk5x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi5x0123, vk5x0123);
 
       const psimd_f32 vi6x0123 = psimd_load_f32(i6);
       const psimd_f32 vk6x0123 = psimd_load_f32(w + 28);
@@ -255,7 +257,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi7x0123 = psimd_load_f32(i7);
       const psimd_f32 vk7x0123 = psimd_load_f32(w + 32);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi7x0123, vk7x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi7x0123, vk7x0123);
 
       const psimd_f32 vi8x0123 = psimd_load_f32(i8);
       const psimd_f32 vk8x0123 = psimd_load_f32(w + 36);
@@ -263,7 +265,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi9x0123 = psimd_load_f32(i9);
       const psimd_f32 vk9x0123 = psimd_load_f32(w + 40);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi9x0123, vk9x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi9x0123, vk9x0123);
 
       const psimd_f32 vi10x0123 = psimd_load_f32(i10);
       const psimd_f32 vk10x0123 = psimd_load_f32(w + 44);
@@ -271,7 +273,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi11x0123 = psimd_load_f32(i11);
       const psimd_f32 vk11x0123 = psimd_load_f32(w + 48);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi11x0123, vk11x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi11x0123, vk11x0123);
 
       const psimd_f32 vi12x0123 = psimd_load_f32(i12);
       const psimd_f32 vk12x0123 = psimd_load_f32(w + 52);
@@ -279,7 +281,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi13x0123 = psimd_load_f32(i13);
       const psimd_f32 vk13x0123 = psimd_load_f32(w + 56);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi13x0123, vk13x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi13x0123, vk13x0123);
 
       const psimd_f32 vi14x0123 = psimd_load_f32(i14);
       const psimd_f32 vk14x0123 = psimd_load_f32(w + 60);
@@ -287,7 +289,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi15x0123 = psimd_load_f32(i15);
       const psimd_f32 vk15x0123 = psimd_load_f32(w + 64);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi15x0123, vk15x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi15x0123, vk15x0123);
 
       const psimd_f32 vi16x0123 = psimd_load_f32(i16);
       const psimd_f32 vk16x0123 = psimd_load_f32(w + 68);
@@ -295,7 +297,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi17x0123 = psimd_load_f32(i17);
       const psimd_f32 vk17x0123 = psimd_load_f32(w + 72);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi17x0123, vk17x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi17x0123, vk17x0123);
 
       const psimd_f32 vi18x0123 = psimd_load_f32(i18);
       const psimd_f32 vk18x0123 = psimd_load_f32(w + 76);
@@ -303,7 +305,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi19x0123 = psimd_load_f32(i19);
       const psimd_f32 vk19x0123 = psimd_load_f32(w + 80);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi19x0123, vk19x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi19x0123, vk19x0123);
 
       const psimd_f32 vi20x0123 = psimd_load_f32(i20);
       const psimd_f32 vk20x0123 = psimd_load_f32(w + 84);
@@ -311,7 +313,7 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi21x0123 = psimd_load_f32(i21);
       const psimd_f32 vk21x0123 = psimd_load_f32(w + 88);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi21x0123, vk21x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi21x0123, vk21x0123);
 
       const psimd_f32 vi22x0123 = psimd_load_f32(i22);
       const psimd_f32 vk22x0123 = psimd_load_f32(w + 92);
@@ -319,12 +321,14 @@ void xnn_f32_dwconv_ukernel_up4x25__psimd(
 
       const psimd_f32 vi23x0123 = psimd_load_f32(i23);
       const psimd_f32 vk23x0123 = psimd_load_f32(w + 96);
-      vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi23x0123, vk23x0123);
+      vacc0123p1 = psimd_qfma_f32(vacc0123p1, vi23x0123, vk23x0123);
 
       const psimd_f32 vi24x0123 = psimd_load_f32(i24);
       const psimd_f32 vk24x0123 = psimd_load_f32(w + 100);
       vacc0123p0 = psimd_qfma_f32(vacc0123p0, vi24x0123, vk24x0123);
 
+      // Add up all accumulators to vacc0123p0
+      vacc0123p0 = psimd_add_f32(vacc0123p0, vacc0123p1);
 
       psimd_f32 vacc0123 = psimd_max_f32(vacc0123p0, vmin);
       vacc0123 = psimd_min_f32(vacc0123, vmax);

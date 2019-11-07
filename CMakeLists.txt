@@ -175,6 +175,15 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/up1x25-scalar.c
   src/f32-dwconv/up1x4-scalar.c
   src/f32-dwconv/up1x9-scalar.c
+  src/f32-dwconv/up1x25-scalar-acc2.c
+  src/f32-dwconv/up1x4-scalar-acc2.c
+  src/f32-dwconv/up1x9-scalar-acc2.c
+  src/f32-dwconv/up2x25-scalar.c
+  src/f32-dwconv/up2x4-scalar.c
+  src/f32-dwconv/up2x9-scalar.c
+  src/f32-dwconv/up2x25-scalar-acc2.c
+  src/f32-dwconv/up2x4-scalar-acc2.c
+  src/f32-dwconv/up2x9-scalar-acc2.c
   src/f32-dwconv-spchw/3x3p1-scalar.c
   src/f32-dwconv-spchw/3x3s2p1-scalar.c
   src/f32-gavgpool-spchw/scalar-x1.c
@@ -261,6 +270,15 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-dwconv/up4x25-psimd.c
   src/f32-dwconv/up4x4-psimd.c
   src/f32-dwconv/up4x9-psimd.c
+  src/f32-dwconv/up4x25-psimd-acc2.c
+  src/f32-dwconv/up4x4-psimd-acc2.c
+  src/f32-dwconv/up4x9-psimd-acc2.c
+  src/f32-dwconv/up8x25-psimd.c
+  src/f32-dwconv/up8x4-psimd.c
+  src/f32-dwconv/up8x9-psimd.c
+  src/f32-dwconv/up8x25-psimd-acc2.c
+  src/f32-dwconv/up8x4-psimd-acc2.c
+  src/f32-dwconv/up8x9-psimd-acc2.c
   src/f32-gavgpool/mp7p7q-psimd.c
   src/f32-gavgpool/up7-psimd.c
   src/f32-gemm/1x8-psimd-loadsplat.c
@@ -312,6 +330,9 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-igemm/4x8-neon-ld64.c
   src/f32-igemm/6x8-neon-ld64.c
   src/f32-dwconv/up4x9-neon.c
+  src/f32-dwconv/up4x9-neon-acc2.c
+  src/f32-dwconv/up8x9-neon.c
+  src/f32-dwconv/up8x9-neon-acc2.c
   src/f32-gavgpool-spchw/neon-x4.c
   src/f32-gavgpool/mp7p7q-neon.c
   src/f32-gavgpool/up7-neon.c
@@ -368,7 +389,9 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-igemm/4x8-neonfma-ld64.c
   src/f32-igemm/6x8-neonfma-ld64.c
   src/f32-dwconv/up4x9-neonfma.c
+  src/f32-dwconv/up4x9-neonfma-acc2.c
   src/f32-dwconv/up8x9-neonfma.c
+  src/f32-dwconv/up8x9-neonfma-acc2.c
   src/f32-gemm/1x8-neonfma-ld64.c
   src/f32-gemm/4x2-neonfma-ld64.c
   src/f32-gemm/4x8-neonfma-ld128.c
@@ -432,6 +455,15 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-dwconv/up4x25-sse.c
   src/f32-dwconv/up4x4-sse.c
   src/f32-dwconv/up4x9-sse.c
+  src/f32-dwconv/up4x25-sse-acc2.c
+  src/f32-dwconv/up4x4-sse-acc2.c
+  src/f32-dwconv/up4x9-sse-acc2.c
+  src/f32-dwconv/up8x25-sse.c
+  src/f32-dwconv/up8x4-sse.c
+  src/f32-dwconv/up8x9-sse.c
+  src/f32-dwconv/up8x25-sse-acc2.c
+  src/f32-dwconv/up8x4-sse-acc2.c
+  src/f32-dwconv/up8x9-sse-acc2.c
   src/f32-gavgpool-spchw/sse-x4.c
   src/f32-gavgpool/mp7p7q-sse.c
   src/f32-gavgpool/up7-sse.c

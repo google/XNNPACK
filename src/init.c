@@ -586,18 +586,18 @@ static void init(void) {
       .log2_kr = 2,
     };
     xnn_params.f32.dwconv[0] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x4__sse,
-      .cr = 4,
+      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x4__sse,
+      .cr = 8,
       .mr = 4,
     };
     xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x9__sse,
-      .cr = 4,
+      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x9__sse,
+      .cr = 8,
       .mr = 9,
     };
     xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x25__sse,
-      .cr = 4,
+      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x25__sse,
+      .cr = 8,
       .mr = 25,
     };
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
@@ -776,17 +776,17 @@ static void init(void) {
       .log2_kr = 2,
     };
     xnn_params.f32.dwconv[0] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x4__psimd,
+      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x4__psimd_acc2,
       .cr = 4,
       .mr = 4,
     };
     xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x9__psimd,
+      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x9__psimd_acc2,
       .cr = 4,
       .mr = 9,
     };
     xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x25__psimd,
+      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x25__psimd_acc2,
       .cr = 4,
       .mr = 25,
     };
@@ -941,17 +941,17 @@ static void init(void) {
       .nr = 2,
     };
     xnn_params.f32.dwconv[0] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up1x4__scalar,
+      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up1x4__scalar_acc2,
       .cr = 1,
       .mr = 4,
     };
     xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up1x9__scalar,
+      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up1x9__scalar_acc2,
       .cr = 1,
       .mr = 9,
     };
     xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up1x25__scalar,
+      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up1x25__scalar_acc2,
       .cr = 1,
       .mr = 25,
     };

@@ -14,7 +14,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_f32_dwconv_ukernel_up8x9__neonfma(
+void xnn_f32_dwconv_ukernel_up8x9__neonfma_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -60,8 +60,8 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
       const float32x4_t vi1x4567 = vld1q_f32(i1); i1 += 4;
       const float32x4_t vk1x0123 = vld1q_f32(w); w += 4;
       const float32x4_t vk1x4567 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi1x0123, vk1x0123);
-      vacc4567p0 = vfmaq_f32(vacc4567p0, vi1x4567, vk1x4567);
+      float32x4_t vacc0123p1 = vmulq_f32(vi1x0123, vk1x0123);
+      float32x4_t vacc4567p1 = vmulq_f32(vi1x4567, vk1x4567);
 
       const float32x4_t vi2x0123 = vld1q_f32(i2); i2 += 4;
       const float32x4_t vi2x4567 = vld1q_f32(i2); i2 += 4;
@@ -74,8 +74,8 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
       const float32x4_t vi3x4567 = vld1q_f32(i3); i3 += 4;
       const float32x4_t vk3x0123 = vld1q_f32(w); w += 4;
       const float32x4_t vk3x4567 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi3x0123, vk3x0123);
-      vacc4567p0 = vfmaq_f32(vacc4567p0, vi3x4567, vk3x4567);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi3x0123, vk3x0123);
+      vacc4567p1 = vfmaq_f32(vacc4567p1, vi3x4567, vk3x4567);
 
       const float32x4_t vi4x0123 = vld1q_f32(i4); i4 += 4;
       const float32x4_t vi4x4567 = vld1q_f32(i4); i4 += 4;
@@ -88,8 +88,8 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
       const float32x4_t vi5x4567 = vld1q_f32(i5); i5 += 4;
       const float32x4_t vk5x0123 = vld1q_f32(w); w += 4;
       const float32x4_t vk5x4567 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi5x0123, vk5x0123);
-      vacc4567p0 = vfmaq_f32(vacc4567p0, vi5x4567, vk5x4567);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi5x0123, vk5x0123);
+      vacc4567p1 = vfmaq_f32(vacc4567p1, vi5x4567, vk5x4567);
 
       const float32x4_t vi6x0123 = vld1q_f32(i6); i6 += 4;
       const float32x4_t vi6x4567 = vld1q_f32(i6); i6 += 4;
@@ -102,8 +102,8 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
       const float32x4_t vi7x4567 = vld1q_f32(i7); i7 += 4;
       const float32x4_t vk7x0123 = vld1q_f32(w); w += 4;
       const float32x4_t vk7x4567 = vld1q_f32(w); w += 4;
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi7x0123, vk7x0123);
-      vacc4567p0 = vfmaq_f32(vacc4567p0, vi7x4567, vk7x4567);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi7x0123, vk7x0123);
+      vacc4567p1 = vfmaq_f32(vacc4567p1, vi7x4567, vk7x4567);
 
       const float32x4_t vi8x0123 = vld1q_f32(i8); i8 += 4;
       const float32x4_t vi8x4567 = vld1q_f32(i8); i8 += 4;
@@ -112,6 +112,9 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
       vacc0123p0 = vfmaq_f32(vacc0123p0, vi8x0123, vk8x0123);
       vacc4567p0 = vfmaq_f32(vacc4567p0, vi8x4567, vk8x4567);
 
+      // Add up all accumulators to vacc01234567p0
+      vacc0123p0 = vaddq_f32(vacc0123p0, vacc0123p1);
+      vacc4567p0 = vaddq_f32(vacc4567p0, vacc4567p1);
 
       float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, vmin);
       float32x4_t vacc4567 = vmaxq_f32(vacc4567p0, vmin);
@@ -131,7 +134,7 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
 
       const float32x4_t vi1x0123 = vld1q_f32(i1); i1 += 4;
       const float32x4_t vk1x0123 = vld1q_f32(w + 12);
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi1x0123, vk1x0123);
+      float32x4_t vacc0123p1 = vmulq_f32(vi1x0123, vk1x0123);
 
       const float32x4_t vi2x0123 = vld1q_f32(i2); i2 += 4;
       const float32x4_t vk2x0123 = vld1q_f32(w + 20);
@@ -139,7 +142,7 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
 
       const float32x4_t vi3x0123 = vld1q_f32(i3); i3 += 4;
       const float32x4_t vk3x0123 = vld1q_f32(w + 28);
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi3x0123, vk3x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi3x0123, vk3x0123);
 
       const float32x4_t vi4x0123 = vld1q_f32(i4); i4 += 4;
       const float32x4_t vk4x0123 = vld1q_f32(w + 36);
@@ -147,7 +150,7 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
 
       const float32x4_t vi5x0123 = vld1q_f32(i5); i5 += 4;
       const float32x4_t vk5x0123 = vld1q_f32(w + 44);
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi5x0123, vk5x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi5x0123, vk5x0123);
 
       const float32x4_t vi6x0123 = vld1q_f32(i6); i6 += 4;
       const float32x4_t vk6x0123 = vld1q_f32(w + 52);
@@ -155,12 +158,14 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
 
       const float32x4_t vi7x0123 = vld1q_f32(i7); i7 += 4;
       const float32x4_t vk7x0123 = vld1q_f32(w + 60);
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi7x0123, vk7x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi7x0123, vk7x0123);
 
       const float32x4_t vi8x0123 = vld1q_f32(i8); i8 += 4;
       const float32x4_t vk8x0123 = vld1q_f32(w + 68);
       vacc0123p0 = vfmaq_f32(vacc0123p0, vi8x0123, vk8x0123);
 
+      // Add up all accumulators to vacc0123p0
+      vacc0123p0 = vaddq_f32(vacc0123p0, vacc0123p1);
 
       float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, vmin);
       vacc0123 = vminq_f32(vacc0123, vmax);
@@ -177,7 +182,7 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
 
       const float32x4_t vi1x0123 = vld1q_f32(i1);
       const float32x4_t vk1x0123 = vld1q_f32(w + 16);
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi1x0123, vk1x0123);
+      float32x4_t vacc0123p1 = vmulq_f32(vi1x0123, vk1x0123);
 
       const float32x4_t vi2x0123 = vld1q_f32(i2);
       const float32x4_t vk2x0123 = vld1q_f32(w + 24);
@@ -185,7 +190,7 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
 
       const float32x4_t vi3x0123 = vld1q_f32(i3);
       const float32x4_t vk3x0123 = vld1q_f32(w + 32);
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi3x0123, vk3x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi3x0123, vk3x0123);
 
       const float32x4_t vi4x0123 = vld1q_f32(i4);
       const float32x4_t vk4x0123 = vld1q_f32(w + 40);
@@ -193,7 +198,7 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
 
       const float32x4_t vi5x0123 = vld1q_f32(i5);
       const float32x4_t vk5x0123 = vld1q_f32(w + 48);
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi5x0123, vk5x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi5x0123, vk5x0123);
 
       const float32x4_t vi6x0123 = vld1q_f32(i6);
       const float32x4_t vk6x0123 = vld1q_f32(w + 56);
@@ -201,12 +206,14 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma(
 
       const float32x4_t vi7x0123 = vld1q_f32(i7);
       const float32x4_t vk7x0123 = vld1q_f32(w + 64);
-      vacc0123p0 = vfmaq_f32(vacc0123p0, vi7x0123, vk7x0123);
+      vacc0123p1 = vfmaq_f32(vacc0123p1, vi7x0123, vk7x0123);
 
       const float32x4_t vi8x0123 = vld1q_f32(i8);
       const float32x4_t vk8x0123 = vld1q_f32(w + 72);
       vacc0123p0 = vfmaq_f32(vacc0123p0, vi8x0123, vk8x0123);
 
+      // Add up all accumulators to vacc0123p0
+      vacc0123p0 = vaddq_f32(vacc0123p0, vacc0123p1);
 
       float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, vmin);
       vacc0123 = vminq_f32(vacc0123, vmax);
