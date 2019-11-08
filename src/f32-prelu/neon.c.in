@@ -64,11 +64,11 @@ void xnn_f32_prelu_ukernel__neon_${ROW_TILE}x${CHANNEL_TILE}(
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
           float32x4_t vacc${M}x${ABC[C:C+4]} = vmulq_f32(vi${M}x${ABC[C:C+4]}, vw${ABC[C:C+4]});
-          const int32x4_t vm${M}x${ABC[C:C+4]} = vcltq_s32(vreinterpretq_s32_f32(vi${M}x${ABC[C:C+4]}), vmovq_n_s32(0));
+          const uint32x4_t vm${M}x${ABC[C:C+4]} = vcltq_s32(vreinterpretq_s32_f32(vi${M}x${ABC[C:C+4]}), vmovq_n_s32(0));
 
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
-          vacc${M}x${ABC[C:C+4]} = vbslq_f32(vreinterpretq_u32_s32(vm${M}x${ABC[C:C+4]}), vacc${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]});
+          vacc${M}x${ABC[C:C+4]} = vbslq_f32(vm${M}x${ABC[C:C+4]}, vacc${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]});
 
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
@@ -92,10 +92,10 @@ void xnn_f32_prelu_ukernel__neon_${ROW_TILE}x${CHANNEL_TILE}(
 
         $for M in range(ROW_TILE):
           float32x4_t vacc${M}x0123 = vmulq_f32(vi${M}x0123, vw0123);
-          const int32x4_t vm${M}x0123 = vcltq_s32(vreinterpretq_s32_f32(vi${M}x0123), vmovq_n_s32(0));
+          const uint32x4_t vm${M}x0123 = vcltq_s32(vreinterpretq_s32_f32(vi${M}x0123), vmovq_n_s32(0));
 
         $for M in range(ROW_TILE):
-          vacc${M}x0123 = vbslq_f32(vreinterpretq_u32_s32(vm${M}x0123), vacc${M}x0123, vi${M}x0123);
+          vacc${M}x0123 = vbslq_f32(vm${M}x0123, vacc${M}x0123, vi${M}x0123);
 
         $for M in range(ROW_TILE):
           vacc${M}x0123 = vmaxq_f32(vacc${M}x0123, vmin);
@@ -115,10 +115,10 @@ void xnn_f32_prelu_ukernel__neon_${ROW_TILE}x${CHANNEL_TILE}(
 
       $for M in range(ROW_TILE):
         float32x4_t vacc${M}x0123 = vmulq_f32(vi${M}x0123, vw0123);
-        const int32x4_t vm${M}x0123 = vcltq_s32(vreinterpretq_s32_f32(vi${M}x0123), vmovq_n_s32(0));
+        const uint32x4_t vm${M}x0123 = vcltq_s32(vreinterpretq_s32_f32(vi${M}x0123), vmovq_n_s32(0));
 
       $for M in range(ROW_TILE):
-        vacc${M}x0123 = vbslq_f32(vreinterpretq_u32_s32(vm${M}x0123), vacc${M}x0123, vi${M}x0123);
+        vacc${M}x0123 = vbslq_f32(vm${M}x0123, vacc${M}x0123, vi${M}x0123);
 
       $for M in range(ROW_TILE):
         vacc${M}x0123 = vmaxq_f32(vacc${M}x0123, vmin);

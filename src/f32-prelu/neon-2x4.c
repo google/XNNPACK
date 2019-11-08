@@ -53,12 +53,12 @@ void xnn_f32_prelu_ukernel__neon_2x4(
       const float32x4_t vi1x0123 = vld1q_f32(i1); i1 += 4;
 
       float32x4_t vacc0x0123 = vmulq_f32(vi0x0123, vw0123);
-      const int32x4_t vm0x0123 = vcltq_s32(vreinterpretq_s32_f32(vi0x0123), vmovq_n_s32(0));
+      const uint32x4_t vm0x0123 = vcltq_s32(vreinterpretq_s32_f32(vi0x0123), vmovq_n_s32(0));
       float32x4_t vacc1x0123 = vmulq_f32(vi1x0123, vw0123);
-      const int32x4_t vm1x0123 = vcltq_s32(vreinterpretq_s32_f32(vi1x0123), vmovq_n_s32(0));
+      const uint32x4_t vm1x0123 = vcltq_s32(vreinterpretq_s32_f32(vi1x0123), vmovq_n_s32(0));
 
-      vacc0x0123 = vbslq_f32(vreinterpretq_u32_s32(vm0x0123), vacc0x0123, vi0x0123);
-      vacc1x0123 = vbslq_f32(vreinterpretq_u32_s32(vm1x0123), vacc1x0123, vi1x0123);
+      vacc0x0123 = vbslq_f32(vm0x0123, vacc0x0123, vi0x0123);
+      vacc1x0123 = vbslq_f32(vm1x0123, vacc1x0123, vi1x0123);
 
       vacc0x0123 = vmaxq_f32(vacc0x0123, vmin);
       vacc1x0123 = vmaxq_f32(vacc1x0123, vmin);
@@ -78,12 +78,12 @@ void xnn_f32_prelu_ukernel__neon_2x4(
       i1 = (const float*) ((uintptr_t) i1 + c);
 
       float32x4_t vacc0x0123 = vmulq_f32(vi0x0123, vw0123);
-      const int32x4_t vm0x0123 = vcltq_s32(vreinterpretq_s32_f32(vi0x0123), vmovq_n_s32(0));
+      const uint32x4_t vm0x0123 = vcltq_s32(vreinterpretq_s32_f32(vi0x0123), vmovq_n_s32(0));
       float32x4_t vacc1x0123 = vmulq_f32(vi1x0123, vw0123);
-      const int32x4_t vm1x0123 = vcltq_s32(vreinterpretq_s32_f32(vi1x0123), vmovq_n_s32(0));
+      const uint32x4_t vm1x0123 = vcltq_s32(vreinterpretq_s32_f32(vi1x0123), vmovq_n_s32(0));
 
-      vacc0x0123 = vbslq_f32(vreinterpretq_u32_s32(vm0x0123), vacc0x0123, vi0x0123);
-      vacc1x0123 = vbslq_f32(vreinterpretq_u32_s32(vm1x0123), vacc1x0123, vi1x0123);
+      vacc0x0123 = vbslq_f32(vm0x0123, vacc0x0123, vi0x0123);
+      vacc1x0123 = vbslq_f32(vm1x0123, vacc1x0123, vi1x0123);
 
       vacc0x0123 = vmaxq_f32(vacc0x0123, vmin);
       vacc1x0123 = vmaxq_f32(vacc1x0123, vmin);
