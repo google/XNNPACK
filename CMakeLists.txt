@@ -188,7 +188,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/up2x4-scalar-acc2.c
   src/f32-dwconv/up2x9-scalar-acc2.c
   src/f32-dwconv-spchw/3x3p1-scalar.c
+  src/f32-dwconv-spchw/5x5p2-scalar.c
   src/f32-dwconv-spchw/3x3s2p1-scalar.c
+  src/f32-dwconv-spchw/5x5s2p2-scalar.c
   src/f32-gavgpool-spchw/scalar-x1.c
   src/f32-gavgpool/mp7p7q-scalar.c
   src/f32-gavgpool/up7-scalar.c
