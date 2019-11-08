@@ -716,6 +716,22 @@ typedef void (*xnn_dwconv_mp_ukernel_function)(
     size_t output_increment,
     const void* params);
 
+typedef void (*xnn_f32_bilinear_ukernel_function)(
+    size_t output_pixels,
+    size_t channels,
+    const float** input,
+    const float* weights,
+    float* output,
+    size_t output_increment);
+
+typedef void (*xnn_bilinear_ukernel_function)(
+    size_t output_pixels,
+    size_t channels,
+    const void** input,
+    const void* weights,
+    void* output,
+    size_t output_increment);
+
 typedef void (*xnn_gavgpool_up_ukernel_function)(
     size_t m,
     size_t n,

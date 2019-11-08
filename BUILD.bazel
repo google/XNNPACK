@@ -77,6 +77,9 @@ SCALAR_UKERNELS = [
     "src/f32-argmaxpool/up9-scalar.c",
     "src/f32-avgpool/mp9p8q-scalar.c",
     "src/f32-avgpool/up9-scalar.c",
+    "src/f32-bilinear/scalar-c1.c",
+    "src/f32-bilinear/scalar-c2.c",
+    "src/f32-bilinear/scalar-c4.c",
     "src/f32-clamp/scalar.c",
     "src/f32-conv-hwc2spchw/3x3s2p1c3x4-scalar-1x1.c",
     "src/f32-igemm/1x4-scalar.c",
@@ -168,6 +171,8 @@ PSIMD_UKERNELS = [
     "src/f32-argmaxpool/up9-psimd.c",
     "src/f32-avgpool/mp9p8q-psimd.c",
     "src/f32-avgpool/up9-psimd.c",
+    "src/f32-bilinear/psimd-c4.c",
+    "src/f32-bilinear/psimd-c8.c",
     "src/f32-clamp/psimd.c",
     "src/f32-igemm/1x8-psimd-loadsplat.c",
     "src/f32-igemm/1x8-psimd-splat.c",
@@ -236,6 +241,8 @@ PSIMD_UKERNELS = [
 NEON_UKERNELS = [
     "src/f32-avgpool/mp9p8q-neon.c",
     "src/f32-avgpool/up9-neon.c",
+    "src/f32-bilinear/neon-c4.c",
+    "src/f32-bilinear/neon-c8.c",
     "src/f32-clamp/neon.c",
     "src/f32-dwconv/up4x9-neon.c",
     "src/f32-dwconv/up4x9-neon-acc2.c",
@@ -297,6 +304,8 @@ NEON_UKERNELS = [
 ]
 
 NEONFMA_UKERNELS = [
+    "src/f32-bilinear/neonfma-c4.c",
+    "src/f32-bilinear/neonfma-c8.c",
     "src/f32-igemm/1x8-neonfma-ld64.c",
     "src/f32-igemm/4x2-neonfma-ld64.c",
     "src/f32-igemm/4x4-neonfma-ld64.c",
@@ -362,6 +371,8 @@ AARCH64_NEONFP16ARITH_UKERNELS = [
 SSE_UKERNELS = [
     "src/f32-avgpool/mp9p8q-sse.c",
     "src/f32-avgpool/up9-sse.c",
+    "src/f32-bilinear/sse-c4.c",
+    "src/f32-bilinear/sse-c8.c",
     "src/f32-clamp/sse.c",
     "src/f32-igemm/1x8-sse-dup.c",
     "src/f32-igemm/1x8-sse-load1.c",
@@ -540,6 +551,7 @@ AARCH64_ASM_UKERNELS = [
 INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/argmaxpool.h",
     "src/xnnpack/avgpool.h",
+    "src/xnnpack/bilinear.h",
     "src/xnnpack/clamp.h",
     "src/xnnpack/common.h",
     "src/xnnpack/conv.h",
@@ -1229,6 +1241,16 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-avgpool.cc",
         "test/avgpool-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_bilinear_test",
+    srcs = [
+        "test/f32-bilinear.cc",
+        "test/bilinear-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
