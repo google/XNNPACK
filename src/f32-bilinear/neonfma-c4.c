@@ -19,6 +19,7 @@ void xnn_f32_bilinear_ukernel__neonfma_c4(
     size_t output_pixels,
     size_t channels,
     const float**restrict input,
+    size_t input_offset,
     const float*restrict weights,
     float*restrict output,
     size_t output_increment)
@@ -28,10 +29,10 @@ void xnn_f32_bilinear_ukernel__neonfma_c4(
   assert(channels % sizeof(float) == 0);
 
   do {
-    const float* i0 = input[0];
-    const float* i1 = input[1];
-    const float* i2 = input[2];
-    const float* i3 = input[3];
+    const float* i0 = (const float*) ((uintptr_t) input[0] + input_offset);
+    const float* i1 = (const float*) ((uintptr_t) input[1] + input_offset);
+    const float* i2 = (const float*) ((uintptr_t) input[2] + input_offset);
+    const float* i3 = (const float*) ((uintptr_t) input[3] + input_offset);
     input += 4;
 
     const float32x2_t valphahv = vld1_f32(weights); weights += 2;

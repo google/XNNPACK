@@ -11,7 +11,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <cstdlib>
+#include <cstdint>
 #include <functional>
 #include <random>
 #include <vector>
@@ -41,6 +41,15 @@ class BilinearMicrokernelTester {
 
   inline uint32_t channels() const {
     return this->channels_;
+  }
+
+  inline BilinearMicrokernelTester& input_offset(uint32_t input_offset) {
+    this->input_offset_ = input_offset;
+    return *this;
+  }
+
+  inline uint32_t input_offset() const {
+    return this->input_offset_;
   }
 
   inline BilinearMicrokernelTester& output_stride(uint32_t output_stride) {
@@ -84,7 +93,7 @@ class BilinearMicrokernelTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < indirection.size(); i++) {
-        indirection[i] = input.data() + i * channels();
+        indirection[i] = input.data() + i * channels() - input_offset();
       }
       std::shuffle(indirection.begin(), indirection.end(), rng);
 
@@ -94,17 +103,18 @@ class BilinearMicrokernelTester {
           const float alpha_h = packed_weights[i * 2 + 0];
           const float alpha_v = packed_weights[i * 2 + 1];
           output_ref[i * channels() + c] =
-            indirection[i * 4 + 0][c] * (1.0f - alpha_h) * (1.0f - alpha_v) +
-            indirection[i * 4 + 1][c] * alpha_h * (1.0f - alpha_v) +
-            indirection[i * 4 + 2][c] * (1.0f - alpha_h) * alpha_v +
-            indirection[i * 4 + 3][c] * alpha_h * alpha_v;
+            indirection[i * 4 + 0][c + input_offset()] * (1.0f - alpha_h) * (1.0f - alpha_v) +
+            indirection[i * 4 + 1][c + input_offset()] * alpha_h * (1.0f - alpha_v) +
+            indirection[i * 4 + 2][c + input_offset()] * (1.0f - alpha_h) * alpha_v +
+            indirection[i * 4 + 3][c + input_offset()] * alpha_h * alpha_v;
         }
       }
 
       // Call optimized micro-kernel.
       bilinear(
         pixels(), channels() * sizeof(float),
-        indirection.data(), packed_weights.data(), output.data(),
+        indirection.data(), input_offset() * sizeof(float),
+        packed_weights.data(), output.data(),
         (output_stride() - channels()) * sizeof(float));
 
       // Verify results.
@@ -124,5 +134,6 @@ class BilinearMicrokernelTester {
   uint32_t channels_{1};
   uint32_t pixels_{1};
   uint32_t output_stride_{0};
+  uint32_t input_offset_{0};
   size_t iterations_{3};
 };

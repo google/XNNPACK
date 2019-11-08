@@ -21,6 +21,7 @@ extern "C" {
       size_t output_pixels,                            \
       size_t channels,                                 \
       const float** input,                             \
+      size_t input_offset,                             \
       const float* weights,                            \
       float* output,                                   \
       size_t output_increment);

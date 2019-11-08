@@ -120,6 +120,19 @@ TEST(${TEST_NAME}, pixels_gt_${PIXEL_TILE}) {
   }
 }
 
+TEST(${TEST_NAME}, input_offset) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t pixels = 1; pixels < ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
+    for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
+      BilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(channels)
+        .input_offset(${next_prime(CHANNEL_TILE * 5 + 1)})
+        .Test(${TEST_FUNC});
+    }
+  }
+}
 TEST(${TEST_NAME}, output_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
