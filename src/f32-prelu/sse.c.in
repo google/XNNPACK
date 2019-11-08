@@ -79,7 +79,7 @@ void xnn_f32_prelu_ukernel__${"sse41" if BLEND else "sse2"}_${ROW_TILE}x${CHANNE
           $if BLEND:
             __m128 vacc${M}x${ABC[C:C+4]} = _mm_blendv_ps(vi${M}x${ABC[C:C+4]}, vprod${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]});
           $else:
-            __m128 vacc${M}x${ABC[C:C+4]} = _mm_or_ps(_mm_and_ps(vprod${M}x${ABC[C:C+4]}, vmask${M}x${ABC[C:C+4]}), _mm_andnot_si128(vmask${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]}));
+            __m128 vacc${M}x${ABC[C:C+4]} = _mm_or_ps(_mm_and_ps(vprod${M}x${ABC[C:C+4]}, vmask${M}x${ABC[C:C+4]}), _mm_andnot_ps(vmask${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]}));
 
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
@@ -113,7 +113,7 @@ void xnn_f32_prelu_ukernel__${"sse41" if BLEND else "sse2"}_${ROW_TILE}x${CHANNE
           $if BLEND:
             __m128 vacc${M}x0123 = _mm_blendv_ps(vi${M}x0123, vprod${M}x0123, vi${M}x0123);
           $else:
-            __m128 vacc${M}x0123 = _mm_or_ps(_mm_and_ps(vprod${M}x0123, vmask${M}x0123), _mm_andnot_si128(vmask${M}x0123, vi${M}x0123));
+            __m128 vacc${M}x0123 = _mm_or_ps(_mm_and_ps(vprod${M}x0123, vmask${M}x0123), _mm_andnot_ps(vmask${M}x0123, vi${M}x0123));
 
         $for M in range(ROW_TILE):
           vacc${M}x0123 = _mm_max_ps(vacc${M}x0123, vmin);
@@ -142,7 +142,7 @@ void xnn_f32_prelu_ukernel__${"sse41" if BLEND else "sse2"}_${ROW_TILE}x${CHANNE
         $if BLEND:
           __m128 vacc${M}x0123 = _mm_blendv_ps(vi${M}x0123, vprod${M}x0123, vi${M}x0123);
         $else:
-          __m128 vacc${M}x0123 = _mm_or_ps(_mm_and_ps(vprod${M}x0123, vmask${M}x0123), _mm_andnot_si128(vmask${M}x0123, vi${M}x0123));
+          __m128 vacc${M}x0123 = _mm_or_ps(_mm_and_ps(vprod${M}x0123, vmask${M}x0123), _mm_andnot_ps(vmask${M}x0123, vi${M}x0123));
 
       $for M in range(ROW_TILE):
         vacc${M}x0123 = _mm_max_ps(vacc${M}x0123, vmin);

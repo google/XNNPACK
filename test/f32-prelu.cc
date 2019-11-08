@@ -1201,7 +1201,7 @@ TEST(F32_PRELU__SCALAR_2X1, channels_eq_1) {
 }
 
 TEST(F32_PRELU__SCALAR_2X1, channels_gt_1) {
-  for (size_t channels = 2; channels < 2; channels++) {
+  for (size_t channels = 2; channels < 10; channels++) {
     PReLUMicrokernelTester()
       .rows(2)
       .channels(channels)

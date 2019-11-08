@@ -60,8 +60,8 @@ void xnn_f32_prelu_ukernel__sse2_2x4(
       const __m128 vprod1x0123 = _mm_mul_ps(vi1x0123, vw0123);
       const __m128 vmask1x0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi1x0123)));
 
-      __m128 vacc0x0123 = _mm_or_ps(_mm_and_ps(vprod0x0123, vmask0x0123), _mm_andnot_si128(vmask0x0123, vi0x0123));
-      __m128 vacc1x0123 = _mm_or_ps(_mm_and_ps(vprod1x0123, vmask1x0123), _mm_andnot_si128(vmask1x0123, vi1x0123));
+      __m128 vacc0x0123 = _mm_or_ps(_mm_and_ps(vprod0x0123, vmask0x0123), _mm_andnot_ps(vmask0x0123, vi0x0123));
+      __m128 vacc1x0123 = _mm_or_ps(_mm_and_ps(vprod1x0123, vmask1x0123), _mm_andnot_ps(vmask1x0123, vi1x0123));
 
       vacc0x0123 = _mm_max_ps(vacc0x0123, vmin);
       vacc1x0123 = _mm_max_ps(vacc1x0123, vmin);
@@ -88,8 +88,8 @@ void xnn_f32_prelu_ukernel__sse2_2x4(
       const __m128 vprod1x0123 = _mm_mul_ps(vi1x0123, vw0123);
       const __m128 vmask1x0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi1x0123)));
 
-      __m128 vacc0x0123 = _mm_or_ps(_mm_and_ps(vprod0x0123, vmask0x0123), _mm_andnot_si128(vmask0x0123, vi0x0123));
-      __m128 vacc1x0123 = _mm_or_ps(_mm_and_ps(vprod1x0123, vmask1x0123), _mm_andnot_si128(vmask1x0123, vi1x0123));
+      __m128 vacc0x0123 = _mm_or_ps(_mm_and_ps(vprod0x0123, vmask0x0123), _mm_andnot_ps(vmask0x0123, vi0x0123));
+      __m128 vacc1x0123 = _mm_or_ps(_mm_and_ps(vprod1x0123, vmask1x0123), _mm_andnot_ps(vmask1x0123, vi1x0123));
 
       vacc0x0123 = _mm_max_ps(vacc0x0123, vmin);
       vacc1x0123 = _mm_max_ps(vacc1x0123, vmin);
