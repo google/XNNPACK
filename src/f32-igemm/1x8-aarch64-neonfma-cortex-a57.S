@@ -165,9 +165,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
         CMP x1, 8
         B.LO 10f
 
-        STP q16, q17, [x6]
-        ADD x6, x6, x10
-
+        ST1 {v16.16b, v17.16b}, [x6], x10
         SUB x4, x4, x3  // a -= ks
 
         # nc loop
