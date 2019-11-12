@@ -145,18 +145,13 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_ld64
         CMP x1, 8
         B.LO 7f
 
-        STP q30, q31,  [x7]
-        ADD  x7,  x7, x14
-        STP q28, q29, [x10]
-        ADD x10, x10, x14
-        STP q18, q19,  [x9]
-        ADD  x9,  x9, x14
-        STP q16, q17,  [x6]
-        ADD  x6,  x6, x14
-
+        ST1 {v30.16b, v31.16b},  [x7], x14
         SUB  x3,  x3, x2 // a0 -= kc
+        ST1 {v28.16b, v29.16b}, [x10], x14
         SUB x11, x11, x2 // a1 -= kc
+        ST1 {v18.16b, v19.16b},  [x9], x14
         SUB x12, x12, x2 // a2 -= kc
+        ST1 {v16.16b, v17.16b},  [x6], x14
         SUB  x4,  x4, x2 // a3 -= kc
 
         SUBS x1, x1, 8
