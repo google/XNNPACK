@@ -488,6 +488,25 @@ void xnn_compute_global_average_pooling_spnchw(
     &context->params);
 }
 
+void xnn_compute_resize_bilinear(
+    const struct resize_bilinear_context context[restrict static 1],
+    size_t batch_index,
+    size_t pixel_start,
+    size_t pixel_range)
+{
+  void* output =
+    (void*) ((uintptr_t) context->output + pixel_start * context->output_pixel_stride + batch_index * context->output_batch_stride);
+
+  context->ukernel(
+    pixel_range,
+    context->scaled_channels,
+    context->indirect_input + pixel_start * 4,
+    context->input_offset + batch_index * context->input_batch_stride,
+    context->packed_weights + (pixel_start << context->log2_wsize),
+    output,
+    context->output_pixel_stride - context->scaled_channels);
+}
+
 void xnn_compute_prelu(
     const struct prelu_context context[restrict static 1],
     size_t batch_start,

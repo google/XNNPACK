@@ -920,6 +920,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(prelu-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(prelu-test prelu-test)
 
+  ADD_EXECUTABLE(resize-bilinear-test test/resize-bilinear.cc)
+  SET_TARGET_PROPERTIES(resize-bilinear-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(resize-bilinear-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(resize-bilinear-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(resize-bilinear-test resize-bilinear-test)
+
   ADD_EXECUTABLE(sigmoid-test test/sigmoid.cc)
   SET_TARGET_PROPERTIES(sigmoid-test PROPERTIES
     CXX_STANDARD 11

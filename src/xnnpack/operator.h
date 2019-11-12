@@ -69,6 +69,7 @@ enum xnn_operator_type {
   xnn_operator_type_max_pooling_f32,
   xnn_operator_type_max_pooling_u8,
   xnn_operator_type_prelu_f32,
+  xnn_operator_type_resize_bilinear_f32,
   xnn_operator_type_sigmoid_q8,
   xnn_operator_type_softargmax_q8,
   xnn_operator_type_unpooling_x32,
@@ -217,6 +218,8 @@ struct xnn_operator {
   size_t last_input_height;
   size_t last_input_width;
   const void* last_input;
+  size_t last_output_height;
+  size_t last_output_width;
   void* last_output;
 
   void* zero_buffer;
@@ -260,6 +263,7 @@ struct xnn_operator {
     struct max_pooling_context max_pooling;
     struct pixelwise_average_pooling_context pixelwise_average_pooling;
     struct prelu_context prelu;
+    struct resize_bilinear_context resize_bilinear;
     struct spmm_context spmm;
     struct subconv_context subconv;
     struct u8_softargmax_context u8_softargmax;

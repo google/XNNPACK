@@ -66,6 +66,7 @@ OPERATOR_SRCS = [
     "src/leaky-relu.c",
     "src/max-pooling.c",
     "src/prelu.c",
+    "src/resize-bilinear.c",
     "src/sigmoid.c",
     "src/softargmax.c",
     "src/unpooling.c",
@@ -1815,6 +1816,15 @@ xnnpack_unit_test(
     srcs = [
         "test/prelu.cc",
         "test/prelu-operator-tester.h",
+    ] + OPERATOR_TEST_PARAMS_HDRS,
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "resize_bilinear_test",
+    srcs = [
+        "test/resize-bilinear.cc",
+        "test/resize-bilinear-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )

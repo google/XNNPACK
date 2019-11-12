@@ -9,7 +9,10 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 #include <assert.h>
+
+#include <xnnpack/common.h>
 
 inline static size_t min(size_t a, size_t b) {
   return a < b ? a : b;
@@ -45,6 +48,14 @@ inline static size_t subtract_modulo(size_t a, size_t b, size_t m) {
   assert(a < m);
   assert(b < m);
   return a >= b ? a - b : a - b + m;
+}
+
+inline static uint32_t math_min_u32(uint32_t a, uint32_t b) {
+  return XNN_UNPREDICTABLE(a < b) ? a : b;
+}
+
+inline static uint32_t math_max_u32(uint32_t a, uint32_t b) {
+  return XNN_UNPREDICTABLE(a > b) ? a : b;
 }
 
 inline static float math_min_f32(float a, float b) {

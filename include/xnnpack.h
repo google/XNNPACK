@@ -33,6 +33,12 @@ extern "C" {
 /// Match "SAME" padding in TensorFlow. Exact padding values are computed dynamically depending on input size.
 #define XNN_FLAG_TENSORFLOW_SAME_PADDING 0x00000004
 
+/// Match behaviour of TensorFlow 1.x.
+#define XNN_FLAG_TENSORFLOW_LEGACY_MODE 0x00000004
+
+/// Align corners of input and output images in resize operations.
+#define XNN_FLAG_ALIGN_CORNERS 0x00000008
+
 /// Status code for any XNNPACK function call.
 enum xnn_status {
   /// The call succeeded, and all output arguments now contain valid data.
@@ -318,6 +324,24 @@ enum xnn_status xnn_create_prelu_nc_f32(
 enum xnn_status xnn_setup_prelu_nc_f32(
     xnn_operator_t prelu_op,
     size_t batch_size,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
+    size_t channels,
+    size_t input_pixel_stride,
+    size_t output_pixel_stride,
+    uint32_t flags,
+    xnn_operator_t* resize_op_out);
+
+enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
+    xnn_operator_t resize_op,
+    size_t batch_size,
+    size_t input_height,
+    size_t input_width,
+    size_t output_height,
+    size_t output_width,
     const float* input,
     float* output,
     pthreadpool_t threadpool);

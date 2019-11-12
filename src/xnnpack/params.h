@@ -1274,6 +1274,16 @@ struct maxpool_parameters {
   uint8_t qr;
 };
 
+struct bilinear_parameters {
+  xnn_bilinear_ukernel_function ukernel;
+  // Number of output pixels in a tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
+  uint8_t pixel_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint8_t channel_tile;
+};
+
 struct zip_parameters {
   xnn_zipc_ukernel_function x2;
   xnn_zipc_ukernel_function x3;
@@ -1337,6 +1347,8 @@ struct xnn_parameters {
       struct gavgpool_parameters gavgpool;
       struct maxpool_parameters maxpool;
       struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
+      // Bilinear interpolation (2D).
+      struct bilinear_parameters bilinear;
       xnn_univector_ukernel_function clamp;
       xnn_univector_ukernel_function hswish;
       struct prelu_parameters prelu;

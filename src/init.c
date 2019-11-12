@@ -19,6 +19,7 @@
 #include <xnnpack.h>
 #include <xnnpack/argmaxpool.h>
 #include <xnnpack/avgpool.h>
+#include <xnnpack/bilinear.h>
 #include <xnnpack/clamp.h>
 #include <xnnpack/common.h>
 #include <xnnpack/conv.h>
@@ -189,6 +190,11 @@ static void init(void) {
       .mp = (xnn_argmaxpool_mp_ukernel_function) xnn_f32_argmaxpool_ukernel_mp9p8q__psimd,
       .mr = 9,
       .qr = 8,
+    };
+    xnn_params.f32.bilinear = (struct bilinear_parameters) {
+      .ukernel = (xnn_bilinear_ukernel_function) xnn_f32_bilinear_ukernel__neon_c8,
+      .pixel_tile = 1,
+      .channel_tile = 8,
     };
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__neon;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__neon;
@@ -441,6 +447,11 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
+    xnn_params.f32.bilinear = (struct bilinear_parameters) {
+      .ukernel = (xnn_bilinear_ukernel_function) xnn_f32_bilinear_ukernel__neonfma_c8,
+      .pixel_tile = 1,
+      .channel_tile = 8,
+    };
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__neon;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__neonfma;
     xnn_params.f32.prelu = (struct prelu_parameters) {
@@ -635,6 +646,11 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
+    xnn_params.f32.bilinear = (struct bilinear_parameters) {
+      .ukernel = (xnn_bilinear_ukernel_function) xnn_f32_bilinear_ukernel__sse_c8,
+      .pixel_tile = 1,
+      .channel_tile = 8,
+    };
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__sse;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__sse;
     xnn_params.f32.prelu = (struct prelu_parameters) {
@@ -825,6 +841,11 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
+    xnn_params.f32.bilinear = (struct bilinear_parameters) {
+      .ukernel = (xnn_bilinear_ukernel_function) xnn_f32_bilinear_ukernel__psimd_c8,
+      .pixel_tile = 1,
+      .channel_tile = 8,
+    };
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__psimd;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__psimd;
     xnn_params.f32.prelu = (struct prelu_parameters) {
@@ -989,6 +1010,11 @@ static void init(void) {
       .mp = (xnn_argmaxpool_mp_ukernel_function) xnn_f32_argmaxpool_ukernel_mp9p8q__scalar,
       .mr = 9,
       .qr = 8,
+    };
+    xnn_params.f32.bilinear = (struct bilinear_parameters) {
+      .ukernel = (xnn_bilinear_ukernel_function) xnn_f32_bilinear_ukernel__scalar_c2,
+      .pixel_tile = 1,
+      .channel_tile = 2,
     };
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__scalar;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__scalar;

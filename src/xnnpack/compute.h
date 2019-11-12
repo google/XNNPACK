@@ -498,6 +498,37 @@ struct global_average_pooling_spnchw_context {
       size_t channels_slice);
 #endif
 
+struct resize_bilinear_context {
+  // Number of channels multiplied by sizeof(input element).
+  size_t scaled_channels;
+  // Indirection buffer with pointers related to rows of input pixels.
+  const void** indirect_input;
+  // Offset, in bytes, to be added to pointers in indirection buffer.
+  size_t input_offset;
+  // Stride, in bytes, between images of consecutive batches in the input.
+  size_t input_batch_stride;
+  // Packed pairs of (x, y) linear interpolation coefficients.
+  const void* packed_weights;
+  // Pointer to the output tensor.
+  void* output;
+  // Stride, in bytes, between adjacent pixels in the output.
+  size_t output_pixel_stride;
+  // Stride, in bytes, between images of consecutive batches in the output.
+  size_t output_batch_stride;
+  // log2(sizeof(weight element)).
+  uint32_t log2_wsize;
+  // Pointer to BILINEAR micro-kernel function.
+  xnn_bilinear_ukernel_function ukernel;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_resize_bilinear(
+      const struct resize_bilinear_context context[restrict static 1],
+      size_t batch_index,
+      size_t pixel_start,
+      size_t pixel_range);
+#endif
+
 struct add_strided_context {
   size_t n;
   const void* a;
