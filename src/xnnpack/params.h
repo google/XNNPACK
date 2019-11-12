@@ -1304,57 +1304,69 @@ struct vmulcaddc_parameters {
 
 struct xnn_parameters {
   bool initialized;
-  struct {
-    struct gemm_parameters gemm;
-    struct dwconv_parameters dwconv[XNN_MAX_Q8_DWCONV_UKERNELS];
-    struct avgpool_parameters avgpool;
-    struct gavgpool_parameters gavgpool;
-    xnn_vadd_ukernel_function vadd;
-  } q8;
-  struct {
-    struct maxpool_parameters maxpool;
-    xnn_univector_ukernel_function clamp;
-    xnn_u8_lut32norm_ukernel_function lut32norm;
-    xnn_u8_rmax_ukernel_function rmax;
-  } u8;
-  struct {
-    xnn_x8_lut_ukernel_function lut;
-    struct zip_parameters zip;
-  } x8;
-  struct {
-    struct gemm_parameters gemm;
-    struct gemm_parameters gemm2;
-    struct dwconv_parameters dwconv[XNN_MAX_F32_DWCONV_UKERNELS];
-    struct avgpool_parameters avgpool;
-    struct pavgpool_parameters pavgpool;
-    struct gavgpool_parameters gavgpool;
-    struct maxpool_parameters maxpool;
-    struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
-    xnn_univector_ukernel_function clamp;
-    xnn_univector_ukernel_function hswish;
-    struct prelu_parameters prelu;
-    xnn_vadd_ukernel_function vadd;
-    struct vmulcaddc_parameters vmulcaddc;
-    // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
-    struct spmm_parameters spmm;
-    // Sparse Matrix-Dense Matrix Multiplication (NR=2 block).
-    struct spmm_parameters spmm2;
-    // Sparse Matrix-Dense Matrix Multiplication (NR=4 block).
-    struct spmm_parameters spmm4;
-    // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->SpCHW layout conversion.
-    struct hwc2spchw_dconv_parameters hwc2spchw_dconv3x3c3s2;
-    // Direct 3x3 stride-1 Convolution with padding 1 on left and right in SpCHW layout.
-    struct spchw_dwconv_parameters spchw_dwconv3x3;
-    // Direct 3x3 stride-2 Convolution with padding 1 on left and right in SpCHW layout.
-    struct spchw_dwconv_parameters spchw_dwconv3x3s2;
-    // Global Average Pooling in SpCHW layout.
-    struct spchw_gavgpool_parameters spchw_gavgpool;
-  } f32;
-  struct {
-    struct pad_parameters pad;
-    xnn_unpool_ukernel_function unpool;
-    struct zip_parameters zip;
-  } x32;
+  #ifndef XNN_NO_Q8_OPERATORS
+    struct {
+      struct gemm_parameters gemm;
+      struct dwconv_parameters dwconv[XNN_MAX_Q8_DWCONV_UKERNELS];
+      struct avgpool_parameters avgpool;
+      struct gavgpool_parameters gavgpool;
+      xnn_vadd_ukernel_function vadd;
+    } q8;
+  #endif  // XNN_NO_Q8_OPERATORS
+  #ifndef XNN_NO_U8_OPERATORS
+    struct {
+      struct maxpool_parameters maxpool;
+      xnn_univector_ukernel_function clamp;
+      xnn_u8_lut32norm_ukernel_function lut32norm;
+      xnn_u8_rmax_ukernel_function rmax;
+    } u8;
+  #endif  // XNN_NO_U8_OPERATORS
+  #ifndef XNN_NO_X8_OPERATORS
+    struct {
+      xnn_x8_lut_ukernel_function lut;
+      struct zip_parameters zip;
+    } x8;
+  #endif  // XNN_NO_X8_OPERATORS
+  #ifndef XNN_NO_F32_OPERATORS
+    struct {
+      struct gemm_parameters gemm;
+      struct gemm_parameters gemm2;
+      struct dwconv_parameters dwconv[XNN_MAX_F32_DWCONV_UKERNELS];
+      struct avgpool_parameters avgpool;
+      struct pavgpool_parameters pavgpool;
+      struct gavgpool_parameters gavgpool;
+      struct maxpool_parameters maxpool;
+      struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
+      xnn_univector_ukernel_function clamp;
+      xnn_univector_ukernel_function hswish;
+      struct prelu_parameters prelu;
+      xnn_vadd_ukernel_function vadd;
+      struct vmulcaddc_parameters vmulcaddc;
+      #ifndef XNN_NO_SPNCHW_OPERATORS
+        // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
+        struct spmm_parameters spmm;
+        // Sparse Matrix-Dense Matrix Multiplication (NR=2 block).
+        struct spmm_parameters spmm2;
+        // Sparse Matrix-Dense Matrix Multiplication (NR=4 block).
+        struct spmm_parameters spmm4;
+        // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->SpCHW layout conversion.
+        struct hwc2spchw_dconv_parameters hwc2spchw_dconv3x3c3s2;
+        // Direct 3x3 stride-1 Convolution with padding 1 on left and right in SpCHW layout.
+        struct spchw_dwconv_parameters spchw_dwconv3x3;
+        // Direct 3x3 stride-2 Convolution with padding 1 on left and right in SpCHW layout.
+        struct spchw_dwconv_parameters spchw_dwconv3x3s2;
+        // Global Average Pooling in SpCHW layout.
+        struct spchw_gavgpool_parameters spchw_gavgpool;
+      #endif  // XNN_NO_SPNCHW_OPERATORS
+    } f32;
+  #endif  // XNN_NO_F32_OPERATORS
+  #ifndef XNN_NO_X32_OPERATORS
+    struct {
+      struct pad_parameters pad;
+      xnn_unpool_ukernel_function unpool;
+      struct zip_parameters zip;
+    } x32;
+  #endif  // XNN_NO_X32_OPERATORS
 };
 
 extern XNN_INTERNAL struct xnn_parameters xnn_params;
