@@ -55,7 +55,7 @@ def escape(line):
   return " + ".join(output_parts)
 
 
-def preprocess(input_text, input_globals):
+def preprocess(input_text, input_globals, input_path="codegen"):
   input_lines = input_text.splitlines()
   python_lines = ["from __future__ import print_function"]
 
@@ -110,9 +110,13 @@ def preprocess(input_text, input_globals):
     blank_lines -= 1
 
   exec_globals = dict(input_globals)
-  output_stream = io.BytesIO()
+  if sys.version_info > (3, 0):
+    output_stream = io.StringIO()
+  else:
+    output_stream = io.BytesIO()
   exec_globals["OUT_STREAM"] = output_stream
-  exec("\n".join(python_lines), exec_globals)
+  python_bytecode = compile("\n".join(python_lines), input_path, 'exec')
+  exec(python_bytecode, exec_globals)
 
   return output_stream.getvalue()
 
@@ -130,7 +134,7 @@ def main(args):
 
   input_text = codecs.open(options.input[0], "r", encoding="utf-8").read()
   python_globals = dict(chain(*options.defines))
-  output_text = preprocess(input_text, python_globals)
+  output_text = preprocess(input_text, python_globals, options.input[0])
 
   with codecs.open(options.output, "w", encoding="utf-8") as output_file:
     output_file.write(PREAMBLE.format(
