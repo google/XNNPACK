@@ -14,20 +14,21 @@
 
 #include <xnnpack/common.h>
 
+
 inline static size_t min(size_t a, size_t b) {
-  return a < b ? a : b;
+  return XNN_UNPREDICTABLE(b < a) ? b : a;
 }
 
 inline static size_t max(size_t a, size_t b) {
-  return a > b ? a : b;
+  return XNN_UNPREDICTABLE(b < a) ? a : b;
 }
 
 inline static size_t doz(size_t a, size_t b) {
-  return a >= b ? a - b : 0;
+  return XNN_UNPREDICTABLE(b < a) ? a - b : 0;
 }
 
 inline static size_t divide_round_up(size_t n, size_t q) {
-  return n % q == 0 ? n / q : n / q + 1;
+  return XNN_UNPREDICTABLE(n % q == 0) ? n / q : n / q + 1;
 }
 
 inline static size_t round_up(size_t n, size_t q) {
@@ -47,7 +48,7 @@ inline static size_t round_up_po2(size_t n, size_t q) {
 inline static size_t subtract_modulo(size_t a, size_t b, size_t m) {
   assert(a < m);
   assert(b < m);
-  return a >= b ? a - b : a - b + m;
+  return XNN_UNPREDICTABLE(a >= b) ? a - b : a - b + m;
 }
 
 inline static uint32_t math_min_u32(uint32_t a, uint32_t b) {
@@ -62,7 +63,7 @@ inline static float math_min_f32(float a, float b) {
   #if defined(__wasm__)
     return __builtin_wasm_min_f32(a, b);
   #else
-    return a < b ? a : b;
+    return XNN_UNPREDICTABLE(b < a) ? b : a;
   #endif
 }
 
@@ -70,6 +71,6 @@ inline static float math_max_f32(float a, float b) {
   #if defined(__wasm__)
     return __builtin_wasm_max_f32(a, b);
   #else
-    return a > b ? a : b;
+    return XNN_UNPREDICTABLE(b < a) ? a : b;
   #endif
 }
