@@ -282,7 +282,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x12__aarch64_neonfma_cortex_a53
         B.LO 7f
 
         ST1 {v20.16b, v21.16b, v22.16b}, [x6], x14
-
         SUB  x3,  x3, x2 // a0 -= kc
 
         SUBS x1, x1, 12
@@ -321,8 +320,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x12__aarch64_neonfma_cortex_a53
 7:
         # Store odd channels
         TBZ x1, 3, 8f
-        STP q20, q21, [x6]
-        ADD x6, x6, 32
+        STP q20, q21, [x6], 32
         MOV v20.16b, v22.16b
 
 8:

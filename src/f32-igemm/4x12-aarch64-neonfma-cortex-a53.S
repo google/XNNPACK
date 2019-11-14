@@ -476,7 +476,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         ST1 {v26.16b, v27.16b, v28.16b}, [x21], x10
         ST1 {v23.16b, v24.16b, v25.16b}, [x20], x10
         ST1 {v20.16b, v21.16b, v22.16b},  [x6], x10
-
         SUB x4, x4, x3  // a -= ks
 
         # nc loop

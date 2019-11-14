@@ -300,7 +300,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         B.LO 8f
 
         ST1 {v20.16b, v21.16b, v22.16b}, [x6], x10
-
         SUB x4, x4, x3  // a -= ks
 
         # nc loop

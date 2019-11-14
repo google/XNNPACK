@@ -165,9 +165,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a53
         CMP x1, 8
         B.LO 9f
 
-        STP q16, q17, [x6]
-        ADD x6, x6, x14
-
+        ST1 {v16.16b, v17.16b}, [x6], x14
         SUB  x3,  x3, x2 // a0 -= kc
 
         SUBS x1, x1, 8
