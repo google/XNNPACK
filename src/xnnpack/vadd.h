@@ -19,20 +19,6 @@ extern "C" {
 #endif
 
 
-#define DECLARE_F32_VADD_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t n,                                    \
-      const float* a,                              \
-      const float* b,                              \
-      float* y,                                    \
-      const union xnn_f32_output_params* params);
-
-DECLARE_F32_VADD_UKERNEL_FUNCTION(xnn_f32_vadd_ukernel__neon)
-DECLARE_F32_VADD_UKERNEL_FUNCTION(xnn_f32_vadd_ukernel__psimd)
-DECLARE_F32_VADD_UKERNEL_FUNCTION(xnn_f32_vadd_ukernel__scalar)
-DECLARE_F32_VADD_UKERNEL_FUNCTION(xnn_f32_vadd_ukernel__sse)
-
-
 #define DECLARE_Q8_VADD_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                      \
       size_t n,                                   \

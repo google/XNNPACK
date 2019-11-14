@@ -1068,28 +1068,14 @@ typedef void (*xnn_q8_vadd_ukernel_function)(
     uint8_t* y,
     const union xnn_q8_add_params* params);
 
-typedef void (*xnn_vmul_ukernel_function)(
+typedef void (*xnn_vbinop_ukernel_function)(
     size_t n,
     const void* a,
     const void* b,
     void* y,
     const void* params);
 
-typedef void (*xnn_f32_vmul_ukernel_function)(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
-    const union xnn_f32_output_params* params);
-
-typedef void (*xnn_vsub_ukernel_function)(
-    size_t n,
-    const void* a,
-    const void* b,
-    void* y,
-    const void* params);
-
-typedef void (*xnn_f32_vsub_ukernel_function)(
+typedef void (*xnn_f32_vbinop_ukernel_function)(
     size_t n,
     const float* a,
     const float* b,

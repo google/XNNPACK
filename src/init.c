@@ -39,6 +39,7 @@
 #include <xnnpack/spmm.h>
 #include <xnnpack/unpool.h>
 #include <xnnpack/vadd.h>
+#include <xnnpack/vbinop.h>
 #include <xnnpack/vmulcaddc.h>
 #include <xnnpack/zip.h>
 
@@ -203,7 +204,7 @@ static void init(void) {
       .row_tile = 2,
       .channel_tile = 8,
     };
-    xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__psimd;
+    xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__neon_x8;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
       .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__neon_2x,
       .channel_tile = 4,
@@ -459,7 +460,7 @@ static void init(void) {
       .row_tile = 2,
       .channel_tile = 8,
     };
-    xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__psimd;
+    xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__neon_x8;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
       .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__neonfma_2x,
       .channel_tile = 4,
@@ -658,7 +659,7 @@ static void init(void) {
       .row_tile = 2,
       .channel_tile = 8,
     };
-    xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__sse;
+    xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__sse_x8;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
       .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__sse_2x,
       .channel_tile = 4,
@@ -853,7 +854,7 @@ static void init(void) {
       .row_tile = 2,
       .channel_tile = 8,
     };
-    xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__psimd;
+    xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__psimd_x8;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
       .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__psimd_2x,
       .channel_tile = 4,
@@ -1023,7 +1024,7 @@ static void init(void) {
       .row_tile = 4,
       .channel_tile = 4,
     };
-    xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__scalar;
+    xnn_params.f32.vadd = (xnn_vadd_ukernel_function) xnn_f32_vadd_ukernel__scalar_x4;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
       .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c1__scalar_2x,
       .channel_tile = 1,
