@@ -1358,6 +1358,10 @@ struct xnn_parameters {
     struct spchw_dwconv_parameters spchw_dwconv3x3;
     // Direct 3x3 stride-2 Convolution with padding 1 on left and right in SpCHW layout.
     struct spchw_dwconv_parameters spchw_dwconv3x3s2;
+    // Direct 5x5 stride-1 Convolution with padding 2 on left and right in SpCHW layout.
+    struct spchw_dwconv_parameters spchw_dwconv5x5;
+    // Direct 5x5 stride-2 Convolution with padding 2 on left and right in SpCHW layout.
+    struct spchw_dwconv_parameters spchw_dwconv5x5s2;
     // Global Average Pooling in SpCHW layout.
     struct spchw_gavgpool_parameters spchw_gavgpool;
   } f32;

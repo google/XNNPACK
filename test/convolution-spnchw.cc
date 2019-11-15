@@ -964,3 +964,473 @@ TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_3x3s2_without_bias) {
     .iterations(3)
     .TestF32();
 }
+
+/**************************** DWCONV 5x5 path ****************************/
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ConvolutionSpNCHWOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5_zero_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ConvolutionSpNCHWOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .groups(19)
+    .sparsity(1.0f)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5_varying_input_width) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t input_width = 25; input_width <= 31; input_width++) {
+    ConvolutionSpNCHWOperatorTester()
+      .input_size(input_width, 29)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .groups(19)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5_varying_input_height) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t input_height = 27; input_height <= 33; input_height++) {
+    ConvolutionSpNCHWOperatorTester()
+      .input_size(27, input_height)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .groups(19)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionSpNCHWOperatorTester()
+      .input_size(27, 29)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .groups(channels)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5_with_qmin) {
+  ConvolutionSpNCHWOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .groups(19)
+    .qmin(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5_with_qmax) {
+  ConvolutionSpNCHWOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .groups(19)
+    .qmax(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+/**************************** DWCONV 5x5 path, batched ****************************/
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5_zero_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .groups(19)
+    .sparsity(1.0f)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5_varying_input_width) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t input_width = 25; input_width <= 31; input_width++) {
+    ConvolutionSpNCHWOperatorTester()
+      .batch_size(2)
+      .input_size(input_width, 29)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .groups(19)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5_varying_input_height) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t input_height = 27; input_height <= 33; input_height++) {
+    ConvolutionSpNCHWOperatorTester()
+      .batch_size(2)
+      .input_size(27, input_height)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .groups(19)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionSpNCHWOperatorTester()
+      .batch_size(2)
+      .input_size(27, 29)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .groups(channels)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5_with_input_stride) {
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .input_batch_stride(14879)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5_with_output_stride) {
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .output_batch_stride(13781)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5_with_qmin) {
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .groups(19)
+    .qmin(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5_with_qmax) {
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .groups(19)
+    .qmax(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+/**************************** DWCONV 5x5 stride-2 path ****************************/
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ConvolutionSpNCHWOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5s2_zero_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ConvolutionSpNCHWOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .groups(19)
+    .sparsity(1.0f)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5s2_varying_input_width) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t input_width = 25; input_width <= 31; input_width++) {
+    ConvolutionSpNCHWOperatorTester()
+      .input_size(input_width, 29)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .subsampling(2)
+      .groups(19)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5s2_varying_input_height) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t input_height = 27; input_height <= 33; input_height++) {
+    ConvolutionSpNCHWOperatorTester()
+      .input_size(27, input_height)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .subsampling(2)
+      .groups(19)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5s2_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionSpNCHWOperatorTester()
+      .input_size(27, 29)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .subsampling(2)
+      .groups(channels)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5s2_with_qmin) {
+  ConvolutionSpNCHWOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .groups(19)
+    .qmin(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5s2_with_qmax) {
+  ConvolutionSpNCHWOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .groups(19)
+    .qmax(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, depthwise_5x5s2_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+/**************************** DWCONV 5x5 stride-2 path, batched ****************************/
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5s2_zero_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .groups(19)
+    .sparsity(1.0f)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5s2_varying_input_width) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t input_width = 25; input_width <= 31; input_width++) {
+    ConvolutionSpNCHWOperatorTester()
+      .batch_size(2)
+      .input_size(input_width, 29)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .subsampling(2)
+      .groups(19)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5s2_varying_input_height) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t input_height = 27; input_height <= 33; input_height++) {
+    ConvolutionSpNCHWOperatorTester()
+      .batch_size(2)
+      .input_size(27, input_height)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .subsampling(2)
+      .groups(19)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5s2_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionSpNCHWOperatorTester()
+      .batch_size(2)
+      .input_size(27, 29)
+      .kernel_size(5, 5)
+      .padding_width(2)
+      .subsampling(2)
+      .groups(channels)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5s2_with_input_stride) {
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .input_batch_stride(14879)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5s2_with_output_stride) {
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .output_batch_stride(13781)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5s2_with_qmin) {
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .groups(19)
+    .qmin(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5s2_with_qmax) {
+  ConvolutionSpNCHWOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .groups(19)
+    .qmax(128)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(CONVOLUTION_SpNHWC_OP_F32, batched_depthwise_5x5s2_without_bias) {
+  ConvolutionSpNCHWOperatorTester()
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding_width(2)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestF32();
+}
