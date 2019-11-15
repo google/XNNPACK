@@ -59,6 +59,14 @@ static void ExpError(benchmark::State& state,
   BENCHMARK(f32_expminus__avx2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  static void f32_expminus__neonfma_p5(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_expminus__neonfma_p5, 4);
+  }
+
+  BENCHMARK(f32_expminus__neonfma_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

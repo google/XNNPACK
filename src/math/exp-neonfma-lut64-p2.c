@@ -28,7 +28,7 @@ void xnn_math_f32_exp__neonfma_lut64_p2(
     const float* input,
     float* output)
 {
-  assert(n % (16 * sizeof(float)) == 0);
+  assert(n % (4 * sizeof(float)) == 0);
 
   const float32x4_t vmagic_bias = vmovq_n_f32(0x1.800000p23f);
   // The smallest x for which expf(x) is non-zero.

@@ -47,9 +47,12 @@ DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__avx512f_perm_p3)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__avx512f_perm2_p2)
 
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_expminus__avx2_p5)
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_expminus__neonfma_p5)
 
 DECLARE_F32_EXT_UNARY_MATH_FUNCTION(xnn_math_f32_extexp__avx2_p5)
 DECLARE_F32_EXT_UNARY_MATH_FUNCTION(xnn_math_f32_extexp__avx512f_p5)
+
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_sigmoid__neonfma_p5)
 
 #ifdef __cplusplus
 } /* extern "C" */

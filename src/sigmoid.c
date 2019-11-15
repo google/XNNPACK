@@ -147,6 +147,79 @@ error:
   return status;
 }
 
+enum xnn_status xnn_create_sigmoid_nc_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* sigmoid_op_out)
+{
+  xnn_operator_t sigmoid_op = NULL;
+  enum xnn_status status = xnn_status_uninitialized;
+
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to create Sigmoid operator: XNNPACK is not initialized");
+    goto error;
+  }
+
+  status = xnn_status_invalid_parameter;
+
+  if (channels == 0) {
+    xnn_log_error(
+      "failed to create Sigmoid operator with %zu channels: number of channels must be non-zero", channels);
+    goto error;
+  }
+
+  if (input_stride < channels) {
+    xnn_log_error(
+      "failed to create Sigmoid operator with input element stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      input_stride, channels);
+    goto error;
+  }
+
+  if (output_stride < channels) {
+    xnn_log_error(
+      "failed to create Sigmoid operator with output element stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      output_stride, channels);
+    goto error;
+  }
+
+  status = xnn_status_unsupported_hardware;
+
+  if (xnn_params.f32.sigmoid == NULL) {
+    xnn_log_error(
+      "failed to create Sigmoid operator: "
+      "only selected hardware configurations are supported");
+    goto error;
+  }
+
+  status = xnn_status_out_of_memory;
+
+  sigmoid_op = calloc(1, sizeof(struct xnn_operator));
+  if (sigmoid_op == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for xnn_operator structure", sizeof(struct xnn_operator));
+    goto error;
+  }
+
+  sigmoid_op->channels = channels;
+  sigmoid_op->input_pixel_stride = input_stride;
+  sigmoid_op->output_pixel_stride = output_stride;
+
+  sigmoid_op->type = xnn_operator_type_sigmoid_f32;
+  sigmoid_op->ukernel.type = xnn_ukernel_type_sigmoid;
+
+  sigmoid_op->state = xnn_run_state_invalid;
+
+  *sigmoid_op_out = sigmoid_op;
+  return xnn_status_success;
+
+error:
+  xnn_delete_operator(sigmoid_op);
+  return status;
+}
+
 enum xnn_status xnn_setup_sigmoid_nc_q8(
     xnn_operator_t sigmoid_op,
     size_t batch_size,
@@ -205,6 +278,64 @@ enum xnn_status xnn_setup_sigmoid_nc_q8(
     sigmoid_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_lut_strided;
     sigmoid_op->compute.range[0] = batch_size;
     sigmoid_op->compute.tile[0] = 0;
+  }
+  sigmoid_op->state = xnn_run_state_ready;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_sigmoid_nc_f32(
+    xnn_operator_t sigmoid_op,
+    size_t batch_size,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  if (sigmoid_op->type != xnn_operator_type_sigmoid_f32) {
+    xnn_log_error("failed to setup Sigmoid (F32) operator: operator type mismatch");
+    return xnn_status_invalid_parameter;
+  }
+  sigmoid_op->state = xnn_run_state_invalid;
+
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to setup Sigmoid operator: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (batch_size == 0) {
+    sigmoid_op->state = xnn_run_state_skip;
+    return xnn_status_success;
+  }
+
+  const size_t channels = sigmoid_op->channels;
+  const size_t input_stride = sigmoid_op->input_pixel_stride;
+  const size_t output_stride = sigmoid_op->output_pixel_stride;
+  if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) || batch_size == 1) {
+    const size_t block_size = 4096;
+    sigmoid_op->context.univector_contiguous = (struct univector_contiguous_context) {
+      .x = input,
+      .x_stride = input_stride * sizeof(float),
+      .y = output,
+      .y_stride = output_stride * sizeof(float),
+      .ukernel = xnn_params.f32.sigmoid,
+    };
+    sigmoid_op->compute.type = xnn_parallelization_type_1d_tile_1d;
+    sigmoid_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
+    sigmoid_op->compute.range[0] = batch_size * channels * sizeof(float);
+    sigmoid_op->compute.tile[0] = block_size;
+  } else {
+    sigmoid_op->context.univector_strided = (struct univector_strided_context) {
+      .n = channels * sizeof(float),
+      .x = input,
+      .x_stride = input_stride * sizeof(float),
+      .y = output,
+      .y_stride = output_stride * sizeof(float),
+      .ukernel = xnn_params.f32.sigmoid,
+    };
+    sigmoid_op->compute.type = xnn_parallelization_type_1d_tile_1d;
+    sigmoid_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_strided;
+    sigmoid_op->compute.range[0] = batch_size;
+    sigmoid_op->compute.tile[0] = 1;
   }
   sigmoid_op->state = xnn_run_state_ready;
 

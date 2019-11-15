@@ -1082,6 +1082,18 @@ typedef void (*xnn_f32_vbinop_ukernel_function)(
     float* y,
     const union xnn_f32_output_params* params);
 
+typedef void (*xnn_vunop_ukernel_function)(
+    size_t n,
+    const void* x,
+    void* y,
+    const void* params);
+
+typedef void (*xnn_f32_vunop_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y,
+    const void* params);
+
 typedef void (*xnn_vmulcaddc_ukernel_function)(
     size_t m,
     size_t c,
@@ -1330,6 +1342,7 @@ struct xnn_parameters {
     struct bilinear_parameters bilinear;
     xnn_univector_ukernel_function clamp;
     xnn_univector_ukernel_function hswish;
+    xnn_univector_ukernel_function sigmoid;
     struct prelu_parameters prelu;
     xnn_vadd_ukernel_function vadd;
     struct vmulcaddc_parameters vmulcaddc;
