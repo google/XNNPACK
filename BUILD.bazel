@@ -378,6 +378,8 @@ NEONFMA_UKERNELS = [
     "src/f32-ppmm/8x8-neonfma.c",
     "src/f32-vmulcaddc/c4-neonfma-2x.c",
     "src/f32-vmulcaddc/c8-neonfma-2x.c",
+    "src/math/exp-neonfma-lut64-p2.c",
+    "src/math/exp-neonfma-p5.c",
 ]
 
 AARCH64_NEONFMA_UKERNELS = [

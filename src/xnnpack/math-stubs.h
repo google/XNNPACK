@@ -36,6 +36,8 @@ typedef void (*xnn_f32_ext_unary_math_function)(
     float* output_mantissa,                          \
     float* output_exponent);
 
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__neonfma_lut64_p2)
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__neonfma_p5)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__avx2_p5)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__avx2_perm_p3)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__avx2_perm_p4)
