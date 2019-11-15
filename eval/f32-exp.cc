@@ -71,17 +71,8 @@ static void ExpError(benchmark::State& state,
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void f32_exp__avx512f_perm2_p2(benchmark::State& state) {
-    ExpError(state, xnn_math_f32_exp__avx512f_perm2_p2, 16);
-  }
-  static void f32_exp__avx512f_perm_p3(benchmark::State& state) {
-    ExpError(state, xnn_math_f32_exp__avx512f_perm_p3, 16);
-  }
-  static void f32_exp__avx512f_p5(benchmark::State& state) {
-    ExpError(state, xnn_math_f32_exp__avx512f_p5, 16);
-  }
-  static void f32_exp__avx512f_p5_scalef(benchmark::State& state) {
-    ExpError(state, xnn_math_f32_exp__avx512f_p5_scalef, 16);
+  static void f32_exp__sse2_p5(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_exp__sse2_p5, 4);
   }
   static void f32_exp__avx2_perm_p3(benchmark::State& state) {
     ExpError(state, xnn_math_f32_exp__avx2_perm_p3, 8);
@@ -92,14 +83,27 @@ static void ExpError(benchmark::State& state,
   static void f32_exp__avx2_p5(benchmark::State& state) {
     ExpError(state, xnn_math_f32_exp__avx2_p5, 8);
   }
+  static void f32_exp__avx512f_perm2_p2(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_exp__avx512f_perm2_p2, 16);
+  }
+  static void f32_exp__avx512f_perm_p3(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_exp__avx512f_perm_p3, 16);
+  }
+  static void f32_exp__avx512f_p5_scalef(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_exp__avx512f_p5_scalef, 16);
+  }
+  static void f32_exp__avx512f_p5(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_exp__avx512f_p5, 16);
+  }
 
-  BENCHMARK(f32_exp__avx512f_perm2_p2)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_exp__avx512f_perm_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_exp__avx512f_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_exp__avx512f_p5_scalef)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_exp__sse2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx2_perm_p4)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx2_perm_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_exp__avx512f_perm2_p2)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_exp__avx512f_perm_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_exp__avx512f_p5_scalef)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_exp__avx512f_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
