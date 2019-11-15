@@ -531,17 +531,13 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x12__aarch64_neonfma_cortex_a53
 7:
         # Store odd channels
         TBZ x1, 3, 8f
-        STP q29, q30,  [x7]
-        ADD  x7,  x7, 32
+        STP q29, q30,  [x7], 32
         MOV v29.16b, v31.16b
-        STP q26, q27, [x10]
-        ADD x10, x10, 32
+        STP q26, q27, [x10], 32
         MOV v26.16b, v28.16b
-        STP q23, q24,  [x9]
-        ADD  x9,  x9, 32
+        STP q23, q24,  [x9], 32
         MOV v23.16b, v25.16b
-        STP q20, q21,  [x6]
-        ADD  x6,  x6, 32
+        STP q20, q21,  [x6], 32
         MOV v20.16b, v22.16b
 
 8:

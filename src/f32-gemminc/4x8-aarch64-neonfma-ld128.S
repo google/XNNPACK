@@ -234,6 +234,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_ld128
         STR s28, [x10]
         STR s18,  [x9]
         STR s16,  [x6]
+
 10:
         RET
 

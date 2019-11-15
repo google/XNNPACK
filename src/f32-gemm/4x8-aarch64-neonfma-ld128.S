@@ -191,13 +191,13 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_ld128
         CMP x1, 8
         B.LO 7f
 
-        ST1 {v30.16b, v31.16b},  [x7], x14
-        SUB  x3,  x3, x2 // a0 -= kc
-        ST1 {v28.16b, v29.16b}, [x10], x14
-        SUB x11, x11, x2 // a1 -= kc
-        ST1 {v18.16b, v19.16b},  [x9], x14
-        SUB x12, x12, x2 // a2 -= kc
         ST1 {v16.16b, v17.16b},  [x6], x14
+        SUB  x3,  x3, x2 // a0 -= kc
+        ST1 {v18.16b, v19.16b},  [x9], x14
+        SUB x11, x11, x2 // a1 -= kc
+        ST1 {v28.16b, v29.16b}, [x10], x14
+        SUB x12, x12, x2 // a2 -= kc
+        ST1 {v30.16b, v31.16b},  [x7], x14
         SUB  x4,  x4, x2 // a3 -= kc
 
         SUBS x1, x1, 8
@@ -208,32 +208,33 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_ld128
         # Store odd width
 7:
         TBZ x1, 2, 8f
-        STR q30, [x7], 16
-        MOV v30.16b, v31.16b
-        STR q28, [x10], 16
-        MOV v28.16b, v29.16b
-        STR q18, [x9], 16
-        MOV v18.16b, v19.16b
         STR q16, [x6], 16
         MOV v16.16b, v17.16b
+        STR q18, [x9], 16
+        MOV v18.16b, v19.16b
+        STR q28, [x10], 16
+        MOV v28.16b, v29.16b
+        STR q30, [x7], 16
+        MOV v30.16b, v31.16b
 
 8:
         TBZ x1, 1, 9f
-        STR d30, [x7], 8
-        DUP d30, v30.d[1]
-        STR d28, [x10], 8
-        DUP d28, v28.d[1]
-        STR d18, [x9], 8
-        DUP d18, v18.d[1]
         STR d16, [x6], 8
         DUP d16, v16.d[1]
+        STR d18, [x9], 8
+        DUP d18, v18.d[1]
+        STR d28, [x10], 8
+        DUP d28, v28.d[1]
+        STR d30, [x7], 8
+        DUP d30, v30.d[1]
 
 9:
         TBZ x1, 0, 10f
-        STR s30,  [x7]
-        STR s28, [x10]
-        STR s18,  [x9]
         STR s16,  [x6]
+        STR s18,  [x9]
+        STR s28, [x10]
+        STR s30,  [x7]
+
 10:
         RET
 

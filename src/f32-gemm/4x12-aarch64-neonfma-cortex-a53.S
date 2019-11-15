@@ -448,14 +448,13 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         CMP x1, 12
         B.LO 7f
 
-        ST1 {v29.16b, v30.16b, v31.16b},  [x7], x14
-        ST1 {v26.16b, v27.16b, v28.16b}, [x10], x14
-        ST1 {v23.16b, v24.16b, v25.16b},  [x9], x14
         ST1 {v20.16b, v21.16b, v22.16b},  [x6], x14
-
         SUB  x3,  x3, x2 // a0 -= kc
+        ST1 {v23.16b, v24.16b, v25.16b},  [x9], x14
         SUB x11, x11, x2 // a1 -= kc
+        ST1 {v26.16b, v27.16b, v28.16b}, [x10], x14
         SUB x12, x12, x2 // a2 -= kc
+        ST1 {v29.16b, v30.16b, v31.16b},  [x7], x14
         SUB  x4,  x4, x2 // a3 -= kc
 
         SUBS x1, x1, 12
@@ -535,47 +534,43 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x12__aarch64_neonfma_cortex_a53
 7:
         # Store odd channels
         TBZ x1, 3, 8f
-        STP q29, q30,  [x7]
-        ADD  x7,  x7, 32
-        MOV v29.16b, v31.16b
-        STP q26, q27, [x10]
-        ADD x10, x10, 32
-        MOV v26.16b, v28.16b
-        STP q23, q24,  [x9]
-        ADD  x9,  x9, 32
-        MOV v23.16b, v25.16b
-        STP q20, q21,  [x6]
-        ADD  x6,  x6, 32
+        STP q20, q21,  [x6], 32
         MOV v20.16b, v22.16b
+        STP q23, q24,  [x9], 32
+        MOV v23.16b, v25.16b
+        STP q26, q27, [x10], 32
+        MOV v26.16b, v28.16b
+        STP q29, q30,  [x7], 32
+        MOV v29.16b, v31.16b
 
 8:
         TBZ x1, 2, 9f
-        STR q29,  [x7], 16
-        MOV v29.16b, v30.16b
-        STR q26, [x10], 16
-        MOV v26.16b, v27.16b
-        STR q23,  [x9], 16
-        MOV v23.16b, v24.16b
         STR q20,  [x6], 16
         MOV v20.16b, v21.16b
+        STR q23,  [x9], 16
+        MOV v23.16b, v24.16b
+        STR q26, [x10], 16
+        MOV v26.16b, v27.16b
+        STR q29,  [x7], 16
+        MOV v29.16b, v30.16b
 
 9:
         TBZ x1, 1, 10f
-        STR d29,  [x7], 8
-        DUP d29, v29.d[1]
-        STR d26, [x10], 8
-        DUP d26, v26.d[1]
-        STR d23,  [x9], 8
-        DUP d23, v23.d[1]
         STR d20,  [x6], 8
         DUP d20, v20.d[1]
+        STR d23,  [x9], 8
+        DUP d23, v23.d[1]
+        STR d26, [x10], 8
+        DUP d26, v26.d[1]
+        STR d29,  [x7], 8
+        DUP d29, v29.d[1]
 
 10:
         TBZ x1, 0, 11f
-        STR s29,  [x7]
-        STR s26, [x10]
-        STR s23,  [x9]
         STR s20,  [x6]
+        STR s23,  [x9]
+        STR s26, [x10]
+        STR s29,  [x7]
 11:
         # Restore d8-d11,d14,d15 from stack
         LDP d14, d15, [sp, 64]

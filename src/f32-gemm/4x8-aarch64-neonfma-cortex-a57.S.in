@@ -412,19 +412,32 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_ukernel_4x8__aarch64_neonfma_
         CMP x1, 8
         B.LO 7f
 
-        STP q30, q31,  [x7]
-        ADD  x7,  x7, x14
-        STP q28, q29, [x10]
-        ADD x10, x10, x14
-        STP q18, q19,  [x9]
-        ADD  x9,  x9, x14
-        STP q16, q17,  [x6]
-        ADD  x6,  x6, x14
-
-        SUB  x3,  x3, x2 // a0 -= kc
-        SUB x11, x11, x2 // a1 -= kc
-        SUB x12, x12, x2 // a2 -= kc
-        SUB  x4,  x4, x2 // a3 -= kc
+        $if INC:
+          STP q30, q31,  [x7]
+          SUB  x3,  x3, x2 // a0 -= kc
+          ADD  x7,  x7, x14
+          STP q28, q29, [x10]
+          SUB x11, x11, x2 // a1 -= kc
+          ADD x10, x10, x14
+          STP q18, q19,  [x9]
+          SUB x12, x12, x2 // a2 -= kc
+          ADD  x9,  x9, x14
+          STP q16, q17,  [x6]
+          SUB  x4,  x4, x2 // a3 -= kc
+          ADD  x6,  x6, x14
+        $else:
+          STP q16, q17,  [x6]
+          SUB  x3,  x3, x2 // a0 -= kc
+          ADD  x6,  x6, x14
+          STP q18, q19,  [x9]
+          SUB x11, x11, x2 // a1 -= kc
+          ADD  x9,  x9, x14
+          STP q28, q29, [x10]
+          SUB x12, x12, x2 // a2 -= kc
+          ADD x10, x10, x14
+          STP q30, q31,  [x7]
+          SUB  x4,  x4, x2 // a3 -= kc
+          ADD  x7,  x7, x14
 
         SUBS x1, x1, 8
         B.HI 0b
@@ -439,32 +452,58 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_ukernel_4x8__aarch64_neonfma_
         # Store odd width
 7:
         TBZ x1, 2, 8f
-        STR q30, [x7], 16
-        MOV v30.16b, v31.16b
-        STR q28, [x10], 16
-        MOV v28.16b, v29.16b
-        STR q18, [x9], 16
-        MOV v18.16b, v19.16b
-        STR q16, [x6], 16
-        MOV v16.16b, v17.16b
+        $if INC:
+          STR q30, [x7], 16
+          MOV v30.16b, v31.16b
+          STR q28, [x10], 16
+          MOV v28.16b, v29.16b
+          STR q18, [x9], 16
+          MOV v18.16b, v19.16b
+          STR q16, [x6], 16
+          MOV v16.16b, v17.16b
+        $else:
+          STR q16, [x6], 16
+          MOV v16.16b, v17.16b
+          STR q18, [x9], 16
+          MOV v18.16b, v19.16b
+          STR q28, [x10], 16
+          MOV v28.16b, v29.16b
+          STR q30, [x7], 16
+          MOV v30.16b, v31.16b
 
 8:
         TBZ x1, 1, 9f
-        STR d30, [x7], 8
-        DUP d30, v30.d[1]
-        STR d28, [x10], 8
-        DUP d28, v28.d[1]
-        STR d18, [x9], 8
-        DUP d18, v18.d[1]
-        STR d16, [x6], 8
-        DUP d16, v16.d[1]
+        $if INC:
+          STR d30, [x7], 8
+          DUP d30, v30.d[1]
+          STR d28, [x10], 8
+          DUP d28, v28.d[1]
+          STR d18, [x9], 8
+          DUP d18, v18.d[1]
+          STR d16, [x6], 8
+          DUP d16, v16.d[1]
+        $else:
+          STR d16, [x6], 8
+          DUP d16, v16.d[1]
+          STR d18, [x9], 8
+          DUP d18, v18.d[1]
+          STR d28, [x10], 8
+          DUP d28, v28.d[1]
+          STR d30, [x7], 8
+          DUP d30, v30.d[1]
 
 9:
         TBZ x1, 0, 10f
-        STR s30,  [x7]
-        STR s28, [x10]
-        STR s18,  [x9]
-        STR s16,  [x6]
+        $if INC:
+          STR s30,  [x7]
+          STR s28, [x10]
+          STR s18,  [x9]
+          STR s16,  [x6]
+        $else:
+          STR s16,  [x6]
+          STR s18,  [x9]
+          STR s28, [x10]
+          STR s30,  [x7]
 10:
         # Restore d8-d15 from stack
         LDP d14, d15, [sp, 48]

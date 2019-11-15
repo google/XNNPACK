@@ -404,18 +404,17 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a75
         B.LO 7f
 
         STP q30, q31,  [x7]
+        SUB  x3,  x3, x2 // a0 -= kc
         ADD  x7,  x7, x14
         STP q28, q29, [x10]
+        SUB x11, x11, x2 // a1 -= kc
         ADD x10, x10, x14
         STP q18, q19,  [x9]
+        SUB x12, x12, x2 // a2 -= kc
         ADD  x9,  x9, x14
         STP q16, q17,  [x6]
-        ADD  x6,  x6, x14
-
-        SUB  x3,  x3, x2 // a0 -= kc
-        SUB x11, x11, x2 // a1 -= kc
-        SUB x12, x12, x2 // a2 -= kc
         SUB  x4,  x4, x2 // a3 -= kc
+        ADD  x6,  x6, x14
 
         SUBS x1, x1, 8
         B.HI 0b
@@ -463,6 +462,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a75
         LDP d10, d11, [sp, 16]
         LDP  d8,  d9, [sp], 64
         RET
+
 
 END_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a75
 
