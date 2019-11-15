@@ -298,10 +298,15 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA v25.4s, v19.4s,  v1.s[1]
 
         // BLOCK 5
+        // NOPs to ensure 4 cycle LDR lands on next LDR
         LDR  d15, [x5, 48]
         INS v13.d[1], x20  // b
         FMLA v27.4s, v19.4s,  v1.s[3]
+        NOP
+        NOP
         LDR x20, [x5, 56]
+        NOP
+        NOP
 
         # Second group of 16 FMA, no loads
         // BLOCK 0
