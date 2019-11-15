@@ -147,6 +147,7 @@ SET(XNNPACK_OPERATOR_SRCS
   src/leaky-relu.c
   src/max-pooling.c
   src/prelu.c
+  src/resize-bilinear.c
   src/sigmoid.c
   src/softargmax.c
   src/unpooling.c)
@@ -169,6 +170,27 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-bilinear/scalar-c1.c
   src/f32-bilinear/scalar-c2.c
   src/f32-bilinear/scalar-c4.c
+  src/f32-binop/vadd-scalar-x1.c
+  src/f32-binop/vadd-scalar-x2.c
+  src/f32-binop/vadd-scalar-x4.c
+  src/f32-binop/vaddc-scalar-x1.c
+  src/f32-binop/vaddc-scalar-x2.c
+  src/f32-binop/vaddc-scalar-x4.c
+  src/f32-binop/vmul-scalar-x1.c
+  src/f32-binop/vmul-scalar-x2.c
+  src/f32-binop/vmul-scalar-x4.c
+  src/f32-binop/vmulc-scalar-x1.c
+  src/f32-binop/vmulc-scalar-x2.c
+  src/f32-binop/vmulc-scalar-x4.c
+  src/f32-binop/vsub-scalar-x1.c
+  src/f32-binop/vsub-scalar-x2.c
+  src/f32-binop/vsub-scalar-x4.c
+  src/f32-binop/vsubc-scalar-x1.c
+  src/f32-binop/vsubc-scalar-x2.c
+  src/f32-binop/vsubc-scalar-x4.c
+  src/f32-binop/vrsubc-scalar-x1.c
+  src/f32-binop/vrsubc-scalar-x2.c
+  src/f32-binop/vrsubc-scalar-x4.c
   src/f32-clamp/scalar.c
   src/f32-conv-hwc2spchw/3x3s2p1c3x4-scalar-1x1.c
   src/f32-igemm/1x4-scalar.c
@@ -222,12 +244,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-spmm/8x1-scalar.c
   src/f32-spmm/8x2-scalar.c
   src/f32-spmm/8x4-scalar.c
-  src/f32-vadd/scalar.c
-  src/f32-vmul/scalar.c
   src/f32-vmulcaddc/c1-scalar-2x.c
   src/f32-vmulcaddc/c2-scalar-2x.c
   src/f32-vmulcaddc/c4-scalar-2x.c
-  src/f32-vsub/scalar.c
   src/q8-avgpool/mp9p8q-scalar.c
   src/q8-avgpool/up9-scalar.c
   src/q8-igemm/2x2-scalar.c
@@ -263,6 +282,20 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-avgpool/up9-psimd.c
   src/f32-bilinear/psimd-c4.c
   src/f32-bilinear/psimd-c8.c
+  src/f32-binop/vadd-psimd-x4.c
+  src/f32-binop/vadd-psimd-x8.c
+  src/f32-binop/vaddc-psimd-x4.c
+  src/f32-binop/vaddc-psimd-x8.c
+  src/f32-binop/vmul-psimd-x4.c
+  src/f32-binop/vmul-psimd-x8.c
+  src/f32-binop/vmulc-psimd-x4.c
+  src/f32-binop/vmulc-psimd-x8.c
+  src/f32-binop/vrsubc-psimd-x4.c
+  src/f32-binop/vrsubc-psimd-x8.c
+  src/f32-binop/vsub-psimd-x4.c
+  src/f32-binop/vsub-psimd-x8.c
+  src/f32-binop/vsubc-psimd-x4.c
+  src/f32-binop/vsubc-psimd-x8.c
   src/f32-clamp/psimd.c
   src/f32-igemm/1x8-psimd-loadsplat.c
   src/f32-igemm/1x8-psimd-splat.c
@@ -313,11 +346,8 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-ppmm/4x8-psimd.c
   src/f32-prelu/psimd-2x4.c
   src/f32-prelu/psimd-2x8.c
-  src/f32-vadd/psimd.c
-  src/f32-vmul/psimd.c
   src/f32-vmulcaddc/c4-psimd-2x.c
   src/f32-vmulcaddc/c8-psimd-2x.c
-  src/f32-vsub/psimd.c
   src/x32-packx/x4-psimd.c
   src/x32-pad/x2-psimd.c
   src/x32-unpool/psimd.c
@@ -331,6 +361,20 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-avgpool/up9-neon.c
   src/f32-bilinear/neon-c4.c
   src/f32-bilinear/neon-c8.c
+  src/f32-binop/vadd-neon-x4.c
+  src/f32-binop/vadd-neon-x8.c
+  src/f32-binop/vaddc-neon-x4.c
+  src/f32-binop/vaddc-neon-x8.c
+  src/f32-binop/vmul-neon-x4.c
+  src/f32-binop/vmul-neon-x8.c
+  src/f32-binop/vmulc-neon-x4.c
+  src/f32-binop/vmulc-neon-x8.c
+  src/f32-binop/vrsubc-neon-x4.c
+  src/f32-binop/vrsubc-neon-x8.c
+  src/f32-binop/vsub-neon-x4.c
+  src/f32-binop/vsub-neon-x8.c
+  src/f32-binop/vsubc-neon-x4.c
+  src/f32-binop/vsubc-neon-x8.c
   src/f32-clamp/neon.c
   src/f32-igemm/1x8-neon-ld64.c
   src/f32-igemm/4x2-neon-ld64.c
@@ -457,6 +501,20 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/up9-sse.c
   src/f32-bilinear/sse-c4.c
   src/f32-bilinear/sse-c8.c
+  src/f32-binop/vadd-sse-x4.c
+  src/f32-binop/vadd-sse-x8.c
+  src/f32-binop/vaddc-sse-x4.c
+  src/f32-binop/vaddc-sse-x8.c
+  src/f32-binop/vmul-sse-x4.c
+  src/f32-binop/vmul-sse-x8.c
+  src/f32-binop/vmulc-sse-x4.c
+  src/f32-binop/vmulc-sse-x8.c
+  src/f32-binop/vrsubc-sse-x4.c
+  src/f32-binop/vrsubc-sse-x8.c
+  src/f32-binop/vsub-sse-x4.c
+  src/f32-binop/vsub-sse-x8.c
+  src/f32-binop/vsubc-sse-x4.c
+  src/f32-binop/vsubc-sse-x8.c
   src/f32-clamp/sse.c
   src/f32-igemm/1x8-sse-dup.c
   src/f32-igemm/1x8-sse-load1.c
@@ -502,11 +560,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-rmax/sse.c
   src/f32-spmm/4x1-sse.c
   src/f32-spmm/8x1-sse.c
-  src/f32-vadd/sse.c
-  src/f32-vmul/sse.c
   src/f32-vmulcaddc/c4-sse-2x.c
   src/f32-vmulcaddc/c8-sse-2x.c
-  src/f32-vsub/sse.c
   src/x32-packx/x4-sse.c)
 
 SET(XNNPACK_SSE2_MICROKERNEL_SRCS
@@ -1182,6 +1237,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vadd-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vadd-test f32-vadd-test)
 
+  ADD_EXECUTABLE(f32-vaddc-test test/f32-vaddc.cc)
+  SET_TARGET_PROPERTIES(f32-vaddc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vaddc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vaddc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vaddc-test f32-vaddc-test)
+
   ADD_EXECUTABLE(f32-vmul-test test/f32-vmul.cc)
   SET_TARGET_PROPERTIES(f32-vmul-test PROPERTIES
     CXX_STANDARD 11
@@ -1190,6 +1254,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vmul-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vmul-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vmul-test f32-vmul-test)
+
+  ADD_EXECUTABLE(f32-vmulc-test test/f32-vmulc.cc)
+  SET_TARGET_PROPERTIES(f32-vmulc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vmulc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vmulc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vmulc-test f32-vmulc-test)
 
   ADD_EXECUTABLE(f32-vmulcaddc-test test/f32-vmulcaddc.cc)
   SET_TARGET_PROPERTIES(f32-vmulcaddc-test PROPERTIES
@@ -1226,6 +1299,24 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vsub-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vsub-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vsub-test f32-vsub-test)
+
+  ADD_EXECUTABLE(f32-vsubc-test test/f32-vsubc.cc)
+  SET_TARGET_PROPERTIES(f32-vsubc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vsubc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vsubc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vsubc-test f32-vsubc-test)
+
+  ADD_EXECUTABLE(f32-vrsubc-test test/f32-vrsubc.cc)
+  SET_TARGET_PROPERTIES(f32-vrsubc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrsubc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vrsubc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vrsubc-test f32-vrsubc-test)
 
   ADD_EXECUTABLE(q8-avgpool-test test/q8-avgpool.cc)
   SET_TARGET_PROPERTIES(q8-avgpool-test PROPERTIES
