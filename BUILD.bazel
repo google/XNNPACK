@@ -65,6 +65,7 @@ OPERATOR_SRCS = [
     "src/hardswish.c",
     "src/leaky-relu.c",
     "src/max-pooling.c",
+    "src/multiply.c",
     "src/prelu.c",
     "src/resize-bilinear.c",
     "src/sigmoid.c",
@@ -1923,6 +1924,15 @@ xnnpack_unit_test(
         "test/max-pooling.cc",
         "test/max-pooling-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "multiply_test",
+    srcs = [
+        "test/multiply.cc",
+        "test/multiply-operator-tester.h",
+    ],
     deps = OPERATOR_TEST_DEPS,
 )
 

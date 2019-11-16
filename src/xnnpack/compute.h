@@ -569,6 +569,27 @@ struct add_contiguous_context {
       size_t size);
 #endif
 
+struct elementwise_binary_context {
+  const void* a;
+  size_t a_stride[XNN_MAX_TENSOR_DIMS - 1];
+  const void* b;
+  size_t b_stride[XNN_MAX_TENSOR_DIMS - 1];
+  void* y;
+  size_t y_stride[XNN_MAX_TENSOR_DIMS - 1];
+  size_t elements;
+  union {
+    union xnn_q8_add_params q8;
+    union xnn_f32_output_params f32;
+  } params;
+  xnn_vbinop_ukernel_function ukernel;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_elementwise_binary_3d(
+      const struct elementwise_binary_context context[restrict static 1],
+      size_t i, size_t j, size_t k, size_t j_range, size_t k_range);
+#endif
+
 struct channel_shuffle_context {
   const void* x;
   size_t x_stride;

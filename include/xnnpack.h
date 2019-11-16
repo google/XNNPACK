@@ -24,6 +24,9 @@ extern "C" {
 /// Note: XNNPACK reads, but never writes beyond array bounds.
 #define XNN_EXTRA_BYTES 16
 
+/// Maximum number of dimensions in tensor shape.
+#define XNN_MAX_TENSOR_DIMS 4
+
 /// The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
 #define XNN_FLAG_DEPTHWISE_CONVOLUTION 0x00000001
 
@@ -308,6 +311,23 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f32(
     size_t input_height,
     size_t input_width,
     const float* input,
+    float* output,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_multiply_nd_f32(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* multiply_op_out);
+
+enum xnn_status xnn_setup_multiply_nd_f32(
+    xnn_operator_t multiply_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
     float* output,
     pthreadpool_t threadpool);
 

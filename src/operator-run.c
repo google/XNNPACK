@@ -562,6 +562,23 @@ void xnn_compute_add_contiguous(
   context->ukernel(size, a, b, y, &context->params);
 }
 
+void xnn_compute_elementwise_binary_3d(
+    const struct elementwise_binary_context context[restrict static 1],
+    size_t i, size_t j, size_t k,
+    size_t j_range, size_t k_range)
+{
+  assert(j_range == 1);
+  assert(k_range == 1);
+
+  const void* a = (const void*) ((uintptr_t) context->a +
+    i * context->a_stride[0] + j * context->a_stride[1] + k * context->a_stride[2]);
+  const void* b = (const void*) ((uintptr_t) context->b +
+    i * context->b_stride[0] + j * context->b_stride[1] + k * context->b_stride[2]);
+  void* y = (void*) ((uintptr_t) context->y +
+    i * context->y_stride[0] + j * context->y_stride[1] + k * context->y_stride[2]);
+  context->ukernel(context->elements, a, b, y, &context->params);
+}
+
 void xnn_compute_channel_shuffle_fixed(
     const struct channel_shuffle_context context[restrict static 1],
     size_t index)

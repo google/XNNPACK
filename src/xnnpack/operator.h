@@ -32,6 +32,7 @@ enum xnn_ukernel_type {
   xnn_ukernel_type_igemm,
   xnn_ukernel_type_lut,
   xnn_ukernel_type_max_pooling,
+  xnn_ukernel_type_multiply,
   xnn_ukernel_type_pad,
   xnn_ukernel_type_pixelwise_average_pooling,
   xnn_ukernel_type_prelu,
@@ -69,6 +70,7 @@ enum xnn_operator_type {
   xnn_operator_type_leaky_relu_q8,
   xnn_operator_type_max_pooling_f32,
   xnn_operator_type_max_pooling_u8,
+  xnn_operator_type_multiply_f32,
   xnn_operator_type_prelu_f32,
   xnn_operator_type_resize_bilinear_f32,
   xnn_operator_type_sigmoid_f32,
@@ -256,6 +258,7 @@ struct xnn_operator {
     struct dconv2d_context dconv2d;
     struct dwconv2d_context dwconv2d;
     struct dwconv_context dwconv;
+    struct elementwise_binary_context elementwise_binary;
     struct gemm_context gemm;
     struct global_average_pooling_context global_average_pooling;
     struct global_average_pooling_spnchw_context global_average_pooling_spnchw;

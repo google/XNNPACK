@@ -1187,6 +1187,15 @@ struct gemm_parameters {
   uint8_t log2_sr;
 };
 
+struct vbinop_parameters {
+  xnn_vbinop_ukernel_function op_ukernel;
+  xnn_vbinop_ukernel_function opc_ukernel;
+  xnn_vbinop_ukernel_function ropc_ukernel;
+  // Number of elements in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
+  uint8_t element_tile;
+};
+
 struct spmm_parameters {
   xnn_spmm_ukernel_function ukernel;
   // Number of M-dimension elements in a tile.
@@ -1345,6 +1354,7 @@ struct xnn_parameters {
     xnn_univector_ukernel_function sigmoid;
     struct prelu_parameters prelu;
     xnn_vadd_ukernel_function vadd;
+    struct vbinop_parameters vmul;
     struct vmulcaddc_parameters vmulcaddc;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
     struct spmm_parameters spmm;
