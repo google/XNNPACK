@@ -25,7 +25,7 @@
 
 
 static void Im2ColGEMMBenchmark(benchmark::State& state,
-  xnn_f32_gemm_ukernel_function sgemm,
+  xnn_f32_gemm_ukernel_function f32_gemm,
   uint32_t mr, uint32_t nr, uint32_t kr, uint32_t sr)
 {
   if (!cpuinfo_initialize()) {
@@ -114,7 +114,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
       const uint32_t mb = min(output_size - m, mr);
       for (uint32_t n = 0; n < group_output_channels; n += nr) {
         const uint32_t nb = min(group_output_channels - n, nr);
-        sgemm(
+        f32_gemm(
           mb, nb, kernel_size * group_input_channels * sizeof(float),
           inputData + m * kernel_size * group_input_channels, kernel_size * group_input_channels * sizeof(float),
           w.data() + (buffer_index * nc_stride + n) * (kernel_size * kc_stride + 1),
@@ -135,31 +135,31 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
 
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-  static void sgemm_4x8__aarch64_neonfma_cortex_a75(benchmark::State& state, const char* net) {
+  static void f32_gemm_4x8__aarch64_neonfma_cortex_a75(benchmark::State& state, const char* net) {
     Im2ColGEMMBenchmark(state, xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75, 4, 8, 1, 1);
   }
 
-  BENCHMARK_CONV(sgemm_4x8__aarch64_neonfma_cortex_a75)
+  BENCHMARK_CONV(f32_gemm_4x8__aarch64_neonfma_cortex_a75)
 #endif  // XNN_ARCH_ARM64
 
 #if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
-  static void sgemm_6x8__psimd_loadsplat(benchmark::State& state, const char* net) {
+  static void f32_gemm_6x8__psimd_loadsplat(benchmark::State& state, const char* net) {
     Im2ColGEMMBenchmark(state, xnn_f32_gemm_ukernel_6x8__psimd_loadsplat, 6, 8, 1, 1);
   }
 
-  BENCHMARK_CONV(sgemm_6x8__psimd_loadsplat)
+  BENCHMARK_CONV(f32_gemm_6x8__psimd_loadsplat)
 #endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
-static void sgemm_2x4__scalar(benchmark::State& state, const char* net) {
+static void f32_gemm_2x4__scalar(benchmark::State& state, const char* net) {
   Im2ColGEMMBenchmark(state, xnn_f32_gemm_ukernel_2x4__scalar, 2, 4, 1, 1);
 }
 
-static void sgemm_4x4__scalar(benchmark::State& state, const char* net) {
+static void f32_gemm_4x4__scalar(benchmark::State& state, const char* net) {
   Im2ColGEMMBenchmark(state, xnn_f32_gemm_ukernel_4x4__scalar, 4, 4, 1, 1);
 }
 
-BENCHMARK_CONV(sgemm_2x4__scalar)
-BENCHMARK_CONV(sgemm_4x4__scalar)
+BENCHMARK_CONV(f32_gemm_2x4__scalar)
+BENCHMARK_CONV(f32_gemm_4x4__scalar)
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
