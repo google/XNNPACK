@@ -146,6 +146,7 @@ SET(XNNPACK_OPERATOR_SRCS
   src/hardswish.c
   src/leaky-relu.c
   src/max-pooling.c
+  src/multiply.c
   src/prelu.c
   src/resize-bilinear.c
   src/sigmoid.c
@@ -198,16 +199,16 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-igemm/4x2-scalar.c
   src/f32-igemm/4x4-scalar.c
   src/f32-dwconv/up1x25-scalar.c
-  src/f32-dwconv/up1x4-scalar.c
-  src/f32-dwconv/up1x9-scalar.c
   src/f32-dwconv/up1x25-scalar-acc2.c
-  src/f32-dwconv/up1x4-scalar-acc2.c
-  src/f32-dwconv/up1x9-scalar-acc2.c
   src/f32-dwconv/up2x25-scalar.c
-  src/f32-dwconv/up2x4-scalar.c
-  src/f32-dwconv/up2x9-scalar.c
   src/f32-dwconv/up2x25-scalar-acc2.c
+  src/f32-dwconv/up1x4-scalar.c
+  src/f32-dwconv/up1x4-scalar-acc2.c
+  src/f32-dwconv/up2x4-scalar.c
   src/f32-dwconv/up2x4-scalar-acc2.c
+  src/f32-dwconv/up1x9-scalar.c
+  src/f32-dwconv/up1x9-scalar-acc2.c
+  src/f32-dwconv/up2x9-scalar.c
   src/f32-dwconv/up2x9-scalar-acc2.c
   src/f32-dwconv-spchw/3x3p1-scalar.c
   src/f32-dwconv-spchw/5x5p2-scalar.c
@@ -461,8 +462,13 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-hswish/neonfma.c
   src/f32-ppmm/4x8-neonfma.c
   src/f32-ppmm/8x8-neonfma.c
+  src/f32-sigmoid/neonfma-p5-x16.c
   src/f32-vmulcaddc/c4-neonfma-2x.c
-  src/f32-vmulcaddc/c8-neonfma-2x.c)
+  src/f32-vmulcaddc/c8-neonfma-2x.c
+  src/math/exp-neonfma-lut64-p2.c
+  src/math/exp-neonfma-p5.c
+  src/math/expminus-neonfma-p5.c
+  src/math/sigmoid-neonfma-p5.c)
 
 SET(AARCH64_XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-conv-hwc/3x3s2p1c3x4-neonfma-2x2.c
@@ -590,7 +596,9 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/x8-zip/x2-sse2.c
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
-  src/x8-zip/xm-sse2.c)
+  src/x8-zip/xm-sse2.c
+  src/math/exp-sse2-p5.c
+  src/math/expminus-sse2-p5.c)
 
 SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/sse41-2x4.c
@@ -609,7 +617,8 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/exp-avx2-p5.c
   src/math/exp-avx2-perm-p3.c
   src/math/exp-avx2-perm-p4.c
-  src/math/expminus-avx2-p5.c)
+  src/math/expminus-avx2-p5.c
+  src/math/extexp-avx2-p5.c)
 
 SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-raddexpminusmax/avx512f-p5-scalef-unroll128.c
@@ -622,7 +631,8 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/math/exp-avx512f-p5-scalef.c
   src/math/exp-avx512f-p5.c
   src/math/exp-avx512f-perm-p3.c
-  src/math/exp-avx512f-perm2-p2.c)
+  src/math/exp-avx512f-perm2-p2.c
+  src/math/extexp-avx512f-p5.c)
 
 SET(XNNPACK_AARCH32_ASM_MICROKERNEL_SRCS
   src/q8-dwconv/up8x9-aarch32-neon.S)
@@ -965,6 +975,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(max-pooling-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(max-pooling-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(max-pooling-test max-pooling-test)
+
+  ADD_EXECUTABLE(multiply-test test/multiply.cc)
+  SET_TARGET_PROPERTIES(multiply-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(multiply-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(multiply-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(multiply-test multiply-test)
 
   ADD_EXECUTABLE(prelu-test test/prelu.cc)
   SET_TARGET_PROPERTIES(prelu-test PROPERTIES
