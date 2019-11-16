@@ -1500,6 +1500,39 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(bench-utils PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark cpuinfo)
 
+  # ---[ Build accuracy microbenchmarks
+  ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc)
+  SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-exp-eval PRIVATE src)
+  TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE XNNPACK benchmark fp16)
+
+  ADD_EXECUTABLE(f32-expminus-eval eval/f32-expminus.cc)
+  SET_TARGET_PROPERTIES(f32-expminus-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE src)
+  TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE XNNPACK benchmark fp16)
+
+  ADD_EXECUTABLE(f32-extexp-eval eval/f32-extexp.cc)
+  SET_TARGET_PROPERTIES(f32-extexp-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-extexp-eval PRIVATE src)
+  TARGET_LINK_LIBRARIES(f32-extexp-eval PRIVATE XNNPACK benchmark fp16)
+
+  ADD_EXECUTABLE(f32-sigmoid-eval eval/f32-sigmoid.cc)
+  SET_TARGET_PROPERTIES(f32-sigmoid-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-eval PRIVATE src)
+  TARGET_LINK_LIBRARIES(f32-sigmoid-eval PRIVATE XNNPACK benchmark fp16)
+
   # ---[ Build end-to-end microbenchmarks
   ADD_EXECUTABLE(end2end-bench bench/end2end.cc models/mobilenet-v1.cc models/mobilenet-v2.cc)
   SET_TARGET_PROPERTIES(end2end-bench PROPERTIES
