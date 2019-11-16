@@ -241,10 +241,23 @@ class SigmoidOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
+          float ref_value = output_ref[i * channels() + c];
           ASSERT_NEAR(
-            output[i * output_stride() + c],
-            output_ref[i * channels() + c],
-            output_ref[i * channels() + c] * 1.0e-6);
+              output[i * output_stride() + c],
+              output_ref[i * channels() + c],
+              5.0e-6);
+          if (abs(ref_value) > .03 && abs(ref_value) < .2){
+            ASSERT_NEAR(
+                output[i * output_stride() + c],
+                output_ref[i * channels() + c],
+                output_ref[i * channels() + c] * 1.0e-4);
+          }
+          else if (abs(ref_value) >= .2) {
+            ASSERT_NEAR(
+                output[i * output_stride() + c],
+                output_ref[i * channels() + c],
+                output_ref[i * channels() + c] * 1.0e-5);
+          }
         }
       }
     }

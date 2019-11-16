@@ -21,318 +21,202 @@ void xnn_f32_sigmoid_ukernel__neonfma_p5_x16(
     float* y,
     const void* params)
 {
-  const float32x4_t vmagic_bias = vmovq_n_f32(0x1.8000FEp23f);
-  // The smallest x for which sigmoidf(x) is normalized.
-  // This number is also the smallest x for which expf(x) is normalized.
-  const float32x4_t vdenorm_cutoff = vmovq_n_f32(-0x1.5D589Ep+6f);
-  // The largest x for which sigmoidf(x) is not equal 1.0.
-  const float32x4_t vone_cutoff = vmovq_n_f32(0x1.154244p+4f);
-  const float32x4_t vminus_log2e = vmovq_n_f32(-0x1.715476p+0f);
-  const float32x4_t vln2_hi = vmovq_n_f32(0x1.62E43p-1f);
-  const float32x4_t vln2_lo = vmovq_n_f32(-0x1.05C61p-29f);
-  const float32x4_t vone = vmovq_n_f32(1.0f);
+  const float32x4_t vhalf = vmovq_n_f32(0.5f);
 
-  const float32x4_t vc1 = vmovq_n_f32(-0x1.FFFFF6p-1f);
-  const float32x4_t vc2 = vmovq_n_f32(0x1.FFFDC6p-2f);
-  const float32x4_t vc3 = vmovq_n_f32(-0x1.555A80p-3f);
-  const float32x4_t vc4 = vmovq_n_f32(0x1.573A1Ap-5f);
-  const float32x4_t vc5 = vmovq_n_f32(-0x1.0F9F9Cp-7f);
+  const float kSigmoidAlpha1 = 2.48287947061529e-01;
+  const float kSigmoidAlpha3 = 8.51377133304701e-03;
+  const float kSigmoidAlpha5 = 6.08574864600143e-05;
+  const float kSigmoidAlpha7 = 1.15627324459942e-07;
+  const float kSigmoidAlpha9 = 4.37031012579801e-11;
+
+  // The monomial coefficients of the denominator polynomial (even).
+  const float kSigmoidBeta0 = 9.93151921023180e-01;
+  const float kSigmoidBeta2 = 1.16817656904453e-01;
+  const float kSigmoidBeta4 = 1.70198817374094e-03;
+  const float kSigmoidBeta6 = 6.29106785017040e-06;
+  const float kSigmoidBeta8 = 5.76102136993427e-09;
+  const float kSigmoidBeta10 = 6.10247389755681e-13;
+
+  // The monomial coefficients of the numerator polynomial (odd).
+  const float32x4_t valpha_1 = vdupq_n_f32(kSigmoidAlpha1);
+  const float32x4_t valpha_3 = vdupq_n_f32(kSigmoidAlpha3);
+  const float32x4_t valpha_5 = vdupq_n_f32(kSigmoidAlpha5);
+  const float32x4_t valpha_7 = vdupq_n_f32(kSigmoidAlpha7);
+  const float32x4_t valpha_9 = vdupq_n_f32(kSigmoidAlpha9);
+
+  // The monomial coefficients of the denominator polynomial (even).
+  const float32x4_t vbeta_0 = vdupq_n_f32(kSigmoidBeta0);
+  const float32x4_t vbeta_2 = vdupq_n_f32(kSigmoidBeta2);
+  const float32x4_t vbeta_4 = vdupq_n_f32(kSigmoidBeta4);
+  const float32x4_t vbeta_6 = vdupq_n_f32(kSigmoidBeta6);
+  const float32x4_t vbeta_8 = vdupq_n_f32(kSigmoidBeta8);
+  const float32x4_t vbeta_10 = vdupq_n_f32(kSigmoidBeta10);
+
+  const float32x4_t vsigmoid_maxinput = vdupq_n_f32(18.f);
+  const float32x4_t vsigmoid_mininput = vdupq_n_f32(-18.f);
 
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const float32x4_t vx0123 = vld1q_f32(x); x += 4;
-    const float32x4_t vx4567 = vld1q_f32(x); x += 4;
-    const float32x4_t vx89AB = vld1q_f32(x); x += 4;
-    const float32x4_t vxCDEF = vld1q_f32(x); x += 4;
+    float32x4_t vx0123 = vld1q_f32(x); x += 4;
+    float32x4_t vx4567 = vld1q_f32(x); x += 4;
+    float32x4_t vx89AB = vld1q_f32(x); x += 4;
+    float32x4_t vxCDEF = vld1q_f32(x); x += 4;
 
-    // General structure of the algorithm:
-    //           / exp(x) / (1 + exp(x)) if x <= 0
-    //   f[x] := 
-    //           \ 1 - f[-x] if x >= 0
-    //
-    // First we compute f[z] := exp(-z) / (1 + exp(-z)) where z = abs(x),
-    // then replace result with 1 - f[z] if x >= 0.
-    const float32x4_t vz0123 = vabsq_f32(vx0123);
-    const float32x4_t vz4567 = vabsq_f32(vx4567);
-    const float32x4_t vz89AB = vabsq_f32(vx89AB);
-    const float32x4_t vzCDEF = vabsq_f32(vxCDEF);
+    vx0123 = vminq_f32(vx0123, vsigmoid_maxinput);
+    vx0123 = vmaxq_f32(vx0123, vsigmoid_mininput);
+    vx4567 = vminq_f32(vx4567, vsigmoid_maxinput);
+    vx4567 = vmaxq_f32(vx4567, vsigmoid_mininput);
+    vx89AB = vminq_f32(vx89AB, vsigmoid_maxinput);
+    vx89AB = vmaxq_f32(vx89AB, vsigmoid_mininput);
+    vxCDEF = vminq_f32(vxCDEF, vsigmoid_maxinput);
+    vxCDEF = vmaxq_f32(vxCDEF, vsigmoid_mininput);
 
-    // Compute reduced argument n := round(-z / log(2)).
-    // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
-    // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
-    // inputs x outside of [-87.336544, 17.328678] (i.e. z outsize [0, 87.336544]) underflow or saturate sigmoidf(x)
-    // anyway. We fixup the result for such inputs at the very end of the algorithm.
-    float32x4_t vn0123 = vfmaq_f32(vmagic_bias, vz0123, vminus_log2e);
-    float32x4_t vn4567 = vfmaq_f32(vmagic_bias, vz4567, vminus_log2e);
-    float32x4_t vn89AB = vfmaq_f32(vmagic_bias, vz89AB, vminus_log2e);
-    float32x4_t vnCDEF = vfmaq_f32(vmagic_bias, vzCDEF, vminus_log2e);
+    const float32x4_t vx0123_sq = vmulq_f32(vx0123, vx0123);
+    const float32x4_t vx4567_sq = vmulq_f32(vx4567, vx4567);
+    const float32x4_t vx89AB_sq = vmulq_f32(vx89AB, vx89AB);
+    const float32x4_t vxCDEF_sq = vmulq_f32(vxCDEF, vxCDEF);
 
-    // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
-    // -87.336544 <= -z <= 0.0, and -126 <= n <= 0 accordingly.
-    const float32x4_t vs0123 = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn0123), 23));
-    const float32x4_t vs4567 = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn4567), 23));
-    const float32x4_t vs89AB = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn89AB), 23));
-    const float32x4_t vsCDEF = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vnCDEF), 23));
+    // Evaluate numerator polynomial
+    float32x4_t vnum0123 = vmlaq_f32(valpha_7, vx0123_sq, valpha_9);
+    float32x4_t vnum4567 = vmlaq_f32(valpha_7, vx4567_sq, valpha_9);
+    float32x4_t vnum89AB = vmlaq_f32(valpha_7, vx89AB_sq, valpha_9);
+    float32x4_t vnumCDEF = vmlaq_f32(valpha_7, vxCDEF_sq, valpha_9);
 
-    // Subtract the large number back to get final n := round(-z / log(2)).
-    vn0123 = vsubq_f32(vn0123, vmagic_bias);
-    vn4567 = vsubq_f32(vn4567, vmagic_bias);
-    vn89AB = vsubq_f32(vn89AB, vmagic_bias);
-    vnCDEF = vsubq_f32(vnCDEF, vmagic_bias);
+    vnum0123 = vmlaq_f32(valpha_5, vx0123_sq, vnum0123);
+    vnum4567 = vmlaq_f32(valpha_5, vx4567_sq, vnum4567);
+    vnum89AB = vmlaq_f32(valpha_5, vx89AB_sq, vnum89AB);
+    vnumCDEF = vmlaq_f32(valpha_5, vxCDEF_sq, vnumCDEF);
 
-    // Compute reduced argument -t := -z - n * log(2) = -(z + n * log(2)).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    float32x4_t vt0123 = vfmaq_f32(vz0123, vn0123, vln2_hi);
-    float32x4_t vt4567 = vfmaq_f32(vz4567, vn4567, vln2_hi);
-    float32x4_t vt89AB = vfmaq_f32(vz89AB, vn89AB, vln2_hi);
-    float32x4_t vtCDEF = vfmaq_f32(vzCDEF, vnCDEF, vln2_hi);
+    vnum0123 = vmlaq_f32(valpha_3, vx0123_sq, vnum0123);
+    vnum4567 = vmlaq_f32(valpha_3, vx4567_sq, vnum4567);
+    vnum89AB = vmlaq_f32(valpha_3, vx89AB_sq, vnum89AB);
+    vnumCDEF = vmlaq_f32(valpha_3, vxCDEF_sq, vnumCDEF);
 
-    vt0123 = vfmaq_f32(vt0123, vn0123, vln2_lo);
-    vt4567 = vfmaq_f32(vt4567, vn4567, vln2_lo);
-    vt89AB = vfmaq_f32(vt89AB, vn89AB, vln2_lo);
-    vtCDEF = vfmaq_f32(vtCDEF, vnCDEF, vln2_lo);
+    vnum0123 = vmlaq_f32(valpha_1, vx0123_sq, vnum0123);
+    vnum4567 = vmlaq_f32(valpha_1, vx4567_sq, vnum4567);
+    vnum89AB = vmlaq_f32(valpha_1, vx89AB_sq, vnum89AB);
+    vnumCDEF = vmlaq_f32(valpha_1, vxCDEF_sq, vnumCDEF);
 
-    // Compute degree-5 polynomial approxiatmion for exp(-t) on [-log(2)/2, log(2)/2].
-    float32x4_t vp0123 = vfmaq_f32(vc4, vc5, vt0123);
-    float32x4_t vp4567 = vfmaq_f32(vc4, vc5, vt4567);
-    float32x4_t vp89AB = vfmaq_f32(vc4, vc5, vt89AB);
-    float32x4_t vpCDEF = vfmaq_f32(vc4, vc5, vtCDEF);
+    vnum0123 = vmulq_f32(vx0123, vnum0123);
+    vnum4567 = vmulq_f32(vx4567, vnum4567);
+    vnum89AB = vmulq_f32(vx89AB, vnum89AB);
+    vnumCDEF = vmulq_f32(vxCDEF, vnumCDEF);
 
-    vp0123 = vfmaq_f32(vc3, vp0123, vt0123);
-    vp4567 = vfmaq_f32(vc3, vp4567, vt4567);
-    vp89AB = vfmaq_f32(vc3, vp89AB, vt89AB);
-    vpCDEF = vfmaq_f32(vc3, vpCDEF, vtCDEF);
+    // Evaluate denominator polynomial
 
-    vp0123 = vfmaq_f32(vc2, vp0123, vt0123);
-    vp4567 = vfmaq_f32(vc2, vp4567, vt4567);
-    vp89AB = vfmaq_f32(vc2, vp89AB, vt89AB);
-    vpCDEF = vfmaq_f32(vc2, vpCDEF, vtCDEF);
+    float32x4_t vdenom0123 = vmlaq_f32(vbeta_8, vx0123_sq, vbeta_10);
+    float32x4_t vdenom4567 = vmlaq_f32(vbeta_8, vx4567_sq, vbeta_10);
+    float32x4_t vdenom89AB = vmlaq_f32(vbeta_8, vx89AB_sq, vbeta_10);
+    float32x4_t vdenomCDEF = vmlaq_f32(vbeta_8, vxCDEF_sq, vbeta_10);
 
-    vp0123 = vfmaq_f32(vc1, vp0123, vt0123);
-    vp4567 = vfmaq_f32(vc1, vp4567, vt4567);
-    vp89AB = vfmaq_f32(vc1, vp89AB, vt89AB);
-    vpCDEF = vfmaq_f32(vc1, vpCDEF, vtCDEF);
+    vdenom0123 = vmlaq_f32(vbeta_6, vx0123_sq, vdenom0123);
+    vdenom4567 = vmlaq_f32(vbeta_6, vx4567_sq, vdenom4567);
+    vdenom89AB = vmlaq_f32(vbeta_6, vx89AB_sq, vdenom89AB);
+    vdenomCDEF = vmlaq_f32(vbeta_6, vxCDEF_sq, vdenomCDEF);
 
-    // Reconstruct the exp(z) value:
-    //   e = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
-    //     = s + (t * s) * p
-    vt0123 = vmulq_f32(vt0123, vs0123);
-    vt4567 = vmulq_f32(vt4567, vs4567);
-    vt89AB = vmulq_f32(vt89AB, vs89AB);
-    vtCDEF = vmulq_f32(vtCDEF, vsCDEF);
+    vdenom0123 = vmlaq_f32(vbeta_4, vx0123_sq, vdenom0123);
+    vdenom4567 = vmlaq_f32(vbeta_4, vx4567_sq, vdenom4567);
+    vdenom89AB = vmlaq_f32(vbeta_4, vx89AB_sq, vdenom89AB);
+    vdenomCDEF = vmlaq_f32(vbeta_4, vxCDEF_sq, vdenomCDEF);
 
-    float32x4_t ve0123 = vfmaq_f32(vs0123, vp0123, vt0123);
-    float32x4_t ve4567 = vfmaq_f32(vs4567, vp4567, vt4567);
-    float32x4_t ve89AB = vfmaq_f32(vs89AB, vp89AB, vt89AB);
-    float32x4_t veCDEF = vfmaq_f32(vsCDEF, vpCDEF, vtCDEF);
+    vdenom0123 = vmlaq_f32(vbeta_2, vx0123_sq, vdenom0123);
+    vdenom4567 = vmlaq_f32(vbeta_2, vx4567_sq, vdenom4567);
+    vdenom89AB = vmlaq_f32(vbeta_2, vx89AB_sq, vdenom89AB);
+    vdenomCDEF = vmlaq_f32(vbeta_2, vxCDEF_sq, vdenomCDEF);
 
-    // Denominator of the sigmoid fraction: 1.0 + exp(z)
-    float32x4_t vd0123 = vaddq_f32(ve0123, vone);
-    float32x4_t vd4567 = vaddq_f32(ve4567, vone);
-    float32x4_t vd89AB = vaddq_f32(ve89AB, vone);
-    float32x4_t vdCDEF = vaddq_f32(veCDEF, vone);
+    vdenom0123 = vmlaq_f32(vbeta_0, vx0123_sq, vdenom0123);
+    vdenom4567 = vmlaq_f32(vbeta_0, vx4567_sq, vdenom4567);
+    vdenom89AB = vmlaq_f32(vbeta_0, vx89AB_sq, vdenom89AB);
+    vdenomCDEF = vmlaq_f32(vbeta_0, vxCDEF_sq, vdenomCDEF);
 
-    // Use Newton-Raphson method (2 iterations) to compute reciprocal of denominator.
-    // Note: 1 < d <= 2, because z <= 0.0 and 0 < exp(z) <= 1.0.
-    // Thus the reciprocal of the denominator never overflows.
-    float32x4_t vr0123 = vrecpeq_f32(vd0123);
-    float32x4_t vr4567 = vrecpeq_f32(vd4567);
-    float32x4_t vr89AB = vrecpeq_f32(vd89AB);
-    float32x4_t vrCDEF = vrecpeq_f32(vdCDEF);
+    // Do division, one NR iteration
 
-    vr0123 = vfmaq_f32(vr0123, vr0123, vfmsq_f32(vone, vr0123, vd0123));
-    vr4567 = vfmaq_f32(vr4567, vr4567, vfmsq_f32(vone, vr4567, vd4567));
-    vr89AB = vfmaq_f32(vr89AB, vr89AB, vfmsq_f32(vone, vr89AB, vd89AB));
-    vrCDEF = vfmaq_f32(vrCDEF, vrCDEF, vfmsq_f32(vone, vrCDEF, vdCDEF));
+    float32x4_t vrecp0123 = vrecpeq_f32(vdenom0123);
+    float32x4_t vrecp4567 = vrecpeq_f32(vdenom4567);
+    float32x4_t vrecp89AB = vrecpeq_f32(vdenom89AB);
+    float32x4_t vrecpCDEF = vrecpeq_f32(vdenomCDEF);
 
-    vr0123 = vfmaq_f32(vr0123, vr0123, vfmsq_f32(vone, vr0123, vd0123));
-    vr4567 = vfmaq_f32(vr4567, vr4567, vfmsq_f32(vone, vr4567, vd4567));
-    vr89AB = vfmaq_f32(vr89AB, vr89AB, vfmsq_f32(vone, vr89AB, vd89AB));
-    vrCDEF = vfmaq_f32(vrCDEF, vrCDEF, vfmsq_f32(vone, vrCDEF, vdCDEF));
+    vrecp0123 = vmulq_f32(vrecp0123, vrecpsq_f32(vrecp0123, vdenom0123));
+    vrecp4567 = vmulq_f32(vrecp4567, vrecpsq_f32(vrecp4567, vdenom4567));
+    vrecp89AB = vmulq_f32(vrecp89AB, vrecpsq_f32(vrecp89AB, vdenom89AB));
+    vrecpCDEF = vmulq_f32(vrecpCDEF, vrecpsq_f32(vrecpCDEF, vdenomCDEF));
 
-    // Reconstruct sigmoid(-z) = exp(z) / (1.0 + exp(z))
-    float32x4_t vf0123 = vmulq_f32(ve0123, vr0123);
-    float32x4_t vf4567 = vmulq_f32(ve4567, vr4567);
-    float32x4_t vf89AB = vmulq_f32(ve89AB, vr89AB);
-    float32x4_t vfCDEF = vmulq_f32(veCDEF, vrCDEF);
+    const float32x4_t vsigmoid0123 = vmlaq_f32(vhalf, vnum0123, vrecp0123);
+    const float32x4_t vsigmoid4567 = vmlaq_f32(vhalf, vnum4567, vrecp4567);
+    const float32x4_t vsigmoid89AB = vmlaq_f32(vhalf, vnum89AB, vrecp89AB);
+    const float32x4_t vsigmoidCDEF = vmlaq_f32(vhalf, vnumCDEF, vrecpCDEF);
 
-    // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_f32_s32(vx0123), vmovq_n_s32(0));
-    const uint32x4_t vm4567 = vcltq_s32(vreinterpretq_f32_s32(vx4567), vmovq_n_s32(0));
-    const uint32x4_t vm89AB = vcltq_s32(vreinterpretq_f32_s32(vx89AB), vmovq_n_s32(0));
-    const uint32x4_t vmCDEF = vcltq_s32(vreinterpretq_f32_s32(vxCDEF), vmovq_n_s32(0));
-
-    vf0123 = vbslq_f32(vm0123, vf0123, vsubq_f32(vone, vf0123));
-    vf4567 = vbslq_f32(vm4567, vf4567, vsubq_f32(vone, vf4567));
-    vf89AB = vbslq_f32(vm89AB, vf89AB, vsubq_f32(vone, vf89AB));
-    vfCDEF = vbslq_f32(vmCDEF, vfCDEF, vsubq_f32(vone, vfCDEF));
-
-    // For inputs above 1.0 cutoff, replace output with 1.0.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf0123 = vbslq_f32(vcgtq_f32(vx0123, vone_cutoff), vone, vf0123);
-    vf4567 = vbslq_f32(vcgtq_f32(vx4567, vone_cutoff), vone, vf4567);
-    vf89AB = vbslq_f32(vcgtq_f32(vx89AB, vone_cutoff), vone, vf89AB);
-    vfCDEF = vbslq_f32(vcgtq_f32(vxCDEF, vone_cutoff), vone, vfCDEF);
-
-    // For inputs below denormal cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf0123 = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf0123), vcltq_f32(vx0123, vdenorm_cutoff)));
-    vf4567 = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf4567), vcltq_f32(vx4567, vdenorm_cutoff)));
-    vf89AB = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf89AB), vcltq_f32(vx89AB, vdenorm_cutoff)));
-    vfCDEF = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vfCDEF), vcltq_f32(vxCDEF, vdenorm_cutoff)));
-
-    vst1q_f32(y, vf0123); y += 4;
-    vst1q_f32(y, vf4567); y += 4;
-    vst1q_f32(y, vf89AB); y += 4;
-    vst1q_f32(y, vfCDEF); y += 4;
+    vst1q_f32(y, vsigmoid0123); y += 4;
+    vst1q_f32(y, vsigmoid4567); y += 4;
+    vst1q_f32(y, vsigmoid89AB); y += 4;
+    vst1q_f32(y, vsigmoidCDEF); y += 4;
   }
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const float32x4_t vx0123 = vld1q_f32(x); x += 4;
+    float32x4_t vx0123 = vld1q_f32(x); x += 4;
 
-    // General structure of the algorithm:
-    //           / exp(x) / (1 + exp(x)) if x <= 0
-    //   f[x] := 
-    //           \ 1 - f[-x] if x >= 0
-    //
-    // First we compute f[z] := exp(-z) / (1 + exp(-z)) where z = abs(x),
-    // then replace result with 1 - f[z] if x <= 0.
-    const float32x4_t vz0123 = vabsq_f32(vx0123);
+    vx0123 = vminq_f32(vx0123, vsigmoid_maxinput);
+    vx0123 = vmaxq_f32(vx0123, vsigmoid_mininput);
 
-    // Compute reduced argument n := round(-z / log(2)).
-    // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
-    // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
-    // inputs x outside of [-87.336544, 17.328678] (i.e. z outsize [0, 87.336544]) underflow or saturate sigmoidf(x)
-    // anyway. We fixup the result for such inputs at the very end of the algorithm.
-    float32x4_t vn0123 = vfmaq_f32(vmagic_bias, vz0123, vminus_log2e);
+    const float32x4_t vx0123_sq = vmulq_f32(vx0123, vx0123);
 
-    // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
-    // -87.336544 <= -z <= 0.0, and -126 <= n <= 0 accordingly.
-    const float32x4_t vs0123 = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn0123), 23));
+    // Evaluate numerator polynomial
+    float32x4_t vnum0123 = vmlaq_f32(valpha_7, vx0123_sq, valpha_9);
 
-    // Subtract the large number back to get final n := round(-z / log(2)).
-    vn0123 = vsubq_f32(vn0123, vmagic_bias);
+    vnum0123 = vmlaq_f32(valpha_5, vx0123_sq, vnum0123);
+    vnum0123 = vmlaq_f32(valpha_3, vx0123_sq, vnum0123);
+    vnum0123 = vmlaq_f32(valpha_1, vx0123_sq, vnum0123);
+    vnum0123 = vmulq_f32(vx0123, vnum0123);
 
-    // Compute reduced argument -t := -z - n * log(2) = -(z + n * log(2)).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    float32x4_t vt0123 = vfmaq_f32(vz0123, vn0123, vln2_hi);
-    vt0123 = vfmaq_f32(vt0123, vn0123, vln2_lo);
+    // Evaluate denominator polynomial
 
-    // Compute degree-5 polynomial approxiatmion for exp(-t) on [-log(2)/2, log(2)/2].
-    float32x4_t vp0123 = vfmaq_f32(vc4, vc5, vt0123);
-    vp0123 = vfmaq_f32(vc3, vp0123, vt0123);
-    vp0123 = vfmaq_f32(vc2, vp0123, vt0123);
-    vp0123 = vfmaq_f32(vc1, vp0123, vt0123);
+    float32x4_t vdenom0123 = vmlaq_f32(vbeta_8, vx0123_sq, vbeta_10);
+    vdenom0123 = vmlaq_f32(vbeta_6, vx0123_sq, vdenom0123);
+    vdenom0123 = vmlaq_f32(vbeta_4, vx0123_sq, vdenom0123);
+    vdenom0123 = vmlaq_f32(vbeta_2, vx0123_sq, vdenom0123);
+    vdenom0123 = vmlaq_f32(vbeta_0, vx0123_sq, vdenom0123);
 
-    // Reconstruct the exp(z) value:
-    //   e = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
-    //     = s + (t * s) * p
-    vt0123 = vmulq_f32(vt0123, vs0123);
-    float32x4_t ve0123 = vfmaq_f32(vs0123, vp0123, vt0123);
+    // Do division, one NR iteration
 
-    // Denominator of the sigmoid fraction: 1.0 + exp(z)
-    float32x4_t vd0123 = vaddq_f32(ve0123, vone);
+    float32x4_t vrecp0123 = vrecpeq_f32(vdenom0123);
+    vrecp0123 = vmulq_f32(vrecp0123, vrecpsq_f32(vrecp0123, vdenom0123));
 
-    // Use Newton-Raphson method (2 iterations) to compute reciprocal of denominator.
-    // Note: 1 < d <= 2, because z <= 0.0 and 0 < exp(z) <= 1.0.
-    // Thus the reciprocal of the denominator never overflows.
-    float32x4_t vr0123 = vrecpeq_f32(vd0123);
-    vr0123 = vfmaq_f32(vr0123, vr0123, vfmsq_f32(vone, vr0123, vd0123));
-    vr0123 = vfmaq_f32(vr0123, vr0123, vfmsq_f32(vone, vr0123, vd0123));
+    const float32x4_t vsigmoid0123 = vmlaq_f32(vhalf, vnum0123, vrecp0123);
 
-    // Reconstruct sigmoid(-z) = exp(z) / (1.0 + exp(z))
-    float32x4_t vf0123 = vmulq_f32(ve0123, vr0123);
-
-    // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_f32_s32(vx0123), vmovq_n_s32(0));
-    vf0123 = vbslq_f32(vm0123, vf0123, vsubq_f32(vone, vf0123));
-
-    // For inputs above 1.0 cutoff, replace output with 1.0.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf0123 = vbslq_f32(vcgtq_f32(vx0123, vone_cutoff), vone, vf0123);
-
-    // For inputs below denormal cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf0123 = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf0123), vcltq_f32(vx0123, vdenorm_cutoff)));
-
-    vst1q_f32(y, vf0123); y += 4;
+    vst1q_f32(y, vsigmoid0123); y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const float32x4_t vx0123 = vld1q_f32(x);
+    float32x4_t vx0123 = vld1q_f32(x);
 
-    // General structure of the algorithm:
-    //           / exp(x) / (1 + exp(x)) if x <= 0
-    //   f[x] := 
-    //           \ 1 - f[-x] if x >= 0
-    //
-    // First we compute f[z] := exp(-z) / (1 + exp(-z)) where z = abs(x),
-    // then replace result with 1 - f[z] if x <= 0.
-    const float32x4_t vz0123 = vabsq_f32(vx0123);
+    vx0123 = vminq_f32(vx0123, vsigmoid_maxinput);
+    vx0123 = vmaxq_f32(vx0123, vsigmoid_mininput);
 
-    // Compute reduced argument n := round(-z / log(2)).
-    // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
-    // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
-    // inputs x outside of [-87.336544, 17.328678] (i.e. z outsize [0, 87.336544]) underflow or saturate sigmoidf(x)
-    // anyway. We fixup the result for such inputs at the very end of the algorithm.
-    float32x4_t vn0123 = vfmaq_f32(vmagic_bias, vz0123, vminus_log2e);
+    const float32x4_t vx0123_sq = vmulq_f32(vx0123, vx0123);
 
-    // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
-    // -87.336544 <= -z <= 0.0, and -126 <= n <= 0 accordingly.
-    const float32x4_t vs0123 = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn0123), 23));
+    // Evaluate numerator polynomial
+    float32x4_t vnum0123 = vmlaq_f32(valpha_7, vx0123_sq, valpha_9);
+    vnum0123 = vmlaq_f32(valpha_5, vx0123_sq, vnum0123);
+    vnum0123 = vmlaq_f32(valpha_3, vx0123_sq, vnum0123);
+    vnum0123 = vmlaq_f32(valpha_1, vx0123_sq, vnum0123);
+    vnum0123 = vmulq_f32(vx0123, vnum0123);
 
-    // Subtract the large number back to get final n := round(-z / log(2)).
-    vn0123 = vsubq_f32(vn0123, vmagic_bias);
+    // Evaluate denominator polynomial
 
-    // Compute reduced argument -t := -z - n * log(2) = -(z + n * log(2)).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    float32x4_t vt0123 = vfmaq_f32(vz0123, vn0123, vln2_hi);
-    vt0123 = vfmaq_f32(vt0123, vn0123, vln2_lo);
+    float32x4_t vdenom0123 = vmlaq_f32(vbeta_8, vx0123_sq, vbeta_10);
+    vdenom0123 = vmlaq_f32(vbeta_6, vx0123_sq, vdenom0123);
+    vdenom0123 = vmlaq_f32(vbeta_4, vx0123_sq, vdenom0123);
+    vdenom0123 = vmlaq_f32(vbeta_2, vx0123_sq, vdenom0123);
+    vdenom0123 = vmlaq_f32(vbeta_0, vx0123_sq, vdenom0123);
 
-    // Compute degree-5 polynomial approxiatmion for exp(-t) on [-log(2)/2, log(2)/2].
-    float32x4_t vp0123 = vfmaq_f32(vc4, vc5, vt0123);
-    vp0123 = vfmaq_f32(vc3, vp0123, vt0123);
-    vp0123 = vfmaq_f32(vc2, vp0123, vt0123);
-    vp0123 = vfmaq_f32(vc1, vp0123, vt0123);
+    // Do division, one NR iteration
 
-    // Reconstruct the exp(z) value:
-    //   e = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
-    //     = s + (t * s) * p
-    vt0123 = vmulq_f32(vt0123, vs0123);
-    float32x4_t ve0123 = vfmaq_f32(vs0123, vp0123, vt0123);
+    float32x4_t vrecp0123 = vrecpeq_f32(vdenom0123);
+    vrecp0123 = vmulq_f32(vrecp0123, vrecpsq_f32(vrecp0123, vdenom0123));
 
-    // Denominator of the sigmoid fraction: 1.0 + exp(z)
-    float32x4_t vd0123 = vaddq_f32(ve0123, vone);
+    const float32x4_t vsigmoid0123 = vmlaq_f32(vhalf, vnum0123, vrecp0123);
 
-    // Use Newton-Raphson method (2 iterations) to compute reciprocal of denominator.
-    // Note: 1 < d <= 2, because z <= 0.0 and 0 < exp(z) <= 1.0.
-    // Thus the reciprocal of the denominator never overflows.
-    float32x4_t vr0123 = vrecpeq_f32(vd0123);
-    vr0123 = vfmaq_f32(vr0123, vr0123, vfmsq_f32(vone, vr0123, vd0123));
-    vr0123 = vfmaq_f32(vr0123, vr0123, vfmsq_f32(vone, vr0123, vd0123));
-
-    // Reconstruct sigmoid(-z) = exp(z) / (1.0 + exp(z))
-    float32x4_t vf0123 = vmulq_f32(ve0123, vr0123);
-
-    // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_f32_s32(vx0123), vmovq_n_s32(0));
-    vf0123 = vbslq_f32(vm0123, vf0123, vsubq_f32(vone, vf0123));
-
-    // For inputs above 1.0 cutoff, replace output with 1.0.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf0123 = vbslq_f32(vcgtq_f32(vx0123, vone_cutoff), vone, vf0123);
-
-    // For inputs below denormal cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf0123 = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf0123), vcltq_f32(vx0123, vdenorm_cutoff)));
-
-    float32x2_t vf01 = vget_low_f32(vf0123);
+    float32x2_t vf01 = vget_low_f32(vsigmoid0123);
     if (n & (2 * sizeof(float))) {
       vst1_f32(y, vf01); y += 2;
-      vf01 = vget_high_f32(vf0123);
+      vf01 = vget_high_f32(vsigmoid0123);
     }
     if (n & (1 * sizeof(float))) {
       vst1_lane_f32(y, vf01, 0);
