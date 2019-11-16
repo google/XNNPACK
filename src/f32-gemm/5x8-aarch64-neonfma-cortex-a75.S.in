@@ -63,9 +63,9 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_ukernel_5x8__aarch64_neonfma_
 
         # Clamp A and C pointers / Save d8-d15 on stack
         STP  d8,  d9, [sp, -48]!
+        CMP x0, 2                // if mr < 2
         ADD x9, x3, x4           // a1 = a0 + a_stride
         ADD x16, x6, x7          // c1 = c0 + cm_stride
-        CMP x0, 2                // if mr < 2
         CSEL x9, x3, x9, LO      //   a1 = a0
         CSEL x16, x6, x16, LO    //   c1 = c0
 
@@ -77,9 +77,9 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_ukernel_5x8__aarch64_neonfma_
         CSEL x17, x16, x17, LS   //   c2 = c1
 
         STP d14, d15, [sp, 32]
+        CMP x0, 4                // if mr < 4
         ADD x11, x10, x4         // a3 = a2 + a_stride
         ADD x13, x17, x7         // c3 = c2 + cm_stride
-        CMP x0, 4                // if mr < 4
         CSEL x11, x10, x11, LO   //   a3 = a2
         CSEL x13, x17, x13, LO   //   c3 = c2
 

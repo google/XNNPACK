@@ -77,9 +77,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         LD2R {v10.4s, v11.4s}, [x8]
 
         # Clamp C pointers
-        ADD x20, x6, x7          // c1 = c0 + cm_stride
-
         CMP x0, 2                // if mr < 2
+        ADD x20, x6, x7          // c1 = c0 + cm_stride
         CSEL x20, x6, x20, LO    //   c1 = c0
 
         ADD x21, x20, x7         // c2 = c1 + cm_stride
@@ -87,8 +86,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
 
         CSEL x21, x20, x21, LS   //   c2 = c1
 
-        ADD x7, x21, x7          // c3 = c2 + cm_stride
         CMP x0, 4                // if mr < 4
+        ADD x7, x21, x7          // c3 = c2 + cm_stride
         CSEL x7, x21, x7, LO     //   c3 = c2
 
 0:

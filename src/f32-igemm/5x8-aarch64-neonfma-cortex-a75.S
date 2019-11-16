@@ -61,8 +61,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_5x8__aarch64_neonfma_cortex_a75
 
         # Clamp C pointers / Save d8-d15 on stack
         STP  d8,  d9, [sp, -64]!
-        ADD x16, x6, x7          // c1 = c0 + cm_stride
         CMP x0, 2                // if mr < 2
+        ADD x16, x6, x7          // c1 = c0 + cm_stride
         CSEL x16, x6, x16, LO    //   c1 = c0
 
         STP d12, d13, [sp, 16]
@@ -71,8 +71,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_5x8__aarch64_neonfma_cortex_a75
         CSEL x17, x16, x17, LS   //   c2 = c1
 
         STP d14, d15, [sp, 32]
-        ADD x13, x17, x7         // c3 = c2 + cm_stride
         CMP x0, 4                // if mr < 4
+        ADD x13, x17, x7         // c3 = c2 + cm_stride
         CSEL x13, x17, x13, LO   //   c3 = c2
 
         # Load zero, clamping params pointer

@@ -66,9 +66,9 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75
         STP d14, d15, [sp, 48]
 
         # Clamp A and C pointers
+        CMP x0, 2                // if mr < 2
         ADD x11, x3, x4          // a1 = a0 + a_stride
         ADD x9, x6, x7           // c1 = c0 + cm_stride
-        CMP x0, 2                // if mr < 2
         CSEL x11, x3, x11, LO    //   a1 = a0
         CSEL x9, x6, x9, LO      //   c1 = c0
 
@@ -78,9 +78,9 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75
         CSEL x12, x11, x12, LS   //   a2 = a1
         CSEL x10, x9, x10, LS    //   c2 = c1
 
+        CMP x0, 4                // if mr < 4
         ADD x4, x12, x4          // a3 = a2 + a_stride
         ADD x7, x10, x7          // c3 = c2 + cm_stride
-        CMP x0, 4                // if mr < 4
         CSEL x4, x12, x4, LO     //   a3 = a2
         CSEL x7, x10, x7, LO     //   c3 = c2
 

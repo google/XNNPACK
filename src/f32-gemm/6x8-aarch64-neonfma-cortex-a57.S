@@ -63,9 +63,9 @@
 BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a57
 
         # Clamp A and C pointers
+        CMP x0, 2                // if mr < 2
         ADD x9, x3, x4           // a1 = a0 + a_stride
         ADD x16, x6, x7          // c1 = c0 + cm_stride
-        CMP x0, 2                // if mr < 2
         CSEL x9, x3, x9, LO      //   a1 = a0
         CSEL x16, x6, x16, LO    //   c1 = c0
 
@@ -75,9 +75,9 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a57
         CSEL x10, x9, x10, LS    //   a2 = a1
         CSEL x17, x16, x17, LS   //   c2 = c1
 
+        CMP x0, 4                // if mr < 4
         ADD x11, x10, x4         // a3 = a2 + a_stride
         ADD x18, x17, x7         // c3 = c2 + cm_stride
-        CMP x0, 4                // if mr < 4
         CSEL x11, x10, x11, LO   //   a3 = a2
         CSEL x18, x17, x18, LO   //   c3 = c2
 
@@ -90,9 +90,9 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a57
         # Load params pointer
         LDR x8, [sp, 8]
 
+        CMP x0, 6                // if mr < 6
         ADD x4, x12, x4          // a5 = a4 + a_stride
         ADD x7, x13, x7          // c5 = c4 + cm_stride
-        CMP x0, 6                // if mr < 6
         CSEL x4, x12, x4, LO     //   a5 = a4
         CSEL x7, x13, x7, LO     //   c5 = c4
 

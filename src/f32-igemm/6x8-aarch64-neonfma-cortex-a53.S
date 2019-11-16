@@ -59,16 +59,16 @@
 BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
 
         # Clamp C pointers
-        ADD x16, x6, x7          // c1 = c0 + cm_stride
         CMP x0, 2                // if mr < 2
+        ADD x16, x6, x7          // c1 = c0 + cm_stride
         CSEL x16, x6, x16, LO    //   c1 = c0
 
         ADD x17, x16, x7         // c2 = c1 + cm_stride
                                  // if mr <= 2
         CSEL x17, x16, x17, LS   //   c2 = c1
 
-        ADD x18, x17, x7         // c3 = c2 + cm_stride
         CMP x0, 4                // if mr < 4
+        ADD x18, x17, x7         // c3 = c2 + cm_stride
         CSEL x18, x17, x18, LO   //   c3 = c2
 
         ADD x13, x18, x7         // c4 = c3 + cm_stride
@@ -79,8 +79,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         STP x20, x21, [sp, -32]!
         STP x22, x23, [sp, 16]
 
-        ADD x7, x13, x7          // c5 = c4 + cm_stride
         CMP x0, 6                // if mr < 6
+        ADD x7, x13, x7          // c5 = c4 + cm_stride
         CSEL x7, x13, x7, LO     //   c5 = c4
 
         # Load cn_stride, a_offset
