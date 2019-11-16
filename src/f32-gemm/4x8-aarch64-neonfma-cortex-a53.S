@@ -120,6 +120,11 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         PRFM PLDL1KEEP, [x5, 256]
         PRFM PLDL1KEEP, [x5, 320]
 
+        PRFM PSTL1KEEP,  [x6]        // Prefetch C0
+        PRFM PSTL1KEEP, [x16]        // Prefetch C1
+        PRFM PSTL1KEEP, [x17]        // Prefetch C2
+        PRFM PSTL1KEEP, [x18]        // Prefetch C3
+
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
         B.LO 3f
@@ -265,6 +270,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA v22.4s, v16.4s,  v0.s[2]
         LDR  x19, [x9], 8              // a1
         FMLA v24.4s, v16.4s,  v1.s[0]
+        PRFM PSTL1KEEP,  [x6]          // Prefetch C0
 
         // BLOCK 1
         LDR  d12, [x5]
@@ -273,6 +279,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA v21.4s, v17.4s,  v0.s[0]
         LDR  x20, [x5, 8]   // b
         FMLA v23.4s, v17.4s,  v0.s[2]
+        PRFM PSTL1KEEP, [x16]          // Prefetch C1
 
         // BLOCK 2
         LDR   d4, [x10], 8             // a2
@@ -281,6 +288,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA v27.4s, v17.4s,  v1.s[2]
         LDR  x19, [x11], 8             // a3
         FMLA v20.4s, v18.4s,  v0.s[1]
+        PRFM PSTL1KEEP, [x17]          // Prefetch C2
 
         // BLOCK 3
         LDR  d13, [x5, 16]
@@ -289,6 +297,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA v24.4s, v18.4s,  v1.s[1]
         LDR  x20, [x5, 24]
         FMLA v26.4s, v18.4s,  v1.s[3]
+        PRFM PSTL1KEEP, [x18]          // Prefetch C3
 
         // BLOCK 4
         LDR  d14, [x5, 32]

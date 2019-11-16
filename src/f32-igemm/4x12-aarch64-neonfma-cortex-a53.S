@@ -323,6 +323,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v23.4s, v4.4s, v0.s[2]
         PRFM PLDL1KEEP, [x5, 192]
         FMLA v26.4s, v4.4s, v1.s[0]
+        PRFM PSTL1KEEP,  [x6]          // Prefetch C0
 
         # BLOCK 1
         LDR d3, [x24], 8         // a2
@@ -332,6 +333,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v21.4s, v5.4s, v0.s[0]
         PRFM PLDL1KEEP, [x5, 256]
         FMLA v24.4s, v5.4s, v0.s[2]
+        PRFM PSTL1KEEP, [x20]          // Prefetch C1
 
         # BLOCK 2
         LDR d14, [x5]          // vb0x0123
@@ -341,6 +343,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v30.4s, v5.4s, v1.s[2]
         PRFM PLDL1KEEP, [x5, 320]
         FMLA v22.4s, v6.4s, v0.s[0]
+        PRFM PSTL1KEEP, [x21]          // Prefetch C2
 
         # BLOCK 3
         LDR d15, [x5, 16]      // vb0x25567
@@ -349,6 +352,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         LDR x15, [x5, 24]
         FMLA v28.4s, v6.4s, v1.s[0]
         FMLA v31.4s, v6.4s, v1.s[2]
+        PRFM PSTL1KEEP, [x7]           // Prefetch C3
 
         # BLOCK 4
         LDR d16, [x5, 32]      // vb0x89AB
