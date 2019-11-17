@@ -14,11 +14,19 @@
 
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
+#ifdef BENCHMARK_TENSORFLOW_LITE
+#include "flatbuffers/include/flatbuffers/flatbuffers.h"
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/model.h"
+#include "tensorflow/lite/schema/schema_generated.h"
+#include "tensorflow/lite/version.h"
+#endif  // BENCHMARK_TENSORFLOW_LITE
 
 
-static void xnn_sigmoid_q8(benchmark::State& state) {
-  const size_t batch_size = static_cast<size_t>(state.range(0));
-  const size_t channels = static_cast<size_t>(state.range(1));
+static void xnnpack_sigmoid_q8(benchmark::State& state) {
+  const size_t batch_size = state.range(0);
+  const size_t channels = state.range(1);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -82,13 +90,13 @@ static void xnn_sigmoid_q8(benchmark::State& state) {
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-static void xnn_sigmoid_f32(benchmark::State& state) {
-  const size_t batch_size = static_cast<size_t>(state.range(0));
-  const size_t channels = static_cast<size_t>(state.range(1));
+static void xnnpack_sigmoid_f32(benchmark::State& state) {
+  const size_t batch_size = state.range(0);
+  const size_t channels = state.range(1);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-25.0f, 25.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), rng);
 
   std::vector<float> input(batch_size * channels);
   std::vector<float> output(batch_size * channels);
@@ -145,6 +153,118 @@ static void xnn_sigmoid_f32(benchmark::State& state) {
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
+#ifdef BENCHMARK_TENSORFLOW_LITE
+static void tflite_sigmoid_f32(benchmark::State& state) {
+  const size_t batch_size = state.range(0);
+  const size_t channels = state.range(1);
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), rng);
+
+  flatbuffers::FlatBufferBuilder builder;
+  flatbuffers::Offset<tflite::OperatorCode> operator_code =
+      CreateOperatorCode(builder, tflite::BuiltinOperator_LOGISTIC);
+
+  flatbuffers::Offset<tflite::Buffer> buffers[1] = {
+    tflite::CreateBuffer(builder, builder.CreateVector({})),
+  };
+
+  const int32_t input_shape[4] = {
+    static_cast<int32_t>(batch_size),
+    static_cast<int32_t>(1 /* height */),
+    static_cast<int32_t>(1 /* width */),
+    static_cast<int32_t>(channels)
+  };
+  const int32_t output_shape[4] = {
+    static_cast<int32_t>(batch_size),
+    static_cast<int32_t>(1 /* height */),
+    static_cast<int32_t>(1 /* width */),
+    static_cast<int32_t>(channels)
+  };
+
+  flatbuffers::Offset<tflite::Tensor> tensors[2] = {
+    tflite::CreateTensor(builder,
+                         builder.CreateVector<int32_t>(input_shape, 4),
+                         tflite::TensorType_FLOAT32),
+    tflite::CreateTensor(builder,
+                         builder.CreateVector<int32_t>(output_shape, 4),
+                         tflite::TensorType_FLOAT32),
+  };
+
+  const int32_t op_inputs[1] = { 0 };
+  const int32_t op_outputs[1] = { 1 };
+  flatbuffers::Offset<tflite::Operator> op = tflite::CreateOperator(
+      builder,
+      0 /* opcode_index */,
+      builder.CreateVector<int32_t>(op_inputs, 1),
+      builder.CreateVector<int32_t>(op_outputs, 1));
+
+  const int32_t graph_inputs[1] = { 0 };
+  const int32_t graph_outputs[1] = { 1 };
+  flatbuffers::Offset<tflite::SubGraph> subgraph = tflite::CreateSubGraph(
+      builder,
+      builder.CreateVector(tensors, 2),
+      builder.CreateVector<int32_t>(graph_inputs, 1),
+      builder.CreateVector<int32_t>(graph_outputs, 1),
+      builder.CreateVector(&op, 1));
+
+  flatbuffers::Offset<flatbuffers::String> description = builder.CreateString("Sigmoid model");
+
+  flatbuffers::Offset<tflite::Model> model_buffer = tflite::CreateModel(builder,
+      TFLITE_SCHEMA_VERSION,
+      builder.CreateVector(&operator_code, 1),
+      builder.CreateVector(&subgraph, 1),
+      description,
+      builder.CreateVector(buffers, 1));
+
+  builder.Finish(model_buffer);
+
+  const tflite::Model* model = tflite::GetModel(builder.GetBufferPointer());
+  tflite::ops::builtin::BuiltinOpResolver resolver;
+  tflite::InterpreterBuilder interpreterBuilder(model, resolver);
+  std::unique_ptr<tflite::Interpreter> interpreter;
+  if (interpreterBuilder(&interpreter) != kTfLiteOk) {
+    state.SkipWithError("failed to create TFLite interpreter");
+    return;
+  }
+  if (interpreter == nullptr) {
+    state.SkipWithError("TFLite interpreter is null");
+    return;
+  }
+  interpreter->SetNumThreads(1);
+
+  if (interpreter->AllocateTensors() != kTfLiteOk) {
+    state.SkipWithError("failed to allocate tensors");
+    return;
+  }
+
+  std::generate(
+    interpreter->typed_tensor<float>(0),
+    interpreter->typed_tensor<float>(0) + batch_size * channels,
+    std::ref(f32rng));
+
+  for (auto _ : state) {
+    if (interpreter->Invoke() != kTfLiteOk) {
+      state.SkipWithError("failed to invoke TFLite interpreter");
+      return;
+    }
+  }
+
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+
+  const size_t elements_per_iteration = batch_size * channels;
+  state.counters["elements"] =
+    benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration = 2 * elements_per_iteration * sizeof(float);
+  state.counters["bytes"] =
+    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+
+  interpreter.reset();
+}
+#endif  // BENCHMARK_TENSORFLOW_LITE
+
 static void CharacteristicArguments(benchmark::internal::Benchmark* b)
 {
   b->ArgNames({"N", "C"});
@@ -156,8 +276,12 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b)
   }
 }
 
-BENCHMARK(xnn_sigmoid_q8)->Apply(CharacteristicArguments)->UseRealTime();
-BENCHMARK(xnn_sigmoid_f32)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK(xnnpack_sigmoid_q8)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK(xnnpack_sigmoid_f32)->Apply(CharacteristicArguments)->UseRealTime();
+
+#ifdef BENCHMARK_TENSORFLOW_LITE
+  BENCHMARK(tflite_sigmoid_f32)->Apply(CharacteristicArguments)->UseRealTime();
+#endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

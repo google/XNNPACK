@@ -1176,7 +1176,8 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "sigmoid_bench",
     srcs = ["bench/sigmoid.cc"],
-    deps = OPERATOR_BENCHMARK_DEPS,
+    copts = xnnpack_optional_tflite_copts(),
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 
 xnnpack_benchmark(
