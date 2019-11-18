@@ -409,6 +409,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-prelu/neon-2x4.c
   src/f32-prelu/neon-2x8.c
   src/f32-rmax/neon.c
+  src/f32-sigmoid/neon-frac-p9-p10-nr1recps-x16.c
   src/f32-vmulcaddc/c4-neon-2x.c
   src/f32-vmulcaddc/c8-neon-2x.c
   src/q8-avgpool/mp9p8q-neon.c
@@ -462,7 +463,7 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-hswish/neonfma.c
   src/f32-ppmm/4x8-neonfma.c
   src/f32-ppmm/8x8-neonfma.c
-  src/f32-sigmoid/neonfma-p5-x16.c
+  src/f32-sigmoid/neonfma-p5-nr2fma-x16.c
   src/f32-vmulcaddc/c4-neonfma-2x.c
   src/f32-vmulcaddc/c8-neonfma-2x.c
   src/math/exp-neonfma-lut64-p2.c
