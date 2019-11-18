@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-sigmoid/neonfma-frac-p9-p10.c.in
+//   Template: src/f32-sigmoid/neon-frac-p9-p10-nr1recps.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
@@ -15,7 +15,7 @@
 #include <xnnpack/vunop.h>
 
 
-void xnn_f32_sigmoid_ukernel__neonfma_frac_p9_p10_x16(
+void xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x16(
     size_t n,
     const float* x,
     float* y,

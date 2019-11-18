@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-sigmoid/neonfma-p5.c.in
+//   Template: src/f32-sigmoid/neonfma-p5-nr2fma.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
@@ -15,7 +15,7 @@
 #include <xnnpack/vunop.h>
 
 
-void xnn_f32_sigmoid_ukernel__neonfma_p5_x16(
+void xnn_f32_sigmoid_ukernel__neonfma_p5_nr2fma_x16(
     size_t n,
     const float* x,
     float* y,

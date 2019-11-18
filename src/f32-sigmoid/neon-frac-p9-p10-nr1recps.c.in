@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMN"
 #include <xnnpack/vunop.h>
 
 
-void xnn_f32_sigmoid_ukernel__neonfma_frac_p9_p10_x${BATCH_TILE}(
+void xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x${BATCH_TILE}(
     size_t n,
     const float* x,
     float* y,
