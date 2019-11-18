@@ -378,6 +378,7 @@ NEONFMA_UKERNELS = [
     "src/f32-ppmm/4x8-neonfma.c",
     "src/f32-ppmm/8x8-neonfma.c",
     "src/f32-sigmoid/neonfma-p5-x16.c",
+    "src/f32-sigmoid/neonfma-frac-p9-p10-x16.c",
     "src/f32-vmulcaddc/c4-neonfma-2x.c",
     "src/f32-vmulcaddc/c8-neonfma-2x.c",
     "src/math/exp-neonfma-lut64-p2.c",

@@ -27,15 +27,15 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_(sigmoid)_ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_(sigmoid)_(fact_)?ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
     "sigmoid": "Sigmoid",
   }[match.group(2)]
-  batch_tile = int(match.group(4))
+  batch_tile = int(match.group(5))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(3))
+  arch, isa = xnncommon.parse_target_name(target_name=match.group(4))
   return op_type, batch_tile, arch, isa
 
 

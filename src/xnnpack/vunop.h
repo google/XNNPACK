@@ -24,6 +24,7 @@ extern "C" {
       const void* params);
 
 DECLARE_F32_VUNOP_UKERNEL_FUNCTION(xnn_f32_sigmoid_ukernel__neonfma_p5_x16)
+DECLARE_F32_VUNOP_UKERNEL_FUNCTION(xnn_f32_sigmoid_ukernel__neonfma_frac_p9_p10_x16)
 
 
 #ifdef __cplusplus

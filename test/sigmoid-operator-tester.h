@@ -244,7 +244,7 @@ class SigmoidOperatorTester {
           ASSERT_NEAR(
             output[i * output_stride() + c],
             output_ref[i * channels() + c],
-            output_ref[i * channels() + c] * 1.0e-6);
+            5.0e-6);
         }
       }
     }

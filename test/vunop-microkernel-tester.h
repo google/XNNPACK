@@ -134,7 +134,7 @@ class VUnOpMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y[i], y_ref[i], std::abs(y_ref[i]) * 1.0e-6)
+        ASSERT_NEAR(y[i], y_ref[i], 5.0e-6)
           << "at " << i << " / " << batch_size();
       }
     }
