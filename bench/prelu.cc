@@ -1,3 +1,8 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
@@ -8,6 +13,7 @@
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
+#include "bench/utils.h"
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"
@@ -77,11 +83,13 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   }
   prelu_op = nullptr;
 
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+
   const size_t elements_per_iteration = batch_size * height * width * channels;
   state.counters["elements"] =
     benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = 2 * batch_size * height * width * channels * sizeof(float);
+  const size_t bytes_per_iteration = (2 * elements_per_iteration + channels) * sizeof(float);
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
@@ -103,12 +111,9 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
 
   flatbuffers::FlatBufferBuilder builder;
   flatbuffers::Offset<tflite::OperatorCode> operator_code =
-      CreateOperatorCode(
-        builder,
-        tflite::BuiltinOperator_PRELU,
-        0);
+      CreateOperatorCode(builder, tflite::BuiltinOperator_PRELU);
 
-  flatbuffers::Offset<tflite::Buffer> buffers[3] = {
+  flatbuffers::Offset<tflite::Buffer> buffers[2] = {
     tflite::CreateBuffer(builder, builder.CreateVector({})),
     tflite::CreateBuffer(builder, builder.CreateVector(
       reinterpret_cast<const uint8_t*>(slope.data()),
@@ -134,25 +139,14 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
   flatbuffers::Offset<tflite::Tensor> tensors[3] = {
     tflite::CreateTensor(builder,
                          builder.CreateVector<int32_t>(input_shape, 4),
-                         tflite::TensorType_FLOAT32,
-                         0 /* buffer id */,
-                         builder.CreateString("input"),
-                         0 /* q_params */,
-                         true /* is_variable */),
+                         tflite::TensorType_FLOAT32),
     tflite::CreateTensor(builder,
                          builder.CreateVector<int32_t>(slope_shape, 1),
                          tflite::TensorType_FLOAT32,
-                         1 /* buffer id */,
-                         builder.CreateString("slope"),
-                         0 /* q_params */,
-                         false /* is_variable */),
+                         1 /* buffer id */),
     tflite::CreateTensor(builder,
                          builder.CreateVector<int32_t>(output_shape, 4),
-                         tflite::TensorType_FLOAT32,
-                         0 /* buffer id */,
-                         builder.CreateString("output"),
-                         0 /* q_params */,
-                         true /* is_variable */),
+                         tflite::TensorType_FLOAT32),
   };
 
   const int32_t op_inputs[2] = { 0, 1 };
@@ -170,8 +164,7 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
       builder.CreateVector(tensors, 3),
       builder.CreateVector<int32_t>(graph_inputs, 1),
       builder.CreateVector<int32_t>(graph_outputs, 1),
-      builder.CreateVector(&op, 1),
-      builder.CreateString("PReLU subgraph"));
+      builder.CreateVector(&op, 1));
 
   flatbuffers::Offset<flatbuffers::String> description = builder.CreateString("PReLU model");
 
@@ -180,7 +173,7 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
       builder.CreateVector(&operator_code, 1),
       builder.CreateVector(&subgraph, 1),
       description,
-      builder.CreateVector(buffers, 3));
+      builder.CreateVector(buffers, 2));
 
   builder.Finish(model_buffer);
 
@@ -215,11 +208,13 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
     }
   }
 
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+
   const size_t elements_per_iteration = batch_size * height * width * channels;
   state.counters["elements"] =
     benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = 2 * elements_per_iteration * sizeof(float);
+  const size_t bytes_per_iteration = (2 * elements_per_iteration + channels) * sizeof(float);
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 
