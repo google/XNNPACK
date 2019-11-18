@@ -134,7 +134,7 @@ class SigmoidOperatorTester {
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
 
-    std::vector<uint8_t> input((batch_size() - 1) * input_stride() + channels());
+    std::vector<uint8_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -195,7 +195,7 @@ class SigmoidOperatorTester {
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(-25.0f, 25.0f), rng);
 
-    std::vector<float> input((batch_size() - 1) * input_stride() + channels());
+    std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((batch_size() - 1) * output_stride() + channels());
     std::vector<double> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

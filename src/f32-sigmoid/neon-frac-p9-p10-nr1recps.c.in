@@ -20,6 +20,8 @@ void xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x${BATCH_TILE}(
     float* y,
     const void* params)
 {
+  assert(n % sizeof(float) == 0);
+
   const float32x4_t vhalf = vmovq_n_f32(0.5f);
 
   // The coefficients of the numerator polynomial (odd).

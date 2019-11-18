@@ -21,6 +21,8 @@ void xnn_f32_sigmoid_ukernel__neonfma_p5_nr2fma_x16(
     float* y,
     const void* params)
 {
+  assert(n % sizeof(float) == 0);
+
   const float32x4_t vmagic_bias = vmovq_n_f32(0x1.8000FEp23f);
   // The smallest x for which sigmoidf(x) is normalized.
   // This number is also the smallest x for which expf(x) is normalized.

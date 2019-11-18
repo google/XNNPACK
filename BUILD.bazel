@@ -496,6 +496,8 @@ SSE2_UKERNELS = [
     "src/f32-argmaxpool/up9-sse2.c",
     "src/f32-prelu/sse2-2x4.c",
     "src/f32-prelu/sse2-2x8.c",
+    "src/f32-sigmoid/sse2-p5-div-x8.c",
+    "src/f32-sigmoid/sse2-p5-div-x16.c",
     "src/q8-avgpool/mp9p8q-sse2.c",
     "src/q8-avgpool/up9-sse2.c",
     "src/q8-igemm/4x4c2-sse2.c",
