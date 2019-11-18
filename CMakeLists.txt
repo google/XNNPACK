@@ -468,7 +468,7 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/math/exp-neonfma-lut64-p2.c
   src/math/exp-neonfma-p5.c
   src/math/expminus-neonfma-p5.c
-  src/math/sigmoid-neonfma-p5.c)
+  src/math/sigmoid-neonfma-p5-nr2fma.c)
 
 SET(AARCH64_XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-conv-hwc/3x3s2p1c3x4-neonfma-2x2.c
@@ -598,7 +598,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/x8-zip/x4-sse2.c
   src/x8-zip/xm-sse2.c
   src/math/exp-sse2-p5.c
-  src/math/expminus-sse2-p5.c)
+  src/math/expminus-sse2-p5.c
+  src/math/sigmoid-sse2-p5-div.c)
 
 SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/sse41-2x4.c

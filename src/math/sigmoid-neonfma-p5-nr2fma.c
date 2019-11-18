@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_sigmoid__neonfma_p5(
+void xnn_math_f32_sigmoid__neonfma_p5_nr2fma(
     size_t n,
     const float* input,
     float* output)

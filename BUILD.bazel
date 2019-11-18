@@ -383,7 +383,7 @@ NEONFMA_UKERNELS = [
     "src/math/exp-neonfma-lut64-p2.c",
     "src/math/exp-neonfma-p5.c",
     "src/math/expminus-neonfma-p5.c",
-    "src/math/sigmoid-neonfma-p5.c",
+    "src/math/sigmoid-neonfma-p5-nr2fma.c",
 ]
 
 AARCH64_NEONFMA_UKERNELS = [
@@ -518,6 +518,7 @@ SSE2_UKERNELS = [
     "src/x8-zip/xm-sse2.c",
     "src/math/exp-sse2-p5.c",
     "src/math/expminus-sse2-p5.c",
+    "src/math/sigmoid-sse2-p5-div.c",
 ]
 
 SSE41_UKERNELS = [
