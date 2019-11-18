@@ -9,8 +9,6 @@
 #include <random>
 #include <vector>
 
-#include <cpuinfo.h>
-
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>

@@ -1240,6 +1240,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-rmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-rmax-test f32-rmax-test)
 
+  ADD_EXECUTABLE(f32-sigmoid-test test/f32-sigmoid.cc)
+  SET_TARGET_PROPERTIES(f32-sigmoid-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-sigmoid-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-sigmoid-test f32-sigmoid-test)
+
   ADD_EXECUTABLE(f32-spmm-test test/f32-spmm.cc)
   SET_TARGET_PROPERTIES(f32-spmm-test PROPERTIES
     CXX_STANDARD 11
@@ -1716,6 +1725,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE src)
   TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-rmax-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+
+  ADD_EXECUTABLE(f32-sigmoid-bench bench/f32-sigmoid.cc)
+  SET_TARGET_PROPERTIES(f32-sigmoid-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-bench PRIVATE src)
+  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(f32-sigmoid-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(f32-spmm-bench bench/f32-spmm.cc)
   SET_TARGET_PROPERTIES(f32-spmm-bench PROPERTIES
