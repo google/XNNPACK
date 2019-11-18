@@ -46,37 +46,37 @@ enum xnn_ukernel_type {
 
 enum xnn_operator_type {
   xnn_operator_type_none = 0,
-  xnn_operator_type_add_f32,
-  xnn_operator_type_add_q8,
-  xnn_operator_type_argmax_pooling_f32,
-  xnn_operator_type_average_pooling_f32,
-  xnn_operator_type_average_pooling_q8,
-  xnn_operator_type_channel_pad_x32,
-  xnn_operator_type_channel_shuffle_x32,
-  xnn_operator_type_channel_shuffle_x8,
-  xnn_operator_type_clamp_f32,
-  xnn_operator_type_clamp_u8,
-  xnn_operator_type_convolution_f32,
-  xnn_operator_type_convolution_q8,
-  xnn_operator_type_convolution_spnchw_f32,
-  xnn_operator_type_deconvolution_f32,
-  xnn_operator_type_deconvolution_q8,
-  xnn_operator_type_fully_connected_f32,
-  xnn_operator_type_fully_connected_q8,
-  xnn_operator_type_global_average_pooling_f32,
-  xnn_operator_type_global_average_pooling_q8,
-  xnn_operator_type_global_average_pooling_spnchw_f32,
-  xnn_operator_type_hswish_f32,
-  xnn_operator_type_leaky_relu_q8,
-  xnn_operator_type_max_pooling_f32,
-  xnn_operator_type_max_pooling_u8,
-  xnn_operator_type_multiply_f32,
-  xnn_operator_type_prelu_f32,
-  xnn_operator_type_resize_bilinear_f32,
-  xnn_operator_type_sigmoid_f32,
-  xnn_operator_type_sigmoid_q8,
-  xnn_operator_type_softargmax_q8,
-  xnn_operator_type_unpooling_x32,
+  xnn_operator_type_add_nc_f32,
+  xnn_operator_type_add_nc_q8,
+  xnn_operator_type_argmax_pooling_nhwc_f32,
+  xnn_operator_type_average_pooling_nhwc_f32,
+  xnn_operator_type_average_pooling_nhwc_q8,
+  xnn_operator_type_channel_pad_nc_x32,
+  xnn_operator_type_channel_shuffle_nc_x32,
+  xnn_operator_type_channel_shuffle_nc_x8,
+  xnn_operator_type_clamp_nc_f32,
+  xnn_operator_type_clamp_nc_u8,
+  xnn_operator_type_convolution_nhwc_f32,
+  xnn_operator_type_convolution_nhwc_q8,
+  xnn_operator_type_convolution_nchw_f32,
+  xnn_operator_type_deconvolution_nhwc_f32,
+  xnn_operator_type_deconvolution_nhwc_q8,
+  xnn_operator_type_fully_connected_nc_f32,
+  xnn_operator_type_fully_connected_nc_q8,
+  xnn_operator_type_global_average_pooling_nwc_f32,
+  xnn_operator_type_global_average_pooling_nwc_q8,
+  xnn_operator_type_global_average_pooling_ncw_f32,
+  xnn_operator_type_hardswish_nc_f32,
+  xnn_operator_type_leaky_relu_nc_q8,
+  xnn_operator_type_max_pooling_nhwc_f32,
+  xnn_operator_type_max_pooling_nhwc_u8,
+  xnn_operator_type_multiply_nd_f32,
+  xnn_operator_type_prelu_nc_f32,
+  xnn_operator_type_resize_bilinear_nhwc_f32,
+  xnn_operator_type_sigmoid_nc_f32,
+  xnn_operator_type_sigmoid_nc_q8,
+  xnn_operator_type_softargmax_nc_q8,
+  xnn_operator_type_unpooling_nhwc_x32,
 };
 
 struct xnn_ukernel_dconv2d {
@@ -260,8 +260,8 @@ struct xnn_operator {
     struct dwconv_context dwconv;
     struct elementwise_binary_context elementwise_binary;
     struct gemm_context gemm;
-    struct global_average_pooling_context global_average_pooling;
-    struct global_average_pooling_spnchw_context global_average_pooling_spnchw;
+    struct global_average_pooling_nwc_context global_average_pooling_nwc;
+    struct global_average_pooling_ncw_context global_average_pooling_ncw;
     struct igemm_context igemm;
     struct lut_contiguous_context lut_contiguous;
     struct lut_strided_context lut_strided;

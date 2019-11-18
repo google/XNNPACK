@@ -380,9 +380,9 @@ enum xnn_status xnn_setup_sigmoid_nc_f32(
     float* output,
     pthreadpool_t threadpool);
 
-#ifndef XNN_NO_SPNCHW_OPERATORS
+#ifndef XNN_NO_NCHW_OPERATORS
 
-enum xnn_status xnn_create_convolution2d_spnchw_f32(
+enum xnn_status xnn_create_convolution2d_nchw_f32(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
     uint32_t input_padding_bottom,
@@ -403,7 +403,7 @@ enum xnn_status xnn_create_convolution2d_spnchw_f32(
     uint32_t flags,
     xnn_operator_t* convolution_op_out);
 
-enum xnn_status xnn_setup_convolution2d_spnchw_f32(
+enum xnn_status xnn_setup_convolution2d_nchw_f32(
     xnn_operator_t convolution_op,
     size_t batch_size,
     size_t input_batch_stride,
@@ -414,23 +414,22 @@ enum xnn_status xnn_setup_convolution2d_spnchw_f32(
     float* output,
     pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_global_average_pooling_spnchw_f32(
+enum xnn_status xnn_create_global_average_pooling_ncw_f32(
     size_t channels,
     float output_min,
     float output_max,
     uint32_t flags,
     xnn_operator_t* global_average_pooling_op_out);
 
-enum xnn_status xnn_setup_global_average_pooling_spnchw_f32(
+enum xnn_status xnn_setup_global_average_pooling_ncw_f32(
     xnn_operator_t global_average_pooling_op,
     size_t batch_size,
-    size_t height,
     size_t width,
     const float* input,
     float* output,
     pthreadpool_t threadpool);
 
-#endif  // XNN_NO_SPNCHW_OPERATORS
+#endif  // XNN_NO_NCHW_OPERATORS
 
 #endif  // XNN_NO_F32_OPERATORS
 

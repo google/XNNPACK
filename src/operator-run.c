@@ -429,8 +429,8 @@ void xnn_compute_pixelwise_average_pooling_multipass(
     &context->params);
 }
 
-void xnn_compute_global_average_pooling_unipass(
-    const struct global_average_pooling_context context[restrict static 1],
+void xnn_compute_global_average_pooling_nwc_unipass(
+    const struct global_average_pooling_nwc_context context[restrict static 1],
     size_t batch_index)
 {
   const void* input =
@@ -448,8 +448,8 @@ void xnn_compute_global_average_pooling_unipass(
     &context->params);
 }
 
-void xnn_compute_global_average_pooling_multipass(
-    const struct global_average_pooling_context context[restrict static 1],
+void xnn_compute_global_average_pooling_nwc_multipass(
+    const struct global_average_pooling_nwc_context context[restrict static 1],
     size_t batch_index)
 {
   const void* input =
@@ -469,16 +469,16 @@ void xnn_compute_global_average_pooling_multipass(
     &context->params);
 }
 
-void xnn_compute_global_average_pooling_spnchw(
-    const struct global_average_pooling_spnchw_context context[restrict static 1],
+void xnn_compute_global_average_pooling_ncw(
+    const struct global_average_pooling_ncw_context context[restrict static 1],
     size_t batch_index,
     size_t channels_start,
     size_t channels_slice)
 {
-  const void* input =
-    (const void*) ((uintptr_t) context->input + channels_start * context->input_channel_stride + batch_index * context->input_batch_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + channels_start * context->output_channel_stride + batch_index * context->output_batch_stride);
+  const void* input = (const void*) ((uintptr_t) context->input +
+    channels_start * context->input_channel_stride + batch_index * context->input_batch_stride);
+  void* output = (void*) ((uintptr_t) context->output +
+    channels_start * context->output_channel_stride + batch_index * context->output_batch_stride);
 
   context->ukernel(
     context->input_elements,

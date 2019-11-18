@@ -131,27 +131,27 @@ ENDIF()
 
 # ---[ XNNPACK library
 SET(XNNPACK_OPERATOR_SRCS
-  src/add.c
-  src/argmax-pooling.c
-  src/average-pooling.c
-  src/channel-pad.c
-  src/channel-shuffle.c
-  src/clamp.c
-  src/convolution-spnchw.c
-  src/convolution.c
-  src/deconvolution.c
-  src/fully-connected.c
-  src/global-average-pooling-spnchw.c
-  src/global-average-pooling.c
-  src/hardswish.c
-  src/leaky-relu.c
-  src/max-pooling.c
-  src/multiply.c
-  src/prelu.c
-  src/resize-bilinear.c
-  src/sigmoid.c
-  src/softargmax.c
-  src/unpooling.c)
+  src/add-nc.c
+  src/argmax-pooling-nhwc.c
+  src/average-pooling-nhwc.c
+  src/channel-pad-nc.c
+  src/channel-shuffle-nc.c
+  src/clamp-nc.c
+  src/convolution-nchw.c
+  src/convolution-nhwc.c
+  src/deconvolution-nhwc.c
+  src/fully-connected-nc.c
+  src/global-average-pooling-ncw.c
+  src/global-average-pooling-nwc.c
+  src/hardswish-nc.c
+  src/leaky-relu-nc.c
+  src/max-pooling-nhwc.c
+  src/multiply-nd.c
+  src/prelu-nc.c
+  src/resize-bilinear-nhwc.c
+  src/sigmoid-nc.c
+  src/softargmax-nc.c
+  src/unpooling-nhwc.c)
 
 SET(XNNPACK_COLD_SRCS ${XNNPACK_OPERATOR_SRCS})
 LIST(APPEND XNNPACK_COLD_SRCS
@@ -841,194 +841,194 @@ IF(XNNPACK_BUILD_TESTS)
   ENDIF()
 
   # ---[ Build operator-level unit tests
-  ADD_EXECUTABLE(add-test test/add.cc)
-  SET_TARGET_PROPERTIES(add-test PROPERTIES
+  ADD_EXECUTABLE(add-nc-test test/add-nc.cc)
+  SET_TARGET_PROPERTIES(add-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(add-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(add-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(add-test add-test)
+  TARGET_INCLUDE_DIRECTORIES(add-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(add-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(add-nc-test add-nc-test)
 
-  ADD_EXECUTABLE(argmax-pooling-test test/argmax-pooling.cc)
-  SET_TARGET_PROPERTIES(argmax-pooling-test PROPERTIES
+  ADD_EXECUTABLE(argmax-pooling-nhwc-test test/argmax-pooling-nhwc.cc)
+  SET_TARGET_PROPERTIES(argmax-pooling-nhwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(argmax-pooling-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(argmax-pooling-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(argmax-pooling-test argmax-pooling-test)
+  TARGET_INCLUDE_DIRECTORIES(argmax-pooling-nhwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(argmax-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(argmax-pooling-nhwc-test argmax-pooling-nhwc-test)
 
-  ADD_EXECUTABLE(average-pooling-test test/average-pooling.cc)
-  SET_TARGET_PROPERTIES(average-pooling-test PROPERTIES
+  ADD_EXECUTABLE(average-pooling-nhwc-test test/average-pooling-nhwc.cc)
+  SET_TARGET_PROPERTIES(average-pooling-nhwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(average-pooling-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(average-pooling-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(average-pooling-test average-pooling-test)
+  TARGET_INCLUDE_DIRECTORIES(average-pooling-nhwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(average-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(average-pooling-nhwc-test average-pooling-nhwc-test)
 
-  ADD_EXECUTABLE(channel-pad-test test/channel-pad.cc)
-  SET_TARGET_PROPERTIES(channel-pad-test PROPERTIES
+  ADD_EXECUTABLE(channel-pad-nc-test test/channel-pad-nc.cc)
+  SET_TARGET_PROPERTIES(channel-pad-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(channel-pad-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(channel-pad-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(channel-pad-test channel-pad-test)
+  TARGET_INCLUDE_DIRECTORIES(channel-pad-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(channel-pad-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(channel-pad-nc-test channel-pad-nc-test)
 
-  ADD_EXECUTABLE(channel-shuffle-test test/channel-shuffle.cc)
-  SET_TARGET_PROPERTIES(channel-shuffle-test PROPERTIES
+  ADD_EXECUTABLE(channel-shuffle-nc-test test/channel-shuffle-nc.cc)
+  SET_TARGET_PROPERTIES(channel-shuffle-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(channel-shuffle-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(channel-shuffle-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(channel-shuffle-test channel-shuffle-test)
+  TARGET_INCLUDE_DIRECTORIES(channel-shuffle-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(channel-shuffle-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(channel-shuffle-nc-test channel-shuffle-nc-test)
 
-  ADD_EXECUTABLE(clamp-test test/clamp.cc)
-  SET_TARGET_PROPERTIES(clamp-test PROPERTIES
+  ADD_EXECUTABLE(clamp-nc-test test/clamp-nc.cc)
+  SET_TARGET_PROPERTIES(clamp-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(clamp-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(clamp-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(clamp-test clamp-test)
+  TARGET_INCLUDE_DIRECTORIES(clamp-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(clamp-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(clamp-nc-test clamp-nc-test)
 
-  ADD_EXECUTABLE(convolution-test test/convolution.cc)
-  SET_TARGET_PROPERTIES(convolution-test PROPERTIES
+  ADD_EXECUTABLE(convolution-nhwc-test test/convolution-nhwc.cc)
+  SET_TARGET_PROPERTIES(convolution-nhwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(convolution-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(convolution-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(convolution-test convolution-test)
+  TARGET_INCLUDE_DIRECTORIES(convolution-nhwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(convolution-nhwc-test convolution-nhwc-test)
 
-  ADD_EXECUTABLE(convolution-spnchw-test test/convolution-spnchw.cc)
-  SET_TARGET_PROPERTIES(convolution-spnchw-test PROPERTIES
+  ADD_EXECUTABLE(convolution-nchw-test test/convolution-nchw.cc)
+  SET_TARGET_PROPERTIES(convolution-nchw-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(convolution-spnchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(convolution-spnchw-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(convolution-spnchw-test convolution-spnchw-test)
+  TARGET_INCLUDE_DIRECTORIES(convolution-nchw-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(convolution-nchw-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(convolution-nchw-test convolution-nchw-test)
 
-  ADD_EXECUTABLE(deconvolution-test test/deconvolution.cc)
-  SET_TARGET_PROPERTIES(deconvolution-test PROPERTIES
+  ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc)
+  SET_TARGET_PROPERTIES(deconvolution-nhwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(deconvolution-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(deconvolution-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(deconvolution-test deconvolution-test)
+  TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(deconvolution-nhwc-test deconvolution-nhwc-test)
 
-  ADD_EXECUTABLE(fully-connected-test test/fully-connected.cc)
-  SET_TARGET_PROPERTIES(fully-connected-test PROPERTIES
+  ADD_EXECUTABLE(fully-connected-nc-test test/fully-connected-nc.cc)
+  SET_TARGET_PROPERTIES(fully-connected-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(fully-connected-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(fully-connected-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(fully-connected-test fully-connected-test)
+  TARGET_INCLUDE_DIRECTORIES(fully-connected-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(fully-connected-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(fully-connected-nc-test fully-connected-nc-test)
 
-  ADD_EXECUTABLE(global-average-pooling-test test/global-average-pooling.cc)
-  SET_TARGET_PROPERTIES(global-average-pooling-test PROPERTIES
+  ADD_EXECUTABLE(global-average-pooling-nwc-test test/global-average-pooling-nwc.cc)
+  SET_TARGET_PROPERTIES(global-average-pooling-nwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(global-average-pooling-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(global-average-pooling-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(global-average-pooling-test global-average-pooling-test)
+  TARGET_INCLUDE_DIRECTORIES(global-average-pooling-nwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(global-average-pooling-nwc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(global-average-pooling-nwc-test global-average-pooling-nwc-test)
 
-  ADD_EXECUTABLE(global-average-pooling-spnchw-test test/global-average-pooling-spnchw.cc)
-  SET_TARGET_PROPERTIES(global-average-pooling-spnchw-test PROPERTIES
+  ADD_EXECUTABLE(global-average-pooling-ncw-test test/global-average-pooling-ncw.cc)
+  SET_TARGET_PROPERTIES(global-average-pooling-ncw-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(global-average-pooling-spnchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(global-average-pooling-spnchw-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(global-average-pooling-spnchw-test global-average-pooling-spnchw-test)
+  TARGET_INCLUDE_DIRECTORIES(global-average-pooling-ncw-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(global-average-pooling-ncw-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(global-average-pooling-ncw-test global-average-pooling-ncw-test)
 
-  ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
-  SET_TARGET_PROPERTIES(hardswish-test PROPERTIES
+  ADD_EXECUTABLE(hardswish-nc-test test/hardswish-nc.cc)
+  SET_TARGET_PROPERTIES(hardswish-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(hardswish-test hardswish-test)
+  TARGET_INCLUDE_DIRECTORIES(hardswish-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(hardswish-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(hardswish-nc-test hardswish-nc-test)
 
-  ADD_EXECUTABLE(leaky-relu-test test/leaky-relu.cc)
-  SET_TARGET_PROPERTIES(leaky-relu-test PROPERTIES
+  ADD_EXECUTABLE(leaky-relu-nc-test test/leaky-relu-nc.cc)
+  SET_TARGET_PROPERTIES(leaky-relu-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(leaky-relu-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(leaky-relu-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(leaky-relu-test leaky-relu-test)
+  TARGET_INCLUDE_DIRECTORIES(leaky-relu-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(leaky-relu-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(leaky-relu-nc-test leaky-relu-nc-test)
 
-  ADD_EXECUTABLE(max-pooling-test test/max-pooling.cc)
-  SET_TARGET_PROPERTIES(max-pooling-test PROPERTIES
+  ADD_EXECUTABLE(max-pooling-nhwc-test test/max-pooling-nhwc.cc)
+  SET_TARGET_PROPERTIES(max-pooling-nhwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(max-pooling-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(max-pooling-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(max-pooling-test max-pooling-test)
+  TARGET_INCLUDE_DIRECTORIES(max-pooling-nhwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(max-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(max-pooling-nhwc-test max-pooling-nhwc-test)
 
-  ADD_EXECUTABLE(multiply-test test/multiply.cc)
-  SET_TARGET_PROPERTIES(multiply-test PROPERTIES
+  ADD_EXECUTABLE(multiply-nd-test test/multiply-nd.cc)
+  SET_TARGET_PROPERTIES(multiply-nd-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(multiply-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(multiply-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(multiply-test multiply-test)
+  TARGET_INCLUDE_DIRECTORIES(multiply-nd-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(multiply-nd-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(multiply-nd-test multiply-nd-test)
 
-  ADD_EXECUTABLE(prelu-test test/prelu.cc)
-  SET_TARGET_PROPERTIES(prelu-test PROPERTIES
+  ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
+  SET_TARGET_PROPERTIES(prelu-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(prelu-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(prelu-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(prelu-test prelu-test)
+  TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(prelu-nc-test prelu-nc-test)
 
-  ADD_EXECUTABLE(resize-bilinear-test test/resize-bilinear.cc)
-  SET_TARGET_PROPERTIES(resize-bilinear-test PROPERTIES
+  ADD_EXECUTABLE(resize-bilinear-nhwc-test test/resize-bilinear-nhwc.cc)
+  SET_TARGET_PROPERTIES(resize-bilinear-nhwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(resize-bilinear-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(resize-bilinear-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(resize-bilinear-test resize-bilinear-test)
+  TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nhwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(resize-bilinear-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(resize-bilinear-nhwc-test resize-bilinear-nhwc-test)
 
-  ADD_EXECUTABLE(sigmoid-test test/sigmoid.cc)
-  SET_TARGET_PROPERTIES(sigmoid-test PROPERTIES
+  ADD_EXECUTABLE(sigmoid-nc-test test/sigmoid-nc.cc)
+  SET_TARGET_PROPERTIES(sigmoid-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(sigmoid-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(sigmoid-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(sigmoid-test sigmoid-test)
+  TARGET_INCLUDE_DIRECTORIES(sigmoid-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(sigmoid-nc-test sigmoid-nc-test)
 
-  ADD_EXECUTABLE(softargmax-test test/softargmax.cc)
-  SET_TARGET_PROPERTIES(softargmax-test PROPERTIES
+  ADD_EXECUTABLE(softargmax-nc-test test/softargmax-nc.cc)
+  SET_TARGET_PROPERTIES(softargmax-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(softargmax-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(softargmax-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(softargmax-test softargmax-test)
+  TARGET_INCLUDE_DIRECTORIES(softargmax-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(softargmax-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(softargmax-nc-test softargmax-nc-test)
 
-  ADD_EXECUTABLE(unpooling-test test/unpooling.cc)
-  SET_TARGET_PROPERTIES(unpooling-test PROPERTIES
+  ADD_EXECUTABLE(unpooling-nhwc-test test/unpooling-nhwc.cc)
+  SET_TARGET_PROPERTIES(unpooling-nhwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(unpooling-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(unpooling-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(unpooling-test unpooling-test)
+  TARGET_INCLUDE_DIRECTORIES(unpooling-nhwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(unpooling-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(unpooling-nhwc-test unpooling-nhwc-test)
 
   # ---[ Build microkernel-level unit tests
   ADD_EXECUTABLE(f16-gemm-test test/f16-gemm.cc)
@@ -1067,14 +1067,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-bilinear-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-bilinear-test f32-bilinear-test)
 
-  ADD_EXECUTABLE(f32-clamp-test test/f32-clamp.cc)
-  SET_TARGET_PROPERTIES(f32-clamp-test PROPERTIES
+  ADD_EXECUTABLE(f32-clamp-nc-test test/f32-clamp.cc)
+  SET_TARGET_PROPERTIES(f32-clamp-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-clamp-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-clamp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-clamp-test f32-clamp-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-clamp-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-clamp-nc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-clamp-nc-test f32-clamp-nc-test)
 
   ADD_EXECUTABLE(f32-conv-hwc-test test/f32-conv-hwc.cc)
   SET_TARGET_PROPERTIES(f32-conv-hwc-test PROPERTIES
@@ -1193,14 +1193,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-ppmm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-ppmm-test f32-ppmm-test)
 
-  ADD_EXECUTABLE(f32-prelu-test test/f32-prelu.cc)
-  SET_TARGET_PROPERTIES(f32-prelu-test PROPERTIES
+  ADD_EXECUTABLE(f32-prelu-nc-test test/f32-prelu.cc)
+  SET_TARGET_PROPERTIES(f32-prelu-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-prelu-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-prelu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-prelu-test f32-prelu-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-prelu-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-prelu-nc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-prelu-nc-test f32-prelu-nc-test)
 
   ADD_EXECUTABLE(f32-raddexpminusmax-test test/f32-raddexpminusmax.cc)
   SET_TARGET_PROPERTIES(f32-raddexpminusmax-test PROPERTIES
@@ -1247,14 +1247,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-spmm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-spmm-test f32-spmm-test)
 
-  ADD_EXECUTABLE(f32-vadd-test test/f32-vadd.cc)
-  SET_TARGET_PROPERTIES(f32-vadd-test PROPERTIES
+  ADD_EXECUTABLE(f32-vadd-nc-test test/f32-vadd.cc)
+  SET_TARGET_PROPERTIES(f32-vadd-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vadd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-vadd-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-vadd-test f32-vadd-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-vadd-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vadd-nc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vadd-nc-test f32-vadd-nc-test)
 
   ADD_EXECUTABLE(f32-vaddc-test test/f32-vaddc.cc)
   SET_TARGET_PROPERTIES(f32-vaddc-test PROPERTIES
@@ -1382,23 +1382,23 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(q8-igemm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(q8-igemm-test q8-igemm-test)
 
-  ADD_EXECUTABLE(q8-vadd-test test/q8-vadd.cc)
-  SET_TARGET_PROPERTIES(q8-vadd-test PROPERTIES
+  ADD_EXECUTABLE(q8-vadd-nc-test test/q8-vadd.cc)
+  SET_TARGET_PROPERTIES(q8-vadd-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(q8-vadd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(q8-vadd-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(q8-vadd-test q8-vadd-test)
+  TARGET_INCLUDE_DIRECTORIES(q8-vadd-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(q8-vadd-nc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(q8-vadd-nc-test q8-vadd-nc-test)
 
-  ADD_EXECUTABLE(u8-clamp-test test/u8-clamp.cc)
-  SET_TARGET_PROPERTIES(u8-clamp-test PROPERTIES
+  ADD_EXECUTABLE(u8-clamp-nc-test test/u8-clamp.cc)
+  SET_TARGET_PROPERTIES(u8-clamp-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(u8-clamp-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(u8-clamp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(u8-clamp-test u8-clamp-test)
+  TARGET_INCLUDE_DIRECTORIES(u8-clamp-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(u8-clamp-nc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(u8-clamp-nc-test u8-clamp-nc-test)
 
   ADD_EXECUTABLE(u8-lut32norm-test test/u8-lut32norm.cc)
   SET_TARGET_PROPERTIES(u8-lut32norm-test PROPERTIES

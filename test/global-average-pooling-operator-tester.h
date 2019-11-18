@@ -150,7 +150,7 @@ class GlobalAveragePoolingOperatorTester {
     return this->iterations_;
   }
 
-  void TestQ8() const {
+  void TestNWCxQ8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
@@ -214,7 +214,7 @@ class GlobalAveragePoolingOperatorTester {
     }
   }
 
-  void TestF32() const {
+  void TestNWCxF32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
@@ -283,6 +283,82 @@ class GlobalAveragePoolingOperatorTester {
           ASSERT_LE(output[i * output_stride() + c], output_max);
           ASSERT_GE(output[i * output_stride() + c], output_min);
           ASSERT_NEAR(output[i * output_stride() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-6f) <<
+            "in batch index " << i << ", channel " << c;
+        }
+      }
+    }
+  }
+
+  void TestNCWxF32() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+
+    std::vector<float> input(batch_size() * channels() * width() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> output(batch_size() * channels());
+    std::vector<float> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results, without clamping.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t j = 0; j < channels(); j++) {
+          float acc = 0.0f;
+          for (size_t k = 0; k < width(); k++) {
+            acc += input[(i * channels() + j) * width() + k];
+          }
+          output_ref[i * channels() + j] = acc / float(width());
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      const float output_min = accumulated_range == 0.0f ?
+        -std::numeric_limits<float>::infinity() :
+        accumulated_min + accumulated_range / 255.0f * float(qmin());
+      const float output_max = accumulated_range == 0.0f ?
+        +std::numeric_limits<float>::infinity() :
+        accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, run, and destroy Global Average Pooling operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      xnn_operator_t global_average_pooling_op = nullptr;
+
+      xnn_status status = xnn_create_global_average_pooling_ncw_f32(
+        channels(), output_min, output_max,
+        0, &global_average_pooling_op);
+      if (status == xnn_status_unsupported_parameter) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+
+      // Smart pointer to automatically delete global_average_pooling_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_global_average_pooling_ncw_f32(
+          global_average_pooling_op,
+          batch_size(), width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_LE(output[i * channels() + c], output_max);
+          ASSERT_GE(output[i * channels() + c], output_min);
+          ASSERT_NEAR(output[i * channels() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-5f) <<
             "in batch index " << i << ", channel " << c;
         }
       }

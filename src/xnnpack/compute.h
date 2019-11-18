@@ -447,7 +447,7 @@ struct pixelwise_average_pooling_context {
       size_t output_y);
 #endif
 
-struct global_average_pooling_context {
+struct global_average_pooling_nwc_context {
   const void* input;
   const void* zero;
   size_t input_pixel_stride;
@@ -467,16 +467,16 @@ struct global_average_pooling_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_global_average_pooling_unipass(
-      const struct global_average_pooling_context context[restrict static 1],
+  XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_unipass(
+      const struct global_average_pooling_nwc_context context[restrict static 1],
       size_t batch_index);
 
-  XNN_PRIVATE void xnn_compute_global_average_pooling_multipass(
-      const struct global_average_pooling_context context[restrict static 1],
+  XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_multipass(
+      const struct global_average_pooling_nwc_context context[restrict static 1],
       size_t batch_index);
 #endif
 
-struct global_average_pooling_spnchw_context {
+struct global_average_pooling_ncw_context {
   size_t input_elements;
   const void* input;
   size_t input_channel_stride;
@@ -491,8 +491,8 @@ struct global_average_pooling_spnchw_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_global_average_pooling_spnchw(
-      const struct global_average_pooling_spnchw_context context[restrict static 1],
+  XNN_PRIVATE void xnn_compute_global_average_pooling_ncw(
+      const struct global_average_pooling_ncw_context context[restrict static 1],
       size_t batch_index,
       size_t channels_start,
       size_t channels_slice);

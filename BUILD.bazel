@@ -50,27 +50,27 @@ OPERATOR_TEST_DEPS = [
 ]
 
 OPERATOR_SRCS = [
-    "src/add.c",
-    "src/argmax-pooling.c",
-    "src/average-pooling.c",
-    "src/channel-pad.c",
-    "src/channel-shuffle.c",
-    "src/clamp.c",
-    "src/convolution-spnchw.c",
-    "src/convolution.c",
-    "src/deconvolution.c",
-    "src/fully-connected.c",
-    "src/global-average-pooling-spnchw.c",
-    "src/global-average-pooling.c",
-    "src/hardswish.c",
-    "src/leaky-relu.c",
-    "src/max-pooling.c",
-    "src/multiply.c",
-    "src/prelu.c",
-    "src/resize-bilinear.c",
-    "src/sigmoid.c",
-    "src/softargmax.c",
-    "src/unpooling.c",
+    "src/add-nc.c",
+    "src/argmax-pooling-nhwc.c",
+    "src/average-pooling-nhwc.c",
+    "src/channel-pad-nc.c",
+    "src/channel-shuffle-nc.c",
+    "src/clamp-nc.c",
+    "src/convolution-nchw.c",
+    "src/convolution-nhwc.c",
+    "src/deconvolution-nhwc.c",
+    "src/fully-connected-nc.c",
+    "src/global-average-pooling-ncw.c",
+    "src/global-average-pooling-nwc.c",
+    "src/hardswish-nc.c",
+    "src/leaky-relu-nc.c",
+    "src/max-pooling-nhwc.c",
+    "src/multiply-nd.c",
+    "src/prelu-nc.c",
+    "src/resize-bilinear-nhwc.c",
+    "src/sigmoid-nc.c",
+    "src/softargmax-nc.c",
+    "src/unpooling-nhwc.c",
 ]
 
 SCALAR_UKERNELS = [
@@ -971,7 +971,7 @@ cc_library(
         "XNN_NO_Q8_OPERATORS",
         "XNN_NO_U8_OPERATORS",
         "XNN_NO_X8_OPERATORS",
-        "XNN_NO_SPNCHW_OPERATORS",
+        "XNN_NO_NCHW_OPERATORS",
     ],
     includes = ["include"],
     linkstatic = True,
@@ -1794,189 +1794,189 @@ xnnpack_binary(
 ########################### Unit tests for operators ###########################
 
 xnnpack_unit_test(
-    name = "add_test",
+    name = "add_nc_test",
     srcs = [
-        "test/add.cc",
+        "test/add-nc.cc",
         "test/add-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "argmax_pooling_test",
+    name = "argmax_pooling_nhwc_test",
     srcs = [
-        "test/argmax-pooling.cc",
+        "test/argmax-pooling-nhwc.cc",
         "test/argmax-pooling-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "average_pooling_test",
+    name = "average_pooling_nhwc_test",
     srcs = [
-        "test/average-pooling.cc",
+        "test/average-pooling-nhwc.cc",
         "test/average-pooling-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "channel_pad_test",
+    name = "channel_pad_nc_test",
     srcs = [
-        "test/channel-pad.cc",
+        "test/channel-pad-nc.cc",
         "test/channel-pad-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "channel_shuffle_test",
+    name = "channel_shuffle_nc_test",
     srcs = [
-        "test/channel-shuffle.cc",
+        "test/channel-shuffle-nc.cc",
         "test/channel-shuffle-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "clamp_test",
+    name = "clamp_nc_test",
     srcs = [
-        "test/clamp.cc",
+        "test/clamp-nc.cc",
         "test/clamp-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "convolution_test",
+    name = "convolution_nhwc_test",
     srcs = [
-        "test/convolution.cc",
+        "test/convolution-nhwc.cc",
         "test/convolution-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "convolution_spnchw_test",
+    name = "convolution_nchw_test",
     srcs = [
-        "test/convolution-spnchw.cc",
-        "test/convolution-spnchw-operator-tester.h",
+        "test/convolution-nchw.cc",
+        "test/convolution-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "deconvolution_test",
+    name = "deconvolution_nhwc_test",
     srcs = [
-        "test/deconvolution.cc",
+        "test/deconvolution-nhwc.cc",
         "test/deconvolution-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "fully_connected_test",
+    name = "fully_connected_nc_test",
     srcs = [
-        "test/fully-connected.cc",
+        "test/fully-connected-nc.cc",
         "test/fully-connected-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "global_average_pooling_test",
+    name = "global_average_pooling_nwc_test",
     srcs = [
-        "test/global-average-pooling.cc",
+        "test/global-average-pooling-nwc.cc",
         "test/global-average-pooling-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "global_average_pooling_spnchw_test",
+    name = "global_average_pooling_ncw_test",
     srcs = [
-        "test/global-average-pooling-spnchw.cc",
-        "test/global-average-pooling-spnchw-operator-tester.h",
+        "test/global-average-pooling-ncw.cc",
+        "test/global-average-pooling-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "hardswish_test",
+    name = "hardswish_nc_test",
     srcs = [
-        "test/hardswish.cc",
+        "test/hardswish-nc.cc",
         "test/hardswish-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "leaky_relu_test",
+    name = "leaky_relu_nc_test",
     srcs = [
-        "test/leaky-relu.cc",
+        "test/leaky-relu-nc.cc",
         "test/leaky-relu-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "max_pooling_test",
+    name = "max_pooling_nhwc_test",
     srcs = [
-        "test/max-pooling.cc",
+        "test/max-pooling-nhwc.cc",
         "test/max-pooling-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "multiply_test",
+    name = "multiply_nd_test",
     srcs = [
-        "test/multiply.cc",
+        "test/multiply-nd.cc",
         "test/multiply-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "prelu_test",
+    name = "prelu_nc_test",
     srcs = [
-        "test/prelu.cc",
+        "test/prelu-nc.cc",
         "test/prelu-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "resize_bilinear_test",
+    name = "resize_bilinear_nhwc_test",
     srcs = [
-        "test/resize-bilinear.cc",
+        "test/resize-bilinear-nhwc.cc",
         "test/resize-bilinear-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "sigmoid_test",
+    name = "sigmoid_nc_test",
     srcs = [
-        "test/sigmoid.cc",
+        "test/sigmoid-nc.cc",
         "test/sigmoid-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "softargmax_test",
+    name = "softargmax_nc_test",
     srcs = [
-        "test/softargmax.cc",
+        "test/softargmax-nc.cc",
         "test/softargmax-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
-    name = "unpooling_test",
+    name = "unpooling_nhwc_test",
     srcs = [
-        "test/unpooling.cc",
+        "test/unpooling-nhwc.cc",
         "test/unpooling-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,

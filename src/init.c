@@ -480,7 +480,7 @@ static void init(void) {
       .channel_tile = 4,
       .row_tile = 2,
     };
-    #ifndef XNN_NO_SPNCHW_OPERATORS
+    #ifndef XNN_NO_NCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
         .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_16x1__neonfma_pipelined,
         .mr = 16,
@@ -531,7 +531,7 @@ static void init(void) {
         .ukernel = (xnn_gavgpool_spchw_ukernel_function) xnn_f32_gavgpool_spchw_ukernel__neon_x4,
         .channel_tile = 4,
       };
-    #endif  // XNN_NO_SPNCHW_OPERATORS
+    #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
   /**************************** X32 micro-kernels ****************************/
@@ -697,7 +697,7 @@ static void init(void) {
       .channel_tile = 4,
       .row_tile = 2,
     };
-    #ifndef XNN_NO_SPNCHW_OPERATORS
+    #ifndef XNN_NO_NCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
         .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_4x1__sse,
         .mr = 4,
@@ -719,7 +719,7 @@ static void init(void) {
         .ukernel = (xnn_gavgpool_spchw_ukernel_function) xnn_f32_gavgpool_spchw_ukernel__sse_x4,
         .channel_tile = 4,
       };
-    #endif  // XNN_NO_SPNCHW_OPERATORS
+    #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
   /**************************** X32 micro-kernels ****************************/
@@ -1074,7 +1074,7 @@ static void init(void) {
       .channel_tile = 1,
       .row_tile = 2,
     };
-    #ifndef XNN_NO_SPNCHW_OPERATORS
+    #ifndef XNN_NO_NCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
         .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_8x1__scalar,
         .mr = 8,
@@ -1125,7 +1125,7 @@ static void init(void) {
         .ukernel = (xnn_gavgpool_spchw_ukernel_function) xnn_f32_gavgpool_spchw_ukernel__scalar_x1,
         .channel_tile = 1,
       };
-    #endif  // XNN_NO_SPNCHW_OPERATORS
+    #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
   /**************************** X32 micro-kernels ****************************/
