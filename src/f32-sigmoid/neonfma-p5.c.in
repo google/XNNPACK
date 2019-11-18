@@ -122,7 +122,7 @@ void xnn_f32_sigmoid_ukernel__neonfma_p5_x${BATCH_TILE}(
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
     $for N in range(0, BATCH_TILE, 4):
-      const uint32x4_t vm${ABC[N:N+4]} = vcltq_s32(vreinterpretq_f32_s32(vx${ABC[N:N+4]}), vmovq_n_s32(0));
+      const uint32x4_t vm${ABC[N:N+4]} = vcltq_s32(vreinterpretq_s32_f32(vx${ABC[N:N+4]}), vmovq_n_s32(0));
 
     $for N in range(0, BATCH_TILE, 4):
       vf${ABC[N:N+4]} = vbslq_f32(vm${ABC[N:N+4]}, vf${ABC[N:N+4]}, vsubq_f32(vone, vf${ABC[N:N+4]}));
@@ -199,7 +199,7 @@ void xnn_f32_sigmoid_ukernel__neonfma_p5_x${BATCH_TILE}(
     float32x4_t vf0123 = vmulq_f32(ve0123, vr0123);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_f32_s32(vx0123), vmovq_n_s32(0));
+    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_s32_f32(vx0123), vmovq_n_s32(0));
     vf0123 = vbslq_f32(vm0123, vf0123, vsubq_f32(vone, vf0123));
 
     // For inputs above 1.0 cutoff, replace output with 1.0.
@@ -271,7 +271,7 @@ void xnn_f32_sigmoid_ukernel__neonfma_p5_x${BATCH_TILE}(
     float32x4_t vf0123 = vmulq_f32(ve0123, vr0123);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_f32_s32(vx0123), vmovq_n_s32(0));
+    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_s32_f32(vx0123), vmovq_n_s32(0));
     vf0123 = vbslq_f32(vm0123, vf0123, vsubq_f32(vone, vf0123));
 
     // For inputs above 1.0 cutoff, replace output with 1.0.

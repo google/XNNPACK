@@ -158,10 +158,10 @@ void xnn_f32_sigmoid_ukernel__neonfma_p5_x16(
     float32x4_t vfCDEF = vmulq_f32(veCDEF, vrCDEF);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_f32_s32(vx0123), vmovq_n_s32(0));
-    const uint32x4_t vm4567 = vcltq_s32(vreinterpretq_f32_s32(vx4567), vmovq_n_s32(0));
-    const uint32x4_t vm89AB = vcltq_s32(vreinterpretq_f32_s32(vx89AB), vmovq_n_s32(0));
-    const uint32x4_t vmCDEF = vcltq_s32(vreinterpretq_f32_s32(vxCDEF), vmovq_n_s32(0));
+    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_s32_f32(vx0123), vmovq_n_s32(0));
+    const uint32x4_t vm4567 = vcltq_s32(vreinterpretq_s32_f32(vx4567), vmovq_n_s32(0));
+    const uint32x4_t vm89AB = vcltq_s32(vreinterpretq_s32_f32(vx89AB), vmovq_n_s32(0));
+    const uint32x4_t vmCDEF = vcltq_s32(vreinterpretq_s32_f32(vxCDEF), vmovq_n_s32(0));
 
     vf0123 = vbslq_f32(vm0123, vf0123, vsubq_f32(vone, vf0123));
     vf4567 = vbslq_f32(vm4567, vf4567, vsubq_f32(vone, vf4567));
@@ -246,7 +246,7 @@ void xnn_f32_sigmoid_ukernel__neonfma_p5_x16(
     float32x4_t vf0123 = vmulq_f32(ve0123, vr0123);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_f32_s32(vx0123), vmovq_n_s32(0));
+    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_s32_f32(vx0123), vmovq_n_s32(0));
     vf0123 = vbslq_f32(vm0123, vf0123, vsubq_f32(vone, vf0123));
 
     // For inputs above 1.0 cutoff, replace output with 1.0.
@@ -318,7 +318,7 @@ void xnn_f32_sigmoid_ukernel__neonfma_p5_x16(
     float32x4_t vf0123 = vmulq_f32(ve0123, vr0123);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_f32_s32(vx0123), vmovq_n_s32(0));
+    const uint32x4_t vm0123 = vcltq_s32(vreinterpretq_s32_f32(vx0123), vmovq_n_s32(0));
     vf0123 = vbslq_f32(vm0123, vf0123, vsubq_f32(vone, vf0123));
 
     // For inputs above 1.0 cutoff, replace output with 1.0.

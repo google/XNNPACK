@@ -94,7 +94,7 @@ void xnn_math_f32_sigmoid__neonfma_p5(
     float32x4_t vf = vmulq_f32(ve, vr);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    const uint32x4_t vm = vcltq_s32(vreinterpretq_f32_s32(vx), vmovq_n_s32(0));
+    const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
     vf = vbslq_f32(vm, vf, vsubq_f32(vone, vf));
 
     // For inputs above 1.0 cutoff, replace output with 1.0.
