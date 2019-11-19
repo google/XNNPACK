@@ -322,8 +322,6 @@ static void init(void) {
           break;
         case cpuinfo_uarch_cortex_a75:
         case cpuinfo_uarch_cortex_a76:
-        case cpuinfo_uarch_mongoose_m1:
-        case cpuinfo_uarch_mongoose_m2:
         case cpuinfo_uarch_meerkat_m3:
         case (cpuinfo_uarch_meerkat_m3 + 1):
           xnn_params.f32.gemm = (struct gemm_parameters) {
@@ -335,6 +333,20 @@ static void init(void) {
             .nr = 8,
           };
           break;
+
+        case cpuinfo_uarch_mongoose_m1:
+        case cpuinfo_uarch_mongoose_m2:
+          xnn_params.f32.gemm = (struct gemm_parameters) {
+            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8s4__psimd,
+            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8s4__psimd,
+            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_igemm_ukernel_1x8s4__psimd,
+            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8s4__psimd,
+            .mr = 6,
+            .nr = 8,
+            .log2_sr = 2,
+          };
+          break;
+
         case cpuinfo_uarch_cortex_a53:
         case cpuinfo_uarch_cortex_a55:
           xnn_params.f32.gemm = (struct gemm_parameters) {
