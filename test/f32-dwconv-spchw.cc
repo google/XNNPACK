@@ -813,9 +813,25 @@
     }
   }
 
-  TEST(F32_DWCONV_SPCHW_5X5P2__NEONFMA, output_height_gt_1) {
+  TEST(F32_DWCONV_SPCHW_5X5P2__NEONFMA, output_height_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_height = 2; output_height < 5; output_height++) {
+    for (size_t input_width = 1; input_width < 32; input_width += 3) {
+      DWConvSpCHWMicrokernelTester()
+        .input_tuple_size(4)
+        .output_tuple_size(4)
+        .input_width(input_width)
+        .padding_left(2)
+        .padding_right(2)
+        .kernel_height(5)
+        .kernel_width(5)
+        .output_height(2)
+        .Test(xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma);
+    }
+  }
+
+  TEST(F32_DWCONV_SPCHW_5X5P2__NEONFMA, output_height_gt_2) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t output_height = 3; output_height < 5; output_height++) {
       for (size_t input_width = 1; input_width < 32; input_width += 3) {
         DWConvSpCHWMicrokernelTester()
           .input_tuple_size(4)

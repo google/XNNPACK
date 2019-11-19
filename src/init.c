@@ -521,7 +521,7 @@ static void init(void) {
         .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma,
         .input_width_tile = 4,
         .output_width_tile = 4,
-        .output_height_tile = 2,
+        .output_height_tile = 3,
       };
       xnn_params.f32.spchw_dwconv5x5s2 = (struct spchw_dwconv_parameters) {
         .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_5x5s2p2__neonfma,
