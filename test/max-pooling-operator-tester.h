@@ -429,7 +429,7 @@ class MaxPoolingOperatorTester {
       }
 
       // Create, setup, run, and destroy Max Pooling operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t max_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -524,7 +524,7 @@ class MaxPoolingOperatorTester {
       }
 
       // Create, setup, run, and destroy Max Pooling operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t max_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -611,7 +611,7 @@ class MaxPoolingOperatorTester {
       }
 
       // Create, setup, and run Max Pooling operator once.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t max_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -765,7 +765,7 @@ class MaxPoolingOperatorTester {
       }
 
       // Create, setup, and run Max Pooling operator once.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t max_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

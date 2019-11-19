@@ -32,7 +32,7 @@ static void add_nc_q8(benchmark::State& state) {
   std::generate(a.begin(), a.end(), std::ref(u8rng));
   std::generate(b.begin(), b.end(), std::ref(u8rng));
 
-  xnn_status status = xnn_initialize();
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
@@ -98,7 +98,7 @@ static void add_nc_q8_inplace(benchmark::State& state) {
   std::vector<uint8_t> y(batch_size * channels);
   std::generate(a.begin(), a.end(), std::ref(u8rng));
 
-  xnn_status status = xnn_initialize();
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;

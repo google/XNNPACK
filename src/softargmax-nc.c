@@ -93,13 +93,13 @@ enum xnn_status xnn_create_softargmax_nc_q8(
 
   status = xnn_status_out_of_memory;
 
-  softargmax_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  softargmax_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (softargmax_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for SoftArgMax operator descriptor", sizeof(struct xnn_operator));
     goto error;
   }
 
-  softargmax_op->lookup_table = xnn_allocate_memory(256 * sizeof(uint32_t));
+  softargmax_op->lookup_table = xnn_allocate_simd_memory(256 * sizeof(uint32_t));
   if (softargmax_op->lookup_table == NULL) {
     xnn_log_error("failed to allocate 256 bytes for SoftArgMax lookup table");
     goto error;

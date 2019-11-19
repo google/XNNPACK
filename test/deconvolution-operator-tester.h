@@ -511,7 +511,7 @@ class DeconvolutionOperatorTester {
         });
 
       // Create, setup, run, and destroy Deconvolution operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -642,7 +642,7 @@ class DeconvolutionOperatorTester {
       }
 
       // Create, setup, run, and destroy Deconvolution operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -783,7 +783,7 @@ class DeconvolutionOperatorTester {
         });
 
       // Create, setup, and run Deconvolution operator once.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -1003,7 +1003,7 @@ class DeconvolutionOperatorTester {
       }
 
       // Create, setup, and run Deconvolution operator once.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

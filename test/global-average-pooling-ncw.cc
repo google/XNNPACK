@@ -9,7 +9,7 @@
 
 
 TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, single_channel) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   GlobalAveragePoolingOperatorTester()
     .width(27)
     .channels(1)
@@ -17,7 +17,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, single_channel) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, varying_channels) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 2; channels <= 16; channels += 3) {
     GlobalAveragePoolingOperatorTester()
       .width(27)
@@ -27,7 +27,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, varying_channels) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, varying_width) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t width = 25; width <= 31; width++) {
     GlobalAveragePoolingOperatorTester()
       .width(width)
@@ -37,7 +37,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, varying_width) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, qmin) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   GlobalAveragePoolingOperatorTester()
     .width(27)
     .channels(19)
@@ -46,7 +46,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, qmin) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NCW_F32, qmax) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   GlobalAveragePoolingOperatorTester()
     .width(27)
     .channels(19)

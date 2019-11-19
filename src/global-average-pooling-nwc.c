@@ -103,13 +103,13 @@ enum xnn_status xnn_create_global_average_pooling_nwc_q8(
 
   status = xnn_status_out_of_memory;
 
-  global_average_pooling_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  global_average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (global_average_pooling_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Global Average Pooling operator descriptor", sizeof(struct xnn_operator));
     goto error;
   }
 
-  void* zero_buffer = xnn_allocate_zero_memory(channels * sizeof(uint8_t) + XNN_EXTRA_BYTES);
+  void* zero_buffer = xnn_allocate_zero_simd_memory(channels * sizeof(uint8_t) + XNN_EXTRA_BYTES);
   if (zero_buffer == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Global Average Pooling zero padding",
       channels * sizeof(uint8_t) + XNN_EXTRA_BYTES);
@@ -204,13 +204,13 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
 
   status = xnn_status_out_of_memory;
 
-  global_average_pooling_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  global_average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (global_average_pooling_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Global Average Pooling operator descriptor", sizeof(struct xnn_operator));
     goto error;
   }
 
-  void* zero_buffer = xnn_allocate_zero_memory(channels * sizeof(float) + XNN_EXTRA_BYTES);
+  void* zero_buffer = xnn_allocate_zero_simd_memory(channels * sizeof(float) + XNN_EXTRA_BYTES);
   if (zero_buffer == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Global Average Pooling zero padding",
       channels * sizeof(float) + XNN_EXTRA_BYTES);

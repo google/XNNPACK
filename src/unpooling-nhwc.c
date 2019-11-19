@@ -92,7 +92,7 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
 
   status = xnn_status_out_of_memory;
 
-  unpooling_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  unpooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (unpooling_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Unpooling operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -187,7 +187,7 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
 
   const size_t indirection_buffer_size = sizeof(void*) * (batch_size * input_height * input_width * pooling_size);
 
-  void** indirection_buffer = (void**) realloc(unpooling_op->indirection_buffer, indirection_buffer_size);
+  void** indirection_buffer = (void**) xnn_reallocate_memory(unpooling_op->indirection_buffer, indirection_buffer_size);
   if (indirection_buffer == NULL) {
     xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
     return xnn_status_out_of_memory;

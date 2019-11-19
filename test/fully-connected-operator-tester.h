@@ -178,7 +178,7 @@ class FullyConnectedOperatorTester {
         });
 
       // Create, setup, run, and destroy Fully Connected operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t fully_connected_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -271,7 +271,7 @@ class FullyConnectedOperatorTester {
       }
 
       // Create, setup, run, and destroy Fully Connected operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t fully_connected_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

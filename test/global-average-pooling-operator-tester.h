@@ -177,7 +177,7 @@ class GlobalAveragePoolingOperatorTester {
       }
 
       // Create, setup, run, and destroy Global Average Pooling operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t global_average_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -254,7 +254,7 @@ class GlobalAveragePoolingOperatorTester {
       }
 
       // Create, setup, run, and destroy Global Average Pooling operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t global_average_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -329,7 +329,7 @@ class GlobalAveragePoolingOperatorTester {
       }
 
       // Create, setup, run, and destroy Global Average Pooling operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t global_average_pooling_op = nullptr;
 
       xnn_status status = xnn_create_global_average_pooling_ncw_f32(

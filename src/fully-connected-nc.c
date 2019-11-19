@@ -123,7 +123,7 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
 
   status = xnn_status_out_of_memory;
 
-  fully_connected_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  fully_connected_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (fully_connected_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Fully Connected operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -135,7 +135,7 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
   const uint32_t n_stride = round_up(output_channels, nr);
   const uint32_t k_stride = round_up_po2(input_channels, kr);
 
-  fully_connected_op->packed_weights = xnn_allocate_memory(n_stride * (k_stride * sizeof(uint8_t) + sizeof(int32_t)));
+  fully_connected_op->packed_weights = xnn_allocate_simd_memory(n_stride * (k_stride * sizeof(uint8_t) + sizeof(int32_t)));
   if (fully_connected_op->packed_weights == NULL) {
     xnn_log_error("failed to allocate %zu bytes for packed weights",
       n_stride * (k_stride * sizeof(uint8_t) + sizeof(int32_t)));
@@ -255,7 +255,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
 
   status = xnn_status_out_of_memory;
 
-  fully_connected_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  fully_connected_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (fully_connected_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Fully Connected operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -268,7 +268,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   const uint32_t n_stride = round_up(output_channels, nr);
   const uint32_t k_stride = round_up_po2(input_channels, kr);
 
-  fully_connected_op->packed_weights = xnn_allocate_memory(n_stride * (k_stride * sizeof(float) + sizeof(float)));
+  fully_connected_op->packed_weights = xnn_allocate_simd_memory(n_stride * (k_stride * sizeof(float) + sizeof(float)));
   if (fully_connected_op->packed_weights == NULL) {
     xnn_log_error("failed to allocate %zu bytes for packed weights",
       n_stride * (k_stride * sizeof(float) + sizeof(float)));

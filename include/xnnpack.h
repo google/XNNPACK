@@ -54,10 +54,60 @@ enum xnn_status {
   xnn_status_out_of_memory = 6,
 };
 
+struct xnn_allocator {
+  /// User-specified pointer that will be passed as-is to all functions in this structure.
+  void* context;
+  /// Pointer to a function to be called for general memory allocation.
+  ///
+  /// @param context - The user-specified pointer from xnn_allocator structure.
+  /// @param size - The size of the memory block to allocate, in bytes.
+  ///
+  /// @returns Pointer to the allocated memory block of at least @ref size bytes.
+  ///          If allocation fails, the function must return NULL.
+  void* (*allocate)(void* context, size_t size);
+  /// Pointer to a function to be called for general memory re-allocation, i.e. to increase or shrink a previously
+  /// allocated memory block. The content of the old memory block is copied to the new memory block.
+  ///
+  /// @param context - The user-specified pointer from xnn_allocator structure.
+  /// @param pointer - Pointer to a memory block allocated by @ref allocate or @ref reallocate functions. Can be NULL.
+  ///                  If the pointer is NULL, the @ref reallocate call is equivalent to an @ref allocate call.
+  /// @param size - The new size of the memory block to allocate, in bytes.
+  ///
+  /// @returns Pointer to the newly allocated memory block of at least @ref size bytes with the content of the previous
+  ///          memory block.
+  ///          If allocation fails, the function must return NULL, but must not release the previous memory block.
+  void* (*reallocate)(void* context, void* pointer, size_t size);
+  /// Pointer to a function to be called for general memory de-allocation.
+  ///
+  /// @param context - The user-specified pointer from xnn_allocator structure.
+  /// @param pointer - Pointer to a memory block allocated by @ref allocate or @ref reallocate functions. Can be NULL.
+  ///                  If the pointer is NULL, the @ref deallocate call is a no-op.
+  void (*deallocate)(void* context, void* pointer);
+  /// Pointer to a function to be called for aligned memory allocation.
+  ///
+  /// @param context - The user-specified pointer from xnn_allocator structure.
+  /// @param alignment - The alignment of the memory block to allocate, in bytes. Alignment is always a power-of-2.
+  /// @param size - The size of the memory block to allocate, in bytes.
+  ///
+  /// @returns Pointer to the allocated memory block of at least @ref size bytes.
+  ///          If allocation fails, the function must return NULL.
+  void* (*aligned_allocate)(void* context, size_t alignment, size_t size);
+  /// Pointer to a function to be called for aligned memory de-allocation.
+  ///
+  /// @param context - The user-specified pointer from xnn_allocator structure.
+  /// @param pointer - Pointer to a memory block allocated by @ref aligned_allocate function. Can be NULL.
+  ///                  If the pointer is NULL, the @ref aligned_deallocate call is a no-op.
+  void (*aligned_deallocate)(void* context, void* pointer);
+};
+
 /// Initialize XNNPACK library.
 ///
 /// XNNPACK must be successfully initialized before use.
 /// During initialization, XNNPACK populates internal structures depending on host processor. It can be time-consuming.
+///
+/// @param[in] allocator - structure with function pointers to be use for memory allocation and de-allocation.
+///                        If this argument is NULL, system-provided memory management functions (e.g. malloc/free)
+///                        will be used.
 ///
 /// @retval xnn_status_success - XNNPACK is succesfully initialized and ready to use.
 /// @retval xnn_status_out_of_memory - initialization failed due to out-of-memory condition.
@@ -65,7 +115,7 @@ enum xnn_status {
 ///                                           minimum hardware requirements for XNNPACK. E.g. this may happen on x86
 ///                                           processors without SSE2 extension, or on 32-bit ARM processors without
 ///                                           the NEON SIMD extension.
-enum xnn_status xnn_initialize(void);
+enum xnn_status xnn_initialize(const struct xnn_allocator* allocator);
 
 /// Deinitialize XNNPACK library.
 ///

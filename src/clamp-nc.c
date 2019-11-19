@@ -69,7 +69,7 @@ enum xnn_status xnn_create_clamp_nc_u8(
 
   status = xnn_status_out_of_memory;
 
-  clamp_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  clamp_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (clamp_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Clamp operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -155,7 +155,7 @@ enum xnn_status xnn_create_clamp_nc_f32(
 
   status = xnn_status_out_of_memory;
 
-  clamp_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  clamp_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (clamp_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Clamp operator descriptor", sizeof(struct xnn_operator));
     goto error;

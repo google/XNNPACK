@@ -75,7 +75,7 @@ void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
   std::generate(bias.begin(), bias.end(), std::ref(s32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
 
-  xnn_status status = xnn_initialize();
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
@@ -192,7 +192,7 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
 
-  xnn_status status = xnn_initialize();
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;

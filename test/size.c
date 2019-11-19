@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     function_idx = atoi(argv[1]);
   }
 
-  xnn_initialize();
+  xnn_initialize(NULL /* allocator */);
 
   xnn_operator_t op = NULL;
   switch (function_idx) {

@@ -156,7 +156,7 @@ class SigmoidOperatorTester {
       }
 
       // Create, setup, run, and destroy Sigmoid operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t sigmoid_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -213,7 +213,7 @@ class SigmoidOperatorTester {
       }
 
       // Create, setup, run, and destroy Sigmoid operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t sigmoid_op = nullptr;
 
       xnn_status status = xnn_create_sigmoid_nc_f32(

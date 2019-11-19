@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 #include <xnnpack.h>
+#include <xnnpack/allocator.h>
 #include <xnnpack/log.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/params-init.h>
@@ -56,7 +57,7 @@ enum xnn_status xnn_create_hardswish_nc_f32(
 
   status = xnn_status_out_of_memory;
 
-  hardswish_op = calloc(1, sizeof(struct xnn_operator));
+  hardswish_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (hardswish_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for xnn_operator structure", sizeof(struct xnn_operator));
     goto error;

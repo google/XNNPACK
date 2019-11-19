@@ -123,7 +123,7 @@ class ClampOperatorTester {
       }
 
       // Create, setup, run, and destroy Clamp operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t clamp_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -184,7 +184,7 @@ class ClampOperatorTester {
       }
 
       // Create, setup, run, and destroy Clamp operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t clamp_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

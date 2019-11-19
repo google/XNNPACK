@@ -643,7 +643,7 @@ class ConvolutionOperatorTester {
         });
 
       // Create, setup, run, and destroy Convolution operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -800,7 +800,7 @@ class ConvolutionOperatorTester {
       }
 
       // Create, setup, run, and destroy Convolution operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -966,7 +966,7 @@ class ConvolutionOperatorTester {
       }
 
       // Create, setup, run, and destroy Convolution operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
       xnn_status status = xnn_create_convolution2d_nchw_f32(
@@ -1109,7 +1109,7 @@ class ConvolutionOperatorTester {
         });
 
       // Create, setup, and run Convolution operator once.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -1325,7 +1325,7 @@ class ConvolutionOperatorTester {
       }
 
       // Create, setup, and run Convolution operator once.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

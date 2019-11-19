@@ -122,7 +122,7 @@ enum xnn_status xnn_create_add_nc_q8(
 
   status = xnn_status_out_of_memory;
 
-  add_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  add_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (add_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Add operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -222,7 +222,7 @@ enum xnn_status xnn_create_add_nc_f32(
 
   status = xnn_status_out_of_memory;
 
-  add_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  add_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (add_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Add operator descriptor", sizeof(struct xnn_operator));
     goto error;

@@ -155,7 +155,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
 
   status = xnn_status_out_of_memory;
 
-  average_pooling_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (average_pooling_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Average Pooling operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -165,7 +165,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
   const uint32_t mr = xnn_params.q8.avgpool.mr;
   const uint32_t qr = xnn_params.q8.avgpool.qr;
   if (any_padding || pooling_size < mr || (pooling_size - mr) % qr != 0) {
-    void* zero_buffer = xnn_allocate_memory(channels * sizeof(uint8_t) + XNN_EXTRA_BYTES);
+    void* zero_buffer = xnn_allocate_simd_memory(channels * sizeof(uint8_t) + XNN_EXTRA_BYTES);
     if (zero_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for Average Pooling zero padding",
         channels * sizeof(uint8_t) + XNN_EXTRA_BYTES);
@@ -303,7 +303,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
 
   status = xnn_status_out_of_memory;
 
-  average_pooling_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (average_pooling_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Average Pooling operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -313,13 +313,12 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   const uint32_t mr = xnn_params.f32.avgpool.mr;
   const uint32_t qr = xnn_params.f32.avgpool.qr;
   if (any_padding || pooling_size < mr || (pooling_size - mr) % qr != 0) {
-    void* zero_buffer = xnn_allocate_memory(channels * sizeof(float) + XNN_EXTRA_BYTES);
+    void* zero_buffer = xnn_allocate_zero_simd_memory(channels * sizeof(float) + XNN_EXTRA_BYTES);
     if (zero_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for Average Pooling zero padding",
         channels * sizeof(float) + XNN_EXTRA_BYTES);
       goto error;
     }
-    memset(zero_buffer, 0, channels * sizeof(float));
     average_pooling_op->zero_buffer = zero_buffer;
   }
 
@@ -431,7 +430,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
   const size_t step_height = pooling_size + (output_width * step_width - 1) * pooling_height;
   const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
 
-  const void** indirection_buffer = (const void**) realloc(average_pooling_op->indirection_buffer, indirection_buffer_size);
+  const void** indirection_buffer = (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
   if (indirection_buffer == NULL) {
     xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
     return xnn_status_out_of_memory;
@@ -559,7 +558,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
   const size_t step_height = pooling_size + (output_width * step_width - 1) * pooling_height;
   const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
 
-  const void** indirection_buffer = (const void**) realloc(average_pooling_op->indirection_buffer, indirection_buffer_size);
+  const void** indirection_buffer = (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
   if (indirection_buffer == NULL) {
     xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
     return xnn_status_out_of_memory;
@@ -611,7 +610,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
           input_width != average_pooling_op->last_input_width)
       {
         const size_t pixelwise_buffer_size = output_height * output_width * sizeof(float);
-        float* pixelwise_buffer = (float*) realloc(average_pooling_op->pixelwise_buffer, pixelwise_buffer_size);
+        float* pixelwise_buffer = (float*) xnn_reallocate_memory(average_pooling_op->pixelwise_buffer, pixelwise_buffer_size);
         if (pixelwise_buffer == NULL) {
           xnn_log_error("failed to allocate %zu bytes for pixelwise buffer", pixelwise_buffer_size);
           return xnn_status_out_of_memory;

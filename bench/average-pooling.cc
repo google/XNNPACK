@@ -40,7 +40,7 @@ static void average_pooling_q8(benchmark::State& state, const char* net) {
   std::vector<uint8_t> output(batch_size * output_height * output_width * channels);
   std::fill(output.begin(), output.end(), 0xA5);
 
-  xnn_status status = xnn_initialize();
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;

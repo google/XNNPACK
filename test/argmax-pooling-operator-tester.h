@@ -348,7 +348,7 @@ class ArgmaxPoolingOperatorTester {
       }
 
       // Create, setup, run, and destroy Argmax Pooling operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t argmax_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -464,7 +464,7 @@ class ArgmaxPoolingOperatorTester {
       }
 
       // Create, setup, and run Argmax Pooling operator once.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t argmax_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

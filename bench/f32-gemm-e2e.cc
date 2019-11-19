@@ -29,7 +29,7 @@ static void GEMMEnd2EndBenchmark(
   xnn_f32_igemm_ukernel_function igemm1,
   uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0)
 {
-  if (xnn_initialize() != xnn_status_success) {
+  if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
   }

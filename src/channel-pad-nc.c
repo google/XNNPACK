@@ -62,7 +62,7 @@ enum xnn_status xnn_create_channel_pad_nc_x32(
 
   status = xnn_status_out_of_memory;
 
-  channel_pad_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  channel_pad_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (channel_pad_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Channel Pad operator descriptor", sizeof(struct xnn_operator));
     goto error;

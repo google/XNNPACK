@@ -311,7 +311,7 @@ class UnpoolingOperatorTester {
       }
 
       // Create, setup, run, and destroy Unpooling operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t unpooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -392,7 +392,7 @@ class UnpoolingOperatorTester {
       }
 
       // Create, setup, and run Unpooling operator once.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t unpooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

@@ -114,7 +114,7 @@ class ChannelPadOperatorTester {
       std::generate(output.begin(), output.end(), std::ref(u32rng));
 
       // Create, setup, run, and destroy Channel Pad operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t channel_pad_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

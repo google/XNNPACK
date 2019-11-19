@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <xnnpack.h>
 #include <xnnpack/common.h>
 
 struct xnn_f16_output_params {
@@ -1321,6 +1322,7 @@ struct vmulcaddc_parameters {
 
 struct xnn_parameters {
   bool initialized;
+  struct xnn_allocator allocator;
   struct {
     struct gemm_parameters gemm;
     struct dwconv_parameters dwconv[XNN_MAX_Q8_DWCONV_UKERNELS];

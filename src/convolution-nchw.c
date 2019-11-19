@@ -193,7 +193,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
 
   status = xnn_status_out_of_memory;
 
-  convolution_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  convolution_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (convolution_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Convolution operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -273,7 +273,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       const size_t packed_weights_size = num_output_channel_blocks * sizeof(uint32_t) +
         (num_nonzero_blocks * 2) * sizeof(int32_t) + (num_nonzero_values + group_output_channels) * sizeof(float);
 
-      convolution_op->packed_weights = xnn_allocate_memory(packed_weights_size);
+      convolution_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights == NULL) {
         xnn_log_error("failed to allocate %zu bytes for packed weights", packed_weights_size);
         goto error;
@@ -384,7 +384,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
         round_up(group_output_channels, xnn_params.f32.hwc2spchw_dconv3x3c3s2.output_channel_tile);
       const size_t packed_weights_size = groups * packed_group_output_channels *
         (group_input_channels * kernel_height * kernel_width + 1 /* bias */) * sizeof(float);
-      convolution_op->packed_weights = xnn_allocate_memory(packed_weights_size);
+      convolution_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights == NULL) {
         xnn_log_error("failed to allocate %zu bytes for packed weights", packed_weights_size);
         goto error;
@@ -412,7 +412,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       assert(group_output_channels == 1);
 
       const size_t packed_weights_size = groups * (kernel_height * kernel_width + 1 /* bias */) * sizeof(float);
-      convolution_op->packed_weights = xnn_allocate_memory(packed_weights_size);
+      convolution_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights == NULL) {
         xnn_log_error("failed to allocate %zu bytes for packed weights", packed_weights_size);
         goto error;
@@ -608,7 +608,7 @@ static enum xnn_status setup_convolution2d_nchw(
     case xnn_ukernel_type_dconv2d_hwc2spchw:
     {
       const size_t zero_size = (input_width * convolution_op->group_input_channels << log2_input_element_size) + XNN_EXTRA_BYTES;
-      void* zero_buffer = realloc(convolution_op->zero_buffer, zero_size);
+      void* zero_buffer = xnn_reallocate_memory(convolution_op->zero_buffer, zero_size);
       if (zero_buffer == NULL) {
         xnn_log_error("failed to allocate %zu bytes for zero padding", sizeof(struct xnn_operator));
         return xnn_status_out_of_memory;

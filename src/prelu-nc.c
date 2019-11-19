@@ -68,14 +68,14 @@ enum xnn_status xnn_create_prelu_nc_f32(
 
   status = xnn_status_out_of_memory;
 
-  prelu_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  prelu_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (prelu_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for PReLU operator descriptor", sizeof(struct xnn_operator));
     goto error;
   }
 
   const size_t packed_channels = round_up_po2(channels, XNN_EXTRA_BYTES / sizeof(float));
-  prelu_op->packed_weights = xnn_allocate_memory(packed_channels * sizeof(float));
+  prelu_op->packed_weights = xnn_allocate_simd_memory(packed_channels * sizeof(float));
   if (prelu_op->packed_weights == NULL) {
     xnn_log_error("failed to allocate %zu bytes for packed slope data",
       packed_channels * sizeof(float));

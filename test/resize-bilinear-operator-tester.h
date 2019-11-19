@@ -257,7 +257,7 @@ class ResizeBilinearOperatorTester {
       }
 
       // Create, setup, run, and destroy Resize Bilinear operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t resize_bilinear_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -354,7 +354,7 @@ class ResizeBilinearOperatorTester {
   //     }
 
   //     // Create, setup, and run Average Pooling operator once.
-  //     ASSERT_EQ(xnn_status_success, xnn_initialize());
+  //     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   //     xnn_operator_t resize_bilinear_op = nullptr;
 
   //     ASSERT_EQ(xnn_status_success,

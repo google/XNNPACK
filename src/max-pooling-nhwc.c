@@ -128,7 +128,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
 
   status = xnn_status_out_of_memory;
 
-  max_pooling_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  max_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (max_pooling_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Max Pooling operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -269,7 +269,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
 
   status = xnn_status_out_of_memory;
 
-  max_pooling_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  max_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (max_pooling_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Max Pooling operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -380,7 +380,7 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_u8(
   const size_t step_height = pooling_size + (output_width * step_width - 1) * pooling_height;
   const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
 
-  const void** indirection_buffer = (const void**) realloc(max_pooling_op->indirection_buffer, indirection_buffer_size);
+  const void** indirection_buffer = (const void**) xnn_reallocate_memory(max_pooling_op->indirection_buffer, indirection_buffer_size);
   if (indirection_buffer == NULL) {
     xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
     return xnn_status_out_of_memory;
@@ -502,7 +502,7 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f32(
   const size_t step_height = pooling_size + (output_width * step_width - 1) * pooling_height;
   const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
 
-  const void** indirection_buffer = (const void**) realloc(max_pooling_op->indirection_buffer, indirection_buffer_size);
+  const void** indirection_buffer = (const void**) xnn_reallocate_memory(max_pooling_op->indirection_buffer, indirection_buffer_size);
   if (indirection_buffer == NULL) {
     xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
     return xnn_status_out_of_memory;

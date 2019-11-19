@@ -70,7 +70,7 @@ static enum xnn_status create_channel_shuffle_nc(
 
   status = xnn_status_out_of_memory;
 
-  channel_shuffle_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  channel_shuffle_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (channel_shuffle_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Channel Shuffle operator descriptor", sizeof(struct xnn_operator));
     goto error;

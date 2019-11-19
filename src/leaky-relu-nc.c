@@ -112,13 +112,13 @@ enum xnn_status xnn_create_leaky_relu_nc_q8(
 
   status = xnn_status_out_of_memory;
 
-  leaky_relu_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  leaky_relu_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (leaky_relu_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Leaky ReLU operator descriptor", sizeof(struct xnn_operator));
     goto error;
   }
 
-  leaky_relu_op->lookup_table = xnn_allocate_memory(256 * sizeof(uint8_t));
+  leaky_relu_op->lookup_table = xnn_allocate_simd_memory(256 * sizeof(uint8_t));
   if (leaky_relu_op->lookup_table == NULL) {
     xnn_log_error("failed to allocate 256 bytes for Leaky ReLU lookup table");
     goto error;

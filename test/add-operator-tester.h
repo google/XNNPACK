@@ -206,7 +206,7 @@ class AddOperatorTester {
       }
 
       // Create, setup, run, and destroy Add operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t add_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -277,7 +277,7 @@ class AddOperatorTester {
       }
 
       // Create, setup, run, and destroy Add operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t add_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

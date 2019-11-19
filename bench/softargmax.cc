@@ -29,7 +29,7 @@ static void softargmax_q8(benchmark::State& state) {
   std::generate(input.begin(), input.end(), std::ref(u8rng));
   std::fill(output.begin(), output.end(), 0xA5);
 
-  xnn_status status = xnn_initialize();
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;

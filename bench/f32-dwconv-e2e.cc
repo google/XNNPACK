@@ -25,7 +25,7 @@ static void DWConvEnd2EndBenchmark(
   xnn_f32_dwconv_up_ukernel_function dwconv,
   uint8_t cr, uint8_t mr)
 {
-  if (xnn_initialize() != xnn_status_success) {
+  if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
   }

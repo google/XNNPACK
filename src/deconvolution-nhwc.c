@@ -181,7 +181,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
 
   status = xnn_status_out_of_memory;
 
-  deconvolution_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  deconvolution_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (deconvolution_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Deconvolution operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -204,7 +204,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
       (sizeof(uint8_t) * kernel_size * k_stride + sizeof(int32_t) * subkernels);
 
     const size_t subconvolution_buffer_size = sizeof(struct subconvolution_params) * subkernels;
-    deconvolution_op->subconvolution_buffer = xnn_allocate_zero_memory(subconvolution_buffer_size);
+    deconvolution_op->subconvolution_buffer = xnn_allocate_zero_simd_memory(subconvolution_buffer_size);
     if (deconvolution_op->subconvolution_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for subconvolution buffer", subconvolution_buffer_size);
       goto error;
@@ -223,7 +223,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
       }
     }
   }
-  deconvolution_op->packed_weights = xnn_allocate_memory(packed_group_weights_size * groups);
+  deconvolution_op->packed_weights = xnn_allocate_simd_memory(packed_group_weights_size * groups);
   if (deconvolution_op->packed_weights == NULL) {
     xnn_log_error("failed to allocate %zu bytes for packed weights", packed_group_weights_size * groups);
     goto error;
@@ -251,7 +251,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   }
 
   size_t zero_size = sizeof(uint8_t) * k_stride + XNN_EXTRA_BYTES;
-  void* zero_buffer = xnn_allocate_memory(zero_size);
+  void* zero_buffer = xnn_allocate_simd_memory(zero_size);
   if (zero_buffer == NULL) {
     xnn_log_error("failed to allocate %zu bytes for zero padding", zero_size);
     goto error;
@@ -419,7 +419,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
 
   status = xnn_status_out_of_memory;
 
-  deconvolution_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  deconvolution_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (deconvolution_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Deconvolution operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -453,7 +453,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
       (sizeof(float) * kernel_size * k_stride + sizeof(float) * subkernels);
 
     const size_t subconvolution_buffer_size = sizeof(struct subconvolution_params) * subkernels;
-    deconvolution_op->subconvolution_buffer = xnn_allocate_zero_memory(subconvolution_buffer_size);
+    deconvolution_op->subconvolution_buffer = xnn_allocate_zero_simd_memory(subconvolution_buffer_size);
     if (deconvolution_op->subconvolution_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for subconvolution buffer", subconvolution_buffer_size);
       goto error;
@@ -472,7 +472,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
       }
     }
   }
-  deconvolution_op->packed_weights = xnn_allocate_memory(packed_group_weights_size * groups);
+  deconvolution_op->packed_weights = xnn_allocate_simd_memory(packed_group_weights_size * groups);
   if (deconvolution_op->packed_weights == NULL) {
     xnn_log_error("failed to allocate %zu bytes for packed weights", packed_group_weights_size * groups);
     goto error;
@@ -498,7 +498,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   }
 
   const size_t zero_size = k_stride * sizeof(float) + XNN_EXTRA_BYTES;
-  void* zero_buffer = xnn_allocate_zero_memory(zero_size);
+  void* zero_buffer = xnn_allocate_zero_simd_memory(zero_size);
   if (zero_buffer == NULL) {
     xnn_log_error("failed to allocate %zu bytes for zero padding", zero_size);
     goto error;
@@ -574,7 +574,7 @@ static enum xnn_status setup_conv_path(
   if (input_height != deconvolution_op->last_input_height ||
       input_width != deconvolution_op->last_input_width)
   {
-    const void** indirection_buffer = (const void**) realloc(deconvolution_op->indirection_buffer, indirection_buffer_size);
+    const void** indirection_buffer = (const void**) xnn_reallocate_memory(deconvolution_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
       return xnn_status_out_of_memory;
@@ -681,7 +681,7 @@ static enum xnn_status setup_subconv2d_path(
   if (input_height != deconvolution_op->last_input_height ||
       input_width != deconvolution_op->last_input_width)
   {
-    const void** indirection_buffer = (const void**) realloc(deconvolution_op->indirection_buffer, indirection_buffer_size);
+    const void** indirection_buffer = (const void**) xnn_reallocate_memory(deconvolution_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
       return xnn_status_out_of_memory;

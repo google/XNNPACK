@@ -9,7 +9,7 @@
 
 
 TEST(UNPOOLING_NHWC_X32, unit_height_horizontal_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pooling_size : std::vector<size_t>{{2, 3, 5, 7}}) {
       UnpoolingOperatorTester()
@@ -25,7 +25,7 @@ TEST(UNPOOLING_NHWC_X32, unit_height_horizontal_pool) {
 }
 
 TEST(UNPOOLING_NHWC_X32, unit_height_horizontal_pool_with_padding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pooling_size : std::vector<size_t>{{3, 5, 7}}) {
       for (size_t padding_left = 0; padding_left <= 1; padding_left++) {
@@ -47,7 +47,7 @@ TEST(UNPOOLING_NHWC_X32, unit_height_horizontal_pool_with_padding) {
 }
 
 TEST(UNPOOLING_NHWC_X32, unit_height_vertical_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pooling_size : std::vector<size_t>{{2, 3, 5, 7}}) {
       UnpoolingOperatorTester()
@@ -63,7 +63,7 @@ TEST(UNPOOLING_NHWC_X32, unit_height_vertical_pool) {
 }
 
 TEST(UNPOOLING_NHWC_X32, unit_height_vertical_pool_with_padding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pooling_size : std::vector<size_t>{{3, 5, 7}}) {
       for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
@@ -85,7 +85,7 @@ TEST(UNPOOLING_NHWC_X32, unit_height_vertical_pool_with_padding) {
 }
 
 TEST(UNPOOLING_NHWC_X32, unit_height_square_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pooling_size : std::vector<size_t>{{2, 3, 5}}) {
       UnpoolingOperatorTester()
@@ -101,7 +101,7 @@ TEST(UNPOOLING_NHWC_X32, unit_height_square_pool) {
 }
 
 TEST(UNPOOLING_NHWC_X32, unit_height_3x3_pool_with_padding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t padding_left = 0; padding_left <= 1; padding_left++) {
       for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
@@ -128,7 +128,7 @@ TEST(UNPOOLING_NHWC_X32, unit_height_3x3_pool_with_padding) {
 }
 
 TEST(UNPOOLING_NHWC_X32, small_height_square_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pooling_size : std::vector<size_t>{{2, 3, 5}}) {
       UnpoolingOperatorTester()
@@ -144,7 +144,7 @@ TEST(UNPOOLING_NHWC_X32, small_height_square_pool) {
 }
 
 TEST(UNPOOLING_NHWC_X32, small_height_3x3_pool_with_input_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     UnpoolingOperatorTester()
       .batch_size(1)
@@ -159,7 +159,7 @@ TEST(UNPOOLING_NHWC_X32, small_height_3x3_pool_with_input_stride) {
 }
 
 TEST(UNPOOLING_NHWC_X32, small_height_3x3_pool_with_output_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     UnpoolingOperatorTester()
       .batch_size(1)
@@ -174,7 +174,7 @@ TEST(UNPOOLING_NHWC_X32, small_height_3x3_pool_with_output_stride) {
 }
 
 TEST(UNPOOLING_NHWC_X32, small_height_3x3_pool_with_padding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 50; channels += 15) {
     for (size_t padding_left = 0; padding_left <= 1; padding_left++) {
       for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
@@ -197,7 +197,7 @@ TEST(UNPOOLING_NHWC_X32, small_height_3x3_pool_with_padding) {
 }
 
 TEST(UNPOOLING_NHWC_X32, small_height_and_batch_square_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pooling_size : std::vector<size_t>{{2, 3}}) {
       UnpoolingOperatorTester()
@@ -213,7 +213,7 @@ TEST(UNPOOLING_NHWC_X32, small_height_and_batch_square_pool) {
 }
 
 TEST(UNPOOLING_NHWC_X32, setup_increasing_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   UnpoolingOperatorTester()
     .batch_size(3)
     .next_batch_size(5)
@@ -226,7 +226,7 @@ TEST(UNPOOLING_NHWC_X32, setup_increasing_batch) {
 }
 
 TEST(UNPOOLING_NHWC_X32, setup_decreasing_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   UnpoolingOperatorTester()
     .batch_size(5)
     .next_batch_size(3)
@@ -239,7 +239,7 @@ TEST(UNPOOLING_NHWC_X32, setup_decreasing_batch) {
 }
 
 TEST(UNPOOLING_NHWC_X32, setup_changing_height) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   UnpoolingOperatorTester()
     .batch_size(3)
     .input_height(4)
@@ -261,7 +261,7 @@ TEST(UNPOOLING_NHWC_X32, setup_changing_height) {
 }
 
 TEST(UNPOOLING_NHWC_X32, setup_changing_width) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   UnpoolingOperatorTester()
     .batch_size(3)
     .input_height(4)
@@ -283,7 +283,7 @@ TEST(UNPOOLING_NHWC_X32, setup_changing_width) {
 }
 
 TEST(UNPOOLING_NHWC_X32, setup_swap_height_and_width) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   UnpoolingOperatorTester()
     .batch_size(3)
     .input_height(5)

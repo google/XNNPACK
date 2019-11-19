@@ -26,12 +26,12 @@ enum xnn_status xnn_delete_operator(xnn_operator_t op)
     return xnn_status_invalid_parameter;
   }
 
-  free(op->indirection_buffer);
-  xnn_release_memory(op->packed_weights);
-  xnn_release_memory(op->zero_buffer);
-  free(op->pixelwise_buffer);
-  free(op->subconvolution_buffer);
-  xnn_release_memory(op->lookup_table);
-  xnn_release_memory(op);
+  xnn_release_memory(op->indirection_buffer);
+  xnn_release_simd_memory(op->packed_weights);
+  xnn_release_simd_memory(op->zero_buffer);
+  xnn_release_memory(op->pixelwise_buffer);
+  xnn_release_memory(op->subconvolution_buffer);
+  xnn_release_simd_memory(op->lookup_table);
+  xnn_release_simd_memory(op);
   return xnn_status_success;
 }

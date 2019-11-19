@@ -31,7 +31,7 @@ static void channel_shuffle_x8(benchmark::State& state, const char* net) {
   std::vector<uint8_t> output(batch_size * groups * group_channels);
   std::generate(input.begin(), input.end(), std::ref(u8rng));
 
-  xnn_status status = xnn_initialize();
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
@@ -96,7 +96,7 @@ static void channel_shuffle_x32(benchmark::State& state, const char* net) {
   std::vector<float> output(batch_size * groups * group_channels);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
 
-  xnn_status status = xnn_initialize();
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;

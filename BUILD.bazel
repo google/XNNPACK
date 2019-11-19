@@ -632,6 +632,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/lut.h",
     "src/xnnpack/math.h",
     "src/xnnpack/maxpool.h",
+    "src/xnnpack/memory.h",
     "src/xnnpack/packx.h",
     "src/xnnpack/pad.h",
     "src/xnnpack/params.h",
@@ -718,6 +719,7 @@ xnnpack_cc_library(
     deps = [
         "@FP16",
         "@FXdiv",
+        "@pthreadpool",
     ],
 )
 
@@ -737,6 +739,7 @@ xnnpack_cc_library(
     deps = [
         "@FP16",
         "@psimd",
+        "@pthreadpool",
     ],
 )
 
@@ -750,7 +753,10 @@ xnnpack_cc_library(
     aarch32_srcs = NEON_UKERNELS,
     aarch64_srcs = NEON_UKERNELS,
     copts = xnnpack_std_copts(),
-    deps = ["@FP16"],
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_cc_library(
@@ -763,7 +769,10 @@ xnnpack_cc_library(
     aarch32_srcs = NEONFMA_UKERNELS,
     aarch64_srcs = NEONFMA_UKERNELS + AARCH64_NEONFMA_UKERNELS,
     copts = xnnpack_std_copts(),
-    deps = ["@FP16"],
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_cc_library(
@@ -772,7 +781,10 @@ xnnpack_cc_library(
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = AARCH64_NEONFP16ARITH_UKERNELS,
     copts = xnnpack_std_copts(),
-    deps = ["@FP16"],
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_cc_library(
@@ -781,7 +793,10 @@ xnnpack_cc_library(
     copts = xnnpack_std_copts(),
     x86_copts = ["-msse2"],
     x86_srcs = SSE_UKERNELS + SSE2_UKERNELS,
-    deps = ["@FP16"],
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_cc_library(
@@ -790,7 +805,10 @@ xnnpack_cc_library(
     copts = xnnpack_std_copts(),
     x86_copts = ["-msse4.1"],
     x86_srcs = SSE41_UKERNELS,
-    deps = ["@FP16"],
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_cc_library(
@@ -799,7 +817,10 @@ xnnpack_cc_library(
     copts = xnnpack_std_copts(),
     x86_copts = ["-mavx"],
     x86_srcs = AVX_UKERNELS,
-    deps = ["@FP16"],
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_cc_library(
@@ -811,7 +832,10 @@ xnnpack_cc_library(
         "-mavx2",
     ],
     x86_srcs = AVX2_UKERNELS,
-    deps = ["@FP16"],
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_cc_library(
@@ -820,7 +844,10 @@ xnnpack_cc_library(
     copts = xnnpack_std_copts(),
     x86_copts = ["-mavx512f"],
     x86_srcs = AVX512F_UKERNELS,
-    deps = ["@FP16"],
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_cc_library(
@@ -909,6 +936,7 @@ cc_library(
 xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS + [
+        "src/memory.c",
         "src/operator-delete.c",
     ],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,

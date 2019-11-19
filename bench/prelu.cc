@@ -41,7 +41,7 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   std::generate(slope.begin(), slope.end(), std::ref(f32wrng));
   std::vector<float> output(batch_size * height * width * channels);
 
-  xnn_status status = xnn_initialize();
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;

@@ -108,7 +108,7 @@ class ChannelShuffleOperatorTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       // Create, setup, run, and destroy Channel Shuffle operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t channel_shuffle_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -156,7 +156,7 @@ class ChannelShuffleOperatorTester {
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Create, setup, run, and destroy Channel Shuffle operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t channel_shuffle_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

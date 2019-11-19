@@ -62,7 +62,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
 
   status = xnn_status_out_of_memory;
 
-  resize_op = xnn_allocate_zero_memory(sizeof(struct xnn_operator));
+  resize_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (resize_op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for Resize Bilinear operator descriptor", sizeof(struct xnn_operator));
     goto error;
@@ -147,14 +147,14 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
     const size_t indirection_buffer_size = sizeof(void*) * (output_height * output_width * 4);
     const size_t packed_weights_size = sizeof(float) * (output_height * output_width * 2);
 
-    const void** indirection_buffer = (const void**) realloc(resize_op->indirection_buffer, indirection_buffer_size);
+    const void** indirection_buffer = (const void**) xnn_reallocate_memory(resize_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
       return xnn_status_out_of_memory;
     }
     resize_op->indirection_buffer = indirection_buffer;
 
-    float* packed_weights = (float*) realloc(resize_op->packed_weights, packed_weights_size);
+    float* packed_weights = (float*) xnn_reallocate_memory(resize_op->packed_weights, packed_weights_size);
     if (packed_weights == NULL) {
       xnn_log_error("failed to allocate %zu bytes for packed weights", packed_weights_size);
       return xnn_status_out_of_memory;

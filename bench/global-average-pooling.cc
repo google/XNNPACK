@@ -33,7 +33,7 @@ static void global_average_pooling_q8(benchmark::State& state) {
   std::generate(input.begin(), input.end(), std::ref(u8rng));
   std::vector<uint8_t> output(batch_size * channels);
 
-  xnn_status status = xnn_initialize();
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
   }

@@ -428,7 +428,7 @@ class AveragePoolingOperatorTester {
       }
 
       // Create, setup, run, and destroy Average Pooling operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t average_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -525,7 +525,7 @@ class AveragePoolingOperatorTester {
       }
 
       // Create, setup, run, and destroy Average Pooling operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t average_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -613,7 +613,7 @@ class AveragePoolingOperatorTester {
       }
 
       // Create, setup, and run Average Pooling operator once.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t average_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
@@ -771,7 +771,7 @@ class AveragePoolingOperatorTester {
       }
 
       // Create, setup, and run Average Pooling operator once.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t average_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

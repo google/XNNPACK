@@ -21,7 +21,7 @@ static void End2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory)
 {
-  if (xnn_initialize() != xnn_status_success) {
+  if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
   }

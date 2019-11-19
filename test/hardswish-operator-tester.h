@@ -102,7 +102,7 @@ class HardSwishOperatorTester {
       }
 
       // Create, setup, run, and destroy HardSwish operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize());
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t hardswish_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,

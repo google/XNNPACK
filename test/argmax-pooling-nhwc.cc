@@ -27,7 +27,7 @@ static argmaxpool_parameters FindMultiPassMicroKernel(const argmaxpool_parameter
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       ArgmaxPoolingOperatorTester()
@@ -43,7 +43,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool_with_padding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 3; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       for (size_t padding_left = 0; padding_left <= 1; padding_left++) {
@@ -65,7 +65,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool_with_padding) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       ArgmaxPoolingOperatorTester()
@@ -81,7 +81,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool_with_padding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
@@ -103,7 +103,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool_with_padding) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_input_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       ArgmaxPoolingOperatorTester()
@@ -129,7 +129,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_input_stride) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_output_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       ArgmaxPoolingOperatorTester()
@@ -155,7 +155,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_output_stride) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_qmin) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       ArgmaxPoolingOperatorTester()
@@ -181,7 +181,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_qmin) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_qmax) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       ArgmaxPoolingOperatorTester()
@@ -207,7 +207,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_qmax) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_1xM_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -224,7 +224,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_1xM_pool) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_1xM_pool_with_padding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -247,7 +247,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_1xM_pool_with_padding) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_Mx1_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -264,7 +264,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_Mx1_pool) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_Mx1_pool_with_padding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -287,7 +287,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_Mx1_pool_with_padding) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_pool_with_input_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -314,7 +314,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_pool_with_input_stride) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_pool_with_output_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -341,7 +341,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_pool_with_output_stride) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_pool_with_qmin) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -368,7 +368,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_pool_with_qmin) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_pool_with_qmax) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -395,7 +395,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_large_pool_with_qmax) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       ArgmaxPoolingOperatorTester()
@@ -419,7 +419,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool_with_input_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       ArgmaxPoolingOperatorTester()
@@ -445,7 +445,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool_with_input_stride) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool_with_output_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= FindMaxSinglePassPoolingSize(xnn_params.f32.argmaxpool); pool_size++) {
       ArgmaxPoolingOperatorTester()
@@ -471,7 +471,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool_with_output_stride) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, small_batch_large_pool) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -496,7 +496,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, small_batch_large_pool) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, small_batch_large_pool_with_input_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -523,7 +523,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, small_batch_large_pool_with_input_stride) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, small_batch_large_pool_with_output_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const auto multipass = FindMultiPassMicroKernel(xnn_params.f32.argmaxpool);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = multipass.mr + 1; pool_size <= multipass.mr + multipass.qr; pool_size++) {
@@ -550,7 +550,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, small_batch_large_pool_with_output_stride) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, setup_increasing_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ArgmaxPoolingOperatorTester()
     .batch_size(3)
     .next_batch_size(5)
@@ -563,7 +563,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, setup_increasing_batch) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, setup_decreasing_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ArgmaxPoolingOperatorTester()
     .batch_size(5)
     .next_batch_size(3)
@@ -576,7 +576,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, setup_decreasing_batch) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, setup_changing_height) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ArgmaxPoolingOperatorTester()
     .batch_size(3)
     .input_height(8)
@@ -598,7 +598,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, setup_changing_height) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, setup_changing_width) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ArgmaxPoolingOperatorTester()
     .batch_size(3)
     .input_height(8)
@@ -620,7 +620,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, setup_changing_width) {
 }
 
 TEST(ARGMAX_POOLING_NHWC_F32, setup_swap_height_and_width) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize());
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ArgmaxPoolingOperatorTester()
     .batch_size(3)
     .input_height(9)
