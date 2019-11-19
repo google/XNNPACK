@@ -36,6 +36,9 @@ void xnn_f32_igemm_ukernel_4x8s4__sse(
   assert(ks != 0);
   assert(ks % (4 * sizeof(void*)) == 0);
   assert(a_offset % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
 
   float* c0 = c;
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
@@ -65,18 +68,22 @@ void xnn_f32_igemm_ukernel_4x8s4__sse(
     size_t p = ks;
     do {
       const float* restrict a0 = a[0];
+      assert(a0 != NULL);
       if XNN_UNPREDICTABLE(a0 != zero) {
         a0 = (const float*) ((uintptr_t) a0 + a_offset);
       }
       const float* restrict a1 = a[1];
+      assert(a1 != NULL);
       if XNN_UNPREDICTABLE(a1 != zero) {
         a1 = (const float*) ((uintptr_t) a1 + a_offset);
       }
       const float* restrict a2 = a[2];
+      assert(a2 != NULL);
       if XNN_UNPREDICTABLE(a2 != zero) {
         a2 = (const float*) ((uintptr_t) a2 + a_offset);
       }
       const float* restrict a3 = a[3];
+      assert(a3 != NULL);
       if XNN_UNPREDICTABLE(a3 != zero) {
         a3 = (const float*) ((uintptr_t) a3 + a_offset);
       }

@@ -34,6 +34,9 @@ void xnn_f32_igemm_ukernel_${MR}x${NR}c4__sse(
   assert(ks != 0);
   assert(ks % (${MR} * sizeof(void*)) == 0);
   assert(a_offset % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
 
   float* c0 = c;
   $for M in range(1, MR):
@@ -64,6 +67,7 @@ void xnn_f32_igemm_ukernel_${MR}x${NR}c4__sse(
     do {
       $for M in range(MR):
         const float* restrict a${M} = a[${M}];
+        assert(a${M} != NULL);
         if XNN_UNPREDICTABLE(a${M} != zero) {
           a${M} = (const float*) ((uintptr_t) a${M} + a_offset);
         }

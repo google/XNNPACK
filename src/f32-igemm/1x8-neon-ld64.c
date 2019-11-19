@@ -36,6 +36,9 @@ void xnn_f32_igemm_ukernel_1x8__neon_ld64(
   assert(ks != 0);
   assert(ks % (1 * sizeof(void*)) == 0);
   assert(a_offset % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
 
   float* c0 = c;
 
@@ -46,6 +49,7 @@ void xnn_f32_igemm_ukernel_1x8__neon_ld64(
     size_t p = ks;
     do {
       const float* restrict a0 = a[0];
+      assert(a0 != NULL);
       if XNN_UNPREDICTABLE(a0 != zero) {
         a0 = (const float*) ((uintptr_t) a0 + a_offset);
       }
