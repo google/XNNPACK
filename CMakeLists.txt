@@ -163,9 +163,9 @@ SET(XNNPACK_HOT_SRCS
   src/operator-run.c)
 
 SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
-  src/f32-argmaxpool/mp9p8q-scalar.c
-  src/f32-argmaxpool/up4-scalar.c
-  src/f32-argmaxpool/up9-scalar.c
+  src/f32-argmaxpool/4x-scalar-c1.c
+  src/f32-argmaxpool/9p8x-scalar-c1.c
+  src/f32-argmaxpool/9x-scalar-c1.c
   src/f32-avgpool/mp9p8q-scalar.c
   src/f32-avgpool/up9-scalar.c
   src/f32-bilinear/scalar-c1.c
@@ -276,9 +276,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x8-zip/xm-scalar.c)
 
 SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
-  src/f32-argmaxpool/mp9p8q-psimd.c
-  src/f32-argmaxpool/up4-psimd.c
-  src/f32-argmaxpool/up9-psimd.c
+  src/f32-argmaxpool/4x-psimd-c4.c
+  src/f32-argmaxpool/9p8x-psimd-c4.c
+  src/f32-argmaxpool/9x-psimd-c4.c
   src/f32-avgpool/mp9p8q-psimd.c
   src/f32-avgpool/up9-psimd.c
   src/f32-bilinear/psimd-c4.c
@@ -572,9 +572,9 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/x32-packx/x4-sse.c)
 
 SET(XNNPACK_SSE2_MICROKERNEL_SRCS
-  src/f32-argmaxpool/mp9p8q-sse2.c
-  src/f32-argmaxpool/up4-sse2.c
-  src/f32-argmaxpool/up9-sse2.c
+  src/f32-argmaxpool/4x-sse2-c4.c
+  src/f32-argmaxpool/9p8x-sse2-c4.c
+  src/f32-argmaxpool/9x-sse2-c4.c
   src/f32-prelu/sse2-2x4.c
   src/f32-prelu/sse2-2x8.c
   src/f32-sigmoid/sse2-p5-div-x8.c
