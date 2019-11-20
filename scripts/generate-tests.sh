@@ -12,3 +12,9 @@ tools/generate-dwconv-test.py --spec test/q8-dwconv.yaml --output test/q8-dwconv
 ### Tests for packing micro-kernels
 tools/generate-pack-test.py --spec test/x32-packx.yaml --output test/x32-packx.cc
 
+### Tests for MaxPool micro-kernels
+tools/generate-maxpool-test.py --spec test/u8-maxpool.yaml --output test/u8-maxpool.cc
+tools/generate-maxpool-test.py --spec test/f32-maxpool.yaml --output test/f32-maxpool.cc
+
+### Tests for ArgMaxPool micro-kernels
+tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/f32-argmaxpool.cc

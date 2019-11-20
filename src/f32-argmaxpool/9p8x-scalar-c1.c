@@ -9,12 +9,13 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_argmaxpool_ukernel_mp9p8q__scalar(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1(
+    size_t output_pixels,
+    size_t pooling_elements,
+    size_t channels,
     const float** input,
-    float* acc_buffer,
+    size_t input_offset,
+    float* accumulation_buffer,
     uint32_t* index_buffer,
     float* output,
     uint32_t* index,
@@ -22,16 +23,16 @@ void xnn_f32_argmaxpool_ukernel_mp9p8q__scalar(
     size_t output_increment,
     const union xnn_f32_output_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks != 0);
-  assert(ks > 9);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(pooling_elements != 0);
+  assert(pooling_elements > 9);
+  assert(channels != 0);
 
   const float voutput_max = params->scalar.max;
   const float voutput_min = params->scalar.min;
   do {
     {
-      float* ab = acc_buffer;
+      float* ab = accumulation_buffer;
       uint32_t* ib = index_buffer;
 
       const float* i0 = *input++;
@@ -43,8 +44,17 @@ void xnn_f32_argmaxpool_ukernel_mp9p8q__scalar(
       const float* i6 = *input++;
       const float* i7 = *input++;
       const float* i8 = *input++;
+      i0 = (const float*) ((uintptr_t) i0 + input_offset);
+      i1 = (const float*) ((uintptr_t) i1 + input_offset);
+      i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      i5 = (const float*) ((uintptr_t) i5 + input_offset);
+      i6 = (const float*) ((uintptr_t) i6 + input_offset);
+      i7 = (const float*) ((uintptr_t) i7 + input_offset);
+      i8 = (const float*) ((uintptr_t) i8 + input_offset);
 
-      size_t k = kc;
+      size_t c = channels;
       do {
         const float vi0 = *i0++;
         const float vi1 = *i1++;
@@ -101,11 +111,11 @@ void xnn_f32_argmaxpool_ukernel_mp9p8q__scalar(
 
         *ab++ = vmax;
         *ib++ = vidx;
-      } while (--k != 0);
+      } while (--c != 0);
     }
     uint32_t vidx0 = 9;
-    size_t m = ks;
-    for (m -= 9; m > 8; m -= 8) {
+    size_t k = pooling_elements;
+    for (k -= 9; k > 8; k -= 8) {
       const float* i0 = *input++;
       const float* i1 = *input++;
       const float* i2 = *input++;
@@ -114,11 +124,19 @@ void xnn_f32_argmaxpool_ukernel_mp9p8q__scalar(
       const float* i5 = *input++;
       const float* i6 = *input++;
       const float* i7 = *input++;
+      i0 = (const float*) ((uintptr_t) i0 + input_offset);
+      i1 = (const float*) ((uintptr_t) i1 + input_offset);
+      i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      i5 = (const float*) ((uintptr_t) i5 + input_offset);
+      i6 = (const float*) ((uintptr_t) i6 + input_offset);
+      i7 = (const float*) ((uintptr_t) i7 + input_offset);
 
-      float* ab = acc_buffer;
+      float* ab = accumulation_buffer;
       uint32_t* ib = index_buffer;
 
-      size_t k = kc;
+      size_t c = channels;
       do {
         const float vi0 = *i0++;
         const float vi1 = *i1++;
@@ -174,7 +192,7 @@ void xnn_f32_argmaxpool_ukernel_mp9p8q__scalar(
 
         *ab++ = vmax;
         *ib++ = vidx;
-      } while (--k != 0);
+      } while (--c != 0);
       vidx0 += 8;
     }
 
@@ -189,31 +207,39 @@ void xnn_f32_argmaxpool_ukernel_mp9p8q__scalar(
       const float* i5 = input[5];
       const float* i6 = input[6];
       const float* i7 = input[7];
+      i0 = (const float*) ((uintptr_t) i0 + input_offset);
+      i1 = (const float*) ((uintptr_t) i1 + input_offset);
+      i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      i5 = (const float*) ((uintptr_t) i5 + input_offset);
+      i6 = (const float*) ((uintptr_t) i6 + input_offset);
+      i7 = (const float*) ((uintptr_t) i7 + input_offset);
       input = (const float**) ((uintptr_t) input + input_increment);
-      if (m < 2) {
+      if (k < 2) {
         i1 = i0;
       }
-      if (m <= 2) {
+      if (k <= 2) {
         i2 = i0;
       }
-      if (m < 4) {
+      if (k < 4) {
         i3 = i0;
       }
-      if (m <= 4) {
+      if (k <= 4) {
         i4 = i0;
       }
-      if (m < 6) {
+      if (k < 6) {
         i5 = i0;
       }
-      if (m <= 6) {
+      if (k <= 6) {
         i6 = i0;
       }
-      if (m != 8) {
+      if (k != 8) {
         i7 = i0;
       }
 
-      size_t k = kc;
-      float* ab = acc_buffer;
+      size_t c = channels;
+      float* ab = accumulation_buffer;
       uint32_t* ib = index_buffer;
       do {
         const float vi0 = *i0++;
@@ -272,10 +298,10 @@ void xnn_f32_argmaxpool_ukernel_mp9p8q__scalar(
 
         *o++ = vout;
         *i++ = vidx;
-      } while (--k != 0);
+      } while (--c != 0);
     }
 
     output = (float*) ((uintptr_t) o + output_increment);
     index = (uint32_t*) i;
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }

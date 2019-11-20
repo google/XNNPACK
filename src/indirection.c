@@ -252,7 +252,6 @@ void xnn_indirection_init_subconv2d(
 
 void xnn_indirection_init_maxpool2d(
   xnn_operator_t op,
-  size_t batch_start,
   size_t step_height,
   size_t step_width,
   uint32_t log2_element_size)
@@ -260,7 +259,6 @@ void xnn_indirection_init_maxpool2d(
   const void** indirection_buffer = op->indirection_buffer;
   const void* input               = op->input;
   const size_t input_pixel_stride = op->input_pixel_stride << log2_element_size;
-  const size_t batch_size         = op->batch_size;
   const size_t input_height       = op->input_height;
   const size_t input_width        = op->input_width;
   const size_t output_height      = op->output_height;
@@ -274,18 +272,16 @@ void xnn_indirection_init_maxpool2d(
   const size_t input_padding_top  = op->padding_top;
   const size_t input_padding_left = op->padding_left;
 
-  for (size_t image = batch_start; image < batch_size; image++) {
-    for (size_t output_y = 0; output_y < output_height; output_y++) {
-      for (size_t pooling_y = 0; pooling_y < pooling_height; pooling_y++) {
-        const size_t input_y = doz(output_y * stride_height + pooling_y * dilation_height, input_padding_top);
-        const size_t clamped_input_y = min(input_y, input_height - 1);
-        for (size_t output_x = 0; output_x < output_width; output_x++) {
-          for (size_t pooling_x = 0; pooling_x < pooling_width; pooling_x++) {
-            const size_t input_x = doz(output_x * stride_width + pooling_x * dilation_width, input_padding_left);
-            const size_t clamped_input_x = min(input_x, input_width - 1);
-            const size_t index = (image * output_height + output_y) * step_height + output_x * step_width * pooling_height + pooling_x * pooling_height + pooling_y;
-            indirection_buffer[index] = input + ((image * input_height + clamped_input_y) * input_width + clamped_input_x) * input_pixel_stride;
-          }
+  for (size_t output_y = 0; output_y < output_height; output_y++) {
+    for (size_t pooling_y = 0; pooling_y < pooling_height; pooling_y++) {
+      const size_t input_y = doz(output_y * stride_height + pooling_y * dilation_height, input_padding_top);
+      const size_t clamped_input_y = min(input_y, input_height - 1);
+      for (size_t output_x = 0; output_x < output_width; output_x++) {
+        for (size_t pooling_x = 0; pooling_x < pooling_width; pooling_x++) {
+          const size_t input_x = doz(output_x * stride_width + pooling_x * dilation_width, input_padding_left);
+          const size_t clamped_input_x = min(input_x, input_width - 1);
+          const size_t index = output_y * step_height + output_x * step_width * pooling_height + pooling_x * pooling_height + pooling_y;
+          indirection_buffer[index] = input + (clamped_input_y * input_width + clamped_input_x) * input_pixel_stride;
         }
       }
     }

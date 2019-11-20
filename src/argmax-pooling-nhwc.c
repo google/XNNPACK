@@ -208,20 +208,6 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->output_width = compute_output_dimension(
       argmax_pooling_op->padding_left + input_width + argmax_pooling_op->padding_right,
       argmax_pooling_op->kernel_width);
-  argmax_pooling_op->output = output;
-
-  size_t valid_batch_size = 0;
-  if (input == argmax_pooling_op->last_input &&
-      input_height == argmax_pooling_op->last_input_height &&
-      input_width == argmax_pooling_op->last_input_width)
-  {
-    valid_batch_size = argmax_pooling_op->valid_batch_size;
-    if (batch_size <= valid_batch_size) {
-      argmax_pooling_op->compute.range[0] = batch_size;
-      argmax_pooling_op->state = xnn_run_state_ready;
-      return xnn_status_success;
-    }
-  }
 
   const size_t pooling_height = argmax_pooling_op->kernel_height;
   const size_t pooling_width = argmax_pooling_op->kernel_width;
@@ -233,17 +219,26 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
 
   const size_t step_width = pooling_width;
   const size_t step_height = pooling_size + (output_width * step_width - 1) * pooling_height;
-  // Micro-kernel may read up to (mr - 1) elements after the end of indirection buffer.
-  const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
 
-  const void** indirection_buffer = (const void**) xnn_reallocate_memory(argmax_pooling_op->indirection_buffer, indirection_buffer_size);
-  if (indirection_buffer == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
-    return xnn_status_out_of_memory;
+  if (input_height != argmax_pooling_op->last_input_height ||
+      input_width != argmax_pooling_op->last_input_width)
+  {
+    // Micro-kernel may read up to (mr - 1) elements after the end of indirection buffer.
+    const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + output_height * step_height);
+
+    const void** indirection_buffer = (const void**) xnn_reallocate_memory(argmax_pooling_op->indirection_buffer, indirection_buffer_size);
+    if (indirection_buffer == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
+      return xnn_status_out_of_memory;
+    }
+    argmax_pooling_op->indirection_buffer = indirection_buffer;
+
+    xnn_indirection_init_maxpool2d(argmax_pooling_op, step_height, step_width, 2 /* log2(sizeof(float)) */);
+
+    argmax_pooling_op->last_input = input;
+    argmax_pooling_op->last_input_height = input_height;
+    argmax_pooling_op->last_input_width = input_width;
   }
-  argmax_pooling_op->indirection_buffer = indirection_buffer;
-
-  xnn_indirection_init_maxpool2d(argmax_pooling_op, valid_batch_size, step_height, step_width, 2 /* log2(sizeof(float)) */);
 
   const size_t channels = argmax_pooling_op->channels;
 
@@ -255,21 +250,22 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   const uint32_t qr = ukernel->qr;
   const size_t multipass_adjustment = qr == 0 ? 0 : round_up(pooling_size - mr, qr) + mr - qr;
   argmax_pooling_op->context.argmax_pooling = (struct argmax_pooling_context) {
-      .indirect_input = indirection_buffer,
-      .indirect_input_batch_stride = output_height * indirect_input_height_stride,
-      .indirect_input_height_stride = indirect_input_height_stride,
-      .output = output,
-      .output_batch_stride = output_height * output_height_stride,
-      .output_height_stride = output_height_stride,
-      .output_width = output_width,
-      .index = index,
-      .index_batch_stride = output_height * index_height_stride,
-      .index_height_stride = index_height_stride,
-      .pooling_size = pooling_size,
-      .channels = channels,
-      .input_increment = (pooling_height * step_width - multipass_adjustment) * sizeof(void*),
-      .output_increment = output_width_stride - channels * sizeof(float),
-      .params.f32 = argmax_pooling_op->f32_output_params,
+    .indirect_input = argmax_pooling_op->indirection_buffer,
+    .indirect_input_height_stride = indirect_input_height_stride,
+    .input_offset = (size_t) ((uintptr_t) input - (uintptr_t) argmax_pooling_op->last_input),
+    .input_batch_stride = input_height * input_width * argmax_pooling_op->input_pixel_stride * sizeof(float),
+    .output = output,
+    .output_batch_stride = output_height * output_height_stride,
+    .output_height_stride = output_height_stride,
+    .output_width = output_width,
+    .index = index,
+    .index_batch_stride = output_height * index_height_stride,
+    .index_height_stride = index_height_stride,
+    .pooling_size = pooling_size,
+    .channels = channels,
+    .input_increment = (pooling_height * step_width - multipass_adjustment) * sizeof(void*),
+    .output_increment = output_width_stride - channels * sizeof(float),
+    .params.f32 = argmax_pooling_op->f32_output_params,
   };
   argmax_pooling_op->compute.type = xnn_parallelization_type_2d;
   argmax_pooling_op->compute.range[0] = batch_size;
@@ -284,10 +280,6 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   }
   argmax_pooling_op->state = xnn_run_state_ready;
 
-  argmax_pooling_op->last_input = input;
-  argmax_pooling_op->last_input_height = input_height;
-  argmax_pooling_op->last_input_width = input_width;
-  argmax_pooling_op->valid_batch_size = max(valid_batch_size, batch_size);
-
   return xnn_status_success;
 }
+

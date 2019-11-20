@@ -10,19 +10,20 @@
 #include <xnnpack/maxpool.h>
 
 
-void xnn_f32_maxpool_ukernel_9p8q__sse(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_f32_maxpool_ukernel_9p8x__sse_c4(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const float** input,
+    size_t input_offset,
     float* output,
     size_t input_increment,
     size_t output_increment,
     const union xnn_f32_output_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks != 0);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(channels != 0);
 
   const __m128 voutput_max = _mm_load_ps(params->sse.max);
   const __m128 voutput_min = _mm_load_ps(params->sse.min);
@@ -38,33 +39,42 @@ void xnn_f32_maxpool_ukernel_9p8q__sse(
       const float* i6 = *input++;
       const float* i7 = *input++;
       const float* i8 = *input++;
-      if (ks < 2) {
+      i0 = (const float*) ((uintptr_t) i0 + input_offset);
+      i1 = (const float*) ((uintptr_t) i1 + input_offset);
+      i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      i5 = (const float*) ((uintptr_t) i5 + input_offset);
+      i6 = (const float*) ((uintptr_t) i6 + input_offset);
+      i7 = (const float*) ((uintptr_t) i7 + input_offset);
+      i8 = (const float*) ((uintptr_t) i8 + input_offset);
+      if (kernel_elements < 2) {
         i1 = i0;
       }
-      if (ks <= 2) {
+      if (kernel_elements <= 2) {
         i2 = i0;
       }
-      if (ks < 4) {
+      if (kernel_elements < 4) {
         i3 = i0;
       }
-      if (ks <= 4) {
+      if (kernel_elements <= 4) {
         i4 = i0;
       }
-      if (ks < 6) {
+      if (kernel_elements < 6) {
         i5 = i0;
       }
-      if (ks <= 6) {
+      if (kernel_elements <= 6) {
         i6 = i0;
       }
-      if (ks < 8) {
+      if (kernel_elements < 8) {
         i7 = i0;
       }
-      if (ks <= 8) {
+      if (kernel_elements <= 8) {
         i8 = i0;
       }
 
-      size_t k = kc;
-      for (; k >= 4; k -= 4) {
+      size_t c = channels;
+      for (; c >= 4; c -= 4) {
         const __m128 vi0 = _mm_loadu_ps(i0);
         i0 += 4;
         const __m128 vi1 = _mm_loadu_ps(i1);
@@ -97,7 +107,7 @@ void xnn_f32_maxpool_ukernel_9p8q__sse(
         _mm_storeu_ps(o, vout);
         o += 4;
       }
-      if (k != 0) {
+      if (c != 0) {
         const __m128 vi0 = _mm_loadu_ps(i0);
         i0 += 4;
         const __m128 vi1 = _mm_loadu_ps(i1);
@@ -127,19 +137,19 @@ void xnn_f32_maxpool_ukernel_9p8q__sse(
         const __m128 vmax = _mm_max_ps(vmax2345, vmax01678);
         __m128 vout = _mm_max_ps(_mm_min_ps(vmax, voutput_max), voutput_min);
 
-        if (k & 2) {
+        if (c & 2) {
           _mm_storel_pi((__m64*) o, vout);
           o += 2;
           vout = _mm_movehl_ps(vout, vout);
         }
-        if (k & 1) {
+        if (c & 1) {
           _mm_store_ss(o, vout);
           o += 1;
         }
       }
     }
 
-    for (ptrdiff_t m = (ptrdiff_t) ks - 9; m > 0; m -= 8) {
+    for (ptrdiff_t k = (ptrdiff_t) kernel_elements - 9; k > 0; k -= 8) {
       const float* i0 = *input++;
       const float* i1 = *input++;
       const float* i2 = *input++;
@@ -148,31 +158,39 @@ void xnn_f32_maxpool_ukernel_9p8q__sse(
       const float* i5 = *input++;
       const float* i6 = *input++;
       const float* i7 = *input++;
-      if (m < 2) {
+      i0 = (const float*) ((uintptr_t) i0 + input_offset);
+      i1 = (const float*) ((uintptr_t) i1 + input_offset);
+      i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      i5 = (const float*) ((uintptr_t) i5 + input_offset);
+      i6 = (const float*) ((uintptr_t) i6 + input_offset);
+      i7 = (const float*) ((uintptr_t) i7 + input_offset);
+      if (k < 2) {
         i1 = i0;
       }
-      if (m <= 2) {
+      if (k <= 2) {
         i2 = i0;
       }
-      if (m < 4) {
+      if (k < 4) {
         i3 = i0;
       }
-      if (m <= 4) {
+      if (k <= 4) {
         i4 = i0;
       }
-      if (m < 6) {
+      if (k < 6) {
         i5 = i0;
       }
-      if (m <= 6) {
+      if (k <= 6) {
         i6 = i0;
       }
-      if (m < 8) {
+      if (k < 8) {
         i7 = i0;
       }
 
       o = output;
-      size_t k = kc;
-      for (; k >= 4; k -= 4) {
+      size_t c = channels;
+      for (; c >= 4; c -= 4) {
         const __m128 vi0 = _mm_loadu_ps(i0);
         i0 += 4;
         const __m128 vi1 = _mm_loadu_ps(i1);
@@ -204,7 +222,7 @@ void xnn_f32_maxpool_ukernel_9p8q__sse(
         _mm_storeu_ps(o, vout);
         o += 4;
       }
-      if (k != 0) {
+      if (c != 0) {
         const __m128 vi0 = _mm_loadu_ps(i0);
         const __m128 vi1 = _mm_loadu_ps(i1);
         const __m128 vi2 = _mm_loadu_ps(i2);
@@ -225,12 +243,12 @@ void xnn_f32_maxpool_ukernel_9p8q__sse(
         const __m128 vmax = _mm_max_ps(vmax2345, vmax0167);
         __m128 vout = _mm_max_ps(_mm_min_ps(vmax, voutput_max), voutput_min);
 
-        if (k & 2) {
+        if (c & 2) {
           _mm_storel_pi((__m64*) o, vout);
           o += 2;
           vout = _mm_movehl_ps(vout, vout);
         }
-        if (k & 1) {
+        if (c & 1) {
           _mm_store_ss(o, vout);
           o += 1;
         }
@@ -238,5 +256,5 @@ void xnn_f32_maxpool_ukernel_9p8q__sse(
     }
     input = (const float**) ((uintptr_t) input + input_increment);
     output = (float*) ((uintptr_t) o + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }

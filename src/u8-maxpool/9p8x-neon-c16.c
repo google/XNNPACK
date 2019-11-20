@@ -13,19 +13,20 @@
 #include <xnnpack/maxpool.h>
 
 
-void xnn_u8_maxpool_ukernel_9p8q__neon(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_u8_maxpool_ukernel_9p8x__neon_c16(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const uint8_t** input,
+    size_t input_offset,
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
     const union xnn_u8_output_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks != 0);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(channels != 0);
 
   const uint8x16_t voutput_max = vld1q_dup_u8(&params->neon.max);
   const uint8x16_t voutput_min = vld1q_dup_u8(&params->neon.min);
@@ -41,33 +42,42 @@ void xnn_u8_maxpool_ukernel_9p8q__neon(
       const uint8_t* i6 = *input++;
       const uint8_t* i7 = *input++;
       const uint8_t* i8 = *input++;
-      if (ks < 2) {
+      i0 = (const uint8_t*) ((uintptr_t) i0 + input_offset);
+      i1 = (const uint8_t*) ((uintptr_t) i1 + input_offset);
+      i2 = (const uint8_t*) ((uintptr_t) i2 + input_offset);
+      i3 = (const uint8_t*) ((uintptr_t) i3 + input_offset);
+      i4 = (const uint8_t*) ((uintptr_t) i4 + input_offset);
+      i5 = (const uint8_t*) ((uintptr_t) i5 + input_offset);
+      i6 = (const uint8_t*) ((uintptr_t) i6 + input_offset);
+      i7 = (const uint8_t*) ((uintptr_t) i7 + input_offset);
+      i8 = (const uint8_t*) ((uintptr_t) i8 + input_offset);
+      if (kernel_elements < 2) {
         i1 = i0;
       }
-      if (ks <= 2) {
+      if (kernel_elements <= 2) {
         i2 = i0;
       }
-      if (ks < 4) {
+      if (kernel_elements < 4) {
         i3 = i0;
       }
-      if (ks <= 4) {
+      if (kernel_elements <= 4) {
         i4 = i0;
       }
-      if (ks < 6) {
+      if (kernel_elements < 6) {
         i5 = i0;
       }
-      if (ks <= 6) {
+      if (kernel_elements <= 6) {
         i6 = i0;
       }
-      if (ks < 8) {
+      if (kernel_elements < 8) {
         i7 = i0;
       }
-      if (ks <= 8) {
+      if (kernel_elements <= 8) {
         i8 = i0;
       }
 
-      size_t k = kc;
-      for (; k >= 16; k -= 16) {
+      size_t c = channels;
+      for (; c >= 16; c -= 16) {
         const uint8x16_t vi0 = vld1q_u8(i0); i0 += 16;
         const uint8x16_t vi1 = vld1q_u8(i1); i1 += 16;
         const uint8x16_t vi2 = vld1q_u8(i2); i2 += 16;
@@ -90,7 +100,7 @@ void xnn_u8_maxpool_ukernel_9p8q__neon(
 
         vst1q_u8(o, vout); o += 16;
       }
-      if (k != 0) {
+      if (c != 0) {
         const uint8x16_t vi0 = vld1q_u8(i0);
         const uint8x16_t vi1 = vld1q_u8(i1);
         const uint8x16_t vi2 = vld1q_u8(i2);
@@ -112,25 +122,25 @@ void xnn_u8_maxpool_ukernel_9p8q__neon(
         const uint8x16_t vout = vmaxq_u8(vminq_u8(vmax, voutput_max), voutput_min);
 
         uint8x8_t vout_lo = vget_low_u8(vout);
-        if (k & 8) {
+        if (c & 8) {
           vst1_u8(o, vout_lo); o += 8;
           vout_lo = vget_high_u8(vout);
         }
-        if (k & 4) {
+        if (c & 4) {
           vst1_lane_u32(__builtin_assume_aligned(o, 1), vreinterpret_u32_u8(vout_lo), 0); o += 4;
           vout_lo = vext_u8(vout_lo, vout_lo, 4);
         }
-        if (k & 2) {
+        if (c & 2) {
           vst1_lane_u16(__builtin_assume_aligned(o, 1), vreinterpret_u16_u8(vout_lo), 0); o += 2;
           vout_lo = vext_u8(vout_lo, vout_lo, 2);
         }
-        if (k & 1) {
+        if (c & 1) {
           vst1_lane_u8(o, vout_lo, 0); o += 1;
         }
       }
     }
 
-    for (ptrdiff_t m = (ptrdiff_t) ks - 9; m > 0; m -= 8) {
+    for (ptrdiff_t k = (ptrdiff_t) kernel_elements - 9; k > 0; k -= 8) {
       const uint8_t* i0 = *input++;
       const uint8_t* i1 = *input++;
       const uint8_t* i2 = *input++;
@@ -139,31 +149,39 @@ void xnn_u8_maxpool_ukernel_9p8q__neon(
       const uint8_t* i5 = *input++;
       const uint8_t* i6 = *input++;
       const uint8_t* i7 = *input++;
-      if (m < 2) {
+      i0 = (const uint8_t*) ((uintptr_t) i0 + input_offset);
+      i1 = (const uint8_t*) ((uintptr_t) i1 + input_offset);
+      i2 = (const uint8_t*) ((uintptr_t) i2 + input_offset);
+      i3 = (const uint8_t*) ((uintptr_t) i3 + input_offset);
+      i4 = (const uint8_t*) ((uintptr_t) i4 + input_offset);
+      i5 = (const uint8_t*) ((uintptr_t) i5 + input_offset);
+      i6 = (const uint8_t*) ((uintptr_t) i6 + input_offset);
+      i7 = (const uint8_t*) ((uintptr_t) i7 + input_offset);
+      if (k < 2) {
         i1 = i0;
       }
-      if (m <= 2) {
+      if (k <= 2) {
         i2 = i0;
       }
-      if (m < 4) {
+      if (k < 4) {
         i3 = i0;
       }
-      if (m <= 4) {
+      if (k <= 4) {
         i4 = i0;
       }
-      if (m < 6) {
+      if (k < 6) {
         i5 = i0;
       }
-      if (m <= 6) {
+      if (k <= 6) {
         i6 = i0;
       }
-      if (m < 8) {
+      if (k < 8) {
         i7 = i0;
       }
 
       o = output;
-      size_t k = kc;
-      for (; k >= 16; k -= 16) {
+      size_t c = channels;
+      for (; c >= 16; c -= 16) {
         const uint8x16_t vi0 = vld1q_u8(i0); i0 += 16;
         const uint8x16_t vi1 = vld1q_u8(i1); i1 += 16;
         const uint8x16_t vi2 = vld1q_u8(i2); i2 += 16;
@@ -186,7 +204,7 @@ void xnn_u8_maxpool_ukernel_9p8q__neon(
 
         vst1q_u8(o, vout); o += 16;
       }
-      if (k != 0) {
+      if (c != 0) {
         const uint8x16_t vi0 = vld1q_u8(i0);
         const uint8x16_t vi1 = vld1q_u8(i1);
         const uint8x16_t vi2 = vld1q_u8(i2);
@@ -208,24 +226,24 @@ void xnn_u8_maxpool_ukernel_9p8q__neon(
         const uint8x16_t vout = vmaxq_u8(vminq_u8(vmax, voutput_max), voutput_min);
 
         uint8x8_t vout_lo = vget_low_u8(vout);
-        if (k & 8) {
+        if (c & 8) {
           vst1_u8(o, vout_lo); o += 8;
           vout_lo = vget_high_u8(vout);
         }
-        if (k & 4) {
+        if (c & 4) {
           vst1_lane_u32(__builtin_assume_aligned(o, 1), vreinterpret_u32_u8(vout_lo), 0); o += 4;
           vout_lo = vext_u8(vout_lo, vout_lo, 4);
         }
-        if (k & 2) {
+        if (c & 2) {
           vst1_lane_u16(__builtin_assume_aligned(o, 1), vreinterpret_u16_u8(vout_lo), 0); o += 2;
           vout_lo = vext_u8(vout_lo, vout_lo, 2);
         }
-        if (k & 1) {
+        if (c & 1) {
           vst1_lane_u8(o, vout_lo, 0); o += 1;
         }
       }
     }
     input = (const uint8_t**) ((uintptr_t) input + input_increment);
     output = (uint8_t*) ((uintptr_t) o + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }

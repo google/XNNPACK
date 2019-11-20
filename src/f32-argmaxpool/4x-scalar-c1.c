@@ -9,43 +9,45 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_argmaxpool_ukernel_up4__scalar(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_f32_argmaxpool_ukernel_4x__scalar_c1(
+    size_t output_pixels,
+    size_t pooling_elements,
+    size_t channels,
     const float** input,
+    size_t input_offset,
     float* output,
     uint32_t* index,
     size_t input_increment,
     size_t output_increment,
     const union xnn_f32_output_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks != 0);
-  assert(ks <= 4);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(pooling_elements != 0);
+  assert(pooling_elements <= 4);
+  assert(channels != 0);
 
   const float voutput_max = params->scalar.max;
   const float voutput_min = params->scalar.min;
   do {
-    float* o = output;
-    uint32_t* i = index;
-
     const float* i0 = input[0];
     const float* i1 = input[1];
     const float* i2 = input[2];
     const float* i3 = input[3];
-    if (ks < 2) {
+    i0 = (const float*) ((uintptr_t) i0 + input_offset);
+    i1 = (const float*) ((uintptr_t) i1 + input_offset);
+    i2 = (const float*) ((uintptr_t) i2 + input_offset);
+    i3 = (const float*) ((uintptr_t) i3 + input_offset);
+    if (pooling_elements < 2) {
       i1 = i0;
     }
-    if (ks <= 2) {
+    if (pooling_elements <= 2) {
       i2 = i0;
     }
-    if (ks != 4) {
+    if (pooling_elements != 4) {
       i3 = i0;
     }
 
-    size_t k = kc;
+    size_t c = channels;
     do {
       const float vi0 = *i0++;
       const float vi1 = *i1++;
@@ -72,11 +74,10 @@ void xnn_f32_argmaxpool_ukernel_up4__scalar(
 
       const float vout = math_max_f32(math_min_f32(vmax, voutput_max), voutput_min);
 
-      *o++ = vout;
-      *i++ = vidx;
-    } while (--k != 0);
+      *output++ = vout;
+      *index++ = vidx;
+    } while (--c != 0);
     input = (const float**) ((uintptr_t) input + input_increment);
-    output = (float*) ((uintptr_t) o + output_increment);
-    index = (uint32_t*) i;
-  } while (--n != 0);
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
 }
