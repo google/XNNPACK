@@ -384,6 +384,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-igemm/4x8-neon-ld128.c
   src/f32-igemm/4x8-neon-ld64.c
   src/f32-igemm/6x8-neon-ld64.c
+  src/f32-igemm/1x8s4-neon.c
+  src/f32-igemm/4x8s4-neon.c
+  src/f32-igemm/6x8s4-neon.c
+  src/f32-igemm/8x8s4-neon.c
   src/f32-dwconv/up4x9-neon.c
   src/f32-dwconv/up4x9-neon-acc2.c
   src/f32-dwconv/up8x9-neon.c
@@ -397,11 +401,19 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-gemm/4x8-neon-ld64.c
   src/f32-gemm/5x8-neon-ld64.c
   src/f32-gemm/6x8-neon-ld64.c
+  src/f32-gemm/1x8s4-neon.c
+  src/f32-gemm/4x8s4-neon.c
+  src/f32-gemm/6x8s4-neon.c
+  src/f32-gemm/8x8s4-neon.c
   src/f32-gemminc/1x8-neon-ld64.c
   src/f32-gemminc/4x8-neon-ld128.c
   src/f32-gemminc/4x8-neon-ld64.c
   src/f32-gemminc/5x8-neon-ld64.c
   src/f32-gemminc/6x8-neon-ld64.c
+  src/f32-gemminc/1x8s4-neon.c
+  src/f32-gemminc/4x8s4-neon.c
+  src/f32-gemminc/6x8s4-neon.c
+  src/f32-gemminc/8x8s4-neon.c
   src/f32-hswish/neon.c
   src/f32-pavgpool/mp9p8q-neon.c
   src/f32-pavgpool/up9-neon.c
@@ -446,6 +458,10 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-igemm/4x8-neonfma-ld128.c
   src/f32-igemm/4x8-neonfma-ld64.c
   src/f32-igemm/6x8-neonfma-ld64.c
+  src/f32-igemm/1x8s4-neonfma.c
+  src/f32-igemm/4x8s4-neonfma.c
+  src/f32-igemm/6x8s4-neonfma.c
+  src/f32-igemm/8x8s4-neonfma.c
   src/f32-dwconv/up4x9-neonfma.c
   src/f32-dwconv/up4x9-neonfma-acc2.c
   src/f32-dwconv/up8x9-neonfma.c
@@ -456,11 +472,19 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-gemm/4x8-neonfma-ld64.c
   src/f32-gemm/5x8-neonfma-ld64.c
   src/f32-gemm/6x8-neonfma-ld64.c
+  src/f32-gemm/1x8s4-neonfma.c
+  src/f32-gemm/4x8s4-neonfma.c
+  src/f32-gemm/6x8s4-neonfma.c
+  src/f32-gemm/8x8s4-neonfma.c
   src/f32-gemminc/1x8-neonfma-ld64.c
   src/f32-gemminc/4x8-neonfma-ld128.c
   src/f32-gemminc/4x8-neonfma-ld64.c
   src/f32-gemminc/5x8-neonfma-ld64.c
   src/f32-gemminc/6x8-neonfma-ld64.c
+  src/f32-gemminc/1x8s4-neonfma.c
+  src/f32-gemminc/4x8s4-neonfma.c
+  src/f32-gemminc/6x8s4-neonfma.c
+  src/f32-gemminc/8x8s4-neonfma.c
   src/f32-hswish/neonfma.c
   src/f32-ppmm/4x8-neonfma.c
   src/f32-ppmm/8x8-neonfma.c

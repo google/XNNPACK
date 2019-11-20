@@ -104,6 +104,31 @@ tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=0 -D INC=0 
 
 tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=1 -D INC=0 -o src/f32-gemm/4x2-neonfma-ld64.c
 
+### LOAD4+PERMUTE micro-kernels
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/1x8s4-neon.c
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemminc/1x8s4-neon.c
+
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/1x8s4-neonfma.c
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemminc/1x8s4-neonfma.c
+
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/4x8s4-neon.c
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemminc/4x8s4-neon.c
+
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/4x8s4-neonfma.c
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemminc/4x8s4-neonfma.c
+
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/6x8s4-neon.c
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemminc/6x8s4-neon.c
+
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/6x8s4-neonfma.c
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemminc/6x8s4-neonfma.c
+
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/8x8s4-neon.c
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemminc/8x8s4-neon.c
+
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/8x8s4-neonfma.c
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemminc/8x8s4-neonfma.c
+
 #################################### PSIMD ####################################
 ### LOAD1+BROADCAST micro-kernels
 tools/xngen src/f32-gemm/psimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -o src/f32-gemm/1x8-psimd-loadsplat.c

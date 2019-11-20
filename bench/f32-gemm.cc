@@ -448,6 +448,38 @@ static void ruy_st(benchmark::State& state, const char* net)
     GEMMBenchmark(state, xnn_f32_gemm_ukernel_6x8__neonfma_ld64, 6, 8, 1, 1);
   }
 
+  static void f32_gemm_1x8s4__neon(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_1x8s4__neon, 1, 8, 1, 4);
+  }
+
+  static void f32_gemm_1x8s4__neonfma(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_1x8s4__neonfma, 1, 8, 1, 4);
+  }
+
+  static void f32_gemm_4x8s4__neon(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_4x8s4__neon, 4, 8, 1, 4);
+  }
+
+  static void f32_gemm_4x8s4__neonfma(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_4x8s4__neonfma, 4, 8, 1, 4);
+  }
+
+  static void f32_gemm_6x8s4__neon(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_6x8s4__neon, 6, 8, 1, 4);
+  }
+
+  static void f32_gemm_6x8s4__neonfma(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_6x8s4__neonfma, 6, 8, 1, 4);
+  }
+
+  static void f32_gemm_8x8s4__neon(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_8x8s4__neon, 8, 8, 1, 4);
+  }
+
+  static void f32_gemm_8x8s4__neonfma(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_8x8s4__neonfma, 8, 8, 1, 4);
+  }
+
   static void f32_ppmm_4x8_unipass__neonfma(benchmark::State& state, const char* net) {
     PPMM1PBenchmark(state, xnn_f32_ppmm_ukernel_4x8__neonfma, xnn_x32_packx_ukernel_4x__neon_st4, 4, 8);
   }
@@ -464,9 +496,14 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(f32_gemm_4x8__neonfma_ld64)
   BENCHMARK_GEMM(f32_gemm_5x8__neon_ld64)
   BENCHMARK_GEMM(f32_gemm_5x8__neonfma_ld64)
-  BENCHMARK_GEMM(f32_gemm_6x8__neon_ld64)
-  BENCHMARK_GEMM(f32_gemm_6x8__neonfma_ld64)
-
+  BENCHMARK_GEMM(f32_gemm_1x8s4__neon)
+  BENCHMARK_GEMM(f32_gemm_1x8s4__neonfma)
+  BENCHMARK_GEMM(f32_gemm_4x8s4__neon)
+  BENCHMARK_GEMM(f32_gemm_4x8s4__neonfma)
+  BENCHMARK_GEMM(f32_gemm_6x8s4__neon)
+  BENCHMARK_GEMM(f32_gemm_6x8s4__neonfma)
+  BENCHMARK_GEMM(f32_gemm_8x8s4__neon)
+  BENCHMARK_GEMM(f32_gemm_8x8s4__neonfma)
   BENCHMARK_GEMM(f32_ppmm_4x8_unipass__neonfma)
   BENCHMARK_GEMM(f32_ppmm_4x8_twopass__neonfma)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64

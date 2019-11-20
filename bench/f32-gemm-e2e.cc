@@ -277,6 +277,60 @@ static void GEMMEnd2EndBenchmark(
       6 /* mr */, 8 /* nr */);
   }
 
+  static void f32_gemm_4x8s4__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_4x8s4__neon,
+      xnn_f32_igemm_ukernel_4x8s4__neon,
+      xnn_f32_gemm_ukernel_1x8s4__neon,
+      xnn_f32_igemm_ukernel_1x8s4__neon,
+      4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+  }
+
+  static void f32_gemm_4x8s4__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_4x8s4__neonfma,
+      xnn_f32_igemm_ukernel_4x8s4__neonfma,
+      xnn_f32_gemm_ukernel_1x8s4__neonfma,
+      xnn_f32_igemm_ukernel_1x8s4__neonfma,
+      4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+  }
+
+  static void f32_gemm_6x8s4__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_6x8s4__neon,
+      xnn_f32_igemm_ukernel_6x8s4__neon,
+      xnn_f32_gemm_ukernel_1x8s4__neon,
+      xnn_f32_igemm_ukernel_1x8s4__neon,
+      6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+  }
+
+  static void f32_gemm_6x8s4__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_6x8s4__neonfma,
+      xnn_f32_igemm_ukernel_6x8s4__neonfma,
+      xnn_f32_gemm_ukernel_1x8s4__neonfma,
+      xnn_f32_igemm_ukernel_1x8s4__neonfma,
+      6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+  }
+
+  static void f32_gemm_8x8s4__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_8x8s4__neon,
+      xnn_f32_igemm_ukernel_8x8s4__neon,
+      xnn_f32_gemm_ukernel_1x8s4__neon,
+      xnn_f32_igemm_ukernel_1x8s4__neon,
+      8 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+  }
+
+  static void f32_gemm_8x8s4__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_8x8s4__neonfma,
+      xnn_f32_igemm_ukernel_8x8s4__neonfma,
+      xnn_f32_gemm_ukernel_1x8s4__neonfma,
+      xnn_f32_igemm_ukernel_1x8s4__neonfma,
+      8 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+  }
+
   BENCHMARK_CAPTURE(f32_gemm_4x8__neon_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_gemm_4x8__neon_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
@@ -294,6 +348,25 @@ static void GEMMEnd2EndBenchmark(
 
   BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_gemm_4x8s4__neon, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_gemm_4x8s4__neon, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_gemm_4x8s4__neonfma, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_gemm_4x8s4__neonfma, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_gemm_6x8s4__neon, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_gemm_6x8s4__neon, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_gemm_6x8s4__neonfma, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_gemm_6x8s4__neonfma, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_gemm_8x8s4__neon, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_gemm_8x8s4__neon, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_gemm_8x8s4__neonfma, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_gemm_8x8s4__neonfma, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 

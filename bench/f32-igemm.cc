@@ -199,6 +199,38 @@ static void IGEMMBenchmark(benchmark::State& state,
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neonfma_ld64, 6, 8, 1, 1);
   }
 
+  static void f32_igemm_1x8s4__neon(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8s4__neon, 1, 8, 1, 4);
+  }
+
+  static void f32_igemm_1x8s4__neonfma(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8s4__neonfma, 1, 8, 1, 4);
+  }
+
+  static void f32_igemm_4x8s4__neon(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8s4__neon, 4, 8, 1, 4);
+  }
+
+  static void f32_igemm_4x8s4__neonfma(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8s4__neonfma, 4, 8, 1, 4);
+  }
+
+  static void f32_igemm_6x8s4__neon(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8s4__neon, 6, 8, 1, 4);
+  }
+
+  static void f32_igemm_6x8s4__neonfma(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8s4__neonfma, 6, 8, 1, 4);
+  }
+
+  static void f32_igemm_8x8s4__neon(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_8x8s4__neon, 8, 8, 1, 4);
+  }
+
+  static void f32_igemm_8x8s4__neonfma(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_8x8s4__neonfma, 8, 8, 1, 4);
+  }
+
   BENCHMARK_CONV(f32_igemm_1x8__neon_ld64)
   BENCHMARK_CONV(f32_igemm_1x8__neonfma_ld64)
   BENCHMARK_CONV(f32_igemm_4x2__neon_ld64)
@@ -209,6 +241,14 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_4x8__neon_ld64)
   BENCHMARK_CONV(f32_igemm_4x8__neonfma_ld128)
   BENCHMARK_CONV(f32_igemm_4x8__neonfma_ld64)
+  BENCHMARK_CONV(f32_igemm_1x8s4__neon)
+  BENCHMARK_CONV(f32_igemm_1x8s4__neonfma)
+  BENCHMARK_CONV(f32_igemm_4x8s4__neon)
+  BENCHMARK_CONV(f32_igemm_4x8s4__neonfma)
+  BENCHMARK_CONV(f32_igemm_6x8s4__neon)
+  BENCHMARK_CONV(f32_igemm_6x8s4__neonfma)
+  BENCHMARK_CONV(f32_igemm_8x8s4__neon)
+  BENCHMARK_CONV(f32_igemm_8x8s4__neonfma)
   BENCHMARK_CONV(f32_igemm_6x8__neon_ld64)
   BENCHMARK_CONV(f32_igemm_6x8__neonfma_ld64)
 #endif
