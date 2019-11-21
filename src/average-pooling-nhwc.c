@@ -413,6 +413,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
     valid_batch_size = average_pooling_op->valid_batch_size;
     if (batch_size <= valid_batch_size) {
       average_pooling_op->compute.range[0] = batch_size;
+      average_pooling_op->context.average_pooling.output = output;
       average_pooling_op->state = xnn_run_state_ready;
       return xnn_status_success;
     }
@@ -540,6 +541,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
     valid_batch_size = average_pooling_op->valid_batch_size;
     if (batch_size <= valid_batch_size) {
       average_pooling_op->compute.range[0] = batch_size;
+      average_pooling_op->context.average_pooling.output = output;
       average_pooling_op->state = xnn_run_state_ready;
       return xnn_status_success;
     }

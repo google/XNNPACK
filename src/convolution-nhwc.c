@@ -955,6 +955,7 @@ static enum xnn_status setup_convolution2d_nhwc(
         valid_batch_size = convolution_op->valid_batch_size;
         if (batch_size <= valid_batch_size) {
           convolution_op->compute.range[0] = batch_size * convolution_op->output_height;
+          convolution_op->context.dwconv.output = output;
           convolution_op->state = xnn_run_state_ready;
           return xnn_status_success;
         }
