@@ -25,7 +25,6 @@ void xnn_f32_dwconv_ukernel_up8x9__neonfma_acc2(
     const union xnn_f32_output_params params[restrict static 1])
 {
   assert(channels != 0);
-  assert(channels % sizeof(float) == 0);
   assert(output_width != 0);
 
   const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
