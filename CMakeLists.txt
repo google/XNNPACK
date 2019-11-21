@@ -634,8 +634,43 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/sse41-2x8.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
+  src/f32-gemm/1x8-avx-broadcast.c
+  src/f32-gemm/4x8-avx-broadcast.c
+  src/f32-gemm/5x8-avx-broadcast.c
+  src/f32-gemm/6x8-avx-broadcast.c
+  src/f32-gemm/7x8-avx-broadcast.c
+  src/f32-gemminc/1x8-avx-broadcast.c
+  src/f32-gemminc/4x8-avx-broadcast.c
+  src/f32-gemminc/5x8-avx-broadcast.c
+  src/f32-gemminc/6x8-avx-broadcast.c
+  src/f32-gemminc/7x8-avx-broadcast.c
+  src/f32-igemm/1x8-avx-broadcast.c
+  src/f32-igemm/4x8-avx-broadcast.c
+  src/f32-igemm/5x8-avx-broadcast.c
+  src/f32-igemm/6x8-avx-broadcast.c
+  src/f32-igemm/7x8-avx-broadcast.c
   src/f32-rmax/avx.c
   src/f32-vscale/avx-unroll32.c)
+
+SET(XNNPACK_FMA3_MICROKERNEL_SRCS
+  src/f32-gemm/1x8-fma3-broadcast.c
+  src/f32-gemm/4x8-fma3-broadcast.c
+  src/f32-gemm/5x8-fma3-broadcast.c
+  src/f32-gemm/6x8-fma3-broadcast.c
+  src/f32-gemm/7x8-fma3-broadcast.c
+  src/f32-gemm/8x8-fma3-broadcast.c
+  src/f32-gemminc/1x8-fma3-broadcast.c
+  src/f32-gemminc/4x8-fma3-broadcast.c
+  src/f32-gemminc/5x8-fma3-broadcast.c
+  src/f32-gemminc/6x8-fma3-broadcast.c
+  src/f32-gemminc/7x8-fma3-broadcast.c
+  src/f32-gemminc/8x8-fma3-broadcast.c
+  src/f32-igemm/1x8-fma3-broadcast.c
+  src/f32-igemm/4x8-fma3-broadcast.c
+  src/f32-igemm/5x8-fma3-broadcast.c
+  src/f32-igemm/6x8-fma3-broadcast.c
+  src/f32-igemm/7x8-fma3-broadcast.c
+  src/f32-igemm/8x8-fma3-broadcast.c)
 
 SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/f32-raddexpminusmax/avx2-p5-unroll64.c
@@ -736,6 +771,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i[3-6]86|x86_64)$" OR IOS_ARCH MATCHES "^(i
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SSE2_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SSE41_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AVX_MICROKERNEL_SRCS})
+  LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_FMA3_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AVX2_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AVX512F_MICROKERNEL_SRCS})
 ENDIF()
@@ -772,6 +808,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i[3-6]86|x86_64)$" OR IOS_ARCH MATCHES "^(i
   SET_PROPERTY(SOURCE ${XNNPACK_SSE2_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -msse2 ")
   SET_PROPERTY(SOURCE ${XNNPACK_SSE41_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -msse4.1 ")
   SET_PROPERTY(SOURCE ${XNNPACK_AVX_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mavx ")
+  SET_PROPERTY(SOURCE ${XNNPACK_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfma ")
   SET_PROPERTY(SOURCE ${XNNPACK_AVX2_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfma -mavx2 ")
   SET_PROPERTY(SOURCE ${XNNPACK_AVX512F_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mavx512f ")
 ENDIF()

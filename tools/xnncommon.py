@@ -35,6 +35,7 @@ _ISA_TO_ARCH_MAP = {
   "sse2": ["x86", "x86-64"],
   "sse41": ["x86", "x86-64"],
   "avx": ["x86", "x86-64"],
+  "fma3": ["x86", "x86-64"],
   "avx512f": ["x86", "x86-64"],
   "psimd": [],
 }
@@ -48,6 +49,7 @@ _ISA_TO_CHECK_MAP = {
   "sse41": "TEST_REQUIRES_X86_SSE41",
   "avx": "TEST_REQUIRES_X86_AVX",
   "avx2": "TEST_REQUIRES_X86_AVX2",
+  "fma3": "TEST_REQUIRES_X86_FMA3",
   "avx512f": "TEST_REQUIRES_X86_AVX512F",
   "psimd": "TEST_REQUIRES_PSIMD",
 }

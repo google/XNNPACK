@@ -65,6 +65,20 @@ tools/xngen src/f32-igemm/sse-shuffle.c.in -D MR=4 -D NR=8 -o src/f32-igemm/4x8s
 ### MRx2 micro-kernels
 tools/xngen src/f32-igemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -o src/f32-igemm/4x2c4-sse.c
 
+################################### x86 AVX ###################################
+### AVX+BROADCAST micro-kernels
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=8 -D FMA=0 -o src/f32-igemm/1x8-avx-broadcast.c
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=8 -D FMA=0 -o src/f32-igemm/4x8-avx-broadcast.c
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=8 -D FMA=0 -o src/f32-igemm/5x8-avx-broadcast.c
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=6 -D NR=8 -D FMA=0 -o src/f32-igemm/6x8-avx-broadcast.c
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=7 -D NR=8 -D FMA=0 -o src/f32-igemm/7x8-avx-broadcast.c
+### FMA3+BROADCAST micro-kernels
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=8 -D FMA=3 -o src/f32-igemm/1x8-fma3-broadcast.c
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=8 -D FMA=3 -o src/f32-igemm/4x8-fma3-broadcast.c
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=8 -D FMA=3 -o src/f32-igemm/5x8-fma3-broadcast.c
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=6 -D NR=8 -D FMA=3 -o src/f32-igemm/6x8-fma3-broadcast.c
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=7 -D NR=8 -D FMA=3 -o src/f32-igemm/7x8-fma3-broadcast.c
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=8 -D NR=8 -D FMA=3 -o src/f32-igemm/8x8-fma3-broadcast.c
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/f32-igemm.yaml --output test/f32-igemm.cc

@@ -541,6 +541,50 @@ static void ruy_st(benchmark::State& state, const char* net)
     PPMM2PBenchmark(state, xnn_f32_ppmm_ukernel_4x8__sse, xnn_x32_packx_ukernel_4x__sse, 4, 8);
   }
 
+  static void f32_gemm_1x8__avx_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_1x8__avx_broadcast, 1, 8, 1, 1);
+  }
+
+  static void f32_gemm_4x8__avx_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_4x8__avx_broadcast, 4, 8, 1, 1);
+  }
+
+  static void f32_gemm_5x8__avx_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_5x8__avx_broadcast, 5, 8, 1, 1);
+  }
+
+  static void f32_gemm_6x8__avx_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_6x8__avx_broadcast, 6, 8, 1, 1);
+  }
+
+  static void f32_gemm_7x8__avx_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_7x8__avx_broadcast, 7, 8, 1, 1);
+  }
+
+  static void f32_gemm_1x8__fma3_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_1x8__fma3_broadcast, 1, 8, 1, 1);
+  }
+
+  static void f32_gemm_4x8__fma3_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_4x8__fma3_broadcast, 4, 8, 1, 1);
+  }
+
+  static void f32_gemm_5x8__fma3_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_5x8__fma3_broadcast, 5, 8, 1, 1);
+  }
+
+  static void f32_gemm_6x8__fma3_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_6x8__fma3_broadcast, 6, 8, 1, 1);
+  }
+
+  static void f32_gemm_7x8__fma3_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_7x8__fma3_broadcast, 7, 8, 1, 1);
+  }
+
+  static void f32_gemm_8x8__fma3_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_ukernel_8x8__fma3_broadcast, 8, 8, 1, 1);
+  }
+
   BENCHMARK_GEMM(f32_gemm_1x8__sse_load1)
   BENCHMARK_GEMM(f32_gemm_4x8__sse_load1)
   BENCHMARK_GEMM(f32_gemm_1x8__sse_dup)
@@ -549,6 +593,17 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(f32_gemm_4x8s4__sse)
   BENCHMARK_GEMM(f32_ppmm_4x8_unipass__sse)
   BENCHMARK_GEMM(f32_ppmm_4x8_twopass__sse)
+  BENCHMARK_GEMM(f32_gemm_1x8__avx_broadcast)
+  BENCHMARK_GEMM(f32_gemm_4x8__avx_broadcast)
+  BENCHMARK_GEMM(f32_gemm_5x8__avx_broadcast)
+  BENCHMARK_GEMM(f32_gemm_6x8__avx_broadcast)
+  BENCHMARK_GEMM(f32_gemm_7x8__avx_broadcast)
+  BENCHMARK_GEMM(f32_gemm_1x8__fma3_broadcast)
+  BENCHMARK_GEMM(f32_gemm_4x8__fma3_broadcast)
+  BENCHMARK_GEMM(f32_gemm_5x8__fma3_broadcast)
+  BENCHMARK_GEMM(f32_gemm_6x8__fma3_broadcast)
+  BENCHMARK_GEMM(f32_gemm_7x8__fma3_broadcast)
+  BENCHMARK_GEMM(f32_gemm_8x8__fma3_broadcast)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS

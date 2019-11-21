@@ -554,8 +554,44 @@ SSE41_UKERNELS = [
 ]
 
 AVX_UKERNELS = [
+    "src/f32-gemm/1x8-avx-broadcast.c",
+    "src/f32-gemm/4x8-avx-broadcast.c",
+    "src/f32-gemm/5x8-avx-broadcast.c",
+    "src/f32-gemm/6x8-avx-broadcast.c",
+    "src/f32-gemm/7x8-avx-broadcast.c",
+    "src/f32-gemminc/1x8-avx-broadcast.c",
+    "src/f32-gemminc/4x8-avx-broadcast.c",
+    "src/f32-gemminc/5x8-avx-broadcast.c",
+    "src/f32-gemminc/6x8-avx-broadcast.c",
+    "src/f32-gemminc/7x8-avx-broadcast.c",
+    "src/f32-igemm/1x8-avx-broadcast.c",
+    "src/f32-igemm/4x8-avx-broadcast.c",
+    "src/f32-igemm/5x8-avx-broadcast.c",
+    "src/f32-igemm/6x8-avx-broadcast.c",
+    "src/f32-igemm/7x8-avx-broadcast.c",
     "src/f32-rmax/avx.c",
     "src/f32-vscale/avx-unroll32.c",
+]
+
+FMA3_UKERNELS = [
+    "src/f32-gemm/1x8-fma3-broadcast.c",
+    "src/f32-gemm/4x8-fma3-broadcast.c",
+    "src/f32-gemm/5x8-fma3-broadcast.c",
+    "src/f32-gemm/6x8-fma3-broadcast.c",
+    "src/f32-gemm/7x8-fma3-broadcast.c",
+    "src/f32-gemm/8x8-fma3-broadcast.c",
+    "src/f32-gemminc/1x8-fma3-broadcast.c",
+    "src/f32-gemminc/4x8-fma3-broadcast.c",
+    "src/f32-gemminc/5x8-fma3-broadcast.c",
+    "src/f32-gemminc/6x8-fma3-broadcast.c",
+    "src/f32-gemminc/7x8-fma3-broadcast.c",
+    "src/f32-gemminc/8x8-fma3-broadcast.c",
+    "src/f32-igemm/1x8-fma3-broadcast.c",
+    "src/f32-igemm/4x8-fma3-broadcast.c",
+    "src/f32-igemm/5x8-fma3-broadcast.c",
+    "src/f32-igemm/6x8-fma3-broadcast.c",
+    "src/f32-igemm/7x8-fma3-broadcast.c",
+    "src/f32-igemm/8x8-fma3-broadcast.c",
 ]
 
 AVX2_UKERNELS = [
@@ -848,6 +884,20 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "fma3_ukernels",
+    hdrs = INTERNAL_HDRS,
+    copts = xnnpack_std_copts(),
+    x86_copts = [
+        "-mfma",
+    ],
+    x86_srcs = FMA3_UKERNELS,
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "avx2_ukernels",
     hdrs = INTERNAL_HDRS,
     copts = xnnpack_std_copts(),
@@ -905,6 +955,7 @@ xnnpack_aggregate_library(
         ":sse2_ukernels",
         ":sse41_ukernels",
         ":avx_ukernels",
+        ":fma3_ukernels",
         ":avx2_ukernels",
         ":avx512f_ukernels",
     ],

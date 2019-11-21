@@ -52,6 +52,13 @@
     } \
   } while (0)
 
+#define TEST_REQUIRES_X86_FMA3 \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_x86_fma3()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
+
 #define TEST_REQUIRES_X86_AVX2 \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx2()) { \
