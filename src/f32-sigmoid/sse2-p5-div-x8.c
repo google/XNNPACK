@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-sigmoid/sse2-p5-div.c.in
+//   Template: src/f32-sigmoid/sse-p5-div.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC

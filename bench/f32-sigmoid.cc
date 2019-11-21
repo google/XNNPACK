@@ -67,6 +67,14 @@ static void f32_sigmoid(
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
     ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, sse41_p5_div_x8, xnn_f32_sigmoid_ukernel__sse41_p5_div_x8)
+    ->RangeMultiplier(10)
+    ->Range(1000, 1000000)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, sse41_p5_div_x16, xnn_f32_sigmoid_ukernel__sse41_p5_div_x16)
+    ->RangeMultiplier(10)
+    ->Range(1000, 1000000)
+    ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

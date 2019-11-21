@@ -9,13 +9,13 @@
 
 #include <assert.h>
 
-#include <emmintrin.h>
+#include <smmintrin.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/vunop.h>
 
 
-void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
+void xnn_f32_sigmoid_ukernel__sse41_p5_div_x8(
     size_t n,
     const float* x,
     float* y,
@@ -42,11 +42,9 @@ void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
   const __m128 vc4 = _mm_set1_ps(0x1.573A1Ap-5f);
   const __m128 vc5 = _mm_set1_ps(0x1.0F9F9Cp-7f);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
+  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(x);
     const __m128 vx4567 = _mm_loadu_ps(x + 4);
-    const __m128 vx89AB = _mm_loadu_ps(x + 8);
-    const __m128 vxCDEF = _mm_loadu_ps(x + 12);
 
     // General structure of the algorithm:
     //           / exp(x) / (1 + exp(x)) if x <= 0
@@ -57,8 +55,6 @@ void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
     // then replace result with 1 - f[z] if x >= 0.
     const __m128 vz0123 = _mm_or_ps(vx0123, vsign_mask);
     const __m128 vz4567 = _mm_or_ps(vx4567, vsign_mask);
-    const __m128 vz89AB = _mm_or_ps(vx89AB, vsign_mask);
-    const __m128 vzCDEF = _mm_or_ps(vxCDEF, vsign_mask);
 
     // Compute reduced argument n := round(z / log(2)).
     // We do it by adding a large number (magic bias) to the product z * (1/log(2)), which cause rounding of the result
@@ -68,54 +64,36 @@ void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
     // the algorithm.
     __m128 vn0123 = _mm_add_ps(_mm_mul_ps(vz0123, vlog2e), vmagic_bias);
     __m128 vn4567 = _mm_add_ps(_mm_mul_ps(vz4567, vlog2e), vmagic_bias);
-    __m128 vn89AB = _mm_add_ps(_mm_mul_ps(vz89AB, vlog2e), vmagic_bias);
-    __m128 vnCDEF = _mm_add_ps(_mm_mul_ps(vzCDEF, vlog2e), vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
     // -87.33642 <= z <= 0.0, and -126 <= n <= 0 accordingly.
     const __m128 vs0123 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn0123), 23));
     const __m128 vs4567 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn4567), 23));
-    const __m128 vs89AB = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn89AB), 23));
-    const __m128 vsCDEF = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vnCDEF), 23));
 
     // Subtract the large number back to get final n := round(z / log(2)).
     vn0123 = _mm_sub_ps(vn0123, vmagic_bias);
     vn4567 = _mm_sub_ps(vn4567, vmagic_bias);
-    vn89AB = _mm_sub_ps(vn89AB, vmagic_bias);
-    vnCDEF = _mm_sub_ps(vnCDEF, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m128 vt0123 = _mm_add_ps(_mm_mul_ps(vn0123, vminus_ln2_hi), vz0123);
     __m128 vt4567 = _mm_add_ps(_mm_mul_ps(vn4567, vminus_ln2_hi), vz4567);
-    __m128 vt89AB = _mm_add_ps(_mm_mul_ps(vn89AB, vminus_ln2_hi), vz89AB);
-    __m128 vtCDEF = _mm_add_ps(_mm_mul_ps(vnCDEF, vminus_ln2_hi), vzCDEF);
 
     vt0123 = _mm_add_ps(_mm_mul_ps(vn0123, vminus_ln2_lo), vt0123);
     vt4567 = _mm_add_ps(_mm_mul_ps(vn4567, vminus_ln2_lo), vt4567);
-    vt89AB = _mm_add_ps(_mm_mul_ps(vn89AB, vminus_ln2_lo), vt89AB);
-    vtCDEF = _mm_add_ps(_mm_mul_ps(vnCDEF, vminus_ln2_lo), vtCDEF);
 
     // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
     __m128 vp0123 = _mm_add_ps(_mm_mul_ps(vc5, vt0123), vc4);
     __m128 vp4567 = _mm_add_ps(_mm_mul_ps(vc5, vt4567), vc4);
-    __m128 vp89AB = _mm_add_ps(_mm_mul_ps(vc5, vt89AB), vc4);
-    __m128 vpCDEF = _mm_add_ps(_mm_mul_ps(vc5, vtCDEF), vc4);
 
     vp0123 = _mm_add_ps(_mm_mul_ps(vp0123, vt0123), vc3);
     vp4567 = _mm_add_ps(_mm_mul_ps(vp4567, vt4567), vc3);
-    vp89AB = _mm_add_ps(_mm_mul_ps(vp89AB, vt89AB), vc3);
-    vpCDEF = _mm_add_ps(_mm_mul_ps(vpCDEF, vtCDEF), vc3);
 
     vp0123 = _mm_add_ps(_mm_mul_ps(vp0123, vt0123), vc2);
     vp4567 = _mm_add_ps(_mm_mul_ps(vp4567, vt4567), vc2);
-    vp89AB = _mm_add_ps(_mm_mul_ps(vp89AB, vt89AB), vc2);
-    vpCDEF = _mm_add_ps(_mm_mul_ps(vpCDEF, vtCDEF), vc2);
 
     vp0123 = _mm_add_ps(_mm_mul_ps(vp0123, vt0123), vc1);
     vp4567 = _mm_add_ps(_mm_mul_ps(vp4567, vt4567), vc1);
-    vp89AB = _mm_add_ps(_mm_mul_ps(vp89AB, vt89AB), vc1);
-    vpCDEF = _mm_add_ps(_mm_mul_ps(vpCDEF, vtCDEF), vc1);
 
     // Reconstruct the exp(z) value:
     //   e = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
@@ -123,63 +101,37 @@ void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
     //     = s + (t * s) * p
     vt0123 = _mm_mul_ps(vt0123, vs0123);
     vt4567 = _mm_mul_ps(vt4567, vs4567);
-    vt89AB = _mm_mul_ps(vt89AB, vs89AB);
-    vtCDEF = _mm_mul_ps(vtCDEF, vsCDEF);
 
     __m128 ve0123 = _mm_add_ps(_mm_mul_ps(vt0123, vp0123), vs0123);
     __m128 ve4567 = _mm_add_ps(_mm_mul_ps(vt4567, vp4567), vs4567);
-    __m128 ve89AB = _mm_add_ps(_mm_mul_ps(vt89AB, vp89AB), vs89AB);
-    __m128 veCDEF = _mm_add_ps(_mm_mul_ps(vtCDEF, vpCDEF), vsCDEF);
 
     // Denominator of the sigmoid fraction: 1.0 + exp(z)
     __m128 vd0123 = _mm_add_ps(ve0123, vone);
     __m128 vd4567 = _mm_add_ps(ve4567, vone);
-    __m128 vd89AB = _mm_add_ps(ve89AB, vone);
-    __m128 vdCDEF = _mm_add_ps(veCDEF, vone);
 
     // Reconstruct sigmoid(-z) = exp(z) / (1.0 + exp(z))
     __m128 vf0123 = _mm_div_ps(ve0123, vd0123);
     __m128 vf4567 = _mm_div_ps(ve4567, vd4567);
-    __m128 vf89AB = _mm_div_ps(ve89AB, vd89AB);
-    __m128 vfCDEF = _mm_div_ps(veCDEF, vdCDEF);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    __m128 vm0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx0123)));
-    __m128 vm4567 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx4567)));
-    __m128 vm89AB = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx89AB)));
-    __m128 vmCDEF = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vxCDEF)));
-
-    vf0123 = _mm_or_ps(_mm_and_ps(vf0123, vm0123), _mm_andnot_ps(vm0123, _mm_sub_ps(vone, vf0123)));
-    vf4567 = _mm_or_ps(_mm_and_ps(vf4567, vm4567), _mm_andnot_ps(vm4567, _mm_sub_ps(vone, vf4567)));
-    vf89AB = _mm_or_ps(_mm_and_ps(vf89AB, vm89AB), _mm_andnot_ps(vm89AB, _mm_sub_ps(vone, vf89AB)));
-    vfCDEF = _mm_or_ps(_mm_and_ps(vfCDEF, vmCDEF), _mm_andnot_ps(vmCDEF, _mm_sub_ps(vone, vfCDEF)));
+    vf0123 = _mm_blendv_ps(_mm_sub_ps(vone, vf0123), vf0123, vx0123);
+    vf4567 = _mm_blendv_ps(_mm_sub_ps(vone, vf4567), vf4567, vx4567);
 
     // For inputs above 1.0 cutoff, replace output with 1.0.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vm0123 = _mm_cmpgt_ps(vx0123, vone_cutoff);
-    vm4567 = _mm_cmpgt_ps(vx4567, vone_cutoff);
-    vm89AB = _mm_cmpgt_ps(vx89AB, vone_cutoff);
-    vmCDEF = _mm_cmpgt_ps(vxCDEF, vone_cutoff);
-
-    vf0123 = _mm_or_ps(_mm_and_ps(vone, vm0123), _mm_andnot_ps(vm0123, vf0123));
-    vf4567 = _mm_or_ps(_mm_and_ps(vone, vm4567), _mm_andnot_ps(vm4567, vf4567));
-    vf89AB = _mm_or_ps(_mm_and_ps(vone, vm89AB), _mm_andnot_ps(vm89AB, vf89AB));
-    vfCDEF = _mm_or_ps(_mm_and_ps(vone, vmCDEF), _mm_andnot_ps(vmCDEF, vfCDEF));
+    vf0123 = _mm_blendv_ps(vf0123, vone, _mm_cmpgt_ps(vx0123, vone_cutoff));
+    vf4567 = _mm_blendv_ps(vf4567, vone, _mm_cmpgt_ps(vx4567, vone_cutoff));
 
     // For inputs below denormal cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf0123 = _mm_andnot_ps(_mm_cmplt_ps(vx0123, vdenorm_cutoff), vf0123);
     vf4567 = _mm_andnot_ps(_mm_cmplt_ps(vx4567, vdenorm_cutoff), vf4567);
-    vf89AB = _mm_andnot_ps(_mm_cmplt_ps(vx89AB, vdenorm_cutoff), vf89AB);
-    vfCDEF = _mm_andnot_ps(_mm_cmplt_ps(vxCDEF, vdenorm_cutoff), vfCDEF);
 
     _mm_storeu_ps(y, vf0123);
     _mm_storeu_ps(y + 4, vf4567);
-    _mm_storeu_ps(y + 8, vf89AB);
-    _mm_storeu_ps(y + 12, vfCDEF);
 
-    x += 16;
-    y += 16;
+    x += 8;
+    y += 8;
   }
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(x);
@@ -233,13 +185,11 @@ void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
     __m128 vf0123 = _mm_div_ps(ve0123, vd0123);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    __m128 vm0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx0123)));
-    vf0123 = _mm_or_ps(_mm_and_ps(vf0123, vm0123), _mm_andnot_ps(vm0123, _mm_sub_ps(vone, vf0123)));
+    vf0123 = _mm_blendv_ps(_mm_sub_ps(vone, vf0123), vf0123, vx0123);
 
     // For inputs above 1.0 cutoff, replace output with 1.0.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vm0123 = _mm_cmpgt_ps(vx0123, vone_cutoff);
-    vf0123 = _mm_or_ps(_mm_and_ps(vone, vm0123), _mm_andnot_ps(vm0123, vf0123));
+    vf0123 = _mm_blendv_ps(vf0123, vone, _mm_cmpgt_ps(vx0123, vone_cutoff));
 
     // For inputs below denormal cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
@@ -302,13 +252,11 @@ void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
     __m128 vf0123 = _mm_div_ps(ve0123, vd0123);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    __m128 vm0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx0123)));
-    vf0123 = _mm_or_ps(_mm_and_ps(vf0123, vm0123), _mm_andnot_ps(vm0123, _mm_sub_ps(vone, vf0123)));
+    vf0123 = _mm_blendv_ps(_mm_sub_ps(vone, vf0123), vf0123, vx0123);
 
     // For inputs above 1.0 cutoff, replace output with 1.0.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vm0123 = _mm_cmpgt_ps(vx0123, vone_cutoff);
-    vf0123 = _mm_or_ps(_mm_and_ps(vone, vm0123), _mm_andnot_ps(vm0123, vf0123));
+    vf0123 = _mm_blendv_ps(vf0123, vone, _mm_cmpgt_ps(vx0123, vone_cutoff));
 
     // For inputs below denormal cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.

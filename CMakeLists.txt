@@ -631,7 +631,9 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
 
 SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/sse41-2x4.c
-  src/f32-prelu/sse41-2x8.c)
+  src/f32-prelu/sse41-2x8.c
+  src/f32-sigmoid/sse41-p5-div-x8.c
+  src/f32-sigmoid/sse41-p5-div-x16.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-gemm/1x8-avx-broadcast.c

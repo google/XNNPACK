@@ -9,13 +9,13 @@
 
 #include <assert.h>
 
-#include <emmintrin.h>
+#include <smmintrin.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/vunop.h>
 
 
-void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
+void xnn_f32_sigmoid_ukernel__sse41_p5_div_x16(
     size_t n,
     const float* x,
     float* y,
@@ -144,27 +144,17 @@ void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
     __m128 vfCDEF = _mm_div_ps(veCDEF, vdCDEF);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    __m128 vm0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx0123)));
-    __m128 vm4567 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx4567)));
-    __m128 vm89AB = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx89AB)));
-    __m128 vmCDEF = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vxCDEF)));
-
-    vf0123 = _mm_or_ps(_mm_and_ps(vf0123, vm0123), _mm_andnot_ps(vm0123, _mm_sub_ps(vone, vf0123)));
-    vf4567 = _mm_or_ps(_mm_and_ps(vf4567, vm4567), _mm_andnot_ps(vm4567, _mm_sub_ps(vone, vf4567)));
-    vf89AB = _mm_or_ps(_mm_and_ps(vf89AB, vm89AB), _mm_andnot_ps(vm89AB, _mm_sub_ps(vone, vf89AB)));
-    vfCDEF = _mm_or_ps(_mm_and_ps(vfCDEF, vmCDEF), _mm_andnot_ps(vmCDEF, _mm_sub_ps(vone, vfCDEF)));
+    vf0123 = _mm_blendv_ps(_mm_sub_ps(vone, vf0123), vf0123, vx0123);
+    vf4567 = _mm_blendv_ps(_mm_sub_ps(vone, vf4567), vf4567, vx4567);
+    vf89AB = _mm_blendv_ps(_mm_sub_ps(vone, vf89AB), vf89AB, vx89AB);
+    vfCDEF = _mm_blendv_ps(_mm_sub_ps(vone, vfCDEF), vfCDEF, vxCDEF);
 
     // For inputs above 1.0 cutoff, replace output with 1.0.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vm0123 = _mm_cmpgt_ps(vx0123, vone_cutoff);
-    vm4567 = _mm_cmpgt_ps(vx4567, vone_cutoff);
-    vm89AB = _mm_cmpgt_ps(vx89AB, vone_cutoff);
-    vmCDEF = _mm_cmpgt_ps(vxCDEF, vone_cutoff);
-
-    vf0123 = _mm_or_ps(_mm_and_ps(vone, vm0123), _mm_andnot_ps(vm0123, vf0123));
-    vf4567 = _mm_or_ps(_mm_and_ps(vone, vm4567), _mm_andnot_ps(vm4567, vf4567));
-    vf89AB = _mm_or_ps(_mm_and_ps(vone, vm89AB), _mm_andnot_ps(vm89AB, vf89AB));
-    vfCDEF = _mm_or_ps(_mm_and_ps(vone, vmCDEF), _mm_andnot_ps(vmCDEF, vfCDEF));
+    vf0123 = _mm_blendv_ps(vf0123, vone, _mm_cmpgt_ps(vx0123, vone_cutoff));
+    vf4567 = _mm_blendv_ps(vf4567, vone, _mm_cmpgt_ps(vx4567, vone_cutoff));
+    vf89AB = _mm_blendv_ps(vf89AB, vone, _mm_cmpgt_ps(vx89AB, vone_cutoff));
+    vfCDEF = _mm_blendv_ps(vfCDEF, vone, _mm_cmpgt_ps(vxCDEF, vone_cutoff));
 
     // For inputs below denormal cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
@@ -233,13 +223,11 @@ void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
     __m128 vf0123 = _mm_div_ps(ve0123, vd0123);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    __m128 vm0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx0123)));
-    vf0123 = _mm_or_ps(_mm_and_ps(vf0123, vm0123), _mm_andnot_ps(vm0123, _mm_sub_ps(vone, vf0123)));
+    vf0123 = _mm_blendv_ps(_mm_sub_ps(vone, vf0123), vf0123, vx0123);
 
     // For inputs above 1.0 cutoff, replace output with 1.0.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vm0123 = _mm_cmpgt_ps(vx0123, vone_cutoff);
-    vf0123 = _mm_or_ps(_mm_and_ps(vone, vm0123), _mm_andnot_ps(vm0123, vf0123));
+    vf0123 = _mm_blendv_ps(vf0123, vone, _mm_cmpgt_ps(vx0123, vone_cutoff));
 
     // For inputs below denormal cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
@@ -302,13 +290,11 @@ void xnn_f32_sigmoid_ukernel__sse2_p5_div_x16(
     __m128 vf0123 = _mm_div_ps(ve0123, vd0123);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    __m128 vm0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx0123)));
-    vf0123 = _mm_or_ps(_mm_and_ps(vf0123, vm0123), _mm_andnot_ps(vm0123, _mm_sub_ps(vone, vf0123)));
+    vf0123 = _mm_blendv_ps(_mm_sub_ps(vone, vf0123), vf0123, vx0123);
 
     // For inputs above 1.0 cutoff, replace output with 1.0.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vm0123 = _mm_cmpgt_ps(vx0123, vone_cutoff);
-    vf0123 = _mm_or_ps(_mm_and_ps(vone, vm0123), _mm_andnot_ps(vm0123, vf0123));
+    vf0123 = _mm_blendv_ps(vf0123, vone, _mm_cmpgt_ps(vx0123, vone_cutoff));
 
     // For inputs below denormal cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
