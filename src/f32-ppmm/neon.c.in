@@ -5,7 +5,7 @@
 
 $assert MR % 4 == 0
 $assert NR % 4 == 0
-$IDLETTERS = "0123456789ABCDEFGHIJKLMN"
+$ABC = "0123456789ABCDEFGHIJKLMN"
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -48,40 +48,40 @@ void xnn_f32_ppmm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
 
   do {
     $for N in range(0, NR, 4):
-      float32x4_t vacc0x${IDLETTERS[N:N+4]} = vld1q_f32(w); w += 4;
+      float32x4_t vacc0x${ABC[N:N+4]} = vld1q_f32(w); w += 4;
     $for M in range(1, MR):
       $for N in range(0, NR, 4):
-        float32x4_t vacc${M}x${IDLETTERS[N:N+4]} = vacc0x${IDLETTERS[N:N+4]};
+        float32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
 
     size_t k = kc;
     do {
       $for M in range(0, MR, 4):
-        const float32x4_t va${IDLETTERS[M:M+4]} = vld1q_f32(a); a += 4;
+        const float32x4_t va${ABC[M:M+4]} = vld1q_f32(a); a += 4;
 
       $for N in range(0, NR, 4):
-        const float32x4_t vb${IDLETTERS[N:N+4]} = vld1q_f32(w); w += 4;
+        const float32x4_t vb${ABC[N:N+4]} = vld1q_f32(w); w += 4;
 
       $if FMA:
         #ifdef __aarch64__
           $for N in range(0, NR, 4):
             $for M in range(MR):
-              vacc${M}x${IDLETTERS[N:N+4]} = vfmaq_laneq_f32(vacc${M}x${IDLETTERS[N:N+4]}, vb${IDLETTERS[N:N+4]}, va${IDLETTERS[M&-4:4+M&-4]}, ${M % 4});
+              vacc${M}x${ABC[N:N+4]} = vfmaq_laneq_f32(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}, va${ABC[M&-4:4+M&-4]}, ${M % 4});
         #else
           $for M in range(MR):
             $VGET_PART_F32 = "vget_low_f32" if M % 4 < 2 else "vget_high_f32"
             $MMMM = str(M) * 4
-            const float32x4_t va${MMMM} = vdupq_lane_f32(${VGET_PART_F32}(va${IDLETTERS[M&-4:4+M&-4]}), ${M % 2});
+            const float32x4_t va${MMMM} = vdupq_lane_f32(${VGET_PART_F32}(va${ABC[M&-4:4+M&-4]}), ${M % 2});
 
           $for N in range(0, NR, 4):
             $for M in range(MR):
               $MMMM = str(M) * 4
-              vacc${M}x${IDLETTERS[N:N+4]} = vfmaq_f32(vacc${M}x${IDLETTERS[N:N+4]}, va${MMMM}, vb${IDLETTERS[N:N+4]});
+              vacc${M}x${ABC[N:N+4]} = vfmaq_f32(vacc${M}x${ABC[N:N+4]}, va${MMMM}, vb${ABC[N:N+4]});
         #endif
       $else:
         $for N in range(0, NR, 4):
           $for M in range(MR):
             $VGET_PART_F32 = "vget_low_f32" if M % 4 < 2 else "vget_high_f32"
-            vacc${M}x${IDLETTERS[N:N+4]} = vmlaq_lane_f32(vacc${M}x${IDLETTERS[N:N+4]}, vb${IDLETTERS[N:N+4]}, ${VGET_PART_F32}(va${IDLETTERS[M&-4:4+M&-4]}), ${M % 2});
+            vacc${M}x${ABC[N:N+4]} = vmlaq_lane_f32(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}, ${VGET_PART_F32}(va${ABC[M&-4:4+M&-4]}), ${M % 2});
 
       k -= sizeof(float);
     } while (k != 0);
@@ -89,18 +89,18 @@ void xnn_f32_ppmm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
-        vacc${M}x${IDLETTERS[N:N+4]} = vminq_f32(vacc${M}x${IDLETTERS[N:N+4]}, vmax);
+        vacc${M}x${ABC[N:N+4]} = vminq_f32(vacc${M}x${ABC[N:N+4]}, vmax);
 
     const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
-        vacc${M}x${IDLETTERS[N:N+4]} = vmaxq_f32(vacc${M}x${IDLETTERS[N:N+4]}, vmin);
+        vacc${M}x${ABC[N:N+4]} = vmaxq_f32(vacc${M}x${ABC[N:N+4]}, vmin);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
-        vst1q_f32(c${M}, vacc${M}x${IDLETTERS[0:4]});
+        vst1q_f32(c${M}, vacc${M}x${ABC[0:4]});
         $for N in range(4, NR, 4):
-          vst1q_f32(c${M} + ${N}, vacc${M}x${IDLETTERS[N:N+4]});
+          vst1q_f32(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
       a = (const float*) ((uintptr_t) a - kc * ${MR});
@@ -116,11 +116,11 @@ void xnn_f32_ppmm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
             $if LOG2N >= 2:
               $for M in reversed(range(MR)):
                 $for N in range(0, 1 << LOG2N, 4):
-                  vst1q_f32(c${M}, vacc${M}x${IDLETTERS[N:N+4]}); c${M} += 4;
+                  vst1q_f32(c${M}, vacc${M}x${ABC[N:N+4]}); c${M} += 4;
 
               $for M in reversed(range(MR)):
                 $for N in range(0, 1 << (LOG2N - 1), 4):
-                  vacc${M}x${IDLETTERS[N:N+4]} = vacc${M}x${IDLETTERS[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
+                  vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
             $elif LOG2N == 1:
               $for M in reversed(range(MR)):
                 vst1_f32(c${M}, vacc${M}x01); c${M} += 2;

@@ -5,7 +5,7 @@
 
 $assert MR % 4 == 0
 $assert NR % 4 == 0
-$IDLETTERS = "0123456789ABCDEFGHIJKLMN"
+$ABC = "0123456789ABCDEFGHIJKLMN"
 #include <assert.h>
 
 #include <xmmintrin.h>
@@ -47,34 +47,34 @@ void xnn_f32_ppmm_ukernel_${MR}x${NR}__sse(
       }
 
   do {
-    __m128 vacc0x${IDLETTERS[0:4]} = _mm_load_ps(w);
+    __m128 vacc0x${ABC[0:4]} = _mm_load_ps(w);
     $for N in range(4, NR, 4):
-      __m128 vacc0x${IDLETTERS[N:N+4]} = _mm_load_ps(w + ${N});
+      __m128 vacc0x${ABC[N:N+4]} = _mm_load_ps(w + ${N});
     $for M in range(1, MR):
       $for N in range(0, NR, 4):
-        __m128 vacc${M}x${IDLETTERS[N:N+4]} = vacc0x${IDLETTERS[N:N+4]};
+        __m128 vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
     w += ${NR};
 
     size_t k = kc;
     do {
-      const __m128 va${IDLETTERS[0:4]} = _mm_load_ps(a);
+      const __m128 va${ABC[0:4]} = _mm_load_ps(a);
       $for M in range(4, MR, 4):
-        const __m128 va${IDLETTERS[M:M+4]} = _mm_load_ps(a + ${M});
+        const __m128 va${ABC[M:M+4]} = _mm_load_ps(a + ${M});
       a += ${MR};
 
-      const __m128 vb${IDLETTERS[0:4]} = _mm_load_ps(w);
+      const __m128 vb${ABC[0:4]} = _mm_load_ps(w);
       $for N in range(4, NR, 4):
-        const __m128 vb${IDLETTERS[N:N+4]} = _mm_load_ps(w + ${N});
+        const __m128 vb${ABC[N:N+4]} = _mm_load_ps(w + ${N});
       w += ${NR};
 
       $for M in range(MR):
         $MMMM = str(M) * 4
-        const __m128 va${MMMM} = _mm_shuffle_ps(va${IDLETTERS[M&-4:4+M&-4]}, va${IDLETTERS[M&-4:4+M&-4]}, _MM_SHUFFLE(${M % 4}, ${M % 4}, ${M % 4}, ${M % 4}));
+        const __m128 va${MMMM} = _mm_shuffle_ps(va${ABC[M&-4:4+M&-4]}, va${ABC[M&-4:4+M&-4]}, _MM_SHUFFLE(${M % 4}, ${M % 4}, ${M % 4}, ${M % 4}));
 
       $for N in range(0, NR, 4):
         $for M in range(MR):
           $MMMM = str(M) * 4
-          vacc${M}x${IDLETTERS[N:N+4]} = _mm_add_ps(vacc${M}x${IDLETTERS[N:N+4]}, _mm_mul_ps(va${MMMM}, vb${IDLETTERS[N:N+4]}));
+          vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${MMMM}, vb${ABC[N:N+4]}));
 
       k -= sizeof(float);
     } while (k != 0);
@@ -82,18 +82,18 @@ void xnn_f32_ppmm_ukernel_${MR}x${NR}__sse(
     const __m128 vmax = _mm_load_ps(params->sse.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
-        vacc${M}x${IDLETTERS[N:N+4]} = _mm_min_ps(vacc${M}x${IDLETTERS[N:N+4]}, vmax);
+        vacc${M}x${ABC[N:N+4]} = _mm_min_ps(vacc${M}x${ABC[N:N+4]}, vmax);
 
     const __m128 vmin = _mm_load_ps(params->sse.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
-        vacc${M}x${IDLETTERS[N:N+4]} = _mm_max_ps(vacc${M}x${IDLETTERS[N:N+4]}, vmin);
+        vacc${M}x${ABC[N:N+4]} = _mm_max_ps(vacc${M}x${ABC[N:N+4]}, vmin);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
-        _mm_storeu_ps(c${M}, vacc${M}x${IDLETTERS[0:4]});
+        _mm_storeu_ps(c${M}, vacc${M}x${ABC[0:4]});
         $for N in range(4, NR, 4):
-          _mm_storeu_ps(c${M} + ${N}, vacc${M}x${IDLETTERS[N:N+4]});
+          _mm_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
 
       a = (const float*) ((uintptr_t) a - kc * ${MR});
 
@@ -107,28 +107,28 @@ void xnn_f32_ppmm_ukernel_${MR}x${NR}__sse(
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 2:
               $for M in reversed(range(MR)):
-                _mm_storeu_ps(c${M}, vacc${M}x${IDLETTERS[0:4]});
+                _mm_storeu_ps(c${M}, vacc${M}x${ABC[0:4]});
                 $for N in range(4, 1 << LOG2N, 4):
-                  _mm_storeu_ps(c${M} + ${N}, vacc${M}x${IDLETTERS[N:N+4]});
+                  _mm_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
 
               $for M in reversed(range(MR)):
                 $for N in range(0, 1 << (LOG2N - 1), 4):
-                  vacc${M}x${IDLETTERS[N:N+4]} = vacc${M}x${IDLETTERS[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
+                  vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
 
               $for M in reversed(range(MR)):
                 c${M} += ${1 << LOG2N};
             $elif LOG2N == 1:
               $for M in reversed(range(MR)):
-                _mm_storel_pi((__m64*) c${M}, vacc${M}x${IDLETTERS[0:4]});
+                _mm_storel_pi((__m64*) c${M}, vacc${M}x${ABC[0:4]});
 
               $for M in reversed(range(MR)):
-                vacc${M}x${IDLETTERS[0:4]} = _mm_movehl_ps(vacc${M}x${IDLETTERS[0:4]}, vacc${M}x${IDLETTERS[0:4]});
+                vacc${M}x${ABC[0:4]} = _mm_movehl_ps(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]});
 
               $for M in reversed(range(MR)):
                 c${M} += 2;
             $elif LOG2N == 0:
               $for M in reversed(range(MR)):
-                _mm_store_ss(c${M}, vacc${M}x${IDLETTERS[0:4]});
+                _mm_store_ss(c${M}, vacc${M}x${ABC[0:4]});
           }
 
       nc = 0;

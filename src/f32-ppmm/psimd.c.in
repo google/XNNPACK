@@ -5,7 +5,7 @@
 
 $assert MR % 4 == 0
 $assert NR % 4 == 0
-$IDLETTERS = "0123456789ABCDEFGHIJKLMN"
+$ABC = "0123456789ABCDEFGHIJKLMN"
 #include <assert.h>
 
 #include <psimd.h>
@@ -47,34 +47,34 @@ void xnn_f32_ppmm_ukernel_${MR}x${NR}__psimd(
       }
 
   do {
-    psimd_f32 vacc0x${IDLETTERS[0:4]} = psimd_load_f32(w);
+    psimd_f32 vacc0x${ABC[0:4]} = psimd_load_f32(w);
     $for N in range(4, NR, 4):
-      psimd_f32 vacc0x${IDLETTERS[N:N+4]} = psimd_load_f32(w + ${N});
+      psimd_f32 vacc0x${ABC[N:N+4]} = psimd_load_f32(w + ${N});
     $for M in range(1, MR):
       $for N in range(0, NR, 4):
-        psimd_f32 vacc${M}x${IDLETTERS[N:N+4]} = vacc0x${IDLETTERS[N:N+4]};
+        psimd_f32 vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
     w += ${NR};
 
     size_t k = kc;
     do {
-      const psimd_f32 va${IDLETTERS[0:4]} = psimd_load_f32(a);
+      const psimd_f32 va${ABC[0:4]} = psimd_load_f32(a);
       $for M in range(4, MR, 4):
-        const psimd_f32 va${IDLETTERS[M:M+4]} = psimd_load_f32(a + ${M});
+        const psimd_f32 va${ABC[M:M+4]} = psimd_load_f32(a + ${M});
       a += ${MR};
 
-      const psimd_f32 vb${IDLETTERS[0:4]} = psimd_load_f32(w);
+      const psimd_f32 vb${ABC[0:4]} = psimd_load_f32(w);
       $for N in range(4, NR, 4):
-        const psimd_f32 vb${IDLETTERS[N:N+4]} = psimd_load_f32(w + ${N});
+        const psimd_f32 vb${ABC[N:N+4]} = psimd_load_f32(w + ${N});
       w += ${NR};
 
       $for M in range(MR):
         $MMMM = str(M) * 4
-        const psimd_f32 va${MMMM} = psimd_splat${M % 4}_f32(va${IDLETTERS[M&-4:4+M&-4]});
+        const psimd_f32 va${MMMM} = psimd_splat${M % 4}_f32(va${ABC[M&-4:4+M&-4]});
 
       $for N in range(0, NR, 4):
         $for M in range(MR):
           $MMMM = str(M) * 4
-          vacc${M}x${IDLETTERS[N:N+4]} = psimd_qfma_f32(vacc${M}x${IDLETTERS[N:N+4]}, va${MMMM}, vb${IDLETTERS[N:N+4]});
+          vacc${M}x${ABC[N:N+4]} = psimd_qfma_f32(vacc${M}x${ABC[N:N+4]}, va${MMMM}, vb${ABC[N:N+4]});
 
       k -= sizeof(float);
     } while (k != 0);
@@ -82,18 +82,18 @@ void xnn_f32_ppmm_ukernel_${MR}x${NR}__psimd(
     const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
-        vacc${M}x${IDLETTERS[N:N+4]} = psimd_min_f32(vacc${M}x${IDLETTERS[N:N+4]}, vmax);
+        vacc${M}x${ABC[N:N+4]} = psimd_min_f32(vacc${M}x${ABC[N:N+4]}, vmax);
 
     const psimd_f32 vmin = psimd_load_splat_f32(&params->scalar.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
-        vacc${M}x${IDLETTERS[N:N+4]} = psimd_max_f32(vacc${M}x${IDLETTERS[N:N+4]}, vmin);
+        vacc${M}x${ABC[N:N+4]} = psimd_max_f32(vacc${M}x${ABC[N:N+4]}, vmin);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
-        psimd_store_f32(c${M}, vacc${M}x${IDLETTERS[0:4]});
+        psimd_store_f32(c${M}, vacc${M}x${ABC[0:4]});
         $for N in range(4, NR, 4):
-          psimd_store_f32(c${M} + ${N}, vacc${M}x${IDLETTERS[N:N+4]});
+          psimd_store_f32(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
 
       a = (const float*) ((uintptr_t) a - kc * ${MR});
 
@@ -107,28 +107,28 @@ void xnn_f32_ppmm_ukernel_${MR}x${NR}__psimd(
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 2:
               $for M in reversed(range(MR)):
-                psimd_store_f32(c${M}, vacc${M}x${IDLETTERS[0:4]});
+                psimd_store_f32(c${M}, vacc${M}x${ABC[0:4]});
                 $for N in range(4, 1 << LOG2N, 4):
-                  psimd_store_f32(c${M} + ${N}, vacc${M}x${IDLETTERS[N:N+4]});
+                  psimd_store_f32(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
 
               $for M in reversed(range(MR)):
                 $for N in range(0, 1 << (LOG2N - 1), 4):
-                  vacc${M}x${IDLETTERS[N:N+4]} = vacc${M}x${IDLETTERS[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
+                  vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
 
               $for M in reversed(range(MR)):
                 c${M} += ${1 << LOG2N};
             $elif LOG2N == 1:
               $for M in reversed(range(MR)):
-                psimd_store2_f32(c${M}, vacc${M}x${IDLETTERS[0:4]});
+                psimd_store2_f32(c${M}, vacc${M}x${ABC[0:4]});
 
               $for M in reversed(range(MR)):
-                vacc${M}x${IDLETTERS[0:4]} = psimd_concat_hi_f32(vacc${M}x${IDLETTERS[0:4]}, vacc${M}x${IDLETTERS[0:4]});
+                vacc${M}x${ABC[0:4]} = psimd_concat_hi_f32(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]});
 
               $for M in reversed(range(MR)):
                 c${M} += 2;
             $elif LOG2N == 0:
               $for M in reversed(range(MR)):
-                psimd_store1_f32(c${M}, vacc${M}x${IDLETTERS[0:4]});
+                psimd_store1_f32(c${M}, vacc${M}x${ABC[0:4]});
           }
 
       nc = 0;
