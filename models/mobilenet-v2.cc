@@ -1598,7 +1598,7 @@ ExecutionPlan MobileNetV2(pthreadpool_t threadpool) {
 
   xnn_operator_t op62 = nullptr;
   status = xnn_create_global_average_pooling_nwc_f32(
-    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
+    1280 /* channels */, 1280 /* input stride */, 1280 /* output stride */,
     -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(),
     0 /* flags */,
     &op62);
