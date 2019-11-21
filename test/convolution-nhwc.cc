@@ -808,6 +808,47 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_Q8, 5x5_without_bias) {
     .TestNHWCxQ8();
 }
 
+TEST(CONVOLUTION_NHWC_Q8, setup_changing_input_buffer) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .batch_size(3)
+    .input_height(8)
+    .input_width(8)
+    .kernel_height(5)
+    .kernel_width(3)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .TestSetupNHWCxQ8();
+}
+
+TEST(CONVOLUTION_NHWC_Q8, setup_changing_input_buffer_grouped) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .batch_size(3)
+    .input_height(8)
+    .input_width(8)
+    .kernel_height(5)
+    .kernel_width(3)
+    .groups(2)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .TestSetupNHWCxQ8();
+}
+
+TEST(CONVOLUTION_NHWC_Q8, setup_changing_input_buffer_depthwise) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .batch_size(3)
+    .input_height(8)
+    .input_width(8)
+    .kernel_height(3)
+    .kernel_width(3)
+    .groups(19)
+    .group_input_channels(1)
+    .group_output_channels(1)
+    .TestSetupNHWCxQ8();
+}
+
 TEST(CONVOLUTION_NHWC_Q8, setup_increasing_batch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
@@ -2389,6 +2430,47 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_F32, 7x7_without_bias) {
     .groups(24)
     .iterations(3)
     .TestNHWCxF32();
+}
+
+TEST(CONVOLUTION_NHWC_F32, setup_changing_input_buffer) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .batch_size(3)
+    .input_height(8)
+    .input_width(8)
+    .kernel_height(5)
+    .kernel_width(3)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .TestSetupNHWCxF32();
+}
+
+TEST(CONVOLUTION_NHWC_F32, setup_changing_input_buffer_grouped) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .batch_size(3)
+    .input_height(8)
+    .input_width(8)
+    .kernel_height(5)
+    .kernel_width(3)
+    .groups(2)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .TestSetupNHWCxF32();
+}
+
+TEST(CONVOLUTION_NHWC_F32, setup_changing_input_buffer_depthwise) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .batch_size(3)
+    .input_height(8)
+    .input_width(8)
+    .kernel_height(3)
+    .kernel_width(3)
+    .groups(19)
+    .group_input_channels(1)
+    .group_output_channels(1)
+    .TestSetupNHWCxF32();
 }
 
 TEST(CONVOLUTION_NHWC_F32, setup_increasing_batch) {
