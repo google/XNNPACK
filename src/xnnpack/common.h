@@ -8,6 +8,10 @@
 
 #pragma once
 
+#if defined(__APPLE__)
+  #include <TargetConditionals.h>
+#endif
+
 
 // Define architecture identification macros
 
@@ -66,6 +70,32 @@
   #define XNN_ARCH_WASMSIMD 0
 #endif
 
+// Define architecture identification macros
+
+#if defined(__ANDROID__)
+  #define XNN_PLATFORM_ANDROID 1
+#else
+  #define XNN_PLATFORM_ANDROID 0
+#endif
+
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+  // iOS on iPhone / iPad Touch, iPad OS, watchOS, or tvOS
+  #define XNN_PLATFORM_IOS 1
+#else
+  #define XNN_PLATFORM_IOS 0
+#endif
+
+#if XNN_PLATFORM_ANDROID || XNN_PLATFORM_IOS
+  #define XNN_PLATFORM_MOBILE 1
+#else
+  #define XNN_PLATFORM_MOBILE 0
+#endif
+
+#if defined(__EMSCRIPTEN__) || defined(__wasm__)
+  #define XNN_PLATFORM_WEB 1
+#else
+  #define XNN_PLATFORM_WEB 0
+#endif
 
 #if defined(__GNUC__)
   #if defined(__clang__) || (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 5)

@@ -622,14 +622,34 @@ static void init(void) {
 
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
-    xnn_params.f32.gemm = (struct gemm_parameters) {
-      .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__sse_load1,
-      .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__sse_load1,
-      .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__sse_load1,
-      .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__sse_load1,
-      .mr = 4,
-      .nr = 8,
-    };
+    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_fma3()) {
+      xnn_params.f32.gemm = (struct gemm_parameters) {
+        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_7x8__fma3_broadcast,
+        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_7x8__fma3_broadcast,
+        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__fma3_broadcast,
+        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__fma3_broadcast,
+        .mr = 7,
+        .nr = 8,
+      };
+    } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx()) {
+      xnn_params.f32.gemm = (struct gemm_parameters) {
+        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_7x8__avx_broadcast,
+        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_7x8__avx_broadcast,
+        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__avx_broadcast,
+        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__avx_broadcast,
+        .mr = 7,
+        .nr = 8,
+      };
+    } else {
+      xnn_params.f32.gemm = (struct gemm_parameters) {
+        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__sse_load1,
+        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__sse_load1,
+        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__sse_load1,
+        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__sse_load1,
+        .mr = 4,
+        .nr = 8,
+      };
+    }
     xnn_params.f32.gemm2 = (struct gemm_parameters) {
       .gemm = NULL,
       .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x2c4__sse,
