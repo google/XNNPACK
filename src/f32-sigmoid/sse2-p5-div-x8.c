@@ -12,7 +12,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/vunop.h>
+#include <xnnpack/vunary.h>
 
 
 void xnn_f32_sigmoid_ukernel__sse2_p5_div_x8(

@@ -14,12 +14,12 @@
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
-#include <xnnpack/vunop.h>
+#include <xnnpack/vunary.h>
 
 
 static void f32_sigmoid(
   benchmark::State& state,
-  xnn_f32_vunop_ukernel_function sigmoid)
+  xnn_f32_vunary_ukernel_function sigmoid)
 {
   const size_t elements = state.range(0);
 

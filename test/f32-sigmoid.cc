@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/f32-sigmoid.yaml
-//   Generator: tools/generate-vunop-test.py
+//   Generator: tools/generate-vunary-test.py
 
 
 #include <gtest/gtest.h>
@@ -13,8 +13,8 @@
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
-#include <xnnpack/vunop.h>
-#include "vunop-microkernel-tester.h"
+#include <xnnpack/vunary.h>
+#include "vunary-microkernel-tester.h"
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

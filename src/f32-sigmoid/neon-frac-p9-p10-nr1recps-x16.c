@@ -12,7 +12,7 @@
 #include <arm_neon.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/vunop.h>
+#include <xnnpack/vunary.h>
 
 
 void xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x16(

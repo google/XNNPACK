@@ -1,0 +1,79 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMN"
+$assert OP in ["ADD", "MUL", "SUB", "RSUB"]
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vbinary.h>
+
+
+$VOPQ_F32 = {
+$  "ADD": lambda x: "vaddq_f32(%s, vb)" % x,
+$  "MUL": lambda x: "vmulq_f32(%s, vb)" % x,
+$  "SUB": lambda x: "vsubq_f32(%s, vb)" % x,
+$  "RSUB": lambda x: "vsubq_f32(vb, %s)" % x,
+$}[OP]
+void xnn_f32_v${OP.lower()}c_ukernel__neon_x${BATCH_TILE}(
+    size_t n,
+    const float* a,
+    const float* b,
+    float* y,
+    const union xnn_f32_output_params params[restrict static 1])
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+
+  const float32x4_t vy_min = vld1q_dup_f32(&params->scalar.min);
+  const float32x4_t vy_max = vld1q_dup_f32(&params->scalar.max);
+
+  const float32x4_t vb = vld1q_dup_f32(b);
+  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+    $for N in range(0, BATCH_TILE, 4):
+      const float32x4_t va${ABC[N:N+4]} = vld1q_f32(a); a += 4;
+
+    $for N in range(0, BATCH_TILE, 4):
+      float32x4_t vy${ABC[N:N+4]} = ${VOPQ_F32("va" + ABC[N:N+4])};
+
+    $for N in range(0, BATCH_TILE, 4):
+      vy${ABC[N:N+4]} = vmaxq_f32(vy${ABC[N:N+4]}, vy_min);
+
+    $for N in range(0, BATCH_TILE, 4):
+      vy${ABC[N:N+4]} = vminq_f32(vy${ABC[N:N+4]}, vy_max);
+
+    $for N in range(0, BATCH_TILE, 4):
+      vst1q_f32(y, vy${ABC[N:N+4]}); y += 4;
+  }
+  $if BATCH_TILE >= 4:
+    for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
+      const float32x4_t va0123 = vld1q_f32(a); a += 4;
+
+      float32x4_t vy0123 = ${VOPQ_F32("va0123")};
+      vy0123 = vmaxq_f32(vy0123, vy_min);
+      vy0123 = vminq_f32(vy0123, vy_max);
+      vst1q_f32(y, vy0123); y += 4;
+    }
+  if XNN_UNLIKELY(n != 0) {
+    const float32x4_t va0123 = vld1q_f32(a);
+
+    float32x4_t vy0123 = ${VOPQ_F32("va0123")};
+    vy0123 = vmaxq_f32(vy0123, vy_min);
+    vy0123 = vminq_f32(vy0123, vy_max);
+
+    float32x2_t vy01 = vget_low_f32(vy0123);
+    if (n & (2 * sizeof(float))) {
+      vst1_f32(y, vy01); y += 2;
+      vy01 = vget_high_f32(vy0123);
+    }
+    if (n & (1 * sizeof(float))) {
+      vst1_lane_f32(y, vy01, 0);
+    }
+  }
+}

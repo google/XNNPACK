@@ -172,49 +172,24 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-bilinear/scalar-c1.c
   src/f32-bilinear/scalar-c2.c
   src/f32-bilinear/scalar-c4.c
-  src/f32-binop/vadd-scalar-x1.c
-  src/f32-binop/vadd-scalar-x2.c
-  src/f32-binop/vadd-scalar-x4.c
-  src/f32-binop/vaddc-scalar-x1.c
-  src/f32-binop/vaddc-scalar-x2.c
-  src/f32-binop/vaddc-scalar-x4.c
-  src/f32-binop/vmul-scalar-x1.c
-  src/f32-binop/vmul-scalar-x2.c
-  src/f32-binop/vmul-scalar-x4.c
-  src/f32-binop/vmulc-scalar-x1.c
-  src/f32-binop/vmulc-scalar-x2.c
-  src/f32-binop/vmulc-scalar-x4.c
-  src/f32-binop/vsub-scalar-x1.c
-  src/f32-binop/vsub-scalar-x2.c
-  src/f32-binop/vsub-scalar-x4.c
-  src/f32-binop/vsubc-scalar-x1.c
-  src/f32-binop/vsubc-scalar-x2.c
-  src/f32-binop/vsubc-scalar-x4.c
-  src/f32-binop/vrsubc-scalar-x1.c
-  src/f32-binop/vrsubc-scalar-x2.c
-  src/f32-binop/vrsubc-scalar-x4.c
   src/f32-clamp/scalar.c
   src/f32-conv-hwc2spchw/3x3s2p1c3x4-scalar-1x1.c
-  src/f32-igemm/1x4-scalar.c
-  src/f32-igemm/2x4-scalar.c
-  src/f32-igemm/4x2-scalar.c
-  src/f32-igemm/4x4-scalar.c
-  src/f32-dwconv/up1x25-scalar.c
-  src/f32-dwconv/up1x25-scalar-acc2.c
-  src/f32-dwconv/up2x25-scalar.c
-  src/f32-dwconv/up2x25-scalar-acc2.c
-  src/f32-dwconv/up1x4-scalar.c
-  src/f32-dwconv/up1x4-scalar-acc2.c
-  src/f32-dwconv/up2x4-scalar.c
-  src/f32-dwconv/up2x4-scalar-acc2.c
-  src/f32-dwconv/up1x9-scalar.c
-  src/f32-dwconv/up1x9-scalar-acc2.c
-  src/f32-dwconv/up2x9-scalar.c
-  src/f32-dwconv/up2x9-scalar-acc2.c
   src/f32-dwconv-spchw/3x3p1-scalar.c
-  src/f32-dwconv-spchw/5x5p2-scalar.c
   src/f32-dwconv-spchw/3x3s2p1-scalar.c
+  src/f32-dwconv-spchw/5x5p2-scalar.c
   src/f32-dwconv-spchw/5x5s2p2-scalar.c
+  src/f32-dwconv/up1x25-scalar-acc2.c
+  src/f32-dwconv/up1x25-scalar.c
+  src/f32-dwconv/up1x4-scalar-acc2.c
+  src/f32-dwconv/up1x4-scalar.c
+  src/f32-dwconv/up1x9-scalar-acc2.c
+  src/f32-dwconv/up1x9-scalar.c
+  src/f32-dwconv/up2x25-scalar-acc2.c
+  src/f32-dwconv/up2x25-scalar.c
+  src/f32-dwconv/up2x4-scalar-acc2.c
+  src/f32-dwconv/up2x4-scalar.c
+  src/f32-dwconv/up2x9-scalar-acc2.c
+  src/f32-dwconv/up2x9-scalar.c
   src/f32-gavgpool-spchw/scalar-x1.c
   src/f32-gavgpool/mp7p7q-scalar.c
   src/f32-gavgpool/up7-scalar.c
@@ -226,6 +201,10 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-gemminc/2x4-scalar.c
   src/f32-gemminc/4x4-scalar.c
   src/f32-hswish/scalar.c
+  src/f32-igemm/1x4-scalar.c
+  src/f32-igemm/2x4-scalar.c
+  src/f32-igemm/4x2-scalar.c
+  src/f32-igemm/4x4-scalar.c
   src/f32-maxpool/9p8x-scalar-c1.c
   src/f32-pavgpool/mp9p8q-scalar.c
   src/f32-pavgpool/up9-scalar.c
@@ -246,16 +225,37 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-spmm/8x1-scalar.c
   src/f32-spmm/8x2-scalar.c
   src/f32-spmm/8x4-scalar.c
+  src/f32-vbinary/vadd-scalar-x1.c
+  src/f32-vbinary/vadd-scalar-x2.c
+  src/f32-vbinary/vadd-scalar-x4.c
+  src/f32-vbinary/vaddc-scalar-x1.c
+  src/f32-vbinary/vaddc-scalar-x2.c
+  src/f32-vbinary/vaddc-scalar-x4.c
+  src/f32-vbinary/vmul-scalar-x1.c
+  src/f32-vbinary/vmul-scalar-x2.c
+  src/f32-vbinary/vmul-scalar-x4.c
+  src/f32-vbinary/vmulc-scalar-x1.c
+  src/f32-vbinary/vmulc-scalar-x2.c
+  src/f32-vbinary/vmulc-scalar-x4.c
+  src/f32-vbinary/vrsubc-scalar-x1.c
+  src/f32-vbinary/vrsubc-scalar-x2.c
+  src/f32-vbinary/vrsubc-scalar-x4.c
+  src/f32-vbinary/vsub-scalar-x1.c
+  src/f32-vbinary/vsub-scalar-x2.c
+  src/f32-vbinary/vsub-scalar-x4.c
+  src/f32-vbinary/vsubc-scalar-x1.c
+  src/f32-vbinary/vsubc-scalar-x2.c
+  src/f32-vbinary/vsubc-scalar-x4.c
   src/f32-vmulcaddc/c1-scalar-2x.c
   src/f32-vmulcaddc/c2-scalar-2x.c
   src/f32-vmulcaddc/c4-scalar-2x.c
   src/q8-avgpool/mp9p8q-scalar.c
   src/q8-avgpool/up9-scalar.c
-  src/q8-igemm/2x2-scalar.c
   src/q8-dwconv/up1x9-scalar.c
   src/q8-gavgpool/mp7p7q-scalar.c
   src/q8-gavgpool/up7-scalar.c
   src/q8-gemm/2x2-scalar.c
+  src/q8-igemm/2x2-scalar.c
   src/q8-vadd/scalar.c
   src/u8-clamp/scalar.c
   src/u8-lut32norm/scalar.c
@@ -284,43 +284,19 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-avgpool/up9-psimd.c
   src/f32-bilinear/psimd-c4.c
   src/f32-bilinear/psimd-c8.c
-  src/f32-binop/vadd-psimd-x4.c
-  src/f32-binop/vadd-psimd-x8.c
-  src/f32-binop/vaddc-psimd-x4.c
-  src/f32-binop/vaddc-psimd-x8.c
-  src/f32-binop/vmul-psimd-x4.c
-  src/f32-binop/vmul-psimd-x8.c
-  src/f32-binop/vmulc-psimd-x4.c
-  src/f32-binop/vmulc-psimd-x8.c
-  src/f32-binop/vrsubc-psimd-x4.c
-  src/f32-binop/vrsubc-psimd-x8.c
-  src/f32-binop/vsub-psimd-x4.c
-  src/f32-binop/vsub-psimd-x8.c
-  src/f32-binop/vsubc-psimd-x4.c
-  src/f32-binop/vsubc-psimd-x8.c
   src/f32-clamp/psimd.c
-  src/f32-igemm/1x8-psimd-loadsplat.c
-  src/f32-igemm/1x8-psimd-splat.c
-  src/f32-igemm/1x8s4-psimd.c
-  src/f32-igemm/4x2c4-psimd.c
-  src/f32-igemm/4x8-psimd-loadsplat.c
-  src/f32-igemm/4x8-psimd-splat.c
-  src/f32-igemm/4x8s4-psimd.c
-  src/f32-igemm/6x8-psimd-loadsplat.c
-  src/f32-igemm/6x8-psimd-splat.c
-  src/f32-igemm/6x8s4-psimd.c
-  src/f32-dwconv/up4x25-psimd.c
-  src/f32-dwconv/up4x4-psimd.c
-  src/f32-dwconv/up4x9-psimd.c
   src/f32-dwconv/up4x25-psimd-acc2.c
+  src/f32-dwconv/up4x25-psimd.c
   src/f32-dwconv/up4x4-psimd-acc2.c
+  src/f32-dwconv/up4x4-psimd.c
   src/f32-dwconv/up4x9-psimd-acc2.c
-  src/f32-dwconv/up8x25-psimd.c
-  src/f32-dwconv/up8x4-psimd.c
-  src/f32-dwconv/up8x9-psimd.c
+  src/f32-dwconv/up4x9-psimd.c
   src/f32-dwconv/up8x25-psimd-acc2.c
+  src/f32-dwconv/up8x25-psimd.c
   src/f32-dwconv/up8x4-psimd-acc2.c
+  src/f32-dwconv/up8x4-psimd.c
   src/f32-dwconv/up8x9-psimd-acc2.c
+  src/f32-dwconv/up8x9-psimd.c
   src/f32-gavgpool/mp7p7q-psimd.c
   src/f32-gavgpool/up7-psimd.c
   src/f32-gemm/1x8-psimd-loadsplat.c
@@ -342,12 +318,36 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-gemminc/6x8-psimd-splat.c
   src/f32-gemminc/6x8s4-psimd.c
   src/f32-hswish/psimd.c
+  src/f32-igemm/1x8-psimd-loadsplat.c
+  src/f32-igemm/1x8-psimd-splat.c
+  src/f32-igemm/1x8s4-psimd.c
+  src/f32-igemm/4x2c4-psimd.c
+  src/f32-igemm/4x8-psimd-loadsplat.c
+  src/f32-igemm/4x8-psimd-splat.c
+  src/f32-igemm/4x8s4-psimd.c
+  src/f32-igemm/6x8-psimd-loadsplat.c
+  src/f32-igemm/6x8-psimd-splat.c
+  src/f32-igemm/6x8s4-psimd.c
   src/f32-maxpool/9p8x-psimd-c4.c
   src/f32-pavgpool/mp9p8q-psimd.c
   src/f32-pavgpool/up9-psimd.c
   src/f32-ppmm/4x8-psimd.c
   src/f32-prelu/psimd-2x4.c
   src/f32-prelu/psimd-2x8.c
+  src/f32-vbinary/vadd-psimd-x4.c
+  src/f32-vbinary/vadd-psimd-x8.c
+  src/f32-vbinary/vaddc-psimd-x4.c
+  src/f32-vbinary/vaddc-psimd-x8.c
+  src/f32-vbinary/vmul-psimd-x4.c
+  src/f32-vbinary/vmul-psimd-x8.c
+  src/f32-vbinary/vmulc-psimd-x4.c
+  src/f32-vbinary/vmulc-psimd-x8.c
+  src/f32-vbinary/vrsubc-psimd-x4.c
+  src/f32-vbinary/vrsubc-psimd-x8.c
+  src/f32-vbinary/vsub-psimd-x4.c
+  src/f32-vbinary/vsub-psimd-x8.c
+  src/f32-vbinary/vsubc-psimd-x4.c
+  src/f32-vbinary/vsubc-psimd-x8.c
   src/f32-vmulcaddc/c4-psimd-2x.c
   src/f32-vmulcaddc/c8-psimd-2x.c
   src/x32-packx/x4-psimd.c
@@ -363,58 +363,44 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-avgpool/up9-neon.c
   src/f32-bilinear/neon-c4.c
   src/f32-bilinear/neon-c8.c
-  src/f32-binop/vadd-neon-x4.c
-  src/f32-binop/vadd-neon-x8.c
-  src/f32-binop/vaddc-neon-x4.c
-  src/f32-binop/vaddc-neon-x8.c
-  src/f32-binop/vmul-neon-x4.c
-  src/f32-binop/vmul-neon-x8.c
-  src/f32-binop/vmulc-neon-x4.c
-  src/f32-binop/vmulc-neon-x8.c
-  src/f32-binop/vrsubc-neon-x4.c
-  src/f32-binop/vrsubc-neon-x8.c
-  src/f32-binop/vsub-neon-x4.c
-  src/f32-binop/vsub-neon-x8.c
-  src/f32-binop/vsubc-neon-x4.c
-  src/f32-binop/vsubc-neon-x8.c
   src/f32-clamp/neon.c
-  src/f32-igemm/1x8-neon-ld64.c
-  src/f32-igemm/4x2-neon-ld64.c
-  src/f32-igemm/4x4-neon-ld64.c
-  src/f32-igemm/4x8-neon-ld128.c
-  src/f32-igemm/4x8-neon-ld64.c
-  src/f32-igemm/6x8-neon-ld64.c
-  src/f32-igemm/1x8s4-neon.c
-  src/f32-igemm/4x8s4-neon.c
-  src/f32-igemm/6x8s4-neon.c
-  src/f32-igemm/8x8s4-neon.c
-  src/f32-dwconv/up4x9-neon.c
   src/f32-dwconv/up4x9-neon-acc2.c
-  src/f32-dwconv/up8x9-neon.c
+  src/f32-dwconv/up4x9-neon.c
   src/f32-dwconv/up8x9-neon-acc2.c
+  src/f32-dwconv/up8x9-neon.c
   src/f32-gavgpool-spchw/neon-x4.c
   src/f32-gavgpool/mp7p7q-neon.c
   src/f32-gavgpool/up7-neon.c
   src/f32-gemm/1x8-neon-ld64.c
+  src/f32-gemm/1x8s4-neon.c
   src/f32-gemm/4x2-neon-ld64.c
   src/f32-gemm/4x8-neon-ld128.c
   src/f32-gemm/4x8-neon-ld64.c
+  src/f32-gemm/4x8s4-neon.c
   src/f32-gemm/5x8-neon-ld64.c
   src/f32-gemm/6x8-neon-ld64.c
-  src/f32-gemm/1x8s4-neon.c
-  src/f32-gemm/4x8s4-neon.c
   src/f32-gemm/6x8s4-neon.c
   src/f32-gemm/8x8s4-neon.c
   src/f32-gemminc/1x8-neon-ld64.c
+  src/f32-gemminc/1x8s4-neon.c
   src/f32-gemminc/4x8-neon-ld128.c
   src/f32-gemminc/4x8-neon-ld64.c
+  src/f32-gemminc/4x8s4-neon.c
   src/f32-gemminc/5x8-neon-ld64.c
   src/f32-gemminc/6x8-neon-ld64.c
-  src/f32-gemminc/1x8s4-neon.c
-  src/f32-gemminc/4x8s4-neon.c
   src/f32-gemminc/6x8s4-neon.c
   src/f32-gemminc/8x8s4-neon.c
   src/f32-hswish/neon.c
+  src/f32-igemm/1x8-neon-ld64.c
+  src/f32-igemm/1x8s4-neon.c
+  src/f32-igemm/4x2-neon-ld64.c
+  src/f32-igemm/4x4-neon-ld64.c
+  src/f32-igemm/4x8-neon-ld128.c
+  src/f32-igemm/4x8-neon-ld64.c
+  src/f32-igemm/4x8s4-neon.c
+  src/f32-igemm/6x8-neon-ld64.c
+  src/f32-igemm/6x8s4-neon.c
+  src/f32-igemm/8x8s4-neon.c
   src/f32-pavgpool/mp9p8q-neon.c
   src/f32-pavgpool/up9-neon.c
   src/f32-ppmm/4x8-neon.c
@@ -423,17 +409,31 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-prelu/neon-2x8.c
   src/f32-rmax/neon.c
   src/f32-sigmoid/neon-frac-p9-p10-nr1recps-x16.c
+  src/f32-vbinary/vadd-neon-x4.c
+  src/f32-vbinary/vadd-neon-x8.c
+  src/f32-vbinary/vaddc-neon-x4.c
+  src/f32-vbinary/vaddc-neon-x8.c
+  src/f32-vbinary/vmul-neon-x4.c
+  src/f32-vbinary/vmul-neon-x8.c
+  src/f32-vbinary/vmulc-neon-x4.c
+  src/f32-vbinary/vmulc-neon-x8.c
+  src/f32-vbinary/vrsubc-neon-x4.c
+  src/f32-vbinary/vrsubc-neon-x8.c
+  src/f32-vbinary/vsub-neon-x4.c
+  src/f32-vbinary/vsub-neon-x8.c
+  src/f32-vbinary/vsubc-neon-x4.c
+  src/f32-vbinary/vsubc-neon-x8.c
   src/f32-vmulcaddc/c4-neon-2x.c
   src/f32-vmulcaddc/c8-neon-2x.c
   src/q8-avgpool/mp9p8q-neon.c
   src/q8-avgpool/up9-neon.c
-  src/q8-igemm/4x8-neon.c
-  src/q8-igemm/8x8-neon.c
   src/q8-dwconv/up8x9-neon.c
   src/q8-gavgpool/mp7p7q-neon.c
   src/q8-gavgpool/up7-neon.c
   src/q8-gemm/4x8-neon.c
   src/q8-gemm/8x8-neon.c
+  src/q8-igemm/4x8-neon.c
+  src/q8-igemm/8x8-neon.c
   src/q8-vadd/neon.c
   src/u8-clamp/neon.c
   src/u8-maxpool/9p8x-neon-c16.c
@@ -533,40 +533,21 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/up9-sse.c
   src/f32-bilinear/sse-c4.c
   src/f32-bilinear/sse-c8.c
-  src/f32-binop/vadd-sse-x4.c
-  src/f32-binop/vadd-sse-x8.c
-  src/f32-binop/vaddc-sse-x4.c
-  src/f32-binop/vaddc-sse-x8.c
-  src/f32-binop/vmul-sse-x4.c
-  src/f32-binop/vmul-sse-x8.c
-  src/f32-binop/vmulc-sse-x4.c
-  src/f32-binop/vmulc-sse-x8.c
-  src/f32-binop/vrsubc-sse-x4.c
-  src/f32-binop/vrsubc-sse-x8.c
-  src/f32-binop/vsub-sse-x4.c
-  src/f32-binop/vsub-sse-x8.c
-  src/f32-binop/vsubc-sse-x4.c
-  src/f32-binop/vsubc-sse-x8.c
   src/f32-clamp/sse.c
-  src/f32-igemm/1x8-sse-dup.c
-  src/f32-igemm/1x8-sse-load1.c
-  src/f32-igemm/1x8s4-sse.c
-  src/f32-igemm/4x2c4-sse.c
-  src/f32-igemm/4x8-sse-dup.c
-  src/f32-igemm/4x8-sse-load1.c
-  src/f32-igemm/4x8s4-sse.c
-  src/f32-dwconv/up4x25-sse.c
-  src/f32-dwconv/up4x4-sse.c
-  src/f32-dwconv/up4x9-sse.c
+  src/f32-dwconv-spchw/3x3p1-sse.c
+  src/f32-dwconv-spchw/3x3s2p1-sse.c
   src/f32-dwconv/up4x25-sse-acc2.c
+  src/f32-dwconv/up4x25-sse.c
   src/f32-dwconv/up4x4-sse-acc2.c
+  src/f32-dwconv/up4x4-sse.c
   src/f32-dwconv/up4x9-sse-acc2.c
-  src/f32-dwconv/up8x25-sse.c
-  src/f32-dwconv/up8x4-sse.c
-  src/f32-dwconv/up8x9-sse.c
+  src/f32-dwconv/up4x9-sse.c
   src/f32-dwconv/up8x25-sse-acc2.c
+  src/f32-dwconv/up8x25-sse.c
   src/f32-dwconv/up8x4-sse-acc2.c
+  src/f32-dwconv/up8x4-sse.c
   src/f32-dwconv/up8x9-sse-acc2.c
+  src/f32-dwconv/up8x9-sse.c
   src/f32-gavgpool-spchw/sse-x4.c
   src/f32-gavgpool/mp7p7q-sse.c
   src/f32-gavgpool/up7-sse.c
@@ -583,15 +564,34 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-gemminc/4x8-sse-load1.c
   src/f32-gemminc/4x8s4-sse.c
   src/f32-hswish/sse.c
+  src/f32-igemm/1x8-sse-dup.c
+  src/f32-igemm/1x8-sse-load1.c
+  src/f32-igemm/1x8s4-sse.c
+  src/f32-igemm/4x2c4-sse.c
+  src/f32-igemm/4x8-sse-dup.c
+  src/f32-igemm/4x8-sse-load1.c
+  src/f32-igemm/4x8s4-sse.c
   src/f32-maxpool/9p8x-sse-c4.c
   src/f32-pavgpool/mp9p8q-sse.c
   src/f32-pavgpool/up9-sse.c
-  src/f32-dwconv-spchw/3x3p1-sse.c
-  src/f32-dwconv-spchw/3x3s2p1-sse.c
   src/f32-ppmm/4x8-sse.c
   src/f32-rmax/sse.c
   src/f32-spmm/4x1-sse.c
   src/f32-spmm/8x1-sse.c
+  src/f32-vbinary/vadd-sse-x4.c
+  src/f32-vbinary/vadd-sse-x8.c
+  src/f32-vbinary/vaddc-sse-x4.c
+  src/f32-vbinary/vaddc-sse-x8.c
+  src/f32-vbinary/vmul-sse-x4.c
+  src/f32-vbinary/vmul-sse-x8.c
+  src/f32-vbinary/vmulc-sse-x4.c
+  src/f32-vbinary/vmulc-sse-x8.c
+  src/f32-vbinary/vrsubc-sse-x4.c
+  src/f32-vbinary/vrsubc-sse-x8.c
+  src/f32-vbinary/vsub-sse-x4.c
+  src/f32-vbinary/vsub-sse-x8.c
+  src/f32-vbinary/vsubc-sse-x4.c
+  src/f32-vbinary/vsubc-sse-x8.c
   src/f32-vmulcaddc/c4-sse-2x.c
   src/f32-vmulcaddc/c8-sse-2x.c
   src/x32-packx/x4-sse.c)

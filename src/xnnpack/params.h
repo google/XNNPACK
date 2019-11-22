@@ -1076,27 +1076,27 @@ typedef void (*xnn_q8_vadd_ukernel_function)(
     uint8_t* y,
     const union xnn_q8_add_params* params);
 
-typedef void (*xnn_vbinop_ukernel_function)(
+typedef void (*xnn_vbinary_ukernel_function)(
     size_t n,
     const void* a,
     const void* b,
     void* y,
     const void* params);
 
-typedef void (*xnn_f32_vbinop_ukernel_function)(
+typedef void (*xnn_f32_vbinary_ukernel_function)(
     size_t n,
     const float* a,
     const float* b,
     float* y,
     const union xnn_f32_output_params* params);
 
-typedef void (*xnn_vunop_ukernel_function)(
+typedef void (*xnn_vunary_ukernel_function)(
     size_t n,
     const void* x,
     void* y,
     const void* params);
 
-typedef void (*xnn_f32_vunop_ukernel_function)(
+typedef void (*xnn_f32_vunary_ukernel_function)(
     size_t n,
     const float* x,
     float* y,
@@ -1195,10 +1195,10 @@ struct gemm_parameters {
   uint8_t log2_sr;
 };
 
-struct vbinop_parameters {
-  xnn_vbinop_ukernel_function op_ukernel;
-  xnn_vbinop_ukernel_function opc_ukernel;
-  xnn_vbinop_ukernel_function ropc_ukernel;
+struct vbinary_parameters {
+  xnn_vbinary_ukernel_function op_ukernel;
+  xnn_vbinary_ukernel_function opc_ukernel;
+  xnn_vbinary_ukernel_function ropc_ukernel;
   // Number of elements in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
   uint8_t element_tile;
@@ -1363,7 +1363,7 @@ struct xnn_parameters {
     xnn_univector_ukernel_function sigmoid;
     struct prelu_parameters prelu;
     xnn_vadd_ukernel_function vadd;
-    struct vbinop_parameters vmul;
+    struct vbinary_parameters vmul;
     struct vmulcaddc_parameters vmulcaddc;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
     struct spmm_parameters spmm;

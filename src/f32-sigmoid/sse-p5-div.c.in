@@ -14,7 +14,7 @@ $else:
   #include <emmintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/vunop.h>
+#include <xnnpack/vunary.h>
 
 
 void xnn_f32_sigmoid_ukernel__${"sse41" if BLEND else "sse2"}_p5_div_x${BATCH_TILE}(

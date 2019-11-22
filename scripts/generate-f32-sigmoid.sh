@@ -13,4 +13,4 @@ tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=8 -D BLEND=1 -o src/f3
 tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=16 -D BLEND=1 -o src/f32-sigmoid/sse41-p5-div-x16.c
 
 ################################## Unit tests #################################
-tools/generate-vunop-test.py --spec test/f32-sigmoid.yaml --output test/f32-sigmoid.cc
+tools/generate-vunary-test.py --spec test/f32-sigmoid.yaml --output test/f32-sigmoid.cc

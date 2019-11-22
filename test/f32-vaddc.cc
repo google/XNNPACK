@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/f32-vaddc.yaml
-//   Generator: tools/generate-vbinop-test.py
+//   Generator: tools/generate-vbinary-test.py
 
 
 #include <gtest/gtest.h>
@@ -13,8 +13,8 @@
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
-#include <xnnpack/vbinop.h>
-#include "vbinopc-microkernel-tester.h"
+#include <xnnpack/vbinary.h>
+#include "vbinaryc-microkernel-tester.h"
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

@@ -583,7 +583,7 @@ struct elementwise_binary_context {
     union xnn_q8_add_params q8;
     union xnn_f32_output_params f32;
   } params;
-  xnn_vbinop_ukernel_function ukernel;
+  xnn_vbinary_ukernel_function ukernel;
 };
 
 #ifndef __cplusplus
