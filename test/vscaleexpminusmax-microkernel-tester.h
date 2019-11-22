@@ -32,7 +32,7 @@ class VScaleExpMinusMaxMicrokernelTester {
   }
 
   inline VScaleExpMinusMaxMicrokernelTester& scale(float scale) {
-    assert(isfinite(scale));
+    assert(std::isfinite(scale));
     assert(scale > 0);
     this->scale_ = scale;
     return *this;
