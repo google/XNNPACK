@@ -347,7 +347,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ld128
 9:
         RET
 
-END_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma__ld128
+END_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

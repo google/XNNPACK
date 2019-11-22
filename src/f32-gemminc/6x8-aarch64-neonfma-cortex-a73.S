@@ -651,7 +651,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a73
         LDP  d8,  d9, [sp], 64
         RET
 
-END_FUNCTION f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a73
+END_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a73
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

@@ -646,7 +646,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_ukernel_5x8__aarch64_neonfma_
         LDP  d8,  d9, [sp], 48
         RET
 
-END_FUNCTION f32_gemm${"inc" if INC else ""}_ukernel_5x8__aarch64_neonfma_cortex_a75
+END_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_ukernel_5x8__aarch64_neonfma_cortex_a75
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
