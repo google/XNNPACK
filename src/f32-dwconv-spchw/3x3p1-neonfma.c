@@ -156,11 +156,11 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
       float32x4_t vo4567p01 = vdupq_laneq_f32(vw0123, 0);
       float32x4_t vo4567p02 = vdupq_laneq_f32(vw0123, 0);
 
-      vi0x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi0x4567)));
-      vi1x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi1x4567)));
-      vi2x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi2x4567)));
-      vi3x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi3x4567)));
-      vi4x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi4x4567)));
+      vi0x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi0x4567)));
+      vi1x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi1x4567)));
+      vi2x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi2x4567)));
+      vi3x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi3x4567)));
+      vi4x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi4x4567)));
 
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi0x4567, vw0123, 2);
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi1x4567, vw4567, 1);
@@ -318,9 +318,9 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
     {
       float32x4_t vo4567p0 = vdupq_laneq_f32(vw0123, 0);
 
-      vi0x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi0x4567)));
-      vi1x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi1x4567)));
-      vi2x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi2x4567)));
+      vi0x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi0x4567)));
+      vi1x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi1x4567)));
+      vi2x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi2x4567)));
 
       vo4567p0 = vfmaq_laneq_f32(vo4567p0, vi0x4567, vw0123, 2);
       float32x4_t vo4567p1 = vmulq_laneq_f32(vi1x4567, vw4567, 1);

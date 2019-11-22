@@ -112,12 +112,12 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
       const float32x4_t vi1x89AB = vld1q_f32((const float*) ((uintptr_t) i1 + input_tuple_stride));
       const float32x4_t vi2x89AB = vld1q_f32((const float*) ((uintptr_t) i2 + input_tuple_stride));
 
-      const float32x4_t vi0x468A = vreinterpretq_u32_f32(vandq_u32(vmask_even, vreinterpretq_f32_u32(vuzp1q_f32(vi0x4567, vi0x89AB))));
-      const float32x4_t vi0x579B = vreinterpretq_u32_f32(vandq_u32(vmask_odd,  vreinterpretq_f32_u32(vuzp2q_f32(vi0x4567, vi0x89AB))));
-      const float32x4_t vi1x468A = vreinterpretq_u32_f32(vandq_u32(vmask_even, vreinterpretq_f32_u32(vuzp1q_f32(vi1x4567, vi1x89AB))));
-      const float32x4_t vi1x579B = vreinterpretq_u32_f32(vandq_u32(vmask_odd,  vreinterpretq_f32_u32(vuzp2q_f32(vi1x4567, vi1x89AB))));
-      const float32x4_t vi2x468A = vreinterpretq_u32_f32(vandq_u32(vmask_even, vreinterpretq_f32_u32(vuzp1q_f32(vi2x4567, vi2x89AB))));
-      const float32x4_t vi2x579B = vreinterpretq_u32_f32(vandq_u32(vmask_odd,  vreinterpretq_f32_u32(vuzp2q_f32(vi2x4567, vi2x89AB))));
+      const float32x4_t vi0x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vuzp1q_f32(vi0x4567, vi0x89AB))));
+      const float32x4_t vi0x579B = vreinterpretq_f32_u32(vandq_u32(vmask_odd,  vreinterpretq_u32_f32(vuzp2q_f32(vi0x4567, vi0x89AB))));
+      const float32x4_t vi1x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vuzp1q_f32(vi1x4567, vi1x89AB))));
+      const float32x4_t vi1x579B = vreinterpretq_f32_u32(vandq_u32(vmask_odd,  vreinterpretq_u32_f32(vuzp2q_f32(vi1x4567, vi1x89AB))));
+      const float32x4_t vi2x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vuzp1q_f32(vi2x4567, vi2x89AB))));
+      const float32x4_t vi2x579B = vreinterpretq_f32_u32(vandq_u32(vmask_odd,  vreinterpretq_u32_f32(vuzp2q_f32(vi2x4567, vi2x89AB))));
       // add bias only to first row, it will then get added
       // to the final result
       // multiply each row by corresponding row of center column of filter

@@ -253,11 +253,11 @@ void xnn_f32_dwconv_spchw_ukernel_5x5s2p2__neonfma(
       float32x4_t vi4x468A = vuzp1q_f32(vi4x4567, vi4x89AB);
       float32x4_t vi4x579B = vuzp2q_f32(vi4x4567, vi4x89AB);
 
-      vi0x468A = vreinterpretq_u32_f32(vandq_u32(vmask_even, vreinterpretq_f32_u32(vi0x468A)));
-      vi1x468A = vreinterpretq_u32_f32(vandq_u32(vmask_even, vreinterpretq_f32_u32(vi1x468A)));
-      vi2x468A = vreinterpretq_u32_f32(vandq_u32(vmask_even, vreinterpretq_f32_u32(vi2x468A)));
-      vi3x468A = vreinterpretq_u32_f32(vandq_u32(vmask_even, vreinterpretq_f32_u32(vi3x468A)));
-      vi4x468A = vreinterpretq_u32_f32(vandq_u32(vmask_even, vreinterpretq_f32_u32(vi4x468A)));
+      vi0x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vi0x468A)));
+      vi1x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vi1x468A)));
+      vi2x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vi2x468A)));
+      vi3x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vi3x468A)));
+      vi4x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vi4x468A)));
 
       vi0x579B = vreinterpretq_u32_f32(vandq_u32(vmask_odd, vreinterpretq_f32_u32(vi0x579B)));
       vi1x579B = vreinterpretq_u32_f32(vandq_u32(vmask_odd, vreinterpretq_f32_u32(vi1x579B)));

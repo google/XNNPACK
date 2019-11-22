@@ -262,13 +262,13 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma(
       float32x4_t vi5x89AB = vld1q_f32(i5); i5 = (const float*) ((uintptr_t) i5 + input_tuple_stride);
       float32x4_t vi6x89AB = vld1q_f32(i6); i6 = (const float*) ((uintptr_t) i6 + input_tuple_stride);
 
-      vi0x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi0x89AB)));
-      vi1x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi1x89AB)));
-      vi2x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi2x89AB)));
-      vi3x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi3x89AB)));
-      vi4x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi4x89AB)));
-      vi5x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi5x89AB)));
-      vi6x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi6x89AB)));
+      vi0x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi0x89AB)));
+      vi1x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi1x89AB)));
+      vi2x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi2x89AB)));
+      vi3x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi3x89AB)));
+      vi4x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi4x89AB)));
+      vi5x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi5x89AB)));
+      vi6x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi6x89AB)));
 
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi0x4567, vw0123, 3);
       vo4567p10 = vfmaq_laneq_f32(vo4567p10, vi1x4567, vw0123, 3);
@@ -446,13 +446,13 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma(
 
       // This might have already happened if there are more than 4 pixels, but
       // we can't count on it.
-      vi0x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi0x4567)));
-      vi1x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi1x4567)));
-      vi2x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi2x4567)));
-      vi3x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi3x4567)));
-      vi4x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi4x4567)));
-      vi5x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi5x4567)));
-      vi6x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi6x4567)));
+      vi0x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi0x4567)));
+      vi1x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi1x4567)));
+      vi2x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi2x4567)));
+      vi3x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi3x4567)));
+      vi4x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi4x4567)));
+      vi5x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi5x4567)));
+      vi6x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi6x4567)));
 
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi0x4567, vw0123, 3);
       vo4567p10 = vfmaq_laneq_f32(vo4567p10, vi1x4567, vw0123, 3);
@@ -808,12 +808,12 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma(
       float32x4_t vi4x89AB = vld1q_f32(i4); i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
       float32x4_t vi5x89AB = vld1q_f32(i5); i5 = (const float*) ((uintptr_t) i5 + input_tuple_stride);
 
-      vi0x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi0x89AB)));
-      vi1x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi1x89AB)));
-      vi2x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi2x89AB)));
-      vi3x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi3x89AB)));
-      vi4x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi4x89AB)));
-      vi5x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi5x89AB)));
+      vi0x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi0x89AB)));
+      vi1x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi1x89AB)));
+      vi2x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi2x89AB)));
+      vi3x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi3x89AB)));
+      vi4x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi4x89AB)));
+      vi5x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi5x89AB)));
 
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi0x4567, vw0123, 3);
       vo4567p10 = vfmaq_laneq_f32(vo4567p10, vi1x4567, vw0123, 3);
@@ -955,12 +955,12 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma(
 
       // This might have already happened if there are more than 4 pixels, but
       // we can't count on it.
-      vi0x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi0x4567)));
-      vi1x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi1x4567)));
-      vi2x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi2x4567)));
-      vi3x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi3x4567)));
-      vi4x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi4x4567)));
-      vi5x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi5x4567)));
+      vi0x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi0x4567)));
+      vi1x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi1x4567)));
+      vi2x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi2x4567)));
+      vi3x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi3x4567)));
+      vi4x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi4x4567)));
+      vi5x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi5x4567)));
 
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi0x4567, vw0123, 3);
       vo4567p10 = vfmaq_laneq_f32(vo4567p10, vi1x4567, vw0123, 3);
@@ -1203,11 +1203,11 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma(
       float32x4_t vi3x89AB = vld1q_f32(i3); i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
       float32x4_t vi4x89AB = vld1q_f32(i4); i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
 
-      vi0x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi0x89AB)));
-      vi1x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi1x89AB)));
-      vi2x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi2x89AB)));
-      vi3x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi3x89AB)));
-      vi4x89AB = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi4x89AB)));
+      vi0x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi0x89AB)));
+      vi1x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi1x89AB)));
+      vi2x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi2x89AB)));
+      vi3x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi3x89AB)));
+      vi4x89AB = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi4x89AB)));
 
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi0x4567, vw0123, 3);
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi1x4567, vw89AB, 0);
@@ -1290,11 +1290,11 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma(
 
       // This might have already happened if there are more than 4 pixels, but
       // we can't count on it.
-      vi0x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi0x4567)));
-      vi1x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi1x4567)));
-      vi2x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi2x4567)));
-      vi3x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi3x4567)));
-      vi4x4567 = vreinterpretq_u32_f32(vandq_u32(vmask, vreinterpretq_f32_u32(vi4x4567)));
+      vi0x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi0x4567)));
+      vi1x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi1x4567)));
+      vi2x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi2x4567)));
+      vi3x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi3x4567)));
+      vi4x4567 = vreinterpretq_f32_u32(vandq_u32(vmask, vreinterpretq_u32_f32(vi4x4567)));
 
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi0x4567, vw0123, 3);
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi1x4567, vw89AB, 0);
