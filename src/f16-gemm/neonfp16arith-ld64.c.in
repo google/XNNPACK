@@ -143,7 +143,7 @@ void xnn_f16_gemm_ukernel_${MR}x${NR}__neonfp16arith_ld64(
                 vst1_f16(c${M}, vacc${M}x${ABC[0:4]}); c${M} += 4;
 
               $for M in range(MR):
-                vacc${M}x${ABC[0:4]} = vget_high_f32(vacc${M}x${ABC[0:8]});
+                vacc${M}x${ABC[0:4]} = vget_high_f16(vacc${M}x${ABC[0:8]});
             $elif LOG2N == 1:
               $for M in range(MR):
                 vst1_lane_u32(__builtin_assume_aligned(c${M}, 1), vreinterpret_u32_f16(vacc${M}x${ABC[0:4]}), 0); c${M} += 2;
@@ -156,7 +156,7 @@ void xnn_f16_gemm_ukernel_${MR}x${NR}__neonfp16arith_ld64(
           }
         $if LOG2N == 3:
           $for M in range(MR):
-            float16x4_t vacc${M}x${ABC[0:4]} = vget_low_f32(vacc${M}x${ABC[0:8]});
+            float16x4_t vacc${M}x${ABC[0:4]} = vget_low_f16(vacc${M}x${ABC[0:8]});
 
       nc = 0;
     }

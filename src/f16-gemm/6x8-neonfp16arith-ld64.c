@@ -253,12 +253,12 @@ void xnn_f16_gemm_ukernel_6x8__neonfp16arith_ld64(
 
       nc -= 8;
     } else {
-      float16x4_t vacc0x0123 = vget_low_f32(vacc0x01234567);
-      float16x4_t vacc1x0123 = vget_low_f32(vacc1x01234567);
-      float16x4_t vacc2x0123 = vget_low_f32(vacc2x01234567);
-      float16x4_t vacc3x0123 = vget_low_f32(vacc3x01234567);
-      float16x4_t vacc4x0123 = vget_low_f32(vacc4x01234567);
-      float16x4_t vacc5x0123 = vget_low_f32(vacc5x01234567);
+      float16x4_t vacc0x0123 = vget_low_f16(vacc0x01234567);
+      float16x4_t vacc1x0123 = vget_low_f16(vacc1x01234567);
+      float16x4_t vacc2x0123 = vget_low_f16(vacc2x01234567);
+      float16x4_t vacc3x0123 = vget_low_f16(vacc3x01234567);
+      float16x4_t vacc4x0123 = vget_low_f16(vacc4x01234567);
+      float16x4_t vacc5x0123 = vget_low_f16(vacc5x01234567);
       if (nc & 4) {
         vst1_f16(c0, vacc0x0123); c0 += 4;
         vst1_f16(c1, vacc1x0123); c1 += 4;
@@ -267,12 +267,12 @@ void xnn_f16_gemm_ukernel_6x8__neonfp16arith_ld64(
         vst1_f16(c4, vacc4x0123); c4 += 4;
         vst1_f16(c5, vacc5x0123); c5 += 4;
 
-        vacc0x0123 = vget_high_f32(vacc0x01234567);
-        vacc1x0123 = vget_high_f32(vacc1x01234567);
-        vacc2x0123 = vget_high_f32(vacc2x01234567);
-        vacc3x0123 = vget_high_f32(vacc3x01234567);
-        vacc4x0123 = vget_high_f32(vacc4x01234567);
-        vacc5x0123 = vget_high_f32(vacc5x01234567);
+        vacc0x0123 = vget_high_f16(vacc0x01234567);
+        vacc1x0123 = vget_high_f16(vacc1x01234567);
+        vacc2x0123 = vget_high_f16(vacc2x01234567);
+        vacc3x0123 = vget_high_f16(vacc3x01234567);
+        vacc4x0123 = vget_high_f16(vacc4x01234567);
+        vacc5x0123 = vget_high_f16(vacc5x01234567);
       }
       if (nc & 2) {
         vst1_lane_u32(__builtin_assume_aligned(c0, 1), vreinterpret_u32_f16(vacc0x0123), 0); c0 += 2;
