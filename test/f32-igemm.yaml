@@ -49,17 +49,19 @@
   k-block: 4
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_ukernel_1x8__neon_ld64
+- name: xnn_f32_igemm_ukernel_1x8__neon_lane_ld64
   k-block: 2
-- name: xnn_f32_igemm_ukernel_4x2__neon_ld64
+  arch:
+    - aarch64
+- name: xnn_f32_igemm_ukernel_4x2__neon_lane_ld64
   k-block: 2
-- name: xnn_f32_igemm_ukernel_4x4__neon_ld64
+- name: xnn_f32_igemm_ukernel_4x4__neon_lane_ld64
   k-block: 2
-- name: xnn_f32_igemm_ukernel_4x8__neon_ld128
+- name: xnn_f32_igemm_ukernel_4x8__neon_lane_ld128
   k-block: 4
-- name: xnn_f32_igemm_ukernel_4x8__neon_ld64
+- name: xnn_f32_igemm_ukernel_4x8__neon_lane_ld64
   k-block: 2
-- name: xnn_f32_igemm_ukernel_6x8__neon_ld64
+- name: xnn_f32_igemm_ukernel_6x8__neon_lane_ld64
   k-block: 2
 - name: xnn_f32_igemm_ukernel_1x8s4__neon
   k-block: 4
@@ -69,16 +71,26 @@
   k-block: 4
 - name: xnn_f32_igemm_ukernel_8x8s4__neon
   k-block: 4
-- name: xnn_f32_igemm_ukernel_4x2__neonfma_ld64
+- name: xnn_f32_igemm_ukernel_4x2__neonfma_lane_ld64
   k-block: 2
-- name: xnn_f32_igemm_ukernel_4x4__neonfma_ld64
+  arch:
+    - aarch64
+- name: xnn_f32_igemm_ukernel_4x4__neonfma_lane_ld64
   k-block: 2
-- name: xnn_f32_igemm_ukernel_4x8__neonfma_ld128
+  arch:
+    - aarch64
+- name: xnn_f32_igemm_ukernel_4x8__neonfma_lane_ld128
   k-block: 4
-- name: xnn_f32_igemm_ukernel_4x8__neonfma_ld64
+  arch:
+    - aarch64
+- name: xnn_f32_igemm_ukernel_4x8__neonfma_lane_ld64
   k-block: 2
-- name: xnn_f32_igemm_ukernel_6x8__neonfma_ld64
+  arch:
+    - aarch64
+- name: xnn_f32_igemm_ukernel_6x8__neonfma_lane_ld64
   k-block: 2
+  arch:
+    - aarch64
 - name: xnn_f32_igemm_ukernel_1x8s4__neonfma
   k-block: 4
 - name: xnn_f32_igemm_ukernel_4x8s4__neonfma

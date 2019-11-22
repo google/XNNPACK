@@ -5,8 +5,8 @@
 
 $assert NR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMN"
-$VMULADDQ_F32 = "${VMULADDQ_F32}" if FMA else "${VMULADDQ_F32}"
-$VMULADDQ_LANE_F32 = "${VMULADDQ_LANE_F32}" if FMA else "${VMULADDQ_LANE_F32}"
+$VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
+$VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 
 #include <assert.h>
 
@@ -85,16 +85,16 @@ void xnn_f32_igemm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_${"dup" 
           $for N in range(0, NR, 4):
             const float32x4_t vb${ABC[N:N+4]}c${L} = vld1q_f32(w); w += 4;
 
-        $if DUP:
-          $for M in range(MR):
-            const float32x4_t va${M}c${L} = vdupq_lane_f32(${VGET_PART_F32}(va${M}), ${L % 2});
-          $for N in range(0, NR, 4):
+          $if DUP:
             $for M in range(MR):
-              vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
-        $else:
-          $for N in range(0, NR, 4):
-            $for M in range(MR):
-              vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_LANE_F32}(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}c${L}, va${M}, ${L});
+              const float32x4_t va${M}c${L} = vdupq_lane_f32(${VGET_PART_F32}(va${M}), ${L % 2});
+            $for N in range(0, NR, 4):
+              $for M in range(MR):
+                vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
+          $else:
+            $for N in range(0, NR, 4):
+              $for M in range(MR):
+                vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_LANE_F32}(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}c${L}, ${VGET_PART_F32}(va${M}), ${L % 2});
       }
       if XNN_UNLIKELY(k != 0) {
         do {
@@ -106,10 +106,7 @@ void xnn_f32_igemm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_${"dup" 
 
           $for N in range(0, NR, 4):
             $for M in range(MR):
-              $if FMA:
-                vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
-              $else:
-                vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
+              vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
 
           k -= sizeof(float);
         } while (k != 0);

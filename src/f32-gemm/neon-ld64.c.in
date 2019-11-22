@@ -5,6 +5,9 @@
 
 $assert NR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMN"
+$VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
+$VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
+
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -12,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMN"
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_ld64(
+void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_${"dup" if DUP else "lane"}_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -79,22 +82,16 @@ void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__${"neonfma" if FMA
         $for N in range(0, NR, 4):
           const float32x4_t vb${ABC[N:N+4]}c${L} = vld1q_f32(w); w += 4;
 
-        $if FMA:
-          #if defined(__aarch64__)
-            $for N in range(0, NR, 4):
-              $for M in range(MR):
-                vacc${M}x${ABC[N:N+4]} = vfmaq_lane_f32(vacc${M}x${ABC[N:N+4]},   vb${ABC[N:N+4]}c${L}, va${M}, ${L});
-          #else
-            $for M in range(MR):
-              const float32x4_t va${M}c${L} = vdupq_lane_f32(va${M}, ${L});
-            $for N in range(0, NR, 4):
-              $for M in range(MR):
-                vacc${M}x${ABC[N:N+4]} = vfmaq_f32(vacc${M}x${ABC[N:N+4]},   va${M}c${L}, vb${ABC[N:N+4]}c${L});
-          #endif
-        $else:
+        $if DUP:
+          $for M in range(MR):
+            const float32x4_t va${M}c${L} = vdupq_lane_f32(va${M}, ${L});
           $for N in range(0, NR, 4):
             $for M in range(MR):
-              vacc${M}x${ABC[N:N+4]} = vmlaq_lane_f32(vacc${M}x${ABC[N:N+4]},   vb${ABC[N:N+4]}c${L}, va${M}, ${L});
+              vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
+        $else:
+           $for N in range(0, NR, 4):
+             $for M in range(MR):
+               vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_LANE_F32}(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}c${L}, va${M}, ${L});
     }
     if XNN_UNLIKELY(k != 0) {
       $for M in range(MR):
@@ -105,10 +102,7 @@ void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__${"neonfma" if FMA
 
       $for N in range(0, NR, 4):
         $for M in range(MR):
-          $if FMA:
-            vacc${M}x${ABC[N:N+4]} = vfmaq_f32(vacc${M}x${ABC[N:N+4]}, va${M},   vb${ABC[N:N+4]});
-          $else:
-            vacc${M}x${ABC[N:N+4]} = vmlaq_f32(vacc${M}x${ABC[N:N+4]}, va${M},   vb${ABC[N:N+4]});
+          vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
     }
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     $for N in range(0, NR, 4):

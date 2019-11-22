@@ -70,39 +70,32 @@ tools/xngen src/f32-gemm/6x8-aarch64-neonfma-ld128.S.in       -D INC=1 -o src/f3
 
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/1x8-neonfma-ld64.c
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemminc/1x8-neonfma-ld64.c
-
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/4x8-neon-ld64.c
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemminc/4x8-neon-ld64.c
-
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/4x8-neonfma-ld64.c
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemminc/4x8-neonfma-ld64.c
-
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=5 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/5x8-neon-ld64.c
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=5 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemminc/5x8-neon-ld64.c
-
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=5 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/5x8-neonfma-ld64.c
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=5 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemminc/5x8-neonfma-ld64.c
-
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/6x8-neon-ld64.c
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemminc/6x8-neon-ld64.c
-
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/6x8-neonfma-ld64.c
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemminc/6x8-neonfma-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/1x8-neonfma-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=1 -D INC=1 -D DUP=0 -o src/f32-gemminc/1x8-neonfma-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=8  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/4x8-neon-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=8  -D FMA=0 -D INC=1 -D DUP=0 -o src/f32-gemminc/4x8-neon-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=8  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/4x8-neonfma-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=4 -D NR=8  -D FMA=1 -D INC=1 -D DUP=0 -o src/f32-gemminc/4x8-neonfma-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=5 -D NR=8  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/5x8-neon-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=5 -D NR=8  -D FMA=0 -D INC=1 -D DUP=0 -o src/f32-gemminc/5x8-neon-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=5 -D NR=8  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/5x8-neonfma-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=5 -D NR=8  -D FMA=1 -D INC=1 -D DUP=0 -o src/f32-gemminc/5x8-neonfma-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/6x8-neon-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=0 -D INC=1 -D DUP=0 -o src/f32-gemminc/6x8-neon-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/6x8-neonfma-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=1 -D INC=1 -D DUP=0 -o src/f32-gemminc/6x8-neonfma-lane-ld64.c
 ### LD128 micro-kernels
-tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/4x8-neon-ld128.c
-tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemminc/4x8-neon-ld128.c
+tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/4x8-neon-lane-ld128.c
+tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=0 -D INC=1 -D DUP=0 -o src/f32-gemminc/4x8-neon-lane-ld128.c
+tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/4x8-neonfma-lane-ld128.c
+tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=1 -D INC=1 -D DUP=0 -o src/f32-gemminc/4x8-neonfma-lane-ld128.c
 
-tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/4x8-neonfma-ld128.c
-tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemminc/4x8-neonfma-ld128.c
-
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/1x8-neon-ld64.c
-tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemminc/1x8-neon-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/1x8-neon-lane-ld64.c
+tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=0 -D INC=1 -D DUP=0 -o src/f32-gemminc/1x8-neon-lane-ld64.c
 ### MRx2 micro-kernels
-tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=0 -D INC=0 -o src/f32-gemm/4x2-neon-ld64.c
+tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/4x2-neon-lane-ld64.c
 
-tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=1 -D INC=0 -o src/f32-gemm/4x2-neonfma-ld64.c
+tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/4x2-neonfma-lane-ld64.c
 
 ### LOAD4+PERMUTE micro-kernels
 tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/1x8s4-neon.c

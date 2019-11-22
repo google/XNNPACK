@@ -11,7 +11,7 @@ $assert NR == 2
 #include <xnnpack/igemm.h>
 
 
-void xnn_f32_igemm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_ld64(
+void xnn_f32_igemm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_lane_ld64(
     size_t mr,
     size_t nc,
     size_t kc,

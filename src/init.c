@@ -132,16 +132,16 @@ static void init(void) {
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
     xnn_params.f32.gemm = (struct gemm_parameters) {
-      .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__neon_ld128,
-      .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__neon_ld128,
-      .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neon_ld64,
-      .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neon_ld64,
+      .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__neon_lane_ld128,
+      .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__neon_lane_ld128,
+      .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neon_lane_ld64,
+      .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neon_lane_ld64,
       .mr = 4,
       .nr = 8,
     };
     xnn_params.f32.gemm2 = (struct gemm_parameters) {
       .gemm = NULL,
-      .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x2__neon_ld64,
+      .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x2__neon_lane_ld64,
       .mr = 4,
       .nr = 2,
     };
@@ -372,8 +372,8 @@ static void init(void) {
           break;
         default:
           xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__neonfma_ld64,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_ld64,
+            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__neonfma_lane_ld64,
+            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_lane_ld64,
             .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
             .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
             .mr = 6,
@@ -383,10 +383,10 @@ static void init(void) {
       }
     #else  // XNN_ENABLE_ASSEMBLY
       xnn_params.f32.gemm = (struct gemm_parameters) {
-        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__neonfma_ld64,
-        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_ld64,
-        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neonfma_ld64,
-        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neonfma_ld64,
+        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__neonfma_lane_ld64,
+        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_lane_ld64,
+        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neonfma_lane_ld64,
+        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neonfma_lane_ld64,
         .mr = 6,
         .nr = 8,
       };
@@ -394,7 +394,7 @@ static void init(void) {
 
     xnn_params.f32.gemm2 = (struct gemm_parameters) {
       .gemm = NULL,
-      .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x2__neonfma_ld64,
+      .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x2__neonfma_lane_ld64,
       .mr = 4,
       .nr = 2,
     };

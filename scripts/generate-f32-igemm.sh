@@ -12,29 +12,29 @@ tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -o src/f32-igemm/4x4-scala
 
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels
-tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=1 -D NR=8  -D FMA=0 -o src/f32-igemm/1x8-neon-ld64.c
-tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=1 -D NR=8  -D FMA=1 -o src/f32-igemm/1x8-neonfma-ld64.c
-tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=4 -D NR=4  -D FMA=0 -o src/f32-igemm/4x4-neon-ld64.c
-tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=4 -D NR=4  -D FMA=1 -o src/f32-igemm/4x4-neonfma-ld64.c
-tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=4 -D NR=8  -D FMA=0 -o src/f32-igemm/4x8-neon-ld64.c
-tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=4 -D NR=8  -D FMA=1 -o src/f32-igemm/4x8-neonfma-ld64.c
-tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=6 -D NR=8  -D FMA=0 -o src/f32-igemm/6x8-neon-ld64.c
-tools/xngen src/f32-igemm/neon-ld64.c.in -D MR=6 -D NR=8  -D FMA=1 -o src/f32-igemm/6x8-neonfma-ld64.c
+tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=1 -D NR=8 -D FMA=0 -D DUP=0 -o src/f32-igemm/1x8-neon-lane-ld64.c
+tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=1 -D NR=8 -D FMA=1 -D DUP=0 -o src/f32-igemm/1x8-neonfma-lane-ld64.c
+tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=4 -D NR=4 -D FMA=0 -D DUP=0 -o src/f32-igemm/4x4-neon-lane-ld64.c
+tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=4 -D NR=4 -D FMA=1 -D DUP=0 -o src/f32-igemm/4x4-neonfma-lane-ld64.c
+tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=4 -D NR=8 -D FMA=0 -D DUP=0 -o src/f32-igemm/4x8-neon-lane-ld64.c
+tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=4 -D NR=8 -D FMA=1 -D DUP=0 -o src/f32-igemm/4x8-neonfma-lane-ld64.c
+tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=6 -D NR=8 -D FMA=0 -D DUP=0 -o src/f32-igemm/6x8-neon-lane-ld64.c
+tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=6 -D NR=8 -D FMA=1 -D DUP=0 -o src/f32-igemm/6x8-neonfma-lane-ld64.c
 ### LD128 micro-kernels
-tools/xngen src/f32-igemm/neon-ld128.c.in -D MR=4 -D NR=8 -D FMA=0 -o src/f32-igemm/4x8-neon-ld128.c
-tools/xngen src/f32-igemm/neon-ld128.c.in -D MR=4 -D NR=8 -D FMA=1 -o src/f32-igemm/4x8-neonfma-ld128.c
-### MRx2 micro-kernels
-tools/xngen src/f32-igemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2 -D FMA=0 -o src/f32-igemm/4x2-neon-ld64.c
-tools/xngen src/f32-igemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2 -D FMA=1 -o src/f32-igemm/4x2-neonfma-ld64.c
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=4 -D NR=8 -D FMA=0 -D DUP=0 -o src/f32-igemm/4x8-neon-lane-ld128.c
+tools/xngen src/f32-igemm/neon-ld128.c.in     -D MR=4 -D NR=8 -D FMA=1 -D DUP=0 -o src/f32-igemm/4x8-neonfma-lane-ld128.c
+### MRx2 micro-kernels-
+tools/xngen src/f32-igemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2 -D FMA=0 -D DUP=0 -o src/f32-igemm/4x2-neon-lane-ld64.c
+tools/xngen src/f32-igemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2 -D FMA=1 -D DUP=0 -o src/f32-igemm/4x2-neonfma-lane-ld64.c
 ### LOAD4+PERMUTE micro-kernels
-tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=0 -o src/f32-igemm/1x8s4-neon.c
-tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=1 -o src/f32-igemm/1x8s4-neonfma.c
-tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=0 -o src/f32-igemm/4x8s4-neon.c
-tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=1 -o src/f32-igemm/4x8s4-neonfma.c
-tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=0 -o src/f32-igemm/6x8s4-neon.c
-tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=1 -o src/f32-igemm/6x8s4-neonfma.c
-tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=0 -o src/f32-igemm/8x8s4-neon.c
-tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=1 -o src/f32-igemm/8x8s4-neonfma.c
+tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=1 -D NR=8 -D FMA=0 -o src/f32-igemm/1x8s4-neon.c
+tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=1 -D NR=8 -D FMA=1 -o src/f32-igemm/1x8s4-neonfma.c
+tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=4 -D NR=8 -D FMA=0 -o src/f32-igemm/4x8s4-neon.c
+tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=4 -D NR=8 -D FMA=1 -o src/f32-igemm/4x8s4-neonfma.c
+tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=6 -D NR=8 -D FMA=0 -o src/f32-igemm/6x8s4-neon.c
+tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=6 -D NR=8 -D FMA=1 -o src/f32-igemm/6x8s4-neonfma.c
+tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=8 -D NR=8 -D FMA=0 -o src/f32-igemm/8x8s4-neon.c
+tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=8 -D NR=8 -D FMA=1 -o src/f32-igemm/8x8s4-neonfma.c
 
 #################################### PSIMD ####################################
 ### LOAD1+BROADCAST micro-kernels
