@@ -636,6 +636,18 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-sigmoid/sse41-p5-div-x16.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
+  src/f32-dwconv/up16x4-avx-acc2.c
+  src/f32-dwconv/up16x4-avx.c
+  src/f32-dwconv/up8x4-avx-acc2.c
+  src/f32-dwconv/up8x4-avx.c
+  src/f32-dwconv/up16x9-avx-acc2.c
+  src/f32-dwconv/up16x9-avx.c
+  src/f32-dwconv/up8x9-avx-acc2.c
+  src/f32-dwconv/up8x9-avx.c
+  src/f32-dwconv/up16x25-avx-acc2.c
+  src/f32-dwconv/up16x25-avx.c
+  src/f32-dwconv/up8x25-avx-acc2.c
+  src/f32-dwconv/up8x25-avx.c
   src/f32-gemm/1x8-avx-broadcast.c
   src/f32-gemm/4x8-avx-broadcast.c
   src/f32-gemm/5x8-avx-broadcast.c
@@ -655,6 +667,18 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vscale/avx-unroll32.c)
 
 SET(XNNPACK_FMA3_MICROKERNEL_SRCS
+  src/f32-dwconv/up16x4-fma3-acc2.c
+  src/f32-dwconv/up16x4-fma3.c
+  src/f32-dwconv/up8x4-fma3-acc2.c
+  src/f32-dwconv/up8x4-fma3.c
+  src/f32-dwconv/up16x9-fma3-acc2.c
+  src/f32-dwconv/up16x9-fma3.c
+  src/f32-dwconv/up8x9-fma3-acc2.c
+  src/f32-dwconv/up8x9-fma3.c
+  src/f32-dwconv/up16x25-fma3-acc2.c
+  src/f32-dwconv/up16x25-fma3.c
+  src/f32-dwconv/up8x25-fma3-acc2.c
+  src/f32-dwconv/up8x25-fma3.c
   src/f32-gemm/1x8-fma3-broadcast.c
   src/f32-gemm/4x8-fma3-broadcast.c
   src/f32-gemm/5x8-fma3-broadcast.c

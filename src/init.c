@@ -657,21 +657,55 @@ static void init(void) {
       .nr = 2,
       .log2_kr = 2,
     };
-    xnn_params.f32.dwconv[0] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x4__sse,
-      .cr = 8,
-      .mr = 4,
-    };
-    xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x9__sse,
-      .cr = 8,
-      .mr = 9,
-    };
-    xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
-      .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x25__sse,
-      .cr = 8,
-      .mr = 25,
-    };
+    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_fma3()) {
+      xnn_params.f32.dwconv[0] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x4__fma3,
+        .cr = 16,
+        .mr = 4,
+      };
+      xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x9__fma3,
+        .cr = 16,
+        .mr = 9,
+      };
+      xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x25__fma3,
+        .cr = 8,
+        .mr = 25,
+      };
+    } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx()) {
+      xnn_params.f32.dwconv[0] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x4__avx,
+        .cr = 16,
+        .mr = 4,
+      };
+      xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x9__avx,
+        .cr = 16,
+        .mr = 9,
+      };
+      xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x25__avx,
+        .cr = 8,
+        .mr = 25,
+      };
+    } else {
+      xnn_params.f32.dwconv[0] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x4__sse,
+        .cr = 8,
+        .mr = 4,
+      };
+      xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x9__sse,
+        .cr = 8,
+        .mr = 9,
+      };
+      xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x25__sse,
+        .cr = 8,
+        .mr = 25,
+      };
+    }
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
       .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_up9__sse,
       .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_mp9p8q__sse,

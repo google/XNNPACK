@@ -556,6 +556,18 @@ SSE41_UKERNELS = [
 ]
 
 AVX_UKERNELS = [
+    "src/f32-dwconv/up16x4-avx-acc2.c",
+    "src/f32-dwconv/up16x4-avx.c",
+    "src/f32-dwconv/up8x4-avx-acc2.c",
+    "src/f32-dwconv/up8x4-avx.c",
+    "src/f32-dwconv/up16x9-avx-acc2.c",
+    "src/f32-dwconv/up16x9-avx.c",
+    "src/f32-dwconv/up8x9-avx-acc2.c",
+    "src/f32-dwconv/up8x9-avx.c",
+    "src/f32-dwconv/up16x25-avx-acc2.c",
+    "src/f32-dwconv/up16x25-avx.c",
+    "src/f32-dwconv/up8x25-avx-acc2.c",
+    "src/f32-dwconv/up8x25-avx.c",
     "src/f32-gemm/1x8-avx-broadcast.c",
     "src/f32-gemm/4x8-avx-broadcast.c",
     "src/f32-gemm/5x8-avx-broadcast.c",
@@ -576,6 +588,18 @@ AVX_UKERNELS = [
 ]
 
 FMA3_UKERNELS = [
+    "src/f32-dwconv/up16x4-fma3-acc2.c",
+    "src/f32-dwconv/up16x4-fma3.c",
+    "src/f32-dwconv/up8x4-fma3-acc2.c",
+    "src/f32-dwconv/up8x4-fma3.c",
+    "src/f32-dwconv/up16x9-fma3-acc2.c",
+    "src/f32-dwconv/up16x9-fma3.c",
+    "src/f32-dwconv/up8x9-fma3-acc2.c",
+    "src/f32-dwconv/up8x9-fma3.c",
+    "src/f32-dwconv/up16x25-fma3-acc2.c",
+    "src/f32-dwconv/up16x25-fma3.c",
+    "src/f32-dwconv/up8x25-fma3-acc2.c",
+    "src/f32-dwconv/up8x25-fma3.c",
     "src/f32-gemm/1x8-fma3-broadcast.c",
     "src/f32-gemm/4x8-fma3-broadcast.c",
     "src/f32-gemm/5x8-fma3-broadcast.c",
