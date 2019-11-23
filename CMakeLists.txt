@@ -377,6 +377,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
     src/f32-gemm/4x8-neon-lane-ld64.c
     src/f32-gemm/5x8-neon-lane-ld64.c
     src/f32-gemm/6x8-neon-lane-ld64.c
+    src/f32-gemm/1x8-neon-dup-ld64.c
+    src/f32-gemm/4x8-neon-dup-ld128.c
+    src/f32-gemm/4x8-neon-dup-ld64.c
+    src/f32-gemm/6x8-neon-dup-ld64.c
     src/f32-gemm/1x8s4-neon.c
     src/f32-gemm/4x8s4-neon.c
     src/f32-gemm/6x8s4-neon.c
@@ -386,6 +390,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
     src/f32-gemminc/4x8-neon-lane-ld64.c
     src/f32-gemminc/5x8-neon-lane-ld64.c
     src/f32-gemminc/6x8-neon-lane-ld64.c
+    src/f32-gemminc/1x8-neon-dup-ld64.c
+    src/f32-gemminc/4x8-neon-dup-ld128.c
+    src/f32-gemminc/4x8-neon-dup-ld64.c
+    src/f32-gemminc/6x8-neon-dup-ld64.c
     src/f32-gemminc/1x8s4-neon.c
     src/f32-gemminc/4x8s4-neon.c
     src/f32-gemminc/6x8s4-neon.c
@@ -397,6 +405,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
     src/f32-igemm/4x8-neon-lane-ld128.c
     src/f32-igemm/4x8-neon-lane-ld64.c
     src/f32-igemm/6x8-neon-lane-ld64.c
+    src/f32-igemm/1x8-neon-dup-ld64.c
+    src/f32-igemm/4x8-neon-dup-ld128.c
+    src/f32-igemm/4x8-neon-dup-ld64.c
+    src/f32-igemm/6x8-neon-dup-ld64.c
     src/f32-igemm/1x8s4-neon.c
     src/f32-igemm/4x8s4-neon.c
     src/f32-igemm/6x8s4-neon.c
@@ -452,6 +464,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
 SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
     src/f32-bilinear/neonfma-c4.c
     src/f32-bilinear/neonfma-c8.c
+    src/f32-igemm/1x8-neonfma-dup-ld64.c
+    src/f32-igemm/4x8-neonfma-dup-ld128.c
+    src/f32-igemm/4x8-neonfma-dup-ld64.c
+    src/f32-igemm/6x8-neonfma-dup-ld64.c
     src/f32-igemm/1x8s4-neonfma.c
     src/f32-igemm/4x8s4-neonfma.c
     src/f32-igemm/6x8s4-neonfma.c
@@ -460,10 +476,18 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
     src/f32-dwconv/up4x9-neonfma-acc2.c
     src/f32-dwconv/up8x9-neonfma.c
     src/f32-dwconv/up8x9-neonfma-acc2.c
+    src/f32-gemm/1x8-neonfma-dup-ld64.c
+    src/f32-gemm/4x8-neonfma-dup-ld128.c
+    src/f32-gemm/4x8-neonfma-dup-ld64.c
+    src/f32-gemm/6x8-neonfma-dup-ld64.c
     src/f32-gemm/1x8s4-neonfma.c
     src/f32-gemm/4x8s4-neonfma.c
     src/f32-gemm/6x8s4-neonfma.c
     src/f32-gemm/8x8s4-neonfma.c
+    src/f32-gemminc/1x8-neonfma-dup-ld64.c
+    src/f32-gemminc/4x8-neonfma-dup-ld128.c
+    src/f32-gemminc/4x8-neonfma-dup-ld64.c
+    src/f32-gemminc/6x8-neonfma-dup-ld64.c
     src/f32-gemminc/1x8s4-neonfma.c
     src/f32-gemminc/4x8s4-neonfma.c
     src/f32-gemminc/6x8s4-neonfma.c
