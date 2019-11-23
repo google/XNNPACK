@@ -501,7 +501,9 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
     src/math/exp-neonfma-lut64-p2.c
     src/math/exp-neonfma-p5.c
     src/math/expminus-neonfma-p5.c
-    src/math/sigmoid-neonfma-p5-nr2fma.c)
+    src/math/sigmoid-neonfma-p5-nr1recps1fma.c
+    src/math/sigmoid-neonfma-p5-nr2fma.c
+    src/math/sigmoid-neonfma-p5-nr2recps.c)
 
 SET(AARCH64_XNNPACK_NEONFMA_MICROKERNEL_SRCS
     src/f32-gemm/1x8-neonfma-lane-ld64.c
@@ -545,7 +547,8 @@ SET(AARCH64_XNNPACK_NEONFMA_MICROKERNEL_SRCS
     src/f32-spmm/8x1-neonfma-unroll2.c
     src/f32-spmm/8x1-neonfma.c
     src/f32-spmm/8x2-neonfma.c
-    src/f32-spmm/8x4-neonfma.c)
+    src/f32-spmm/8x4-neonfma.c
+    src/math/sigmoid-neonfma-p5-div.c)
 
 SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-gemm/4x8-neonfp16arith-ld64.c
