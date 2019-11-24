@@ -5,10 +5,10 @@ XNNPACK is a highly optimized library of floating-point neural network inference
 ## Supported Architectures
 
 - ARM64 on Android and Linux
-- ARM on Android
+- ARMv7 (with NEON) on Android and Linux
 - WebAssembly MVP
 - WebAssembly SIMD (experimental)
-- x86 and x86-64 (up to SSE2 only) on Android, Linux, and macOS
+- x86 and x86-64 (up to AVX2) on Android, Linux, and macOS
 
 ## Operator Coverage
 
@@ -20,7 +20,9 @@ XNNPACK implements the following neural network operators:
 - 2D Max Pooling
 - 2D ArgMax Pooling (Max Pooling + indices)
 - 2D Unpooling
+- 2D Bilinear Resize
 - Add (tensors of same shape)
+- Multiply (including broadcasting)
 - Global Average Pooling
 - Channel Shuffle
 - Fully Connected
