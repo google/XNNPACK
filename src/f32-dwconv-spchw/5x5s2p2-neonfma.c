@@ -259,11 +259,11 @@ void xnn_f32_dwconv_spchw_ukernel_5x5s2p2__neonfma(
       vi3x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vi3x468A)));
       vi4x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vi4x468A)));
 
-      vi0x579B = vreinterpretq_u32_f32(vandq_u32(vmask_odd, vreinterpretq_f32_u32(vi0x579B)));
-      vi1x579B = vreinterpretq_u32_f32(vandq_u32(vmask_odd, vreinterpretq_f32_u32(vi1x579B)));
-      vi2x579B = vreinterpretq_u32_f32(vandq_u32(vmask_odd, vreinterpretq_f32_u32(vi2x579B)));
-      vi3x579B = vreinterpretq_u32_f32(vandq_u32(vmask_odd, vreinterpretq_f32_u32(vi3x579B)));
-      vi4x579B = vreinterpretq_u32_f32(vandq_u32(vmask_odd, vreinterpretq_f32_u32(vi4x579B)));
+      vi0x579B = vreinterpretq_f32_u32(vandq_u32(vmask_odd, vreinterpretq_u32_f32(vi0x579B)));
+      vi1x579B = vreinterpretq_f32_u32(vandq_u32(vmask_odd, vreinterpretq_u32_f32(vi1x579B)));
+      vi2x579B = vreinterpretq_f32_u32(vandq_u32(vmask_odd, vreinterpretq_u32_f32(vi2x579B)));
+      vi3x579B = vreinterpretq_f32_u32(vandq_u32(vmask_odd, vreinterpretq_u32_f32(vi3x579B)));
+      vi4x579B = vreinterpretq_f32_u32(vandq_u32(vmask_odd, vreinterpretq_u32_f32(vi4x579B)));
 
       // middle tap
       vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x468A, vw0123, 3);
