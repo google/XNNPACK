@@ -46,6 +46,9 @@ Benchmarked on October 9, 2019 with `end2end_bench --benchmark_min_time=5` on an
 ## Publications
 
 - Marat Dukhan "The Indirect Convolution Algorithm". Presented on [Efficient Deep Learning for Compute Vision (ECV) 2019](https://sites.google.com/corp/view/ecv2019/) workshop ([slides](https://drive.google.com/file/d/1ZayB3By5ZxxQIRtN7UDq_JvPg1IYd3Ac/view), [paper on ArXiv](https://arxiv.org/abs/1907.02129)).
+- Erich Elsen, Marat Dukhan, Trevor Gale, Karen Simonyan "Fast Sparse ConvNets".
+  [Paper on ArXiv](https://arxiv.org/abs/1911.09723), [pre-trained sparse
+  models](https://github.com/google-research/google-research/tree/master/fastconvnets).
 
 ## Acknowledgements
 
