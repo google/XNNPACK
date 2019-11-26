@@ -27,10 +27,14 @@
 
 static void IGEMMBenchmark(benchmark::State& state,
   xnn_f32_igemm_ukernel_function f32_igemm,
-  uint32_t mr, uint32_t nr, uint32_t kr, uint32_t sr)
+  uint32_t mr, uint32_t nr, uint32_t kr, uint32_t sr,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (!cpuinfo_initialize()) {
     state.SkipWithError("cpuinfo initialization failed");
+  }
+  if (isa_check && !isa_check(state)) {
+    return;
   }
 
   const size_t input_height = state.range(0);
@@ -152,71 +156,71 @@ static void IGEMMBenchmark(benchmark::State& state,
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void f32_igemm_1x8__neon_lane_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__neon_lane_ld64, 1, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__neon_lane_ld64, 1, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_4x2__neon_lane_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x2__neon_lane_ld64, 4, 2, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x2__neon_lane_ld64, 4, 2, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_4x4__neon_lane_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x4__neon_lane_ld64, 4, 4, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x4__neon_lane_ld64, 4, 4, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_4x8__neon_lane_ld128(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neon_lane_ld128, 4, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neon_lane_ld128, 4, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_4x8__neon_lane_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neon_lane_ld64, 4, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neon_lane_ld64, 4, 8, 1, 1, benchmark::utils::CheckNEON);
   }
 
   static void f32_igemm_1x8__neon_dup_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__neon_dup_ld64, 1, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__neon_dup_ld64, 1, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_4x8__neon_dup_ld128(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neon_dup_ld128, 4, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neon_dup_ld128, 4, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_4x8__neon_dup_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neon_dup_ld64, 4, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neon_dup_ld64, 4, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_6x8__neon_dup_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neon_dup_ld64, 6, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neon_dup_ld64, 6, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_1x8__neonfma_dup_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__neonfma_dup_ld64, 1, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__neonfma_dup_ld64, 1, 8, 1, 1, benchmark::utils::CheckNEONFMA);
   }
   static void f32_igemm_4x8__neonfma_dup_ld128(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neonfma_dup_ld128, 4, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neonfma_dup_ld128, 4, 8, 1, 1, benchmark::utils::CheckNEONFMA);
   }
   static void f32_igemm_4x8__neonfma_dup_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neonfma_dup_ld64, 4, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neonfma_dup_ld64, 4, 8, 1, 1, benchmark::utils::CheckNEONFMA);
   }
   static void f32_igemm_6x8__neonfma_dup_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neonfma_dup_ld64, 6, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neonfma_dup_ld64, 6, 8, 1, 1, benchmark::utils::CheckNEONFMA);
   }
   static void f32_igemm_6x8__neon_lane_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neon_lane_ld64, 6, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neon_lane_ld64, 6, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_1x8s4__neon(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8s4__neon, 1, 8, 1, 4);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8s4__neon, 1, 8, 1, 4, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_1x8s4__neonfma(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8s4__neonfma, 1, 8, 1, 4);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8s4__neonfma, 1, 8, 1, 4, benchmark::utils::CheckNEONFMA);
   }
   static void f32_igemm_4x8s4__neon(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8s4__neon, 4, 8, 1, 4);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8s4__neon, 4, 8, 1, 4, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_4x8s4__neonfma(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8s4__neonfma, 4, 8, 1, 4);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8s4__neonfma, 4, 8, 1, 4, benchmark::utils::CheckNEONFMA);
   }
   static void f32_igemm_6x8s4__neon(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8s4__neon, 6, 8, 1, 4);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8s4__neon, 6, 8, 1, 4, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_6x8s4__neonfma(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8s4__neonfma, 6, 8, 1, 4);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8s4__neonfma, 6, 8, 1, 4, benchmark::utils::CheckNEONFMA);
   }
   static void f32_igemm_8x8s4__neon(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_8x8s4__neon, 8, 8, 1, 4);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_8x8s4__neon, 8, 8, 1, 4, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_8x8s4__neonfma(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_8x8s4__neonfma, 8, 8, 1, 4);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_8x8s4__neonfma, 8, 8, 1, 4, benchmark::utils::CheckNEONFMA);
   }
 
   BENCHMARK_CONV(f32_igemm_1x8__neon_lane_ld64)
@@ -362,47 +366,47 @@ static void IGEMMBenchmark(benchmark::State& state,
   }
 
   static void f32_igemm_1x8__avx_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__avx_broadcast, 1, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__avx_broadcast, 1, 8, 1, 1, benchmark::utils::CheckAVX);
   }
 
   static void f32_igemm_4x8__avx_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__avx_broadcast, 4, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__avx_broadcast, 4, 8, 1, 1, benchmark::utils::CheckAVX);
   }
 
   static void f32_igemm_5x8__avx_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_5x8__avx_broadcast, 5, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_5x8__avx_broadcast, 5, 8, 1, 1, benchmark::utils::CheckAVX);
   }
 
   static void f32_igemm_6x8__avx_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__avx_broadcast, 6, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__avx_broadcast, 6, 8, 1, 1, benchmark::utils::CheckAVX);
   }
 
   static void f32_igemm_7x8__avx_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_7x8__avx_broadcast, 7, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_7x8__avx_broadcast, 7, 8, 1, 1, benchmark::utils::CheckAVX);
   }
 
   static void f32_igemm_1x8__fma3_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__fma3_broadcast, 1, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__fma3_broadcast, 1, 8, 1, 1, benchmark::utils::CheckFMA3);
   }
 
   static void f32_igemm_4x8__fma3_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__fma3_broadcast, 4, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__fma3_broadcast, 4, 8, 1, 1, benchmark::utils::CheckFMA3);
   }
 
   static void f32_igemm_5x8__fma3_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_5x8__fma3_broadcast, 5, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_5x8__fma3_broadcast, 5, 8, 1, 1, benchmark::utils::CheckFMA3);
   }
 
   static void f32_igemm_6x8__fma3_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__fma3_broadcast, 6, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__fma3_broadcast, 6, 8, 1, 1, benchmark::utils::CheckFMA3);
   }
 
   static void f32_igemm_7x8__fma3_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_7x8__fma3_broadcast, 7, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_7x8__fma3_broadcast, 7, 8, 1, 1, benchmark::utils::CheckFMA3);
   }
 
   static void f32_igemm_8x8__fma3_broadcast(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_8x8__fma3_broadcast, 8, 8, 1, 1);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_8x8__fma3_broadcast, 8, 8, 1, 1, benchmark::utils::CheckFMA3);
   }
 
   BENCHMARK_CONV(f32_igemm_1x8__sse_load1)

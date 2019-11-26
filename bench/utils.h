@@ -29,6 +29,36 @@ size_t GetMaxCacheSize();
 // Set multi-threading parameters appropriate for the processor.
 void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark);
 
+typedef bool (*IsaCheckFunction)(benchmark::State& state);
+
+// Check if ARM NEON extension is supported.
+// If NEON is unsupported, report error in benchmark state, and return false.
+bool CheckNEON(benchmark::State& state);
+
+// Check if ARM NEON-FMA extension is supported.
+// If NEON-FMA is unsupported, report error in benchmark state, and return false.
+bool CheckNEONFMA(benchmark::State& state);
+
+// Check if x86 SSE4.1 extension is supported.
+// If SSE4.1 is unsupported, report error in benchmark state, and return false.
+bool CheckSSE41(benchmark::State& state);
+
+// Check if x86 AVX extension is supported.
+// If AVX is unsupported, report error in benchmark state, and return false.
+bool CheckAVX(benchmark::State& state);
+
+// Check if x86 FMA3 extension is supported.
+// If FMA3 is unsupported, report error in benchmark state, and return false.
+bool CheckFMA3(benchmark::State& state);
+
+// Check if x86 AVX2 extension is supported.
+// If AVX2 is unsupported, report error in benchmark state, and return false.
+bool CheckAVX2(benchmark::State& state);
+
+// Check if x86 AVX512F extension is supported.
+// If AVX512F is unsupported, report error in benchmark state, and return false.
+bool CheckAVX512F(benchmark::State& state);
+
 template <class T>
 inline T DivideRoundUp(T x, T q) {
   return x / q + T(x % q != 0);

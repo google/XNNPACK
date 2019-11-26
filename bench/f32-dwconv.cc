@@ -27,10 +27,14 @@
 
 static void DWConvBenchmark(benchmark::State& state,
   xnn_f32_dwconv_up_ukernel_function dwconv,
-  uint32_t cr, uint32_t kr)
+  uint32_t cr, uint32_t kr,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (!cpuinfo_initialize()) {
     state.SkipWithError("cpuinfo initialization failed");
+    return;
+  }
+  if (isa_check && !isa_check(state)) {
     return;
   }
 
@@ -164,15 +168,18 @@ static void DWConvBenchmark(benchmark::State& state,
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void f32_dwconv_4x9__neon(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up4x9__neon, 4, 9);
+    DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up4x9__neon, 4, 9,
+      benchmark::utils::CheckNEON);
   }
 
   static void f32_dwconv_4x9__neonfma(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up4x9__neonfma, 4, 9);
+    DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up4x9__neonfma, 4, 9,
+      benchmark::utils::CheckNEONFMA);
   }
 
   static void f32_dwconv_8x9__neonfma(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up8x9__neonfma, 8, 9);
+    DWConvBenchmark(state, xnn_f32_dwconv_ukernel_up8x9__neonfma, 8, 9,
+      benchmark::utils::CheckNEONFMA);
   }
 
   BENCHMARK_DWCONV(f32_dwconv_4x9__neon)

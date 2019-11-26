@@ -255,5 +255,62 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
   }
 }
 
+
+bool CheckNEON(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon()) {
+    state.SkipWithError("no NEON extension");
+    return false;
+  }
+  return true;
+}
+
+bool CheckNEONFMA(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fma()) {
+    state.SkipWithError("no NEON-FMA extension");
+    return false;
+  }
+  return true;
+}
+
+bool CheckSSE41(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_x86_sse4_1()) {
+    state.SkipWithError("no SSE4.1 extension");
+    return false;
+  }
+  return true;
+}
+
+bool CheckAVX(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx()) {
+    state.SkipWithError("no AVX extension");
+    return false;
+  }
+  return true;
+}
+
+bool CheckFMA3(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_x86_fma3()) {
+    state.SkipWithError("no FMA3 extension");
+    return false;
+  }
+  return true;
+}
+
+bool CheckAVX2(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx2()) {
+    state.SkipWithError("no AVX2 extension");
+    return false;
+  }
+  return true;
+}
+
+bool CheckAVX512F(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx512f()) {
+    state.SkipWithError("no AVX512F extension");
+    return false;
+  }
+  return true;
+}
+
 }  // namespace utils
 }  // namespace benchmark

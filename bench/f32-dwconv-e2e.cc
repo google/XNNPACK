@@ -23,8 +23,12 @@ static void DWConvEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory, 
   xnn_f32_dwconv_up_ukernel_function dwconv,
-  uint8_t cr, uint8_t mr)
+  uint8_t cr, uint8_t mr,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
+  if (isa_check && !isa_check(state)) {
+    return;
+  }
   if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
@@ -85,49 +89,49 @@ static void DWConvEnd2EndBenchmark(
   static void f32_dwconv_up4x9__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up4x9__neon,
-      4 /* cr */, 9 /* mr */);
+      4 /* cr */, 9 /* mr */, benchmark::utils::CheckNEON);
   }
 
   static void f32_dwconv_up4x9__neon_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up4x9__neon_acc2,
-      4 /* cr */, 9 /* mr */);
+      4 /* cr */, 9 /* mr */, benchmark::utils::CheckNEON);
   }
 
   static void f32_dwconv_up8x9__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up8x9__neon,
-      8 /* cr */, 9 /* mr */);
+      8 /* cr */, 9 /* mr */, benchmark::utils::CheckNEON);
   }
 
   static void f32_dwconv_up8x9__neon_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up8x9__neon_acc2,
-      8 /* cr */, 9 /* mr */);
+      8 /* cr */, 9 /* mr */, benchmark::utils::CheckNEON);
   }
 
   static void f32_dwconv_up4x9__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up4x9__neonfma,
-      4 /* cr */, 9 /* mr */);
+      4 /* cr */, 9 /* mr */, benchmark::utils::CheckNEONFMA);
   }
 
   static void f32_dwconv_up4x9__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up4x9__neonfma_acc2,
-      4 /* cr */, 9 /* mr */);
+      4 /* cr */, 9 /* mr */, benchmark::utils::CheckNEONFMA);
   }
 
   static void f32_dwconv_up8x9__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up8x9__neonfma,
-      8 /* cr */, 9 /* mr */);
+      8 /* cr */, 9 /* mr */, benchmark::utils::CheckNEONFMA);
   }
 
   static void f32_dwconv_up8x9__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up8x9__neonfma_acc2,
-      8 /* cr */, 9 /* mr */);
+      8 /* cr */, 9 /* mr */, benchmark::utils::CheckNEONFMA);
   }
 
   BENCHMARK_CAPTURE(f32_dwconv_up4x9__neon, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
@@ -184,49 +188,49 @@ static void DWConvEnd2EndBenchmark(
   static void f32_dwconv_up8x9__avx(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up8x9__avx,
-      8 /* cr */, 9 /* mr */);
+      8 /* cr */, 9 /* mr */, benchmark::utils::CheckAVX);
   }
 
   static void f32_dwconv_up8x9__avx_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up8x9__avx_acc2,
-      8 /* cr */, 9 /* mr */);
+      8 /* cr */, 9 /* mr */, benchmark::utils::CheckAVX);
   }
 
   static void f32_dwconv_up16x9__avx(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up16x9__avx,
-      16 /* cr */, 9 /* mr */);
+      16 /* cr */, 9 /* mr */, benchmark::utils::CheckAVX);
   }
 
   static void f32_dwconv_up16x9__avx_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up16x9__avx_acc2,
-      16 /* cr */, 9 /* mr */);
+      16 /* cr */, 9 /* mr */, benchmark::utils::CheckAVX);
   }
 
   static void f32_dwconv_up8x9__fma3(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up8x9__fma3,
-      8 /* cr */, 9 /* mr */);
+      8 /* cr */, 9 /* mr */, benchmark::utils::CheckFMA3);
   }
 
   static void f32_dwconv_up8x9__fma3_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up8x9__fma3_acc2,
-      8 /* cr */, 9 /* mr */);
+      8 /* cr */, 9 /* mr */, benchmark::utils::CheckFMA3);
   }
 
   static void f32_dwconv_up16x9__fma3(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up16x9__fma3,
-      16 /* cr */, 9 /* mr */);
+      16 /* cr */, 9 /* mr */, benchmark::utils::CheckFMA3);
   }
 
   static void f32_dwconv_up16x9__fma3_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_ukernel_up16x9__fma3_acc2,
-      16 /* cr */, 9 /* mr */);
+      16 /* cr */, 9 /* mr */, benchmark::utils::CheckFMA3);
   }
 
   BENCHMARK_CAPTURE(f32_dwconv_up4x9__sse, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();

@@ -27,8 +27,12 @@ static void GEMMEnd2EndBenchmark(
   xnn_f32_igemm_ukernel_function igemm,
   xnn_f32_gemm_ukernel_function gemm1,
   xnn_f32_igemm_ukernel_function igemm1,
-  uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0)
+  uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
+  if (isa_check && !isa_check(state)) {
+    return;
+  }
   if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
@@ -265,7 +269,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_4x8__neon_lane_ld64,
       xnn_f32_gemm_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_ukernel_1x8__neon_lane_ld64,
-      4 /* mr */, 8 /* nr */);
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
   }
 
   static void f32_gemm_4x8__neon_lane_ld128(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -274,7 +279,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_4x8__neon_lane_ld128,
       xnn_f32_gemm_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_ukernel_1x8__neon_lane_ld64,
-      4 /* mr */, 8 /* nr */);
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
   }
 
   static void f32_gemm_6x8__neon_lane_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -283,7 +289,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_6x8__neon_lane_ld64,
       xnn_f32_gemm_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_ukernel_1x8__neon_lane_ld64,
-      6 /* mr */, 8 /* nr */);
+      6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
   }
   static void f32_gemm_4x8__neon_dup_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
@@ -291,7 +298,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_4x8__neon_dup_ld64,
       xnn_f32_gemm_ukernel_1x8__neon_dup_ld64,
       xnn_f32_igemm_ukernel_1x8__neon_dup_ld64,
-      4 /* mr */, 8 /* nr */);
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
   }
 
   static void f32_gemm_4x8__neon_dup_ld128(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -300,7 +308,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_4x8__neon_dup_ld128,
       xnn_f32_gemm_ukernel_1x8__neon_dup_ld64,
       xnn_f32_igemm_ukernel_1x8__neon_dup_ld64,
-      4 /* mr */, 8 /* nr */);
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
   }
 
   static void f32_gemm_6x8__neon_dup_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -309,7 +318,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_6x8__neon_dup_ld64,
       xnn_f32_gemm_ukernel_1x8__neon_dup_ld64,
       xnn_f32_igemm_ukernel_1x8__neon_dup_ld64,
-      6 /* mr */, 8 /* nr */);
+      6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
   }
 
   static void f32_gemm_4x8__neonfma_dup_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -318,7 +328,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_4x8__neonfma_dup_ld64,
       xnn_f32_gemm_ukernel_1x8__neonfma_dup_ld64,
       xnn_f32_igemm_ukernel_1x8__neonfma_dup_ld64,
-      4 /* mr */, 8 /* nr */);
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEONFMA);
   }
 
   static void f32_gemm_4x8__neonfma_dup_ld128(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -327,7 +338,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_4x8__neonfma_dup_ld128,
       xnn_f32_gemm_ukernel_1x8__neonfma_dup_ld64,
       xnn_f32_igemm_ukernel_1x8__neonfma_dup_ld64,
-      4 /* mr */, 8 /* nr */);
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEONFMA);
   }
 
   static void f32_gemm_6x8__neonfma_dup_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -336,7 +348,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_6x8__neonfma_dup_ld64,
       xnn_f32_gemm_ukernel_1x8__neonfma_dup_ld64,
       xnn_f32_igemm_ukernel_1x8__neonfma_dup_ld64,
-      6 /* mr */, 8 /* nr */);
+      6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEONFMA);
   }
 
   static void f32_gemm_4x8s4__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -345,7 +358,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_4x8s4__neon,
       xnn_f32_gemm_ukernel_1x8s4__neon,
       xnn_f32_igemm_ukernel_1x8s4__neon,
-      4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+      4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
+      benchmark::utils::CheckNEON);
   }
 
   static void f32_gemm_4x8s4__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -354,7 +368,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_4x8s4__neonfma,
       xnn_f32_gemm_ukernel_1x8s4__neonfma,
       xnn_f32_igemm_ukernel_1x8s4__neonfma,
-      4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+      4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
+      benchmark::utils::CheckNEONFMA);
   }
 
   static void f32_gemm_6x8s4__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -363,7 +378,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_6x8s4__neon,
       xnn_f32_gemm_ukernel_1x8s4__neon,
       xnn_f32_igemm_ukernel_1x8s4__neon,
-      6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+      6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
+      benchmark::utils::CheckNEON);
   }
 
   static void f32_gemm_6x8s4__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -372,7 +388,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_6x8s4__neonfma,
       xnn_f32_gemm_ukernel_1x8s4__neonfma,
       xnn_f32_igemm_ukernel_1x8s4__neonfma,
-      6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+      6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
+      benchmark::utils::CheckNEONFMA);
   }
 
   static void f32_gemm_8x8s4__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -381,7 +398,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_8x8s4__neon,
       xnn_f32_gemm_ukernel_1x8s4__neon,
       xnn_f32_igemm_ukernel_1x8s4__neon,
-      8 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+      8 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
+      benchmark::utils::CheckNEON);
   }
 
   static void f32_gemm_8x8s4__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -390,7 +408,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_8x8s4__neonfma,
       xnn_f32_gemm_ukernel_1x8s4__neonfma,
       xnn_f32_igemm_ukernel_1x8s4__neonfma,
-      8 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
+      8 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
+      benchmark::utils::CheckNEONFMA);
   }
 
   BENCHMARK_CAPTURE(f32_gemm_4x8__neon_lane_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
@@ -420,7 +439,6 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_dup_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_dup_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
-
   BENCHMARK_CAPTURE(f32_gemm_4x8__neonfma_dup_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_gemm_4x8__neonfma_dup_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
@@ -429,8 +447,6 @@ static void GEMMEnd2EndBenchmark(
 
   BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_dup_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_dup_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-
 
   BENCHMARK_CAPTURE(f32_gemm_4x8s4__neon, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_gemm_4x8s4__neon, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
@@ -487,7 +503,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_4x8__avx_broadcast,
       xnn_f32_gemm_ukernel_1x8__avx_broadcast,
       xnn_f32_igemm_ukernel_1x8__avx_broadcast,
-      4 /* mr */, 8 /* nr */);
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckAVX);
   }
 
   static void f32_gemm_5x8__avx_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -496,7 +513,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_5x8__avx_broadcast,
       xnn_f32_gemm_ukernel_1x8__avx_broadcast,
       xnn_f32_igemm_ukernel_1x8__avx_broadcast,
-      5 /* mr */, 8 /* nr */);
+      5 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckAVX);
   }
 
   static void f32_gemm_6x8__avx_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -505,7 +523,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_6x8__avx_broadcast,
       xnn_f32_gemm_ukernel_1x8__avx_broadcast,
       xnn_f32_igemm_ukernel_1x8__avx_broadcast,
-      6 /* mr */, 8 /* nr */);
+      6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckAVX);
   }
 
   static void f32_gemm_7x8__avx_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -514,7 +533,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_7x8__avx_broadcast,
       xnn_f32_gemm_ukernel_1x8__avx_broadcast,
       xnn_f32_igemm_ukernel_1x8__avx_broadcast,
-      7 /* mr */, 8 /* nr */);
+      7 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckAVX);
   }
 
   static void f32_gemm_4x8__fma3_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -523,7 +543,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_4x8__fma3_broadcast,
       xnn_f32_gemm_ukernel_1x8__fma3_broadcast,
       xnn_f32_igemm_ukernel_1x8__fma3_broadcast,
-      4 /* mr */, 8 /* nr */);
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckFMA3);
   }
 
   static void f32_gemm_5x8__fma3_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -532,7 +553,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_5x8__fma3_broadcast,
       xnn_f32_gemm_ukernel_1x8__fma3_broadcast,
       xnn_f32_igemm_ukernel_1x8__fma3_broadcast,
-      5 /* mr */, 8 /* nr */);
+      5 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckFMA3);
   }
 
   static void f32_gemm_6x8__fma3_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -541,7 +563,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_6x8__fma3_broadcast,
       xnn_f32_gemm_ukernel_1x8__fma3_broadcast,
       xnn_f32_igemm_ukernel_1x8__fma3_broadcast,
-      6 /* mr */, 8 /* nr */);
+      6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckFMA3);
   }
 
   static void f32_gemm_7x8__fma3_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -550,7 +573,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_7x8__fma3_broadcast,
       xnn_f32_gemm_ukernel_1x8__fma3_broadcast,
       xnn_f32_igemm_ukernel_1x8__fma3_broadcast,
-      7 /* mr */, 8 /* nr */);
+      7 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckFMA3);
   }
 
   static void f32_gemm_8x8__fma3_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -559,7 +583,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_ukernel_8x8__fma3_broadcast,
       xnn_f32_gemm_ukernel_1x8__fma3_broadcast,
       xnn_f32_igemm_ukernel_1x8__fma3_broadcast,
-      8 /* mr */, 8 /* nr */);
+      8 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckFMA3);
   }
 
   BENCHMARK_CAPTURE(f32_gemm_4x8__sse_load1, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
