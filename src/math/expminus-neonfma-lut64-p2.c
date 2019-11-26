@@ -32,7 +32,7 @@ static const float exp2_table[64] = {
   0x1.EA4AFAp+0f, 0x1.EFA1BEp+0f, 0x1.F50766p+0f, 0x1.FA7C18p+0f,
 };
 
-void xnn_math_f32_exp__neonfma_lut64_p2(
+void xnn_math_f32_expminus__neonfma_lut64_p2(
     size_t n,
     const float* input,
     float* output)
@@ -40,48 +40,41 @@ void xnn_math_f32_exp__neonfma_lut64_p2(
   assert(n % (4 * sizeof(float)) == 0);
 
   const float32x4_t vmagic_bias = vmovq_n_f32(0x1.800000p23f);
-  // The smallest x for which expf(x) is non-zero.
-  const float32x4_t vzero_cutoff = vmovq_n_f32(-0x1.9FE368p6f);
-  // The largest x for which expf(x) is finite.
-  const float32x4_t vinf_cutoff = vmovq_n_f32(0x1.62E42Ep6f);
+  // The smallest x for which expf(x) is normalized.
+  const float32x4_t vdenorm_cutoff = vmovq_n_f32(-0x1.5D589Ep6f);
   const float32x4_t vlog2e_x64  = vmovq_n_f32(0x1.715476p6f);
   const float32x4_t vminus_ln2_o64_hi = vmovq_n_f32(-0x1.62e43p-7f);
   const float32x4_t vminus_ln2_o64_lo = vmovq_n_f32(0x1.05c61p-35f);
-  const float32x4_t vplus_inf = vmovq_n_f32(INFINITY);
 
   const float32x4_t vc2 = vmovq_n_f32(0x1.FFFF0Ap-2f);
 
-  const int32x4_t vmin_exponent = vmovq_n_s32(INT32_C(0xC1000000));
-  const int32x4_t vmax_exponent = vmovq_n_s32(INT32_C(0x3F800000));
-  const int32x4_t vdefault_exponent = vmax_exponent;
   const int32x4_t vindex_mask = vmovq_n_s32(INT32_C(0x3F));
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     const float32x4_t vx = vld1q_f32(input); input += 4;
 
     // Compute reduced argument n := round(x * 64 / log(2)).
-    // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
-    // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
-    // inputs outside of [-103.97207, 88.72283] underflow or overflow expf(x) anyway. We fixup the result for such
-    // inputs at the very end of the algorithm.
+    // We do it by adding a large number (magic bias), which cause rounding of the result to an integer, then subtracing
+    // the large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
+    // The trick with adding large number is valid only within certain bounds (|x * 64 / log(2)| <= 2**22, i.e.
+    // |x| <= 0x1.62E43p+15 = 45426.09375), but that is acceptable, because inputs outside of [-87.336540, 0.0]
+    // result in denormalized or underflown expf(x). We fixup the result for such inputs at the very end of the
+    // algorithm.
     float32x4_t vn = vfmaq_f32(vmagic_bias, vx, vlog2e_x64);
 
-    // Create two floating-point numbers, sn (scale, normal) and so (scale, overflow) such that sn * so == 2**n
-    // for inputs which don't cause overflow, i.e. -103.97207 <= x <= 88.72283, and -150 <= n <= 128 accordingly.
-    // We need to use two numbers rather than one because a normalized single-precision exponent must be in [-127, 126]
-    // range, which is insufficient to cover [-150, 128] range of n.
-    // - When n is within [-127, 126], sn == 2**n and so == 1.0.
-    // - When n < -127, sn == 2**(-127) and so == 2**(n + 127).
-    // - When n > 126, sn == 2**126 and so == 2**(n - 126).
-    // While we explicitly compute sn, the so is fused into the value l fetched from a table by adjusting its exponential.
-    int32x4_t veo = vshlq_n_s32(vbicq_s32(vreinterpretq_s32_f32(vn), vmovq_n_s32(INT32_C(0x3F))), 17);
-    int32x4_t ven = vmaxq_s32(veo, vmin_exponent);
-    ven = vminq_s32(ven, vmax_exponent);
-    veo = vsubq_s32(veo, ven);
-    const float32x4_t vsn = vreinterpretq_f32_s32(vaddq_s32(ven, vdefault_exponent));
+    // Create a floating-point number s (scale) such that s := 2**(n / 64) for such inputs that expf(x) is normalized,
+    // i.e. -87.33642 <= x <= 0.0. As n has 6 fractional bits, we split s == 2**(n / 64) = 2**e * 2**(n / 64 - e), where
+    // e := int(n / 64). We create s in two steps:
+    // 1. Fetch 2**(n / 64 - e) = 2**(n % 64) from exp2_table using the 6 low bits of n, as integer. Note that the
+    //    fetched values are in the [1.0, 2.0) range, i.e. their floating-point exponent is 0.
+    // 2. Adjust fecthed value by addition of e to its floating-point exponent. The result is always a normalized
+    //    number, because for -87.33642 <= x <= 0.0 (inputs for which expf(x) is normalized) we have -126 <= e <= 0,
+    //    and thus the adjusted exponent is not lower than -126.
+    //
+    // Extract e from bits 6:14 of n and shift it into bits 23:31 (position of floating-point exponent).
+    const int32x4_t ve = vshlq_n_s32(vbicq_s32(vreinterpretq_s32_f32(vn), vmovq_n_s32(INT32_C(0x3F))), 17);
 
-    // Use the low 6 bits of n (as integer) for table lookup.
+    // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
     const uint64x2_t vidx = vreinterpretq_u64_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask));
     const uint64_t vidx01 = vgetq_lane_u64(vidx, 0);
     const uint64_t vidx23 = vgetq_lane_u64(vidx, 1);
@@ -89,15 +82,15 @@ void xnn_math_f32_exp__neonfma_lut64_p2(
     float32x2_t vl23 = vld1_dup_f32(&exp2_table[(uint32_t) vidx23]);
     vl01 = vld1_lane_f32(&exp2_table[(uint32_t) (vidx01 >> 32)], vl01, 1);
     vl23 = vld1_lane_f32(&exp2_table[(uint32_t) (vidx23 >> 32)], vl23, 1);
-    float32x4_t vl = vcombine_f32(vl01, vl23);
-    // Fuse so into the value l fetched from a table by adjusting its exponential.
-    vl = vreinterpretq_f32_s32(vaddq_s32(vreinterpretq_s32_f32(vl), veo));
+    const float32x4_t vl = vcombine_f32(vl01, vl23);
+    // Adjust exponent of the value l fetched from the exp2_table to get the final s value.
+    const float32x4_t vs = vreinterpretq_f32_s32(vaddq_s32(vreinterpretq_s32_f32(vl), ve));
 
-    // Subtract the large number back to get final n := round(x * 64 / log(2)).
+    // Subtract the large number back to get final n := round(x * 64 / log(2)) as a floating-point number.
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument t := x - n * log(2) / 64.
-    // Use Cody-Waite range reduction method (note two constants to represent log(2) / 64) to improve accuracy.
+    // Use Cody-Waite range reduction method (note the two constants representing log(2) / 64) to improve accuracy.
     float32x4_t vt = vfmaq_f32(vx, vn, vminus_ln2_o64_hi);
     vt = vfmaq_f32(vt, vn, vminus_ln2_o64_lo);
 
@@ -106,18 +99,15 @@ void xnn_math_f32_exp__neonfma_lut64_p2(
     vp = vfmaq_f32(vt, vt, vp);
 
     // Reconstruct the final f value:
-    //   f = sn * (so * l) * (1 + t * (1 + t * c2))
-    //     = sn * (so * l) * (1 + t + t * (t * c2))
-    //     = sn * ((so * l) + (so * l) * (t + t * (t * c2)))
-    float32x4_t vf = vfmaq_f32(vl, vl, vp);
-    vf = vmulq_f32(vf, vsn);
+    //   f = s * (1 + t * (1 + t * c2))
+    //     = s * (1 + t + t * (t * c2))
+    //     = s + s * (t + t * (t * c2))
+    //     = s + s * p
+    float32x4_t vf = vfmaq_f32(vs, vs, vp);
 
-    // For inputs below zero cutoff, replace output with +0.0f.
+    // For inputs below denormal cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcltq_f32(vx, vzero_cutoff)));
-    // For inputs above inf cutoff, replace output with +inf.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = vbslq_f32(vcgtq_f32(vx, vinf_cutoff), vplus_inf, vf);
+    vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcltq_f32(vx, vdenorm_cutoff)));
     vst1q_f32(output, vf); output += 4;
   }
 }

@@ -92,6 +92,22 @@ lb = round(-log(2)/128, single, RN);
 ub = round(log(2)/128, single, RN);
 print("-log(2)/128 =", lb);
 print("+log(2)/128 =", ub);
+P = fpminimax(exp(x), [|1,2|], [|SG...|], [lb; ub], relative, 1);
+print("Degree-2 P[exp(x)] with 1 constraint on [-log(2)/128, log(2)/128] =", horner(P));
+print("relative error =", round(dirtyinfnorm(P / exp(x) - 1, [lb; ub]), single, RU));
+
+lb = round(-log(2)/128, single, RN);
+ub = round(log(2)/128, single, RN);
+print("-log(2)/128 =", lb);
+print("+log(2)/128 =", ub);
 P = fpminimax(exp(x), [|2|], [|SG...|], [lb; ub], relative, 1+x);
 print("Degree-2 P[exp(x)] with 1+x constraint on [-log(2)/128, log(2)/128] =", horner(P));
+print("relative error =", round(dirtyinfnorm(P / exp(x) - 1, [lb; ub]), single, RU));
+
+lb = round(-log(2)/2048, single, RN);
+ub = round(log(2)/2048, single, RN);
+print("-log(2)/2048 =", lb);
+print("+log(2)/2048 =", ub);
+P = fpminimax(exp(x), [|0,1|], [|SG...|], [lb; ub], relative);
+print("Degree-1 P[exp(x)] with 1 constraint on [-log(2)/2048, log(2)/2048] =", horner(P));
 print("relative error =", round(dirtyinfnorm(P / exp(x) - 1, [lb; ub]), single, RU));

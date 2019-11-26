@@ -38,7 +38,7 @@ void xnn_math_f32_expminus__avx2_p5(
     // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
     // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
     // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
-    // inputs outside of [-103.97207, 0.0] underflow expf(x) anyway. We fixup the result for such inputs at the very end
+    // inputs outside of [-87.336540, 0.0] underflow expf(x) anyway. We fixup the result for such inputs at the very end
     // of the algorithm.
     __m256 vn = _mm256_fmadd_ps(vx, vlog2e, vmagic_bias);
 

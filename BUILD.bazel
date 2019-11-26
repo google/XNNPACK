@@ -414,6 +414,8 @@ NEONFMA_UKERNELS = [
     "src/f32-vmulcaddc/gen/c8-neonfma-2x.c",
     "src/math/exp-neonfma-lut64-p2.c",
     "src/math/exp-neonfma-p5.c",
+    "src/math/expminus-neonfma-lut2048-p1.c",
+    "src/math/expminus-neonfma-lut64-p2.c",
     "src/math/expminus-neonfma-p5.c",
     "src/math/sigmoid-neonfma-p5-nr1recps1fma.c",
     "src/math/sigmoid-neonfma-p5-nr2fma.c",
