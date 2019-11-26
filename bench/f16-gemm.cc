@@ -86,7 +86,7 @@ static void GEMMBenchmark(benchmark::State& state,
       for (uint32_t n = 0; n < nc; n += nr) {
         const uint32_t nb = min(nc - n, nr);
         hgemm(
-          mb, nb, kc,
+          mb, nb, kc * sizeof(uint16_t),
           a.data() + m * kc, kc * sizeof(uint16_t),
           w.data() + (nc_stride * buffer_index + n) * (kc_stride + 1),
           c.data() + (mc * buffer_index + m) * nc + n, nc * sizeof(uint16_t), nr * sizeof(uint16_t),
