@@ -165,6 +165,18 @@
   k-block: 1
 - name: xnn_f32_igemm_ukernel_8x8__fma3_broadcast
   k-block: 1
+- name: xnn_f32_igemm_ukernel_1x16__avx512f_broadcast
+  k-block: 1
+- name: xnn_f32_igemm_ukernel_4x16__avx512f_broadcast
+  k-block: 1
+- name: xnn_f32_igemm_ukernel_5x16__avx512f_broadcast
+  k-block: 1
+- name: xnn_f32_igemm_ukernel_6x16__avx512f_broadcast
+  k-block: 1
+- name: xnn_f32_igemm_ukernel_7x16__avx512f_broadcast
+  k-block: 1
+- name: xnn_f32_igemm_ukernel_8x16__avx512f_broadcast
+  k-block: 1
 - name: xnn_f32_igemm_ukernel_1x8__psimd_loadsplat
   k-block: 1
 - name: xnn_f32_igemm_ukernel_4x8__psimd_loadsplat

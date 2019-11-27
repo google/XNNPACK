@@ -622,7 +622,16 @@ static void init(void) {
 
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_fma3()) {
+    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+      xnn_params.f32.gemm = (struct gemm_parameters) {
+        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_7x16__avx512f_broadcast,
+        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_7x16__avx512f_broadcast,
+        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x16__avx512f_broadcast,
+        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x16__avx512f_broadcast,
+        .mr = 7,
+        .nr = 16,
+      };
+    } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_fma3()) {
       xnn_params.f32.gemm = (struct gemm_parameters) {
         .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_7x8__fma3_broadcast,
         .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_7x8__fma3_broadcast,

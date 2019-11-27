@@ -222,6 +222,26 @@ tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=7 -D NR=8 -D FMA=3 -D INC=1 -o
 tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=8 -D NR=8 -D FMA=3 -D INC=0 -o src/f32-gemm/gen/8x8-fma3-broadcast.c
 tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=8 -D NR=8 -D FMA=3 -D INC=1 -o src/f32-gemm/gen-inc/8x8-fma3-broadcast.c
 
+################################# x86 AVX-512 #################################
+### AVX512F+BROADCAST micro-kernels
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=1 -D NR=16 -D INC=0 -o src/f32-gemm/gen/1x16-avx512f-broadcast.c
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=1 -D NR=16 -D INC=1 -o src/f32-gemm/gen-inc/1x16-avx512f-broadcast.c
+
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=4 -D NR=16 -D INC=0 -o src/f32-gemm/gen/4x16-avx512f-broadcast.c
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=4 -D NR=16 -D INC=1 -o src/f32-gemm/gen-inc/4x16-avx512f-broadcast.c
+
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=5 -D NR=16 -D INC=0 -o src/f32-gemm/gen/5x16-avx512f-broadcast.c
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=5 -D NR=16 -D INC=1 -o src/f32-gemm/gen-inc/5x16-avx512f-broadcast.c
+
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=6 -D NR=16 -D INC=0 -o src/f32-gemm/gen/6x16-avx512f-broadcast.c
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=6 -D NR=16 -D INC=1 -o src/f32-gemm/gen-inc/6x16-avx512f-broadcast.c
+
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=7 -D NR=16 -D INC=0 -o src/f32-gemm/gen/7x16-avx512f-broadcast.c
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=7 -D NR=16 -D INC=1 -o src/f32-gemm/gen-inc/7x16-avx512f-broadcast.c
+
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -D INC=0 -o src/f32-gemm/gen/8x16-avx512f-broadcast.c
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -D INC=1 -o src/f32-gemm/gen-inc/8x16-avx512f-broadcast.c
+
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/f32-gemm.yaml --output test/f32-gemm.cc
 tools/generate-gemm-test.py --spec test/f32-gemminc.yaml --output test/f32-gemminc.cc

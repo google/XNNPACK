@@ -752,6 +752,24 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/extexp-avx2-p5.c)
 
 SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
+  src/f32-gemm/gen/1x16-avx512f-broadcast.c
+  src/f32-gemm/gen/4x16-avx512f-broadcast.c
+  src/f32-gemm/gen/5x16-avx512f-broadcast.c
+  src/f32-gemm/gen/6x16-avx512f-broadcast.c
+  src/f32-gemm/gen/7x16-avx512f-broadcast.c
+  src/f32-gemm/gen/8x16-avx512f-broadcast.c
+  src/f32-gemm/gen-inc/1x16-avx512f-broadcast.c
+  src/f32-gemm/gen-inc/4x16-avx512f-broadcast.c
+  src/f32-gemm/gen-inc/5x16-avx512f-broadcast.c
+  src/f32-gemm/gen-inc/6x16-avx512f-broadcast.c
+  src/f32-gemm/gen-inc/7x16-avx512f-broadcast.c
+  src/f32-gemm/gen-inc/8x16-avx512f-broadcast.c
+  src/f32-igemm/gen/1x16-avx512f-broadcast.c
+  src/f32-igemm/gen/4x16-avx512f-broadcast.c
+  src/f32-igemm/gen/5x16-avx512f-broadcast.c
+  src/f32-igemm/gen/6x16-avx512f-broadcast.c
+  src/f32-igemm/gen/7x16-avx512f-broadcast.c
+  src/f32-igemm/gen/8x16-avx512f-broadcast.c
   src/f32-raddexpminusmax/avx512f-p5-scalef-unroll128.c
   src/f32-raddextexp/avx512f-p5-scalef-unroll128.c
   src/f32-raddstoreexpminusmax/avx512f-p5-scalef-unroll128.c
