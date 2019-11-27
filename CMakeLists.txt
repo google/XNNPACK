@@ -756,6 +756,18 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/extexp-avx2-p5.c)
 
 SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
+  src/f32-dwconv/gen/up32x4-avx512f-acc2.c
+  src/f32-dwconv/gen/up32x4-avx512f.c
+  src/f32-dwconv/gen/up16x4-avx512f-acc2.c
+  src/f32-dwconv/gen/up16x4-avx512f.c
+  src/f32-dwconv/gen/up32x9-avx512f-acc2.c
+  src/f32-dwconv/gen/up32x9-avx512f.c
+  src/f32-dwconv/gen/up16x9-avx512f-acc2.c
+  src/f32-dwconv/gen/up16x9-avx512f.c
+  src/f32-dwconv/gen/up32x25-avx512f-acc2.c
+  src/f32-dwconv/gen/up32x25-avx512f.c
+  src/f32-dwconv/gen/up16x25-avx512f-acc2.c
+  src/f32-dwconv/gen/up16x25-avx512f.c
   src/f32-gemm/gen/1x16-avx512f-broadcast.c
   src/f32-gemm/gen/4x16-avx512f-broadcast.c
   src/f32-gemm/gen/5x16-avx512f-broadcast.c

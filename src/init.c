@@ -666,7 +666,23 @@ static void init(void) {
       .nr = 2,
       .log2_kr = 2,
     };
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_fma3()) {
+    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+      xnn_params.f32.dwconv[0] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x4__avx512f,
+        .cr = 16,
+        .mr = 4,
+      };
+      xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x9__avx512f,
+        .cr = 16,
+        .mr = 9,
+      };
+      xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x25__avx512f,
+        .cr = 16,
+        .mr = 25,
+      };
+    } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_fma3()) {
       xnn_params.f32.dwconv[0] = (struct dwconv_parameters) {
         .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x4__fma3,
         .cr = 16,

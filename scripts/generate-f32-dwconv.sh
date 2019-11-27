@@ -62,6 +62,22 @@ tools/xngen src/f32-dwconv/up-avx.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D FM
 tools/xngen src/f32-dwconv/up-avx.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D FMA=3 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up16x25-fma3.c
 tools/xngen src/f32-dwconv/up-avx.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D FMA=3 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up16x25-fma3-acc2.c
 
+################################# x86 AVX-512 #################################
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up16x4-avx512f.c
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up16x4-avx512f-acc2.c
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up32x4-avx512f.c
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up32x4-avx512f-acc2.c
+
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up16x9-avx512f.c
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up16x9-avx512f-acc2.c
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up32x9-avx512f.c
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up32x9-avx512f-acc2.c
+
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up16x25-avx512f.c
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up16x25-avx512f-acc2.c
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up32x25-avx512f.c
+tools/xngen src/f32-dwconv/up-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up32x25-avx512f-acc2.c
+
 #################################### PSIMD ####################################
 tools/xngen src/f32-dwconv/up-psimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up4x4-psimd.c
 tools/xngen src/f32-dwconv/up-psimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up4x4-psimd-acc2.c
