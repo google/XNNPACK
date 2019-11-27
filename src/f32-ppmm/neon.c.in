@@ -10,6 +10,7 @@ $ABC = "0123456789ABCDEFGHIJKLMN"
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/ppmm.h>
 
 
@@ -62,7 +63,7 @@ void xnn_f32_ppmm_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
         const float32x4_t vb${ABC[N:N+4]} = vld1q_f32(w); w += 4;
 
       $if FMA:
-        #ifdef __aarch64__
+        #if XNN_ARCH_ARM64
           $for N in range(0, NR, 4):
             $for M in range(MR):
               vacc${M}x${ABC[N:N+4]} = vfmaq_laneq_f32(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}, va${ABC[M&-4:4+M&-4]}, ${M % 4});

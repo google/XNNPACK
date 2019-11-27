@@ -8,6 +8,7 @@
 #include <arm_neon.h>
 
 #include <xnnpack/clamp.h>
+#include <xnnpack/common.h>
 
 
 void xnn_f32_clamp_ukernel__neon(
@@ -19,7 +20,7 @@ void xnn_f32_clamp_ukernel__neon(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-#ifdef __aarch64__
+#if XNN_ARCH_ARM64
   const float32x4x2_t voutput_clamp = vld2q_dup_f32(&params->scalar.max);
   const float32x4_t voutput_max = voutput_clamp.val[0];
   const float32x4_t voutput_min = voutput_clamp.val[1];

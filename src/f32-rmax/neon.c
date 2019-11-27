@@ -7,6 +7,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/rmax.h>
 
 
@@ -38,7 +39,7 @@ void xnn_f32_rmax_ukernel__neon(
     const float32x4_t vx = vld1q_f32(x); x += 4;
     vmax = vmaxq_f32(vmax, vx);
   }
-#ifdef __aarch64__
+#if XNN_ARCH_ARM64
   float32x2_t vmax_lo = vget_low_f32(vpmaxq_f32(vmax, vmax));
 #else
   float32x2_t vmax_lo = vmax_f32(vget_low_f32(vmax), vget_high_f32(vmax));
@@ -50,7 +51,7 @@ void xnn_f32_rmax_ukernel__neon(
       n -= 4;
     } while (n != 0);
   }
-#ifdef __aarch64__
+#if XNN_ARCH_ARM64
   *y = vmaxv_f32(vmax_lo);
 #else
   vst1_lane_f32(y, vpmax_f32(vmax_lo, vmax_lo), 0);

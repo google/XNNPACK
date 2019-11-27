@@ -70,7 +70,7 @@ void xnn_f32_gavgpool_spchw_ukernel__neon_x4(
 
     // Having exaclty 4 rows makes this work out nicely as we end up with
     // the 4 totals in 4 different lanes of the same vector.
-#ifdef __aarch64__
+#if XNN_ARCH_ARM64
     const float32x4_t vsum01 = vpaddq_f32(vsum0, vsum1);
     const float32x4_t vsum23 = vpaddq_f32(vsum2, vsum3);
     const float32x4_t vsum = vpaddq_f32(vsum01, vsum23);

@@ -10,6 +10,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/igemm.h>
 
 
@@ -347,7 +348,7 @@ void xnn_q8_igemm_ukernel_4x8__neon(
     vacc3x4567 = vrshlq_s32(vacc3x4567, vright_shift);
 
     const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  #ifdef __aarch64__
+  #if XNN_ARCH_ARM64
     const int16x8_t vacc0x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567), voutput_zero_point);
     const int16x8_t vacc1x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc1x0123), vacc1x4567), voutput_zero_point);
     const int16x8_t vacc2x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc2x0123), vacc2x4567), voutput_zero_point);

@@ -12,6 +12,7 @@ $ABC = "0123456789ABCDEFGHIJKLMN"
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 
 
@@ -70,7 +71,7 @@ void xnn_f16_gemm_ukernel_${MR}x${NR}__neonfp16arith_ld64(
         $for N in range(0, NR, 8):
           const float16x8_t vb${ABC[N:N+8]}c${L} = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
-        #if defined(__aarch64__)
+        #if XNN_ARCH_ARM64
             $for M in range(MR):
               vacc${M}x${ABC[N:N+8]} = vfmaq_lane_f16(vacc${M}x${ABC[N:N+8]}, vb${ABC[N:N+8]}c${L}, va${M}, ${L});
         #else

@@ -11,6 +11,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 
 
@@ -71,7 +72,7 @@ void xnn_f32_gemm_ukernel_4x2__neonfma_lane_ld64(
 
       const float32x2_t vb01c0 = vld1_f32(w); w += 2;
 
-      #if defined(__aarch64__)
+      #if XNN_ARCH_ARM64
         vacc0x01 = vfma_lane_f32(vacc0x01, vb01c0, va0, 0);
         vacc1x01 = vfma_lane_f32(vacc1x01, vb01c0, va1, 0);
         vacc2x01 = vfma_lane_f32(vacc2x01, vb01c0, va2, 0);
@@ -88,7 +89,7 @@ void xnn_f32_gemm_ukernel_4x2__neonfma_lane_ld64(
       #endif
       const float32x2_t vb01c1 = vld1_f32(w); w += 2;
 
-      #if defined(__aarch64__)
+      #if XNN_ARCH_ARM64
         vacc0x01 = vfma_lane_f32(vacc0x01, vb01c1, va0, 1);
         vacc1x01 = vfma_lane_f32(vacc1x01, vb01c1, va1, 1);
         vacc2x01 = vfma_lane_f32(vacc2x01, vb01c1, va2, 1);

@@ -11,6 +11,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/igemm.h>
 
 

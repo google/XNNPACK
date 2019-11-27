@@ -10,6 +10,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/math.h>
 
@@ -99,7 +100,7 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__neon(
     }
   }
 
-#ifdef __aarch64__
+#if XNN_ARCH_ARM64
   const int32x4_t vmultiplier = vld1q_dup_s32(&params->neon.multiplier);
 #else
   const int32x2_t vmultiplier = vld1_dup_s32(&params->neon.multiplier);
@@ -161,7 +162,7 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__neon(
     const int32x4_t vneg_mask_lo = vreinterpretq_s32_u32(vcltq_s32(vacc_lo, vmovq_n_s32(0)));
     const int32x4_t vneg_mask_hi = vreinterpretq_s32_u32(vcltq_s32(vacc_hi, vmovq_n_s32(0)));
 
-#if defined(__aarch64__)
+#if XNN_ARCH_ARM64
     const int64x2_t vproduct01 = vmull_s32(vget_low_s32(vacc_lo), vget_low_s32(vmultiplier));
     const int64x2_t vproduct23 = vmull_high_s32(vacc_lo, vmultiplier);
     const int64x2_t vproduct45 = vmull_s32(vget_low_s32(vacc_hi), vget_low_s32(vmultiplier));
@@ -188,7 +189,7 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__neon(
     const int64x2_t vscaled_acc45 = vrshlq_s64(vadjusted_product45, vleft_shift);
     const int64x2_t vscaled_acc67 = vrshlq_s64(vadjusted_product67, vleft_shift);
 
-#ifdef __aarch64__
+#if XNN_ARCH_ARM64
     vacc_lo = vuzp1q_s32(vreinterpretq_s32_s64(vscaled_acc01), vreinterpretq_s32_s64(vscaled_acc23));
     vacc_hi = vuzp1q_s32(vreinterpretq_s32_s64(vscaled_acc45), vreinterpretq_s32_s64(vscaled_acc67));
 
@@ -233,7 +234,7 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__neon(
     const int32x4_t vneg_mask_lo = vreinterpretq_s32_u32(vcltq_s32(vacc_lo, vmovq_n_s32(0)));
     const int32x4_t vneg_mask_hi = vreinterpretq_s32_u32(vcltq_s32(vacc_hi, vmovq_n_s32(0)));
 
-#if defined(__aarch64__)
+#if XNN_ARCH_ARM64
     const int64x2_t vproduct01 = vmull_s32(vget_low_s32(vacc_lo), vget_low_s32(vmultiplier));
     const int64x2_t vproduct23 = vmull_high_s32(vacc_lo, vmultiplier);
     const int64x2_t vproduct45 = vmull_s32(vget_low_s32(vacc_hi), vget_low_s32(vmultiplier));
@@ -260,7 +261,7 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__neon(
     const int64x2_t vscaled_acc45 = vrshlq_s64(vadjusted_product45, vleft_shift);
     const int64x2_t vscaled_acc67 = vrshlq_s64(vadjusted_product67, vleft_shift);
 
-#ifdef __aarch64__
+#if XNN_ARCH_ARM64
     vacc_lo = vuzp1q_s32(vreinterpretq_s32_s64(vscaled_acc01), vreinterpretq_s32_s64(vscaled_acc23));
     vacc_hi = vuzp1q_s32(vreinterpretq_s32_s64(vscaled_acc45), vreinterpretq_s32_s64(vscaled_acc67));
 

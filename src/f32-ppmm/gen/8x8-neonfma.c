@@ -11,6 +11,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/ppmm.h>
 
 
@@ -87,7 +88,7 @@ void xnn_f32_ppmm_ukernel_8x8__neonfma(
       const float32x4_t vb0123 = vld1q_f32(w); w += 4;
       const float32x4_t vb4567 = vld1q_f32(w); w += 4;
 
-      #ifdef __aarch64__
+      #if XNN_ARCH_ARM64
         vacc0x0123 = vfmaq_laneq_f32(vacc0x0123, vb0123, va0123, 0);
         vacc1x0123 = vfmaq_laneq_f32(vacc1x0123, vb0123, va0123, 1);
         vacc2x0123 = vfmaq_laneq_f32(vacc2x0123, vb0123, va0123, 2);

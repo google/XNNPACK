@@ -22,6 +22,9 @@
 
 #include <fp16.h>
 
+#include <xnnpack/common.h>
+
+
 #if defined(__clang__) && !defined(__pnacl__)
   #if __clang_major__ == 3 && __clang_minor__ >= 7 || __clang_major__ > 3
     #define XNN_IGNORE_SHIFT_BASE_UB __attribute__((__no_sanitize__("shift-base")))
@@ -47,7 +50,7 @@
 XNN_IGNORE_SHIFT_BASE_UB
 inline static int32_t asr_s32(int32_t x, uint32_t n) {
   #ifdef XNN_USE_SHIFT_BASE_UB_WORKAROUND
-    #if defined(__x86_64__) || defined(__aarch64__)
+    #if XNN_ARCH_X86_64 || XNN_ARCH_ARM64
       return (int32_t) ((uint64_t) (int64_t) x >> n);
     #else
       return x >= 0 ? x >> n : ~(~x >> n);

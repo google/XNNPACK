@@ -8,6 +8,7 @@ $assert NR == 2
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 
 
@@ -75,7 +76,7 @@ void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__${"neonfma" if FMA
         const float32x2_t vb01c${L} = vld1_f32(w); w += 2;
 
         $if FMA:
-          #if defined(__aarch64__)
+          #if XNN_ARCH_ARM64
             $for M in range(MR):
               vacc${M}x01 = vfma_lane_f32(vacc${M}x01, vb01c${L}, va${M}, ${L});
           #else

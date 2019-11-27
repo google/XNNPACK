@@ -8,6 +8,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/dwconv.h>
 
 
@@ -28,7 +29,7 @@ void xnn_q8_dwconv_ukernel_up8x9__neon(
   const uint8x8_t voutput_min = vld1_dup_u8(&params->neon.output_min);
   const uint8x8_t voutput_max = vld1_dup_u8(&params->neon.output_max);
 
-#ifdef __aarch64__
+#if XNN_ARCH_ARM64
   // Larger number of registers on AArch64 make it possible to process few pixels at a time.
   if (input_stride == 3 * sizeof(void*)) {
     for (; output_width >= 3; output_width -= 3) {
@@ -397,7 +398,7 @@ void xnn_q8_dwconv_ukernel_up8x9__neon(
       return;
     }
   }
-#endif
+#endif  // XNN_ARCH_ARM64
 
   do {
     const uint8_t* i0 = input[0];
@@ -494,7 +495,7 @@ void xnn_q8_dwconv_ukernel_up8x9__neon(
       vacc_lo = vrshlq_s32(vacc_lo, vright_shift);
       vacc_hi = vrshlq_s32(vacc_hi, vright_shift);
 
-#ifdef __aarch64__
+#if XNN_ARCH_ARM64
       const int16x8_t vacc = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc_lo), vacc_hi), voutput_zero_point);
 #else
       const int16x8_t vacc = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi)), voutput_zero_point);
@@ -585,7 +586,7 @@ void xnn_q8_dwconv_ukernel_up8x9__neon(
       vacc_lo = vrshlq_s32(vacc_lo, vright_shift);
       vacc_hi = vrshlq_s32(vacc_hi, vright_shift);
 
-#ifdef __aarch64__
+#if XNN_ARCH_ARM64
       const int16x8_t vacc = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc_lo), vacc_hi), voutput_zero_point);
 #else
       const int16x8_t vacc = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi)), voutput_zero_point);
