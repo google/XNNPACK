@@ -377,10 +377,12 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen/4x8-neon-lane-ld64.c
   src/f32-gemm/gen/5x8-neon-lane-ld64.c
   src/f32-gemm/gen/6x8-neon-lane-ld64.c
+  src/f32-gemm/gen/6x8-neon-lane-ld128.c
   src/f32-gemm/gen/1x8-neon-dup-ld64.c
   src/f32-gemm/gen/4x8-neon-dup-ld128.c
   src/f32-gemm/gen/4x8-neon-dup-ld64.c
   src/f32-gemm/gen/6x8-neon-dup-ld64.c
+  src/f32-gemm/gen/6x8-neon-dup-ld128.c
   src/f32-gemm/gen/1x8s4-neon.c
   src/f32-gemm/gen/4x8s4-neon.c
   src/f32-gemm/gen/6x8s4-neon.c
@@ -390,10 +392,12 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/4x8-neon-lane-ld64.c
   src/f32-gemm/gen-inc/5x8-neon-lane-ld64.c
   src/f32-gemm/gen-inc/6x8-neon-lane-ld64.c
+  src/f32-gemm/gen-inc/6x8-neon-lane-ld128.c
   src/f32-gemm/gen-inc/1x8-neon-dup-ld64.c
   src/f32-gemm/gen-inc/4x8-neon-dup-ld128.c
   src/f32-gemm/gen-inc/4x8-neon-dup-ld64.c
   src/f32-gemm/gen-inc/6x8-neon-dup-ld64.c
+  src/f32-gemm/gen-inc/6x8-neon-dup-ld128.c
   src/f32-gemm/gen-inc/1x8s4-neon.c
   src/f32-gemm/gen-inc/4x8s4-neon.c
   src/f32-gemm/gen-inc/6x8s4-neon.c
@@ -405,10 +409,12 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8-neon-lane-ld128.c
   src/f32-igemm/gen/4x8-neon-lane-ld64.c
   src/f32-igemm/gen/6x8-neon-lane-ld64.c
+  src/f32-igemm/gen/6x8-neon-lane-ld128.c
   src/f32-igemm/gen/1x8-neon-dup-ld64.c
   src/f32-igemm/gen/4x8-neon-dup-ld128.c
   src/f32-igemm/gen/4x8-neon-dup-ld64.c
   src/f32-igemm/gen/6x8-neon-dup-ld64.c
+  src/f32-igemm/gen/6x8-neon-dup-ld128.c
   src/f32-igemm/gen/1x8s4-neon.c
   src/f32-igemm/gen/4x8s4-neon.c
   src/f32-igemm/gen/6x8s4-neon.c
@@ -468,6 +474,7 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8-neonfma-dup-ld128.c
   src/f32-igemm/gen/4x8-neonfma-dup-ld64.c
   src/f32-igemm/gen/6x8-neonfma-dup-ld64.c
+  src/f32-igemm/gen/6x8-neonfma-dup-ld128.c
   src/f32-igemm/gen/1x8s4-neonfma.c
   src/f32-igemm/gen/4x8s4-neonfma.c
   src/f32-igemm/gen/6x8s4-neonfma.c
@@ -480,6 +487,7 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-gemm/gen/4x8-neonfma-dup-ld128.c
   src/f32-gemm/gen/4x8-neonfma-dup-ld64.c
   src/f32-gemm/gen/6x8-neonfma-dup-ld64.c
+  src/f32-gemm/gen/6x8-neonfma-dup-ld128.c
   src/f32-gemm/gen/1x8s4-neonfma.c
   src/f32-gemm/gen/4x8s4-neonfma.c
   src/f32-gemm/gen/6x8s4-neonfma.c
@@ -488,6 +496,7 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/4x8-neonfma-dup-ld128.c
   src/f32-gemm/gen-inc/4x8-neonfma-dup-ld64.c
   src/f32-gemm/gen-inc/6x8-neonfma-dup-ld64.c
+  src/f32-gemm/gen-inc/6x8-neonfma-dup-ld128.c
   src/f32-gemm/gen-inc/1x8s4-neonfma.c
   src/f32-gemm/gen-inc/4x8s4-neonfma.c
   src/f32-gemm/gen-inc/6x8s4-neonfma.c
@@ -514,17 +523,20 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-gemm/gen/4x8-neonfma-lane-ld64.c
   src/f32-gemm/gen/5x8-neonfma-lane-ld64.c
   src/f32-gemm/gen/6x8-neonfma-lane-ld64.c
+  src/f32-gemm/gen/6x8-neonfma-lane-ld128.c
   src/f32-gemm/gen-inc/1x8-neonfma-lane-ld64.c
   src/f32-gemm/gen-inc/4x8-neonfma-lane-ld128.c
   src/f32-gemm/gen-inc/4x8-neonfma-lane-ld64.c
   src/f32-gemm/gen-inc/5x8-neonfma-lane-ld64.c
   src/f32-gemm/gen-inc/6x8-neonfma-lane-ld64.c
+  src/f32-gemm/gen-inc/6x8-neonfma-lane-ld128.c
   src/f32-igemm/gen/1x8-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x2-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x4-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x8-neonfma-lane-ld128.c
   src/f32-igemm/gen/4x8-neonfma-lane-ld64.c
   src/f32-igemm/gen/6x8-neonfma-lane-ld64.c
+  src/f32-igemm/gen/6x8-neonfma-lane-ld128.c
   src/f32-conv-hwc/3x3s2p1c3x4-neonfma-2x2.c
   src/f32-conv-hwc/3x3s2p1c3x8-neonfma-2x2.c
   src/f32-conv-hwc2spchw/3x3s2p1c3x4-neonfma-2x2.c

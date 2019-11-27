@@ -96,6 +96,10 @@ DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8__neon_lane_ld64)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8__neonfma_lane_ld64)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8__neon_dup_ld64)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8__neonfma_dup_ld64)
+DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8__neon_lane_ld128)
+DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8__neonfma_lane_ld128)
+DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8__neon_dup_ld128)
+DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8__neonfma_dup_ld128)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8__psimd_loadsplat)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8__psimd_splat)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_6x8s4__neon)
@@ -106,7 +110,6 @@ DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_7x8__fma3_broadcast)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_8x8__fma3_broadcast)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_8x8s4__neon)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_8x8s4__neonfma)
-
 
 #define DECLARE_Q8_IGEMM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
@@ -127,7 +130,6 @@ DECLARE_Q8_IGEMM_UKERNEL_FUNCTION(xnn_q8_igemm_ukernel_2x2__scalar)
 DECLARE_Q8_IGEMM_UKERNEL_FUNCTION(xnn_q8_igemm_ukernel_4x4c2__sse2)
 DECLARE_Q8_IGEMM_UKERNEL_FUNCTION(xnn_q8_igemm_ukernel_4x8__neon)
 DECLARE_Q8_IGEMM_UKERNEL_FUNCTION(xnn_q8_igemm_ukernel_8x8__neon)
-
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -97,6 +97,10 @@ DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8__neon_lane_ld64)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8__neonfma_lane_ld64)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8__neon_dup_ld64)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8__neonfma_dup_ld64)
+DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8__neon_lane_ld128)
+DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8__neonfma_lane_ld128)
+DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8__neon_dup_ld128)
+DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8__neonfma_dup_ld128)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8__psimd_loadsplat)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8__psimd_splat)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_6x8s4__neon)
@@ -187,6 +191,10 @@ DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8__neon_lane_ld64
 DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8__neonfma_lane_ld64)
 DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8__neon_dup_ld64)
 DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8__neonfma_dup_ld64)
+DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8__neon_lane_ld128)
+DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8__neonfma_lane_ld128)
+DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8__neon_dup_ld128)
+DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8__neonfma_dup_ld128)
 DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8__psimd_loadsplat)
 DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8__psimd_splat)
 DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_6x8s4__neon)
@@ -215,7 +223,6 @@ DECLARE_F16_GEMM_UKERNEL_FUNCTION(xnn_f16_gemm_ukernel_4x8__neonfp16arith_ld64)
 DECLARE_F16_GEMM_UKERNEL_FUNCTION(xnn_f16_gemm_ukernel_6x8__neonfp16arith_ld64)
 DECLARE_F16_GEMM_UKERNEL_FUNCTION(xnn_f16_gemm_ukernel_8x8__neonfp16arith_ld64)
 
-
 #define DECLARE_Q8_GEMM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                      \
       size_t mr,                                  \
@@ -239,7 +246,6 @@ DECLARE_Q8_GEMM_UKERNEL_FUNCTION(xnn_q8_gemm_ukernel_4x8__neon)
 DECLARE_Q8_GEMM_UKERNEL_FUNCTION(xnn_q8_gemm_ukernel_6x4__neon)
 DECLARE_Q8_GEMM_UKERNEL_FUNCTION(xnn_q8_gemm_ukernel_8x8__aarch64_neon)
 DECLARE_Q8_GEMM_UKERNEL_FUNCTION(xnn_q8_gemm_ukernel_8x8__neon)
-
 
 #ifdef __cplusplus
 }  // extern "C"
