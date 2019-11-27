@@ -681,6 +681,7 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/sse41-p5-div-x16.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
+  src/f32-clamp/avx.c
   src/f32-dwconv/gen/up16x4-avx-acc2.c
   src/f32-dwconv/gen/up16x4-avx.c
   src/f32-dwconv/gen/up8x4-avx-acc2.c
@@ -756,6 +757,7 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/extexp-avx2-p5.c)
 
 SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
+  src/f32-clamp/avx512f.c
   src/f32-dwconv/gen/up32x4-avx512f-acc2.c
   src/f32-dwconv/gen/up32x4-avx512f.c
   src/f32-dwconv/gen/up16x4-avx512f-acc2.c
