@@ -43,8 +43,8 @@ void xnn_math_f32_sigmoid__neonfma_p5_nr1recps1fma(
     //   f[x] := 
     //           \ 1 - f[-x] if x >= 0
     //
-    // First we compute f[z] := exp(-z) / (1 + exp(-z)) where z = abs(x),
-    // then replace result with 1 - f[z] if x >= 0.
+    // First we compute f[-z] := exp(-z) / (1 + exp(-z)) where z = abs(x),
+    // then replace result with 1 - f[-z] if x >= 0.
     const float32x4_t vz = vabsq_f32(vx);
 
     // Compute reduced argument n := round(-z / log(2)).
@@ -59,41 +59,42 @@ void xnn_math_f32_sigmoid__neonfma_p5_nr1recps1fma(
     // -87.336544 <= -z <= 0.0, and -126 <= n <= 0 accordingly.
     const float32x4_t vs = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn), 23));
 
-    // Subtract the large number back to get final n := round(-z / log(2)).
+    // Subtract the large number back to get the final n := round(-z / log(2)) as a floating-point number.
     vn = vsubq_f32(vn, vmagic_bias);
 
-    // Compute reduced argument -t := -z - n * log(2) = -(z + n * log(2)).
+    // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     float32x4_t vt = vfmaq_f32(vz, vn, vln2_hi);
     vt = vfmaq_f32(vt, vn, vln2_lo);
 
-    // Compute degree-5 polynomial approxiatmion for exp(-t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(-t) on [-log(2)/2, log(2)/2]:
+    //   P5(t) = 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
     float32x4_t vp = vfmaq_f32(vc4, vc5, vt);
     vp = vfmaq_f32(vc3, vp, vt);
     vp = vfmaq_f32(vc2, vp, vt);
     vp = vfmaq_f32(vc1, vp, vt);
 
-    // Reconstruct the exp(z) value:
+    // Reconstruct the exp(-z) value:
     //   e = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
     //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
     //     = s + (t * s) * p
     vt = vmulq_f32(vt, vs);
     float32x4_t ve = vfmaq_f32(vs, vp, vt);
 
-    // Denominator of the sigmoid fraction: 1.0 + exp(z)
+    // Denominator of the sigmoid fraction: 1.0 + exp(-z)
     float32x4_t vd = vaddq_f32(ve, vone);
 
     // Use Newton-Raphson method (2 iterations) to compute reciprocal of denominator.
-    // Note: 1 < d <= 2, because z <= 0.0 and 0 < exp(z) <= 1.0.
+    // Note: 1 < d <= 2, because z >= 0.0 and 0 < exp(-z) <= 1.0.
     // Thus the reciprocal of the denominator never overflows.
     float32x4_t vr = vrecpeq_f32(vd);
     vr = vmulq_f32(vr, vrecpsq_f32(vr, vd));
     vr = vfmaq_f32(vr, vr, vfmsq_f32(vone, vr, vd));
 
-    // Reconstruct sigmoid(-z) = exp(z) / (1.0 + exp(z))
+    // Reconstruct sigmoid(-z) = exp(-z) / (1.0 + exp(-z))
     float32x4_t vf = vmulq_f32(ve, vr);
 
-    // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
+    // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
     const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
     vf = vbslq_f32(vm, vf, vsubq_f32(vone, vf));
 

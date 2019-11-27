@@ -72,17 +72,29 @@ static void SigmoidError(benchmark::State& state,
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  static void f32_sigmoid__neonfma_lut2048_p1_nr1recps1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut2048_p1_nr1recps1fma, 4);
+  }
+  static void f32_sigmoid__neonfma_lut2048_p1_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut2048_p1_nr2recps, 4);
+  }
+  static void f32_sigmoid__neonfma_lut2048_p1_nr2fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut2048_p1_nr2fma, 4);
+  }
+
   static void f32_sigmoid__neonfma_p5_nr1recps1fma(benchmark::State& state) {
     SigmoidError(state, xnn_math_f32_sigmoid__neonfma_p5_nr1recps1fma, 4);
   }
-
   static void f32_sigmoid__neonfma_p5_nr2recps(benchmark::State& state) {
     SigmoidError(state, xnn_math_f32_sigmoid__neonfma_p5_nr2recps, 4);
   }
-
   static void f32_sigmoid__neonfma_p5_nr2fma(benchmark::State& state) {
     SigmoidError(state, xnn_math_f32_sigmoid__neonfma_p5_nr2fma, 4);
   }
+
+  BENCHMARK(f32_sigmoid__neonfma_lut2048_p1_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_lut2048_p1_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_lut2048_p1_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
 
   BENCHMARK(f32_sigmoid__neonfma_p5_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_sigmoid__neonfma_p5_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
@@ -90,10 +102,14 @@ static void SigmoidError(benchmark::State& state,
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM64
+  static void f32_sigmoid__neonfma_lut2048_p1_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut2048_p1_div, 4);
+  }
   static void f32_sigmoid__neonfma_p5_div(benchmark::State& state) {
     SigmoidError(state, xnn_math_f32_sigmoid__neonfma_p5_div, 4);
   }
 
+  BENCHMARK(f32_sigmoid__neonfma_lut2048_p1_div)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_sigmoid__neonfma_p5_div)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_ARM64
 
