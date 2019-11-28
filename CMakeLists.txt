@@ -507,9 +507,9 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/neonfma-p5-nr2fma-x16.c
   src/f32-vmulcaddc/gen/c4-neonfma-2x.c
   src/f32-vmulcaddc/gen/c8-neonfma-2x.c
-  src/math/exp-neonfma-lut2048-p1.c
   src/math/exp-neonfma-lut64-p2.c
   src/math/exp-neonfma-p5.c
+  src/math/expminus-neonfma-lut2048-p1.c
   src/math/expminus-neonfma-lut64-p2.c
   src/math/expminus-neonfma-p5.c
   src/math/sigmoid-neonfma-lut2048-p1-nr1recps1fma.c
