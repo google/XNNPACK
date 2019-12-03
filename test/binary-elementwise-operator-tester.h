@@ -27,6 +27,7 @@ class BinaryElementwiseOperatorTester {
     Unknown,
     Add,
     Multiply,
+    Subtract,
   };
 
   inline BinaryElementwiseOperatorTester& input1_shape(std::initializer_list<size_t> input1_shape) {
@@ -117,6 +118,8 @@ class BinaryElementwiseOperatorTester {
         return a + b;
       case OperationType::Multiply:
         return a * b;
+      case OperationType::Subtract:
+        return a - b;
       default:
         return std::nanf("");
     }
@@ -214,6 +217,12 @@ class BinaryElementwiseOperatorTester {
               output_min, output_max,
               0, &binary_elementwise_op));
           break;
+        case OperationType::Subtract:
+          ASSERT_EQ(xnn_status_success,
+            xnn_create_subtract_nd_f32(
+              output_min, output_max,
+              0, &binary_elementwise_op));
+          break;
         default:
           FAIL() << "Unsupported operation type";
       }
@@ -237,6 +246,17 @@ class BinaryElementwiseOperatorTester {
         case OperationType::Multiply:
           ASSERT_EQ(xnn_status_success,
             xnn_setup_multiply_nd_f32(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Subtract:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_subtract_nd_f32(
               binary_elementwise_op,
               num_input1_dims(),
               input1_shape().data(),

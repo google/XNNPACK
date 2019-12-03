@@ -1200,6 +1200,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(softargmax-nc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(softargmax-nc-test softargmax-nc-test)
 
+  ADD_EXECUTABLE(subtract-nd-test test/subtract-nd.cc)
+  SET_TARGET_PROPERTIES(subtract-nd-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(subtract-nd-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(subtract-nd-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(subtract-nd-test subtract-nd-test)
+
   ADD_EXECUTABLE(unpooling-nhwc-test test/unpooling-nhwc.cc)
   SET_TARGET_PROPERTIES(unpooling-nhwc-test PROPERTIES
     CXX_STANDARD 11

@@ -450,6 +450,23 @@ enum xnn_status xnn_setup_sigmoid_nc_f32(
     float* output,
     pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_subtract_nd_f32(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* subtract_op_out);
+
+enum xnn_status xnn_setup_subtract_nd_f32(
+    xnn_operator_t subtract_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    pthreadpool_t threadpool);
+
 #ifndef XNN_NO_NCHW_OPERATORS
 
 enum xnn_status xnn_create_convolution2d_nchw_f32(

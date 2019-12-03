@@ -2204,6 +2204,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "subtract_nd_test",
+    srcs = [
+        "test/binary-elementwise-operator-tester.h",
+        "test/subtract-nd.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "unpooling_nhwc_test",
     srcs = [
         "test/unpooling-nhwc.cc",

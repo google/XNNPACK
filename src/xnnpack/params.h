@@ -1364,6 +1364,7 @@ struct xnn_parameters {
     struct prelu_parameters prelu;
     struct vbinary_parameters vadd;
     struct vbinary_parameters vmul;
+    struct vbinary_parameters vsub;
     struct vmulcaddc_parameters vmulcaddc;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
     struct spmm_parameters spmm;
