@@ -30,6 +30,9 @@ extern "C" {
 /// The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
 #define XNN_FLAG_DEPTHWISE_CONVOLUTION 0x00000001
 
+/// Assume transposed weights in a fully connected operator.
+#define XNN_FLAG_TRANSPOSE_WEIGHTS 0x00000001
+
 /// The operator assumes NHWC layout for the input, regardless of the output layout.
 #define XNN_FLAG_INPUT_NHWC 0x00000002
 

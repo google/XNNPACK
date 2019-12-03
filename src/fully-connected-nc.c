@@ -143,12 +143,21 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
   }
   memset(fully_connected_op->packed_weights, kernel_zero_point, n_stride * (k_stride * sizeof(uint8_t) + sizeof(int32_t)));
 
-  xnn_pack_q8_gemm_goi_w(
-    1, output_channels, input_channels,
-    nr, kr,
-    input_zero_point, kernel_zero_point,
-    kernel, bias,
-    fully_connected_op->packed_weights);
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    xnn_pack_q8_gemm_io_w(
+      output_channels, input_channels,
+      nr, kr,
+      input_zero_point, kernel_zero_point,
+      kernel, bias,
+      fully_connected_op->packed_weights);
+  } else {
+    xnn_pack_q8_gemm_goi_w(
+      1, output_channels, input_channels,
+      nr, kr,
+      input_zero_point, kernel_zero_point,
+      kernel, bias,
+      fully_connected_op->packed_weights);
+  }
 
   fully_connected_op->group_input_channels = input_channels;
   fully_connected_op->group_output_channels = output_channels;
@@ -276,11 +285,19 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   }
   memset(fully_connected_op->packed_weights, 0, n_stride * (k_stride * sizeof(float) + sizeof(float)));
 
-  xnn_pack_f32_gemm_goi_w(
-    1, output_channels, input_channels,
-    nr, kr, sr,
-    kernel, bias,
-    fully_connected_op->packed_weights);
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    xnn_pack_f32_gemm_io_w(
+      output_channels, input_channels,
+      nr, kr, sr,
+      kernel, bias,
+      fully_connected_op->packed_weights);
+  } else {
+    xnn_pack_f32_gemm_goi_w(
+      1, output_channels, input_channels,
+      nr, kr, sr,
+      kernel, bias,
+      fully_connected_op->packed_weights);
+  }
 
   fully_connected_op->group_input_channels = input_channels;
   fully_connected_op->group_output_channels = output_channels;
