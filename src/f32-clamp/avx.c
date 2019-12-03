@@ -34,8 +34,8 @@ void xnn_f32_clamp_ukernel__avx(
     y += 8;
   }
   if (n != 0) {
-    assert(n >= 1);
-    assert(n <= 7);
+    assert(n >= 1 * sizeof(float));
+    assert(n <= 7 * sizeof(float));
     __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - n));
 
     const __m256 vx = _mm256_maskload_ps(x, vmask);

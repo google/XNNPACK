@@ -32,8 +32,8 @@ void xnn_f32_clamp_ukernel__avx512f(
     y += 16;
   }
   if (n != 0) {
-    assert(n >= 1);
-    assert(n <= 15);
+    assert(n >= 1 * sizeof(float));
+    assert(n <= 15 * sizeof(float));
     // Prepare mask for valid 32-bit elements (depends on n).
     n >>= 2 /* log2(sizeof(float)) */;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
