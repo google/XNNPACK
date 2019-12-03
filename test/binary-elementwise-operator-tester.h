@@ -270,5 +270,5 @@ class BinaryElementwiseOperatorTester {
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   OperationType operation_type_{OperationType::Unknown};
-  size_t iterations_{5};
+  size_t iterations_{3};
 };
