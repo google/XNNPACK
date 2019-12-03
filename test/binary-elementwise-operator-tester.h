@@ -175,9 +175,13 @@ class BinaryElementwiseOperatorTester {
         for (size_t j = 0; j < output_dims[1]; j++) {
           for (size_t k = 0; k < output_dims[2]; k++) {
             for (size_t l = 0; l < output_dims[3]; l++) {
-              output_ref[i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3]] = Compute(
-                input1[i * input1_strides[0] + j * input1_strides[1] + k * input1_strides[2] + l * input1_strides[3]],
-                input2[i * input2_strides[0] + j * input2_strides[1] + k * input2_strides[2] + l * input2_strides[3]]);
+              for (size_t m = 0; m < output_dims[4]; m++) {
+                for (size_t n = 0; n < output_dims[5]; n++) {
+                  output_ref[i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5]] = Compute(
+                    input1[i * input1_strides[0] + j * input1_strides[1] + k * input1_strides[2] + l * input1_strides[3] + m * input1_strides[4] + n * input1_strides[5]],
+                    input2[i * input2_strides[0] + j * input2_strides[1] + k * input2_strides[2] + l * input2_strides[3] + m * input2_strides[4] + n * input2_strides[5]]);
+                }
+              }
             }
           }
         }
@@ -253,10 +257,14 @@ class BinaryElementwiseOperatorTester {
         for (size_t j = 0; j < output_dims[1]; j++) {
           for (size_t k = 0; k < output_dims[2]; k++) {
             for (size_t l = 0; l < output_dims[3]; l++) {
-              const size_t index =
-                i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3];
-              ASSERT_NEAR(output[index], output_ref[index], 1.0e-6f * std::abs(output_ref[index]))
-                << "(i, j, k, l) = (" << i << ", " << j << ", " << k << ", " << l << ")";
+              for (size_t m = 0; m < output_dims[4]; m++) {
+                for (size_t n = 0; n < output_dims[5]; n++) {
+                  const size_t index =
+                    i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
+                  ASSERT_NEAR(output[index], output_ref[index], 1.0e-6f * std::abs(output_ref[index]))
+                    << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")";
+                }
+              }
             }
           }
         }

@@ -25,7 +25,7 @@ extern "C" {
 #define XNN_EXTRA_BYTES 16
 
 /// Maximum number of dimensions in tensor shape.
-#define XNN_MAX_TENSOR_DIMS 4
+#define XNN_MAX_TENSOR_DIMS 6
 
 /// The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
 #define XNN_FLAG_DEPTHWISE_CONVOLUTION 0x00000001

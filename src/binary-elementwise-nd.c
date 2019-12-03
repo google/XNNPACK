@@ -120,11 +120,11 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
     return xnn_status_uninitialized;
   }
 
-  if (max(num_input1_dims, num_input2_dims) > 4) {
+  if (max(num_input1_dims, num_input2_dims) > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
       "failed to setup Add/Multiply operator with %zu and %zu dimensions in input shapes: "
-      "the number of input dimensions must not exceed 4",
-      num_input1_dims, num_input2_dims);
+      "the number of input dimensions must not exceed %d",
+      num_input1_dims, num_input2_dims, XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
   }
 
@@ -251,11 +251,13 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
     y_stride *= compressed_output_shape[i];
   }
 
-  binary_elementwise_op->compute.type = xnn_parallelization_type_3d_tile_2d;
-  binary_elementwise_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_elementwise_binary_3d;
-  binary_elementwise_op->compute.range[0] = compressed_output_shape[3];
-  binary_elementwise_op->compute.range[1] = compressed_output_shape[2];
-  binary_elementwise_op->compute.range[2] = compressed_output_shape[1];
+  binary_elementwise_op->compute.type = xnn_parallelization_type_5d_tile_2d;
+  binary_elementwise_op->compute.task_5d_tile_2d = (pthreadpool_task_5d_tile_2d_t) xnn_compute_elementwise_binary_5d;
+  binary_elementwise_op->compute.range[0] = compressed_output_shape[5];
+  binary_elementwise_op->compute.range[1] = compressed_output_shape[4];
+  binary_elementwise_op->compute.range[2] = compressed_output_shape[3];
+  binary_elementwise_op->compute.range[3] = compressed_output_shape[2];
+  binary_elementwise_op->compute.range[4] = compressed_output_shape[1];
   binary_elementwise_op->compute.tile[0] = 1;
   binary_elementwise_op->compute.tile[1] = 1;
   binary_elementwise_op->state = xnn_run_state_ready;

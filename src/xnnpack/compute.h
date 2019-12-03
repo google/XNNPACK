@@ -587,9 +587,9 @@ struct elementwise_binary_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_elementwise_binary_3d(
+  XNN_PRIVATE void xnn_compute_elementwise_binary_5d(
       const struct elementwise_binary_context context[restrict static 1],
-      size_t i, size_t j, size_t k, size_t j_range, size_t k_range);
+      size_t i, size_t j, size_t k, size_t l, size_t m, size_t l_range, size_t m_range);
 #endif
 
 struct channel_shuffle_context {
