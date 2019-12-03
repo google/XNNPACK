@@ -53,6 +53,7 @@ OPERATOR_SRCS = [
     "src/add-nc.c",
     "src/argmax-pooling-nhwc.c",
     "src/average-pooling-nhwc.c",
+    "src/binary-elementwise-nd.c",
     "src/channel-pad-nc.c",
     "src/channel-shuffle-nc.c",
     "src/clamp-nc.c",
@@ -65,7 +66,6 @@ OPERATOR_SRCS = [
     "src/hardswish-nc.c",
     "src/leaky-relu-nc.c",
     "src/max-pooling-nhwc.c",
-    "src/multiply-nd.c",
     "src/prelu-nc.c",
     "src/resize-bilinear-nhwc.c",
     "src/sigmoid-nc.c",
@@ -2024,6 +2024,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "add_nd_test",
+    srcs = [
+        "test/add-nd.cc",
+        "test/binary-elementwise-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "argmax_pooling_nhwc_test",
     srcs = [
         "test/argmax-pooling-nhwc.cc",
@@ -2152,8 +2161,8 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "multiply_nd_test",
     srcs = [
+        "test/binary-elementwise-operator-tester.h",
         "test/multiply-nd.cc",
-        "test/multiply-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )

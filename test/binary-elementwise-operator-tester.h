@@ -21,9 +21,15 @@
 #include <xnnpack.h>
 
 
-class MultiplyOperatorTester {
+class BinaryElementwiseOperatorTester {
  public:
-  inline MultiplyOperatorTester& input1_shape(std::initializer_list<size_t> input1_shape) {
+  enum class OperationType {
+    Unknown,
+    Add,
+    Multiply,
+  };
+
+  inline BinaryElementwiseOperatorTester& input1_shape(std::initializer_list<size_t> input1_shape) {
     assert(input1_shape.size() <= XNN_MAX_TENSOR_DIMS);
     this->input1_shape_ = std::vector<size_t>(input1_shape);
     return *this;
@@ -46,7 +52,7 @@ class MultiplyOperatorTester {
       this->input1_shape_.begin(), this->input1_shape_.end(), size_t(1), std::multiplies<size_t>());
   }
 
-  inline MultiplyOperatorTester& input2_shape(std::initializer_list<size_t> input2_shape) {
+  inline BinaryElementwiseOperatorTester& input2_shape(std::initializer_list<size_t> input2_shape) {
     assert(input2_shape.size() <= XNN_MAX_TENSOR_DIMS);
     this->input2_shape_ = std::vector<size_t>(input2_shape);
     return *this;
@@ -69,7 +75,7 @@ class MultiplyOperatorTester {
       this->input2_shape_.begin(), this->input2_shape_.end(), size_t(1), std::multiplies<size_t>());
   }
 
-  inline MultiplyOperatorTester& qmin(uint8_t qmin) {
+  inline BinaryElementwiseOperatorTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
@@ -78,7 +84,7 @@ class MultiplyOperatorTester {
     return this->qmin_;
   }
 
-  inline MultiplyOperatorTester& qmax(uint8_t qmax) {
+  inline BinaryElementwiseOperatorTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
@@ -87,7 +93,16 @@ class MultiplyOperatorTester {
     return this->qmax_;
   }
 
-  inline MultiplyOperatorTester& iterations(size_t iterations) {
+  inline BinaryElementwiseOperatorTester& operation_type(OperationType operation_type) {
+    this->operation_type_ = operation_type;
+    return *this;
+  }
+
+  inline OperationType operation_type() const {
+    return this->operation_type_;
+  }
+
+  inline BinaryElementwiseOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -96,7 +111,20 @@ class MultiplyOperatorTester {
     return this->iterations_;
   }
 
+  float Compute(float a, float b) const {
+    switch (operation_type()) {
+      case OperationType::Add:
+        return a + b;
+      case OperationType::Multiply:
+        return a * b;
+      default:
+        return std::nanf("");
+    }
+  }
+
   void TestF32() const {
+    ASSERT_NE(operation_type(), OperationType::Unknown);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
@@ -147,9 +175,9 @@ class MultiplyOperatorTester {
         for (size_t j = 0; j < output_dims[1]; j++) {
           for (size_t k = 0; k < output_dims[2]; k++) {
             for (size_t l = 0; l < output_dims[3]; l++) {
-              output_ref[i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3]] =
-                input1[i * input1_strides[0] + j * input1_strides[1] + k * input1_strides[2] + l * input1_strides[3]] *
-                input2[i * input2_strides[0] + j * input2_strides[1] + k * input2_strides[2] + l * input2_strides[3]];
+              output_ref[i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3]] = Compute(
+                input1[i * input1_strides[0] + j * input1_strides[1] + k * input1_strides[2] + l * input1_strides[3]],
+                input2[i * input2_strides[0] + j * input2_strides[1] + k * input2_strides[2] + l * input2_strides[3]]);
             }
           }
         }
@@ -165,31 +193,60 @@ class MultiplyOperatorTester {
         output_value = std::min(std::max(output_value, output_min), output_max);
       }
 
-      // Create, setup, run, and destroy Multiply operator.
+      // Create, setup, run, and destroy a binary elementwise operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-      xnn_operator_t multiply_op = nullptr;
+      xnn_operator_t binary_elementwise_op = nullptr;
+
+      switch (operation_type()) {
+        case OperationType::Add:
+          ASSERT_EQ(xnn_status_success,
+            xnn_create_add_nd_f32(
+              output_min, output_max,
+              0, &binary_elementwise_op));
+          break;
+        case OperationType::Multiply:
+          ASSERT_EQ(xnn_status_success,
+            xnn_create_multiply_nd_f32(
+              output_min, output_max,
+              0, &binary_elementwise_op));
+          break;
+        default:
+          FAIL() << "Unsupported operation type";
+      }
+      ASSERT_NE(nullptr, binary_elementwise_op);
+
+      // Smart pointer to automatically delete binary_elementwise_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_binary_elementwise_op(binary_elementwise_op, xnn_delete_operator);
+
+      switch (operation_type()) {
+        case OperationType::Add:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_add_nd_f32(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Multiply:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_multiply_nd_f32(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        default:
+          FAIL() << "Unsupported operation type";
+      }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_multiply_nd_f32(
-          output_min, output_max,
-          0, &multiply_op));
-      ASSERT_NE(nullptr, multiply_op);
-
-      // Smart pointer to automatically delete multiply_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_multiply_op(multiply_op, xnn_delete_operator);
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_multiply_nd_f32(
-          multiply_op,
-          num_input1_dims(),
-          input1_shape().data(),
-          num_input2_dims(),
-          input2_shape().data(),
-          input1.data(), input2.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(multiply_op, nullptr /* thread pool */));
+        xnn_run_operator(binary_elementwise_op, nullptr /* thread pool */));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -212,5 +269,6 @@ class MultiplyOperatorTester {
   std::vector<size_t> input2_shape_;
   uint8_t qmin_{0};
   uint8_t qmax_{255};
+  OperationType operation_type_{OperationType::Unknown};
   size_t iterations_{5};
 };

@@ -8,135 +8,135 @@
 #include "binary-elementwise-operator-tester.h"
 
 
-TEST(MULTIPLY_ND_F32, vector_x_vector) {
+TEST(ADD_ND_F32, vector_x_vector) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2})
     .input2_shape({2})
     .iterations(1)
     .TestF32();
 }
 
-TEST(MULTIPLY_ND_F32, vector_x_scalar) {
+TEST(ADD_ND_F32, vector_x_scalar) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2})
     .iterations(1)
     .TestF32();
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2})
     .input2_shape({1})
     .iterations(1)
     .TestF32();
 }
 
-TEST(MULTIPLY_ND_F32, scalar_x_vector) {
+TEST(ADD_ND_F32, scalar_x_vector) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input2_shape({2})
     .iterations(1)
     .TestF32();
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({1})
     .input2_shape({2})
     .iterations(1)
     .TestF32();
 }
 
-TEST(MULTIPLY_ND_F32, matrix_x_matrix) {
+TEST(ADD_ND_F32, matrix_x_matrix) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2, 3})
     .input2_shape({2, 3})
     .iterations(1)
     .TestF32();
 }
 
-TEST(MULTIPLY_ND_F32, matrix_x_row) {
+TEST(ADD_ND_F32, matrix_x_row) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2, 3})
     .input2_shape({1, 3})
     .iterations(1)
     .TestF32();
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2, 3})
     .input2_shape({3})
     .iterations(1)
     .TestF32();
 }
 
-TEST(MULTIPLY_ND_F32, matrix_x_column) {
+TEST(ADD_ND_F32, matrix_x_column) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2, 3})
     .input2_shape({2, 1})
     .iterations(1)
     .TestF32();
 }
 
-TEST(MULTIPLY_ND_F32, matrix_x_scalar) {
+TEST(ADD_ND_F32, matrix_x_scalar) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2, 3})
     .input2_shape({1, 1})
     .iterations(1)
     .TestF32();
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2, 3})
     .input2_shape({1})
     .iterations(1)
     .TestF32();
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2, 3})
     .iterations(1)
     .TestF32();
 }
 
-TEST(MULTIPLY_ND_F32, row_x_matrix) {
+TEST(ADD_ND_F32, row_x_matrix) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({1, 3})
     .input2_shape({2, 3})
     .iterations(1)
     .TestF32();
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({3})
     .input2_shape({2, 3})
     .iterations(1)
     .TestF32();
 }
 
-TEST(MULTIPLY_ND_F32, column_x_matrix) {
+TEST(ADD_ND_F32, column_x_matrix) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({2, 1})
     .input2_shape({2, 3})
     .iterations(1)
     .TestF32();
 }
 
-TEST(MULTIPLY_ND_F32, scalar_x_matrix) {
+TEST(ADD_ND_F32, scalar_x_matrix) {
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({1, 1})
     .input2_shape({2, 3})
     .iterations(1)
     .TestF32();
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input1_shape({1})
     .input2_shape({2, 3})
     .iterations(1)
     .TestF32();
   BinaryElementwiseOperatorTester()
-    .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .operation_type(BinaryElementwiseOperatorTester::OperationType::Add)
     .input2_shape({2, 3})
     .iterations(1)
     .TestF32();

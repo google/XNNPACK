@@ -134,6 +134,7 @@ SET(XNNPACK_OPERATOR_SRCS
   src/add-nc.c
   src/argmax-pooling-nhwc.c
   src/average-pooling-nhwc.c
+  src/binary-elementwise-nd.c
   src/channel-pad-nc.c
   src/channel-shuffle-nc.c
   src/clamp-nc.c
@@ -146,7 +147,6 @@ SET(XNNPACK_OPERATOR_SRCS
   src/hardswish-nc.c
   src/leaky-relu-nc.c
   src/max-pooling-nhwc.c
-  src/multiply-nd.c
   src/prelu-nc.c
   src/resize-bilinear-nhwc.c
   src/sigmoid-nc.c
@@ -1019,6 +1019,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(add-nc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(add-nc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(add-nc-test add-nc-test)
+
+  ADD_EXECUTABLE(add-nd-test test/add-nd.cc)
+  SET_TARGET_PROPERTIES(add-nd-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(add-nd-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(add-nd-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(add-nd-test add-nd-test)
 
   ADD_EXECUTABLE(argmax-pooling-nhwc-test test/argmax-pooling-nhwc.cc)
   SET_TARGET_PROPERTIES(argmax-pooling-nhwc-test PROPERTIES

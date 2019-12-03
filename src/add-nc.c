@@ -345,7 +345,7 @@ enum xnn_status xnn_setup_add_nc_f32(
       .b = b,
       .y = sum,
       .params.f32 = add_op->f32_output_params,
-      .ukernel = xnn_params.f32.vadd,
+      .ukernel = xnn_params.f32.vadd.op_ukernel,
     };
     add_op->compute.type = xnn_parallelization_type_1d_tile_1d;
     add_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_add_contiguous;
@@ -361,7 +361,7 @@ enum xnn_status xnn_setup_add_nc_f32(
       .y_stride = sum_stride * sizeof(float),
       .n = channels * sizeof(float),
       .params.f32 = add_op->f32_output_params,
-      .ukernel = xnn_params.f32.vadd,
+      .ukernel = xnn_params.f32.vadd.op_ukernel,
     };
     add_op->compute.type = xnn_parallelization_type_1d_tile_1d;
     add_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_add_strided;

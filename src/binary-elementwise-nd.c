@@ -17,17 +17,18 @@
 #include <xnnpack/params.h>
 
 
-enum xnn_status xnn_create_multiply_nd_f32(
+static enum xnn_status create_binary_elementwise_nd_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_operator_t* multiply_op_out)
+    enum xnn_operator_type operator_type,
+    xnn_operator_t* binary_elementwise_op_out)
 {
-  xnn_operator_t multiply_op = NULL;
+  xnn_operator_t binary_elementwise_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Multiply operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create Add/Multiply operator: XNNPACK is not initialized");
     goto error;
   }
 
@@ -35,48 +36,69 @@ enum xnn_status xnn_create_multiply_nd_f32(
 
   if (isnan(output_min)) {
     xnn_log_error(
-      "failed to create Multiply operator with NaN output lower bound: lower bound must be non-NaN");
+      "failed to create Add/Multiply operator with NaN output lower bound: lower bound must be non-NaN");
     goto error;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
-      "failed to create Multiply operator with NaN output upper bound: upper bound must be non-NaN");
+      "failed to create Add/Multiply operator with NaN output upper bound: upper bound must be non-NaN");
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Multiply operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      "failed to create Add/Multiply operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
       output_min, output_max);
     goto error;
   }
 
   status = xnn_status_out_of_memory;
 
-  multiply_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
-  if (multiply_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Multiply operator descriptor", sizeof(struct xnn_operator));
+  binary_elementwise_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
+  if (binary_elementwise_op == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for Add/Multiply operator descriptor", sizeof(struct xnn_operator));
     goto error;
   }
 
-  multiply_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
+  binary_elementwise_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
 
-  multiply_op->type = xnn_operator_type_multiply_nd_f32;
-  multiply_op->ukernel.type = xnn_ukernel_type_multiply;
+  binary_elementwise_op->type = operator_type;
+  binary_elementwise_op->ukernel.type = xnn_ukernel_type_binary_elementwise;
 
-  multiply_op->state = xnn_run_state_invalid;
+  binary_elementwise_op->state = xnn_run_state_invalid;
 
-  *multiply_op_out = multiply_op;
+  *binary_elementwise_op_out = binary_elementwise_op;
   return xnn_status_success;
 
 error:
-  xnn_delete_operator(multiply_op);
+  xnn_delete_operator(binary_elementwise_op);
   return status;
 }
 
-enum xnn_status xnn_setup_multiply_nd_f32(
-    xnn_operator_t multiply_op,
+enum xnn_status xnn_create_add_nd_f32(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* add_op_out)
+{
+  return create_binary_elementwise_nd_f32(
+    output_min, output_max, flags, xnn_operator_type_add_nd_f32, add_op_out);
+}
+
+enum xnn_status xnn_create_multiply_nd_f32(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* multiply_op_out)
+{
+  return create_binary_elementwise_nd_f32(
+    output_min, output_max, flags, xnn_operator_type_multiply_nd_f32, multiply_op_out);
+}
+
+static enum xnn_status setup_binary_elementwise_nd_f32(
+    xnn_operator_t binary_elementwise_op,
+    enum xnn_operator_type expected_operator_type,
     size_t num_input1_dims,
     const size_t* input1_shape,
     size_t num_input2_dims,
@@ -84,22 +106,23 @@ enum xnn_status xnn_setup_multiply_nd_f32(
     const float* input1,
     const float* input2,
     float* output,
-    pthreadpool_t threadpool)
+    const struct vbinary_parameters vbinary[restrict static 1],
+    size_t num_threads)
 {
-  if (multiply_op->type != xnn_operator_type_multiply_nd_f32) {
-    xnn_log_error("failed to setup Multiply (ND, F32) operator: operator type mismatch");
+  if (binary_elementwise_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup Add/Multiply (ND, F32) operator: operator type mismatch");
     return xnn_status_invalid_parameter;
   }
-  multiply_op->state = xnn_run_state_invalid;
+  binary_elementwise_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Multiply operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup Add/Multiply operator: XNNPACK is not initialized");
     return xnn_status_uninitialized;
   }
 
   if (max(num_input1_dims, num_input2_dims) > 4) {
     xnn_log_error(
-      "failed to setup Multiply operator with %zu and %zu dimensions in input shapes: "
+      "failed to setup Add/Multiply operator with %zu and %zu dimensions in input shapes: "
       "the number of input dimensions must not exceed 4",
       num_input1_dims, num_input2_dims);
     return xnn_status_unsupported_parameter;
@@ -107,14 +130,14 @@ enum xnn_status xnn_setup_multiply_nd_f32(
 
   for (size_t i = 0; i < num_input1_dims; i++) {
     if (input1_shape[i] == 0) {
-      xnn_log_error("failed to setup Multiply operator: shape dimension #%zu of input #1 is zero", i);
+      xnn_log_error("failed to setup Add/Multiply operator: shape dimension #%zu of input #1 is zero", i);
       return xnn_status_invalid_parameter;
     }
   }
 
   for (size_t i = 0; i < num_input2_dims; i++) {
     if (input2_shape[i] == 0) {
-      xnn_log_error("failed to setup Multiply operator: shape dimension #%zu of input #2 is zero", i);
+      xnn_log_error("failed to setup Add/Multiply operator: shape dimension #%zu of input #2 is zero", i);
       return xnn_status_invalid_parameter;
     }
   }
@@ -166,7 +189,7 @@ enum xnn_status xnn_setup_multiply_nd_f32(
       compressed_input2_shape[num_compressed_dims - 1] *= input1_dim;
       compressed_output_shape[num_compressed_dims - 1] *= input1_dim;
     } else {
-      xnn_log_error("failed to setup Multiply operator: "
+      xnn_log_error("failed to setup Add/Multiply operator: "
         "shape dimension #%zu of input1 (%zu) does not match shape dimension #%zu of input2 (%zu)",
         num_input1_dims - i, input1_dim, num_input2_dims - i, input2_dim);
       return xnn_status_invalid_parameter;
@@ -194,48 +217,88 @@ enum xnn_status xnn_setup_multiply_nd_f32(
   }
   num_compressed_dims = max(num_compressed_dims, 1);
 
-  multiply_op->context.elementwise_binary = (struct elementwise_binary_context) {
+  binary_elementwise_op->context.elementwise_binary = (struct elementwise_binary_context) {
     .a = input1,
     .b = input2,
     .y = output,
     .elements = compressed_output_shape[0] * sizeof(float),
-    .params.f32 = multiply_op->f32_output_params,
+    .params.f32 = binary_elementwise_op->f32_output_params,
   };
   const size_t* compressed_a_shape = compressed_input1_shape;
   const size_t* compressed_b_shape = compressed_input2_shape;
   if (compressed_input1_shape[0] == 1) {
-    multiply_op->context.elementwise_binary.ukernel = xnn_params.f32.vmul.ropc_ukernel;
-    multiply_op->context.elementwise_binary.a = input2;
-    multiply_op->context.elementwise_binary.b = input1;
+    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->ropc_ukernel;
+    binary_elementwise_op->context.elementwise_binary.a = input2;
+    binary_elementwise_op->context.elementwise_binary.b = input1;
     compressed_a_shape = compressed_input2_shape;
     compressed_b_shape = compressed_input1_shape;
   } else if (compressed_input2_shape[0] == 1) {
-    multiply_op->context.elementwise_binary.ukernel = xnn_params.f32.vmul.opc_ukernel;
+    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->opc_ukernel;
   } else if (compressed_input1_shape[0] == compressed_input2_shape[0]) {
-    multiply_op->context.elementwise_binary.ukernel = xnn_params.f32.vmul.op_ukernel;
+    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->op_ukernel;
   }
   size_t a_stride = compressed_a_shape[0], b_stride = compressed_b_shape[0], y_stride = compressed_output_shape[0];
   for (size_t i = 1; i < num_compressed_dims; i++) {
     if (compressed_a_shape[i] != 1) {
-      multiply_op->context.elementwise_binary.a_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = a_stride * sizeof(float);
+      binary_elementwise_op->context.elementwise_binary.a_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = a_stride * sizeof(float);
     }
     if (compressed_b_shape[i] != 1) {
-      multiply_op->context.elementwise_binary.b_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = b_stride * sizeof(float);
+      binary_elementwise_op->context.elementwise_binary.b_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = b_stride * sizeof(float);
     }
-    multiply_op->context.elementwise_binary.y_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = y_stride * sizeof(float);
+    binary_elementwise_op->context.elementwise_binary.y_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = y_stride * sizeof(float);
     a_stride *= compressed_a_shape[i];
     b_stride *= compressed_b_shape[i];
     y_stride *= compressed_output_shape[i];
   }
 
-  multiply_op->compute.type = xnn_parallelization_type_3d_tile_2d;
-  multiply_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_elementwise_binary_3d;
-  multiply_op->compute.range[0] = compressed_output_shape[3];
-  multiply_op->compute.range[1] = compressed_output_shape[2];
-  multiply_op->compute.range[2] = compressed_output_shape[1];
-  multiply_op->compute.tile[0] = 1;
-  multiply_op->compute.tile[1] = 1;
-  multiply_op->state = xnn_run_state_ready;
+  binary_elementwise_op->compute.type = xnn_parallelization_type_3d_tile_2d;
+  binary_elementwise_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_elementwise_binary_3d;
+  binary_elementwise_op->compute.range[0] = compressed_output_shape[3];
+  binary_elementwise_op->compute.range[1] = compressed_output_shape[2];
+  binary_elementwise_op->compute.range[2] = compressed_output_shape[1];
+  binary_elementwise_op->compute.tile[0] = 1;
+  binary_elementwise_op->compute.tile[1] = 1;
+  binary_elementwise_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_add_nd_f32(
+    xnn_operator_t add_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f32(
+    add_op, xnn_operator_type_add_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f32.vadd,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_multiply_nd_f32(
+    xnn_operator_t multiply_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f32(
+    multiply_op, xnn_operator_type_multiply_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f32.vmul,
+    pthreadpool_get_threads_count(threadpool));
 }

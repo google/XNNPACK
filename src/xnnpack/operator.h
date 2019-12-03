@@ -22,6 +22,7 @@ enum xnn_ukernel_type {
   xnn_ukernel_type_add,
   xnn_ukernel_type_argmax_pooling,
   xnn_ukernel_type_average_pooling,
+  xnn_ukernel_type_binary_elementwise,
   xnn_ukernel_type_channel_shuffle,
   xnn_ukernel_type_clamp,
   xnn_ukernel_type_dconv2d_hwc2spchw,
@@ -32,7 +33,6 @@ enum xnn_ukernel_type {
   xnn_ukernel_type_igemm,
   xnn_ukernel_type_lut,
   xnn_ukernel_type_max_pooling,
-  xnn_ukernel_type_multiply,
   xnn_ukernel_type_pad,
   xnn_ukernel_type_pixelwise_average_pooling,
   xnn_ukernel_type_prelu,
@@ -47,6 +47,7 @@ enum xnn_ukernel_type {
 enum xnn_operator_type {
   xnn_operator_type_none = 0,
   xnn_operator_type_add_nc_f32,
+  xnn_operator_type_add_nd_f32,
   xnn_operator_type_add_nc_q8,
   xnn_operator_type_argmax_pooling_nhwc_f32,
   xnn_operator_type_average_pooling_nhwc_f32,

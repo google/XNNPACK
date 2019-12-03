@@ -1362,7 +1362,7 @@ struct xnn_parameters {
     xnn_univector_ukernel_function hswish;
     xnn_univector_ukernel_function sigmoid;
     struct prelu_parameters prelu;
-    xnn_vadd_ukernel_function vadd;
+    struct vbinary_parameters vadd;
     struct vbinary_parameters vmul;
     struct vmulcaddc_parameters vmulcaddc;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
