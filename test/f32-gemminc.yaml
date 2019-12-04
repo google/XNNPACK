@@ -201,6 +201,12 @@
   k-block: 4
 - name: xnn_f32_gemminc_ukernel_6x8s4__psimd
   k-block: 4
+- name: xnn_f32_gemminc_ukernel_1x4__wasm
+  k-block: 1
+- name: xnn_f32_gemminc_ukernel_2x4__wasm
+  k-block: 1
+- name: xnn_f32_gemminc_ukernel_4x4__wasm
+  k-block: 1
 - name: xnn_f32_gemminc_ukernel_1x4__scalar
   k-block: 1
 - name: xnn_f32_gemminc_ukernel_2x4__scalar

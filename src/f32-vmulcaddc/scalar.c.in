@@ -12,7 +12,9 @@ $ABC = "0123456789ABCDEFGHIJKLMN"
 #include <xnnpack/vmulcaddc.h>
 
 
-void xnn_f32_vmulcaddc_ukernel_c${CHANNEL_TILE}__scalar_${ROW_TILE}x(
+$MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
+$MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
+void xnn_f32_vmulcaddc_ukernel_c${CHANNEL_TILE}__${"wasm" if WASM else "scalar"}_${ROW_TILE}x(
     size_t rows,
     size_t channels,
     const float*restrict input,
@@ -69,11 +71,11 @@ void xnn_f32_vmulcaddc_ukernel_c${CHANNEL_TILE}__scalar_${ROW_TILE}x(
 
         $for M in range(ROW_TILE):
           $for C in range(CHANNEL_TILE):
-            vacc${M}x${ABC[C]} = math_max_f32(vacc${M}x${ABC[C]}, vmin);
+            vacc${M}x${ABC[C]} = ${MAX_F32}(vacc${M}x${ABC[C]}, vmin);
 
         $for M in range(ROW_TILE):
           $for C in range(CHANNEL_TILE):
-            vacc${M}x${ABC[C]} = math_min_f32(vacc${M}x${ABC[C]}, vmax);
+            vacc${M}x${ABC[C]} = ${MIN_F32}(vacc${M}x${ABC[C]}, vmax);
 
         $for M in range(ROW_TILE):
           $for C in range(CHANNEL_TILE):
@@ -95,10 +97,10 @@ void xnn_f32_vmulcaddc_ukernel_c${CHANNEL_TILE}__scalar_${ROW_TILE}x(
             vacc${M} = vacc${M} * vscale + vbias;
 
           $for M in range(ROW_TILE):
-            vacc${M} = math_max_f32(vacc${M}, vmin);
+            vacc${M} = ${MAX_F32}(vacc${M}, vmin);
 
           $for M in range(ROW_TILE):
-            vacc${M} = math_min_f32(vacc${M}, vmax);
+            vacc${M} = ${MIN_F32}(vacc${M}, vmax);
 
           $for M in range(ROW_TILE):
             *o${M}++ = vacc${M};
@@ -119,10 +121,10 @@ void xnn_f32_vmulcaddc_ukernel_c${CHANNEL_TILE}__scalar_${ROW_TILE}x(
           vacc${M} = vacc${M} * vscale + vbias;
 
         $for M in range(ROW_TILE):
-          vacc${M} = math_max_f32(vacc${M}, vmin);
+          vacc${M} = ${MAX_F32}(vacc${M}, vmin);
 
         $for M in range(ROW_TILE):
-          vacc${M} = math_min_f32(vacc${M}, vmax);
+          vacc${M} = ${MIN_F32}(vacc${M}, vmax);
 
         $for M in range(ROW_TILE):
           *o${M}++ = vacc${M};

@@ -13,7 +13,9 @@ $ABC = "0123456789ABCDEF"
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__scalar${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+$MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
+$MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
+void xnn_f32_dwconv_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${"wasm" if WASM else "scalar"}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -66,10 +68,10 @@ void xnn_f32_dwconv_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__scalar${"" if ACCU
             $ACC_SLICE *= 2
 
         $for C in range(CHANNEL_TILE):
-          float vacc${C} = math_max_f32(vacc${C}p0, vmin);
+          float vacc${C} = ${MAX_F32}(vacc${C}p0, vmin);
 
         $for C in range(CHANNEL_TILE):
-          vacc${C} = math_min_f32(vacc${C}, vmax);
+          vacc${C} = ${MIN_F32}(vacc${C}, vmax);
 
         $for C in range(CHANNEL_TILE):
           output[${C}] = vacc${C};
@@ -95,8 +97,8 @@ void xnn_f32_dwconv_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__scalar${"" if ACCU
                 vacc0p${A} = vacc0p${A} + vacc0p${A + ACC_SLICE};
             $ACC_SLICE *= 2
 
-        float vacc0 = math_max_f32(vacc0p0, vmin);
-        vacc0 = math_min_f32(vacc0, vmax);
+        float vacc0 = ${MAX_F32}(vacc0p0, vmin);
+        vacc0 = ${MIN_F32}(vacc0, vmax);
         *output++ = vacc0;
       }
     $else:
@@ -120,8 +122,8 @@ void xnn_f32_dwconv_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__scalar${"" if ACCU
               vacc0p${A} += vacc0p${A + ACC_STEP};
           $ACC_STEP *= 2
 
-        float vacc0 = math_max_f32(vacc0p0, vmin);
-        vacc0 = math_min_f32(vacc0, vmax);
+        float vacc0 = ${MAX_F32}(vacc0p0, vmin);
+        vacc0 = ${MIN_F32}(vacc0, vmax);
 
         *output++ = vacc0;
       } while (--c != 0);

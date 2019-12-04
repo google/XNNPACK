@@ -95,20 +95,37 @@ tools/xngen src/f32-dwconv/up-psimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D 
 tools/xngen src/f32-dwconv/up-psimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up8x25-psimd-acc2.c
 
 #################################### Scalar ###################################
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=4  -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up1x4-scalar.c
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=4  -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up1x4-scalar-acc2.c
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=4  -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up2x4-scalar.c
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=4  -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up2x4-scalar-acc2.c
+### Generic C micro-kernels
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=4  -D ACCUMULATORS=1 -D WASM=0 -o src/f32-dwconv/gen/up1x4-scalar.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=4  -D ACCUMULATORS=2 -D WASM=0 -o src/f32-dwconv/gen/up1x4-scalar-acc2.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=4  -D ACCUMULATORS=1 -D WASM=0 -o src/f32-dwconv/gen/up2x4-scalar.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=4  -D ACCUMULATORS=2 -D WASM=0 -o src/f32-dwconv/gen/up2x4-scalar-acc2.c
 
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up1x9-scalar.c
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up1x9-scalar-acc2.c
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9  -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up2x9-scalar.c
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9  -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up2x9-scalar-acc2.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D ACCUMULATORS=1 -D WASM=0 -o src/f32-dwconv/gen/up1x9-scalar.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D ACCUMULATORS=2 -D WASM=0 -o src/f32-dwconv/gen/up1x9-scalar-acc2.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9  -D ACCUMULATORS=1 -D WASM=0 -o src/f32-dwconv/gen/up2x9-scalar.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9  -D ACCUMULATORS=2 -D WASM=0 -o src/f32-dwconv/gen/up2x9-scalar-acc2.c
 
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up1x25-scalar.c
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up1x25-scalar-acc2.c
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up2x25-scalar.c
-tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/up2x25-scalar-acc2.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D WASM=0 -o src/f32-dwconv/gen/up1x25-scalar.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D WASM=0 -o src/f32-dwconv/gen/up1x25-scalar-acc2.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D WASM=0 -o src/f32-dwconv/gen/up2x25-scalar.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D WASM=0 -o src/f32-dwconv/gen/up2x25-scalar-acc2.c
+
+### WAsm-specific micro-kernels
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=4  -D ACCUMULATORS=1 -D WASM=1 -o src/f32-dwconv/gen/up1x4-wasm.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=4  -D ACCUMULATORS=2 -D WASM=1 -o src/f32-dwconv/gen/up1x4-wasm-acc2.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=4  -D ACCUMULATORS=1 -D WASM=1 -o src/f32-dwconv/gen/up2x4-wasm.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=4  -D ACCUMULATORS=2 -D WASM=1 -o src/f32-dwconv/gen/up2x4-wasm-acc2.c
+
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D ACCUMULATORS=1 -D WASM=1 -o src/f32-dwconv/gen/up1x9-wasm.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D ACCUMULATORS=2 -D WASM=1 -o src/f32-dwconv/gen/up1x9-wasm-acc2.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9  -D ACCUMULATORS=1 -D WASM=1 -o src/f32-dwconv/gen/up2x9-wasm.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9  -D ACCUMULATORS=2 -D WASM=1 -o src/f32-dwconv/gen/up2x9-wasm-acc2.c
+
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D WASM=1 -o src/f32-dwconv/gen/up1x25-wasm.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D WASM=1 -o src/f32-dwconv/gen/up1x25-wasm-acc2.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D WASM=1 -o src/f32-dwconv/gen/up2x25-wasm.c
+tools/xngen src/f32-dwconv/up-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D WASM=1 -o src/f32-dwconv/gen/up2x25-wasm-acc2.c
 
 ################################## Unit tests #################################
 tools/generate-dwconv-test.py --spec test/f32-dwconv.yaml --output test/f32-dwconv.cc

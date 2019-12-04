@@ -201,6 +201,33 @@
 #endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 
+#if XNN_ARCH_WASM
+  TEST(F32_HSWISH__WASM, n_eq_1) {
+    HSwishMicrokernelTester()
+      .n(1)
+      .Test(xnn_f32_hswish_ukernel__wasm, HSwishMicrokernelTester::Variant::Scalar);
+  }
+
+  TEST(F32_HSWISH__WASM, n_gt_1) {
+    for (size_t n = 2; n < 8; n++) {
+      HSwishMicrokernelTester()
+        .n(n)
+        .Test(xnn_f32_hswish_ukernel__wasm, HSwishMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_HSWISH__WASM, inplace) {
+    for (size_t n = 1; n < 32; n += 3) {
+      HSwishMicrokernelTester()
+        .iterations(1)
+        .n(n)
+        .inplace(true)
+        .Test(xnn_f32_hswish_ukernel__wasm, HSwishMicrokernelTester::Variant::Scalar);
+    }
+  }
+#endif  // XNN_ARCH_WASM
+
+
 TEST(F32_HSWISH__SCALAR, n_eq_1) {
   HSwishMicrokernelTester()
     .n(1)

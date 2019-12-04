@@ -5,28 +5,53 @@
 # LICENSE file in the root directory of this source tree.
 
 #################################### Scalar ###################################
-tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=1 -o src/f32-vbinary/gen/vadd-scalar-x1.c
-tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=2 -o src/f32-vbinary/gen/vadd-scalar-x2.c
-tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=4 -o src/f32-vbinary/gen/vadd-scalar-x4.c
-tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=1 -o src/f32-vbinary/gen/vmul-scalar-x1.c
-tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=2 -o src/f32-vbinary/gen/vmul-scalar-x2.c
-tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=4 -o src/f32-vbinary/gen/vmul-scalar-x4.c
-tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=1 -o src/f32-vbinary/gen/vsub-scalar-x1.c
-tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=2 -o src/f32-vbinary/gen/vsub-scalar-x2.c
-tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=4 -o src/f32-vbinary/gen/vsub-scalar-x4.c
+### Generic C micro-kernels
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=1 -D WASM=0 -o src/f32-vbinary/gen/vadd-scalar-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=2 -D WASM=0 -o src/f32-vbinary/gen/vadd-scalar-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=4 -D WASM=0 -o src/f32-vbinary/gen/vadd-scalar-x4.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=1 -D WASM=0 -o src/f32-vbinary/gen/vmul-scalar-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=2 -D WASM=0 -o src/f32-vbinary/gen/vmul-scalar-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=4 -D WASM=0 -o src/f32-vbinary/gen/vmul-scalar-x4.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=1 -D WASM=0 -o src/f32-vbinary/gen/vsub-scalar-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=2 -D WASM=0 -o src/f32-vbinary/gen/vsub-scalar-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=4 -D WASM=0 -o src/f32-vbinary/gen/vsub-scalar-x4.c
 
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD -D BATCH_TILE=1 -o src/f32-vbinary/gen/vaddc-scalar-x1.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD -D BATCH_TILE=2 -o src/f32-vbinary/gen/vaddc-scalar-x2.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD -D BATCH_TILE=4 -o src/f32-vbinary/gen/vaddc-scalar-x4.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL -D BATCH_TILE=1 -o src/f32-vbinary/gen/vmulc-scalar-x1.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL -D BATCH_TILE=2 -o src/f32-vbinary/gen/vmulc-scalar-x2.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL -D BATCH_TILE=4 -o src/f32-vbinary/gen/vmulc-scalar-x4.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB -D BATCH_TILE=1 -o src/f32-vbinary/gen/vsubc-scalar-x1.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB -D BATCH_TILE=2 -o src/f32-vbinary/gen/vsubc-scalar-x2.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB -D BATCH_TILE=4 -o src/f32-vbinary/gen/vsubc-scalar-x4.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=1 -o src/f32-vbinary/gen/vrsubc-scalar-x1.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=2 -o src/f32-vbinary/gen/vrsubc-scalar-x2.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=4 -o src/f32-vbinary/gen/vrsubc-scalar-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=1 -D WASM=0 -o src/f32-vbinary/gen/vaddc-scalar-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=2 -D WASM=0 -o src/f32-vbinary/gen/vaddc-scalar-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=4 -D WASM=0 -o src/f32-vbinary/gen/vaddc-scalar-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL  -D BATCH_TILE=1 -D WASM=0 -o src/f32-vbinary/gen/vmulc-scalar-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL  -D BATCH_TILE=2 -D WASM=0 -o src/f32-vbinary/gen/vmulc-scalar-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL  -D BATCH_TILE=4 -D WASM=0 -o src/f32-vbinary/gen/vmulc-scalar-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=1 -D WASM=0 -o src/f32-vbinary/gen/vsubc-scalar-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=2 -D WASM=0 -o src/f32-vbinary/gen/vsubc-scalar-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=4 -D WASM=0 -o src/f32-vbinary/gen/vsubc-scalar-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=1 -D WASM=0 -o src/f32-vbinary/gen/vrsubc-scalar-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=2 -D WASM=0 -o src/f32-vbinary/gen/vrsubc-scalar-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=4 -D WASM=0 -o src/f32-vbinary/gen/vrsubc-scalar-x4.c
+
+### WAsm-specific micro-kernels
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=1 -D WASM=1 -o src/f32-vbinary/gen/vadd-wasm-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=2 -D WASM=1 -o src/f32-vbinary/gen/vadd-wasm-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=4 -D WASM=1 -o src/f32-vbinary/gen/vadd-wasm-x4.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=1 -D WASM=1 -o src/f32-vbinary/gen/vmul-wasm-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=2 -D WASM=1 -o src/f32-vbinary/gen/vmul-wasm-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=4 -D WASM=1 -o src/f32-vbinary/gen/vmul-wasm-x4.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=1 -D WASM=1 -o src/f32-vbinary/gen/vsub-wasm-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=2 -D WASM=1 -o src/f32-vbinary/gen/vsub-wasm-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=4 -D WASM=1 -o src/f32-vbinary/gen/vsub-wasm-x4.c
+
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=1 -D WASM=1 -o src/f32-vbinary/gen/vaddc-wasm-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=2 -D WASM=1 -o src/f32-vbinary/gen/vaddc-wasm-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=4 -D WASM=1 -o src/f32-vbinary/gen/vaddc-wasm-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL  -D BATCH_TILE=1 -D WASM=1 -o src/f32-vbinary/gen/vmulc-wasm-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL  -D BATCH_TILE=2 -D WASM=1 -o src/f32-vbinary/gen/vmulc-wasm-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL  -D BATCH_TILE=4 -D WASM=1 -o src/f32-vbinary/gen/vmulc-wasm-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=1 -D WASM=1 -o src/f32-vbinary/gen/vsubc-wasm-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=2 -D WASM=1 -o src/f32-vbinary/gen/vsubc-wasm-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=4 -D WASM=1 -o src/f32-vbinary/gen/vsubc-wasm-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=1 -D WASM=1 -o src/f32-vbinary/gen/vrsubc-wasm-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=2 -D WASM=1 -o src/f32-vbinary/gen/vrsubc-wasm-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=4 -D WASM=1 -o src/f32-vbinary/gen/vrsubc-wasm-x4.c
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=ADD -D BATCH_TILE=4 -o src/f32-vbinary/gen/vadd-neon-x4.c

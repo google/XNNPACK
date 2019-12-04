@@ -2811,6 +2811,513 @@
 #endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
 
 
+#if XNN_ARCH_WASM
+  TEST(F32_PAVGPOOL_UP9__WASM, kc_eq_1_fulltile) {
+    auto tester = AvgPoolMicrokernelTester()
+      .mr(9)
+      .kc(1);
+    for (size_t kh = 1; kh <= tester.mr(); kh++) {
+      for (size_t kw = 1; kw <= tester.mr(); kw++) {
+        if (kh * kw == tester.mr()) {
+          tester
+            .kh(kh)
+            .kw(kw)
+            .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_UP9__WASM, kc_eq_1_subtile) {
+    auto tester = AvgPoolMicrokernelTester()
+      .mr(9)
+      .kc(1);
+    for (size_t ks = 2; ks < tester.mr(); ks++) {
+      for (size_t kh = 1; kh <= ks; kh++) {
+        for (size_t kw = 1; kw <= ks; kw++) {
+          if (kh * kw == ks) {
+            tester
+              .kh(kh)
+              .kw(kw)
+              .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_UP9__WASM, kc_gt_1_fulltile) {
+    auto tester = AvgPoolMicrokernelTester()
+      .mr(9);
+    for (size_t kh = 1; kh <= tester.mr(); kh++) {
+      for (size_t kw = 1; kw <= tester.mr(); kw++) {
+        if (kh * kw == tester.mr()) {
+          for (size_t kc = 2; kc < 8; kc++) {
+            tester
+              .kh(kh)
+              .kw(kw)
+              .kc(kc)
+              .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_UP9__WASM, kc_gt_1_subtile) {
+    auto tester = AvgPoolMicrokernelTester()
+      .mr(9)
+      .iterations(3);
+    for (size_t ks = 2; ks < tester.mr(); ks++) {
+      for (size_t kh = 1; kh <= ks; kh++) {
+        for (size_t kw = 1; kw <= ks; kw++) {
+          if (kh * kw == ks) {
+            for (size_t kc = 2; kc < 8; kc++) {
+              tester
+                .kh(kh)
+                .kw(kw)
+                .kc(kc)
+                .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_UP9__WASM, kc_gt_1_fulltile_with_x_stride) {
+    auto tester = AvgPoolMicrokernelTester()
+      .mr(9)
+      .iterations(3);
+    for (size_t kh = 1; kh <= tester.mr(); kh++) {
+      for (size_t kw = 1; kw <= tester.mr(); kw++) {
+        if (kh * kw == tester.mr()) {
+          for (size_t kc = 2; kc < 8; kc++) {
+            tester
+              .kh(kh)
+              .kw(kw)
+              .kc(kc)
+              .x_stride(23)
+              .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_UP9__WASM, qmax) {
+    for (size_t n = 1; n <= 5; n += 2) {
+      for (size_t kc = 1; kc < 8; kc += 3) {
+        AvgPoolMicrokernelTester()
+          .mr(9)
+          .n(n)
+          .kh(3)
+          .kw(3)
+          .kc(kc)
+          .qmax(128)
+          .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_UP9__WASM, qmin) {
+    for (size_t n = 1; n <= 5; n += 2) {
+      for (size_t kc = 1; kc < 8; kc += 3) {
+        AvgPoolMicrokernelTester()
+          .mr(9)
+          .n(n)
+          .kh(3)
+          .kw(3)
+          .kc(kc)
+          .qmin(128)
+          .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_UP9__WASM, small_n) {
+    for (size_t n = 2; n < 5; n++) {
+      for (size_t ks : std::vector<size_t>{{2, 3}}) {
+        for (size_t kc = 1; kc < 8; kc += 3) {
+          AvgPoolMicrokernelTester()
+            .mr(9)
+            .n(n)
+            .kh(ks)
+            .kw(ks)
+            .kc(kc)
+            .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_UP9__WASM, small_n_with_x_stride) {
+    for (size_t n = 2; n < 5; n++) {
+      for (size_t ks : std::vector<size_t>{{2, 3}}) {
+        for (size_t kc = 1; kc < 8; kc += 3) {
+          AvgPoolMicrokernelTester()
+            .mr(9)
+            .n(n)
+            .kh(ks)
+            .kw(ks)
+            .kc(kc)
+            .x_stride(29)
+            .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_UP9__WASM, small_n_with_y_stride) {
+    for (size_t n = 2; n < 5; n++) {
+      for (size_t ks : std::vector<size_t>{{2, 3}}) {
+        for (size_t kc = 1; kc < 8; kc += 3) {
+          AvgPoolMicrokernelTester()
+            .mr(9)
+            .n(n)
+            .kh(ks)
+            .kw(ks)
+            .kc(kc)
+            .y_stride(31)
+            .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_UP9__WASM, small_n_with_s) {
+    for (size_t n = 2; n < 5; n++) {
+      for (size_t ks : std::vector<size_t>{{2, 3}}) {
+        for (size_t kc = 1; kc < 8; kc += 3) {
+          for (size_t s = 2; s <= ks; s++) {
+            AvgPoolMicrokernelTester()
+              .mr(9)
+              .n(n)
+              .kh(ks)
+              .kw(ks)
+              .kc(kc)
+              .s(s)
+              .Test(xnn_f32_pavgpool_ukernel_up9__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, kc_eq_1_twopass_fulltile) {
+    auto tester = AvgPoolMicrokernelTester()
+      .mr(9)
+      .qr(8)
+      .kc(1);
+    const size_t ks = tester.mr() + tester.qr();
+    for (size_t kh = 1; kh <= ks; kh++) {
+      for (size_t kw = 1; kw <= ks; kw++) {
+        if (kh * kw == ks) {
+          tester
+            .kh(kh)
+            .kw(kw)
+            .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, kc_eq_1_twopass_subtile) {
+    auto tester = AvgPoolMicrokernelTester()
+      .mr(9)
+      .qr(8)
+      .kc(1);
+    for (size_t ks = 10; ks < tester.mr() + tester.qr(); ks++) {
+      tester
+        .kh(ks)
+        .kw(1)
+        .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+      tester
+        .kh(1)
+        .kw(ks)
+        .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, kc_eq_1_multipass_fulltile) {
+    for (size_t ks : std::vector<size_t>{{25, 49}}) {
+      auto tester = AvgPoolMicrokernelTester()
+        .mr(9)
+        .qr(8)
+        .kc(1);
+      for (size_t kh = 1; kh <= ks; kh++) {
+        for (size_t kw = 1; kw <= ks; kw++) {
+          if (kh * kw == ks) {
+            tester
+              .kh(kh)
+              .kw(kw)
+              .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, kc_eq_1_multipass_subtile) {
+    for (size_t ks_max : std::vector<size_t>{{25, 49}}) {
+      auto tester = AvgPoolMicrokernelTester()
+        .mr(9)
+        .qr(8)
+        .kc(1);
+      for (size_t ks = ks_max - tester.qr() + 1; ks < ks_max; ks++) {
+        tester
+          .kh(ks)
+          .kw(1)
+          .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        tester
+          .kh(1)
+          .kw(ks)
+          .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, kc_gt_1_twopass_fulltile) {
+    auto tester = AvgPoolMicrokernelTester()
+      .mr(9)
+      .qr(8)
+      .iterations(3);
+    const size_t ks = tester.mr() + tester.qr();
+    for (size_t kh = 1; kh <= ks; kh++) {
+      for (size_t kw = 1; kw <= ks; kw++) {
+        if (kh * kw == ks) {
+          for (size_t kc = 2; kc < 8; kc++) {
+            tester
+              .kh(kh)
+              .kw(kw)
+              .kc(kc)
+              .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, kc_gt_1_twopass_subtile) {
+    auto tester = AvgPoolMicrokernelTester()
+      .mr(9)
+      .qr(8)
+      .iterations(3);
+    for (size_t ks = 10; ks < tester.mr() + tester.qr(); ks++) {
+      for (size_t kc = 2; kc < 8; kc++) {
+        tester
+          .kc(kc)
+          .kh(ks)
+          .kw(1)
+          .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        tester
+          .kc(kc)
+          .kh(1)
+          .kw(ks)
+          .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, kc_gt_1_twopass_fulltile_with_x_stride) {
+    auto tester = AvgPoolMicrokernelTester()
+      .mr(9)
+      .qr(8)
+      .iterations(3);
+    const size_t ks = tester.mr() + tester.qr();
+    for (size_t kh = 1; kh <= ks; kh++) {
+      for (size_t kw = 1; kw <= ks; kw++) {
+        if (kh * kw == ks) {
+          for (size_t kc = 2; kc < 8; kc++) {
+            tester
+              .kh(kh)
+              .kw(kw)
+              .kc(kc)
+              .x_stride(23)
+              .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, kc_gt_1_multipass_fulltile) {
+    for (size_t ks : std::vector<size_t>{{25, 49}}) {
+      auto tester = AvgPoolMicrokernelTester()
+        .mr(9)
+        .qr(8)
+        .iterations(3);
+      for (size_t kh = 1; kh <= ks; kh++) {
+        for (size_t kw = 1; kw <= ks; kw++) {
+          if (kh * kw == ks) {
+            for (size_t kc = 2; kc < 8; kc++) {
+              tester
+                .kh(kh)
+                .kw(kw)
+                .kc(kc)
+                .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, kc_gt_1_multipass_subtile) {
+    for (size_t ks_max : std::vector<size_t>{{25, 49}}) {
+      auto tester = AvgPoolMicrokernelTester()
+        .mr(9)
+        .qr(8)
+        .iterations(3);
+      for (size_t ks = ks_max - tester.qr() + 1; ks < ks_max; ks++) {
+        for (size_t kc = 2; kc < 8; kc++) {
+          tester
+            .kc(kc)
+            .kh(ks)
+            .kw(1)
+            .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+          tester
+            .kc(kc)
+            .kh(1)
+            .kw(ks)
+            .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, kc_gt_1_multipass_fulltile_with_x_stride) {
+    for (size_t ks : std::vector<size_t>{{25, 49}}) {
+      auto tester = AvgPoolMicrokernelTester()
+        .mr(9)
+        .qr(8)
+        .iterations(3);
+      for (size_t kh = 1; kh <= ks; kh++) {
+        for (size_t kw = 1; kw <= ks; kw++) {
+          if (kh * kw == ks) {
+            for (size_t kc = 2; kc < 8; kc++) {
+              tester
+                .kh(kh)
+                .kw(kw)
+                .kc(kc)
+                .x_stride(23)
+                .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, qmax) {
+    for (size_t n = 1; n <= 5; n += 2) {
+      for (size_t kc = 1; kc < 8; kc += 3) {
+        AvgPoolMicrokernelTester()
+          .mr(9)
+          .qr(8)
+          .n(n)
+          .kh(5)
+          .kw(5)
+          .kc(kc)
+          .qmax(128)
+          .iterations(3)
+          .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, qmin) {
+    for (size_t n = 1; n <= 5; n += 2) {
+      for (size_t kc = 1; kc < 8; kc += 3) {
+        AvgPoolMicrokernelTester()
+          .mr(9)
+          .qr(8)
+          .n(n)
+          .kh(5)
+          .kw(5)
+          .kc(kc)
+          .qmin(128)
+          .iterations(3)
+          .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, small_n) {
+    for (size_t n = 2; n < 5; n++) {
+      for (size_t ks : std::vector<size_t>{{5, 7}}) {
+        for (size_t kc = 1; kc < 8; kc += 3) {
+          AvgPoolMicrokernelTester()
+            .mr(9)
+            .qr(8)
+            .n(n)
+            .kh(ks)
+            .kw(ks)
+            .kc(kc)
+            .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, small_n_with_x_stride) {
+    for (size_t n = 2; n < 5; n++) {
+      for (size_t ks : std::vector<size_t>{{5, 7}}) {
+        for (size_t kc = 1; kc < 8; kc += 3) {
+          AvgPoolMicrokernelTester()
+            .mr(9)
+            .qr(8)
+            .n(n)
+            .kh(ks)
+            .kw(ks)
+            .kc(kc)
+            .x_stride(29)
+            .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, small_n_with_y_stride) {
+    for (size_t n = 2; n < 5; n++) {
+      for (size_t ks : std::vector<size_t>{{5, 7}}) {
+        for (size_t kc = 1; kc < 8; kc += 3) {
+          AvgPoolMicrokernelTester()
+            .mr(9)
+            .qr(8)
+            .n(n)
+            .kh(ks)
+            .kw(ks)
+            .kc(kc)
+            .y_stride(31)
+            .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_PAVGPOOL_MP9P8Q__WASM, small_n_with_s) {
+    for (size_t n = 2; n < 5; n++) {
+      for (size_t ks : std::vector<size_t>{{5, 7}}) {
+        for (size_t s = 2; s <= 5; s++) {
+          for (size_t kc = 1; kc < 8; kc += 3) {
+            AvgPoolMicrokernelTester()
+              .mr(9)
+              .qr(8)
+              .n(n)
+              .kh(ks)
+              .kw(ks)
+              .kc(kc)
+              .s(s)
+              .Test(xnn_f32_pavgpool_ukernel_mp9p8q__wasm, AvgPoolMicrokernelTester::Variant::Scalar);
+          }
+        }
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASM
+
+
 TEST(F32_PAVGPOOL_UP9__SCALAR, kc_eq_1_fulltile) {
   auto tester = AvgPoolMicrokernelTester()
     .mr(9)

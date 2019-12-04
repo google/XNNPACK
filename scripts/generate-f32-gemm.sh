@@ -5,16 +5,29 @@
 # LICENSE file in the root directory of this source tree.
 
 #################################### Scalar ###################################
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D INC=0 -o src/f32-gemm/gen/1x4-scalar.c
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D INC=1 -o src/f32-gemm/gen-inc/1x4-scalar.c
+### Generic C micro-kernels
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -o src/f32-gemm/gen/1x4-scalar.c
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=1 -o src/f32-gemm/gen-inc/1x4-scalar.c
 
-tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D INC=0 -o src/f32-gemm/gen/2x4-scalar.c
-tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D INC=1 -o src/f32-gemm/gen-inc/2x4-scalar.c
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -o src/f32-gemm/gen/2x4-scalar.c
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=1 -o src/f32-gemm/gen-inc/2x4-scalar.c
 
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D INC=0 -o src/f32-gemm/gen/4x2-scalar.c
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D INC=0 -o src/f32-gemm/gen/4x2-scalar.c
 
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D INC=0 -o src/f32-gemm/gen/4x4-scalar.c
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D INC=1 -o src/f32-gemm/gen-inc/4x4-scalar.c
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=0 -o src/f32-gemm/gen/4x4-scalar.c
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=1 -o src/f32-gemm/gen-inc/4x4-scalar.c
+
+### WAsm-specific micro-kernels
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D INC=0 -o src/f32-gemm/gen/1x4-wasm.c
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D INC=1 -o src/f32-gemm/gen-inc/1x4-wasm.c
+
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D INC=0 -o src/f32-gemm/gen/2x4-wasm.c
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D INC=1 -o src/f32-gemm/gen-inc/2x4-wasm.c
+
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=1 -D INC=0 -o src/f32-gemm/gen/4x2-wasm.c
+
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D INC=0 -o src/f32-gemm/gen/4x4-wasm.c
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D INC=1 -o src/f32-gemm/gen-inc/4x4-wasm.c
 
 ############################### AArch64 assembly ##############################
 tools/xngen src/f32-gemm/1x12-aarch64-neonfma-cortex-a53.S.in -D INC=0 -o src/f32-gemm/gen/1x12-aarch64-neonfma-cortex-a53.S

@@ -27,16 +27,23 @@ extern "C" {
       size_t output_stride,                                    \
       const union xnn_f32_output_params* params);
 
-DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__scalar_2x1)
-DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__scalar_2x4)
 DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__neon_2x4)
 DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__neon_2x8)
-DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__psimd_2x4)
-DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__psimd_2x8)
+
 DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__sse2_2x4)
 DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__sse2_2x8)
+
 DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__sse41_2x4)
 DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__sse41_2x8)
+
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__psimd_2x4)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__psimd_2x8)
+
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__wasm_2x1)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__wasm_2x4)
+
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__scalar_2x1)
+DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__scalar_2x4)
 
 
 #ifdef __cplusplus

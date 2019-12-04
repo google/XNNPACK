@@ -60,17 +60,9 @@ inline static uint32_t math_max_u32(uint32_t a, uint32_t b) {
 }
 
 inline static float math_min_f32(float a, float b) {
-  #if defined(__wasm__)
-    return __builtin_wasm_min_f32(a, b);
-  #else
-    return XNN_UNPREDICTABLE(b < a) ? b : a;
-  #endif
+  return XNN_UNPREDICTABLE(b < a) ? b : a;
 }
 
 inline static float math_max_f32(float a, float b) {
-  #if defined(__wasm__)
-    return __builtin_wasm_max_f32(a, b);
-  #else
-    return XNN_UNPREDICTABLE(b < a) ? a : b;
-  #endif
+  return XNN_UNPREDICTABLE(b < a) ? a : b;
 }

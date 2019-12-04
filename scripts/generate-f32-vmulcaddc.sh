@@ -5,9 +5,15 @@
 # LICENSE file in the root directory of this source tree.
 
 #################################### Scalar ###################################
-tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=1 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/c1-scalar-2x.c
-tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=2 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/c2-scalar-2x.c
-tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/c4-scalar-2x.c
+### Generic C micro-kernels
+tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=1 -D ROW_TILE=2 -D WASM=0 -o src/f32-vmulcaddc/gen/c1-scalar-2x.c
+tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=2 -D ROW_TILE=2 -D WASM=0 -o src/f32-vmulcaddc/gen/c2-scalar-2x.c
+tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D WASM=0 -o src/f32-vmulcaddc/gen/c4-scalar-2x.c
+
+### WAsm-specific micro-kernels
+tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=1 -D ROW_TILE=2 -D WASM=1 -o src/f32-vmulcaddc/gen/c1-wasm-2x.c
+tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=2 -D ROW_TILE=2 -D WASM=1 -o src/f32-vmulcaddc/gen/c2-wasm-2x.c
+tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D WASM=1 -o src/f32-vmulcaddc/gen/c4-wasm-2x.c
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-vmulcaddc/neon.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D FMA=0 -o src/f32-vmulcaddc/gen/c4-neon-2x.c

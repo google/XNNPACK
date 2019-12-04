@@ -31,8 +31,9 @@ extern "C" {
       size_t output_increment,                        \
       const union xnn_f32_output_params* params);
 
-DECLARE_F32_MAXPOOL_UKERNEL_FUNCTION(xnn_f32_maxpool_ukernel_9p8x__psimd_c4)
 DECLARE_F32_MAXPOOL_UKERNEL_FUNCTION(xnn_f32_maxpool_ukernel_9p8x__sse_c4)
+DECLARE_F32_MAXPOOL_UKERNEL_FUNCTION(xnn_f32_maxpool_ukernel_9p8x__psimd_c4)
+DECLARE_F32_MAXPOOL_UKERNEL_FUNCTION(xnn_f32_maxpool_ukernel_9p8x__wasm_c1)
 DECLARE_F32_MAXPOOL_UKERNEL_FUNCTION(xnn_f32_maxpool_ukernel_9p8x__scalar_c1)
 
 

@@ -25,6 +25,7 @@ _ARCH_TO_MACRO_MAP = {
   "aarch64": "XNN_ARCH_ARM64",
   "x86": "XNN_ARCH_X86",
   "x86-64": "XNN_ARCH_X86_64",
+  "wasm": "XNN_ARCH_WASM",
 }
 
 _ISA_TO_ARCH_MAP = {
@@ -37,6 +38,7 @@ _ISA_TO_ARCH_MAP = {
   "avx": ["x86", "x86-64"],
   "fma3": ["x86", "x86-64"],
   "avx512f": ["x86", "x86-64"],
+  "wasm": ["wasm"],
   "psimd": [],
 }
 

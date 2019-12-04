@@ -8,6 +8,9 @@
 - name: xnn_f32_vrsubc_ukernel__sse_x8
 - name: xnn_f32_vrsubc_ukernel__psimd_x4
 - name: xnn_f32_vrsubc_ukernel__psimd_x8
+- name: xnn_f32_vrsubc_ukernel__wasm_x1
+- name: xnn_f32_vrsubc_ukernel__wasm_x2
+- name: xnn_f32_vrsubc_ukernel__wasm_x4
 - name: xnn_f32_vrsubc_ukernel__scalar_x1
 - name: xnn_f32_vrsubc_ukernel__scalar_x2
 - name: xnn_f32_vrsubc_ukernel__scalar_x4

@@ -5,10 +5,17 @@
 # LICENSE file in the root directory of this source tree.
 
 #################################### Scalar ###################################
-tools/xngen src/f32-igemm/scalar.c.in -D MR=1 -D NR=4 -o src/f32-igemm/gen/1x4-scalar.c
-tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -o src/f32-igemm/gen/2x4-scalar.c
-tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -o src/f32-igemm/gen/4x2-scalar.c
-tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -o src/f32-igemm/gen/4x4-scalar.c
+### Generic C micro-kernels
+tools/xngen src/f32-igemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -o src/f32-igemm/gen/1x4-scalar.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -o src/f32-igemm/gen/2x4-scalar.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -o src/f32-igemm/gen/4x2-scalar.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -o src/f32-igemm/gen/4x4-scalar.c
+
+### WAsm-specific micro-kernels
+tools/xngen src/f32-igemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -o src/f32-igemm/gen/1x4-wasm.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -o src/f32-igemm/gen/2x4-wasm.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=1 -o src/f32-igemm/gen/4x2-wasm.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -o src/f32-igemm/gen/4x4-wasm.c
 
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels

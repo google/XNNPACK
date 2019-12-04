@@ -9,7 +9,9 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__scalar(
+$MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
+$MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
+void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -88,12 +90,12 @@ void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__scalar(
     const float vmin = params->scalar.min;
     $for M in range(MR):
       $for N in range(NR):
-        vacc${M}${N} = math_max_f32(vacc${M}${N}, vmin);
+        vacc${M}${N} = ${MAX_F32}(vacc${M}${N}, vmin);
 
     const float vmax = params->scalar.max;
     $for M in range(MR):
       $for N in range(NR):
-        vacc${M}${N} = math_min_f32(vacc${M}${N}, vmax);
+        vacc${M}${N} = ${MIN_F32}(vacc${M}${N}, vmax);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
