@@ -396,7 +396,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57
         FMAX v31.4s, v31.4s, v5.4s
 
         # Store full 4 x 8
-        CMP x1, 8
+        SUBS x1, x1, 8
         B.LO 7f
 
         STP q16, q17,  [x6]
@@ -412,7 +412,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57
         SUB  x4,  x4, x2 // a3 -= kc
         ADD  x7,  x7, x14
 
-        SUBS x1, x1, 8
         B.HI 0b
 
         # Restore d8-d15 from stack

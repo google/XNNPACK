@@ -446,7 +446,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMAX v31.4s, v31.4s, v5.4s
 
         # Store full 4 x 12
-        CMP x1, 12
+        SUBS x1, x1, 12
         B.LO 7f
 
         ST1 {v20.16b, v21.16b, v22.16b},  [x6], x14
@@ -458,7 +458,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         ST1 {v29.16b, v30.16b, v31.16b},  [x7], x14
         SUB  x4,  x4, x2 // a3 -= kc
 
-        SUBS x1, x1, 12
         B.HI 0b
 
         # Restore d8-d11,d14,d15 from stack
@@ -533,6 +532,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         B 4b
 
 7:
+        ADD x1, x1, 12
         # Store odd channels
         TBZ x1, 3, 8f
         STP q20, q21,  [x6], 32

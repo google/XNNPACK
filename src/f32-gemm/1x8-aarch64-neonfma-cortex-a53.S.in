@@ -172,13 +172,12 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_ukernel_1x8__aarch64_neonfma_
         FMAX v17.4s, v17.4s, v5.4s
 
         # Store full 1 x 8
-        CMP x1, 8
+        SUBS x1, x1, 8
         B.LO 9f
 
         ST1 {v16.16b, v17.16b}, [x6], x14
         SUB  x3,  x3, x2 // a0 -= kc
 
-        SUBS x1, x1, 8
         B.HI 0b
 
         RET

@@ -387,7 +387,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMAX v27.4s, v27.4s, v7.4s
 
         # Store full 4 x 8
-        CMP x1, 8
+        SUBS x1, x1, 8
         B.LO 8f
 
         STP q26, q27, [x7]
@@ -402,7 +402,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         SUB x4, x4, x3  // a -= ks
 
         # nc loop
-        SUBS x1, x1, 8
         B.HI 0b
 
         // Restore x19, x20, d12-d15 from stack

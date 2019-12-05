@@ -296,14 +296,13 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         FMAX v22.4s, v22.4s, v31.4s
 
         # Store full 1 x 12
-        CMP x1, 12
+        SUBS x1, x1, 12
         B.LO 8f
 
         ST1 {v20.16b, v21.16b, v22.16b}, [x6], x10
         SUB x4, x4, x3  // a -= ks
 
         # nc loop
-        SUBS x1, x1, 12
         B.HI 0b
 
         RET
@@ -337,6 +336,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         B 5b
 
 8:
+        ADD x1, x1, 12
         # Store odd channels
         TBZ x1, 3, 9f
         STP q20, q21, [x6]

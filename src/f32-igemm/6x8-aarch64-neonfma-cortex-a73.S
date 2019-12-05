@@ -452,7 +452,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a73
         FMAX v31.4s, v31.4s, v7.4s
 
         # Store full 6 x 8
-        CMP x1, 8
+        SUBS x1, x1, 8
         B.LO 8f
 
         STP q30, q31,  [x7]
@@ -471,7 +471,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a73
         SUB x4, x4, x3  // a -= ks
 
         # nc loop
-        SUBS x1, x1, 8
         B.HI 0b
 
         # Restore x20,x21,x22,x23 from stack
@@ -485,6 +484,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a73
         LDP  d8,  d9, [sp], 96
         RET
 
+        .p2align 3
 5:
         # Is there a remainder?- 4 floats of A (16 bytes)
         TBZ x0, 4, 6f

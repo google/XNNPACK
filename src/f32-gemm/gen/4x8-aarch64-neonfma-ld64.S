@@ -142,7 +142,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_ld64
         FMAX v31.4s, v31.4s, v5.4s
 
         # Store full 4 x 8
-        CMP x1, 8
+        SUBS x1, x1, 8
         B.LO 7f
 
         ST1 {v16.16b, v17.16b},  [x6], x14
@@ -154,7 +154,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_ld64
         ST1 {v30.16b, v31.16b},  [x7], x14
         SUB  x4,  x4, x2 // a3 -= kc
 
-        SUBS x1, x1, 8
         B.HI 0b
 
         RET

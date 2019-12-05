@@ -174,14 +174,13 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53
         FMAX v17.4s, v17.4s, v31.4s
 
         # Store full 1 x 8
-        CMP x1, 8
+        SUBS x1, x1, 8
         B.LO 10f
 
         ST1 {v16.16b, v17.16b}, [x6], x10
         SUB x4, x4, x3  // a -= ks
 
         # nc loop
-        SUBS x1, x1, 8
         B.HI 0b
 
         RET

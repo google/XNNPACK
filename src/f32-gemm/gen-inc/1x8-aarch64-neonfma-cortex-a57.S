@@ -153,7 +153,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x8__aarch64_neonfma_cortex_a57
         FMAX v17.4s, v17.4s, v5.4s
 
         # Store full 1 x 8
-        CMP x1, 8
+        SUBS x1, x1, 8
         B.LO 9f
 
         STP q16, q17, [x6]
@@ -161,7 +161,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x8__aarch64_neonfma_cortex_a57
 
         SUB  x3,  x3, x2 // a0 -= kc
 
-        SUBS x1, x1, 8
         B.HI 0b
 
         RET
