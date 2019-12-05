@@ -244,8 +244,8 @@ public:
 
   inline size_t output_height() const {
     const size_t padded_input_height = padding_top() + input_height() + padding_bottom();
-    if (padded_input_height <= kernel_height()) {
-      return 1;
+    if (padded_input_height < kernel_height()) {
+      return 0;
     } else {
       return (padded_input_height - kernel_height()) / subsampling_height() + 1;
     }
@@ -253,8 +253,8 @@ public:
 
   inline size_t output_width() const {
     const size_t padded_input_width = padding_left() + input_width() + padding_right();
-    if (padded_input_width <= kernel_width()) {
-      return 1;
+    if (padded_input_width < kernel_width()) {
+      return 0;
     } else {
       return (padded_input_width - kernel_width()) / subsampling_width() + 1;
     }
@@ -291,6 +291,8 @@ public:
     ASSERT_LT(output_y_start(), output_height());
     ASSERT_LE(output_y_end(), output_height());
     ASSERT_GT(output_y_end(), output_y_start());
+    ASSERT_GE(output_width(), 1);
+    ASSERT_GE(output_height(), 1);
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
