@@ -284,9 +284,21 @@ static void GEMMEnd2EndBenchmark(
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
   }
+  static void f32_gemm_4x8__aarch32_neon_cortex_a75(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75,
+      xnn_f32_igemm_ukernel_4x8__neon_lane_ld64,
+      xnn_f32_gemm_ukernel_1x8__neon_lane_ld64,
+      xnn_f32_igemm_ukernel_1x8__neon_lane_ld64,
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
 
   BENCHMARK_CAPTURE(f32_gemm_4x8__aarch32_neon_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_gemm_4x8__aarch32_neon_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch32_neon_cortex_a75, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch32_neon_cortex_a75, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 #endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
