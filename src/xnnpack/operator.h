@@ -71,6 +71,8 @@ enum xnn_operator_type {
   xnn_operator_type_leaky_relu_nc_q8,
   xnn_operator_type_max_pooling_nhwc_f32,
   xnn_operator_type_max_pooling_nhwc_u8,
+  xnn_operator_type_maximum_nd_f32,
+  xnn_operator_type_minimum_nd_f32,
   xnn_operator_type_multiply_nd_f32,
   xnn_operator_type_prelu_nc_f32,
   xnn_operator_type_resize_bilinear_nhwc_f32,

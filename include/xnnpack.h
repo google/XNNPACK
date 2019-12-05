@@ -384,6 +384,36 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f32(
     float* output,
     pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_maximum_nd_f32(
+    uint32_t flags,
+    xnn_operator_t* maximum_op_out);
+
+enum xnn_status xnn_setup_maximum_nd_f32(
+    xnn_operator_t maximum_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_minimum_nd_f32(
+    uint32_t flags,
+    xnn_operator_t* minimum_op_out);
+
+enum xnn_status xnn_setup_minimum_nd_f32(
+    xnn_operator_t minimum_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_multiply_nd_f32(
     float output_min,
     float output_max,

@@ -26,6 +26,8 @@ class BinaryElementwiseOperatorTester {
   enum class OperationType {
     Unknown,
     Add,
+    Maximum,
+    Minimum,
     Multiply,
     Subtract,
   };
@@ -116,6 +118,10 @@ class BinaryElementwiseOperatorTester {
     switch (operation_type()) {
       case OperationType::Add:
         return a + b;
+      case OperationType::Maximum:
+        return std::max<float>(a, b);
+      case OperationType::Minimum:
+        return std::min<float>(a, b);
       case OperationType::Multiply:
         return a * b;
       case OperationType::Subtract:
@@ -211,6 +217,16 @@ class BinaryElementwiseOperatorTester {
               output_min, output_max,
               0, &binary_elementwise_op));
           break;
+        case OperationType::Maximum:
+          ASSERT_EQ(xnn_status_success,
+            xnn_create_maximum_nd_f32(
+              0, &binary_elementwise_op));
+          break;
+        case OperationType::Minimum:
+          ASSERT_EQ(xnn_status_success,
+            xnn_create_minimum_nd_f32(
+              0, &binary_elementwise_op));
+          break;
         case OperationType::Multiply:
           ASSERT_EQ(xnn_status_success,
             xnn_create_multiply_nd_f32(
@@ -235,6 +251,28 @@ class BinaryElementwiseOperatorTester {
         case OperationType::Add:
           ASSERT_EQ(xnn_status_success,
             xnn_setup_add_nd_f32(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Maximum:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_maximum_nd_f32(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Minimum:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_minimum_nd_f32(
               binary_elementwise_op,
               num_input1_dims(),
               input1_shape().data(),

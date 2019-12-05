@@ -2324,6 +2324,24 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "maximum_nd_test",
+    srcs = [
+        "test/binary-elementwise-operator-tester.h",
+        "test/maximum-nd.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "minimum_nd_test",
+    srcs = [
+        "test/binary-elementwise-operator-tester.h",
+        "test/minimum-nd.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "multiply_nd_test",
     srcs = [
         "test/binary-elementwise-operator-tester.h",

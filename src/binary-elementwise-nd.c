@@ -86,6 +86,24 @@ enum xnn_status xnn_create_add_nd_f32(
     output_min, output_max, flags, xnn_operator_type_add_nd_f32, add_op_out);
 }
 
+enum xnn_status xnn_create_maximum_nd_f32(
+    uint32_t flags,
+    xnn_operator_t* maximum_op_out)
+{
+  return create_binary_elementwise_nd_f32(
+    -INFINITY /* output_min */, INFINITY /* output_max */,
+    flags, xnn_operator_type_maximum_nd_f32, maximum_op_out);
+}
+
+enum xnn_status xnn_create_minimum_nd_f32(
+    uint32_t flags,
+    xnn_operator_t* minimum_op_out)
+{
+  return create_binary_elementwise_nd_f32(
+    -INFINITY /* output_min */, INFINITY /* output_max */,
+    flags, xnn_operator_type_minimum_nd_f32, minimum_op_out);
+}
+
 enum xnn_status xnn_create_multiply_nd_f32(
     float output_min,
     float output_max,
@@ -292,6 +310,46 @@ enum xnn_status xnn_setup_add_nd_f32(
     num_input2_dims, input2_shape,
     input1, input2, output,
     &xnn_params.f32.vadd,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_maximum_nd_f32(
+    xnn_operator_t maximum_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f32(
+    maximum_op, xnn_operator_type_maximum_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f32.vmax,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_minimum_nd_f32(
+    xnn_operator_t minimum_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f32(
+    minimum_op, xnn_operator_type_minimum_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f32.vmin,
     pthreadpool_get_threads_count(threadpool));
 }
 

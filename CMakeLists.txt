@@ -1194,6 +1194,24 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(max-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(max-pooling-nhwc-test max-pooling-nhwc-test)
 
+  ADD_EXECUTABLE(maximum-nd-test test/multiply-nd.cc)
+  SET_TARGET_PROPERTIES(maximum-nd-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(maximum-nd-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(maximum-nd-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(maximum-nd-test maximum-nd-test)
+
+  ADD_EXECUTABLE(minimum-nd-test test/multiply-nd.cc)
+  SET_TARGET_PROPERTIES(minimum-nd-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(minimum-nd-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(minimum-nd-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(minimum-nd-test minimum-nd-test)
+
   ADD_EXECUTABLE(multiply-nd-test test/multiply-nd.cc)
   SET_TARGET_PROPERTIES(multiply-nd-test PROPERTIES
     CXX_STANDARD 11
