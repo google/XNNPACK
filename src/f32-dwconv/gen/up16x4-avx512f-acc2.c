@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/dwconv.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f32_dwconv_ukernel_up16x4__avx512f_acc2(

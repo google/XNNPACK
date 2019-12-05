@@ -8,6 +8,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/clamp.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f32_clamp_ukernel__avx512f(

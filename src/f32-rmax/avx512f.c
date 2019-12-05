@@ -7,6 +7,7 @@
 
 #include <immintrin.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/rmax.h>
 
 

@@ -8,6 +8,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vscale.h>
 
 

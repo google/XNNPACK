@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f32_gemminc_ukernel_1x16__avx512f_broadcast(

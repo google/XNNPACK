@@ -857,6 +857,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/gemm.h",
     "src/xnnpack/hswish.h",
     "src/xnnpack/igemm.h",
+    "src/xnnpack/intrinsics-polyfill.h",
     "src/xnnpack/lut.h",
     "src/xnnpack/math.h",
     "src/xnnpack/maxpool.h",

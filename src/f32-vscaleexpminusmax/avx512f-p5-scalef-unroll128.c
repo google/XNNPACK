@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <math.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vscaleexpminusmax.h>
 
 

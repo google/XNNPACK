@@ -10,6 +10,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__avx512f_broadcast(
