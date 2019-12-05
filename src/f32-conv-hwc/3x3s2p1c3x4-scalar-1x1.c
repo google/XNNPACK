@@ -9,7 +9,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1(
+void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1(
     size_t input_height,
     size_t input_width,
     size_t output_y_start,
@@ -21,7 +21,7 @@ void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1(
     size_t input_padding_top,
     size_t output_channels,
     size_t output_height_stride,
-    size_t output_channel_stride,
+    size_t output_width_stride,
     const union xnn_f32_output_params params[restrict static 1])
 {
   assert(input_width != 0);
@@ -32,7 +32,8 @@ void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1(
   const size_t input_height_stride = input_width * 3 /* channels */ * sizeof(float);
   const size_t input_width_decrement = round_down_po2(input_width, 2) * 3 /* channels */ * sizeof(float);
   const size_t output_width = (input_width + 1) / 2;
-  const size_t output_channel_increment = output_channel_stride * 4 - output_width * sizeof(float);
+  const size_t output_channel_increment = 4 * sizeof(float) - output_width * output_width_stride;
+
 
   // Adjustment for padding processed below
   const float* i0 = (const float*) ((uintptr_t) input + input_height_stride * (output_y_start * 2 - input_padding_top));
@@ -55,22 +56,8 @@ void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1(
 
     const float* w = weights;
     size_t c = output_channels;
-    float* o0c0 = output0;
-    float* o0c1 = (float*) ((uintptr_t) o0c0 + output_channel_stride);
-    float* o0c2 = (float*) ((uintptr_t) o0c1 + output_channel_stride);
-    float* o0c3 = (float*) ((uintptr_t) o0c2 + output_channel_stride);
+    float* o0 = output0;
     do {
-      if XNN_UNPREDICTABLE(c < 2) {
-        o0c1 = o0c0;
-      }
-      if XNN_UNPREDICTABLE(c <= 2) {
-        o0c2 = o0c1;
-      }
-      if XNN_UNPREDICTABLE(c < 4) {
-        o0c3 = o0c2;
-      }
-
-      // Left edge padding
       float vi00c0 = 0.0f;
       float vi00c1 = 0.0f;
       float vi00c2 = 0.0f;
@@ -83,6 +70,7 @@ void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1(
 
       size_t iw = input_width;
       for (; iw >= 2; iw -= 2) {
+        // start with biases
         float voc0 = w[0];
         float voc1 = w[1];
         float voc2 = w[2];
@@ -416,10 +404,25 @@ void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1(
         voc2 = math_max_f32(voc2, voutput_min);
         voc3 = math_max_f32(voc3, voutput_min);
 
-        *o0c0++ = voc0;
-        *o0c1++ = voc1;
-        *o0c2++ = voc2;
-        *o0c3++ = voc3;
+        if XNN_LIKELY(c >= 4) {
+          o0[0] = voc0;
+          o0[1] = voc1;
+          o0[2] = voc2;
+          o0[3] = voc3;
+          o0 = (float*) ((uintptr_t) o0 + output_width_stride);
+        } else {
+          float* o0_tmp = o0;
+          if (c & 2) {
+            o0_tmp[0] = voc0;
+            o0_tmp[1] = voc1;
+            o0_tmp += 2;
+            voc0 = voc2;
+          }
+          if (c & 1) {
+            *o0_tmp++ = voc0;
+          }
+          o0 = (float*) ((uintptr_t) o0 + output_width_stride);
+        }
 
         i0 += 6;
         i1 += 6;
@@ -640,17 +643,29 @@ void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1(
         voc2 = math_max_f32(voc2, voutput_min);
         voc3 = math_max_f32(voc3, voutput_min);
 
-        *o0c0++ = voc0;
-        *o0c1++ = voc1;
-        *o0c2++ = voc2;
-        *o0c3++ = voc3;
+        if XNN_LIKELY(c >= 4) {
+          o0[0] = voc0;
+          o0[1] = voc1;
+          o0[2] = voc2;
+          o0[3] = voc3;
+          o0 = (float*) ((uintptr_t) o0 + output_width_stride);
+        } else {
+          float* o0_tmp = o0;
+          if (c & 2) {
+            o0_tmp[0] = voc0;
+            o0_tmp[1] = voc1;
+            o0_tmp += 2;
+            voc0 = voc2;
+          }
+          if (c & 1) {
+            *o0_tmp++ = voc0;
+          }
+          o0 = (float*) ((uintptr_t) o0 + output_width_stride);
+        }
       }
       // Move output pointers back to the position of the first pixel in a row,
-      // and forward to the next block of output channels.
-      o0c0 = (float*) ((uintptr_t) o0c0 + output_channel_increment);
-      o0c1 = (float*) ((uintptr_t) o0c1 + output_channel_increment);
-      o0c2 = (float*) ((uintptr_t) o0c2 + output_channel_increment);
-      o0c3 = (float*) ((uintptr_t) o0c3 + output_channel_increment);
+      // and forward to the next block of output channels
+      o0 = (float*) ((uintptr_t) o0 + output_channel_increment);
       // Revert input pointers to the position of the first pixel in a row
       i0 = (const float*) ((uintptr_t) i0 - input_width_decrement);
       i1 = (const float*) ((uintptr_t) i1 - input_width_decrement);

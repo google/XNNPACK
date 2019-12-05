@@ -37,6 +37,7 @@ extern "C" {
 
 DECLARE_F32_CONV_HWC_UKERNEL_FUNCTION(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neonfma_2x2)
 DECLARE_F32_CONV_HWC_UKERNEL_FUNCTION(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x2)
+DECLARE_F32_CONV_HWC_UKERNEL_FUNCTION(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1)
 
 
 #define DECLARE_F32_CONV_HWC2SPCHW_UKERNEL_FUNCTION(fn_name) \
