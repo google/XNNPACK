@@ -70,14 +70,14 @@ static void DWConvBenchmark(benchmark::State& state,
 
   const size_t c_stride = benchmark::utils::RoundUp<size_t>(channels, cr);
 
-  std::vector<float> a(channels * input_height * input_width);
+  std::vector<float> a(channels * input_height * input_width + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::vector<float> k(channels * kernel_height * kernel_width);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
   std::vector<float> b(channels);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
-  std::vector<float> z(channels);
+  std::vector<float> z(channels + XNN_EXTRA_BYTES / sizeof(float));
 
   const size_t w_elements = (kernel_size + 1) * c_stride;
   const size_t i_elements = output_height * step_height;
