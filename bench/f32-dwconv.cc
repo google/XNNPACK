@@ -66,7 +66,7 @@ static void DWConvBenchmark(benchmark::State& state,
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
   const size_t output_size = output_height * output_width;
   const size_t step_width = dilation == 1 ? subsampling : kernel_width;
-  const size_t step_height = kernel_size + (output_width * step_width - 1) * kernel_height;
+  const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
 
   const size_t c_stride = benchmark::utils::RoundUp<size_t>(channels, cr);
 

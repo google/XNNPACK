@@ -967,7 +967,7 @@ static enum xnn_status setup_convolution2d_nhwc(
       const size_t output_height = convolution_op->output_height;
       const size_t output_width = convolution_op->output_width;
       const size_t step_width = convolution_op->dilation_width == 1 ? convolution_op->stride_width : kernel_width;
-      const size_t step_height = kernel_size + (output_width * step_width - 1) * kernel_height;
+      const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
       const size_t indirection_buffer_size = sizeof(void*) * batch_size * output_height * step_height;
 
       const void** indirection_buffer =
