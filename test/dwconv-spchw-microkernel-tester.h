@@ -228,10 +228,10 @@ class DWConvSpCHWMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
 
-    std::vector<float, AlignedAllocator<float, 32>> input((input_height() - 1) * input_width_stride() +
+    std::vector<float, AlignedAllocator<float, 64>> input((input_height() - 1) * input_width_stride() +
       (input_width() - 1) / input_tuple_size() * input_tuple_stride() + input_tuple_stride() + input_tuple_size());
     std::vector<float> packed_weights(kernel_size() + 1);
-    std::vector<float, AlignedAllocator<float, 32>> output((output_height() - 1) * output_width_stride() +
+    std::vector<float, AlignedAllocator<float, 64>> output((output_height() - 1) * output_width_stride() +
       (output_width() - 1) / output_tuple_size() * output_tuple_stride() + output_tuple_size());
     std::vector<float> output_ref(output_height() * output_width());
 

@@ -83,7 +83,7 @@ class PackMicrokernelTester {
 
     const uint32_t c = u32rng();
     std::vector<uint32_t> x(k() + (m() - 1) * x_stride() + XNN_EXTRA_BYTES / sizeof(uint32_t));
-    std::vector<uint32_t, AlignedAllocator<uint32_t, 32>> y(mr() * k());
+    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> y(mr() * k());
     std::vector<uint32_t> y_ref(mr() * k());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(u32rng));

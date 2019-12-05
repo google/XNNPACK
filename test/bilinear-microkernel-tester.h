@@ -83,7 +83,7 @@ class BilinearMicrokernelTester {
 
     std::vector<const float*> indirection(pixels() * 4);
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
-    std::vector<float, AlignedAllocator<float, 32>> packed_weights(pixels() * 2);
+    std::vector<float, AlignedAllocator<float, 64>> packed_weights(pixels() * 2);
     std::vector<float> output((pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(pixels() * channels());
 

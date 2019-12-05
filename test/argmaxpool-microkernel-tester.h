@@ -271,9 +271,9 @@ class ArgMaxPoolMicrokernelTester {
       ((output_pixels() - 1) * step() + pooling_elements()) * channels());
     std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
     std::vector<uint32_t> index(output_pixels() * channels());
-    std::vector<uint32_t, AlignedAllocator<uint32_t, XNN_EXTRA_BYTES>> index_buffer(
+    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> index_buffer(
       channels() + XNN_EXTRA_BYTES / sizeof(uint32_t));
-    std::vector<float, AlignedAllocator<float, XNN_EXTRA_BYTES>> output_buffer(
+    std::vector<float, AlignedAllocator<float, 64>> output_buffer(
       channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output_ref(output_pixels() * channels());
     std::vector<uint32_t> index_ref(output_pixels() * channels());

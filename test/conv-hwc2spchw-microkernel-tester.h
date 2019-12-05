@@ -305,7 +305,7 @@ public:
     std::vector<float> bias(output_channels());
     std::vector<float> output(batch_size() * output_channels() * output_height() * output_width());
     std::vector<float> output_ref(batch_size() * output_channels() * output_height() * output_width());
-    std::vector<float, AlignedAllocator<float, 32>> packed_weights((input_channels() * kernel_height() * kernel_width() + 1) * packed_output_channels());
+    std::vector<float, AlignedAllocator<float, 64>> packed_weights((input_channels() * kernel_height() * kernel_width() + 1) * packed_output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f32rng));

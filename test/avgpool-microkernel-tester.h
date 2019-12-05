@@ -305,7 +305,7 @@ class AvgPoolMicrokernelTester {
 
     std::vector<const uint8_t*> indirect_x(packed_ks() + (n() * s() - 1) * kh());
     std::vector<uint8_t> x((indirect_x.size() - 1) * x_stride() + kc() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<int32_t, AlignedAllocator<int32_t, 16>> buf(kc() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<int32_t, AlignedAllocator<int32_t, 64>> buf(kc() + XNN_EXTRA_BYTES / sizeof(uint8_t));
 
     std::vector<uint8_t> zero(kc() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> y((n() - 1) * y_stride() + kc());
@@ -470,7 +470,7 @@ class AvgPoolMicrokernelTester {
 
     std::vector<const float*> indirect_x(packed_ks() + (n() * s() - 1) * kh());
     std::vector<float> x((indirect_x.size() - 1) * x_stride() + kc() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float, AlignedAllocator<float, 16>> buf(kc() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float, AlignedAllocator<float, 64>> buf(kc() + XNN_EXTRA_BYTES / sizeof(float));
 
     std::vector<float> zero(kc() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y((n() - 1) * y_stride() + kc());
@@ -629,7 +629,7 @@ class AvgPoolMicrokernelTester {
 
     std::vector<const float*> indirect_x(packed_ks() + (n() * s() - 1) * kh());
     std::vector<float> x((indirect_x.size() - 1) * x_stride() + kc() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float, AlignedAllocator<float, 16>> buf(kc() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float, AlignedAllocator<float, 64>> buf(kc() + XNN_EXTRA_BYTES / sizeof(float));
 
     std::vector<float> zero(kc() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> m(kc() + XNN_EXTRA_BYTES / sizeof(float));

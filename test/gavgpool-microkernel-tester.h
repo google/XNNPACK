@@ -222,7 +222,7 @@ class GAvgPoolMicrokernelTester {
     auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
 
     std::vector<uint8_t> x((m() - 1) * x_stride() + n() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<int32_t, AlignedAllocator<int32_t, 16>> buf(n() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<int32_t, AlignedAllocator<int32_t, 64>> buf(n() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> zero(n() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> y(n());
     std::vector<uint8_t> y_ref(n());
@@ -364,7 +364,7 @@ class GAvgPoolMicrokernelTester {
     auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
 
     std::vector<float> x((m() - 1) * x_stride() + n() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float, AlignedAllocator<float, 16>> buf(n() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float, AlignedAllocator<float, 64>> buf(n() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> zero(n() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(n());
     std::vector<float> y_ref(n());

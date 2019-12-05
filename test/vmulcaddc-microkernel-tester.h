@@ -128,7 +128,7 @@ class VMulCAddCMicrokernelTester {
     std::vector<float> x((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> scale(channels());
     std::vector<float> bias(channels());
-    std::vector<float, AlignedAllocator<float, 32>> packed_w(packed_channels() * 2);
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_channels() * 2);
     std::vector<float> y((rows() - 1) * output_stride() + channels() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(rows() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

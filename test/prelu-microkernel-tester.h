@@ -122,7 +122,7 @@ class PReLUMicrokernelTester {
     auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), rng);
 
     std::vector<float> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float, AlignedAllocator<float, 16>> w(channels() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float, AlignedAllocator<float, 64>> w(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
