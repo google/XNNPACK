@@ -6,7 +6,7 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMN"
-$assert OP in ["ADD", "MUL", "SUB", "RSUB"]
+$assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "RSUB"]
 #include <assert.h>
 
 #include <psimd.h>
@@ -17,6 +17,8 @@ $assert OP in ["ADD", "MUL", "SUB", "RSUB"]
 
 $PSIMD_OP_F32 = {
 $  "ADD": lambda x: "psimd_add_f32(%s, vb)" % x,
+$  "MAX": lambda x: "psimd_max_f32(%s, vb)" % x,
+$  "MIN": lambda x: "psimd_min_f32(%s, vb)" % x,
 $  "MUL": lambda x: "psimd_mul_f32(%s, vb)" % x,
 $  "SUB": lambda x: "psimd_sub_f32(%s, vb)" % x,
 $  "RSUB": lambda x: "psimd_sub_f32(vb, %s)" % x,

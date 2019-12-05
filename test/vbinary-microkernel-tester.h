@@ -24,6 +24,8 @@ class VBinOpMicrokernelTester {
  public:
   enum class OpType {
     Add,
+    Max,
+    Min,
     Mul,
     Sub,
   };
@@ -113,6 +115,12 @@ class VBinOpMicrokernelTester {
         switch (op_type) {
           case OpType::Add:
             y_ref[i] = a_data[i] + b_data[i];
+            break;
+          case OpType::Max:
+            y_ref[i] = std::max<float>(a_data[i], b_data[i]);
+            break;
+          case OpType::Min:
+            y_ref[i] = std::min<float>(a_data[i], b_data[i]);
             break;
           case OpType::Mul:
             y_ref[i] = a_data[i] * b_data[i];

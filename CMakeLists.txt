@@ -233,6 +233,18 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vaddc-scalar-x1.c
   src/f32-vbinary/gen/vaddc-scalar-x2.c
   src/f32-vbinary/gen/vaddc-scalar-x4.c
+  src/f32-vbinary/gen/vmax-scalar-x1.c
+  src/f32-vbinary/gen/vmax-scalar-x2.c
+  src/f32-vbinary/gen/vmax-scalar-x4.c
+  src/f32-vbinary/gen/vmaxc-scalar-x1.c
+  src/f32-vbinary/gen/vmaxc-scalar-x2.c
+  src/f32-vbinary/gen/vmaxc-scalar-x4.c
+  src/f32-vbinary/gen/vmin-scalar-x1.c
+  src/f32-vbinary/gen/vmin-scalar-x2.c
+  src/f32-vbinary/gen/vmin-scalar-x4.c
+  src/f32-vbinary/gen/vminc-scalar-x1.c
+  src/f32-vbinary/gen/vminc-scalar-x2.c
+  src/f32-vbinary/gen/vminc-scalar-x4.c
   src/f32-vbinary/gen/vmul-scalar-x1.c
   src/f32-vbinary/gen/vmul-scalar-x2.c
   src/f32-vbinary/gen/vmul-scalar-x4.c
@@ -340,6 +352,14 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vadd-psimd-x8.c
   src/f32-vbinary/gen/vaddc-psimd-x4.c
   src/f32-vbinary/gen/vaddc-psimd-x8.c
+  src/f32-vbinary/gen/vmax-psimd-x4.c
+  src/f32-vbinary/gen/vmax-psimd-x8.c
+  src/f32-vbinary/gen/vmaxc-psimd-x4.c
+  src/f32-vbinary/gen/vmaxc-psimd-x8.c
+  src/f32-vbinary/gen/vmin-psimd-x4.c
+  src/f32-vbinary/gen/vmin-psimd-x8.c
+  src/f32-vbinary/gen/vminc-psimd-x4.c
+  src/f32-vbinary/gen/vminc-psimd-x8.c
   src/f32-vbinary/gen/vmul-psimd-x4.c
   src/f32-vbinary/gen/vmul-psimd-x8.c
   src/f32-vbinary/gen/vmulc-psimd-x4.c
@@ -433,6 +453,14 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vadd-neon-x8.c
   src/f32-vbinary/gen/vaddc-neon-x4.c
   src/f32-vbinary/gen/vaddc-neon-x8.c
+  src/f32-vbinary/gen/vmax-neon-x4.c
+  src/f32-vbinary/gen/vmax-neon-x8.c
+  src/f32-vbinary/gen/vmaxc-neon-x4.c
+  src/f32-vbinary/gen/vmaxc-neon-x8.c
+  src/f32-vbinary/gen/vmin-neon-x4.c
+  src/f32-vbinary/gen/vmin-neon-x8.c
+  src/f32-vbinary/gen/vminc-neon-x4.c
+  src/f32-vbinary/gen/vminc-neon-x8.c
   src/f32-vbinary/gen/vmul-neon-x4.c
   src/f32-vbinary/gen/vmul-neon-x8.c
   src/f32-vbinary/gen/vmulc-neon-x4.c
@@ -629,6 +657,14 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vadd-sse-x8.c
   src/f32-vbinary/gen/vaddc-sse-x4.c
   src/f32-vbinary/gen/vaddc-sse-x8.c
+  src/f32-vbinary/gen/vmax-sse-x4.c
+  src/f32-vbinary/gen/vmax-sse-x8.c
+  src/f32-vbinary/gen/vmaxc-sse-x4.c
+  src/f32-vbinary/gen/vmaxc-sse-x8.c
+  src/f32-vbinary/gen/vmin-sse-x4.c
+  src/f32-vbinary/gen/vmin-sse-x8.c
+  src/f32-vbinary/gen/vminc-sse-x4.c
+  src/f32-vbinary/gen/vminc-sse-x8.c
   src/f32-vbinary/gen/vmul-sse-x4.c
   src/f32-vbinary/gen/vmul-sse-x8.c
   src/f32-vbinary/gen/vmulc-sse-x4.c
@@ -1464,6 +1500,42 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vaddc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vaddc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vaddc-test f32-vaddc-test)
+
+  ADD_EXECUTABLE(f32-vmax-test test/f32-vmax.cc)
+  SET_TARGET_PROPERTIES(f32-vmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vmax-test f32-vmax-test)
+
+  ADD_EXECUTABLE(f32-vmaxc-test test/f32-vmaxc.cc)
+  SET_TARGET_PROPERTIES(f32-vmaxc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vmaxc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vmaxc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vmaxc-test f32-vmaxc-test)
+
+  ADD_EXECUTABLE(f32-vmin-test test/f32-vmin.cc)
+  SET_TARGET_PROPERTIES(f32-vmin-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vmin-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vmin-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vmin-test f32-vmin-test)
+
+  ADD_EXECUTABLE(f32-vminc-test test/f32-vminc.cc)
+  SET_TARGET_PROPERTIES(f32-vminc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vminc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vminc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vminc-test f32-vminc-test)
 
   ADD_EXECUTABLE(f32-vmul-test test/f32-vmul.cc)
   SET_TARGET_PROPERTIES(f32-vmul-test PROPERTIES
