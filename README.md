@@ -21,7 +21,8 @@ XNNPACK implements the following neural network operators:
 - 2D ArgMax Pooling (Max Pooling + indices)
 - 2D Unpooling
 - 2D Bilinear Resize
-- Add (tensors of same shape)
+- Add (including broadcasting, two inputs only)
+- Subtract (including broadcasting)
 - Multiply (including broadcasting)
 - Global Average Pooling
 - Channel Shuffle
