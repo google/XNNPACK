@@ -233,6 +233,12 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vaddc-scalar-x1.c
   src/f32-vbinary/gen/vaddc-scalar-x2.c
   src/f32-vbinary/gen/vaddc-scalar-x4.c
+  src/f32-vbinary/gen/vdiv-scalar-x1.c
+  src/f32-vbinary/gen/vdiv-scalar-x2.c
+  src/f32-vbinary/gen/vdiv-scalar-x4.c
+  src/f32-vbinary/gen/vdivc-scalar-x1.c
+  src/f32-vbinary/gen/vdivc-scalar-x2.c
+  src/f32-vbinary/gen/vdivc-scalar-x4.c
   src/f32-vbinary/gen/vmax-scalar-x1.c
   src/f32-vbinary/gen/vmax-scalar-x2.c
   src/f32-vbinary/gen/vmax-scalar-x4.c
@@ -251,6 +257,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmulc-scalar-x1.c
   src/f32-vbinary/gen/vmulc-scalar-x2.c
   src/f32-vbinary/gen/vmulc-scalar-x4.c
+  src/f32-vbinary/gen/vrdivc-scalar-x1.c
+  src/f32-vbinary/gen/vrdivc-scalar-x2.c
+  src/f32-vbinary/gen/vrdivc-scalar-x4.c
   src/f32-vbinary/gen/vrsubc-scalar-x1.c
   src/f32-vbinary/gen/vrsubc-scalar-x2.c
   src/f32-vbinary/gen/vrsubc-scalar-x4.c
@@ -352,6 +361,10 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vadd-psimd-x8.c
   src/f32-vbinary/gen/vaddc-psimd-x4.c
   src/f32-vbinary/gen/vaddc-psimd-x8.c
+  src/f32-vbinary/gen/vdiv-psimd-x4.c
+  src/f32-vbinary/gen/vdiv-psimd-x8.c
+  src/f32-vbinary/gen/vdivc-psimd-x4.c
+  src/f32-vbinary/gen/vdivc-psimd-x8.c
   src/f32-vbinary/gen/vmax-psimd-x4.c
   src/f32-vbinary/gen/vmax-psimd-x8.c
   src/f32-vbinary/gen/vmaxc-psimd-x4.c
@@ -364,6 +377,8 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmul-psimd-x8.c
   src/f32-vbinary/gen/vmulc-psimd-x4.c
   src/f32-vbinary/gen/vmulc-psimd-x8.c
+  src/f32-vbinary/gen/vrdivc-psimd-x4.c
+  src/f32-vbinary/gen/vrdivc-psimd-x8.c
   src/f32-vbinary/gen/vrsubc-psimd-x4.c
   src/f32-vbinary/gen/vrsubc-psimd-x8.c
   src/f32-vbinary/gen/vsub-psimd-x4.c
@@ -550,6 +565,12 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/math/sigmoid-neonfma-p5-nr2recps.c)
 
 SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
+  src/f32-vbinary/gen/vdiv-neon-x4.c
+  src/f32-vbinary/gen/vdiv-neon-x8.c
+  src/f32-vbinary/gen/vdivc-neon-x4.c
+  src/f32-vbinary/gen/vdivc-neon-x8.c
+  src/f32-vbinary/gen/vrdivc-neon-x4.c
+  src/f32-vbinary/gen/vrdivc-neon-x8.c
   src/f32-gemm/gen/1x8-neonfma-lane-ld64.c
   src/f32-gemm/gen/4x2-neonfma-lane-ld64.c
   src/f32-gemm/gen/4x8-neonfma-lane-ld128.c
@@ -657,6 +678,10 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vadd-sse-x8.c
   src/f32-vbinary/gen/vaddc-sse-x4.c
   src/f32-vbinary/gen/vaddc-sse-x8.c
+  src/f32-vbinary/gen/vdiv-sse-x4.c
+  src/f32-vbinary/gen/vdiv-sse-x8.c
+  src/f32-vbinary/gen/vdivc-sse-x4.c
+  src/f32-vbinary/gen/vdivc-sse-x8.c
   src/f32-vbinary/gen/vmax-sse-x4.c
   src/f32-vbinary/gen/vmax-sse-x8.c
   src/f32-vbinary/gen/vmaxc-sse-x4.c
@@ -669,6 +694,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmul-sse-x8.c
   src/f32-vbinary/gen/vmulc-sse-x4.c
   src/f32-vbinary/gen/vmulc-sse-x8.c
+  src/f32-vbinary/gen/vrdivc-sse-x4.c
+  src/f32-vbinary/gen/vrdivc-sse-x8.c
   src/f32-vbinary/gen/vrsubc-sse-x4.c
   src/f32-vbinary/gen/vrsubc-sse-x8.c
   src/f32-vbinary/gen/vsub-sse-x4.c
@@ -1518,6 +1545,33 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vaddc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vaddc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vaddc-test f32-vaddc-test)
+
+  ADD_EXECUTABLE(f32-vdiv-test test/f32-vdiv.cc)
+  SET_TARGET_PROPERTIES(f32-vdiv-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vdiv-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vdiv-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vdiv-test f32-vdiv-test)
+
+  ADD_EXECUTABLE(f32-vdivc-test test/f32-vdivc.cc)
+  SET_TARGET_PROPERTIES(f32-vdivc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vdivc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vdivc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vdivc-test f32-vdivc-test)
+
+  ADD_EXECUTABLE(f32-vrdivc-test test/f32-vrdivc.cc)
+  SET_TARGET_PROPERTIES(f32-vrdivc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrdivc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vrdivc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vrdivc-test f32-vrdivc-test)
 
   ADD_EXECUTABLE(f32-vmax-test test/f32-vmax.cc)
   SET_TARGET_PROPERTIES(f32-vmax-test PROPERTIES

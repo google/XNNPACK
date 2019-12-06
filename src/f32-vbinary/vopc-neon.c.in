@@ -6,7 +6,7 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMN"
-$assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "RSUB"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB"]
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -17,6 +17,8 @@ $assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "RSUB"]
 
 $VOPQ_F32 = {
 $  "ADD": lambda x: "vaddq_f32(%s, vb)" % x,
+$  "DIV": lambda x: "vdivq_f32(%s, vb)" % x,
+$  "RDIV": lambda x: "vdivq_f32(vb, %s)" % x,
 $  "MAX": lambda x: "vmaxq_f32(%s, vb)" % x,
 $  "MIN": lambda x: "vminq_f32(%s, vb)" % x,
 $  "MUL": lambda x: "vmulq_f32(%s, vb)" % x,

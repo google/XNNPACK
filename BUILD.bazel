@@ -143,6 +143,12 @@ SCALAR_UKERNELS = [
     "src/f32-vbinary/gen/vaddc-scalar-x1.c",
     "src/f32-vbinary/gen/vaddc-scalar-x2.c",
     "src/f32-vbinary/gen/vaddc-scalar-x4.c",
+    "src/f32-vbinary/gen/vdiv-scalar-x1.c",
+    "src/f32-vbinary/gen/vdiv-scalar-x2.c",
+    "src/f32-vbinary/gen/vdiv-scalar-x4.c",
+    "src/f32-vbinary/gen/vdivc-scalar-x1.c",
+    "src/f32-vbinary/gen/vdivc-scalar-x2.c",
+    "src/f32-vbinary/gen/vdivc-scalar-x4.c",
     "src/f32-vbinary/gen/vmax-scalar-x1.c",
     "src/f32-vbinary/gen/vmax-scalar-x2.c",
     "src/f32-vbinary/gen/vmax-scalar-x4.c",
@@ -161,6 +167,9 @@ SCALAR_UKERNELS = [
     "src/f32-vbinary/gen/vmulc-scalar-x1.c",
     "src/f32-vbinary/gen/vmulc-scalar-x2.c",
     "src/f32-vbinary/gen/vmulc-scalar-x4.c",
+    "src/f32-vbinary/gen/vrdivc-scalar-x1.c",
+    "src/f32-vbinary/gen/vrdivc-scalar-x2.c",
+    "src/f32-vbinary/gen/vrdivc-scalar-x4.c",
     "src/f32-vbinary/gen/vrsubc-scalar-x1.c",
     "src/f32-vbinary/gen/vrsubc-scalar-x2.c",
     "src/f32-vbinary/gen/vrsubc-scalar-x4.c",
@@ -242,6 +251,12 @@ WASM_UKERNELS = [
     "src/f32-vbinary/gen/vaddc-wasm-x1.c",
     "src/f32-vbinary/gen/vaddc-wasm-x2.c",
     "src/f32-vbinary/gen/vaddc-wasm-x4.c",
+    "src/f32-vbinary/gen/vdiv-wasm-x1.c",
+    "src/f32-vbinary/gen/vdiv-wasm-x2.c",
+    "src/f32-vbinary/gen/vdiv-wasm-x4.c",
+    "src/f32-vbinary/gen/vdivc-wasm-x1.c",
+    "src/f32-vbinary/gen/vdivc-wasm-x2.c",
+    "src/f32-vbinary/gen/vdivc-wasm-x4.c",
     "src/f32-vbinary/gen/vmax-wasm-x1.c",
     "src/f32-vbinary/gen/vmax-wasm-x2.c",
     "src/f32-vbinary/gen/vmax-wasm-x4.c",
@@ -260,6 +275,9 @@ WASM_UKERNELS = [
     "src/f32-vbinary/gen/vmulc-wasm-x1.c",
     "src/f32-vbinary/gen/vmulc-wasm-x2.c",
     "src/f32-vbinary/gen/vmulc-wasm-x4.c",
+    "src/f32-vbinary/gen/vrdivc-wasm-x1.c",
+    "src/f32-vbinary/gen/vrdivc-wasm-x2.c",
+    "src/f32-vbinary/gen/vrdivc-wasm-x4.c",
     "src/f32-vbinary/gen/vrsubc-wasm-x1.c",
     "src/f32-vbinary/gen/vrsubc-wasm-x2.c",
     "src/f32-vbinary/gen/vrsubc-wasm-x4.c",
@@ -336,6 +354,10 @@ PSIMD_UKERNELS = [
     "src/f32-vbinary/gen/vadd-psimd-x8.c",
     "src/f32-vbinary/gen/vaddc-psimd-x4.c",
     "src/f32-vbinary/gen/vaddc-psimd-x8.c",
+    "src/f32-vbinary/gen/vdiv-psimd-x4.c",
+    "src/f32-vbinary/gen/vdiv-psimd-x8.c",
+    "src/f32-vbinary/gen/vdivc-psimd-x4.c",
+    "src/f32-vbinary/gen/vdivc-psimd-x8.c",
     "src/f32-vbinary/gen/vmax-psimd-x4.c",
     "src/f32-vbinary/gen/vmax-psimd-x8.c",
     "src/f32-vbinary/gen/vmaxc-psimd-x4.c",
@@ -348,6 +370,8 @@ PSIMD_UKERNELS = [
     "src/f32-vbinary/gen/vmul-psimd-x8.c",
     "src/f32-vbinary/gen/vmulc-psimd-x4.c",
     "src/f32-vbinary/gen/vmulc-psimd-x8.c",
+    "src/f32-vbinary/gen/vrdivc-psimd-x4.c",
+    "src/f32-vbinary/gen/vrdivc-psimd-x8.c",
     "src/f32-vbinary/gen/vrsubc-psimd-x4.c",
     "src/f32-vbinary/gen/vrsubc-psimd-x8.c",
     "src/f32-vbinary/gen/vsub-psimd-x4.c",
@@ -538,6 +562,12 @@ NEONFMA_UKERNELS = [
 ]
 
 AARCH64_NEONFMA_UKERNELS = [
+    "src/f32-vbinary/gen/vdiv-neon-x4.c",
+    "src/f32-vbinary/gen/vdiv-neon-x8.c",
+    "src/f32-vbinary/gen/vdivc-neon-x4.c",
+    "src/f32-vbinary/gen/vdivc-neon-x8.c",
+    "src/f32-vbinary/gen/vrdivc-neon-x4.c",
+    "src/f32-vbinary/gen/vrdivc-neon-x8.c",
     "src/f32-gemm/gen/1x8-neonfma-lane-ld64.c",
     "src/f32-gemm/gen/4x2-neonfma-lane-ld64.c",
     "src/f32-gemm/gen/4x8-neonfma-lane-ld128.c",
@@ -647,6 +677,10 @@ SSE_UKERNELS = [
     "src/f32-vbinary/gen/vadd-sse-x8.c",
     "src/f32-vbinary/gen/vaddc-sse-x4.c",
     "src/f32-vbinary/gen/vaddc-sse-x8.c",
+    "src/f32-vbinary/gen/vdiv-sse-x4.c",
+    "src/f32-vbinary/gen/vdiv-sse-x8.c",
+    "src/f32-vbinary/gen/vdivc-sse-x4.c",
+    "src/f32-vbinary/gen/vdivc-sse-x8.c",
     "src/f32-vbinary/gen/vmax-sse-x4.c",
     "src/f32-vbinary/gen/vmax-sse-x8.c",
     "src/f32-vbinary/gen/vmaxc-sse-x4.c",
@@ -659,6 +693,8 @@ SSE_UKERNELS = [
     "src/f32-vbinary/gen/vmul-sse-x8.c",
     "src/f32-vbinary/gen/vmulc-sse-x4.c",
     "src/f32-vbinary/gen/vmulc-sse-x8.c",
+    "src/f32-vbinary/gen/vrdivc-sse-x4.c",
+    "src/f32-vbinary/gen/vrdivc-sse-x8.c",
     "src/f32-vbinary/gen/vrsubc-sse-x4.c",
     "src/f32-vbinary/gen/vrsubc-sse-x8.c",
     "src/f32-vbinary/gen/vsub-sse-x4.c",
@@ -1896,6 +1932,33 @@ xnnpack_unit_test(
     name = "f32_vaddc_test",
     srcs = [
         "test/f32-vaddc.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vdiv_test",
+    srcs = [
+        "test/f32-vdiv.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vdivc_test",
+    srcs = [
+        "test/f32-vdivc.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vrdivc_test",
+    srcs = [
+        "test/f32-vrdivc.cc",
         "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,

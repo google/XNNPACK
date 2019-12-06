@@ -24,6 +24,7 @@ class VBinOpMicrokernelTester {
  public:
   enum class OpType {
     Add,
+    Div,
     Max,
     Min,
     Mul,
@@ -93,7 +94,7 @@ class VBinOpMicrokernelTester {
   void Test(xnn_f32_vbinary_ukernel_function vbinary, OpType op_type, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), rng);
 
     std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
@@ -115,6 +116,9 @@ class VBinOpMicrokernelTester {
         switch (op_type) {
           case OpType::Add:
             y_ref[i] = a_data[i] + b_data[i];
+            break;
+          case OpType::Div:
+            y_ref[i] = a_data[i] / b_data[i];
             break;
           case OpType::Max:
             y_ref[i] = std::max<float>(a_data[i], b_data[i]);

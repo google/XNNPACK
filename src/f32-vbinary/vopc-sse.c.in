@@ -6,7 +6,7 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMN"
-$assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "RSUB"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB"]
 #include <assert.h>
 
 #include <xmmintrin.h>
@@ -17,6 +17,8 @@ $assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "RSUB"]
 
 $_MM_OP_PS = {
 $  "ADD": lambda x: "_mm_add_ps(%s, vb)" % x,
+$  "DIV": lambda x: "_mm_div_ps(%s, vb)" % x,
+$  "RDIV": lambda x: "_mm_div_ps(vb, %s)" % x,
 $  "MAX": lambda x: "_mm_max_ps(%s, vb)" % x,
 $  "MIN": lambda x: "_mm_min_ps(%s, vb)" % x,
 $  "MUL": lambda x: "_mm_mul_ps(%s, vb)" % x,

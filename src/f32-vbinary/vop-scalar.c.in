@@ -5,7 +5,7 @@
 
 $assert BATCH_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMN"
-$assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB"]
+$assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB"]
 #include <assert.h>
 
 #include <xnnpack/common.h>
@@ -17,6 +17,7 @@ $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
 $OP_FUNC = {
 $  "ADD": lambda x, y: "%s + %s" % (x, y),
+$  "DIV": lambda x, y: "%s / %s" % (x, y),
 $  "MAX": lambda x, y: "%s(%s, %s)" % (MAX_F32, x, y),
 $  "MIN": lambda x, y: "%s(%s, %s)" % (MIN_F32, x, y),
 $  "MUL": lambda x, y: "%s * %s" % (x, y),

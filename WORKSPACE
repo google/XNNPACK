@@ -77,10 +77,10 @@ http_archive(
 # psimd library, used for fallback 128-bit SIMD micro-kernels
 http_archive(
     name = "psimd",
-    strip_prefix = "psimd-4f2c53947184b56f58607b9e777416bb63ebbde1",
-    sha256 = "7d1795ebf289af26e404cff5877c284775e491414cf41d7d99ab850ceaced458",
+    strip_prefix = "psimd-8fd2884b88848180904a40c452a362d1ee429ad5",
+    sha256 = "9d4f05bc5a93a0ab8bcef12027ebe54cfddd0050d4862442449c8de11b4e8c17",
     urls = [
-        "https://github.com/Maratyszcza/psimd/archive/4f2c53947184b56f58607b9e777416bb63ebbde1.tar.gz",
+        "https://github.com/Maratyszcza/psimd/archive/8fd2884b88848180904a40c452a362d1ee429ad5.tar.gz",
     ],
     build_file = "@//third_party:psimd.BUILD",
 )
