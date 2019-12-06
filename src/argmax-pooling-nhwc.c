@@ -218,7 +218,7 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   const uint32_t mr = ukernel->mr;
 
   const size_t step_width = pooling_width;
-  const size_t step_height = pooling_size + (output_width * step_width - 1) * pooling_height;
+  const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
 
   if (input_height != argmax_pooling_op->last_input_height ||
       input_width != argmax_pooling_op->last_input_width)

@@ -362,7 +362,7 @@ static enum xnn_status setup_max_pooling2d(
 
   const size_t step_width =
     max_pooling_op->dilation_width > 1 ? pooling_width : min(max_pooling_op->stride_width, pooling_width);
-  const size_t step_height = pooling_size + (output_width * step_width - 1) * pooling_height;
+  const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
 
   if (input_height != max_pooling_op->last_input_height ||
       input_width != max_pooling_op->last_input_width)

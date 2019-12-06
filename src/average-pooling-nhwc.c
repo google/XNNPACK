@@ -428,7 +428,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
   const uint32_t mr = xnn_params.q8.avgpool.mr;
 
   const size_t step_width = min(average_pooling_op->stride_width, pooling_width);
-  const size_t step_height = pooling_size + (output_width * step_width - 1) * pooling_height;
+  const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
   const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
 
   const void** indirection_buffer = (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
@@ -557,7 +557,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
   assert(mr == xnn_params.f32.pavgpool.mr);
 
   const size_t step_width = min(average_pooling_op->stride_width, pooling_width);
-  const size_t step_height = pooling_size + (output_width * step_width - 1) * pooling_height;
+  const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
   const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
 
   const void** indirection_buffer = (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);

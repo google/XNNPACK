@@ -217,7 +217,7 @@ class AvgPoolMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
 
-    std::vector<const uint8_t*> indirect_x(packed_ks() + (n() * s() - 1) * kh());
+    std::vector<const uint8_t*> indirect_x(packed_ks() + (n() - 1) * s() * kh());
     std::vector<uint8_t> x((indirect_x.size() - 1) * x_stride() + kc() + XNN_EXTRA_BYTES / sizeof(uint8_t));
 
     std::vector<uint8_t> zero(kc() + XNN_EXTRA_BYTES / sizeof(uint8_t));
@@ -303,7 +303,7 @@ class AvgPoolMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
 
-    std::vector<const uint8_t*> indirect_x(packed_ks() + (n() * s() - 1) * kh());
+    std::vector<const uint8_t*> indirect_x(packed_ks() + (n() - 1) * s() * kh());
     std::vector<uint8_t> x((indirect_x.size() - 1) * x_stride() + kc() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<int32_t, AlignedAllocator<int32_t, 64>> buf(kc() + XNN_EXTRA_BYTES / sizeof(uint8_t));
 
@@ -390,7 +390,7 @@ class AvgPoolMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
 
-    std::vector<const float*> indirect_x(packed_ks() + (n() * s() - 1) * kh());
+    std::vector<const float*> indirect_x(packed_ks() + (n() - 1) * s() * kh());
     std::vector<float> x((indirect_x.size() - 1) * x_stride() + kc() + XNN_EXTRA_BYTES / sizeof(float));
 
     std::vector<float> zero(kc() + XNN_EXTRA_BYTES / sizeof(float));
@@ -468,7 +468,7 @@ class AvgPoolMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
 
-    std::vector<const float*> indirect_x(packed_ks() + (n() * s() - 1) * kh());
+    std::vector<const float*> indirect_x(packed_ks() + (n() - 1) * s() * kh());
     std::vector<float> x((indirect_x.size() - 1) * x_stride() + kc() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float, AlignedAllocator<float, 64>> buf(kc() + XNN_EXTRA_BYTES / sizeof(float));
 
@@ -548,7 +548,7 @@ class AvgPoolMicrokernelTester {
     auto f32irng = std::bind(std::uniform_real_distribution<float>(), rng);
     auto f32mrng = std::bind(std::uniform_real_distribution<float>(0.1f, 0.5f), rng);
 
-    std::vector<const float*> indirect_x(packed_ks() + (n() * s() - 1) * kh());
+    std::vector<const float*> indirect_x(packed_ks() + (n() - 1) * s() * kh());
     std::vector<float> x((indirect_x.size() - 1) * x_stride() + kc() + XNN_EXTRA_BYTES / sizeof(float));
 
     std::vector<float> zero(kc() + XNN_EXTRA_BYTES / sizeof(float));
@@ -627,7 +627,7 @@ class AvgPoolMicrokernelTester {
     auto f32irng = std::bind(std::uniform_real_distribution<float>(), rng);
     auto f32mrng = std::bind(std::uniform_real_distribution<float>(0.1f, 0.5f), rng);
 
-    std::vector<const float*> indirect_x(packed_ks() + (n() * s() - 1) * kh());
+    std::vector<const float*> indirect_x(packed_ks() + (n() - 1) * s() * kh());
     std::vector<float> x((indirect_x.size() - 1) * x_stride() + kc() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float, AlignedAllocator<float, 64>> buf(kc() + XNN_EXTRA_BYTES / sizeof(float));
 
