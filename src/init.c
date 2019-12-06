@@ -224,6 +224,12 @@ static void init(void) {
       .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vaddc_ukernel__neon_x8,
       .element_tile = 8,
     };
+    xnn_params.f32.vdiv = (struct vbinary_parameters) {
+      .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdiv_ukernel__scalar_x2,
+      .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdivc_ukernel__scalar_x2,
+      .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vrdivc_ukernel__scalar_x2,
+      .element_tile = 2,
+    };
     xnn_params.f32.vmax = (struct vbinary_parameters) {
       .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vmax_ukernel__neon_x8,
       .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vmaxc_ukernel__neon_x8,
@@ -520,6 +526,12 @@ static void init(void) {
       .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vadd_ukernel__neon_x8,
       .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vaddc_ukernel__neon_x8,
       .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vaddc_ukernel__neon_x8,
+      .element_tile = 8,
+    };
+    xnn_params.f32.vdiv = (struct vbinary_parameters) {
+      .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdiv_ukernel__neon_x8,
+      .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdivc_ukernel__neon_x8,
+      .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vrdivc_ukernel__neon_x8,
       .element_tile = 8,
     };
     xnn_params.f32.vmax = (struct vbinary_parameters) {
@@ -848,6 +860,12 @@ static void init(void) {
       .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vaddc_ukernel__sse_x8,
       .element_tile = 8,
     };
+    xnn_params.f32.vdiv = (struct vbinary_parameters) {
+      .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdiv_ukernel__sse_x8,
+      .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdivc_ukernel__sse_x8,
+      .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vrdivc_ukernel__sse_x8,
+      .element_tile = 8,
+    };
     xnn_params.f32.vmax = (struct vbinary_parameters) {
       .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vmax_ukernel__sse_x8,
       .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vmaxc_ukernel__sse_x8,
@@ -1072,6 +1090,12 @@ static void init(void) {
       .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vaddc_ukernel__psimd_x8,
       .element_tile = 8,
     };
+    xnn_params.f32.vdiv = (struct vbinary_parameters) {
+      .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdiv_ukernel__psimd_x4,
+      .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdivc_ukernel__psimd_x4,
+      .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdivc_ukernel__psimd_x4,
+      .element_tile = 4,
+    };
     xnn_params.f32.vmax = (struct vbinary_parameters) {
       .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vmax_ukernel__psimd_x8,
       .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vmaxc_ukernel__psimd_x8,
@@ -1270,6 +1294,12 @@ static void init(void) {
       .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vaddc_ukernel__wasm_x4,
       .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vaddc_ukernel__wasm_x4,
       .element_tile = 8,
+    };
+    xnn_params.f32.vdiv = (struct vbinary_parameters) {
+      .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdiv_ukernel__wasm_x2,
+      .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdivc_ukernel__wasm_x2,
+      .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vrdivc_ukernel__wasm_x2,
+      .element_tile = 2,
     };
     xnn_params.f32.vmax = (struct vbinary_parameters) {
       .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vmax_ukernel__wasm_x4,

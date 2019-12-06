@@ -62,6 +62,7 @@ enum xnn_operator_type {
   xnn_operator_type_convolution_nchw_f32,
   xnn_operator_type_deconvolution_nhwc_f32,
   xnn_operator_type_deconvolution_nhwc_q8,
+  xnn_operator_type_divide_nd_f32,
   xnn_operator_type_fully_connected_nc_f32,
   xnn_operator_type_fully_connected_nc_q8,
   xnn_operator_type_global_average_pooling_nwc_f32,

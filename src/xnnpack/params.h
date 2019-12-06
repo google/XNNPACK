@@ -1363,6 +1363,7 @@ struct xnn_parameters {
     xnn_univector_ukernel_function sigmoid;
     struct prelu_parameters prelu;
     struct vbinary_parameters vadd;
+    struct vbinary_parameters vdiv;
     struct vbinary_parameters vmax;
     struct vbinary_parameters vmin;
     struct vbinary_parameters vmul;

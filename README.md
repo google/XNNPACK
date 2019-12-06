@@ -23,6 +23,7 @@ XNNPACK implements the following neural network operators:
 - 2D Bilinear Resize
 - Add (including broadcasting, two inputs only)
 - Subtract (including broadcasting)
+- Divide (including broadcasting)
 - Maximum (including broadcasting)
 - Minimum (including broadcasting)
 - Multiply (including broadcasting)

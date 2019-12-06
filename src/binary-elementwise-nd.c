@@ -28,7 +28,7 @@ static enum xnn_status create_binary_elementwise_nd_f32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Add/Subtract/Multiply operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create Add/Subtract/Multiply/Divide/Minimum/Maximum operator: XNNPACK is not initialized");
     goto error;
   }
 
@@ -36,19 +36,19 @@ static enum xnn_status create_binary_elementwise_nd_f32(
 
   if (isnan(output_min)) {
     xnn_log_error(
-      "failed to create Add/Subtract/Multiply operator with NaN output lower bound: lower bound must be non-NaN");
+      "failed to create Add/Subtract/Multiply/Divide/Minimum/Maximum operator with NaN output lower bound: lower bound must be non-NaN");
     goto error;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
-      "failed to create Add/Subtract/Multiply operator with NaN output upper bound: upper bound must be non-NaN");
+      "failed to create Add/Subtract/Multiply/Divide/Minimum/Maximum operator with NaN output upper bound: upper bound must be non-NaN");
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Add/Subtract/Multiply operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      "failed to create Add/Subtract/Multiply/Divide/Minimum/Maximum operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
       output_min, output_max);
     goto error;
   }
@@ -57,7 +57,7 @@ static enum xnn_status create_binary_elementwise_nd_f32(
 
   binary_elementwise_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (binary_elementwise_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Add/Subtract/Multiply operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error("failed to allocate %zu bytes for Add/Subtract/Multiply/Divide/Minimum/Maximum operator descriptor", sizeof(struct xnn_operator));
     goto error;
   }
 
@@ -84,6 +84,16 @@ enum xnn_status xnn_create_add_nd_f32(
 {
   return create_binary_elementwise_nd_f32(
     output_min, output_max, flags, xnn_operator_type_add_nd_f32, add_op_out);
+}
+
+enum xnn_status xnn_create_divide_nd_f32(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* divide_op_out)
+{
+  return create_binary_elementwise_nd_f32(
+    output_min, output_max, flags, xnn_operator_type_divide_nd_f32, divide_op_out);
 }
 
 enum xnn_status xnn_create_maximum_nd_f32(
@@ -138,19 +148,19 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
     size_t num_threads)
 {
   if (binary_elementwise_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup Add/Subtract/Multiply (ND, F32) operator: operator type mismatch");
+    xnn_log_error("failed to setup Add/Subtract/Multiply/Divide/Minimum/Maximum (ND, F32) operator: operator type mismatch");
     return xnn_status_invalid_parameter;
   }
   binary_elementwise_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Add/Subtract/Multiply operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup Add/Subtract/Multiply/Divide/Minimum/Maximum operator: XNNPACK is not initialized");
     return xnn_status_uninitialized;
   }
 
   if (max(num_input1_dims, num_input2_dims) > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
-      "failed to setup Add/Subtract/Multiply operator with %zu and %zu dimensions in input shapes: "
+      "failed to setup Add/Subtract/Multiply/Divide/Minimum/Maximum operator with %zu and %zu dimensions in input shapes: "
       "the number of input dimensions must not exceed %d",
       num_input1_dims, num_input2_dims, XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
@@ -158,14 +168,14 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
 
   for (size_t i = 0; i < num_input1_dims; i++) {
     if (input1_shape[i] == 0) {
-      xnn_log_error("failed to setup Add/Subtract/Multiply operator: shape dimension #%zu of input #1 is zero", i);
+      xnn_log_error("failed to setup Add/Subtract/Multiply/Divide/Minimum/Maximum operator: shape dimension #%zu of input #1 is zero", i);
       return xnn_status_invalid_parameter;
     }
   }
 
   for (size_t i = 0; i < num_input2_dims; i++) {
     if (input2_shape[i] == 0) {
-      xnn_log_error("failed to setup Add/Subtract/Multiply operator: shape dimension #%zu of input #2 is zero", i);
+      xnn_log_error("failed to setup Add/Subtract/Multiply/Divide/Minimum/Maximum operator: shape dimension #%zu of input #2 is zero", i);
       return xnn_status_invalid_parameter;
     }
   }
@@ -217,7 +227,7 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
       compressed_input2_shape[num_compressed_dims - 1] *= input1_dim;
       compressed_output_shape[num_compressed_dims - 1] *= input1_dim;
     } else {
-      xnn_log_error("failed to setup Add/Subtract/Multiply operator: "
+      xnn_log_error("failed to setup Add/Subtract/Multiply/Divide/Minimum/Maximum operator: "
         "shape dimension #%zu of input1 (%zu) does not match shape dimension #%zu of input2 (%zu)",
         num_input1_dims - i, input1_dim, num_input2_dims - i, input2_dim);
       return xnn_status_invalid_parameter;
@@ -310,6 +320,26 @@ enum xnn_status xnn_setup_add_nd_f32(
     num_input2_dims, input2_shape,
     input1, input2, output,
     &xnn_params.f32.vadd,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_divide_nd_f32(
+    xnn_operator_t divide_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f32(
+    divide_op, xnn_operator_type_divide_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f32.vdiv,
     pthreadpool_get_threads_count(threadpool));
 }
 

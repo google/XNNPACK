@@ -1167,6 +1167,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(deconvolution-nhwc-test deconvolution-nhwc-test)
 
+  ADD_EXECUTABLE(divide-nd-test test/divide-nd.cc)
+  SET_TARGET_PROPERTIES(divide-nd-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(divide-nd-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(divide-nd-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(divide-nd-test divide-nd-test)
+
   ADD_EXECUTABLE(fully-connected-nc-test test/fully-connected-nc.cc)
   SET_TARGET_PROPERTIES(fully-connected-nc-test PROPERTIES
     CXX_STANDARD 11

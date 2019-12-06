@@ -306,6 +306,23 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_f32(
     float* output,
     pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_divide_nd_f32(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* divide_op_out);
+
+enum xnn_status xnn_setup_divide_nd_f32(
+    xnn_operator_t divide_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_fully_connected_nc_f32(
     size_t input_channels,
     size_t output_channels,

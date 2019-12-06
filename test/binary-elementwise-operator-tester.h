@@ -26,6 +26,7 @@ class BinaryElementwiseOperatorTester {
   enum class OperationType {
     Unknown,
     Add,
+    Divide,
     Maximum,
     Minimum,
     Multiply,
@@ -118,6 +119,8 @@ class BinaryElementwiseOperatorTester {
     switch (operation_type()) {
       case OperationType::Add:
         return a + b;
+      case OperationType::Divide:
+        return a / b;
       case OperationType::Maximum:
         return std::max<float>(a, b);
       case OperationType::Minimum:
@@ -136,7 +139,7 @@ class BinaryElementwiseOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), rng);
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
@@ -217,6 +220,12 @@ class BinaryElementwiseOperatorTester {
               output_min, output_max,
               0, &binary_elementwise_op));
           break;
+        case OperationType::Divide:
+          ASSERT_EQ(xnn_status_success,
+            xnn_create_divide_nd_f32(
+              output_min, output_max,
+              0, &binary_elementwise_op));
+          break;
         case OperationType::Maximum:
           ASSERT_EQ(xnn_status_success,
             xnn_create_maximum_nd_f32(
@@ -251,6 +260,17 @@ class BinaryElementwiseOperatorTester {
         case OperationType::Add:
           ASSERT_EQ(xnn_status_success,
             xnn_setup_add_nd_f32(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Divide:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_divide_nd_f32(
               binary_elementwise_op,
               num_input1_dims(),
               input1_shape().data(),
