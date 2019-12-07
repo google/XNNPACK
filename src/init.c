@@ -700,15 +700,6 @@ static void init(void) {
         .mr = 7,
         .nr = 16,
       };
-    } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_fma3()) {
-      xnn_params.f32.gemm = (struct gemm_parameters) {
-        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_7x8__fma3_broadcast,
-        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_7x8__fma3_broadcast,
-        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__fma3_broadcast,
-        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__fma3_broadcast,
-        .mr = 7,
-        .nr = 8,
-      };
     } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx()) {
       xnn_params.f32.gemm = (struct gemm_parameters) {
         .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_7x8__avx_broadcast,
@@ -749,22 +740,6 @@ static void init(void) {
       xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
         .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x25__avx512f,
         .cr = 16,
-        .mr = 25,
-      };
-    } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_fma3()) {
-      xnn_params.f32.dwconv[0] = (struct dwconv_parameters) {
-        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x4__fma3,
-        .cr = 16,
-        .mr = 4,
-      };
-      xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
-        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up16x9__fma3,
-        .cr = 16,
-        .mr = 9,
-      };
-      xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
-        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x25__fma3,
-        .cr = 8,
         .mr = 25,
       };
     } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx()) {
