@@ -1348,14 +1348,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-bilinear-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-bilinear-test f32-bilinear-test)
 
-  ADD_EXECUTABLE(f32-clamp-nc-test test/f32-clamp.cc)
-  SET_TARGET_PROPERTIES(f32-clamp-nc-test PROPERTIES
+  ADD_EXECUTABLE(f32-clamp-test test/f32-clamp.cc)
+  SET_TARGET_PROPERTIES(f32-clamp-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-clamp-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-clamp-nc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-clamp-nc-test f32-clamp-nc-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-clamp-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-clamp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-clamp-test f32-clamp-test)
 
   ADD_EXECUTABLE(f32-conv-hwc-test test/f32-conv-hwc.cc)
   SET_TARGET_PROPERTIES(f32-conv-hwc-test PROPERTIES
@@ -1474,14 +1474,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-ppmm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-ppmm-test f32-ppmm-test)
 
-  ADD_EXECUTABLE(f32-prelu-nc-test test/f32-prelu.cc)
-  SET_TARGET_PROPERTIES(f32-prelu-nc-test PROPERTIES
+  ADD_EXECUTABLE(f32-prelu-test test/f32-prelu.cc)
+  SET_TARGET_PROPERTIES(f32-prelu-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-prelu-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-prelu-nc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-prelu-nc-test f32-prelu-nc-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-prelu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-prelu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-prelu-test f32-prelu-test)
 
   ADD_EXECUTABLE(f32-raddexpminusmax-test test/f32-raddexpminusmax.cc)
   SET_TARGET_PROPERTIES(f32-raddexpminusmax-test PROPERTIES
@@ -1537,14 +1537,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-spmm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-spmm-test f32-spmm-test)
 
-  ADD_EXECUTABLE(f32-vadd-nc-test test/f32-vadd.cc)
-  SET_TARGET_PROPERTIES(f32-vadd-nc-test PROPERTIES
+  ADD_EXECUTABLE(f32-vadd-test test/f32-vadd.cc)
+  SET_TARGET_PROPERTIES(f32-vadd-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vadd-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-vadd-nc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-vadd-nc-test f32-vadd-nc-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-vadd-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vadd-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vadd-test f32-vadd-test)
 
   ADD_EXECUTABLE(f32-vaddc-test test/f32-vaddc.cc)
   SET_TARGET_PROPERTIES(f32-vaddc-test PROPERTIES
@@ -1735,23 +1735,23 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(q8-igemm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(q8-igemm-test q8-igemm-test)
 
-  ADD_EXECUTABLE(q8-vadd-nc-test test/q8-vadd.cc)
-  SET_TARGET_PROPERTIES(q8-vadd-nc-test PROPERTIES
+  ADD_EXECUTABLE(q8-vadd-test test/q8-vadd.cc)
+  SET_TARGET_PROPERTIES(q8-vadd-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(q8-vadd-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(q8-vadd-nc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(q8-vadd-nc-test q8-vadd-nc-test)
+  TARGET_INCLUDE_DIRECTORIES(q8-vadd-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(q8-vadd-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(q8-vadd-test q8-vadd-test)
 
-  ADD_EXECUTABLE(u8-clamp-nc-test test/u8-clamp.cc)
-  SET_TARGET_PROPERTIES(u8-clamp-nc-test PROPERTIES
+  ADD_EXECUTABLE(u8-clamp-test test/u8-clamp.cc)
+  SET_TARGET_PROPERTIES(u8-clamp-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(u8-clamp-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(u8-clamp-nc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(u8-clamp-nc-test u8-clamp-nc-test)
+  TARGET_INCLUDE_DIRECTORIES(u8-clamp-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(u8-clamp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(u8-clamp-test u8-clamp-test)
 
   ADD_EXECUTABLE(u8-lut32norm-test test/u8-lut32norm.cc)
   SET_TARGET_PROPERTIES(u8-lut32norm-test PROPERTIES
