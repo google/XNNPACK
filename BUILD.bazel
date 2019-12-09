@@ -1782,25 +1782,57 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "mobilenet_v3_large",
+    srcs = ["models/mobilenet-v3-large.cc"],
+    hdrs = ["models/models.h"],
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
+    name = "mobilenet_v3_small",
+    srcs = ["models/mobilenet-v3-small.cc"],
+    hdrs = ["models/models.h"],
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
 xnnpack_benchmark(
     name = "f32_dwconv_e2e_bench",
-    srcs = ["bench/f32-dwconv-e2e.cc"] + MICROKERNEL_BENCHMARK_HDRS,
+    srcs = [
+        "bench/f32-dwconv-e2e.cc",
+        "bench/end2end.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
     copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":mobilenet_v1",
         ":mobilenet_v2",
+        ":mobilenet_v3_large",
+        ":mobilenet_v3_small",
     ],
 )
 
 xnnpack_benchmark(
     name = "f32_gemm_e2e_bench",
-    srcs = ["bench/f32-gemm-e2e.cc"] + MICROKERNEL_BENCHMARK_HDRS,
+    srcs = [
+        "bench/f32-gemm-e2e.cc",
+        "bench/end2end.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
     copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":mobilenet_v1",
         ":mobilenet_v2",
+        ":mobilenet_v3_large",
+        ":mobilenet_v3_small",
     ],
 )
 
@@ -1812,6 +1844,8 @@ xnnpack_benchmark(
         ":bench_utils",
         ":mobilenet_v1",
         ":mobilenet_v2",
+        ":mobilenet_v3_large",
+        ":mobilenet_v3_small",
         "@pthreadpool",
     ],
 )

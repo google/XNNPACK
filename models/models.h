@@ -17,5 +17,7 @@ typedef ExecutionPlan (*ExecutionPlanFactory)(pthreadpool_t threadpool);
 
 ExecutionPlan MobileNetV1(pthreadpool_t threadpool);
 ExecutionPlan MobileNetV2(pthreadpool_t threadpool);
+ExecutionPlan MobileNetV3Large(pthreadpool_t threadpool);
+ExecutionPlan MobileNetV3Small(pthreadpool_t threadpool);
 
 }  // namespace models

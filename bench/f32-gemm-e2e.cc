@@ -13,6 +13,7 @@
 
 #include <benchmark/benchmark.h>
 
+#include "bench/end2end.h"
 #include "bench/utils.h"
 #include "models/models.h"
 #include <xnnpack/gemm.h>
@@ -222,56 +223,25 @@ static void GEMMEnd2EndBenchmark(
       6 /* mr */, 8 /* nr */);
   }
 
-  BENCHMARK_CAPTURE(f32_gemm_4x12__aarch64_neonfma_cortex_a53, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x12__aarch64_neonfma_cortex_a53, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__aarch64_neonfma_ld64)
+  BENCHMARK_END2END(f32_gemm_4x8__aarch64_neonfma_ld128);
+  BENCHMARK_END2END(f32_gemm_6x8__aarch64_neonfma_ld64);
+  BENCHMARK_END2END(f32_gemm_6x8__aarch64_neonfma_ld128);
+  BENCHMARK_END2END(f32_gemm_4x8__aarch64_neonfma_cortex_a53)
+  BENCHMARK_END2END(f32_gemm_4x8__aarch64_neonfma_cortex_a57)
+  BENCHMARK_END2END(f32_gemm_4x8__aarch64_neonfma_cortex_a75)
+  BENCHMARK_END2END(f32_gemm_5x8__aarch64_neonfma_cortex_a75);
+  BENCHMARK_END2END(f32_gemm_6x8__aarch64_neonfma_cortex_a53);
+  BENCHMARK_END2END(f32_gemm_6x8__aarch64_neonfma_cortex_a57);
+  BENCHMARK_END2END(f32_gemm_6x8__aarch64_neonfma_cortex_a73);
+  BENCHMARK_END2END(f32_gemm_6x8__aarch64_neonfma_cortex_a75);
+  BENCHMARK_END2END(f32_gemm_4x12__aarch64_neonfma_cortex_a53)
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch64_neonfma_cortex_a53, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch64_neonfma_cortex_a53, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__neonfma_lane_ld64);
+  BENCHMARK_END2END(f32_gemm_4x8__neonfma_lane_ld128);
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch64_neonfma_cortex_a57, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch64_neonfma_cortex_a57, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch64_neonfma_cortex_a75, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch64_neonfma_cortex_a75, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch64_neonfma_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch64_neonfma_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch64_neonfma_ld128, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch64_neonfma_ld128, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_5x8__aarch64_neonfma_cortex_a75, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_5x8__aarch64_neonfma_cortex_a75, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_cortex_a53, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_cortex_a53, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_cortex_a57, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_cortex_a57, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_cortex_a73, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_cortex_a73, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_cortex_a75, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_cortex_a75, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_ld128, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__aarch64_neonfma_ld128, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neonfma_lane_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neonfma_lane_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neonfma_lane_ld128, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neonfma_lane_ld128, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_lane_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_lane_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_lane_ld128, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_lane_ld128, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_6x8__neonfma_lane_ld64);
+  BENCHMARK_END2END(f32_gemm_6x8__neonfma_lane_ld128);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
@@ -294,11 +264,8 @@ static void GEMMEnd2EndBenchmark(
       benchmark::utils::CheckNEON);
   }
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch32_neon_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch32_neon_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch32_neon_cortex_a75, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__aarch32_neon_cortex_a75, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__aarch32_neon_ld64);
+  BENCHMARK_END2END(f32_gemm_4x8__aarch32_neon_cortex_a75);
 #endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
@@ -483,59 +450,28 @@ static void GEMMEnd2EndBenchmark(
       benchmark::utils::CheckNEONFMA);
   }
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neon_lane_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neon_lane_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__neon_lane_ld64);
+  BENCHMARK_END2END(f32_gemm_4x8__neon_lane_ld128);
+  BENCHMARK_END2END(f32_gemm_6x8__neon_lane_ld64);
+  BENCHMARK_END2END(f32_gemm_6x8__neon_lane_ld128);
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neon_lane_ld128, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neon_lane_ld128, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__neon_dup_ld64);
+  BENCHMARK_END2END(f32_gemm_4x8__neon_dup_ld128);
+  BENCHMARK_END2END(f32_gemm_6x8__neon_dup_ld64);
+  BENCHMARK_END2END(f32_gemm_6x8__neon_dup_ld128);
 
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neon_lane_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neon_lane_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__neonfma_dup_ld64);
+  BENCHMARK_END2END(f32_gemm_4x8__neonfma_dup_ld128);
+  BENCHMARK_END2END(f32_gemm_6x8__neonfma_dup_ld64);
+  BENCHMARK_END2END(f32_gemm_6x8__neonfma_dup_ld128);
 
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neon_lane_ld128, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neon_lane_ld128, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8s4__neon);
+  BENCHMARK_END2END(f32_gemm_6x8s4__neon);
+  BENCHMARK_END2END(f32_gemm_8x8s4__neon);
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neon_dup_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neon_dup_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neon_dup_ld128, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neon_dup_ld128, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neon_dup_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neon_dup_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neon_dup_ld128, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neon_dup_ld128, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neonfma_dup_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neonfma_dup_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neonfma_dup_ld128, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__neonfma_dup_ld128, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_dup_ld64, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_dup_ld64, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_dup_ld128, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__neonfma_dup_ld128, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8s4__neon, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8s4__neon, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8s4__neonfma, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8s4__neonfma, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8s4__neon, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8s4__neon, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8s4__neonfma, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8s4__neonfma, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_8x8s4__neon, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_8x8s4__neon, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_8x8s4__neonfma, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_8x8s4__neonfma, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8s4__neonfma);
+  BENCHMARK_END2END(f32_gemm_6x8s4__neonfma);
+  BENCHMARK_END2END(f32_gemm_8x8s4__neonfma);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -766,74 +702,34 @@ static void GEMMEnd2EndBenchmark(
       benchmark::utils::CheckAVX512F);
   }
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__sse_load1, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__sse_load1, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__sse_load1);
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__sse_dup, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__sse_dup, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__sse_dup);
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8s4__sse, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8s4__sse, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8s4__sse);
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__avx_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__avx_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__avx_broadcast);
+  BENCHMARK_END2END(f32_gemm_5x8__avx_broadcast);
+  BENCHMARK_END2END(f32_gemm_6x8__avx_broadcast);
+  BENCHMARK_END2END(f32_gemm_7x8__avx_broadcast);
+  BENCHMARK_END2END(f32_gemm_3x16__avx_broadcast);
+  BENCHMARK_END2END(f32_gemm_4x16__avx_broadcast);
+  BENCHMARK_END2END(f32_gemm_5x16__avx_broadcast);
 
-  BENCHMARK_CAPTURE(f32_gemm_5x8__avx_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_5x8__avx_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__fma3_broadcast);
+  BENCHMARK_END2END(f32_gemm_5x8__fma3_broadcast);
+  BENCHMARK_END2END(f32_gemm_6x8__fma3_broadcast);
+  BENCHMARK_END2END(f32_gemm_7x8__fma3_broadcast);
+  BENCHMARK_END2END(f32_gemm_8x8__fma3_broadcast);
+  BENCHMARK_END2END(f32_gemm_3x16__fma3_broadcast);
+  BENCHMARK_END2END(f32_gemm_4x16__fma3_broadcast);
+  BENCHMARK_END2END(f32_gemm_5x16__fma3_broadcast);
 
-  BENCHMARK_CAPTURE(f32_gemm_6x8__avx_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__avx_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_7x8__avx_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_7x8__avx_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_3x16__avx_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_3x16__avx_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x16__avx_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x16__avx_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_5x16__avx_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_5x16__avx_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8__fma3_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__fma3_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_5x8__fma3_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_5x8__fma3_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__fma3_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__fma3_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_7x8__fma3_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_7x8__fma3_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_8x8__fma3_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_8x8__fma3_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_3x16__fma3_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_3x16__fma3_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x16__fma3_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x16__fma3_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_5x16__fma3_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_5x16__fma3_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x16__avx512f_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x16__avx512f_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_5x16__avx512f_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_5x16__avx512f_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x16__avx512f_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x16__avx512f_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_7x16__avx512f_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_7x16__avx512f_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_8x16__avx512f_broadcast, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_8x16__avx512f_broadcast, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x16__avx512f_broadcast);
+  BENCHMARK_END2END(f32_gemm_5x16__avx512f_broadcast);
+  BENCHMARK_END2END(f32_gemm_6x16__avx512f_broadcast);
+  BENCHMARK_END2END(f32_gemm_7x16__avx512f_broadcast);
+  BENCHMARK_END2END(f32_gemm_8x16__avx512f_broadcast);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
@@ -891,24 +787,38 @@ static void GEMMEnd2EndBenchmark(
       6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__psimd_loadsplat, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__psimd_loadsplat, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__psimd_loadsplat);
+  BENCHMARK_END2END(f32_gemm_6x8__psimd_loadsplat);
 
-  BENCHMARK_CAPTURE(f32_gemm_6x8__psimd_loadsplat, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__psimd_loadsplat, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8__psimd_splat);
+  BENCHMARK_END2END(f32_gemm_6x8__psimd_splat);
 
-  BENCHMARK_CAPTURE(f32_gemm_4x8__psimd_splat, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8__psimd_splat, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8__psimd_splat, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8__psimd_splat, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_4x8s4__psimd, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_4x8s4__psimd, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_gemm_6x8s4__psimd, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-  BENCHMARK_CAPTURE(f32_gemm_6x8s4__psimd, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+  BENCHMARK_END2END(f32_gemm_4x8s4__psimd);
+  BENCHMARK_END2END(f32_gemm_6x8s4__psimd);
 #endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+
+#if XNN_ARCH_WASM
+  static void f32_gemm_2x4__wasm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_2x4__wasm,
+      xnn_f32_igemm_ukernel_2x4__wasm,
+      xnn_f32_gemm_ukernel_1x4__wasm,
+      xnn_f32_igemm_ukernel_1x4__wasm,
+      2 /* mr */, 4 /* nr */);
+  }
+
+  static void f32_gemm_4x4__wasm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_4x4__wasm,
+      xnn_f32_igemm_ukernel_4x4__wasm,
+      xnn_f32_gemm_ukernel_1x4__wasm,
+      xnn_f32_igemm_ukernel_1x4__wasm,
+      4 /* mr */, 4 /* nr */);
+  }
+
+  BENCHMARK_END2END(f32_gemm_2x4__wasm);
+  BENCHMARK_END2END(f32_gemm_4x4__wasm);
+#endif  // XNN_ARCH_WASM
 
 static void f32_gemm_2x4__scalar(benchmark::State& state, models::ExecutionPlanFactory model) {
   GEMMEnd2EndBenchmark(state, model,
@@ -928,11 +838,8 @@ static void f32_gemm_4x4__scalar(benchmark::State& state, models::ExecutionPlanF
     4 /* mr */, 4 /* nr */);
 }
 
-BENCHMARK_CAPTURE(f32_gemm_2x4__scalar, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK_CAPTURE(f32_gemm_2x4__scalar, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-BENCHMARK_CAPTURE(f32_gemm_4x4__scalar, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK_CAPTURE(f32_gemm_4x4__scalar, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK_END2END(f32_gemm_2x4__scalar);
+BENCHMARK_END2END(f32_gemm_4x4__scalar);
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

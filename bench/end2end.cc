@@ -56,8 +56,18 @@ static void MobileNetV2(benchmark::State& state) {
   End2EndBenchmark(state, models::MobileNetV2);
 }
 
+static void MobileNetV3Large(benchmark::State& state) {
+  End2EndBenchmark(state, models::MobileNetV3Large);
+}
+
+static void MobileNetV3Small(benchmark::State& state) {
+  End2EndBenchmark(state, models::MobileNetV3Small);
+}
+
 BENCHMARK(MobileNetV1)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(MobileNetV2)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(MobileNetV3Large)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(MobileNetV3Small)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
