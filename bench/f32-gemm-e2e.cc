@@ -652,6 +652,36 @@ static void GEMMEnd2EndBenchmark(
       benchmark::utils::CheckFMA3);
   }
 
+  static void f32_gemm_3x16s4__fma3_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_3x16s4__fma3_broadcast,
+      xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast,
+      xnn_f32_gemm_ukernel_1x16s4__fma3_broadcast,
+      xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast,
+      3 /* mr */, 16 /* nr */, 0 /* log2_kr */, 2 /* log2_sr */,
+      benchmark::utils::CheckFMA3);
+  }
+
+  static void f32_gemm_4x16s4__fma3_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_4x16s4__fma3_broadcast,
+      xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast,
+      xnn_f32_gemm_ukernel_1x16s4__fma3_broadcast,
+      xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast,
+      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 2 /* log2_sr */,
+      benchmark::utils::CheckFMA3);
+  }
+
+  static void f32_gemm_5x16s4__fma3_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_ukernel_5x16s4__fma3_broadcast,
+      xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast,
+      xnn_f32_gemm_ukernel_1x16s4__fma3_broadcast,
+      xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast,
+      5 /* mr */, 16 /* nr */, 0 /* log2_kr */, 2 /* log2_sr */,
+      benchmark::utils::CheckFMA3);
+  }
+
   static void f32_gemm_4x16__avx512f_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_ukernel_4x16__avx512f_broadcast,
@@ -724,6 +754,10 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_END2END(f32_gemm_3x16__fma3_broadcast);
   BENCHMARK_END2END(f32_gemm_4x16__fma3_broadcast);
   BENCHMARK_END2END(f32_gemm_5x16__fma3_broadcast);
+
+  BENCHMARK_END2END(f32_gemm_3x16s4__fma3_broadcast);
+  BENCHMARK_END2END(f32_gemm_4x16s4__fma3_broadcast);
+  BENCHMARK_END2END(f32_gemm_5x16s4__fma3_broadcast);
 
   BENCHMARK_END2END(f32_gemm_4x16__avx512f_broadcast);
   BENCHMARK_END2END(f32_gemm_5x16__avx512f_broadcast);

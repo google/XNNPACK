@@ -32122,6 +32122,1878 @@
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, k_eq_4) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(1)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(1)
+      .n(16)
+      .k(4)
+      .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(1)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(1)
+      .n(16)
+      .k(4)
+      .cn_stride(19)
+      .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, k_eq_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t m = 1; m <= 1; m++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(m)
+          .n(n)
+          .k(4)
+          .iterations(1)
+          .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, k_eq_4_subtile_m) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t m = 1; m <= 1; m++) {
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(m)
+        .n(16)
+        .k(4)
+        .iterations(1)
+        .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, k_eq_4_subtile_n) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 1; n <= 16; n++) {
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(1)
+        .n(n)
+        .k(4)
+        .iterations(1)
+        .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, k_lt_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k < 4; k++) {
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(1)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, k_lt_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k < 4; k++) {
+      for (uint32_t m = 1; m <= 1; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(1)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, k_gt_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 5; k < 8; k++) {
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(1)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, k_gt_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 5; k < 8; k++) {
+      for (uint32_t m = 1; m <= 1; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(1)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, k_div_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 8; k <= 40; k += 4) {
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(1)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, k_div_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 8; k <= 40; k += 4) {
+      for (uint32_t m = 1; m <= 1; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(1)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, n_gt_16) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(1)
+          .n(16)
+          .k(k)
+          .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, n_gt_16_strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(1)
+          .n(16)
+          .k(k)
+          .cn_stride(19)
+          .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, n_gt_16_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        for (uint32_t m = 1; m <= 1; m++) {
+          GemmMicrokernelTester()
+            .mr(1)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, n_div_16) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(1)
+          .n(16)
+          .k(k)
+          .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, n_div_16_strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(1)
+          .n(n)
+          .k(k)
+          .cn_stride(19)
+          .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, n_div_16_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        for (uint32_t m = 1; m <= 1; m++) {
+          GemmMicrokernelTester()
+            .mr(1)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(1)
+        .n(16)
+        .k(k)
+        .ks(3)
+        .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, small_kernel_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      for (uint32_t m = 1; m <= 1; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(1)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .ks(3)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, n_gt_16_small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(1)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, n_div_16_small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(1)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, strided_cm_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      for (uint32_t m = 1; m <= 1; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(1)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .cm_stride(19)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, a_offset) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(1)
+        .n(16)
+        .k(k)
+        .ks(3)
+        .a_offset(23)
+        .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, zero) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t mz = 0; mz < 1; mz++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(1)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .a_offset(23)
+          .zero_index(mz)
+          .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, qmin) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(1)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(1)
+      .n(16)
+      .k(4)
+      .qmin(128)
+      .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, qmax) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(1)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(1)
+      .n(16)
+      .k(4)
+      .qmax(128)
+      .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_1X16S4__FMA3_BROADCAST, strided_cm) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(1)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(1)
+      .n(16)
+      .k(4)
+      .cm_stride(19)
+      .Test(xnn_f32_igemm_ukernel_1x16s4__fma3_broadcast);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, k_eq_4) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(3)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(3)
+      .n(16)
+      .k(4)
+      .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(3)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(3)
+      .n(16)
+      .k(4)
+      .cn_stride(19)
+      .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, k_eq_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t m = 1; m <= 3; m++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        GemmMicrokernelTester()
+          .mr(3)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(m)
+          .n(n)
+          .k(4)
+          .iterations(1)
+          .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, k_eq_4_subtile_m) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t m = 1; m <= 3; m++) {
+      GemmMicrokernelTester()
+        .mr(3)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(m)
+        .n(16)
+        .k(4)
+        .iterations(1)
+        .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, k_eq_4_subtile_n) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 1; n <= 16; n++) {
+      GemmMicrokernelTester()
+        .mr(3)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(3)
+        .n(n)
+        .k(4)
+        .iterations(1)
+        .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, k_lt_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k < 4; k++) {
+      GemmMicrokernelTester()
+        .mr(3)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(3)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, k_lt_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k < 4; k++) {
+      for (uint32_t m = 1; m <= 3; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(3)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, k_gt_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 5; k < 8; k++) {
+      GemmMicrokernelTester()
+        .mr(3)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(3)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, k_gt_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 5; k < 8; k++) {
+      for (uint32_t m = 1; m <= 3; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(3)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, k_div_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 8; k <= 40; k += 4) {
+      GemmMicrokernelTester()
+        .mr(3)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(3)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, k_div_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 8; k <= 40; k += 4) {
+      for (uint32_t m = 1; m <= 3; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(3)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, n_gt_16) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(3)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(3)
+          .n(16)
+          .k(k)
+          .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, n_gt_16_strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(3)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(3)
+          .n(16)
+          .k(k)
+          .cn_stride(19)
+          .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, n_gt_16_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        for (uint32_t m = 1; m <= 3; m++) {
+          GemmMicrokernelTester()
+            .mr(3)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, n_div_16) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(3)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(3)
+          .n(16)
+          .k(k)
+          .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, n_div_16_strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(3)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(3)
+          .n(n)
+          .k(k)
+          .cn_stride(19)
+          .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, n_div_16_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        for (uint32_t m = 1; m <= 3; m++) {
+          GemmMicrokernelTester()
+            .mr(3)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      GemmMicrokernelTester()
+        .mr(3)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(3)
+        .n(16)
+        .k(k)
+        .ks(3)
+        .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, small_kernel_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      for (uint32_t m = 1; m <= 3; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(3)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .ks(3)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, n_gt_16_small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(3)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(3)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, n_div_16_small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(3)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(3)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, strided_cm_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      for (uint32_t m = 1; m <= 3; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(3)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .cm_stride(19)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, a_offset) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      GemmMicrokernelTester()
+        .mr(3)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(3)
+        .n(16)
+        .k(k)
+        .ks(3)
+        .a_offset(67)
+        .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, zero) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t mz = 0; mz < 3; mz++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(3)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(3)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .a_offset(67)
+          .zero_index(mz)
+          .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, qmin) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(3)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(3)
+      .n(16)
+      .k(4)
+      .qmin(128)
+      .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, qmax) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(3)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(3)
+      .n(16)
+      .k(4)
+      .qmax(128)
+      .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_3X16S4__FMA3_BROADCAST, strided_cm) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(3)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(3)
+      .n(16)
+      .k(4)
+      .cm_stride(19)
+      .Test(xnn_f32_igemm_ukernel_3x16s4__fma3_broadcast);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, k_eq_4) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(4)
+      .n(16)
+      .k(4)
+      .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(4)
+      .n(16)
+      .k(4)
+      .cn_stride(19)
+      .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, k_eq_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t m = 1; m <= 4; m++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(m)
+          .n(n)
+          .k(4)
+          .iterations(1)
+          .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, k_eq_4_subtile_m) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t m = 1; m <= 4; m++) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(m)
+        .n(16)
+        .k(4)
+        .iterations(1)
+        .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, k_eq_4_subtile_n) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 1; n <= 16; n++) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(4)
+        .n(n)
+        .k(4)
+        .iterations(1)
+        .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, k_lt_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k < 4; k++) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(4)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, k_lt_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k < 4; k++) {
+      for (uint32_t m = 1; m <= 4; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, k_gt_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 5; k < 8; k++) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(4)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, k_gt_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 5; k < 8; k++) {
+      for (uint32_t m = 1; m <= 4; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, k_div_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 8; k <= 40; k += 4) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(4)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, k_div_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 8; k <= 40; k += 4) {
+      for (uint32_t m = 1; m <= 4; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, n_gt_16) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(4)
+          .n(16)
+          .k(k)
+          .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, n_gt_16_strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(4)
+          .n(16)
+          .k(k)
+          .cn_stride(19)
+          .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, n_gt_16_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        for (uint32_t m = 1; m <= 4; m++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, n_div_16) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(4)
+          .n(16)
+          .k(k)
+          .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, n_div_16_strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(4)
+          .n(n)
+          .k(k)
+          .cn_stride(19)
+          .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, n_div_16_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        for (uint32_t m = 1; m <= 4; m++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(4)
+        .n(16)
+        .k(k)
+        .ks(3)
+        .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, small_kernel_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      for (uint32_t m = 1; m <= 4; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .ks(3)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, n_gt_16_small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(4)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, n_div_16_small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(4)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, strided_cm_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      for (uint32_t m = 1; m <= 4; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(4)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .cm_stride(19)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, a_offset) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(4)
+        .n(16)
+        .k(k)
+        .ks(3)
+        .a_offset(83)
+        .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, zero) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t mz = 0; mz < 4; mz++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(4)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .a_offset(83)
+          .zero_index(mz)
+          .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, qmin) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(4)
+      .n(16)
+      .k(4)
+      .qmin(128)
+      .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, qmax) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(4)
+      .n(16)
+      .k(4)
+      .qmax(128)
+      .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_4X16S4__FMA3_BROADCAST, strided_cm) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(4)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(4)
+      .n(16)
+      .k(4)
+      .cm_stride(19)
+      .Test(xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, k_eq_4) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(5)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(5)
+      .n(16)
+      .k(4)
+      .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(5)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(5)
+      .n(16)
+      .k(4)
+      .cn_stride(19)
+      .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, k_eq_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t m = 1; m <= 5; m++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        GemmMicrokernelTester()
+          .mr(5)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(m)
+          .n(n)
+          .k(4)
+          .iterations(1)
+          .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, k_eq_4_subtile_m) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t m = 1; m <= 5; m++) {
+      GemmMicrokernelTester()
+        .mr(5)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(m)
+        .n(16)
+        .k(4)
+        .iterations(1)
+        .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, k_eq_4_subtile_n) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 1; n <= 16; n++) {
+      GemmMicrokernelTester()
+        .mr(5)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(5)
+        .n(n)
+        .k(4)
+        .iterations(1)
+        .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, k_lt_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k < 4; k++) {
+      GemmMicrokernelTester()
+        .mr(5)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(5)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, k_lt_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k < 4; k++) {
+      for (uint32_t m = 1; m <= 5; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(5)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, k_gt_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 5; k < 8; k++) {
+      GemmMicrokernelTester()
+        .mr(5)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(5)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, k_gt_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 5; k < 8; k++) {
+      for (uint32_t m = 1; m <= 5; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(5)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, k_div_4) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 8; k <= 40; k += 4) {
+      GemmMicrokernelTester()
+        .mr(5)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(5)
+        .n(16)
+        .k(k)
+        .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, k_div_4_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 8; k <= 40; k += 4) {
+      for (uint32_t m = 1; m <= 5; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(5)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, n_gt_16) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(5)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(5)
+          .n(16)
+          .k(k)
+          .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, n_gt_16_strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(5)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(5)
+          .n(16)
+          .k(k)
+          .cn_stride(19)
+          .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, n_gt_16_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        for (uint32_t m = 1; m <= 5; m++) {
+          GemmMicrokernelTester()
+            .mr(5)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, n_div_16) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(5)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(5)
+          .n(16)
+          .k(k)
+          .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, n_div_16_strided_cn) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(5)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(5)
+          .n(n)
+          .k(k)
+          .cn_stride(19)
+          .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, n_div_16_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        for (uint32_t m = 1; m <= 5; m++) {
+          GemmMicrokernelTester()
+            .mr(5)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      GemmMicrokernelTester()
+        .mr(5)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(5)
+        .n(16)
+        .k(k)
+        .ks(3)
+        .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, small_kernel_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      for (uint32_t m = 1; m <= 5; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(5)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .ks(3)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, n_gt_16_small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 17; n < 32; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(5)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(5)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, n_div_16_small_kernel) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t n = 32; n <= 48; n += 16) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(5)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(5)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, strided_cm_subtile) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      for (uint32_t m = 1; m <= 5; m++) {
+        for (uint32_t n = 1; n <= 16; n++) {
+          GemmMicrokernelTester()
+            .mr(5)
+            .nr(16)
+            .kr(1)
+            .sr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .cm_stride(19)
+            .iterations(1)
+            .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+        }
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, a_offset) {
+    TEST_REQUIRES_X86_FMA3;
+    for (size_t k = 1; k <= 20; k += 5) {
+      GemmMicrokernelTester()
+        .mr(5)
+        .nr(16)
+        .kr(1)
+        .sr(4)
+        .m(5)
+        .n(16)
+        .k(k)
+        .ks(3)
+        .a_offset(103)
+        .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, zero) {
+    TEST_REQUIRES_X86_FMA3;
+    for (uint32_t mz = 0; mz < 5; mz++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(5)
+          .nr(16)
+          .kr(1)
+          .sr(4)
+          .m(5)
+          .n(16)
+          .k(k)
+          .ks(3)
+          .a_offset(103)
+          .zero_index(mz)
+          .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+      }
+    }
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, qmin) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(5)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(5)
+      .n(16)
+      .k(4)
+      .qmin(128)
+      .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, qmax) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(5)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(5)
+      .n(16)
+      .k(4)
+      .qmax(128)
+      .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+  }
+
+  TEST(F32_IGEMM_5X16S4__FMA3_BROADCAST, strided_cm) {
+    TEST_REQUIRES_X86_FMA3;
+    GemmMicrokernelTester()
+      .mr(5)
+      .nr(16)
+      .kr(1)
+      .sr(4)
+      .m(5)
+      .n(16)
+      .k(4)
+      .cm_stride(19)
+      .Test(xnn_f32_igemm_ukernel_5x16s4__fma3_broadcast);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_IGEMM_1X16__AVX512F_BROADCAST, k_eq_1) {
     TEST_REQUIRES_X86_AVX512F;
     GemmMicrokernelTester()

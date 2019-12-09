@@ -159,6 +159,14 @@
   k-block: 1
 - name: xnn_f32_gemminc_ukernel_7x8__avx_broadcast
   k-block: 1
+- name: xnn_f32_gemminc_ukernel_1x16__avx_broadcast
+  k-block: 1
+- name: xnn_f32_gemminc_ukernel_3x16__avx_broadcast
+  k-block: 1
+- name: xnn_f32_gemminc_ukernel_4x16__avx_broadcast
+  k-block: 1
+- name: xnn_f32_gemminc_ukernel_5x16__avx_broadcast
+  k-block: 1
 - name: xnn_f32_gemminc_ukernel_1x8__fma3_broadcast
   k-block: 1
 - name: xnn_f32_gemminc_ukernel_4x8__fma3_broadcast
@@ -171,6 +179,22 @@
   k-block: 1
 - name: xnn_f32_gemminc_ukernel_8x8__fma3_broadcast
   k-block: 1
+- name: xnn_f32_gemminc_ukernel_1x16__fma3_broadcast
+  k-block: 1
+- name: xnn_f32_gemminc_ukernel_3x16__fma3_broadcast
+  k-block: 1
+- name: xnn_f32_gemminc_ukernel_4x16__fma3_broadcast
+  k-block: 1
+- name: xnn_f32_gemminc_ukernel_5x16__fma3_broadcast
+  k-block: 1
+- name: xnn_f32_gemminc_ukernel_1x16s4__fma3_broadcast
+  k-block: 4
+- name: xnn_f32_gemminc_ukernel_3x16s4__fma3_broadcast
+  k-block: 4
+- name: xnn_f32_gemminc_ukernel_4x16s4__fma3_broadcast
+  k-block: 4
+- name: xnn_f32_gemminc_ukernel_5x16s4__fma3_broadcast
+  k-block: 4
 - name: xnn_f32_gemminc_ukernel_1x16__avx512f_broadcast
   k-block: 1
 - name: xnn_f32_gemminc_ukernel_4x16__avx512f_broadcast

@@ -1,0 +1,190 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR % 8 == 0
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/igemm.h>
+
+
+$ISA = {0: "avx", 3: "fma3"}[FMA]
+void xnn_f32_igemm_ukernel_${MR}x${NR}s4__${ISA}_broadcast(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const float**restrict a,
+    const float*restrict w,
+    float*restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const float* zero,
+    const union xnn_f32_output_params params[restrict static 1])
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(float) == 0);
+  assert(ks != 0);
+  assert(ks % (${MR} * sizeof(void*)) == 0);
+  assert(a_offset % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  float* c0 = c;
+  $for M in range(1, MR):
+    float* c${M} = (float*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  do {
+    __m256 vacc0x${ABC[0:8]} = _mm256_load_ps(w);
+    $for N in range(8, NR, 8):
+      __m256 vacc0x${ABC[N:N+8]} = _mm256_load_ps(w + ${N});
+    $for M in range(1, MR):
+      $for N in range(0, NR, 8):
+        __m256 vacc${M}x${ABC[N:N+8]} = vacc0x${ABC[N:N+8]};
+    w += ${NR};
+
+    size_t p = ks;
+    do {
+      $for M in range(MR):
+        const float* restrict a${M} = a[${M}];
+        assert(a${M} != NULL);
+        if XNN_UNPREDICTABLE(a${M} != zero) {
+          a${M} = (const float*) ((uintptr_t) a${M} + a_offset);
+        }
+      a += ${MR};
+
+      size_t k = kc;
+      while (k >= 4 * sizeof(float)) {
+        $for M in range(MR):
+          __m256 va${M} = _mm256_broadcast_ps((const __m128*) a${M});
+          a${M} += 4;
+
+        $for L in range(4):
+
+          $for N in range(0, NR, 8):
+            const __m256 vb${ABC[N:N+8]}c${L} = _mm256_load_ps(w + ${L * NR + N});
+
+          $for N in range(0, NR, 8):
+            $for M in range(MR):
+              $if FMA == 3:
+                vacc${M}x${ABC[N:N+8]} = _mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}c${L}, vacc${M}x${ABC[N:N+8]});
+              $else:
+                vacc${M}x${ABC[N:N+8]} = _mm_add_ps(vacc${M}x${ABC[N:N+8]}, _mm_mul_ps(va${M}, vb${ABC[N:N+8]}c${L}));
+
+          $if L + 1 != 4:
+            $for M in range(MR):
+              va${M} = _mm256_permute_ps(va${M}, _MM_SHUFFLE(0, 3, 2, 1));
+
+        w += ${4 * NR};
+        k -= 4 * sizeof(float);
+      }
+      if XNN_UNLIKELY(k != 0) {
+        do {
+          $for M in range(MR):
+            const __m256 va${M} = _mm256_broadcast_ss(a${M});
+            a${M} += 1;
+
+          const __m256 vb${ABC[0:8]} = _mm256_load_ps(w);
+          $for N in range(8, NR, 8):
+            const __m256 vb${ABC[N:N+8]} = _mm256_load_ps(w + ${N});
+          w += ${NR};
+
+          $for N in range(0, NR, 8):
+            $for M in range(MR):
+              $if FMA == 3:
+                vacc${M}x${ABC[N:N+8]} = _mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}, vacc${M}x${ABC[N:N+8]});
+              $else:
+                vacc${M}x${ABC[N:N+8]} = _mm256_add_ps(vacc${M}x${ABC[N:N+8]}, _mm256_mul_ps(va${M}, vb${ABC[N:N+8]}));
+
+          k -= sizeof(float);
+        } while (k != 0);
+      }
+      p -= ${MR} * sizeof(void*);
+    } while (p != 0);
+
+    const __m256 vmax = _mm256_broadcast_ps((const __m128*) params->sse.max);
+    $for N in range(0, NR, 8):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+8]} = _mm256_min_ps(vacc${M}x${ABC[N:N+8]}, vmax);
+
+    const __m256 vmin = _mm256_broadcast_ps((const __m128*) params->sse.min);
+    $for N in range(0, NR, 8):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+8]} = _mm256_max_ps(vacc${M}x${ABC[N:N+8]}, vmin);
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in reversed(range(MR)):
+        _mm256_storeu_ps(c${M}, vacc${M}x${ABC[0:8]});
+        $for N in range(8, NR, 8):
+          _mm256_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+8]});
+        c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+
+      a = (const float**restrict) ((uintptr_t) a - ks);
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(NR.bit_length())):
+        $if NR != 1 << LOG2N:
+          if (nc & ${1 << LOG2N}) {
+            $if LOG2N >= 3:
+              $for M in reversed(range(MR)):
+                _mm256_storeu_ps(c${M}, vacc${M}x${ABC[0:8]});
+                $for N in range(8, 1 << LOG2N, 8):
+                  _mm256_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+8]});
+
+              $for M in reversed(range(MR)):
+                $for N in range(0, 1 << (LOG2N - 1), 8):
+                  vacc${M}x${ABC[N:N+8]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+8]};
+
+              $for M in reversed(range(MR)):
+                c${M} += ${1 << LOG2N};
+            $elif LOG2N == 2:
+              $for M in reversed(range(MR)):
+                _mm_storeu_ps(c${M}, vacc${M}x${ABC[0:4]});
+
+              $for M in reversed(range(MR)):
+                vacc${M}x${ABC[0:4]} = _mm256_extractf128_ps(vacc${M}x${ABC[0:8]}, 1);
+
+              $for M in reversed(range(MR)):
+                c${M} += 4;
+            $elif LOG2N == 1:
+              $for M in reversed(range(MR)):
+                _mm_storel_pi((__m64*) c${M}, vacc${M}x${ABC[0:4]});
+
+              $for M in reversed(range(MR)):
+                vacc${M}x${ABC[0:4]} = _mm_movehl_ps(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]});
+
+              $for M in reversed(range(MR)):
+                c${M} += 2;
+            $elif LOG2N == 0:
+              $for M in reversed(range(MR)):
+                _mm_store_ss(c${M}, vacc${M}x${ABC[0:4]});
+          }
+        $if LOG2N == 3:
+          $for M in reversed(range(MR)):
+            __m128 vacc${M}x${ABC[0:4]} = _mm256_castps256_ps128(vacc${M}x${ABC[0:8]});
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}
