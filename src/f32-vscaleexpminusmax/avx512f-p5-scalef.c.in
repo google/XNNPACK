@@ -1,0 +1,168 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ELEMENTS_TILE % 16 == 0
+$assert ELEMENTS_TILE >= 16
+$SIMD_TILE = ELEMENTS_TILE // 16
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/vscaleexpminusmax.h>
+
+
+void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x${ELEMENTS_TILE}(
+    size_t elements,
+    const float* input,
+    float* output,
+    float scale,
+    float max)
+{
+  assert(elements % sizeof(float) == 0);
+
+  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
+  const __m512 vminus_ln2_hi = _mm512_set1_ps(-0x1.62E43p-1f);
+  const __m512 vminus_ln2_lo = _mm512_set1_ps(0x1.05C61p-29f);
+
+  const __m512 vc0 = _mm512_set1_ps(1.0f);
+  const __m512 vc1 = _mm512_set1_ps(0x1.FFFFF6p-1f);
+  const __m512 vc2 = _mm512_set1_ps(0x1.FFFDC6p-2f);
+  const __m512 vc3 = _mm512_set1_ps(0x1.555A80p-3f);
+  const __m512 vc4 = _mm512_set1_ps(0x1.573A1Ap-5f);
+  const __m512 vc5 = _mm512_set1_ps(0x1.0F9F9Cp-7f);
+
+  const __m512 vscale = _mm512_set1_ps(scale);
+  const __m512 vi_max = _mm512_set1_ps(max);
+
+  for (; elements >= ${ELEMENTS_TILE} * sizeof(float); elements -= ${ELEMENTS_TILE} * sizeof(float)) {
+    // Load ${ELEMENTS_TILE} (${SIMD_TILE}x16) inputs at a time.
+    const __m512 vi0 = _mm512_loadu_ps(input);
+    $for N in range(1, SIMD_TILE):
+      const __m512 vi${N} = _mm512_loadu_ps(input + ${N * 16});
+    input += ${ELEMENTS_TILE};
+
+    // Subtract maximum input x := i - i_max.
+    $for N in range(SIMD_TILE):
+      const __m512 vx${N} = _mm512_sub_ps(vi${N}, vi_max);
+
+    // Compute reduced argument elements := round(x / log(2)).
+    $for N in range(SIMD_TILE):
+      __m512 vn${N} = _mm512_roundscale_ps(_mm512_mul_ps(vx${N}, vlog2e), 0);
+
+    // Compute reduced argument t := x - elements * log(2).
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    $for N in range(SIMD_TILE):
+      __m512 vt${N} = _mm512_fmadd_ps(vn${N}, vminus_ln2_hi, vx${N});
+
+    $for N in range(SIMD_TILE):
+      vt${N} = _mm512_fmadd_ps(vn${N}, vminus_ln2_lo, vt${N});
+
+    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    $for N in range(SIMD_TILE):
+      __m512 vp${N} = _mm512_fmadd_ps(vc5, vt${N}, vc4);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm512_fmadd_ps(vp${N}, vt${N}, vc3);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm512_fmadd_ps(vp${N}, vt${N}, vc2);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm512_fmadd_ps(vp${N}, vt${N}, vc1);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm512_fmadd_ps(vp${N}, vt${N}, vc0);
+
+    // Reconstruct the final f value:
+    //   f = 2**elements * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
+    //     = 2**elements * p
+    $for N in range(SIMD_TILE):
+      __m512 vf${N} = _mm512_scalef_ps(vp${N}, vn${N});
+
+    // Multiply by scale.
+    $for N in range(SIMD_TILE):
+      vf${N} = _mm512_mul_ps(vf${N}, vscale);
+
+    // Store ${ELEMENTS_TILE} (${SIMD_TILE}x16) outputs at a time.
+    _mm512_storeu_ps(output, vf0);
+    $for N in range(SIMD_TILE):
+      _mm512_storeu_ps(output + ${N * 16}, vf${N});
+    output += ${ELEMENTS_TILE};
+  }
+  for (; elements >= 16 * sizeof(float); elements -= 16 * sizeof(float)) {
+    // Load 16 inputs at a time.
+    const __m512 vi = _mm512_loadu_ps(input);
+    input += 16;
+
+    // Subtract maximum input x := i - i_max.
+    const __m512 vx = _mm512_sub_ps(vi, vi_max);
+
+    // Compute reduced argument elements := round(x / log(2)).
+    __m512 vn = _mm512_roundscale_ps(_mm512_mul_ps(vx, vlog2e), 0);
+
+    // Compute reduced argument t := x - elements * log(2).
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
+    vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
+
+    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    __m512 vp = _mm512_fmadd_ps(vc5, vt, vc4);
+    vp = _mm512_fmadd_ps(vp, vt, vc3);
+    vp = _mm512_fmadd_ps(vp, vt, vc2);
+    vp = _mm512_fmadd_ps(vp, vt, vc1);
+    vp = _mm512_fmadd_ps(vp, vt, vc0);
+
+    // Reconstruct the final f value:
+    //   f = 2**elements * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
+    //     = 2**elements * p
+    __m512 vf = _mm512_scalef_ps(vp, vn);
+
+    // Multiply by scale.
+    vf = _mm512_mul_ps(vf, vscale);
+
+    // Store 16 outputs at a time.
+    _mm512_storeu_ps(output, vf);
+    output += 16;
+  }
+  if (elements != 0) {
+    // Prepare mask for valid 32-bit elements (depends on elements).
+    elements >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << elements) - UINT32_C(1)));
+
+    // Load up to 15 inputs at a time.
+    const __m512 vi = _mm512_mask_loadu_ps(_mm512_undefined_ps(), vmask, input);
+
+    // Subtract maximum input x := i - i_max.
+    const __m512 vx = _mm512_sub_ps(vi, vi_max);
+
+    // Compute reduced argument elements := round(x / log(2)).
+    __m512 vn = _mm512_roundscale_ps(_mm512_mul_ps(vx, vlog2e), 0);
+
+    // Compute reduced argument t := x - elements * log(2).
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
+    vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
+
+    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    __m512 vp = _mm512_fmadd_ps(vc5, vt, vc4);
+    vp = _mm512_fmadd_ps(vp, vt, vc3);
+    vp = _mm512_fmadd_ps(vp, vt, vc2);
+    vp = _mm512_fmadd_ps(vp, vt, vc1);
+    vp = _mm512_fmadd_ps(vp, vt, vc0);
+
+    // Reconstruct the final f value:
+    //   f = 2**elements * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
+    //     = 2**elements * p
+    __m512 vf = _mm512_scalef_ps(vp, vn);
+
+    // Multiply by scale.
+    vf = _mm512_mul_ps(vf, vscale);
+
+    // Store up to 15 outputs at a time.
+    _mm512_mask_storeu_ps(output, vmask, vf);
+  }
+}

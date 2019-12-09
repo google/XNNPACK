@@ -1,0 +1,28 @@
+# Copyright 2019 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x8
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x16
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x24
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x32
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x40
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x48
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x56
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x64
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x72
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x80
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x88
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x96
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x16
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x32
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x48
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x64
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x80
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x96
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x112
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x144
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x160
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x176
+- name: xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x192

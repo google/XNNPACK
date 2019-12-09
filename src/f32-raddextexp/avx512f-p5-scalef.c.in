@@ -1,0 +1,204 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ELEMENTS_TILE % 16 == 0
+$assert ELEMENTS_TILE >= 16
+$SIMD_TILE = ELEMENTS_TILE // 16
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+#include <math.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/raddextexp.h>
+
+
+void xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t elements,
+    const float* x,
+    float* sum)
+{
+  assert(elements % sizeof(float) == 0);
+
+  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
+  const __m512 vminus_ln2_hi = _mm512_set1_ps(-0x1.62E43p-1f);
+  const __m512 vminus_ln2_lo = _mm512_set1_ps(0x1.05C61p-29f);
+
+  const __m512 vc0 = _mm512_set1_ps(1.0f);
+  const __m512 vc1 = _mm512_set1_ps(0x1.FFFFF6p-1f);
+  const __m512 vc2 = _mm512_set1_ps(0x1.FFFDC6p-2f);
+  const __m512 vc3 = _mm512_set1_ps(0x1.555A80p-3f);
+  const __m512 vc4 = _mm512_set1_ps(0x1.573A1Ap-5f);
+  const __m512 vc5 = _mm512_set1_ps(0x1.0F9F9Cp-7f);
+
+  const __m512 vminus_inf = _mm512_set1_ps(-INFINITY);
+
+  $for K in range(ACCUMULATORS):
+    __m512 vaccv${K} = _mm512_setzero_ps();
+  $for K in range(ACCUMULATORS):
+    __m512 vacce${K} = vminus_inf;
+  for (; elements >= ${ELEMENTS_TILE} * sizeof(float); elements -= ${ELEMENTS_TILE} * sizeof(float)) {
+    // Load ${ELEMENTS_TILE} (${SIMD_TILE}x16) inputs at a time.
+    const __m512 vx0 = _mm512_loadu_ps(x);
+    $for N in range(1, SIMD_TILE):
+      const __m512 vx${N} = _mm512_loadu_ps(x + ${N * 16});
+    x += ${ELEMENTS_TILE};
+
+    // Compute reduced argument elements := round(x / log(2)).
+    $for N in range(SIMD_TILE):
+      const __m512 vn${N} = _mm512_roundscale_ps(_mm512_mul_ps(vx${N}, vlog2e), 0);
+
+    // Compute reduced argument t := x - elements * log(2).
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    $for N in range(SIMD_TILE):
+      __m512 vt${N} = _mm512_fmadd_ps(vn${N}, vminus_ln2_hi, vx${N});
+
+    $for N in range(SIMD_TILE):
+      vt${N} = _mm512_fmadd_ps(vn${N}, vminus_ln2_lo, vt${N});
+
+    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    $for N in range(SIMD_TILE):
+      __m512 vp${N} = _mm512_fmadd_ps(vc5, vt${N}, vc4);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm512_fmadd_ps(vp${N}, vt${N}, vc3);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm512_fmadd_ps(vp${N}, vt${N}, vc2);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm512_fmadd_ps(vp${N}, vt${N}, vc1);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm512_fmadd_ps(vp${N}, vt${N}, vc0);
+
+    // Accumulate "extended" floating-point numbers in ("mantissa", "exponent") representation where
+    //  - vnX is "exponent"
+    //  - vpX is "mantissa"
+    //   
+    // exp2(ae) * av + exp2(be) * bv = 
+    //   = exp2(max(ae, be)) * exp2(ae - max(ae, be)) * av + exp2(max(ae, be)) * exp2(be - max(ae, be)) * bv
+    //   = exp2(max_e) * (exp2(ae - max_e) * av + exp2(be - max_e) * bv)
+    //   = exp2(max_e) * (exp2(delta_ae) * av + exp2(delta_be) * bv)
+    //
+    // For computational efficiency we add three "extended" floating-point numbers at a time.
+    $for N in range(SIMD_TILE):
+      $if N < ACCUMULATORS:
+        __m512 vmax_e${N} = _mm512_max_ps(vacce${N}, vn${N});
+      $else:
+        vmax_e${N % ACCUMULATORS} = _mm512_max_ps(vmax_e${N % ACCUMULATORS}, vn${N});
+
+    $for K in range(ACCUMULATORS):
+      const __m512 vdelta_acce${K} = _mm512_sub_ps(vacce${K}, vmax_e${K});
+    $for N in range(SIMD_TILE):
+      const __m512 vdelta_e${N} = _mm512_sub_ps(vn${N}, vmax_e${N % ACCUMULATORS});
+
+    // Update accumulated "mantissa" and "exponent" values
+    $for K in range(ACCUMULATORS):
+      vaccv${K} = _mm512_scalef_ps(vaccv${K}, vdelta_acce${K});
+    $for N in range(SIMD_TILE):
+      vaccv${N % ACCUMULATORS} = _mm512_add_ps(vaccv${N % ACCUMULATORS}, _mm512_scalef_ps(vp${N}, vdelta_e${N}));
+
+    $for K in range(ACCUMULATORS):
+      vacce${K} = vmax_e${K};
+  }
+
+  // Reduce partial sums of "extended" floating-point numbers into a single "extended" SIMD vector of sums.
+  $if ACCUMULATORS > 1:
+    $for A in range(0, ACCUMULATORS, 2):
+      $if A + 1 < ACCUMULATORS:
+        const __m512 vmax_acce${ABC[A:A+2]} = _mm512_max_ps(vacce${A}, vacce${A+1});
+      $else:
+        const __m512 vmax_acce${ABC[A]} = vacce${A};
+    $ACC_SLICE = 2
+    $while ACC_SLICE < ACCUMULATORS:
+      $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+        $if A + ACC_SLICE < ACCUMULATORS:
+          const __m512 vmax_acce${ABC[A:min(A+ACC_SLICE*2, ACCUMULATORS)]} = _mm512_max_ps(vmax_acce${ABC[A:A+ACC_SLICE]}, vmax_acce${ABC[A+ACC_SLICE:min(ACCUMULATORS,A+ACC_SLICE*2)]});
+      $ACC_SLICE *= 2
+
+    $for K in range(ACCUMULATORS):
+      const __m512 vdelta_acce${K} = _mm512_sub_ps(vacce${K}, vmax_acce${ABC[0:ACCUMULATORS]});
+
+    __m512 vaccv = _mm512_scalef_ps(vaccv0, vdelta_acce0);
+    $for K in range(1, ACCUMULATORS):
+      vaccv = _mm512_add_ps(vaccv, _mm512_scalef_ps(vaccv${K}, vdelta_acce${K}));
+    __m512 vacce = vmax_acce${ABC[0:ACCUMULATORS]};
+  $else:
+    __m512 vaccv = vaccv0;
+    __m512 vacce = vacce0;
+
+  for (; elements >= 16 * sizeof(float); elements -= 16 * sizeof(float)) {
+    // Load 16 inputs at a time.
+    const __m512 vx = _mm512_loadu_ps(x);
+    x += 16;
+
+    // Compute reduced argument elements := round(x / log(2)).
+    const __m512 vn = _mm512_roundscale_ps(_mm512_mul_ps(vx, vlog2e), 0);
+
+    // Compute reduced argument t := x - elements * log(2).
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
+    vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
+
+    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    __m512 vp = _mm512_fmadd_ps(vc5, vt, vc4);
+    vp = _mm512_fmadd_ps(vp, vt, vc3);
+    vp = _mm512_fmadd_ps(vp, vt, vc2);
+    vp = _mm512_fmadd_ps(vp, vt, vc1);
+    vp = _mm512_fmadd_ps(vp, vt, vc0);
+
+    // Accumulate "extended" floating-point numbers in ("mantissa", "exponent") representation.
+    const __m512 vmax_e = _mm512_max_ps(vacce, vn);
+    const __m512 vdelta_acce = _mm512_sub_ps(vacce, vmax_e);
+    const __m512 vdelta_e = _mm512_sub_ps(vn, vmax_e);
+    vaccv = _mm512_scalef_ps(vaccv, vdelta_acce);
+    vaccv = _mm512_add_ps(vaccv, _mm512_scalef_ps(vp, vdelta_e));
+
+    vacce = vmax_e;
+  }
+  if XNN_UNLIKELY(elements != 0) {
+    // Prepare mask for valid 32-bit elements (depends on elements).
+    elements >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << elements) - UINT32_C(1)));
+
+    // Load up to 15 inputs at a time.
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+
+    // Compute reduced argument elements := round(x / log(2)).
+    const __m512 vn = _mm512_roundscale_ps(_mm512_mul_ps(vx, vlog2e), 0);
+
+    // Compute reduced argument t := x - elements * log(2).
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
+    vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
+
+    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    __m512 vp = _mm512_fmadd_ps(vc5, vt, vc4);
+    vp = _mm512_fmadd_ps(vp, vt, vc3);
+    vp = _mm512_fmadd_ps(vp, vt, vc2);
+    vp = _mm512_fmadd_ps(vp, vt, vc1);
+    vp = _mm512_fmadd_ps(vp, vt, vc0);
+
+    // Accumulate "extended" floating-point numbers in ("mantissa", "exponent") representation.
+    const __m512 vmax_e = _mm512_mask_max_ps(vacce, vmask, vacce, vn);
+    const __m512 vdelta_acce = _mm512_sub_ps(vacce, vmax_e);
+    const __m512 vdelta_e = _mm512_sub_ps(vn, vmax_e);
+    vaccv = _mm512_mask_scalef_ps(vaccv, vmask, vaccv, vdelta_acce);
+    vaccv = _mm512_mask_add_ps(vaccv, vmask, vaccv, _mm512_maskz_scalef_ps(vmask, vp, vdelta_e));
+    vacce = vmax_e;
+  }
+
+  // Reduce partial sums of "extended" floating-point numbers into a single "extended" floating-point sum.
+  const float vmax_acce = _mm512_reduce_max_ps(vacce);
+  const __m512 vdelta_acce = _mm512_sub_ps(vacce, _mm512_set1_ps(vmax_acce));
+
+  sum[0] = _mm512_reduce_add_ps(_mm512_scalef_ps(vaccv, vdelta_acce));
+  sum[1] = vmax_acce;
+
+  _mm256_zeroupper();
+}
