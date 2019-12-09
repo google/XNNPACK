@@ -764,16 +764,28 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-gemm/gen/5x8-avx-broadcast.c
   src/f32-gemm/gen/6x8-avx-broadcast.c
   src/f32-gemm/gen/7x8-avx-broadcast.c
+  src/f32-gemm/gen/1x16-avx-broadcast.c
+  src/f32-gemm/gen/3x16-avx-broadcast.c
+  src/f32-gemm/gen/4x16-avx-broadcast.c
+  src/f32-gemm/gen/5x16-avx-broadcast.c
   src/f32-gemm/gen-inc/1x8-avx-broadcast.c
   src/f32-gemm/gen-inc/4x8-avx-broadcast.c
   src/f32-gemm/gen-inc/5x8-avx-broadcast.c
   src/f32-gemm/gen-inc/6x8-avx-broadcast.c
   src/f32-gemm/gen-inc/7x8-avx-broadcast.c
+  src/f32-gemm/gen-inc/1x16-avx-broadcast.c
+  src/f32-gemm/gen-inc/3x16-avx-broadcast.c
+  src/f32-gemm/gen-inc/4x16-avx-broadcast.c
+  src/f32-gemm/gen-inc/5x16-avx-broadcast.c
   src/f32-igemm/gen/1x8-avx-broadcast.c
   src/f32-igemm/gen/4x8-avx-broadcast.c
   src/f32-igemm/gen/5x8-avx-broadcast.c
   src/f32-igemm/gen/6x8-avx-broadcast.c
   src/f32-igemm/gen/7x8-avx-broadcast.c
+  src/f32-igemm/gen/1x16-avx-broadcast.c
+  src/f32-igemm/gen/3x16-avx-broadcast.c
+  src/f32-igemm/gen/4x16-avx-broadcast.c
+  src/f32-igemm/gen/5x16-avx-broadcast.c
   src/f32-rmax/avx.c
   src/f32-vscale/avx-unroll32.c)
 
@@ -796,18 +808,30 @@ SET(XNNPACK_FMA3_MICROKERNEL_SRCS
   src/f32-gemm/gen/6x8-fma3-broadcast.c
   src/f32-gemm/gen/7x8-fma3-broadcast.c
   src/f32-gemm/gen/8x8-fma3-broadcast.c
+  src/f32-gemm/gen/1x16-fma3-broadcast.c
+  src/f32-gemm/gen/3x16-fma3-broadcast.c
+  src/f32-gemm/gen/4x16-fma3-broadcast.c
+  src/f32-gemm/gen/5x16-fma3-broadcast.c
   src/f32-gemm/gen-inc/1x8-fma3-broadcast.c
   src/f32-gemm/gen-inc/4x8-fma3-broadcast.c
   src/f32-gemm/gen-inc/5x8-fma3-broadcast.c
   src/f32-gemm/gen-inc/6x8-fma3-broadcast.c
   src/f32-gemm/gen-inc/7x8-fma3-broadcast.c
   src/f32-gemm/gen-inc/8x8-fma3-broadcast.c
+  src/f32-gemm/gen-inc/1x16-fma3-broadcast.c
+  src/f32-gemm/gen-inc/3x16-fma3-broadcast.c
+  src/f32-gemm/gen-inc/4x16-fma3-broadcast.c
+  src/f32-gemm/gen-inc/5x16-fma3-broadcast.c
   src/f32-igemm/gen/1x8-fma3-broadcast.c
   src/f32-igemm/gen/4x8-fma3-broadcast.c
   src/f32-igemm/gen/5x8-fma3-broadcast.c
   src/f32-igemm/gen/6x8-fma3-broadcast.c
   src/f32-igemm/gen/7x8-fma3-broadcast.c
-  src/f32-igemm/gen/8x8-fma3-broadcast.c)
+  src/f32-igemm/gen/8x8-fma3-broadcast.c
+  src/f32-igemm/gen/1x16-fma3-broadcast.c
+  src/f32-igemm/gen/3x16-fma3-broadcast.c
+  src/f32-igemm/gen/4x16-fma3-broadcast.c
+  src/f32-igemm/gen/5x16-fma3-broadcast.c)
 
 SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/f32-raddexpminusmax/avx2-p5-unroll64.c
