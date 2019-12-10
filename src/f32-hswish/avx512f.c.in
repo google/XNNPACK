@@ -5,7 +5,7 @@
 
 $assert BATCH_TILE % 16 == 0
 $assert BATCH_TILE >= 16
-$ABC = "456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <immintrin.h>
@@ -65,7 +65,7 @@ void xnn_f32_hswish_ukernel__avx512f_x${BATCH_TILE}(
     }
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
-    assert(n <= 16 * sizeof(float));
+    assert(n <= 15 * sizeof(float));
     // Prepare mask for valid 32-bit elements (depends on n).
     n >>= 2 /* log2(sizeof(float)) */;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));

@@ -31,24 +31,24 @@ void xnn_f32_hswish_ukernel__avx512f_x32(
   const __m512 vzero = _mm512_setzero_ps();
 
   for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 vx456789ABCDEFGHIJ = _mm512_loadu_ps(x);
-    const __m512 vxKLMNOPQRSTUVWXYZ = _mm512_loadu_ps(x + 16);
+    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(x);
+    const __m512 vxGHIJKLMNOPQRSTUV = _mm512_loadu_ps(x + 16);
     x += 32;
 
-    __m512 vacc456789ABCDEFGHIJ = _mm512_fmadd_ps(vx456789ABCDEFGHIJ, vsixth, vhalf);
-    __m512 vaccKLMNOPQRSTUVWXYZ = _mm512_fmadd_ps(vxKLMNOPQRSTUVWXYZ, vsixth, vhalf);
+    __m512 vacc0123456789ABCDEF = _mm512_fmadd_ps(vx0123456789ABCDEF, vsixth, vhalf);
+    __m512 vaccGHIJKLMNOPQRSTUV = _mm512_fmadd_ps(vxGHIJKLMNOPQRSTUV, vsixth, vhalf);
 
-    vacc456789ABCDEFGHIJ = _mm512_max_ps(vacc456789ABCDEFGHIJ, vzero);
-    vaccKLMNOPQRSTUVWXYZ = _mm512_max_ps(vaccKLMNOPQRSTUVWXYZ, vzero);
+    vacc0123456789ABCDEF = _mm512_max_ps(vacc0123456789ABCDEF, vzero);
+    vaccGHIJKLMNOPQRSTUV = _mm512_max_ps(vaccGHIJKLMNOPQRSTUV, vzero);
 
-    vacc456789ABCDEFGHIJ = _mm512_min_ps(vacc456789ABCDEFGHIJ, vone);
-    vaccKLMNOPQRSTUVWXYZ = _mm512_min_ps(vaccKLMNOPQRSTUVWXYZ, vone);
+    vacc0123456789ABCDEF = _mm512_min_ps(vacc0123456789ABCDEF, vone);
+    vaccGHIJKLMNOPQRSTUV = _mm512_min_ps(vaccGHIJKLMNOPQRSTUV, vone);
 
-    vacc456789ABCDEFGHIJ = _mm512_mul_ps(vacc456789ABCDEFGHIJ, vx456789ABCDEFGHIJ);
-    vaccKLMNOPQRSTUVWXYZ = _mm512_mul_ps(vaccKLMNOPQRSTUVWXYZ, vxKLMNOPQRSTUVWXYZ);
+    vacc0123456789ABCDEF = _mm512_mul_ps(vacc0123456789ABCDEF, vx0123456789ABCDEF);
+    vaccGHIJKLMNOPQRSTUV = _mm512_mul_ps(vaccGHIJKLMNOPQRSTUV, vxGHIJKLMNOPQRSTUV);
 
-    _mm512_storeu_ps(y, vacc456789ABCDEFGHIJ);
-    _mm512_storeu_ps(y + 16, vaccKLMNOPQRSTUVWXYZ);
+    _mm512_storeu_ps(y, vacc0123456789ABCDEF);
+    _mm512_storeu_ps(y + 16, vaccGHIJKLMNOPQRSTUV);
     y += 32;
   }
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
@@ -63,7 +63,7 @@ void xnn_f32_hswish_ukernel__avx512f_x32(
   }
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
-    assert(n <= 16 * sizeof(float));
+    assert(n <= 15 * sizeof(float));
     // Prepare mask for valid 32-bit elements (depends on n).
     n >>= 2 /* log2(sizeof(float)) */;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));

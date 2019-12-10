@@ -32,18 +32,18 @@ void xnn_f32_hswish_ukernel__fma3_x8(
   const __m256 vzero = _mm256_setzero_ps();
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    const __m256 vx456789AB = _mm256_loadu_ps(x);
+    const __m256 vx01234567 = _mm256_loadu_ps(x);
     x += 8;
 
-    __m256 vacc456789AB = _mm256_fmadd_ps(vx456789AB, vsixth, vhalf);
+    __m256 vacc01234567 = _mm256_fmadd_ps(vx01234567, vsixth, vhalf);
 
-    vacc456789AB = _mm256_max_ps(vacc456789AB, vzero);
+    vacc01234567 = _mm256_max_ps(vacc01234567, vzero);
 
-    vacc456789AB = _mm256_min_ps(vacc456789AB, vone);
+    vacc01234567 = _mm256_min_ps(vacc01234567, vone);
 
-    vacc456789AB = _mm256_mul_ps(vacc456789AB, vx456789AB);
+    vacc01234567 = _mm256_mul_ps(vacc01234567, vx01234567);
 
-    _mm256_storeu_ps(y, vacc456789AB);
+    _mm256_storeu_ps(y, vacc01234567);
     y += 8;
   }
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {

@@ -32,24 +32,24 @@ void xnn_f32_hswish_ukernel__fma3_x16(
   const __m256 vzero = _mm256_setzero_ps();
 
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m256 vx456789AB = _mm256_loadu_ps(x);
-    const __m256 vxCDEFGHIJ = _mm256_loadu_ps(x + 8);
+    const __m256 vx01234567 = _mm256_loadu_ps(x);
+    const __m256 vx89ABCDEF = _mm256_loadu_ps(x + 8);
     x += 16;
 
-    __m256 vacc456789AB = _mm256_fmadd_ps(vx456789AB, vsixth, vhalf);
-    __m256 vaccCDEFGHIJ = _mm256_fmadd_ps(vxCDEFGHIJ, vsixth, vhalf);
+    __m256 vacc01234567 = _mm256_fmadd_ps(vx01234567, vsixth, vhalf);
+    __m256 vacc89ABCDEF = _mm256_fmadd_ps(vx89ABCDEF, vsixth, vhalf);
 
-    vacc456789AB = _mm256_max_ps(vacc456789AB, vzero);
-    vaccCDEFGHIJ = _mm256_max_ps(vaccCDEFGHIJ, vzero);
+    vacc01234567 = _mm256_max_ps(vacc01234567, vzero);
+    vacc89ABCDEF = _mm256_max_ps(vacc89ABCDEF, vzero);
 
-    vacc456789AB = _mm256_min_ps(vacc456789AB, vone);
-    vaccCDEFGHIJ = _mm256_min_ps(vaccCDEFGHIJ, vone);
+    vacc01234567 = _mm256_min_ps(vacc01234567, vone);
+    vacc89ABCDEF = _mm256_min_ps(vacc89ABCDEF, vone);
 
-    vacc456789AB = _mm256_mul_ps(vacc456789AB, vx456789AB);
-    vaccCDEFGHIJ = _mm256_mul_ps(vaccCDEFGHIJ, vxCDEFGHIJ);
+    vacc01234567 = _mm256_mul_ps(vacc01234567, vx01234567);
+    vacc89ABCDEF = _mm256_mul_ps(vacc89ABCDEF, vx89ABCDEF);
 
-    _mm256_storeu_ps(y, vacc456789AB);
-    _mm256_storeu_ps(y + 8, vaccCDEFGHIJ);
+    _mm256_storeu_ps(y, vacc01234567);
+    _mm256_storeu_ps(y + 8, vacc89ABCDEF);
     y += 16;
   }
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
