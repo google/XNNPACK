@@ -1,0 +1,87 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB"]
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vbinary.h>
+
+
+static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
+$_MM256_OP_PS = {
+$  "ADD": lambda x: "_mm256_add_ps(%s, vb)" % x,
+$  "DIV": lambda x: "_mm256_div_ps(%s, vb)" % x,
+$  "RDIV": lambda x: "_mm256_div_ps(vb, %s)" % x,
+$  "MAX": lambda x: "_mm256_max_ps(%s, vb)" % x,
+$  "MIN": lambda x: "_mm256_min_ps(%s, vb)" % x,
+$  "MUL": lambda x: "_mm256_mul_ps(%s, vb)" % x,
+$  "SUB": lambda x: "_mm256_sub_ps(%s, vb)" % x,
+$  "RSUB": lambda x: "_mm256_sub_ps(vb, %s)" % x,
+$}[OP]
+void xnn_f32_v${OP.lower()}c_ukernel__avx_x${BATCH_TILE}(
+    size_t n,
+    const float* a,
+    const float* b,
+    float* y,
+    const union xnn_f32_output_params params[restrict static 1])
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+
+  const __m256 vy_min = _mm256_broadcast_ps((const __m128*) params->sse.min);
+  const __m256 vy_max = _mm256_broadcast_ps((const __m128*) params->sse.max);
+
+  const __m256 vb = _mm256_broadcast_ss(b);
+  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+    const __m256 va${ABC[0:8]} = _mm256_loadu_ps(a);
+    $for N in range(8, BATCH_TILE, 8):
+      const __m256 va${ABC[N:N+8]} = _mm256_loadu_ps(a + ${N});
+    a += ${BATCH_TILE};
+
+    $for N in range(0, BATCH_TILE, 8):
+      __m256 vy${ABC[N:N+8]} = ${_MM256_OP_PS("va" + ABC[N:N+8])};
+
+    $for N in range(0, BATCH_TILE, 8):
+      vy${ABC[N:N+8]} = _mm256_max_ps(vy${ABC[N:N+8]}, vy_min);
+
+    $for N in range(0, BATCH_TILE, 8):
+      vy${ABC[N:N+8]} = _mm256_min_ps(vy${ABC[N:N+8]}, vy_max);
+
+    _mm256_storeu_ps(y, vy${ABC[0:8]});
+    $for N in range(8, BATCH_TILE, 8):
+      _mm256_storeu_ps(y + ${N}, vy${ABC[N:N+8]});
+    y += ${BATCH_TILE};
+  }
+  $if BATCH_TILE >= 8:
+    for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
+      const __m256 va = _mm256_loadu_ps(a);
+      a += 8;
+
+      __m256 vy = ${_MM256_OP_PS("va")};
+      vy = _mm256_max_ps(vy, vy_min);
+      vy = _mm256_min_ps(vy, vy_max);
+      _mm256_storeu_ps(y, vy);
+      y += 8;
+    }
+  if XNN_UNLIKELY(n != 0) {
+    assert(n >= 1 * sizeof(float));
+    assert(n <= 7 * sizeof(float));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - n));
+
+    const __m256 va = _mm256_maskload_ps(a, vmask);
+
+    __m256 vy = ${_MM256_OP_PS("va")};
+    vy = _mm256_max_ps(vy, vy_min);
+    vy = _mm256_min_ps(vy, vy_max);
+    _mm256_maskstore_ps(y, vmask, vy);
+  }
+}

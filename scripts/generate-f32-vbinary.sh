@@ -157,7 +157,7 @@ tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=SUB  -D BATCH_TILE=8 -o src/f3
 tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=RSUB -D BATCH_TILE=4 -o src/f32-vbinary/gen/vrsubc-psimd-x4.c
 tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=RSUB -D BATCH_TILE=8 -o src/f32-vbinary/gen/vrsubc-psimd-x8.c
 
-################################### x86 SSE ###################################
+################################# x86 128-bit #################################
 tools/xngen src/f32-vbinary/vop-sse.c.in -D OP=ADD -D BATCH_TILE=4 -o src/f32-vbinary/gen/vadd-sse-x4.c
 tools/xngen src/f32-vbinary/vop-sse.c.in -D OP=ADD -D BATCH_TILE=8 -o src/f32-vbinary/gen/vadd-sse-x8.c
 tools/xngen src/f32-vbinary/vop-sse.c.in -D OP=DIV -D BATCH_TILE=4 -o src/f32-vbinary/gen/vdiv-sse-x4.c
@@ -187,6 +187,68 @@ tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=SUB  -D BATCH_TILE=4 -o src/f32-
 tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=SUB  -D BATCH_TILE=8 -o src/f32-vbinary/gen/vsubc-sse-x8.c
 tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=RSUB -D BATCH_TILE=4 -o src/f32-vbinary/gen/vrsubc-sse-x4.c
 tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=RSUB -D BATCH_TILE=8 -o src/f32-vbinary/gen/vrsubc-sse-x8.c
+
+################################# x86 256-bit #################################
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=ADD -D BATCH_TILE=8  -o src/f32-vbinary/gen/vadd-avx-x8.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=ADD -D BATCH_TILE=16 -o src/f32-vbinary/gen/vadd-avx-x16.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=DIV -D BATCH_TILE=8  -o src/f32-vbinary/gen/vdiv-avx-x8.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=DIV -D BATCH_TILE=16 -o src/f32-vbinary/gen/vdiv-avx-x16.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=MAX -D BATCH_TILE=8  -o src/f32-vbinary/gen/vmax-avx-x8.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=MAX -D BATCH_TILE=16 -o src/f32-vbinary/gen/vmax-avx-x16.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=MIN -D BATCH_TILE=8  -o src/f32-vbinary/gen/vmin-avx-x8.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=MIN -D BATCH_TILE=16 -o src/f32-vbinary/gen/vmin-avx-x16.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=MUL -D BATCH_TILE=8  -o src/f32-vbinary/gen/vmul-avx-x8.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=MUL -D BATCH_TILE=16 -o src/f32-vbinary/gen/vmul-avx-x16.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=SUB -D BATCH_TILE=8  -o src/f32-vbinary/gen/vsub-avx-x8.c
+tools/xngen src/f32-vbinary/vop-avx.c.in -D OP=SUB -D BATCH_TILE=16 -o src/f32-vbinary/gen/vsub-avx-x16.c
+
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=ADD  -D BATCH_TILE=8  -o src/f32-vbinary/gen/vaddc-avx-x8.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=ADD  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vaddc-avx-x16.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=DIV  -D BATCH_TILE=8  -o src/f32-vbinary/gen/vdivc-avx-x8.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=DIV  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vdivc-avx-x16.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=RDIV -D BATCH_TILE=8  -o src/f32-vbinary/gen/vrdivc-avx-x8.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=RDIV -D BATCH_TILE=16 -o src/f32-vbinary/gen/vrdivc-avx-x16.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=MAX  -D BATCH_TILE=8  -o src/f32-vbinary/gen/vmaxc-avx-x8.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=MAX  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vmaxc-avx-x16.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=MIN  -D BATCH_TILE=8  -o src/f32-vbinary/gen/vminc-avx-x8.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=MIN  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vminc-avx-x16.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=MUL  -D BATCH_TILE=8  -o src/f32-vbinary/gen/vmulc-avx-x8.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=MUL  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vmulc-avx-x16.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=SUB  -D BATCH_TILE=8  -o src/f32-vbinary/gen/vsubc-avx-x8.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=SUB  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vsubc-avx-x16.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=RSUB -D BATCH_TILE=8  -o src/f32-vbinary/gen/vrsubc-avx-x8.c
+tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=RSUB -D BATCH_TILE=16 -o src/f32-vbinary/gen/vrsubc-avx-x16.c
+
+################################# x86 512-bit #################################
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=ADD -D BATCH_TILE=16 -o src/f32-vbinary/gen/vadd-avx512f-x16.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=ADD -D BATCH_TILE=32 -o src/f32-vbinary/gen/vadd-avx512f-x32.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=DIV -D BATCH_TILE=16 -o src/f32-vbinary/gen/vdiv-avx512f-x16.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=DIV -D BATCH_TILE=32 -o src/f32-vbinary/gen/vdiv-avx512f-x32.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=MAX -D BATCH_TILE=16 -o src/f32-vbinary/gen/vmax-avx512f-x16.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=MAX -D BATCH_TILE=32 -o src/f32-vbinary/gen/vmax-avx512f-x32.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=MIN -D BATCH_TILE=16 -o src/f32-vbinary/gen/vmin-avx512f-x16.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=MIN -D BATCH_TILE=32 -o src/f32-vbinary/gen/vmin-avx512f-x32.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=MUL -D BATCH_TILE=16 -o src/f32-vbinary/gen/vmul-avx512f-x16.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=MUL -D BATCH_TILE=32 -o src/f32-vbinary/gen/vmul-avx512f-x32.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=SUB -D BATCH_TILE=16 -o src/f32-vbinary/gen/vsub-avx512f-x16.c
+tools/xngen src/f32-vbinary/vop-avx512f.c.in -D OP=SUB -D BATCH_TILE=32 -o src/f32-vbinary/gen/vsub-avx512f-x32.c
+
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=ADD  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vaddc-avx512f-x16.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=ADD  -D BATCH_TILE=32 -o src/f32-vbinary/gen/vaddc-avx512f-x32.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=DIV  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vdivc-avx512f-x16.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=DIV  -D BATCH_TILE=32 -o src/f32-vbinary/gen/vdivc-avx512f-x32.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=RDIV -D BATCH_TILE=16 -o src/f32-vbinary/gen/vrdivc-avx512f-x16.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=RDIV -D BATCH_TILE=32 -o src/f32-vbinary/gen/vrdivc-avx512f-x32.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=MAX  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vmaxc-avx512f-x16.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=MAX  -D BATCH_TILE=32 -o src/f32-vbinary/gen/vmaxc-avx512f-x32.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=MIN  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vminc-avx512f-x16.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=MIN  -D BATCH_TILE=32 -o src/f32-vbinary/gen/vminc-avx512f-x32.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=MUL  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vmulc-avx512f-x16.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=MUL  -D BATCH_TILE=32 -o src/f32-vbinary/gen/vmulc-avx512f-x32.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SUB  -D BATCH_TILE=16 -o src/f32-vbinary/gen/vsubc-avx512f-x16.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SUB  -D BATCH_TILE=32 -o src/f32-vbinary/gen/vsubc-avx512f-x32.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=RSUB -D BATCH_TILE=16 -o src/f32-vbinary/gen/vrsubc-avx512f-x16.c
+tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=RSUB -D BATCH_TILE=32 -o src/f32-vbinary/gen/vrsubc-avx512f-x32.c
 
 ################################## Unit tests #################################
 tools/generate-vbinary-test.py --spec test/f32-vadd.yaml --output test/f32-vadd.cc

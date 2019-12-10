@@ -795,6 +795,34 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x16-avx-broadcast.c
   src/f32-igemm/gen/5x16-avx-broadcast.c
   src/f32-rmax/avx.c
+  src/f32-vbinary/gen/vadd-avx-x8.c
+  src/f32-vbinary/gen/vadd-avx-x16.c
+  src/f32-vbinary/gen/vaddc-avx-x8.c
+  src/f32-vbinary/gen/vaddc-avx-x16.c
+  src/f32-vbinary/gen/vdiv-avx-x8.c
+  src/f32-vbinary/gen/vdiv-avx-x16.c
+  src/f32-vbinary/gen/vdivc-avx-x8.c
+  src/f32-vbinary/gen/vdivc-avx-x16.c
+  src/f32-vbinary/gen/vmax-avx-x8.c
+  src/f32-vbinary/gen/vmax-avx-x16.c
+  src/f32-vbinary/gen/vmaxc-avx-x8.c
+  src/f32-vbinary/gen/vmaxc-avx-x16.c
+  src/f32-vbinary/gen/vmin-avx-x8.c
+  src/f32-vbinary/gen/vmin-avx-x16.c
+  src/f32-vbinary/gen/vminc-avx-x8.c
+  src/f32-vbinary/gen/vminc-avx-x16.c
+  src/f32-vbinary/gen/vmul-avx-x8.c
+  src/f32-vbinary/gen/vmul-avx-x16.c
+  src/f32-vbinary/gen/vmulc-avx-x8.c
+  src/f32-vbinary/gen/vmulc-avx-x16.c
+  src/f32-vbinary/gen/vrdivc-avx-x8.c
+  src/f32-vbinary/gen/vrdivc-avx-x16.c
+  src/f32-vbinary/gen/vrsubc-avx-x8.c
+  src/f32-vbinary/gen/vrsubc-avx-x16.c
+  src/f32-vbinary/gen/vsub-avx-x8.c
+  src/f32-vbinary/gen/vsub-avx-x16.c
+  src/f32-vbinary/gen/vsubc-avx-x8.c
+  src/f32-vbinary/gen/vsubc-avx-x16.c
   src/f32-vscale/avx-unroll32.c)
 
 SET(XNNPACK_FMA3_MICROKERNEL_SRCS
@@ -993,6 +1021,34 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x192-acc3.c
   src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x192-acc6.c
   src/f32-rmax/avx512f.c
+  src/f32-vbinary/gen/vadd-avx512f-x16.c
+  src/f32-vbinary/gen/vadd-avx512f-x32.c
+  src/f32-vbinary/gen/vaddc-avx512f-x16.c
+  src/f32-vbinary/gen/vaddc-avx512f-x32.c
+  src/f32-vbinary/gen/vdiv-avx512f-x16.c
+  src/f32-vbinary/gen/vdiv-avx512f-x32.c
+  src/f32-vbinary/gen/vdivc-avx512f-x16.c
+  src/f32-vbinary/gen/vdivc-avx512f-x32.c
+  src/f32-vbinary/gen/vmax-avx512f-x16.c
+  src/f32-vbinary/gen/vmax-avx512f-x32.c
+  src/f32-vbinary/gen/vmaxc-avx512f-x16.c
+  src/f32-vbinary/gen/vmaxc-avx512f-x32.c
+  src/f32-vbinary/gen/vmin-avx512f-x16.c
+  src/f32-vbinary/gen/vmin-avx512f-x32.c
+  src/f32-vbinary/gen/vminc-avx512f-x16.c
+  src/f32-vbinary/gen/vminc-avx512f-x32.c
+  src/f32-vbinary/gen/vmul-avx512f-x16.c
+  src/f32-vbinary/gen/vmul-avx512f-x32.c
+  src/f32-vbinary/gen/vmulc-avx512f-x16.c
+  src/f32-vbinary/gen/vmulc-avx512f-x32.c
+  src/f32-vbinary/gen/vrdivc-avx512f-x16.c
+  src/f32-vbinary/gen/vrdivc-avx512f-x32.c
+  src/f32-vbinary/gen/vrsubc-avx512f-x16.c
+  src/f32-vbinary/gen/vrsubc-avx512f-x32.c
+  src/f32-vbinary/gen/vsub-avx512f-x16.c
+  src/f32-vbinary/gen/vsub-avx512f-x32.c
+  src/f32-vbinary/gen/vsubc-avx512f-x16.c
+  src/f32-vbinary/gen/vsubc-avx512f-x32.c
   src/f32-vscale/avx512f-unroll64.c
   src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x16.c
   src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x32.c
