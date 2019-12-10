@@ -2045,7 +2045,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-sigmoid-eval PRIVATE XNNPACK benchmark fp16)
 
   # ---[ Build end-to-end microbenchmarks
-  ADD_LIBRARY(bench-models OBJECT
+  ADD_LIBRARY(bench-models STATIC
     models/mobilenet-v1.cc
     models/mobilenet-v2.cc
     models/mobilenet-v3-large.cc
