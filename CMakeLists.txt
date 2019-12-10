@@ -202,7 +202,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/1x4-scalar.c
   src/f32-gemm/gen-inc/2x4-scalar.c
   src/f32-gemm/gen-inc/4x4-scalar.c
-  src/f32-hswish/scalar.c
+  src/f32-hswish/gen/scalar-x1.c
+  src/f32-hswish/gen/scalar-x2.c
+  src/f32-hswish/gen/scalar-x4.c
   src/f32-igemm/gen/1x4-scalar.c
   src/f32-igemm/gen/2x4-scalar.c
   src/f32-igemm/gen/4x2-scalar.c
@@ -340,7 +342,8 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/6x8-psimd-loadsplat.c
   src/f32-gemm/gen-inc/6x8-psimd-splat.c
   src/f32-gemm/gen-inc/6x8s4-psimd.c
-  src/f32-hswish/psimd.c
+  src/f32-hswish/gen/psimd-x4.c
+  src/f32-hswish/gen/psimd-x8.c
   src/f32-igemm/gen/1x8-psimd-loadsplat.c
   src/f32-igemm/gen/1x8-psimd-splat.c
   src/f32-igemm/gen/1x8s4-psimd.c
@@ -439,7 +442,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/4x8s4-neon.c
   src/f32-gemm/gen-inc/6x8s4-neon.c
   src/f32-gemm/gen-inc/8x8s4-neon.c
-  src/f32-hswish/neon.c
+  src/f32-hswish/gen/neon-x4.c
+  src/f32-hswish/gen/neon-x8.c
   src/f32-igemm/gen/1x8-neon-lane-ld64.c
   src/f32-igemm/gen/4x2-neon-lane-ld64.c
   src/f32-igemm/gen/4x4-neon-lane-ld64.c
@@ -546,7 +550,8 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/4x8s4-neonfma.c
   src/f32-gemm/gen-inc/6x8s4-neonfma.c
   src/f32-gemm/gen-inc/8x8s4-neonfma.c
-  src/f32-hswish/neonfma.c
+  src/f32-hswish/gen/neonfma-x4.c
+  src/f32-hswish/gen/neonfma-x8.c
   src/f32-ppmm/gen/4x8-neonfma.c
   src/f32-ppmm/gen/8x8-neonfma.c
   src/f32-sigmoid/gen/neonfma-p5-nr2fma-x16.c
@@ -659,7 +664,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/4x8-sse-dup.c
   src/f32-gemm/gen-inc/4x8-sse-load1.c
   src/f32-gemm/gen-inc/4x8s4-sse.c
-  src/f32-hswish/sse.c
+  src/f32-hswish/gen/sse-x4.c
+  src/f32-hswish/gen/sse-x8.c
   src/f32-igemm/gen/1x8-sse-dup.c
   src/f32-igemm/gen/1x8-sse-load1.c
   src/f32-igemm/gen/1x8s4-sse.c
@@ -777,6 +783,8 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/3x16-avx-broadcast.c
   src/f32-gemm/gen-inc/4x16-avx-broadcast.c
   src/f32-gemm/gen-inc/5x16-avx-broadcast.c
+  src/f32-hswish/gen/avx-x8.c
+  src/f32-hswish/gen/avx-x16.c
   src/f32-igemm/gen/1x8-avx-broadcast.c
   src/f32-igemm/gen/4x8-avx-broadcast.c
   src/f32-igemm/gen/5x8-avx-broadcast.c
@@ -830,6 +838,8 @@ SET(XNNPACK_FMA3_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/3x16s4-fma3-broadcast.c
   src/f32-gemm/gen-inc/4x16s4-fma3-broadcast.c
   src/f32-gemm/gen-inc/5x16s4-fma3-broadcast.c
+  src/f32-hswish/gen/fma3-x8.c
+  src/f32-hswish/gen/fma3-x16.c
   src/f32-igemm/gen/1x8-fma3-broadcast.c
   src/f32-igemm/gen/4x8-fma3-broadcast.c
   src/f32-igemm/gen/5x8-fma3-broadcast.c
@@ -938,6 +948,8 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/6x16-avx512f-broadcast.c
   src/f32-gemm/gen-inc/7x16-avx512f-broadcast.c
   src/f32-gemm/gen-inc/8x16-avx512f-broadcast.c
+  src/f32-hswish/gen/avx512f-x16.c
+  src/f32-hswish/gen/avx512f-x32.c
   src/f32-igemm/gen/1x16-avx512f-broadcast.c
   src/f32-igemm/gen/4x16-avx512f-broadcast.c
   src/f32-igemm/gen/5x16-avx512f-broadcast.c

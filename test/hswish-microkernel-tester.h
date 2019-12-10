@@ -27,14 +27,14 @@ class HSwishMicrokernelTester {
     Scalar,
   };
 
-  inline HSwishMicrokernelTester& n(size_t n) {
-    assert(n != 0);
-    this->n_ = n;
+  inline HSwishMicrokernelTester& batch_size(size_t batch_size) {
+    assert(batch_size != 0);
+    this->batch_size_ = batch_size;
     return *this;
   }
 
-  inline size_t n() const {
-    return this->n_;
+  inline size_t batch_size() const {
+    return this->batch_size_;
   }
 
   inline HSwishMicrokernelTester& inplace(bool inplace) {
@@ -60,9 +60,9 @@ class HSwishMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
 
-    std::vector<float> x(n() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(n() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<float> y_ref(n());
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(f32rng));
       if (inplace()) {
@@ -84,23 +84,23 @@ class HSwishMicrokernelTester {
       }
 
       // Compute reference results.
-      for (size_t i = 0; i < n(); i++) {
+      for (size_t i = 0; i < batch_size(); i++) {
         y_ref[i] = x_data[i] * std::max(std::min(x_data[i] + 3.0f, 6.0f), 0.0f) / 6.0f;
       }
 
       // Call optimized micro-kernel.
-      hswish(n() * sizeof(float), x_data, y.data(), &params);
+      hswish(batch_size() * sizeof(float), x_data, y.data(), &params);
 
       // Verify results.
-      for (size_t i = 0; i < n(); i++) {
+      for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_NEAR(y_ref[i], y[i], std::abs(y_ref[i]) * 1.0e-6f)
-          << "at position " << i << ", n = " << n();
+          << "at position " << i << ", batch_size = " << batch_size();
       }
     }
   }
 
  private:
-  size_t n_{1};
+  size_t batch_size_{1};
   bool inplace_{false};
-  size_t iterations_{15};
+  size_t iterations_{5};
 };

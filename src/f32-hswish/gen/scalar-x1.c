@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-hswish/scalar.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -5,11 +9,12 @@
 
 #include <assert.h>
 
-#include <xnnpack/hswish.h>
+#include <xnnpack/common.h>
 #include <xnnpack/math.h>
+#include <xnnpack/vbinary.h>
 
 
-void xnn_f32_hswish_ukernel__scalar(
+void xnn_f32_hswish_ukernel__scalar_x1(
     size_t n,
     const float* x,
     float* y,
@@ -24,13 +29,12 @@ void xnn_f32_hswish_ukernel__scalar(
   assert(vhalf == 0.5f);
   assert(vone == 1.0f);
 
-  do {
+  for (; n >= sizeof(float); n -= sizeof(float)) {
     const float vx = *x++;
-
-    const float vt = math_min_f32(math_max_f32(vx * vsixth + vhalf, 0.0f), vone);
-    const float vy = vt * vx;
-
-    *y++ = vy;
-    n -= 4;
-  } while (n != 0);
+    float vacc = vx * vsixth + vhalf;
+    vacc = math_max_f32(vacc, 0.0f);
+    vacc = math_min_f32(vacc, vone);
+    vacc = vacc * vx;
+    *y++ = vacc;
+  }
 }

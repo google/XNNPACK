@@ -1,0 +1,81 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <psimd.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vbinary.h>
+
+
+void xnn_f32_hswish_ukernel__psimd_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_hswish_params params[restrict static 1])
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+
+  const psimd_f32 vsixth = psimd_load_splat_f32(&params->scalar.sixth);
+  const psimd_f32 vhalf = psimd_load_splat_f32(&params->scalar.half);
+  const psimd_f32 vone = psimd_load_splat_f32(&params->scalar.one);
+  const psimd_f32 vzero = psimd_splat_f32(0.0f);
+
+  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+    const psimd_f32 vx${ABC[0:4]} = psimd_load_f32(x);
+    $for N in range(4, BATCH_TILE, 4):
+      const psimd_f32 vx${ABC[N:N+4]} = psimd_load_f32(x + ${N});
+    x += ${BATCH_TILE};
+
+    $for N in range(0, BATCH_TILE, 4):
+      psimd_f32 vacc${ABC[N:N+4]} = psimd_qfma_f32(vhalf, vx${ABC[N:N+4]}, vsixth);
+
+    $for N in range(0, BATCH_TILE, 4):
+      vacc${ABC[N:N+4]} = psimd_max_f32(vacc${ABC[N:N+4]}, vzero);
+
+    $for N in range(0, BATCH_TILE, 4):
+      vacc${ABC[N:N+4]} = psimd_min_f32(vacc${ABC[N:N+4]}, vone);
+
+    $for N in range(0, BATCH_TILE, 4):
+      vacc${ABC[N:N+4]} = psimd_mul_f32(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]});
+
+    psimd_store_f32(y, vacc${ABC[0:4]});
+    $for N in range(4, BATCH_TILE, 4):
+      psimd_store_f32(y + ${N}, vacc${ABC[N:N+4]});
+    y += ${BATCH_TILE};
+  }
+  $if BATCH_TILE >= 4:
+    for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
+      const psimd_f32 vx0123 = psimd_load_f32(x);
+      x += 4;
+      psimd_f32 vacc0123 = psimd_qfma_f32(vhalf, vx0123, vsixth);
+      vacc0123 = psimd_max_f32(vacc0123, vzero);
+      vacc0123 = psimd_min_f32(vacc0123, vone);
+      vacc0123 = psimd_mul_f32(vacc0123, vx0123);
+      psimd_store_f32(y, vacc0123);
+      y += 4;
+    }
+  if XNN_UNLIKELY(n != 0) {
+    const psimd_f32 vx0123 = psimd_load_f32(x);
+    psimd_f32 vacc0123 = psimd_qfma_f32(vhalf, vx0123, vsixth);
+    vacc0123 = psimd_max_f32(vacc0123, vzero);
+    vacc0123 = psimd_min_f32(vacc0123, vone);
+    vacc0123 = psimd_mul_f32(vacc0123, vx0123);
+
+    if (n & (2 * sizeof(float))) {
+      psimd_store2_f32(y, vacc0123);
+      vacc0123 = psimd_concat_hi_f32(vacc0123, vacc0123);
+      y += 2;
+    }
+    if (n & (1 * sizeof(float))) {
+      psimd_store1_f32(y, vacc0123);
+    }
+  }
+}
