@@ -72,9 +72,9 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
         MOVLO  r6, r8                // c3
 
         // Load clamping_params values
-        VLD1.32     {d4[]-d5[]}, [r5]!
-        LDR    r7, [sp, 112]         // cn_stride
-        VLD1.32     {d6[]-d7[]}, [r5]
+        VLD1.32     {d4[], d5[]}, [r5]!
+        LDR         r7, [sp, 112]    // cn_stride
+        VLD1.32     {d6[], d7[]}, [r5]
 
 1:
         # Load initial bias from w into accumulators

@@ -200,8 +200,8 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75
         LDR    r5, [sp, 116]         // clamping_params
 
         // Load clamping_params values
-        VLD1.32     {d4[]-d5[]}, [r5]!
-        VLD1.32     {d6[]-d7[]}, [r5]
+        VLD1.32     {d4[], d5[]}, [r5]!
+        VLD1.32     {d6[], d7[]}, [r5]
 
         // Clamp
         VMIN.F32     q8,  q8, q2
