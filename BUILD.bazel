@@ -6,7 +6,7 @@
 # Description:
 #   XNNPACK - optimized floating-point neural network operators library
 
-load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_min_size_copts", "xnnpack_optional_armcl_copts", "xnnpack_optional_armcl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_copts", "xnnpack_unit_test", "xnnpack_visibility")
+load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_min_size_copts", "xnnpack_optional_armcl_copts", "xnnpack_optional_armcl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_copts", "xnnpack_std_cxxopts", "xnnpack_unit_test", "xnnpack_visibility")
 
 licenses(["notice"])
 
@@ -1847,6 +1847,7 @@ cc_library(
     name = "mobilenet_v1",
     srcs = ["models/mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
     linkstatic = True,
     deps = [
         ":XNNPACK",
@@ -1858,6 +1859,7 @@ cc_library(
     name = "mobilenet_v2",
     srcs = ["models/mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
     linkstatic = True,
     deps = [
         ":XNNPACK",
@@ -1869,6 +1871,7 @@ cc_library(
     name = "mobilenet_v3_large",
     srcs = ["models/mobilenet-v3-large.cc"],
     hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
     linkstatic = True,
     deps = [
         ":XNNPACK",
@@ -1880,6 +1883,7 @@ cc_library(
     name = "mobilenet_v3_small",
     srcs = ["models/mobilenet-v3-small.cc"],
     hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
     linkstatic = True,
     deps = [
         ":XNNPACK",
