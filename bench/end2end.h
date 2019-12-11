@@ -13,4 +13,4 @@
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3_large, models::MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
-  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3_small, models::MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
+  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3_small, models::MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
