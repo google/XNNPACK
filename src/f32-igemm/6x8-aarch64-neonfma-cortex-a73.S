@@ -420,6 +420,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a73
         FMLA v31.4s, v19.4s, v11.s[3]
         B.NE 5f
 
+        .p2align 3
 4:
         # ks loop
         SUBS x9, x9, 48  // ks -= MR * sizeof(void*)

@@ -401,6 +401,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a73
 
         # Clamp
 3:
+        SUBS x1, x1, 8
         FMIN v20.4s, v20.4s, v6.4s
         FMIN v21.4s, v21.4s, v6.4s
         FMIN v22.4s, v22.4s, v6.4s
@@ -427,7 +428,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a73
         FMAX v31.4s, v31.4s, v7.4s
 
         # Store full 6 x 8
-        SUBS x1, x1, 8
         B.LO 7f
 
         STP q30, q31,  [x7]
@@ -449,6 +449,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a73
         ADD  x6,  x6, x14
         SUB  x4,  x4, x2 // a5 -= kc
 
+        NOP
         B.HI 0b
 
         # Restore d8-d15 from stack
@@ -602,6 +603,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a73
         FMLA v29.4s, v13.4s,  v4.s[0]
         FMLA v31.4s, v13.4s,  v5.s[0]
         B 3b
+
+        .p2align 3
 
         # Store odd width
 7:
