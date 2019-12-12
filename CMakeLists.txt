@@ -1084,6 +1084,7 @@ SET(XNNPACK_AARCH32_ASM_MICROKERNEL_SRCS
   src/q8-dwconv/up8x9-aarch32-neon.S
   src/f32-gemm/4x8-aarch32-neon-cortex-a53.S
   src/f32-gemm/4x8-aarch32-neon-cortex-a75.S
+  src/f32-gemm/4x8-aarch32-neon-pld-cortex-a75.S
   src/f32-gemm/4x8-aarch32-neon-ld64.S)
 
 SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS

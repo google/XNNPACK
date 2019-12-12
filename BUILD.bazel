@@ -1092,6 +1092,7 @@ AARCH32_ASM_UKERNELS = [
     "src/q8-dwconv/up8x9-aarch32-neon.S",
     "src/f32-gemm/4x8-aarch32-neon-cortex-a53.S",
     "src/f32-gemm/4x8-aarch32-neon-cortex-a75.S",
+    "src/f32-gemm/4x8-aarch32-neon-pld-cortex-a75.S",
     "src/f32-gemm/4x8-aarch32-neon-ld64.S",
 ]
 
