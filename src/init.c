@@ -144,6 +144,20 @@ static void init(void) {
             .nr = 8,
           };
           break;
+
+        case cpuinfo_uarch_cortex_a57:
+        case cpuinfo_uarch_cortex_a72:
+        case cpuinfo_uarch_cortex_a73:
+          xnn_params.f32.gemm = (struct gemm_parameters) {
+            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch32_neon_pld_cortex_a75,
+            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__neon_lane_ld128,
+            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neon_lane_ld64,
+            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neon_lane_ld64,
+            .mr = 4,
+            .nr = 8,
+          };
+          break;
+
         default:
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75,
