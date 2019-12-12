@@ -420,6 +420,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
 4:
         # Clamp
         FMIN v20.4s, v20.4s, v6.4s
+        SUBS x1, x1, 8
         FMIN v21.4s, v21.4s, v6.4s
         FMIN v22.4s, v22.4s, v6.4s
         FMIN v23.4s, v23.4s, v6.4s
@@ -445,7 +446,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMAX v31.4s, v31.4s, v7.4s
 
         # Store full 6 x 8
-        SUBS x1, x1, 8
         B.LO 8f
 
         ST1 {v30.16b, v31.16b},  [x7], x14

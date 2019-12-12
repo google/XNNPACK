@@ -268,6 +268,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 4:
         # Clamp
         FMIN v20.4s, v20.4s, v30.4s
+        SUBS x1, x1, 12
         FMIN v21.4s, v21.4s, v30.4s
         FMIN v22.4s, v22.4s, v30.4s
         FMAX v20.4s, v20.4s, v31.4s
@@ -275,7 +276,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         FMAX v22.4s, v22.4s, v31.4s
 
         # Store full 1 x 12
-        SUBS x1, x1, 12
         B.LO 7f
 
         ST1 {v20.16b, v21.16b, v22.16b}, [x6], x14

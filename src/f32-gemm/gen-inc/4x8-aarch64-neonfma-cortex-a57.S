@@ -379,6 +379,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a57
 6:
         # Clamp
         FMIN v16.4s, v16.4s, v4.4s
+        SUBS x1, x1, 8
         FMIN v17.4s, v17.4s, v4.4s
         FMIN v18.4s, v18.4s, v4.4s
         FMIN v19.4s, v19.4s, v4.4s
@@ -396,7 +397,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a57
         FMAX v31.4s, v31.4s, v5.4s
 
         # Store full 4 x 8
-        SUBS x1, x1, 8
         B.LO 7f
 
         STP q30, q31,  [x7]
