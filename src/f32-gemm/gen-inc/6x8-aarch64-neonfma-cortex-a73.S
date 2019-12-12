@@ -428,6 +428,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a73
         FMAX v31.4s, v31.4s, v7.4s
 
         # Store full 6 x 8
+        NOP
         B.LO 7f
 
         STP q30, q31,  [x7]
