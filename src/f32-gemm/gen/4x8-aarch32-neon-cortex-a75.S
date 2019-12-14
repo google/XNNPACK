@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-gemm/4x8-aarch32-neon-cortex-a75.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -7,7 +11,7 @@
 
 .syntax unified
 
-// void xnn_f32_gemm_ukernel_4x8__aarch32_neon_pld_cortex_a75(
+// void xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
@@ -37,9 +41,7 @@
 
 // Clamp (r5) d4 d5 d6 d7
 
-// TODO - generate PLD from cortex_a75 with prefetches added
-
-BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_pld_cortex_a75
+BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75
         .arm
 #ifndef __APPLE__
         .arch armv7-a
@@ -86,20 +88,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_pld_cortex_a75
         VMOV        q14, q8
         VMOV        q15, q9
 
-        PLD         [r3,  0]    // Prefetch A
-        PLD         [r3, 64]
-        PLD         [r12,  0]
-        PLD         [r12, 64]
-        PLD         [r10,  0]
-        PLD         [r10, 64]
-        PLD         [r0,  0]
-        PLD         [r0, 64]
-        PLD         [r9,   0]  // Prefetch B
-        PLD         [r9,  64]
-        PLD         [r9, 128]
-        PLD         [r9, 192]
-        PLD         [r9, 256]
-        PLD         [r9, 320]
 
         BLO         4f               // less than 4 channels?
 
@@ -145,25 +133,19 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_pld_cortex_a75
         VMLA.F32    q10, q4, d5[0]
         VLD1.32    {d0}, [r3]!       // A0
         VMLA.F32    q11, q5, d5[0]
-        PLD         [r3, 128]        // Prefetch A0
         VMLA.F32    q12, q4, d6[0]
         VLD1.32    {d1}, [r12]!      // A1
         VMLA.F32    q13, q5, d6[0]
-        PLD         [r12, 128]       // Prefetch A1
         VMLA.F32    q14, q4, d7[0]
         VLD1.32    {d2}, [r10]!      // A2
         VMLA.F32    q15, q5, d7[0]
-        PLD         [r10, 128]       // Prefetch A2
         VMLA.F32     q8, q6, d4[1]
         VLD1.32    {d3}, [ r0]!      // A3
         VMLA.F32     q9, q7, d4[1]
-        PLD         [r0, 128]        // Prefetch A3
         VMLA.F32    q10, q6, d5[1]
         VLDM        r9!, {d8-d11}    // B0
         VMLA.F32    q11, q7, d5[1]
-        PLD         [r9, 384]        // Prefetch B
         VMLA.F32    q12, q6, d6[1]
-        PLD         [r9, 448]        // Prefetch B
         VMLA.F32    q13, q7, d6[1]
         SUBS         r5, r5, 16
         VMLA.F32    q14, q6, d7[1]
@@ -354,7 +336,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_pld_cortex_a75
         POP         {r4, r5, r6, r7, r8, r9, r10, r11}
         BX          lr
 
-END_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_pld_cortex_a75
+END_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
