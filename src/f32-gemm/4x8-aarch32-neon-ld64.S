@@ -124,6 +124,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
 4:
         // Clamp
         VMIN.F32     q8,  q8, q2
+        SUBS        r1, r1, 8
         VMIN.F32     q9,  q9, q2
         VMIN.F32    q10, q10, q2
         VMIN.F32    q11, q11, q2
@@ -141,7 +142,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
         VMAX.F32    q15, q15, q3
 
         // Store full 4 x 8
-        SUBS        r1, r1, 8
         BLO         10f
         VST1.32     {d16-d19}, [r11], r7
         SUB         r0, r0, r2
