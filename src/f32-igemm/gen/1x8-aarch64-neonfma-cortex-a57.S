@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -5,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75(
+# void xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a57(
 #     size_t mr,                         (x0) - unused.  mr = 1
 #     size_t nc,                         x1
 #     size_t kc,                         x2 / x0
@@ -28,7 +32,7 @@
 # C pointer
 # x6  c0
 
-BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75
+BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
 
         # Load cn_stride, a_offset
         LDP x10, x11, [sp]
@@ -43,11 +47,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75
         # Load initial bias from w into accumulators
         LDP q16, q17, [x5], 32
         MOVI v18.4s, 0  // second set of C for pipelining FMLA
-        PRFM PLDL1KEEP, [x5]
         MOVI v19.4s, 0
-        PRFM PLDL1KEEP, [x5, 64]
-        PRFM PLDL1KEEP, [x5, 128]
-        PRFM PLDL1KEEP, [x5, 192]
 
         MOV x9, x3  // p = ks
 
@@ -88,9 +88,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75
         FMLA v16.4s, v24.4s, v0.s[2]
         FMLA v17.4s, v25.4s, v0.s[2]
         LDP q24, q25, [x5], 32
-        PRFM PLDL1KEEP, [x5, 128]
         FMLA v18.4s, v26.4s, v0.s[3]
-        PRFM PLDL1KEEP, [x5, 256]
         FMLA v19.4s, v27.4s, v0.s[3]
         LDP q26, q27, [x5], 32
 
@@ -105,9 +103,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75
         FMLA v16.4s, v24.4s, v1.s[2]
         FMLA v17.4s, v25.4s, v1.s[2]
         LDP q24, q25, [x5], 32
-        PRFM PLDL1KEEP, [x5, 128]
         FMLA v18.4s, v26.4s, v1.s[3]
-        PRFM PLDL1KEEP, [x5, 256]
         FMLA v19.4s, v27.4s, v1.s[3]
         SUBS x0, x0, 32
         LDP q26, q27, [x5], 32
@@ -127,9 +123,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75
         FMLA v16.4s, v24.4s, v0.s[2]
         FMLA v17.4s, v25.4s, v0.s[2]
         LDP q24, q25, [x5], 32
-        PRFM PLDL1KEEP, [x5, 128]
         FMLA v18.4s, v26.4s, v0.s[3]
-        PRFM PLDL1KEEP, [x5, 256]
         FMLA v19.4s, v27.4s, v0.s[3]
         LDP q26, q27, [x5], 32
 
@@ -232,7 +226,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75
 13:
         RET
 
-END_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75
+END_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

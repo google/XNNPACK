@@ -1100,10 +1100,11 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-gemm/gen/4x8-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen/4x8-aarch64-neonfma-ld128.S
   src/f32-gemm/gen/4x8-aarch64-neonfma-ld64.S
+  src/f32-gemm/gen/5x8-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen/5x8-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a53.S
-  src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a73.S
+  src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen/6x8-aarch64-neonfma-ld128.S
   src/f32-gemm/gen/6x8-aarch64-neonfma-ld64.S
@@ -1117,24 +1118,28 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/4x8-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen-inc/4x8-aarch64-neonfma-ld128.S
   src/f32-gemm/gen-inc/4x8-aarch64-neonfma-ld64.S
+  src/f32-gemm/gen-inc/5x8-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen-inc/5x8-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a53.S
-  src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a73.S
+  src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen-inc/6x8-aarch64-neonfma-ld128.S
   src/f32-gemm/gen-inc/6x8-aarch64-neonfma-ld64.S
   src/f32-igemm/1x12-aarch64-neonfma-cortex-a53.S
   src/f32-igemm/1x8-aarch64-neonfma-cortex-a53.S
-  src/f32-igemm/1x8-aarch64-neonfma-cortex-a57.S
-  src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S
+  src/f32-igemm/gen/1x8-aarch64-neonfma-cortex-a57.S
+  src/f32-igemm/gen/1x8-aarch64-neonfma-cortex-a75.S
+  src/f32-igemm/4x8-aarch64-neonfma-cortex-a53.S
   src/f32-igemm/4x12-aarch64-neonfma-cortex-a53.S
-  src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.S
-  src/f32-igemm/5x8-aarch64-neonfma-cortex-a75.S
+  src/f32-igemm/gen/4x8-aarch64-neonfma-cortex-a57.S
+  src/f32-igemm/gen/4x8-aarch64-neonfma-cortex-a75.S
+  src/f32-igemm/gen/5x8-aarch64-neonfma-cortex-a57.S
+  src/f32-igemm/gen/5x8-aarch64-neonfma-cortex-a75.S
   src/f32-igemm/6x8-aarch64-neonfma-cortex-a53.S
-  src/f32-igemm/6x8-aarch64-neonfma-cortex-a57.S
   src/f32-igemm/6x8-aarch64-neonfma-cortex-a73.S
-  src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.S)
+  src/f32-igemm/gen/6x8-aarch64-neonfma-cortex-a57.S
+  src/f32-igemm/gen/6x8-aarch64-neonfma-cortex-a75.S)
 
 SET(XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SCALAR_MICROKERNEL_SRCS})
 IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")

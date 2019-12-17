@@ -17,6 +17,17 @@ tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -o src/f32-igemm
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=1 -o src/f32-igemm/gen/4x2-wasm.c
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -o src/f32-igemm/gen/4x4-wasm.c
 
+############################### AArch64 assembly ##############################
+# Cortex A75 / A57 micro-kernels
+tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S.in  -D INC=0 -D PREFETCH=0 -o src/f32-igemm/gen/1x8-aarch64-neonfma-cortex-a57.S
+tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S.in  -D INC=0 -D PREFETCH=1 -o src/f32-igemm/gen/1x8-aarch64-neonfma-cortex-a75.S
+tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.S.in  -D INC=0 -D PREFETCH=0 -o src/f32-igemm/gen/4x8-aarch64-neonfma-cortex-a57.S
+tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.S.in  -D INC=0 -D PREFETCH=1 -o src/f32-igemm/gen/4x8-aarch64-neonfma-cortex-a75.S
+tools/xngen src/f32-igemm/5x8-aarch64-neonfma-cortex-a75.S.in  -D INC=0 -D PREFETCH=0 -o src/f32-igemm/gen/5x8-aarch64-neonfma-cortex-a57.S
+tools/xngen src/f32-igemm/5x8-aarch64-neonfma-cortex-a75.S.in  -D INC=0 -D PREFETCH=1 -o src/f32-igemm/gen/5x8-aarch64-neonfma-cortex-a75.S
+tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.S.in  -D INC=0 -D PREFETCH=0 -o src/f32-igemm/gen/6x8-aarch64-neonfma-cortex-a57.S
+tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.S.in  -D INC=0 -D PREFETCH=1 -o src/f32-igemm/gen/6x8-aarch64-neonfma-cortex-a75.S
+
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels
 tools/xngen src/f32-igemm/neon-ld64.c.in      -D MR=1 -D NR=8 -D FMA=0 -D DUP=0 -o src/f32-igemm/gen/1x8-neon-lane-ld64.c

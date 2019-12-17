@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/1x8-aarch64-neonfma-cortex-a57.S.in
+//   Template: src/f32-gemm/1x8-aarch64-neonfma-cortex-a75.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
@@ -33,8 +33,6 @@
 
 # Clamp v4 v5
 
-# A57 based on A75 but with PRFM removed from main loop
-
 BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x8__aarch64_neonfma_cortex_a57
 
         # Load cn_stride, acc
@@ -49,11 +47,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x8__aarch64_neonfma_cortex_a57
         LDP q16, q17, [x15], 32
 
         MOVI v18.4s, 0  // second set of C for pipelining FMLA
-        PRFM PLDL1KEEP, [x5]
         MOVI v19.4s, 0
-        PRFM PLDL1KEEP, [x5, 64]
-        PRFM PLDL1KEEP, [x5, 128]
-        PRFM PLDL1KEEP, [x5, 192]
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS x0, x2, 32  // k = kc - 32

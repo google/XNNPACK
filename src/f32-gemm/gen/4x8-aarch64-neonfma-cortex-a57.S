@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/4x8-aarch64-neonfma-cortex-a57.S.in
+//   Template: src/f32-gemm/4x8-aarch64-neonfma-cortex-a75.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
@@ -120,33 +120,33 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57
         LDP q8, q9, [x5], 32
         FMLA v17.4s, v21.4s, v0.s[0]
         FMLA v18.4s, v20.4s, v1.s[0]
+        LDP q10, q11, [x5], 32
         FMLA v19.4s, v21.4s, v1.s[0]
         FMLA v28.4s, v20.4s, v2.s[0]
-        LDP q10, q11, [x5], 32
+        LDP q12, q13, [x5], 32
         FMLA v29.4s, v21.4s, v2.s[0]
         FMLA v30.4s, v20.4s, v3.s[0]
+        LDP q14, q15, [x5], 32
         FMLA v31.4s, v21.4s, v3.s[0]
         FMLA v16.4s, v22.4s, v0.s[1]
-        LDP q12, q13, [x5], 32
+        LDR q4, [x3], 16
         FMLA v17.4s, v23.4s, v0.s[1]
         FMLA v18.4s, v22.4s, v1.s[1]
+        LDR q5, [x11], 16
         FMLA v19.4s, v23.4s, v1.s[1]
         FMLA v28.4s, v22.4s, v2.s[1]
-        LDP q14, q15, [x5], 32
+        LDR q6, [x12], 16
         FMLA v29.4s, v23.4s, v2.s[1]
         FMLA v30.4s, v22.4s, v3.s[1]
+        LDR q7, [x4], 16
         FMLA v31.4s, v23.4s, v3.s[1]
         FMLA v16.4s, v24.4s, v0.s[2]
-        LDR q4, [x3], 16
         FMLA v17.4s, v25.4s, v0.s[2]
         FMLA v18.4s, v24.4s, v1.s[2]
-        LDR q5, [x11], 16
         FMLA v19.4s, v25.4s, v1.s[2]
         FMLA v28.4s, v24.4s, v2.s[2]
-        LDR q6, [x12], 16
         FMLA v29.4s, v25.4s, v2.s[2]
         FMLA v30.4s, v24.4s, v3.s[2]
-        LDR q7, [x4], 16
         FMLA v31.4s, v25.4s, v3.s[2]
         FMLA v16.4s, v26.4s, v0.s[3]
         FMLA v17.4s, v27.4s, v0.s[3]
@@ -162,33 +162,33 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57
         LDP q20, q21, [x5], 32
         FMLA v17.4s, v9.4s, v4.s[0]
         FMLA v18.4s, v8.4s, v5.s[0]
+        LDP q22, q23, [x5], 32
         FMLA v19.4s, v9.4s, v5.s[0]
         FMLA v28.4s, v8.4s, v6.s[0]
-        LDP q22, q23, [x5], 32
+        LDP q24, q25, [x5], 32
         FMLA v29.4s, v9.4s, v6.s[0]
         FMLA v30.4s, v8.4s, v7.s[0]
+        LDP q26, q27, [x5], 32
         FMLA v31.4s, v9.4s, v7.s[0]
         FMLA v16.4s, v10.4s, v4.s[1]
-        LDP q24, q25, [x5], 32
+        LDR q0, [x3], 16
         FMLA v17.4s, v11.4s, v4.s[1]
         FMLA v18.4s, v10.4s, v5.s[1]
+        LDR q1, [x11], 16
         FMLA v19.4s, v11.4s, v5.s[1]
         FMLA v28.4s, v10.4s, v6.s[1]
-        LDP q26, q27, [x5], 32
+        LDR q2, [x12], 16
         FMLA v29.4s, v11.4s, v6.s[1]
         FMLA v30.4s, v10.4s, v7.s[1]
+        LDR q3, [x4], 16
         FMLA v31.4s, v11.4s, v7.s[1]
         FMLA v16.4s, v12.4s, v4.s[2]
-        LDR q0, [x3], 16
         FMLA v17.4s, v13.4s, v4.s[2]
         FMLA v18.4s, v12.4s, v5.s[2]
-        LDR q1, [x11], 16
         FMLA v19.4s, v13.4s, v5.s[2]
         FMLA v28.4s, v12.4s, v6.s[2]
-        LDR q2, [x12], 16
         FMLA v29.4s, v13.4s, v6.s[2]
         FMLA v30.4s, v12.4s, v7.s[2]
-        LDR q3, [x4], 16
         FMLA v31.4s, v13.4s, v7.s[2]
         FMLA v16.4s, v14.4s, v4.s[3]
         FMLA v17.4s, v15.4s, v4.s[3]
@@ -208,33 +208,33 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57
         LDP q8, q9, [x5], 32
         FMLA v17.4s, v21.4s, v0.s[0]
         FMLA v18.4s, v20.4s, v1.s[0]
+        LDP q10, q11, [x5], 32
         FMLA v19.4s, v21.4s, v1.s[0]
         FMLA v28.4s, v20.4s, v2.s[0]
-        LDP q10, q11, [x5], 32
+        LDP q12, q13, [x5], 32
         FMLA v29.4s, v21.4s, v2.s[0]
         FMLA v30.4s, v20.4s, v3.s[0]
+        LDP q14, q15, [x5], 32
         FMLA v31.4s, v21.4s, v3.s[0]
         FMLA v16.4s, v22.4s, v0.s[1]
-        LDP q12, q13, [x5], 32
+        LDR q4, [x3], 16
         FMLA v17.4s, v23.4s, v0.s[1]
         FMLA v18.4s, v22.4s, v1.s[1]
+        LDR q5, [x11], 16
         FMLA v19.4s, v23.4s, v1.s[1]
         FMLA v28.4s, v22.4s, v2.s[1]
-        LDP q14, q15, [x5], 32
+        LDR q6, [x12], 16
         FMLA v29.4s, v23.4s, v2.s[1]
         FMLA v30.4s, v22.4s, v3.s[1]
+        LDR q7, [x4], 16
         FMLA v31.4s, v23.4s, v3.s[1]
         FMLA v16.4s, v24.4s, v0.s[2]
-        LDR q4, [x3], 16
         FMLA v17.4s, v25.4s, v0.s[2]
         FMLA v18.4s, v24.4s, v1.s[2]
-        LDR q5, [x11], 16
         FMLA v19.4s, v25.4s, v1.s[2]
         FMLA v28.4s, v24.4s, v2.s[2]
-        LDR q6, [x12], 16
         FMLA v29.4s, v25.4s, v2.s[2]
         FMLA v30.4s, v24.4s, v3.s[2]
-        LDR q7, [x4], 16
         FMLA v31.4s, v25.4s, v3.s[2]
         FMLA v16.4s, v26.4s, v0.s[3]
         FMLA v17.4s, v27.4s, v0.s[3]
@@ -457,6 +457,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57
         LDP d10, d11, [sp, 16]
         LDP  d8,  d9, [sp], 64
         RET
+
 
 END_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57
 
