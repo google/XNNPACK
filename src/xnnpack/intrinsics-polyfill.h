@@ -9,12 +9,23 @@
 #ifdef __AVX512F__
 #include <immintrin.h>
 
-// gcc pre-7 lacks _cvtu32_mask16, _mm512_reduce_add_ps, and _mm512_reduce_max_ps
-#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 7)
+// GCC pre-7, Clang pre-8, Apple Clang pre-10, and ICC pre-18
+#if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 7)) || \
+    (defined(__clang__) && !defined(__apple_build_version__) && (__clang_major__ < 8)) || \
+    (defined(__clang__) && defined(__apple_build_version__) && (__apple_build_version__ < 10000000)) || \
+    (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1800))
+
 static inline __mmask16 __attribute__((__gnu_inline__, __always_inline__, __artificial__))
 _cvtu32_mask16(unsigned int mask) {
   return (__mmask16) mask;
 }
+
+#endif  // GCC pre-7, Clang pre-8, Apple Clang pre-10, and ICC pre-18
+
+// GCC pre-7, Clang pre-4, and ICC pre-18
+#if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 7)) || \
+    (defined(__clang__) && (__clang_major__ < 4)) || \
+    (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1800))
 
 static inline float __attribute__((__gnu_inline__, __always_inline__, __artificial__))
 _mm512_reduce_add_ps(__m512 v) {
@@ -41,6 +52,7 @@ _mm512_reduce_max_ps(__m512 v) {
   const __m128 sum16 = _mm_max_ss(sum8, _mm_movehdup_ps(sum8));
   return _mm_cvtss_f32(sum16);
 }
-#endif  // gcc pre-7
+
+#endif  // GCC pre-7, Clang pre-4, and ICC pre-18
 
 #endif  // __AVX512F__
