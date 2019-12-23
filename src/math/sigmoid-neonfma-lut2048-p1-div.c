@@ -12,7 +12,7 @@
 
 
 // Table of exp2(k / 2048) values, k = 0..2047
-static const float exp2_table[2048] = {
+static const float exp2_k_over_2048_table[2048] = {
   0x1.000000p+0f, 0x1.001630p+0f, 0x1.002C60p+0f, 0x1.004294p+0f,
   0x1.0058C8p+0f, 0x1.006F00p+0f, 0x1.008538p+0f, 0x1.009B72p+0f,
   0x1.00B1B0p+0f, 0x1.00C7EEp+0f, 0x1.00DE2Ep+0f, 0x1.00F472p+0f,
@@ -573,7 +573,7 @@ void xnn_math_f32_sigmoid__neonfma_lut2048_p1_div(
     // Create a floating-point number s (scale) such that s := 2**(n / 2048) for such inputs that sigmoidf(-z) is
     // normalized, i.e. 0 <= z <= 87.33642. As n has 11 fractional bits, we split s == 2**(n / 2048) =
     // = 2**e * 2**(n / 2048 - e), where e := int(n / 2048). We create s in two steps:
-    // 1. Fetch 2**(n / 2048 - e) = 2**(n % 2048) from exp2_table using the 6 low bits of n, as integer. Note that the
+    // 1. Fetch 2**(n / 2048 - e) = 2**(n % 2048) from exp2_k_over_2048_table using the 6 low bits of n, as integer. Note that the
     //    fetched values are in the [1.0, 2.0) range, i.e. their floating-point exponent is 0.
     // 2. Adjust fecthed value by addition of e to its floating-point exponent. The result is always a normalized
     //    number, because for 0 <= z <= 87.33642 (inputs for which sigmoidf(-z) is normalized) we have -126 <= e <= 0,
@@ -586,12 +586,12 @@ void xnn_math_f32_sigmoid__neonfma_lut2048_p1_div(
     const uint64x2_t vidx = vreinterpretq_u64_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask));
     const uint64_t vidx01 = vgetq_lane_u64(vidx, 0);
     const uint64_t vidx23 = vgetq_lane_u64(vidx, 1);
-    float32x2_t vl01 = vld1_dup_f32(&exp2_table[(uint32_t) vidx01]);
-    float32x2_t vl23 = vld1_dup_f32(&exp2_table[(uint32_t) vidx23]);
-    vl01 = vld1_lane_f32(&exp2_table[(uint32_t) (vidx01 >> 32)], vl01, 1);
-    vl23 = vld1_lane_f32(&exp2_table[(uint32_t) (vidx23 >> 32)], vl23, 1);
+    float32x2_t vl01 = vld1_dup_f32(&exp2_k_over_2048_table[(uint32_t) vidx01]);
+    float32x2_t vl23 = vld1_dup_f32(&exp2_k_over_2048_table[(uint32_t) vidx23]);
+    vl01 = vld1_lane_f32(&exp2_k_over_2048_table[(uint32_t) (vidx01 >> 32)], vl01, 1);
+    vl23 = vld1_lane_f32(&exp2_k_over_2048_table[(uint32_t) (vidx23 >> 32)], vl23, 1);
     const float32x4_t vl = vcombine_f32(vl01, vl23);
-    // Adjust exponent of the value l fetched from the exp2_table to get the final s value.
+    // Adjust exponent of the value l fetched from the exp2_k_over_2048_table to get the final s value.
     const float32x4_t vs = vreinterpretq_f32_s32(vaddq_s32(vreinterpretq_s32_f32(vl), ve));
 
     // Subtract the large number back to get the final n := round(-z * 2048 / log(2)) as a floating-point number.

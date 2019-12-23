@@ -6,73 +6,74 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <emmintrin.h>
-
+#include <xnnpack/common.h>
 #include <xnnpack/math-stubs.h>
 
+#include <fp16/bitcasts.h>
 
-void xnn_math_f32_expminus__sse2_p5(
+
+void xnn_math_f32_expminus__scalar_p5(
     size_t n,
     const float* input,
     float* output)
 {
-  assert(n % (4 * sizeof(float)) == 0);
+  assert(n % sizeof(float) == 0);
 
-  const __m128 vmagic_bias = _mm_set1_ps(0x1.8000FEp23f);
+  const float vmagic_bias = 0x1.8000FEp23f;
   // The smallest x for which expf(x) is normalized.
-  const __m128 vdenorm_cutoff = _mm_set1_ps(-0x1.5D589Ep6f);
-  const __m128 vlog2e = _mm_set1_ps(0x1.715476p+0f);
+  const float vdenorm_cutoff = -0x1.5D589Ep6f;
+  const float vlog2e = 0x1.715476p+0f;
   // Last 7 bits are zeroes
-  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
-  const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
+  const float vminus_ln2_hi = -0x1.62E400p-1f;
+  const float vminus_ln2_lo = -0x1.7F7D1Cp-20f;
 
-  const __m128 vc1 = _mm_set1_ps(0x1.FFFFF6p-1f);
-  const __m128 vc2 = _mm_set1_ps(0x1.FFFDC6p-2f);
-  const __m128 vc3 = _mm_set1_ps(0x1.555A80p-3f);
-  const __m128 vc4 = _mm_set1_ps(0x1.573A1Ap-5f);
-  const __m128 vc5 = _mm_set1_ps(0x1.0F9F9Cp-7f);
+  const float vc1 = 0x1.FFFFF6p-1f;
+  const float vc2 = 0x1.FFFDC6p-2f;
+  const float vc3 = 0x1.555A80p-3f;
+  const float vc4 = 0x1.573A1Ap-5f;
+  const float vc5 = 0x1.0F9F9Cp-7f;
 
-  for (; n != 0; n -= 4 * sizeof(float)) {
-    const __m128 vx = _mm_loadu_ps(input);
+  for (; n != 0; n -= sizeof(float)) {
+    const float vx = *input++;
 
     // Compute reduced argument n := round(x / log(2)).
     // We do it by adding a large number (magic bias) to the product x * (1/log(2)), which cause rounding of the result
     // to an integer, then subtracing the large number back. The trick with adding large number is valid only within
     // certain bounds (|x| <= 2**22), but thats ok, because inputs outside of [-87.336540, 0.0] underflow expf(x)
     // anyway. We fixup the result for such inputs at the very end of the algorithm.
-    __m128 vn = _mm_add_ps(_mm_mul_ps(vx, vlog2e), vmagic_bias);
+    float vn = vx * vlog2e + vmagic_bias;
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= n <= 0 accordingly.
-    const __m128 vs = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn), 23));
+    const float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
 
     // Subtract the large number back to get final n := round(x / log(2)).
-    vn = _mm_sub_ps(vn, vmagic_bias);
+    vn -= vmagic_bias;
 
     // Compute reduced argument t := x - n * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_hi), vx);
-    vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_lo), vt);
+    float vt = vn * vminus_ln2_hi + vx;
+    vt = vn * vminus_ln2_lo + vt;
 
     // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
-    __m128 vp = _mm_add_ps(_mm_mul_ps(vc5, vt), vc4);
-    vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc3);
-    vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc2);
-    vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc1);
+    float vp = vc5 * vt + vc4;
+    vp = vp * vt + vc3;
+    vp = vp * vt + vc2;
+    vp = vp * vt + vc1;
 
     // Reconstruct the final f value:
     //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
     //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
     //     = s + (t * s) * p
-    vt = _mm_mul_ps(vt, vs);
-    __m128 vf = _mm_add_ps(_mm_mul_ps(vt, vp), vs);
+    vt *= vs;
+    float vf = vt * vp + vs;
 
     // For inputs below denormal cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = _mm_andnot_ps(_mm_cmplt_ps(vx, vdenorm_cutoff), vf);
-    _mm_storeu_ps(output, vf);
+    if XNN_UNPREDICTABLE(vx < vdenorm_cutoff) {
+      vf = 0.0f;
+    }
 
-    input += 4;
-    output += 4;
+    *output++ = vf;
   }
 }

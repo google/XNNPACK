@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #include <fp16/bitcasts.h>
+
 #include <xnnpack/requantization-stubs.h>
 
 

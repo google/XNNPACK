@@ -12,6 +12,7 @@
 #include <tmmintrin.h>
 
 #include <fp16/bitcasts.h>
+
 #include <xnnpack/requantization-stubs.h>
 
 #include "gemmlowp-sse.h"

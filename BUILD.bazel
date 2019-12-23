@@ -74,6 +74,9 @@ OPERATOR_SRCS = [
 ]
 
 SCALAR_UKERNELS = [
+    "src/math/expminus-scalar-lut2048-p1.c",
+    "src/math/expminus-scalar-lut64-p2.c",
+    "src/math/expminus-scalar-p5.c",
     "src/f32-argmaxpool/4x-scalar-c1.c",
     "src/f32-argmaxpool/9p8x-scalar-c1.c",
     "src/f32-argmaxpool/9x-scalar-c1.c",

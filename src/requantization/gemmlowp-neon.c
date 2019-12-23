@@ -12,6 +12,7 @@
 #include <arm_neon.h>
 
 #include <fp16/bitcasts.h>
+
 #include <xnnpack/requantization-stubs.h>
 
 
