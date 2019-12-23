@@ -203,3 +203,307 @@
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X1, batch_eq_1) {
+  VUnOpMicrokernelTester()
+    .batch_size(1)
+    .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x1, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X1, batch_gt_1) {
+  for (size_t batch_size = 2; batch_size < 10; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x1, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X1, inplace) {
+  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace(true)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x1, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X2, batch_eq_2) {
+  VUnOpMicrokernelTester()
+    .batch_size(2)
+    .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X2, batch_div_2) {
+  for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X2, batch_lt_2) {
+  for (size_t batch_size = 1; batch_size < 2; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X2, batch_gt_2) {
+  for (size_t batch_size = 3; batch_size < 4; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X2, inplace) {
+  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace(true)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X4, batch_eq_4) {
+  VUnOpMicrokernelTester()
+    .batch_size(4)
+    .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X4, batch_div_4) {
+  for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X4, batch_lt_4) {
+  for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X4, batch_gt_4) {
+  for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT2048_P1_DIV_X4, inplace) {
+  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace(true)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X1, batch_eq_1) {
+  VUnOpMicrokernelTester()
+    .batch_size(1)
+    .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x1, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X1, batch_gt_1) {
+  for (size_t batch_size = 2; batch_size < 10; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x1, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X1, inplace) {
+  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace(true)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x1, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X2, batch_eq_2) {
+  VUnOpMicrokernelTester()
+    .batch_size(2)
+    .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X2, batch_div_2) {
+  for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X2, batch_lt_2) {
+  for (size_t batch_size = 1; batch_size < 2; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X2, batch_gt_2) {
+  for (size_t batch_size = 3; batch_size < 4; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X2, inplace) {
+  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace(true)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X4, batch_eq_4) {
+  VUnOpMicrokernelTester()
+    .batch_size(4)
+    .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X4, batch_div_4) {
+  for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X4, batch_lt_4) {
+  for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X4, batch_gt_4) {
+  for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_LUT64_P2_DIV_X4, inplace) {
+  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace(true)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X1, batch_eq_1) {
+  VUnOpMicrokernelTester()
+    .batch_size(1)
+    .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x1, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X1, batch_gt_1) {
+  for (size_t batch_size = 2; batch_size < 10; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x1, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X1, inplace) {
+  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace(true)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x1, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X2, batch_eq_2) {
+  VUnOpMicrokernelTester()
+    .batch_size(2)
+    .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X2, batch_div_2) {
+  for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X2, batch_lt_2) {
+  for (size_t batch_size = 1; batch_size < 2; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X2, batch_gt_2) {
+  for (size_t batch_size = 3; batch_size < 4; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X2, inplace) {
+  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace(true)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x2, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X4, batch_eq_4) {
+  VUnOpMicrokernelTester()
+    .batch_size(4)
+    .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X4, batch_div_4) {
+  for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X4, batch_lt_4) {
+  for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X4, batch_gt_4) {
+  for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(F32_SIGMOID__SCALAR_P5_DIV_X4, inplace) {
+  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+    VUnOpMicrokernelTester()
+      .batch_size(batch_size)
+      .inplace(true)
+      .Test(xnn_f32_sigmoid_ukernel__scalar_p5_div_x4, VUnOpMicrokernelTester::OpType::Sigmoid, VUnOpMicrokernelTester::Variant::Scalar);
+  }
+}

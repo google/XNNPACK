@@ -77,6 +77,45 @@ static void f32_sigmoid(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+BENCHMARK_CAPTURE(f32_sigmoid, scalar_lut2048_p1_div_x1, xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x1)
+  ->RangeMultiplier(10)
+  ->Range(1000, 1000000)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_sigmoid, scalar_lut2048_p1_div_x2, xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x2)
+  ->RangeMultiplier(10)
+  ->Range(1000, 1000000)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_sigmoid, scalar_lut2048_p1_div_x4, xnn_f32_sigmoid_ukernel__scalar_lut2048_p1_div_x4)
+  ->RangeMultiplier(10)
+  ->Range(1000, 1000000)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_sigmoid, scalar_lut64_p2_div_x1, xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x1)
+  ->RangeMultiplier(10)
+  ->Range(1000, 1000000)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_sigmoid, scalar_lut64_p2_div_x2, xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x2)
+  ->RangeMultiplier(10)
+  ->Range(1000, 1000000)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_sigmoid, scalar_lut64_p2_div_x4, xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x4)
+  ->RangeMultiplier(10)
+  ->Range(1000, 1000000)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_sigmoid, scalar_p5_div_x1, xnn_f32_sigmoid_ukernel__scalar_p5_div_x1)
+  ->RangeMultiplier(10)
+  ->Range(1000, 1000000)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_sigmoid, scalar_p5_div_x2, xnn_f32_sigmoid_ukernel__scalar_p5_div_x2)
+  ->RangeMultiplier(10)
+  ->Range(1000, 1000000)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_sigmoid, scalar_p5_div_x4, xnn_f32_sigmoid_ukernel__scalar_p5_div_x4)
+  ->RangeMultiplier(10)
+  ->Range(1000, 1000000)
+  ->UseRealTime();
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

@@ -163,6 +163,10 @@ SET(XNNPACK_HOT_SRCS
   src/indirection.c
   src/operator-run.c)
 
+SET(XNNPACK_TABLE_SRCS
+  src/tables/exp2-k-over-64.c
+  src/tables/exp2-k-over-2048.c)
+
 SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-scalar-c1.c
   src/f32-argmaxpool/9p8x-scalar-c1.c
@@ -219,6 +223,15 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-prelu/gen/scalar-2x1.c
   src/f32-prelu/gen/scalar-2x4.c
   src/f32-rmax/scalar.c
+  src/f32-sigmoid/gen/scalar-lut2048-p1-div-x1.c
+  src/f32-sigmoid/gen/scalar-lut2048-p1-div-x2.c
+  src/f32-sigmoid/gen/scalar-lut2048-p1-div-x4.c
+  src/f32-sigmoid/gen/scalar-lut64-p2-div-x1.c
+  src/f32-sigmoid/gen/scalar-lut64-p2-div-x2.c
+  src/f32-sigmoid/gen/scalar-lut64-p2-div-x4.c
+  src/f32-sigmoid/gen/scalar-p5-div-x1.c
+  src/f32-sigmoid/gen/scalar-p5-div-x2.c
+  src/f32-sigmoid/gen/scalar-p5-div-x4.c
   src/f32-spmm/gen/1x1-scalar-pipelined.c
   src/f32-spmm/gen/1x1-scalar.c
   src/f32-spmm/gen/2x1-scalar-pipelined.c
@@ -1174,11 +1187,11 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i[3-6]86|x86_64)$" OR IOS_ARCH MATCHES "^(i
 ENDIF()
 
 IF(XNNPACK_LIBRARY_TYPE STREQUAL "default")
-  ADD_LIBRARY(XNNPACK ${XNNPACK_COLD_SRCS} ${XNNPACK_HOT_SRCS} ${XNNPACK_MICROKERNEL_SRCS})
+  ADD_LIBRARY(XNNPACK ${XNNPACK_COLD_SRCS} ${XNNPACK_HOT_SRCS} ${XNNPACK_TABLE_SRCS} ${XNNPACK_MICROKERNEL_SRCS})
 ELSEIF(XNNPACK_LIBRARY_TYPE STREQUAL "shared")
-  ADD_LIBRARY(XNNPACK SHARED ${XNNPACK_COLD_SRCS} ${XNNPACK_HOT_SRCS} ${XNNPACK_MICROKERNEL_SRCS})
+  ADD_LIBRARY(XNNPACK SHARED ${XNNPACK_COLD_SRCS} ${XNNPACK_HOT_SRCS} ${XNNPACK_TABLE_SRCS} ${XNNPACK_MICROKERNEL_SRCS})
 ELSEIF(XNNPACK_LIBRARY_TYPE STREQUAL "static")
-  ADD_LIBRARY(XNNPACK STATIC ${XNNPACK_COLD_SRCS} ${XNNPACK_HOT_SRCS} ${XNNPACK_MICROKERNEL_SRCS})
+  ADD_LIBRARY(XNNPACK STATIC ${XNNPACK_COLD_SRCS} ${XNNPACK_HOT_SRCS} ${XNNPACK_TABLE_SRCS} ${XNNPACK_MICROKERNEL_SRCS})
 ELSE()
   MESSAGE(FATAL_ERROR "Unsupported XNNPACK library type \"${XNNPACK_LIBRARY_TYPE}\". Must be \"static\", \"shared\", or \"default\"")
 ENDIF()

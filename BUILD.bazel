@@ -73,6 +73,11 @@ OPERATOR_SRCS = [
     "src/unpooling-nhwc.c",
 ]
 
+TABLE_SRCS = [
+    "src/tables/exp2-k-over-64.c",
+    "src/tables/exp2-k-over-2048.c",
+]
+
 SCALAR_UKERNELS = [
     "src/f32-argmaxpool/4x-scalar-c1.c",
     "src/f32-argmaxpool/9p8x-scalar-c1.c",
@@ -129,6 +134,15 @@ SCALAR_UKERNELS = [
     "src/f32-prelu/gen/scalar-2x1.c",
     "src/f32-prelu/gen/scalar-2x4.c",
     "src/f32-rmax/scalar.c",
+    "src/f32-sigmoid/gen/scalar-lut2048-p1-div-x1.c",
+    "src/f32-sigmoid/gen/scalar-lut2048-p1-div-x2.c",
+    "src/f32-sigmoid/gen/scalar-lut2048-p1-div-x4.c",
+    "src/f32-sigmoid/gen/scalar-lut64-p2-div-x1.c",
+    "src/f32-sigmoid/gen/scalar-lut64-p2-div-x2.c",
+    "src/f32-sigmoid/gen/scalar-lut64-p2-div-x4.c",
+    "src/f32-sigmoid/gen/scalar-p5-div-x1.c",
+    "src/f32-sigmoid/gen/scalar-p5-div-x2.c",
+    "src/f32-sigmoid/gen/scalar-p5-div-x4.c",
     "src/f32-spmm/gen/1x1-scalar-pipelined.c",
     "src/f32-spmm/gen/1x1-scalar.c",
     "src/f32-spmm/gen/2x1-scalar-pipelined.c",
@@ -1252,12 +1266,20 @@ LOGGING_HDRS = [
 ]
 
 xnnpack_cc_library(
+    name = "tables",
+    srcs = TABLE_SRCS,
+    hdrs = INTERNAL_HDRS,
+    copts = xnnpack_std_copts(),
+)
+
+xnnpack_cc_library(
     name = "scalar_ukernels",
     srcs = SCALAR_UKERNELS,
     hdrs = INTERNAL_HDRS,
     aarch32_copts = ["-marm"],
     copts = xnnpack_std_copts(),
     deps = [
+        ":tables",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -1270,6 +1292,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_copts(),
     wasm_srcs = WASM_UKERNELS,
     deps = [
+        ":tables",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -1290,6 +1313,7 @@ xnnpack_cc_library(
         "-ffast-math",
     ],
     deps = [
+        ":tables",
         "@FP16",
         "@psimd",
         "@pthreadpool",
@@ -1307,6 +1331,7 @@ xnnpack_cc_library(
     aarch64_srcs = NEON_UKERNELS,
     copts = xnnpack_std_copts(),
     deps = [
+        ":tables",
         "@FP16",
         "@pthreadpool",
     ],
@@ -1323,6 +1348,7 @@ xnnpack_cc_library(
     aarch64_srcs = NEONFMA_UKERNELS + AARCH64_NEONFMA_UKERNELS,
     copts = xnnpack_std_copts(),
     deps = [
+        ":tables",
         "@FP16",
         "@pthreadpool",
     ],
@@ -1335,6 +1361,7 @@ xnnpack_cc_library(
     aarch64_srcs = AARCH64_NEONFP16ARITH_UKERNELS,
     copts = xnnpack_std_copts(),
     deps = [
+        ":tables",
         "@FP16",
         "@pthreadpool",
     ],
@@ -1347,6 +1374,7 @@ xnnpack_cc_library(
     x86_copts = ["-msse2"],
     x86_srcs = SSE_UKERNELS + SSE2_UKERNELS,
     deps = [
+        ":tables",
         "@FP16",
         "@pthreadpool",
     ],
@@ -1359,6 +1387,7 @@ xnnpack_cc_library(
     x86_copts = ["-msse4.1"],
     x86_srcs = SSE41_UKERNELS,
     deps = [
+        ":tables",
         "@FP16",
         "@pthreadpool",
     ],
@@ -1371,6 +1400,7 @@ xnnpack_cc_library(
     x86_copts = ["-mavx"],
     x86_srcs = AVX_UKERNELS,
     deps = [
+        ":tables",
         "@FP16",
         "@pthreadpool",
     ],
@@ -1385,6 +1415,7 @@ xnnpack_cc_library(
     ],
     x86_srcs = FMA3_UKERNELS,
     deps = [
+        ":tables",
         "@FP16",
         "@pthreadpool",
     ],
@@ -1400,6 +1431,7 @@ xnnpack_cc_library(
     ],
     x86_srcs = AVX2_UKERNELS,
     deps = [
+        ":tables",
         "@FP16",
         "@pthreadpool",
     ],
@@ -1412,6 +1444,7 @@ xnnpack_cc_library(
     x86_copts = ["-mavx512f"],
     x86_srcs = AVX512F_UKERNELS,
     deps = [
+        ":tables",
         "@FP16",
         "@pthreadpool",
     ],
