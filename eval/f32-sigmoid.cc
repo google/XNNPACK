@@ -121,6 +121,20 @@ static void SigmoidError(benchmark::State& state,
   BENCHMARK(f32_sigmoid__sse2_p5_div)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+static void f32_sigmoid__scalar_lut2048_p1_div(benchmark::State& state) {
+  SigmoidError(state, xnn_math_f32_sigmoid__scalar_lut2048_p1_div, 1);
+}
+static void f32_sigmoid__scalar_lut64_p2_div(benchmark::State& state) {
+  SigmoidError(state, xnn_math_f32_sigmoid__scalar_lut64_p2_div, 1);
+}
+static void f32_sigmoid__scalar_p5_div(benchmark::State& state) {
+  SigmoidError(state, xnn_math_f32_sigmoid__scalar_p5_div, 1);
+}
+
+BENCHMARK(f32_sigmoid__scalar_lut2048_p1_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+BENCHMARK(f32_sigmoid__scalar_lut64_p2_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+BENCHMARK(f32_sigmoid__scalar_p5_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

@@ -274,6 +274,12 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vmulcaddc/gen/c1-scalar-2x.c
   src/f32-vmulcaddc/gen/c2-scalar-2x.c
   src/f32-vmulcaddc/gen/c4-scalar-2x.c
+  src/math/expminus-scalar-lut2048-p1.c
+  src/math/expminus-scalar-lut64-p2.c
+  src/math/expminus-scalar-p5.c
+  src/math/sigmoid-scalar-lut2048-p1-div.c
+  src/math/sigmoid-scalar-lut64-p2-div.c
+  src/math/sigmoid-scalar-p5-div.c
   src/q8-avgpool/mp9p8q-scalar.c
   src/q8-avgpool/up9-scalar.c
   src/q8-dwconv/up1x9-scalar.c
