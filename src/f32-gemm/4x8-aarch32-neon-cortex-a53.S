@@ -176,43 +176,43 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53
 3:
         VMLA.F32     q8, q4, d0[0]
         VLDM        r9!, {d12-d15}   // B1
-        VMLA.F32     q9, q5, d0[0]
         VMLA.F32    q10, q4, d1[0]
-        VLD1.32    {d4}, [r3]!       // A0
-        VMLA.F32    q11, q5, d1[0]
         VMLA.F32    q12, q4, d2[0]
-        VLD1.32    {d5}, [r12]!      // A1
-        VMLA.F32    q13, q5, d2[0]
+        VLD1.32    {d4}, [r3]!       // A0
         VMLA.F32    q14, q4, d3[0]
-        VLD1.32    {d6}, [r10]!      // A2
+        VMLA.F32     q9, q5, d0[0]
+        VLD1.32    {d5}, [r12]!      // A1
+        VMLA.F32    q11, q5, d1[0]
+        VMLA.F32    q13, q5, d2[0]
         VMLA.F32    q15, q5, d3[0]
+        VLD1.32    {d6}, [r10]!      // A2
         VMLA.F32     q8, q6, d0[1]
-        VLD1.32    {d7}, [ r0]!      // A3
-        VMLA.F32     q9, q7, d0[1]
         VMLA.F32    q10, q6, d1[1]
-        VLDM        r9!, {d8-d11}    // B0
-        VMLA.F32    q11, q7, d1[1]
+        VLD1.32    {d7}, [ r0]!      // A3
         VMLA.F32    q12, q6, d2[1]
-        VMLA.F32    q13, q7, d2[1]
         VMLA.F32    q14, q6, d3[1]
+        VLDM        r9!, {d8-d11}    // B0
+        VMLA.F32     q9, q7, d0[1]
+        VMLA.F32    q11, q7, d1[1]
+        VMLA.F32    q13, q7, d2[1]
         VMLA.F32    q15, q7, d3[1]
 
         VMLA.F32     q8, q4, d4[0]
         VLDM        r9!, {d12-d15}   // B1
-        VMLA.F32     q9, q5, d4[0]
         VMLA.F32    q10, q4, d5[0]
-        VMLA.F32    q11, q5, d5[0]
         VMLA.F32    q12, q4, d6[0]
-        VMLA.F32    q13, q5, d6[0]
         VMLA.F32    q14, q4, d7[0]
+        VMLA.F32     q9, q5, d4[0]
+        VMLA.F32    q11, q5, d5[0]
+        VMLA.F32    q13, q5, d6[0]
         VMLA.F32    q15, q5, d7[0]
         VMLA.F32     q8, q6, d4[1]
-        VMLA.F32     q9, q7, d4[1]
         VMLA.F32    q10, q6, d5[1]
-        VMLA.F32    q11, q7, d5[1]
         VMLA.F32    q12, q6, d6[1]
-        VMLA.F32    q13, q7, d6[1]
         VMLA.F32    q14, q6, d7[1]
+        VMLA.F32     q9, q7, d4[1]
+        VMLA.F32    q11, q7, d5[1]
+        VMLA.F32    q13, q7, d6[1]
         VMLA.F32    q15, q7, d7[1]
 
 4:
