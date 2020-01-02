@@ -129,9 +129,9 @@ size_t GetMaxCacheSize() {
       case cpuinfo_uarch_scorpion:
       case cpuinfo_uarch_krait:
       case cpuinfo_uarch_kryo:
-      case cpuinfo_uarch_mongoose_m1:
-      case cpuinfo_uarch_mongoose_m2:
-      case cpuinfo_uarch_meerkat_m3:
+      case cpuinfo_uarch_exynos_m1:
+      case cpuinfo_uarch_exynos_m2:
+      case cpuinfo_uarch_exynos_m3:
         // cpuinfo-detected cache size always correct.
         break;
       case cpuinfo_uarch_cortex_a5:

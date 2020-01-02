@@ -17,6 +17,7 @@ C99OPTS = [
 COMMON_SRCS = [
     "src/api.c",
     "src/init.c",
+    "src/cache.c",
 ]
 
 # Architecture-specific sources and headers.

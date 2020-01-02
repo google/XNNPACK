@@ -72,6 +72,7 @@ http_archive(
         "https://github.com/pytorch/cpuinfo/archive/d5e37adf1406cf899d7d9ec1d317c47506ccb970.tar.gz",
     ],
     build_file = "@//third_party:cpuinfo.BUILD",
+    patches = ["@//third_party:cpuinfo.patch"],
 )
 
 # psimd library, used for fallback 128-bit SIMD micro-kernels
