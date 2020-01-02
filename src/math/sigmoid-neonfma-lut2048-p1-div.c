@@ -535,14 +535,12 @@ void xnn_math_f32_sigmoid__neonfma_lut2048_p1_div(
   assert(n % (4 * sizeof(float)) == 0);
 
   const float32x4_t vmagic_bias = vmovq_n_f32(0x1.800000p23f);
-  // The smallest x for which sigmoidf(x) is normalized.
-  // This number is also the smallest x for which expf(x) is normalized.
+  // The largest z for which sigmoidf(-z) is normalized.
+  // This number is also the largest z for which expf(-z) is normalized.
   const float32x4_t vdenorm_cutoff = vmovq_n_f32(-0x1.5D589Ep+6f);
-  // The largest x for which sigmoidf(x) is not equal 1.0.
-  const float32x4_t vone_cutoff = vmovq_n_f32(0x1.154244p+4f);
   const float32x4_t vminus_log2e_x2048  = vmovq_n_f32(-0x1.715476p11f);
-  const float32x4_t vln2_o2048_hi = vmovq_n_f32(0x1.62e43p-12f);
-  const float32x4_t vln2_o2048_lo = vmovq_n_f32(-0x1.05c61p-40f);
+  const float32x4_t vln2_o2048_hi = vmovq_n_f32(0x1.62E43p-12f);
+  const float32x4_t vln2_o2048_lo = vmovq_n_f32(-0x1.05C61p-40f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
 
   const float32x4_t vc1 = vmovq_n_f32(-0x1.FFFFFEp-1f);
@@ -618,17 +616,13 @@ void xnn_math_f32_sigmoid__neonfma_lut2048_p1_div(
     // Reconstruct sigmoid(-z) = exp(-z) / (1.0 + exp(-z))
     float32x4_t vf = vdivq_f32(vy, vd);
 
+    // For inputs below denormal cutoff, replace output with +0.0f.
+    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+    vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcagtq_f32(vx, vdenorm_cutoff)));
+
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
     const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
     vf = vbslq_f32(vm, vf, vsubq_f32(vone, vf));
-
-    // For inputs above 1.0 cutoff, replace output with 1.0.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = vbslq_f32(vcgtq_f32(vx, vone_cutoff), vone, vf);
-
-    // For inputs below denormal cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcltq_f32(vx, vdenorm_cutoff)));
 
     vst1q_f32(output, vf); output += 4;
   }

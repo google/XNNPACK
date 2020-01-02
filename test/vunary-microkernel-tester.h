@@ -80,7 +80,7 @@ class VUnOpMicrokernelTester {
   void Test(xnn_f32_vunary_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-25.0f, 25.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-125.0f, 125.0f), rng);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
@@ -135,7 +135,7 @@ class VUnOpMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_NEAR(y[i], y_ref[i], 5.0e-6)
-          << "at " << i << " / " << batch_size();
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
   }

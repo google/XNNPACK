@@ -320,7 +320,7 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x8-zip/x4-scalar.c
   src/x8-zip/xm-scalar.c)
 
-SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
+SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-psimd-c4.c
   src/f32-argmaxpool/9p8x-psimd-c4.c
   src/f32-argmaxpool/9x-psimd-c4.c
@@ -417,6 +417,15 @@ SET(XNNPACK_PSIMD_MICROKERNEL_SRCS
   src/x32-zip/x4-psimd.c
   src/x32-zip/xm-psimd.c)
 
+SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
+  src/f32-sigmoid/gen/psimd-p5-div-x4.c
+  src/f32-sigmoid/gen/psimd-p5-div-x8.c
+  src/f32-sigmoid/gen/psimd-p5-div-x12.c
+  src/f32-sigmoid/gen/psimd-p5-div-x16.c
+  src/f32-sigmoid/gen/psimd-p5-div-x20.c
+  src/f32-sigmoid/gen/psimd-p5-div-x24.c
+  src/math/sigmoid-psimd-p5-div.c)
+
 SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-avgpool/mp9p8q-neon.c
   src/f32-avgpool/up9-neon.c
@@ -487,6 +496,18 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-prelu/gen/neon-2x8.c
   src/f32-rmax/neon.c
   src/f32-sigmoid/gen/neon-frac-p9-p10-nr1recps-x16.c
+  src/f32-sigmoid/gen/neon-p5-nr2recps-x4.c
+  src/f32-sigmoid/gen/neon-p5-nr2recps-x8.c
+  src/f32-sigmoid/gen/neon-p5-nr2recps-x12.c
+  src/f32-sigmoid/gen/neon-p5-nr2recps-x16.c
+  src/f32-sigmoid/gen/neon-p5-nr2recps-x20.c
+  src/f32-sigmoid/gen/neon-p5-nr2recps-x24.c
+  src/f32-sigmoid/gen/neon-lut2048-p1-nr2recps-x4.c
+  src/f32-sigmoid/gen/neon-lut2048-p1-nr2recps-x8.c
+  src/f32-sigmoid/gen/neon-lut2048-p1-nr2recps-x12.c
+  src/f32-sigmoid/gen/neon-lut2048-p1-nr2recps-x16.c
+  src/f32-sigmoid/gen/neon-lut2048-p1-nr2recps-x20.c
+  src/f32-sigmoid/gen/neon-lut2048-p1-nr2recps-x24.c
   src/f32-vbinary/gen/vadd-neon-x4.c
   src/f32-vbinary/gen/vadd-neon-x8.c
   src/f32-vbinary/gen/vaddc-neon-x4.c
@@ -533,7 +554,9 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/x8-zip/x2-neon.c
   src/x8-zip/x3-neon.c
   src/x8-zip/x4-neon.c
-  src/x8-zip/xm-neon.c)
+  src/x8-zip/xm-neon.c
+  src/math/sigmoid-neon-lut2048-p1-nr2recps.c
+  src/math/sigmoid-neon-p5-nr2recps.c)
 
 SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-bilinear/gen/neonfma-c4.c
@@ -573,7 +596,42 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-hswish/gen/neonfma-x8.c
   src/f32-ppmm/gen/4x8-neonfma.c
   src/f32-ppmm/gen/8x8-neonfma.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2fma-x4.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2fma-x8.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2fma-x12.c
   src/f32-sigmoid/gen/neonfma-p5-nr2fma-x16.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2fma-x20.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2fma-x24.c
+  src/f32-sigmoid/gen/neonfma-p5-nr1recps1fma-x4.c
+  src/f32-sigmoid/gen/neonfma-p5-nr1recps1fma-x8.c
+  src/f32-sigmoid/gen/neonfma-p5-nr1recps1fma-x12.c
+  src/f32-sigmoid/gen/neonfma-p5-nr1recps1fma-x16.c
+  src/f32-sigmoid/gen/neonfma-p5-nr1recps1fma-x20.c
+  src/f32-sigmoid/gen/neonfma-p5-nr1recps1fma-x24.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2recps-x4.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2recps-x8.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2recps-x12.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2recps-x16.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2recps-x20.c
+  src/f32-sigmoid/gen/neonfma-p5-nr2recps-x24.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2fma-x4.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2fma-x8.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2fma-x12.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2fma-x16.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2fma-x20.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2fma-x24.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr1recps1fma-x4.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr1recps1fma-x8.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr1recps1fma-x12.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr1recps1fma-x16.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr1recps1fma-x20.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr1recps1fma-x24.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2recps-x4.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2recps-x8.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2recps-x12.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2recps-x16.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2recps-x20.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2recps-x24.c
   src/f32-vmulcaddc/gen/c4-neonfma-2x.c
   src/f32-vmulcaddc/gen/c8-neonfma-2x.c
   src/math/exp-neonfma-lut64-p2.c
@@ -622,6 +680,18 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-dwconv-spchw/5x5p2-neonfma.c
   src/f32-dwconv-spchw/3x3s2p1-neonfma.c
   src/f32-dwconv-spchw/5x5s2p2-neonfma.c
+  src/f32-sigmoid/gen/neonfma-p5-div-x4.c
+  src/f32-sigmoid/gen/neonfma-p5-div-x8.c
+  src/f32-sigmoid/gen/neonfma-p5-div-x12.c
+  src/f32-sigmoid/gen/neonfma-p5-div-x16.c
+  src/f32-sigmoid/gen/neonfma-p5-div-x20.c
+  src/f32-sigmoid/gen/neonfma-p5-div-x24.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-div-x4.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-div-x8.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-div-x12.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-div-x16.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-div-x20.c
+  src/f32-sigmoid/gen/neonfma-lut2048-p1-div-x24.c
   src/f32-spmm/gen/12x1-neonfma.c
   src/f32-spmm/gen/12x2-neonfma.c
   src/f32-spmm/gen/12x4-neonfma.c
@@ -737,8 +807,12 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/9x-sse2-c4.c
   src/f32-prelu/gen/sse2-2x4.c
   src/f32-prelu/gen/sse2-2x8.c
+  src/f32-sigmoid/gen/sse2-p5-div-x4.c
   src/f32-sigmoid/gen/sse2-p5-div-x8.c
+  src/f32-sigmoid/gen/sse2-p5-div-x12.c
   src/f32-sigmoid/gen/sse2-p5-div-x16.c
+  src/f32-sigmoid/gen/sse2-p5-div-x20.c
+  src/f32-sigmoid/gen/sse2-p5-div-x24.c
   src/q8-avgpool/mp9p8q-sse2.c
   src/q8-avgpool/up9-sse2.c
   src/q8-igemm/4x4c2-sse2.c
@@ -767,8 +841,12 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
 SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/gen/sse41-2x4.c
   src/f32-prelu/gen/sse41-2x8.c
+  src/f32-sigmoid/gen/sse41-p5-div-x4.c
   src/f32-sigmoid/gen/sse41-p5-div-x8.c
-  src/f32-sigmoid/gen/sse41-p5-div-x16.c)
+  src/f32-sigmoid/gen/sse41-p5-div-x12.c
+  src/f32-sigmoid/gen/sse41-p5-div-x16.c
+  src/f32-sigmoid/gen/sse41-p5-div-x20.c
+  src/f32-sigmoid/gen/sse41-p5-div-x24.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-clamp/avx.c
@@ -1162,7 +1240,8 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
 
 SET(XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SCALAR_MICROKERNEL_SRCS})
 IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-  LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_PSIMD_MICROKERNEL_SRCS})
+  LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS})
+  LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS})
 ENDIF()
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_NEON_MICROKERNEL_SRCS})
@@ -1200,7 +1279,7 @@ SET_TARGET_PROPERTIES(XNNPACK PROPERTIES
   C_EXTENSIONS YES)
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   SET_PROPERTY(SOURCE ${XNNPACK_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -marm ")
-  SET_PROPERTY(SOURCE ${XNNPACK_PSIMD_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon ")
+  SET_PROPERTY(SOURCE ${XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS} ${XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon ")
   SET_PROPERTY(SOURCE ${XNNPACK_NEON_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon ")
   SET_PROPERTY(SOURCE ${XNNPACK_NEONFMA_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon-vfpv4 ")
   IF(IOS)
@@ -1231,7 +1310,8 @@ ELSE()
   SET_PROPERTY(SOURCE ${XNNPACK_COLD_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -Os ")
 ENDIF()
 IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-  SET_PROPERTY(SOURCE ${XNNPACK_PSIMD_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -O3 -ffast-math ")
+  SET_PROPERTY(SOURCE ${XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -O3 ")
+  SET_PROPERTY(SOURCE ${XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -O3 -ffast-math ")
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(XNNPACK PUBLIC include)

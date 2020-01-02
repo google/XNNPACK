@@ -25,11 +25,9 @@ void xnn_f32_sigmoid_ukernel__scalar_p5_div_x4(
   assert(n % sizeof(float) == 0);
 
   const float vmagic_bias = 0x1.8000FEp23f;
-  // The smallest x for which sigmoidf(x) is normalized.
-  // This number is also the smallest x for which expf(x) is normalized.
-  const float vdenorm_cutoff = -0x1.5D589Ep+6f;
-  // The largest x for which sigmoidf(x) is not equal 1.0.
-  const float vone_cutoff = 0x1.154244p+4f;
+  // The largest z for which sigmoidf(-z) is normalized.
+  // This number is also the largest z for which expf(-z) is normalized.
+  const float vdenorm_cutoff = 0x1.5D589Ep+6f;
   const float vminus_log2e = -0x1.715476p+0f;
   // Last 7 bits are zeroes
   const float vln2_hi = 0x1.62E400p-1f;
@@ -139,6 +137,21 @@ void xnn_f32_sigmoid_ukernel__scalar_p5_div_x4(
     float vf2 = ve2 / (ve2 + vone);
     float vf3 = ve3 / (ve3 + vone);
 
+    // For inputs below denormal cutoff, replace output with +0.0f.
+    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+    if XNN_UNPREDICTABLE(vz0 > vdenorm_cutoff) {
+      vf0 = 0.0f;
+    }
+    if XNN_UNPREDICTABLE(vz1 > vdenorm_cutoff) {
+      vf1 = 0.0f;
+    }
+    if XNN_UNPREDICTABLE(vz2 > vdenorm_cutoff) {
+      vf2 = 0.0f;
+    }
+    if XNN_UNPREDICTABLE(vz3 > vdenorm_cutoff) {
+      vf3 = 0.0f;
+    }
+
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
     if XNN_UNPREDICTABLE(vx0 > 0.0f) {
       vf0 = vone - vf0;
@@ -151,36 +164,6 @@ void xnn_f32_sigmoid_ukernel__scalar_p5_div_x4(
     }
     if XNN_UNPREDICTABLE(vx3 > 0.0f) {
       vf3 = vone - vf3;
-    }
-
-    // For inputs above 1.0 cutoff, replace output with 1.0.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    if XNN_UNPREDICTABLE(vx0 > vone_cutoff) {
-      vf0 = vone;
-    }
-    if XNN_UNPREDICTABLE(vx1 > vone_cutoff) {
-      vf1 = vone;
-    }
-    if XNN_UNPREDICTABLE(vx2 > vone_cutoff) {
-      vf2 = vone;
-    }
-    if XNN_UNPREDICTABLE(vx3 > vone_cutoff) {
-      vf3 = vone;
-    }
-
-    // For inputs below denormal cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    if XNN_UNPREDICTABLE(vx0 < vdenorm_cutoff) {
-      vf0 = 0.0f;
-    }
-    if XNN_UNPREDICTABLE(vx1 < vdenorm_cutoff) {
-      vf1 = 0.0f;
-    }
-    if XNN_UNPREDICTABLE(vx2 < vdenorm_cutoff) {
-      vf2 = 0.0f;
-    }
-    if XNN_UNPREDICTABLE(vx3 < vdenorm_cutoff) {
-      vf3 = 0.0f;
     }
 
     y[0] = vf0;
@@ -239,21 +222,15 @@ void xnn_f32_sigmoid_ukernel__scalar_p5_div_x4(
       // Reconstruct sigmoid(-z) = exp(-z) / (1.0 + exp(-z))
       float vf = ve / (ve + vone);
 
+      // For inputs above denormal cutoff, replace output with +0.0f.
+      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+      if XNN_UNPREDICTABLE(vz > vdenorm_cutoff) {
+        vf = 0.0f;
+      }
+
       // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
       if XNN_UNPREDICTABLE(vx > 0.0f) {
         vf = vone - vf;
-      }
-
-      // For inputs above 1.0 cutoff, replace output with 1.0.
-      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      if XNN_UNPREDICTABLE(vx > vone_cutoff) {
-        vf = vone;
-      }
-
-      // For inputs below denormal cutoff, replace output with +0.0f.
-      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      if XNN_UNPREDICTABLE(vx < vdenorm_cutoff) {
-        vf = 0.0f;
       }
 
       *y++ = vf;

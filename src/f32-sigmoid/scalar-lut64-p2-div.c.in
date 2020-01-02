@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert BATCH_TILE >= 1
-$ABC = "0123456789ABCDEFGHIJKLMN"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 #include <math.h>
 
@@ -26,11 +26,9 @@ void xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x${BATCH_TILE}(
   assert(n % sizeof(float) == 0);
 
   const float vmagic_bias = 0x1.800000p23f;
-  // The smallest x for which sigmoidf(x) is normalized.
-  // This number is also the smallest x for which expf(x) is normalized.
-  const float vdenorm_cutoff = -0x1.5D589Ep+6f;
-  // The largest x for which sigmoidf(x) is not equal 1.0.
-  const float vone_cutoff = 0x1.154244p+4f;
+  // The largest z for which sigmoidf(-z) is normalized.
+  // This number is also the largest z for which expf(-z) is normalized.
+  const float vdenorm_cutoff = 0x1.5D589Ep+6f;
   const float vminus_log2e_x64 = -0x1.715476p6f;
   // Last 13 bits are zeroes
   const float vln2_o64_hi =  0x1.630000p-7f;
@@ -119,24 +117,17 @@ void xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x${BATCH_TILE}(
       $for N in range(BATCH_TILE):
         float vf${N} = vy${N} / (vy${N} + vone);
 
+      // For inputs below denormal cutoff, replace output with +0.0f.
+      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+      $for N in range(BATCH_TILE):
+        if XNN_UNPREDICTABLE(vz${N} > vdenorm_cutoff) {
+          vf${N} = 0.0f;
+        }
+
       // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
       $for N in range(BATCH_TILE):
         if XNN_UNPREDICTABLE(vx${N} > 0.0f) {
           vf${N} = vone - vf${N};
-        }
-
-      // For inputs above 1.0 cutoff, replace output with 1.0.
-      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      $for N in range(BATCH_TILE):
-        if XNN_UNPREDICTABLE(vx${N} > vone_cutoff) {
-          vf${N} = vone;
-        }
-
-      // For inputs below denormal cutoff, replace output with +0.0f.
-      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      $for N in range(BATCH_TILE):
-        if XNN_UNPREDICTABLE(vx${N} < vdenorm_cutoff) {
-          vf${N} = 0.0f;
         }
 
       $for N in range(BATCH_TILE):
@@ -205,21 +196,15 @@ void xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x${BATCH_TILE}(
       // Reconstruct sigmoid(-z) = exp(-z) / (1.0 + exp(-z))
       float vf = vy / (vy + vone);
 
+      // For inputs below denormal cutoff, replace output with +0.0f.
+      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+      if XNN_UNPREDICTABLE(vz > vdenorm_cutoff) {
+        vf = 0.0f;
+      }
+
       // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
       if XNN_UNPREDICTABLE(vx > 0.0f) {
         vf = vone - vf;
-      }
-
-      // For inputs above 1.0 cutoff, replace output with 1.0.
-      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      if XNN_UNPREDICTABLE(vx > vone_cutoff) {
-        vf = vone;
-      }
-
-      // For inputs below denormal cutoff, replace output with +0.0f.
-      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      if XNN_UNPREDICTABLE(vx < vdenorm_cutoff) {
-        vf = 0.0f;
       }
 
       *y++ = vf;
@@ -288,21 +273,15 @@ void xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x${BATCH_TILE}(
       // Reconstruct sigmoid(-z) = exp(-z) / (1.0 + exp(-z))
       float vf = vy / (vy + vone);
 
+      // For inputs below denormal cutoff, replace output with +0.0f.
+      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+      if XNN_UNPREDICTABLE(vz > vdenorm_cutoff) {
+        vf = 0.0f;
+      }
+
       // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
       if XNN_UNPREDICTABLE(vx > 0.0f) {
         vf = vone - vf;
-      }
-
-      // For inputs above 1.0 cutoff, replace output with 1.0.
-      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      if XNN_UNPREDICTABLE(vx > vone_cutoff) {
-        vf = vone;
-      }
-
-      // For inputs below denormal cutoff, replace output with +0.0f.
-      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      if XNN_UNPREDICTABLE(vx < vdenorm_cutoff) {
-        vf = 0.0f;
       }
 
       *y = vf;
@@ -370,21 +349,15 @@ void xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x${BATCH_TILE}(
         // Reconstruct sigmoid(-z) = exp(-z) / (1.0 + exp(-z))
         float vf = vy / (vy + vone);
 
+        // For inputs below denormal cutoff, replace output with +0.0f.
+        // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+        if XNN_UNPREDICTABLE(vz > vdenorm_cutoff) {
+          vf = 0.0f;
+        }
+
         // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
         if XNN_UNPREDICTABLE(vx > 0.0f) {
           vf = vone - vf;
-        }
-
-        // For inputs above 1.0 cutoff, replace output with 1.0.
-        // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-        if XNN_UNPREDICTABLE(vx > vone_cutoff) {
-          vf = vone;
-        }
-
-        // For inputs below denormal cutoff, replace output with +0.0f.
-        // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-        if XNN_UNPREDICTABLE(vx < vdenorm_cutoff) {
-          vf = 0.0f;
         }
 
         *y++ = vf;

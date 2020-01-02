@@ -22,10 +22,8 @@ void xnn_math_f32_sigmoid__sse2_p5_div(
   // The smallest x for which sigmoidf(x) is normalized.
   // This number is also the smallest x for which expf(x) is normalized.
   const __m128 vdenorm_cutoff = _mm_set1_ps(-0x1.5D589Ep+6f);
-  // The largest x for which sigmoidf(x) is not equal 1.0.
-  const __m128 vone_cutoff = _mm_set1_ps(0x1.154244p+4f);
   const __m128 vlog2e = _mm_set1_ps(0x1.715476p+0f);
-  // Last 8 bits are zeroes
+  // Last 7 bits are zeroes
   const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
   const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
   const __m128 vone = _mm_set1_ps(1.0f);
@@ -88,18 +86,13 @@ void xnn_math_f32_sigmoid__sse2_p5_div(
     // Reconstruct sigmoid(-z) = exp(z) / (1.0 + exp(z))
     __m128 vf = _mm_div_ps(ve, vd);
 
+    // For inputs below denormal cutoff, replace output with +0.0f.
+    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+    vf = _mm_andnot_ps(_mm_cmplt_ps(vz, vdenorm_cutoff), vf);
+
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
     __m128 vm = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx)));
     vf = _mm_or_ps(_mm_and_ps(vf, vm), _mm_andnot_ps(vm, _mm_sub_ps(vone, vf)));
-
-    // For inputs above 1.0 cutoff, replace output with 1.0.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vm = _mm_cmpgt_ps(vx, vone_cutoff);
-    vf = _mm_or_ps(_mm_and_ps(vone, vm), _mm_andnot_ps(vm, vf));
-
-    // For inputs below denormal cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = _mm_andnot_ps(_mm_cmplt_ps(vx, vdenorm_cutoff), vf);
 
     _mm_storeu_ps(output, vf);
 
