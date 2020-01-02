@@ -32,6 +32,7 @@ XNNPACK implements the following neural network operators:
 - Fully Connected
 - Clamp (includes ReLU and ReLU6)
 - HardSwish
+- Sigmoid
 - PReLU
 
 All operators in XNNPACK support NHWC layout, but additionally allow custom stride along the **C**hannel dimension. Thus, operators can consume a subset of channels in the input tensor, and produce a subset of channels in the output tensor, providing a zero-cost Channel Split and Channel Concatenation operations.

@@ -502,6 +502,12 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/neon-p5-nr2recps-x16.c
   src/f32-sigmoid/gen/neon-p5-nr2recps-x20.c
   src/f32-sigmoid/gen/neon-p5-nr2recps-x24.c
+  src/f32-sigmoid/gen/neon-lut64-p2-nr2recps-x4.c
+  src/f32-sigmoid/gen/neon-lut64-p2-nr2recps-x8.c
+  src/f32-sigmoid/gen/neon-lut64-p2-nr2recps-x12.c
+  src/f32-sigmoid/gen/neon-lut64-p2-nr2recps-x16.c
+  src/f32-sigmoid/gen/neon-lut64-p2-nr2recps-x20.c
+  src/f32-sigmoid/gen/neon-lut64-p2-nr2recps-x24.c
   src/f32-sigmoid/gen/neon-lut2048-p1-nr2recps-x4.c
   src/f32-sigmoid/gen/neon-lut2048-p1-nr2recps-x8.c
   src/f32-sigmoid/gen/neon-lut2048-p1-nr2recps-x12.c
@@ -555,7 +561,9 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/x8-zip/x3-neon.c
   src/x8-zip/x4-neon.c
   src/x8-zip/xm-neon.c
+  src/math/sigmoid-neon-frac-p9-p10-nr1recps.c
   src/math/sigmoid-neon-lut2048-p1-nr2recps.c
+  src/math/sigmoid-neon-lut64-p2-nr2recps.c
   src/math/sigmoid-neon-p5-nr2recps.c)
 
 SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
@@ -614,6 +622,24 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/neonfma-p5-nr2recps-x16.c
   src/f32-sigmoid/gen/neonfma-p5-nr2recps-x20.c
   src/f32-sigmoid/gen/neonfma-p5-nr2recps-x24.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2fma-x4.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2fma-x8.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2fma-x12.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2fma-x16.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2fma-x20.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2fma-x24.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr1recps1fma-x4.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr1recps1fma-x8.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr1recps1fma-x12.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr1recps1fma-x16.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr1recps1fma-x20.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr1recps1fma-x24.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2recps-x4.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2recps-x8.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2recps-x12.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2recps-x16.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2recps-x20.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-nr2recps-x24.c
   src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2fma-x4.c
   src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2fma-x8.c
   src/f32-sigmoid/gen/neonfma-lut2048-p1-nr2fma-x12.c
@@ -642,6 +668,9 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/math/sigmoid-neonfma-lut2048-p1-nr1recps1fma.c
   src/math/sigmoid-neonfma-lut2048-p1-nr2fma.c
   src/math/sigmoid-neonfma-lut2048-p1-nr2recps.c
+  src/math/sigmoid-neonfma-lut64-p2-nr1recps1fma.c
+  src/math/sigmoid-neonfma-lut64-p2-nr2fma.c
+  src/math/sigmoid-neonfma-lut64-p2-nr2recps.c
   src/math/sigmoid-neonfma-p5-nr1recps1fma.c
   src/math/sigmoid-neonfma-p5-nr2fma.c
   src/math/sigmoid-neonfma-p5-nr2recps.c)
@@ -686,6 +715,12 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/neonfma-p5-div-x16.c
   src/f32-sigmoid/gen/neonfma-p5-div-x20.c
   src/f32-sigmoid/gen/neonfma-p5-div-x24.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-div-x4.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-div-x8.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-div-x12.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-div-x16.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-div-x20.c
+  src/f32-sigmoid/gen/neonfma-lut64-p2-div-x24.c
   src/f32-sigmoid/gen/neonfma-lut2048-p1-div-x4.c
   src/f32-sigmoid/gen/neonfma-lut2048-p1-div-x8.c
   src/f32-sigmoid/gen/neonfma-lut2048-p1-div-x12.c
@@ -711,6 +746,7 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-spmm/gen/8x2-neonfma.c
   src/f32-spmm/gen/8x4-neonfma.c
   src/math/sigmoid-neonfma-lut2048-p1-div.c
+  src/math/sigmoid-neonfma-lut64-p2-div.c
   src/math/sigmoid-neonfma-p5-div.c)
 
 SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS

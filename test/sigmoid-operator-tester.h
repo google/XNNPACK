@@ -219,9 +219,6 @@ class SigmoidOperatorTester {
       xnn_status status = xnn_create_sigmoid_nc_f32(
           channels(), input_stride(), output_stride(),
           0, &sigmoid_op);
-      if (status == xnn_status_unsupported_hardware) {
-        GTEST_SKIP();
-      }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, sigmoid_op);
 

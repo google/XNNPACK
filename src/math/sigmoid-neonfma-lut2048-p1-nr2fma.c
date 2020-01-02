@@ -571,7 +571,7 @@ void xnn_math_f32_sigmoid__neonfma_lut2048_p1_nr2fma(
     // Create a floating-point number s (scale) such that s := 2**(n / 2048) for such inputs that sigmoidf(-z) is
     // normalized, i.e. 0 <= z <= 87.33642. As n has 11 fractional bits, we split s == 2**(n / 2048) =
     // = 2**e * 2**(n / 2048 - e), where e := int(n / 2048). We create s in two steps:
-    // 1. Fetch 2**(n / 2048 - e) = 2**(n % 2048) from exp2_k_over_2048_table using the 6 low bits of n, as integer. Note that the
+    // 1. Fetch 2**(n / 2048 - e) = 2**(n % 2048) from exp2_k_over_2048_table using the 11 low bits of n, as integer. Note that the
     //    fetched values are in the [1.0, 2.0) range, i.e. their floating-point exponent is 0.
     // 2. Adjust fecthed value by addition of e to its floating-point exponent. The result is always a normalized
     //    number, because for 0 <= z <= 87.33642 (inputs for which sigmoidf(-z) is normalized) we have -126 <= e <= 0,
@@ -600,7 +600,7 @@ void xnn_math_f32_sigmoid__neonfma_lut2048_p1_nr2fma(
     float32x4_t vt = vfmaq_f32(vz, vn, vln2_o2048_hi);
     vt = vfmaq_f32(vt, vn, vln2_o2048_lo);
 
-    // Compute degree-1 polynomial approximation for exp(-t) on [-log(2)/2048, log(2)/2048]:
+    // Compute degree-1 polynomial approximation for exp(-t) on [-log(2)/4096, log(2)/4096]:
     //   P1(t) = 1 + t * c1
     const float32x4_t vp = vmulq_f32(vt, vc1);
 
