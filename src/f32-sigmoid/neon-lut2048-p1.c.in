@@ -5,6 +5,7 @@
 
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
+$assert RR_STEPS in [1, 2]
 $assert DIV_ALGO in ["div", "nr2fma", "nr2recps", "nr1recps1fma"]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
@@ -18,7 +19,7 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 
 extern XNN_INTERNAL const float xnn_table_exp2_k_over_2048[2048];
 
-void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_lut2048_p1_${DIV_ALGO}_x${BATCH_TILE}(
+void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_rr${RR_STEPS}_lut2048_p1_${DIV_ALGO}_x${BATCH_TILE}(
     size_t n,
     const float* x,
     float* y,
@@ -31,13 +32,16 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_lut2048_p1_${DIV_A
   // This number is also the largest z for which expf(-z) is normalized.
   const float32x4_t vdenorm_cutoff = vmovq_n_f32(0x1.5D589Ep+6f);
   const float32x4_t vminus_log2e_x2048  = vmovq_n_f32(-0x1.715476p11f);
-  $if FMA:
-    const float32x4_t vln2_o2048_hi = vmovq_n_f32(0x1.62E43p-12f);
-    const float32x4_t vln2_o2048_lo = vmovq_n_f32(-0x1.05C61p-40f);
+  $if RR_STEPS == 1:
+    const float32x4_t vln2_o2048 = vmovq_n_f32(0x1.62E43p-12f);
   $else:
-    // Last 18 bits are zeroes
-    const float32x4_t vln2_o2048_hi = vmovq_n_f32(0x1.600000p-12f);
-    const float32x4_t vln2_o2048_lo = vmovq_n_f32(0x1.7217F8p-19f);
+    $if FMA:
+      const float32x4_t vln2_o2048_hi = vmovq_n_f32(0x1.62E43p-12f);
+      const float32x4_t vln2_o2048_lo = vmovq_n_f32(-0x1.05C61p-40f);
+    $else:
+      // Last 18 bits are zeroes
+      const float32x4_t vln2_o2048_hi = vmovq_n_f32(0x1.600000p-12f);
+      const float32x4_t vln2_o2048_lo = vmovq_n_f32(0x1.7217F8p-19f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
 
   const float32x4_t vc1 = vmovq_n_f32(-0x1.FFFFFEp-1f);
@@ -106,12 +110,16 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_lut2048_p1_${DIV_A
         vn${ABC[N:N+4]} = vsubq_f32(vn${ABC[N:N+4]}, vmagic_bias);
 
       // Compute reduced argument t := (z + n * log(2) / 2048). Note that -t = -z - n * log(2) / 2048.
-      // Use Cody-Waite range reduction method (note two constants to represent log(2) / 2048) to improve accuracy.
-      $for N in range(0, BATCH_TILE, 4):
-        float32x4_t vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vz${ABC[N:N+4]}, vn${ABC[N:N+4]}, vln2_o2048_hi);
+      $if RR_STEPS == 1:
+        $for N in range(0, BATCH_TILE, 4):
+          float32x4_t vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vz${ABC[N:N+4]}, vn${ABC[N:N+4]}, vln2_o2048);
+      $else:
+        // Use Cody-Waite range reduction method (note two constants to represent log(2) / 2048) to improve accuracy.
+        $for N in range(0, BATCH_TILE, 4):
+          float32x4_t vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vz${ABC[N:N+4]}, vn${ABC[N:N+4]}, vln2_o2048_hi);
 
-      $for N in range(0, BATCH_TILE, 4):
-        vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vt${ABC[N:N+4]}, vn${ABC[N:N+4]}, vln2_o2048_lo);
+        $for N in range(0, BATCH_TILE, 4):
+          vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vt${ABC[N:N+4]}, vn${ABC[N:N+4]}, vln2_o2048_lo);
 
       // Compute degree-1 polynomial approximation for exp(-t) on [-log(2)/2048, log(2)/2048]:
       //   P1(t) = 1 + t * c1
@@ -222,9 +230,12 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_lut2048_p1_${DIV_A
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument t := (z + n * log(2) / 2048). Note that -t = -z - n * log(2) / 2048.
-    // Use Cody-Waite range reduction method (note two constants to represent log(2) / 2048) to improve accuracy.
-    float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2_o2048_hi);
-    vt = ${VMULADDQ_F32}(vt, vn, vln2_o2048_lo);
+    $if RR_STEPS == 1:
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2_o2048);
+    $else:
+      // Use Cody-Waite range reduction method (note two constants to represent log(2) / 2048) to improve accuracy.
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2_o2048_hi);
+      vt = ${VMULADDQ_F32}(vt, vn, vln2_o2048_lo);
 
     // Compute degree-1 polynomial approximation for exp(-t) on [-log(2)/2048, log(2)/2048]:
     //   P1(t) = 1 + t * c1
@@ -320,9 +331,12 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_lut2048_p1_${DIV_A
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument t := (z + n * log(2) / 2048). Note that -t = -z - n * log(2) / 2048.
-    // Use Cody-Waite range reduction method (note two constants to represent log(2) / 2048) to improve accuracy.
-    float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2_o2048_hi);
-    vt = ${VMULADDQ_F32}(vt, vn, vln2_o2048_lo);
+    $if RR_STEPS == 1:
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2_o2048);
+    $else:
+      // Use Cody-Waite range reduction method (note two constants to represent log(2) / 2048) to improve accuracy.
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2_o2048_hi);
+      vt = ${VMULADDQ_F32}(vt, vn, vln2_o2048_lo);
 
     // Compute degree-1 polynomial approximation for exp(-t) on [-log(2)/2048, log(2)/2048]:
     //   P1(t) = 1 + t * c1

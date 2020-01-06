@@ -5,6 +5,7 @@
 
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
+$assert RR_STEPS in [1, 2]
 $assert DIV_ALGO in ["div", "nr2fma", "nr2recps", "nr1recps1fma"]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
@@ -16,7 +17,7 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_p5_${DIV_ALGO}_x${BATCH_TILE}(
+void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_rr${RR_STEPS}_p5_${DIV_ALGO}_x${BATCH_TILE}(
     size_t n,
     const float* x,
     float* y,
@@ -29,13 +30,16 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_p5_${DIV_ALGO}_x${
   // This number is also the largest z for which expf(-z) is normalized.
   const float32x4_t vdenorm_cutoff = vmovq_n_f32(0x1.5D589Ep+6f);
   const float32x4_t vminus_log2e = vmovq_n_f32(-0x1.715476p+0f);
-  $if FMA:
-    const float32x4_t vln2_hi = vmovq_n_f32(0x1.62E43p-1f);
-    const float32x4_t vln2_lo = vmovq_n_f32(-0x1.05C61p-29f);
+  $if RR_STEPS == 1:
+    const float32x4_t vln2 = vmovq_n_f32(0x1.62E43p-1f);
   $else:
-    // Last 7 bits are zeroes
-    const float32x4_t vln2_hi = vmovq_n_f32(0x1.62E400p-1f);
-    const float32x4_t vln2_lo = vmovq_n_f32(0x1.7F7D1Cp-20f);
+    $if FMA:
+      const float32x4_t vln2_hi = vmovq_n_f32(0x1.62E43p-1f);
+      const float32x4_t vln2_lo = vmovq_n_f32(-0x1.05C61p-29f);
+    $else:
+      // Last 7 bits are zeroes
+      const float32x4_t vln2_hi = vmovq_n_f32(0x1.62E400p-1f);
+      const float32x4_t vln2_lo = vmovq_n_f32(0x1.7F7D1Cp-20f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
 
   const float32x4_t vc1 = vmovq_n_f32(-0x1.FFFFF6p-1f);
@@ -78,12 +82,16 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_p5_${DIV_ALGO}_x${
         vn${ABC[N:N+4]} = vsubq_f32(vn${ABC[N:N+4]}, vmagic_bias);
 
       // Compute reduced argument -t := -z - n * log(2) = -(z + n * log(2)).
-      // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-      $for N in range(0, BATCH_TILE, 4):
-        float32x4_t vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vz${ABC[N:N+4]}, vn${ABC[N:N+4]}, vln2_hi);
+      $if RR_STEPS == 1:
+        $for N in range(0, BATCH_TILE, 4):
+          float32x4_t vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vz${ABC[N:N+4]}, vn${ABC[N:N+4]}, vln2);
+      $else:
+        // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+        $for N in range(0, BATCH_TILE, 4):
+          float32x4_t vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vz${ABC[N:N+4]}, vn${ABC[N:N+4]}, vln2_hi);
 
-      $for N in range(0, BATCH_TILE, 4):
-        vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vt${ABC[N:N+4]}, vn${ABC[N:N+4]}, vln2_lo);
+        $for N in range(0, BATCH_TILE, 4):
+          vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vt${ABC[N:N+4]}, vn${ABC[N:N+4]}, vln2_lo);
 
       // Compute degree-5 polynomial approxiatmion for exp(-t) on [-log(2)/2, log(2)/2].
       $for N in range(0, BATCH_TILE, 4):
@@ -184,9 +192,12 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_p5_${DIV_ALGO}_x${
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument -t := -z - n * log(2) = -(z + n * log(2)).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2_hi);
-    vt = ${VMULADDQ_F32}(vt, vn, vln2_lo);
+    $if RR_STEPS == 1:
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2);
+    $else:
+      // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2_hi);
+      vt = ${VMULADDQ_F32}(vt, vn, vln2_lo);
 
     // Compute degree-5 polynomial approxiatmion for exp(-t) on [-log(2)/2, log(2)/2].
     float32x4_t vp = ${VMULADDQ_F32}(vc4, vc5, vt);
@@ -264,9 +275,12 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_p5_${DIV_ALGO}_x${
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument -t := -z - n * log(2) = -(z + n * log(2)).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2_hi);
-    vt = ${VMULADDQ_F32}(vt, vn, vln2_lo);
+    $if RR_STEPS == 1:
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2);
+    $else:
+      // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vln2_hi);
+      vt = ${VMULADDQ_F32}(vt, vn, vln2_lo);
 
     // Compute degree-5 polynomial approxiatmion for exp(-t) on [-log(2)/2, log(2)/2].
     float32x4_t vp = ${VMULADDQ_F32}(vc4, vc5, vt);
