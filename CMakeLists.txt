@@ -1081,7 +1081,13 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/exp-avx2-perm-p3.c
   src/math/exp-avx2-perm-p4.c
   src/math/expminus-avx2-p5.c
-  src/math/extexp-avx2-p5.c)
+  src/math/extexp-avx2-p5.c
+  src/math/sigmoid-avx2-rr2-p5-div.c
+  src/math/sigmoid-avx2-rr1-p5-div.c
+  src/math/sigmoid-avx2-rr2-p5-nr2fma.c
+  src/math/sigmoid-avx2-rr1-p5-nr2fma.c
+  src/math/sigmoid-avx2-rr2-p5-nr1fma.c
+  src/math/sigmoid-avx2-rr1-p5-nr1fma.c)
 
 SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-clamp/avx512f.c
