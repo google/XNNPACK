@@ -76,77 +76,143 @@ static void SigmoidError(benchmark::State& state,
     SigmoidError(state, xnn_math_f32_sigmoid__neon_frac_p9_p10_nr1recps, 4);
   }
 
-  static void f32_sigmoid__neon_lut2048_p1_nr2recps(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neon_lut2048_p1_nr2recps, 4);
+  static void f32_sigmoid__neon_rr2_lut2048_p1_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neon_rr2_lut2048_p1_nr2recps, 4);
   }
-  static void f32_sigmoid__neonfma_lut2048_p1_nr2recps(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut2048_p1_nr2recps, 4);
+  static void f32_sigmoid__neonfma_rr2_lut2048_p1_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_lut2048_p1_nr2recps, 4);
   }
-  static void f32_sigmoid__neonfma_lut2048_p1_nr1recps1fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut2048_p1_nr1recps1fma, 4);
+  static void f32_sigmoid__neonfma_rr2_lut2048_p1_nr1recps1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_lut2048_p1_nr1recps1fma, 4);
   }
-  static void f32_sigmoid__neonfma_lut2048_p1_nr2fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut2048_p1_nr2fma, 4);
-  }
-
-  static void f32_sigmoid__neon_lut64_p2_nr2recps(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neon_lut64_p2_nr2recps, 4);
-  }
-  static void f32_sigmoid__neonfma_lut64_p2_nr2recps(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut64_p2_nr2recps, 4);
-  }
-  static void f32_sigmoid__neonfma_lut64_p2_nr1recps1fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut64_p2_nr1recps1fma, 4);
-  }
-  static void f32_sigmoid__neonfma_lut64_p2_nr2fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut64_p2_nr2fma, 4);
+  static void f32_sigmoid__neonfma_rr2_lut2048_p1_nr2fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_lut2048_p1_nr2fma, 4);
   }
 
-  static void f32_sigmoid__neon_p5_nr2recps(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neon_p5_nr2recps, 4);
+  static void f32_sigmoid__neon_rr2_lut64_p2_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neon_rr2_lut64_p2_nr2recps, 4);
   }
-  static void f32_sigmoid__neonfma_p5_nr2recps(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_p5_nr2recps, 4);
+  static void f32_sigmoid__neonfma_rr2_lut64_p2_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_lut64_p2_nr2recps, 4);
   }
-  static void f32_sigmoid__neonfma_p5_nr1recps1fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_p5_nr1recps1fma, 4);
+  static void f32_sigmoid__neonfma_rr2_lut64_p2_nr1recps1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_lut64_p2_nr1recps1fma, 4);
   }
-  static void f32_sigmoid__neonfma_p5_nr2fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_p5_nr2fma, 4);
+  static void f32_sigmoid__neonfma_rr2_lut64_p2_nr2fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_lut64_p2_nr2fma, 4);
+  }
+
+  static void f32_sigmoid__neon_rr2_p5_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neon_rr2_p5_nr2recps, 4);
+  }
+  static void f32_sigmoid__neonfma_rr2_p5_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_p5_nr2recps, 4);
+  }
+  static void f32_sigmoid__neonfma_rr2_p5_nr1recps1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_p5_nr1recps1fma, 4);
+  }
+  static void f32_sigmoid__neonfma_rr2_p5_nr2fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_p5_nr2fma, 4);
+  }
+
+  static void f32_sigmoid__neon_rr1_lut2048_p1_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neon_rr1_lut2048_p1_nr2recps, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_lut2048_p1_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_lut2048_p1_nr2recps, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_lut2048_p1_nr1recps1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_lut2048_p1_nr1recps1fma, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_lut2048_p1_nr2fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_lut2048_p1_nr2fma, 4);
+  }
+
+  static void f32_sigmoid__neon_rr1_lut64_p2_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neon_rr1_lut64_p2_nr2recps, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_lut64_p2_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_lut64_p2_nr2recps, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_lut64_p2_nr1recps1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_lut64_p2_nr1recps1fma, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_lut64_p2_nr2fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_lut64_p2_nr2fma, 4);
+  }
+
+  static void f32_sigmoid__neon_rr1_p5_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neon_rr1_p5_nr2recps, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_p5_nr2recps(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_p5_nr2recps, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_p5_nr1recps1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_p5_nr1recps1fma, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_p5_nr2fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_p5_nr2fma, 4);
   }
 
   BENCHMARK(f32_sigmoid__neon_frac_p9_p10_nr1recps)->Unit(benchmark::kMillisecond)->Iterations(1);
 
-  BENCHMARK(f32_sigmoid__neon_lut2048_p1_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_lut2048_p1_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_lut2048_p1_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_lut2048_p1_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neon_rr2_lut2048_p1_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_lut2048_p1_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_lut2048_p1_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_lut2048_p1_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
 
-  BENCHMARK(f32_sigmoid__neon_lut64_p2_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_lut64_p2_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_lut64_p2_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_lut64_p2_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neon_rr2_lut64_p2_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_lut64_p2_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_lut64_p2_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_lut64_p2_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
 
-  BENCHMARK(f32_sigmoid__neon_p5_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_p5_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_p5_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_p5_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neon_rr2_p5_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_p5_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_p5_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_p5_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+
+  BENCHMARK(f32_sigmoid__neon_rr1_lut2048_p1_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_lut2048_p1_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_lut2048_p1_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_lut2048_p1_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+
+  BENCHMARK(f32_sigmoid__neon_rr1_lut64_p2_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_lut64_p2_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_lut64_p2_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_lut64_p2_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+
+  BENCHMARK(f32_sigmoid__neon_rr1_p5_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_p5_nr2recps)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_p5_nr1recps1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_p5_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM64
-  static void f32_sigmoid__neonfma_lut2048_p1_div(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut2048_p1_div, 4);
+  static void f32_sigmoid__neonfma_rr2_lut2048_p1_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_lut2048_p1_div, 4);
   }
-  static void f32_sigmoid__neonfma_lut64_p2_div(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_lut64_p2_div, 4);
+  static void f32_sigmoid__neonfma_rr2_lut64_p2_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_lut64_p2_div, 4);
   }
-  static void f32_sigmoid__neonfma_p5_div(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_p5_div, 4);
+  static void f32_sigmoid__neonfma_rr2_p5_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr2_p5_div, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_lut2048_p1_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_lut2048_p1_div, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_lut64_p2_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_lut64_p2_div, 4);
+  }
+  static void f32_sigmoid__neonfma_rr1_p5_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__neonfma_rr1_p5_div, 4);
   }
 
-  BENCHMARK(f32_sigmoid__neonfma_lut2048_p1_div)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_lut64_p2_div)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__neonfma_p5_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_lut2048_p1_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_lut64_p2_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr2_p5_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_lut2048_p1_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_lut64_p2_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__neonfma_rr1_p5_div)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
