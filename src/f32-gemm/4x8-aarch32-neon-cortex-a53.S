@@ -42,6 +42,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53
         .arm
 #ifndef __APPLE__
         .arch armv7-a
+        .arch_extension mp
         .fpu neon
 #endif
         // Push 112 bytes
@@ -100,17 +101,19 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53
         PLD         [r9, 192]
         PLD         [r9, 256]
         PLD         [r9, 320]
-
+        PLDW        [r11]            // Prefetch C0
+        PLDW         [r4]            // Prefetch C1
+        PLDW         [r8]            // Prefetch C2
+        PLDW         [r6]            // Prefetch C3
         BLO         4f               // less than 4 channels?
 
-// Prologue
+        # Prologue - First group loads, no FMA
         VLD1.32    {d0}, [r3]!       // A0
+        SUBS        r5, r5, 16
         VLDM        r9!, {d8-d11}    // B0, B1
         VLD1.32    {d1}, [r12]!      // A1
         VLD1.32    {d2}, [r10]!      // A2
         VLD1.32    {d3}, [ r0]!      // A3
-
-        SUBS        r5, r5, 16
         BLO         3f               // less than 4 channels?  skip main loop
 
         # Main loop - 4 floats of A (16 bytes)
@@ -172,7 +175,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32    q15, q7, d7[1]
         BHS         2b
 
-        // Epilogue
+        # Epilogue - Second group loads and FMA.
 3:
         VMLA.F32     q8, q4, d0[0]
         VLDM        r9!, {d12-d15}   // B1
