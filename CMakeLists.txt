@@ -1068,6 +1068,36 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/avx2-p5-x96-acc2.c
   src/f32-raddstoreexpminusmax/gen/avx2-p5-x96-acc3.c
   src/f32-raddstoreexpminusmax/gen/avx2-p5-x96-acc6.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-div-x8.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-div-x16.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-div-x24.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-div-x32.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-div-x40.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-div-x48.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-div-x56.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-div-x64.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-div-x72.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-div-x80.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr1fma-x8.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr1fma-x16.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr1fma-x24.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr1fma-x32.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr1fma-x40.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr1fma-x48.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr1fma-x56.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr1fma-x64.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr1fma-x72.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr1fma-x80.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x8.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x16.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x24.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x32.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x40.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x48.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x56.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x64.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x72.c
+  src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x80.c
   src/f32-vscaleexpminusmax/gen/avx2-p5-x8.c
   src/f32-vscaleexpminusmax/gen/avx2-p5-x16.c
   src/f32-vscaleexpminusmax/gen/avx2-p5-x24.c

@@ -901,7 +901,11 @@ static void init(void) {
     } else {
       xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__sse_x8;
     }
-    xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__sse2_p5_div_x16;
+    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx2()) {
+      xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__avx2_rr1_p5_div_x40;
+    } else {
+      xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__sse2_p5_div_x16;
+    }
     xnn_params.f32.prelu = (struct prelu_parameters) {
       .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__sse2_2x8,
       .row_tile = 2,
