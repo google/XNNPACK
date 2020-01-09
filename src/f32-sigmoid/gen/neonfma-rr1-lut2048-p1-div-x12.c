@@ -152,9 +152,9 @@ void xnn_f32_sigmoid_ukernel__neonfma_rr1_lut2048_p1_div_x12(
     vf89AB = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf89AB), vcagtq_f32(vx89AB, vdenorm_cutoff)));
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
-    const uint32x4_t vm0123 = vcltq_f32(vx0123, vmovq_n_s32(0.0f));
-    const uint32x4_t vm4567 = vcltq_f32(vx4567, vmovq_n_s32(0.0f));
-    const uint32x4_t vm89AB = vcltq_f32(vx89AB, vmovq_n_s32(0.0f));
+    const uint32x4_t vm0123 = vcltq_f32(vx0123, vmovq_n_f32(0.0f));
+    const uint32x4_t vm4567 = vcltq_f32(vx4567, vmovq_n_f32(0.0f));
+    const uint32x4_t vm89AB = vcltq_f32(vx89AB, vmovq_n_f32(0.0f));
 
     vf0123 = vbslq_f32(vm0123, vf0123, vsubq_f32(vone, vf0123));
     vf4567 = vbslq_f32(vm4567, vf4567, vsubq_f32(vone, vf4567));
@@ -236,7 +236,7 @@ void xnn_f32_sigmoid_ukernel__neonfma_rr1_lut2048_p1_div_x12(
     vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcagtq_f32(vx, vdenorm_cutoff)));
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
-    const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
+    const uint32x4_t vm = vcltq_f32(vx, vmovq_n_f32(0.0f));
     vf = vbslq_f32(vm, vf, vsubq_f32(vone, vf));
 
     vst1q_f32(y, vf); y += 4;
@@ -313,7 +313,7 @@ void xnn_f32_sigmoid_ukernel__neonfma_rr1_lut2048_p1_div_x12(
     vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcagtq_f32(vx, vdenorm_cutoff)));
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
-    const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
+    const uint32x4_t vm = vcltq_f32(vx, vmovq_n_f32(0.0f));
     vf = vbslq_f32(vm, vf, vsubq_f32(vone, vf));
 
     float32x2_t vf_lo = vget_low_f32(vf);

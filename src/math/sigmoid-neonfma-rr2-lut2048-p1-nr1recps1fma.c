@@ -116,7 +116,7 @@ void xnn_math_f32_sigmoid__neonfma_rr2_lut2048_p1_nr1recps1fma(
     vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcagtq_f32(vx, vdenorm_cutoff)));
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
-    const uint32x4_t vm = vcltq_s32(vx, vmovq_n_f32(0.0f));
+    const uint32x4_t vm = vcltq_f32(vx, vmovq_n_f32(0.0f));
     vf = vbslq_f32(vm, vf, vsubq_f32(vone, vf));
 
     vst1q_f32(output, vf); output += 4;

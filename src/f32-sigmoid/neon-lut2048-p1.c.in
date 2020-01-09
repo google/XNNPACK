@@ -173,7 +173,7 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_rr${RR_STEPS}_lut2
 
       // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
       $for N in range(0, BATCH_TILE, 4):
-        const uint32x4_t vm${ABC[N:N+4]} = vcltq_f32(vx${ABC[N:N+4]}, vmovq_n_s32(0.0f));
+        const uint32x4_t vm${ABC[N:N+4]} = vcltq_f32(vx${ABC[N:N+4]}, vmovq_n_f32(0.0f));
 
       $for N in range(0, BATCH_TILE, 4):
         vf${ABC[N:N+4]} = vbslq_f32(vm${ABC[N:N+4]}, vf${ABC[N:N+4]}, vsubq_f32(vone, vf${ABC[N:N+4]}));
@@ -277,7 +277,7 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_rr${RR_STEPS}_lut2
     vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcagtq_f32(vx, vdenorm_cutoff)));
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
-    const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
+    const uint32x4_t vm = vcltq_f32(vx, vmovq_n_f32(0.0f));
     vf = vbslq_f32(vm, vf, vsubq_f32(vone, vf));
 
     vst1q_f32(y, vf); y += 4;
@@ -378,7 +378,7 @@ void xnn_f32_sigmoid_ukernel__${"neonfma" if FMA else "neon"}_rr${RR_STEPS}_lut2
     vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcagtq_f32(vx, vdenorm_cutoff)));
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
-    const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
+    const uint32x4_t vm = vcltq_f32(vx, vmovq_n_f32(0.0f));
     vf = vbslq_f32(vm, vf, vsubq_f32(vone, vf));
 
     float32x2_t vf_lo = vget_low_f32(vf);
