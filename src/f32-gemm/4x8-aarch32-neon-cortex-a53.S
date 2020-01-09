@@ -42,6 +42,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53
         .arm
 #ifndef __APPLE__
         .arch armv7-a
+//        .arch_extension mp
         .fpu neon
 #endif
         // Push 112 bytes
@@ -101,120 +102,258 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53
         PLD         [r9, 256]
         PLD         [r9, 320]
 
+        //  118877 us with PLDW vs 119550 us without in e2e
+        // PLDW [r11]        // Prefetch C0
+        // PLDW  [r4]        // Prefetch C1
+        // PLDW  [r8]        // Prefetch C2
+        // PLDW  [r6]        // Prefetch C3
+
         BLO         4f               // less than 4 channels?
 
-// Prologue
+        // Prologue
         VLD1.32    {d0}, [r3]!       // A0
-        VLDM        r9!, {d8-d11}    // B0, B1
         VLD1.32    {d1}, [r12]!      // A1
         VLD1.32    {d2}, [r10]!      // A2
         VLD1.32    {d3}, [ r0]!      // A3
-
         SUBS        r5, r5, 16
+
+        VLDM        r9, {d8-d11}     // B0
+        LDR         r7, [r9, 40]     // B1 low   VMOV is in BLOCK 0
+        LDR        r14, [r9, 44]     // B1 high
+        LDR         r1, [r9, 56]     // B1 low   VMOV is in BLOCK 0
+        LDR         r2, [r9, 60]     // B1 high
+
         BLO         3f               // less than 4 channels?  skip main loop
 
         # Main loop - 4 floats of A (16 bytes)
         # 32 FMA + 8 LD64 A + 8 LDR B
         .p2align 3
 2:
-        VMLA.F32     q8, q4, d0[0]
-        VLDM        r9!, {d12-d15}   // B1
-        VMLA.F32    q10, q4, d1[0]
-        VMLA.F32    q12, q4, d2[0]
+        # First group of 16 FMA, Second group loads
+        // BLOCK 0
         VLD1.32    {d4}, [r3]!       // A0
-        VMLA.F32    q14, q4, d3[0]
-        VMLA.F32     q9, q5, d0[0]
-        VLD1.32    {d5}, [r12]!      // A1
-        VMLA.F32    q11, q5, d1[0]
-        VMLA.F32    q13, q5, d2[0]
-        VMLA.F32    q15, q5, d3[0]
-        VLD1.32    {d6}, [r10]!      // A2
-        VMLA.F32     q8, q6, d0[1]
-        VMLA.F32    q10, q6, d1[1]
-        VLD1.32    {d7}, [ r0]!      // A3
-        VMLA.F32    q12, q6, d2[1]
-        VMLA.F32    q14, q6, d3[1]
-        VLDM        r9!, {d8-d11}    // B0
-        VMLA.F32     q9, q7, d0[1]
-        VMLA.F32    q11, q7, d1[1]
-        VMLA.F32    q13, q7, d2[1]
-        VMLA.F32    q15, q7, d3[1]
-
-        VMLA.F32     q8, q4, d4[0]
-        VLDM        r9!, {d12-d15}   // B1
-        VMLA.F32    q10, q4, d5[0]
+        VMOV        d13, r7, r14     // b1 VMOV b from second group
+        VMLA.F32     q8, q4, d0[0]
+        LDR          r7, [r12]       // A1 low
+        VMLA.F32    q10, q4, d1[0]
+        LDR         r14, [r12, 4]    // A1 high
+        VMLA.F32    q12, q4, d2[0]
         PLD         [r3, 128]        // Prefetch A0
-        VMLA.F32    q12, q4, d6[0]
-        VLD1.32    {d0}, [r3]!       // A0
-        VMLA.F32    q14, q4, d7[0]
-        PLD         [r12, 128]       // Prefetch A1
-        VMLA.F32     q9, q5, d4[0]
-        VLD1.32    {d1}, [r12]!      // A1
-        VMLA.F32    q11, q5, d5[0]
-        PLD         [r10, 128]       // Prefetch A2
-        VMLA.F32    q13, q5, d6[0]
-        VLD1.32    {d2}, [r10]!      // A2
-        VMLA.F32    q15, q5, d7[0]
-        PLD         [r0, 128]        // Prefetch A3
-        VMLA.F32     q8, q6, d4[1]
-        VLD1.32    {d3}, [ r0]!      // A3
-        VMLA.F32    q10, q6, d5[1]
-        PLD         [r9, 384]        // Prefetch B
-        VMLA.F32    q12, q6, d6[1]
-        PLD         [r9, 448]        // Prefetch B
-        VMLA.F32    q14, q6, d7[1]
-        VLDM        r9!, {d8-d11}    // B0
-        VMLA.F32     q9, q7, d4[1]
-        VMLA.F32    q11, q7, d5[1]
-        VMLA.F32    q13, q7, d6[1]
 
-        SUBS         r5, r5, 16
+        // BLOCK 1
+        VLDR        d12, [r9, 32]    // B1
+        VMOV        d15, r1, r2      // b1 VMOV b from second group
+        VMLA.F32    q14, q4, d3[0]
+        LDR          r1, [r9, 72]    // B0 low
+        VMLA.F32     q9, q5, d0[0]
+        LDR          r2, [r9, 76]    // B0 high
+        VMLA.F32    q11, q5, d1[0]
+        PLD         [r12, 128]       // Prefetch A1
+
+        // BLOCK 2
+        VLD1.32    {d6}, [r10]!      // A2
+        VMOV         d5, r7, r14     // a1 VMOV
+        VMLA.F32    q13, q5, d2[0]
+        LDR          r7, [r0]        // A3 low
+        VMLA.F32    q15, q5, d3[0]
+        LDR         r14, [r0, 4]     // A3 high
+        VMLA.F32     q8, q6, d0[1]
+        PLD         [r10, 128]       // Prefetch A2
+
+        // BLOCK 3
+        VLDR        d14, [r9, 48]    // B1
+        VMOV         d9, r1, r2      // b0 VMOV
+        VMLA.F32    q10, q6, d1[1]
+        LDR          r1, [r9, 88]    // B0 low
+        VMLA.F32    q12, q6, d2[1]
+        LDR          r2, [r9, 92]    // B0 high
+        VMLA.F32    q14, q6, d3[1]
+        PLD         [r0, 128]        // Prefetch A3
+
+        // BLOCK 4
+        VLDR         d8, [r9, 64]    // B0
+        VMOV         d7, r7, r14     // a3 VMOV
+        VMLA.F32     q9, q7, d0[1]
+        LDR         r7, [r9, 104]     // B1 low   VMOV is in BLOCK 0
+        VMLA.F32    q11, q7, d1[1]
+        LDR        r14, [r9, 108]     // B1 high
+        VMLA.F32    q13, q7, d2[1]
+        PLD         [r9, 384]        // Prefetch B
+
+        // BLOCK 5
+        VLDR        d10, [r9, 80]    // B0
+        VMOV        d11, r1, r2      // B0 VMOV
+        VMLA.F32    q15, q7, d3[1]
+        LDR         r1, [r9, 120]     // B1 low   VMOV is in BLOCK 0
+        NOP
+        LDR         r2, [r9, 124]     // B1 high
+        NOP
+        PLD         [r9, 448]        // Prefetch B
+
+        # Second group of 16 FMA, First group of loads
+        // BLOCK 0
+        VLD1.32    {d0}, [r3]!       // A0
+        VMOV        d13, r7, r14     // b1 VMOV b from second group
+        VMLA.F32     q8, q4, d4[0]
+        LDR          r7, [r12, 8]    // A1 low
+        VMLA.F32    q10, q4, d5[0]
+        LDR         r14, [r12, 12]   // A1 high
+        VMLA.F32    q12, q4, d6[0]
+        NOP
+
+        // BLOCK 1
+        VLDR        d12, [r9, 96]    // B1
+        VMOV        d15, r1, r2      // b1 VMOV b from second group
+        VMLA.F32    q14, q4, d7[0]
+        LDR          r1, [r9, 136]   // B0 low
+        VMLA.F32     q9, q5, d4[0]
+        LDR          r2, [r9, 140]   // B0 high
+        VMLA.F32    q11, q5, d5[0]
+        NOP
+
+        // BLOCK 2
+        VLD1.32    {d2}, [r10]!      // A2
+        VMOV         d1, r7, r14     // a1 VMOV
+        VMLA.F32    q13, q5, d6[0]
+        LDR          r7, [r0, 8]     // A3 low
+        VMLA.F32    q15, q5, d7[0]
+        LDR         r14, [r0, 12]    // A3 high
+        VMLA.F32     q8, q6, d4[1]
+        NOP
+
+        // BLOCK 3
+        VLDR        d14, [r9, 112]   // B1
+        VMOV         d9, r1, r2      // b0 VMOV
+        VMLA.F32    q10, q6, d5[1]
+        LDR          r1, [r9, 152]   // B0 low
+        VMLA.F32    q12, q6, d6[1]
+        LDR          r2, [r9, 156]   // B0 high
+        VMLA.F32    q14, q6, d7[1]
+        ADD         r12, r12, 16     // A1++
+
+        // BLOCK 4
+        VLDR         d8, [r9, 128]   // B0
+        VMOV         d3, r7, r14     // a3 VMOV
+        VMLA.F32     q9, q7, d4[1]
+        LDR         r7, [r9, 168]    // B1 low   VMOV is in BLOCK 0
+        VMLA.F32    q11, q7, d5[1]
+        LDR        r14, [r9, 172]    // B1 high
+        VMLA.F32    q13, q7, d6[1]
+        ADD          r0, r0, 16      // A3++
+
+        // BLOCK 5
+        VLDR        d10, [r9, 144]   // B0
+        VMOV        d11, r1, r2      // B0 VMOV
         VMLA.F32    q15, q7, d7[1]
+        LDR         r1, [r9, 184]    // B1 low   VMOV is in BLOCK 0
+        SUBS        r5, r5, 16
+        LDR         r2, [r9, 188]    // B1 high
+        ADD         r9, r9, 128      // B++
         BHS         2b
 
-        // Epilogue
+        # Epilogue - 4 floats of A (16 bytes)
 3:
-        VMLA.F32     q8, q4, d0[0]
-        VLDM        r9!, {d12-d15}   // B1
-        VMLA.F32    q10, q4, d1[0]
-        VMLA.F32    q12, q4, d2[0]
+        # First group of 16 FMA, Second group loads
+        // BLOCK 0
         VLD1.32    {d4}, [r3]!       // A0
-        VMLA.F32    q14, q4, d3[0]
-        VMLA.F32     q9, q5, d0[0]
-        VLD1.32    {d5}, [r12]!      // A1
-        VMLA.F32    q11, q5, d1[0]
-        VMLA.F32    q13, q5, d2[0]
-        VMLA.F32    q15, q5, d3[0]
-        VLD1.32    {d6}, [r10]!      // A2
-        VMLA.F32     q8, q6, d0[1]
-        VMLA.F32    q10, q6, d1[1]
-        VLD1.32    {d7}, [ r0]!      // A3
-        VMLA.F32    q12, q6, d2[1]
-        VMLA.F32    q14, q6, d3[1]
-        VLDM        r9!, {d8-d11}    // B0
-        VMLA.F32     q9, q7, d0[1]
-        VMLA.F32    q11, q7, d1[1]
-        VMLA.F32    q13, q7, d2[1]
-        VMLA.F32    q15, q7, d3[1]
+        VMOV        d13, r7, r14     // b1 VMOV b from second group
+        VMLA.F32     q8, q4, d0[0]
+        LDR          r7, [r12]       // A1 low
+        VMLA.F32    q10, q4, d1[0]
+        LDR         r14, [r12, 4]    // A1 high
+        VMLA.F32    q12, q4, d2[0]
 
+        // BLOCK 1
+        VLDR        d12, [r9, 32]    // B1
+        VMOV        d15, r1, r2      // b1 VMOV b from second group
+        VMLA.F32    q14, q4, d3[0]
+        LDR          r1, [r9, 72]    // B0 low
+        VMLA.F32     q9, q5, d0[0]
+        LDR          r2, [r9, 76]    // B0 high
+        VMLA.F32    q11, q5, d1[0]
+
+        // BLOCK 2
+        VLD1.32    {d6}, [r10]!      // A2
+        VMOV         d5, r7, r14     // a1 VMOV
+        VMLA.F32    q13, q5, d2[0]
+        LDR          r7, [r0]        // A3 low
+        VMLA.F32    q15, q5, d3[0]
+        LDR         r14, [r0, 4]     // A3 high
+        VMLA.F32     q8, q6, d0[1]
+
+        // BLOCK 3
+        VLDR        d14, [r9, 48]    // B1
+        VMOV         d9, r1, r2      // b0 VMOV
+        VMLA.F32    q10, q6, d1[1]
+        LDR          r1, [r9, 88]    // B0 low
+        VMLA.F32    q12, q6, d2[1]
+        LDR          r2, [r9, 92]    // B0 high
+        VMLA.F32    q14, q6, d3[1]
+
+        // BLOCK 4
+        VLDR         d8, [r9, 64]    // B0
+        VMOV         d7, r7, r14     // a3 VMOV
+        VMLA.F32     q9, q7, d0[1]
+        LDR         r7, [r9, 104]     // B1 low   VMOV is in BLOCK 0
+        VMLA.F32    q11, q7, d1[1]
+        LDR        r14, [r9, 108]     // B1 high
+        VMLA.F32    q13, q7, d2[1]
+
+        // BLOCK 5
+        VLDR        d10, [r9, 80]    // B0
+        VMOV        d11, r1, r2      // B0 VMOV
+        VMLA.F32    q15, q7, d3[1]
+        LDR         r1, [r9, 120]    // B1 low   VMOV is in BLOCK 0
+        NOP
+        LDR         r2, [r9, 124]    // B1 high
+        NOP
+
+        # Second group of 16 FMA, First group of loads
+        // BLOCK 0
+        NOP
+        VMOV        d13, r7, r14     // b1 VMOV b from second group
         VMLA.F32     q8, q4, d4[0]
-        VLDM        r9!, {d12-d15}   // B1
         VMLA.F32    q10, q4, d5[0]
         VMLA.F32    q12, q4, d6[0]
+
+        // BLOCK 1
+        VLDR        d12, [r9, 96]    // B1
+        VMOV        d15, r1, r2      // b1 VMOV b from second group
         VMLA.F32    q14, q4, d7[0]
+        LDR          r1, [r9, 136]   // B0 low
         VMLA.F32     q9, q5, d4[0]
+        LDR          r2, [r9, 140]   // B0 high
         VMLA.F32    q11, q5, d5[0]
+        NOP
+
+        // BLOCK 2
+        NOP
+        NOP
         VMLA.F32    q13, q5, d6[0]
         VMLA.F32    q15, q5, d7[0]
         VMLA.F32     q8, q6, d4[1]
+
+        // BLOCK 3
+        VLDR        d14, [r9, 112]   // B1
+        VMOV         d9, r1, r2      // b0 VMOV
         VMLA.F32    q10, q6, d5[1]
         VMLA.F32    q12, q6, d6[1]
         VMLA.F32    q14, q6, d7[1]
+        ADD         r12, r12, 8      // A1++
+
+        // BLOCK 4
+        NOP
+        NOP
         VMLA.F32     q9, q7, d4[1]
         VMLA.F32    q11, q7, d5[1]
         VMLA.F32    q13, q7, d6[1]
-        VMLA.F32    q15, q7, d7[1]
+        ADD          r0, r0, 8       // A3++
 
+        // BLOCK 5
+        NOP
+        NOP
+        VMLA.F32    q15, q7, d7[1]
+        ADD         r9, r9, 128      // B++
 4:
         // Is there a remainder?- 1 to 3 floats of A (4, 8 or 12 bytes)
         TST         r5, 12
@@ -234,7 +373,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53
 
         // Clamp
         VMIN.F32     q8,  q8, q2
-        SUBS        r1, r1, 8
+        SUBS         r1, r1, 8
         VMIN.F32     q9,  q9, q2
         VMIN.F32    q10, q10, q2
         VMIN.F32    q11, q11, q2
@@ -321,7 +460,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32    q15, q5, d3[0]
         B           5b
 
-// Store odd width
+        // Store odd width
 10:
         TST         r1, 4
         BEQ         11f
