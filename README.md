@@ -41,14 +41,25 @@ All operators in XNNPACK support NHWC layout, but additionally allow custom stri
 
 ### Mobile phones
 
-The table below presents **single-threaded** performance of XNNPACK library on two generations of MobileNet models and three generations of Pixel phones.
+The table below presents **single-threaded** performance of XNNPACK library on three generations of MobileNet models and three generations of Pixel phones.
 
 | Model              | Pixel, ms | Pixel 2, ms | Pixel 3a, ms |
 | ------------------ | :-------: | :---------: | :----------: |
-| MobileNet v1 1.0X  |    81     |      93     |      88      |
-| MobileNet v2 1.0X  |    48     |      58     |      54      |
+| MobileNet v1 1.0X  |    81     |      89     |      88      |
+| MobileNet v2 1.0X  |    48     |      55     |      54      |
+| MobileNet v3 Large |    40     |      44     |      44      |
+| MobileNet v3 Small |    12     |      14     |      14      |
 
-Benchmarked on October 9, 2019 with `end2end_bench --benchmark_min_time=5` on an Android/ARM64 build (`bazel build -c opt --config android_arm64 :end2end_bench`) and neural network models with randomized weights and inputs.
+The following table presents **multi-threaded** (using as many threads as there are big cores) performance of XNNPACK library on three generations of MobileNet models and three generations of Pixel phones.
+
+| Model              | Pixel, ms | Pixel 2, ms | Pixel 3a, ms |
+| ------------------ | :-------: | :---------: | :----------: |
+| MobileNet v1 1.0X  |    45     |      27     |      46      |
+| MobileNet v2 1.0X  |    28     |      18     |      28      |
+| MobileNet v3 Large |    23     |      16     |      24      |
+| MobileNet v3 Small |     7     |       6     |       8      |
+
+Benchmarked on January 9, 2020 with `end2end_bench --benchmark_min_time=5` on an Android/ARM64 build (`bazel build -c opt --config android_arm64 :end2end_bench`) and neural network models with randomized weights and inputs.
 
 ### Raspberry Pi
 
@@ -56,12 +67,12 @@ The table below presents **multi-threaded** performance of XNNPACK library on th
 
 | Model              | RPi 2 (BCM2836), ms | RPi 3+ (BCM2837B0), ms | RPi 4 (BCM2711), ms |
 | ------------------ | :-----------------: | :--------------------: | :-----------------: |
-| MobileNet v1 1.0X  |         342         |          122           |          79         |
-| MobileNet v2 1.0X  |         199         |           82           |          47         |
-| MobileNet v3 Large |         166         |           71           |          42         |
-| MobileNet v3 Small |          53         |           24           |          15         |
+| MobileNet v1 1.0X  |         380         |          115           |          76         |
+| MobileNet v2 1.0X  |         217         |           80           |          45         |
+| MobileNet v3 Large |         180         |           67           |          41         |
+| MobileNet v3 Small |          57         |           23           |          15         |
 
-Benchmarked on December 12, 2019 with `end2end_bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs.
+Benchmarked on January 9, 2020 with `end2end-bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs.
 
 ## Publications
 
