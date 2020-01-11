@@ -94,9 +94,9 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         # Load initial bias from w into accumulators
         LD1 {v20.16b, v21.16b, v22.16b}, [x5], 48
         MOV v23.16b, v20.16b
-        PRFM PLDL1KEEP, [x5]
+        PRFM PLDL1KEEP, [x5,   0]  // Prefetch B
         MOV v24.16b, v21.16b
-        PRFM PLDL1KEEP, [x5, 64]
+        PRFM PLDL1KEEP, [x5,  64]
         MOV v25.16b, v22.16b
         PRFM PLDL1KEEP, [x5, 128]
         MOV v26.16b, v20.16b
@@ -131,6 +131,15 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
+
+        PRFM PLDL1KEEP, [x22,  0]  // Prefetch A
+        PRFM PLDL1KEEP, [x22, 64]
+        PRFM PLDL1KEEP, [x23,  0]
+        PRFM PLDL1KEEP, [x23, 64]
+        PRFM PLDL1KEEP, [x24,  0]
+        PRFM PLDL1KEEP, [x24, 64]
+        PRFM PLDL1KEEP, [x25,  0]
+        PRFM PLDL1KEEP, [x25, 64]
         B.LO 4f
 
         SUBS x0, x0, 16  // 4 floats for main loop
@@ -180,8 +189,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v20.4s, v4.4s, v0.s[0]
         LDR x13, [x23], 8        // a1
         FMLA v23.4s, v4.4s, v0.s[2]
-        PRFM PLDL1KEEP, [x5, 192]
         FMLA v26.4s, v4.4s, v1.s[0]
+        PRFM PLDL1KEEP, [x22, 128]      // Prefetch A0
 
         # BLOCK 1
         LDR d3, [x24], 8         // a2
@@ -189,8 +198,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v29.4s, v4.4s, v1.s[2]
         LDR x8, [x25], 8         // a3
         FMLA v21.4s, v5.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 256]
         FMLA v24.4s, v5.4s, v0.s[2]
+        PRFM PLDL1KEEP, [x23, 128]      // Prefetch A1
 
         # BLOCK 2
         LDR d14, [x5]       // vb0x0123
@@ -198,8 +207,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v27.4s, v5.4s, v1.s[0]
         LDR x14, [x5, 8]
         FMLA v30.4s, v5.4s, v1.s[2]
-        PRFM PLDL1KEEP, [x5, 320]
         FMLA v22.4s, v6.4s, v0.s[0]
+        PRFM PLDL1KEEP, [x24, 128]     // Prefetch A2
 
         # BLOCK 3
         LDR d15, [x5, 16]   // vb0x25567
@@ -208,6 +217,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         LDR x15, [x5, 24]
         FMLA v28.4s, v6.4s, v1.s[0]
         FMLA v31.4s, v6.4s, v1.s[2]
+        PRFM PLDL1KEEP, [x25, 128]     // Prefetch A3
 
         # BLOCK 4
         LDR d16, [x5, 32]   // vb0x89AB
@@ -216,6 +226,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         LDR x16, [x5, 40]
         FMLA v23.4s, v7.4s, v0.s[3]
         FMLA v26.4s, v7.4s, v1.s[1]
+        PRFM PLDL1KEEP, [x5, 384]      // Prefetch B
 
         # BLOCK 5
         LDR d17, [x5, 48]   // vb1x0123
@@ -224,6 +235,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         LDR x17, [x5, 56]
         FMLA v21.4s, v8.4s, v0.s[1]
         FMLA v24.4s, v8.4s, v0.s[3]
+        PRFM PLDL1KEEP, [x5, 448]      // Prefetch B
 
         # BLOCK 6
         LDR d18, [x5, 64]   // vb1x25567
@@ -320,7 +332,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v20.4s, v4.4s, v0.s[0]
         LDR x13, [x23], 8        // a1
         FMLA v23.4s, v4.4s, v0.s[2]
-        PRFM PLDL1KEEP, [x5, 192]
         FMLA v26.4s, v4.4s, v1.s[0]
         PRFM PSTL1KEEP,  [x6]          // Prefetch C0
 
@@ -330,7 +341,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v29.4s, v4.4s, v1.s[2]
         LDR x8, [x25], 8         // a3
         FMLA v21.4s, v5.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 256]
         FMLA v24.4s, v5.4s, v0.s[2]
         PRFM PSTL1KEEP, [x20]          // Prefetch C1
 
@@ -340,7 +350,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v27.4s, v5.4s, v1.s[0]
         LDR x14, [x5, 8]
         FMLA v30.4s, v5.4s, v1.s[2]
-        PRFM PLDL1KEEP, [x5, 320]
         FMLA v22.4s, v6.4s, v0.s[0]
         PRFM PSTL1KEEP, [x21]          // Prefetch C2
 
