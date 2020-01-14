@@ -146,9 +146,9 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         # Prologue - First group loads, no FMA
         LDR  d0, [x3], 8               // a0
         LDP q16, q17, [x5], 32         // b
-        LD1  {v0.d}[1], [x9], 8        // a1
         LDR  d1, [x10], 8              // a2
         LDR  d2, [x12], 8              // a4
+        LD1  {v0.d}[1],  [x9], 8       // a1
         LD1  {v1.d}[1], [x11], 8       // a3
         LD1  {v2.d}[1],  [x4], 8       // a5
         SUBS x0, x0, 16

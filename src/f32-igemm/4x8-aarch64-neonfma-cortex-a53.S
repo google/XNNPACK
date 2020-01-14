@@ -34,6 +34,8 @@
 # x17 c2
 #  x7 c3
 
+# x19 temporary vector shadow register
+
 # Vector register usage
 # A0  v0     v3
 # A1  v0[1]  v3[1]
@@ -82,10 +84,10 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         # Load clamping_params values
         LD2R {v6.4s, v7.4s}, [x8]
 
-        // Save x19, x20, d12-d15 on stack
+        // Save x19, d12-d15 on stack
         STP d12, d13, [sp, -48]!
         STP d14, d15, [sp, 16]
-        STP x19, x20, [sp, 32]
+        STP x19, x19, [sp, 32]
 
 0:
         # Load initial bias from w into accumulators
@@ -118,6 +120,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDP x13, x14, [x4], 16
         LDP x15, x8, [x4], 16
 
+
         CMP x13, x12            // if a0 == zero
         ADD x13, x13, x11       // a0 += a_offset
         CSEL x13, x12, x13, EQ  //   a0 = zero, else += a0 + a_offset
@@ -131,26 +134,20 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         ADD x8, x8, x11         // a3 += a_offset
         CSEL x8, x12, x8, EQ    //   a3 = zero, else += a3 + a_offset
 
-
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
         B.LO 4f
 
-
         # Prologue - First group loads, no FMA
-        LDR   d0, [x13], 8             // a0
-        LDR  x20, [x14], 8             // a1
-        LDR   d1, [x15], 8             // a2
-        INS v0.d[1], x20               // a1 ins
-        LDR  x19, [x8], 8              // a3
-        INS v1.d[1], x19               // a3 ins
-        LDR  q16,  [x5], 16            // b
-        LDR  q17, [x5], 16
+        LDR   d0, [x13], 8            // a0
+        LDP q16, q17, [x5], 32        // b
+        LDR   d1, [x15], 8            // a2
+        LD1  {v0.d}[1],  [x14], 8     // a1
+        LD1  {v1.d}[1], [x8], 8       // a3
         SUBS x0, x0, 16
-        LDR  d18, [x5], 8
-        LDR  x19, [x5], 8   // ins is in BLOCK 0
+        LDR  q18, [x5], 16
         LDR  d19, [x5], 8
-        LDR  x20, [x5], 8   // ins is in BLOCK 1
+        LDR  x19, [x5], 8   // ins is in BLOCK 0
 
         # Is there at least 4 floats (16 bytes) for main loop?
         B.LO 3f
@@ -160,110 +157,110 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
 2:
         # First group of 16 FMA, Second group loads
         // BLOCK 0
-        LDR   d3, [x13], 8             // a0
-        INS v18.d[1], x19              // b from second group
+        LDR   d3, [x13], 8              // a0
+        INS v19.d[1], x19               // b from second group
         FMLA v20.4s, v16.4s,  v0.s[0]
+        LDR  x19, [x14], 8              // a1
         FMLA v22.4s, v16.4s,  v0.s[2]
-        LDR  x19, [x14], 8             // a1
         FMLA v24.4s, v16.4s,  v1.s[0]
 
         // BLOCK 1
         LDR  d12, [x5]
-        INS v19.d[1], x20              // b from second group
+        INS v3.d[1], x19                // a1 ins
         FMLA v26.4s, v16.4s,  v1.s[2]
+        LDR  x19, [x5, 8]   // b
         FMLA v21.4s, v17.4s,  v0.s[0]
-        LDR  x20, [x5, 8]   // b
         FMLA v23.4s, v17.4s,  v0.s[2]
 
         // BLOCK 2
-        LDR   d4, [x15], 8             // a2
-        INS v3.d[1], x19               // a1 ins
+        LDR   d4, [x15], 8              // a2
+        INS v12.d[1], x19  // b  ins
         FMLA v25.4s, v17.4s,  v1.s[0]
+        LDR  x19, [x8], 8               // a3
         FMLA v27.4s, v17.4s,  v1.s[2]
-        LDR  x19, [x8], 8              // a3
         FMLA v20.4s, v18.4s,  v0.s[1]
 
         // BLOCK 3
         LDR  d13, [x5, 16]
-        INS v12.d[1], x20  // b  ins
+        INS v4.d[1], x19                // a3 ins
         FMLA v22.4s, v18.4s,  v0.s[3]
+        LDR  x19, [x5, 24]
         FMLA v24.4s, v18.4s,  v1.s[1]
-        LDR  x20, [x5, 24]
         FMLA v26.4s, v18.4s,  v1.s[3]
 
         // BLOCK 4
         LDR  d14, [x5, 32]
-        INS v4.d[1], x19               // a3 ins
+        INS v13.d[1], x19  // b
         FMLA v21.4s, v19.4s,  v0.s[1]
-        FMLA v23.4s, v19.4s,  v0.s[3]
         LDR  x19, [x5, 40]
+        FMLA v23.4s, v19.4s,  v0.s[3]
         FMLA v25.4s, v19.4s,  v1.s[1]
 
         // BLOCK 5
         // NOPs to ensure 4 cycle LDR lands on next LDR
         LDR  d15, [x5, 48]
-        INS v13.d[1], x20  // b
+        INS v14.d[1], x19  // b from previous
         FMLA v27.4s, v19.4s,  v1.s[3]
+        LDR x19, [x5, 56]
         NOP
         NOP
-        LDR x20, [x5, 56]
         NOP
         NOP
 
         # Second group of 16 FMA, First group of loads
         // BLOCK 0
-        LDR   d0, [x13], 8             // a0
-        INS v14.d[1], x19  // b from previous
+        LDR   d0, [x13], 8              // a0
+        INS v15.d[1], x19  // b from previous
         FMLA v20.4s, v12.4s,  v3.s[0]
+        LDR  x19, [x14], 8              // a1
         FMLA v22.4s, v12.4s,  v3.s[2]
-        LDR  x19, [x14], 8             // a1
         FMLA v24.4s, v12.4s,  v4.s[0]
-        PRFM PLDL1KEEP, [x13, 128]     // Prefetch A0
+        PRFM PLDL1KEEP, [x13, 128]      // Prefetch A0
 
         // BLOCK 1
         LDR  d16, [x5, 64]
-        INS v15.d[1], x20  // b from previous
+        INS v0.d[1], x19               // a1 ins
         FMLA v26.4s, v12.4s,  v4.s[2]
+        LDR  x19, [x5, 72]  // b
         FMLA v21.4s, v13.4s,  v3.s[0]
-        LDR  x20, [x5, 72]  // b
         FMLA v23.4s, v13.4s,  v3.s[2]
-        PRFM PLDL1KEEP, [x14, 128]     // Prefetch A1
+        PRFM PLDL1KEEP, [x14, 128]      // Prefetch A1
 
         // BLOCK 2
         LDR   d1, [x15], 8             // a2
-        INS v0.d[1], x19               // a1 ins
+        INS v16.d[1], x19  // b
         FMLA v25.4s, v13.4s,  v4.s[0]
+        LDR  x19, [x8], 8             // a3
         FMLA v27.4s, v13.4s,  v4.s[2]
-        LDR  x19, [x8], 8              // a3
         FMLA v20.4s, v14.4s,  v3.s[1]
         PRFM PLDL1KEEP, [x15, 128]     // Prefetch A2
 
         // BLOCK 3
         LDR  d17, [x5, 80]
-        INS v16.d[1], x20  // b
+        INS v1.d[1], x19               // a3 ins
         FMLA v22.4s, v14.4s,  v3.s[3]
+        LDR  x19, [x5, 88]
         FMLA v24.4s, v14.4s,  v4.s[1]
-        LDR  x20, [x5, 88]
         FMLA v26.4s, v14.4s,  v4.s[3]
-        PRFM PLDL1KEEP, [x8, 128]      // Prefetch A3
+        PRFM PLDL1KEEP, [x8, 128]     // Prefetch A3
 
         // BLOCK 4
         LDR  d18, [x5, 96]
-        INS v1.d[1], x19               // a3 ins
+        INS v17.d[1], x19  // b
         FMLA v21.4s, v15.4s,  v3.s[1]
-        FMLA v23.4s, v15.4s,  v3.s[3]
         LDR  x19, [x5, 104]
+        FMLA v23.4s, v15.4s,  v3.s[3]
         FMLA v25.4s, v15.4s,  v4.s[1]
         PRFM PLDL1KEEP, [x5, 384]      // Prefetch B
 
         // BLOCK 5
         // NOTE that block needs to be 4 cycles for LDR not to stall
         LDR  d19, [x5, 112]
-        INS v17.d[1], x20  // b
+        INS v18.d[1], x19
         FMLA v27.4s, v15.4s,  v4.s[3]
-        PRFM PLDL1KEEP, [x5, 448]      // Prefetch B
+        LDR  x19, [x5, 120]
         SUBS x0, x0, 16
-        LDR  x20, [x5, 120]
+        PRFM PLDL1KEEP, [x5, 448]      // Prefetch B
         ADD x5, x5, 128
         B.HS 2b
 
@@ -272,69 +269,64 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
 3:
         # First group of 16 FMA, Second group loads
         // BLOCK 0
-        LDR   d3, [x13], 8             // a0
-        INS v18.d[1], x19              // b from second group
+        LDR   d3, [x13], 8              // a0
+        INS v19.d[1], x19              // b from second group
         FMLA v20.4s, v16.4s,  v0.s[0]
+        LDR  x19, [x14], 8              // a1
         FMLA v22.4s, v16.4s,  v0.s[2]
-        LDR  x19, [x14], 8             // a1
         FMLA v24.4s, v16.4s,  v1.s[0]
-        PRFM PSTL1KEEP,  [x6]          // Prefetch C0
 
         // BLOCK 1
         LDR  d12, [x5]
-        INS v19.d[1], x20              // b from second group
+        INS v3.d[1], x19               // a1 ins
         FMLA v26.4s, v16.4s,  v1.s[2]
+        LDR  x19, [x5, 8]   // b
         FMLA v21.4s, v17.4s,  v0.s[0]
-        LDR  x20, [x5, 8]   // b
         FMLA v23.4s, v17.4s,  v0.s[2]
-        PRFM PSTL1KEEP, [x16]          // Prefetch C1
 
         // BLOCK 2
         LDR   d4, [x15], 8             // a2
-        INS v3.d[1], x19               // a1 ins
+        INS v12.d[1], x19  // b  ins
         FMLA v25.4s, v17.4s,  v1.s[0]
+        LDR  x19, [x8], 8             // a3
         FMLA v27.4s, v17.4s,  v1.s[2]
-        LDR  x19, [x8], 8              // a3
         FMLA v20.4s, v18.4s,  v0.s[1]
-        PRFM PSTL1KEEP, [x17]          // Prefetch C2
 
         // BLOCK 3
         LDR  d13, [x5, 16]
-        INS v12.d[1], x20  // b  ins
+        INS v4.d[1], x19               // a3 ins
         FMLA v22.4s, v18.4s,  v0.s[3]
+        LDR  x19, [x5, 24]
         FMLA v24.4s, v18.4s,  v1.s[1]
-        LDR  x20, [x5, 24]
         FMLA v26.4s, v18.4s,  v1.s[3]
-        PRFM PSTL1KEEP, [x7]           // Prefetch C3
 
         // BLOCK 4
         LDR  d14, [x5, 32]
-        INS v4.d[1], x19               // a3 ins
+        INS v13.d[1], x19  // b
         FMLA v21.4s, v19.4s,  v0.s[1]
-        FMLA v23.4s, v19.4s,  v0.s[3]
         LDR  x19, [x5, 40]
+        FMLA v23.4s, v19.4s,  v0.s[3]
         FMLA v25.4s, v19.4s,  v1.s[1]
 
         // BLOCK 5
         // NOPs to ensure 4 cycle LDR lands on next LDR
         LDR  d15, [x5, 48]
-        INS v13.d[1], x20  // b
+        INS v14.d[1], x19
         FMLA v27.4s, v19.4s,  v1.s[3]
+        LDR x19, [x5, 56]
+        NOP // fma
         NOP
-        NOP
-        LDR x20, [x5, 56]
-        NOP
+        NOP // fma
         NOP
 
         # Second group of 16 FMA, no loads
         // BLOCK 0
+        INS v15.d[1], x19  // b from previous
         FMLA v20.4s, v12.4s,  v3.s[0]
         FMLA v22.4s, v12.4s,  v3.s[2]
         FMLA v24.4s, v12.4s,  v4.s[0]
 
         // BLOCK 1
-        INS v14.d[1], x19  // b from previous
-        INS v15.d[1], x20  // b from previous
         FMLA v26.4s, v12.4s,  v4.s[2]
         FMLA v21.4s, v13.4s,  v3.s[0]
         FMLA v23.4s, v13.4s,  v3.s[2]
@@ -404,8 +396,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         # nc loop
         B.HI 0b
 
-        // Restore x19, x20, d12-d15 from stack
-        LDP x19, x20, [sp, 32]
+        // Restore x19, d12-d15 from stack
+        LDR x19,      [sp, 32]
         LDP d14, d15, [sp, 16]
         LDP d12, d13, [sp], 48
         RET
@@ -487,8 +479,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         STR s22, [x16]
         STR s20,  [x6]
 11:
-        // Restore x19, x20, d12-d15 from stack
-        LDP x19, x20, [sp, 32]
+        // Restore x19, d12-d15 from stack
+        LDR x19,      [sp, 32]
         LDP d14, d15, [sp, 16]
         LDP d12, d13, [sp], 48
         RET
