@@ -80,6 +80,8 @@ Benchmarked on January 9, 2020 with `end2end-bench --benchmark_min_time=5` on a 
 - Erich Elsen, Marat Dukhan, Trevor Gale, Karen Simonyan "Fast Sparse ConvNets".
   [Paper on ArXiv](https://arxiv.org/abs/1911.09723), [pre-trained sparse
   models](https://github.com/google-research/google-research/tree/master/fastconvnets).
+- Marat Dukhan, Artsiom Ablavatski "The Two-Pass Softmax Algorithm".
+  [Paper on ArXiv](https://arxiv.org/abs/2001.04438).
 
 ## Acknowledgements
 
