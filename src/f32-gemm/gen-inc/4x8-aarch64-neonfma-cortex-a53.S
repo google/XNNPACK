@@ -37,7 +37,7 @@
 # x17 c2
 # x18 c3
 
-# x19 temporary vector shadow register
+# x4 temporary vector shadow register
 
 # Vector register usage
 # A0  v0     v3
@@ -55,7 +55,6 @@
 
 # unused A   v8 v9 v10 v11
 # x12 a4
-#  x4 a5
 # x13 c4
 #  x7 c5
 # A4  v2     v5
@@ -93,10 +92,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
         # Load cn_stride
         LDR x14, [sp]
 
-        // Save x19, d12-d15 on stack
-        STP d12, d13, [sp, -48]!
+        // Save d12-d15 on stack
+        STP d12, d13, [sp, -32]!
         STP d14, d15, [sp, 16]
-        STR x19,      [sp, 32]
 
 0:
         # Load initial accumulators
@@ -132,7 +130,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
         SUBS x0, x0, 16
         LDR  q18, [x5], 16
         LDR  d19, [x5], 8
-        LDR  x19, [x5], 8   // ins is in BLOCK 0
+        LDR  x4, [x5], 8   // ins is in BLOCK 0
 
         # Is there at least 4 floats (16 bytes) for main loop?
         B.LO 2f
@@ -143,50 +141,50 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
         # First group of 16 FMA, Second group loads
         // BLOCK 0
         LDR   d3, [x3], 8              // a0
-        INS v19.d[1], x19              // b from second group
+        INS v19.d[1], x4               // b from second group
         FMLA v20.4s, v16.4s,  v0.s[0]
-        LDR  x19, [x9], 8              // a1
+        LDR  x4, [x9], 8               // a1
         FMLA v22.4s, v16.4s,  v0.s[2]
         FMLA v24.4s, v16.4s,  v1.s[0]
 
         // BLOCK 1
         LDR  d12, [x5]
-        INS v3.d[1], x19               // a1 ins
+        INS v3.d[1], x4                // a1 ins
         FMLA v26.4s, v16.4s,  v1.s[2]
-        LDR  x19, [x5, 8]   // b
+        LDR  x4, [x5, 8]   // b
         FMLA v21.4s, v17.4s,  v0.s[0]
         FMLA v23.4s, v17.4s,  v0.s[2]
 
         // BLOCK 2
         LDR   d4, [x10], 8             // a2
-        INS v12.d[1], x19  // b  ins
+        INS v12.d[1], x4  // b  ins
         FMLA v25.4s, v17.4s,  v1.s[0]
-        LDR  x19, [x11], 8             // a3
+        LDR  x4, [x11], 8              // a3
         FMLA v27.4s, v17.4s,  v1.s[2]
         FMLA v20.4s, v18.4s,  v0.s[1]
 
         // BLOCK 3
         LDR  d13, [x5, 16]
-        INS v4.d[1], x19               // a3 ins
+        INS v4.d[1], x4                // a3 ins
         FMLA v22.4s, v18.4s,  v0.s[3]
-        LDR  x19, [x5, 24]
+        LDR  x4, [x5, 24]
         FMLA v24.4s, v18.4s,  v1.s[1]
         FMLA v26.4s, v18.4s,  v1.s[3]
 
         // BLOCK 4
         LDR  d14, [x5, 32]
-        INS v13.d[1], x19  // b
+        INS v13.d[1], x4  // b
         FMLA v21.4s, v19.4s,  v0.s[1]
-        LDR  x19, [x5, 40]
+        LDR  x4, [x5, 40]
         FMLA v23.4s, v19.4s,  v0.s[3]
         FMLA v25.4s, v19.4s,  v1.s[1]
 
         // BLOCK 5
         // NOPs to ensure 4 cycle LDR lands on next LDR
         LDR  d15, [x5, 48]
-        INS v14.d[1], x19  // b from previous
+        INS v14.d[1], x4  // b from previous
         FMLA v27.4s, v19.4s,  v1.s[3]
-        LDR x19, [x5, 56]
+        LDR x4, [x5, 56]
         NOP
         NOP
         NOP
@@ -195,45 +193,45 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
         # Second group of 16 FMA, First group of loads
         // BLOCK 0
         LDR   d0, [x3], 8              // a0
-        INS v15.d[1], x19  // b from previous
+        INS v15.d[1], x4  // b from previous
         FMLA v20.4s, v12.4s,  v3.s[0]
-        LDR  x19, [x9], 8              // a1
+        LDR  x4, [x9], 8               // a1
         FMLA v22.4s, v12.4s,  v3.s[2]
         FMLA v24.4s, v12.4s,  v4.s[0]
         PRFM PLDL1KEEP, [x3, 128]      // Prefetch A0
 
         // BLOCK 1
         LDR  d16, [x5, 64]
-        INS v0.d[1], x19               // a1 ins
+        INS v0.d[1], x4                // a1 ins
         FMLA v26.4s, v12.4s,  v4.s[2]
-        LDR  x19, [x5, 72]  // b
+        LDR  x4, [x5, 72]  // b
         FMLA v21.4s, v13.4s,  v3.s[0]
         FMLA v23.4s, v13.4s,  v3.s[2]
         PRFM PLDL1KEEP, [x9, 128]      // Prefetch A1
 
         // BLOCK 2
         LDR   d1, [x10], 8             // a2
-        INS v16.d[1], x19  // b
+        INS v16.d[1], x4  // b
         FMLA v25.4s, v13.4s,  v4.s[0]
-        LDR  x19, [x11], 8             // a3
+        LDR  x4, [x11], 8              // a3
         FMLA v27.4s, v13.4s,  v4.s[2]
         FMLA v20.4s, v14.4s,  v3.s[1]
         PRFM PLDL1KEEP, [x10, 128]     // Prefetch A2
 
         // BLOCK 3
         LDR  d17, [x5, 80]
-        INS v1.d[1], x19               // a3 ins
+        INS v1.d[1], x4                // a3 ins
         FMLA v22.4s, v14.4s,  v3.s[3]
-        LDR  x19, [x5, 88]
+        LDR  x4, [x5, 88]
         FMLA v24.4s, v14.4s,  v4.s[1]
         FMLA v26.4s, v14.4s,  v4.s[3]
         PRFM PLDL1KEEP, [x11, 128]     // Prefetch A3
 
         // BLOCK 4
         LDR  d18, [x5, 96]
-        INS v17.d[1], x19  // b
+        INS v17.d[1], x4  // b
         FMLA v21.4s, v15.4s,  v3.s[1]
-        LDR  x19, [x5, 104]
+        LDR  x4, [x5, 104]
         FMLA v23.4s, v15.4s,  v3.s[3]
         FMLA v25.4s, v15.4s,  v4.s[1]
         PRFM PLDL1KEEP, [x5, 384]      // Prefetch B
@@ -241,9 +239,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
         // BLOCK 5
         // NOTE that block needs to be 4 cycles for LDR not to stall
         LDR  d19, [x5, 112]
-        INS v18.d[1], x19
+        INS v18.d[1], x4
         FMLA v27.4s, v15.4s,  v4.s[3]
-        LDR  x19, [x5, 120]
+        LDR  x4, [x5, 120]
         SUBS x0, x0, 16
         PRFM PLDL1KEEP, [x5, 448]      // Prefetch B
         ADD x5, x5, 128
@@ -255,50 +253,50 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
         # First group of 16 FMA, Second group loads
         // BLOCK 0
         LDR   d3, [x3], 8              // a0
-        INS v19.d[1], x19              // b from second group
+        INS v19.d[1], x4               // b from second group
         FMLA v20.4s, v16.4s,  v0.s[0]
-        LDR  x19, [x9], 8              // a1
+        LDR  x4, [x9], 8               // a1
         FMLA v22.4s, v16.4s,  v0.s[2]
         FMLA v24.4s, v16.4s,  v1.s[0]
 
         // BLOCK 1
         LDR  d12, [x5]
-        INS v3.d[1], x19               // a1 ins
+        INS v3.d[1], x4                // a1 ins
         FMLA v26.4s, v16.4s,  v1.s[2]
-        LDR  x19, [x5, 8]   // b
+        LDR  x4, [x5, 8]   // b
         FMLA v21.4s, v17.4s,  v0.s[0]
         FMLA v23.4s, v17.4s,  v0.s[2]
 
         // BLOCK 2
         LDR   d4, [x10], 8             // a2
-        INS v12.d[1], x19  // b  ins
+        INS v12.d[1], x4  // b  ins
         FMLA v25.4s, v17.4s,  v1.s[0]
-        LDR  x19, [x11], 8             // a3
+        LDR  x4, [x11], 8              // a3
         FMLA v27.4s, v17.4s,  v1.s[2]
         FMLA v20.4s, v18.4s,  v0.s[1]
 
         // BLOCK 3
         LDR  d13, [x5, 16]
-        INS v4.d[1], x19               // a3 ins
+        INS v4.d[1], x4                // a3 ins
         FMLA v22.4s, v18.4s,  v0.s[3]
-        LDR  x19, [x5, 24]
+        LDR  x4, [x5, 24]
         FMLA v24.4s, v18.4s,  v1.s[1]
         FMLA v26.4s, v18.4s,  v1.s[3]
 
         // BLOCK 4
         LDR  d14, [x5, 32]
-        INS v13.d[1], x19  // b
+        INS v13.d[1], x4  // b
         FMLA v21.4s, v19.4s,  v0.s[1]
-        LDR  x19, [x5, 40]
+        LDR  x4, [x5, 40]
         FMLA v23.4s, v19.4s,  v0.s[3]
         FMLA v25.4s, v19.4s,  v1.s[1]
 
         // BLOCK 5
         // NOPs to ensure 4 cycle LDR lands on next LDR
         LDR  d15, [x5, 48]
-        INS v14.d[1], x19
+        INS v14.d[1], x4
         FMLA v27.4s, v19.4s,  v1.s[3]
-        LDR x19, [x5, 56]
+        LDR x4, [x5, 56]
         NOP // fma
         NOP
         NOP // fma
@@ -306,7 +304,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
 
         # Second group of 16 FMA, no loads
         // BLOCK 0
-        INS v15.d[1], x19  // b from previous
+        INS v15.d[1], x4  // b from previous
         FMLA v20.4s, v12.4s,  v3.s[0]
         FMLA v22.4s, v12.4s,  v3.s[2]
         FMLA v24.4s, v12.4s,  v4.s[0]
@@ -374,10 +372,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
 
         B.HI 0b
 
-        // Restore x19, d12-d15 from stack
-        LDR x19,      [sp, 32]
+        // Restore d12-d15 from stack
         LDP d14, d15, [sp, 16]
-        LDP d12, d13, [sp], 48
+        LDP d12, d13, [sp], 32
         RET
 
         # Remainder- 2 floats of A (8 bytes)
@@ -460,10 +457,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
         STR s22, [x16]
         STR s20,  [x6]
 11:
-        // Restore x19, d12-d15 from stack
-        LDR x19,      [sp, 32]
+        // Restore d12-d15 from stack
         LDP d14, d15, [sp, 16]
-        LDP d12, d13, [sp], 48
+        LDP d12, d13, [sp], 32
         RET
 
 END_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
