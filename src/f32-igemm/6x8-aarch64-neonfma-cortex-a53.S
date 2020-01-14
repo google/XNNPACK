@@ -147,17 +147,13 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         B.LO 4f
 
         # Prologue - First group loads, no FMA
-        LDR   d0, [x14], 8             // a0
-        LDR  x19, [x15], 8             // a1
-        LDR   d1, [x20], 8             // a2
-        INS v0.d[1], x19               // a1 ins
-        LDR  x19, [x21], 8             // a3
-        LDR   d2, [x22], 8             // a4
-        INS v1.d[1], x19               // a3 ins
-        LDR  x19,  [x23], 8            // a5
-        LDR  q16,  [x5], 16            // b
-        INS v2.d[1], x19               // a5 ins
-        LDR  q17, [x5], 16
+        LDR  d0, [x14], 8              // a0
+        LDP q16, q17, [x5], 32         // b
+        LDR  d1, [x20], 8              // a2
+        LDR  d2, [x22], 8              // a4
+        LD1  {v0.d}[1], [x15], 8       // a1
+        LD1  {v1.d}[1], [x21], 8       // a3
+        LD1  {v2.d}[1],  [x23], 8      // a5
         SUBS x0, x0, 16
         LDR  q18, [x5], 16
         LDR  d19, [x5], 8
@@ -431,6 +427,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
 
         # Clamp
         FMIN v20.4s, v20.4s, v6.4s
+        SUBS x1, x1, 8
         FMIN v21.4s, v21.4s, v6.4s
         FMIN v22.4s, v22.4s, v6.4s
         FMIN v23.4s, v23.4s, v6.4s
@@ -456,7 +453,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMAX v31.4s, v31.4s, v7.4s
 
         # Store full 6 x 8
-        SUBS x1, x1, 8
         B.LO 8f
 
         STP q30, q31,  [x7]
