@@ -136,8 +136,6 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_ukernel_6x8__aarch64_neonfma_
           PRFM PLDL1KEEP, [x5,  64]
           PRFM PLDL1KEEP, [x5, 128]
           PRFM PLDL1KEEP, [x5, 192]
-          PRFM PLDL1KEEP, [x5, 256]
-          PRFM PLDL1KEEP, [x5, 320]
         $else:
           # Load initial bias from w into accumulators
           LDP q20, q21, [x5], 32
@@ -161,14 +159,12 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_ukernel_6x8__aarch64_neonfma_
           PRFM PLDL1KEEP,  [x4, 64]
           MOV v28.16b, v20.16b
           PRFM PLDL1KEEP, [x5,   0]  // Prefetch B
-          PRFM PLDL1KEEP, [x5,  64]
           MOV v29.16b, v21.16b
-          PRFM PLDL1KEEP, [x5, 128]
-          PRFM PLDL1KEEP, [x5, 192]
+          PRFM PLDL1KEEP, [x5,  64]
           MOV v30.16b, v20.16b
-          PRFM PLDL1KEEP, [x5, 256]
-          PRFM PLDL1KEEP, [x5, 320]
+          PRFM PLDL1KEEP, [x5, 128]
           MOV v31.16b, v21.16b
+          PRFM PLDL1KEEP, [x5, 192]
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
@@ -316,9 +312,9 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_ukernel_6x8__aarch64_neonfma_
         FMLA v21.4s, v15.4s,  v3.s[1]
         LDR  x19, [x5, 120]
         FMLA v23.4s, v15.4s,  v3.s[3]
-        PRFM PLDL1KEEP, [x5, 384]      // Prefetch B
+        PRFM PLDL1KEEP, [x5, 192]      // Prefetch B
         FMLA v25.4s, v15.4s,  v4.s[1]
-        PRFM PLDL1KEEP, [x5, 448]      // Prefetch B
+        PRFM PLDL1KEEP, [x5, 256]      // Prefetch B
 
         // BLOCK 7
         SUBS x0, x0, 16  // LDR lands here

@@ -110,8 +110,6 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         MOV v27.16b, v21.16b
         PRFM PLDL1KEEP, [x5, 128]
         PRFM PLDL1KEEP, [x5, 192]
-        PRFM PLDL1KEEP, [x5, 256]
-        PRFM PLDL1KEEP, [x5, 320]
 
         MOV x9, x3  // p = ks
 
@@ -251,7 +249,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR  x19, [x5, 104]
         FMLA v23.4s, v15.4s,  v3.s[3]
         FMLA v25.4s, v15.4s,  v4.s[1]
-        PRFM PLDL1KEEP, [x5, 384]      // Prefetch B
+        PRFM PLDL1KEEP, [x5, 192]      // Prefetch B
 
         // BLOCK 5
         // NOTE that block needs to be 4 cycles for LDR not to stall
@@ -260,7 +258,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA v27.4s, v15.4s,  v4.s[3]
         LDR  x19, [x5, 120]
         SUBS x0, x0, 16
-        PRFM PLDL1KEEP, [x5, 448]      // Prefetch B
+        PRFM PLDL1KEEP, [x5, 256]      // Prefetch B
         ADD x5, x5, 128
         B.HS 2b
 

@@ -132,8 +132,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         PRFM PLDL1KEEP, [x5,  64]
         PRFM PLDL1KEEP, [x5, 128]
         PRFM PLDL1KEEP, [x5, 192]
-        PRFM PLDL1KEEP, [x5, 256]
-        PRFM PLDL1KEEP, [x5, 320]
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
@@ -281,9 +279,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA v21.4s, v15.4s,  v3.s[1]
         LDR  x19, [x5, 120]
         FMLA v23.4s, v15.4s,  v3.s[3]
-        PRFM PLDL1KEEP, [x5, 384]      // Prefetch B
+        PRFM PLDL1KEEP, [x5, 192]      // Prefetch B
         FMLA v25.4s, v15.4s,  v4.s[1]
-        PRFM PLDL1KEEP, [x5, 448]      // Prefetch B
+        PRFM PLDL1KEEP, [x5, 256]      // Prefetch B
 
         // BLOCK 7
         SUBS x0, x0, 16  // LDR lands here
