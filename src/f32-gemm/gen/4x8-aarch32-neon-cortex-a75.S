@@ -115,14 +115,14 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75
         VLD1.32    {d5}, [r12]!      // A1
         VMLA.F32    q11, q5, d1[0]
         VMLA.F32    q13, q5, d2[0]
-        VMLA.F32    q15, q5, d3[0]
         VLD1.32    {d6}, [r10]!      // A2
+        VMLA.F32    q15, q5, d3[0]
         VMLA.F32     q8, q6, d0[1]
-        VMLA.F32    q10, q6, d1[1]
         VLD1.32    {d7}, [ r0]!      // A3
+        VMLA.F32    q10, q6, d1[1]
         VMLA.F32    q12, q6, d2[1]
-        VMLA.F32    q14, q6, d3[1]
         VLDM        r9!, {d8-d11}    // B0
+        VMLA.F32    q14, q6, d3[1]
         VMLA.F32     q9, q7, d0[1]
         VMLA.F32    q11, q7, d1[1]
         VMLA.F32    q13, q7, d2[1]
