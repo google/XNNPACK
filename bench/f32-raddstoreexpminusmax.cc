@@ -179,6 +179,44 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_lut64_p2_x1,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x1)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_lut64_p2_x2,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_lut64_p2_x2_acc2,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2_acc2)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_lut64_p2_x4,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_lut64_p2_x4_acc2,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc2)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_lut64_p2_x4_acc4,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc4)->Apply(CharacteristicArguments)->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_p5_x1,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x1)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_p5_x2,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_p5_x2_acc2,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2_acc2)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_p5_x4,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_p5_x4_acc2,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc2)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_p5_x4_acc4,
+  xnn_f32_rmax_ukernel__scalar,
+  xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc4)->Apply(CharacteristicArguments)->UseRealTime();
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

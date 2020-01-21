@@ -903,3 +903,332 @@
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X1, elements_eq_1) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(1)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x1);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X1, elements_gt_1) {
+  for (size_t elements = 2; elements < 10; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x1);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X2, elements_eq_2) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(2)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X2, elements_div_2) {
+  for (size_t elements = 4; elements < 20; elements += 2) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X2, elements_lt_2) {
+  for (size_t elements = 1; elements < 2; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X2, elements_gt_2) {
+  for (size_t elements = 3; elements < 4; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X2_ACC2, elements_eq_2) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(2)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2_acc2);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X2_ACC2, elements_div_2) {
+  for (size_t elements = 4; elements < 20; elements += 2) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X2_ACC2, elements_lt_2) {
+  for (size_t elements = 1; elements < 2; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X2_ACC2, elements_gt_2) {
+  for (size_t elements = 3; elements < 4; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4, elements_eq_4) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(4)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4, elements_div_4) {
+  for (size_t elements = 8; elements < 40; elements += 4) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4, elements_lt_4) {
+  for (size_t elements = 1; elements < 4; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4, elements_gt_4) {
+  for (size_t elements = 5; elements < 8; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4_ACC2, elements_eq_4) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(4)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc2);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4_ACC2, elements_div_4) {
+  for (size_t elements = 8; elements < 40; elements += 4) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4_ACC2, elements_lt_4) {
+  for (size_t elements = 1; elements < 4; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4_ACC2, elements_gt_4) {
+  for (size_t elements = 5; elements < 8; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4_ACC4, elements_eq_4) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(4)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc4);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4_ACC4, elements_div_4) {
+  for (size_t elements = 8; elements < 40; elements += 4) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4_ACC4, elements_lt_4) {
+  for (size_t elements = 1; elements < 4; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X4_ACC4, elements_gt_4) {
+  for (size_t elements = 5; elements < 8; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X1, elements_eq_1) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(1)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x1);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X1, elements_gt_1) {
+  for (size_t elements = 2; elements < 10; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x1);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X2, elements_eq_2) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(2)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X2, elements_div_2) {
+  for (size_t elements = 4; elements < 20; elements += 2) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X2, elements_lt_2) {
+  for (size_t elements = 1; elements < 2; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X2, elements_gt_2) {
+  for (size_t elements = 3; elements < 4; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X2_ACC2, elements_eq_2) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(2)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2_acc2);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X2_ACC2, elements_div_2) {
+  for (size_t elements = 4; elements < 20; elements += 2) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X2_ACC2, elements_lt_2) {
+  for (size_t elements = 1; elements < 2; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X2_ACC2, elements_gt_2) {
+  for (size_t elements = 3; elements < 4; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4, elements_eq_4) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(4)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4, elements_div_4) {
+  for (size_t elements = 8; elements < 40; elements += 4) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4, elements_lt_4) {
+  for (size_t elements = 1; elements < 4; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4, elements_gt_4) {
+  for (size_t elements = 5; elements < 8; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4_ACC2, elements_eq_4) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(4)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc2);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4_ACC2, elements_div_4) {
+  for (size_t elements = 8; elements < 40; elements += 4) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4_ACC2, elements_lt_4) {
+  for (size_t elements = 1; elements < 4; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4_ACC2, elements_gt_4) {
+  for (size_t elements = 5; elements < 8; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc2);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4_ACC4, elements_eq_4) {
+  RAddStoreExpMinusMaxMicrokernelTester()
+    .elements(4)
+    .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc4);
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4_ACC4, elements_div_4) {
+  for (size_t elements = 8; elements < 40; elements += 4) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4_ACC4, elements_lt_4) {
+  for (size_t elements = 1; elements < 4; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc4);
+  }
+}
+
+TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_LUT64_P2_X4_ACC4, elements_gt_4) {
+  for (size_t elements = 5; elements < 8; elements++) {
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(elements)
+      .Test(xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc4);
+  }
+}
