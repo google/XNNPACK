@@ -24,11 +24,12 @@ extern "C" {
       const float* x,                              \
       float* y);
 
+DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__neon)
+DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__sse)
 DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__avx)
 DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__avx512f)
-DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__neon)
+DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__psimd)
 DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__scalar)
-DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__sse)
 
 
 #define DECLARE_U8_RMAX_UKERNEL_FUNCTION(fn_name) \
@@ -38,8 +39,8 @@ DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__sse)
       uint8_t* y);
 
 DECLARE_U8_RMAX_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__neon)
-DECLARE_U8_RMAX_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__scalar)
 DECLARE_U8_RMAX_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__sse2)
+DECLARE_U8_RMAX_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__scalar)
 
 
 #ifdef __cplusplus

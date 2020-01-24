@@ -391,6 +391,7 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-ppmm/gen/4x8-psimd.c
   src/f32-prelu/gen/psimd-2x4.c
   src/f32-prelu/gen/psimd-2x8.c
+  src/f32-rmax/psimd.c
   src/f32-vbinary/gen/vadd-psimd-x4.c
   src/f32-vbinary/gen/vadd-psimd-x8.c
   src/f32-vbinary/gen/vaddc-psimd-x4.c
@@ -430,6 +431,18 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/x32-zip/xm-psimd.c)
 
 SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x4.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x8.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x12.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x16.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x20.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/psimd-p5-x20-acc5.c
   src/f32-sigmoid/gen/psimd-p5-div-x4.c
   src/f32-sigmoid/gen/psimd-p5-div-x8.c
   src/f32-sigmoid/gen/psimd-p5-div-x12.c
@@ -870,6 +883,18 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/9x-sse2-c4.c
   src/f32-prelu/gen/sse2-2x4.c
   src/f32-prelu/gen/sse2-2x8.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x4.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x8.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x12.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x16.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x20.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/sse2-p5-x20-acc5.c
   src/f32-sigmoid/gen/sse2-p5-div-x4.c
   src/f32-sigmoid/gen/sse2-p5-div-x8.c
   src/f32-sigmoid/gen/sse2-p5-div-x12.c
