@@ -73,6 +73,204 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
   }
 }
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x4,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x4,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x8,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x8,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x8_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x8_acc2,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x12,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x12,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x12_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x12_acc2,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x12_acc3,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x12_acc3,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x16,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x16,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x16_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x16_acc2,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x16_acc4,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x16_acc4,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x20,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x20,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x20_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x20_acc2,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_p5_x20_acc5,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x20_acc5,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x4,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x4,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x8,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x8,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x8_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x8_acc2,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x12,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x12,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x12_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x12_acc2,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x12_acc3,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x12_acc3,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x16,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x16,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x16_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x16_acc2,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x16_acc4,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x16_acc4,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x20,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x20,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x20_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x20_acc2,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neon_lut64_p2_x20_acc5,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x20_acc5,
+    benchmark::utils::CheckNEON)->Apply(CharacteristicArguments)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x4,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x4,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x8,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x8,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x8_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x8_acc2,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x12,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x12,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x12_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x12_acc2,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x12_acc3,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x12_acc3,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x16,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x16,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x16_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x16_acc2,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x16_acc4,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x16_acc4,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x20,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x20,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x20_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x20_acc2,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_p5_x20_acc5,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x20_acc5,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x4,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x4,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x8,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x8,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x8_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x8_acc2,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x12,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x12,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x12_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x12_acc2,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x12_acc3,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x12_acc3,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x16,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x16,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x16_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x16_acc2,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x16_acc4,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x16_acc4,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x20,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x20,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x20_acc2,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x20_acc2,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, neonfma_lut64_p2_x20_acc5,
+    xnn_f32_rmax_ukernel__neon,
+    xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x20_acc5,
+    benchmark::utils::CheckNEONFMA)->Apply(CharacteristicArguments)->UseRealTime();
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx512f_p5_scalef_x128,
     xnn_f32_rmax_ukernel__avx,

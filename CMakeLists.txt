@@ -519,6 +519,30 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-ppmm/gen/8x8-neon.c
   src/f32-prelu/gen/neon-2x4.c
   src/f32-prelu/gen/neon-2x8.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x4.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x8.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x12.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x16.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x20.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-p5-x20-acc5.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x4.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x8.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x12.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x16.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x20.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x20-acc5.c
   src/f32-rmax/neon.c
   src/f32-sigmoid/gen/neon-frac-p9-p10-nr1recps-x16.c
   src/f32-sigmoid/gen/neon-rr2-p5-nr2recps-x4.c
@@ -632,6 +656,30 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-hswish/gen/neonfma-x8.c
   src/f32-ppmm/gen/4x8-neonfma.c
   src/f32-ppmm/gen/8x8-neonfma.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x4.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x8.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x12.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x16.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x20.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x20-acc5.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x4.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x8.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x12.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x16.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x20.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x20-acc5.c
   src/f32-sigmoid/gen/neonfma-rr1-p5-nr2fma-x4.c
   src/f32-sigmoid/gen/neonfma-rr1-p5-nr2fma-x8.c
   src/f32-sigmoid/gen/neonfma-rr1-p5-nr2fma-x12.c
