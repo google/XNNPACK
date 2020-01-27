@@ -474,7 +474,7 @@ static void MobileNetV3LargeConvArguments(benchmark::internal::Benchmark* b) {
   /******************** Bottleneck 3 *******************/
   /*        H    W   KH  KW  PH  PW  S  D  GCin  GCout */
   b->Args({ 56,  56,  1,  1,  0,  0, 1, 1,   24,   72});
-  b->Args({ 56,  56,  1,  1,  0,  0, 1, 1,    1,   72,   24});
+  b->Args({ 56,  56,  1,  1,  0,  0, 1, 1,   72,   24});
   /******************** Bottleneck 4 *******************/
   /*        H    W   KH  KW  PH  PW  S  D  GCin  GCout */
 //b->Args({ 56,  56,  1,  1,  0,  0, 1, 1,   24,   72});*/
