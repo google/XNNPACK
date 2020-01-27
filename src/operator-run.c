@@ -657,6 +657,27 @@ void xnn_compute_u8_softargmax(
   context->lut_norm_ukernel(n, x, t, y);
 }
 
+void xnn_compute_f32_three_pass_softargmax(
+    const struct f32_three_pass_softargmax_context context[restrict static 1],
+    size_t batch_index)
+{
+  const float* x = (const float*) ((uintptr_t) context->x + context->x_stride * batch_index);
+  float* y = (float*) ((uintptr_t) context->y + context->y_stride * batch_index);
+  const size_t n = context->n;
+
+  // First pass: reduce-max
+  float x_max;
+  context->rmax_ukernel(n, x, &x_max);
+
+  // Second pass: reduce-add & store exp(x-x_max)
+  float y_sum;
+  context->raddstoreexpminusmax_ukernel(n, x, y, &y_sum, x_max);
+
+  // Third pass: scale y
+  const float y_scale = 1.0f / y_sum;
+  context->vmulc_ukernel(n, y, &y_scale, y, &context->params);
+}
+
 void xnn_compute_vmulcaddc(
     const struct vmulcaddc_context context[restrict static 1],
     size_t batch_start,

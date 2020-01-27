@@ -16,6 +16,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/log.h>
+#include <xnnpack/params-init.h>
 
 
 enum xnn_status xnn_create_softargmax_nc_q8(
@@ -46,7 +47,7 @@ enum xnn_status xnn_create_softargmax_nc_q8(
 
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to create Sigmoid operator with input element stride of %zu: "
+      "failed to create SoftArgMax operator with input element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
       input_stride, channels);
     goto error;
@@ -54,7 +55,7 @@ enum xnn_status xnn_create_softargmax_nc_q8(
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to create Sigmoid operator with output element stride of %zu: "
+      "failed to create SoftArgMax operator with output element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
       output_stride, channels);
     goto error;
@@ -168,6 +169,116 @@ enum xnn_status xnn_setup_softargmax_nc_q8(
   };
   softargmax_op->compute.type = xnn_parallelization_type_1d;
   softargmax_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_u8_softargmax;
+  softargmax_op->compute.range[0] = batch_size;
+  softargmax_op->state = xnn_run_state_ready;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_create_softargmax_nc_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* softargmax_op_out)
+{
+  xnn_operator_t softargmax_op = NULL;
+  enum xnn_status status = xnn_status_uninitialized;
+
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to create SoftArgMax operator: XNNPACK is not initialized");
+    goto error;
+  }
+
+  status = xnn_status_invalid_parameter;
+
+  if (channels == 0) {
+    xnn_log_error(
+      "failed to create SoftArgMax operator with %zu channels: number of channels must be non-zero", channels);
+    goto error;
+  }
+
+  if (input_stride < channels) {
+    xnn_log_error(
+      "failed to create SoftArgMax operator with input element stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      input_stride, channels);
+    goto error;
+  }
+
+  if (output_stride < channels) {
+    xnn_log_error(
+      "failed to create SoftArgMax operator with output element stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      output_stride, channels);
+    goto error;
+  }
+
+  status = xnn_status_out_of_memory;
+
+  softargmax_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
+  if (softargmax_op == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for SoftArgMax operator descriptor", sizeof(struct xnn_operator));
+    goto error;
+  }
+
+  softargmax_op->channels = channels;
+  softargmax_op->input_pixel_stride = input_stride;
+  softargmax_op->output_pixel_stride = output_stride;
+
+  softargmax_op->type = xnn_operator_type_softargmax_nc_f32;
+  softargmax_op->ukernel.type = xnn_ukernel_type_softargmax;
+
+  softargmax_op->state = xnn_run_state_invalid;
+
+  *softargmax_op_out = softargmax_op;
+  return xnn_status_success;
+
+error:
+  xnn_delete_operator(softargmax_op);
+  return status;
+}
+
+enum xnn_status xnn_setup_softargmax_nc_f32(
+    xnn_operator_t softargmax_op,
+    size_t batch_size,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  if (softargmax_op->type != xnn_operator_type_softargmax_nc_f32) {
+    xnn_log_error("failed to setup SoftArgMax (NC, F32) operator: operator type mismatch");
+    return xnn_status_invalid_parameter;
+  }
+  softargmax_op->state = xnn_run_state_invalid;
+
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to setup SoftArgMax operator: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (batch_size == 0) {
+    softargmax_op->state = xnn_run_state_skip;
+    return xnn_status_success;
+  }
+
+  softargmax_op->batch_size = batch_size;
+  softargmax_op->input = input;
+  softargmax_op->output = output;
+
+  softargmax_op->context.f32_three_pass_softargmax = (struct f32_three_pass_softargmax_context) {
+    .n = softargmax_op->channels * sizeof(float),
+    .x = input,
+    .x_stride = softargmax_op->input_pixel_stride * sizeof(float),
+    .y = output,
+    .y_stride = softargmax_op->output_pixel_stride * sizeof(float),
+    .rmax_ukernel = xnn_params.f32.rmax,
+    .raddstoreexpminusmax_ukernel = xnn_params.f32.raddstoreexpminusmax,
+    .vmulc_ukernel = xnn_params.f32.vmul.opc_ukernel,
+    .params = xnn_init_f32_output_params(-INFINITY, INFINITY),
+  };
+  softargmax_op->compute.type = xnn_parallelization_type_1d;
+  softargmax_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_f32_three_pass_softargmax;
   softargmax_op->compute.range[0] = batch_size;
   softargmax_op->state = xnn_run_state_ready;
 

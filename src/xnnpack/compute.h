@@ -761,3 +761,21 @@ struct u8_softargmax_context {
       const struct u8_softargmax_context context[restrict static 1],
       size_t batch_index);
 #endif
+
+struct f32_three_pass_softargmax_context {
+  size_t n;
+  const void* x;
+  size_t x_stride;
+  void* y;
+  size_t y_stride;
+  xnn_f32_rmax_ukernel_function rmax_ukernel;
+  xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax_ukernel;
+  xnn_vbinary_ukernel_function vmulc_ukernel;
+  union xnn_f32_output_params params;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_f32_three_pass_softargmax(
+      const struct f32_three_pass_softargmax_context context[restrict static 1],
+      size_t batch_index);
+#endif

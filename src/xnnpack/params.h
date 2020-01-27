@@ -1369,6 +1369,8 @@ struct xnn_parameters {
     struct vbinary_parameters vmul;
     struct vbinary_parameters vsub;
     struct vmulcaddc_parameters vmulcaddc;
+    xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax;
+    xnn_f32_rmax_ukernel_function rmax;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
     struct spmm_parameters spmm;
     // Sparse Matrix-Dense Matrix Multiplication (NR=2 block).

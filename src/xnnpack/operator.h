@@ -79,6 +79,7 @@ enum xnn_operator_type {
   xnn_operator_type_resize_bilinear_nhwc_f32,
   xnn_operator_type_sigmoid_nc_f32,
   xnn_operator_type_sigmoid_nc_q8,
+  xnn_operator_type_softargmax_nc_f32,
   xnn_operator_type_softargmax_nc_q8,
   xnn_operator_type_subtract_nd_f32,
   xnn_operator_type_unpooling_nhwc_x32,
@@ -276,6 +277,7 @@ struct xnn_operator {
     struct resize_bilinear_context resize_bilinear;
     struct spmm_context spmm;
     struct subconv_context subconv;
+    struct f32_three_pass_softargmax_context f32_three_pass_softargmax;
     struct u8_softargmax_context u8_softargmax;
     struct univector_contiguous_context univector_contiguous;
     struct univector_strided_context univector_strided;
