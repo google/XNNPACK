@@ -745,7 +745,7 @@ struct channel_pad_context {
       size_t batch_range);
 #endif
 
-struct u8_softargmax_context {
+struct u8_softmax_context {
   size_t n;
   const uint8_t* x;
   size_t x_stride;
@@ -757,12 +757,12 @@ struct u8_softargmax_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_u8_softargmax(
-      const struct u8_softargmax_context context[restrict static 1],
+  XNN_PRIVATE void xnn_compute_u8_softmax(
+      const struct u8_softmax_context context[restrict static 1],
       size_t batch_index);
 #endif
 
-struct f32_three_pass_softargmax_context {
+struct f32_three_pass_softmax_context {
   size_t n;
   const void* x;
   size_t x_stride;
@@ -775,7 +775,7 @@ struct f32_three_pass_softargmax_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_f32_three_pass_softargmax(
-      const struct f32_three_pass_softargmax_context context[restrict static 1],
+  XNN_PRIVATE void xnn_compute_f32_three_pass_softmax(
+      const struct f32_three_pass_softmax_context context[restrict static 1],
       size_t batch_index);
 #endif

@@ -69,7 +69,7 @@ OPERATOR_SRCS = [
     "src/prelu-nc.c",
     "src/resize-bilinear-nhwc.c",
     "src/sigmoid-nc.c",
-    "src/softargmax-nc.c",
+    "src/softmax-nc.c",
     "src/unpooling-nhwc.c",
 ]
 
@@ -2058,9 +2058,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_softargmax_bench",
+    name = "f32_softmax_bench",
     srcs = [
-        "bench/f32-softargmax.cc",
+        "bench/f32-softmax.cc",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
@@ -2155,8 +2155,8 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "softargmax_bench",
-    srcs = ["bench/softargmax.cc"],
+    name = "softmax_bench",
+    srcs = ["bench/softmax.cc"],
     deps = OPERATOR_BENCHMARK_DEPS,
 )
 
@@ -3069,10 +3069,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "softargmax_nc_test",
+    name = "softmax_nc_test",
     srcs = [
-        "test/softargmax-nc.cc",
-        "test/softargmax-operator-tester.h",
+        "test/softmax-nc.cc",
+        "test/softmax-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )

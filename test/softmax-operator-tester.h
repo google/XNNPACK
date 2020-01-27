@@ -22,9 +22,9 @@
 #include <xnnpack.h>
 
 
-class SoftArgMaxOperatorTester {
+class SoftMaxOperatorTester {
  public:
-  inline SoftArgMaxOperatorTester& channels(size_t channels) {
+  inline SoftMaxOperatorTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
@@ -34,7 +34,7 @@ class SoftArgMaxOperatorTester {
     return this->channels_;
   }
 
-  inline SoftArgMaxOperatorTester& input_stride(size_t input_stride) {
+  inline SoftMaxOperatorTester& input_stride(size_t input_stride) {
     assert(input_stride != 0);
     this->input_stride_ = input_stride;
     return *this;
@@ -49,7 +49,7 @@ class SoftArgMaxOperatorTester {
     }
   }
 
-  inline SoftArgMaxOperatorTester& output_stride(size_t output_stride) {
+  inline SoftMaxOperatorTester& output_stride(size_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
@@ -64,7 +64,7 @@ class SoftArgMaxOperatorTester {
     }
   }
 
-  inline SoftArgMaxOperatorTester& batch_size(size_t batch_size) {
+  inline SoftMaxOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
@@ -74,7 +74,7 @@ class SoftArgMaxOperatorTester {
     return this->batch_size_;
   }
 
-  inline SoftArgMaxOperatorTester& input_scale(float input_scale) {
+  inline SoftMaxOperatorTester& input_scale(float input_scale) {
     assert(input_scale > 0.0f);
     assert(std::isnormal(input_scale));
     this->input_scale_ = input_scale;
@@ -85,7 +85,7 @@ class SoftArgMaxOperatorTester {
     return this->input_scale_;
   }
 
-  inline SoftArgMaxOperatorTester& input_zero_point(uint8_t input_zero_point) {
+  inline SoftMaxOperatorTester& input_zero_point(uint8_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
     return *this;
   }
@@ -102,7 +102,7 @@ class SoftArgMaxOperatorTester {
     return 0;
   }
 
-  inline SoftArgMaxOperatorTester& iterations(size_t iterations) {
+  inline SoftMaxOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -143,30 +143,30 @@ class SoftArgMaxOperatorTester {
         }
       }
 
-      // Create, setup, run, and destroy SoftArgMax operator.
+      // Create, setup, run, and destroy SoftMax operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-      xnn_operator_t soft_arg_max_op = nullptr;
+      xnn_operator_t softmax_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_softargmax_nc_q8(
+        xnn_create_softmax_nc_q8(
           channels(), input_stride(), output_stride(),
           input_scale(),
           output_zero_point(), output_scale(),
-          0, &soft_arg_max_op));
-      ASSERT_NE(nullptr, soft_arg_max_op);
+          0, &softmax_op));
+      ASSERT_NE(nullptr, softmax_op);
 
-      // Smart pointer to automatically delete soft_arg_max_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_soft_arg_max_op(soft_arg_max_op, xnn_delete_operator);
+      // Smart pointer to automatically delete softmax_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_softmax_op(softmax_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_softargmax_nc_q8(
-          soft_arg_max_op,
+        xnn_setup_softmax_nc_q8(
+          softmax_op,
           batch_size(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(soft_arg_max_op, nullptr /* thread pool */));
+        xnn_run_operator(softmax_op, nullptr /* thread pool */));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -204,28 +204,28 @@ class SoftArgMaxOperatorTester {
         }
       }
 
-      // Create, setup, run, and destroy SoftArgMax operator.
+      // Create, setup, run, and destroy SoftMax operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-      xnn_operator_t soft_arg_max_op = nullptr;
+      xnn_operator_t softmax_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_softargmax_nc_f32(
+        xnn_create_softmax_nc_f32(
           channels(), input_stride(), output_stride(),
-          0, &soft_arg_max_op));
-      ASSERT_NE(nullptr, soft_arg_max_op);
+          0, &softmax_op));
+      ASSERT_NE(nullptr, softmax_op);
 
-      // Smart pointer to automatically delete soft_arg_max_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_soft_arg_max_op(soft_arg_max_op, xnn_delete_operator);
+      // Smart pointer to automatically delete softmax_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_softmax_op(softmax_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_softargmax_nc_f32(
-          soft_arg_max_op,
+        xnn_setup_softmax_nc_f32(
+          softmax_op,
           batch_size(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(soft_arg_max_op, nullptr /* thread pool */));
+        xnn_run_operator(softmax_op, nullptr /* thread pool */));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

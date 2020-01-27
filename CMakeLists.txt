@@ -150,7 +150,7 @@ SET(XNNPACK_OPERATOR_SRCS
   src/prelu-nc.c
   src/resize-bilinear-nhwc.c
   src/sigmoid-nc.c
-  src/softargmax-nc.c
+  src/softmax-nc.c
   src/unpooling-nhwc.c)
 
 SET(XNNPACK_COLD_SRCS ${XNNPACK_OPERATOR_SRCS})
@@ -1776,14 +1776,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(sigmoid-nc-test sigmoid-nc-test)
 
-  ADD_EXECUTABLE(softargmax-nc-test test/softargmax-nc.cc)
-  SET_TARGET_PROPERTIES(softargmax-nc-test PROPERTIES
+  ADD_EXECUTABLE(softmax-nc-test test/softmax-nc.cc)
+  SET_TARGET_PROPERTIES(softmax-nc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(softargmax-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(softargmax-nc-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(softargmax-nc-test softargmax-nc-test)
+  TARGET_INCLUDE_DIRECTORIES(softmax-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(softmax-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(softmax-nc-test softmax-nc-test)
 
   ADD_EXECUTABLE(subtract-nd-test test/subtract-nd.cc)
   SET_TARGET_PROPERTIES(subtract-nd-test PROPERTIES
@@ -2488,13 +2488,13 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(sigmoid-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
 
-  ADD_EXECUTABLE(softargmax-bench bench/softargmax.cc)
-  SET_TARGET_PROPERTIES(softargmax-bench PROPERTIES
+  ADD_EXECUTABLE(softmax-bench bench/softmax.cc)
+  SET_TARGET_PROPERTIES(softmax-bench PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(softargmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(softargmax-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
+  TARGET_INCLUDE_DIRECTORIES(softmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
 
   # ---[ Build microkernel-level microbenchmarks
   ADD_EXECUTABLE(f16-gemm-bench bench/f16-gemm.cc)
@@ -2590,14 +2590,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-spmm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-softargmax-bench bench/f32-softargmax.cc)
-  SET_TARGET_PROPERTIES(f32-softargmax-bench PROPERTIES
+  ADD_EXECUTABLE(f32-softmax-bench bench/f32-softmax.cc)
+  SET_TARGET_PROPERTIES(f32-softmax-bench PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-softargmax-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-softargmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-softargmax-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
+  TARGET_INCLUDE_DIRECTORIES(f32-softmax-bench PRIVATE src)
+  TARGET_INCLUDE_DIRECTORIES(f32-softmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(f32-softmax-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(q8-gemm-bench bench/q8-gemm.cc)
   SET_TARGET_PROPERTIES(q8-gemm-bench PROPERTIES

@@ -16,7 +16,7 @@
 #include "bench/utils.h"
 
 
-static void softargmax_q8(benchmark::State& state) {
+static void softmax_q8(benchmark::State& state) {
   const size_t batch_size = static_cast<size_t>(state.range(0));
   const size_t channels = static_cast<size_t>(state.range(1));
 
@@ -35,38 +35,38 @@ static void softargmax_q8(benchmark::State& state) {
     return;
   }
 
-  xnn_operator_t softargmax_op = nullptr;
-  status = xnn_create_softargmax_nc_q8(
+  xnn_operator_t softmax_op = nullptr;
+  status = xnn_create_softmax_nc_q8(
     channels, channels /* input stride */, channels /* output stride */,
     1.0f /* input scale */,
     0 /* output zero point */, 1.0f / 256.0f /* output scale */,
-    0 /* flags */, &softargmax_op);
-  if (status != xnn_status_success || softargmax_op == nullptr) {
-    state.SkipWithError("failed to create SoftArgMax operator");
+    0 /* flags */, &softmax_op);
+  if (status != xnn_status_success || softmax_op == nullptr) {
+    state.SkipWithError("failed to create SoftMax operator");
     return;
   }
 
-  status = xnn_setup_softargmax_nc_q8(
-    softargmax_op,
+  status = xnn_setup_softmax_nc_q8(
+    softmax_op,
     batch_size,
     input.data(), output.data(),
     nullptr /* thread pool */);
   if (status != xnn_status_success) {
-    state.SkipWithError("failed to setup SoftArgMax operator");
+    state.SkipWithError("failed to setup SoftMax operator");
     return;
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(softargmax_op, nullptr /* thread pool */);
+    status = xnn_run_operator(softmax_op, nullptr /* thread pool */);
     if (status != xnn_status_success) {
-      state.SkipWithError("failed to run SoftArgMax operator");
+      state.SkipWithError("failed to run SoftMax operator");
       return;
     }
   }
 
-  status = xnn_delete_operator(softargmax_op);
+  status = xnn_delete_operator(softmax_op);
   if (status != xnn_status_success) {
-    state.SkipWithError("failed to delete SoftArgMax operator");
+    state.SkipWithError("failed to delete SoftMax operator");
     return;
   }
 
@@ -97,7 +97,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b)
   b->Args({1, 21841});
 }
 
-BENCHMARK(softargmax_q8)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK(softmax_q8)->Apply(CharacteristicArguments)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

@@ -642,8 +642,8 @@ void xnn_compute_univector_contiguous(
   context->ukernel(size, x, y, &context->params);
 }
 
-void xnn_compute_u8_softargmax(
-    const struct u8_softargmax_context context[restrict static 1],
+void xnn_compute_u8_softmax(
+    const struct u8_softmax_context context[restrict static 1],
     size_t batch_index)
 {
   const uint8_t* x = (const uint8_t*) ((uintptr_t) context->x + context->x_stride * batch_index);
@@ -657,8 +657,8 @@ void xnn_compute_u8_softargmax(
   context->lut_norm_ukernel(n, x, t, y);
 }
 
-void xnn_compute_f32_three_pass_softargmax(
-    const struct f32_three_pass_softargmax_context context[restrict static 1],
+void xnn_compute_f32_three_pass_softmax(
+    const struct f32_three_pass_softmax_context context[restrict static 1],
     size_t batch_index)
 {
   const float* x = (const float*) ((uintptr_t) context->x + context->x_stride * batch_index);
