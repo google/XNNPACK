@@ -1819,9 +1819,6 @@ xnnpack_cc_library(
     srcs = OPERATOR_SRCS + [
         "src/memory.c",
         "src/operator-delete.c",
-        "src/runtime.c",
-        "src/subgraph.c",
-        "src/tensor.c",
     ],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
     copts = xnnpack_std_copts() + LOGGING_COPTS + [
@@ -1846,6 +1843,9 @@ cc_library(
     name = "XNNPACK",
     srcs = [
         "src/init.c",
+        "src/runtime.c",
+        "src/subgraph.c",
+        "src/tensor.c",
     ],
     copts = xnnpack_std_copts() + LOGGING_COPTS + [
         "-Isrc",
