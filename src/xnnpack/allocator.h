@@ -25,6 +25,14 @@ inline static void* xnn_allocate_memory(size_t memory_size) {
   return xnn_params.allocator.allocate(xnn_params.allocator.context, memory_size);
 }
 
+inline static void* xnn_allocate_zero_memory(size_t memory_size) {
+  void* memory_pointer = xnn_params.allocator.allocate(xnn_params.allocator.context, memory_size);
+  if (memory_pointer != NULL) {
+    memset(memory_pointer, 0, memory_size);
+  }
+  return memory_pointer;
+}
+
 inline static void* xnn_reallocate_memory(void* memory_pointer, size_t memory_size) {
   return xnn_params.allocator.reallocate(xnn_params.allocator.context, memory_pointer, memory_size);
 }
