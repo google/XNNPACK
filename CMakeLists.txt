@@ -157,7 +157,10 @@ SET(XNNPACK_COLD_SRCS ${XNNPACK_OPERATOR_SRCS})
 LIST(APPEND XNNPACK_COLD_SRCS
   src/init.c
   src/memory.c
-  src/operator-delete.c)
+  src/operator-delete.c
+  src/runtime.c
+  src/subgraph.c
+  src/tensor.c)
 
 SET(XNNPACK_HOT_SRCS
   src/indirection.c
