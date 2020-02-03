@@ -32,6 +32,7 @@ void xnn_f32_dwconv_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__psimd${"" if ACCUM
   do {
     $for K in range(KERNEL_TILE):
       const float* i${K} = input[${K}];
+      assert(i${K} != NULL);
     input = (const float**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;

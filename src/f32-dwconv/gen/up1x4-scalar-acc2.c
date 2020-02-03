@@ -30,9 +30,13 @@ void xnn_f32_dwconv_ukernel_up1x4__scalar_acc2(
   const float vmax = params->scalar.max;
   do {
     const float* i0 = input[0];
+    assert(i0 != NULL);
     const float* i1 = input[1];
+    assert(i1 != NULL);
     const float* i2 = input[2];
+    assert(i2 != NULL);
     const float* i3 = input[3];
+    assert(i3 != NULL);
     input = (const float**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;

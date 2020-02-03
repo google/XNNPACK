@@ -31,9 +31,13 @@ void xnn_f32_dwconv_ukernel_up4x4__sse(
   const __m128 vmin = _mm_load_ps(params->sse.min);
   do {
     const float* i0 = input[0];
+    assert(i0 != NULL);
     const float* i1 = input[1];
+    assert(i1 != NULL);
     const float* i2 = input[2];
+    assert(i2 != NULL);
     const float* i3 = input[3];
+    assert(i3 != NULL);
     input = (const float**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;

@@ -33,14 +33,23 @@ void xnn_f32_dwconv_ukernel_up16x9__fma3_acc2(
   const __m256 vmin = _mm256_broadcast_ps((const __m128*) params->sse.min);
   do {
     const float* i0 = input[0];
+    assert(i0 != NULL);
     const float* i1 = input[1];
+    assert(i1 != NULL);
     const float* i2 = input[2];
+    assert(i2 != NULL);
     const float* i3 = input[3];
+    assert(i3 != NULL);
     const float* i4 = input[4];
+    assert(i4 != NULL);
     const float* i5 = input[5];
+    assert(i5 != NULL);
     const float* i6 = input[6];
+    assert(i6 != NULL);
     const float* i7 = input[7];
+    assert(i7 != NULL);
     const float* i8 = input[8];
+    assert(i8 != NULL);
     input = (const float**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;
