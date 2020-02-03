@@ -127,6 +127,159 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator);
 /// @retval xnn_status_success - deinitialization call succeeded.
 enum xnn_status xnn_deinitialize(void);
 
+typedef struct xnn_subgraph* xnn_subgraph_t;
+
+enum xnn_status xnn_create_subgraph(
+  uint32_t external_value_ids,
+  uint32_t flags,
+  xnn_subgraph_t* subgraph_out);
+
+enum xnn_status xnn_delete_subgraph(
+  xnn_subgraph_t subgraph);
+
+#define XNN_VALUE_FLAG_EXTERNAL_INPUT  0x00000001
+#define XNN_VALUE_FLAG_EXTERNAL_OUTPUT 0x00000002
+
+#define XNN_INVALID_VALUE_ID UINT32_MAX
+
+enum xnn_datatype {
+  xnn_datatype_invalid = 0,
+  xnn_datatype_fp32 = 1,
+  xnn_datatype_fp16 = 2,
+};
+
+/// Define a tensor-type Value and add it to a subgraph.
+///
+/// @param datatype - type of tensor elements.
+/// @param num_dims - number of dimensions in the shape.
+/// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
+/// @param data - pointer to static data used for tensor initialization. If the tensor is not statically initialized,
+///               this pointer must be is NULL.
+/// @param external_id - external ID for the Value. The ID must be within the range of reversed Value IDs specified in
+///                      subgraph creation. If the external ID is XNN_INVALID_VALUE_ID, an internal ID will be created
+///                      for the Value.
+/// @param subgraph - subgraph that will own the created value.
+/// @param id_out - pointer to the variable that will be initialized with the Value ID upon successful return.
+enum xnn_status xnn_define_tensor_value(
+  xnn_subgraph_t subgraph,
+  enum xnn_datatype datatype,
+  size_t num_dims,
+  const size_t* dims,
+  const void* data,
+  uint32_t external_id,
+  uint32_t flags,
+  uint32_t* id_out);
+
+/// Define a 2D Convolution node and add it to a subgraph.
+///
+/// @param input_padding_top - implicit zero-padding above 2D input data.
+/// @param input_padding_right - implicit zero-padding to the right of 2D input data.
+/// @param input_padding_bottom - implicit zero-padding below 2D input data.
+/// @param input_padding_left - implicit zero-padding to the left of 2D input data.
+/// @param kernel_height - kernel (filter) height.
+/// @param kernel_width - kernel (filter) width.
+/// @param subsampling_height - height of subsampling region for convolution output (convolution height stride).
+/// @param subsampling_width - width of subsampling region for convolution output (convolution width stride).
+/// @param dilation_height - dilation of kernel elements along the height dimension.
+/// @param dilation_width - dilation of kernel elements along the width dimension.
+/// @param groups - number of convolution groups.
+/// @param group_input_channels - number of input channels per group.
+/// @param group_output_channels - number of output channels per group.
+/// @param output_min - lower bound for clipping output values.
+/// @param output_max - upper bound for clipping output values.
+/// @param input_id - input tensor ID. Must be a 4D tensor with [N, IH, IW, groups * group_input_channels] dimensions.
+/// @param filter_id - filter tensor ID. Must ge a 4D tensor with
+///                 [groups * group_output_channels, kernel_height, kernel_width, group_input_channels] dimensions.
+/// @param bias_id - bias tensor ID. Must be a 1D tensor with [groups * group_output_channels] dimensions.
+/// @param output_id - output tensor ID. Must be a 4D tensor with [N, OH, OW, groups * group_output_channels] dimensions.
+enum xnn_status xnn_define_convolution_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t subsampling_height,
+  uint32_t subsampling_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t groups,
+  size_t group_input_channels,
+  size_t group_output_channels,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
+  uint32_t filter_id,
+  uint32_t bias_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+/// Define a 2D Depthwise Convolution node and add it to a subgraph.
+///
+/// @param input_padding_top - implicit zero-padding above 2D input data.
+/// @param input_padding_right - implicit zero-padding to the right of 2D input data.
+/// @param input_padding_bottom - implicit zero-padding below 2D input data.
+/// @param input_padding_left - implicit zero-padding to the left of 2D input data.
+/// @param kernel_height - kernel (filter) height.
+/// @param kernel_width - kernel (filter) width.
+/// @param subsampling_height - height of subsampling region for convolution output (convolution height stride).
+/// @param subsampling_width - width of subsampling region for convolution output (convolution width stride).
+/// @param dilation_height - dilation of kernel elements along the height dimension.
+/// @param dilation_width - dilation of kernel elements along the width dimension.
+/// @param depth_multiplier - ratio of output channels to input channels.
+/// @param input_channels - number of input channels.
+/// @param output_min - lower bound for clipping output values.
+/// @param output_max - upper bound for clipping output values.
+/// @param input_id - input tensor. Must be a 4D tensor with [N, IH, IW, input_channels] dimensions.
+/// @param filter_id - filter tensor. Must ge a 4D tensor with
+///                 [1, kernel_height, kernel_width, input_channels * depth_multiplier] dimensions.
+/// @param bias_id - bias tensor. Must be a 1D tensor with [input_channels * depth_multiplier] dimensions.
+/// @param output_id - output tensor. Must be a 4D tensor with [N, OH, OW, input_channels * depth_multiplier] dimensions.
+enum xnn_status xnn_define_depthwise_convolution_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t subsampling_height,
+  uint32_t subsampling_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t depth_multiplier,
+  size_t input_channels,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
+  uint32_t filter_id,
+  uint32_t bias_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+typedef struct xnn_runtime* xnn_runtime_t;
+
+enum xnn_status xnn_create_runtime(
+  xnn_subgraph_t subgraph,
+  xnn_runtime_t* runtime_out);
+
+struct xnn_external_value {
+  uint32_t id;
+  void* data;
+};
+
+enum xnn_status xnn_setup_runtime(
+  xnn_runtime_t runtime,
+  size_t num_external_values,
+  const struct xnn_external_value* external_values);
+
+enum xnn_status xnn_invoke_runtime(
+  xnn_runtime_t runtime);
+
+enum xnn_status xnn_delete_runtime(
+  xnn_runtime_t runtime);
+
 typedef struct xnn_operator* xnn_operator_t;
 
 enum xnn_status xnn_run_operator(

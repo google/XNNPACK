@@ -1,0 +1,425 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include <xnnpack.h>
+#include <xnnpack/allocator.h>
+#include <xnnpack/log.h>
+#include <xnnpack/math.h>
+#include <xnnpack/params.h>
+#include <xnnpack/subgraph.h>
+
+
+enum xnn_status xnn_create_subgraph(
+    uint32_t external_value_ids,
+    uint32_t flags,
+    xnn_subgraph_t* subgraph_out)
+{
+  struct xnn_subgraph* subgraph = NULL;
+  enum xnn_status status = xnn_status_uninitialized;
+
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to create subgraph: XNNPACK is not initialized");
+    goto error;
+  }
+
+  status = xnn_status_out_of_memory;
+
+  subgraph = xnn_allocate_zero_memory(sizeof(struct xnn_subgraph));
+  if (subgraph == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for subgraph descriptor", sizeof(struct xnn_subgraph));
+    goto error;
+  }
+
+  subgraph->external_value_ids = external_value_ids;
+
+  subgraph->values = xnn_allocate_zero_memory(external_value_ids * sizeof(struct xnn_value));
+  if (subgraph->values == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for subgraph values", external_value_ids * sizeof(struct xnn_value));
+    goto error;
+  }
+  for (size_t i = 0; i < external_value_ids; i++) {
+    subgraph->values[i].id = i;
+  }
+  subgraph->num_values = external_value_ids;
+  subgraph->num_reserved_values = external_value_ids;
+
+  *subgraph_out = subgraph;
+  return xnn_status_success;
+
+error:
+  xnn_delete_subgraph(subgraph);
+  return status;
+}
+
+
+struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph)
+{
+  struct xnn_value* values = subgraph->values;
+  const size_t size = subgraph->num_values;
+  const size_t capacity = subgraph->num_reserved_values;
+  if (capacity < size + 1) {
+    const size_t new_capacity = max(min(capacity * 2, capacity + 512), capacity + 64);
+    assert(new_capacity >= size + 1);
+    values = xnn_reallocate_memory(values, new_capacity * sizeof(struct xnn_value));
+    if (values == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for subgraph values",
+        capacity * sizeof(struct xnn_value));
+      return values;
+    }
+
+    memset(values + size, 0, (new_capacity - size) * sizeof(struct xnn_value));
+    subgraph->num_reserved_values = new_capacity;
+    subgraph->values = values;
+  }
+  subgraph->num_values = size + 1;
+  struct xnn_value* new_value = values + size;
+  new_value->id = size;
+  return new_value;
+}
+
+struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
+{
+  struct xnn_node* nodes = subgraph->nodes;
+  const size_t size = subgraph->num_nodes;
+  const size_t capacity = subgraph->num_reserved_nodes;
+
+  if (capacity < size + 1) {
+    const size_t new_capacity = max(min(capacity * 2, capacity + 512), capacity + 64);
+    assert(new_capacity >= size + 1);
+    nodes = xnn_reallocate_memory(nodes, new_capacity * sizeof(struct xnn_node));
+    if (nodes == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for subgraph nodes",
+        capacity * sizeof(struct xnn_node));
+      return nodes;
+    }
+
+    memset(nodes + size, 0, (new_capacity - size) * sizeof(struct xnn_node));
+    subgraph->num_reserved_nodes = new_capacity;
+    subgraph->nodes = nodes;
+  }
+  subgraph->num_nodes = size + 1;
+  struct xnn_node* new_node = nodes + size;
+  new_node->id = size;
+  return new_node;
+}
+
+enum xnn_status xnn_define_convolution_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t subsampling_height,
+  uint32_t subsampling_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t groups,
+  size_t group_input_channels,
+  size_t group_output_channels,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
+  uint32_t filter_id,
+  uint32_t bias_id,
+  uint32_t output_id,
+  uint32_t flags)
+{
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to define Convolution operator: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (kernel_width == 0 || kernel_height == 0) {
+    xnn_log_error(
+      "failed to define Convolution operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
+      kernel_width, kernel_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (subsampling_width == 0 || subsampling_height == 0) {
+    xnn_log_error(
+      "failed to define Convolution operator with %" PRIu32 "x%" PRIu32 " subsampling: "
+      "subsampling dimensions must be non-zero",
+      subsampling_width, subsampling_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (dilation_width == 0 || dilation_height == 0) {
+    xnn_log_error(
+      "failed to define Convolution operator with %" PRIu32 "x%" PRIu32 " dilation: "
+      "dilation dimensions must be non-zero",
+      dilation_width, dilation_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (groups == 0) {
+    xnn_log_error(
+      "failed to define Convolution operator with %" PRIu32 " groups: number of groups must be non-zero", groups);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (group_input_channels == 0) {
+    xnn_log_error(
+      "failed to define Convolution operator with %zu input channels per group: "
+      "number of channels must be non-zero",
+      group_input_channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (group_output_channels == 0) {
+    xnn_log_error(
+      "failed to define Convolution operator with %zu output channels per group: "
+      "number of channels must be non-zero",
+      group_output_channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to define Convolution operator with NaN output lower bound: lower bound must be non-NaN");
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to define Convolution operator with NaN output upper bound: upper bound must be non-NaN");
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to define Convolution operator with [%.7g, %.7g] output range: "
+      "lower bound must be below upper bound",
+      output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Convolution operator with input ID #%" PRIu32 ": invalid Value ID",
+      input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (filter_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Convolution operator with filter ID #%" PRIu32 ": invalid Value ID",
+      filter_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (bias_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Convolution operator with bias ID #%" PRIu32 ": invalid Value ID",
+      bias_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Convolution operator with output ID #%" PRIu32 ": invalid Value ID",
+      output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  if (node == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
+  node->type = xnn_node_type_convolution_2d;
+  node->params.convolution_2d.input_padding_top = input_padding_top;
+  node->params.convolution_2d.input_padding_right = input_padding_right;
+  node->params.convolution_2d.input_padding_bottom = input_padding_bottom;
+  node->params.convolution_2d.input_padding_left = input_padding_left;
+  node->params.convolution_2d.kernel_height = kernel_height;
+  node->params.convolution_2d.kernel_width = kernel_width;
+  node->params.convolution_2d.subsampling_height = subsampling_height;
+  node->params.convolution_2d.subsampling_width = subsampling_width;
+  node->params.convolution_2d.dilation_height = dilation_height;
+  node->params.convolution_2d.dilation_width = dilation_width;
+  node->params.convolution_2d.groups = groups;
+  node->params.convolution_2d.group_input_channels = group_input_channels;
+  node->params.convolution_2d.group_output_channels = group_output_channels;
+  node->params.convolution_2d.output_min = output_min;
+  node->params.convolution_2d.output_max = output_max;
+  node->num_inputs = 3;
+  node->inputs.raw[0] = input_id;
+  node->inputs.raw[1] = filter_id;
+  node->inputs.raw[2] = bias_id;
+  node->num_outputs = 1;
+  node->outputs.raw[0] = output_id;
+  node->flags = flags;
+
+  return xnn_status_success;
+};
+
+enum xnn_status xnn_define_depthwise_convolution_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t subsampling_height,
+  uint32_t subsampling_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t depth_multiplier,
+  size_t input_channels,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
+  uint32_t filter_id,
+  uint32_t bias_id,
+  uint32_t output_id,
+  uint32_t flags)
+{
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to define Depthwise Convolution operator: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (kernel_width == 0 || kernel_height == 0) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
+      kernel_width, kernel_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (subsampling_width == 0 || subsampling_height == 0) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with %" PRIu32 "x%" PRIu32 " subsampling: "
+      "subsampling dimensions must be non-zero",
+      subsampling_width, subsampling_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (dilation_width == 0 || dilation_height == 0) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with %" PRIu32 "x%" PRIu32 " dilation: "
+      "dilation dimensions must be non-zero",
+      dilation_width, dilation_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (depth_multiplier == 0) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with %" PRIu32 " depth multiplier: "
+      "depth multiplier must be non-zero",
+      depth_multiplier);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_channels == 0) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with %zu input channels: "
+      "number of channels must be non-zero",
+      input_channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with NaN output lower bound: lower bound must be non-NaN");
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with NaN output upper bound: upper bound must be non-NaN");
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with [%.7g, %.7g] output range: "
+      "lower bound must be below upper bound",
+      output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with input ID #%" PRIu32 ": invalid Value ID",
+      input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (filter_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with filter ID #%" PRIu32 ": invalid Value ID",
+      filter_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (bias_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with bias ID #%" PRIu32 ": invalid Value ID",
+      bias_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Depthwise Convolution operator with output ID #%" PRIu32 ": invalid Value ID",
+      output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  if (node == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
+  node->type = xnn_node_type_depthwise_convolution_2d;
+  node->params.depthwise_convolution_2d.input_padding_top = input_padding_top;
+  node->params.depthwise_convolution_2d.input_padding_right = input_padding_right;
+  node->params.depthwise_convolution_2d.input_padding_bottom = input_padding_bottom;
+  node->params.depthwise_convolution_2d.input_padding_left = input_padding_left;
+  node->params.depthwise_convolution_2d.kernel_height = kernel_height;
+  node->params.depthwise_convolution_2d.kernel_width = kernel_width;
+  node->params.depthwise_convolution_2d.subsampling_height = subsampling_height;
+  node->params.depthwise_convolution_2d.subsampling_width = subsampling_width;
+  node->params.depthwise_convolution_2d.dilation_height = dilation_height;
+  node->params.depthwise_convolution_2d.dilation_width = dilation_width;
+  node->params.depthwise_convolution_2d.depth_multiplier = depth_multiplier;
+  node->params.depthwise_convolution_2d.input_channels = input_channels;
+  node->params.depthwise_convolution_2d.output_min = output_min;
+  node->params.depthwise_convolution_2d.output_max = output_max;
+  node->num_inputs = 3;
+  node->inputs.raw[0] = input_id;
+  node->inputs.raw[1] = filter_id;
+  node->inputs.raw[2] = bias_id;
+  node->num_outputs = 1;
+  node->outputs.raw[0] = output_id;
+  node->flags = flags;
+
+  return xnn_status_success;
+};
+
+enum xnn_status xnn_delete_subgraph(
+  xnn_subgraph_t subgraph)
+{
+  if (subgraph != NULL) {
+    memset(subgraph->nodes, 0, sizeof(struct xnn_node) * subgraph->num_nodes);
+    xnn_release_memory(subgraph->nodes);
+
+    memset(subgraph->values, 0, sizeof(struct xnn_value) * subgraph->num_values);
+    xnn_release_memory(subgraph->values);
+
+    memset(subgraph, 0, sizeof(struct xnn_subgraph));
+    xnn_release_memory(subgraph);
+  }
+  return xnn_status_success;
+}
