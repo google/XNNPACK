@@ -171,10 +171,10 @@ static void IGEMMBenchmark(benchmark::State& state,
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__neon_lane_ld128, 4, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_6x8__neon_lane_ld64(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neon_lane_ld64, 4, 8, 1, 1, benchmark::utils::CheckNEON);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neon_lane_ld64, 6, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_6x8__neon_lane_ld128(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neon_lane_ld128, 4, 8, 1, 1, benchmark::utils::CheckNEON);
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__neon_lane_ld128, 6, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_1x8__neon_dup_ld64(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x8__neon_dup_ld64, 1, 8, 1, 1, benchmark::utils::CheckNEON);
