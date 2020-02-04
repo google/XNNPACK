@@ -157,7 +157,7 @@ enum xnn_status xnn_create_runtime(
   for (size_t i = 0; i < subgraph->num_values; i++) {
     const struct xnn_value* value = &subgraph->values[i];
     struct xnn_blob* blob = &runtime->blobs[i];
-    if (values->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
+    if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
       if (value->data == NULL && !blob->external) {
         // Value is purely internal to the runtime, allocate it in the workspace.
         blob->data = (void*) ((uintptr_t) runtime->workspace + buffer_offset);
