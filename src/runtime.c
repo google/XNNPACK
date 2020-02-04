@@ -133,7 +133,7 @@ enum xnn_status xnn_create_runtime(
   for (size_t i = 0; i < subgraph->num_values; i++) {
     const struct xnn_value* value = &subgraph->values[i];
     struct xnn_blob* blob = &runtime->blobs[i];
-    if (values->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
+    if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
       blob->size = xnn_tensor_get_size(subgraph, i);
       if (value->data == NULL) {
         if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
