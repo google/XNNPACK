@@ -365,16 +365,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     #if XNN_ENABLE_ASSEMBLY
       switch (cpuinfo_get_core(0)->uarch) {
-        case cpuinfo_uarch_kryo:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .mr = 4,
-            .nr = 8,
-          };
-          break;
         case cpuinfo_uarch_cortex_a57:
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a57,
@@ -395,16 +385,6 @@ static void init(void) {
             .nr = 8,
           };
           break;
-        case cpuinfo_uarch_cortex_a77:
-        case cpuinfo_uarch_exynos_m5:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .mr = 4,
-            .nr = 8,
-          };
         case cpuinfo_uarch_cortex_a75:
         case cpuinfo_uarch_cortex_a76:
         case cpuinfo_uarch_exynos_m3:
@@ -453,11 +433,14 @@ static void init(void) {
           };
           break;
         default:
+        case cpuinfo_uarch_cortex_a77:
+        case cpuinfo_uarch_exynos_m5:
+        case cpuinfo_uarch_kryo:
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a57,
+            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
+            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
             .mr = 4,
             .nr = 8,
           };
