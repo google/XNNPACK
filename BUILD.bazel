@@ -1514,7 +1514,7 @@ WEIGHTS_PACK_HDRS = [
 
 LOGGING_COPTS = select({
     # No logging in optimized mode
-    ":optimized_build": ["-DXNN_LOG_LEVEL=0"],
+    ":optimized_build": ["-DXNN_LOG_LEVEL=5"],
     # Full logging in debug mode
     ":debug_build": ["-DXNN_LOG_LEVEL=5"],
     # Error-only logging in default (fastbuild) mode
