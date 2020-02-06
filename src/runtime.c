@@ -22,6 +22,15 @@ enum xnn_status xnn_create_runtime(
   xnn_subgraph_t subgraph,
   xnn_runtime_t* runtime_out)
 {
+  return xnn_create_runtime_v2(subgraph, NULL /* threadpool */, 0 /* flags */, runtime_out);
+}
+
+enum xnn_status xnn_create_runtime_v2(
+  xnn_subgraph_t subgraph,
+  pthreadpool_t threadpool,
+  uint32_t flags,
+  xnn_runtime_t* runtime_out)
+{
   struct xnn_runtime* runtime = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
@@ -166,6 +175,8 @@ enum xnn_status xnn_create_runtime(
     }
   }
 
+  runtime->threadpool = threadpool;
+
   *runtime_out = runtime;
   return xnn_status_success;
 
@@ -217,7 +228,7 @@ enum xnn_status xnn_setup_runtime(
           op->input_width,
           runtime->blobs[op->inputs[0]].data,
           runtime->blobs[op->outputs[0]].data,
-          NULL /* threadpool */);
+          runtime->threadpool);
         break;
       default:
         xnn_log_fatal("unexpected operator type %d in operator #%zu", op->op->type, i);
@@ -236,7 +247,7 @@ enum xnn_status xnn_invoke_runtime(
   xnn_runtime_t runtime)
 {
   for (size_t i = 0; i < runtime->num_ops; i++) {
-    const enum xnn_status status = xnn_run_operator(runtime->ops[i].op, NULL /* thread pool */);
+    const enum xnn_status status = xnn_run_operator(runtime->ops[i].op, runtime->threadpool);
     if (status != xnn_status_success) {
       return status;
     }

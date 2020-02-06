@@ -157,6 +157,8 @@ struct xnn_runtime {
   size_t num_blobs;
 
   void* workspace;
+
+  pthreadpool_t threadpool;
 };
 
 struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);

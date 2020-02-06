@@ -264,6 +264,12 @@ enum xnn_status xnn_create_runtime(
   xnn_subgraph_t subgraph,
   xnn_runtime_t* runtime_out);
 
+enum xnn_status xnn_create_runtime_v2(
+  xnn_subgraph_t subgraph,
+  pthreadpool_t threadpool,
+  uint32_t flags,
+  xnn_runtime_t* runtime_out);
+
 struct xnn_external_value {
   uint32_t id;
   void* data;
