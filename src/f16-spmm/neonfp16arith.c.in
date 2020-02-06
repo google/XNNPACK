@@ -1,0 +1,165 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert MR % 8 == 0
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/spmm.h>
+
+
+void xnn_f16_spmm_ukernel_${MR}x${NR}__neonfp16arith${"_unroll" + str(UNROLL) if UNROLL > 1 else ""}(
+    uint32_t m,
+    uint32_t n,
+    const void*restrict input,
+    const void*restrict weights,
+    const int32_t*restrict widx_dmap,
+    const uint32_t*restrict nidx_nnzmap,
+    void*restrict output,
+    const struct xnn_f16_output_params params[restrict static 1])
+{
+  assert(m != 0);
+
+  const __fp16*restrict a = input;
+  __fp16*restrict c = output;
+
+  const float16x8_t vscale = vld1q_dup_f16((const __fp16*) &params->scale);
+  const float16x8_t vmax = vld1q_dup_f16((const __fp16*) &params->max);
+  const float16x8_t vmin = vld1q_dup_f16((const __fp16*) &params->min);
+
+  size_t i = m;
+  while XNN_LIKELY(i >= ${MR}) {
+    const __fp16*restrict w = weights;
+    const int32_t* dmap = widx_dmap;
+    const uint32_t* nnzmap = nidx_nnzmap;
+    size_t j = n;
+    do {
+      uint32_t nnz = *nnzmap++;
+      $if UNROLL > 1:
+        float16x8_t vacc01234567x0 = vld1q_dup_f16(w); w += 1;
+        $for K in range(1, UNROLL):
+          float16x8_t vacc01234567x${K} = vmovq_n_f16(0.0f);
+        $for M in range(8, MR, 8):
+          float16x8_t vacc${ABC[M:M+8]}x0 = vacc01234567x0;
+          $for K in range(1, UNROLL):
+            float16x8_t vacc${ABC[M:M+8]}x${K} = vmovq_n_f16(0.0f);
+        for (; nnz >= ${UNROLL}; nnz -= ${UNROLL}) {
+          $for K in range(UNROLL):
+            const intptr_t diff${K} = dmap[${K}];
+          dmap += ${UNROLL};
+          $for K in range(UNROLL):
+            const float16x8_t va01234567x${K} = vld1q_f16(a);
+            $for M in range(8, MR, 8):
+              const float16x8_t va${ABC[M:M+8]}x${K} = vld1q_f16(a + ${M});
+            a = (const __fp16*restrict) ((uintptr_t) a + (uintptr_t) diff${K});
+            const float16x8_t vb${K} = vld1q_dup_f16(w); w += 1;
+            $for M in range(0, MR, 8):
+              vacc${ABC[M:M+8]}x${K} = vfmaq_f16(vacc${ABC[M:M+8]}x${K}, va${ABC[M:M+8]}x${K}, vb${K});
+        }
+        $for M in range(0, MR, 8):
+          float16x8_t vacc${ABC[M:M+8]} = vacc${ABC[M:M+8]}x0;
+        $for K in range(1, UNROLL):
+          $for M in range(0, MR, 8):
+            vacc${ABC[M:M+8]} = vaddq_f16(vacc${ABC[M:M+8]}, vacc${ABC[M:M+8]}x${K});
+      $else:
+        float16x8_t vacc01234567 = vld1q_dup_f16(w); w += 1;
+        $for M in range(8, MR, 8):
+          float16x8_t vacc${ABC[M:M+8]} = vacc01234567;
+      if XNN_LIKELY(nnz != 0) {
+        do {
+          const intptr_t diff = *dmap++;
+          const float16x8_t va01234567 = vld1q_f16(a);
+          $for M in range(8, MR, 8):
+            const float16x8_t va${ABC[M:M+8]} = vld1q_f16(a + ${M});
+          a = (const __fp16*restrict) ((uintptr_t) a + (uintptr_t) diff);
+          const float16x8_t vb = vld1q_dup_f16(w); w += 1;
+          $for M in range(0, MR, 8):
+            vacc${ABC[M:M+8]} = vfmaq_f16(vacc${ABC[M:M+8]}, va${ABC[M:M+8]}, vb);
+        } while (--nnz != 0);
+      }
+      $for M in range(0, MR, 8):
+        float16x8_t vout${ABC[M:M+8]} = vmulq_f16(vacc${ABC[M:M+8]}, vscale);
+      $for M in range(0, MR, 8):
+        vout${ABC[M:M+8]} = vminq_f16(vout${ABC[M:M+8]}, vmax);
+      $for M in range(0, MR, 8):
+        vout${ABC[M:M+8]} = vmaxq_f16(vout${ABC[M:M+8]}, vmin);
+      vst1q_f16(c, vout01234567);
+      $for M in range(8, MR, 8):
+        vst1q_f16(c + ${M}, vout${ABC[M:M+8]});
+      c += m;
+    } while (--j != 0);
+    c -= m * n;
+    c += ${MR};
+    a += ${MR};
+    i -= ${MR};
+  }
+  if XNN_UNLIKELY(i != 0) {
+    $for LOG2M in reversed(range((MR - 1).bit_length())):
+      $SUBMR = 1 << LOG2M
+      if (i & ${SUBMR}) {
+        const __fp16*restrict w = weights;
+        const int32_t* dmap = widx_dmap;
+        const uint32_t* nnzmap = nidx_nnzmap;
+        size_t j = n;
+        do {
+          uint32_t nnz = *nnzmap++;
+          $if SUBMR <= 4:
+            float16x4_t vacc${ABC[0:SUBMR]} = vld1_dup_f16(w); w += 1;
+          $else:
+            float16x8_t vacc01234567 = vld1q_dup_f16(w); w += 1;
+          $for M in range(8, SUBMR, 8):
+            float16x8_t vacc${ABC[M:M+8]} = vacc01234567;
+          if XNN_LIKELY(nnz != 0) {
+            do {
+              const intptr_t diff = *dmap++;
+              $if SUBMR == 1:
+                const float16x4_t va0 = vld1_dup_f16(a);
+              $elif SUBMR == 2:
+                const float16x4_t va01 = vreinterpret_f32_f16(vld1_dup_f32(__builtin_assume_aligned(a, 1)));
+              $elif SUBMR == 4:
+                const float16x4_t va0123 = vld1_f16(a);
+              $else:
+                const float16x8_t va01234567 = vld1q_f16(a);
+              $for M in range(8, SUBMR, 8):
+                const float16x8_t va${ABC[M:M+8]} = vld1q_f16(a + ${M});
+              a = (const __fp16*restrict) ((uintptr_t) a + (uintptr_t) diff);
+              $if SUBMR <= 4:
+                const float16x4_t vb = vld1_dup_f16(w); w += 1;
+              $else:
+                const float16x8_t vb = vld1q_dup_f16(w); w += 1;
+              $if SUBMR <= 4:
+                vacc${ABC[0:SUBMR]} = vfma_f16(vacc${ABC[0:SUBMR]}, va${ABC[0:SUBMR]}, vb);
+              $else:
+                $for M in range(0, SUBMR, 8):
+                  vacc${ABC[M:M+8]} = vfmaq_f16(vacc${ABC[M:M+8]}, va${ABC[M:M+8]}, vb);
+            } while (--nnz != 0);
+          }
+          $if SUBMR <= 4:
+            float16x4_t vout${ABC[0:SUBMR]} = vmin_f16(vacc${ABC[0:SUBMR]}, vget_low_f16(vmax));
+            vout${ABC[0:SUBMR]} = vmax_f16(vout${ABC[0:SUBMR]}, vget_low_f16(vmin));
+            $if SUBMR == 1:
+              vst1_lane_f16(c, vout${ABC[0]}, 0);
+            $elif SUBMR == 2:
+              vst1_lane_f32(__builtin_assume_aligned(c, 1), vreinterpret_f16_f32(vout${ABC[0:SUBMR]}), 0);
+            $else:
+              vst1_f16(c, vout${ABC[0:SUBMR]});
+          $else:
+            $for M in range(0, SUBMR, 8):
+              float16x8_t vout${ABC[M:M+8]} = vminq_f16(vacc${ABC[M:M+8]}, vmax);
+            $for M in range(0, SUBMR, 8):
+              vout${ABC[M:M+8]} = vmaxq_f16(vout${ABC[M:M+8]}, vmin);
+            vst1q_f16(c, vout01234567);
+            $for M in range(8, SUBMR, 8):
+              vst1q_f16(c + ${M}, vout${ABC[M:M+8]});
+          c += m;
+        } while (--j != 0);
+        c -= m * n;
+        c += ${SUBMR};
+        a += ${SUBMR};
+      }
+  }
+}

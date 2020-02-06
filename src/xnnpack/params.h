@@ -562,6 +562,16 @@ typedef void (*xnn_spmm_ukernel_function)(
     void* c,
     const void* params);
 
+typedef void (*xnn_f16_spmm_ukernel_function)(
+    uint32_t m,
+    uint32_t n,
+    const void* a,
+    const void* w,
+    const int32_t* dmap,
+    const uint32_t* nmap,
+    void* c,
+    const struct xnn_f16_output_params* params);
+
 typedef void (*xnn_f32_spmm_ukernel_function)(
     uint32_t m,
     uint32_t n,

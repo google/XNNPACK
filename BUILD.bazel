@@ -843,6 +843,14 @@ AARCH64_NEONFP16ARITH_UKERNELS = [
     "src/f16-gemm/gen/4x8-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/6x8-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/8x8-neonfp16arith-ld64.c",
+    "src/f16-spmm/gen/8x1-neonfp16arith.c",
+    "src/f16-spmm/gen/8x1-neonfp16arith-unroll2.c",
+    "src/f16-spmm/gen/16x1-neonfp16arith.c",
+    "src/f16-spmm/gen/16x1-neonfp16arith-unroll2.c",
+    "src/f16-spmm/gen/24x1-neonfp16arith.c",
+    "src/f16-spmm/gen/24x1-neonfp16arith-unroll2.c",
+    "src/f16-spmm/gen/32x1-neonfp16arith.c",
+    "src/f16-spmm/gen/32x1-neonfp16arith-unroll2.c",
 ]
 
 SSE_UKERNELS = [
@@ -1942,6 +1950,18 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_spmm_bench",
+    srcs = [
+        "bench/f16-spmm.cc",
+        "bench/gemm.h",
+        "bench/google/gemm.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    copts = ["-Wno-unused-function"],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_igemm_bench",
     srcs = [
         "bench/f32-igemm.cc",
@@ -2308,6 +2328,16 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_spmm_test",
+    srcs = [
+        "test/f16-spmm.cc",
+        "test/spmm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
 

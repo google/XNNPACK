@@ -58,6 +58,25 @@ DECLARE_F32_SPMM_UKERNEL_FUNCTION(xnn_f32_spmm_ukernel_8x4__scalar)
 DECLARE_F32_SPMM_UKERNEL_FUNCTION(xnn_f32_spmm_ukernel_8x1__scalar_pipelined)
 DECLARE_F32_SPMM_UKERNEL_FUNCTION(xnn_f32_spmm_ukernel_8x1__sse)
 
+#define DECLARE_F16_SPMM_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                       \
+    uint32_t m,                                    \
+    uint32_t n,                                    \
+    const void* a,                                 \
+    const void* w,                                 \
+    const int32_t* dmap,                           \
+    const uint32_t* nmap,                          \
+    void* c,                                       \
+    const struct xnn_f16_output_params* params);
+
+DECLARE_F16_SPMM_UKERNEL_FUNCTION(xnn_f16_spmm_ukernel_8x1__neonfp16arith)
+DECLARE_F16_SPMM_UKERNEL_FUNCTION(xnn_f16_spmm_ukernel_8x1__neonfp16arith_unroll2)
+DECLARE_F16_SPMM_UKERNEL_FUNCTION(xnn_f16_spmm_ukernel_16x1__neonfp16arith)
+DECLARE_F16_SPMM_UKERNEL_FUNCTION(xnn_f16_spmm_ukernel_16x1__neonfp16arith_unroll2)
+DECLARE_F16_SPMM_UKERNEL_FUNCTION(xnn_f16_spmm_ukernel_24x1__neonfp16arith)
+DECLARE_F16_SPMM_UKERNEL_FUNCTION(xnn_f16_spmm_ukernel_24x1__neonfp16arith_unroll2)
+DECLARE_F16_SPMM_UKERNEL_FUNCTION(xnn_f16_spmm_ukernel_32x1__neonfp16arith)
+DECLARE_F16_SPMM_UKERNEL_FUNCTION(xnn_f16_spmm_ukernel_32x1__neonfp16arith_unroll2)
 
 #ifdef __cplusplus
 }  // extern "C"
