@@ -127,13 +127,26 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator);
 /// @retval xnn_status_success - deinitialization call succeeded.
 enum xnn_status xnn_deinitialize(void);
 
+/// Subgraph is an abstract representation of a neural network model.
+/// Subgraph objects are used to define Values (tensors) and Nodes (operators) comprising the model.
 typedef struct xnn_subgraph* xnn_subgraph_t;
 
+/// Create a empty Subgraph object.
+///
+/// @param external_value_ids - number of Value IDs to reserve for communication with external graph representation.
+///                             The Subgraph object would avoid creating internal Value IDs in the
+///                             [0, reserved_value_ids-1] range.
+/// @param flags - binary features of the subgraph. No supported flags are currently defined.
+/// @param subgraph_out - pointer to the variable that will be initialized with a handle to the Subgraph object upon
+///                       successful return.
 enum xnn_status xnn_create_subgraph(
   uint32_t external_value_ids,
   uint32_t flags,
   xnn_subgraph_t* subgraph_out);
 
+/// Destroy a Subgraph object, as well as Values, and Nodes associated with the subgraph.
+///
+/// @param subgraph - the Subgraph object to destroy.
 enum xnn_status xnn_delete_subgraph(
   xnn_subgraph_t subgraph);
 
@@ -142,24 +155,33 @@ enum xnn_status xnn_delete_subgraph(
 
 #define XNN_INVALID_VALUE_ID UINT32_MAX
 
+/// Type of elements in a Value object.
 enum xnn_datatype {
+  /// Invalid data type. Valid Values never have this datatype.
   xnn_datatype_invalid = 0,
+  /// IEEE754 single-precision floating-point.
   xnn_datatype_fp32 = 1,
+  /// IEEE754 half-precision floating-point.
   xnn_datatype_fp16 = 2,
 };
 
-/// Define a tensor-type Value and add it to a subgraph.
+/// Define a tensor-type Value and add it to a Subgraph.
 ///
-/// @param datatype - type of tensor elements.
+/// @param subgraph - a Subgraph object that will own the created Value.
+/// @param datatype - type of the tensor elements.
 /// @param num_dims - number of dimensions in the shape.
 /// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
+///               XNNPACK does not keep any pointers to this array after the function returns.
 /// @param data - pointer to static data used for tensor initialization. If the tensor is not statically initialized,
-///               this pointer must be is NULL.
-/// @param external_id - external ID for the Value. The ID must be within the range of reversed Value IDs specified in
-///                      subgraph creation. If the external ID is XNN_INVALID_VALUE_ID, an internal ID will be created
-///                      for the Value.
-/// @param subgraph - subgraph that will own the created value.
-/// @param id_out - pointer to the variable that will be initialized with the Value ID upon successful return.
+///               this pointer must be is NULL. If non-NULL, the life-time of the static data must exceed the life-time
+///               of the Subgraph object, and of any Runtime objects created from the Subgraph.
+/// @param external_id - external ID for the Value. The ID must be within the range of reversed Value IDs specified on
+///                      the Subgraph creation. If the external ID is XNN_INVALID_VALUE_ID, an internal ID will be
+///                      created for the Value.
+/// @param flags - binary features of the Value. Supported values are any combination of XNN_VALUE_FLAG_EXTERNAL_INPUT
+///                and XNN_VALUE_FLAG_EXTERNAL_OUTPUT.
+/// @param id_out - pointer to the variable that will be initialized with the Value ID upon successful return. If a
+///                 valid @a external_id was provided, the variable will be initialized with the @a external_id value.
 enum xnn_status xnn_define_tensor_value(
   xnn_subgraph_t subgraph,
   enum xnn_datatype datatype,
@@ -170,8 +192,9 @@ enum xnn_status xnn_define_tensor_value(
   uint32_t flags,
   uint32_t* id_out);
 
-/// Define a 2D Convolution node and add it to a subgraph.
+/// Define a 2D Convolution Node and add it to a Subgraph.
 ///
+/// @param subgraph - a Subgraph object that will own the created Node.
 /// @param input_padding_top - implicit zero-padding above 2D input data.
 /// @param input_padding_right - implicit zero-padding to the right of 2D input data.
 /// @param input_padding_bottom - implicit zero-padding below 2D input data.
@@ -187,11 +210,17 @@ enum xnn_status xnn_define_tensor_value(
 /// @param group_output_channels - number of output channels per group.
 /// @param output_min - lower bound for clipping output values.
 /// @param output_max - upper bound for clipping output values.
-/// @param input_id - input tensor ID. Must be a 4D tensor with [N, IH, IW, groups * group_input_channels] dimensions.
-/// @param filter_id - filter tensor ID. Must ge a 4D tensor with
-///                 [groups * group_output_channels, kernel_height, kernel_width, group_input_channels] dimensions.
-/// @param bias_id - bias tensor ID. Must be a 1D tensor with [groups * group_output_channels] dimensions.
-/// @param output_id - output tensor ID. Must be a 4D tensor with [N, OH, OW, groups * group_output_channels] dimensions.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, IH, IW, groups * group_input_channels] dimensions
+/// @param filter_id - Value ID for the filter tensor. The filter tensor must ge a 4D tensor defined in the @a subgraph
+///                    with [groups * group_output_channels, kernel_height, kernel_width, group_input_channels]
+///                    dimensions.
+/// @param bias_id - Value ID for the bias tensor. The bias tensor must be a 1D tensor defined in the @a subgraph with
+///                  [groups * group_output_channels] dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, OH, OW, groups * group_output_channels] dimensions.
+/// @param flags - binary features of the 2D Convolution Node. The only currently supported values is
+///                XNN_FLAG_TENSORFLOW_SAME_PADDING.
 enum xnn_status xnn_define_convolution_2d(
   xnn_subgraph_t subgraph,
   uint32_t input_padding_top,
@@ -215,8 +244,9 @@ enum xnn_status xnn_define_convolution_2d(
   uint32_t output_id,
   uint32_t flags);
 
-/// Define a 2D Depthwise Convolution node and add it to a subgraph.
+/// Define a 2D Depthwise Convolution Node and add it to a Subgraph.
 ///
+/// @param subgraph - a Subgraph object that will own the created Node.
 /// @param input_padding_top - implicit zero-padding above 2D input data.
 /// @param input_padding_right - implicit zero-padding to the right of 2D input data.
 /// @param input_padding_bottom - implicit zero-padding below 2D input data.
@@ -231,11 +261,16 @@ enum xnn_status xnn_define_convolution_2d(
 /// @param input_channels - number of input channels.
 /// @param output_min - lower bound for clipping output values.
 /// @param output_max - upper bound for clipping output values.
-/// @param input_id - input tensor. Must be a 4D tensor with [N, IH, IW, input_channels] dimensions.
-/// @param filter_id - filter tensor. Must ge a 4D tensor with
-///                 [1, kernel_height, kernel_width, input_channels * depth_multiplier] dimensions.
-/// @param bias_id - bias tensor. Must be a 1D tensor with [input_channels * depth_multiplier] dimensions.
-/// @param output_id - output tensor. Must be a 4D tensor with [N, OH, OW, input_channels * depth_multiplier] dimensions.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, IH, IW, input_channels] dimensions
+/// @param filter_id - Value ID for the filter tensor. The filter tensor must ge a 4D tensor defined in the @a subgraph
+///                    with [1, kernel_height, kernel_width, input_channels * depth_multiplier] dimensions.
+/// @param bias_id - Value ID for the bias tensor. The bias tensor must be a 1D tensor defined in the @a subgraph with
+///                  [input_channels * depth_multiplier] dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, OH, OW, input_channels * depth_multiplier] dimensions.
+/// @param flags - binary features of the 2D Depthwise Convolution Node. The only currently supported values is
+///                XNN_FLAG_TENSORFLOW_SAME_PADDING.
 enum xnn_status xnn_define_depthwise_convolution_2d(
   xnn_subgraph_t subgraph,
   uint32_t input_padding_top,
@@ -258,16 +293,27 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   uint32_t output_id,
   uint32_t flags);
 
+/// Runtime is a combination of an execution plan for subgraph Nodes and a memory manager for subgraph Values.
 typedef struct xnn_runtime* xnn_runtime_t;
 
-enum xnn_status xnn_create_runtime(
-  xnn_subgraph_t subgraph,
-  xnn_runtime_t* runtime_out);
-
+/// Create a empty Runtime object from a subgraph.
+///
+/// @param subgraph - a Subgraph object with all Values and Nodes that would be handled by the runtime. No Values or
+///                   Nodes can be added to the runtime once it is constructed.
+/// @param threadpool - the thread pool to be used for parallelisation of computations in the runtime. If the thread
+///                     pool is NULL, the computation would run on the caller thread without parallelization.
+/// @param flags - binary features of the subgraph. No supported flags are currently defined.
+/// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
+///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
+///                      used to create it.
 enum xnn_status xnn_create_runtime_v2(
   xnn_subgraph_t subgraph,
   pthreadpool_t threadpool,
   uint32_t flags,
+  xnn_runtime_t* runtime_out);
+
+enum xnn_status xnn_create_runtime(
+  xnn_subgraph_t subgraph,
   xnn_runtime_t* runtime_out);
 
 struct xnn_external_value {
@@ -275,14 +321,27 @@ struct xnn_external_value {
   void* data;
 };
 
+/// Setup data pointers for external inputs and outputs in a Runtime object.
+///
+/// @param runtime - a Runtime object created with @ref xnn_create_runtime or @ref xnn_create_runtime_v2.
+/// @param num_external_values - the number of external inputs and outputs specified in this call. This number must
+///                              match the number of external inputs and outputs in the runtime, i.e. all external
+///                              inputs and outputs in the runtime must be specified in one call.
+/// @param external_values - array with location information for all external inputs and outputs in the runtime.
 enum xnn_status xnn_setup_runtime(
   xnn_runtime_t runtime,
   size_t num_external_values,
   const struct xnn_external_value* external_values);
 
+/// Execute forward pass for all operators in the runtime.
+///
+/// @param runtime - the Runtime object with the execution plan to invoke.
 enum xnn_status xnn_invoke_runtime(
   xnn_runtime_t runtime);
 
+/// Destroy a Runtime object, as well as operators and memory associated with it.
+///
+/// @param runtime - the Runtime object to destroy.
 enum xnn_status xnn_delete_runtime(
   xnn_runtime_t runtime);
 
