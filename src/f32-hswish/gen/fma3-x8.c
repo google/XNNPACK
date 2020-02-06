@@ -66,6 +66,21 @@ void xnn_f32_hswish_ukernel__fma3_x8(
     vacc = _mm256_max_ps(vacc, vzero);
     vacc = _mm256_min_ps(vacc, vone);
     vacc = _mm256_mul_ps(vacc, vx);
-    _mm256_maskstore_ps(y, vmask, vacc);
+
+    // _mm256_maskstore_ps(y, vmask, vacc) could be used here, but triggers msan failures (probably an msan bug).
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
+    if (n & (4 * sizeof(float))) {
+      _mm_storeu_ps(y, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
+      y += 4;
+    }
+    if (n & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) y, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
+      y += 2;
+    }
+    if (n & (1 * sizeof(float))) {
+      _mm_store_ss(y, vacc_lo);
+    }
   }
 }

@@ -69,6 +69,21 @@ void xnn_f32_vrdivc_ukernel__avx_x16(
     __m256 vy = _mm256_div_ps(vb, va);
     vy = _mm256_max_ps(vy, vy_min);
     vy = _mm256_min_ps(vy, vy_max);
-    _mm256_maskstore_ps(y, vmask, vy);
+
+    // _mm256_maskstore_ps(y, vmask, vy) could be used here, but triggers msan failures (probably an msan bug).
+    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    if (n & (4 * sizeof(float))) {
+      _mm_storeu_ps(y, vy_lo);
+      vy_lo = _mm256_extractf128_ps(vy, 1);
+      y += 4;
+    }
+    if (n & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) y, vy_lo);
+      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      y += 2;
+    }
+    if (n & (1 * sizeof(float))) {
+      _mm_store_ss(y, vy_lo);
+    }
   }
 }

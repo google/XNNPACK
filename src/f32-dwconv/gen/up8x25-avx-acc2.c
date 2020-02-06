@@ -364,8 +364,22 @@ void xnn_f32_dwconv_ukernel_up8x25__avx_acc2(
       __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
       vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
 
-      _mm256_maskstore_ps(output, vmask, vacc01234567);
-      output += c;
+      // _mm256_maskstore_ps(output, vmask, vacc01234567); output += c; could be used here, but triggers msan failures (probably an msan bug).
+      __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
+      if (c & 4) {
+        _mm_storeu_ps(output, vacc0123);
+        vacc0123 = _mm256_extractf128_ps(vacc01234567, 1);
+        output += 4;
+      }
+      if (c & 2) {
+        _mm_storel_pi((__m64*) output, vacc0123);
+        vacc0123 = _mm_movehl_ps(vacc0123, vacc0123);
+        output += 2;
+      }
+      if (c & 1) {
+        _mm_store_ss(output, vacc0123);
+        output += 1;
+      }
     }
 
     output = (float*) ((uintptr_t) output + output_increment);
