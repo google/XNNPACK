@@ -366,22 +366,13 @@ static void init(void) {
     #if XNN_ENABLE_ASSEMBLY
       switch (cpuinfo_get_core(0)->uarch) {
         case cpuinfo_uarch_cortex_a57:
+        case cpuinfo_uarch_cortex_a72:
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a57,
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a57,
             .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
             .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
             .mr = 6,
-            .nr = 8,
-          };
-          break;
-        case cpuinfo_uarch_cortex_a72:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .mr = 4,
             .nr = 8,
           };
           break;
@@ -422,6 +413,7 @@ static void init(void) {
             .nr = 8,
           };
           break;
+
         case cpuinfo_uarch_cortex_a73:
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a73,
