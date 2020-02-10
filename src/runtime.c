@@ -157,6 +157,25 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->ops[i].inputs[1] = node->inputs.raw[1];
         runtime->ops[i].outputs[0] = node->outputs.raw[0];
         break;
+      case xnn_node_type_prelu:
+        status = xnn_create_prelu_nc_f32(
+          subgraph->values[node->inputs.raw[1]].shape.dim[0] /* channels */,
+          subgraph->values[node->inputs.raw[1]].shape.dim[0] /* input stride */,
+          subgraph->values[node->inputs.raw[1]].shape.dim[0] /* output stride */,
+          subgraph->values[node->inputs.raw[1]].data /* negative slope */,
+          -INFINITY,
+          +INFINITY,
+          node->flags,
+          &runtime->ops[i].op);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->ops[i].batch_size = subgraph->values[node->inputs.raw[0]].shape.dim[0];
+        runtime->ops[i].input_height = subgraph->values[node->inputs.raw[0]].shape.dim[1];
+        runtime->ops[i].input_width = subgraph->values[node->inputs.raw[0]].shape.dim[2];
+        runtime->ops[i].inputs[0] = node->inputs.raw[0];
+        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        break;
       case xnn_node_type_invalid:
         xnn_log_fatal("unexpected node type %d in node #%zu", node->type, i);
         XNN_UNREACHABLE;
@@ -294,6 +313,16 @@ enum xnn_status xnn_setup_runtime(
           op->shape2.dim,
           runtime->blobs[op->inputs[0]].data,
           runtime->blobs[op->inputs[1]].data,
+          runtime->blobs[op->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_prelu_nc_f32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
+        status = xnn_setup_prelu_nc_f32(
+          op->op,
+          op->batch_size * op->input_height * op->input_width,
+          runtime->blobs[op->inputs[0]].data,
           runtime->blobs[op->outputs[0]].data,
           runtime->threadpool);
         break;

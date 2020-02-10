@@ -61,6 +61,7 @@ enum xnn_node_type {
   xnn_node_type_convolution_2d,
   xnn_node_type_depthwise_convolution_2d,
   xnn_node_type_multiply2,
+  xnn_node_type_prelu,
 };
 
 struct xnn_node {

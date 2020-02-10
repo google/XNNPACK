@@ -349,6 +349,23 @@ enum xnn_status xnn_define_multiply2(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a PReLU (Parametric ReLU) Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, H, W, channels] dimensions
+/// @param slope_id - Value ID for the bias tensor. The bias tensor must be a 1D tensor defined in the @a subgraph with
+///                   [channels] dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, H, W, channels] dimensions.
+/// @param flags - binary features of the PReLU Node. No supported flags are currently defined.
+enum xnn_status xnn_define_prelu(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t slope_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Runtime is a combination of an execution plan for subgraph Nodes and a memory manager for subgraph Values.
 typedef struct xnn_runtime* xnn_runtime_t;
 
