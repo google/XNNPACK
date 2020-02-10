@@ -554,6 +554,55 @@ enum xnn_status xnn_define_multiply2(
   return xnn_status_success;
 }
 
+enum xnn_status xnn_define_prelu(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t slope_id,
+  uint32_t output_id,
+  uint32_t flags)
+{
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to define PReLU operator: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define PReLU operator with input ID #%" PRIu32 ": invalid Value ID",
+      input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (slope_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define PReLU operator with slope ID #%" PRIu32 ": invalid Value ID",
+      slope_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define PReLU operator with output ID #%" PRIu32 ": invalid Value ID",
+      output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  if (node == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
+  node->type = xnn_node_type_prelu;
+  node->num_inputs = 2;
+  node->inputs.raw[0] = input_id;
+  node->inputs.raw[1] = slope_id;
+  node->num_outputs = 1;
+  node->outputs.raw[0] = output_id;
+  node->flags = flags;
+
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_delete_subgraph(
   xnn_subgraph_t subgraph)
 {
