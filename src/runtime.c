@@ -59,6 +59,23 @@ enum xnn_status xnn_create_runtime_v2(
   for (size_t i = 0; i < subgraph->num_nodes; i++) {
     const struct xnn_node* node = subgraph->nodes + i;
     switch (node->type) {
+      case xnn_node_type_add2:
+        status = xnn_create_add_nd_f32(
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags,
+          &runtime->ops[i].op);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->ops[i].shape1.num_dims = subgraph->values[node->inputs.raw[0]].shape.num_dims;
+        runtime->ops[i].shape2.num_dims = subgraph->values[node->inputs.raw[1]].shape.num_dims;
+        memcpy(runtime->ops[i].shape1.dim, subgraph->values[node->inputs.raw[0]].shape.dim, subgraph->values[node->inputs.raw[0]].shape.num_dims * sizeof(size_t));
+        memcpy(runtime->ops[i].shape2.dim, subgraph->values[node->inputs.raw[1]].shape.dim, subgraph->values[node->inputs.raw[1]].shape.num_dims * sizeof(size_t));
+        runtime->ops[i].inputs[0] = node->inputs.raw[0];
+        runtime->ops[i].inputs[1] = node->inputs.raw[1];
+        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        break;
       case xnn_node_type_convolution_2d:
         status = xnn_create_convolution2d_nhwc_f32(
           node->params.convolution_2d.input_padding_top,
@@ -78,8 +95,8 @@ enum xnn_status xnn_create_runtime_v2(
           node->params.convolution_2d.group_output_channels * node->params.convolution_2d.groups /* output_pixel_stride */,
           values[node->inputs.convolution_2d.filter].data,
           values[node->inputs.convolution_2d.bias].data,
-          node->params.convolution_2d.output_min,
-          node->params.convolution_2d.output_max,
+          node->activation.output_min,
+          node->activation.output_max,
           node->flags,
           &runtime->ops[i].op);
         if (status != xnn_status_success) {
@@ -110,8 +127,8 @@ enum xnn_status xnn_create_runtime_v2(
           node->params.depthwise_convolution_2d.input_channels * node->params.depthwise_convolution_2d.depth_multiplier /* output_pixel_stride */,
           values[node->inputs.convolution_2d.filter].data,
           values[node->inputs.convolution_2d.bias].data,
-          node->params.depthwise_convolution_2d.output_min,
-          node->params.depthwise_convolution_2d.output_max,
+          node->activation.output_min,
+          node->activation.output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
           &runtime->ops[i].op);
         if (status != xnn_status_success) {
@@ -121,6 +138,23 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->ops[i].input_height = subgraph->values[node->inputs.raw[0]].shape.dim[1];
         runtime->ops[i].input_width = subgraph->values[node->inputs.raw[0]].shape.dim[2];
         runtime->ops[i].inputs[0] = node->inputs.raw[0];
+        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        break;
+      case xnn_node_type_multiply2:
+        status = xnn_create_multiply_nd_f32(
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags,
+          &runtime->ops[i].op);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->ops[i].shape1.num_dims = subgraph->values[node->inputs.raw[0]].shape.num_dims;
+        runtime->ops[i].shape2.num_dims = subgraph->values[node->inputs.raw[1]].shape.num_dims;
+        memcpy(runtime->ops[i].shape1.dim, subgraph->values[node->inputs.raw[0]].shape.dim, subgraph->values[node->inputs.raw[0]].shape.num_dims * sizeof(size_t));
+        memcpy(runtime->ops[i].shape2.dim, subgraph->values[node->inputs.raw[1]].shape.dim, subgraph->values[node->inputs.raw[1]].shape.num_dims * sizeof(size_t));
+        runtime->ops[i].inputs[0] = node->inputs.raw[0];
+        runtime->ops[i].inputs[1] = node->inputs.raw[1];
         runtime->ops[i].outputs[0] = node->outputs.raw[0];
         break;
       case xnn_node_type_invalid:
@@ -221,13 +255,45 @@ enum xnn_status xnn_setup_runtime(
     const struct xnn_operator_data* op = &runtime->ops[i];
     enum xnn_status status = xnn_status_success;
     switch (op->op->type) {
+      case xnn_operator_type_add_nd_f32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->inputs[1]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
+        status = xnn_setup_add_nd_f32(
+          op->op,
+          op->shape1.num_dims,
+          op->shape1.dim,
+          op->shape2.num_dims,
+          op->shape2.dim,
+          runtime->blobs[op->inputs[0]].data,
+          runtime->blobs[op->inputs[1]].data,
+          runtime->blobs[op->outputs[0]].data,
+          runtime->threadpool);
+        break;
       case xnn_operator_type_convolution_nhwc_f32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
         status = xnn_setup_convolution2d_nhwc_f32(
           op->op,
           op->batch_size,
           op->input_height,
           op->input_width,
           runtime->blobs[op->inputs[0]].data,
+          runtime->blobs[op->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_multiply_nd_f32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->inputs[1]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
+        status = xnn_setup_multiply_nd_f32(
+          op->op,
+          op->shape1.num_dims,
+          op->shape1.dim,
+          op->shape2.num_dims,
+          op->shape2.dim,
+          runtime->blobs[op->inputs[0]].data,
+          runtime->blobs[op->inputs[1]].data,
           runtime->blobs[op->outputs[0]].data,
           runtime->threadpool);
         break;
