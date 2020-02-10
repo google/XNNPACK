@@ -258,6 +258,14 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_8x8s4__neonfma)
 #endif
 
+#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
+  static void f32_igemm_4x8__aarch32_neon_ld64(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_4x8__aarch32_neon_ld64, 4, 8, 1, 1);
+  }
+
+  BENCHMARK_CONV(f32_igemm_4x8__aarch32_neon_ld64)
+#endif  /* XNN_ARCH_ARM */
+
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void f32_igemm_1x12__aarch64_neonfma_cortex_a53(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53, 1, 12, 1, 1);
