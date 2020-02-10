@@ -57,8 +57,10 @@ struct xnn_blob {
 
 enum xnn_node_type {
   xnn_node_type_invalid = 0,
+  xnn_node_type_add2,
   xnn_node_type_convolution_2d,
   xnn_node_type_depthwise_convolution_2d,
+  xnn_node_type_multiply2,
 };
 
 struct xnn_node {
@@ -80,8 +82,6 @@ struct xnn_node {
       uint32_t groups;
       size_t group_input_channels;
       size_t group_output_channels;
-      float output_min;
-      float output_max;
     } convolution_2d;
     struct {
       uint32_t input_padding_top;
@@ -96,10 +96,12 @@ struct xnn_node {
       uint32_t dilation_width;
       uint32_t depth_multiplier;
       size_t input_channels;
-      float output_min;
-      float output_max;
     } depthwise_convolution_2d;
   } params;
+  struct {
+    float output_min;
+    float output_max;
+  } activation;
   /// Value IDs for node inputs.
   union {
     uint32_t raw[XNN_MAX_INPUTS];
@@ -126,6 +128,8 @@ struct xnn_operator_data {
   size_t batch_size;
   size_t input_height;
   size_t input_width;
+  struct xnn_shape shape1;
+  struct xnn_shape shape2;
   uint32_t inputs[XNN_MAX_RUNTIME_INPUTS];
   uint32_t outputs[XNN_MAX_RUNTIME_OUTPUTS];
 };
