@@ -144,7 +144,8 @@ enum xnn_status xnn_create_runtime_v2(
     struct xnn_blob* blob = &runtime->blobs[i];
     if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
       blob->size = xnn_tensor_get_size(subgraph, i);
-      if (value->data == NULL) {
+      blob->data = (void*) value->data;
+      if (blob->data == NULL) {
         if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
           // Value is purely internal to the runtime, and must be allocated in its workspace.
           buffer_size = round_up_po2(buffer_size + blob->size, XNN_EXTRA_BYTES);
