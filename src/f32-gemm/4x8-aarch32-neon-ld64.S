@@ -86,7 +86,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
         VMOV        q13, q9
         VMOV        q14, q8
         VMOV        q15, q9
-        BLO         3f               // less than 2 channels?
+        BLO         8f               // less than 2 channels?
 
         // Main loop - 2 floats of A (8 bytes)
 2:
@@ -116,7 +116,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
         VMLA.F32    q15, q7, d3[1]
         BHS         2b
 
-3:
         // Is there a remainder?- 1 floats of A (4 bytes)
         TST         r5, 4
         BNE         8f
