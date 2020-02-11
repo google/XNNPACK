@@ -117,11 +117,11 @@ void xnn_f32_dwconv_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx512f${"" if ACC
       // Prepare mask for valid 32-bit elements (depends on nc).
       const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
 
-      __m512 vacc${ABC[0:16]}p0 = _mm512_load_ps(w);
+      __m512 vacc${ABC[0:16]}p0 = _mm512_maskz_loadu_ps(vmask, w);
       $for K in range(KERNEL_TILE):
 
         const __m512 vi${K}x${ABC[0:16]} = _mm512_maskz_loadu_ps(vmask, i${K});
-        const __m512 vk${K}x${ABC[0:16]} = _mm512_load_ps(w + ${(K + 1) * CHANNEL_TILE});
+        const __m512 vk${K}x${ABC[0:16]} = _mm512_maskz_loadu_ps(vmask, w + ${(K + 1) * CHANNEL_TILE});
         $if 1 <= K < ACCUMULATORS:
           __m512 vacc${ABC[0:16]}p${K} = _mm512_mul_ps(vi${K}x${ABC[0:16]}, vk${K}x${ABC[0:16]});
         $else:

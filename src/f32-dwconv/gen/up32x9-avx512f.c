@@ -223,42 +223,42 @@ void xnn_f32_dwconv_ukernel_up32x9__avx512f(
       // Prepare mask for valid 32-bit elements (depends on nc).
       const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
 
-      __m512 vacc0123456789ABCDEFp0 = _mm512_load_ps(w);
+      __m512 vacc0123456789ABCDEFp0 = _mm512_maskz_loadu_ps(vmask, w);
 
       const __m512 vi0x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i0);
-      const __m512 vk0x0123456789ABCDEF = _mm512_load_ps(w + 32);
+      const __m512 vk0x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 32);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi0x0123456789ABCDEF, vk0x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
       const __m512 vi1x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i1);
-      const __m512 vk1x0123456789ABCDEF = _mm512_load_ps(w + 64);
+      const __m512 vk1x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 64);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi1x0123456789ABCDEF, vk1x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
       const __m512 vi2x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i2);
-      const __m512 vk2x0123456789ABCDEF = _mm512_load_ps(w + 96);
+      const __m512 vk2x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 96);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi2x0123456789ABCDEF, vk2x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
       const __m512 vi3x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i3);
-      const __m512 vk3x0123456789ABCDEF = _mm512_load_ps(w + 128);
+      const __m512 vk3x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 128);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi3x0123456789ABCDEF, vk3x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
       const __m512 vi4x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i4);
-      const __m512 vk4x0123456789ABCDEF = _mm512_load_ps(w + 160);
+      const __m512 vk4x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 160);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi4x0123456789ABCDEF, vk4x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
       const __m512 vi5x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i5);
-      const __m512 vk5x0123456789ABCDEF = _mm512_load_ps(w + 192);
+      const __m512 vk5x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 192);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi5x0123456789ABCDEF, vk5x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
       const __m512 vi6x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i6);
-      const __m512 vk6x0123456789ABCDEF = _mm512_load_ps(w + 224);
+      const __m512 vk6x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 224);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi6x0123456789ABCDEF, vk6x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
       const __m512 vi7x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i7);
-      const __m512 vk7x0123456789ABCDEF = _mm512_load_ps(w + 256);
+      const __m512 vk7x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 256);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi7x0123456789ABCDEF, vk7x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
       const __m512 vi8x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i8);
-      const __m512 vk8x0123456789ABCDEF = _mm512_load_ps(w + 288);
+      const __m512 vk8x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 288);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi8x0123456789ABCDEF, vk8x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
 

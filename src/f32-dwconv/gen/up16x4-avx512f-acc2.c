@@ -88,22 +88,22 @@ void xnn_f32_dwconv_ukernel_up16x4__avx512f_acc2(
       // Prepare mask for valid 32-bit elements (depends on nc).
       const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
 
-      __m512 vacc0123456789ABCDEFp0 = _mm512_load_ps(w);
+      __m512 vacc0123456789ABCDEFp0 = _mm512_maskz_loadu_ps(vmask, w);
 
       const __m512 vi0x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i0);
-      const __m512 vk0x0123456789ABCDEF = _mm512_load_ps(w + 16);
+      const __m512 vk0x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 16);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi0x0123456789ABCDEF, vk0x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
       const __m512 vi1x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i1);
-      const __m512 vk1x0123456789ABCDEF = _mm512_load_ps(w + 32);
+      const __m512 vk1x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 32);
       __m512 vacc0123456789ABCDEFp1 = _mm512_mul_ps(vi1x0123456789ABCDEF, vk1x0123456789ABCDEF);
 
       const __m512 vi2x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i2);
-      const __m512 vk2x0123456789ABCDEF = _mm512_load_ps(w + 48);
+      const __m512 vk2x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 48);
       vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi2x0123456789ABCDEF, vk2x0123456789ABCDEF, vacc0123456789ABCDEFp0);
 
       const __m512 vi3x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i3);
-      const __m512 vk3x0123456789ABCDEF = _mm512_load_ps(w + 64);
+      const __m512 vk3x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 64);
       vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi3x0123456789ABCDEF, vk3x0123456789ABCDEF, vacc0123456789ABCDEFp1);
 
       // Add up all accumulators to vacc0123456789ABCDEFp0
