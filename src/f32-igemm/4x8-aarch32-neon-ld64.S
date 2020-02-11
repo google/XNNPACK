@@ -108,7 +108,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_ld64
         MOVEQ       r0,  r7          //   a3 = zero, else += a3 + a_offset
 
         SUBS        r5, r5, 8        // kc - 8
-        BLO         3f               // less than 2 channels?
+        BLO         8f               // less than 2 channels?
 
         // Main loop - 2 floats of A (8 bytes)
 2:
@@ -138,9 +138,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_ld64
         VMLA.F32    q15, q7, d3[1]
         BHS         2b
 
-3:
         // Is there a remainder?- 1 floats of A (4 bytes)
-        TST          r5, 4
+        TST         r5, 4
         BNE         8f
 
 4:
