@@ -57,7 +57,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
-        B.LO 3f
+        B.LO 5f
 
         # Prologue - loads for first group of 6 fma
 
@@ -251,6 +251,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         # BLOCK 4
         INS v19.d[1], x9
         FMLA v20.4s, v17.4s, v1.s[1]
+        TST x0, 15
 
         # BLOCK 5
         FMLA v21.4s, v18.4s, v1.s[1]
@@ -259,11 +260,8 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         FMLA v22.4s, v19.4s, v1.s[1]
 
         # BLOCK 7
-3:
-        # Is there a remainder?- 2 floats of A (8 bytes)
-        TBNZ x0, 3, 5f
-        # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ x0, 2, 6f
+        # Is there a remainder?- 2 floats of A (8 bytes) or less
+        B.NE 5f
 
 4:
         # Clamp
@@ -280,12 +278,13 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         ST1 {v20.16b, v21.16b, v22.16b}, [x6], x14
         SUB  x3,  x3, x2 // a0 -= kc
-
         B.HI 0b
-
         RET
 
 5:
+        # Is there a remainder?- 2 floats of A (8 bytes)
+        TBZ x0, 3, 6f
+
         # Remainder - 2 floats of A (8 bytes)
         # Read first block of 1 A.
         LDR d0, [x3], 8   // a0

@@ -63,7 +63,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS x0, x2, 32  // k = kc - 32    // k = kc
-        B.LO 4f
+        B.LO 5f
 
         # 16 prologue
         # Read first block of A and B.
@@ -148,18 +148,13 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53
         FMLA v19.4s, v23.4s, v1.s[1]
         FMLA v16.4s, v24.4s, v1.s[2]
         FMLA v17.4s, v25.4s, v1.s[2]
+        TST x0, 31
         FMLA v18.4s, v26.4s, v1.s[3]
         FMLA v19.4s, v27.4s, v1.s[3]
+        # Is there a remainder?- 4 floats of A (16 bytes) or less
+        B.NE 5f
 
 4:
-        # Is there a remainder?- 4 floats of A (16 bytes)
-        TBNZ x0, 4, 6f
-        # Is there a remainder?- 2 floats of A (8 bytes)
-        TBNZ x0, 3, 7f
-        # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ x0, 2, 9f
-
-5:
         # ks loop
         SUBS x9, x9, 8  // ks -= MR * sizeof(void*)
         B.NE 1b
@@ -185,7 +180,10 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53
 
         RET
 
-6:
+5:
+        # Is there a remainder?- 2 floats of A (8 bytes)
+        TBZ x0, 4, 6f
+
         # Remainder- 4 floats of A (16 bytes)
         LDR q20, [x5], 16
         LDR q21, [x5], 16
@@ -205,8 +203,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53
         FMLA v18.4s, v26.4s, v0.s[3]
         FMLA v19.4s, v27.4s, v0.s[3]
 
-        TBZ x0, 3, 8f
-7:
+6:
+        TBZ x0, 3, 7f
         # Remainder- 2 floats of A (8 bytes)
         LDR q20, [x5], 16
         LDR q21, [x5], 16
@@ -217,16 +215,15 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53
         LDR q23, [x5], 16
         FMLA v18.4s, v22.4s, v0.s[1]
         FMLA v19.4s, v23.4s, v0.s[1]
-8:
-        TBZ x0, 2, 5b
-9:
+7:
+        TBZ x0, 2, 4b
         # Remainder- 1 float of A (4 bytes)
         LDR q20, [x5], 16
         LDR q21, [x5], 16
         LDR s0, [x8], 4
         FMLA v16.4s, v20.4s, v0.s[0]
         FMLA v17.4s, v21.4s, v0.s[0]
-        B 5b
+        B 4b
 
 10:
         # Store odd channels

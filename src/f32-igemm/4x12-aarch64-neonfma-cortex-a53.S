@@ -136,7 +136,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         PRFM PLDL1KEEP, [x15, 64]
         PRFM PLDL1KEEP, [x16,  0]
         PRFM PLDL1KEEP, [x16, 64]
-        B.LO 4f
+        B.LO 5f
 
         SUBS x0, x0, 16  // 4 floats for main loop
 
@@ -408,19 +408,18 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v27.4s, v18.4s, v3.s[1]
         FMLA v30.4s, v18.4s, v3.s[3]
         FMLA v22.4s, v19.4s, v2.s[1]
+        TST x0, 15
 
         # BLOCK 7
         FMLA v25.4s, v19.4s, v2.s[3]
         FMLA v28.4s, v19.4s, v3.s[1]
         ADD x5, x5, 96
         FMLA v31.4s, v19.4s, v3.s[3]
-4:
-        # Is there a remainder?- 2 floats of A (8 bytes)
-        TBNZ x0, 3, 6f
-        # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ x0, 2, 7f
 
-5:
+        # Is there a remainder?- 2 floats of A (8 bytes) or less
+        B.NE 5f
+
+4:
         # ks loop
         SUBS x9, x9, 32  // ks -= MR * sizeof(void*)
         B.NE 1b
@@ -470,9 +469,11 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         LDP  d8,  d9, [sp], 48
         RET
 
-6:
-        # Remainder - 2 floats of A (8 bytes)
-        # Read first block of 4 A.
+5:
+        # Is there a remainder?- 2 floats of A (8 bytes)
+        TBZ x0, 3, 6f
+
+        # Remainder- 2 floats of A (8 bytes)
         LDR d0,  [x13], 8  // a0
         LD1 {v6.16b, v7.16b, v8.16b}, [x5], 48
         LDR d1, [x14], 8  // a1
@@ -508,9 +509,10 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v28.4s, v11.4s, v2.s[1]
         FMLA v31.4s, v11.4s, v3.s[1]
 
-        TBZ x0, 2, 5b
-7:
-        # Remainder - 1 float of A (4 bytes)
+        # Is there a remainder?- 1 floats of A (4 bytes)
+        TBZ x0, 2, 4b
+6:
+        # Remainder- 1 floats of A (4 bytes)
         LDR s0,  [x13], 4  // a0
         LD1 {v6.16b, v7.16b, v8.16b}, [x5], 48
         LDR s1, [x14], 4  // a1
@@ -529,7 +531,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v25.4s, v8.4s, v1.s[0]
         FMLA v28.4s, v8.4s, v2.s[0]
         FMLA v31.4s, v8.4s, v3.s[0]
-        B 5b
+        B 4b
 
 8:
         ADD x1, x1, 12

@@ -71,7 +71,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
-        B.LO 4f
+        B.LO 5f
 
         # Prologue - loads for first group of 6 fma
 
@@ -267,6 +267,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         # BLOCK 4
         INS v19.d[1], x7
         FMLA v20.4s, v17.4s, v1.s[1]
+        TST x0, 15
 
         # BLOCK 5
         FMLA v21.4s, v18.4s, v1.s[1]
@@ -275,14 +276,10 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         FMLA v22.4s, v19.4s, v1.s[1]
 
         # BLOCK 7
+        # Is there a remainder?- 2 floats of A (8 bytes) or less
+        B.NE 5f
 
 4:
-        # Is there a remainder?- 2 floats of A (8 bytes)
-        TBNZ x0, 3, 6f
-        # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ x0, 2, 7f
-
-5:
         # ks loop
         SUBS x9, x9, 8  // ks -= MR * sizeof(void*)
         B.NE 1b
@@ -304,12 +301,13 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # nc loop
         B.HI 0b
-
         RET
 
-6:
-        # Remainder - 2 floats of A (8 bytes)
-        # Read first block of 1 A.
+5:
+        # Is there a remainder?- 2 floats of A (8 bytes)
+        TBZ x0, 3, 6f
+
+        # Remainder- 2 floats of A (8 bytes)
         LDR d0, [x8], 8  // a0
         LD1 {v2.16b, v3.16b, v4.16b}, [x5], 48
         LD1 {v5.16b, v6.16b, v7.16b}, [x5], 48
@@ -324,8 +322,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         FMLA v21.4s, v6.4s, v0.s[1]
         FMLA v22.4s, v7.4s, v0.s[1]
 
-        TBZ x0, 2, 5b
-7:
+        TBZ x0, 2, 4b
+6:
         # Remainder - 1 float of A (4 bytes)
         LDR s0, [x8], 4  // a0
         LD1 {v2.16b, v3.16b, v4.16b}, [x5], 48
@@ -333,7 +331,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         FMLA v20.4s, v2.4s, v0.s[0]
         FMLA v21.4s, v3.4s, v0.s[0]
         FMLA v22.4s, v4.4s, v0.s[0]
-        B 5b
+        B 4b
 
 8:
         ADD x1, x1, 12
