@@ -84,6 +84,15 @@ Benchmarked on January 9, 2020 with `end2end-bench --benchmark_min_time=5` on a 
 - Marat Dukhan, Artsiom Ablavatski "The Two-Pass Softmax Algorithm".
   [Paper on ArXiv](https://arxiv.org/abs/2001.04438).
 
+## Ecosystem
+
+### Machine Learning Frameworks
+
+- [TensorFlow.js WebAssembly backend](https://github.com/tensorflow/tfjs/tree/master/tfjs-backend-wasm).
+- TensorFlow Lite through the [XNNPACK delegate](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/delegates/xnnpack).
+- [MediaPipe for Web](https://developers.googleblog.com/2020/01/mediapipe-on-web.html).
+- PyTorch integration is ongoing. Follow [PR #32509](https://github.com/pytorch/pytorch/pull/32509) for progress and details.
+
 ## Acknowledgements
 
 XNNPACK is a based on [QNNPACK](https://github.com/pytorch/QNNPACK) library. Unlike QNNPACK, XNNPACK focuses entirely on floating-point operators, and its API is no longer compatible with QNNPACK.
