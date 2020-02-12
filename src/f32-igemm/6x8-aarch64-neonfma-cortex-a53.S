@@ -145,7 +145,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
-        B.LO 4f
+        B.LO 5f
 
         # Prologue - First group loads, no FMA
         LDR  d0, [x14], 8              // a0
@@ -408,6 +408,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA v21.4s, v15.4s,  v3.s[1]
         FMLA v23.4s, v15.4s,  v3.s[3]
         FMLA v25.4s, v15.4s,  v4.s[1]
+        TST x0, 15
 
         // BLOCK 7
         FMLA v27.4s, v15.4s,  v4.s[3]
@@ -415,13 +416,10 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA v31.4s, v15.4s,  v5.s[3]
         ADD x5, x5, 64
 
-4:
-        # Is there a remainder?- 2 floats of A (8 bytes)
-        TBNZ x0, 3, 6f
-        # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ x0, 2, 7f
+        # Is there a remainder?- 2 floats of A (8 bytes) or less
+        B.NE 5f
 
-5:
+4:
         # ks loop
         SUBS x9, x9, 48  // ks -= MR * sizeof(void*)
         B.NE 1b
@@ -482,9 +480,11 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         LDP d12, d13, [sp], 80
         RET
 
-        # Remainder - 2 floats of A (8 bytes)
-        # 24 FMA + 6 LD64 A + 2 LDP B
-6:
+5:
+        # Is there a remainder?- 2 floats of A (8 bytes)
+        TBZ x0, 3, 6f
+
+        # Remainder- 2 floats of A (8 bytes)
         LDR   d0, [x14], 8
         LDR  q16, [x5], 16
         LD1   {v0.d}[1], [x15], 8
@@ -522,8 +522,8 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA v31.4s, v19.4s,  v2.s[3]
 
         # Is there a remainder?- 1 floats of A (4 bytes)
-        TBZ x0, 2, 5b
-7:
+        TBZ x0, 2, 4b
+6:
         # Remainder- 1 floats of A (4 bytes)
         LDR   s0,  [x14], 4
         LDR  q16, [x5], 16
@@ -546,7 +546,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA v27.4s, v17.4s,  v1.s[2]
         FMLA v29.4s, v17.4s,  v2.s[0]
         FMLA v31.4s, v17.4s,  v2.s[2]
-        B 5b
+        B 4b
 
         # Store odd width
 8:

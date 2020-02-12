@@ -214,7 +214,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64
         SUB  x4,  x4, x2 // a5 -= kc
 
         B.HI 0b
-
         RET
 
 4:

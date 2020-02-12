@@ -75,10 +75,9 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_ld64
 
         # Is there at least 2 floats (8 bytes)?
         SUBS x0, x2, 8  // k = kc - 8
-        B.LO 2f
+        B.LO 5f
 
         # Main loop - 2 floats of A (8 bytes)
-
 1:
         LDR d0,  [x3], 8
         LDP q20, q21, [x5], 32
@@ -105,25 +104,10 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_ld64
         FMLA v31.4s, v23.4s, v3.s[1]
         B.HS 1b
 
-        # Remainder- 1 floats of A (4 bytes)
-        TBZ x0, 2, 6f
+        # Is there a remainder?- 1 floats of A (4 bytes)
+        TBNZ x0, 2, 5f
 
-2:
-        LDR s0,  [x3], 4
-        LDP q20, q21, [x5], 32
-        LDR s1, [x11], 4
-        LDR s2, [x12], 4
-        LDR s3 , [x4], 4
-        FMLA v16.4s, v20.4s, v0.s[0]
-        FMLA v17.4s, v21.4s, v0.s[0]
-        FMLA v18.4s, v20.4s, v1.s[0]
-        FMLA v19.4s, v21.4s, v1.s[0]
-        FMLA v28.4s, v20.4s, v2.s[0]
-        FMLA v29.4s, v21.4s, v2.s[0]
-        FMLA v30.4s, v20.4s, v3.s[0]
-        FMLA v31.4s, v21.4s, v3.s[0]
-
-6:
+4:
         # Clamp
         FMIN v16.4s, v16.4s, v4.4s
         SUBS x1, x1, 8
@@ -158,6 +142,23 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_ld64
         B.HI 0b
 
         RET
+
+        # Remainder- 1 float of A (4 bytes)
+5:
+        LDR s0,  [x3], 4
+        LDP q20, q21, [x5], 32
+        LDR s1, [x11], 4
+        LDR s2, [x12], 4
+        LDR s3 , [x4], 4
+        FMLA v16.4s, v20.4s, v0.s[0]
+        FMLA v17.4s, v21.4s, v0.s[0]
+        FMLA v18.4s, v20.4s, v1.s[0]
+        FMLA v19.4s, v21.4s, v1.s[0]
+        FMLA v28.4s, v20.4s, v2.s[0]
+        FMLA v29.4s, v21.4s, v2.s[0]
+        FMLA v30.4s, v20.4s, v3.s[0]
+        FMLA v31.4s, v21.4s, v3.s[0]
+        B 4b
 
         # Store odd width
 7:

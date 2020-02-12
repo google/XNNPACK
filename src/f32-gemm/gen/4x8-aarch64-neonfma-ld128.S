@@ -75,7 +75,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_ld128
 
         # Is there at least 4 floats (16 bytes)?
         SUBS x0, x2, 16  // k = kc - 16
-        B.LO 2f
+        B.LO 5f
 
         # Main loop - 4 floats of A (16 bytes)
 1:
@@ -122,52 +122,10 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_ld128
         FMLA v31.4s, v27.4s, v3.s[3]
         B.HS 1b
 
-        # Remainder- 2 floats of A (8 bytes)
-2:
-        TBZ x0, 3, 3f
+        TST x0, 15
+        B.NE 5f
 
-        LDR d0,  [x3], 8
-        LDP q20, q21, [x5], 32
-        LDR d1, [x11], 8
-        LDR d2, [x12], 8
-        LDR d3,  [x4], 8
-        FMLA v16.4s, v20.4s, v0.s[0]
-        FMLA v17.4s, v21.4s, v0.s[0]
-        FMLA v18.4s, v20.4s, v1.s[0]
-        FMLA v19.4s, v21.4s, v1.s[0]
-        LDP q22, q23, [x5], 32
-        FMLA v28.4s, v20.4s, v2.s[0]
-        FMLA v29.4s, v21.4s, v2.s[0]
-        FMLA v30.4s, v20.4s, v3.s[0]
-        FMLA v31.4s, v21.4s, v3.s[0]
-        FMLA v16.4s, v22.4s, v0.s[1]
-        FMLA v17.4s, v23.4s, v0.s[1]
-        FMLA v18.4s, v22.4s, v1.s[1]
-        FMLA v19.4s, v23.4s, v1.s[1]
-        FMLA v28.4s, v22.4s, v2.s[1]
-        FMLA v29.4s, v23.4s, v2.s[1]
-        FMLA v30.4s, v22.4s, v3.s[1]
-        FMLA v31.4s, v23.4s, v3.s[1]
-
-        # Remainder- 1 float of A (4 bytes)
-3:
-        TBZ x0, 2, 6f
-
-        LDR s0,  [x3], 4
-        LDP q20, q21, [x5], 32
-        LDR s1, [x11], 4
-        LDR s2, [x12], 4
-        LDR s3,  [x4], 4
-        FMLA v16.4s, v20.4s, v0.s[0]
-        FMLA v17.4s, v21.4s, v0.s[0]
-        FMLA v18.4s, v20.4s, v1.s[0]
-        FMLA v19.4s, v21.4s, v1.s[0]
-        FMLA v28.4s, v20.4s, v2.s[0]
-        FMLA v29.4s, v21.4s, v2.s[0]
-        FMLA v30.4s, v20.4s, v3.s[0]
-        FMLA v31.4s, v21.4s, v3.s[0]
-
-6:
+4:
         # Clamp
         FMIN v16.4s, v16.4s, v4.4s
         SUBS x1, x1, 8
@@ -200,8 +158,57 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_ld128
         SUB  x4,  x4, x2 // a3 -= kc
 
         B.HI 0b
-
         RET
+
+        # Remainder- 2 floats of A (8 bytes)
+5:
+        # Is there a remainder?- 2 floats of A (8 bytes)
+        TBZ x0, 3, 6f
+
+        # Remainder- 2 floats of A (8 bytes)
+        LDR d0,  [x3], 8
+        LDP q20, q21, [x5], 32
+        LDR d1, [x11], 8
+        LDR d2, [x12], 8
+        LDR d3,  [x4], 8
+        FMLA v16.4s, v20.4s, v0.s[0]
+        FMLA v17.4s, v21.4s, v0.s[0]
+        FMLA v18.4s, v20.4s, v1.s[0]
+        FMLA v19.4s, v21.4s, v1.s[0]
+        LDP q22, q23, [x5], 32
+        FMLA v28.4s, v20.4s, v2.s[0]
+        FMLA v29.4s, v21.4s, v2.s[0]
+        FMLA v30.4s, v20.4s, v3.s[0]
+        FMLA v31.4s, v21.4s, v3.s[0]
+        FMLA v16.4s, v22.4s, v0.s[1]
+        FMLA v17.4s, v23.4s, v0.s[1]
+        FMLA v18.4s, v22.4s, v1.s[1]
+        FMLA v19.4s, v23.4s, v1.s[1]
+        FMLA v28.4s, v22.4s, v2.s[1]
+        FMLA v29.4s, v23.4s, v2.s[1]
+        FMLA v30.4s, v22.4s, v3.s[1]
+        FMLA v31.4s, v23.4s, v3.s[1]
+
+        # Is there a remainder?- 1 floats of A (4 bytes)
+        TBZ x0, 2, 4b
+
+        # Remainder- 1 float of A (4 bytes)
+6:
+        LDR s0,  [x3], 4
+        LDP q20, q21, [x5], 32
+        LDR s1, [x11], 4
+        LDR s2, [x12], 4
+        LDR s3,  [x4], 4
+        FMLA v16.4s, v20.4s, v0.s[0]
+        FMLA v17.4s, v21.4s, v0.s[0]
+        FMLA v18.4s, v20.4s, v1.s[0]
+        FMLA v19.4s, v21.4s, v1.s[0]
+        FMLA v28.4s, v20.4s, v2.s[0]
+        FMLA v29.4s, v21.4s, v2.s[0]
+        FMLA v30.4s, v20.4s, v3.s[0]
+        FMLA v31.4s, v21.4s, v3.s[0]
+        B 4b
+
 
         # Store odd width
 7:
