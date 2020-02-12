@@ -48,9 +48,9 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
         VPUSH  {d8-d15}                            // +64 = 96
 
         LDR     r7, [sp, 96]         // a_stride
-        LDR     r9, [sp, 100]        // w
         LDR    r11, [sp, 104]        // c
         LDR     r6, [sp, 108]        // cm_stride
+        LDR     r9, [sp, 100]        // w
         LDR     r5, [sp, 116]        // clamping_params
 
         // Clamp A and C pointers
@@ -86,7 +86,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
         VMOV        q13, q9
         VMOV        q14, q8
         VMOV        q15, q9
-        BLO         8f               // less than 2 channels?
+        BLO         5f               // less than 2 channels?
 
         // Main loop - 2 floats of A (8 bytes)
 2:
@@ -118,7 +118,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
 
         // Is there a remainder?- 1 floats of A (4 bytes)
         TST         r5, 4
-        BNE         8f
+        BNE         5f
 
 4:
         // Clamp
@@ -152,12 +152,11 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
         SUB         r3, r3, r2
         BHI         1b
 
-6:
         VPOP        {d8-d15}
         POP         {r4, r5, r6, r7, r8, r9, r10, r11}
         BX          lr
 
-8:
+5:
         // Remainder- 1 floats of A (4 bytes)
         VLDM        r3!,  {s0}       // A0
         VLDM        r9!, {d8-d11}    // B0
@@ -174,7 +173,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
         VMLA.F32    q15, q5, d3[0]
         B           4b
 
-// Store odd width
+        // Store odd width
 10:
         TST         r1, 4
         BEQ         11f

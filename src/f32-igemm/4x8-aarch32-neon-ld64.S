@@ -50,12 +50,12 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_ld64
         SUB    sp, sp, 4                                        // 4
         VPUSH  {d8-d15}                                         // +64 = 112
 
-        MOV        r14, r3           // p = ks
-        LDR         r2, [sp, 112]    // a
-        LDR         r9, [sp, 116]    // w
         LDR        r11, [sp, 120]    // c
         LDR         r6, [sp, 124]    // cm_stride
+        LDR         r2, [sp, 112]    // a
+        LDR         r9, [sp, 116]    // w
         LDR         r5, [sp, 140]    // clamping_params
+        MOV        r14, r3           // p = ks
 
         // Clamp C pointers
         CMP         r0, 2                 // if mr >= 2
@@ -108,7 +108,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_ld64
         MOVEQ       r0,  r7          //   a3 = zero, else += a3 + a_offset
 
         SUBS        r5, r5, 8        // kc - 8
-        BLO         8f               // less than 2 channels?
+        BLO         5f               // less than 2 channels?
 
         // Main loop - 2 floats of A (8 bytes)
 2:
@@ -140,7 +140,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_ld64
 
         // Is there a remainder?- 1 floats of A (4 bytes)
         TST         r5, 4
-        BNE         8f
+        BNE         5f
 
 4:
         # ks loop
@@ -178,12 +178,11 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_ld64
         SUB         r2, r2, r14    // a -= ks
         BHI         0b
 
-6:
         VPOP        {d8-d15}
         ADD         sp, sp, 12  // skip pad, r2, r3
         POP         {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-8:
+5:
         // Remainder- 1 floats of A (4 bytes)
         VLDM        r3!, {s0}       // A0
         VLDM        r9!, {d8-d11}   // B0
