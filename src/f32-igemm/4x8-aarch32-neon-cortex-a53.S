@@ -371,7 +371,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53
         SUBS r14, r14, 16  // ks -= MR * sizeof(void*)
 
         # ks loop
-        BNE 1b
+        BHI 1b
 
         // Load params pointer
         LDR          r0, [sp, 128]   // cn_stride

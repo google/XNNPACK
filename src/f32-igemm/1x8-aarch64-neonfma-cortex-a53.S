@@ -157,7 +157,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53
 4:
         # ks loop
         SUBS x9, x9, 8  // ks -= MR * sizeof(void*)
-        B.NE 1b
+        B.HI 1b
 
         FADD v16.4s, v16.4s, v18.4s
         FADD v17.4s, v17.4s, v19.4s

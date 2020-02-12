@@ -244,7 +244,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_pld_cortex_a75
 4:
         # ks loop
         SUBS r14, r14, 16  // ks -= MR * sizeof(void*)
-        BNE 1b
+        BHI 1b
 
         // Load params pointer
         LDR          r5, [sp, 136]   // clamping_params

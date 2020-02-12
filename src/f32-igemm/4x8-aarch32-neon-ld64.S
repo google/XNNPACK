@@ -145,7 +145,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_ld64
 4:
         # ks loop
         SUBS        r14, r14, 16  // ks -= MR * sizeof(void*)
-        BNE         1b
+        BHI         1b
 
         LDR          r7, [sp, 128]   // cn_stride
         LDR         r14, [sp, 72]    // p = ks
