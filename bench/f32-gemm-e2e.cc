@@ -267,7 +267,7 @@ static void GEMMEnd2EndBenchmark(
   static void f32_gemm_4x8__aarch32_neon_cortex_a53(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53,
-      xnn_f32_igemm_ukernel_4x8__neon_lane_ld64,
+      xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53,
       xnn_f32_gemm_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_ukernel_1x8__neon_lane_ld64,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
