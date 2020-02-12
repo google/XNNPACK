@@ -58,10 +58,14 @@ struct xnn_blob {
 enum xnn_node_type {
   xnn_node_type_invalid = 0,
   xnn_node_type_add2,
+  xnn_node_type_clamp,
   xnn_node_type_convolution_2d,
   xnn_node_type_depthwise_convolution_2d,
+  xnn_node_type_hardswish,
   xnn_node_type_multiply2,
   xnn_node_type_prelu,
+  xnn_node_type_sigmoid,
+  xnn_node_type_softmax,
 };
 
 struct xnn_node {
