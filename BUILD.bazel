@@ -3247,3 +3247,91 @@ config_setting(
         "cpu": "asmjs",
     },
 )
+
+config_setting(
+    name = "ios_armv7",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "ios_armv7",
+    },
+)
+
+config_setting(
+    name = "ios_arm64",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "ios_arm64",
+    },
+)
+
+config_setting(
+    name = "ios_arm64e",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "ios_arm64e",
+    },
+)
+
+config_setting(
+    name = "ios_x86",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "ios_i386",
+    },
+)
+
+config_setting(
+    name = "ios_x86_64",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "ios_x86_64",
+    },
+)
+
+config_setting(
+    name = "watchos_armv7k",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "watchos_armv7k",
+    },
+)
+
+config_setting(
+    name = "watchos_arm64_32",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "watchos_arm64_32",
+    },
+)
+
+config_setting(
+    name = "watchos_x86",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "watchos_i386",
+    },
+)
+
+config_setting(
+    name = "watchos_x86_64",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "watchos_x86_64",
+    },
+)
+
+config_setting(
+    name = "tvos_arm64",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "tvos_arm64",
+    },
+)
+
+config_setting(
+    name = "tvos_x86_64",
+    values = {
+        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "cpu": "tvos_x86_64",
+    },
+)
