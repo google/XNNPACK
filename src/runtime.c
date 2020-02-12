@@ -25,6 +25,17 @@ enum xnn_status xnn_create_runtime(
   return xnn_create_runtime_v2(subgraph, NULL /* threadpool */, 0 /* flags */, runtime_out);
 }
 
+// Product of all shape dimensions, except for the last (channel) one
+static size_t product_non_channel_dims(
+  const struct xnn_shape shape[restrict static 1])
+{
+  size_t batch_size = 1;
+  for (size_t i = 0; i + 1 < shape->num_dims; i++) {
+    batch_size *= shape->dim[i];
+  }
+  return batch_size;
+}
+
 enum xnn_status xnn_create_runtime_v2(
   xnn_subgraph_t subgraph,
   pthreadpool_t threadpool,
@@ -120,10 +131,7 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = 1;
-        for (size_t i = 0; i + 1 < values[node->inputs.raw[0]].shape.num_dims; i++) {
-          runtime->ops[i].batch_size *= values[node->inputs.raw[0]].shape.dim[i];
-        }
+        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
         runtime->ops[i].inputs[0] = node->inputs.raw[0];
         runtime->ops[i].outputs[0] = node->outputs.raw[0];
         break;
@@ -169,10 +177,7 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = 1;
-        for (size_t i = 0; i + 1 < values[node->inputs.raw[0]].shape.num_dims; i++) {
-          runtime->ops[i].batch_size *= values[node->inputs.raw[0]].shape.dim[i];
-        }
+        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
         runtime->ops[i].inputs[0] = node->inputs.raw[0];
         runtime->ops[i].outputs[0] = node->outputs.raw[0];
         break;
@@ -206,10 +211,7 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = 1;
-        for (size_t i = 0; i + 1 < values[node->inputs.raw[0]].shape.num_dims; i++) {
-          runtime->ops[i].batch_size *= values[node->inputs.raw[0]].shape.dim[i];
-        }
+        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
         runtime->ops[i].inputs[0] = node->inputs.raw[0];
         runtime->ops[i].outputs[0] = node->outputs.raw[0];
         break;
@@ -223,10 +225,7 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = 1;
-        for (size_t i = 0; i + 1 < values[node->inputs.raw[0]].shape.num_dims; i++) {
-          runtime->ops[i].batch_size *= values[node->inputs.raw[0]].shape.dim[i];
-        }
+        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
         runtime->ops[i].inputs[0] = node->inputs.raw[0];
         runtime->ops[i].outputs[0] = node->outputs.raw[0];
         break;
@@ -240,10 +239,7 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = 1;
-        for (size_t i = 0; i + 1 < values[node->inputs.raw[0]].shape.num_dims; i++) {
-          runtime->ops[i].batch_size *= values[node->inputs.raw[0]].shape.dim[i];
-        }
+        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
         runtime->ops[i].inputs[0] = node->inputs.raw[0];
         runtime->ops[i].outputs[0] = node->outputs.raw[0];
         break;
