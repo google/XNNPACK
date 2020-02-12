@@ -603,6 +603,170 @@ enum xnn_status xnn_define_prelu(
   return xnn_status_success;
 }
 
+enum xnn_status xnn_define_clamp(
+  xnn_subgraph_t subgraph,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags)
+{
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to define Clamp operator: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Clamp operator with input ID #%" PRIu32 ": invalid Value ID",
+      input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Clamp operator with output ID #%" PRIu32 ": invalid Value ID",
+      output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  if (node == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
+  node->type = xnn_node_type_clamp;
+  node->activation.output_min = output_min;
+  node->activation.output_max = output_max;
+  node->num_inputs = 1;
+  node->inputs.raw[0] = input_id;
+  node->num_outputs = 1;
+  node->outputs.raw[0] = output_id;
+  node->flags = flags;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_define_hardswish(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags)
+{
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to define HardSwish operator: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define HardSwish operator with input ID #%" PRIu32 ": invalid Value ID",
+      input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define HardSwish operator with output ID #%" PRIu32 ": invalid Value ID",
+      output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  if (node == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
+  node->type = xnn_node_type_hardswish;
+  node->num_inputs = 1;
+  node->inputs.raw[0] = input_id;
+  node->num_outputs = 1;
+  node->outputs.raw[0] = output_id;
+  node->flags = flags;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_define_sigmoid(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags)
+{
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to define Sigmoid operator: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Sigmoid operator with input ID #%" PRIu32 ": invalid Value ID",
+      input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Sigmoid operator with output ID #%" PRIu32 ": invalid Value ID",
+      output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  if (node == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
+  node->type = xnn_node_type_sigmoid;
+  node->num_inputs = 1;
+  node->inputs.raw[0] = input_id;
+  node->num_outputs = 1;
+  node->outputs.raw[0] = output_id;
+  node->flags = flags;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_define_softmax(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags)
+{
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to define SoftMax operator: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define SoftMax operator with input ID #%" PRIu32 ": invalid Value ID",
+      input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define SoftMax operator with output ID #%" PRIu32 ": invalid Value ID",
+      output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  if (node == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
+  node->type = xnn_node_type_softmax;
+  node->num_inputs = 1;
+  node->inputs.raw[0] = input_id;
+  node->num_outputs = 1;
+  node->outputs.raw[0] = output_id;
+  node->flags = flags;
+
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_delete_subgraph(
   xnn_subgraph_t subgraph)
 {
