@@ -400,7 +400,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a57
 7:
         # ks loop
         SUBS x9, x9, 32  // ks -= MR * sizeof(void*)
-        B.NE 1b
+        B.HI 1b
 
         # Clamp
         FMIN v16.4s, v16.4s, v4.4s
