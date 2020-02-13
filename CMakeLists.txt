@@ -361,6 +361,7 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-gemm/gen/1x8-psimd-loadsplat.c
   src/f32-gemm/gen/1x8-psimd-splat.c
   src/f32-gemm/gen/1x8s4-psimd.c
+  src/f32-gemm/gen/4x2c4-psimd.c
   src/f32-gemm/gen/4x8-psimd-loadsplat.c
   src/f32-gemm/gen/4x8-psimd-splat.c
   src/f32-gemm/gen/4x8s4-psimd.c
@@ -871,6 +872,7 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-gemm/gen/1x8-sse-dup.c
   src/f32-gemm/gen/1x8-sse-load1.c
   src/f32-gemm/gen/1x8s4-sse.c
+  src/f32-gemm/gen/4x2c4-sse.c
   src/f32-gemm/gen/4x8-sse-dup.c
   src/f32-gemm/gen/4x8-sse-load1.c
   src/f32-gemm/gen/4x8s4-sse.c

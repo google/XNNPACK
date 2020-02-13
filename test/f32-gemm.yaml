@@ -167,6 +167,8 @@
   k-block: 4
 - name: xnn_f32_gemm_ukernel_4x8s4__sse
   k-block: 4
+- name: xnn_f32_gemm_ukernel_4x2c4__sse
+  k-block: 4
 - name: xnn_f32_gemm_ukernel_1x8__avx_broadcast
   k-block: 1
 - name: xnn_f32_gemm_ukernel_4x8__avx_broadcast
@@ -242,6 +244,8 @@
 - name: xnn_f32_gemm_ukernel_4x8s4__psimd
   k-block: 4
 - name: xnn_f32_gemm_ukernel_6x8s4__psimd
+  k-block: 4
+- name: xnn_f32_gemm_ukernel_4x2c4__psimd
   k-block: 4
 - name: xnn_f32_gemm_ukernel_1x4__wasm
   k-block: 1
