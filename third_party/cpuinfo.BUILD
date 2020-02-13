@@ -214,7 +214,7 @@ config_setting(
 config_setting(
     name = "ios_armv7",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "ios",
         "cpu": "ios_armv7",
     },
 )
@@ -222,7 +222,7 @@ config_setting(
 config_setting(
     name = "ios_arm64",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "ios",
         "cpu": "ios_arm64",
     },
 )
@@ -230,7 +230,7 @@ config_setting(
 config_setting(
     name = "ios_arm64e",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "ios",
         "cpu": "ios_arm64e",
     },
 )
@@ -238,7 +238,7 @@ config_setting(
 config_setting(
     name = "ios_x86",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "ios",
         "cpu": "ios_i386",
     },
 )
@@ -246,7 +246,7 @@ config_setting(
 config_setting(
     name = "ios_x86_64",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "ios",
         "cpu": "ios_x86_64",
     },
 )
@@ -254,7 +254,7 @@ config_setting(
 config_setting(
     name = "watchos_armv7k",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "watchos",
         "cpu": "watchos_armv7k",
     },
 )
@@ -262,7 +262,7 @@ config_setting(
 config_setting(
     name = "watchos_arm64_32",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "watchos",
         "cpu": "watchos_arm64_32",
     },
 )
@@ -270,7 +270,7 @@ config_setting(
 config_setting(
     name = "watchos_x86",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "watchos",
         "cpu": "watchos_i386",
     },
 )
@@ -278,7 +278,7 @@ config_setting(
 config_setting(
     name = "watchos_x86_64",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "watchos",
         "cpu": "watchos_x86_64",
     },
 )
@@ -286,7 +286,7 @@ config_setting(
 config_setting(
     name = "tvos_arm64",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "tvos",
         "cpu": "tvos_arm64",
     },
 )
@@ -294,7 +294,7 @@ config_setting(
 config_setting(
     name = "tvos_x86_64",
     values = {
-        "crosstool_top": "//tools/osx/crosstool:crosstool",
+        "apple_platform_type": "tvos",
         "cpu": "tvos_x86_64",
     },
 )
