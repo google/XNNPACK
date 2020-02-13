@@ -68,12 +68,12 @@ The table below presents **multi-threaded** performance of XNNPACK library on th
 
 | Model              | RPi 2 (BCM2836), ms | RPi 3+ (BCM2837B0), ms | RPi 4 (BCM2711), ms |
 | ------------------ | :-----------------: | :--------------------: | :-----------------: |
-| MobileNet v1 1.0X  |         380         |          115           |          76         |
-| MobileNet v2 1.0X  |         217         |           80           |          45         |
-| MobileNet v3 Large |         180         |           67           |          41         |
-| MobileNet v3 Small |          57         |           23           |          15         |
+| MobileNet v1 1.0X  |         378         |          115           |          75         |
+| MobileNet v2 1.0X  |         216         |           79           |          44         |
+| MobileNet v3 Large |         178         |           67           |          41         |
+| MobileNet v3 Small |          56         |           23           |          14         |
 
-Benchmarked on January 9, 2020 with `end2end-bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs.
+Benchmarked on February 12, 2020 with `end2end-bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs.
 
 ## Publications
 
