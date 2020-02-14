@@ -162,6 +162,51 @@ struct igemm_context {
       size_t nr_block_size);
 #endif
 
+struct subgemm_context {
+  const struct subconvolution_params* subconvolution_params;
+  size_t kc;
+  const void* a;
+  size_t ax_stride;
+  size_t ay_stride;
+  size_t cx_stride;
+  size_t cy_stride;
+  size_t cn_stride;
+  size_t ga_stride;
+  size_t gw_stride;
+  size_t gc_stride;
+  size_t ba_stride;
+  size_t bc_stride;
+  uint32_t log2_csize;
+  xnn_gemm_ukernel_function ukernel;
+  union {
+    union xnn_q8_gemm_params q8;
+    union xnn_f32_output_params f32;
+  } params;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_gsubgemm2d(
+      const struct subgemm_context context[restrict static 1],
+      size_t batch_index,
+      size_t group_index,
+      size_t subkernel_index,
+      size_t slice_y,
+      size_t slice_x_start,
+      size_t nr_block_start,
+      size_t slice_x_max,
+      size_t nr_block_size);
+
+  XNN_PRIVATE void xnn_compute_subgemm2d(
+      const struct subgemm_context context[restrict static 1],
+      size_t batch_index,
+      size_t subkernel_index,
+      size_t slice_y,
+      size_t slice_x_start,
+      size_t nr_block_start,
+      size_t slice_x_max,
+      size_t nr_block_size);
+#endif
+
 struct subconv_context {
   const struct subconvolution_params* subconvolution_params;
   size_t kc;

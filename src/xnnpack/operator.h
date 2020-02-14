@@ -123,6 +123,7 @@ struct xnn_ukernel_gemm {
 struct xnn_ukernel_igemm {
   xnn_igemm_ukernel_function default_function;
   xnn_igemm_ukernel_function mr1_function;
+  xnn_gemm_ukernel_function gemm_function;
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
@@ -277,6 +278,7 @@ struct xnn_operator {
     struct resize_bilinear_context resize_bilinear;
     struct spmm_context spmm;
     struct subconv_context subconv;
+    struct subgemm_context subgemm;
     struct f32_three_pass_softmax_context f32_three_pass_softmax;
     struct u8_softmax_context u8_softmax;
     struct univector_contiguous_context univector_contiguous;
