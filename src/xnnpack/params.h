@@ -1139,8 +1139,7 @@ typedef void (*xnn_prelu_ukernel_function)(
     size_t x_stride,
     const void* w,
     void* y,
-    size_t y_stride,
-    const void* params);
+    size_t y_stride);
 
 typedef void (*xnn_f32_prelu_ukernel_function)(
     size_t mr,
@@ -1149,8 +1148,7 @@ typedef void (*xnn_f32_prelu_ukernel_function)(
     size_t x_stride,
     const float* w,
     float* y,
-    size_t y_stride,
-    const union xnn_f32_output_params* params);
+    size_t y_stride);
 
 typedef void (*xnn_f32_raddexpminusmax_ukernel_function)(
     size_t n,

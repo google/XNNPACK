@@ -741,7 +741,6 @@ struct prelu_context {
   void* y;
   size_t y_stride;
   xnn_prelu_ukernel_function ukernel;
-  union xnn_f32_output_params params;
 };
 
 #ifndef __cplusplus

@@ -18,17 +18,11 @@
 
 #include <xnnpack.h>
 #include <xnnpack/AlignedAllocator.h>
-#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 
 
 class PReLUMicrokernelTester {
  public:
-  enum class Variant {
-    Native,
-    Scalar,
-  };
-
   inline PReLUMicrokernelTester& rows(size_t rows) {
     assert(rows != 0);
     this->rows_ = rows;
@@ -88,24 +82,6 @@ class PReLUMicrokernelTester {
     return this->inplace_;
   }
 
-  inline PReLUMicrokernelTester& qmin(uint8_t qmin) {
-    this->qmin_ = qmin;
-    return *this;
-  }
-
-  inline uint8_t qmin() const {
-    return this->qmin_;
-  }
-
-  inline PReLUMicrokernelTester& qmax(uint8_t qmax) {
-    this->qmax_ = qmax;
-    return *this;
-  }
-
-  inline uint8_t qmax() const {
-    return this->qmax_;
-  }
-
   inline PReLUMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -115,7 +91,7 @@ class PReLUMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_prelu_ukernel_function prelu, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_prelu_ukernel_function prelu) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
@@ -140,44 +116,14 @@ class PReLUMicrokernelTester {
         y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * w[i] : x_data[i];
       }
 
-      // Compute clamping parameters.
-      const float accumulated_min = *std::min_element(y_ref.cbegin(), y_ref.cend());
-      const float accumulated_max = *std::max_element(y_ref.cbegin(), y_ref.cend());
-      const float accumulated_range = accumulated_max - accumulated_min;
-      const float y_min = accumulated_range == 0.0f ?
-        -std::numeric_limits<float>::infinity() : accumulated_min + accumulated_range / 255.0f * float(qmin());
-      const float y_max = accumulated_range == 0.0f ?
-        +std::numeric_limits<float>::infinity() : accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
-
-      // Prepare output parameters.
-      xnn_f32_output_params output_params = { };
-      switch (variant) {
-        case Variant::Native:
-          output_params = xnn_init_f32_output_params(y_min, y_max);
-          break;
-        case Variant::Scalar:
-          output_params = xnn_init_scalar_f32_output_params(y_min, y_max);
-          break;
-      }
-
-      // Clamp reference results.
-      for (float& value : y_ref) {
-        value = std::min(std::max(value, y_min), y_max);
-      }
-
       // Call optimized micro-kernel.
       prelu(rows(), channels() * sizeof(float),
         x_data, input_stride() * sizeof(float),
         w.data(),
-        y.data(), output_stride() * sizeof(float),
-        &output_params);
+        y.data(), output_stride() * sizeof(float));
 
       // Verify results.
       for (size_t i = 0; i < channels(); i++) {
-        ASSERT_LE(y[i], y_max)
-          << "at " << i << ", channels = " << channels();
-        ASSERT_GE(y[i], y_min)
-          << "at " << i << ", channels = " << channels();
         ASSERT_NEAR(y[i], y_ref[i], 1.0e-6f * std::abs(y_ref[i]))
           << "at " << i << ", channels = " << channels();
       }
@@ -190,7 +136,5 @@ class PReLUMicrokernelTester {
   size_t input_stride_{0};
   size_t output_stride_{0};
   bool inplace_{false};
-  uint8_t qmin_{0};
-  uint8_t qmax_{255};
   size_t iterations_{15};
 };

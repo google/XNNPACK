@@ -22,8 +22,7 @@ void xnn_f32_prelu_ukernel__psimd_${ROW_TILE}x${CHANNEL_TILE}(
     size_t input_stride,
     const float*restrict weights,
     float*restrict output,
-    size_t output_stride,
-    const union xnn_f32_output_params params[restrict static 1])
+    size_t output_stride)
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -48,8 +47,6 @@ void xnn_f32_prelu_ukernel__psimd_${ROW_TILE}x${CHANNEL_TILE}(
   const size_t input_increment = input_stride * ${ROW_TILE} - channels;
   const size_t output_increment = output_stride * ${ROW_TILE} - channels;
 
-  const psimd_f32 vmin = psimd_load_splat_f32(&params->scalar.min);
-  const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
   do {
     const float* w = weights;
     size_t c = channels;
@@ -74,14 +71,6 @@ void xnn_f32_prelu_ukernel__psimd_${ROW_TILE}x${CHANNEL_TILE}(
           vacc${M}x${ABC[C:C+4]} = psimd_signblend_f32(vi${M}x${ABC[C:C+4]}, vacc${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]});
 
       $for M in range(ROW_TILE):
-        $for C in range(0, CHANNEL_TILE, 4):
-          vacc${M}x${ABC[C:C+4]} = psimd_max_f32(vacc${M}x${ABC[C:C+4]}, vmin);
-
-      $for M in range(ROW_TILE):
-        $for C in range(0, CHANNEL_TILE, 4):
-          vacc${M}x${ABC[C:C+4]} = psimd_min_f32(vacc${M}x${ABC[C:C+4]}, vmax);
-
-      $for M in range(ROW_TILE):
         psimd_store_f32(o${M}, vacc${M}x${ABC[0:4]});
         $for C in range(4, CHANNEL_TILE, 4):
           psimd_store_f32(o${M} + ${C}, vacc${M}x${ABC[C:C+4]});
@@ -103,12 +92,6 @@ void xnn_f32_prelu_ukernel__psimd_${ROW_TILE}x${CHANNEL_TILE}(
           vacc${M}x0123 = psimd_signblend_f32(vi${M}x0123, vacc${M}x0123, vi${M}x0123);
 
         $for M in range(ROW_TILE):
-          vacc${M}x0123 = psimd_max_f32(vacc${M}x0123, vmin);
-
-        $for M in range(ROW_TILE):
-          vacc${M}x0123 = psimd_min_f32(vacc${M}x0123, vmax);
-
-        $for M in range(ROW_TILE):
           psimd_store_f32(o${M}, vacc${M}x0123);
           o${M} += 4;
       }
@@ -125,12 +108,6 @@ void xnn_f32_prelu_ukernel__psimd_${ROW_TILE}x${CHANNEL_TILE}(
 
       $for M in range(ROW_TILE):
         vacc${M}x0123 = psimd_signblend_f32(vi${M}x0123, vacc${M}x0123, vi${M}x0123);
-
-      $for M in range(ROW_TILE):
-        vacc${M}x0123 = psimd_max_f32(vacc${M}x0123, vmin);
-
-      $for M in range(ROW_TILE):
-        vacc${M}x0123 = psimd_min_f32(vacc${M}x0123, vmax);
 
       if (c & (2 * sizeof(float))) {
         $for M in range(ROW_TILE):

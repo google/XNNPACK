@@ -22,8 +22,7 @@ void xnn_f32_prelu_ukernel__neon_2x4(
     size_t input_stride,
     const float*restrict weights,
     float*restrict output,
-    size_t output_stride,
-    const union xnn_f32_output_params params[restrict static 1])
+    size_t output_stride)
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -41,8 +40,6 @@ void xnn_f32_prelu_ukernel__neon_2x4(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
   do {
     const float* w = weights;
     size_t c = channels;
@@ -59,12 +56,6 @@ void xnn_f32_prelu_ukernel__neon_2x4(
 
       vacc0x0123 = vbslq_f32(vm0x0123, vacc0x0123, vi0x0123);
       vacc1x0123 = vbslq_f32(vm1x0123, vacc1x0123, vi1x0123);
-
-      vacc0x0123 = vmaxq_f32(vacc0x0123, vmin);
-      vacc1x0123 = vmaxq_f32(vacc1x0123, vmin);
-
-      vacc0x0123 = vminq_f32(vacc0x0123, vmax);
-      vacc1x0123 = vminq_f32(vacc1x0123, vmax);
 
       vst1q_f32(o0, vacc0x0123); o0 += 4;
       vst1q_f32(o1, vacc1x0123); o1 += 4;
@@ -84,12 +75,6 @@ void xnn_f32_prelu_ukernel__neon_2x4(
 
       vacc0x0123 = vbslq_f32(vm0x0123, vacc0x0123, vi0x0123);
       vacc1x0123 = vbslq_f32(vm1x0123, vacc1x0123, vi1x0123);
-
-      vacc0x0123 = vmaxq_f32(vacc0x0123, vmin);
-      vacc1x0123 = vmaxq_f32(vacc1x0123, vmin);
-
-      vacc0x0123 = vminq_f32(vacc0x0123, vmax);
-      vacc1x0123 = vminq_f32(vacc1x0123, vmax);
 
       float32x2_t vacc0x01 = vget_low_f32(vacc0x0123);
       float32x2_t vacc1x01 = vget_low_f32(vacc1x0123);

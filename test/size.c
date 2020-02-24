@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
       break;
     case 28:
       xnn_create_prelu_nc_f32(
-        0, 0, 0, NULL, 0, 0, 0, &op);
+        0, 0, 0, NULL, 0, &op);
       break;
     case 29:
       xnn_setup_prelu_nc_f32(

@@ -20,28 +20,6 @@ TEST(PRELU_NC_F32, unit_batch) {
   }
 }
 
-TEST(PRELU_NC_F32, unit_batch_with_qmin) {
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
-    PReLUOperatorTester()
-      .batch_size(1)
-      .channels(channels)
-      .qmin(128)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(PRELU_NC_F32, unit_batch_with_qmax) {
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
-    PReLUOperatorTester()
-      .batch_size(1)
-      .channels(channels)
-      .qmax(128)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
 TEST(PRELU_NC_F32, small_batch) {
   for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
     PReLUOperatorTester()
@@ -81,28 +59,6 @@ TEST(PRELU_NC_F32, small_batch_with_x_stride_and_y_stride) {
       .channels(channels)
       .x_stride(123)
       .y_stride(117)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(PRELU_NC_F32, small_batch_with_qmin) {
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
-    PReLUOperatorTester()
-      .batch_size(xnn_params.f32.prelu.row_tile)
-      .channels(channels)
-      .qmin(128)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(PRELU_NC_F32, small_batch_with_qmax) {
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
-    PReLUOperatorTester()
-      .batch_size(xnn_params.f32.prelu.row_tile)
-      .channels(channels)
-      .qmax(128)
       .iterations(3)
       .TestF32();
   }

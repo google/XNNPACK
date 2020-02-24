@@ -24,8 +24,7 @@ extern "C" {
       size_t input_stride,                                     \
       const float* weights,                                    \
       float* output,                                           \
-      size_t output_stride,                                    \
-      const union xnn_f32_output_params* params);
+      size_t output_stride);
 
 DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__neon_2x4)
 DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__neon_2x8)

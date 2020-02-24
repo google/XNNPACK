@@ -279,8 +279,6 @@ WASM_UKERNELS = [
     "src/f32-maxpool/9p8x-wasm-c1.c",
     "src/f32-pavgpool/mp9p8q-wasm.c",
     "src/f32-pavgpool/up9-wasm.c",
-    "src/f32-prelu/gen/wasm-2x1.c",
-    "src/f32-prelu/gen/wasm-2x4.c",
     "src/f32-vbinary/gen/vadd-wasm-x1.c",
     "src/f32-vbinary/gen/vadd-wasm-x2.c",
     "src/f32-vbinary/gen/vadd-wasm-x4.c",
