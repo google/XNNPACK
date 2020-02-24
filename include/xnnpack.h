@@ -195,10 +195,14 @@ enum xnn_status xnn_define_tensor_value(
 /// Define a 2D Convolution Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param input_padding_top - implicit zero-padding above 2D input data.
-/// @param input_padding_right - implicit zero-padding to the right of 2D input data.
-/// @param input_padding_bottom - implicit zero-padding below 2D input data.
-/// @param input_padding_left - implicit zero-padding to the left of 2D input data.
+/// @param input_padding_top - implicit zero-padding above 2D input data. Must be 0 if XNN_FLAG_TENSORFLOW_SAME_PADDING
+///                            flag is specified.
+/// @param input_padding_right - implicit zero-padding to the right of 2D input data. Must be 0 if
+///                              XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_bottom - implicit zero-padding below 2D input data. Must be 0 if
+///                               XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_left - implicit zero-padding to the left of 2D input data. Must be 0 if
+///                             XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
 /// @param kernel_height - kernel (filter) height.
 /// @param kernel_width - kernel (filter) width.
 /// @param subsampling_height - height of subsampling region for convolution output (convolution height stride).
@@ -247,10 +251,14 @@ enum xnn_status xnn_define_convolution_2d(
 /// Define a 2D Depthwise Convolution Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param input_padding_top - implicit zero-padding above 2D input data.
-/// @param input_padding_right - implicit zero-padding to the right of 2D input data.
-/// @param input_padding_bottom - implicit zero-padding below 2D input data.
-/// @param input_padding_left - implicit zero-padding to the left of 2D input data.
+/// @param input_padding_top - implicit zero-padding above 2D input data. Must be 0 if XNN_FLAG_TENSORFLOW_SAME_PADDING
+///                            flag is specified.
+/// @param input_padding_right - implicit zero-padding to the right of 2D input data. Must be 0 if
+///                              XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_bottom - implicit zero-padding below 2D input data. Must be 0 if
+///                               XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
+/// @param input_padding_left - implicit zero-padding to the left of 2D input data. Must be 0 if
+///                             XNN_FLAG_TENSORFLOW_SAME_PADDING flag is specified.
 /// @param kernel_height - kernel (filter) height.
 /// @param kernel_width - kernel (filter) width.
 /// @param subsampling_height - height of subsampling region for convolution output (convolution height stride).
