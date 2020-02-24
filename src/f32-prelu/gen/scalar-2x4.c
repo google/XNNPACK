@@ -22,8 +22,7 @@ void xnn_f32_prelu_ukernel__scalar_2x4(
     size_t input_stride,
     const float*restrict weights,
     float*restrict output,
-    size_t output_stride,
-    const union xnn_f32_output_params params[restrict static 1])
+    size_t output_stride)
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -41,8 +40,6 @@ void xnn_f32_prelu_ukernel__scalar_2x4(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
   do {
     const float* w = weights;
     size_t c = channels;
@@ -72,24 +69,6 @@ void xnn_f32_prelu_ukernel__scalar_2x4(
       float vacc1x2 = signbit(vi1x2) ? vi1x2 * vw2 : vi1x2;
       float vacc1x3 = signbit(vi1x3) ? vi1x3 * vw3 : vi1x3;
 
-      vacc0x0 = math_max_f32(vacc0x0, vmin);
-      vacc0x1 = math_max_f32(vacc0x1, vmin);
-      vacc0x2 = math_max_f32(vacc0x2, vmin);
-      vacc0x3 = math_max_f32(vacc0x3, vmin);
-      vacc1x0 = math_max_f32(vacc1x0, vmin);
-      vacc1x1 = math_max_f32(vacc1x1, vmin);
-      vacc1x2 = math_max_f32(vacc1x2, vmin);
-      vacc1x3 = math_max_f32(vacc1x3, vmin);
-
-      vacc0x0 = math_min_f32(vacc0x0, vmax);
-      vacc0x1 = math_min_f32(vacc0x1, vmax);
-      vacc0x2 = math_min_f32(vacc0x2, vmax);
-      vacc0x3 = math_min_f32(vacc0x3, vmax);
-      vacc1x0 = math_min_f32(vacc1x0, vmax);
-      vacc1x1 = math_min_f32(vacc1x1, vmax);
-      vacc1x2 = math_min_f32(vacc1x2, vmax);
-      vacc1x3 = math_min_f32(vacc1x3, vmax);
-
       o0[0] = vacc0x0;
       o0[1] = vacc0x1;
       o0[2] = vacc0x2;
@@ -111,12 +90,6 @@ void xnn_f32_prelu_ukernel__scalar_2x4(
 
       float vacc0 = signbit(vi0) ? vi0 * vw : vi0;
       float vacc1 = signbit(vi1) ? vi1 * vw : vi1;
-
-      vacc0 = math_max_f32(vacc0, vmin);
-      vacc1 = math_max_f32(vacc1, vmin);
-
-      vacc0 = math_min_f32(vacc0, vmax);
-      vacc1 = math_min_f32(vacc1, vmax);
 
       *o0++ = vacc0;
       *o1++ = vacc1;

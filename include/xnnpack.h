@@ -801,8 +801,6 @@ enum xnn_status xnn_create_prelu_nc_f32(
   size_t input_stride,
   size_t output_stride,
   const float* negative_slope,
-  float output_min,
-  float output_max,
   uint32_t flags,
   xnn_operator_t* prelu_op_out);
 

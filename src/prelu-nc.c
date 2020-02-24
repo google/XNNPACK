@@ -22,8 +22,6 @@ enum xnn_status xnn_create_prelu_nc_f32(
     size_t input_stride,
     size_t output_stride,
     const float* negative_slope,
-    float output_min,
-    float output_max,
     uint32_t flags,
     xnn_operator_t* prelu_op_out)
 {
@@ -59,13 +57,6 @@ enum xnn_status xnn_create_prelu_nc_f32(
     goto error;
   }
 
-  if (output_min >= output_max) {
-    xnn_log_error(
-      "failed to create PReLU operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      output_min, output_max);
-    goto error;
-  }
-
   status = xnn_status_out_of_memory;
 
   prelu_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -86,7 +77,6 @@ enum xnn_status xnn_create_prelu_nc_f32(
   prelu_op->channels = channels;
   prelu_op->input_pixel_stride = input_stride;
   prelu_op->output_pixel_stride = output_stride;
-  prelu_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
 
   prelu_op->type = xnn_operator_type_prelu_nc_f32;
   prelu_op->ukernel.type = xnn_ukernel_type_prelu;
@@ -133,7 +123,6 @@ enum xnn_status xnn_setup_prelu_nc_f32(
     .y = output,
     .y_stride = prelu_op->output_pixel_stride * sizeof(float),
     .ukernel = xnn_params.f32.prelu.ukernel,
-    .params = prelu_op->f32_output_params,
   };
 
   size_t batch_tile = batch_size;

@@ -51,7 +51,6 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   status = xnn_create_prelu_nc_f32(
     channels, channels /* input stride */, channels /* output stride */,
     slope.data(),
-    -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
     0 /* flags */, &prelu_op);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to create FP32 PReLU operator");

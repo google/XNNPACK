@@ -22,8 +22,7 @@ void xnn_f32_prelu_ukernel__sse41_2x4(
     size_t input_stride,
     const float*restrict weights,
     float*restrict output,
-    size_t output_stride,
-    const union xnn_f32_output_params params[restrict static 1])
+    size_t output_stride)
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -41,8 +40,6 @@ void xnn_f32_prelu_ukernel__sse41_2x4(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
-  const __m128 vmin = _mm_load_ps(params->sse.min);
-  const __m128 vmax = _mm_load_ps(params->sse.max);
   do {
     const float* w = weights;
     size_t c = channels;
@@ -60,12 +57,6 @@ void xnn_f32_prelu_ukernel__sse41_2x4(
 
       __m128 vacc0x0123 = _mm_blendv_ps(vi0x0123, vprod0x0123, vi0x0123);
       __m128 vacc1x0123 = _mm_blendv_ps(vi1x0123, vprod1x0123, vi1x0123);
-
-      vacc0x0123 = _mm_max_ps(vacc0x0123, vmin);
-      vacc1x0123 = _mm_max_ps(vacc1x0123, vmin);
-
-      vacc0x0123 = _mm_min_ps(vacc0x0123, vmax);
-      vacc1x0123 = _mm_min_ps(vacc1x0123, vmax);
 
       _mm_storeu_ps(o0, vacc0x0123);
       o0 += 4;
@@ -86,12 +77,6 @@ void xnn_f32_prelu_ukernel__sse41_2x4(
 
       __m128 vacc0x0123 = _mm_blendv_ps(vi0x0123, vprod0x0123, vi0x0123);
       __m128 vacc1x0123 = _mm_blendv_ps(vi1x0123, vprod1x0123, vi1x0123);
-
-      vacc0x0123 = _mm_max_ps(vacc0x0123, vmin);
-      vacc1x0123 = _mm_max_ps(vacc1x0123, vmin);
-
-      vacc0x0123 = _mm_min_ps(vacc0x0123, vmax);
-      vacc1x0123 = _mm_min_ps(vacc1x0123, vmax);
 
       if (c & (2 * sizeof(float))) {
         _mm_storel_pi((__m64*) o0, vacc0x0123);

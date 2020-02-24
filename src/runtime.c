@@ -204,8 +204,6 @@ enum xnn_status xnn_create_runtime_v2(
           values[node->inputs.raw[1]].shape.dim[values[node->inputs.raw[1]].shape.num_dims - 1] /* input stride */,
           values[node->inputs.raw[1]].shape.dim[values[node->inputs.raw[1]].shape.num_dims - 1] /* output stride */,
           values[node->inputs.raw[1]].data /* negative slope */,
-          -INFINITY,
-          +INFINITY,
           node->flags,
           &runtime->ops[i].op);
         if (status != xnn_status_success) {

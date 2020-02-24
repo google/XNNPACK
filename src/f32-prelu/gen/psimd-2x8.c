@@ -22,8 +22,7 @@ void xnn_f32_prelu_ukernel__psimd_2x8(
     size_t input_stride,
     const float*restrict weights,
     float*restrict output,
-    size_t output_stride,
-    const union xnn_f32_output_params params[restrict static 1])
+    size_t output_stride)
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -41,8 +40,6 @@ void xnn_f32_prelu_ukernel__psimd_2x8(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
-  const psimd_f32 vmin = psimd_load_splat_f32(&params->scalar.min);
-  const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
   do {
     const float* w = weights;
     size_t c = channels;
@@ -68,16 +65,6 @@ void xnn_f32_prelu_ukernel__psimd_2x8(
       vacc1x0123 = psimd_signblend_f32(vi1x0123, vacc1x0123, vi1x0123);
       vacc1x4567 = psimd_signblend_f32(vi1x4567, vacc1x4567, vi1x4567);
 
-      vacc0x0123 = psimd_max_f32(vacc0x0123, vmin);
-      vacc0x4567 = psimd_max_f32(vacc0x4567, vmin);
-      vacc1x0123 = psimd_max_f32(vacc1x0123, vmin);
-      vacc1x4567 = psimd_max_f32(vacc1x4567, vmin);
-
-      vacc0x0123 = psimd_min_f32(vacc0x0123, vmax);
-      vacc0x4567 = psimd_min_f32(vacc0x4567, vmax);
-      vacc1x0123 = psimd_min_f32(vacc1x0123, vmax);
-      vacc1x4567 = psimd_min_f32(vacc1x4567, vmax);
-
       psimd_store_f32(o0, vacc0x0123);
       psimd_store_f32(o0 + 4, vacc0x4567);
       o0 += 8;
@@ -100,12 +87,6 @@ void xnn_f32_prelu_ukernel__psimd_2x8(
       vacc0x0123 = psimd_signblend_f32(vi0x0123, vacc0x0123, vi0x0123);
       vacc1x0123 = psimd_signblend_f32(vi1x0123, vacc1x0123, vi1x0123);
 
-      vacc0x0123 = psimd_max_f32(vacc0x0123, vmin);
-      vacc1x0123 = psimd_max_f32(vacc1x0123, vmin);
-
-      vacc0x0123 = psimd_min_f32(vacc0x0123, vmax);
-      vacc1x0123 = psimd_min_f32(vacc1x0123, vmax);
-
       psimd_store_f32(o0, vacc0x0123);
       o0 += 4;
       psimd_store_f32(o1, vacc1x0123);
@@ -125,12 +106,6 @@ void xnn_f32_prelu_ukernel__psimd_2x8(
 
       vacc0x0123 = psimd_signblend_f32(vi0x0123, vacc0x0123, vi0x0123);
       vacc1x0123 = psimd_signblend_f32(vi1x0123, vacc1x0123, vi1x0123);
-
-      vacc0x0123 = psimd_max_f32(vacc0x0123, vmin);
-      vacc1x0123 = psimd_max_f32(vacc1x0123, vmin);
-
-      vacc0x0123 = psimd_min_f32(vacc0x0123, vmax);
-      vacc1x0123 = psimd_min_f32(vacc1x0123, vmax);
 
       if (c & (2 * sizeof(float))) {
         psimd_store2_f32(o0, vacc0x0123);

@@ -70,24 +70,6 @@ class PReLUOperatorTester {
     }
   }
 
-  inline PReLUOperatorTester& qmin(uint8_t qmin) {
-    this->qmin_ = qmin;
-    return *this;
-  }
-
-  inline uint8_t qmin() const {
-    return this->qmin_;
-  }
-
-  inline PReLUOperatorTester& qmax(uint8_t qmax) {
-    this->qmax_ = qmax;
-    return *this;
-  }
-
-  inline uint8_t qmax() const {
-    return this->qmax_;
-  }
-
   inline PReLUOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -119,20 +101,6 @@ class PReLUOperatorTester {
         }
       }
 
-      // Compute clamping parameters.
-      const float accumulated_min = *std::min_element(y_ref.cbegin(), y_ref.cend());
-      const float accumulated_max = *std::max_element(y_ref.cbegin(), y_ref.cend());
-      const float accumulated_range = accumulated_max - accumulated_min;
-      const float y_min = accumulated_range == 0.0f ?
-        -std::numeric_limits<float>::infinity() : accumulated_min + accumulated_range / 255.0f * float(qmin());
-      const float y_max = accumulated_range == 0.0f ?
-        +std::numeric_limits<float>::infinity() : accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
-
-      // Clamp reference results.
-      for (float& value : y_ref) {
-        value = std::min(std::max(value, y_min), y_max);
-      }
-
       // Create, setup, run, and destroy PReLU operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t prelu_op = nullptr;
@@ -141,7 +109,6 @@ class PReLUOperatorTester {
         xnn_create_prelu_nc_f32(
           channels(), x_stride(), y_stride(),
           w.data(),
-          y_min, y_max,
           0, &prelu_op));
       ASSERT_NE(nullptr, prelu_op);
 
@@ -161,10 +128,6 @@ class PReLUOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(y[i * y_stride() + c], y_max)
-            << "i = " << i << ", c = " << c;
-          ASSERT_GE(y[i * y_stride() + c], y_min)
-            << "i = " << i << ", c = " << c;
           ASSERT_NEAR(y[i * y_stride() + c], y_ref[i * channels() + c], 1.0e-6f * std::abs(y_ref[i * channels() + c]))
             << "i = " << i << ", c = " << c;
         }
@@ -177,7 +140,5 @@ class PReLUOperatorTester {
   size_t channels_{1};
   size_t x_stride_{0};
   size_t y_stride_{0};
-  uint8_t qmin_{0};
-  uint8_t qmax_{255};
   size_t iterations_{15};
 };
