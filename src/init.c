@@ -171,6 +171,7 @@ static void init(void) {
           };
           break;
 
+        case cpuinfo_uarch_krait:
         default:
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75,
