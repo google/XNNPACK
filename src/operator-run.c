@@ -439,7 +439,7 @@ void xnn_compute_average_pooling_unipass(
 
   context->unipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, context->zero, output,
+    indirect_input, 0, context->zero, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -458,7 +458,7 @@ void xnn_compute_average_pooling_multipass(
 
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, context->zero, multipass_buffer, output,
+    indirect_input, 0, context->zero, multipass_buffer, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -478,7 +478,7 @@ void xnn_compute_pixelwise_average_pooling_unipass(
 
   context->unipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, context->zero, pixelwise_buffer, output,
+    indirect_input, 0, context->zero, pixelwise_buffer, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -499,7 +499,7 @@ void xnn_compute_pixelwise_average_pooling_multipass(
 
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, context->zero, pixelwise_buffer, multipass_buffer, output,
+    indirect_input, 0, context->zero, pixelwise_buffer, multipass_buffer, output,
     context->input_increment, context->output_increment,
     &context->params);
 }

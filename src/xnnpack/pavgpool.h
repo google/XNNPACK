@@ -22,6 +22,7 @@ extern "C" {
       size_t kernel_elements,                                    \
       size_t channels,                                           \
       const float** input,                                       \
+      size_t input_offset,                                       \
       const float* zero,                                         \
       const float* multiplier,                                   \
       float* buffer,                                             \
@@ -43,6 +44,7 @@ DECLARE_F32_PAVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_ukernel_9p8x__s
       size_t kernel_elements,                                  \
       size_t channels,                                         \
       const float** input,                                     \
+      size_t input_offset,                                     \
       const float* zero,                                       \
       const float* multiplier,                                 \
       float* output,                                           \
