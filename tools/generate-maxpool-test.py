@@ -475,7 +475,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
       for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -489,7 +489,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
       for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE*8)})
@@ -555,7 +555,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
       for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -569,7 +569,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
       for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE)})
@@ -635,7 +635,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_twopass_subtile) {
   for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
     for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+        .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
@@ -649,7 +649,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_twopass_subtile_with_input_offset
   for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
     for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+        .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE*2)})
@@ -663,7 +663,7 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass) {
     ${ISA_CHECK};
   for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
     MaxPoolMicrokernelTester()
-      .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+      .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
       .Test(${", ".join(TEST_ARGS)});
@@ -675,7 +675,7 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_with_input_offset) {
     ${ISA_CHECK};
   for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
     MaxPoolMicrokernelTester()
-      .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+      .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
       .input_offset(${next_prime(CHANNEL_TILE+1)})
@@ -688,7 +688,7 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_with_qmin) {
     ${ISA_CHECK};
   for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
     MaxPoolMicrokernelTester()
-      .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+      .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
       .qmin(192)
@@ -701,7 +701,7 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_with_qmax) {
     ${ISA_CHECK};
   for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
     MaxPoolMicrokernelTester()
-      .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+      .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
       .qmax(192)
@@ -716,7 +716,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
       for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -730,7 +730,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
       for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE*8)})
@@ -745,7 +745,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
       for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .qmin(192)
@@ -760,7 +760,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
       for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .qmax(192)
@@ -775,7 +775,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
       for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -789,7 +789,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
       for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${CHANNEL_TILE})
@@ -804,7 +804,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
       for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .qmin(192)
@@ -819,7 +819,7 @@ $if CHANNEL_TILE > 1:
     for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
       for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+          .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .qmax(192)
@@ -834,7 +834,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass) {
   for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
     for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+        .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
@@ -848,7 +848,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_with_input_offset) {
   for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
     for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+        .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE*2)})
@@ -863,7 +863,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_with_qmin) {
   for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
     for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+        .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .qmin(192)
@@ -878,7 +878,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_with_qmax) {
   for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
     for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
+        .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .qmax(192)

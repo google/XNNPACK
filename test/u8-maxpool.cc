@@ -419,7 +419,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__neon_c16);
@@ -432,7 +432,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(131)
@@ -493,7 +493,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__neon_c16);
@@ -506,7 +506,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(17)
@@ -567,7 +567,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__neon_c16);
@@ -580,7 +580,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(37)
@@ -593,7 +593,7 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
         .Test(xnn_u8_maxpool_ukernel_9p8x__neon_c16);
@@ -604,7 +604,7 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
         .input_offset(19)
@@ -616,7 +616,7 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
         .qmin(192)
@@ -628,7 +628,7 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
         .qmax(192)
@@ -641,7 +641,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__neon_c16);
@@ -654,7 +654,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(131)
@@ -668,7 +668,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(192)
@@ -682,7 +682,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(192)
@@ -696,7 +696,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__neon_c16);
@@ -709,7 +709,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(16)
@@ -723,7 +723,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(192)
@@ -737,7 +737,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(192)
@@ -751,7 +751,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__neon_c16);
@@ -764,7 +764,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(37)
@@ -778,7 +778,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(192)
@@ -792,7 +792,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(192)
@@ -1306,7 +1306,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__sse2_c16);
@@ -1319,7 +1319,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(131)
@@ -1380,7 +1380,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__sse2_c16);
@@ -1393,7 +1393,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(17)
@@ -1454,7 +1454,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__sse2_c16);
@@ -1467,7 +1467,7 @@
     for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(37)
@@ -1480,7 +1480,7 @@
     TEST_REQUIRES_X86_SSE2;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
         .Test(xnn_u8_maxpool_ukernel_9p8x__sse2_c16);
@@ -1491,7 +1491,7 @@
     TEST_REQUIRES_X86_SSE2;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
         .input_offset(19)
@@ -1503,7 +1503,7 @@
     TEST_REQUIRES_X86_SSE2;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
         .qmin(192)
@@ -1515,7 +1515,7 @@
     TEST_REQUIRES_X86_SSE2;
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
         .qmax(192)
@@ -1528,7 +1528,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__sse2_c16);
@@ -1541,7 +1541,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(131)
@@ -1555,7 +1555,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(192)
@@ -1569,7 +1569,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 32; channels < 128; channels += 16) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(192)
@@ -1583,7 +1583,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__sse2_c16);
@@ -1596,7 +1596,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(16)
@@ -1610,7 +1610,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(192)
@@ -1624,7 +1624,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 1; channels < 16; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(192)
@@ -1638,7 +1638,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .Test(xnn_u8_maxpool_ukernel_9p8x__sse2_c16);
@@ -1651,7 +1651,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(37)
@@ -1665,7 +1665,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(192)
@@ -1679,7 +1679,7 @@
     for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
       for (size_t channels = 17; channels < 32; channels++) {
         MaxPoolMicrokernelTester()
-          .pooling_elements(17)
+          .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(192)
@@ -2021,7 +2021,7 @@ TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_gt_1_twopass_subtile) {
   for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
     for (size_t channels = 2; channels < 10; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(channels)
         .Test(xnn_u8_maxpool_ukernel_9p8x__scalar_c1, MaxPoolMicrokernelTester::Variant::Scalar);
@@ -2033,7 +2033,7 @@ TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_gt_1_twopass_subtile_with_input_offset
   for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
     for (size_t channels = 2; channels < 10; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(3)
@@ -2045,7 +2045,7 @@ TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_gt_1_twopass_subtile_with_input_offset
 TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_eq_1_multipass) {
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     MaxPoolMicrokernelTester()
-      .pooling_elements(17)
+      .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
       .channels(1)
       .Test(xnn_u8_maxpool_ukernel_9p8x__scalar_c1, MaxPoolMicrokernelTester::Variant::Scalar);
@@ -2055,7 +2055,7 @@ TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_eq_1_multipass) {
 TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_eq_1_multipass_with_input_offset) {
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     MaxPoolMicrokernelTester()
-      .pooling_elements(17)
+      .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
       .channels(1)
       .input_offset(3)
@@ -2066,7 +2066,7 @@ TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_eq_1_multipass_with_input_offset) {
 TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_eq_1_multipass_with_qmin) {
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     MaxPoolMicrokernelTester()
-      .pooling_elements(17)
+      .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
       .channels(1)
       .qmin(192)
@@ -2077,7 +2077,7 @@ TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_eq_1_multipass_with_qmin) {
 TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_eq_1_multipass_with_qmax) {
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     MaxPoolMicrokernelTester()
-      .pooling_elements(17)
+      .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
       .channels(1)
       .qmax(192)
@@ -2089,7 +2089,7 @@ TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_gt_1_multipass) {
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     for (size_t channels = 2; channels < 10; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(channels)
         .Test(xnn_u8_maxpool_ukernel_9p8x__scalar_c1, MaxPoolMicrokernelTester::Variant::Scalar);
@@ -2101,7 +2101,7 @@ TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_gt_1_multipass_with_input_offset) {
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     for (size_t channels = 2; channels < 10; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(3)
@@ -2114,7 +2114,7 @@ TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_gt_1_multipass_with_qmin) {
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     for (size_t channels = 2; channels < 10; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(192)
@@ -2127,7 +2127,7 @@ TEST(U8_MAXPOOL_9P8X__SCALAR_C1, channels_gt_1_multipass_with_qmax) {
   for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
     for (size_t channels = 2; channels < 10; channels++) {
       MaxPoolMicrokernelTester()
-        .pooling_elements(17)
+        .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(192)
