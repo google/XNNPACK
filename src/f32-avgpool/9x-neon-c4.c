@@ -7,28 +7,28 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/pavgpool.h>
+#include <xnnpack/avgpool.h>
 
 
-void xnn_f32_pavgpool_ukernel_up9__neon(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_f32_avgpool_ukernel_9x__neon_c4(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const float** input,
     const float* zero,
-    const float* multiplier,
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_output_params params[restrict static 1])
+    const union xnn_f32_avgpool_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks != 0);
-  assert(ks <= 9);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(kernel_elements <= 9);
+  assert(channels != 0);
 
-  const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t vmultiplier = vld1q_dup_f32(&params->scalar.multiplier);
+  const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.output_min);
+  const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.output_max);
 
   do {
     const float* i0 = input[0];
@@ -41,35 +41,33 @@ void xnn_f32_pavgpool_ukernel_up9__neon(
     const float* i7 = input[7];
     const float* i8 = input[8];
     input = (const float**) ((uintptr_t) input + input_increment);
-    if (ks < 2) {
+    if (kernel_elements < 2) {
       i1 = zero;
     }
-    if (ks <= 2) {
+    if (kernel_elements <= 2) {
       i2 = zero;
     }
-    if (ks < 4) {
+    if (kernel_elements < 4) {
       i3 = zero;
     }
-    if (ks <= 4) {
+    if (kernel_elements <= 4) {
       i4 = zero;
     }
-    if (ks < 6) {
+    if (kernel_elements < 6) {
       i5 = zero;
     }
-    if (ks <= 6) {
+    if (kernel_elements <= 6) {
       i6 = zero;
     }
-    if (ks < 8) {
+    if (kernel_elements < 8) {
       i7 = zero;
     }
-    if (ks <= 8) {
+    if (kernel_elements <= 8) {
       i8 = zero;
     }
 
-    const float32x4_t vmultiplier = vld1q_dup_f32(multiplier); multiplier += 1;
-
-    size_t k = kc;
-    while (k >= 4) {
+    size_t c = channels;
+    while (c >= 4) {
       const float32x4_t vi0 = vld1q_f32(i0); i0 += 4;
       const float32x4_t vi1 = vld1q_f32(i1); i1 += 4;
       const float32x4_t vi2 = vld1q_f32(i2); i2 += 4;
@@ -95,9 +93,9 @@ void xnn_f32_pavgpool_ukernel_up9__neon(
 
       vst1q_f32(output, vout); output += 4;
 
-      k -= 4;
+      c -= 4;
     }
-    if (k != 0) {
+    if (c != 0) {
       const float32x4_t vi0 = vld1q_f32(i0);
       const float32x4_t vi1 = vld1q_f32(i1);
       const float32x4_t vi2 = vld1q_f32(i2);
@@ -122,14 +120,14 @@ void xnn_f32_pavgpool_ukernel_up9__neon(
       vout = vminq_f32(vout, voutput_max);
 
       float32x2_t vout_lo = vget_low_f32(vout);
-      if (k & 2) {
+      if (c & 2) {
         vst1_f32(output, vout_lo); output += 2;
         vout_lo = vget_high_f32(vout);
       }
-      if (k & 1) {
+      if (c & 1) {
         vst1_lane_f32(output, vout_lo, 0); output += 1;
       }
     }
     output = (float*) ((uintptr_t) output + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }

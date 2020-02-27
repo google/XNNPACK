@@ -181,8 +181,8 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-scalar-c1.c
   src/f32-argmaxpool/9p8x-scalar-c1.c
   src/f32-argmaxpool/9x-scalar-c1.c
-  src/f32-avgpool/mp9p8q-scalar.c
-  src/f32-avgpool/up9-scalar.c
+  src/f32-avgpool/9p8x-scalar-c1.c
+  src/f32-avgpool/9x-scalar-c1.c
   src/f32-bilinear/gen/scalar-c1.c
   src/f32-bilinear/gen/scalar-c2.c
   src/f32-bilinear/gen/scalar-c4.c
@@ -224,8 +224,8 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x2-scalar.c
   src/f32-igemm/gen/4x4-scalar.c
   src/f32-maxpool/9p8x-scalar-c1.c
-  src/f32-pavgpool/mp9p8q-scalar.c
-  src/f32-pavgpool/up9-scalar.c
+  src/f32-pavgpool/9p8x-scalar-c1.c
+  src/f32-pavgpool/9x-scalar-c1.c
   src/f32-ppmm/gen/2x4-scalar.c
   src/f32-ppmm/gen/3x3-scalar.c
   src/f32-ppmm/gen/4x2-scalar.c
@@ -315,8 +315,8 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/math/sigmoid-scalar-lut2048-p1-div.c
   src/math/sigmoid-scalar-lut64-p2-div.c
   src/math/sigmoid-scalar-p5-div.c
-  src/q8-avgpool/mp9p8q-scalar.c
-  src/q8-avgpool/up9-scalar.c
+  src/q8-avgpool/9p8x-scalar-c1.c
+  src/q8-avgpool/9x-scalar-c1.c
   src/q8-dwconv/up1x9-scalar.c
   src/q8-gavgpool/mp7p7q-scalar.c
   src/q8-gavgpool/up7-scalar.c
@@ -346,8 +346,8 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-psimd-c4.c
   src/f32-argmaxpool/9p8x-psimd-c4.c
   src/f32-argmaxpool/9x-psimd-c4.c
-  src/f32-avgpool/mp9p8q-psimd.c
-  src/f32-avgpool/up9-psimd.c
+  src/f32-avgpool/9p8x-psimd-c4.c
+  src/f32-avgpool/9x-psimd-c4.c
   src/f32-bilinear/gen/psimd-c4.c
   src/f32-bilinear/gen/psimd-c8.c
   src/f32-clamp/psimd.c
@@ -397,8 +397,8 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-igemm/gen/6x8-psimd-splat.c
   src/f32-igemm/gen/6x8s4-psimd.c
   src/f32-maxpool/9p8x-psimd-c4.c
-  src/f32-pavgpool/mp9p8q-psimd.c
-  src/f32-pavgpool/up9-psimd.c
+  src/f32-pavgpool/9p8x-psimd-c4.c
+  src/f32-pavgpool/9x-psimd-c4.c
   src/f32-ppmm/gen/4x8-psimd.c
   src/f32-prelu/gen/psimd-2x4.c
   src/f32-prelu/gen/psimd-2x8.c
@@ -463,8 +463,8 @@ SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/math/sigmoid-psimd-p5-div.c)
 
 SET(XNNPACK_NEON_MICROKERNEL_SRCS
-  src/f32-avgpool/mp9p8q-neon.c
-  src/f32-avgpool/up9-neon.c
+  src/f32-avgpool/9p8x-neon-c4.c
+  src/f32-avgpool/9x-neon-c4.c
   src/f32-bilinear/gen/neon-c4.c
   src/f32-bilinear/gen/neon-c8.c
   src/f32-clamp/neon.c
@@ -524,8 +524,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8s4-neon.c
   src/f32-igemm/gen/6x8s4-neon.c
   src/f32-igemm/gen/8x8s4-neon.c
-  src/f32-pavgpool/mp9p8q-neon.c
-  src/f32-pavgpool/up9-neon.c
+  src/f32-pavgpool/9p8x-neon-c4.c
+  src/f32-pavgpool/9x-neon-c4.c
   src/f32-ppmm/gen/4x8-neon.c
   src/f32-ppmm/gen/8x8-neon.c
   src/f32-prelu/gen/neon-2x4.c
@@ -598,8 +598,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsubc-neon-x8.c
   src/f32-vmulcaddc/gen/c4-neon-2x.c
   src/f32-vmulcaddc/gen/c8-neon-2x.c
-  src/q8-avgpool/mp9p8q-neon.c
-  src/q8-avgpool/up9-neon.c
+  src/q8-avgpool/9p8x-neon-c8.c
+  src/q8-avgpool/9x-neon-c8.c
   src/q8-dwconv/up8x9-neon.c
   src/q8-gavgpool/mp7p7q-neon.c
   src/q8-gavgpool/up7-neon.c
@@ -854,8 +854,8 @@ SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-gemm/gen/8x8-neonfp16arith-ld64.c)
 
 SET(XNNPACK_SSE_MICROKERNEL_SRCS
-  src/f32-avgpool/mp9p8q-sse.c
-  src/f32-avgpool/up9-sse.c
+  src/f32-avgpool/9p8x-sse-c4.c
+  src/f32-avgpool/9x-sse-c4.c
   src/f32-bilinear/gen/sse-c4.c
   src/f32-bilinear/gen/sse-c8.c
   src/f32-clamp/sse.c
@@ -899,8 +899,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8-sse-load1.c
   src/f32-igemm/gen/4x8s4-sse.c
   src/f32-maxpool/9p8x-sse-c4.c
-  src/f32-pavgpool/mp9p8q-sse.c
-  src/f32-pavgpool/up9-sse.c
+  src/f32-pavgpool/9p8x-sse-c4.c
+  src/f32-pavgpool/9x-sse-c4.c
   src/f32-ppmm/gen/4x8-sse.c
   src/f32-rmax/sse.c
   src/f32-spmm/gen/4x1-sse.c
@@ -961,8 +961,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/sse2-p5-div-x16.c
   src/f32-sigmoid/gen/sse2-p5-div-x20.c
   src/f32-sigmoid/gen/sse2-p5-div-x24.c
-  src/q8-avgpool/mp9p8q-sse2.c
-  src/q8-avgpool/up9-sse2.c
+  src/q8-avgpool/9p8x-sse2-c8.c
+  src/q8-avgpool/9x-sse2-c8.c
   src/q8-igemm/4x4c2-sse2.c
   src/q8-dwconv/up8x9-sse2.c
   src/q8-gavgpool/mp7p7q-sse2.c

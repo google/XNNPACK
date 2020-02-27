@@ -14,10 +14,10 @@
 #include <xnnpack/common.h>
 
 
-void xnn_q8_avgpool_ukernel_mp9p8q__neon(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_q8_avgpool_ukernel_9p8x__neon_c8(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const uint8_t** input,
     const uint8_t* zero,
     int32_t* buffer,
@@ -26,9 +26,9 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
     size_t output_increment,
     const union xnn_q8_avgpool_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks > 9);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements > 9);
+  assert(channels != 0);
 
   const int32x4_t vbias = vld1q_dup_s32(&params->neon.bias);
 #if XNN_ARCH_ARM64
@@ -53,8 +53,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
       const uint8_t* i7 = *input++;
       const uint8_t* i8 = *input++;
 
-      int32_t* acc = buffer;
-      for (size_t k = 0; k < kc; k += 8) {
+      int32_t* b = buffer;
+      for (size_t c = 0; c < channels; c += 8) {
         const uint8x8_t vi0 = vld1_u8(i0); i0 += 8;
         const uint8x8_t vi1 = vld1_u8(i1); i1 += 8;
         const uint8x8_t vi2 = vld1_u8(i2); i2 += 8;
@@ -77,13 +77,13 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
         const int32x4_t vacc_lo = vaddw_s16(vbias, vreinterpret_s16_u16(vget_low_u16(vsum)));
         const int32x4_t vacc_hi = vaddw_s16(vbias, vreinterpret_s16_u16(vget_high_u16(vsum)));
 
-        vst1q_s32(acc, vacc_lo); acc += 4;
-        vst1q_s32(acc, vacc_hi); acc += 4;
+        vst1q_s32(b, vacc_lo); b += 4;
+        vst1q_s32(b, vacc_hi); b += 4;
       }
     }
 
-    size_t m = ks;
-    for (m -= 9; m > 8; m -= 8) {
+    size_t k = kernel_elements;
+    for (k -= 9; k > 8; k -= 8) {
       const uint8_t* i0 = *input++;
       const uint8_t* i1 = *input++;
       const uint8_t* i2 = *input++;
@@ -93,8 +93,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
       const uint8_t* i6 = *input++;
       const uint8_t* i7 = *input++;
 
-      int32_t* acc = buffer;
-      for (size_t k = 0; k < kc; k += 8) {
+      int32_t* b = buffer;
+      for (size_t c = 0; c < channels; c += 8) {
         const uint8x8_t vi0 = vld1_u8(i0); i0 += 8;
         const uint8x8_t vi1 = vld1_u8(i1); i1 += 8;
         const uint8x8_t vi2 = vld1_u8(i2); i2 += 8;
@@ -103,8 +103,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
         const uint8x8_t vi5 = vld1_u8(i5); i5 += 8;
         const uint8x8_t vi6 = vld1_u8(i6); i6 += 8;
         const uint8x8_t vi7 = vld1_u8(i7); i7 += 8;
-        int32x4_t vacc_lo = vld1q_s32(acc);
-        int32x4_t vacc_hi = vld1q_s32(acc + 4);
+        int32x4_t vacc_lo = vld1q_s32(b);
+        int32x4_t vacc_hi = vld1q_s32(b + 4);
 
         const uint16x8_t vsum01 = vaddl_u8(vi0, vi1);
         const uint16x8_t vsum23 = vaddl_u8(vi2, vi3);
@@ -118,8 +118,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
         vacc_lo = vaddw_s16(vacc_lo, vreinterpret_s16_u16(vget_low_u16(vsum)));
         vacc_hi = vaddw_s16(vacc_hi, vreinterpret_s16_u16(vget_high_u16(vsum)));
 
-        vst1q_s32(acc, vacc_lo); acc += 4;
-        vst1q_s32(acc, vacc_hi); acc += 4;
+        vst1q_s32(b, vacc_lo); b += 4;
+        vst1q_s32(b, vacc_hi); b += 4;
       }
     }
 
@@ -133,31 +133,31 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
       const uint8_t* i6 = input[6];
       const uint8_t* i7 = input[7];
       input = (const uint8_t**) ((uintptr_t) input + input_increment);
-      if (m < 2) {
+      if (k < 2) {
         i1 = zero;
       }
-      if (m <= 2) {
+      if (k <= 2) {
         i2 = zero;
       }
-      if (m < 4) {
+      if (k < 4) {
         i3 = zero;
       }
-      if (m <= 4) {
+      if (k <= 4) {
         i4 = zero;
       }
-      if (m < 6) {
+      if (k < 6) {
         i5 = zero;
       }
-      if (m <= 6) {
+      if (k <= 6) {
         i6 = zero;
       }
-      if (m != 8) {
+      if (k != 8) {
         i7 = zero;
       }
 
-      size_t k = kc;
-      int32_t* acc = buffer;
-      while (k >= 8) {
+      size_t c = channels;
+      int32_t* b = buffer;
+      while (c >= 8) {
         const uint8x8_t vi0 = vld1_u8(i0); i0 += 8;
         const uint8x8_t vi1 = vld1_u8(i1); i1 += 8;
         const uint8x8_t vi2 = vld1_u8(i2); i2 += 8;
@@ -166,8 +166,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
         const uint8x8_t vi5 = vld1_u8(i5); i5 += 8;
         const uint8x8_t vi6 = vld1_u8(i6); i6 += 8;
         const uint8x8_t vi7 = vld1_u8(i7); i7 += 8;
-        int32x4_t vacc_lo = vld1q_s32(acc); acc += 4;
-        int32x4_t vacc_hi = vld1q_s32(acc); acc += 4;
+        int32x4_t vacc_lo = vld1q_s32(b); b += 4;
+        int32x4_t vacc_hi = vld1q_s32(b); b += 4;
 
         const int16x8_t vsum01 = vreinterpretq_s16_u16(vaddl_u8(vi0, vi1));
         const int16x8_t vsum23 = vreinterpretq_s16_u16(vaddl_u8(vi2, vi3));
@@ -229,9 +229,9 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
 
         vst1_u8(output, vout); output += 8;
 
-        k -= 8;
+        c -= 8;
       }
-      if (k != 0) {
+      if (c != 0) {
         const uint8x8_t vi0 = vld1_u8(i0);
         const uint8x8_t vi1 = vld1_u8(i1);
         const uint8x8_t vi2 = vld1_u8(i2);
@@ -240,8 +240,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
         const uint8x8_t vi5 = vld1_u8(i5);
         const uint8x8_t vi6 = vld1_u8(i6);
         const uint8x8_t vi7 = vld1_u8(i7);
-        int32x4_t vacc_lo = vld1q_s32(acc); acc += 4;
-        int32x4_t vacc_hi = vld1q_s32(acc);
+        int32x4_t vacc_lo = vld1q_s32(b); b += 4;
+        int32x4_t vacc_hi = vld1q_s32(b);
 
         const int16x8_t vsum01 = vreinterpretq_s16_u16(vaddl_u8(vi0, vi1));
         const int16x8_t vsum23 = vreinterpretq_s16_u16(vaddl_u8(vi2, vi3));
@@ -301,19 +301,19 @@ void xnn_q8_avgpool_ukernel_mp9p8q__neon(
         vout = vmax_u8(vout, voutput_min);
         vout = vmin_u8(vout, voutput_max);
 
-        if (k & 4) {
+        if (c & 4) {
           vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u8(vout), 0); output += 4;
           vout = vext_u8(vout, vout, 4);
         }
-        if (k & 2) {
+        if (c & 2) {
           vst1_lane_u16(__builtin_assume_aligned(output, 1), vreinterpret_u16_u8(vout), 0); output += 2;
           vout = vext_u8(vout, vout, 2);
         }
-        if (k & 1) {
+        if (c & 1) {
           vst1_lane_u8(output, vout, 0); output += 1;
         }
       }
     }
     output = (uint8_t*) ((uintptr_t) output + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }

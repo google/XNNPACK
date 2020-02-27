@@ -14,10 +14,10 @@
 #include <xnnpack/common.h>
 
 
-void xnn_q8_avgpool_ukernel_up9__neon(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_q8_avgpool_ukernel_9x__neon_c8(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const uint8_t** input,
     const uint8_t* zero,
     uint8_t* output,
@@ -25,10 +25,10 @@ void xnn_q8_avgpool_ukernel_up9__neon(
     size_t output_increment,
     const union xnn_q8_avgpool_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks != 0);
-  assert(ks <= 9);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(kernel_elements <= 9);
+  assert(channels != 0);
 
   const int32x4_t vbias = vld1q_dup_s32(&params->neon.bias);
 #if XNN_ARCH_ARM64
@@ -52,33 +52,33 @@ void xnn_q8_avgpool_ukernel_up9__neon(
     const uint8_t* i7 = input[7];
     const uint8_t* i8 = input[8];
     input = (const uint8_t**) ((uintptr_t) input + input_increment);
-    if (ks < 2) {
+    if (kernel_elements < 2) {
       i1 = zero;
     }
-    if (ks <= 2) {
+    if (kernel_elements <= 2) {
       i2 = zero;
     }
-    if (ks < 4) {
+    if (kernel_elements < 4) {
       i3 = zero;
     }
-    if (ks <= 4) {
+    if (kernel_elements <= 4) {
       i4 = zero;
     }
-    if (ks < 6) {
+    if (kernel_elements < 6) {
       i5 = zero;
     }
-    if (ks <= 6) {
+    if (kernel_elements <= 6) {
       i6 = zero;
     }
-    if (ks < 8) {
+    if (kernel_elements < 8) {
       i7 = zero;
     }
-    if (ks <= 8) {
+    if (kernel_elements <= 8) {
       i8 = zero;
     }
 
-    size_t k = kc;
-    while (k >= 8) {
+    size_t c = channels;
+    while (c >= 8) {
       const uint8x8_t vi0 = vld1_u8(i0); i0 += 8;
       const uint8x8_t vi1 = vld1_u8(i1); i1 += 8;
       const uint8x8_t vi2 = vld1_u8(i2); i2 += 8;
@@ -149,9 +149,9 @@ void xnn_q8_avgpool_ukernel_up9__neon(
 
       vst1_u8(output, vout); output += 8;
 
-      k -= 8;
+      c -= 8;
     }
-    if (k != 0) {
+    if (c != 0) {
       const uint8x8_t vi0 = vld1_u8(i0);
       const uint8x8_t vi1 = vld1_u8(i1);
       const uint8x8_t vi2 = vld1_u8(i2);
@@ -220,18 +220,18 @@ void xnn_q8_avgpool_ukernel_up9__neon(
       vout = vmax_u8(vout, voutput_min);
       vout = vmin_u8(vout, voutput_max);
 
-      if (k & 4) {
+      if (c & 4) {
         vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u8(vout), 0); output += 4;
         vout = vext_u8(vout, vout, 4);
       }
-      if (k & 2) {
+      if (c & 2) {
         vst1_lane_u16(__builtin_assume_aligned(output, 1), vreinterpret_u16_u8(vout), 0); output += 2;
         vout = vext_u8(vout, vout, 2);
       }
-      if (k & 1) {
+      if (c & 1) {
         vst1_lane_u8(output, vout, 0); output += 1;
       }
     }
     output = (uint8_t*) ((uintptr_t) output + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }

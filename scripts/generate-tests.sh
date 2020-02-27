@@ -16,5 +16,12 @@ tools/generate-pack-test.py --spec test/x32-packx.yaml --output test/x32-packx.c
 tools/generate-maxpool-test.py --spec test/u8-maxpool.yaml --output test/u8-maxpool.cc
 tools/generate-maxpool-test.py --spec test/f32-maxpool.yaml --output test/f32-maxpool.cc
 
+### Tests for AvgPool micro-kernels
+tools/generate-avgpool-test.py --spec test/q8-avgpool.yaml --output test/q8-avgpool.cc
+tools/generate-avgpool-test.py --spec test/f32-avgpool.yaml --output test/f32-avgpool.cc
+
+### Tests for PAvgPool micro-kernels
+tools/generate-avgpool-test.py --spec test/f32-pavgpool.yaml --output test/f32-pavgpool.cc
+
 ### Tests for ArgMaxPool micro-kernels
 tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/f32-argmaxpool.cc

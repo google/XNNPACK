@@ -12,10 +12,10 @@
 #include <xnnpack/avgpool.h>
 
 
-void xnn_q8_avgpool_ukernel_up9__scalar(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_q8_avgpool_ukernel_9x__scalar_c1(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const uint8_t** input,
     const uint8_t* zero,
     uint8_t* output,
@@ -23,10 +23,10 @@ void xnn_q8_avgpool_ukernel_up9__scalar(
     size_t output_increment,
     const union xnn_q8_avgpool_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks != 0);
-  assert(ks <= 9);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(kernel_elements <= 9);
+  assert(channels != 0);
 
   const int32_t vbias = params->scalar.bias;
   const int32_t vmultiplier = params->scalar.multiplier;
@@ -46,32 +46,32 @@ void xnn_q8_avgpool_ukernel_up9__scalar(
     const uint8_t* i7 = input[7];
     const uint8_t* i8 = input[8];
     input = (const uint8_t**) ((uintptr_t) input + input_increment);
-    if (ks < 2) {
+    if (kernel_elements < 2) {
       i1 = zero;
     }
-    if (ks <= 2) {
+    if (kernel_elements <= 2) {
       i2 = zero;
     }
-    if (ks < 4) {
+    if (kernel_elements < 4) {
       i3 = zero;
     }
-    if (ks <= 4) {
+    if (kernel_elements <= 4) {
       i4 = zero;
     }
-    if (ks < 6) {
+    if (kernel_elements < 6) {
       i5 = zero;
     }
-    if (ks <= 6) {
+    if (kernel_elements <= 6) {
       i6 = zero;
     }
-    if (ks < 8) {
+    if (kernel_elements < 8) {
       i7 = zero;
     }
-    if (ks <= 8) {
+    if (kernel_elements <= 8) {
       i8 = zero;
     }
 
-    size_t k = kc;
+    size_t c = channels;
     do {
       const uint32_t vi0 = (uint32_t) *i0++;
       const uint32_t vi1 = (uint32_t) *i1++;
@@ -102,7 +102,7 @@ void xnn_q8_avgpool_ukernel_up9__scalar(
       vout += voutput_zero_point;
 
       *output++ = (uint8_t) vout;
-    } while (--k != 0);
+    } while (--c != 0);
     output = (uint8_t*) ((uintptr_t) output + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }

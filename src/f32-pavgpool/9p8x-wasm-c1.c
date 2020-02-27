@@ -9,10 +9,10 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_pavgpool_ukernel_mp9p8q__scalar(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_f32_pavgpool_ukernel_9p8x__wasm_c1(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const float** input,
     const float* zero,
     const float* multiplier,
@@ -22,9 +22,9 @@ void xnn_f32_pavgpool_ukernel_mp9p8q__scalar(
     size_t output_increment,
     const union xnn_f32_output_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks > 9);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements > 9);
+  assert(channels != 0);
 
   const float voutput_min = params->scalar.min;
   const float voutput_max = params->scalar.max;
@@ -42,7 +42,7 @@ void xnn_f32_pavgpool_ukernel_mp9p8q__scalar(
       const float* i8 = *input++;
 
       float* b = buffer;
-      size_t k = kc;
+      size_t c = channels;
       do {
         const float vi0 = *i0++;
         const float vi1 = *i1++;
@@ -64,11 +64,11 @@ void xnn_f32_pavgpool_ukernel_mp9p8q__scalar(
         const float vsum = vsum2345 + vsum01678;
 
         *b++ = vsum;
-      } while (--k != 0);
+      } while (--c != 0);
     }
 
-    size_t m = ks;
-    for (m -= 9; m > 8; m -= 8) {
+    size_t k = kernel_elements;
+    for (k -= 9; k > 8; k -= 8) {
       const float* i0 = *input++;
       const float* i1 = *input++;
       const float* i2 = *input++;
@@ -79,7 +79,7 @@ void xnn_f32_pavgpool_ukernel_mp9p8q__scalar(
       const float* i7 = *input++;
 
       float* b = buffer;
-      size_t k = kc;
+      size_t c = channels;
       do {
         const float vi0 = *i0++;
         const float vi1 = *i1++;
@@ -101,7 +101,7 @@ void xnn_f32_pavgpool_ukernel_mp9p8q__scalar(
         const float vsum = vsum2345 + vsum0167a;
 
         *b++ = vsum;
-      } while (--k != 0);
+      } while (--c != 0);
     }
 
     {
@@ -114,31 +114,31 @@ void xnn_f32_pavgpool_ukernel_mp9p8q__scalar(
       const float* i6 = input[6];
       const float* i7 = input[7];
       input = (const float**) ((uintptr_t) input + input_increment);
-      if (m < 2) {
+      if (k < 2) {
         i1 = zero;
       }
-      if (m <= 2) {
+      if (k <= 2) {
         i2 = zero;
       }
-      if (m < 4) {
+      if (k < 4) {
         i3 = zero;
       }
-      if (m <= 4) {
+      if (k <= 4) {
         i4 = zero;
       }
-      if (m < 6) {
+      if (k < 6) {
         i5 = zero;
       }
-      if (m <= 6) {
+      if (k <= 6) {
         i6 = zero;
       }
-      if (m != 8) {
+      if (k != 8) {
         i7 = zero;
       }
 
       const float vmultiplier = *multiplier++;
 
-      size_t k = kc;
+      size_t c = channels;
       float* b = buffer;
       do {
         const float vi0 = *i0++;
@@ -161,12 +161,12 @@ void xnn_f32_pavgpool_ukernel_mp9p8q__scalar(
         const float vsum = vsum2345 + vsum0167a;
 
         float vout = vsum * vmultiplier;
-        vout = math_max_f32(vout, voutput_min);
-        vout = math_min_f32(vout, voutput_max);
+        vout = __builtin_wasm_max_f32(vout, voutput_min);
+        vout = __builtin_wasm_min_f32(vout, voutput_max);
 
         *output++ = vout;
-      } while (--k != 0);
+      } while (--c != 0);
     }
     output = (float*) ((uintptr_t) output + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }

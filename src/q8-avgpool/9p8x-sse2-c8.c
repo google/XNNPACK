@@ -13,10 +13,10 @@
 #include <xnnpack/avgpool.h>
 
 
-void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_q8_avgpool_ukernel_9p8x__sse2_c8(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const uint8_t** input,
     const uint8_t* zero,
     int32_t* buffer,
@@ -25,9 +25,9 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
     size_t output_increment,
     const union xnn_q8_avgpool_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks > 9);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements > 9);
+  assert(channels != 0);
 
   const __m128i vbias = _mm_load_si128((const __m128i*) &params->sse2.bias);
   const __m128i vzero = _mm_setzero_si128();
@@ -47,8 +47,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
       const uint8_t* i7 = *input++;
       const uint8_t* i8 = *input++;
 
-      int32_t* acc = buffer;
-      for (size_t k = 0; k < kc; k += 8) {
+      int32_t* b = buffer;
+      for (size_t c = 0; c < channels; c += 8) {
         const __m128i vi0 = _mm_loadl_epi64((const __m128i*) i0); i0 += 8;
         const __m128i vi1 = _mm_loadl_epi64((const __m128i*) i1); i1 += 8;
         const __m128i vi2 = _mm_loadl_epi64((const __m128i*) i2); i2 += 8;
@@ -81,14 +81,14 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
         const __m128i vacc_lo = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vsum, vzero));
         const __m128i vacc_hi = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vsum, vzero));
 
-        _mm_store_si128((__m128i*) acc, vacc_lo);
-        _mm_store_si128((__m128i*) acc + 1, vacc_hi);
-        acc += 8;
+        _mm_store_si128((__m128i*) b, vacc_lo);
+        _mm_store_si128((__m128i*) b + 1, vacc_hi);
+        b += 8;
       }
     }
 
-    size_t m = ks;
-    for (m -= 9; m > 8; m -= 8) {
+    size_t k = kernel_elements;
+    for (k -= 9; k > 8; k -= 8) {
       const uint8_t* i0 = *input++;
       const uint8_t* i1 = *input++;
       const uint8_t* i2 = *input++;
@@ -98,8 +98,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
       const uint8_t* i6 = *input++;
       const uint8_t* i7 = *input++;
 
-      int32_t* acc = buffer;
-      for (size_t k = 0; k < kc; k += 8) {
+      int32_t* b = buffer;
+      for (size_t c = 0; c < channels; c += 8) {
         const __m128i vi0 = _mm_loadl_epi64((const __m128i*) i0); i0 += 8;
         const __m128i vi1 = _mm_loadl_epi64((const __m128i*) i1); i1 += 8;
         const __m128i vi2 = _mm_loadl_epi64((const __m128i*) i2); i2 += 8;
@@ -108,8 +108,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
         const __m128i vi5 = _mm_loadl_epi64((const __m128i*) i5); i5 += 8;
         const __m128i vi6 = _mm_loadl_epi64((const __m128i*) i6); i6 += 8;
         const __m128i vi7 = _mm_loadl_epi64((const __m128i*) i7); i7 += 8;
-        __m128i vacc_lo = _mm_load_si128((const __m128i*) acc);
-        __m128i vacc_hi = _mm_load_si128((const __m128i*) acc + 1);
+        __m128i vacc_lo = _mm_load_si128((const __m128i*) b);
+        __m128i vacc_hi = _mm_load_si128((const __m128i*) b + 1);
 
         const __m128i vxi0 = _mm_unpacklo_epi8(vi0, vzero);
         const __m128i vxi1 = _mm_unpacklo_epi8(vi1, vzero);
@@ -132,9 +132,9 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
         vacc_lo = _mm_add_epi32(vacc_lo, _mm_unpacklo_epi16(vsum, vzero));
         vacc_hi = _mm_add_epi32(vacc_hi, _mm_unpackhi_epi16(vsum, vzero));
 
-        _mm_store_si128((__m128i*) acc, vacc_lo);
-        _mm_store_si128((__m128i*) acc + 1, vacc_hi);
-        acc += 8;
+        _mm_store_si128((__m128i*) b, vacc_lo);
+        _mm_store_si128((__m128i*) b + 1, vacc_hi);
+        b += 8;
       }
     }
 
@@ -148,31 +148,31 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
       const uint8_t* i6 = input[6];
       const uint8_t* i7 = input[7];
       input = (const uint8_t**) ((uintptr_t) input + input_increment);
-      if (m < 2) {
+      if (k < 2) {
         i1 = zero;
       }
-      if (m <= 2) {
+      if (k <= 2) {
         i2 = zero;
       }
-      if (m < 4) {
+      if (k < 4) {
         i3 = zero;
       }
-      if (m <= 4) {
+      if (k <= 4) {
         i4 = zero;
       }
-      if (m < 6) {
+      if (k < 6) {
         i5 = zero;
       }
-      if (m <= 6) {
+      if (k <= 6) {
         i6 = zero;
       }
-      if (m != 8) {
+      if (k != 8) {
         i7 = zero;
       }
 
-      size_t k = kc;
-      int32_t* acc = buffer;
-      while (k >= 8) {
+      size_t c = channels;
+      int32_t* b = buffer;
+      while (c >= 8) {
         const __m128i vi0 = _mm_loadl_epi64((const __m128i*) i0); i0 += 8;
         const __m128i vi1 = _mm_loadl_epi64((const __m128i*) i1); i1 += 8;
         const __m128i vi2 = _mm_loadl_epi64((const __m128i*) i2); i2 += 8;
@@ -181,9 +181,9 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
         const __m128i vi5 = _mm_loadl_epi64((const __m128i*) i5); i5 += 8;
         const __m128i vi6 = _mm_loadl_epi64((const __m128i*) i6); i6 += 8;
         const __m128i vi7 = _mm_loadl_epi64((const __m128i*) i7); i7 += 8;
-        __m128i vacc_lo = _mm_load_si128((const __m128i*) acc);
-        __m128i vacc_hi = _mm_load_si128((const __m128i*) acc + 1);
-        acc += 8;
+        __m128i vacc_lo = _mm_load_si128((const __m128i*) b);
+        __m128i vacc_hi = _mm_load_si128((const __m128i*) b + 1);
+        b += 8;
 
         const __m128i vxi0 = _mm_unpacklo_epi8(vi0, vzero);
         const __m128i vxi1 = _mm_unpacklo_epi8(vi1, vzero);
@@ -246,9 +246,9 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
         _mm_storel_epi64((__m128i*) output, vout);
         output += 8;
 
-        k -= 8;
+        c -= 8;
       }
-      if (k != 0) {
+      if (c != 0) {
         const __m128i vi0 = _mm_loadl_epi64((const __m128i*) i0);
         const __m128i vi1 = _mm_loadl_epi64((const __m128i*) i1);
         const __m128i vi2 = _mm_loadl_epi64((const __m128i*) i2);
@@ -257,8 +257,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
         const __m128i vi5 = _mm_loadl_epi64((const __m128i*) i5);
         const __m128i vi6 = _mm_loadl_epi64((const __m128i*) i6);
         const __m128i vi7 = _mm_loadl_epi64((const __m128i*) i7);
-        __m128i vacc_lo = _mm_load_si128((const __m128i*) acc);
-        __m128i vacc_hi = _mm_load_si128((const __m128i*) acc + 1);
+        __m128i vacc_lo = _mm_load_si128((const __m128i*) b);
+        __m128i vacc_hi = _mm_load_si128((const __m128i*) b + 1);
 
         const __m128i vxi0 = _mm_unpacklo_epi8(vi0, vzero);
         const __m128i vxi1 = _mm_unpacklo_epi8(vi1, vzero);
@@ -318,22 +318,22 @@ void xnn_q8_avgpool_ukernel_mp9p8q__sse2(
         vout = _mm_min_epu8(vout, _mm_load_si128((const __m128i*) &params->sse2.output_max));
         vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) &params->sse2.output_min));
 
-        if (k & 4) {
+        if (c & 4) {
           *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout);
           output += 4;
           vout = _mm_srli_epi64(vout, 32);
         }
-        if (k & 2) {
+        if (c & 2) {
           *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout, 0);
           output += 2;
           vout = _mm_srli_epi32(vout, 16);
         }
-        if (k & 1) {
+        if (c & 1) {
           *((uint8_t*) output) = (uint8_t) _mm_cvtsi128_si32(vout);
           output += 1;
         }
       }
     }
     output = (uint8_t*) ((uintptr_t) output + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }

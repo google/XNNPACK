@@ -10,10 +10,10 @@
 #include <xnnpack/avgpool.h>
 
 
-void xnn_f32_avgpool_ukernel_up9__sse(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_f32_avgpool_ukernel_9x__sse_c4(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const float** input,
     const float* zero,
     float* output,
@@ -21,10 +21,10 @@ void xnn_f32_avgpool_ukernel_up9__sse(
     size_t output_increment,
     const union xnn_f32_avgpool_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks != 0);
-  assert(ks <= 9);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(kernel_elements <= 9);
+  assert(channels != 0);
 
   const __m128 vmultiplier = _mm_load_ps(params->sse2.multiplier);
   const __m128 voutput_min = _mm_load_ps(params->sse2.output_min);
@@ -41,33 +41,33 @@ void xnn_f32_avgpool_ukernel_up9__sse(
     const float* i7 = input[7];
     const float* i8 = input[8];
     input = (const float**) ((uintptr_t) input + input_increment);
-    if (ks < 2) {
+    if (kernel_elements < 2) {
       i1 = zero;
     }
-    if (ks <= 2) {
+    if (kernel_elements <= 2) {
       i2 = zero;
     }
-    if (ks < 4) {
+    if (kernel_elements < 4) {
       i3 = zero;
     }
-    if (ks <= 4) {
+    if (kernel_elements <= 4) {
       i4 = zero;
     }
-    if (ks < 6) {
+    if (kernel_elements < 6) {
       i5 = zero;
     }
-    if (ks <= 6) {
+    if (kernel_elements <= 6) {
       i6 = zero;
     }
-    if (ks < 8) {
+    if (kernel_elements < 8) {
       i7 = zero;
     }
-    if (ks <= 8) {
+    if (kernel_elements <= 8) {
       i8 = zero;
     }
 
-    size_t k = kc;
-    while (k >= 4) {
+    size_t c = channels;
+    while (c >= 4) {
       const __m128 vi0 = _mm_loadu_ps(i0);
       i0 += 4;
       const __m128 vi1 = _mm_loadu_ps(i1);
@@ -102,9 +102,9 @@ void xnn_f32_avgpool_ukernel_up9__sse(
 
       _mm_storeu_ps(output, vout); output += 4;
 
-      k -= 4;
+      c -= 4;
     }
-    if (k != 0) {
+    if (c != 0) {
       const __m128 vi0 = _mm_loadu_ps(i0);
       const __m128 vi1 = _mm_loadu_ps(i1);
       const __m128 vi2 = _mm_loadu_ps(i2);
@@ -128,16 +128,16 @@ void xnn_f32_avgpool_ukernel_up9__sse(
       vout = _mm_max_ps(vout, voutput_min);
       vout = _mm_min_ps(vout, voutput_max);
 
-      if (k & 2) {
+      if (c & 2) {
         _mm_storel_pi((__m64*) output, vout);
         vout = _mm_movehl_ps(vout, vout);
         output += 2;
       }
-      if (k & 1) {
+      if (c & 1) {
         _mm_store_ss(output, vout);
         output += 1;
       }
     }
     output = (float*) ((uintptr_t) output + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }
