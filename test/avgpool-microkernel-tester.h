@@ -55,12 +55,21 @@ class AvgPoolMicrokernelTester {
 
   inline AvgPoolMicrokernelTester& input_offset(size_t input_offset) {
     assert(input_offset != 0);
-    // TODO(b/150311435): support input offset in the micro-kernels
+    this->input_offset_ = input_offset;
     return *this;
   }
 
   inline size_t input_offset() const {
     return this->input_offset_;
+  }
+
+  inline AvgPoolMicrokernelTester& zero_index(size_t zero_index) {
+    this->zero_index_ = zero_index;
+    return *this;
+  }
+
+  inline size_t zero_index() const {
+    return this->zero_index_;
   }
 
   inline AvgPoolMicrokernelTester& pooling_elements(size_t pooling_elements) {
@@ -207,7 +216,7 @@ class AvgPoolMicrokernelTester {
 
     std::vector<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
-      indirect_input.size() * channels());
+      input_offset() + indirect_input.size() * channels());
     std::vector<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> output((output_pixels() - 1) * output_stride() + channels());
     std::vector<uint8_t> output_ref(output_pixels() * channels());
@@ -217,13 +226,18 @@ class AvgPoolMicrokernelTester {
       do {
         std::generate(input.begin(), input.end(), std::ref(u8rng));
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
+      std::fill(input.begin(), input.begin() + input_offset(), 0xA5);
+      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint8_t), input.end(), 0xA5);
       std::fill(output.begin(), output.end(), 0xA5);
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
-        indirect_input[i] = input.data() + i * channels() - input_offset();
+        indirect_input[i] = input.data() + i * channels();
       }
       std::shuffle(indirect_input.begin(),
         indirect_input.begin() + (output_pixels() - 1) * step() + pooling_elements(), rng);
+      if (zero_index() != SIZE_MAX) {
+        indirect_input[zero_index()] = zero.data();
+      }
 
       // Prepare quantization parameters.
       xnn_q8_avgpool_params quantization_params = { };
@@ -252,7 +266,10 @@ class AvgPoolMicrokernelTester {
         for (size_t c = 0; c < channels(); c++) {
           int32_t acc = scalar_quantization_params.scalar.bias;
           for (size_t p = 0; p < pooling_elements(); p++) {
-            acc += int32_t(indirect_input[x * step() + p][c]);
+            const uint8_t* row = indirect_input[x * step() + p];
+            if (row != zero.data()) {
+              acc += int32_t(row[c + input_offset()]);
+            }
           }
           accumulator[x * channels() + c] = acc;
           output_ref[x * channels() + c] = xnn_avgpool_quantize(acc, scalar_quantization_params);
@@ -264,7 +281,8 @@ class AvgPoolMicrokernelTester {
 
       // Call optimized micro-kernel.
       avgpool(output_pixels(), pooling_elements(), channels(),
-        indirect_input.data(), zero.data(), output.data(),
+        indirect_input.data(), input_offset() * sizeof(uint8_t), zero.data(),
+        output.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(uint8_t),
         &quantization_params);
@@ -300,7 +318,7 @@ class AvgPoolMicrokernelTester {
 
     std::vector<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
-      indirect_input.size() * channels());
+      input_offset() + indirect_input.size() * channels());
     std::vector<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> output((output_pixels() - 1) * output_stride() + channels());
     std::vector<uint8_t> output_ref(output_pixels() * channels());
@@ -311,13 +329,18 @@ class AvgPoolMicrokernelTester {
       do {
         std::generate(input.begin(), input.end(), std::ref(u8rng));
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
+      std::fill(input.begin(), input.begin() + input_offset(), 0xA5);
+      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint8_t), input.end(), 0xA5);
       std::fill(output.begin(), output.end(), 0xA5);
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
-        indirect_input[i] = input.data() + i * channels() - input_offset();
+        indirect_input[i] = input.data() + i * channels();
       }
       std::shuffle(indirect_input.begin(),
         indirect_input.begin() + (output_pixels() - 1) * step() + pooling_elements(), rng);
+      if (zero_index() != SIZE_MAX) {
+        indirect_input[zero_index()] = zero.data();
+      }
 
       // Prepare quantization parameters.
       xnn_q8_avgpool_params quantization_params = { };
@@ -346,7 +369,10 @@ class AvgPoolMicrokernelTester {
         for (size_t c = 0; c < channels(); c++) {
           int32_t acc = scalar_quantization_params.scalar.bias;
           for (size_t p = 0; p < pooling_elements(); p++) {
-            acc += int32_t(indirect_input[x * step() + p][c]);
+            const uint8_t* row = indirect_input[x * step() + p];
+            if (row != zero.data()) {
+              acc += int32_t(row[c + input_offset()]);
+            }
           }
           accumulator[x * channels() + c] = acc;
           output_ref[x * channels() + c] = xnn_avgpool_quantize(acc, scalar_quantization_params);
@@ -358,7 +384,8 @@ class AvgPoolMicrokernelTester {
 
       // Call optimized micro-kernel.
       avgpool(output_pixels(), pooling_elements(), channels(),
-        indirect_input.data(), zero.data(), buffer.data(), output.data(),
+        indirect_input.data(), input_offset() * sizeof(uint8_t), zero.data(),
+        buffer.data(), output.data(),
         (step() - (packed_pooling_elements() - incremental_pooling_tile())) * sizeof(void*),
         (output_stride() - channels()) * sizeof(uint8_t),
         &quantization_params);
@@ -394,26 +421,34 @@ class AvgPoolMicrokernelTester {
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-      indirect_input.size() * channels());
+      input_offset() + indirect_input.size() * channels());
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
+      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
-        indirect_input[i] = input.data() + i * channels() - input_offset();
+        indirect_input[i] = input.data() + i * channels();
       }
       std::shuffle(indirect_input.begin(),
         indirect_input.begin() + (output_pixels() - 1) * step() + pooling_elements(), rng);
+      if (zero_index() != SIZE_MAX) {
+        indirect_input[zero_index()] = zero.data();
+      }
 
       // Compute reference results, without clamping.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = 0.0f;
           for (size_t p = 0; p < pooling_elements(); p++) {
-            acc += indirect_input[x * step() + p][c];
+            const float* row = indirect_input[x * step() + p];
+            if (row != zero.data()) {
+              acc += row[c + input_offset()];
+            }
           }
           output_ref[x * channels() + c] = acc / float(pooling_elements());
         }
@@ -446,7 +481,8 @@ class AvgPoolMicrokernelTester {
 
       // Call optimized micro-kernel.
       avgpool(output_pixels(), pooling_elements(), channels(),
-        indirect_input.data(), zero.data(), output.data(),
+        indirect_input.data(), input_offset() * sizeof(float), zero.data(),
+        output.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
         &params);
@@ -481,27 +517,35 @@ class AvgPoolMicrokernelTester {
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-      indirect_input.size() * channels());
+      input_offset() + indirect_input.size() * channels());
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(output_pixels() * channels());
     std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_EXTRA_BYTES / sizeof(float) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
+      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
-        indirect_input[i] = input.data() + i * channels() - input_offset();
+        indirect_input[i] = input.data() + i * channels();
       }
       std::shuffle(indirect_input.begin(),
         indirect_input.begin() + (output_pixels() - 1) * step() + pooling_elements(), rng);
+      if (zero_index() != SIZE_MAX) {
+        indirect_input[zero_index()] = zero.data();
+      }
 
       // Compute reference results, without clamping.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = 0.0f;
           for (size_t p = 0; p < pooling_elements(); p++) {
-            acc += indirect_input[x * step() + p][c];
+            const float* row = indirect_input[x * step() + p];
+            if (row != zero.data()) {
+              acc += row[c + input_offset()];
+            }
           }
           output_ref[x * channels() + c] = acc / float(pooling_elements());
         }
@@ -534,7 +578,8 @@ class AvgPoolMicrokernelTester {
 
       // Call optimized micro-kernel.
       avgpool(output_pixels(), pooling_elements(), channels(),
-        indirect_input.data(), zero.data(), buffer.data(), output.data(),
+        indirect_input.data(), input_offset() * sizeof(float), zero.data(),
+        buffer.data(), output.data(),
         (step() - (packed_pooling_elements() - incremental_pooling_tile())) * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
         &params);
@@ -570,28 +615,36 @@ class AvgPoolMicrokernelTester {
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-      indirect_input.size() * channels());
+      input_offset() + indirect_input.size() * channels());
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> multiplier(output_pixels());
     std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f32irng));
+      std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
+      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(), std::ref(f32mrng));
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
-        indirect_input[i] = input.data() + i * channels() - input_offset();
+        indirect_input[i] = input.data() + i * channels();
       }
       std::shuffle(indirect_input.begin(),
         indirect_input.begin() + (output_pixels() - 1) * step() + pooling_elements(), rng);
+      if (zero_index() != SIZE_MAX) {
+        indirect_input[zero_index()] = zero.data();
+      }
 
       // Compute reference results, without clamping.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = 0.0f;
           for (size_t p = 0; p < pooling_elements(); p++) {
-            acc += indirect_input[x * step() + p][c];
+            const float* row = indirect_input[x * step() + p];
+            if (row != zero.data()) {
+              acc += row[c + input_offset()];
+            }
           }
           output_ref[x * channels() + c] = acc * multiplier[x];
         }
@@ -622,7 +675,8 @@ class AvgPoolMicrokernelTester {
 
       // Call optimized micro-kernel.
       pavgpool(output_pixels(), pooling_elements(), channels(),
-        indirect_input.data(), zero.data(), multiplier.data(), output.data(),
+        indirect_input.data(), input_offset() * sizeof(float), zero.data(),
+        multiplier.data(), output.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
         &params);
@@ -658,7 +712,7 @@ class AvgPoolMicrokernelTester {
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-      indirect_input.size() * channels());
+      input_offset() + indirect_input.size() * channels());
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> multiplier(output_pixels());
     std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
@@ -666,21 +720,29 @@ class AvgPoolMicrokernelTester {
     std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_EXTRA_BYTES / sizeof(float) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f32irng));
+      std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
+      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(), std::ref(f32mrng));
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
-        indirect_input[i] = input.data() + i * channels() - input_offset();
+        indirect_input[i] = input.data() + i * channels();
       }
       std::shuffle(indirect_input.begin(),
         indirect_input.begin() + (output_pixels() - 1) * step() + pooling_elements(), rng);
+      if (zero_index() != SIZE_MAX) {
+        indirect_input[zero_index()] = zero.data();
+      }
 
       // Compute reference results, without clamping.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = 0.0f;
           for (size_t p = 0; p < pooling_elements(); p++) {
-            acc += indirect_input[x * step() + p][c];
+            const float* row = indirect_input[x * step() + p];
+            if (row != zero.data()) {
+              acc += row[c + input_offset()];
+            }
           }
           output_ref[x * channels() + c] = acc * multiplier[x];
         }
@@ -711,7 +773,8 @@ class AvgPoolMicrokernelTester {
 
       // Call optimized micro-kernel.
       pavgpool(output_pixels(), pooling_elements(), channels(),
-        indirect_input.data(), zero.data(), multiplier.data(), buffer.data(), output.data(),
+        indirect_input.data(), input_offset() * sizeof(float), zero.data(),
+        multiplier.data(), buffer.data(), output.data(),
         (step() - (packed_pooling_elements() - incremental_pooling_tile())) * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
         &params);
@@ -744,6 +807,7 @@ class AvgPoolMicrokernelTester {
   size_t pooling_elements_{1};
   size_t channels_{1};
   size_t input_offset_{0};
+  size_t zero_index_{SIZE_MAX};
   size_t step_{1};
   size_t primary_pooling_tile_{1};
   size_t incremental_pooling_tile_{1};

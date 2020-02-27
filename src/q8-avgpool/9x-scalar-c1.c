@@ -17,6 +17,7 @@ void xnn_q8_avgpool_ukernel_9x__scalar_c1(
     size_t kernel_elements,
     size_t channels,
     const uint8_t** input,
+    size_t input_offset,
     const uint8_t* zero,
     uint8_t* output,
     size_t input_increment,
@@ -37,6 +38,7 @@ void xnn_q8_avgpool_ukernel_9x__scalar_c1(
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
   do {
     const uint8_t* i0 = input[0];
+    assert(i0 != NULL);
     const uint8_t* i1 = input[1];
     const uint8_t* i2 = input[2];
     const uint8_t* i3 = input[3];
@@ -49,26 +51,61 @@ void xnn_q8_avgpool_ukernel_9x__scalar_c1(
     if (kernel_elements < 2) {
       i1 = zero;
     }
+    assert(i1 != NULL);
     if (kernel_elements <= 2) {
       i2 = zero;
     }
+    assert(i2 != NULL);
     if (kernel_elements < 4) {
       i3 = zero;
     }
+    assert(i3 != NULL);
     if (kernel_elements <= 4) {
       i4 = zero;
     }
+    assert(i4 != NULL);
     if (kernel_elements < 6) {
       i5 = zero;
     }
+    assert(i5 != NULL);
     if (kernel_elements <= 6) {
       i6 = zero;
     }
+    assert(i6 != NULL);
     if (kernel_elements < 8) {
       i7 = zero;
     }
+    assert(i7 != NULL);
     if (kernel_elements <= 8) {
       i8 = zero;
+    }
+    assert(i8 != NULL);
+    if XNN_UNPREDICTABLE(i0 != zero) {
+      i0 = (const uint8_t*) ((uintptr_t) i0 + input_offset);
+    }
+    if XNN_UNPREDICTABLE(i1 != zero) {
+      i1 = (const uint8_t*) ((uintptr_t) i1 + input_offset);
+    }
+    if XNN_UNPREDICTABLE(i2 != zero) {
+      i2 = (const uint8_t*) ((uintptr_t) i2 + input_offset);
+    }
+    if XNN_UNPREDICTABLE(i3 != zero) {
+      i3 = (const uint8_t*) ((uintptr_t) i3 + input_offset);
+    }
+    if XNN_UNPREDICTABLE(i4 != zero) {
+      i4 = (const uint8_t*) ((uintptr_t) i4 + input_offset);
+    }
+    if XNN_UNPREDICTABLE(i5 != zero) {
+      i5 = (const uint8_t*) ((uintptr_t) i5 + input_offset);
+    }
+    if XNN_UNPREDICTABLE(i6 != zero) {
+      i6 = (const uint8_t*) ((uintptr_t) i6 + input_offset);
+    }
+    if XNN_UNPREDICTABLE(i7 != zero) {
+      i7 = (const uint8_t*) ((uintptr_t) i7 + input_offset);
+    }
+    if XNN_UNPREDICTABLE(i8 != zero) {
+      i8 = (const uint8_t*) ((uintptr_t) i8 + input_offset);
     }
 
     size_t c = channels;

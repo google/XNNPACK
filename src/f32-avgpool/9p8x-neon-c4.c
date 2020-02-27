@@ -15,6 +15,7 @@ void xnn_f32_avgpool_ukernel_9p8x__neon_c4(
     size_t kernel_elements,
     size_t channels,
     const float** input,
+    size_t input_offset,
     const float* zero,
     float* buffer,
     float* output,
@@ -33,14 +34,50 @@ void xnn_f32_avgpool_ukernel_9p8x__neon_c4(
   do {
     {
       const float* i0 = *input++;
+      assert(i0 != NULL);
+      if XNN_UNPREDICTABLE(i0 != zero) {
+        i0 = (const float*) ((uintptr_t) i0 + input_offset);
+      }
       const float* i1 = *input++;
+      assert(i1 != NULL);
+      if XNN_UNPREDICTABLE(i1 != zero) {
+        i1 = (const float*) ((uintptr_t) i1 + input_offset);
+      }
       const float* i2 = *input++;
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
       const float* i3 = *input++;
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
       const float* i4 = *input++;
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
       const float* i5 = *input++;
+      assert(i5 != NULL);
+      if XNN_UNPREDICTABLE(i5 != zero) {
+        i5 = (const float*) ((uintptr_t) i5 + input_offset);
+      }
       const float* i6 = *input++;
+      assert(i6 != NULL);
+      if XNN_UNPREDICTABLE(i6 != zero) {
+        i6 = (const float*) ((uintptr_t) i6 + input_offset);
+      }
       const float* i7 = *input++;
+      assert(i7 != NULL);
+      if XNN_UNPREDICTABLE(i7 != zero) {
+        i7 = (const float*) ((uintptr_t) i7 + input_offset);
+      }
       const float* i8 = *input++;
+      assert(i8 != NULL);
+      if XNN_UNPREDICTABLE(i8 != zero) {
+        i8 = (const float*) ((uintptr_t) i8 + input_offset);
+      }
 
       float* b = buffer;
       for (size_t c = 0; c < channels; c += 4) {
@@ -70,13 +107,45 @@ void xnn_f32_avgpool_ukernel_9p8x__neon_c4(
     size_t k = kernel_elements;
     for (k -= 9; k > 8; k -= 8) {
       const float* i0 = *input++;
+      assert(i0 != NULL);
+      if XNN_UNPREDICTABLE(i0 != zero) {
+        i0 = (const float*) ((uintptr_t) i0 + input_offset);
+      }
       const float* i1 = *input++;
+      assert(i1 != NULL);
+      if XNN_UNPREDICTABLE(i1 != zero) {
+        i1 = (const float*) ((uintptr_t) i1 + input_offset);
+      }
       const float* i2 = *input++;
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
       const float* i3 = *input++;
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
       const float* i4 = *input++;
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
       const float* i5 = *input++;
+      assert(i5 != NULL);
+      if XNN_UNPREDICTABLE(i5 != zero) {
+        i5 = (const float*) ((uintptr_t) i5 + input_offset);
+      }
       const float* i6 = *input++;
+      assert(i6 != NULL);
+      if XNN_UNPREDICTABLE(i6 != zero) {
+        i6 = (const float*) ((uintptr_t) i6 + input_offset);
+      }
       const float* i7 = *input++;
+      assert(i7 != NULL);
+      if XNN_UNPREDICTABLE(i7 != zero) {
+        i7 = (const float*) ((uintptr_t) i7 + input_offset);
+      }
 
       float* b = buffer;
       for (size_t c = 0; c < channels; c += 4) {
@@ -103,8 +172,10 @@ void xnn_f32_avgpool_ukernel_9p8x__neon_c4(
       }
     }
 
+    assert(k >= 1);
     {
       const float* i0 = input[0];
+      assert(i0 != NULL);
       const float* i1 = input[1];
       const float* i2 = input[2];
       const float* i3 = input[3];
@@ -116,23 +187,54 @@ void xnn_f32_avgpool_ukernel_9p8x__neon_c4(
       if (k < 2) {
         i1 = zero;
       }
+      assert(i1 != NULL);
       if (k <= 2) {
         i2 = zero;
       }
+      assert(i2 != NULL);
       if (k < 4) {
         i3 = zero;
       }
+      assert(i3 != NULL);
       if (k <= 4) {
         i4 = zero;
       }
+      assert(i4 != NULL);
       if (k < 6) {
         i5 = zero;
       }
+      assert(i5 != NULL);
       if (k <= 6) {
         i6 = zero;
       }
-      if (k != 8) {
+      assert(i6 != NULL);
+      if (k < 8) {
         i7 = zero;
+      }
+      assert(i7 != NULL);
+      if XNN_UNPREDICTABLE(i0 != zero) {
+        i0 = (const float*) ((uintptr_t) i0 + input_offset);
+      }
+      if XNN_UNPREDICTABLE(i1 != zero) {
+        i1 = (const float*) ((uintptr_t) i1 + input_offset);
+      }
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
+      if XNN_UNPREDICTABLE(i5 != zero) {
+        i5 = (const float*) ((uintptr_t) i5 + input_offset);
+      }
+      if XNN_UNPREDICTABLE(i6 != zero) {
+        i6 = (const float*) ((uintptr_t) i6 + input_offset);
+      }
+      if XNN_UNPREDICTABLE(i7 != zero) {
+        i7 = (const float*) ((uintptr_t) i7 + input_offset);
       }
 
       size_t c = channels;

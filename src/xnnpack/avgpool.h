@@ -25,6 +25,7 @@ extern "C" {
       size_t kernel_elements,                                   \
       size_t channels,                                          \
       const float** input,                                      \
+      size_t input_offset,                                      \
       const float* zero,                                        \
       float* buffer,                                            \
       float* output,                                            \
@@ -45,6 +46,7 @@ DECLARE_F32_AVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_ukernel_9p8x__sca
       size_t kernel_elements,                                 \
       size_t channels,                                        \
       const float** input,                                    \
+      size_t input_offset,                                    \
       const float* zero,                                      \
       float* output,                                          \
       size_t input_increment,                                 \
@@ -64,6 +66,7 @@ DECLARE_F32_AVGPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_ukernel_9x__scalar_
       size_t kernel_elements,                                  \
       size_t channels,                                         \
       const uint8_t** input,                                   \
+      size_t input_offset,                                     \
       const uint8_t* zero,                                     \
       int32_t* buffer,                                         \
       uint8_t* output,                                         \
@@ -82,6 +85,7 @@ DECLARE_Q8_AVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_q8_avgpool_ukernel_9p8x__scala
       size_t kernel_elements,                                \
       size_t channels,                                       \
       const uint8_t** input,                                 \
+      size_t input_offset,                                   \
       const uint8_t* zero,                                   \
       uint8_t* output,                                       \
       size_t input_increment,                                \
