@@ -1794,6 +1794,449 @@
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
+#if XNN_ARCH_WASM
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_unipass_fulltile) {
+    MaxPoolMicrokernelTester()
+      .pooling_elements(9)
+      .pooling_tile(9, 8)
+      .channels(1)
+      .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_unipass_fulltile_with_input_offset) {
+    MaxPoolMicrokernelTester()
+      .pooling_elements(9)
+      .pooling_tile(9, 8)
+      .channels(1)
+      .input_offset(3)
+      .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_unipass_fulltile_with_qmin) {
+    MaxPoolMicrokernelTester()
+      .pooling_elements(9)
+      .pooling_tile(9, 8)
+      .channels(1)
+      .qmin(192)
+      .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_unipass_fulltile_with_qmax) {
+    MaxPoolMicrokernelTester()
+      .pooling_elements(9)
+      .pooling_tile(9, 8)
+      .channels(1)
+      .qmax(192)
+      .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_unipass_subtile) {
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9, 8)
+        .channels(1)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_unipass_subtile_with_input_offset) {
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9, 8)
+        .channels(1)
+        .input_offset(3)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_unipass_fulltile) {
+    for (size_t channels = 2; channels < 10; channels++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_unipass_fulltile_with_input_offset) {
+    for (size_t channels = 2; channels < 10; channels++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .input_offset(3)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_unipass_fulltile_with_qmin) {
+    for (size_t channels = 2; channels < 10; channels++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .qmin(192)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_unipass_fulltile_with_qmax) {
+    for (size_t channels = 2; channels < 10; channels++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(9)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .qmax(192)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_unipass_subtile) {
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = 2; channels < 10; channels++) {
+        MaxPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_unipass_subtile_with_input_offset) {
+    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
+      for (size_t channels = 2; channels < 10; channels++) {
+        MaxPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset(3)
+          .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_twopass_fulltile) {
+    MaxPoolMicrokernelTester()
+      .pooling_elements(17)
+      .pooling_tile(9, 8)
+      .channels(1)
+      .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_twopass_fulltile_with_input_offset) {
+    MaxPoolMicrokernelTester()
+      .pooling_elements(17)
+      .pooling_tile(9, 8)
+      .channels(1)
+      .input_offset(3)
+      .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_twopass_fulltile_with_qmin) {
+    MaxPoolMicrokernelTester()
+      .pooling_elements(17)
+      .pooling_tile(9, 8)
+      .channels(1)
+      .qmin(192)
+      .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_twopass_fulltile_with_qmax) {
+    MaxPoolMicrokernelTester()
+      .pooling_elements(17)
+      .pooling_tile(9, 8)
+      .channels(1)
+      .qmax(192)
+      .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_twopass_subtile) {
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9, 8)
+        .channels(1)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_twopass_subtile_with_input_offset) {
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(9, 8)
+        .channels(1)
+        .input_offset(3)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_twopass_fulltile) {
+    for (size_t channels = 2; channels < 10; channels++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_twopass_fulltile_with_input_offset) {
+    for (size_t channels = 2; channels < 10; channels++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .input_offset(3)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_twopass_fulltile_with_qmin) {
+    for (size_t channels = 2; channels < 10; channels++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .qmin(192)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_twopass_fulltile_with_qmax) {
+    for (size_t channels = 2; channels < 10; channels++) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(channels)
+        .qmax(192)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_twopass_subtile) {
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = 2; channels < 10; channels++) {
+        MaxPoolMicrokernelTester()
+          .pooling_elements(17)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_twopass_subtile_with_input_offset) {
+    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
+      for (size_t channels = 2; channels < 10; channels++) {
+        MaxPoolMicrokernelTester()
+          .pooling_elements(17)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset(3)
+          .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_multipass) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(1)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_multipass_with_input_offset) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(1)
+        .input_offset(3)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_multipass_with_qmin) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(1)
+        .qmin(192)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_eq_1_multipass_with_qmax) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      MaxPoolMicrokernelTester()
+        .pooling_elements(17)
+        .pooling_tile(9, 8)
+        .channels(1)
+        .qmax(192)
+        .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_multipass) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = 2; channels < 10; channels++) {
+        MaxPoolMicrokernelTester()
+          .pooling_elements(17)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_multipass_with_input_offset) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = 2; channels < 10; channels++) {
+        MaxPoolMicrokernelTester()
+          .pooling_elements(17)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .input_offset(3)
+          .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_multipass_with_qmin) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = 2; channels < 10; channels++) {
+        MaxPoolMicrokernelTester()
+          .pooling_elements(17)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .qmin(192)
+          .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, channels_gt_1_multipass_with_qmax) {
+    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements += 3) {
+      for (size_t channels = 2; channels < 10; channels++) {
+        MaxPoolMicrokernelTester()
+          .pooling_elements(17)
+          .pooling_tile(9, 8)
+          .channels(channels)
+          .qmax(192)
+          .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, few_output_pixels) {
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
+        for (size_t channels = 1; channels <= 5; channels += 1) {
+          MaxPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, few_output_pixels_with_input_offset) {
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
+        for (size_t channels = 1; channels <= 5; channels += 1) {
+          MaxPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .input_offset(7)
+            .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, few_output_pixels_with_qmin) {
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
+        for (size_t channels = 1; channels <= 5; channels += 1) {
+          MaxPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .qmin(192)
+            .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, few_output_pixels_with_qmax) {
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
+        for (size_t channels = 1; channels <= 5; channels += 1) {
+          MaxPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .qmax(192)
+            .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, few_output_pixels_with_output_stride) {
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
+        for (size_t channels = 1; channels <= 5; channels += 1) {
+          MaxPoolMicrokernelTester()
+            .output_pixels(output_pixels)
+            .pooling_elements(pooling_elements)
+            .pooling_tile(9, 8)
+            .channels(channels)
+            .output_stride(7)
+            .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+        }
+      }
+    }
+  }
+
+  TEST(F32_MAXPOOL_9P8X__WASM_C1, few_output_pixels_with_step) {
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
+        for (size_t channels = 1; channels <= 5; channels += 1) {
+          for (size_t step = 2; step <= pooling_elements; step++) {
+            MaxPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(9, 8)
+              .step(step)
+              .channels(channels)
+              .output_stride(7)
+              .Test(xnn_f32_maxpool_ukernel_9p8x__wasm_c1, MaxPoolMicrokernelTester::Variant::Scalar);
+          }
+        }
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASM
+
+
 TEST(F32_MAXPOOL_9P8X__SCALAR_C1, channels_eq_1_unipass_fulltile) {
   MaxPoolMicrokernelTester()
     .pooling_elements(9)
