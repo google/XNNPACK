@@ -12,10 +12,10 @@
 #include <xnnpack/avgpool.h>
 
 
-void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_q8_avgpool_ukernel_9p8x__scalar_c1(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const uint8_t** input,
     const uint8_t* zero,
     int32_t* buffer,
@@ -24,9 +24,9 @@ void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
     size_t output_increment,
     const union xnn_q8_avgpool_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks > 9);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements > 9);
+  assert(channels != 0);
 
   const int32_t vbias = params->scalar.bias;
   const int32_t vmultiplier = params->scalar.multiplier;
@@ -49,7 +49,7 @@ void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
       const uint8_t* i8 = *input++;
 
       int32_t* b = buffer;
-      size_t k = kc;
+      size_t c = channels;
       do {
         const uint32_t vi0 = (uint32_t) *i0++;
         const uint32_t vi1 = (uint32_t) *i1++;
@@ -71,12 +71,12 @@ void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
         int32_t vacc = vbias + (int32_t) vsum2345;
         vacc += (int32_t) vsum01678;
         *b++ = vacc;
-      } while (--k != 0);
+      } while (--c != 0);
     }
 
-    size_t m = ks;
+    size_t k = kernel_elements;
     // Intermediate passes.
-    for (m -= 9; m > 8; m -= 8) {
+    for (k -= 9; k > 8; k -= 8) {
       const uint8_t* i0 = *input++;
       const uint8_t* i1 = *input++;
       const uint8_t* i2 = *input++;
@@ -87,7 +87,7 @@ void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
       const uint8_t* i7 = *input++;
 
       int32_t* b = buffer;
-      size_t k = kc;
+      size_t c = channels;
       do {
         int32_t vacc = *b;
 
@@ -110,7 +110,7 @@ void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
         vacc += (int32_t) vsum4567;
 
         *b++ = vacc;
-      } while (--k != 0);
+      } while (--c != 0);
     }
 
     // Last pass.
@@ -124,29 +124,29 @@ void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
       const uint8_t* i6 = input[6];
       const uint8_t* i7 = input[7];
       input = (const uint8_t**) ((uintptr_t) input + input_increment);
-      if (m < 2) {
+      if (k < 2) {
         i1 = zero;
       }
-      if (m <= 2) {
+      if (k <= 2) {
         i2 = zero;
       }
-      if (m < 4) {
+      if (k < 4) {
         i3 = zero;
       }
-      if (m <= 4) {
+      if (k <= 4) {
         i4 = zero;
       }
-      if (m < 6) {
+      if (k < 6) {
         i5 = zero;
       }
-      if (m <= 6) {
+      if (k <= 6) {
         i6 = zero;
       }
-      if (m != 8) {
+      if (k != 8) {
         i7 = zero;
       }
 
-      size_t k = kc;
+      size_t c = channels;
       int32_t* b = buffer;
       do {
         int32_t vacc = *b++;
@@ -177,8 +177,8 @@ void xnn_q8_avgpool_ukernel_mp9p8q__scalar(
         vout += voutput_zero_point;
 
         *output++ = (uint8_t) vout;
-      } while (--k != 0);
+      } while (--c != 0);
     }
     output = (uint8_t*) ((uintptr_t) output + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }

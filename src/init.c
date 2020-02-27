@@ -94,8 +94,8 @@ static void init(void) {
       };
     #endif
     xnn_params.q8.avgpool = (struct avgpool_parameters) {
-      .up = (xnn_avgpool_up_ukernel_function) xnn_q8_avgpool_ukernel_up9__neon,
-      .mp = (xnn_avgpool_mp_ukernel_function) xnn_q8_avgpool_ukernel_mp9p8q__neon,
+      .up = (xnn_avgpool_up_ukernel_function) xnn_q8_avgpool_ukernel_9x__neon_c8,
+      .mp = (xnn_avgpool_mp_ukernel_function) xnn_q8_avgpool_ukernel_9p8x__neon_c8,
       .mr = 9,
       .qr = 8,
     };
@@ -215,14 +215,14 @@ static void init(void) {
       .mr = 25,
     };
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
-      .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_up9__neon,
-      .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_mp9p8q__neon,
+      .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_9x__neon_c4,
+      .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_9p8x__neon_c4,
       .mr = 9,
       .qr = 8,
     };
     xnn_params.f32.pavgpool = (struct pavgpool_parameters) {
-      .up = (xnn_pavgpool_up_ukernel_function) xnn_f32_pavgpool_ukernel_up9__neon,
-      .mp = (xnn_pavgpool_mp_ukernel_function) xnn_f32_pavgpool_ukernel_mp9p8q__neon,
+      .up = (xnn_pavgpool_up_ukernel_function) xnn_f32_pavgpool_ukernel_9x__neon_c4,
+      .mp = (xnn_pavgpool_mp_ukernel_function) xnn_f32_pavgpool_ukernel_9p8x__neon_c4,
       .mr = 9,
       .qr = 8,
     };
@@ -338,8 +338,8 @@ static void init(void) {
       .mr = 9,
     };
     xnn_params.q8.avgpool = (struct avgpool_parameters) {
-      .up = (xnn_avgpool_up_ukernel_function) xnn_q8_avgpool_ukernel_up9__neon,
-      .mp = (xnn_avgpool_mp_ukernel_function) xnn_q8_avgpool_ukernel_mp9p8q__neon,
+      .up = (xnn_avgpool_up_ukernel_function) xnn_q8_avgpool_ukernel_9x__neon_c8,
+      .mp = (xnn_avgpool_mp_ukernel_function) xnn_q8_avgpool_ukernel_9p8x__neon_c8,
       .mr = 9,
       .qr = 8,
     };
@@ -513,14 +513,14 @@ static void init(void) {
       .mr = 25,
     };
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
-      .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_up9__neon,
-      .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_mp9p8q__neon,
+      .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_9x__neon_c4,
+      .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_9p8x__neon_c4,
       .mr = 9,
       .qr = 8,
     };
     xnn_params.f32.pavgpool = (struct pavgpool_parameters) {
-      .up = (xnn_pavgpool_up_ukernel_function) xnn_f32_pavgpool_ukernel_up9__neon,
-      .mp = (xnn_pavgpool_mp_ukernel_function) xnn_f32_pavgpool_ukernel_mp9p8q__neon,
+      .up = (xnn_pavgpool_up_ukernel_function) xnn_f32_pavgpool_ukernel_9x__neon_c4,
+      .mp = (xnn_pavgpool_mp_ukernel_function) xnn_f32_pavgpool_ukernel_9p8x__neon_c4,
       .mr = 9,
       .qr = 8,
     };
@@ -693,8 +693,8 @@ static void init(void) {
       .mr = 9,
     };
     xnn_params.q8.avgpool = (struct avgpool_parameters) {
-      .up = (xnn_avgpool_up_ukernel_function) xnn_q8_avgpool_ukernel_up9__sse2,
-      .mp = (xnn_avgpool_mp_ukernel_function) xnn_q8_avgpool_ukernel_mp9p8q__sse2,
+      .up = (xnn_avgpool_up_ukernel_function) xnn_q8_avgpool_ukernel_9x__sse2_c8,
+      .mp = (xnn_avgpool_mp_ukernel_function) xnn_q8_avgpool_ukernel_9p8x__sse2_c8,
       .mr = 9,
       .qr = 8,
     };
@@ -856,14 +856,14 @@ static void init(void) {
       };
     }
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
-      .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_up9__sse,
-      .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_mp9p8q__sse,
+      .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_9x__sse_c4,
+      .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_9p8x__sse_c4,
       .mr = 9,
       .qr = 8,
     };
     xnn_params.f32.pavgpool = (struct pavgpool_parameters) {
-      .up = (xnn_pavgpool_up_ukernel_function) xnn_f32_pavgpool_ukernel_up9__sse,
-      .mp = (xnn_pavgpool_mp_ukernel_function) xnn_f32_pavgpool_ukernel_mp9p8q__sse,
+      .up = (xnn_pavgpool_up_ukernel_function) xnn_f32_pavgpool_ukernel_9x__sse_c4,
+      .mp = (xnn_pavgpool_mp_ukernel_function) xnn_f32_pavgpool_ukernel_9p8x__sse_c4,
       .mr = 9,
       .qr = 8,
     };
@@ -1102,8 +1102,8 @@ static void init(void) {
       .mr = 9,
     };
     xnn_params.q8.avgpool = (struct avgpool_parameters) {
-      .up = (xnn_avgpool_up_ukernel_function) xnn_q8_avgpool_ukernel_up9__scalar,
-      .mp = (xnn_avgpool_mp_ukernel_function) xnn_q8_avgpool_ukernel_mp9p8q__scalar,
+      .up = (xnn_avgpool_up_ukernel_function) xnn_q8_avgpool_ukernel_9x__scalar_c1,
+      .mp = (xnn_avgpool_mp_ukernel_function) xnn_q8_avgpool_ukernel_9p8x__scalar_c1,
       .mr = 9,
       .qr = 8,
     };
@@ -1183,14 +1183,14 @@ static void init(void) {
       .mr = 25,
     };
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
-      .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_up9__psimd,
-      .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_mp9p8q__psimd,
+      .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_9x__psimd_c4,
+      .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_9p8x__psimd_c4,
       .mr = 9,
       .qr = 8,
     };
     xnn_params.f32.pavgpool = (struct pavgpool_parameters) {
-      .up = (xnn_pavgpool_up_ukernel_function) xnn_f32_pavgpool_ukernel_up9__psimd,
-      .mp = (xnn_pavgpool_mp_ukernel_function) xnn_f32_pavgpool_ukernel_mp9p8q__psimd,
+      .up = (xnn_pavgpool_up_ukernel_function) xnn_f32_pavgpool_ukernel_9x__psimd_c4,
+      .mp = (xnn_pavgpool_mp_ukernel_function) xnn_f32_pavgpool_ukernel_9p8x__psimd_c4,
       .mr = 9,
       .qr = 8,
     };
@@ -1312,8 +1312,8 @@ static void init(void) {
       .mr = 9,
     };
     xnn_params.q8.avgpool = (struct avgpool_parameters) {
-      .up = (xnn_avgpool_up_ukernel_function) xnn_q8_avgpool_ukernel_up9__scalar,
-      .mp = (xnn_avgpool_mp_ukernel_function) xnn_q8_avgpool_ukernel_mp9p8q__scalar,
+      .up = (xnn_avgpool_up_ukernel_function) xnn_q8_avgpool_ukernel_9x__scalar_c1,
+      .mp = (xnn_avgpool_mp_ukernel_function) xnn_q8_avgpool_ukernel_9p8x__scalar_c1,
       .mr = 9,
       .qr = 8,
     };
@@ -1391,14 +1391,14 @@ static void init(void) {
       .mr = 25,
     };
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
-      .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_up9__wasm,
-      .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_mp9p8q__wasm,
+      .up = (xnn_avgpool_up_ukernel_function) xnn_f32_avgpool_ukernel_9x__wasm_c1,
+      .mp = (xnn_avgpool_mp_ukernel_function) xnn_f32_avgpool_ukernel_9p8x__wasm_c1,
       .mr = 9,
       .qr = 8,
     };
     xnn_params.f32.pavgpool = (struct pavgpool_parameters) {
-      .up = (xnn_pavgpool_up_ukernel_function) xnn_f32_pavgpool_ukernel_up9__wasm,
-      .mp = (xnn_pavgpool_mp_ukernel_function) xnn_f32_pavgpool_ukernel_mp9p8q__wasm,
+      .up = (xnn_pavgpool_up_ukernel_function) xnn_f32_pavgpool_ukernel_9x__wasm_c1,
+      .mp = (xnn_pavgpool_mp_ukernel_function) xnn_f32_pavgpool_ukernel_9p8x__wasm_c1,
       .mr = 9,
       .qr = 8,
     };

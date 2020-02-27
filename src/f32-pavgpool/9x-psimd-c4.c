@@ -7,28 +7,28 @@
 
 #include <psimd.h>
 
-#include <xnnpack/avgpool.h>
+#include <xnnpack/pavgpool.h>
 
 
-void xnn_f32_avgpool_ukernel_up9__psimd(
-    size_t n,
-    size_t ks,
-    size_t kc,
+void xnn_f32_pavgpool_ukernel_9x__psimd_c4(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
     const float** input,
     const float* zero,
+    const float* multiplier,
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_avgpool_params params[restrict static 1])
+    const union xnn_f32_output_params params[restrict static 1])
 {
-  assert(n != 0);
-  assert(ks != 0);
-  assert(ks <= 9);
-  assert(kc != 0);
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(kernel_elements <= 9);
+  assert(channels != 0);
 
-  const psimd_f32 vmultiplier = psimd_load_splat_f32(&params->scalar.multiplier);
-  const psimd_f32 voutput_min = psimd_load_splat_f32(&params->scalar.output_min);
-  const psimd_f32 voutput_max = psimd_load_splat_f32(&params->scalar.output_max);
+  const psimd_f32 voutput_min = psimd_load_splat_f32(&params->scalar.min);
+  const psimd_f32 voutput_max = psimd_load_splat_f32(&params->scalar.max);
 
   do {
     const float* i0 = input[0];
@@ -41,33 +41,36 @@ void xnn_f32_avgpool_ukernel_up9__psimd(
     const float* i7 = input[7];
     const float* i8 = input[8];
     input = (const float**) ((uintptr_t) input + input_increment);
-    if (ks < 2) {
+    if (kernel_elements < 2) {
       i1 = zero;
     }
-    if (ks <= 2) {
+    if (kernel_elements <= 2) {
       i2 = zero;
     }
-    if (ks < 4) {
+    if (kernel_elements < 4) {
       i3 = zero;
     }
-    if (ks <= 4) {
+    if (kernel_elements <= 4) {
       i4 = zero;
     }
-    if (ks < 6) {
+    if (kernel_elements < 6) {
       i5 = zero;
     }
-    if (ks <= 6) {
+    if (kernel_elements <= 6) {
       i6 = zero;
     }
-    if (ks < 8) {
+    if (kernel_elements < 8) {
       i7 = zero;
     }
-    if (ks <= 8) {
+    if (kernel_elements <= 8) {
       i8 = zero;
     }
 
-    size_t k = kc;
-    while (k >= 4) {
+    const psimd_f32 vmultiplier = psimd_load_splat_f32(multiplier);
+    multiplier += 1;
+
+    size_t c = channels;
+    while (c >= 4) {
       const psimd_f32 vi0 = psimd_load_f32(i0);
       i0 += 4;
       const psimd_f32 vi1 = psimd_load_f32(i1);
@@ -103,9 +106,9 @@ void xnn_f32_avgpool_ukernel_up9__psimd(
       psimd_store_f32(output, vout);
       output += 4;
 
-      k -= 4;
+      c -= 4;
     }
-    if (k != 0) {
+    if (c != 0) {
       const psimd_f32 vi0 = psimd_load_f32(i0);
       const psimd_f32 vi1 = psimd_load_f32(i1);
       const psimd_f32 vi2 = psimd_load_f32(i2);
@@ -129,16 +132,16 @@ void xnn_f32_avgpool_ukernel_up9__psimd(
       vout = psimd_max_f32(vout, voutput_min);
       vout = psimd_min_f32(vout, voutput_max);
 
-      if (k & 2) {
+      if (c & 2) {
         psimd_store2_f32(output, vout);
         output += 2;
         vout = psimd_concat_hi_f32(vout, vout);
       }
-      if (k & 1) {
+      if (c & 1) {
         psimd_store1_f32(output, vout);
         output += 1;
       }
     }
     output = (float*) ((uintptr_t) output + output_increment);
-  } while (--n != 0);
+  } while (--output_pixels != 0);
 }
