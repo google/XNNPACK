@@ -424,8 +424,9 @@ struct argmax_pooling_context {
 
 struct average_pooling_context {
   const void** indirect_input;
-  size_t indirect_input_batch_stride;
   size_t indirect_input_height_stride;
+  size_t input_offset;
+  size_t input_batch_stride;
   void* output;
   size_t output_batch_stride;
   size_t output_height_stride;
@@ -459,8 +460,9 @@ struct average_pooling_context {
 
 struct pixelwise_average_pooling_context {
   const void** indirect_input;
-  size_t indirect_input_batch_stride;
   size_t indirect_input_height_stride;
+  size_t input_offset;
+  size_t input_batch_stride;
   const void* pixelwise_buffer;
   size_t pixelwise_buffer_height_stride;
   void* output;

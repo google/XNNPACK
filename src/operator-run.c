@@ -432,14 +432,14 @@ void xnn_compute_average_pooling_unipass(
     size_t output_y)
 {
   const void** indirect_input =
-    (const void**) ((uintptr_t) context->indirect_input +
-      batch_index * context->indirect_input_batch_stride + output_y * context->indirect_input_height_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
 
   context->unipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, 0, context->zero, output,
+    indirect_input, input_offset, context->zero, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -450,15 +450,15 @@ void xnn_compute_average_pooling_multipass(
     size_t output_y)
 {
   const void** indirect_input =
-    (const void**) ((uintptr_t) context->indirect_input +
-      batch_index * context->indirect_input_batch_stride + output_y * context->indirect_input_height_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
   XNN_ALIGN(16) int32_t multipass_buffer[context->channels + XNN_EXTRA_BYTES / sizeof(uint8_t)];
 
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, 0, context->zero, multipass_buffer, output,
+    indirect_input, input_offset, context->zero, multipass_buffer, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -469,16 +469,16 @@ void xnn_compute_pixelwise_average_pooling_unipass(
     size_t output_y)
 {
   const void** indirect_input =
-    (const void**) ((uintptr_t) context->indirect_input +
-      batch_index * context->indirect_input_batch_stride + output_y * context->indirect_input_height_stride);
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
   const void* pixelwise_buffer =
     (const void*) ((uintptr_t) context->pixelwise_buffer + output_y * context->pixelwise_buffer_height_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
 
   context->unipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, 0, context->zero, pixelwise_buffer, output,
+    indirect_input, input_offset, context->zero, pixelwise_buffer, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -489,17 +489,17 @@ void xnn_compute_pixelwise_average_pooling_multipass(
     size_t output_y)
 {
   const void** indirect_input =
-    (const void**) ((uintptr_t) context->indirect_input +
-      batch_index * context->indirect_input_batch_stride + output_y * context->indirect_input_height_stride);
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
   const void* pixelwise_buffer =
     (const void*) ((uintptr_t) context->pixelwise_buffer + output_y * context->pixelwise_buffer_height_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
   XNN_ALIGN(16) int32_t multipass_buffer[context->channels + XNN_EXTRA_BYTES / sizeof(uint8_t)];
 
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, 0, context->zero, pixelwise_buffer, multipass_buffer, output,
+    indirect_input, input_offset, context->zero, pixelwise_buffer, multipass_buffer, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
