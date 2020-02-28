@@ -171,11 +171,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
 
   max_pooling_op->type = xnn_operator_type_max_pooling_nhwc_u8;
   max_pooling_op->ukernel.type = xnn_ukernel_type_max_pooling;
-
-  const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && max(pooling_height, pooling_width) != 1;
-  if (tf_same_padding) {
-    max_pooling_op->flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
-  }
+  max_pooling_op->flags = flags;
 
   max_pooling_op->state = xnn_run_state_invalid;
 
@@ -328,11 +324,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
 
   max_pooling_op->type = xnn_operator_type_max_pooling_nhwc_f32;
   max_pooling_op->ukernel.type = xnn_ukernel_type_max_pooling;
-
-  const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && max(pooling_height, pooling_width) != 1;
-  if (tf_same_padding) {
-    max_pooling_op->flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
-  }
+  max_pooling_op->flags = flags;
 
   max_pooling_op->state = xnn_run_state_invalid;
 

@@ -33,6 +33,13 @@ static inline size_t compute_output_dimension(
   return (padded_input_dimension - pooling_dimension) / stride_dimension + 1;
 }
 
+static inline size_t compute_output_dimension_with_tf_same_padding(
+    size_t input_dimension,
+    size_t stride_dimension)
+{
+  return divide_round_up(input_dimension, stride_dimension);
+}
+
 enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
@@ -134,6 +141,17 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
     goto error;
   }
 
+  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
+  if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
+    if (any_padding) {
+      xnn_log_error(
+        "failed to create Average Pooling operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "TensorFlow SAME padding can't be combined with explicit padding specification",
+        input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+      goto error;
+    }
+  }
+
   status = xnn_status_unsupported_parameter;
 
   const float input_output_scale = input_scale / output_scale;
@@ -161,10 +179,10 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
     goto error;
   }
 
-  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   const uint32_t mr = xnn_params.q8.avgpool.mr;
   const uint32_t qr = xnn_params.q8.avgpool.qr;
-  if (any_padding || pooling_size < mr || (pooling_size - mr) % qr != 0) {
+  const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
+  if (any_padding || tf_same_padding || pooling_size < mr || (pooling_size - mr) % qr != 0) {
     void* zero_buffer = xnn_allocate_simd_memory(channels * sizeof(uint8_t) + XNN_EXTRA_BYTES);
     if (zero_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for Average Pooling zero padding",
@@ -200,6 +218,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
 
   average_pooling_op->type = xnn_operator_type_average_pooling_nhwc_q8;
   average_pooling_op->ukernel.type = xnn_ukernel_type_average_pooling;
+  average_pooling_op->flags = flags;
 
   *average_pooling_op_out = average_pooling_op;
   return xnn_status_success;
@@ -301,6 +320,17 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
     goto error;
   }
 
+  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
+  if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
+    if (any_padding) {
+      xnn_log_error(
+        "failed to create Average Pooling operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "TensorFlow SAME padding can't be combined with explicit padding specification",
+        input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+      goto error;
+    }
+  }
+
   status = xnn_status_out_of_memory;
 
   average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -309,10 +339,10 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
     goto error;
   }
 
-  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   const uint32_t mr = xnn_params.f32.avgpool.mr;
   const uint32_t qr = xnn_params.f32.avgpool.qr;
-  if (any_padding || pooling_size < mr || (pooling_size - mr) % qr != 0) {
+  const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
+  if (any_padding || tf_same_padding || pooling_size < mr || (pooling_size - mr) % qr != 0) {
     void* zero_buffer = xnn_allocate_zero_simd_memory(channels * sizeof(float) + XNN_EXTRA_BYTES);
     if (zero_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for Average Pooling zero padding",
@@ -349,6 +379,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
 
     average_pooling_op->ukernel.type = xnn_ukernel_type_average_pooling;
   }
+  average_pooling_op->flags = flags;
 
   *average_pooling_op_out = average_pooling_op;
   return xnn_status_success;
@@ -394,14 +425,32 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
   average_pooling_op->input_width = input_width;
   average_pooling_op->input = input;
 
-  average_pooling_op->output_height = compute_output_dimension(
-      average_pooling_op->padding_top + input_height + average_pooling_op->padding_bottom,
-      average_pooling_op->kernel_height,
-      average_pooling_op->stride_height);
-  average_pooling_op->output_width = compute_output_dimension(
-      average_pooling_op->padding_left + input_width + average_pooling_op->padding_right,
-      average_pooling_op->kernel_width,
-      average_pooling_op->stride_width);
+  if (average_pooling_op->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
+    average_pooling_op->output_height = compute_output_dimension_with_tf_same_padding(
+        input_height, average_pooling_op->stride_height);
+    average_pooling_op->output_width = compute_output_dimension_with_tf_same_padding(
+        input_width, average_pooling_op->stride_width);
+
+    const uint32_t effective_kernel_height = (average_pooling_op->kernel_height - 1) * average_pooling_op->dilation_height + 1;
+    const uint32_t effective_kernel_width = (average_pooling_op->kernel_width - 1) * average_pooling_op->dilation_width + 1;
+    const uint32_t total_padding_height =
+      (average_pooling_op->output_height - 1) * average_pooling_op->stride_height + effective_kernel_height - input_height;
+    const uint32_t total_padding_width =
+      (average_pooling_op->output_width - 1) * average_pooling_op->stride_width + effective_kernel_width - input_width;
+    average_pooling_op->padding_top = total_padding_height / 2;
+    average_pooling_op->padding_left = total_padding_width / 2;
+    average_pooling_op->padding_bottom = total_padding_height - average_pooling_op->padding_top;
+    average_pooling_op->padding_right = total_padding_width - average_pooling_op->padding_left;
+  } else {
+    average_pooling_op->output_height = compute_output_dimension(
+        average_pooling_op->padding_top + input_height + average_pooling_op->padding_bottom,
+        average_pooling_op->kernel_height,
+        average_pooling_op->stride_height);
+    average_pooling_op->output_width = compute_output_dimension(
+        average_pooling_op->padding_left + input_width + average_pooling_op->padding_right,
+        average_pooling_op->kernel_width,
+        average_pooling_op->stride_width);
+  }
   average_pooling_op->output = output;
 
   const size_t pooling_height = average_pooling_op->kernel_height;
@@ -513,14 +562,32 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
   average_pooling_op->input_width = input_width;
   average_pooling_op->input = input;
 
-  average_pooling_op->output_height = compute_output_dimension(
-      average_pooling_op->padding_top + input_height + average_pooling_op->padding_bottom,
-      average_pooling_op->kernel_height,
-      average_pooling_op->stride_height);
-  average_pooling_op->output_width = compute_output_dimension(
-      average_pooling_op->padding_left + input_width + average_pooling_op->padding_right,
-      average_pooling_op->kernel_width,
-      average_pooling_op->stride_width);
+  if (average_pooling_op->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
+    average_pooling_op->output_height = compute_output_dimension_with_tf_same_padding(
+        input_height, average_pooling_op->stride_height);
+    average_pooling_op->output_width = compute_output_dimension_with_tf_same_padding(
+        input_width, average_pooling_op->stride_width);
+
+    const uint32_t effective_kernel_height = (average_pooling_op->kernel_height - 1) * average_pooling_op->dilation_height + 1;
+    const uint32_t effective_kernel_width = (average_pooling_op->kernel_width - 1) * average_pooling_op->dilation_width + 1;
+    const uint32_t total_padding_height =
+      (average_pooling_op->output_height - 1) * average_pooling_op->stride_height + effective_kernel_height - input_height;
+    const uint32_t total_padding_width =
+      (average_pooling_op->output_width - 1) * average_pooling_op->stride_width + effective_kernel_width - input_width;
+    average_pooling_op->padding_top = total_padding_height / 2;
+    average_pooling_op->padding_left = total_padding_width / 2;
+    average_pooling_op->padding_bottom = total_padding_height - average_pooling_op->padding_top;
+    average_pooling_op->padding_right = total_padding_width - average_pooling_op->padding_left;
+  } else {
+    average_pooling_op->output_height = compute_output_dimension(
+        average_pooling_op->padding_top + input_height + average_pooling_op->padding_bottom,
+        average_pooling_op->kernel_height,
+        average_pooling_op->stride_height);
+    average_pooling_op->output_width = compute_output_dimension(
+        average_pooling_op->padding_left + input_width + average_pooling_op->padding_right,
+        average_pooling_op->kernel_width,
+        average_pooling_op->stride_width);
+  }
   average_pooling_op->output = output;
 
   const size_t pooling_height = average_pooling_op->kernel_height;

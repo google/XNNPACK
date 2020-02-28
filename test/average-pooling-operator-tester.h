@@ -24,7 +24,23 @@
 
 class AveragePoolingOperatorTester {
  public:
+  inline AveragePoolingOperatorTester& padding_tf_same(bool padding_same) {
+    if (padding_same) {
+      assert(padding_top() == 0);
+      assert(padding_left() == 0);
+      assert(padding_bottom() == 0);
+      assert(padding_right() == 0);
+    }
+    this->padding_tf_same_ = padding_same;
+    return *this;
+  }
+
+  inline bool padding_tf_same() const {
+    return this->padding_tf_same_;
+  }
+
   inline AveragePoolingOperatorTester& padding(uint32_t padding) {
+    assert(!padding_tf_same());
     this->padding_top_ = padding;
     this->padding_right_ = padding;
     this->padding_bottom_ = padding;
@@ -33,6 +49,7 @@ class AveragePoolingOperatorTester {
   }
 
   inline AveragePoolingOperatorTester& padding(uint32_t padding_height, uint32_t padding_width) {
+    assert(!padding_tf_same());
     this->padding_top_ = padding_height;
     this->padding_right_ = padding_width;
     this->padding_bottom_ = padding_height;
@@ -41,51 +58,81 @@ class AveragePoolingOperatorTester {
   }
 
   inline AveragePoolingOperatorTester& padding_height(uint32_t padding_height) {
+    assert(!padding_tf_same());
     this->padding_top_ = padding_height;
     this->padding_bottom_ = padding_height;
     return *this;
   }
 
   inline AveragePoolingOperatorTester& padding_width(uint32_t padding_width) {
+    assert(!padding_tf_same());
     this->padding_right_ = padding_width;
     this->padding_left_ = padding_width;
     return *this;
   }
 
   inline AveragePoolingOperatorTester& padding_top(uint32_t padding_top) {
+    assert(!padding_tf_same());
     this->padding_top_ = padding_top;
     return *this;
   }
 
   inline uint32_t padding_top() const {
-    return this->padding_top_;
-  }
-
-  inline AveragePoolingOperatorTester& padding_right(uint32_t padding_right) {
-    this->padding_right_ = padding_right;
-    return *this;
-  }
-
-  inline uint32_t padding_right() const {
-    return this->padding_right_;
-  }
-
-  inline AveragePoolingOperatorTester& padding_bottom(uint32_t padding_bottom) {
-    this->padding_bottom_ = padding_bottom;
-    return *this;
-  }
-
-  inline uint32_t padding_bottom() const {
-    return this->padding_bottom_;
+    if (padding_tf_same()) {
+      const uint32_t total_padding_height =
+        (output_height() - 1) * stride_height() + pooling_height() - input_height();
+      return total_padding_height / 2;
+    } else {
+      return this->padding_top_;
+    }
   }
 
   inline AveragePoolingOperatorTester& padding_left(uint32_t padding_left) {
+    assert(!padding_tf_same());
     this->padding_left_ = padding_left;
     return *this;
   }
 
   inline uint32_t padding_left() const {
-    return this->padding_left_;
+    if (padding_tf_same()) {
+      const uint32_t total_padding_width =
+        (output_width() - 1) * stride_width() + pooling_width() - input_width();
+      return total_padding_width / 2;
+    } else {
+      return this->padding_left_;
+    }
+  }
+
+  inline AveragePoolingOperatorTester& padding_bottom(uint32_t padding_bottom) {
+    assert(!padding_tf_same());
+    this->padding_bottom_ = padding_bottom;
+    return *this;
+  }
+
+  inline uint32_t padding_bottom() const {
+    if (padding_tf_same()) {
+      const uint32_t total_padding_height =
+        (output_height() - 1) * stride_height() + pooling_height() - input_height();
+      return total_padding_height - total_padding_height / 2;
+    } else {
+      return this->padding_bottom_;
+    }
+  }
+
+  inline AveragePoolingOperatorTester& padding_right(uint32_t padding_right) {
+    assert(!padding_tf_same());
+    this->padding_right_ = padding_right;
+    return *this;
+  }
+
+  inline uint32_t padding_right() const {
+    if (padding_tf_same()) {
+      const uint32_t total_padding_width =
+        (output_width() - 1) * stride_width() + pooling_width() - input_width();
+      return total_padding_width - total_padding_width / 2;
+    } else {
+      return this->padding_right_;
+    }
   }
 
   inline AveragePoolingOperatorTester& input_size(size_t input_height, size_t input_width) {
@@ -207,20 +254,28 @@ class AveragePoolingOperatorTester {
   }
 
   inline size_t output_height() const {
-    const size_t padded_input_height = padding_top() + input_height() + padding_bottom();
-    if (padded_input_height <= pooling_height()) {
-      return 1;
+    if (padding_tf_same()) {
+      return (input_height() + stride_height() - 1) / stride_height();
     } else {
-      return (padded_input_height - pooling_height()) / stride_height() + 1;
+      const size_t padded_input_height = padding_top() + input_height() + padding_bottom();
+      if (padded_input_height <= pooling_height()) {
+        return 1;
+      } else {
+        return (padded_input_height - pooling_height()) / stride_height() + 1;
+      }
     }
   }
 
   inline size_t output_width() const {
-    const size_t padded_input_width = padding_left() + input_width() + padding_right();
-    if (padded_input_width <= pooling_width()) {
-      return 1;
+    if (padding_tf_same()) {
+      return (input_width() + stride_width() - 1) / stride_width();
     } else {
-      return (padded_input_width - pooling_width()) / stride_width() + 1;
+      const size_t padded_input_width = padding_left() + input_width() + padding_right();
+      if (padded_input_width <= pooling_width()) {
+        return 1;
+      } else {
+        return (padded_input_width - pooling_width()) / stride_width() + 1;
+      }
     }
   }
 
@@ -876,6 +931,7 @@ class AveragePoolingOperatorTester {
   uint32_t padding_right_{0};
   uint32_t padding_bottom_{0};
   uint32_t padding_left_{0};
+  bool padding_tf_same_{false};
   size_t input_height_{1};
   size_t input_width_{1};
   size_t channels_{1};
