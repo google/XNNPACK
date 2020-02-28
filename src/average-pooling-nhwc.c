@@ -390,7 +390,6 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
     return xnn_status_success;
   }
 
-  average_pooling_op->batch_size = batch_size;
   average_pooling_op->input_height = input_height;
   average_pooling_op->input_width = input_width;
   average_pooling_op->input = input;
@@ -405,20 +404,6 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
       average_pooling_op->stride_width);
   average_pooling_op->output = output;
 
-  size_t valid_batch_size = 0;
-  if (input == average_pooling_op->last_input &&
-      input_height == average_pooling_op->last_input_height &&
-      input_width == average_pooling_op->last_input_width)
-  {
-    valid_batch_size = average_pooling_op->valid_batch_size;
-    if (batch_size <= valid_batch_size) {
-      average_pooling_op->compute.range[0] = batch_size;
-      average_pooling_op->context.average_pooling.output = output;
-      average_pooling_op->state = xnn_run_state_ready;
-      return xnn_status_success;
-    }
-  }
-
   const size_t pooling_height = average_pooling_op->kernel_height;
   const size_t pooling_width = average_pooling_op->kernel_width;
   const size_t pooling_size = pooling_height * pooling_width;
@@ -429,46 +414,54 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
 
   const size_t step_width = min(average_pooling_op->stride_width, pooling_width);
   const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
-  const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
 
-  const void** indirection_buffer = (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
-  if (indirection_buffer == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
-    return xnn_status_out_of_memory;
+  const size_t last_input_height = average_pooling_op->last_input_height;
+  const size_t last_input_width = average_pooling_op->last_input_width;
+  if (input_height != last_input_height || input_width != last_input_width) {
+    // Micro-kernel may read up to (mr - 1) elements after the end of indirection buffer.
+    const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
+
+    const void** indirection_buffer = (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
+    if (indirection_buffer == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
+      return xnn_status_out_of_memory;
+    }
+    average_pooling_op->indirection_buffer = indirection_buffer;
+
+    // Indirection buffer always setup for batch size 1, larger batch size supported through input_offset argument
+    average_pooling_op->batch_size = 1;
+    xnn_indirection_init_dwconv2d(
+      average_pooling_op, 0, step_height, step_width, 0 /* log2(sizeof(uint8_t)) */);
+
+    average_pooling_op->last_input = input;
+    average_pooling_op->last_input_height = input_height;
+    average_pooling_op->last_input_width = input_width;
   }
-  average_pooling_op->indirection_buffer = indirection_buffer;
-
-  xnn_indirection_init_dwconv2d(
-    average_pooling_op, valid_batch_size, step_height, step_width, 0 /* log2(sizeof(uint8_t)) */);
 
   const uint32_t qr = xnn_params.q8.avgpool.qr;
   const size_t channels = average_pooling_op->channels;
 
-  const size_t indirect_input_height_stride = step_height * sizeof(void*);
   const size_t output_width_stride = average_pooling_op->output_pixel_stride * sizeof(uint8_t);
   const size_t output_height_stride = output_width * output_width_stride;
 
   const size_t multipass_adjustment =
     pooling_size > mr ? round_up(pooling_size - mr, qr) + mr - qr : 0;
   average_pooling_op->context.average_pooling = (struct average_pooling_context) {
-      .indirect_input = indirection_buffer,
-      .indirect_input_batch_stride = output_height * indirect_input_height_stride,
-      .indirect_input_height_stride = indirect_input_height_stride,
-      .output = output,
-      .output_batch_stride = output_height * output_height_stride,
-      .output_height_stride = output_height_stride,
-      .output_width = output_width,
-      .pooling_size = pooling_size,
-      .channels = channels,
-      .zero = average_pooling_op->zero_buffer,
-      .input_increment = (pooling_height * step_width - multipass_adjustment) * sizeof(void*),
-      .output_increment = output_width_stride - channels * sizeof(uint8_t),
-      .params.q8 = average_pooling_op->q8_avgpool_params,
+    .indirect_input = average_pooling_op->indirection_buffer,
+    .indirect_input_height_stride = step_height * sizeof(void*),
+    .input_offset = (size_t) ((uintptr_t) input - (uintptr_t) average_pooling_op->last_input),
+    .input_batch_stride = input_height * input_width * average_pooling_op->input_pixel_stride * sizeof(uint8_t),
+    .output = output,
+    .output_batch_stride = output_height * output_height_stride,
+    .output_height_stride = output_height_stride,
+    .output_width = output_width,
+    .pooling_size = pooling_size,
+    .channels = channels,
+    .zero = average_pooling_op->zero_buffer,
+    .input_increment = (pooling_height * step_width - multipass_adjustment) * sizeof(void*),
+    .output_increment = output_width_stride - channels * sizeof(uint8_t),
+    .params.q8 = average_pooling_op->q8_avgpool_params,
   };
-  average_pooling_op->compute.type = xnn_parallelization_type_2d;
-  average_pooling_op->compute.range[0] = batch_size;
-  average_pooling_op->compute.range[1] = output_height;
-
   if (pooling_size <= mr) {
     average_pooling_op->context.average_pooling.unipass_ukernel = xnn_params.q8.avgpool.up;
     average_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_unipass;
@@ -476,12 +469,10 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
     average_pooling_op->context.average_pooling.multipass_ukernel = xnn_params.q8.avgpool.mp;
     average_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_multipass;
   }
+  average_pooling_op->compute.type = xnn_parallelization_type_2d;
+  average_pooling_op->compute.range[0] = batch_size;
+  average_pooling_op->compute.range[1] = output_height;
   average_pooling_op->state = xnn_run_state_ready;
-
-  average_pooling_op->last_input = input;
-  average_pooling_op->last_input_height = input_height;
-  average_pooling_op->last_input_width = input_width;
-  average_pooling_op->valid_batch_size = max(valid_batch_size, batch_size);
 
   return xnn_status_success;
 }
@@ -518,7 +509,6 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
     return xnn_status_success;
   }
 
-  average_pooling_op->batch_size = batch_size;
   average_pooling_op->input_height = input_height;
   average_pooling_op->input_width = input_width;
   average_pooling_op->input = input;
@@ -533,20 +523,6 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
       average_pooling_op->stride_width);
   average_pooling_op->output = output;
 
-  size_t valid_batch_size = 0;
-  if (input == average_pooling_op->last_input &&
-      input_height == average_pooling_op->last_input_height &&
-      input_width == average_pooling_op->last_input_width)
-  {
-    valid_batch_size = average_pooling_op->valid_batch_size;
-    if (batch_size <= valid_batch_size) {
-      average_pooling_op->compute.range[0] = batch_size;
-      average_pooling_op->context.average_pooling.output = output;
-      average_pooling_op->state = xnn_run_state_ready;
-      return xnn_status_success;
-    }
-  }
-
   const size_t pooling_height = average_pooling_op->kernel_height;
   const size_t pooling_width = average_pooling_op->kernel_width;
   const size_t pooling_size = pooling_height * pooling_width;
@@ -558,17 +534,29 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
 
   const size_t step_width = min(average_pooling_op->stride_width, pooling_width);
   const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
-  const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
 
-  const void** indirection_buffer = (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
-  if (indirection_buffer == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
-    return xnn_status_out_of_memory;
+  const size_t last_input_height = average_pooling_op->last_input_height;
+  const size_t last_input_width = average_pooling_op->last_input_width;
+  if (input_height != last_input_height || input_width != last_input_width) {
+    // Micro-kernel may read up to (mr - 1) elements after the end of indirection buffer.
+    const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
+
+    const void** indirection_buffer = (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
+    if (indirection_buffer == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
+      return xnn_status_out_of_memory;
+    }
+    average_pooling_op->indirection_buffer = indirection_buffer;
+
+    // Indirection buffer always setup for batch size 1, larger batch size supported through input_offset argument
+    average_pooling_op->batch_size = 1;
+    xnn_indirection_init_dwconv2d(
+      average_pooling_op, 0, step_height, step_width, 2 /* log2(sizeof(float)) */);
+
+    average_pooling_op->last_input = input;
+    average_pooling_op->last_input_height = input_height;
+    average_pooling_op->last_input_width = input_width;
   }
-  average_pooling_op->indirection_buffer = indirection_buffer;
-
-  xnn_indirection_init_dwconv2d(
-    average_pooling_op, valid_batch_size, step_height, step_width, 2 /* log2(sizeof(float)) */);
 
   const size_t channels = average_pooling_op->channels;
 
@@ -583,9 +571,10 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
       const size_t multipass_adjustment =
         pooling_size > mr ? round_up(pooling_size - mr, qr) + mr - qr : 0;
       average_pooling_op->context.average_pooling = (struct average_pooling_context) {
-        .indirect_input = indirection_buffer,
-        .indirect_input_batch_stride = output_height * indirect_input_height_stride,
+        .indirect_input = average_pooling_op->indirection_buffer,
         .indirect_input_height_stride = indirect_input_height_stride,
+        .input_offset = (size_t) ((uintptr_t) input - (uintptr_t) average_pooling_op->last_input),
+        .input_batch_stride = input_height * input_width * average_pooling_op->input_pixel_stride * sizeof(float),
         .output = output,
         .output_batch_stride = output_height * output_height_stride,
         .output_height_stride = output_height_stride,
@@ -608,9 +597,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
     }
     case xnn_ukernel_type_pixelwise_average_pooling:
     {
-      if (input_height != average_pooling_op->last_input_height ||
-          input_width != average_pooling_op->last_input_width)
-      {
+      if (input_height != last_input_height || input_width != last_input_width) {
         const size_t pixelwise_buffer_size = output_height * output_width * sizeof(float);
         float* pixelwise_buffer = (float*) xnn_reallocate_memory(average_pooling_op->pixelwise_buffer, pixelwise_buffer_size);
         if (pixelwise_buffer == NULL) {
@@ -639,9 +626,10 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
       const size_t multipass_adjustment =
         pooling_size > mr ? round_up(pooling_size - mr, qr) + mr - qr : 0;
       average_pooling_op->context.pixelwise_average_pooling = (struct pixelwise_average_pooling_context) {
-        .indirect_input = indirection_buffer,
-        .indirect_input_batch_stride = output_height * indirect_input_height_stride,
+        .indirect_input = average_pooling_op->indirection_buffer,
         .indirect_input_height_stride = indirect_input_height_stride,
+        .input_batch_stride = input_height * input_width * average_pooling_op->input_pixel_stride * sizeof(float),
+        .input_offset = (size_t) ((uintptr_t) input - (uintptr_t) average_pooling_op->last_input),
         .pixelwise_buffer = average_pooling_op->pixelwise_buffer,
         .pixelwise_buffer_height_stride = output_width * sizeof(float),
         .output = output,
@@ -671,11 +659,6 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
   average_pooling_op->compute.range[0] = batch_size;
   average_pooling_op->compute.range[1] = output_height;
   average_pooling_op->state = xnn_run_state_ready;
-
-  average_pooling_op->last_input = input;
-  average_pooling_op->last_input_height = input_height;
-  average_pooling_op->last_input_width = input_width;
-  average_pooling_op->valid_batch_size = max(valid_batch_size, batch_size);
 
   return xnn_status_success;
 }
