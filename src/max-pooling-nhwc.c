@@ -35,6 +35,13 @@ static inline size_t compute_output_dimension(
   return (padded_input_dimension - effective_kernel_dimension) / stride_dimension + 1;
 }
 
+static inline size_t compute_output_dimension_with_tf_same_padding(
+    size_t input_dimension,
+    size_t stride_dimension)
+{
+  return divide_round_up(input_dimension, stride_dimension);
+}
+
 enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
@@ -126,6 +133,17 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
     goto error;
   }
 
+  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
+  if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
+    if (any_padding) {
+      xnn_log_error(
+        "failed to create Max Pooling operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "TensorFlow SAME padding can't be combined with explicit padding specification",
+        input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+      goto error;
+    }
+  }
+
   status = xnn_status_out_of_memory;
 
   max_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -153,6 +171,11 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
 
   max_pooling_op->type = xnn_operator_type_max_pooling_nhwc_u8;
   max_pooling_op->ukernel.type = xnn_ukernel_type_max_pooling;
+
+  const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && max(pooling_height, pooling_width) != 1;
+  if (tf_same_padding) {
+    max_pooling_op->flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+  }
 
   max_pooling_op->state = xnn_run_state_invalid;
 
@@ -267,6 +290,17 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
     goto error;
   }
 
+  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
+  if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
+    if (any_padding) {
+      xnn_log_error(
+        "failed to create Max Pooling operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "TensorFlow SAME padding can't be combined with explicit padding specification",
+        input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+      goto error;
+    }
+  }
+
   status = xnn_status_out_of_memory;
 
   max_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -294,6 +328,11 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
 
   max_pooling_op->type = xnn_operator_type_max_pooling_nhwc_f32;
   max_pooling_op->ukernel.type = xnn_ukernel_type_max_pooling;
+
+  const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && max(pooling_height, pooling_width) != 1;
+  if (tf_same_padding) {
+    max_pooling_op->flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+  }
 
   max_pooling_op->state = xnn_run_state_invalid;
 
@@ -342,16 +381,34 @@ static enum xnn_status setup_max_pooling2d(
   max_pooling_op->input_width = input_width;
   max_pooling_op->input = input;
 
-  max_pooling_op->output_height = compute_output_dimension(
-      max_pooling_op->padding_top + input_height + max_pooling_op->padding_bottom,
-      max_pooling_op->kernel_height,
-      max_pooling_op->dilation_height,
-      max_pooling_op->stride_height);
-  max_pooling_op->output_width = compute_output_dimension(
-      max_pooling_op->padding_left + input_width + max_pooling_op->padding_right,
-      max_pooling_op->kernel_width,
-      max_pooling_op->dilation_width,
-      max_pooling_op->stride_width);
+  if (max_pooling_op->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
+    max_pooling_op->output_height = compute_output_dimension_with_tf_same_padding(
+        input_height, max_pooling_op->stride_height);
+    max_pooling_op->output_width = compute_output_dimension_with_tf_same_padding(
+        input_width, max_pooling_op->stride_width);
+
+    const uint32_t effective_kernel_height = (max_pooling_op->kernel_height - 1) * max_pooling_op->dilation_height + 1;
+    const uint32_t effective_kernel_width = (max_pooling_op->kernel_width - 1) * max_pooling_op->dilation_width + 1;
+    const uint32_t total_padding_height =
+      (max_pooling_op->output_height - 1) * max_pooling_op->stride_height + effective_kernel_height - input_height;
+    const uint32_t total_padding_width =
+      (max_pooling_op->output_width - 1) * max_pooling_op->stride_width + effective_kernel_width - input_width;
+    max_pooling_op->padding_top = total_padding_height / 2;
+    max_pooling_op->padding_left = total_padding_width / 2;
+    max_pooling_op->padding_bottom = total_padding_height - max_pooling_op->padding_top;
+    max_pooling_op->padding_right = total_padding_width - max_pooling_op->padding_left;
+  } else {
+    max_pooling_op->output_height = compute_output_dimension(
+        max_pooling_op->padding_top + input_height + max_pooling_op->padding_bottom,
+        max_pooling_op->kernel_height,
+        max_pooling_op->dilation_height,
+        max_pooling_op->stride_height);
+    max_pooling_op->output_width = compute_output_dimension(
+        max_pooling_op->padding_left + input_width + max_pooling_op->padding_right,
+        max_pooling_op->kernel_width,
+        max_pooling_op->dilation_width,
+        max_pooling_op->stride_width);
+  }
 
   const size_t pooling_height = max_pooling_op->kernel_height;
   const size_t pooling_width = max_pooling_op->kernel_width;

@@ -51,6 +51,25 @@ TEST(MAX_POOLING_NHWC_U8, unit_batch_small_1xM_pool_with_padding) {
   }
 }
 
+TEST(MAX_POOLING_NHWC_U8, unit_batch_small_1xM_pool_with_tf_same_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t pool_size = 3; pool_size <= xnn_params.u8.maxpool.mr; pool_size++) {
+      for (size_t input_width = pool_size; input_width <= pool_size * 2; input_width++) {
+        MaxPoolingOperatorTester()
+          .batch_size(1)
+          .input_height(2)
+          .input_width(input_width)
+          .padding_tf_same(true)
+          .pooling_height(1)
+          .pooling_width(pool_size)
+          .channels(channels)
+          .TestU8();
+      }
+    }
+  }
+}
+
 TEST(MAX_POOLING_NHWC_U8, unit_batch_small_1xM_pool_with_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
@@ -118,6 +137,25 @@ TEST(MAX_POOLING_NHWC_U8, unit_batch_small_Mx1_pool_with_padding) {
             .channels(channels)
             .TestU8();
         }
+      }
+    }
+  }
+}
+
+TEST(MAX_POOLING_NHWC_U8, unit_batch_small_Mx1_pool_with_tf_same_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t pool_size = 2; pool_size <= xnn_params.u8.maxpool.mr; pool_size++) {
+      for (size_t input_height = pool_size; input_height <= pool_size * 2; input_height++) {
+        MaxPoolingOperatorTester()
+          .batch_size(1)
+          .input_height(input_height)
+          .input_width(3)
+          .padding_tf_same(true)
+          .pooling_height(pool_size)
+          .pooling_width(1)
+          .channels(channels)
+          .TestU8();
       }
     }
   }
@@ -299,6 +337,25 @@ TEST(MAX_POOLING_NHWC_U8, unit_batch_large_1xM_pool_with_padding) {
   }
 }
 
+TEST(MAX_POOLING_NHWC_U8, unit_batch_large_1xM_pool_with_tf_same_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t pool_size = xnn_params.u8.maxpool.mr + 1; pool_size <= xnn_params.u8.maxpool.mr + xnn_params.u8.maxpool.qr; pool_size++) {
+      for (size_t input_width = pool_size; input_width <= pool_size * 2; input_width++) {
+        MaxPoolingOperatorTester()
+          .batch_size(1)
+          .input_height(2)
+          .input_width(input_width)
+          .padding_tf_same(true)
+          .pooling_height(1)
+          .pooling_width(pool_size)
+          .channels(channels)
+          .TestU8();
+      }
+    }
+  }
+}
+
 TEST(MAX_POOLING_NHWC_U8, unit_batch_large_1xM_pool_with_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
@@ -366,6 +423,25 @@ TEST(MAX_POOLING_NHWC_U8, unit_batch_large_Mx1_pool_with_padding) {
             .channels(channels)
             .TestU8();
         }
+      }
+    }
+  }
+}
+
+TEST(MAX_POOLING_NHWC_U8, unit_batch_large_Mx1_pool_with_tf_same_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t pool_size = xnn_params.u8.maxpool.mr + 1; pool_size <= xnn_params.u8.maxpool.mr + xnn_params.u8.maxpool.qr; pool_size++) {
+      for (size_t input_height = pool_size; input_height <= pool_size * 2; input_height++) {
+        MaxPoolingOperatorTester()
+          .batch_size(1)
+          .input_height(input_height)
+          .input_width(3)
+          .padding_tf_same(true)
+          .pooling_height(pool_size)
+          .pooling_width(1)
+          .channels(channels)
+          .TestU8();
       }
     }
   }
@@ -783,6 +859,25 @@ TEST(MAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool_with_padding) {
   }
 }
 
+TEST(MAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool_with_tf_same_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t pool_size = 3; pool_size <= xnn_params.f32.maxpool.mr; pool_size++) {
+      for (size_t input_width = pool_size; input_width <= pool_size * 2; input_width++) {
+        MaxPoolingOperatorTester()
+          .batch_size(1)
+          .input_height(2)
+          .input_width(input_width)
+          .padding_tf_same(true)
+          .pooling_height(1)
+          .pooling_width(pool_size)
+          .channels(channels)
+          .TestF32();
+      }
+    }
+  }
+}
+
 TEST(MAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool_with_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
@@ -850,6 +945,25 @@ TEST(MAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool_with_padding) {
             .channels(channels)
             .TestF32();
         }
+      }
+    }
+  }
+}
+
+TEST(MAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool_with_tf_same_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t pool_size = 2; pool_size <= xnn_params.f32.maxpool.mr; pool_size++) {
+      for (size_t input_height = pool_size; input_height <= pool_size * 2; input_height++) {
+        MaxPoolingOperatorTester()
+          .batch_size(1)
+          .input_height(input_height)
+          .input_width(3)
+          .padding_tf_same(true)
+          .pooling_height(pool_size)
+          .pooling_width(1)
+          .channels(channels)
+          .TestF32();
       }
     }
   }
@@ -1031,6 +1145,25 @@ TEST(MAX_POOLING_NHWC_F32, unit_batch_large_1xM_pool_with_padding) {
   }
 }
 
+TEST(MAX_POOLING_NHWC_F32, unit_batch_large_1xM_pool_with_tf_same_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t pool_size = xnn_params.f32.maxpool.mr + 1; pool_size <= xnn_params.f32.maxpool.mr + xnn_params.f32.maxpool.qr; pool_size++) {
+      for (size_t input_width = pool_size; input_width <= pool_size * 2; input_width++) {
+        MaxPoolingOperatorTester()
+          .batch_size(1)
+          .input_height(2)
+          .input_width(input_width)
+          .padding_tf_same(true)
+          .pooling_height(1)
+          .pooling_width(pool_size)
+          .channels(channels)
+          .TestF32();
+      }
+    }
+  }
+}
+
 TEST(MAX_POOLING_NHWC_F32, unit_batch_large_1xM_pool_with_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
@@ -1098,6 +1231,25 @@ TEST(MAX_POOLING_NHWC_F32, unit_batch_large_Mx1_pool_with_padding) {
             .channels(channels)
             .TestF32();
         }
+      }
+    }
+  }
+}
+
+TEST(MAX_POOLING_NHWC_F32, unit_batch_large_Mx1_pool_with_tf_same_padding) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t pool_size = xnn_params.f32.maxpool.mr + 1; pool_size <= xnn_params.f32.maxpool.mr + xnn_params.f32.maxpool.qr; pool_size++) {
+      for (size_t input_height = pool_size; input_height <= pool_size * 2; input_height++) {
+        MaxPoolingOperatorTester()
+          .batch_size(1)
+          .input_height(input_height)
+          .input_width(3)
+          .padding_tf_same(true)
+          .pooling_height(pool_size)
+          .pooling_width(1)
+          .channels(channels)
+          .TestF32();
       }
     }
   }
