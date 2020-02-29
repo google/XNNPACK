@@ -87,6 +87,32 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->ops[i].inputs[1] = node->inputs.raw[1];
         runtime->ops[i].outputs[0] = node->outputs.raw[0];
         break;
+      case xnn_node_type_average_pooling_2d:
+        status = xnn_create_average_pooling2d_nhwc_f32(
+          node->params.pooling_2d.input_padding_top,
+          node->params.pooling_2d.input_padding_right,
+          node->params.pooling_2d.input_padding_bottom,
+          node->params.pooling_2d.input_padding_left,
+          node->params.pooling_2d.pooling_height,
+          node->params.pooling_2d.pooling_width,
+          node->params.pooling_2d.stride_height,
+          node->params.pooling_2d.stride_width,
+          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* output stride */,
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags,
+          &runtime->ops[i].op);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->ops[i].batch_size = values[node->inputs.raw[0]].shape.dim[0];
+        runtime->ops[i].input_height = values[node->inputs.raw[0]].shape.dim[1];
+        runtime->ops[i].input_width = values[node->inputs.raw[0]].shape.dim[2];
+        runtime->ops[i].inputs[0] = node->inputs.raw[0];
+        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        break;
       case xnn_node_type_convolution_2d:
         status = xnn_create_convolution2d_nhwc_f32(
           node->params.convolution_2d.input_padding_top,
@@ -178,6 +204,34 @@ enum xnn_status xnn_create_runtime_v2(
           goto error;
         }
         runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
+        runtime->ops[i].inputs[0] = node->inputs.raw[0];
+        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        break;
+      case xnn_node_type_max_pooling_2d:
+        status = xnn_create_max_pooling2d_nhwc_f32(
+          node->params.pooling_2d.input_padding_top,
+          node->params.pooling_2d.input_padding_right,
+          node->params.pooling_2d.input_padding_bottom,
+          node->params.pooling_2d.input_padding_left,
+          node->params.pooling_2d.pooling_height,
+          node->params.pooling_2d.pooling_width,
+          node->params.pooling_2d.stride_height,
+          node->params.pooling_2d.stride_width,
+          node->params.pooling_2d.dilation_height,
+          node->params.pooling_2d.dilation_width,
+          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* output stride */,
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags,
+          &runtime->ops[i].op);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->ops[i].batch_size = values[node->inputs.raw[0]].shape.dim[0];
+        runtime->ops[i].input_height = values[node->inputs.raw[0]].shape.dim[1];
+        runtime->ops[i].input_width = values[node->inputs.raw[0]].shape.dim[2];
         runtime->ops[i].inputs[0] = node->inputs.raw[0];
         runtime->ops[i].outputs[0] = node->outputs.raw[0];
         break;
@@ -354,6 +408,18 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[op->outputs[0]].data,
           runtime->threadpool);
         break;
+      case xnn_operator_type_average_pooling_nhwc_f32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
+        status = xnn_setup_average_pooling2d_nhwc_f32(
+          op->op,
+          op->batch_size,
+          op->input_height,
+          op->input_width,
+          runtime->blobs[op->inputs[0]].data,
+          runtime->blobs[op->outputs[0]].data,
+          runtime->threadpool);
+        break;
       case xnn_operator_type_convolution_nhwc_f32:
         assert(runtime->blobs[op->inputs[0]].data != NULL);
         assert(runtime->blobs[op->outputs[0]].data != NULL);
@@ -382,6 +448,18 @@ enum xnn_status xnn_setup_runtime(
         status = xnn_setup_hardswish_nc_f32(
           op->op,
           op->batch_size,
+          runtime->blobs[op->inputs[0]].data,
+          runtime->blobs[op->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_max_pooling_nhwc_f32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
+        status = xnn_setup_max_pooling2d_nhwc_f32(
+          op->op,
+          op->batch_size,
+          op->input_height,
+          op->input_width,
           runtime->blobs[op->inputs[0]].data,
           runtime->blobs[op->outputs[0]].data,
           runtime->threadpool);
