@@ -58,11 +58,13 @@ struct xnn_blob {
 enum xnn_node_type {
   xnn_node_type_invalid = 0,
   xnn_node_type_add2,
+  xnn_node_type_average_pooling_2d,
   xnn_node_type_clamp,
   xnn_node_type_convolution_2d,
   xnn_node_type_depthwise_convolution_2d,
   xnn_node_type_hardswish,
   xnn_node_type_multiply2,
+  xnn_node_type_max_pooling_2d,
   xnn_node_type_prelu,
   xnn_node_type_sigmoid,
   xnn_node_type_softmax,
@@ -102,6 +104,18 @@ struct xnn_node {
       uint32_t depth_multiplier;
       size_t input_channels;
     } depthwise_convolution_2d;
+    struct {
+      uint32_t input_padding_top;
+      uint32_t input_padding_right;
+      uint32_t input_padding_bottom;
+      uint32_t input_padding_left;
+      uint32_t pooling_height;
+      uint32_t pooling_width;
+      uint32_t stride_height;
+      uint32_t stride_width;
+      uint32_t dilation_height;
+      uint32_t dilation_width;
+    } pooling_2d;
   } params;
   struct {
     float output_min;
