@@ -81,7 +81,7 @@ class AlignedAllocator {
     void* memory = nullptr;
     memory = _aligned_malloc(n * sizeof(T), Alignment);
     if (memory == 0) {
-#if !defined(__GNUC__) || defined(__EXCEPTIONS)
+#if !defined(__GNUC__) && !defined(_MSC_VER) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)
       throw std::bad_alloc();
 #endif
     }
