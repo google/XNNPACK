@@ -37,6 +37,8 @@ void* xnn_aligned_allocate(void* context, size_t alignment, size_t size) {
   return malloc(size);
 #elif defined(__ANDROID__)
   return memalign(alignment, size);
+#elif defined(_WIN32)
+  return _aligned_malloc(size, alignment);
 #else
   void* memory_ptr = NULL;
   if (posix_memalign(&memory_ptr, alignment, size) != 0) {
