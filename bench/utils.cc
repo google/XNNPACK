@@ -35,6 +35,8 @@ static void InitWipeBuffer() {
 #if defined(__ANDROID__)
   // memalign is obsolete, but it is the only option on Android until API level 17.
   wipe_buffer = memalign(128, wipe_buffer_size);
+#elif defined(_WIN32)
+  wipe_buffer = _aligned_malloc(wipe_buffer_size, 128);
 #else
   (void) posix_memalign((void**) &wipe_buffer, 128, wipe_buffer_size);
 #endif
