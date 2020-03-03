@@ -91,7 +91,7 @@ Benchmarked on February 12, 2020 with `end2end-bench --benchmark_min_time=5` on 
 - [TensorFlow.js WebAssembly backend](https://github.com/tensorflow/tfjs/tree/master/tfjs-backend-wasm).
 - TensorFlow Lite through the [XNNPACK delegate](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/delegates/xnnpack).
 - [MediaPipe for Web](https://developers.googleblog.com/2020/01/mediapipe-on-web.html).
-- PyTorch integration is ongoing. Follow [PR #32509](https://github.com/pytorch/pytorch/pull/32509) for progress and details.
+- [PyTorch](https://github.com/pytorch/pytorch/tree/master/aten/src/ATen/native/xnnpack).
 
 ## Acknowledgements
 
