@@ -524,6 +524,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8s4-neon.c
   src/f32-igemm/gen/6x8s4-neon.c
   src/f32-igemm/gen/8x8s4-neon.c
+  src/f32-maxpool/9p8x-neon-c4.c
   src/f32-pavgpool/9p8x-neon-c4.c
   src/f32-pavgpool/9x-neon-c4.c
   src/f32-ppmm/gen/4x8-neon.c
