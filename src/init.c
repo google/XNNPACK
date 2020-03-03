@@ -232,7 +232,7 @@ static void init(void) {
       .mr = 7,
     };
     xnn_params.f32.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_ukernel_9p8x__psimd_c4,
+      .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_ukernel_9p8x__neon_c4,
       .mr = 9,
       .qr = 8,
     };
@@ -530,7 +530,7 @@ static void init(void) {
       .mr = 7,
     };
     xnn_params.f32.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_ukernel_9p8x__psimd_c4,
+      .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_ukernel_9p8x__neon_c4,
       .mr = 9,
       .qr = 8,
     };
