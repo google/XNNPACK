@@ -70,7 +70,7 @@
   #define XNN_ARCH_WASMSIMD 0
 #endif
 
-// Define architecture identification macros
+// Define platform identification macros
 
 #if defined(__ANDROID__)
   #define XNN_PLATFORM_ANDROID 1
