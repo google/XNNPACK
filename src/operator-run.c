@@ -20,7 +20,7 @@
 #include <xnnpack/compute.h>
 
 
-void xnn_compute_ggemm(
+void xnn_compute_grouped_gemm(
     const struct gemm_context context[restrict static 1],
     size_t group_index,
     size_t mr_block_start,
@@ -85,7 +85,7 @@ void xnn_compute_spmm(
       &context->params);
 }
 
-void xnn_compute_gigemm(
+void xnn_compute_grouped_igemm(
     const struct igemm_context context[restrict static 1],
     size_t batch_index,
     size_t group_index,
@@ -138,7 +138,7 @@ void xnn_compute_igemm(
       &context->params);
 }
 
-void xnn_compute_gsubgemm2d(
+void xnn_compute_grouped_subgemm2d(
       const struct subgemm_context context[restrict static 1],
       size_t batch_index,
       size_t group_index,
@@ -213,7 +213,7 @@ void xnn_compute_subgemm2d(
       &context->params);
 }
 
-void xnn_compute_gsubconv2d(
+void xnn_compute_grouped_subconv2d(
       const struct subconv_context context[restrict static 1],
       size_t batch_index,
       size_t group_index,

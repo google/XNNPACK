@@ -841,7 +841,7 @@ static enum xnn_status setup_convolution2d_nhwc(
         convolution_op->compute.tile[1] = nc;
       } else {
         convolution_op->compute.type = xnn_parallelization_type_3d_tile_2d;
-        convolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_ggemm;
+        convolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_grouped_gemm;
         convolution_op->compute.range[0] = groups;
         convolution_op->compute.range[1] = batch_output_size;
         convolution_op->compute.range[2] = group_output_channels;
@@ -933,7 +933,7 @@ static enum xnn_status setup_convolution2d_nhwc(
         convolution_op->compute.tile[1] = nc;
       } else {
         convolution_op->compute.type = xnn_parallelization_type_4d_tile_2d;
-        convolution_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_gigemm;
+        convolution_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_igemm;
         convolution_op->compute.range[0] = batch_size;
         convolution_op->compute.range[1] = groups;
         convolution_op->compute.range[2] = output_size;
