@@ -65,7 +65,7 @@ struct gemm_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_ggemm(
+  XNN_PRIVATE void xnn_compute_grouped_gemm(
       const struct gemm_context context[restrict static 1],
       size_t group_index,
       size_t mr_block_start,
@@ -144,7 +144,7 @@ struct igemm_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_gigemm(
+  XNN_PRIVATE void xnn_compute_grouped_igemm(
       const struct igemm_context context[restrict static 1],
       size_t batch_index,
       size_t group_index,
@@ -185,7 +185,7 @@ struct subgemm_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_gsubgemm2d(
+  XNN_PRIVATE void xnn_compute_grouped_subgemm2d(
       const struct subgemm_context context[restrict static 1],
       size_t batch_index,
       size_t group_index,
@@ -229,7 +229,7 @@ struct subconv_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_gsubconv2d(
+  XNN_PRIVATE void xnn_compute_grouped_subconv2d(
       const struct subconv_context context[restrict static 1],
       size_t batch_index,
       size_t group_index,

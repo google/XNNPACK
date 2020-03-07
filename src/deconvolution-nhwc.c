@@ -641,7 +641,7 @@ static enum xnn_status setup_conv_path(
     deconvolution_op->compute.tile[1] = nc;
   } else {
     deconvolution_op->compute.type = xnn_parallelization_type_4d_tile_2d;
-    deconvolution_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_gigemm;
+    deconvolution_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_igemm;
     deconvolution_op->compute.range[0] = batch_size;
     deconvolution_op->compute.range[1] = groups;
     deconvolution_op->compute.range[2] = output_size;
@@ -806,7 +806,7 @@ static enum xnn_status setup_subconv2d_path(
   } else {
     deconvolution_op->compute.type = xnn_parallelization_type_6d_tile_2d;
     deconvolution_op->compute.task_6d_tile_2d = use_gemm ?
-      (pthreadpool_task_6d_tile_2d_t) xnn_compute_gsubgemm2d : (pthreadpool_task_6d_tile_2d_t) xnn_compute_gsubconv2d;
+      (pthreadpool_task_6d_tile_2d_t) xnn_compute_grouped_subgemm2d : (pthreadpool_task_6d_tile_2d_t) xnn_compute_grouped_subconv2d;
     deconvolution_op->compute.range[0] = batch_size;
     deconvolution_op->compute.range[1] = groups;
     deconvolution_op->compute.range[2] = stride_height * stride_width;
