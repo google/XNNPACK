@@ -6,7 +6,7 @@
 # Description:
 #   XNNPACK - optimized floating-point neural network operators library
 
-load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_min_size_copts", "xnnpack_optional_armcl_copts", "xnnpack_optional_armcl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_copts", "xnnpack_std_cxxopts", "xnnpack_unit_test", "xnnpack_visibility")
+load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_min_size_copts", "xnnpack_optional_armcl_copts", "xnnpack_optional_armcl_deps", "xnnpack_optional_dnnl_copts", "xnnpack_optional_dnnl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_copts", "xnnpack_std_cxxopts", "xnnpack_unit_test", "xnnpack_visibility")
 
 licenses(["notice"])
 
@@ -2092,8 +2092,8 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-softmax.cc",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    copts = ["-Wno-unused-function"] + xnnpack_optional_dnnl_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps(),
 )
 
 xnnpack_benchmark(

@@ -38,6 +38,10 @@ def xnnpack_optional_armcl_copts():
     """Compiler flags to optionally enable ARM ComputeLibrary benchmarks."""
     return []
 
+def xnnpack_optional_dnnl_copts():
+    """Compiler flags to optionally enable Intel DNNL benchmarks."""
+    return []
+
 def xnnpack_optional_ruy_deps():
     """Optional Ruy dependencies."""
     return []
@@ -52,6 +56,10 @@ def xnnpack_optional_tflite_deps():
 
 def xnnpack_optional_armcl_deps():
     """Optional ARM ComputeLibrary dependencies."""
+    return []
+
+def xnnpack_optional_dnnl_deps():
+    """Optional Intel DNNL dependencies."""
     return []
 
 def xnnpack_cc_library(
