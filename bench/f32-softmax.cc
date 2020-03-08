@@ -344,80 +344,31 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
 #endif
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  // Parameters auto-tuned for a mix
-  BENCHMARK_CAPTURE(TwoPassSoftMax, avx2_blend,
+  BENCHMARK_CAPTURE(TwoPassSoftMax, avx2_p5,
     xnn_f32_raddextexp_ukernel__avx2_p5_x96,
     xnn_f32_vscaleextexp_ukernel__avx2_p5_x40,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx2_blend,
+  BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx2_p5,
     xnn_f32_rmax_ukernel__avx,
     xnn_f32_raddexpminusmax_ukernel__avx2_p5_x96,
     xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x24,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx2_blend,
+  BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx2_p5,
     xnn_f32_rmax_ukernel__avx,
     xnn_f32_raddstoreexpminusmax_ukernel__avx2_p5_x64_acc2,
     xnn_f32_vscale_ukernel__avx_unroll32,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
 
-  // Parameters auto-tuned for Broadwell
-  BENCHMARK_CAPTURE(TwoPassSoftMax, avx2_broadwell,
-    xnn_f32_raddextexp_ukernel__avx2_p5_x96,
-    xnn_f32_vscaleextexp_ukernel__avx2_p5_x32,
-    benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx2_broadwell,
-    xnn_f32_rmax_ukernel__avx,
-    xnn_f32_raddexpminusmax_ukernel__avx2_p5_x96,
-    xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x24,
-    benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx2_broadwell,
-    xnn_f32_rmax_ukernel__avx,
-    xnn_f32_raddstoreexpminusmax_ukernel__avx2_p5_x64,
-    xnn_f32_vscale_ukernel__avx_unroll32,
-    benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-
-  // Parameters auto-tuned for Zen 2
-  BENCHMARK_CAPTURE(TwoPassSoftMax, avx2_zen2,
-    xnn_f32_raddextexp_ukernel__avx2_p5_x72,
-    xnn_f32_vscaleextexp_ukernel__avx2_p5_x40,
-    benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx2_zen2,
-    xnn_f32_rmax_ukernel__avx,
-    xnn_f32_raddexpminusmax_ukernel__avx2_p5_x80,
-    xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x16,
-    benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx2_zen2,
-    xnn_f32_rmax_ukernel__avx,
-    xnn_f32_raddstoreexpminusmax_ukernel__avx2_p5_x64,
-    xnn_f32_vscale_ukernel__avx_unroll32,
-    benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-
-  // Parameters auto-tuned for Skylake
-  BENCHMARK_CAPTURE(TwoPassSoftMax, avx2_skylake,
-    xnn_f32_raddextexp_ukernel__avx2_p5_x64,
-    xnn_f32_vscaleextexp_ukernel__avx2_p5_x40,
-    benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx2_skylake,
-    xnn_f32_rmax_ukernel__avx,
-    xnn_f32_raddexpminusmax_ukernel__avx2_p5_x64_acc2,
-    xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x24,
-    benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx2_skylake,
-    xnn_f32_rmax_ukernel__avx,
-    xnn_f32_raddstoreexpminusmax_ukernel__avx2_p5_x80_acc2,
-    xnn_f32_vscale_ukernel__avx_unroll32,
-    benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-
-  BENCHMARK_CAPTURE(TwoPassSoftMax, avx512f_skylake,
+  BENCHMARK_CAPTURE(TwoPassSoftMax, avx512f_p5_scalef,
     xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x144_acc3,
     xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_x16,
     benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx512f_skylake,
+  BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx512f_p5_scalef,
     xnn_f32_rmax_ukernel__avx512f,
     xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_x128_acc4,
     xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x16,
     benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx512f_skylake,
+  BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx512f_p5_scalef,
     xnn_f32_rmax_ukernel__avx512f,
     xnn_f32_raddstoreexpminusmax_ukernel__avx512f_p5_scalef_x128_acc2,
     xnn_f32_vscale_ukernel__avx512f_unroll64,
