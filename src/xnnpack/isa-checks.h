@@ -13,7 +13,7 @@
 #include <xnnpack/common.h>
 
 
-#if XNN_ARCH_PNACL || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD
   #define TEST_REQUIRES_PSIMD
 #else
   #define TEST_REQUIRES_PSIMD \

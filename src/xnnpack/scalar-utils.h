@@ -25,7 +25,7 @@
 #include <xnnpack/common.h>
 
 
-#if defined(__clang__) && !defined(__pnacl__)
+#if defined(__clang__)
   #if __clang_major__ == 3 && __clang_minor__ >= 7 || __clang_major__ > 3
     #define XNN_IGNORE_SHIFT_BASE_UB __attribute__((__no_sanitize__("shift-base")))
   #else
