@@ -59,10 +59,6 @@ EMSCRIPTEN_SRCS = [
     "src/emscripten/init.c",
 ]
 
-PNACL_SRCS = [
-    "src/pnacl/init.c",
-]
-
 LINUX_X86_SRCS = [
     "src/x86/linux/cpuinfo.c",
     "src/x86/linux/init.c",

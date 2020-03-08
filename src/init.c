@@ -57,10 +57,10 @@ struct xnn_parameters xnn_params = {
   .initialized = false
 };
 
-#if XNN_ARCH_PNACL || XNN_ARCH_ASMJS || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_ASMJS || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   extern uint32_t xnn_stub_wasm_f32_sub(uint32_t a, uint32_t b);
 #endif
-#if XNN_ARCH_PNACL || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   extern uint32_t xnn_stub_wasm_f32_min(uint32_t a, uint32_t b);
 #endif
 
@@ -1080,7 +1080,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_X32_OPERATORS
 
-#elif XNN_ARCH_PNACL || XNN_ARCH_WASMSIMD
+#elif XNN_ARCH_WASMSIMD
   // Unlike most other architectures, on x86/x86-64 when floating-point instructions
   // have no NaN arguments, but produce NaN output, the output NaN has sign bit set.
   // We use it to distinguish x86/x86-64 from other architectures, by doing subtraction
