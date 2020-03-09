@@ -1618,7 +1618,6 @@ xnnpack_cc_library(
     deps = [
         ":tables",
         "@FP16",
-        "@psimd",  # remove me
         "@pthreadpool",
     ],
 )
