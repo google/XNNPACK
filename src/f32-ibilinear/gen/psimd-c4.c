@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-bilinear/psimd.c.in
+//   Template: src/f32-ibilinear/psimd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
@@ -11,10 +11,10 @@
 
 #include <psimd.h>
 
-#include <xnnpack/bilinear.h>
+#include <xnnpack/ibilinear.h>
 
 
-void xnn_f32_bilinear_ukernel__psimd_c4(
+void xnn_f32_ibilinear_ukernel__psimd_c4(
     size_t output_pixels,
     size_t channels,
     const float**restrict input,

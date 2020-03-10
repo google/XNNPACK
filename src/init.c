@@ -20,7 +20,6 @@
 #include <xnnpack.h>
 #include <xnnpack/argmaxpool.h>
 #include <xnnpack/avgpool.h>
-#include <xnnpack/bilinear.h>
 #include <xnnpack/clamp.h>
 #include <xnnpack/common.h>
 #include <xnnpack/conv.h>
@@ -28,6 +27,7 @@
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/hswish.h>
+#include <xnnpack/ibilinear.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/log.h>
 #include <xnnpack/lut.h>
@@ -249,8 +249,8 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    xnn_params.f32.bilinear = (struct bilinear_parameters) {
-      .ukernel = (xnn_bilinear_ukernel_function) xnn_f32_bilinear_ukernel__neon_c8,
+    xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_f32_ibilinear_ukernel__neon_c8,
       .pixel_tile = 1,
       .channel_tile = 8,
     };
@@ -556,8 +556,8 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    xnn_params.f32.bilinear = (struct bilinear_parameters) {
-      .ukernel = (xnn_bilinear_ukernel_function) xnn_f32_bilinear_ukernel__neonfma_c8,
+    xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_f32_ibilinear_ukernel__neonfma_c8,
       .pixel_tile = 1,
       .channel_tile = 8,
     };
@@ -899,8 +899,8 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    xnn_params.f32.bilinear = (struct bilinear_parameters) {
-      .ukernel = (xnn_bilinear_ukernel_function) xnn_f32_bilinear_ukernel__sse_c8,
+    xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_f32_ibilinear_ukernel__sse_c8,
       .pixel_tile = 1,
       .channel_tile = 8,
     };
@@ -1226,8 +1226,8 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    xnn_params.f32.bilinear = (struct bilinear_parameters) {
-      .ukernel = (xnn_bilinear_ukernel_function) xnn_f32_bilinear_ukernel__psimd_c8,
+    xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_f32_ibilinear_ukernel__psimd_c8,
       .pixel_tile = 1,
       .channel_tile = 8,
     };
@@ -1434,8 +1434,8 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    xnn_params.f32.bilinear = (struct bilinear_parameters) {
-      .ukernel = (xnn_bilinear_ukernel_function) xnn_f32_bilinear_ukernel__scalar_c2,
+    xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_f32_ibilinear_ukernel__scalar_c2,
       .pixel_tile = 1,
       .channel_tile = 2,
     };

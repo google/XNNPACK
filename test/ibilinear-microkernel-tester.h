@@ -21,9 +21,9 @@
 #include <xnnpack/params.h>
 
 
-class BilinearMicrokernelTester {
+class IBilinearMicrokernelTester {
  public:
-  inline BilinearMicrokernelTester& pixels(uint32_t pixels) {
+  inline IBilinearMicrokernelTester& pixels(uint32_t pixels) {
     assert(pixels >= 1);
     this->pixels_ = pixels;
     return *this;
@@ -33,7 +33,7 @@ class BilinearMicrokernelTester {
     return this->pixels_;
   }
 
-  inline BilinearMicrokernelTester& channels(uint32_t channels) {
+  inline IBilinearMicrokernelTester& channels(uint32_t channels) {
     assert(channels >= 1);
     this->channels_ = channels;
     return *this;
@@ -43,7 +43,7 @@ class BilinearMicrokernelTester {
     return this->channels_;
   }
 
-  inline BilinearMicrokernelTester& input_offset(uint32_t input_offset) {
+  inline IBilinearMicrokernelTester& input_offset(uint32_t input_offset) {
     this->input_offset_ = input_offset;
     return *this;
   }
@@ -52,7 +52,7 @@ class BilinearMicrokernelTester {
     return this->input_offset_;
   }
 
-  inline BilinearMicrokernelTester& output_stride(uint32_t output_stride) {
+  inline IBilinearMicrokernelTester& output_stride(uint32_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
@@ -67,7 +67,7 @@ class BilinearMicrokernelTester {
     }
   }
 
-  inline BilinearMicrokernelTester& iterations(size_t iterations) {
+  inline IBilinearMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -76,7 +76,7 @@ class BilinearMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_bilinear_ukernel_function bilinear) const {
+  void Test(xnn_f32_ibilinear_ukernel_function ibilinear) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
@@ -111,7 +111,7 @@ class BilinearMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      bilinear(
+      ibilinear(
         pixels(), channels() * sizeof(float),
         indirection.data(), input_offset() * sizeof(float),
         packed_weights.data(), output.data(),

@@ -727,7 +727,7 @@ typedef void (*xnn_dwconv_mp_ukernel_function)(
     size_t output_increment,
     const void* params);
 
-typedef void (*xnn_f32_bilinear_ukernel_function)(
+typedef void (*xnn_f32_ibilinear_ukernel_function)(
     size_t output_pixels,
     size_t channels,
     const float** input,
@@ -736,7 +736,7 @@ typedef void (*xnn_f32_bilinear_ukernel_function)(
     float* output,
     size_t output_increment);
 
-typedef void (*xnn_bilinear_ukernel_function)(
+typedef void (*xnn_ibilinear_ukernel_function)(
     size_t output_pixels,
     size_t channels,
     const void** input,
@@ -1307,8 +1307,8 @@ struct maxpool_parameters {
   uint8_t qr;
 };
 
-struct bilinear_parameters {
-  xnn_bilinear_ukernel_function ukernel;
+struct ibilinear_parameters {
+  xnn_ibilinear_ukernel_function ukernel;
   // Number of output pixels in a tile.
   // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
   uint8_t pixel_tile;
@@ -1375,7 +1375,7 @@ struct xnn_parameters {
     struct maxpool_parameters maxpool;
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
     // Bilinear interpolation (2D).
-    struct bilinear_parameters bilinear;
+    struct ibilinear_parameters ibilinear;
     xnn_univector_ukernel_function clamp;
     xnn_univector_ukernel_function hswish;
     xnn_univector_ukernel_function sigmoid;

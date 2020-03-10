@@ -195,7 +195,7 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
     .output_pixel_stride = output_pixel_stride_in_bytes,
     .output_batch_stride = output_pixel_stride_in_bytes * output_height * output_width,
     .log2_wsize = 3 /* log2(2 * sizeof(float)) */,
-    .ukernel = xnn_params.f32.bilinear.ukernel,
+    .ukernel = xnn_params.f32.ibilinear.ukernel,
   };
 
   const size_t output_size = output_height * output_width;
@@ -205,7 +205,7 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
     const size_t target_tiles_per_thread = 5;
     const size_t max_output_size_tile = divide_round_up(output_size, num_threads * target_tiles_per_thread);
     if (max_output_size_tile < output_size_tile) {
-      const uint32_t output_size_subtile = xnn_params.f32.bilinear.pixel_tile;
+      const uint32_t output_size_subtile = xnn_params.f32.ibilinear.pixel_tile;
       output_size_tile =
         min(output_size_tile,
           divide_round_up(output_size_tile, max_output_size_tile * output_size_subtile) * output_size_subtile);
