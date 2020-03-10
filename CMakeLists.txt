@@ -183,9 +183,6 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-argmaxpool/9x-scalar-c1.c
   src/f32-avgpool/9p8x-scalar-c1.c
   src/f32-avgpool/9x-scalar-c1.c
-  src/f32-bilinear/gen/scalar-c1.c
-  src/f32-bilinear/gen/scalar-c2.c
-  src/f32-bilinear/gen/scalar-c4.c
   src/f32-clamp/scalar.c
   src/f32-conv-hwc/3x3s2p1c3x4-scalar-1x1.c
   src/f32-conv-hwc/3x3s2p0p1c3x4-scalar-1x1.c
@@ -219,6 +216,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-hswish/gen/scalar-x1.c
   src/f32-hswish/gen/scalar-x2.c
   src/f32-hswish/gen/scalar-x4.c
+  src/f32-ibilinear/gen/scalar-c1.c
+  src/f32-ibilinear/gen/scalar-c2.c
+  src/f32-ibilinear/gen/scalar-c4.c
   src/f32-igemm/gen/1x4-scalar.c
   src/f32-igemm/gen/2x4-scalar.c
   src/f32-igemm/gen/4x2-scalar.c
@@ -352,8 +352,6 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-argmaxpool/9x-psimd-c4.c
   src/f32-avgpool/9p8x-psimd-c4.c
   src/f32-avgpool/9x-psimd-c4.c
-  src/f32-bilinear/gen/psimd-c4.c
-  src/f32-bilinear/gen/psimd-c8.c
   src/f32-clamp/psimd.c
   src/f32-dwconv/gen/up4x25-psimd-acc2.c
   src/f32-dwconv/gen/up4x25-psimd.c
@@ -390,6 +388,8 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/6x8s4-psimd.c
   src/f32-hswish/gen/psimd-x4.c
   src/f32-hswish/gen/psimd-x8.c
+  src/f32-ibilinear/gen/psimd-c4.c
+  src/f32-ibilinear/gen/psimd-c8.c
   src/f32-igemm/gen/1x8-psimd-loadsplat.c
   src/f32-igemm/gen/1x8-psimd-splat.c
   src/f32-igemm/gen/1x8s4-psimd.c
@@ -471,8 +471,6 @@ SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
 SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-neon-c4.c
   src/f32-avgpool/9x-neon-c4.c
-  src/f32-bilinear/gen/neon-c4.c
-  src/f32-bilinear/gen/neon-c8.c
   src/f32-clamp/neon.c
   src/f32-dwconv/gen/up4x9-neon.c
   src/f32-dwconv/gen/up4x9-neon-acc2.c
@@ -514,6 +512,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/8x8s4-neon.c
   src/f32-hswish/gen/neon-x4.c
   src/f32-hswish/gen/neon-x8.c
+  src/f32-ibilinear/gen/neon-c4.c
+  src/f32-ibilinear/gen/neon-c8.c
   src/f32-igemm/gen/1x8-neon-lane-ld64.c
   src/f32-igemm/gen/4x2-neon-lane-ld64.c
   src/f32-igemm/gen/4x4-neon-lane-ld64.c
@@ -641,8 +641,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/requantization/gemmlowp-neon.c)
 
 SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
-  src/f32-bilinear/gen/neonfma-c4.c
-  src/f32-bilinear/gen/neonfma-c8.c
+  src/f32-ibilinear/gen/neonfma-c4.c
+  src/f32-ibilinear/gen/neonfma-c8.c
   src/f32-igemm/gen/1x8-neonfma-dup-ld64.c
   src/f32-igemm/gen/4x8-neonfma-dup-ld128.c
   src/f32-igemm/gen/4x8-neonfma-dup-ld64.c
@@ -867,8 +867,6 @@ SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
 SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-sse-c4.c
   src/f32-avgpool/9x-sse-c4.c
-  src/f32-bilinear/gen/sse-c4.c
-  src/f32-bilinear/gen/sse-c8.c
   src/f32-clamp/sse.c
   src/f32-dwconv-spchw/3x3p1-sse.c
   src/f32-dwconv-spchw/3x3s2p1-sse.c
@@ -902,6 +900,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/4x8s4-sse.c
   src/f32-hswish/gen/sse-x4.c
   src/f32-hswish/gen/sse-x8.c
+  src/f32-ibilinear/gen/sse-c4.c
+  src/f32-ibilinear/gen/sse-c8.c
   src/f32-igemm/gen/1x8-sse-dup.c
   src/f32-igemm/gen/1x8-sse-load1.c
   src/f32-igemm/gen/1x8s4-sse.c
@@ -1893,15 +1893,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-avgpool-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-avgpool-test f32-avgpool-test)
 
-  ADD_EXECUTABLE(f32-bilinear-test test/f32-bilinear.cc)
-  SET_TARGET_PROPERTIES(f32-bilinear-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-bilinear-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-bilinear-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-bilinear-test f32-bilinear-test)
-
   ADD_EXECUTABLE(f32-clamp-test test/f32-clamp.cc)
   SET_TARGET_PROPERTIES(f32-clamp-test PROPERTIES
     CXX_STANDARD 11
@@ -1991,6 +1982,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-hswish-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-hswish-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-hswish-test f32-hswish-test)
+
+  ADD_EXECUTABLE(f32-ibilinear-test test/f32-ibilinear.cc)
+  SET_TARGET_PROPERTIES(f32-ibilinear-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-ibilinear-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-ibilinear-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-ibilinear-test f32-ibilinear-test)
 
   ADD_EXECUTABLE(f32-igemm-test test/f32-igemm.cc)
   SET_TARGET_PROPERTIES(f32-igemm-test PROPERTIES

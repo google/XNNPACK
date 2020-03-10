@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-bilinear/neon.c.in
+//   Template: src/f32-ibilinear/neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
@@ -12,10 +12,10 @@
 #include <arm_neon.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/bilinear.h>
+#include <xnnpack/ibilinear.h>
 
 
-void xnn_f32_bilinear_ukernel__neonfma_c8(
+void xnn_f32_ibilinear_ukernel__neonfma_c4(
     size_t output_pixels,
     size_t channels,
     const float**restrict input,
@@ -42,47 +42,6 @@ void xnn_f32_bilinear_ukernel__neonfma_c8(
     #endif
 
     size_t c = channels;
-    for (; c >= 8 * sizeof(float); c -= 8 * sizeof(float)) {
-      const float32x4_t vtl0123 = vld1q_f32(i0); i0 += 4;
-      const float32x4_t vtr0123 = vld1q_f32(i1); i1 += 4;
-      const float32x4_t vbl0123 = vld1q_f32(i2); i2 += 4;
-      const float32x4_t vbr0123 = vld1q_f32(i3); i3 += 4;
-      const float32x4_t vtl4567 = vld1q_f32(i0); i0 += 4;
-      const float32x4_t vtr4567 = vld1q_f32(i1); i1 += 4;
-      const float32x4_t vbl4567 = vld1q_f32(i2); i2 += 4;
-      const float32x4_t vbr4567 = vld1q_f32(i3); i3 += 4;
-
-      const float32x4_t vtd0123 = vsubq_f32(vtr0123, vtl0123);
-      const float32x4_t vbd0123 = vsubq_f32(vbr0123, vbl0123);
-      const float32x4_t vtd4567 = vsubq_f32(vtr4567, vtl4567);
-      const float32x4_t vbd4567 = vsubq_f32(vbr4567, vbl4567);
-
-      #if XNN_ARCH_ARM
-      const float32x4_t vt0123 = vfmaq_f32(vtl0123, vtd0123, valphah);
-      const float32x4_t vb0123 = vfmaq_f32(vbl0123, vbd0123, valphah);
-      const float32x4_t vt4567 = vfmaq_f32(vtl4567, vtd4567, valphah);
-      const float32x4_t vb4567 = vfmaq_f32(vbl4567, vbd4567, valphah);
-      #else
-      const float32x4_t vt0123 = vfmaq_lane_f32(vtl0123, vtd0123, valphahv, 0);
-      const float32x4_t vb0123 = vfmaq_lane_f32(vbl0123, vbd0123, valphahv, 0);
-      const float32x4_t vt4567 = vfmaq_lane_f32(vtl4567, vtd4567, valphahv, 0);
-      const float32x4_t vb4567 = vfmaq_lane_f32(vbl4567, vbd4567, valphahv, 0);
-      #endif
-
-      const float32x4_t vd0123 = vsubq_f32(vb0123, vt0123);
-      const float32x4_t vd4567 = vsubq_f32(vb4567, vt4567);
-
-      #if XNN_ARCH_ARM
-      const float32x4_t vo0123 = vfmaq_f32(vt0123, vd0123, valphav);
-      const float32x4_t vo4567 = vfmaq_f32(vt4567, vd4567, valphav);
-      #else
-      const float32x4_t vo0123 = vfmaq_lane_f32(vt0123, vd0123, valphahv, 1);
-      const float32x4_t vo4567 = vfmaq_lane_f32(vt4567, vd4567, valphahv, 1);
-      #endif
-
-      vst1q_f32(output, vo0123); output += 4;
-      vst1q_f32(output, vo4567); output += 4;
-    }
     for (; c >= 4 * sizeof(float); c -= 4 * sizeof(float)) {
       const float32x4_t vtl0123 = vld1q_f32(i0); i0 += 4;
       const float32x4_t vtr0123 = vld1q_f32(i1); i1 += 4;
@@ -108,8 +67,7 @@ void xnn_f32_bilinear_ukernel__neonfma_c8(
       const float32x4_t vo0123 = vfmaq_lane_f32(vt0123, vd0123, valphahv, 1);
       #endif
 
-      vst1q_f32(output, vo0123);
-      output += 4;
+      vst1q_f32(output, vo0123); output += 4;
     }
     if XNN_UNLIKELY(c != 0) {
       const float32x4_t vtl0123 = vld1q_f32(i0);

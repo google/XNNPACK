@@ -11,10 +11,10 @@ $ABC = "0123456789ABCDEFGHIJKLMN"
 
 #include <psimd.h>
 
-#include <xnnpack/bilinear.h>
+#include <xnnpack/ibilinear.h>
 
 
-void xnn_f32_bilinear_ukernel__psimd_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
+void xnn_f32_ibilinear_ukernel__psimd_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
     size_t output_pixels,
     size_t channels,
     const float**restrict input,

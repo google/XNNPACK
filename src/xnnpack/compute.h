@@ -567,7 +567,7 @@ struct resize_bilinear_context {
   // log2(sizeof(weight element)).
   uint32_t log2_wsize;
   // Pointer to BILINEAR micro-kernel function.
-  xnn_bilinear_ukernel_function ukernel;
+  xnn_ibilinear_ukernel_function ukernel;
 };
 
 #ifndef __cplusplus
