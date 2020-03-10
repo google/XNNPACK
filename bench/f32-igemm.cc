@@ -311,6 +311,10 @@ static void IGEMMBenchmark(benchmark::State& state,
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53, 6, 8, 1, 1);
   }
 
+  static void f32_igemm_6x8__aarch64_neonfma_cortex_a55(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a55, 6, 8, 1, 1);
+  }
+
   static void f32_igemm_6x8__aarch64_neonfma_cortex_a73(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a73, 6, 8, 1, 1);
   }
@@ -362,6 +366,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_5x8__aarch64_neonfma_cortex_a57)
   BENCHMARK_CONV(f32_igemm_5x8__aarch64_neonfma_cortex_a75)
   BENCHMARK_CONV(f32_igemm_6x8__aarch64_neonfma_cortex_a53)
+  BENCHMARK_CONV(f32_igemm_6x8__aarch64_neonfma_cortex_a55)
   BENCHMARK_CONV(f32_igemm_6x8__aarch64_neonfma_cortex_a73)
   BENCHMARK_CONV(f32_igemm_6x8__aarch64_neonfma_cortex_a57)
   BENCHMARK_CONV(f32_igemm_6x8__aarch64_neonfma_cortex_a75)
