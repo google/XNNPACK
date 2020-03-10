@@ -14,7 +14,7 @@
 #include <xnnpack/requantization-stubs.h>
 #include <xnnpack/scalar-utils.h>
 
-#include "gemmlowp-scalar.h"
+#include "gemmlowp-requantization.h"
 
 
 void xnn_requantize_gemmlowp__scalar(
