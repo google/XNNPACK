@@ -34,6 +34,10 @@
   k-block: 4
   pipelined: true
   assembly: true
+- name: xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a55
+  k-block: 4
+  pipelined: true
+  assembly: true
 - name: xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a57
   k-block: 4
   assembly: true

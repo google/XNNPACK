@@ -69,6 +69,9 @@ tools/xngen src/f32-gemm/5x8-aarch64-neonfma-cortex-a75.S.in  -D INC=1 -D PREFET
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a53.S.in  -D INC=0 -o src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a53.S
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a53.S.in  -D INC=1 -o src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a53.S
 
+tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a55.S.in  -D INC=0 -o src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a55.S
+tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a55.S.in  -D INC=1 -o src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a55.S
+
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a73.S.in  -D INC=0 -o src/f32-gemm/gen/6x8-aarch64-neonfma-cortex-a73.S
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a73.S.in  -D INC=1 -o src/f32-gemm/gen-inc/6x8-aarch64-neonfma-cortex-a73.S
 
