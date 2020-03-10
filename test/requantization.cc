@@ -26,63 +26,63 @@ TEST(PRECISE__SCALAR_UNSIGNED32, exact_divide_by_po2) {
   for (uint32_t s = 1; s < 32; s++) {
     RequantizationTester()
       .s(s)
-      .testExactDivideByPO2(xnn_requantize_precise__scalar_unsigned32);
+      .TestExactDivideByPO2(xnn_requantize_precise__scalar_unsigned32);
   }
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED32, exact_divide_by_po2_with_zero_point) {
-  for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_precise__scalar_unsigned32);
+        .TestExactDivideByPO2(xnn_requantize_precise__scalar_unsigned32);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_up) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingUp(xnn_requantize_precise__scalar_unsigned32);
+        .TestDivideByPO2WithRoundingUp(xnn_requantize_precise__scalar_unsigned32);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_down) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingDown(xnn_requantize_precise__scalar_unsigned32);
+        .TestDivideByPO2WithRoundingDown(xnn_requantize_precise__scalar_unsigned32);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_away) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingAway(xnn_requantize_precise__scalar_unsigned32);
+        .TestDivideByPO2WithRoundingAway(xnn_requantize_precise__scalar_unsigned32);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED32, special_cases) {
   RequantizationTester()
-    .testSpecialCases(xnn_requantize_precise__scalar_unsigned32);
+    .TestSpecialCases(xnn_requantize_precise__scalar_unsigned32);
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED32, random_cases) {
   RequantizationTester()
     .iterations(100)
-    .testRandomCasesPrecise(xnn_requantize_precise__scalar_unsigned32);
+    .TestRandomCasesPrecise(xnn_requantize_precise__scalar_unsigned32);
 }
 
 
@@ -94,63 +94,63 @@ TEST(PRECISE__SCALAR_UNSIGNED64, exact_divide_by_po2) {
   for (uint32_t s = 1; s < 32; s++) {
     RequantizationTester()
       .s(s)
-      .testExactDivideByPO2(xnn_requantize_precise__scalar_unsigned64);
+      .TestExactDivideByPO2(xnn_requantize_precise__scalar_unsigned64);
   }
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED64, exact_divide_by_po2_with_zero_point) {
-  for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_precise__scalar_unsigned64);
+        .TestExactDivideByPO2(xnn_requantize_precise__scalar_unsigned64);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_up) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingUp(xnn_requantize_precise__scalar_unsigned64);
+        .TestDivideByPO2WithRoundingUp(xnn_requantize_precise__scalar_unsigned64);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_down) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingDown(xnn_requantize_precise__scalar_unsigned64);
+        .TestDivideByPO2WithRoundingDown(xnn_requantize_precise__scalar_unsigned64);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_away) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingAway(xnn_requantize_precise__scalar_unsigned64);
+        .TestDivideByPO2WithRoundingAway(xnn_requantize_precise__scalar_unsigned64);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED64, special_cases) {
   RequantizationTester()
-    .testSpecialCases(xnn_requantize_precise__scalar_unsigned64);
+    .TestSpecialCases(xnn_requantize_precise__scalar_unsigned64);
 }
 
 TEST(PRECISE__SCALAR_UNSIGNED64, random_cases) {
   RequantizationTester()
     .iterations(100)
-    .testRandomCasesPrecise(xnn_requantize_precise__scalar_unsigned64);
+    .TestRandomCasesPrecise(xnn_requantize_precise__scalar_unsigned64);
 }
 
 
@@ -162,63 +162,63 @@ TEST(PRECISE__SCALAR_SIGNED64, exact_divide_by_po2) {
   for (uint32_t s = 1; s < 32; s++) {
     RequantizationTester()
       .s(s)
-      .testExactDivideByPO2(xnn_requantize_precise__scalar_signed64);
+      .TestExactDivideByPO2(xnn_requantize_precise__scalar_signed64);
   }
 }
 
 TEST(PRECISE__SCALAR_SIGNED64, exact_divide_by_po2_with_zero_point) {
-  for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_precise__scalar_signed64);
+        .TestExactDivideByPO2(xnn_requantize_precise__scalar_signed64);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_SIGNED64, divide_by_po2_with_rounding_up) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingUp(xnn_requantize_precise__scalar_signed64);
+        .TestDivideByPO2WithRoundingUp(xnn_requantize_precise__scalar_signed64);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_SIGNED64, divide_by_po2_with_rounding_down) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingDown(xnn_requantize_precise__scalar_signed64);
+        .TestDivideByPO2WithRoundingDown(xnn_requantize_precise__scalar_signed64);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_SIGNED64, divide_by_po2_with_rounding_away) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingAway(xnn_requantize_precise__scalar_signed64);
+        .TestDivideByPO2WithRoundingAway(xnn_requantize_precise__scalar_signed64);
     }
   }
 }
 
 TEST(PRECISE__SCALAR_SIGNED64, special_cases) {
   RequantizationTester()
-    .testSpecialCases(xnn_requantize_precise__scalar_signed64);
+    .TestSpecialCases(xnn_requantize_precise__scalar_signed64);
 }
 
 TEST(PRECISE__SCALAR_SIGNED64, random_cases) {
   RequantizationTester()
     .iterations(100)
-    .testRandomCasesPrecise(xnn_requantize_precise__scalar_signed64);
+    .TestRandomCasesPrecise(xnn_requantize_precise__scalar_signed64);
 }
 
 
@@ -229,7 +229,7 @@ TEST(PRECISE__SCALAR_SIGNED64, random_cases) {
 TEST(FP32__SCALAR_LRINTF, random_cases) {
   RequantizationTester()
     .iterations(1000)
-    .testRandomCasesApproximate(xnn_requantize_fp32__scalar_lrintf);
+    .TestRandomCasesApproximate(xnn_requantize_fp32__scalar_lrintf);
 }
 
 
@@ -240,7 +240,7 @@ TEST(FP32__SCALAR_LRINTF, random_cases) {
 TEST(FP32__SCALAR_MAGIC, random_cases) {
   RequantizationTester()
     .iterations(1000)
-    .testRandomCasesApproximate(xnn_requantize_fp32__scalar_magic);
+    .TestRandomCasesApproximate(xnn_requantize_fp32__scalar_magic);
 }
 
 
@@ -252,28 +252,28 @@ TEST(Q31__SCALAR, exact_divide_by_po2) {
   for (uint32_t s = 1; s < 32; s++) {
     RequantizationTester()
       .s(s)
-      .testExactDivideByPO2(xnn_requantize_q31__scalar);
+      .TestExactDivideByPO2(xnn_requantize_q31__scalar);
   }
 }
 
 TEST(Q31__SCALAR, exact_divide_by_po2_with_zero_point) {
-  for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_q31__scalar);
+        .TestExactDivideByPO2(xnn_requantize_q31__scalar);
     }
   }
 }
 
 TEST(Q31__SCALAR, divide_by_po2_with_rounding_up) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingUp(xnn_requantize_q31__scalar);
+        .TestDivideByPO2WithRoundingUp(xnn_requantize_q31__scalar);
     }
   }
 }
@@ -281,31 +281,31 @@ TEST(Q31__SCALAR, divide_by_po2_with_rounding_up) {
 /* No rounding down Test - it fails because of upward bias in multiplication */
 
 TEST(Q31__SCALAR, divide_by_po2_with_rounding_away) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
-        .zeroPoint(zeroPoint)
+        .zero_point(zero_point)
         .s(s)
-        .testDivideByPO2WithRoundingAway(xnn_requantize_q31__scalar);
+        .TestDivideByPO2WithRoundingAway(xnn_requantize_q31__scalar);
     }
   }
 }
 
 TEST(Q31__SCALAR, special_cases) {
   RequantizationTester()
-    .testSpecialCases(xnn_requantize_q31__scalar);
+    .TestSpecialCases(xnn_requantize_q31__scalar);
 }
 
 TEST(Q31__SCALAR, random_cases) {
   RequantizationTester()
     .iterations(100)
-    .testRandomCasesApproximate(xnn_requantize_q31__scalar);
+    .TestRandomCasesApproximate(xnn_requantize_q31__scalar);
 }
 
 TEST(Q31__SCALAR, random_match_gemmlowp) {
   RequantizationTester()
     .iterations(100)
-    .testRandomCasesAgainstReference(xnn_requantize_q31__scalar, xnn_requantize_gemmlowp__scalar);
+    .TestRandomCasesAgainstReference(xnn_requantize_q31__scalar, xnn_requantize_gemmlowp__scalar);
 }
 
 
@@ -316,87 +316,89 @@ TEST(Q31__SCALAR, random_match_gemmlowp) {
 TEST(GEMMLOWP__SCALAR, random_cases) {
   RequantizationTester()
     .iterations(100)
-    .testRandomCasesApproximate(xnn_requantize_gemmlowp__scalar);
+    .TestRandomCasesApproximate(xnn_requantize_gemmlowp__scalar);
 }
 
 
-/*
- * Precise PSIMD implementation using unsigned 32-bit arithmetics.
- */
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+  /*
+   * Precise PSIMD implementation using unsigned 32-bit arithmetics.
+   */
 
-TEST(PRECISE__PSIMD, exact_divide_by_po2) {
-  for (uint32_t s = 1; s < 32; s++) {
+  TEST(PRECISE__PSIMD, exact_divide_by_po2) {
+    for (uint32_t s = 1; s < 32; s++) {
+      RequantizationTester()
+        .s(s)
+        .TestExactDivideByPO2(xnn_requantize_precise__psimd);
+    }
+  }
+
+  TEST(PRECISE__PSIMD, exact_divide_by_po2_with_zero_point) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .s(s)
+          .TestExactDivideByPO2(xnn_requantize_precise__psimd);
+      }
+    }
+  }
+
+  TEST(PRECISE__PSIMD, divide_by_po2_with_rounding_up) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .s(s)
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_precise__psimd);
+      }
+    }
+  }
+
+  TEST(PRECISE__PSIMD, divide_by_po2_with_rounding_down) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .s(s)
+          .TestDivideByPO2WithRoundingDown(xnn_requantize_precise__psimd);
+      }
+    }
+  }
+
+  TEST(PRECISE__PSIMD, divide_by_po2_with_rounding_away) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .s(s)
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_precise__psimd);
+      }
+    }
+  }
+
+  TEST(PRECISE__PSIMD, special_cases) {
     RequantizationTester()
-      .s(s)
-      .testExactDivideByPO2(xnn_requantize_precise__psimd);
+      .TestSpecialCases(xnn_requantize_precise__psimd);
   }
-}
 
-TEST(PRECISE__PSIMD, exact_divide_by_po2_with_zero_point) {
-  for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
-    for (uint32_t s = 1; s < 32; s++) {
-      RequantizationTester()
-        .zeroPoint(zeroPoint)
-        .s(s)
-        .testExactDivideByPO2(xnn_requantize_precise__psimd);
-    }
+  TEST(PRECISE__PSIMD, random_cases) {
+    RequantizationTester()
+      .iterations(100)
+      .TestRandomCasesPrecise(xnn_requantize_precise__psimd);
   }
-}
 
-TEST(PRECISE__PSIMD, divide_by_po2_with_rounding_up) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
-    for (uint32_t s = 1; s < 32; s++) {
-      RequantizationTester()
-        .zeroPoint(zeroPoint)
-        .s(s)
-        .testDivideByPO2WithRoundingUp(xnn_requantize_precise__psimd);
-    }
+
+  /*
+   * FP32-based PSIMD implementation using magic trick for FP32->INT32 conversion.
+   */
+
+  TEST(FP32__PSIMD, random_cases) {
+    RequantizationTester()
+      .iterations(1000)
+      .TestRandomCasesApproximate(xnn_requantize_fp32__psimd);
   }
-}
-
-TEST(PRECISE__PSIMD, divide_by_po2_with_rounding_down) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
-    for (uint32_t s = 1; s < 32; s++) {
-      RequantizationTester()
-        .zeroPoint(zeroPoint)
-        .s(s)
-        .testDivideByPO2WithRoundingDown(xnn_requantize_precise__psimd);
-    }
-  }
-}
-
-TEST(PRECISE__PSIMD, divide_by_po2_with_rounding_away) {
-  for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
-    for (uint32_t s = 1; s < 32; s++) {
-      RequantizationTester()
-        .zeroPoint(zeroPoint)
-        .s(s)
-        .testDivideByPO2WithRoundingAway(xnn_requantize_precise__psimd);
-    }
-  }
-}
-
-TEST(PRECISE__PSIMD, special_cases) {
-  RequantizationTester()
-    .testSpecialCases(xnn_requantize_precise__psimd);
-}
-
-TEST(PRECISE__PSIMD, random_cases) {
-  RequantizationTester()
-    .iterations(100)
-    .testRandomCasesPrecise(xnn_requantize_precise__psimd);
-}
-
-
-/*
- * FP32-based PSIMD implementation using magic trick for FP32->INT32 conversion.
- */
-
-TEST(FP32__PSIMD, random_cases) {
-  RequantizationTester()
-    .iterations(1000)
-    .testRandomCasesApproximate(xnn_requantize_fp32__psimd);
-}
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -408,63 +410,63 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_precise__sse2);
+        .TestExactDivideByPO2(xnn_requantize_precise__sse2);
     }
   }
 
   TEST(PRECISE__SSE2, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_precise__sse2);
+          .TestExactDivideByPO2(xnn_requantize_precise__sse2);
       }
     }
   }
 
   TEST(PRECISE__SSE2, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_precise__sse2);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_precise__sse2);
       }
     }
   }
 
   TEST(PRECISE__SSE2, divide_by_po2_with_rounding_down) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingDown(xnn_requantize_precise__sse2);
+          .TestDivideByPO2WithRoundingDown(xnn_requantize_precise__sse2);
       }
     }
   }
 
   TEST(PRECISE__SSE2, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_precise__sse2);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_precise__sse2);
       }
     }
   }
 
   TEST(PRECISE__SSE2, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_precise__sse2);
+      .TestSpecialCases(xnn_requantize_precise__sse2);
   }
 
   TEST(PRECISE__SSE2, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesPrecise(xnn_requantize_precise__sse2);
+      .TestRandomCasesPrecise(xnn_requantize_precise__sse2);
   }
 
 
@@ -476,63 +478,63 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_precise__ssse3);
+        .TestExactDivideByPO2(xnn_requantize_precise__ssse3);
     }
   }
 
   TEST(PRECISE__SSSE3, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_precise__ssse3);
+          .TestExactDivideByPO2(xnn_requantize_precise__ssse3);
       }
     }
   }
 
   TEST(PRECISE__SSSE3, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_precise__ssse3);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_precise__ssse3);
       }
     }
   }
 
   TEST(PRECISE__SSSE3, divide_by_po2_with_rounding_down) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingDown(xnn_requantize_precise__ssse3);
+          .TestDivideByPO2WithRoundingDown(xnn_requantize_precise__ssse3);
       }
     }
   }
 
   TEST(PRECISE__SSSE3, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_precise__ssse3);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_precise__ssse3);
       }
     }
   }
 
   TEST(PRECISE__SSSE3, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_precise__ssse3);
+      .TestSpecialCases(xnn_requantize_precise__ssse3);
   }
 
   TEST(PRECISE__SSSE3, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesPrecise(xnn_requantize_precise__ssse3);
+      .TestRandomCasesPrecise(xnn_requantize_precise__ssse3);
   }
 
 
@@ -544,63 +546,63 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_precise__sse4);
+        .TestExactDivideByPO2(xnn_requantize_precise__sse4);
     }
   }
 
   TEST(PRECISE__SSE4, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_precise__sse4);
+          .TestExactDivideByPO2(xnn_requantize_precise__sse4);
       }
     }
   }
 
   TEST(PRECISE__SSE4, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_precise__sse4);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_precise__sse4);
       }
     }
   }
 
   TEST(PRECISE__SSE4, divide_by_po2_with_rounding_down) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingDown(xnn_requantize_precise__sse4);
+          .TestDivideByPO2WithRoundingDown(xnn_requantize_precise__sse4);
       }
     }
   }
 
   TEST(PRECISE__SSE4, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_precise__sse4);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_precise__sse4);
       }
     }
   }
 
   TEST(PRECISE__SSE4, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_precise__sse4);
+      .TestSpecialCases(xnn_requantize_precise__sse4);
   }
 
   TEST(PRECISE__SSE4, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesPrecise(xnn_requantize_precise__sse4);
+      .TestRandomCasesPrecise(xnn_requantize_precise__sse4);
   }
 
 
@@ -611,7 +613,7 @@ TEST(FP32__PSIMD, random_cases) {
   TEST(FP32__SSE2, random_cases) {
     RequantizationTester()
       .iterations(1000)
-      .testRandomCasesApproximate(xnn_requantize_fp32__sse2);
+      .TestRandomCasesApproximate(xnn_requantize_fp32__sse2);
   }
 
 
@@ -623,28 +625,28 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_q31__sse2);
+        .TestExactDivideByPO2(xnn_requantize_q31__sse2);
     }
   }
 
   TEST(Q31__SSE2, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_q31__sse2);
+          .TestExactDivideByPO2(xnn_requantize_q31__sse2);
       }
     }
   }
 
   TEST(Q31__SSE2, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_q31__sse2);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_q31__sse2);
       }
     }
   }
@@ -652,31 +654,31 @@ TEST(FP32__PSIMD, random_cases) {
   /* No rounding down Test - it fails because of upward bias in multiplication */
 
   TEST(Q31__SSE2, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_q31__sse2);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_q31__sse2);
       }
     }
   }
 
   TEST(Q31__SSE2, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_q31__sse2);
+      .TestSpecialCases(xnn_requantize_q31__sse2);
   }
 
   TEST(Q31__SSE2, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesApproximate(xnn_requantize_q31__sse2);
+      .TestRandomCasesApproximate(xnn_requantize_q31__sse2);
   }
 
   TEST(Q31__SSE2, random_match_gemmlowp) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesAgainstReference(xnn_requantize_q31__sse2, xnn_requantize_gemmlowp__sse2);
+      .TestRandomCasesAgainstReference(xnn_requantize_q31__sse2, xnn_requantize_gemmlowp__sse2);
   }
 
 
@@ -688,28 +690,28 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_q31__ssse3);
+        .TestExactDivideByPO2(xnn_requantize_q31__ssse3);
     }
   }
 
   TEST(Q31__SSSE3, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_q31__ssse3);
+          .TestExactDivideByPO2(xnn_requantize_q31__ssse3);
       }
     }
   }
 
   TEST(Q31__SSSE3, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_q31__ssse3);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_q31__ssse3);
       }
     }
   }
@@ -717,31 +719,31 @@ TEST(FP32__PSIMD, random_cases) {
   /* No rounding down Test - it fails because of upward bias in multiplication */
 
   TEST(Q31__SSSE3, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_q31__ssse3);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_q31__ssse3);
       }
     }
   }
 
   TEST(Q31__SSSE3, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_q31__ssse3);
+      .TestSpecialCases(xnn_requantize_q31__ssse3);
   }
 
   TEST(Q31__SSSE3, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesApproximate(xnn_requantize_q31__ssse3);
+      .TestRandomCasesApproximate(xnn_requantize_q31__ssse3);
   }
 
   TEST(Q31__SSSE3, random_match_gemmlowp) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesAgainstReference(xnn_requantize_q31__ssse3, xnn_requantize_gemmlowp__ssse3);
+      .TestRandomCasesAgainstReference(xnn_requantize_q31__ssse3, xnn_requantize_gemmlowp__ssse3);
   }
 
 
@@ -753,28 +755,28 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_q31__sse4);
+        .TestExactDivideByPO2(xnn_requantize_q31__sse4);
     }
   }
 
   TEST(Q31__SSE4, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_q31__sse4);
+          .TestExactDivideByPO2(xnn_requantize_q31__sse4);
       }
     }
   }
 
   TEST(Q31__SSE4, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_q31__sse4);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_q31__sse4);
       }
     }
   }
@@ -782,31 +784,31 @@ TEST(FP32__PSIMD, random_cases) {
   /* No rounding down Test - it fails because of upward bias in multiplication */
 
   TEST(Q31__SSE4, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_q31__sse4);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_q31__sse4);
       }
     }
   }
 
   TEST(Q31__SSE4, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_q31__sse4);
+      .TestSpecialCases(xnn_requantize_q31__sse4);
   }
 
   TEST(Q31__SSE4, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesApproximate(xnn_requantize_q31__sse4);
+      .TestRandomCasesApproximate(xnn_requantize_q31__sse4);
   }
 
   TEST(Q31__SSE4, random_match_gemmlowp) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesAgainstReference(xnn_requantize_q31__sse4, xnn_requantize_gemmlowp__sse4);
+      .TestRandomCasesAgainstReference(xnn_requantize_q31__sse4, xnn_requantize_gemmlowp__sse4);
   }
 
 
@@ -818,28 +820,28 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_gemmlowp__sse2);
+        .TestExactDivideByPO2(xnn_requantize_gemmlowp__sse2);
     }
   }
 
   TEST(GEMMLOWP__SSE2, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_gemmlowp__sse2);
+          .TestExactDivideByPO2(xnn_requantize_gemmlowp__sse2);
       }
     }
   }
 
   TEST(GEMMLOWP__SSE2, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_gemmlowp__sse2);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_gemmlowp__sse2);
       }
     }
   }
@@ -847,25 +849,25 @@ TEST(FP32__PSIMD, random_cases) {
   /* No rounding down Test - it fails because of upward bias in multiplication */
 
   TEST(GEMMLOWP__SSE2, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_gemmlowp__sse2);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_gemmlowp__sse2);
       }
     }
   }
 
   TEST(GEMMLOWP__SSE2, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_gemmlowp__sse2);
+      .TestSpecialCases(xnn_requantize_gemmlowp__sse2);
   }
 
   TEST(GEMMLOWP__SSE2, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesApproximate(xnn_requantize_gemmlowp__sse2);
+      .TestRandomCasesApproximate(xnn_requantize_gemmlowp__sse2);
   }
 
 
@@ -877,28 +879,28 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_gemmlowp__ssse3);
+        .TestExactDivideByPO2(xnn_requantize_gemmlowp__ssse3);
     }
   }
 
   TEST(GEMMLOWP__SSSE3, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_gemmlowp__ssse3);
+          .TestExactDivideByPO2(xnn_requantize_gemmlowp__ssse3);
       }
     }
   }
 
   TEST(GEMMLOWP__SSSE3, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_gemmlowp__ssse3);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_gemmlowp__ssse3);
       }
     }
   }
@@ -906,25 +908,25 @@ TEST(FP32__PSIMD, random_cases) {
   /* No rounding down Test - it fails because of upward bias in multiplication */
 
   TEST(GEMMLOWP__SSSE3, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_gemmlowp__ssse3);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_gemmlowp__ssse3);
       }
     }
   }
 
   TEST(GEMMLOWP__SSSE3, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_gemmlowp__ssse3);
+      .TestSpecialCases(xnn_requantize_gemmlowp__ssse3);
   }
 
   TEST(GEMMLOWP__SSSE3, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesApproximate(xnn_requantize_gemmlowp__ssse3);
+      .TestRandomCasesApproximate(xnn_requantize_gemmlowp__ssse3);
   }
 
 
@@ -936,28 +938,28 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_gemmlowp__sse4);
+        .TestExactDivideByPO2(xnn_requantize_gemmlowp__sse4);
     }
   }
 
   TEST(GEMMLOWP__SSE4, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_gemmlowp__sse4);
+          .TestExactDivideByPO2(xnn_requantize_gemmlowp__sse4);
       }
     }
   }
 
   TEST(GEMMLOWP__SSE4, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_gemmlowp__sse4);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_gemmlowp__sse4);
       }
     }
   }
@@ -965,25 +967,25 @@ TEST(FP32__PSIMD, random_cases) {
   /* No rounding down Test - it fails because of upward bias in multiplication */
 
   TEST(GEMMLOWP__SSE4, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_gemmlowp__sse4);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_gemmlowp__sse4);
       }
     }
   }
 
   TEST(GEMMLOWP__SSE4, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_gemmlowp__sse4);
+      .TestSpecialCases(xnn_requantize_gemmlowp__sse4);
   }
 
   TEST(GEMMLOWP__SSE4, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesApproximate(xnn_requantize_gemmlowp__sse4);
+      .TestRandomCasesApproximate(xnn_requantize_gemmlowp__sse4);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -996,63 +998,63 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_precise__neon);
+        .TestExactDivideByPO2(xnn_requantize_precise__neon);
     }
   }
 
   TEST(PRECISE__NEON, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_precise__neon);
+          .TestExactDivideByPO2(xnn_requantize_precise__neon);
       }
     }
   }
 
   TEST(PRECISE__NEON, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_precise__neon);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_precise__neon);
       }
     }
   }
 
   TEST(PRECISE__NEON, divide_by_po2_with_rounding_down) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingDown(xnn_requantize_precise__neon);
+          .TestDivideByPO2WithRoundingDown(xnn_requantize_precise__neon);
       }
     }
   }
 
   TEST(PRECISE__NEON, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_precise__neon);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_precise__neon);
       }
     }
   }
 
   TEST(PRECISE__NEON, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_precise__neon);
+      .TestSpecialCases(xnn_requantize_precise__neon);
   }
 
   TEST(PRECISE__NEON, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesPrecise(xnn_requantize_precise__neon);
+      .TestRandomCasesPrecise(xnn_requantize_precise__neon);
   }
 
 
@@ -1063,7 +1065,7 @@ TEST(FP32__PSIMD, random_cases) {
   TEST(FP32__NEON, random_cases) {
     RequantizationTester()
       .iterations(1000)
-      .testRandomCasesApproximate(xnn_requantize_fp32__neon);
+      .TestRandomCasesApproximate(xnn_requantize_fp32__neon);
   }
 
 
@@ -1075,28 +1077,28 @@ TEST(FP32__PSIMD, random_cases) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .s(s)
-        .testExactDivideByPO2(xnn_requantize_q31__neon);
+        .TestExactDivideByPO2(xnn_requantize_q31__neon);
     }
   }
 
   TEST(Q31__NEON, exact_divide_by_po2_with_zero_point) {
-    for (int32_t zeroPoint = 1; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testExactDivideByPO2(xnn_requantize_q31__neon);
+          .TestExactDivideByPO2(xnn_requantize_q31__neon);
       }
     }
   }
 
   TEST(Q31__NEON, divide_by_po2_with_rounding_up) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingUp(xnn_requantize_q31__neon);
+          .TestDivideByPO2WithRoundingUp(xnn_requantize_q31__neon);
       }
     }
   }
@@ -1104,31 +1106,31 @@ TEST(FP32__PSIMD, random_cases) {
   /* No rounding down Test - it fails because of upward bias in multiplication */
 
   TEST(Q31__NEON, divide_by_po2_with_rounding_away) {
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       for (uint32_t s = 1; s < 32; s++) {
         RequantizationTester()
-          .zeroPoint(zeroPoint)
+          .zero_point(zero_point)
           .s(s)
-          .testDivideByPO2WithRoundingAway(xnn_requantize_q31__neon);
+          .TestDivideByPO2WithRoundingAway(xnn_requantize_q31__neon);
       }
     }
   }
 
   TEST(Q31__NEON, special_cases) {
     RequantizationTester()
-      .testSpecialCases(xnn_requantize_q31__neon);
+      .TestSpecialCases(xnn_requantize_q31__neon);
   }
 
   TEST(Q31__NEON, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesApproximate(xnn_requantize_q31__neon);
+      .TestRandomCasesApproximate(xnn_requantize_q31__neon);
   }
 
   TEST(Q31__NEON, random_match_gemmlowp) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesAgainstReference(xnn_requantize_q31__neon, xnn_requantize_gemmlowp__neon);
+      .TestRandomCasesAgainstReference(xnn_requantize_q31__neon, xnn_requantize_gemmlowp__neon);
   }
 
 
@@ -1139,6 +1141,6 @@ TEST(FP32__PSIMD, random_cases) {
   TEST(GEMMLOWP__NEON, random_cases) {
     RequantizationTester()
       .iterations(100)
-      .testRandomCasesApproximate(xnn_requantize_gemmlowp__neon);
+      .TestRandomCasesApproximate(xnn_requantize_gemmlowp__neon);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64

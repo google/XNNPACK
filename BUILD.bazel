@@ -242,6 +242,10 @@ SCALAR_UKERNELS = [
     "src/x8-zip/x3-scalar.c",
     "src/x8-zip/x4-scalar.c",
     "src/x8-zip/xm-scalar.c",
+    "src/requantization/precise-scalar.c",
+    "src/requantization/fp32-scalar.c",
+    "src/requantization/q31-scalar.c",
+    "src/requantization/gemmlowp-scalar.c",
 ]
 
 WASM_UKERNELS = [
@@ -424,6 +428,8 @@ PSIMD_FASTMATH_UKERNELS = [
     "src/x32-zip/x3-psimd.c",
     "src/x32-zip/x4-psimd.c",
     "src/x32-zip/xm-psimd.c",
+    "src/requantization/precise-psimd.c",
+    "src/requantization/fp32-psimd.c",
 ]
 
 PSIMD_ACCMATH_UKERNELS = [
@@ -616,6 +622,10 @@ NEON_UKERNELS = [
     "src/math/sigmoid-neon-rr2-lut2048-p1-nr2recps.c",
     "src/math/sigmoid-neon-rr2-lut64-p2-nr2recps.c",
     "src/math/sigmoid-neon-rr2-p5-nr2recps.c",
+    "src/requantization/precise-neon.c",
+    "src/requantization/fp32-neon.c",
+    "src/requantization/q31-neon.c",
+    "src/requantization/gemmlowp-neon.c",
 ]
 
 NEONFMA_UKERNELS = [
@@ -986,6 +996,16 @@ SSE2_UKERNELS = [
     "src/math/exp-sse2-p5.c",
     "src/math/expminus-sse2-p5.c",
     "src/math/sigmoid-sse2-p5-div.c",
+    "src/requantization/precise-sse2.c",
+    "src/requantization/fp32-sse2.c",
+    "src/requantization/q31-sse2.c",
+    "src/requantization/gemmlowp-sse2.c",
+]
+
+SSSE3_UKERNELS = [
+    "src/requantization/precise-ssse3.c",
+    "src/requantization/q31-ssse3.c",
+    "src/requantization/gemmlowp-ssse3.c",
 ]
 
 SSE41_UKERNELS = [
@@ -997,6 +1017,9 @@ SSE41_UKERNELS = [
     "src/f32-sigmoid/gen/sse41-p5-div-x16.c",
     "src/f32-sigmoid/gen/sse41-p5-div-x20.c",
     "src/f32-sigmoid/gen/sse41-p5-div-x24.c",
+    "src/requantization/precise-sse4.c",
+    "src/requantization/q31-sse4.c",
+    "src/requantization/gemmlowp-sse4.c",
 ]
 
 AVX_UKERNELS = [
@@ -1439,6 +1462,7 @@ AARCH64_ASM_UKERNELS = [
 ]
 
 INTERNAL_MICROKERNEL_HDRS = [
+    "src/requantization/gemmlowp-requantization.h",
     "src/xnnpack/argmaxpool.h",
     "src/xnnpack/avgpool.h",
     "src/xnnpack/bilinear.h",
@@ -1669,6 +1693,19 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "ssse3_ukernels",
+    hdrs = INTERNAL_HDRS,
+    copts = xnnpack_std_copts(),
+    x86_copts = ["-mssse3"],
+    x86_srcs = SSSE3_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "sse41_ukernels",
     hdrs = INTERNAL_HDRS,
     copts = xnnpack_std_copts(),
@@ -1775,6 +1812,7 @@ xnnpack_aggregate_library(
         ":psimd_fastmath_ukernels",
         ":psimd_accmath_ukernels",
         ":sse2_ukernels",
+        ":ssse3_ukernels",
         ":sse41_ukernels",
         ":avx_ukernels",
         ":fma3_ukernels",
@@ -2124,6 +2162,16 @@ xnnpack_benchmark(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [":im2col"],
+)
+
+xnnpack_benchmark(
+    name = "requantization_bench",
+    srcs = [
+        "bench/requantization.cc",
+        "src/xnnpack/requantization-stubs.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 ########################### Benchmarks for operators ###########################
@@ -2890,6 +2938,16 @@ xnnpack_unit_test(
     srcs = [
         "test/x8-zip.cc",
         "test/zip-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "requantization_test",
+    srcs = [
+        "src/xnnpack/requantization-stubs.h",
+        "test/requantization.cc",
+        "test/requantization-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

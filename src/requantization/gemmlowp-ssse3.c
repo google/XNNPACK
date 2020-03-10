@@ -15,7 +15,7 @@
 
 #include <xnnpack/requantization-stubs.h>
 
-#include "gemmlowp-sse.h"
+#include "gemmlowp-requantization.h"
 
 
 void xnn_requantize_gemmlowp__ssse3(

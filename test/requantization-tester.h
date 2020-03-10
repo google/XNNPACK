@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <xnnpack/params.h>
+#include <xnnpack/requantization-stubs.h>
 #include <xnnpack/scalar-utils.h>
 
 
@@ -39,13 +40,13 @@ class RequantizationTester {
     return ldexpf(1.0f, -s());
   }
 
-  inline RequantizationTester& zeroPoint(int32_t zeroPoint) {
-    this->zeroPoint_ = zeroPoint;
+  inline RequantizationTester& zero_point(int32_t zero_point) {
+    this->zero_point_ = zero_point;
     return *this;
   }
 
-  inline int32_t zeroPoint() const {
-    return this->zeroPoint_;
+  inline int32_t zero_point() const {
+    return this->zero_point_;
   }
 
   inline RequantizationTester& qmin(uint8_t qmin) {
@@ -82,9 +83,9 @@ class RequantizationTester {
    * - no output clamping
    * produces exactly i, provided that ((i - zero point) * 2**s) does not overflow.
    */
-  void testExactDivideByPO2(requantization_function requantize) const {
-    ASSERT_GE(zeroPoint(), 0);
-    ASSERT_LE(zeroPoint(), 255);
+  void TestExactDivideByPO2(requantization_function requantize) const {
+    ASSERT_GE(zero_point(), 0);
+    ASSERT_LE(zero_point(), 255);
 
     /* Note: need s >= 1 to ensure scale = exp2(-s) < 1.0 */
     ASSERT_GE(s(), 1);
@@ -92,20 +93,20 @@ class RequantizationTester {
 
     std::vector<int32_t> inputs(256);
     std::vector<uint8_t> outputs(inputs.size());
-    const int32_t maxI = (uint32_t(std::numeric_limits<int32_t>::max()) >> s()) + zeroPoint();
-    const int32_t minI = -(-uint32_t(std::numeric_limits<int32_t>::min()) >> s()) + zeroPoint();
+    const int32_t maxI = (uint32_t(std::numeric_limits<int32_t>::max()) >> s()) + zero_point();
+    const int32_t minI = -(-uint32_t(std::numeric_limits<int32_t>::min()) >> s()) + zero_point();
     for (int32_t i = 0; i < 256; i++) {
       const int32_t clampedI = std::max(minI, std::min(maxI, i));
-      inputs[i] = int32_t(uint32_t(clampedI - zeroPoint()) << s());
+      inputs[i] = int32_t(uint32_t(clampedI - zero_point()) << s());
     }
     requantize(inputs.size(), inputs.data(),
-        scale(), zeroPoint(), qmin(), qmax(),
+        scale(), zero_point(), qmin(), qmax(),
         outputs.data());
     for (int32_t i = 0; i < 256; i++) {
       const int32_t clampedI = std::max(minI, std::min(maxI, i));
       ASSERT_EQ(clampedI, outputs[i]) << "i = " << i << ", clamped i = " << clampedI <<
         ", min i = " << minI << ", max i = " << maxI <<
-        ", s = " << s() << ", zero point = " << zeroPoint();
+        ", s = " << s() << ", zero point = " << zero_point();
     }
   }
 
@@ -116,9 +117,9 @@ class RequantizationTester {
    * - no output clamping
    * produces exactly i, provided that ((i - zero point) * 2**s) does not overflow.
    */
-  void testDivideByPO2WithRoundingUp(requantization_function requantize) {
-    ASSERT_GE(zeroPoint(), 0);
-    ASSERT_LE(zeroPoint(), 255);
+  void TestDivideByPO2WithRoundingUp(requantization_function requantize) {
+    ASSERT_GE(zero_point(), 0);
+    ASSERT_LE(zero_point(), 255);
 
     /* Note: need s >= 1 to ensure scale = exp2(-s) < 1.0 */
     ASSERT_GE(s(), 1);
@@ -127,19 +128,19 @@ class RequantizationTester {
     std::vector<int32_t> inputs(256);
     std::vector<uint8_t> outputs(inputs.size());
     for (int32_t i = 0; i < 256; i++) {
-      const int64_t input = RequantizationTester::shiftLeft(i - zeroPoint(), s()) -
-        (INT64_C(1) << (s() - 1)) + (int64_t) (i <= zeroPoint());
+      const int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s()) -
+        (INT64_C(1) << (s() - 1)) + (int64_t) (i <= zero_point());
       inputs[i] = int32_t(input);
     }
     requantize(inputs.size(), inputs.data(),
-        scale(), zeroPoint(), qmin(), qmax(),
+        scale(), zero_point(), qmin(), qmax(),
         outputs.data());
     for (int32_t i = 0; i < 256; i++) {
-      const int64_t input = RequantizationTester::shiftLeft(i - zeroPoint(), s()) -
-        (INT64_C(1) << (s() - 1)) + (int64_t) (i <= zeroPoint());
+      const int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s()) -
+        (INT64_C(1) << (s() - 1)) + (int64_t) (i <= zero_point());
       if (int32_t(input) == input) {
         ASSERT_EQ(i, uint32_t(outputs[i])) << "i = " << i << ", input = " << input <<
-          ", s = " << s() << ", zero point = " << zeroPoint();
+          ", s = " << s() << ", zero point = " << zero_point();
       }
     }
   }
@@ -151,9 +152,9 @@ class RequantizationTester {
    * - no output clamping
    * produces exactly i, provided that ((i - zero point) * 2**s) does not overflow.
    */
-  void testDivideByPO2WithRoundingDown(requantization_function requantize) {
-    ASSERT_GE(zeroPoint(), 0);
-    ASSERT_LE(zeroPoint(), 255);
+  void TestDivideByPO2WithRoundingDown(requantization_function requantize) {
+    ASSERT_GE(zero_point(), 0);
+    ASSERT_LE(zero_point(), 255);
 
     /* Note: need s >= 1 to ensure scale = exp2(-s) < 1.0 */
     ASSERT_GE(s(), 1);
@@ -162,26 +163,26 @@ class RequantizationTester {
     std::vector<int32_t> inputs(256);
     std::vector<uint8_t> outputs(inputs.size());
     for (int32_t i = 0; i < 256; i++) {
-      const int64_t input = RequantizationTester::shiftLeft(i - zeroPoint(), s()) +
-        (INT64_C(1) << (s() - 1)) - (int64_t) (i >= zeroPoint());
+      const int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s()) +
+        (INT64_C(1) << (s() - 1)) - (int64_t) (i >= zero_point());
       inputs[i] = int32_t(input);
     }
     requantize(inputs.size(), inputs.data(),
-        scale(), zeroPoint(), qmin(), qmax(),
+        scale(), zero_point(), qmin(), qmax(),
         outputs.data());
     for (int32_t i = 0; i < 256; i++) {
-      const int64_t input = RequantizationTester::shiftLeft(i - zeroPoint(), s()) +
-        (INT64_C(1) << (s() - 1)) - (int64_t) (i >= zeroPoint());
+      const int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s()) +
+        (INT64_C(1) << (s() - 1)) - (int64_t) (i >= zero_point());
       if (int32_t(input) == input) {
         ASSERT_EQ(i, uint32_t(outputs[i])) << "i = " << i << ", input = " << input <<
-          ", s = " << s() << ", zero point = " << zeroPoint();
+          ", s = " << s() << ", zero point = " << zero_point();
       }
     }
   }
 
-  void testDivideByPO2WithRoundingAway(requantization_function requantize) {
-    ASSERT_GE(zeroPoint(), 0);
-    ASSERT_LE(zeroPoint(), 255);
+  void TestDivideByPO2WithRoundingAway(requantization_function requantize) {
+    ASSERT_GE(zero_point(), 0);
+    ASSERT_LE(zero_point(), 255);
 
     /* Note: need s >= 1 to ensure scale = exp2(-s) < 1.0 */
     ASSERT_GE(s(), 1);
@@ -190,7 +191,7 @@ class RequantizationTester {
     std::vector<int32_t> inputs(256);
     std::vector<uint8_t> outputs(inputs.size());
     for (int32_t i = 0; i < 256; i++) {
-      int64_t input = RequantizationTester::shiftLeft(i - zeroPoint(), s());
+      int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s());
       if (input > 0) {
         input -= INT64_C(1) << (s() - 1);
       } else if (input < 0) {
@@ -199,10 +200,10 @@ class RequantizationTester {
       inputs[i] = int32_t(input);
     }
     requantize(inputs.size(), inputs.data(),
-        scale(), zeroPoint(), qmin(), qmax(),
+        scale(), zero_point(), qmin(), qmax(),
         outputs.data());
     for (uint32_t i = 0; i < 256; i++) {
-      int64_t input = RequantizationTester::shiftLeft(i - zeroPoint(), s());
+      int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s());
       if (input > 0) {
         input -= INT64_C(1) << (s() - 1);
       } else if (input < 0) {
@@ -210,26 +211,26 @@ class RequantizationTester {
       }
       if (int32_t(input) == input) {
         ASSERT_EQ(i, uint32_t(outputs[i])) << "i = " << i << ", input = " << input <<
-          ", s = " << s() << ", zero point = " << zeroPoint();
+          ", s = " << s() << ", zero point = " << zero_point();
       }
     }
   }
 
-  void testSpecialCases(requantization_function requantize) {
+  void TestSpecialCases(requantization_function requantize) {
     std::vector<int32_t> inputs(256);
     std::vector<uint8_t> outputs(inputs.size());
 
     std::fill(inputs.begin(), inputs.end(), std::numeric_limits<int32_t>::min());
-    for (int32_t zeroPoint = 0; zeroPoint < 256; zeroPoint++) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
       requantize(
           inputs.size(),
           inputs.data(),
           ldexpf(1.0f, -32) /* scale */,
-          zeroPoint /* zero point */,
+          zero_point /* zero point */,
           std::numeric_limits<uint8_t>::min(),
           std::numeric_limits<uint8_t>::max(),
           outputs.data());
-      ASSERT_EQ(std::max(int32_t(0), zeroPoint - 1), *std::min_element(outputs.cbegin(), outputs.cend()));
+      ASSERT_EQ(std::max(int32_t(0), zero_point - 1), *std::min_element(outputs.cbegin(), outputs.cend()));
     }
 
     std::fill(inputs.begin(), inputs.end(), std::numeric_limits<int32_t>::max());
@@ -246,7 +247,7 @@ class RequantizationTester {
     }
   }
 
-  void testRandomCasesPrecise(requantization_function requantize) {
+  void TestRandomCasesPrecise(requantization_function requantize) {
     std::random_device random_device;
     std::mt19937 mtRng(random_device());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -255,17 +256,17 @@ class RequantizationTester {
       std::vector<int32_t> inputs(4096);
       std::vector<uint8_t> outputs(inputs.size());
 
-      const uint8_t zeroPoint = UINT8_C(128);
-      std::uniform_real_distribution<float> scaleDistribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
-      const float scale = scaleDistribution(mtRng);
+      const uint8_t zero_point = UINT8_C(128);
+      std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
+      const float scale = scale_distribution(mtRng);
       for (size_t i = 0; i < inputs.size(); i++) {
-        const uint8_t approximateOutput = rng();
-        const int32_t input = int32_t(double(approximateOutput) / double(scale));
+        const uint8_t approximate_output = rng();
+        const int32_t input = int32_t(double(approximate_output) / double(scale));
         inputs[i] = input;
       }
 
       requantize(
-        inputs.size(), inputs.data(), scale, zeroPoint,
+        inputs.size(), inputs.data(), scale, zero_point,
         std::numeric_limits<uint8_t>::min(),
         std::numeric_limits<uint8_t>::max(),
         outputs.data());
@@ -276,17 +277,17 @@ class RequantizationTester {
         *std::min_element(outputs.cbegin(), outputs.cend()));
 
       for (size_t i = 0; i < inputs.size(); i++) {
-        const uint8_t referenceOutput =
+        const uint8_t reference_output =
           scalar_requantize_precise(
-            inputs[i], scale, zeroPoint,
+            inputs[i], scale, zero_point,
             std::numeric_limits<uint8_t>::min(),
             std::numeric_limits<uint8_t>::max());
-        ASSERT_EQ(uint32_t(referenceOutput), uint32_t(outputs[i]));
+        ASSERT_EQ(uint32_t(reference_output), uint32_t(outputs[i]));
       }
     }
   }
 
-  void testRandomCasesApproximate(requantization_function requantize) {
+  void TestRandomCasesApproximate(requantization_function requantize) {
     std::random_device random_device;
     std::mt19937 mtRng(random_device());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -295,17 +296,17 @@ class RequantizationTester {
       std::vector<int32_t> inputs(4096);
       std::vector<uint8_t> outputs(inputs.size());
 
-      const uint8_t zeroPoint = UINT8_C(128);
-      std::uniform_real_distribution<float> scaleDistribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
-      const float scale = scaleDistribution(mtRng);
+      const uint8_t zero_point = UINT8_C(128);
+      std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
+      const float scale = scale_distribution(mtRng);
       for (size_t i = 0; i < inputs.size(); i++) {
-        const uint8_t approximateOutput = rng();
-        const int32_t input = int32_t(double(approximateOutput) / double(scale));
+        const uint8_t approximate_output = rng();
+        const int32_t input = int32_t(double(approximate_output) / double(scale));
         inputs[i] = input;
       }
 
       requantize(
-        inputs.size(), inputs.data(), scale, zeroPoint,
+        inputs.size(), inputs.data(), scale, zero_point,
         std::numeric_limits<uint8_t>::min(),
         std::numeric_limits<uint8_t>::max(),
         outputs.data());
@@ -316,19 +317,19 @@ class RequantizationTester {
         *std::min_element(outputs.cbegin(), outputs.cend()));
 
       for (size_t i = 0; i < inputs.size(); i++) {
-        const double referenceOutput =
-          RequantizationTester::requantizeApproximate(
-            inputs[i], scale, zeroPoint,
+        const double reference_output =
+          RequantizationTester::RequantizeApproximate(
+            inputs[i], scale, zero_point,
             std::numeric_limits<uint8_t>::min(),
             std::numeric_limits<uint8_t>::max());
-        ASSERT_LE(fabs(referenceOutput - double(outputs[i])), 0.55) <<
+        ASSERT_LE(fabs(reference_output - double(outputs[i])), 0.55) <<
           "input = " << inputs[i] <<
-          ", output = " << uint32_t(outputs[i]) << ", reference output = " << referenceOutput;
+          ", output = " << uint32_t(outputs[i]) << ", reference output = " << reference_output;
       }
     }
   }
 
-  void testRandomCasesAgainstReference(requantization_function requantize, requantization_function requantizeReference) {
+  void TestRandomCasesAgainstReference(requantization_function requantize, requantization_function requantize_reference) {
     std::random_device random_device;
     std::mt19937 mtRng(random_device());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -336,28 +337,28 @@ class RequantizationTester {
 
       std::vector<int32_t> inputs(4096);
       std::vector<uint8_t> outputs(inputs.size());
-      std::vector<uint8_t> referenceOutputs(inputs.size());
+      std::vector<uint8_t> reference_outputs(inputs.size());
 
-      const uint8_t zeroPoint = UINT8_C(128);
-      std::uniform_real_distribution<float> scaleDistribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
-      const float scale = scaleDistribution(mtRng);
+      const uint8_t zero_point = UINT8_C(128);
+      std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
+      const float scale = scale_distribution(mtRng);
       for (size_t i = 0; i < inputs.size(); i++) {
-        const uint8_t approximateOutput = rng();
-        const int32_t input = int32_t(double(approximateOutput) / double(scale));
+        const uint8_t approximate_output = rng();
+        const int32_t input = int32_t(double(approximate_output) / double(scale));
         inputs[i] = input;
       }
 
       requantize(
-        inputs.size(), inputs.data(), scale, zeroPoint,
+        inputs.size(), inputs.data(), scale, zero_point,
         std::numeric_limits<uint8_t>::min(),
         std::numeric_limits<uint8_t>::max(),
         outputs.data());
 
-      requantizeReference(
-        inputs.size(), inputs.data(), scale, zeroPoint,
+      requantize_reference(
+        inputs.size(), inputs.data(), scale, zero_point,
         std::numeric_limits<uint8_t>::min(),
         std::numeric_limits<uint8_t>::max(),
-        referenceOutputs.data());
+        reference_outputs.data());
 
       /* Ensure that outputs are not all identical, as in this case Test doesn't validate much */
       ASSERT_NE(
@@ -365,42 +366,42 @@ class RequantizationTester {
         *std::min_element(outputs.cbegin(), outputs.cend()));
 
       for (size_t i = 0; i < inputs.size(); i++) {
-        ASSERT_EQ(uint32_t(referenceOutputs[i]), uint32_t(outputs[i]));
+        ASSERT_EQ(uint32_t(reference_outputs[i]), uint32_t(outputs[i]));
       }
     }
   }
 
-  static inline int64_t shiftLeft(int64_t w, uint32_t n) {
+  static inline int64_t ShiftLeft(int64_t w, uint32_t n) {
     return (int64_t) ((uint64_t) w << n);
   }
 
-  static inline double requantizeApproximate(
+  static inline double RequantizeApproximate(
     int32_t value,
     float scale,
-    uint8_t zeroPoint,
+    uint8_t zero_point,
     uint8_t qmin,
     uint8_t qmax)
   {
     assert(scale < 1.0f);
     assert(scale >= 0x1.0p-32f);
 
-    double clampedValue = double(value) * double(scale) + double(zeroPoint);
+    double clamped_value = double(value) * double(scale) + double(zero_point);
 
     const double fmin = double(qmin);
-    if (clampedValue < fmin) {
-      clampedValue = fmin;
+    if (clamped_value < fmin) {
+      clamped_value = fmin;
     }
 
     const double fmax = double(qmax);
-    if (clampedValue > fmax) {
-      clampedValue = fmax;
+    if (clamped_value > fmax) {
+      clamped_value = fmax;
     }
 
-    return clampedValue;
+    return clamped_value;
   }
 
  private:
-  size_t zeroPoint_{0};
+  size_t zero_point_{0};
   size_t s_{1};
   uint8_t qmin_{std::numeric_limits<uint8_t>::min()};
   uint8_t qmax_{std::numeric_limits<uint8_t>::max()};
