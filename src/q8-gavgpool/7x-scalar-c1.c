@@ -9,42 +9,42 @@
 #include <xnnpack/gavgpool.h>
 
 
-void xnn_q8_gavgpool_ukernel_up7__scalar(
-    size_t m,
-    size_t n,
+void xnn_q8_gavgpool_ukernel_7x__scalar_c1(
+    size_t rows,
+    size_t channels,
     const uint8_t* input,
     size_t input_stride,
     const uint8_t* zero,
     uint8_t* output,
     const union xnn_q8_avgpool_params params[restrict static 1])
 {
-  assert(m != 0);
-  assert(m <= 7);
-  assert(n != 0);
+  assert(rows != 0);
+  assert(rows <= 7);
+  assert(channels != 0);
 
   const uint8_t* i0 = input;
   const uint8_t* i1 = (const uint8_t*) ((uintptr_t) i0 + input_stride);
-  if (m < 2) {
+  if (rows < 2) {
     i1 = zero;
   }
   const uint8_t* i2 = (const uint8_t*) ((uintptr_t) i1 + input_stride);
-  if (m <= 2) {
+  if (rows <= 2) {
     i2 = zero;
   }
   const uint8_t* i3 = (const uint8_t*) ((uintptr_t) i2 + input_stride);
-  if (m < 4) {
+  if (rows < 4) {
     i3 = zero;
   }
   const uint8_t* i4 = (const uint8_t*) ((uintptr_t) i3 + input_stride);
-  if (m <= 4) {
+  if (rows <= 4) {
     i4 = zero;
   }
   const uint8_t* i5 = (const uint8_t*) ((uintptr_t) i4 + input_stride);
-  if (m < 6) {
+  if (rows < 6) {
     i5 = zero;
   }
   const uint8_t* i6 = (const uint8_t*) ((uintptr_t) i5 + input_stride);
-  if (m <= 6) {
+  if (rows <= 6) {
     i6 = zero;
   }
 
@@ -82,5 +82,5 @@ void xnn_q8_gavgpool_ukernel_up7__scalar(
     vout += voutput_zero_point;
 
     *output++ = (uint8_t) vout;
-  } while (--n != 0);
+  } while (--channels != 0);
 }

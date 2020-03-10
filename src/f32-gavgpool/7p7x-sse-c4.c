@@ -11,9 +11,9 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_gavgpool_ukernel_mp7p7q__sse(
-    size_t m,
-    size_t n,
+void xnn_f32_gavgpool_ukernel_7p7x__sse_c4(
+    size_t rows,
+    size_t channels,
     const float* input,
     size_t input_stride,
     const float* zero,
@@ -21,8 +21,8 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__sse(
     float* output,
     const union xnn_f32_avgpool_params params[restrict static 1])
 {
-  assert(m > 7);
-  assert(n != 0);
+  assert(rows > 7);
+  assert(channels != 0);
 
   const float* i0 = input;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_stride);
@@ -31,11 +31,11 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__sse(
   const float* i4 = (const float*) ((uintptr_t) i3 + input_stride);
   const float* i5 = (const float*) ((uintptr_t) i4 + input_stride);
   const float* i6 = (const float*) ((uintptr_t) i5 + input_stride);
-  const size_t packed_n = round_up_po2(n, 4);
-  const size_t input_increment = 7 * input_stride - packed_n * sizeof(float);
+  const size_t packed_channels = round_up_po2(channels, 4);
+  const size_t input_increment = 7 * input_stride - packed_channels * sizeof(float);
 
   float* b = buffer;
-  for (size_t k = 0; k < n; k += 4) {
+  for (size_t c = 0; c < channels; c += 4) {
     const __m128 vi0 = _mm_loadu_ps(i0);
     i0 += 4;
     const __m128 vi1 = _mm_loadu_ps(i1);
@@ -62,7 +62,7 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__sse(
 
     _mm_store_ps(b, vsum); b += 4;
   }
-  for (m -= 7; m > 7; m -= 7) {
+  for (rows -= 7; rows > 7; rows -= 7) {
     b = buffer;
 
     i0 = (const float*) ((uintptr_t) i0 + input_increment);
@@ -73,7 +73,7 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__sse(
     i5 = (const float*) ((uintptr_t) i5 + input_increment);
     i6 = (const float*) ((uintptr_t) i6 + input_increment);
 
-    for (size_t k = 0; k < n; k += 4) {
+    for (size_t c = 0; c < channels; c += 4) {
       const __m128 vi0 = _mm_loadu_ps(i0);
       i0 += 4;
       const __m128 vi1 = _mm_loadu_ps(i1);
@@ -106,27 +106,27 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__sse(
 
   i0 = (const float*) ((uintptr_t) i0 + input_increment);
   i1 = (const float*) ((uintptr_t) i1 + input_increment);
-  if (m < 2) {
+  if (rows < 2) {
     i1 = zero;
   }
   i2 = (const float*) ((uintptr_t) i2 + input_increment);
-  if (m <= 2) {
+  if (rows <= 2) {
     i2 = zero;
   }
   i3 = (const float*) ((uintptr_t) i3 + input_increment);
-  if (m < 4) {
+  if (rows < 4) {
     i3 = zero;
   }
   i4 = (const float*) ((uintptr_t) i4 + input_increment);
-  if (m <= 4) {
+  if (rows <= 4) {
     i4 = zero;
   }
   i5 = (const float*) ((uintptr_t) i5 + input_increment);
-  if (m < 6) {
+  if (rows < 6) {
     i5 = zero;
   }
   i6 = (const float*) ((uintptr_t) i6 + input_increment);
-  if (m <= 6) {
+  if (rows <= 6) {
     i6 = zero;
   }
   const __m128 vmultiplier = _mm_load_ps(params->sse2.multiplier);
@@ -134,7 +134,7 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__sse(
   const __m128 voutput_max = _mm_load_ps(params->sse2.output_max);
 
   b = buffer;
-  while (n >= 4) {
+  while (channels >= 4) {
     const __m128 vi0 = _mm_loadu_ps(i0);
     i0 += 4;
     const __m128 vi1 = _mm_loadu_ps(i1);
@@ -169,9 +169,9 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__sse(
     _mm_storeu_ps(output, vout);
     output += 4;
 
-    n -= 4;
+    channels -= 4;
   }
-  if (n != 0) {
+  if (channels != 0) {
     const __m128 vi0 = _mm_loadu_ps(i0);
     const __m128 vi1 = _mm_loadu_ps(i1);
     const __m128 vi2 = _mm_loadu_ps(i2);
@@ -195,12 +195,12 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__sse(
     vout = _mm_max_ps(vout, voutput_min);
     vout = _mm_min_ps(vout, voutput_max);
 
-    if (n & 2) {
+    if (channels & 2) {
       _mm_storel_pi((__m64*) output, vout);
       vout = _mm_movehl_ps(vout, vout);
       output += 2;
     }
-    if (n & 1) {
+    if (channels & 1) {
       _mm_store_ss(output, vout);
     }
   }

@@ -9,9 +9,9 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_gavgpool_ukernel_mp7p7q__wasm(
-    size_t m,
-    size_t n,
+void xnn_f32_gavgpool_ukernel_7p7x__scalar_c1(
+    size_t rows,
+    size_t channels,
     const float* input,
     size_t input_stride,
     const float* zero,
@@ -19,8 +19,8 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__wasm(
     float* output,
     const union xnn_f32_avgpool_params params[restrict static 1])
 {
-  assert(m > 7);
-  assert(n != 0);
+  assert(rows > 7);
+  assert(channels != 0);
 
   const float* i0 = input;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_stride);
@@ -29,10 +29,10 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__wasm(
   const float* i4 = (const float*) ((uintptr_t) i3 + input_stride);
   const float* i5 = (const float*) ((uintptr_t) i4 + input_stride);
   const float* i6 = (const float*) ((uintptr_t) i5 + input_stride);
-  const size_t input_increment = 7 * input_stride - n * sizeof(float);
+  const size_t input_increment = 7 * input_stride - channels * sizeof(float);
 
   float* b = buffer;
-  size_t k = n;
+  size_t c = channels;
   do {
     const float vi0 = *i0++;
     const float vi1 = *i1++;
@@ -52,8 +52,8 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__wasm(
     const float vsum = vsum016 + vsum2345;
 
     *b++ = vsum;
-  } while (--k != 0);
-  for (m -= 7; m > 7; m -= 7) {
+  } while (--c != 0);
+  for (rows -= 7; rows > 7; rows -= 7) {
     b = buffer;
 
     i0 = (const float*) ((uintptr_t) i0 + input_increment);
@@ -64,7 +64,7 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__wasm(
     i5 = (const float*) ((uintptr_t) i5 + input_increment);
     i6 = (const float*) ((uintptr_t) i6 + input_increment);
 
-    size_t k = n;
+    size_t c = channels;
     do {
       const float vi0 = *i0++;
       const float vi1 = *i1++;
@@ -86,32 +86,32 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__wasm(
       const float vsum = vsum0123 + vsum456a;
 
       *b++ = vsum;
-    } while (--k != 0);
+    } while (--c != 0);
   }
 
   i0 = (const float*) ((uintptr_t) i0 + input_increment);
   i1 = (const float*) ((uintptr_t) i1 + input_increment);
-  if (m < 2) {
+  if (rows < 2) {
     i1 = zero;
   }
   i2 = (const float*) ((uintptr_t) i2 + input_increment);
-  if (m <= 2) {
+  if (rows <= 2) {
     i2 = zero;
   }
   i3 = (const float*) ((uintptr_t) i3 + input_increment);
-  if (m < 4) {
+  if (rows < 4) {
     i3 = zero;
   }
   i4 = (const float*) ((uintptr_t) i4 + input_increment);
-  if (m <= 4) {
+  if (rows <= 4) {
     i4 = zero;
   }
   i5 = (const float*) ((uintptr_t) i5 + input_increment);
-  if (m < 6) {
+  if (rows < 6) {
     i5 = zero;
   }
   i6 = (const float*) ((uintptr_t) i6 + input_increment);
-  if (m <= 6) {
+  if (rows <= 6) {
     i6 = zero;
   }
   const float vmultiplier = params->scalar.multiplier;
@@ -140,9 +140,9 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__wasm(
     const float vsum = vsum0123 + vsum456a;
 
     float vout = vsum * vmultiplier;
-    vout = __builtin_wasm_max_f32(vout, voutput_min);
-    vout = __builtin_wasm_min_f32(vout, voutput_max);
+    vout = math_max_f32(vout, voutput_min);
+    vout = math_min_f32(vout, voutput_max);
 
     *output++ = vout;
-  } while (--n != 0);
+  } while (--channels != 0);
 }
