@@ -204,8 +204,8 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up2x9-scalar-acc2.c
   src/f32-dwconv/gen/up2x9-scalar.c
   src/f32-gavgpool-spchw/scalar-x1.c
-  src/f32-gavgpool/mp7p7q-scalar.c
-  src/f32-gavgpool/up7-scalar.c
+  src/f32-gavgpool/7p7x-scalar-c1.c
+  src/f32-gavgpool/7x-scalar-c1.c
   src/f32-gemm/gen/1x4-scalar.c
   src/f32-gemm/gen/2x4-scalar.c
   src/f32-gemm/gen/4x2-scalar.c
@@ -318,8 +318,8 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/q8-avgpool/9p8x-scalar-c1.c
   src/q8-avgpool/9x-scalar-c1.c
   src/q8-dwconv/up1x9-scalar.c
-  src/q8-gavgpool/mp7p7q-scalar.c
-  src/q8-gavgpool/up7-scalar.c
+  src/q8-gavgpool/7p7x-scalar-c1.c
+  src/q8-gavgpool/7x-scalar-c1.c
   src/q8-gemm/2x2-scalar.c
   src/q8-igemm/2x2-scalar.c
   src/q8-vadd/scalar.c
@@ -365,8 +365,8 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x4-psimd.c
   src/f32-dwconv/gen/up8x9-psimd-acc2.c
   src/f32-dwconv/gen/up8x9-psimd.c
-  src/f32-gavgpool/mp7p7q-psimd.c
-  src/f32-gavgpool/up7-psimd.c
+  src/f32-gavgpool/7p7x-psimd-c4.c
+  src/f32-gavgpool/7x-psimd-c4.c
   src/f32-gemm/gen/1x8-psimd-loadsplat.c
   src/f32-gemm/gen/1x8-psimd-splat.c
   src/f32-gemm/gen/1x8s4-psimd.c
@@ -477,8 +477,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x9-neon.c
   src/f32-dwconv/gen/up8x9-neon-acc2.c
   src/f32-gavgpool-spchw/neon-x4.c
-  src/f32-gavgpool/mp7p7q-neon.c
-  src/f32-gavgpool/up7-neon.c
+  src/f32-gavgpool/7p7x-neon-c4.c
+  src/f32-gavgpool/7x-neon-c4.c
   src/f32-gemm/gen/1x8-neon-lane-ld64.c
   src/f32-gemm/gen/4x2-neon-lane-ld64.c
   src/f32-gemm/gen/4x8-neon-lane-ld128.c
@@ -608,8 +608,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/q8-avgpool/9p8x-neon-c8.c
   src/q8-avgpool/9x-neon-c8.c
   src/q8-dwconv/up8x9-neon.c
-  src/q8-gavgpool/mp7p7q-neon.c
-  src/q8-gavgpool/up7-neon.c
+  src/q8-gavgpool/7p7x-neon-c8.c
+  src/q8-gavgpool/7x-neon-c8.c
   src/q8-gemm/4x8-neon.c
   src/q8-gemm/8x8-neon.c
   src/q8-igemm/4x8-neon.c
@@ -883,8 +883,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x9-sse-acc2.c
   src/f32-dwconv/gen/up8x9-sse.c
   src/f32-gavgpool-spchw/sse-x4.c
-  src/f32-gavgpool/mp7p7q-sse.c
-  src/f32-gavgpool/up7-sse.c
+  src/f32-gavgpool/7p7x-sse-c4.c
+  src/f32-gavgpool/7x-sse-c4.c
   src/f32-gemm/gen/1x8-sse-dup.c
   src/f32-gemm/gen/1x8-sse-load1.c
   src/f32-gemm/gen/1x8s4-sse.c
@@ -976,8 +976,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/q8-avgpool/9x-sse2-c8.c
   src/q8-igemm/4x4c2-sse2.c
   src/q8-dwconv/up8x9-sse2.c
-  src/q8-gavgpool/mp7p7q-sse2.c
-  src/q8-gavgpool/up7-sse2.c
+  src/q8-gavgpool/7p7x-sse2-c8.c
+  src/q8-gavgpool/7x-sse2-c8.c
   src/q8-gemm/2x4c8-sse2.c
   src/q8-gemm/4x4c2-sse2.c
   src/q8-vadd/sse2.c

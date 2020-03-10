@@ -11,145 +11,54 @@
 #include <emmintrin.h>
 
 #include <xnnpack/gavgpool.h>
-#include <xnnpack/math.h>
 
 
-void xnn_q8_gavgpool_ukernel_mp7p7q__sse2(
-    size_t m,
-    size_t n,
+void xnn_q8_gavgpool_ukernel_7x__sse2_c8(
+    size_t rows,
+    size_t channels,
     const uint8_t* input,
     size_t input_stride,
     const uint8_t* zero,
-    int32_t* buffer,
     uint8_t* output,
     const union xnn_q8_avgpool_params params[restrict static 1])
 {
-  assert(m > 7);
-  assert(n != 0);
+  assert(rows != 0);
+  assert(rows <= 7);
+  assert(channels != 0);
 
   const uint8_t* i0 = input;
   const uint8_t* i1 = (const uint8_t*) ((uintptr_t) i0 + input_stride);
+  if (rows < 2) {
+    i1 = zero;
+  }
   const uint8_t* i2 = (const uint8_t*) ((uintptr_t) i1 + input_stride);
+  if (rows <= 2) {
+    i2 = zero;
+  }
   const uint8_t* i3 = (const uint8_t*) ((uintptr_t) i2 + input_stride);
+  if (rows < 4) {
+    i3 = zero;
+  }
   const uint8_t* i4 = (const uint8_t*) ((uintptr_t) i3 + input_stride);
+  if (rows <= 4) {
+    i4 = zero;
+  }
   const uint8_t* i5 = (const uint8_t*) ((uintptr_t) i4 + input_stride);
+  if (rows < 6) {
+    i5 = zero;
+  }
   const uint8_t* i6 = (const uint8_t*) ((uintptr_t) i5 + input_stride);
-  const size_t packed_n = round_up_po2(n, 8);
-  const size_t input_increment = 7 * input_stride - packed_n;
+  if (rows <= 6) {
+    i6 = zero;
+  }
+
   const __m128i vbias = _mm_load_si128((const __m128i*) &params->sse2.bias);
   const __m128i vzero = _mm_setzero_si128();
-
-  int32_t* acc = buffer;
-  for (size_t k = 0; k < n; k += 8) {
-    const __m128i vi0 = _mm_loadl_epi64((const __m128i*) i0); i0 += 8;
-    const __m128i vi1 = _mm_loadl_epi64((const __m128i*) i1); i1 += 8;
-    const __m128i vi2 = _mm_loadl_epi64((const __m128i*) i2); i2 += 8;
-    const __m128i vi3 = _mm_loadl_epi64((const __m128i*) i3); i3 += 8;
-    const __m128i vi4 = _mm_loadl_epi64((const __m128i*) i4); i4 += 8;
-    const __m128i vi5 = _mm_loadl_epi64((const __m128i*) i5); i5 += 8;
-    const __m128i vi6 = _mm_loadl_epi64((const __m128i*) i6); i6 += 8;
-
-    const __m128i vxi0 = _mm_unpacklo_epi8(vi0, vzero);
-    const __m128i vxi1 = _mm_unpacklo_epi8(vi1, vzero);
-    const __m128i vxi2 = _mm_unpacklo_epi8(vi2, vzero);
-    const __m128i vxi3 = _mm_unpacklo_epi8(vi3, vzero);
-    const __m128i vxi4 = _mm_unpacklo_epi8(vi4, vzero);
-    const __m128i vxi5 = _mm_unpacklo_epi8(vi5, vzero);
-    const __m128i vxi6 = _mm_unpacklo_epi8(vi6, vzero);
-
-    const __m128i vsum01 = _mm_add_epi16(vxi0, vxi1);
-    const __m128i vsum23 = _mm_add_epi16(vxi2, vxi3);
-    const __m128i vsum45 = _mm_add_epi16(vxi4, vxi5);
-
-    const __m128i vsum016 = _mm_add_epi16(vsum01, vxi6);
-    const __m128i vsum2345 = _mm_add_epi16(vsum23, vsum45);
-    const __m128i vsum = _mm_add_epi16(vsum016, vsum2345);
-
-    const __m128i vacc_lo = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vsum, vzero));
-    const __m128i vacc_hi = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vsum, vzero));
-
-    _mm_store_si128((__m128i*) acc, vacc_lo);
-    _mm_store_si128((__m128i*) acc + 1, vacc_hi);
-    acc += 8;
-  }
-  for (m -= 7; m > 7; m -= 7) {
-    acc = buffer;
-    i0 = (const uint8_t*) ((uintptr_t) i0 + input_increment);
-    i1 = (const uint8_t*) ((uintptr_t) i1 + input_increment);
-    i2 = (const uint8_t*) ((uintptr_t) i2 + input_increment);
-    i3 = (const uint8_t*) ((uintptr_t) i3 + input_increment);
-    i4 = (const uint8_t*) ((uintptr_t) i4 + input_increment);
-    i5 = (const uint8_t*) ((uintptr_t) i5 + input_increment);
-    i6 = (const uint8_t*) ((uintptr_t) i6 + input_increment);
-
-    for (size_t k = 0; k < n; k += 8) {
-      const __m128i vi0 = _mm_loadl_epi64((const __m128i*) i0); i0 += 8;
-      const __m128i vi1 = _mm_loadl_epi64((const __m128i*) i1); i1 += 8;
-      const __m128i vi2 = _mm_loadl_epi64((const __m128i*) i2); i2 += 8;
-      const __m128i vi3 = _mm_loadl_epi64((const __m128i*) i3); i3 += 8;
-      const __m128i vi4 = _mm_loadl_epi64((const __m128i*) i4); i4 += 8;
-      const __m128i vi5 = _mm_loadl_epi64((const __m128i*) i5); i5 += 8;
-      const __m128i vi6 = _mm_loadl_epi64((const __m128i*) i6); i6 += 8;
-      __m128i vacc_lo = _mm_load_si128((const __m128i*) acc);
-      __m128i vacc_hi = _mm_load_si128((const __m128i*) acc + 1);
-
-      const __m128i vxi0 = _mm_unpacklo_epi8(vi0, vzero);
-      const __m128i vxi1 = _mm_unpacklo_epi8(vi1, vzero);
-      const __m128i vxi2 = _mm_unpacklo_epi8(vi2, vzero);
-      const __m128i vxi3 = _mm_unpacklo_epi8(vi3, vzero);
-      const __m128i vxi4 = _mm_unpacklo_epi8(vi4, vzero);
-      const __m128i vxi5 = _mm_unpacklo_epi8(vi5, vzero);
-      const __m128i vxi6 = _mm_unpacklo_epi8(vi6, vzero);
-
-      const __m128i vsum01 = _mm_add_epi16(vxi0, vxi1);
-      const __m128i vsum23 = _mm_add_epi16(vxi2, vxi3);
-      const __m128i vsum45 = _mm_add_epi16(vxi4, vxi5);
-
-      const __m128i vsum016 = _mm_add_epi16(vsum01, vxi6);
-      const __m128i vsum2345 = _mm_add_epi16(vsum23, vsum45);
-      const __m128i vsum = _mm_add_epi16(vsum016, vsum2345);
-
-      vacc_lo = _mm_add_epi32(vacc_lo, _mm_unpacklo_epi16(vsum, vzero));
-      vacc_hi = _mm_add_epi32(vacc_hi, _mm_unpackhi_epi16(vsum, vzero));
-
-      _mm_store_si128((__m128i*) acc, vacc_lo);
-      _mm_store_si128((__m128i*) acc + 1, vacc_hi);
-      acc += 8;
-    }
-  }
-
   const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
   const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
   const __m128i vright_shift = _mm_loadl_epi64((const __m128i*) params->sse2.right_shift);
 
-  i0 = (const uint8_t*) ((uintptr_t) i0 + input_increment);
-  i1 = (const uint8_t*) ((uintptr_t) i1 + input_increment);
-  if (m < 2) {
-    i1 = zero;
-  }
-  i2 = (const uint8_t*) ((uintptr_t) i2 + input_increment);
-  if (m <= 2) {
-    i2 = zero;
-  }
-  i3 = (const uint8_t*) ((uintptr_t) i3 + input_increment);
-  if (m < 4) {
-    i3 = zero;
-  }
-  i4 = (const uint8_t*) ((uintptr_t) i4 + input_increment);
-  if (m <= 4) {
-    i4 = zero;
-  }
-  i5 = (const uint8_t*) ((uintptr_t) i5 + input_increment);
-  if (m < 6) {
-    i5 = zero;
-  }
-  i6 = (const uint8_t*) ((uintptr_t) i6 + input_increment);
-  if (m <= 6) {
-    i6 = zero;
-  }
-
-  acc = buffer;
-  while (n >= 8) {
+  while (channels >= 8) {
     const __m128i vi0 = _mm_loadl_epi64((const __m128i*) i0); i0 += 8;
     const __m128i vi1 = _mm_loadl_epi64((const __m128i*) i1); i1 += 8;
     const __m128i vi2 = _mm_loadl_epi64((const __m128i*) i2); i2 += 8;
@@ -157,9 +66,6 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__sse2(
     const __m128i vi4 = _mm_loadl_epi64((const __m128i*) i4); i4 += 8;
     const __m128i vi5 = _mm_loadl_epi64((const __m128i*) i5); i5 += 8;
     const __m128i vi6 = _mm_loadl_epi64((const __m128i*) i6); i6 += 8;
-    __m128i vacc_lo = _mm_load_si128((const __m128i*) acc);
-    __m128i vacc_hi = _mm_load_si128((const __m128i*) acc + 1);
-    acc += 8;
 
     const __m128i vxi0 = _mm_unpacklo_epi8(vi0, vzero);
     const __m128i vxi1 = _mm_unpacklo_epi8(vi1, vzero);
@@ -177,8 +83,8 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__sse2(
     const __m128i vsum2345 = _mm_add_epi16(vsum23, vsum45);
     const __m128i vsum = _mm_add_epi16(vsum016, vsum2345);
 
-    vacc_lo = _mm_add_epi32(vacc_lo, _mm_unpacklo_epi16(vsum, vzero));
-    vacc_hi = _mm_add_epi32(vacc_hi, _mm_unpackhi_epi16(vsum, vzero));
+    __m128i vacc_lo = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vsum, vzero));
+    __m128i vacc_hi = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vsum, vzero));
 
     const __m128i vneg_mask_lo = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc_lo);
     const __m128i vneg_mask_hi = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc_hi);
@@ -219,9 +125,9 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__sse2(
 
     _mm_storel_epi64((__m128i*) output, vout); output += 8;
 
-    n -= 8;
+    channels -= 8;
   }
-  if (n != 0) {
+  if (channels != 0) {
     const __m128i vi0 = _mm_loadl_epi64((const __m128i*) i0);
     const __m128i vi1 = _mm_loadl_epi64((const __m128i*) i1);
     const __m128i vi2 = _mm_loadl_epi64((const __m128i*) i2);
@@ -229,8 +135,6 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__sse2(
     const __m128i vi4 = _mm_loadl_epi64((const __m128i*) i4);
     const __m128i vi5 = _mm_loadl_epi64((const __m128i*) i5);
     const __m128i vi6 = _mm_loadl_epi64((const __m128i*) i6);
-    __m128i vacc_lo = _mm_load_si128((const __m128i*) acc);
-    __m128i vacc_hi = _mm_load_si128((const __m128i*) acc + 1);
 
     const __m128i vxi0 = _mm_unpacklo_epi8(vi0, vzero);
     const __m128i vxi1 = _mm_unpacklo_epi8(vi1, vzero);
@@ -248,8 +152,8 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__sse2(
     const __m128i vsum2345 = _mm_add_epi16(vsum23, vsum45);
     const __m128i vsum = _mm_add_epi16(vsum016, vsum2345);
 
-    vacc_lo = _mm_add_epi32(vacc_lo, _mm_unpacklo_epi16(vsum, vzero));
-    vacc_hi = _mm_add_epi32(vacc_hi, _mm_unpackhi_epi16(vsum, vzero));
+    __m128i vacc_lo = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vsum, vzero));
+    __m128i vacc_hi = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vsum, vzero));
 
     const __m128i vneg_mask_lo = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc_lo);
     const __m128i vneg_mask_hi = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc_hi);
@@ -288,17 +192,17 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__sse2(
     vout = _mm_min_epu8(vout, _mm_load_si128((const __m128i*) params->sse2.output_max));
     vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) params->sse2.output_min));
 
-    if (n & 4) {
+    if (channels & 4) {
       *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout);
       output += 4;
       vout = _mm_srli_epi64(vout, 32);
     }
-    if (n & 2) {
+    if (channels & 2) {
       *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout, 0);
       output += 2;
       vout = _mm_srli_epi32(vout, 16);
     }
-    if (n & 1) {
+    if (channels & 1) {
       *((uint8_t*) output) = (uint8_t) _mm_cvtsi128_si32(vout);
     }
   }

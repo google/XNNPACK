@@ -11,9 +11,9 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_gavgpool_ukernel_mp7p7q__psimd(
-    size_t m,
-    size_t n,
+void xnn_f32_gavgpool_ukernel_7p7x__psimd_c4(
+    size_t rows,
+    size_t channels,
     const float* input,
     size_t input_stride,
     const float* zero,
@@ -21,8 +21,8 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__psimd(
     float* output,
     const union xnn_f32_avgpool_params params[restrict static 1])
 {
-  assert(m > 7);
-  assert(n != 0);
+  assert(rows > 7);
+  assert(channels != 0);
 
   const float* i0 = input;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_stride);
@@ -31,11 +31,11 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__psimd(
   const float* i4 = (const float*) ((uintptr_t) i3 + input_stride);
   const float* i5 = (const float*) ((uintptr_t) i4 + input_stride);
   const float* i6 = (const float*) ((uintptr_t) i5 + input_stride);
-  const size_t packed_n = round_up_po2(n, 4);
-  const size_t input_increment = 7 * input_stride - packed_n * sizeof(float);
+  const size_t packed_channels = round_up_po2(channels, 4);
+  const size_t input_increment = 7 * input_stride - packed_channels * sizeof(float);
 
   float* b = buffer;
-  for (size_t k = 0; k < n; k += 4) {
+  for (size_t c = 0; c < channels; c += 4) {
     const psimd_f32 vi0 = psimd_load_f32(i0);
     i0 += 4;
     const psimd_f32 vi1 = psimd_load_f32(i1);
@@ -62,7 +62,7 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__psimd(
 
     psimd_store_f32(b, vsum); b += 4;
   }
-  for (m -= 7; m > 7; m -= 7) {
+  for (rows -= 7; rows > 7; rows -= 7) {
     b = buffer;
 
     i0 = (const float*) ((uintptr_t) i0 + input_increment);
@@ -73,7 +73,7 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__psimd(
     i5 = (const float*) ((uintptr_t) i5 + input_increment);
     i6 = (const float*) ((uintptr_t) i6 + input_increment);
 
-    for (size_t k = 0; k < n; k += 4) {
+    for (size_t c = 0; c < channels; c += 4) {
       const psimd_f32 vi0 = psimd_load_f32(i0);
       i0 += 4;
       const psimd_f32 vi1 = psimd_load_f32(i1);
@@ -106,27 +106,27 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__psimd(
 
   i0 = (const float*) ((uintptr_t) i0 + input_increment);
   i1 = (const float*) ((uintptr_t) i1 + input_increment);
-  if (m < 2) {
+  if (rows < 2) {
     i1 = zero;
   }
   i2 = (const float*) ((uintptr_t) i2 + input_increment);
-  if (m <= 2) {
+  if (rows <= 2) {
     i2 = zero;
   }
   i3 = (const float*) ((uintptr_t) i3 + input_increment);
-  if (m < 4) {
+  if (rows < 4) {
     i3 = zero;
   }
   i4 = (const float*) ((uintptr_t) i4 + input_increment);
-  if (m <= 4) {
+  if (rows <= 4) {
     i4 = zero;
   }
   i5 = (const float*) ((uintptr_t) i5 + input_increment);
-  if (m < 6) {
+  if (rows < 6) {
     i5 = zero;
   }
   i6 = (const float*) ((uintptr_t) i6 + input_increment);
-  if (m <= 6) {
+  if (rows <= 6) {
     i6 = zero;
   }
   const psimd_f32 vmultiplier = psimd_load_splat_f32(&params->scalar.multiplier);
@@ -134,7 +134,7 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__psimd(
   const psimd_f32 voutput_max = psimd_load_splat_f32(&params->scalar.output_max);
 
   b = buffer;
-  while (n >= 4) {
+  while (channels >= 4) {
     const psimd_f32 vi0 = psimd_load_f32(i0);
     i0 += 4;
     const psimd_f32 vi1 = psimd_load_f32(i1);
@@ -169,9 +169,9 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__psimd(
     psimd_store_f32(output, vout);
     output += 4;
 
-    n -= 4;
+    channels -= 4;
   }
-  if (n != 0) {
+  if (channels != 0) {
     const psimd_f32 vi0 = psimd_load_f32(i0);
     const psimd_f32 vi1 = psimd_load_f32(i1);
     const psimd_f32 vi2 = psimd_load_f32(i2);
@@ -195,12 +195,12 @@ void xnn_f32_gavgpool_ukernel_mp7p7q__psimd(
     vout = psimd_max_f32(vout, voutput_min);
     vout = psimd_min_f32(vout, voutput_max);
 
-    if (n & 2) {
+    if (channels & 2) {
       psimd_store2_f32(output, vout);
       output += 2;
       vout = psimd_concat_hi_f32(vout, vout);
     }
-    if (n & 1) {
+    if (channels & 1) {
       psimd_store1_f32(output, vout);
     }
   }

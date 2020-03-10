@@ -9,9 +9,9 @@
 #include <xnnpack/gavgpool.h>
 
 
-void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
-    size_t m,
-    size_t n,
+void xnn_q8_gavgpool_ukernel_7p7x__scalar_c1(
+    size_t rows,
+    size_t channels,
     const uint8_t* input,
     size_t input_stride,
     const uint8_t* zero,
@@ -19,8 +19,8 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
     uint8_t* output,
     const union xnn_q8_avgpool_params params[restrict static 1])
 {
-  assert(m > 7);
-  assert(n != 0);
+  assert(rows > 7);
+  assert(channels != 0);
 
   const uint8_t* i0 = input;
   const uint8_t* i1 = (const uint8_t*) ((uintptr_t) i0 + input_stride);
@@ -29,14 +29,14 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
   const uint8_t* i4 = (const uint8_t*) ((uintptr_t) i3 + input_stride);
   const uint8_t* i5 = (const uint8_t*) ((uintptr_t) i4 + input_stride);
   const uint8_t* i6 = (const uint8_t*) ((uintptr_t) i5 + input_stride);
-  const size_t input_increment = 7 * input_stride - n;
+  const size_t input_increment = 7 * input_stride - channels;
 
   // First pass.
   {
     const int32_t vbias = params->scalar.bias;
 
     int32_t* b = buffer;
-    size_t k = n;
+    size_t c = channels;
     do {
       const uint32_t vi0 = (uint32_t) *i0++;
       const uint32_t vi1 = (uint32_t) *i1++;
@@ -57,10 +57,10 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
       const int32_t vacc = vbias + (int32_t) vsum;
 
       *b++ = vacc;
-    } while (--k != 0);
+    } while (--c != 0);
   }
   // Intermediate passes.
-  for (m -= 7; m > 7; m -= 7) {
+  for (rows -= 7; rows > 7; rows -= 7) {
     i0 = (const uint8_t*) ((uintptr_t) i0 + input_increment);
     i1 = (const uint8_t*) ((uintptr_t) i1 + input_increment);
     i2 = (const uint8_t*) ((uintptr_t) i2 + input_increment);
@@ -70,7 +70,7 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
     i6 = (const uint8_t*) ((uintptr_t) i6 + input_increment);
 
     int32_t* b = buffer;
-    size_t k = n;
+    size_t c = channels;
     do {
       const uint32_t vi0 = (uint32_t) *i0++;
       const uint32_t vi1 = (uint32_t) *i1++;
@@ -90,7 +90,7 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
       const uint32_t vsum = vsum016 + vsum2345;
 
       *b++ += (int32_t) vsum;
-    } while (--k != 0);
+    } while (--c != 0);
   }
 
   // Last pass.
@@ -104,32 +104,32 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
 
     i0 = (const uint8_t*) ((uintptr_t) i0 + input_increment);
     i1 = (const uint8_t*) ((uintptr_t) i1 + input_increment);
-    if (m < 2) {
+    if (rows < 2) {
       i1 = zero;
     }
     i2 = (const uint8_t*) ((uintptr_t) i2 + input_increment);
-    if (m <= 2) {
+    if (rows <= 2) {
       i2 = zero;
     }
     i3 = (const uint8_t*) ((uintptr_t) i3 + input_increment);
-    if (m < 4) {
+    if (rows < 4) {
       i3 = zero;
     }
     i4 = (const uint8_t*) ((uintptr_t) i4 + input_increment);
-    if (m <= 4) {
+    if (rows <= 4) {
       i4 = zero;
     }
     i5 = (const uint8_t*) ((uintptr_t) i5 + input_increment);
-    if (m < 6) {
+    if (rows < 6) {
       i5 = zero;
     }
     i6 = (const uint8_t*) ((uintptr_t) i6 + input_increment);
-    if (m <= 6) {
+    if (rows <= 6) {
       i6 = zero;
     }
 
     int32_t* b = buffer;
-    size_t k = n;
+    size_t c = channels;
     do {
       int32_t vacc = *b++;
       const uint32_t vi0 = (uint32_t) *i0++;
@@ -158,6 +158,6 @@ void xnn_q8_gavgpool_ukernel_mp7p7q__scalar(
       vout += voutput_zero_point;
 
       *output++ = (uint8_t) vout;
-    } while (--k != 0);
+    } while (--c != 0);
   }
 }

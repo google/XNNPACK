@@ -10,49 +10,49 @@
 #include <xnnpack/gavgpool.h>
 
 
-void xnn_f32_gavgpool_ukernel_up7__psimd(
-    size_t m,
-    size_t n,
+void xnn_f32_gavgpool_ukernel_7x__psimd_c4(
+    size_t rows,
+    size_t channels,
     const float* input,
     size_t input_stride,
     const float* zero,
     float* output,
     const union xnn_f32_avgpool_params params[restrict static 1])
 {
-  assert(m != 0);
-  assert(m <= 7);
-  assert(n != 0);
+  assert(rows != 0);
+  assert(rows <= 7);
+  assert(channels != 0);
 
   const float* i0 = input;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_stride);
-  if (m < 2) {
+  if (rows < 2) {
     i1 = zero;
   }
   const float* i2 = (const float*) ((uintptr_t) i1 + input_stride);
-  if (m <= 2) {
+  if (rows <= 2) {
     i2 = zero;
   }
   const float* i3 = (const float*) ((uintptr_t) i2 + input_stride);
-  if (m < 4) {
+  if (rows < 4) {
     i3 = zero;
   }
   const float* i4 = (const float*) ((uintptr_t) i3 + input_stride);
-  if (m <= 4) {
+  if (rows <= 4) {
     i4 = zero;
   }
   const float* i5 = (const float*) ((uintptr_t) i4 + input_stride);
-  if (m < 6) {
+  if (rows < 6) {
     i5 = zero;
   }
   const float* i6 = (const float*) ((uintptr_t) i5 + input_stride);
-  if (m <= 6) {
+  if (rows <= 6) {
     i6 = zero;
   }
   const psimd_f32 vmultiplier = psimd_load_splat_f32(&params->scalar.multiplier);
   const psimd_f32 voutput_min = psimd_load_splat_f32(&params->scalar.output_min);
   const psimd_f32 voutput_max = psimd_load_splat_f32(&params->scalar.output_max);
 
-  while (n >= 4) {
+  while (channels >= 4) {
     const psimd_f32 vi0 = psimd_load_f32(i0);
     i0 += 4;
     const psimd_f32 vi1 = psimd_load_f32(i1);
@@ -84,9 +84,9 @@ void xnn_f32_gavgpool_ukernel_up7__psimd(
     psimd_store_f32(output, vout);
     output += 4;
 
-    n -= 4;
+    channels -= 4;
   }
-  if (n != 0) {
+  if (channels != 0) {
     const psimd_f32 vi0 = psimd_load_f32(i0);
     const psimd_f32 vi1 = psimd_load_f32(i1);
     const psimd_f32 vi2 = psimd_load_f32(i2);
@@ -108,12 +108,12 @@ void xnn_f32_gavgpool_ukernel_up7__psimd(
     vout = psimd_max_f32(vout, voutput_min);
     vout = psimd_min_f32(vout, voutput_max);
 
-    if (n & 2) {
+    if (channels & 2) {
       psimd_store2_f32(output, vout);
       output += 2;
       vout = psimd_concat_hi_f32(vout, vout);
     }
-    if (n & 1) {
+    if (channels & 1) {
       psimd_store1_f32(output, vout);
     }
   }

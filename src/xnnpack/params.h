@@ -746,22 +746,61 @@ typedef void (*xnn_ibilinear_ukernel_function)(
     size_t output_increment);
 
 typedef void (*xnn_gavgpool_up_ukernel_function)(
-    size_t m,
-    size_t n,
-    const void* x,
-    size_t x_stride,
+    size_t rows,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
     const void* zero,
-    void* y,
+    void* output,
     const void* params);
 
 typedef void (*xnn_f32_gavgpool_up_ukernel_function)(
-    size_t m,
-    size_t n,
-    const float* x,
-    size_t x_stride,
+    size_t rows,
+    size_t channels,
+    const float* input,
+    size_t input_stride,
     const float* zero,
-    float* y,
+    float* output,
     const union xnn_f32_avgpool_params* params);
+
+typedef void (*xnn_q8_gavgpool_up_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    const uint8_t* input,
+    size_t input_stride,
+    const uint8_t* zero,
+    uint8_t* output,
+    const union xnn_q8_avgpool_params* params);
+
+typedef void (*xnn_gavgpool_mp_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
+    const void* zero,
+    void* buffer,
+    void* output,
+    const void* params);
+
+typedef void (*xnn_f32_gavgpool_mp_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    const float* input,
+    size_t input_stride,
+    const float* zero,
+    float* buffer,
+    float* output,
+    const union xnn_f32_avgpool_params* params);
+
+typedef void (*xnn_q8_gavgpool_mp_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    const uint8_t* input,
+    size_t input_stride,
+    const uint8_t* zero,
+    int32_t* buffer,
+    uint8_t* output,
+    const union xnn_q8_avgpool_params* params);
 
 typedef void (*xnn_gavgpool_spchw_ukernel_function)(
     size_t elements,
@@ -776,45 +815,6 @@ typedef void (*xnn_f32_gavgpool_spchw_ukernel_function)(
     const float* input,
     float* output,
     const union xnn_f32_gavgpool_params* params);
-
-typedef void (*xnn_q8_gavgpool_up_ukernel_function)(
-    size_t m,
-    size_t n,
-    const uint8_t* x,
-    size_t x_stride,
-    const uint8_t* zero,
-    uint8_t* y,
-    const union xnn_q8_avgpool_params* params);
-
-typedef void (*xnn_gavgpool_mp_ukernel_function)(
-    size_t m,
-    size_t n,
-    const void* x,
-    size_t x_stride,
-    const void* zero,
-    void* buffer,
-    void* y,
-    const void* params);
-
-typedef void (*xnn_f32_gavgpool_mp_ukernel_function)(
-    size_t m,
-    size_t n,
-    const float* x,
-    size_t x_stride,
-    const float* zero,
-    float* buffer,
-    float* y,
-    const union xnn_f32_avgpool_params* params);
-
-typedef void (*xnn_q8_gavgpool_mp_ukernel_function)(
-    size_t m,
-    size_t n,
-    const uint8_t* x,
-    size_t x_stride,
-    const uint8_t* zero,
-    int32_t* buffer,
-    uint8_t* y,
-    const union xnn_q8_avgpool_params* params);
 
 typedef void (*xnn_avgpool_up_ukernel_function)(
     size_t output_pixels,
