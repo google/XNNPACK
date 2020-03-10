@@ -9,7 +9,7 @@
 #include <xnnpack.h>
 
 
-// A dummy program that calls every function in XNNPACK, for size estimation.
+// A dummy program that calls every Operators API function in XNNPACK, for size estimation.
 int main(int argc, char** argv) {
   int function_idx = 0;
   if (argc >= 2) {

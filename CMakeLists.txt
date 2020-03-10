@@ -1616,6 +1616,20 @@ IF(XNNPACK_BUILD_TESTS)
       "${CMAKE_BINARY_DIR}/googletest")
   ENDIF()
 
+  # ---[ Build size tests
+
+  ADD_EXECUTABLE(operator-size-test test/size.c)
+  SET_TARGET_PROPERTIES(operator-size-test PROPERTIES
+    C_STANDARD 99
+    C_EXTENSIONS NO)
+  TARGET_LINK_LIBRARIES(operator-size-test PRIVATE XNNPACK)
+
+  ADD_EXECUTABLE(subgraph-size-test test/size.c)
+  SET_TARGET_PROPERTIES(subgraph-size-test PROPERTIES
+    C_STANDARD 99
+    C_EXTENSIONS NO)
+  TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
+
   # ---[ Build operator-level unit tests
   ADD_EXECUTABLE(add-nc-test test/add-nc.cc)
   SET_TARGET_PROPERTIES(add-nc-test PROPERTIES
