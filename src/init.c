@@ -925,11 +925,25 @@ static void init(void) {
     } else {
       xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__sse2_p5_div_x16;
     }
-    xnn_params.f32.prelu = (struct prelu_parameters) {
-      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__sse2_2x8,
-      .row_tile = 2,
-      .channel_tile = 8,
-    };
+    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+      xnn_params.f32.prelu = (struct prelu_parameters) {
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__avx512f_2x16,
+        .row_tile = 2,
+        .channel_tile = 16,
+      };
+    } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx()) {
+      xnn_params.f32.prelu = (struct prelu_parameters) {
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__avx_2x16,
+        .row_tile = 2,
+        .channel_tile = 16,
+      };
+    } else {
+      xnn_params.f32.prelu = (struct prelu_parameters) {
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__sse2_2x8,
+        .row_tile = 2,
+        .channel_tile = 8,
+      };
+    }
     xnn_params.f32.raddstoreexpminusmax = xnn_f32_raddstoreexpminusmax_ukernel__sse2_p5_x20_acc2;
     xnn_params.f32.rmax = xnn_f32_rmax_ukernel__sse;
     if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {

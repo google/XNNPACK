@@ -1068,6 +1068,8 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/3x16-avx-broadcast.c
   src/f32-igemm/gen/4x16-avx-broadcast.c
   src/f32-igemm/gen/5x16-avx-broadcast.c
+  src/f32-prelu/gen/avx-2x8.c
+  src/f32-prelu/gen/avx-2x16.c
   src/f32-rmax/avx.c
   src/f32-vbinary/gen/vadd-avx-x8.c
   src/f32-vbinary/gen/vadd-avx-x16.c
@@ -1295,6 +1297,8 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-igemm/gen/6x16-avx512f-broadcast.c
   src/f32-igemm/gen/7x16-avx512f-broadcast.c
   src/f32-igemm/gen/8x16-avx512f-broadcast.c
+  src/f32-prelu/gen/avx512f-2x16.c
+  src/f32-prelu/gen/avx512f-2x32.c
   src/f32-raddexpminusmax/gen/avx512f-p5-scalef-x128.c
   src/f32-raddexpminusmax/gen/avx512f-p5-scalef-x128-acc2.c
   src/f32-raddexpminusmax/gen/avx512f-p5-scalef-x128-acc4.c
