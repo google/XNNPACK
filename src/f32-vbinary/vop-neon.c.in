@@ -5,7 +5,7 @@
 
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
-$ABC = "0123456789ABCDEFGHIJKLMN"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB"]
 #include <assert.h>
 

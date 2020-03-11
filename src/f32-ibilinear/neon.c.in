@@ -6,7 +6,7 @@
 $assert CHANNEL_TILE % 4 == 0
 $assert CHANNEL_TILE >= 4
 $assert PIXEL_TILE == 1
-$ABC = "0123456789ABCDEFGHIJKLMN"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include <assert.h>
 

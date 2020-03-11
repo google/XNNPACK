@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert MR % 4 == 0
-$ABC = "0123456789ABCDEFGHIJK"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <arm_neon.h>

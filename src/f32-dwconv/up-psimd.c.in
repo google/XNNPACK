@@ -6,7 +6,7 @@
 $assert CHANNEL_TILE % 4 == 0
 $assert KERNEL_TILE >= 2
 $assert ACCUMULATORS >= 1
-$ABC = "0123456789ABCDEF"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <psimd.h>
