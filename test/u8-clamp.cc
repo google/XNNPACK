@@ -1,10 +1,12 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
-// All rights reserved.
-//
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Specification: test/u8-clamp.yaml
+//   Generator: tools/generate-clamp-test.py
+
 
 #include <gtest/gtest.h>
 
@@ -16,201 +18,210 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(U8_CLAMP__NEON, n_eq_8) {
+  TEST(U8_CLAMP__NEON_X64, batch_eq_64) {
     TEST_REQUIRES_ARM_NEON;
     ClampMicrokernelTester()
-      .n(8)
-      .Test(xnn_u8_clamp_ukernel__neon);
+      .batch_size(64)
+      .Test(xnn_u8_clamp_ukernel__neon_x64);
   }
 
-  TEST(U8_CLAMP__NEON, n_div_8) {
+  TEST(U8_CLAMP__NEON_X64, batch_div_64) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t n = 8; n < 512; n += 8) {
+    for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       ClampMicrokernelTester()
-        .n(n)
-        .Test(xnn_u8_clamp_ukernel__neon);
+        .batch_size(batch_size)
+        .Test(xnn_u8_clamp_ukernel__neon_x64);
     }
   }
 
-  TEST(U8_CLAMP__NEON, n_gt_8) {
+  TEST(U8_CLAMP__NEON_X64, batch_lt_64) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t n = 9; n < 16; n++) {
+    for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       ClampMicrokernelTester()
-        .n(n)
-        .Test(xnn_u8_clamp_ukernel__neon);
+        .batch_size(batch_size)
+        .Test(xnn_u8_clamp_ukernel__neon_x64);
     }
   }
 
-  TEST(U8_CLAMP__NEON, n_lt_8) {
+  TEST(U8_CLAMP__NEON_X64, batch_gt_64) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t n = 1; n < 8; n++) {
+    for (size_t batch_size = 65; batch_size < 128; batch_size++) {
       ClampMicrokernelTester()
-        .n(n)
-        .Test(xnn_u8_clamp_ukernel__neon);
+        .batch_size(batch_size)
+        .Test(xnn_u8_clamp_ukernel__neon_x64);
     }
   }
 
-  TEST(U8_CLAMP__NEON, inplace) {
+  TEST(U8_CLAMP__NEON_X64, inplace) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t n = 1; n < 128; n += 5) {
+    for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       ClampMicrokernelTester()
-        .iterations(1)
-        .n(n)
+        .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_u8_clamp_ukernel__neon);
+        .Test(xnn_u8_clamp_ukernel__neon_x64);
     }
   }
 
-  TEST(U8_CLAMP__NEON, qmin) {
+  TEST(U8_CLAMP__NEON_X64, qmin) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t n = 1; n < 128; n += 11) {
+    for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       for (uint8_t qmin = 1; qmin < 255; qmin++) {
         ClampMicrokernelTester()
-          .iterations(1)
-          .n(n)
+          .batch_size(batch_size)
           .qmin(qmin)
           .qmax(255)
-          .Test(xnn_u8_clamp_ukernel__neon);
+          .Test(xnn_u8_clamp_ukernel__neon_x64);
       }
     }
   }
 
-  TEST(U8_CLAMP__NEON, qmax) {
+  TEST(U8_CLAMP__NEON_X64, qmax) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t n = 1; n < 128; n += 11) {
+    for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       for (uint8_t qmax = 1; qmax < 255; qmax++) {
         ClampMicrokernelTester()
-          .iterations(1)
-          .n(n)
+          .batch_size(batch_size)
           .qmin(0)
           .qmax(qmax)
-          .Test(xnn_u8_clamp_ukernel__neon);
+          .Test(xnn_u8_clamp_ukernel__neon_x64);
       }
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(U8_CLAMP__SSE2, n_eq_8) {
+  TEST(U8_CLAMP__SSE2_X64, batch_eq_64) {
     TEST_REQUIRES_X86_SSE2;
     ClampMicrokernelTester()
-      .n(8)
-      .Test(xnn_u8_clamp_ukernel__sse2);
+      .batch_size(64)
+      .Test(xnn_u8_clamp_ukernel__sse2_x64);
   }
 
-  TEST(U8_CLAMP__SSE2, n_div_8) {
+  TEST(U8_CLAMP__SSE2_X64, batch_div_64) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t n = 8; n < 512; n += 8) {
+    for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       ClampMicrokernelTester()
-        .n(n)
-        .Test(xnn_u8_clamp_ukernel__sse2);
+        .batch_size(batch_size)
+        .Test(xnn_u8_clamp_ukernel__sse2_x64);
     }
   }
 
-  TEST(U8_CLAMP__SSE2, n_gt_8) {
+  TEST(U8_CLAMP__SSE2_X64, batch_lt_64) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t n = 9; n < 16; n++) {
+    for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       ClampMicrokernelTester()
-        .n(n)
-        .Test(xnn_u8_clamp_ukernel__sse2);
+        .batch_size(batch_size)
+        .Test(xnn_u8_clamp_ukernel__sse2_x64);
     }
   }
 
-  TEST(U8_CLAMP__SSE2, n_lt_8) {
+  TEST(U8_CLAMP__SSE2_X64, batch_gt_64) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t n = 1; n < 8; n++) {
+    for (size_t batch_size = 65; batch_size < 128; batch_size++) {
       ClampMicrokernelTester()
-        .n(n)
-        .Test(xnn_u8_clamp_ukernel__sse2);
+        .batch_size(batch_size)
+        .Test(xnn_u8_clamp_ukernel__sse2_x64);
     }
   }
 
-  TEST(U8_CLAMP__SSE2, inplace) {
+  TEST(U8_CLAMP__SSE2_X64, inplace) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t n = 1; n < 128; n += 5) {
+    for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       ClampMicrokernelTester()
-        .iterations(1)
-        .n(n)
+        .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_u8_clamp_ukernel__sse2);
+        .Test(xnn_u8_clamp_ukernel__sse2_x64);
     }
   }
 
-  TEST(U8_CLAMP__SSE2, qmin) {
+  TEST(U8_CLAMP__SSE2_X64, qmin) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t n = 1; n < 128; n += 11) {
+    for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       for (uint8_t qmin = 1; qmin < 255; qmin++) {
         ClampMicrokernelTester()
-          .iterations(1)
-          .n(n)
+          .batch_size(batch_size)
           .qmin(qmin)
           .qmax(255)
-          .Test(xnn_u8_clamp_ukernel__sse2);
+          .Test(xnn_u8_clamp_ukernel__sse2_x64);
       }
     }
   }
 
-  TEST(U8_CLAMP__SSE2, qmax) {
+  TEST(U8_CLAMP__SSE2_X64, qmax) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t n = 1; n < 128; n += 11) {
+    for (size_t batch_size = 1; batch_size <= 320; batch_size += 63) {
       for (uint8_t qmax = 1; qmax < 255; qmax++) {
         ClampMicrokernelTester()
-          .iterations(1)
-          .n(n)
+          .batch_size(batch_size)
           .qmin(0)
           .qmax(qmax)
-          .Test(xnn_u8_clamp_ukernel__sse2);
+          .Test(xnn_u8_clamp_ukernel__sse2_x64);
       }
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-TEST(U8_CLAMP__SCALAR, n_eq_1) {
+
+TEST(U8_CLAMP__SCALAR_X4, batch_eq_4) {
   ClampMicrokernelTester()
-    .n(1)
-    .Test(xnn_u8_clamp_ukernel__scalar, ClampMicrokernelTester::Variant::Scalar);
+    .batch_size(4)
+    .Test(xnn_u8_clamp_ukernel__scalar_x4, ClampMicrokernelTester::Variant::Scalar);
 }
 
-TEST(U8_CLAMP__SCALAR, n_gt_1) {
-  for (size_t n = 2; n < 8; n++) {
+TEST(U8_CLAMP__SCALAR_X4, batch_div_4) {
+  for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
     ClampMicrokernelTester()
-      .n(n)
-      .Test(xnn_u8_clamp_ukernel__scalar, ClampMicrokernelTester::Variant::Scalar);
+      .batch_size(batch_size)
+      .Test(xnn_u8_clamp_ukernel__scalar_x4, ClampMicrokernelTester::Variant::Scalar);
   }
 }
 
-TEST(U8_CLAMP__SCALAR, inplace) {
-  for (size_t n = 1; n < 16; n += 5) {
+TEST(U8_CLAMP__SCALAR_X4, batch_lt_4) {
+  for (size_t batch_size = 1; batch_size < 4; batch_size++) {
     ClampMicrokernelTester()
-      .iterations(1)
-      .n(n)
+      .batch_size(batch_size)
+      .Test(xnn_u8_clamp_ukernel__scalar_x4, ClampMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(U8_CLAMP__SCALAR_X4, batch_gt_4) {
+  for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+    ClampMicrokernelTester()
+      .batch_size(batch_size)
+      .Test(xnn_u8_clamp_ukernel__scalar_x4, ClampMicrokernelTester::Variant::Scalar);
+  }
+}
+
+TEST(U8_CLAMP__SCALAR_X4, inplace) {
+  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+    ClampMicrokernelTester()
+      .batch_size(batch_size)
       .inplace(true)
-      .Test(xnn_u8_clamp_ukernel__scalar, ClampMicrokernelTester::Variant::Scalar);
+      .Test(xnn_u8_clamp_ukernel__scalar_x4, ClampMicrokernelTester::Variant::Scalar);
   }
 }
 
-TEST(U8_CLAMP__SCALAR, qmin) {
-  for (size_t n = 1; n < 16; n += 5) {
+TEST(U8_CLAMP__SCALAR_X4, qmin) {
+  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
     for (uint8_t qmin = 1; qmin < 255; qmin++) {
       ClampMicrokernelTester()
-        .iterations(1)
-        .n(n)
+        .batch_size(batch_size)
         .qmin(qmin)
         .qmax(255)
-        .Test(xnn_u8_clamp_ukernel__scalar, ClampMicrokernelTester::Variant::Scalar);
+        .Test(xnn_u8_clamp_ukernel__scalar_x4, ClampMicrokernelTester::Variant::Scalar);
     }
   }
 }
 
-TEST(U8_CLAMP__SCALAR, qmax) {
-  for (size_t n = 1; n < 16; n += 5) {
+TEST(U8_CLAMP__SCALAR_X4, qmax) {
+  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
     for (uint8_t qmax = 1; qmax < 255; qmax++) {
       ClampMicrokernelTester()
-        .iterations(1)
-        .n(n)
+        .batch_size(batch_size)
         .qmin(0)
         .qmax(qmax)
-        .Test(xnn_u8_clamp_ukernel__scalar, ClampMicrokernelTester::Variant::Scalar);
+        .Test(xnn_u8_clamp_ukernel__scalar_x4, ClampMicrokernelTester::Variant::Scalar);
     }
   }
 }

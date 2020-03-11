@@ -13,7 +13,7 @@
 #include <xnnpack/clamp.h>
 
 
-void xnn_u8_clamp_ukernel__neon(
+void xnn_u8_clamp_ukernel__neon_x64(
     size_t n,
     const uint8_t* x,
     uint8_t* y,

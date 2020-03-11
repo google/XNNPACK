@@ -9,6 +9,9 @@ tools/generate-gemm-test.py --spec test/q8-gemm.yaml --output test/q8-gemm.cc
 tools/generate-gemm-test.py --spec test/q8-igemm.yaml --output test/q8-igemm.cc
 tools/generate-dwconv-test.py --spec test/q8-dwconv.yaml --output test/q8-dwconv.cc
 
+### Tests for U8 micro-kernels
+tools/generate-clamp-test.py --spec test/u8-clamp.yaml --output test/u8-clamp.cc
+
 ### Tests for packing micro-kernels
 tools/generate-pack-test.py --spec test/x32-packx.yaml --output test/x32-packx.cc
 

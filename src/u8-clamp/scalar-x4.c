@@ -8,7 +8,7 @@
 #include <xnnpack/clamp.h>
 
 
-void xnn_u8_clamp_ukernel__scalar(
+void xnn_u8_clamp_ukernel__scalar_x4(
     size_t n,
     const uint8_t* x,
     uint8_t* y,
@@ -26,15 +26,15 @@ void xnn_u8_clamp_ukernel__scalar(
     uint8_t vt3 = x[3];
     x += 4;
 
-    vt0 = vt0 < voutput_min ? voutput_min : vt0;
-    vt1 = vt1 < voutput_min ? voutput_min : vt1;
-    vt2 = vt2 < voutput_min ? voutput_min : vt2;
-    vt3 = vt3 < voutput_min ? voutput_min : vt3;
+    vt0 = XNN_UNPREDICTABLE(vt0 < voutput_min) ? voutput_min : vt0;
+    vt1 = XNN_UNPREDICTABLE(vt1 < voutput_min) ? voutput_min : vt1;
+    vt2 = XNN_UNPREDICTABLE(vt2 < voutput_min) ? voutput_min : vt2;
+    vt3 = XNN_UNPREDICTABLE(vt3 < voutput_min) ? voutput_min : vt3;
 
-    vt0 = vt0 > voutput_max ? voutput_max : vt0;
-    vt1 = vt1 > voutput_max ? voutput_max : vt1;
-    vt2 = vt2 > voutput_max ? voutput_max : vt2;
-    vt3 = vt3 > voutput_max ? voutput_max : vt3;
+    vt0 = XNN_UNPREDICTABLE(vt0 > voutput_max) ? voutput_max : vt0;
+    vt1 = XNN_UNPREDICTABLE(vt1 > voutput_max) ? voutput_max : vt1;
+    vt2 = XNN_UNPREDICTABLE(vt2 > voutput_max) ? voutput_max : vt2;
+    vt3 = XNN_UNPREDICTABLE(vt3 > voutput_max) ? voutput_max : vt3;
 
     y[0] = vt0;
     y[1] = vt1;
@@ -46,8 +46,8 @@ void xnn_u8_clamp_ukernel__scalar(
   if XNN_UNLIKELY(n != 0) {
     do {
       uint8_t vt = *x++;
-      vt = vt < voutput_min ? voutput_min : vt;
-      vt = vt > voutput_max ? voutput_max : vt;
+      vt = XNN_UNPREDICTABLE(vt < voutput_min) ? voutput_min : vt;
+      vt = XNN_UNPREDICTABLE(vt > voutput_max) ? voutput_max : vt;
       *y++ = vt;
 
       n -= sizeof(uint8_t);
