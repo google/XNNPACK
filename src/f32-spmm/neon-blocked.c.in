@@ -5,7 +5,7 @@
 
 $assert MR % 4 == 0
 $assert NR in [1, 2, 4]
-$ABC = "0123456789ABCDEFGHIJK"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <arm_neon.h>

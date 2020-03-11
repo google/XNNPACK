@@ -6,7 +6,7 @@
 $assert CHANNEL_TILE % 4 == 0
 $assert CHANNEL_TILE >= 4
 $assert ROW_TILE >= 1
-$ABC = "0123456789ABCDEFGHIJKLMN"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <psimd.h>

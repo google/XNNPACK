@@ -6,7 +6,7 @@
 $assert CHANNEL_TILE % 4 == 0
 $assert KERNEL_TILE >= 2
 $assert ACCUMULATORS >= 1
-$ABC = "0123456789ABCDEF"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include <assert.h>
 

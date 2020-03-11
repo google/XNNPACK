@@ -5,7 +5,7 @@
 
 $assert CHANNEL_TILE >= 1
 $assert ROW_TILE >= 1
-$ABC = "0123456789ABCDEFGHIJKLMN"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <xnnpack/math.h>
