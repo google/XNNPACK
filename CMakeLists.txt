@@ -183,7 +183,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-argmaxpool/9x-scalar-c1.c
   src/f32-avgpool/9p8x-scalar-c1.c
   src/f32-avgpool/9x-scalar-c1.c
-  src/f32-clamp/scalar.c
+  src/f32-clamp/gen/scalar-x1.c
+  src/f32-clamp/gen/scalar-x2.c
+  src/f32-clamp/gen/scalar-x4.c
   src/f32-conv-hwc/3x3s2p1c3x4-scalar-1x1.c
   src/f32-conv-hwc/3x3s2p0p1c3x4-scalar-1x1.c
   src/f32-conv-hwc2spchw/3x3s2p1c3x4-scalar-1x1.c
@@ -323,7 +325,7 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/q8-gemm/2x2-scalar.c
   src/q8-igemm/2x2-scalar.c
   src/q8-vadd/scalar.c
-  src/u8-clamp/scalar.c
+  src/u8-clamp/scalar-x4.c
   src/u8-lut32norm/scalar.c
   src/u8-maxpool/9p8x-scalar-c1.c
   src/u8-rmax/scalar.c
@@ -352,7 +354,8 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-argmaxpool/9x-psimd-c4.c
   src/f32-avgpool/9p8x-psimd-c4.c
   src/f32-avgpool/9x-psimd-c4.c
-  src/f32-clamp/psimd.c
+  src/f32-clamp/gen/psimd-x4.c
+  src/f32-clamp/gen/psimd-x8.c
   src/f32-dwconv/gen/up4x25-psimd-acc2.c
   src/f32-dwconv/gen/up4x25-psimd.c
   src/f32-dwconv/gen/up4x4-psimd-acc2.c
@@ -471,7 +474,8 @@ SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
 SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-neon-c4.c
   src/f32-avgpool/9x-neon-c4.c
-  src/f32-clamp/neon.c
+  src/f32-clamp/gen/neon-x4.c
+  src/f32-clamp/gen/neon-x8.c
   src/f32-dwconv/gen/up4x9-neon.c
   src/f32-dwconv/gen/up4x9-neon-acc2.c
   src/f32-dwconv/gen/up8x9-neon.c
@@ -615,7 +619,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/q8-igemm/4x8-neon.c
   src/q8-igemm/8x8-neon.c
   src/q8-vadd/neon.c
-  src/u8-clamp/neon.c
+  src/u8-clamp/neon-x64.c
   src/u8-maxpool/9p8x-neon-c16.c
   src/u8-rmax/neon.c
   src/x32-packx/x4-neon-st4.c
@@ -867,7 +871,8 @@ SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
 SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-sse-c4.c
   src/f32-avgpool/9x-sse-c4.c
-  src/f32-clamp/sse.c
+  src/f32-clamp/gen/sse-x4.c
+  src/f32-clamp/gen/sse-x8.c
   src/f32-dwconv-spchw/3x3p1-sse.c
   src/f32-dwconv-spchw/3x3s2p1-sse.c
   src/f32-dwconv/gen/up4x25-sse-acc2.c
@@ -981,7 +986,7 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/q8-gemm/2x4c8-sse2.c
   src/q8-gemm/4x4c2-sse2.c
   src/q8-vadd/sse2.c
-  src/u8-clamp/sse2.c
+  src/u8-clamp/sse2-x64.c
   src/u8-maxpool/9p8x-sse2-c16.c
   src/u8-rmax/sse2.c
   src/x32-pad/x2-sse2.c
@@ -1020,7 +1025,8 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/requantization/gemmlowp-sse4.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
-  src/f32-clamp/avx.c
+  src/f32-clamp/gen/avx-x8.c
+  src/f32-clamp/gen/avx-x16.c
   src/f32-dwconv/gen/up16x4-avx-acc2.c
   src/f32-dwconv/gen/up16x4-avx.c
   src/f32-dwconv/gen/up8x4-avx-acc2.c
@@ -1255,7 +1261,8 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/sigmoid-avx2-rr1-p5-nr1fma.c)
 
 SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
-  src/f32-clamp/avx512f.c
+  src/f32-clamp/gen/avx512f-x16.c
+  src/f32-clamp/gen/avx512f-x32.c
   src/f32-dwconv/gen/up32x4-avx512f-acc2.c
   src/f32-dwconv/gen/up32x4-avx512f.c
   src/f32-dwconv/gen/up16x4-avx512f-acc2.c
