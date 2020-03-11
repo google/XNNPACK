@@ -99,10 +99,12 @@ void xnn_f32_prelu_ukernel__avx_2x16(
       assert(c <= 7 * sizeof(float));
       __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - c));
 
-      const __m256 vw = _mm256_load_ps(w);
+      const __m256 vw = _mm256_maskload_ps(w, vmask);
 
       const __m256 vi0 = _mm256_maskload_ps(i0, vmask);
+      i0 = (const float*) ((uintptr_t) i0 + c);
       const __m256 vi1 = _mm256_maskload_ps(i1, vmask);
+      i1 = (const float*) ((uintptr_t) i1 + c);
 
       const __m256 vprod0 = _mm256_mul_ps(vi0, vw);
       const __m256 vprod1 = _mm256_mul_ps(vi1, vw);

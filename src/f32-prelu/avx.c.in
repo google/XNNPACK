@@ -102,10 +102,11 @@ void xnn_f32_prelu_ukernel__avx_${ROW_TILE}x${CHANNEL_TILE}(
       assert(c <= 7 * sizeof(float));
       __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - c));
 
-      const __m256 vw = _mm256_load_ps(w);
+      const __m256 vw = _mm256_maskload_ps(w, vmask);
 
       $for M in range(ROW_TILE):
         const __m256 vi${M} = _mm256_maskload_ps(i${M}, vmask);
+        i${M} = (const float*) ((uintptr_t) i${M} + c);
 
       $for M in range(ROW_TILE):
         const __m256 vprod${M} = _mm256_mul_ps(vi${M}, vw);

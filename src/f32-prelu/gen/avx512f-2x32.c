@@ -96,8 +96,7 @@ void xnn_f32_prelu_ukernel__avx512f_2x32(
       assert(c >= 1 * sizeof(float));
       assert(c <= 15 * sizeof(float));
       // Prepare mask for valid 32-bit elements (depends on c).
-      c >>= 2 /* log2(sizeof(float)) */;
-      const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << c) - UINT32_C(1)));
+      const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << (c >> 2 /* log2(sizeof(float))*/)) - UINT32_C(1)));
 
       const __m512 vw = _mm512_maskz_loadu_ps(vmask, w);
 
