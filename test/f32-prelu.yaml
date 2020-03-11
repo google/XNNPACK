@@ -8,6 +8,10 @@
 - name: xnn_f32_prelu_ukernel__sse2_2x8
 - name: xnn_f32_prelu_ukernel__sse41_2x4
 - name: xnn_f32_prelu_ukernel__sse41_2x8
+- name: xnn_f32_prelu_ukernel__avx_2x8
+- name: xnn_f32_prelu_ukernel__avx_2x16
+- name: xnn_f32_prelu_ukernel__avx512f_2x16
+- name: xnn_f32_prelu_ukernel__avx512f_2x32
 - name: xnn_f32_prelu_ukernel__psimd_2x4
 - name: xnn_f32_prelu_ukernel__psimd_2x8
 - name: xnn_f32_prelu_ukernel__scalar_2x1
