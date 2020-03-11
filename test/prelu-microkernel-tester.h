@@ -100,7 +100,7 @@ class PReLUMicrokernelTester {
     std::vector<float> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float, AlignedAllocator<float, 64>> w(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y_ref(channels());
+    std::vector<float> y_ref(channels() * rows());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(f32irng));
       std::generate(w.begin(), w.end(), std::ref(f32wrng));
@@ -112,8 +112,11 @@ class PReLUMicrokernelTester {
       const float* x_data = inplace() ? y.data() : x.data();
 
       // Compute reference results, without clamping.
-      for (size_t i = 0; i < channels(); i++) {
-        y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * w[i] : x_data[i];
+      for (size_t n = 0; n < rows(); n++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const float x_value = x_data[n * input_stride() + c];
+          y_ref[n * channels() + c] = std::signbit(x_value) ? x_value * w[c] : x_value;
+        }
       }
 
       // Call optimized micro-kernel.
@@ -123,9 +126,15 @@ class PReLUMicrokernelTester {
         y.data(), output_stride() * sizeof(float));
 
       // Verify results.
-      for (size_t i = 0; i < channels(); i++) {
-        ASSERT_NEAR(y[i], y_ref[i], 1.0e-6f * std::abs(y_ref[i]))
-          << "at " << i << ", channels = " << channels();
+      for (size_t n = 0; n < rows(); n++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_NEAR(
+              y[n * output_stride() + c],
+              y_ref[n * channels() + c],
+              1.0e-6f * std::abs(y_ref[n * channels() + c]))
+            << "at row " << n << " / " << rows()
+            << ", channel " << c << " / " << channels();
+        }
       }
     }
   }
