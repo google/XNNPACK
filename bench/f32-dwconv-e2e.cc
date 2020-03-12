@@ -38,11 +38,12 @@ static void DWConvEnd2EndBenchmark(
   for (size_t i = 0; i < XNN_MAX_F32_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel the matching kernel size.
     if (xnn_params.f32.dwconv[i].mr == mr) {
-      xnn_params.f32.dwconv[i] = (struct dwconv_parameters) {
-        .up = (xnn_dwconv_up_ukernel_function) dwconv,
-        .cr = cr,
-        .mr = mr,
-      };
+      struct dwconv_parameters param;
+      param.up = (xnn_dwconv_up_ukernel_function) dwconv;
+      param.cr = cr;
+      param.mr = mr;
+      param.qr = 0;
+      xnn_params.f32.dwconv[i] = param;
       break;
     }
   }
