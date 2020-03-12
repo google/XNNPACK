@@ -147,6 +147,7 @@ static void init(void) {
           break;
 
         case cpuinfo_uarch_cortex_a53:
+        case cpuinfo_uarch_cortex_a55r0:
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53,
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53,
@@ -435,6 +436,7 @@ static void init(void) {
           break;
 
         case cpuinfo_uarch_cortex_a53:
+        case cpuinfo_uarch_cortex_a55r0:
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
@@ -510,6 +512,7 @@ static void init(void) {
         break;
 #if XNN_ENABLE_ASSEMBLY
       case cpuinfo_uarch_cortex_a53:
+      case cpuinfo_uarch_cortex_a55r0:
       case cpuinfo_uarch_cortex_a55:
         xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
           .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55,
@@ -762,6 +765,7 @@ static void init(void) {
     } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_fma3()) {
       switch (cpuinfo_get_core(0)->uarch) {
         case cpuinfo_uarch_zen:
+        case cpuinfo_uarch_dhyana:
           xnn_params.f32.gemm = (struct gemm_parameters) {
             .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x16s4__fma3_broadcast,
             .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x16s4__fma3_broadcast,
