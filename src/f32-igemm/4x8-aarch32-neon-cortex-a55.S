@@ -10,19 +10,18 @@
 // void xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
-//     size_t kc,                            r2 -> r5 -> sp + 68
-//     size_t ks,                            r3 -> sp + 72 -> r14
-//     const float**restrict a,  sp + 112 -> (r5)
-//     const void*restrict w,    sp + 116 -> r9
-//     uint8_t*restrict c,       sp + 120 -> r11
-//     size_t cm_stride,         sp + 124 -> (r6)
-//     size_t cn_stride,         sp + 128 -> (r0)
-//     size_t a_offset,          sp + 132 -> (r5)
-//     const float* zero,        sp + 136 -> (r0)
-//     output_params*params,     sp + 140 -> (r5)
+//     size_t kc,                            r2 -> r5
+//     size_t ks,                            r3 -> sp + 64 -> r14
+//     const float**restrict a,  sp + 104 -> (r5)
+//     const void*restrict w,    sp + 108 -> r9
+//     uint8_t*restrict c,       sp + 112 -> r11
+//     size_t cm_stride,         sp + 116 -> (r6)
+//     size_t cn_stride,         sp + 120 -> (r0)
+//     size_t a_offset,          sp + 124 -> (r5)
+//     const float* zero,        sp + 128 -> (r0)
+//     output_params*params,     sp + 132 -> (r5)
 
 // inner loop registers
-// r0, r2   scratch temporaries for loads
 
 // A0   r3  d0
 // A1  r12  d1
@@ -45,16 +44,14 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55
         .arch armv7-a
         .fpu neon
 #endif
-        // Push 112 bytes
-        // r2 will be reloaded in outer loop.  r3 is ks
-        PUSH   {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r14}  // +44
-        SUB    sp, sp, 4                                        // 4
-        VPUSH  {d8-d15}                                         // +64 = 112
+        // Push 104 bytes
+        PUSH   {r3, r4, r5, r6, r7, r8, r9, r10, r11, r14}  // +40
+        VPUSH  {d8-d15}                                     // +64 = 104
 
-        LDR        r11, [sp, 120]    // c
-        LDR         r6, [sp, 124]    // cm_stride
-        LDR         r5, [sp, 112]    // a
-        LDR         r9, [sp, 116]    // w
+        LDR        r11, [sp, 112]    // c
+        LDR         r6, [sp, 116]    // cm_stride
+        LDR         r5, [sp, 104]    // a
+        LDR         r9, [sp, 108]    // w
         MOV        r14, r3           // p = ks
 
         // Clamp C pointers
@@ -95,13 +92,12 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55
         LDR         r7, [r5, 12]
         ADD         r5, r5, 16
         PLD         [r3,  0]         // Prefetch A
-        STR         r5, [sp, 112]    // a
+        STR         r5, [sp, 104]    // a
         PLD         [r3, 64]
-        LDR         r0, [sp, 136]    // zero
+        LDR         r0, [sp, 128]    // zero
         PLD        [r12,  0]
-        LDR         r5, [sp, 132]    // a_offset
+        LDR         r5, [sp, 124]    // a_offset
         PLD        [r12, 64]
-        LDR         r2, [sp, 68]     // kc
         PLD        [r10,  0]
         PLD        [r10, 64]
         PLD         [r7,  0]
@@ -306,21 +302,20 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55
 
         .p2align 3
 4:
-        LDR          r5, [sp, 112]   // a
+        LDR          r5, [sp, 104]   // a
         SUBS r14, r14, 16  // ks -= MR * sizeof(void*)
 
         # ks loop
         BHI 1b
 
         // Load params pointer
-        LDR          r0, [sp, 128]   // cn_stride
-        LDR          r2, [sp, 140]   // clamping_params
-        LDR         r14, [sp, 72]    // p = ks
-        SUBS         r1, r1, 8
-
+        LDR          r0, [sp, 132]   // clamping_params
+        LDR         r14, [sp, 64]    // p = ks
         // Load clamping_params values
-        VLD1.32     {d4[],d5[]}, [r2]!
-        VLD1.32     {d6[],d7[]}, [r2]
+        VLD1.32     {d4[],d5[]}, [r0]!
+        VLD1.32     {d6[],d7[]}, [r0]
+        SUBS         r1, r1, 8
+        LDR          r0, [sp, 120]   // cn_stride
 
         // Clamp
         VMIN.F32     q8,  q8, q2
@@ -352,7 +347,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55
         BHI         0b
 
         VPOP        {d8-d15}
-        ADD         sp, sp, 12  // skip pad, r2, r3
+        ADD         sp, sp, 4  // skip r3
         POP         {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
         .p2align 3
@@ -442,7 +437,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55
 
 13:
         VPOP        {d8-d15}
-        ADD         sp, sp, 12  // skip pad, r2, r3
+        ADD         sp, sp, 4  // skip r3
         POP         {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 END_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55
