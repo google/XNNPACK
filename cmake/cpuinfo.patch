@@ -924,7 +924,7 @@ index a340c4c..0e58dba 100755
              sources += ["arm/uarch.c", "arm/cache.c"]
              if build.target.is_linux or build.target.is_android:
 diff --git include/cpuinfo.h include/cpuinfo.h
-index 9938d2b..1107ea3 100644
+index 9938d2b..e4d2d0c 100644
 --- include/cpuinfo.h
 +++ include/cpuinfo.h
 @@ -34,10 +34,6 @@
@@ -949,7 +949,29 @@ index 9938d2b..1107ea3 100644
  #ifndef CPUINFO_ARCH_ASMJS
  	#define CPUINFO_ARCH_ASMJS 0
  #endif
-@@ -478,6 +470,10 @@ enum cpuinfo_uarch {
+@@ -190,6 +182,12 @@ enum cpuinfo_vendor {
+ 	 * Processors are designed by HiSilicon, a subsidiary of Huawei.
+ 	 */
+ 	cpuinfo_vendor_huawei   = 15,
++	/**
++	 * Hygon (Chengdu Haiguang Integrated Circuit Design Co., Ltd), Vendor of x86-64 processor microarchitectures.
++	 *
++	 * Processors are variants of AMD cores.
++	 */
++	cpuinfo_vendor_hygon    = 16,
+ 
+ 	/* Active vendors of embedded CPUs */
+ 
+@@ -401,6 +399,8 @@ enum cpuinfo_uarch {
+ 	cpuinfo_uarch_cortex_a35   = 0x00300335,
+ 	/** ARM Cortex-A53. */
+ 	cpuinfo_uarch_cortex_a53   = 0x00300353,
++	/** ARM Cortex-A55 revision 0 (restricted dual-issue capabilities compared to revision 1+). */
++	cpuinfo_uarch_cortex_a55r0 = 0x00300354,
+ 	/** ARM Cortex-A55. */
+ 	cpuinfo_uarch_cortex_a55   = 0x00300355,
+ 	/** ARM Cortex-A57. */
+@@ -478,6 +478,10 @@ enum cpuinfo_uarch {
  	cpuinfo_uarch_vortex    = 0x00700107,
  	/** Apple A12 processor (little cores). */
  	cpuinfo_uarch_tempest   = 0x00700108,
@@ -960,7 +982,17 @@ index 9938d2b..1107ea3 100644
  
  	/** Cavium ThunderX. */
  	cpuinfo_uarch_thunderx = 0x00800100,
-@@ -613,6 +609,22 @@ struct cpuinfo_package {
+@@ -494,6 +498,9 @@ enum cpuinfo_uarch {
+ 
+ 	/** Applied Micro X-Gene. */
+ 	cpuinfo_uarch_xgene = 0x00B00100,
++
++	/* Hygon Dhyana (a modification of AMD Zen for Chinese market). */
++	cpuinfo_uarch_dhyana = 0x01000100,
+ };
+ 
+ struct cpuinfo_processor {
+@@ -613,6 +620,22 @@ struct cpuinfo_package {
  	uint32_t cluster_count;
  };
  
@@ -983,7 +1015,7 @@ index 9938d2b..1107ea3 100644
  #ifdef __cplusplus
  extern "C" {
  #endif
-@@ -1721,6 +1733,7 @@ const struct cpuinfo_processor* CPUINFO_ABI cpuinfo_get_processors(void);
+@@ -1721,6 +1744,7 @@ const struct cpuinfo_processor* CPUINFO_ABI cpuinfo_get_processors(void);
  const struct cpuinfo_core* CPUINFO_ABI cpuinfo_get_cores(void);
  const struct cpuinfo_cluster* CPUINFO_ABI cpuinfo_get_clusters(void);
  const struct cpuinfo_package* CPUINFO_ABI cpuinfo_get_packages(void);
@@ -991,7 +1023,7 @@ index 9938d2b..1107ea3 100644
  const struct cpuinfo_cache* CPUINFO_ABI cpuinfo_get_l1i_caches(void);
  const struct cpuinfo_cache* CPUINFO_ABI cpuinfo_get_l1d_caches(void);
  const struct cpuinfo_cache* CPUINFO_ABI cpuinfo_get_l2_caches(void);
-@@ -1731,6 +1744,7 @@ const struct cpuinfo_processor* CPUINFO_ABI cpuinfo_get_processor(uint32_t index
+@@ -1731,6 +1755,7 @@ const struct cpuinfo_processor* CPUINFO_ABI cpuinfo_get_processor(uint32_t index
  const struct cpuinfo_core* CPUINFO_ABI cpuinfo_get_core(uint32_t index);
  const struct cpuinfo_cluster* CPUINFO_ABI cpuinfo_get_cluster(uint32_t index);
  const struct cpuinfo_package* CPUINFO_ABI cpuinfo_get_package(uint32_t index);
@@ -999,7 +1031,7 @@ index 9938d2b..1107ea3 100644
  const struct cpuinfo_cache* CPUINFO_ABI cpuinfo_get_l1i_cache(uint32_t index);
  const struct cpuinfo_cache* CPUINFO_ABI cpuinfo_get_l1d_cache(uint32_t index);
  const struct cpuinfo_cache* CPUINFO_ABI cpuinfo_get_l2_cache(uint32_t index);
-@@ -1741,6 +1755,7 @@ uint32_t CPUINFO_ABI cpuinfo_get_processors_count(void);
+@@ -1741,6 +1766,7 @@ uint32_t CPUINFO_ABI cpuinfo_get_processors_count(void);
  uint32_t CPUINFO_ABI cpuinfo_get_cores_count(void);
  uint32_t CPUINFO_ABI cpuinfo_get_clusters_count(void);
  uint32_t CPUINFO_ABI cpuinfo_get_packages_count(void);
@@ -1007,7 +1039,7 @@ index 9938d2b..1107ea3 100644
  uint32_t CPUINFO_ABI cpuinfo_get_l1i_caches_count(void);
  uint32_t CPUINFO_ABI cpuinfo_get_l1d_caches_count(void);
  uint32_t CPUINFO_ABI cpuinfo_get_l2_caches_count(void);
-@@ -1752,9 +1767,31 @@ uint32_t CPUINFO_ABI cpuinfo_get_l4_caches_count(void);
+@@ -1752,9 +1778,31 @@ uint32_t CPUINFO_ABI cpuinfo_get_l4_caches_count(void);
   */
  uint32_t CPUINFO_ABI cpuinfo_get_max_cache_size(void);
  
@@ -1463,6 +1495,18 @@ index b180d80..0cc5d4e 100644
 +		return 0;
 +	#endif
 +}
+diff --git src/arm/cache.c src/arm/cache.c
+index ccadeb4..c2bc7d2 100644
+--- src/arm/cache.c
++++ src/arm/cache.c
+@@ -659,6 +659,7 @@ void cpuinfo_arm_decode_cache(
+ 				};
+ 			}
+ 			break;
++		case cpuinfo_uarch_cortex_a55r0:
+ 		case cpuinfo_uarch_cortex_a55:
+ 			/*
+ 			 * ARM Cortex-A55 Core Technical Reference Manual
 diff --git src/arm/linux/api.h src/arm/linux/api.h
 index 275d072..f99da66 100644
 --- src/arm/linux/api.h
@@ -1844,6 +1888,33 @@ index e64cc18..bd27259 100644
  	free(l1i);
  	free(l1d);
  	free(l2);
+diff --git src/arm/uarch.c src/arm/uarch.c
+index a38250a..2aef9e7 100644
+--- src/arm/uarch.c
++++ src/arm/uarch.c
+@@ -58,7 +58,9 @@ void cpuinfo_arm_decode_vendor_uarch(
+ 					*uarch = cpuinfo_uarch_cortex_a35;
+ 					break;
+ 				case 0xD05:
+-					*uarch = cpuinfo_uarch_cortex_a55;
++					// Note: use Variant, not Revision, field
++					*uarch = (midr & CPUINFO_ARM_MIDR_VARIANT_MASK) == 0 ?
++						cpuinfo_uarch_cortex_a55r0 : cpuinfo_uarch_cortex_a55;
+ 					break;
+ 				case 0xD06:
+ 					*uarch = cpuinfo_uarch_cortex_a65;
+@@ -257,9 +259,9 @@ void cpuinfo_arm_decode_vendor_uarch(
+ 					*vendor = cpuinfo_vendor_arm;
+ 					*uarch = cpuinfo_uarch_cortex_a75;
+ 					break;
+-				case 0x803: /* Low-power Kryo 385 "Silver" -> Cortex-A55 */
++				case 0x803: /* Low-power Kryo 385 "Silver" -> Cortex-A55r0 */
+ 					*vendor = cpuinfo_vendor_arm;
+-					*uarch = cpuinfo_uarch_cortex_a55;
++					*uarch = cpuinfo_uarch_cortex_a55r0;
+ 					break;
+ 				case 0x804: /* High-performance Kryo 485 "Gold" / "Gold Prime" -> Cortex-A76 */
+ 					*vendor = cpuinfo_vendor_arm;
 diff --git src/cpuinfo/common.h src/cpuinfo/common.h
 index 6ba746e..b2b404d 100644
 --- src/cpuinfo/common.h
@@ -1993,6 +2064,19 @@ index 5f5e76d..213c2d8 100644
  
  CPUINFO_INTERNAL void cpuinfo_x86_detect_topology(
  	uint32_t max_base_index,
+diff --git src/x86/cache/init.c src/x86/cache/init.c
+index d581016..dd1f1ea 100644
+--- src/x86/cache/init.c
++++ src/x86/cache/init.c
+@@ -65,7 +65,7 @@ iterate_descriptors:
+ 			}
+ 		}
+ 
+-		if (vendor != cpuinfo_vendor_amd && max_base_index >= 4) {
++		if (vendor != cpuinfo_vendor_amd && vendor != cpuinfo_vendor_hygon && max_base_index >= 4) {
+ 			struct cpuid_regs leaf4;
+ 			uint32_t input_ecx = 0;
+ 			uint32_t package_cores_max = 0;
 diff --git src/x86/cpuid.h src/x86/cpuid.h
 index 829ec21..9e9e013 100644
 --- src/x86/cpuid.h
@@ -2045,6 +2129,26 @@ index d736578..244359c 100644
  	}
  	if (max_extended_index >= UINT32_C(0x80000004)) {
  		struct cpuid_regs brand_string[3];
+diff --git src/x86/isa.c src/x86/isa.c
+index d27dbca..f2e5a28 100644
+--- src/x86/isa.c
++++ src/x86/isa.c
+@@ -244,6 +244,7 @@ struct cpuinfo_x86_isa cpuinfo_x86_detect_isa(
+ 			 */
+ 			break;
+ 		case cpuinfo_vendor_amd:
++		case cpuinfo_vendor_hygon:
+ 			isa.prefetch = !!((extended_info.ecx & UINT32_C(0x00000100)) | (extended_info.edx & UINT32_C(0xE0000000)));
+ 			break;
+ 		default:
+@@ -265,6 +266,7 @@ struct cpuinfo_x86_isa cpuinfo_x86_detect_isa(
+ 	 */
+ 	switch (vendor) {
+ 		case cpuinfo_vendor_amd:
++		case cpuinfo_vendor_hygon:
+ 			isa.prefetchw = !!((extended_info.ecx & UINT32_C(0x00000100)) | (extended_info.edx & UINT32_C(0xE0000000)));
+ 			break;
+ 		default:
 diff --git src/x86/linux/init.c src/x86/linux/init.c
 index c096336..f565789 100644
 --- src/x86/linux/init.c
@@ -2466,6 +2570,110 @@ index 662be33..0000000
 -finish:
 -	return isa;
 -}
+diff --git src/x86/name.c src/x86/name.c
+index 708be1d..e0d5a5b 100644
+--- src/x86/name.c
++++ src/x86/name.c
+@@ -671,6 +671,7 @@ static const char* vendor_string_map[] = {
+ 	[cpuinfo_vendor_intel] = "Intel",
+ 	[cpuinfo_vendor_amd] = "AMD",
+ 	[cpuinfo_vendor_via] = "VIA",
++	[cpuinfo_vendor_hygon] = "Hygon",
+ 	[cpuinfo_vendor_rdc] = "RDC",
+ 	[cpuinfo_vendor_dmp] = "DM&P",
+ 	[cpuinfo_vendor_transmeta] = "Transmeta",
+diff --git src/x86/uarch.c src/x86/uarch.c
+index ba72d8a..ecaa762 100644
+--- src/x86/uarch.c
++++ src/x86/uarch.c
+@@ -79,6 +79,8 @@ enum cpuinfo_uarch cpuinfo_x86_decode_uarch(
+ 						case 0x5E: // Sky Lake Client DT/H/S
+ 						case 0x8E: // Kaby/Whiskey/Amber/Comet Lake Y/U
+ 						case 0x9E: // Kaby/Coffee Lake DT/H/S
++						case 0xA5: // Comet Lake H/S
++						case 0xA6: // Comet Lake U/Y
+ 							return cpuinfo_uarch_sky_lake;
+ 						case 0x66: // Cannon Lake (Core i3-8121U)
+ 							return cpuinfo_uarch_palm_cove;
+@@ -94,7 +96,7 @@ enum cpuinfo_uarch cpuinfo_x86_decode_uarch(
+ 							return cpuinfo_uarch_bonnell;
+ 						case 0x27: // Medfield
+ 						case 0x35: // Cloverview
+-						case 0x36: // Cedarview, Centerton 
++						case 0x36: // Cedarview, Centerton
+ 							return cpuinfo_uarch_saltwell;
+ 						case 0x37: // Bay Trail
+ 						case 0x4A: // Merrifield
+@@ -110,6 +112,7 @@ enum cpuinfo_uarch cpuinfo_x86_decode_uarch(
+ 							return cpuinfo_uarch_goldmont;
+ 						case 0x7A: // Gemini Lake
+ 							return cpuinfo_uarch_goldmont_plus;
++
+ 						/* Knights-series cores */
+ 						case 0x57:
+ 							return cpuinfo_uarch_knights_landing;
+@@ -173,7 +176,7 @@ enum cpuinfo_uarch cpuinfo_x86_decode_uarch(
+ 						case 0x38: // Godavari
+ 						case 0x30: // Kaveri
+ 							return cpuinfo_uarch_steamroller;
+-						case 0x60: // Carrizo 
++						case 0x60: // Carrizo
+ 						case 0x65: // Bristol Ridge
+ 						case 0x70: // Stoney Ridge
+ 							return cpuinfo_uarch_excavator;
+@@ -201,14 +204,22 @@ enum cpuinfo_uarch cpuinfo_x86_decode_uarch(
+ 					switch (model_info->model) {
+ 						case 0x01: // 14 nm Naples, Whitehaven, Summit Ridge, Snowy Owl
+ 						case 0x08: // 12 nm Pinnacle Ridge
+-						case 0x11: // 14 nm Raven Ridge
++						case 0x11: // 14 nm Raven Ridge, Great Horned Owl
+ 						case 0x18: // 12 nm Picasso
+ 							return cpuinfo_uarch_zen;
++						case 0x31: // Rome, Castle Peak
++						case 0x60: // Renoir
+ 						case 0x71: // Matisse
+ 							return cpuinfo_uarch_zen2;
+ 					}
+ 			}
+ 			break;
++		case cpuinfo_vendor_hygon:
++			switch (model_info->family) {
++				case 0x00:
++					return cpuinfo_uarch_dhyana;
++			}
++			break;
+ 		default:
+ 			break;
+ 	}
+diff --git src/x86/vendor.c src/x86/vendor.c
+index 3f3c753..2bba90d 100644
+--- src/x86/vendor.c
++++ src/x86/vendor.c
+@@ -26,6 +26,11 @@
+ #define auls UINT32_C(0x736C7561)
+ #define VIA  UINT32_C(0x20414956)
+ 
++/* Hygon vendor string: "HygonGenuine" */
++#define Hygo UINT32_C(0x6F677948)
++#define nGen UINT32_C(0x6E65476E)
++#define uine UINT32_C(0x656E6975)
++
+ /* Transmeta vendor strings: "GenuineTMx86", "TransmetaCPU" */
+ #define ineT UINT32_C(0x54656E69)
+ #define Mx86 UINT32_C(0x3638784D)
+@@ -105,6 +110,12 @@ enum cpuinfo_vendor cpuinfo_x86_decode_vendor(uint32_t ebx, uint32_t ecx, uint32
+ 				return cpuinfo_vendor_via;
+ 			}
+ 			break;
++		case Hygo:
++			if (edx == nGen && ecx == uine) {
++				/* "HygonGenuine" */
++				return cpuinfo_vendor_hygon;
++			}
++			break;
+ #if CPUINFO_ARCH_X86
+ 		case AMDi:
+ 			if (edx == sbet && ecx == ter) {
 diff --git src/x86/windows/init.c src/x86/windows/init.c
 index 7a2090e..2c7e3cd 100644
 --- src/x86/windows/init.c
@@ -2526,6 +2734,28 @@ index 7a2090e..2c7e3cd 100644
  	MemoryBarrier();
  
  	cpuinfo_is_initialized = true;
+diff --git test/arm-cache.cc test/arm-cache.cc
+index 8373f7c..7d2e4a4 100644
+--- test/arm-cache.cc
++++ test/arm-cache.cc
+@@ -766,7 +766,7 @@ TEST(QUALCOMM, snapdragon_845) {
+ 	struct cpuinfo_cache little_l2 = { 0 };
+ 	struct cpuinfo_cache little_l3 = { 0 };
+ 	cpuinfo_arm_decode_cache(
+-		cpuinfo_uarch_cortex_a55, 4, UINT32_C(0x518F803C),
++		cpuinfo_uarch_cortex_a55r0, 4, UINT32_C(0x518F803C),
+ 		&chipset, 1, 8,
+ 		&little_l1i, &little_l1d, &little_l2, &little_l3);
+ 
+@@ -910,7 +910,7 @@ TEST(SAMSUNG, exynos_9810) {
+ 	struct cpuinfo_cache little_l2 = { 0 };
+ 	struct cpuinfo_cache little_l3 = { 0 };
+ 	cpuinfo_arm_decode_cache(
+-		cpuinfo_uarch_cortex_a55, 4, UINT32_C(0x410FD051),
++		cpuinfo_uarch_cortex_a55r0, 4, UINT32_C(0x410FD051),
+ 		&chipset, 1, 8,
+ 		&little_l1i, &little_l1d, &little_l2, &little_l3);
+ 
 diff --git test/get-current.cc test/get-current.cc
 index 4a80cab..f410b12 100644
 --- test/get-current.cc
@@ -2656,11 +2886,80 @@ index 941cb97..718eb96 100644
  TEST(L1I_CACHES_COUNT, within_bounds) {
  	ASSERT_TRUE(cpuinfo_initialize());
  	EXPECT_NE(0, cpuinfo_get_l1i_caches_count());
+diff --git test/mock/galaxy-s9-global.cc test/mock/galaxy-s9-global.cc
+index 7a67129..6c72513 100644
+--- test/mock/galaxy-s9-global.cc
++++ test/mock/galaxy-s9-global.cc
+@@ -207,7 +207,7 @@ TEST(CORES, uarch) {
+ 			case 5:
+ 			case 6:
+ 			case 7:
+-				ASSERT_EQ(cpuinfo_uarch_cortex_a55, cpuinfo_get_core(i)->uarch);
++				ASSERT_EQ(cpuinfo_uarch_cortex_a55r0, cpuinfo_get_core(i)->uarch);
+ 				break;
+ 		}
+ 	}
+@@ -329,7 +329,7 @@ TEST(CLUSTERS, uarch) {
+ 				ASSERT_EQ(cpuinfo_uarch_exynos_m3, cpuinfo_get_cluster(i)->uarch);
+ 				break;
+ 			case 1:
+-				ASSERT_EQ(cpuinfo_uarch_cortex_a55, cpuinfo_get_cluster(i)->uarch);
++				ASSERT_EQ(cpuinfo_uarch_cortex_a55r0, cpuinfo_get_cluster(i)->uarch);
+ 				break;
+ 		}
+ 	}
+diff --git test/mock/galaxy-s9-us.cc test/mock/galaxy-s9-us.cc
+index 6df7f3c..ceea969 100644
+--- test/mock/galaxy-s9-us.cc
++++ test/mock/galaxy-s9-us.cc
+@@ -168,7 +168,7 @@ TEST(CORES, uarch) {
+ 			case 5:
+ 			case 6:
+ 			case 7:
+-				ASSERT_EQ(cpuinfo_uarch_cortex_a55, cpuinfo_get_core(i)->uarch);
++				ASSERT_EQ(cpuinfo_uarch_cortex_a55r0, cpuinfo_get_core(i)->uarch);
+ 				break;
+ 		}
+ 	}
+@@ -283,7 +283,7 @@ TEST(CLUSTERS, uarch) {
+ 				ASSERT_EQ(cpuinfo_uarch_cortex_a75, cpuinfo_get_cluster(i)->uarch);
+ 				break;
+ 			case 1:
+-				ASSERT_EQ(cpuinfo_uarch_cortex_a55, cpuinfo_get_cluster(i)->uarch);
++				ASSERT_EQ(cpuinfo_uarch_cortex_a55r0, cpuinfo_get_cluster(i)->uarch);
+ 				break;
+ 		}
+ 	}
+@@ -817,4 +817,4 @@ int main(int argc, char* argv[]) {
+ 	cpuinfo_initialize();
+ 	::testing::InitGoogleTest(&argc, argv);
+ 	return RUN_ALL_TESTS();
+-}
+\ No newline at end of file
++}
 diff --git tools/cpu-info.c tools/cpu-info.c
-index 7fa5187..62f969c 100644
+index 7fa5187..7963c00 100644
 --- tools/cpu-info.c
 +++ tools/cpu-info.c
-@@ -223,6 +223,10 @@ static const char* uarch_to_string(enum cpuinfo_uarch uarch) {
+@@ -14,6 +14,8 @@ static const char* vendor_to_string(enum cpuinfo_vendor vendor) {
+ 			return "Intel";
+ 		case cpuinfo_vendor_amd:
+ 			return "AMD";
++		case cpuinfo_vendor_hygon:
++			return "Hygon";
+ 		case cpuinfo_vendor_arm:
+ 			return "ARM";
+ 		case cpuinfo_vendor_qualcomm:
+@@ -161,6 +163,8 @@ static const char* uarch_to_string(enum cpuinfo_uarch uarch) {
+ 			return "Cortex-A35";
+ 		case cpuinfo_uarch_cortex_a53:
+ 			return "Cortex-A53";
++		case cpuinfo_uarch_cortex_a55r0:
++			return "Cortex-A55r0";
+ 		case cpuinfo_uarch_cortex_a55:
+ 			return "Cortex-A55";
+ 		case cpuinfo_uarch_cortex_a57:
+@@ -223,6 +227,10 @@ static const char* uarch_to_string(enum cpuinfo_uarch uarch) {
  			return "Vortex";
  		case cpuinfo_uarch_tempest:
  			return "Tempest";
@@ -2671,7 +2970,7 @@ index 7fa5187..62f969c 100644
  		case cpuinfo_uarch_thunderx:
  			return "ThunderX";
  		case cpuinfo_uarch_thunderx2:
-@@ -253,6 +257,17 @@ int main(int argc, char** argv) {
+@@ -253,6 +261,17 @@ int main(int argc, char** argv) {
  			printf("\t%"PRIu32": %s\n", i, cpuinfo_get_package(i)->name);
  		}
  	#endif
@@ -2689,7 +2988,7 @@ index 7fa5187..62f969c 100644
  	printf("Cores:\n");
  	for (uint32_t i = 0; i < cpuinfo_get_cores_count(); i++) {
  		const struct cpuinfo_core* core = cpuinfo_get_core(i);
-@@ -277,17 +292,17 @@ int main(int argc, char** argv) {
+@@ -277,17 +296,17 @@ int main(int argc, char** argv) {
  		}
  	}
  	printf("Logical processors");
