@@ -10,18 +10,16 @@
 // void xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
-//     size_t kc,                            r2 -> r5 -> sp + 0
+//     size_t kc,                            r2 -> r5
 //     const uint8_t*restrict a,             r3
-//     size_t a_stride,          sp + 100 -> (r7)
-//     const void*restrict w,    sp + 104 -> r9
-//     uint8_t*restrict c,       sp + 108 -> r11
-//     size_t cm_stride,         sp + 112 -> (r6)
-//     size_t cn_stride,         sp + 116 -> (r0)
-//     const union xnn_f32_output_params params[restrict static 1])  sp + 120 -> (r5)
-
+//     size_t a_stride,          sp + 96 -> (r7)
+//     const void*restrict w,    sp + 100 -> r9
+//     uint8_t*restrict c,       sp + 104 -> r11
+//     size_t cm_stride,         sp + 108 -> (r6)
+//     size_t cn_stride,         sp + 112 -> (r0)
+//     output_params*params,     sp + 116 -> (r5)
 
 // inner loop registers
-// r0, r2   scratch temporaries for loads
 // r14 (lr) unused
 
 // A0   r3  d0
@@ -45,15 +43,14 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55
         .arch armv7-a
         .fpu neon
 #endif
-        // Push 100 bytes
-        // r2 will be reloaded in outer loop
-        VPUSH  {d8-d15}                                // 64
-        PUSH   {r2, r4, r5, r6, r7, r8, r9, r10, r11}  // +36 = 100
+        // Push 96 bytes
+        VPUSH  {d8-d15}                            // 64
+        PUSH   {r4, r5, r6, r7, r8, r9, r10, r11}  // +32 = 96
 
-        LDR     r7, [sp, 100]        // a_stride
-        LDR    r11, [sp, 108]        // c
-        LDR     r6, [sp, 112]        // cm_stride
-        LDR     r9, [sp, 104]        // w
+        LDR     r7, [sp,  96]        // a_stride
+        LDR    r11, [sp, 104]        // c
+        LDR     r6, [sp, 108]        // cm_stride
+        LDR     r9, [sp, 100]        // w
 
         // Clamp A and C pointers
         CMP    r0, 2                 // if mr >= 2
@@ -284,9 +281,8 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55
         .p2align 3
 4:
         // Load params pointer
-        LDR          r0, [sp, 116]   // cn_stride
-        LDR          r5, [sp, 120]   // clamping_params
-        LDR          r2, [sp, 0]     // kc
+        LDR          r0, [sp, 112]   // cn_stride
+        LDR          r5, [sp, 116]   // clamping_params
         SUBS         r1, r1, 8
 
         // Load clamping_params values
@@ -323,7 +319,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55
         SUB         r3, r3, r2
         BHI         1b
 
-        ADD         sp, sp, 4
         POP         {r4, r5, r6, r7, r8, r9, r10, r11}
         VPOP        {d8-d15}
         BX          lr
@@ -414,7 +409,6 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55
         VST1.32    {d28[0]},  [r6]
 
 13:
-        ADD         sp, sp, 4
         POP         {r4, r5, r6, r7, r8, r9, r10, r11}
         VPOP        {d8-d15}
         BX          lr
