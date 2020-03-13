@@ -1551,6 +1551,12 @@ TARGET_INCLUDE_DIRECTORIES(XNNPACK PUBLIC include)
 TARGET_INCLUDE_DIRECTORIES(XNNPACK PRIVATE src)
 SET_TARGET_PROPERTIES(XNNPACK PROPERTIES PUBLIC_HEADER include/xnnpack.h)
 
+# ---[ Find libm
+FIND_LIBRARY(LIBM m)
+IF(LIBM)
+  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE ${LIBM})
+ENDIF()
+
 # ---[ Configure clog
 IF(NOT TARGET clog)
   SET(CLOG_BUILD_TESTS OFF CACHE BOOL "")
@@ -1631,13 +1637,13 @@ IF(XNNPACK_BUILD_TESTS)
 
   # ---[ Build size tests
 
-  ADD_EXECUTABLE(operator-size-test test/size.c)
+  ADD_EXECUTABLE(operator-size-test test/operator-size.c)
   SET_TARGET_PROPERTIES(operator-size-test PROPERTIES
     C_STANDARD 99
     C_EXTENSIONS NO)
   TARGET_LINK_LIBRARIES(operator-size-test PRIVATE XNNPACK)
 
-  ADD_EXECUTABLE(subgraph-size-test test/size.c)
+  ADD_EXECUTABLE(subgraph-size-test test/subgraph-size.c)
   SET_TARGET_PROPERTIES(subgraph-size-test PROPERTIES
     C_STANDARD 99
     C_EXTENSIONS NO)
