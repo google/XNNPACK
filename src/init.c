@@ -80,7 +80,8 @@ static void init(void) {
       .nr = 8,
     };
 
-    #if XNN_ENABLE_ASSEMBLY
+    // TODO: Test assembly for IOS.
+    #if XNN_ENABLE_ASSEMBLY && !defined(TARGET_OS_IPHONE)
       xnn_params.q8.dwconv[0] = (struct dwconv_parameters) {
         .up = (xnn_dwconv_up_ukernel_function) xnn_q8_dwconv_ukernel_up8x9__aarch32_neon,
         .cr = 8,
@@ -387,7 +388,17 @@ static void init(void) {
 
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
-    #if XNN_ENABLE_ASSEMBLY
+    // TODO: Review assembly for IOS.
+    #if defined(TARGET_OS_IPHONE)
+      xnn_params.f32.gemm = (struct gemm_parameters) {
+        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__neonfma_lane_ld64,
+        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_lane_ld64,
+        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neonfma_lane_ld64,
+        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neonfma_lane_ld64,
+        .mr = 6,
+        .nr = 8,
+      };
+    #elif XNN_ENABLE_ASSEMBLY
       switch (cpuinfo_get_core(0)->uarch) {
         case cpuinfo_uarch_cortex_a57:
           xnn_params.f32.gemm = (struct gemm_parameters) {
@@ -510,7 +521,7 @@ static void init(void) {
           .mr = 9,
         };
         break;
-#if XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ASSEMBLY && !defined(TARGET_OS_IPHONE)
       case cpuinfo_uarch_cortex_a53:
       case cpuinfo_uarch_cortex_a55r0:
       case cpuinfo_uarch_cortex_a55:
