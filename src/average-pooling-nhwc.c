@@ -203,20 +203,19 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
   average_pooling_op->input_pixel_stride = input_pixel_stride;
   average_pooling_op->output_pixel_stride = output_pixel_stride;
 
+  average_pooling_op->input_zero_point = input_zero_point;
+  average_pooling_op->output_zero_point = output_zero_point;
+  average_pooling_op->input_scale = input_scale;
+  average_pooling_op->output_scale = output_scale;
+  average_pooling_op->output_min = output_min;
+  average_pooling_op->output_max = output_max;
+
   // Number of rows read in the AVGPOOL micro-kernel.
   const size_t avgpool_nrows =
     round_up(doz(pooling_size, xnn_params.q8.avgpool.mr), xnn_params.q8.avgpool.qr) + xnn_params.q8.avgpool.mr;
   average_pooling_op->q8_avgpool_params =
     xnn_init_q8_avgpool_params(
       (int32_t) -((uint32_t) input_zero_point * (uint32_t) avgpool_nrows),
-      input_scale / (output_scale * (float) pooling_size),
-      output_zero_point, output_min, output_max);
-
-  // Number of rows read in the GAVGPOOL micro-kernel.
-  const size_t gavgpool_nrows = round_up(pooling_size, xnn_params.q8.gavgpool.mr);
-  average_pooling_op->q8_gavgpool_params =
-    xnn_init_q8_avgpool_params(
-      (int32_t) -((uint32_t) input_zero_point * (uint32_t) gavgpool_nrows),
       input_scale / (output_scale * (float) pooling_size),
       output_zero_point, output_min, output_max);
 
@@ -462,7 +461,9 @@ static enum xnn_status setup_average_pooling2d(
 
   const size_t output_height = average_pooling_op->output_height;
   const size_t output_width = average_pooling_op->output_width;
-  if (input_width == average_pooling_op->kernel_width && input_height == average_pooling_op->kernel_height) {
+  const size_t padded_input_width = average_pooling_op->padding_left + input_width + average_pooling_op->padding_right;
+  const size_t padded_input_height = average_pooling_op->padding_top + input_height + average_pooling_op->padding_bottom;
+  if (padded_input_width == average_pooling_op->kernel_width && padded_input_height == average_pooling_op->kernel_height) {
     // Global average pooling
     const size_t input_elements = input_height * input_width;
     const size_t input_stride_in_bytes = average_pooling_op->input_pixel_stride << log2_input_element_size;
@@ -637,6 +638,18 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
 
   assert(average_pooling_op->ukernel.type == xnn_ukernel_type_average_pooling);
 
+  // Number of rows read in the GAVGPOOL micro-kernel.
+  const size_t input_size = input_height * input_width;
+  const size_t pooling_size = average_pooling_op->kernel_height * average_pooling_op->kernel_width;
+  const size_t gavgpool_nrows = round_up(input_size, xnn_params.q8.gavgpool.mr);
+  average_pooling_op->q8_gavgpool_params =
+    xnn_init_q8_avgpool_params(
+      (int32_t) -((uint32_t) average_pooling_op->input_zero_point * (uint32_t) gavgpool_nrows),
+      average_pooling_op->input_scale / (average_pooling_op->output_scale * (float) pooling_size),
+      average_pooling_op->output_zero_point,
+      average_pooling_op->output_min,
+      average_pooling_op->output_max);
+
   return setup_average_pooling2d(
     average_pooling_op,
     batch_size, input_height, input_width,
@@ -672,6 +685,10 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
          average_pooling_op->ukernel.type == xnn_ukernel_type_pixelwise_average_pooling);
 
   const bool is_pixelwise = average_pooling_op->ukernel.type == xnn_ukernel_type_pixelwise_average_pooling;
+  if (is_pixelwise) {
+    const size_t input_size = input_height * input_width;
+    xnn_update_f32_avgpool_params(&average_pooling_op->f32_avgpool_params, 1.0f / (float) input_size);
+  }
 
   return setup_average_pooling2d(
     average_pooling_op,
