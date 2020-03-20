@@ -481,7 +481,8 @@ static enum xnn_status setup_convolution2d_nchw(
   uint32_t log2_filter_element_size,
   uint32_t bias_element_size,
   uint32_t log2_output_element_size,
-  const void* params,
+  const void* output_params,
+  const void* spchw_params,
   size_t num_threads)
 {
   convolution_op->state = xnn_run_state_invalid;
@@ -585,7 +586,7 @@ static enum xnn_status setup_convolution2d_nchw(
           .batched_c_stride = output_batch_stride << log2_output_element_size,
           .ukernel = convolution_op->ukernel.spmm.function,
       };
-      memcpy(&convolution_op->context.spmm.params, params, sizeof(convolution_op->context.spmm.params));
+      memcpy(&convolution_op->context.spmm.params, output_params, sizeof(convolution_op->context.spmm.params));
 
       const size_t mr = convolution_op->ukernel.spmm.mr;
       size_t mc = input_size;
@@ -631,7 +632,7 @@ static enum xnn_status setup_convolution2d_nchw(
         .output_channel_stride = output_height * output_width << log2_output_element_size,
         .hwc2spchw_ukernel = convolution_op->ukernel.dconv2d.hwc2spchw_function,
       };
-      memcpy(&convolution_op->context.dconv2d.params, params, sizeof(convolution_op->context.dconv2d.params));
+      memcpy(&convolution_op->context.dconv2d.params, output_params, sizeof(convolution_op->context.dconv2d.params));
 
       size_t output_height_slice = output_height;
       const size_t output_height_tile = convolution_op->ukernel.dconv2d.output_height_tile;
@@ -654,7 +655,7 @@ static enum xnn_status setup_convolution2d_nchw(
     }
     case xnn_ukernel_type_dwconv:
     {
-      xnn_update_f32_spchw_params((union xnn_f32_spchw_params*) params, input_width);
+      xnn_update_f32_spchw_params((union xnn_f32_spchw_params*) spchw_params, input_width);
       convolution_op->context.dwconv2d = (struct dwconv2d_context) {
         .output_height = output_height,
         .input_width = input_width,
@@ -673,7 +674,7 @@ static enum xnn_status setup_convolution2d_nchw(
         .output_pixel_stride = output_width << log2_output_element_size,
         .spchw_ukernel = convolution_op->ukernel.dwconv2d.spchw_function,
       };
-      memcpy(&convolution_op->context.dwconv2d.params, params, sizeof(convolution_op->context.dwconv2d.params));
+      memcpy(&convolution_op->context.dwconv2d.params, spchw_params, sizeof(convolution_op->context.dwconv2d.params));
 
       convolution_op->compute.type = xnn_parallelization_type_2d;
       convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv2d_spchw;
@@ -714,5 +715,6 @@ enum xnn_status xnn_setup_convolution2d_nchw_f32(
     sizeof(float) /* sizeof(bias element) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
     &convolution_op->f32_output_params,
+    &convolution_op->f32_spchw_params,
     pthreadpool_get_threads_count(threadpool));
 }

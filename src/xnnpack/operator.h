@@ -240,14 +240,24 @@ struct xnn_operator {
   uint32_t flags;
 
   union {
-    union xnn_f32_avgpool_params f32_avgpool_params;
+    // Parameters for Global Average Pooling in CHW layout
     union xnn_f32_gavgpool_params f32_gavgpool_params;
     union xnn_f32_hswish_params f32_hswish_params;
-    union xnn_f32_output_params f32_output_params;
+    // Pixelwise Average Pooling normally use f32_output_params, but also initialize f32_avgpool_params in case it needs
+    // to switch to Global Average Pooling operation.
+    struct {
+      union xnn_f32_avgpool_params f32_avgpool_params;
+      union xnn_f32_output_params f32_output_params;
+    };
     union xnn_f32_spchw_params f32_spchw_params;
     union xnn_q8_add_params q8_add_params;
-    union xnn_q8_avgpool_params q8_avgpool_params;
     union xnn_q8_gemm_params q8_gemm_params;
+    // Average Pooling normally use q8_avgpool_params, but also initialize q8_gavgpool_params in case it needs to switch
+    // to Global Average Pooling operation.
+    struct {
+      union xnn_q8_avgpool_params q8_avgpool_params;
+      union xnn_q8_avgpool_params q8_gavgpool_params;
+    };
     union xnn_u8_output_params u8_output_params;
   };
   enum xnn_operator_type type;
