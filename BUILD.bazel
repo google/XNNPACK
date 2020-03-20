@@ -12,13 +12,6 @@ licenses(["notice"])
 
 exports_files(["LICENSE"])
 
-OPERATOR_BENCHMARK_DEPS = [
-    ":XNNPACK",
-    ":bench_utils",
-    "@cpuinfo",
-    "@pthreadpool",
-]
-
 MICROKERNEL_BENCHMARK_DEPS = [
     ":ukernels",
     ":bench_utils",
@@ -41,12 +34,6 @@ MICROKERNEL_TEST_DEPS = [
     "@cpuinfo",
     "@FP16",
     "@pthreadpool",
-]
-
-OPERATOR_TEST_DEPS = [
-    ":XNNPACK",
-    "@pthreadpool",
-    "@FP16",
 ]
 
 OPERATOR_SRCS = [
@@ -1479,7 +1466,7 @@ AARCH64_ASM_UKERNELS = [
     "src/f32-igemm/gen/6x8-aarch64-neonfma-cortex-a75.S",
 ]
 
-INTERNAL_MICROKERNEL_HDRS = [
+INTERNAL_HDRS = [
     "src/requantization/gemmlowp-requantization.h",
     "src/xnnpack/argmaxpool.h",
     "src/xnnpack/avgpool.h",
@@ -1518,9 +1505,6 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vscaleextexp.h",
     "src/xnnpack/vunary.h",
     "src/xnnpack/zip.h",
-]
-
-INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "include/xnnpack.h",
     "src/xnnpack/allocator.h",
     "src/xnnpack/compute.h",
@@ -1535,16 +1519,130 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/subgraph.h",
 ]
 
-ACCURACY_EVAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
+ACCURACY_EVAL_HDRS = [
+    "src/requantization/gemmlowp-requantization.h",
+    "src/xnnpack/argmaxpool.h",
+    "src/xnnpack/avgpool.h",
+    "src/xnnpack/clamp.h",
+    "src/xnnpack/common.h",
+    "src/xnnpack/conv.h",
+    "src/xnnpack/dwconv.h",
+    "src/xnnpack/gavgpool.h",
+    "src/xnnpack/gemm.h",
+    "src/xnnpack/hswish.h",
+    "src/xnnpack/ibilinear.h",
+    "src/xnnpack/igemm.h",
+    "src/xnnpack/intrinsics-polyfill.h",
+    "src/xnnpack/lut.h",
+    "src/xnnpack/math.h",
+    "src/xnnpack/maxpool.h",
+    "src/xnnpack/memory.h",
+    "src/xnnpack/packx.h",
+    "src/xnnpack/pad.h",
+    "src/xnnpack/params.h",
+    "src/xnnpack/pavgpool.h",
+    "src/xnnpack/ppmm.h",
+    "src/xnnpack/prelu.h",
+    "src/xnnpack/raddexpminusmax.h",
+    "src/xnnpack/raddextexp.h",
+    "src/xnnpack/raddstoreexpminusmax.h",
+    "src/xnnpack/rmax.h",
+    "src/xnnpack/scalar-utils.h",
+    "src/xnnpack/spmm.h",
+    "src/xnnpack/unpool.h",
+    "src/xnnpack/vadd.h",
+    "src/xnnpack/vbinary.h",
+    "src/xnnpack/vmulcaddc.h",
+    "src/xnnpack/vscale.h",
+    "src/xnnpack/vscaleexpminusmax.h",
+    "src/xnnpack/vscaleextexp.h",
+    "src/xnnpack/vunary.h",
+    "src/xnnpack/zip.h",
     "src/xnnpack/math-stubs.h",
 ]
 
-MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS + [
+MICROKERNEL_BENCHMARK_HDRS = [
+    "src/requantization/gemmlowp-requantization.h",
+    "src/xnnpack/argmaxpool.h",
+    "src/xnnpack/avgpool.h",
+    "src/xnnpack/clamp.h",
+    "src/xnnpack/common.h",
+    "src/xnnpack/conv.h",
+    "src/xnnpack/dwconv.h",
+    "src/xnnpack/gavgpool.h",
+    "src/xnnpack/gemm.h",
+    "src/xnnpack/hswish.h",
+    "src/xnnpack/ibilinear.h",
+    "src/xnnpack/igemm.h",
+    "src/xnnpack/intrinsics-polyfill.h",
+    "src/xnnpack/lut.h",
+    "src/xnnpack/math.h",
+    "src/xnnpack/maxpool.h",
+    "src/xnnpack/memory.h",
+    "src/xnnpack/packx.h",
+    "src/xnnpack/pad.h",
+    "src/xnnpack/params.h",
+    "src/xnnpack/pavgpool.h",
+    "src/xnnpack/ppmm.h",
+    "src/xnnpack/prelu.h",
+    "src/xnnpack/raddexpminusmax.h",
+    "src/xnnpack/raddextexp.h",
+    "src/xnnpack/raddstoreexpminusmax.h",
+    "src/xnnpack/rmax.h",
+    "src/xnnpack/scalar-utils.h",
+    "src/xnnpack/spmm.h",
+    "src/xnnpack/unpool.h",
+    "src/xnnpack/vadd.h",
+    "src/xnnpack/vbinary.h",
+    "src/xnnpack/vmulcaddc.h",
+    "src/xnnpack/vscale.h",
+    "src/xnnpack/vscaleexpminusmax.h",
+    "src/xnnpack/vscaleextexp.h",
+    "src/xnnpack/vunary.h",
+    "src/xnnpack/zip.h",
     "src/xnnpack/params-init.h",
     "include/xnnpack.h",
 ]
 
-MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS + [
+MICROKERNEL_TEST_HDRS = [
+    "src/requantization/gemmlowp-requantization.h",
+    "src/xnnpack/argmaxpool.h",
+    "src/xnnpack/avgpool.h",
+    "src/xnnpack/clamp.h",
+    "src/xnnpack/common.h",
+    "src/xnnpack/conv.h",
+    "src/xnnpack/dwconv.h",
+    "src/xnnpack/gavgpool.h",
+    "src/xnnpack/gemm.h",
+    "src/xnnpack/hswish.h",
+    "src/xnnpack/ibilinear.h",
+    "src/xnnpack/igemm.h",
+    "src/xnnpack/intrinsics-polyfill.h",
+    "src/xnnpack/lut.h",
+    "src/xnnpack/math.h",
+    "src/xnnpack/maxpool.h",
+    "src/xnnpack/memory.h",
+    "src/xnnpack/packx.h",
+    "src/xnnpack/pad.h",
+    "src/xnnpack/params.h",
+    "src/xnnpack/pavgpool.h",
+    "src/xnnpack/ppmm.h",
+    "src/xnnpack/prelu.h",
+    "src/xnnpack/raddexpminusmax.h",
+    "src/xnnpack/raddextexp.h",
+    "src/xnnpack/raddstoreexpminusmax.h",
+    "src/xnnpack/rmax.h",
+    "src/xnnpack/scalar-utils.h",
+    "src/xnnpack/spmm.h",
+    "src/xnnpack/unpool.h",
+    "src/xnnpack/vadd.h",
+    "src/xnnpack/vbinary.h",
+    "src/xnnpack/vmulcaddc.h",
+    "src/xnnpack/vscale.h",
+    "src/xnnpack/vscaleexpminusmax.h",
+    "src/xnnpack/vscaleextexp.h",
+    "src/xnnpack/vunary.h",
+    "src/xnnpack/zip.h",
     "src/xnnpack/isa-checks.h",
     "src/xnnpack/params-init.h",
     "src/xnnpack/requantization.h",
@@ -2197,67 +2295,117 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "add_bench",
     srcs = ["bench/add.cc"],
-    deps = OPERATOR_BENCHMARK_DEPS,
+    deps = [
+        ":XNNPACK",
+        ":bench_utils",
+        "@cpuinfo",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_benchmark(
     name = "average_pooling_bench",
     srcs = ["bench/average-pooling.cc"],
     copts = xnnpack_optional_tflite_copts(),
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+    deps = [
+        ":XNNPACK",
+        ":bench_utils",
+        "@cpuinfo",
+        "@pthreadpool",
+    ] + xnnpack_optional_tflite_deps(),
 )
 
 xnnpack_benchmark(
     name = "channel_shuffle_bench",
     srcs = ["bench/channel-shuffle.cc"],
-    deps = OPERATOR_BENCHMARK_DEPS,
+    deps = [
+        ":XNNPACK",
+        ":bench_utils",
+        "@cpuinfo",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_benchmark(
     name = "convolution_bench",
     srcs = ["bench/convolution.cc"],
     copts = xnnpack_optional_tflite_copts() + xnnpack_optional_armcl_copts(),
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + xnnpack_optional_armcl_deps(),
+    deps = [
+        ":XNNPACK",
+        ":bench_utils",
+        "@cpuinfo",
+        "@pthreadpool",
+    ] + xnnpack_optional_tflite_deps() + xnnpack_optional_armcl_deps(),
 )
 
 xnnpack_benchmark(
     name = "deconvolution_bench",
     srcs = ["bench/deconvolution.cc"],
     copts = xnnpack_optional_tflite_copts(),
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+    deps = [
+        ":XNNPACK",
+        ":bench_utils",
+        "@cpuinfo",
+        "@pthreadpool",
+    ] + xnnpack_optional_tflite_deps(),
 )
 
 xnnpack_benchmark(
     name = "global_average_pooling_bench",
     srcs = ["bench/global-average-pooling.cc"],
-    deps = OPERATOR_BENCHMARK_DEPS,
+    deps = [
+        ":XNNPACK",
+        ":bench_utils",
+        "@cpuinfo",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_benchmark(
     name = "max_pooling_bench",
     srcs = ["bench/max-pooling.cc"],
-    deps = OPERATOR_BENCHMARK_DEPS,
+    deps = [
+        ":XNNPACK",
+        ":bench_utils",
+        "@cpuinfo",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_benchmark(
     name = "sigmoid_bench",
     srcs = ["bench/sigmoid.cc"],
     copts = xnnpack_optional_tflite_copts(),
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+    deps = [
+        ":XNNPACK",
+        ":bench_utils",
+        "@cpuinfo",
+        "@pthreadpool",
+    ] + xnnpack_optional_tflite_deps(),
 )
 
 xnnpack_benchmark(
     name = "prelu_bench",
     srcs = ["bench/prelu.cc"],
     copts = xnnpack_optional_tflite_copts(),
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+    deps = [
+        ":XNNPACK",
+        ":bench_utils",
+        "@cpuinfo",
+        "@pthreadpool",
+    ] + xnnpack_optional_tflite_deps(),
 )
 
 xnnpack_benchmark(
     name = "softmax_bench",
     srcs = ["bench/softmax.cc"],
     copts = xnnpack_optional_tflite_copts(),
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+    deps = [
+        ":XNNPACK",
+        ":bench_utils",
+        "@cpuinfo",
+        "@pthreadpool",
+    ] + xnnpack_optional_tflite_deps(),
 )
 
 ############################# End-to-end benchmarks ############################
@@ -2993,7 +3141,11 @@ xnnpack_unit_test(
         "test/add-nc.cc",
         "test/add-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3002,7 +3154,11 @@ xnnpack_unit_test(
         "test/add-nd.cc",
         "test/binary-elementwise-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3011,7 +3167,11 @@ xnnpack_unit_test(
         "test/argmax-pooling-nhwc.cc",
         "test/argmax-pooling-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3020,7 +3180,11 @@ xnnpack_unit_test(
         "test/average-pooling-nhwc.cc",
         "test/average-pooling-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3029,7 +3193,11 @@ xnnpack_unit_test(
         "test/channel-pad-nc.cc",
         "test/channel-pad-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3038,7 +3206,11 @@ xnnpack_unit_test(
         "test/channel-shuffle-nc.cc",
         "test/channel-shuffle-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3047,7 +3219,11 @@ xnnpack_unit_test(
         "test/clamp-nc.cc",
         "test/clamp-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3056,7 +3232,11 @@ xnnpack_unit_test(
         "test/convolution-nhwc.cc",
         "test/convolution-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3065,7 +3245,11 @@ xnnpack_unit_test(
         "test/convolution-nchw.cc",
         "test/convolution-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3074,7 +3258,11 @@ xnnpack_unit_test(
         "test/deconvolution-nhwc.cc",
         "test/deconvolution-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3083,7 +3271,11 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/divide-nd.cc",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3092,7 +3284,11 @@ xnnpack_unit_test(
         "test/fully-connected-nc.cc",
         "test/fully-connected-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3101,7 +3297,11 @@ xnnpack_unit_test(
         "test/global-average-pooling-nwc.cc",
         "test/global-average-pooling-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3110,7 +3310,11 @@ xnnpack_unit_test(
         "test/global-average-pooling-ncw.cc",
         "test/global-average-pooling-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3119,7 +3323,11 @@ xnnpack_unit_test(
         "test/hardswish-nc.cc",
         "test/hardswish-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3128,7 +3336,11 @@ xnnpack_unit_test(
         "test/leaky-relu-nc.cc",
         "test/leaky-relu-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3137,7 +3349,11 @@ xnnpack_unit_test(
         "test/max-pooling-nhwc.cc",
         "test/max-pooling-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3146,7 +3362,11 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/maximum-nd.cc",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3155,7 +3375,11 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/minimum-nd.cc",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3164,7 +3388,11 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/multiply-nd.cc",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3173,7 +3401,11 @@ xnnpack_unit_test(
         "test/prelu-nc.cc",
         "test/prelu-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3182,7 +3414,11 @@ xnnpack_unit_test(
         "test/resize-bilinear-nhwc.cc",
         "test/resize-bilinear-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3191,7 +3427,11 @@ xnnpack_unit_test(
         "test/sigmoid-nc.cc",
         "test/sigmoid-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3200,7 +3440,11 @@ xnnpack_unit_test(
         "test/softmax-nc.cc",
         "test/softmax-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3209,7 +3453,11 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/subtract-nd.cc",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_unit_test(
@@ -3218,7 +3466,11 @@ xnnpack_unit_test(
         "test/unpooling-nhwc.cc",
         "test/unpooling-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
 )
 
 ############################# Build configurations #############################
