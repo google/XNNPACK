@@ -272,16 +272,56 @@ void xnn_indirection_init_maxpool2d(
   const size_t input_padding_top  = op->padding_top;
   const size_t input_padding_left = op->padding_left;
 
-  for (size_t output_y = 0; output_y < output_height; output_y++) {
-    for (size_t pooling_y = 0; pooling_y < pooling_height; pooling_y++) {
-      const size_t input_y = doz(output_y * stride_height + pooling_y * dilation_height, input_padding_top);
-      const size_t clamped_input_y = min(input_y, input_height - 1);
-      for (size_t output_x = 0; output_x < output_width; output_x++) {
-        for (size_t pooling_x = 0; pooling_x < pooling_width; pooling_x++) {
-          const size_t input_x = doz(output_x * stride_width + pooling_x * dilation_width, input_padding_left);
-          const size_t clamped_input_x = min(input_x, input_width - 1);
-          const size_t index = output_y * step_height + output_x * step_width * pooling_height + pooling_x * pooling_height + pooling_y;
-          indirection_buffer[index] = input + (clamped_input_y * input_width + clamped_input_x) * input_pixel_stride;
+  const bool any_dilation = (dilation_height | dilation_width) > 1;
+
+  if (any_dilation) {
+    // Clamp to the border doesn't work for pooling with dilation.
+    const size_t adjusted_padding_top = input_padding_top % dilation_height;
+    const size_t adjusted_padding_left = input_padding_left % dilation_width;
+    for (size_t output_y = 0; output_y < output_height; output_y++) {
+      for (size_t pooling_y = 0; pooling_y < pooling_height; pooling_y++) {
+        size_t safe_input_y = output_y * stride_height;
+        if XNN_UNPREDICTABLE(safe_input_y < adjusted_padding_top) {
+          safe_input_y += dilation_height;
+        }
+        safe_input_y -= adjusted_padding_top;
+
+        size_t input_y = output_y * stride_height + pooling_y * dilation_height - input_padding_top;
+        if XNN_UNPREDICTABLE(input_y >= input_height) {
+          input_y = safe_input_y;
+        }
+
+        for (size_t output_x = 0; output_x < output_width; output_x++) {
+          for (size_t pooling_x = 0; pooling_x < pooling_width; pooling_x++) {
+            size_t safe_input_x = output_x * stride_width;
+            if XNN_UNPREDICTABLE(safe_input_x < adjusted_padding_left) {
+              safe_input_x += dilation_width;
+            }
+            safe_input_x -= adjusted_padding_left;
+
+            size_t input_x = output_x * stride_width + pooling_x * dilation_width - input_padding_left;
+            if XNN_UNPREDICTABLE(input_x >= input_width) {
+              input_x = safe_input_x;
+            }
+
+            const size_t index = output_y * step_height + output_x * step_width * pooling_height + pooling_x * pooling_height + pooling_y;
+            indirection_buffer[index] = input + (input_y * input_width + input_x) * input_pixel_stride;
+          }
+        }
+      }
+    }
+  } else {
+    const size_t input_x_max = input_width - 1;
+    const size_t input_y_max = input_height - 1;
+    for (size_t output_y = 0; output_y < output_height; output_y++) {
+      for (size_t pooling_y = 0; pooling_y < pooling_height; pooling_y++) {
+        const size_t input_y = min(doz(output_y * stride_height + pooling_y * dilation_height, input_padding_top), input_y_max);
+        for (size_t output_x = 0; output_x < output_width; output_x++) {
+          for (size_t pooling_x = 0; pooling_x < pooling_width; pooling_x++) {
+            const size_t input_x = min(doz(output_x * stride_width + pooling_x * dilation_width, input_padding_left), input_x_max);
+            const size_t index = output_y * step_height + output_x * step_width * pooling_height + pooling_x * pooling_height + pooling_y;
+            indirection_buffer[index] = input + (input_y * input_width + input_x) * input_pixel_stride;
+          }
         }
       }
     }
