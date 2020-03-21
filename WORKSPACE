@@ -86,6 +86,16 @@ http_archive(
     build_file = "@//third_party:psimd.BUILD",
 )
 
+# ruy library, used to benchmark against
+# tf_http_archive(
+#    name = "ruy",
+#    strip_prefix = "ruy-3d62e9545bd15c5df9ccfdd8453b93d64a6dd8eb",
+#    sha256 = "ca3024739684d5aba3612072511f508e88b34231ac8d19c8c3cc6598b6bb535d",
+#    urls = [
+#        "https://github.com/google/ruy/archive/3d62e9545bd15c5df9ccfdd8453b93d64a6dd8eb.zip",
+#    ],
+#)
+
 # Android NDK location and version is auto-detected from $ANDROID_NDK_HOME environment variable
 android_ndk_repository(name = "androidndk")
 
