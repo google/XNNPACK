@@ -34,9 +34,9 @@
 # a0  v0           first set of A
 # a0  v1           second set of A
 # B   v2  v3  v4    x7 x10 x16  first set of B
-# B   v5  v6  v7   x17 x18  x9
+# B   v5  v6  v7   x17 x13  x9
 # B  v23 v24 v25    x7 x10 x16  second set of B (same x as first set)
-# B  v17 v18 v19   x17 x18  x9
+# B  v17 v18 v19   x17 x13  x9
 # C  v20 v21 v22
 
 BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
@@ -77,7 +77,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         LDR x17, [x5, 56]
 
         LDR d6, [x5, 64]   // vb1x4567
-        LDR x18, [x5, 72]
+        LDR x13, [x5, 72]
 
         LDR d7, [x5, 80]   // vb1x89AB
         LDR x9, [x5, 88]
@@ -112,7 +112,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # BLOCK 3
         LDR d24, [x5, 16]   // vb0x4567
-        INS v6.d[1], x18
+        INS v6.d[1], x13
         LDR x10, [x5, 24]
 
         # BLOCK 4
@@ -128,7 +128,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # BLOCK 6
         LDR d18, [x5, 64]   // vb1x4567
-        LDR x18, [x5, 72]
+        LDR x13, [x5, 72]
         FMLA v22.4s, v7.4s, v0.s[1]
 
         # BLOCK 7
@@ -156,7 +156,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # BLOCK 3
         LDR d3, [x5, 112]    // vb0x4567
-        INS v18.d[1], x18
+        INS v18.d[1], x13
         LDR x10, [x5, 120]
 
         # BLOCK 4
@@ -172,7 +172,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # BLOCK 6
         LDR d6, [x5, 160]   // vb1x4567
-        LDR x18, [x5, 168]
+        LDR x13, [x5, 168]
         SUBS x0, x0, 16
         FMLA v22.4s, v19.4s, v1.s[1]
 
@@ -205,7 +205,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # BLOCK 3
         LDR d24, [x5, 16]   // vb0x4567
-        INS v6.d[1], x18
+        INS v6.d[1], x13
         LDR x10, [x5, 24]
 
         # BLOCK 4
@@ -221,7 +221,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
 
         # BLOCK 6
         LDR d18, [x5, 64]   // vb1x4567
-        LDR x18, [x5, 72]
+        LDR x13, [x5, 72]
         FMLA v22.4s, v7.4s, v0.s[1]
 
         # BLOCK 7
@@ -246,7 +246,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         FMLA v22.4s, v25.4s, v1.s[0]
 
         # BLOCK 3
-        INS v18.d[1], x18
+        INS v18.d[1], x13
 
         # BLOCK 4
         INS v19.d[1], x9
