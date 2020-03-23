@@ -16,11 +16,10 @@
 #     const union xnn_f32_output_params params[restrict static 1])
 BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
 
-        # Save d8-d15 on stack
-        STP  d8,  d9, [sp, -64]!
-        STP d10, d11, [sp, 16]
-        STP d12, d13, [sp, 32]
-        STP d14, d15, [sp, 48]
+        # Save d10-d15 on stack
+        STP d10, d11, [sp, -48]!
+        STP d12, d13, [sp, 16]
+        STP d14, d15, [sp, 32]
 
         # Load clamping_params values
         LD2R {v30.4s, v31.4s}, [x7]
@@ -73,10 +72,10 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
           LD1 {v7.2S}, [x17], 8
 
           # Load vi1.lo
-          LD1 {v8.2S}, [x8], 8
+          LD1 {v28.2S}, [x8], 8
 
           # Load vk1.lo
-          LD1 {v9.2S}, [x17], 8
+          LD1 {v29.2S}, [x17], 8
 
           # Load vi1.hi
           LD1 {v10.2S}, [x8], 8
@@ -149,12 +148,12 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
           LD1 {v7.2S}, [x17], 8
 
           # vacc.lo += vi1.lo * vk0.lo
-          FMLA v0.2S, v8.2S, v9.2S
+          FMLA v0.2S, v28.2S, v29.2S
           # Load vi7.lo
-          LD1 {v8.2S}, [x14], 8
+          LD1 {v28.2S}, [x14], 8
 
           # Load vk7.lo
-          LD1 {v9.2S}, [x17], 8
+          LD1 {v29.2S}, [x17], 8
 
           # vacc.hi += vi1.hi * vk0.hi
           FMLA v1.2S, v10.2S, v11.2S
@@ -251,12 +250,12 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
           LD1 {v7.2S}, [x17], 8
 
           # vacc.lo += vi7.lo * vk7.lo
-          FMLA v0.2S, v8.2S, v9.2S
+          FMLA v0.2S, v28.2S, v29.2S
           # Load vi4_next.lo
-          LD1 {v8.2S}, [x11], 8
+          LD1 {v28.2S}, [x11], 8
 
           # Load vk4_next.lo
-          LD1 {v9.2S}, [x17], 8
+          LD1 {v29.2S}, [x17], 8
 
           # vacc.hi += vi7.hi * vk7.hi
           FMLA v1.2S, v10.2S, v11.2S
@@ -371,12 +370,12 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             LD1 {v7.2S}, [x17], 8
 
             # vacc_prev.lo += vi4_prev.lo * vk4_prev.lo
-            FMLA v2.2S, v8.2S, v9.2S
+            FMLA v2.2S, v28.2S, v29.2S
             # Load vi1.lo
-            LD1 {v8.2S}, [x8], 8
+            LD1 {v28.2S}, [x8], 8
 
             # Load vk1.lo
-            LD1 {v9.2S}, [x17], 8
+            LD1 {v29.2S}, [x17], 8
 
             # vacc_prev.hi += vi4_prev.hi * vk4_prev.hi
             FMLA v3.2S, v10.2S, v11.2S
@@ -471,14 +470,14 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             LD1 {v7.2S}, [x17], 8
 
             # vacc.lo += vi1.lo * vk0.lo
-            FMLA v0.2S, v8.2S, v9.2S
+            FMLA v0.2S, v28.2S, v29.2S
             # Load vi7.lo
-            LD1 {v8.2S}, [x14], 8
+            LD1 {v28.2S}, [x14], 8
 
             # vacc_prev.lo = max(vacc_prev.lo, vmin)
             FMAX v2.2S, v2.2S, v31.2S
             # Load vk7.lo
-            LD1 {v9.2S}, [x17], 8
+            LD1 {v29.2S}, [x17], 8
 
             # vacc.hi += vi1.hi * vk0.hi
             FMLA v1.2S, v10.2S, v11.2S
@@ -580,12 +579,12 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             LD1 {v7.2S}, [x17], 8
 
             # vacc.lo += vi7.lo * vk7.lo
-            FMLA v0.2S, v8.2S, v9.2S
+            FMLA v0.2S, v28.2S, v29.2S
             # Load vi4_next.lo
-            LD1 {v8.2S}, [x11], 8
+            LD1 {v28.2S}, [x11], 8
 
             # Load vk4_next.lo
-            LD1 {v9.2S}, [x17], 8
+            LD1 {v29.2S}, [x17], 8
 
             # vacc.hi += vi7.hi * vk7.hi
             FMLA v1.2S, v10.2S, v11.2S
@@ -684,7 +683,7 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
           FMLA v3.2S, v6.2S, v7.2S
 
           # vacc_prev.lo += vi4_prev.lo * vk4_prev.lo
-          FMLA v2.2S, v8.2S, v9.2S
+          FMLA v2.2S, v28.2S, v29.2S
 
           # vacc_prev.hi += vi4_prev.hi * vk4_prev.hi
           FMLA v3.2S, v10.2S, v11.2S
@@ -736,7 +735,7 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
         LDP q2, q3, [x17], 32
         LDP q4, q5, [x17], 32
         LDP q6, q7, [x17], 32
-        LDP q8, q9, [x17], 32
+        LDP q28, q29, [x17], 32
         LDR q10, [x7], 16
         LDR q11, [x8], 16
         LDR q12, [x9], 16
@@ -754,8 +753,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
         FMLA v0.4S, v5.4S, v14.4S
         FMLA v0.4S, v6.4S, v15.4S
         FMLA v0.4S, v7.4S, v16.4S
-        FMLA v0.4S, v8.4S, v17.4S
-        FMLA v0.4S, v9.4S, v18.4S
+        FMLA v0.4S, v28.4S, v17.4S
+        FMLA v0.4S, v29.4S, v18.4S
 
         FMIN v0.4S, v0.4S, v30.4S
         FMAX v0.4S, v0.4S, v31.4S
@@ -772,7 +771,7 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
         LDP q2, q3, [x17], 32
         LDP q4, q5, [x17], 32
         LDP q6, q7, [x17], 32
-        LDP q8, q9, [x17], 32
+        LDP q28, q29, [x17], 32
         LDR q10, [x7], 16
         LDR q11, [x8], 16
         LDR q12, [x9], 16
@@ -790,8 +789,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
         FMLA v0.4S, v5.4S, v14.4S
         FMLA v0.4S, v6.4S, v15.4S
         FMLA v0.4S, v7.4S, v16.4S
-        FMLA v0.4S, v8.4S, v17.4S
-        FMLA v0.4S, v9.4S, v18.4S
+        FMLA v0.4S, v28.4S, v17.4S
+        FMLA v0.4S, v29.4S, v18.4S
 
         FMIN v0.4S, v0.4S, v30.4S
         FMAX v0.4S, v0.4S, v31.4S
@@ -814,11 +813,10 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
         # process next pixel if output_width != 0
         B.NE 0b
 
-        # Restore d8-d15 from stack
-        LDP d14, d15, [sp, 48]
-        LDP d12, d13, [sp, 32]
-        LDP d10, d11, [sp, 16]
-        LDP  d8,  d9, [sp], 64
+        # Restore d10-d15 from stack
+        LDP d14, d15, [sp, 32]
+        LDP d12, d13, [sp, 16]
+        LDP d10, d11, [sp], 48
         RET
 
 END_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
