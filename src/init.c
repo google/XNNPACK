@@ -80,8 +80,7 @@ static void init(void) {
       .nr = 8,
     };
 
-    // TODO: Test assembly for IOS.
-    #if XNN_ENABLE_ASSEMBLY && !defined(TARGET_OS_IPHONE)
+    #if XNN_ENABLE_ASSEMBLY
       xnn_params.q8.dwconv[0] = (struct dwconv_parameters) {
         .up = (xnn_dwconv_up_ukernel_function) xnn_q8_dwconv_ukernel_up8x9__aarch32_neon,
         .cr = 8,
@@ -388,120 +387,131 @@ static void init(void) {
 
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
-    // TODO: Review assembly for IOS.
-    #if defined(TARGET_OS_IPHONE)
-      xnn_params.f32.gemm = (struct gemm_parameters) {
-        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__neonfma_lane_ld64,
-        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_lane_ld64,
-        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neonfma_lane_ld64,
-        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neonfma_lane_ld64,
-        .mr = 6,
-        .nr = 8,
-      };
-    #elif XNN_ENABLE_ASSEMBLY
-      switch (cpuinfo_get_core(0)->uarch) {
-        case cpuinfo_uarch_cortex_a57:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a57,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a57,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
-            .mr = 6,
-            .nr = 8,
-          };
-          break;
-        case cpuinfo_uarch_cortex_a72:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .mr = 4,
-            .nr = 8,
-          };
-          break;
-        case cpuinfo_uarch_cortex_a75:
-        case cpuinfo_uarch_cortex_a76:
-        case cpuinfo_uarch_exynos_m3:
-        case cpuinfo_uarch_exynos_m4:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .mr = 6,
-            .nr = 8,
-          };
-          break;
-        case cpuinfo_uarch_exynos_m1:
-        case cpuinfo_uarch_exynos_m2:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8s4__neonfma,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8s4__neonfma,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8s4__neonfma,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8s4__neonfma,
-            .mr = 6,
-            .nr = 8,
-            .log2_sr = 2,
-          };
-          break;
+    #if XNN_PLATFORM_IOS
+      #if XNN_ENABLE_ASSEMBLY
+        xnn_params.f32.gemm = (struct gemm_parameters) {
+          .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ios,
+          .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_ios,
+          .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
+          .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
+          .mr = 6,
+          .nr = 8,
+        };
+      #else  // !XNN_ENABLE_ASSEMBLY
+        xnn_params.f32.gemm = (struct gemm_parameters) {
+          .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__neonfma_lane_ld64,
+          .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_lane_ld64,
+          .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neonfma_lane_ld64,
+          .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neonfma_lane_ld64,
+          .mr = 6,
+          .nr = 8,
+        };
+       #endif  // XNN_ENABLE_ASSEMBLY
+    #else  // !XNN_PLATFORM_IOS
+      #if XNN_ENABLE_ASSEMBLY
+        switch (cpuinfo_get_core(0)->uarch) {
+          case cpuinfo_uarch_cortex_a57:
+            xnn_params.f32.gemm = (struct gemm_parameters) {
+              .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a57,
+              .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a57,
+              .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
+              .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
+              .mr = 6,
+              .nr = 8,
+            };
+            break;
+          case cpuinfo_uarch_cortex_a72:
+            xnn_params.f32.gemm = (struct gemm_parameters) {
+              .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
+              .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75,
+              .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+              .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+              .mr = 4,
+              .nr = 8,
+            };
+            break;
+          case cpuinfo_uarch_cortex_a75:
+          case cpuinfo_uarch_cortex_a76:
+          case cpuinfo_uarch_exynos_m3:
+          case cpuinfo_uarch_exynos_m4:
+            xnn_params.f32.gemm = (struct gemm_parameters) {
+              .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75,
+              .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75,
+              .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+              .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+              .mr = 6,
+              .nr = 8,
+            };
+            break;
+          case cpuinfo_uarch_exynos_m1:
+          case cpuinfo_uarch_exynos_m2:
+            xnn_params.f32.gemm = (struct gemm_parameters) {
+              .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8s4__neonfma,
+              .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8s4__neonfma,
+              .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8s4__neonfma,
+              .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8s4__neonfma,
+              .mr = 6,
+              .nr = 8,
+              .log2_sr = 2,
+            };
+            break;
 
-        case cpuinfo_uarch_cortex_a53:
-        case cpuinfo_uarch_cortex_a55r0:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a53,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53,
-            .mr = 6,
-            .nr = 8,
-          };
-          break;
-        case cpuinfo_uarch_cortex_a55:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a55,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a55,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a53,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53,
-            .mr = 6,
-            .nr = 8,
-          };
-          break;
-        case cpuinfo_uarch_cortex_a73:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a73,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a73,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
-            .mr = 6,
-            .nr = 8,
-          };
-          break;
-        default:
-        case cpuinfo_uarch_cortex_a77:
-        case cpuinfo_uarch_exynos_m5:
-        case cpuinfo_uarch_kryo:
-          xnn_params.f32.gemm = (struct gemm_parameters) {
-            .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57,
-            .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a57,
-            .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
-            .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
-            .mr = 4,
-            .nr = 8,
-          };
-          break;
-      }
-    #else  // XNN_ENABLE_ASSEMBLY
-      xnn_params.f32.gemm = (struct gemm_parameters) {
-        .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__neonfma_lane_ld64,
-        .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_lane_ld64,
-        .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neonfma_lane_ld64,
-        .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neonfma_lane_ld64,
-        .mr = 6,
-        .nr = 8,
-      };
-    #endif  // XNN_ENABLE_ASSEMBLY
-
+          case cpuinfo_uarch_cortex_a53:
+          case cpuinfo_uarch_cortex_a55r0:
+            xnn_params.f32.gemm = (struct gemm_parameters) {
+              .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
+              .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53,
+              .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a53,
+              .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53,
+              .mr = 6,
+              .nr = 8,
+            };
+            break;
+          case cpuinfo_uarch_cortex_a55:
+            xnn_params.f32.gemm = (struct gemm_parameters) {
+              .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a55,
+              .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a55,
+              .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a53,
+              .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53,
+              .mr = 6,
+              .nr = 8,
+            };
+            break;
+          case cpuinfo_uarch_cortex_a73:
+            xnn_params.f32.gemm = (struct gemm_parameters) {
+              .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a73,
+              .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a73,
+              .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+              .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75,
+              .mr = 6,
+              .nr = 8,
+            };
+            break;
+          default:
+          case cpuinfo_uarch_cortex_a77:
+          case cpuinfo_uarch_exynos_m5:
+          case cpuinfo_uarch_kryo:
+            xnn_params.f32.gemm = (struct gemm_parameters) {
+              .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a57,
+              .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a57,
+              .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
+              .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57,
+              .mr = 4,
+              .nr = 8,
+            };
+            break;
+        }
+      #else  // !XNN_ENABLE_ASSEMBLY
+        xnn_params.f32.gemm = (struct gemm_parameters) {
+          .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_6x8__neonfma_lane_ld64,
+          .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_6x8__neonfma_lane_ld64,
+          .gemm1 = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_1x8__neonfma_lane_ld64,
+          .igemm1 = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_1x8__neonfma_lane_ld64,
+          .mr = 6,
+          .nr = 8,
+        };
+       #endif  // XNN_ENABLE_ASSEMBLY
+    #endif  // XNN_PLATFORM_IOS
     xnn_params.f32.gemm2 = (struct gemm_parameters) {
       .gemm = (xnn_gemm_ukernel_function) xnn_f32_gemm_ukernel_4x2__neonfma_lane_ld64,
       .igemm = (xnn_igemm_ukernel_function) xnn_f32_igemm_ukernel_4x2__neonfma_lane_ld64,
@@ -513,33 +523,41 @@ static void init(void) {
       .cr = 4,
       .mr = 4,
     };
-    switch (cpuinfo_get_core(0)->uarch) {
-      case cpuinfo_uarch_kryo:
-        xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
-          .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x9__neonfma,
-          .cr = 4,
-          .mr = 9,
-        };
-        break;
-#if XNN_ENABLE_ASSEMBLY && !defined(TARGET_OS_IPHONE)
-      case cpuinfo_uarch_cortex_a53:
-      case cpuinfo_uarch_cortex_a55r0:
-      case cpuinfo_uarch_cortex_a55:
-        xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
-          .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55,
-          .cr = 4,
-          .mr = 9,
-        };
-        break;
-#endif
-      default:
-        xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
-          .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x9__neonfma,
-          .cr = 8,
-          .mr = 9,
-        };
-        break;
-    }
+    #if XNN_PLATFORM_IOS
+      xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
+        .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x9__neonfma,
+        .cr = 8,
+        .mr = 9,
+      };
+    #else  // !XNN_PLATFORM_IOS
+      switch (cpuinfo_get_core(0)->uarch) {
+        case cpuinfo_uarch_kryo:
+          xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
+            .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x9__neonfma,
+            .cr = 4,
+            .mr = 9,
+          };
+          break;
+        #if XNN_ENABLE_ASSEMBLY
+          case cpuinfo_uarch_cortex_a53:
+          case cpuinfo_uarch_cortex_a55r0:
+          case cpuinfo_uarch_cortex_a55:
+            xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
+              .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55,
+              .cr = 4,
+              .mr = 9,
+            };
+            break;
+        #endif  // XNN_ENABLE_ASSEMBLY
+        default:
+          xnn_params.f32.dwconv[1] = (struct dwconv_parameters) {
+            .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up8x9__neonfma,
+            .cr = 8,
+            .mr = 9,
+          };
+          break;
+      }
+    #endif  // XNN_PLATFORM_IOS
     xnn_params.f32.dwconv[2] = (struct dwconv_parameters) {
       .up = (xnn_dwconv_up_ukernel_function) xnn_f32_dwconv_ukernel_up4x25__psimd,
       .cr = 4,
