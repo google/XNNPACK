@@ -39,11 +39,10 @@ static void DWConvEnd2EndBenchmark(
     // Replace only the microkernel the matching kernel size.
     if (xnn_params.f32.dwconv[i].mr == mr) {
       // Note: do not directly assign to xnn_params.f32.dwconv[i] because it breaks older gcc.
-      const dwconv_parameters dwconv_params = (dwconv_parameters) {
-        .up = (xnn_dwconv_up_ukernel_function) dwconv,
-        .cr = cr,
-        .mr = mr,
-      };
+      dwconv_parameters dwconv_params = { { 0 } };
+      dwconv_params.up = (xnn_dwconv_up_ukernel_function) dwconv;
+      dwconv_params.cr = cr;
+      dwconv_params.mr = mr;
       xnn_params.f32.dwconv[i] = dwconv_params;
       break;
     }
