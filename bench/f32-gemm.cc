@@ -19,7 +19,7 @@
 
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_RUY
-#include "tensorflow/lite/experimental/ruy/ruy.h"
+#include "ruy/ruy.h"
 #endif  // BENCHMARK_RUY
 #include "bench/gemm.h"
 #include "bench/utils.h"
