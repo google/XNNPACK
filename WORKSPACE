@@ -66,13 +66,12 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    strip_prefix = "cpuinfo-d6c0f915ee737f961915c9d17f1679b6777af207",
-    sha256 = "146fc61c3cf63d7d88db963876929a4d373f621fb65568b895efa0857f467770",
+    strip_prefix = "cpuinfo-0cc563acb9baac39f2c1349bc42098c4a1da59e3",
+    sha256 = "80625d0b69a3d69b70c2236f30db2c542d0922ccf9bb51a61bc39c49fac91a35",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/d6c0f915ee737f961915c9d17f1679b6777af207.tar.gz",
+        "https://github.com/pytorch/cpuinfo/archive/0cc563acb9baac39f2c1349bc42098c4a1da59e3.tar.gz",
     ],
     build_file = "@//third_party:cpuinfo.BUILD",
-    patches = ["@//third_party:cpuinfo.patch"],
 )
 
 # psimd library, used for fallback 128-bit SIMD micro-kernels
