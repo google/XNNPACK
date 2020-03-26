@@ -91,6 +91,16 @@
   #define XNN_PLATFORM_WEB 0
 #endif
 
+#ifndef XNN_MAX_UARCH_TYPES
+  #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
+    #define XNN_MAX_UARCH_TYPES 3
+  #else
+    #define XNN_MAX_UARCH_TYPES 1
+  #endif
+#endif
+
+#define XNN_UARCH_DEFAULT 0
+
 #if defined(__GNUC__)
   #if defined(__clang__) || (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 5)
     #define XNN_UNREACHABLE do { __builtin_unreachable(); } while (0)

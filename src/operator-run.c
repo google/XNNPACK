@@ -32,7 +32,7 @@ void xnn_compute_grouped_gemm(
   const size_t a_stride  = context->a_stride;
   const size_t cm_stride = context->cm_stride;
 
-  context->ukernel(
+  context->ukernel.function[XNN_UARCH_DEFAULT](
       mr_block_size,
       nr_block_size,
       k_scaled,
@@ -55,7 +55,7 @@ void xnn_compute_gemm(
   const size_t a_stride  = context->a_stride;
   const size_t cm_stride = context->cm_stride;
 
-  context->ukernel(
+  context->ukernel.function[XNN_UARCH_DEFAULT](
       mr_block_size,
       nr_block_size,
       context->k_scaled,
@@ -97,7 +97,7 @@ void xnn_compute_grouped_igemm(
   const size_t ks        = context->ks;
   const size_t cm_stride = context->cm_stride;
 
-  context->ukernel(
+  context->ukernel.function[XNN_UARCH_DEFAULT](
       mr_block_size,
       nr_block_size,
       context->kc,
@@ -123,7 +123,7 @@ void xnn_compute_igemm(
   const size_t ks        = context->ks;
   const size_t cm_stride = context->cm_stride;
 
-  context->ukernel(
+  context->ukernel.function[XNN_UARCH_DEFAULT](
       mr_block_size,
       nr_block_size,
       context->kc,
@@ -163,7 +163,7 @@ void xnn_compute_grouped_subgemm2d(
 
   const size_t ax_stride = context->ax_stride;
   const size_t cx_stride = context->cx_stride;
-  context->ukernel(
+  context->ukernel.function[XNN_UARCH_DEFAULT](
       slice_x_size,
       nc_block_size,
       context->kc,
@@ -200,7 +200,7 @@ void xnn_compute_subgemm2d(
 
   const size_t ax_stride = context->ax_stride;
   const size_t cx_stride = context->cx_stride;
-  context->ukernel(
+  context->ukernel.function[XNN_UARCH_DEFAULT](
       slice_x_size,
       nc_block_size,
       context->kc,
@@ -237,7 +237,7 @@ void xnn_compute_grouped_subconv2d(
   const size_t slice_x_size = min(slice_x_max, slice_width - slice_x_start);
 
   const size_t cx_stride = context->cx_stride;
-  context->ukernel(
+  context->ukernel.function[XNN_UARCH_DEFAULT](
       slice_x_size,
       nc_block_size,
       context->kc,
@@ -275,7 +275,7 @@ void xnn_compute_subconv2d(
   const size_t slice_x_size = min(slice_x_max, slice_width - slice_x_start);
 
   const size_t cx_stride = context->cx_stride;
-  context->ukernel(
+  context->ukernel.function[XNN_UARCH_DEFAULT](
       slice_x_size,
       nc_block_size,
       context->kc,
@@ -773,6 +773,113 @@ void xnn_compute_vmulcaddc(
     &context->params);
 }
 
+#if XNN_MAX_UARCH_TYPES > 1
+  void xnn_compute_hmp_grouped_gemm(
+      const struct gemm_context context[restrict static 1],
+      uint32_t uarch_index,
+      size_t group_index,
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size)
+  {
+    const size_t k_scaled  = context->k_scaled;
+    const size_t a_stride  = context->a_stride;
+    const size_t cm_stride = context->cm_stride;
+
+    context->ukernel.function[uarch_index](
+        mr_block_size,
+        nr_block_size,
+        k_scaled,
+        (const void*) ((uintptr_t) context->a + mr_block_start * a_stride + group_index * k_scaled),
+        a_stride,
+        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->wg_stride),
+        (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize) + group_index * context->cg_stride),
+        cm_stride,
+        context->cn_stride,
+        &context->params);
+  }
+
+  void xnn_compute_hmp_gemm(
+      const struct gemm_context context[restrict static 1],
+      uint32_t uarch_index,
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size)
+  {
+    const size_t a_stride  = context->a_stride;
+    const size_t cm_stride = context->cm_stride;
+
+    context->ukernel.function[uarch_index](
+        mr_block_size,
+        nr_block_size,
+        context->k_scaled,
+        (const void*) ((uintptr_t) context->a + mr_block_start * a_stride),
+        a_stride,
+        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
+        (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+        cm_stride,
+        context->cn_stride,
+        &context->params);
+  }
+
+  void xnn_compute_hmp_grouped_igemm(
+      const struct igemm_context context[restrict static 1],
+      uint32_t uarch_index,
+      size_t batch_index,
+      size_t group_index,
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size)
+  {
+    const size_t ks        = context->ks;
+    const size_t cm_stride = context->cm_stride;
+
+    context->ukernel.function[uarch_index](
+        mr_block_size,
+        nr_block_size,
+        context->kc,
+        context->ks_scaled,
+        (const void**) ((uintptr_t) context->indirect_a + mr_block_start * ks * sizeof(void*)),
+        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->gw_stride),
+        (void*) ((uintptr_t) context->c + group_index * context->gc_stride + batch_index * context->bc_stride + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+        cm_stride,
+        context->cn_stride,
+        context->a_offset + group_index * context->ga_stride + batch_index * context->ba_stride,
+        context->zero,
+        &context->params);
+  }
+
+  void xnn_compute_hmp_igemm(
+      const struct igemm_context context[restrict static 1],
+      uint32_t uarch_index,
+      size_t batch_index,
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size)
+  {
+    const size_t ks        = context->ks;
+    const size_t cm_stride = context->cm_stride;
+
+    context->ukernel.function[uarch_index](
+        mr_block_size,
+        nr_block_size,
+        context->kc,
+        context->ks_scaled,
+        (const void**) ((uintptr_t) context->indirect_a + mr_block_start * ks * sizeof(void*)),
+        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
+        (void*) ((uintptr_t) context->c + batch_index * context->bc_stride + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+        cm_stride,
+        context->cn_stride,
+        context->a_offset + batch_index * context->ba_stride,
+        context->zero,
+        &context->params);
+  }
+#endif  // XNN_MAX_UARCH_TYPES > 1
+
 enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
 {
   if (!xnn_params.initialized) {
@@ -909,6 +1016,53 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           op->compute.tile[0], op->compute.tile[1],
           PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
       break;
+#if XNN_MAX_UARCH_TYPES > 1
+    case xnn_parallelization_type_2d_tile_2d_with_uarch:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.tile[0] != 0);
+      assert(op->compute.tile[1] != 0);
+      pthreadpool_parallelize_2d_tile_2d_with_uarch(
+          threadpool,
+          op->compute.task_2d_tile_2d_with_id,
+          &op->context,
+          0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
+          op->compute.range[0], op->compute.range[1],
+          op->compute.tile[0], op->compute.tile[1],
+          PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
+      break;
+    case xnn_parallelization_type_3d_tile_2d_with_uarch:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      assert(op->compute.tile[0] != 0);
+      assert(op->compute.tile[1] != 0);
+      pthreadpool_parallelize_3d_tile_2d_with_uarch(
+          threadpool,
+          op->compute.task_3d_tile_2d_with_id,
+          &op->context,
+          0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2],
+          op->compute.tile[0], op->compute.tile[1],
+          PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
+      break;
+    case xnn_parallelization_type_4d_tile_2d_with_uarch:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      assert(op->compute.range[3] != 0);
+      assert(op->compute.tile[0] != 0);
+      assert(op->compute.tile[1] != 0);
+      pthreadpool_parallelize_4d_tile_2d_with_uarch(
+          threadpool,
+          op->compute.task_4d_tile_2d_with_id,
+          &op->context,
+          0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3],
+          op->compute.tile[0], op->compute.tile[1],
+          PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
+      break;
+#endif  // XNN_MAX_UARCH_TYPES > 1
     default:
       XNN_UNREACHABLE;
   }

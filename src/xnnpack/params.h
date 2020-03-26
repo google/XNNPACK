@@ -1200,13 +1200,62 @@ typedef void (*xnn_f32_vscaleextexp_ukernel_function)(
     float scale_mantissa,
     float scale_exponent);
 
+struct xnn_hmp_gemm_ukernel {
+  xnn_gemm_ukernel_function function[XNN_MAX_UARCH_TYPES];
+};
+
+static inline struct xnn_hmp_gemm_ukernel xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function function) {
+  struct xnn_hmp_gemm_ukernel ukernel = { function };
+  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
+    ukernel.function[i] = function;
+  }
+  return ukernel;
+}
+
+static inline bool xnn_is_hmp_gemm_ukernel(struct xnn_hmp_gemm_ukernel ukernel) {
+#if XNN_MAX_UARCH_TYPES == 1
+  return false;
+#else
+  uintptr_t default_function = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
+  uintptr_t difference = 0;
+  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
+    difference |= (default_function ^ (uintptr_t) ukernel.function[i]);
+  }
+  return difference != 0;
+#endif
+}
+
+struct xnn_hmp_igemm_ukernel {
+  xnn_igemm_ukernel_function function[XNN_MAX_UARCH_TYPES];
+};
+
+static inline struct xnn_hmp_igemm_ukernel xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function function) {
+  struct xnn_hmp_igemm_ukernel ukernel = { function };
+  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
+    ukernel.function[i] = function;
+  }
+  return ukernel;
+}
+
+static inline bool xnn_is_hmp_igemm_ukernel(struct xnn_hmp_igemm_ukernel ukernel) {
+#if XNN_MAX_UARCH_TYPES == 1
+  return false;
+#else
+  uintptr_t default_function = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
+  uintptr_t difference = 0;
+  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
+    difference |= (default_function ^ (uintptr_t) ukernel.function[i]);
+  }
+  return difference != 0;
+#endif
+}
 
 struct gemm_parameters {
-  xnn_gemm_ukernel_function gemm;
-  xnn_igemm_ukernel_function igemm;
+  struct xnn_hmp_gemm_ukernel gemm;
+  struct xnn_hmp_igemm_ukernel igemm;
   // Optional GEMM and IGEMM micro-kernels with MR=1 and the same NR and KR parameters.
-  xnn_gemm_ukernel_function gemm1;
-  xnn_igemm_ukernel_function igemm1;
+  struct xnn_hmp_gemm_ukernel gemm1;
+  struct xnn_hmp_igemm_ukernel igemm1;
   uint8_t mr;
   uint8_t nr;
   uint8_t log2_kr;

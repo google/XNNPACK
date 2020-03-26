@@ -42,10 +42,10 @@ static void GEMMEnd2EndBenchmark(
   // Override microkernels chosen in xnn_initialize
   // Note: do not directly assign to xnn_params.f32.gemm because it breaks older gcc.
   const gemm_parameters gemm_params = (gemm_parameters) {
-    .gemm = xnn_gemm_ukernel_function(gemm),
-    .igemm = xnn_igemm_ukernel_function(igemm),
-    .gemm1 = xnn_gemm_ukernel_function(gemm1),
-    .igemm1 = xnn_igemm_ukernel_function(igemm1),
+    .gemm = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm)),
+    .igemm = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm)),
+    .gemm1 = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1)),
+    .igemm1 = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1)),
     .mr = mr,
     .nr = nr,
     .log2_kr = log2_kr,

@@ -1871,11 +1871,15 @@ xnnpack_cc_library(
     copts = xnnpack_std_copts() + LOGGING_COPTS + [
         # Wrappers for multi-pass microkernels use VLAs for temporary buffers.
         "-Wno-vla",
-    ],
+    ] + select({
+        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
+        "//conditions:default": [],
+    }),
     deps = [
         "@FP16",
         "@FXdiv",
         "@clog",
+        "@cpuinfo",
         "@pthreadpool",
     ],
 )
@@ -1902,6 +1906,9 @@ xnnpack_cc_library(
     ] + select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
+    }) + select({
+        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
+        "//conditions:default": [],
     }),
     wasm_srcs = ["src/wasm-stubs.c"],
     wasmsimd_srcs = ["src/wasm-stubs.c"],
@@ -1928,6 +1935,9 @@ cc_library(
     ] + select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
+    }) + select({
+        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
+        "//conditions:default": [],
     }),
     includes = ["include"],
     linkstatic = True,
@@ -1957,6 +1967,9 @@ cc_library(
     ] + select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
+    }) + select({
+        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
+        "//conditions:default": [],
     }),
     defines = [
         "XNN_NO_Q8_OPERATORS",
@@ -3236,6 +3249,12 @@ config_setting(
 config_setting(
     name = "xnn_enable_assembly_explicit_false",
     define_values = {"xnn_enable_assembly": "false"},
+)
+
+# Disables usage of HMP-aware optimizations.
+config_setting(
+    name = "xnn_enable_hmp_explicit_false",
+    define_values = {"xnn_enable_hmp": "false"},
 )
 
 # Builds with -c dbg
