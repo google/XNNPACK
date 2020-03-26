@@ -113,17 +113,17 @@ struct xnn_ukernel_dwconv2d {
 };
 
 struct xnn_ukernel_gemm {
-  xnn_gemm_ukernel_function default_function;
-  xnn_gemm_ukernel_function mr1_function;
+  struct xnn_hmp_gemm_ukernel general_case;
+  struct xnn_hmp_gemm_ukernel mr1_case;
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
 };
 
 struct xnn_ukernel_igemm {
-  xnn_igemm_ukernel_function default_function;
-  xnn_igemm_ukernel_function mr1_function;
-  xnn_gemm_ukernel_function gemm_function;
+  struct xnn_hmp_igemm_ukernel general_case;
+  struct xnn_hmp_igemm_ukernel mr1_case;
+  struct xnn_hmp_gemm_ukernel gemm_case;
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;

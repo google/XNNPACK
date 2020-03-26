@@ -26,6 +26,11 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_4d_tile_2d,
   xnn_parallelization_type_5d_tile_2d,
   xnn_parallelization_type_6d_tile_2d,
+#if XNN_MAX_UARCH_TYPES > 1
+  xnn_parallelization_type_2d_tile_2d_with_uarch,
+  xnn_parallelization_type_3d_tile_2d_with_uarch,
+  xnn_parallelization_type_4d_tile_2d_with_uarch,
+#endif  // XNN_MAX_UARCH_TYPES > 1
 };
 
 struct compute_parameters {
@@ -40,6 +45,11 @@ struct compute_parameters {
     pthreadpool_task_4d_tile_2d_t task_4d_tile_2d;
     pthreadpool_task_5d_tile_2d_t task_5d_tile_2d;
     pthreadpool_task_6d_tile_2d_t task_6d_tile_2d;
+#if XNN_MAX_UARCH_TYPES > 1
+    pthreadpool_task_2d_tile_2d_with_id_t task_2d_tile_2d_with_id;
+    pthreadpool_task_3d_tile_2d_with_id_t task_3d_tile_2d_with_id;
+    pthreadpool_task_4d_tile_2d_with_id_t task_4d_tile_2d_with_id;
+#endif  // XNN_MAX_UARCH_TYPES > 1
   };
   size_t range[6];
   size_t tile[2];
@@ -57,7 +67,7 @@ struct gemm_context {
   size_t cn_stride;
   size_t cg_stride;
   uint32_t log2_csize;
-  xnn_gemm_ukernel_function ukernel;
+  struct xnn_hmp_gemm_ukernel ukernel;
   union {
     union xnn_q8_gemm_params q8;
     union xnn_f32_output_params f32;
@@ -79,6 +89,25 @@ struct gemm_context {
       size_t nr_block_start,
       size_t mr_block_size,
       size_t nr_block_size);
+
+  #if XNN_MAX_UARCH_TYPES > 1
+    XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
+        const struct gemm_context context[restrict static 1],
+        uint32_t uarch_index,
+        size_t group_index,
+        size_t mr_block_start,
+        size_t nr_block_start,
+        size_t mr_block_size,
+        size_t nr_block_size);
+
+    XNN_PRIVATE void xnn_compute_hmp_gemm(
+        const struct gemm_context context[restrict static 1],
+        uint32_t uarch_index,
+        size_t mr_block_start,
+        size_t nr_block_start,
+        size_t mr_block_size,
+        size_t nr_block_size);
+  #endif  // XNN_MAX_UARCH_TYPES > 1
 #endif
 
 // Context for Sparse Matrix-Dense Matrix Multiplication.
@@ -136,7 +165,7 @@ struct igemm_context {
   size_t ba_stride;
   size_t bc_stride;
   uint32_t log2_csize;
-  xnn_igemm_ukernel_function ukernel;
+  struct xnn_hmp_igemm_ukernel ukernel;
   union {
     union xnn_q8_gemm_params q8;
     union xnn_f32_output_params f32;
@@ -160,6 +189,27 @@ struct igemm_context {
       size_t nr_block_start,
       size_t mr_block_size,
       size_t nr_block_size);
+
+  #if XNN_MAX_UARCH_TYPES > 1
+    XNN_PRIVATE void xnn_compute_hmp_grouped_igemm(
+        const struct igemm_context context[restrict static 1],
+        uint32_t uarch_index,
+        size_t batch_index,
+        size_t group_index,
+        size_t mr_block_start,
+        size_t nr_block_start,
+        size_t mr_block_size,
+        size_t nr_block_size);
+
+    XNN_PRIVATE void xnn_compute_hmp_igemm(
+        const struct igemm_context context[restrict static 1],
+        uint32_t uarch_index,
+        size_t batch_index,
+        size_t mr_block_start,
+        size_t nr_block_start,
+        size_t mr_block_size,
+        size_t nr_block_size);
+  #endif  // XNN_MAX_UARCH_TYPES > 1
 #endif
 
 struct subgemm_context {
@@ -177,7 +227,7 @@ struct subgemm_context {
   size_t ba_stride;
   size_t bc_stride;
   uint32_t log2_csize;
-  xnn_gemm_ukernel_function ukernel;
+  struct xnn_hmp_gemm_ukernel ukernel;
   union {
     union xnn_q8_gemm_params q8;
     union xnn_f32_output_params f32;
@@ -221,7 +271,7 @@ struct subconv_context {
   size_t ba_stride;
   size_t bc_stride;
   uint32_t log2_csize;
-  xnn_igemm_ukernel_function ukernel;
+  struct xnn_hmp_igemm_ukernel ukernel;
   union {
     union xnn_q8_gemm_params q8;
     union xnn_f32_output_params f32;

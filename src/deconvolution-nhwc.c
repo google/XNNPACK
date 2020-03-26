@@ -190,8 +190,8 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   const uint32_t mr = xnn_params.q8.gemm.mr;
   const uint32_t nr = xnn_params.q8.gemm.nr;
   const uint32_t kr = UINT32_C(1) << xnn_params.q8.gemm.log2_kr;
-  const xnn_igemm_ukernel_function igemm_ukernel_function = xnn_params.q8.gemm.igemm;
-  const xnn_gemm_ukernel_function gemm_ukernel_function = xnn_params.q8.gemm.gemm;
+  const struct xnn_hmp_igemm_ukernel igemm_ukernel = xnn_params.q8.gemm.igemm;
+  const struct xnn_hmp_gemm_ukernel gemm_ukernel = xnn_params.q8.gemm.gemm;
 
   const uint32_t n_stride = round_up(group_output_channels, nr);
   const uint32_t k_stride = round_up_po2(group_input_channels, kr);
@@ -287,8 +287,8 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   deconvolution_op->type = xnn_operator_type_deconvolution_nhwc_q8;
   deconvolution_op->ukernel.type = ukernel_type;
   deconvolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
-    .default_function = igemm_ukernel_function,
-    .gemm_function = gemm_ukernel_function,
+    .general_case = igemm_ukernel,
+    .gemm_case = gemm_ukernel,
     .mr = mr,
     .nr = nr,
     .kr = kr,
@@ -431,17 +431,17 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   uint32_t nr = xnn_params.f32.gemm.nr;
   uint32_t kr = UINT32_C(1) << xnn_params.f32.gemm.log2_kr;
   uint32_t sr = UINT32_C(1) << xnn_params.f32.gemm.log2_sr;
-  xnn_igemm_ukernel_function igemm_ukernel_function = xnn_params.f32.gemm.igemm;
-  xnn_gemm_ukernel_function gemm_ukernel_function = xnn_params.f32.gemm.gemm;
+  struct xnn_hmp_igemm_ukernel igemm_ukernel = xnn_params.f32.gemm.igemm;
+  struct xnn_hmp_gemm_ukernel gemm_ukernel = xnn_params.f32.gemm.gemm;
   if (nr > group_output_channels) {
     // Default micro-kernel is suboptimal. Try to find a better micro-kernel.
-    if (xnn_params.f32.gemm2.igemm != NULL) {
+    if (xnn_params.f32.gemm2.igemm.function[XNN_UARCH_DEFAULT] != NULL) {
       mr = xnn_params.f32.gemm2.mr;
       nr = xnn_params.f32.gemm2.nr;
       kr = UINT32_C(1) << xnn_params.f32.gemm2.log2_kr;
       sr = UINT32_C(1) << xnn_params.f32.gemm2.log2_sr;
-      igemm_ukernel_function = xnn_params.f32.gemm2.igemm;
-      gemm_ukernel_function = xnn_params.f32.gemm2.gemm;
+      igemm_ukernel = xnn_params.f32.gemm2.igemm;
+      gemm_ukernel = xnn_params.f32.gemm2.gemm;
     }
   }
 
@@ -531,8 +531,8 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   deconvolution_op->type = xnn_operator_type_deconvolution_nhwc_f32;
   deconvolution_op->ukernel.type = ukernel_type;
   deconvolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
-    .default_function = igemm_ukernel_function,
-    .gemm_function = gemm_ukernel_function,
+    .general_case = igemm_ukernel,
+    .gemm_case = gemm_ukernel,
     .mr = mr,
     .nr = nr,
     .kr = kr,
@@ -615,10 +615,10 @@ static enum xnn_status setup_conv_path(
       .ba_stride = input_height * input_width * deconvolution_op->input_pixel_stride << log2_input_element_size,
       .bc_stride = output_size * deconvolution_op->output_pixel_stride << log2_output_element_size,
       .log2_csize = log2_output_element_size,
-      .ukernel = deconvolution_op->ukernel.igemm.default_function,
+      .ukernel = deconvolution_op->ukernel.igemm.general_case,
   };
-  if (output_size == 1 && deconvolution_op->ukernel.igemm.mr1_function != NULL) {
-    deconvolution_op->context.igemm.ukernel = deconvolution_op->ukernel.igemm.mr1_function;
+  if (output_size == 1 && deconvolution_op->ukernel.igemm.mr1_case.function[XNN_UARCH_DEFAULT] != NULL) {
+    deconvolution_op->context.igemm.ukernel = deconvolution_op->ukernel.igemm.mr1_case;
   }
   memcpy(&deconvolution_op->context.igemm.params, params, sizeof(deconvolution_op->context.igemm.params));
 
@@ -755,7 +755,7 @@ static enum xnn_status setup_subconv2d_path(
         .ba_stride = input_height * input_width * input_pixel_stride,
         .bc_stride = output_size * output_pixel_stride,
         .log2_csize = log2_output_element_size,
-        .ukernel = deconvolution_op->ukernel.igemm.gemm_function,
+        .ukernel = deconvolution_op->ukernel.igemm.gemm_case,
     };
     memcpy(&deconvolution_op->context.subgemm.params, params, sizeof(deconvolution_op->context.subgemm.params));
   } else {
@@ -773,7 +773,7 @@ static enum xnn_status setup_subconv2d_path(
         .ba_stride = input_height * input_width * input_pixel_stride,
         .bc_stride = output_size * output_pixel_stride,
         .log2_csize = log2_output_element_size,
-        .ukernel = deconvolution_op->ukernel.igemm.default_function,
+        .ukernel = deconvolution_op->ukernel.igemm.general_case,
     };
     memcpy(&deconvolution_op->context.subconv.params, params, sizeof(deconvolution_op->context.subconv.params));
   }
@@ -901,7 +901,7 @@ static enum xnn_status setup_deconvolution2d(
       const bool use_gemm = no_padding && no_adjustment &&
         deconvolution_op->kernel_height == deconvolution_op->stride_height &&
         deconvolution_op->kernel_width == deconvolution_op->stride_width &&
-        deconvolution_op->ukernel.igemm.gemm_function != NULL;
+        deconvolution_op->ukernel.igemm.gemm_case.function[XNN_UARCH_DEFAULT] != NULL;
       return setup_subconv2d_path(
         deconvolution_op,
         batch_size,

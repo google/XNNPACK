@@ -175,7 +175,7 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
 
   fully_connected_op->ukernel.type = xnn_ukernel_type_gemm;
   fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
-    .default_function = xnn_params.q8.gemm.gemm,
+    .general_case = xnn_params.q8.gemm.gemm,
     .mr = xnn_params.q8.gemm.mr,
     .nr = nr,
     .kr = kr,
@@ -310,8 +310,8 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
 
   fully_connected_op->ukernel.type = xnn_ukernel_type_gemm;
   fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
-    .default_function = xnn_params.f32.gemm.gemm,
-    .mr1_function = xnn_params.f32.gemm.gemm1,
+    .general_case = xnn_params.f32.gemm.gemm,
+    .mr1_case = xnn_params.f32.gemm.gemm1,
     .mr = xnn_params.f32.gemm.mr,
     .nr = nr,
     .kr = kr,
@@ -366,9 +366,9 @@ static enum xnn_status setup_fully_connected_nc(
   uint32_t mr = fully_connected_op->ukernel.gemm.mr;
   const uint32_t nr = fully_connected_op->ukernel.gemm.nr;
 
-  xnn_gemm_ukernel_function gemm_ukernel = fully_connected_op->ukernel.gemm.default_function;
-  if (batch_size == 1 && fully_connected_op->ukernel.gemm.mr1_function != NULL) {
-    gemm_ukernel = fully_connected_op->ukernel.gemm.mr1_function;
+  struct xnn_hmp_gemm_ukernel gemm_ukernel = fully_connected_op->ukernel.gemm.general_case;
+  if (batch_size == 1 && fully_connected_op->ukernel.gemm.mr1_case.function[XNN_UARCH_DEFAULT] != NULL) {
+    gemm_ukernel = fully_connected_op->ukernel.gemm.mr1_case;
     mr = 1;
   }
 
