@@ -1,6 +1,6 @@
 # XNNPACK
 
-XNNPACK is a highly optimized library of floating-point neural network inference operators for ARM, WebAssembly, and x86 platforms. XNNPACK is not intended for direct use by deep learning practitioners and researchers; instead it provides low-level performance primitives for accelerating high-level machine learning frameworks, such as [MediaPipe](https://mediapipe.dev), [TensorFlow Lite](https://www.tensorflow.org/lite), and [TensorFlow.js](https://www.tensorflow.org/js).
+XNNPACK is a highly optimized library of floating-point neural network inference operators for ARM, WebAssembly, and x86 platforms. XNNPACK is not intended for direct use by deep learning practitioners and researchers; instead it provides low-level performance primitives for accelerating high-level machine learning frameworks, such as [TensorFlow Lite](https://www.tensorflow.org/lite), [TensorFlow.js](https://www.tensorflow.org/js), [PyTorch](https://pytorch.org/), and [MediaPipe](https://mediapipe.dev).
 
 ## Supported Architectures
 
@@ -88,9 +88,9 @@ Benchmarked on February 12, 2020 with `end2end-bench --benchmark_min_time=5` on 
 
 ### Machine Learning Frameworks
 
-- [TensorFlow.js WebAssembly backend](https://github.com/tensorflow/tfjs/tree/master/tfjs-backend-wasm).
-- TensorFlow Lite through the [XNNPACK delegate](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/delegates/xnnpack).
+- [TensorFlow.js WebAssembly backend](https://blog.tensorflow.org/2020/03/introducing-webassembly-backend-for-tensorflow-js.html).
 - [MediaPipe for Web](https://developers.googleblog.com/2020/01/mediapipe-on-web.html).
+- TensorFlow Lite through the [XNNPACK delegate](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/delegates/xnnpack).
 - [PyTorch](https://github.com/pytorch/pytorch/tree/master/aten/src/ATen/native/xnnpack).
 
 ## Acknowledgements
