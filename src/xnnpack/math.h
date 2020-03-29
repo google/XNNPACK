@@ -41,6 +41,10 @@ inline static size_t divide_round_up(size_t n, size_t q) {
   return XNN_UNPREDICTABLE(n % q == 0) ? n / q : n / q + 1;
 }
 
+inline static size_t round_down(size_t n, size_t q) {
+  return n / q * q;
+}
+
 inline static size_t round_up(size_t n, size_t q) {
   return divide_round_up(n, q) * q;
 }

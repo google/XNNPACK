@@ -1064,6 +1064,38 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           op->compute.tile[0], op->compute.tile[1],
           PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
       break;
+    case xnn_parallelization_type_gemm:
+    {
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.tile[0] != 0);
+      assert(op->compute.tile[1] != 0);
+      const size_t nc = op->context.gemm.nc;
+      const size_t n = op->compute.range[1];
+      const void* packed_w = op->context.gemm.packed_w;
+      void* c = op->context.gemm.c;
+      const size_t w_stride = op->context.gemm.w_stride;
+      const uint32_t log2_csize = op->context.gemm.log2_csize;
+
+      for (size_t n_start = 0; n_start < n; n_start += nc) {
+        // Update context
+        op->context.gemm.packed_w = (const void*) ((uintptr_t) packed_w + w_stride * n_start);
+        op->context.gemm.c = (void*) ((uintptr_t) c + (n_start << log2_csize));
+
+        pthreadpool_parallelize_2d_tile_2d(
+            threadpool,
+            op->compute.task_2d_tile_2d,
+            &op->context,
+            op->compute.range[0], min(n - n_start, nc),
+            op->compute.tile[0], op->compute.tile[1],
+            PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
+      }
+
+      // Restore the original context
+      op->context.gemm.packed_w = packed_w;
+      op->context.gemm.c = c;
+      break;
+    }
 #if XNN_MAX_UARCH_TYPES > 1
     case xnn_parallelization_type_2d_tile_2d_with_uarch:
       assert(op->compute.range[0] != 0);
@@ -1110,6 +1142,39 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           op->compute.tile[0], op->compute.tile[1],
           PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
       break;
+    case xnn_parallelization_type_gemm_with_uarch:
+    {
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.tile[0] != 0);
+      assert(op->compute.tile[1] != 0);
+      const size_t nc = op->context.gemm.nc;
+      const size_t n = op->compute.range[1];
+      const void* packed_w = op->context.gemm.packed_w;
+      void* c = op->context.gemm.c;
+      const size_t w_stride = op->context.gemm.w_stride;
+      const uint32_t log2_csize = op->context.gemm.log2_csize;
+
+      for (size_t n_start = 0; n_start < n; n_start += nc) {
+        // Update context
+        op->context.gemm.packed_w = (const void*) ((uintptr_t) packed_w + w_stride * n_start);
+        op->context.gemm.c = (void*) ((uintptr_t) c + (n_start << log2_csize));
+
+        pthreadpool_parallelize_2d_tile_2d_with_uarch(
+            threadpool,
+            op->compute.task_2d_tile_2d_with_id,
+            &op->context,
+            0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
+            op->compute.range[0], min(n - n_start, nc),
+            op->compute.tile[0], op->compute.tile[1],
+            PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
+      }
+
+      // Restore the original context
+      op->context.gemm.packed_w = packed_w;
+      op->context.gemm.c = c;
+      break;
+    }
 #endif  // XNN_MAX_UARCH_TYPES > 1
     default:
       XNN_UNREACHABLE;

@@ -26,10 +26,12 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_4d_tile_2d,
   xnn_parallelization_type_5d_tile_2d,
   xnn_parallelization_type_6d_tile_2d,
+  xnn_parallelization_type_gemm,
 #if XNN_MAX_UARCH_TYPES > 1
   xnn_parallelization_type_2d_tile_2d_with_uarch,
   xnn_parallelization_type_3d_tile_2d_with_uarch,
   xnn_parallelization_type_4d_tile_2d_with_uarch,
+  xnn_parallelization_type_gemm_with_uarch,
 #endif  // XNN_MAX_UARCH_TYPES > 1
 };
 
@@ -72,6 +74,7 @@ struct gemm_context {
     union xnn_q8_gemm_params q8;
     union xnn_f32_minmax_params f32;
   } params;
+  size_t nc;
 };
 
 #ifndef __cplusplus
