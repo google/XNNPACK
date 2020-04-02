@@ -736,7 +736,6 @@ void xnn_compute_f32_three_pass_softmax(
     const struct f32_three_pass_softmax_context context[restrict static 1],
     size_t batch_index)
 {
-  
   const float* x = (const float*) ((uintptr_t) context->x + context->x_stride * batch_index);
   float* y = (float*) ((uintptr_t) context->y + context->y_stride * batch_index);
   const size_t n = context->n;
@@ -744,18 +743,10 @@ void xnn_compute_f32_three_pass_softmax(
   // First pass: reduce-max
   float x_max;
   context->rmax_ukernel(n, x, &x_max);
-  xnn_log_error("MAX %f", x_max);
 
   // Second pass: reduce-add & store exp(x-x_max)
   float y_sum;
   context->raddstoreexpminusmax_ukernel(n, x, y, &y_sum, x_max);
-  xnn_log_error("Y SUM %f", y_sum);
-  xnn_log_error("y 0 %f", y[0]);
-  xnn_log_error("y 1 %f", y[1]);
-  xnn_log_error("y 2 %f", y[2]);
-  xnn_log_error("y 3 %f", y[3]);
-  xnn_log_error("MIN CTX %f", context->params.scalar.min);
-  xnn_log_error("MAX CTX %f", context->params.scalar.max);
 
   // Third pass: scale y
   const float y_scale = 1.0f / y_sum;

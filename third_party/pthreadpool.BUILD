@@ -16,7 +16,6 @@ cc_library(
     ],
     hdrs = [
         "include/pthreadpool.h",
-        "src/threadpool-atomics.h",
     ],
     copts = [
         "-O2",
@@ -36,7 +35,7 @@ cc_library(
         "include",
     ],
     linkopts = select({
-        "//third_party/emscripten:pthreads_on": [
+        ":emscripten_wasm_threads": [
             "-s ALLOW_BLOCKING_ON_MAIN_THREAD=1",
             "-s PTHREAD_POOL_SIZE=8",
         ],
@@ -54,6 +53,15 @@ cc_library(
 )
 
 ############################# Build configurations #############################
+
+config_setting(
+    name = "emscripten_wasm_threads",
+    values = {
+        "crosstool_top": "//toolchain:emscripten",
+        "cpu": "wasm",
+        "copt": "-pthread",
+    },
+)
 
 config_setting(
     name = "optimized_build",
