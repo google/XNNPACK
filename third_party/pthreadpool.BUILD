@@ -16,6 +16,7 @@ cc_library(
     ],
     hdrs = [
         "include/pthreadpool.h",
+        "src/threadpool-atomics.h",
     ],
     copts = [
         "-O2",
@@ -34,6 +35,13 @@ cc_library(
     includes = [
         "include",
     ],
+    linkopts = select({
+        "//third_party/emscripten:pthreads_on": [
+            "-s ALLOW_BLOCKING_ON_MAIN_THREAD=1",
+            "-s PTHREAD_POOL_SIZE=8",
+        ],
+        "//conditions:default": [],
+    }),
     strip_include_prefix = "include",
     deps = [
         "@FXdiv",
