@@ -1879,7 +1879,6 @@ xnnpack_cc_library(
         "@FP16",
         "@FXdiv",
         "@clog",
-        "@cpuinfo",
         "@pthreadpool",
     ],
 )
