@@ -114,7 +114,6 @@ cc_library(
         ":watchos_arm64_32": COMMON_SRCS + MACH_SRCS + MACH_ARM_SRCS,
         ":tvos_x86_64": COMMON_SRCS + X86_SRCS + MACH_SRCS + MACH_X86_SRCS,
         ":tvos_arm64": COMMON_SRCS + MACH_SRCS + MACH_ARM_SRCS,
-        ":emscripten_wasm": COMMON_SRCS + EMSCRIPTEN_SRCS,
     }),
     copts = C99OPTS + [
         "-Iexternal/cpuinfo/include",
