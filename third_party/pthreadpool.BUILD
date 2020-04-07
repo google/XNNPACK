@@ -34,6 +34,12 @@ cc_library(
     includes = [
         "include",
     ],
+    linkopts = select({
+        ":emscripten_wasm_threads": [
+            "-s ALLOW_BLOCKING_ON_MAIN_THREAD=1",
+            "-s PTHREAD_POOL_SIZE=8",
+        ]
+    }),
     strip_include_prefix = "include",
     deps = [
         "@FXdiv",
@@ -46,6 +52,15 @@ cc_library(
 )
 
 ############################# Build configurations #############################
+
+config_setting(
+    name = "emscripten_wasm_threads",
+    values = {
+        "crosstool_top": "//toolchain:emscripten",
+        "cpu": "wasm",
+        "copt": "-pthread",
+    }
+)
 
 config_setting(
     name = "optimized_build",
