@@ -8,8 +8,6 @@ $assert ROW_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
-#include <math.h>
-
 #include <xnnpack/math.h>
 #include <xnnpack/prelu.h>
 
@@ -61,7 +59,7 @@ void xnn_f32_prelu_ukernel__scalar_${ROW_TILE}x${CHANNEL_TILE}(
 
         $for M in range(ROW_TILE):
           $for C in range(CHANNEL_TILE):
-            float vacc${M}x${ABC[C]} = signbit(vi${M}x${ABC[C]}) ? vi${M}x${ABC[C]} * vw${ABC[C]} : vi${M}x${ABC[C]};
+            const float vacc${M}x${ABC[C]} = XNN_UNPREDICTABLE(vi${M}x${ABC[C]} < 0.0f) ? vi${M}x${ABC[C]} * vw${ABC[C]} : vi${M}x${ABC[C]};
 
         $for M in range(ROW_TILE):
           $for C in range(CHANNEL_TILE):
@@ -77,7 +75,7 @@ void xnn_f32_prelu_ukernel__scalar_${ROW_TILE}x${CHANNEL_TILE}(
           const float vi${M} = *i${M}++;
 
         $for M in range(ROW_TILE):
-          float vacc${M} = signbit(vi${M}) ? vi${M} * vw : vi${M};
+          const float vacc${M} = XNN_UNPREDICTABLE(vi${M} < 0.0f) ? vi${M} * vw : vi${M};
 
         $for M in range(ROW_TILE):
           *o${M}++ = vacc${M};
@@ -90,8 +88,7 @@ void xnn_f32_prelu_ukernel__scalar_${ROW_TILE}x${CHANNEL_TILE}(
           const float vi${M} = *i${M}++;
 
         $for M in range(ROW_TILE):
-          $for C in range(CHANNEL_TILE):
-            float vacc${M} = signbit(vi${M}) ? vi${M} * vw : vi${M};
+          const float vacc${M} = XNN_UNPREDICTABLE(vi${M} < 0.0f) ? vi${M} * vw : vi${M};
 
         $for M in range(ROW_TILE):
           *o${M}++ = vacc${M};

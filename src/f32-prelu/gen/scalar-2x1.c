@@ -9,8 +9,6 @@
 
 #include <assert.h>
 
-#include <math.h>
-
 #include <xnnpack/math.h>
 #include <xnnpack/prelu.h>
 
@@ -49,8 +47,8 @@ void xnn_f32_prelu_ukernel__scalar_2x1(
       const float vi0 = *i0++;
       const float vi1 = *i1++;
 
-      float vacc0 = signbit(vi0) ? vi0 * vw : vi0;
-      float vacc1 = signbit(vi1) ? vi1 * vw : vi1;
+      const float vacc0 = XNN_UNPREDICTABLE(vi0 < 0.0f) ? vi0 * vw : vi0;
+      const float vacc1 = XNN_UNPREDICTABLE(vi1 < 0.0f) ? vi1 * vw : vi1;
 
       *o0++ = vacc0;
       *o1++ = vacc1;
