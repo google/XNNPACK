@@ -77,8 +77,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma
         FMLA v0.4S, v8.4S, v17.4S
         FMLA v0.4S, v9.4S, v18.4S
 
-        FMIN v0.4S, v0.4S, v30.4S
-        FMAX v0.4S, v0.4S, v31.4S
+        FMAX v0.4S, v0.4S, v30.4S
+        FMIN v0.4S, v0.4S, v31.4S
 
         STR q0, [x4], 16
         SUBS x16, x16, 4
@@ -115,8 +115,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma
         FMLA v0.4S, v8.4S, v17.4S
         FMLA v0.4S, v9.4S, v18.4S
 
-        FMIN v0.4S, v0.4S, v30.4S
-        FMAX v0.4S, v0.4S, v31.4S
+        FMAX v0.4S, v0.4S, v30.4S
+        FMIN v0.4S, v0.4S, v31.4S
 
         TBZ x16, 1, 3f
 

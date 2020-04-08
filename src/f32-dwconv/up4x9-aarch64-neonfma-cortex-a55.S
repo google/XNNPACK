@@ -286,8 +286,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
           # Load vi6_next.lo
           LD1 {v16.2S}, [x13], 8
 
-          # vacc.lo = min(vacc.lo, vmax)
-          FMIN v0.2S, v0.2S, v30.2S
+          # vacc.lo = min(vacc.lo, vmin)
+          FMAX v0.2S, v0.2S, v30.2S
           # Load vk6_next.lo
           LD1 {v17.2S}, [x17], 8
 
@@ -296,8 +296,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
           # Load vi6_next.hi
           LD1 {v18.2S}, [x13], 8
 
-          # vacc.hi = min(vacc.hi, vmax)
-          FMIN v1.2S, v1.2S, v30.2S
+          # vacc.hi = min(vacc.hi, vmin)
+          FMAX v1.2S, v1.2S, v30.2S
           # Load vk6_next.hi
           LD1 {v19.2S}, [x17], 8
 
@@ -306,8 +306,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
           # Load vi7_next.lo
           LD1 {v20.2S}, [x14], 8
 
-          # vacc.lo = max(vacc.lo, vmin)
-          FMAX v0.2S, v0.2S, v31.2S
+          # vacc.lo = max(vacc.lo, vmax)
+          FMIN v0.2S, v0.2S, v31.2S
           # Load vk7_next.lo
           LD1 {v21.2S}, [x17], 8
 
@@ -316,8 +316,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
           # Load vi7_next.hi
           LD1 {v22.2S}, [x14], 8
 
-          # vacc.hi = max(vacc.hi, vmin)
-          FMAX v1.2S, v1.2S, v31.2S
+          # vacc.hi = max(vacc.hi, vmax)
+          FMIN v1.2S, v1.2S, v31.2S
           # Load vk7_next.hi
           LD1 {v23.2S}, [x17], 8
 
@@ -454,8 +454,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             # Load vi6.lo
             LD1 {v4.2S}, [x13], 8
 
-            # vacc_prev.lo = min(vacc_prev.lo, vmax)
-            FMIN v2.2S, v2.2S, v30.2S
+            # vacc_prev.lo = min(vacc_prev.lo, vmin)
+            FMAX v2.2S, v2.2S, v30.2S
             # Load vk6.lo
             LD1 {v5.2S}, [x17], 8
 
@@ -464,8 +464,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             # Load vi6.hi
             LD1 {v6.2S}, [x13], 8
 
-            # vacc_prev.hi = min(vacc_prev.hi, vmax)
-            FMIN v3.2S, v3.2S, v30.2S
+            # vacc_prev.hi = min(vacc_prev.hi, vmin)
+            FMAX v3.2S, v3.2S, v30.2S
             # Load vk6.hi
             LD1 {v7.2S}, [x17], 8
 
@@ -474,8 +474,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             # Load vi7.lo
             LD1 {v28.2S}, [x14], 8
 
-            # vacc_prev.lo = max(vacc_prev.lo, vmin)
-            FMAX v2.2S, v2.2S, v31.2S
+            # vacc_prev.lo = max(vacc_prev.lo, vmax)
+            FMIN v2.2S, v2.2S, v31.2S
             # Load vk7.lo
             LD1 {v29.2S}, [x17], 8
 
@@ -484,8 +484,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             # Load vi7.hi
             LD1 {v10.2S}, [x14], 8
 
-            # vacc_prev.lo = max(vacc_prev.lo, vmin)
-            FMAX v3.2S, v3.2S, v31.2S
+            # vacc_prev.lo = max(vacc_prev.lo, vmax)
+            FMIN v3.2S, v3.2S, v31.2S
             # Load vk7.hi
             LD1 {v11.2S}, [x17], 8
 
@@ -615,8 +615,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             # Load vi6_next.lo
             LD1 {v16.2S}, [x13], 8
 
-            # vacc.lo = min(vacc.lo, vmax)
-            FMIN v0.2S, v0.2S, v30.2S
+            # vacc.lo = min(vacc.lo, vmin)
+            FMAX v0.2S, v0.2S, v30.2S
             # Load vk6_next.lo
             LD1 {v17.2S}, [x17], 8
 
@@ -625,8 +625,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             # Load vi6_next.hi
             LD1 {v18.2S}, [x13], 8
 
-            # vacc.hi = min(vacc.hi, vmax)
-            FMIN v1.2S, v1.2S, v30.2S
+            # vacc.hi = min(vacc.hi, vmin)
+            FMAX v1.2S, v1.2S, v30.2S
             # Load vk6_next.hi
             LD1 {v19.2S}, [x17], 8
 
@@ -635,8 +635,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             # Load vi7_next.lo
             LD1 {v20.2S}, [x14], 8
 
-            # vacc.lo = max(vacc.lo, vmin)
-            FMAX v0.2S, v0.2S, v31.2S
+            # vacc.lo = max(vacc.lo, vmax)
+            FMIN v0.2S, v0.2S, v31.2S
             # Load vk7_next.lo
             LD1 {v21.2S}, [x17], 8
 
@@ -645,8 +645,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
             # Load vi7_next.hi
             LD1 {v22.2S}, [x14], 8
 
-            # vacc.hi = max(vacc.hi, vmin)
-            FMAX v1.2S, v1.2S, v31.2S
+            # vacc.hi = max(vacc.hi, vmax)
+            FMIN v1.2S, v1.2S, v31.2S
             # Load vk7_next.hi
             LD1 {v23.2S}, [x17], 8
 
@@ -712,17 +712,17 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
           # vacc_prev.hi += vi8_prev.hi * vk8_prev.hi
           FMLA v3.2S, v26.2S, v27.2S
 
-          # vacc_prev.lo = min(vacc_prev.lo, vmax)
-          FMIN v2.2S, v2.2S, v30.2S
+          # vacc_prev.lo = min(vacc_prev.lo, vmin)
+          FMAX v2.2S, v2.2S, v30.2S
 
-          # vacc_prev.hi = min(vacc_prev.hi, vmax)
-          FMIN v3.2S, v3.2S, v30.2S
+          # vacc_prev.hi = min(vacc_prev.hi, vmin)
+          FMAX v3.2S, v3.2S, v30.2S
 
-          # vacc_prev.lo = max(vacc_prev.lo, vmin)
-          FMAX v2.2S, v2.2S, v31.2S
+          # vacc_prev.lo = max(vacc_prev.lo, vmax)
+          FMIN v2.2S, v2.2S, v31.2S
 
-          # vacc_prev.lo = max(vacc_prev.lo, vmin)
-          FMAX v3.2S, v3.2S, v31.2S
+          # vacc_prev.lo = max(vacc_prev.lo, vmax)
+          FMIN v3.2S, v3.2S, v31.2S
 
           # Store vacc_prev
           STP d2, d3, [x4], 16
@@ -756,8 +756,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
         FMLA v0.4S, v28.4S, v17.4S
         FMLA v0.4S, v29.4S, v18.4S
 
-        FMIN v0.4S, v0.4S, v30.4S
-        FMAX v0.4S, v0.4S, v31.4S
+        FMAX v0.4S, v0.4S, v30.4S
+        FMIN v0.4S, v0.4S, v31.4S
 
         STR q0, [x4], 16
 
@@ -792,8 +792,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
         FMLA v0.4S, v28.4S, v17.4S
         FMLA v0.4S, v29.4S, v18.4S
 
-        FMIN v0.4S, v0.4S, v30.4S
-        FMAX v0.4S, v0.4S, v31.4S
+        FMAX v0.4S, v0.4S, v30.4S
+        FMIN v0.4S, v0.4S, v31.4S
 
         TBZ x16, 1, 5f
 

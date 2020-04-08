@@ -114,8 +114,8 @@ static inline union xnn_q8_gemm_params xnn_init_q8_gemm_params(
       params.sse2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
     }
     for (uint32_t i = 0; i < 16; i++) {
-      params.sse2.output_max[i] = output_max;
       params.sse2.output_min[i] = output_min;
+      params.sse2.output_max[i] = output_max;
     }
   #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.input_zero_point = (int16_t) (uint16_t) input_zero_point;
@@ -123,8 +123,8 @@ static inline union xnn_q8_gemm_params xnn_init_q8_gemm_params(
     params.neon.multiplier = multiplier;
     params.neon.right_shift = -shift;
     params.neon.output_zero_point = (int16_t) (uint16_t) output_zero_point;
-    params.neon.output_max = output_max;
     params.neon.output_min = output_min;
+    params.neon.output_max = output_max;
   #else
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
@@ -185,16 +185,16 @@ static inline union xnn_q8_avgpool_params xnn_init_q8_avgpool_params(
       params.sse2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
     }
     for (uint32_t i = 0; i < 16; i++) {
-      params.sse2.output_max[i] = output_max;
       params.sse2.output_min[i] = output_min;
+      params.sse2.output_max[i] = output_max;
     }
   #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.bias = bias;
     params.neon.multiplier = multiplier;
     params.neon.left_shift = (int64_t) -shift;
     params.neon.output_zero_point = (int16_t) (uint16_t) output_zero_point;
-    params.neon.output_max = output_max;
     params.neon.output_min = output_min;
+    params.neon.output_max = output_max;
   #else
     const uint32_t right_shift = (uint32_t) shift;
     const int64_t rounding = INT64_C(1) << (right_shift - 1);
@@ -432,8 +432,8 @@ static inline union xnn_f32_spchw_params xnn_init_f32_spchw_params(
   union xnn_f32_spchw_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 4; i++) {
-      params.sse.max[i] = output_max;
       params.sse.min[i] = output_min;
+      params.sse.max[i] = output_max;
     }
 
     const uint32_t w4 = (width - 1) & 3;
@@ -452,8 +452,8 @@ static inline union xnn_f32_spchw_params xnn_init_f32_spchw_params(
     params.sse.mask_odd[2] = -(uint32_t) (w8 >= 5);
     params.sse.mask_odd[3] = -(uint32_t) (w8 >= 7);
   #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-    params.neon.max = output_max;
     params.neon.min = output_min;
+    params.neon.max = output_max;
 
     const uint32_t w4 = (width - 1) & 3;
     params.neon.mask[0] = UINT32_C(0xFFFFFFFF);
@@ -471,8 +471,8 @@ static inline union xnn_f32_spchw_params xnn_init_f32_spchw_params(
     params.neon.mask_odd[2] = -(uint32_t) (w8 >= 5);
     params.neon.mask_odd[3] = -(uint32_t) (w8 >= 7);
   #else
-    params.scalar.max = output_max;
     params.scalar.min = output_min;
+    params.scalar.max = output_max;
   #endif
   return params;
 }
@@ -522,8 +522,8 @@ static inline union xnn_f32_spchw_params xnn_init_scalar_f32_spchw_params(
   float output_max)
 {
   union xnn_f32_spchw_params params;
-  params.scalar.max = output_max;
   params.scalar.min = output_min;
+  params.scalar.max = output_max;
   return params;
 }
 
@@ -536,12 +536,12 @@ static inline union xnn_u8_output_params xnn_init_u8_output_params(
   union xnn_u8_output_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 16; i++) {
-      params.sse2.max[i] = output_max;
       params.sse2.min[i] = output_min;
+      params.sse2.max[i] = output_max;
     }
   #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-    params.neon.max = output_max;
     params.neon.min = output_min;
+    params.neon.max = output_max;
   #else
     params.scalar.min = (int32_t) (uint32_t) output_min;
     params.scalar.max = (int32_t) (uint32_t) output_max;
@@ -621,8 +621,8 @@ static inline union xnn_q8_add_params xnn_init_q8_add_params(
     }
     params.sse2.shift = shift;
     for (uint32_t i = 0; i < 16; i++) {
-      params.sse2.y_max[i] = output_max;
       params.sse2.y_min[i] = output_min;
+      params.sse2.y_max[i] = output_max;
     }
   #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.a_zero_point = a_zero_point;
@@ -631,8 +631,8 @@ static inline union xnn_q8_add_params xnn_init_q8_add_params(
     params.neon.a_multiplier = (int32_t) a_multiplier;
     params.neon.b_multiplier = (int32_t) b_multiplier;
     params.neon.right_shift = (int32_t) -shift;
-    params.neon.y_max = output_max;
     params.neon.y_min = output_min;
+    params.neon.y_max = output_max;
   #else
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
@@ -644,8 +644,8 @@ static inline union xnn_q8_add_params xnn_init_q8_add_params(
     params.scalar.remainder_threshold = (int32_t) remainder_threshold;
     params.scalar.shift = shift;
     params.scalar.y_zero_point = (int32_t) (uint32_t) output_zero_point;
-    params.scalar.y_max = (int32_t) (uint32_t) output_max;
     params.scalar.y_min = (int32_t) (uint32_t) output_min;
+    params.scalar.y_max = (int32_t) (uint32_t) output_max;
   #endif
   return params;
 }
@@ -693,8 +693,8 @@ static inline union xnn_q8_add_params xnn_init_scalar_q8_add_params(
   params.scalar.remainder_threshold = (int32_t) remainder_threshold;
   params.scalar.shift = shift;
   params.scalar.y_zero_point = (int32_t) (uint32_t) output_zero_point;
-  params.scalar.y_max = (int32_t) (uint32_t) output_max;
   params.scalar.y_min = (int32_t) (uint32_t) output_min;
+  params.scalar.y_max = (int32_t) (uint32_t) output_max;
   return params;
 }
 
@@ -775,15 +775,15 @@ static inline union xnn_q31_requantization_params xnn_init_requantization_params
       params.sse2.zero_point[i] = (int16_t) (uint16_t) zero_point;
     }
     for (uint32_t i = 0; i < 16; i++) {
-      params.sse2.max[i] = max;
       params.sse2.min[i] = min;
+      params.sse2.max[i] = max;
     }
   #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.multiplier = multiplier;
     params.neon.right_shift = -shift;
     params.neon.zero_point = (int16_t) (uint16_t) zero_point;
-    params.neon.max = max;
     params.neon.min = min;
+    params.neon.max = max;
   #else
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;

@@ -337,23 +337,23 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
 
 4:
         # Clamp
-        FMIN v20.4s, v20.4s, v6.4s
+        FMAX v20.4s, v20.4s, v6.4s
         SUBS x1, x1, 8
-        FMIN v21.4s, v21.4s, v6.4s
-        FMIN v22.4s, v22.4s, v6.4s
-        FMIN v23.4s, v23.4s, v6.4s
-        FMIN v24.4s, v24.4s, v6.4s
-        FMIN v25.4s, v25.4s, v6.4s
-        FMIN v26.4s, v26.4s, v6.4s
-        FMIN v27.4s, v27.4s, v6.4s
-        FMAX v20.4s, v20.4s, v7.4s
-        FMAX v21.4s, v21.4s, v7.4s
-        FMAX v22.4s, v22.4s, v7.4s
-        FMAX v23.4s, v23.4s, v7.4s
-        FMAX v24.4s, v24.4s, v7.4s
-        FMAX v25.4s, v25.4s, v7.4s
-        FMAX v26.4s, v26.4s, v7.4s
-        FMAX v27.4s, v27.4s, v7.4s
+        FMAX v21.4s, v21.4s, v6.4s
+        FMAX v22.4s, v22.4s, v6.4s
+        FMAX v23.4s, v23.4s, v6.4s
+        FMAX v24.4s, v24.4s, v6.4s
+        FMAX v25.4s, v25.4s, v6.4s
+        FMAX v26.4s, v26.4s, v6.4s
+        FMAX v27.4s, v27.4s, v6.4s
+        FMIN v20.4s, v20.4s, v7.4s
+        FMIN v21.4s, v21.4s, v7.4s
+        FMIN v22.4s, v22.4s, v7.4s
+        FMIN v23.4s, v23.4s, v7.4s
+        FMIN v24.4s, v24.4s, v7.4s
+        FMIN v25.4s, v25.4s, v7.4s
+        FMIN v26.4s, v26.4s, v7.4s
+        FMIN v27.4s, v27.4s, v7.4s
 
         # Store full 4 x 8
         B.LO 8f

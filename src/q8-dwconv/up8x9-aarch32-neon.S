@@ -62,12 +62,12 @@ BEGIN_FUNCTION xnn_q8_dwconv_ukernel_up8x9__aarch32_neon
 	# - q11 = vzero_shift_mask
 	VCEQ.S32 q11, q13, 0
 
-	# Load output max:
-	# - d20 = voutput_max
+	# Load output min:
+	# - d20 = voutput_min
 	VLD1.8 {d20[]}, [r12]!
 
-	# Load output min:
-	# - d21 = voutput_min
+	# Load output max:
+	# - d21 = voutput_max
 	VLD1.8 {d21[]}, [r12]
 
 	.p2align 3
@@ -207,8 +207,8 @@ BEGIN_FUNCTION xnn_q8_dwconv_ukernel_up8x9__aarch32_neon
 
 	VQADD.S16 q0, q12
 	VQMOVUN.S16 d0, q0
-	VMIN.U8 d0, d0, d20
-	VMAX.U8 d0, d0, d21
+	VMAX.U8 d0, d0, d20
+	VMIN.U8 d0, d0, d21
 
 	VST1.8 {d0}, [lr]!
 	SUBS r0, r0, 8
@@ -318,8 +318,8 @@ BEGIN_FUNCTION xnn_q8_dwconv_ukernel_up8x9__aarch32_neon
 
 	VQADD.S16 q0, q12
 	VQMOVUN.S16 d0, q0
-	VMIN.U8 d0, d0, d20
-	VMAX.U8 d0, d0, d21
+	VMAX.U8 d0, d0, d20
+	VMIN.U8 d0, d0, d21
 
 	TST r0, 4
 	BEQ 3f

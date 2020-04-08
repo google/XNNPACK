@@ -154,10 +154,10 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a57
         FADD v17.4s, v17.4s, v19.4s
 
         # Clamp
-        FMIN v16.4s, v16.4s, v30.4s
-        FMIN v17.4s, v17.4s, v30.4s
-        FMAX v16.4s, v16.4s, v31.4s
-        FMAX v17.4s, v17.4s, v31.4s
+        FMAX v16.4s, v16.4s, v30.4s
+        FMAX v17.4s, v17.4s, v30.4s
+        FMIN v16.4s, v16.4s, v31.4s
+        FMIN v17.4s, v17.4s, v31.4s
 
         # Store full 1 x 8
         SUBS x1, x1, 8

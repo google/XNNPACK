@@ -285,12 +285,12 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_1x12__aarch64_neonfma_cortex_a53
         B.HI 1b
 
         # Clamp
-        FMIN v20.4s, v20.4s, v30.4s
-        FMIN v21.4s, v21.4s, v30.4s
-        FMIN v22.4s, v22.4s, v30.4s
-        FMAX v20.4s, v20.4s, v31.4s
-        FMAX v21.4s, v21.4s, v31.4s
-        FMAX v22.4s, v22.4s, v31.4s
+        FMAX v20.4s, v20.4s, v30.4s
+        FMAX v21.4s, v21.4s, v30.4s
+        FMAX v22.4s, v22.4s, v30.4s
+        FMIN v20.4s, v20.4s, v31.4s
+        FMIN v21.4s, v21.4s, v31.4s
+        FMIN v22.4s, v22.4s, v31.4s
 
         # Store full 1 x 12
         SUBS x1, x1, 12

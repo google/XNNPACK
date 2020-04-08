@@ -17,27 +17,27 @@
 
 struct xnn_f16_output_params {
   uint16_t scale;
-  uint16_t max;
   uint16_t min;
+  uint16_t max;
 };
 
 union xnn_f32_output_params {
   struct {
-    float max;
     float min;
+    float max;
   } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    XNN_ALIGN(16) float max[4];
     XNN_ALIGN(16) float min[4];
+    XNN_ALIGN(16) float max[4];
   } sse;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f32_spchw_params {
   struct {
-    float max;
     float min;
+    float max;
   } scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
@@ -50,8 +50,8 @@ union xnn_f32_spchw_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    XNN_ALIGN(16) float max[4];
     XNN_ALIGN(16) float min[4];
+    XNN_ALIGN(16) float max[4];
     XNN_ALIGN(16) uint32_t mask_even[4]; // used by stride 2 kernels
     XNN_ALIGN(16) uint32_t mask_odd[4];  // used by stride 2 kernels
     XNN_ALIGN(16) uint32_t mask[4]; // used by stride 1 kernels
@@ -61,19 +61,19 @@ union xnn_f32_spchw_params {
 
 union xnn_u8_output_params {
   struct {
-    int32_t max;
     int32_t min;
+    int32_t max;
   } scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    uint8_t max;
     uint8_t min;
+    uint8_t max;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    XNN_ALIGN(16) uint8_t max[16];
     XNN_ALIGN(16) uint8_t min[16];
+    XNN_ALIGN(16) uint8_t max[16];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
@@ -87,15 +87,15 @@ union xnn_f32_avgpool_params {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float multiplier[4];
-    XNN_ALIGN(16) float output_max[4];
     XNN_ALIGN(16) float output_min[4];
+    XNN_ALIGN(16) float output_max[4];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     XNN_ALIGN(16) float multiplier;
-    XNN_ALIGN(16) float output_max;
     XNN_ALIGN(16) float output_min;
+    XNN_ALIGN(16) float output_max;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
@@ -109,16 +109,16 @@ union xnn_f32_gavgpool_params {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float multiplier[4];
-    XNN_ALIGN(16) float output_max[4];
     XNN_ALIGN(16) float output_min[4];
+    XNN_ALIGN(16) float output_max[4];
     XNN_ALIGN(16) uint32_t mask[4];
   } sse;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     XNN_ALIGN(16) float multiplier;
-    XNN_ALIGN(16) float output_max;
     XNN_ALIGN(16) float output_min;
+    XNN_ALIGN(16) float output_max;
     XNN_ALIGN(16) uint32_t mask[4];
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
@@ -158,8 +158,8 @@ union xnn_q8_gemm_params {
     int32_t multiplier;
     int32_t right_shift;
     int16_t output_zero_point;
-    uint8_t output_max;
     uint8_t output_min;
+    uint8_t output_max;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -172,8 +172,8 @@ union xnn_q8_gemm_params {
     XNN_ALIGN(16) int32_t remainder_threshold[4];
     XNN_ALIGN(16) uint64_t shift[2];
     XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) uint8_t output_max[16];
     XNN_ALIGN(16) uint8_t output_min[16];
+    XNN_ALIGN(16) uint8_t output_max[16];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
@@ -187,8 +187,8 @@ union xnn_q8_add_params {
     int32_t remainder_mask;
     int32_t remainder_threshold;
     int32_t y_zero_point;
-    int32_t y_max;
     int32_t y_min;
+    int32_t y_max;
   } scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
@@ -198,8 +198,8 @@ union xnn_q8_add_params {
     int32_t a_multiplier;
     int32_t b_multiplier;
     int32_t right_shift;
-    uint8_t y_max;
     uint8_t y_min;
+    uint8_t y_max;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -212,8 +212,8 @@ union xnn_q8_add_params {
     XNN_ALIGN(16) int32_t remainder_mask[4];
     XNN_ALIGN(16) int32_t remainder_threshold[4];
     XNN_ALIGN(16) int16_t y_zero_point[8];
-    XNN_ALIGN(16) uint8_t y_max[16];
     XNN_ALIGN(16) uint8_t y_min[16];
+    XNN_ALIGN(16) uint8_t y_max[16];
     uint32_t shift;
     uint32_t a_multiplier;
     uint32_t b_multiplier;
@@ -237,8 +237,8 @@ union xnn_q8_avgpool_params {
     int32_t multiplier;
     int64_t left_shift;
     int16_t output_zero_point;
-    uint8_t output_max;
     uint8_t output_min;
+    uint8_t output_max;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -248,8 +248,8 @@ union xnn_q8_avgpool_params {
     XNN_ALIGN(16) uint64_t rounding[2];
     XNN_ALIGN(16) uint64_t right_shift[2];
     XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) uint8_t output_max[16];
     XNN_ALIGN(16) uint8_t output_min[16];
+    XNN_ALIGN(16) uint8_t output_max[16];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
@@ -264,22 +264,22 @@ union xnn_fp32_requantization_params {
   } scalar;
   struct {
     float scale;
-    float max;
     float min;
+    float max;
     float magic;
     int32_t magic_less_zero_point;
   } neon;
   struct {
     float scale;
     int16_t zero_point;
-    uint8_t max;
     uint8_t min;
+    uint8_t max;
   } neonv8;
   struct {
     XNN_ALIGN(16) float scale[4];
     XNN_ALIGN(16) int16_t zero_point[8];
-    XNN_ALIGN(16) uint8_t max[16];
     XNN_ALIGN(16) uint8_t min[16];
+    XNN_ALIGN(16) uint8_t max[16];
   } sse2;
   struct {
     XNN_ALIGN(16) float scale[4];
@@ -304,16 +304,16 @@ union xnn_precise_requantization_params {
     int32_t multiplier;
     int32_t right_shift;
     int16_t zero_point;
-    uint8_t max;
     uint8_t min;
+    uint8_t max;
   } neon;
   struct {
     XNN_ALIGN(16) uint32_t multiplier[4];
     XNN_ALIGN(16) uint64_t rounding[2];
     XNN_ALIGN(16) uint32_t shift[4];
     XNN_ALIGN(16) int16_t zero_point[8];
-    XNN_ALIGN(16) uint8_t max[16];
     XNN_ALIGN(16) uint8_t min[16];
+    XNN_ALIGN(16) uint8_t max[16];
   } sse2;
 };
 
@@ -332,8 +332,8 @@ union xnn_q31_requantization_params {
     int32_t multiplier;
     int32_t right_shift;
     int16_t zero_point;
-    uint8_t max;
     uint8_t min;
+    uint8_t max;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -344,8 +344,8 @@ union xnn_q31_requantization_params {
     XNN_ALIGN(16) int32_t remainder_threshold[4];
     XNN_ALIGN(16) uint64_t shift[2];
     XNN_ALIGN(16) int16_t zero_point[8];
-    XNN_ALIGN(16) uint8_t max[16];
     XNN_ALIGN(16) uint8_t min[16];
+    XNN_ALIGN(16) uint8_t max[16];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };

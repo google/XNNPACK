@@ -231,22 +231,22 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_pld_cortex_a75
         VLD1.32     {d6[],d7[]}, [r5]
 
         // Clamp
-        VMIN.F32     q8,  q8, q2
-        VMIN.F32     q9,  q9, q2
-        VMIN.F32    q10, q10, q2
-        VMIN.F32    q11, q11, q2
-        VMIN.F32    q12, q12, q2
-        VMIN.F32    q13, q13, q2
-        VMIN.F32    q14, q14, q2
-        VMIN.F32    q15, q15, q2
-        VMAX.F32     q8,  q8, q3
-        VMAX.F32     q9,  q9, q3
-        VMAX.F32    q10, q10, q3
-        VMAX.F32    q11, q11, q3
-        VMAX.F32    q12, q12, q3
-        VMAX.F32    q13, q13, q3
-        VMAX.F32    q14, q14, q3
-        VMAX.F32    q15, q15, q3
+        VMAX.F32     q8,  q8, q2
+        VMAX.F32     q9,  q9, q2
+        VMAX.F32    q10, q10, q2
+        VMAX.F32    q11, q11, q2
+        VMAX.F32    q12, q12, q2
+        VMAX.F32    q13, q13, q2
+        VMAX.F32    q14, q14, q2
+        VMAX.F32    q15, q15, q2
+        VMIN.F32     q8,  q8, q3
+        VMIN.F32     q9,  q9, q3
+        VMIN.F32    q10, q10, q3
+        VMIN.F32    q11, q11, q3
+        VMIN.F32    q12, q12, q3
+        VMIN.F32    q13, q13, q3
+        VMIN.F32    q14, q14, q3
+        VMIN.F32    q15, q15, q3
 
         // Store full 4 x 8
         BLO         10f
