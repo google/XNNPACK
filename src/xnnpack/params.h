@@ -709,7 +709,7 @@ typedef void (*xnn_f32_dwconv_spchw_ukernel_function)(
     size_t output_height_stride,
     const union xnn_f32_spchw_params* params);
 
-typedef void (*xnn_dwconv_up_ukernel_function)(
+typedef void (*xnn_dwconv_unipass_ukernel_function)(
     size_t channels,
     size_t output_width,
     const void** input,
@@ -749,7 +749,7 @@ typedef void (*xnn_q8_dwconv_up_ukernel_function)(
     size_t output_increment,
     const union xnn_q8_gemm_params* params);
 
-typedef void (*xnn_dwconv_mp_ukernel_function)(
+typedef void (*xnn_dwconv_multipass_ukernel_function)(
     size_t channels,
     size_t output_width,
     const void** input,
@@ -1283,12 +1283,16 @@ static inline bool xnn_is_hmp_igemm_ukernel(struct xnn_hmp_igemm_ukernel ukernel
 #endif
 }
 
-struct gemm_parameters {
+struct gemm_fused_ukernels {
   struct xnn_hmp_gemm_ukernel gemm;
   struct xnn_hmp_igemm_ukernel igemm;
   // Optional GEMM and IGEMM micro-kernels with MR=1 and the same NR and KR parameters.
   struct xnn_hmp_gemm_ukernel gemm1;
   struct xnn_hmp_igemm_ukernel igemm1;
+};
+
+struct gemm_parameters {
+  struct gemm_fused_ukernels minmax;
   uint8_t mr;
   uint8_t nr;
   uint8_t log2_kr;
@@ -1344,14 +1348,16 @@ struct spchw_gavgpool_parameters {
   uint8_t channel_tile;
 };
 
+union dwconv_fused_ukernels {
+  xnn_dwconv_unipass_ukernel_function unipass;
+  xnn_dwconv_multipass_ukernel_function multipass;
+};
+
 struct dwconv_parameters {
-  union {
-    xnn_dwconv_up_ukernel_function up;
-    xnn_dwconv_mp_ukernel_function mp;
-  };
-  uint8_t cr;
-  uint8_t mr;
-  uint8_t qr;
+  union dwconv_fused_ukernels minmax;
+  uint8_t channel_tile;
+  uint8_t primary_tile;
+  uint8_t incremental_tile;
 };
 
 struct gavgpool_parameters {

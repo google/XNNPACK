@@ -21,9 +21,9 @@
 
 static void DWConvEnd2EndBenchmark(
   benchmark::State& state,
-  models::ExecutionPlanFactory model_factory, 
+  models::ExecutionPlanFactory model_factory,
   xnn_f32_dwconv_minmax_unipass_ukernel_function dwconv,
-  uint8_t cr, uint8_t mr,
+  uint8_t channel_tile, uint8_t primary_tile,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -37,13 +37,12 @@ static void DWConvEnd2EndBenchmark(
   // Override microkernels chosen in xnn_initialize
   for (size_t i = 0; i < XNN_MAX_F32_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel the matching kernel size.
-    if (xnn_params.f32.dwconv[i].mr == mr) {
+    if (xnn_params.f32.dwconv[i].primary_tile == primary_tile) {
       // Note: do not directly assign to xnn_params.f32.dwconv[i] because it breaks older gcc.
-      dwconv_parameters dwconv_params = { { 0 } };
-      dwconv_params.up = (xnn_dwconv_up_ukernel_function) dwconv;
-      dwconv_params.cr = cr;
-      dwconv_params.mr = mr;
-      xnn_params.f32.dwconv[i] = dwconv_params;
+      xnn_params.f32.dwconv[i].minmax.unipass = xnn_dwconv_unipass_ukernel_function(dwconv);
+      xnn_params.f32.dwconv[i].channel_tile = channel_tile;
+      xnn_params.f32.dwconv[i].primary_tile = primary_tile;
+      xnn_params.f32.dwconv[i].incremental_tile = 0;
       break;
     }
   }

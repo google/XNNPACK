@@ -96,11 +96,11 @@ struct xnn_ukernel_dconv2d {
 
 struct xnn_ukernel_dwconv {
   union {
-    xnn_dwconv_up_ukernel_function unipass_function;
-    xnn_dwconv_mp_ukernel_function multipass_function;
+    xnn_dwconv_unipass_ukernel_function unipass_function;
+    xnn_dwconv_multipass_ukernel_function multipass_function;
   };
-  uint8_t mr;
-  uint8_t qr;
+  uint8_t primary_tile;
+  uint8_t incremental_tile;
 };
 
 // Direct 2D Depthwise Convolution

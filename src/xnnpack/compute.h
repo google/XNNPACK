@@ -345,7 +345,7 @@ struct dwconv_context {
     union xnn_f32_minmax_params f32;
   } params;
   union {
-    xnn_dwconv_up_ukernel_function unipass_ukernel;
+    xnn_dwconv_unipass_ukernel_function unipass_ukernel;
   };
 };
 

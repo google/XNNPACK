@@ -41,17 +41,14 @@ static void GEMMEnd2EndBenchmark(
 
   // Override microkernels chosen in xnn_initialize
   // Note: do not directly assign to xnn_params.f32.gemm because it breaks older gcc.
-  const gemm_parameters gemm_params = (gemm_parameters) {
-    .gemm = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm)),
-    .igemm = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm)),
-    .gemm1 = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1)),
-    .igemm1 = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1)),
-    .mr = mr,
-    .nr = nr,
-    .log2_kr = log2_kr,
-    .log2_sr = log2_sr,
-  };
-  xnn_params.f32.gemm = gemm_params;
+  xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm));
+  xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm));
+  xnn_params.f32.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1));
+  xnn_params.f32.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1));
+  xnn_params.f32.gemm.mr = mr;
+  xnn_params.f32.gemm.nr = nr;
+  xnn_params.f32.gemm.log2_kr = log2_kr;
+  xnn_params.f32.gemm.log2_sr = log2_sr;
 
   auto execution_plan = model_factory(nullptr);
   if (execution_plan.empty()) {

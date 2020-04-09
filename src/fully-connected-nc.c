@@ -175,7 +175,7 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
 
   fully_connected_op->ukernel.type = xnn_ukernel_type_gemm;
   fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
-    .general_case = xnn_params.q8.gemm.gemm,
+    .general_case = xnn_params.q8.gemm.minmax.gemm,
     .mr = xnn_params.q8.gemm.mr,
     .nr = nr,
     .kr = kr,
@@ -310,8 +310,8 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
 
   fully_connected_op->ukernel.type = xnn_ukernel_type_gemm;
   fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
-    .general_case = xnn_params.f32.gemm.gemm,
-    .mr1_case = xnn_params.f32.gemm.gemm1,
+    .general_case = xnn_params.f32.gemm.minmax.gemm,
+    .mr1_case = xnn_params.f32.gemm.minmax.gemm1,
     .mr = xnn_params.f32.gemm.mr,
     .nr = nr,
     .kr = kr,
