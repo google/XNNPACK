@@ -37,6 +37,8 @@ void xnn_f32_gemm_minmax_ukernel_1x4__wasm(
   const float* a0 = a;
   float* c0 = c;
 
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
   do {
     float vacc00 = w[0];
     float vacc01 = w[1];
@@ -62,13 +64,11 @@ void xnn_f32_gemm_minmax_ukernel_1x4__wasm(
       k -= sizeof(float);
     } while (k != 0);
 
-    const float vmin = params->scalar.min;
     vacc00 = __builtin_wasm_max_f32(vacc00, vmin);
     vacc01 = __builtin_wasm_max_f32(vacc01, vmin);
     vacc02 = __builtin_wasm_max_f32(vacc02, vmin);
     vacc03 = __builtin_wasm_max_f32(vacc03, vmin);
 
-    const float vmax = params->scalar.max;
     vacc00 = __builtin_wasm_min_f32(vacc00, vmax);
     vacc01 = __builtin_wasm_min_f32(vacc01, vmax);
     vacc02 = __builtin_wasm_min_f32(vacc02, vmax);

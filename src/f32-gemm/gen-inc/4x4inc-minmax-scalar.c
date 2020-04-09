@@ -57,6 +57,8 @@ void xnn_f32_gemminc_minmax_ukernel_4x4__scalar(
     c3 = c2;
   }
 
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
   do {
     float vacc00 = acc[0];
     float vacc01 = acc[1];
@@ -109,7 +111,6 @@ void xnn_f32_gemminc_minmax_ukernel_4x4__scalar(
       k -= sizeof(float);
     } while (k != 0);
 
-    const float vmin = params->scalar.min;
     vacc00 = math_max_f32(vacc00, vmin);
     vacc01 = math_max_f32(vacc01, vmin);
     vacc02 = math_max_f32(vacc02, vmin);
@@ -127,7 +128,6 @@ void xnn_f32_gemminc_minmax_ukernel_4x4__scalar(
     vacc32 = math_max_f32(vacc32, vmin);
     vacc33 = math_max_f32(vacc33, vmin);
 
-    const float vmax = params->scalar.max;
     vacc00 = math_min_f32(vacc00, vmax);
     vacc01 = math_min_f32(vacc01, vmax);
     vacc02 = math_min_f32(vacc02, vmax);

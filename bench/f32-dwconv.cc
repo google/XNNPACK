@@ -26,7 +26,7 @@
 
 
 static void DWConvBenchmark(benchmark::State& state,
-  xnn_f32_dwconv_up_ukernel_function dwconv,
+  xnn_f32_dwconv_minmax_unipass_ukernel_function dwconv,
   uint32_t cr, uint32_t kr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

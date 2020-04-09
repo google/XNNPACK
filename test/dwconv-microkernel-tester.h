@@ -254,7 +254,68 @@ class DWConvMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_dwconv_up_ukernel_function dwconv, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_dwconv_unipass_ukernel_function dwconv) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+
+    std::vector<const float*> indirection((width() - 1) * step() + kr());
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
+    std::vector<float> kernel(channels() * kr());
+    std::vector<float> bias(channels());
+    std::vector<float, AlignedAllocator<float, 64>> packed_weights((kr() + 1) * packed_channels());
+    std::vector<float> output((width() - 1) * output_stride() + channels());
+    std::vector<float> output_ref(width() * channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
+      std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+      std::fill(output_ref.begin(), output_ref.end(), nanf(""));
+      std::fill(output.begin(), output.end(), nanf(""));
+
+      std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
+      xnn_pack_f32_dwconv_ghw_w(
+        kr(), 1, channels(), cr(),
+        kernel.data(), bias.data(), packed_weights.data());
+      for (size_t i = 0; i < indirection.size(); i++) {
+        indirection[i] = input.data() + i * channels();
+      }
+      std::shuffle(indirection.begin(), indirection.end(), rng);
+
+      // Compute reference results, without clamping.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          float acc = bias[c];
+          for (size_t k = 0; k < kr(); k++) {
+            acc += indirection[x * step() + k][c] * kernel[c * kr() + k];
+          }
+          output_ref[x * channels() + c] = acc;
+        }
+      }
+
+      // Call optimized micro-kernel.
+      dwconv(
+        channels(), width(),
+        indirection.data(), packed_weights.data(), output.data(),
+        step() * sizeof(void*),
+        (output_stride() - channels()) * sizeof(float),
+        nullptr);
+
+      // Verify results.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_NEAR(
+              output_ref[x * channels() + c],
+              output[x * output_stride() + c],
+              std::abs(output_ref[x * channels() + c]) * 1.0e-5)
+            << "x = " << x << ", channel = " << c;
+        }
+      }
+    }
+  }
+
+  void Test(xnn_f32_dwconv_minmax_unipass_ukernel_function dwconv_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
@@ -318,7 +379,7 @@ class DWConvMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      dwconv(
+      dwconv_minmax(
         channels(), width(),
         indirection.data(), packed_weights.data(), output.data(),
         step() * sizeof(void*),

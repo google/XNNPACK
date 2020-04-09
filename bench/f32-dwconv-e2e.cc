@@ -22,7 +22,7 @@
 static void DWConvEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory, 
-  xnn_f32_dwconv_up_ukernel_function dwconv,
+  xnn_f32_dwconv_minmax_unipass_ukernel_function dwconv,
   uint8_t cr, uint8_t mr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

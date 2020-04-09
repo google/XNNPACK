@@ -1,0 +1,28 @@
+# Copyright 2020 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f32_dwconv_ukernel_up1x4__wasm
+- name: xnn_f32_dwconv_ukernel_up1x4__wasm_acc2
+- name: xnn_f32_dwconv_ukernel_up2x4__wasm
+- name: xnn_f32_dwconv_ukernel_up2x4__wasm_acc2
+- name: xnn_f32_dwconv_ukernel_up1x9__wasm
+- name: xnn_f32_dwconv_ukernel_up1x9__wasm_acc2
+- name: xnn_f32_dwconv_ukernel_up2x9__wasm
+- name: xnn_f32_dwconv_ukernel_up2x9__wasm_acc2
+- name: xnn_f32_dwconv_ukernel_up1x25__wasm
+- name: xnn_f32_dwconv_ukernel_up1x25__wasm_acc2
+- name: xnn_f32_dwconv_ukernel_up2x25__wasm
+- name: xnn_f32_dwconv_ukernel_up2x25__wasm_acc2
+- name: xnn_f32_dwconv_ukernel_up1x4__scalar
+- name: xnn_f32_dwconv_ukernel_up1x4__scalar_acc2
+- name: xnn_f32_dwconv_ukernel_up2x4__scalar
+- name: xnn_f32_dwconv_ukernel_up2x4__scalar_acc2
+- name: xnn_f32_dwconv_ukernel_up1x9__scalar
+- name: xnn_f32_dwconv_ukernel_up1x9__scalar_acc2
+- name: xnn_f32_dwconv_ukernel_up2x9__scalar
+- name: xnn_f32_dwconv_ukernel_up2x9__scalar_acc2
+- name: xnn_f32_dwconv_ukernel_up1x25__scalar
+- name: xnn_f32_dwconv_ukernel_up1x25__scalar_acc2
+- name: xnn_f32_dwconv_ukernel_up2x25__scalar
+- name: xnn_f32_dwconv_ukernel_up2x25__scalar_acc2

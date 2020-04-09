@@ -21,6 +21,10 @@ struct xnn_f16_output_params {
   uint16_t max;
 };
 
+union xnn_f32_default_params {
+  /* Empty; serves to differentiate pointer types for micro-kernels without fused activation */
+};
+
 union xnn_f32_minmax_params {
   struct {
     float min;
@@ -394,6 +398,18 @@ typedef void (*xnn_gemm_ukernel_function)(
     size_t cn_stride,
     const void* params);
 
+typedef void (*xnn_f32_gemm_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const float* a,
+    size_t a_stride,
+    const float* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_f32_default_params* params);
+
 typedef void (*xnn_f32_gemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
@@ -456,6 +472,20 @@ typedef void (*xnn_igemm_ukernel_function)(
     size_t a_offset,
     const void* zero,
     const void* params);
+
+typedef void (*xnn_f32_igemm_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t kc,
+    size_t ks,
+    const float** a,
+    const float* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const float* zero,
+    const union xnn_f32_default_params* params);
 
 typedef void (*xnn_f32_igemm_minmax_ukernel_function)(
     size_t mr,
@@ -689,7 +719,17 @@ typedef void (*xnn_dwconv_up_ukernel_function)(
     size_t output_increment,
     const void* params);
 
-typedef void (*xnn_f32_dwconv_up_ukernel_function)(
+typedef void (*xnn_f32_dwconv_unipass_ukernel_function)(
+    size_t channels,
+    size_t output_width,
+    const float** input,
+    const float* weights,
+    float* output,
+    size_t input_stride,
+    size_t output_increment,
+    const union xnn_f32_default_params* params);
+
+typedef void (*xnn_f32_dwconv_minmax_unipass_ukernel_function)(
     size_t channels,
     size_t output_width,
     const float** input,

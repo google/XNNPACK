@@ -657,35 +657,36 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
     }
   }
 
-TEST(${TEST_NAME}, qmin) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  GemmMicrokernelTester()
-    .mr(${MR})
-    .nr(${NR})
-    .kr(${KR})
-    .sr(${SR})
-    .m(${MR})
-    .n(${NR})
-    .k(${KBLOCK})
-    .qmin(128)
-    .Test(${", ".join(TEST_ARGS)});
-}
+$if ACTIVATION == "MINMAX":
+  TEST(${TEST_NAME}, qmin) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    GemmMicrokernelTester()
+      .mr(${MR})
+      .nr(${NR})
+      .kr(${KR})
+      .sr(${SR})
+      .m(${MR})
+      .n(${NR})
+      .k(${KBLOCK})
+      .qmin(128)
+      .Test(${", ".join(TEST_ARGS)});
+  }
 
-TEST(${TEST_NAME}, qmax) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  GemmMicrokernelTester()
-    .mr(${MR})
-    .nr(${NR})
-    .kr(${KR})
-    .sr(${SR})
-    .m(${MR})
-    .n(${NR})
-    .k(${KBLOCK})
-    .qmax(128)
-    .Test(${", ".join(TEST_ARGS)});
-}
+  TEST(${TEST_NAME}, qmax) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    GemmMicrokernelTester()
+      .mr(${MR})
+      .nr(${NR})
+      .kr(${KR})
+      .sr(${SR})
+      .m(${MR})
+      .n(${NR})
+      .k(${KBLOCK})
+      .qmax(128)
+      .Test(${", ".join(TEST_ARGS)});
+  }
 
 TEST(${TEST_NAME}, strided_cm) {
   $if ISA_CHECK:
@@ -780,15 +781,18 @@ def generate_test_cases(ukernel, mr, nr, kr, sr,
     Code for the test case.
   """
   _, test_name = ukernel.split("_", 1)
-  _, datatype, ukernel_type, _ = ukernel.split("_", 3)
+  _, datatype, ukernel_type, activation, _ = ukernel.split("_", 4)
+  if activation == "ukernel":
+    activation = "linear"
   test_args = [ukernel]
-  if not isa or isa == "psimd":
+  if activation != "linear" and (not isa or isa == "psimd"):
     test_args.append("GemmMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(GEMM_TEST_CODE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
       "UKERNEL_TYPE": ukernel_type.upper(),
       "DATATYPE": datatype,
+      "ACTIVATION": activation.upper(),
       "MR": mr,
       "NR": nr,
       "KR": kr,

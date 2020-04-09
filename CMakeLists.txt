@@ -193,21 +193,37 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv-spchw/3x3s2p1-scalar.c
   src/f32-dwconv-spchw/5x5p2-scalar.c
   src/f32-dwconv-spchw/5x5s2p2-scalar.c
-  src/f32-dwconv/gen/up1x25-minmax-scalar-acc2.c
-  src/f32-dwconv/gen/up1x25-minmax-scalar.c
-  src/f32-dwconv/gen/up1x4-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/up1x4-scalar.c
+  src/f32-dwconv/gen/up1x4-scalar-acc2.c
+  src/f32-dwconv/gen/up1x9-scalar.c
+  src/f32-dwconv/gen/up1x9-scalar-acc2.c
+  src/f32-dwconv/gen/up1x25-scalar.c
+  src/f32-dwconv/gen/up1x25-scalar-acc2.c
+  src/f32-dwconv/gen/up2x4-scalar.c
+  src/f32-dwconv/gen/up2x4-scalar-acc2.c
+  src/f32-dwconv/gen/up2x9-scalar.c
+  src/f32-dwconv/gen/up2x9-scalar-acc2.c
+  src/f32-dwconv/gen/up2x25-scalar.c
+  src/f32-dwconv/gen/up2x25-scalar-acc2.c
   src/f32-dwconv/gen/up1x4-minmax-scalar.c
-  src/f32-dwconv/gen/up1x9-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/up1x4-minmax-scalar-acc2.c
   src/f32-dwconv/gen/up1x9-minmax-scalar.c
-  src/f32-dwconv/gen/up2x25-minmax-scalar-acc2.c
-  src/f32-dwconv/gen/up2x25-minmax-scalar.c
-  src/f32-dwconv/gen/up2x4-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/up1x9-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/up1x25-minmax-scalar.c
+  src/f32-dwconv/gen/up1x25-minmax-scalar-acc2.c
   src/f32-dwconv/gen/up2x4-minmax-scalar.c
-  src/f32-dwconv/gen/up2x9-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/up2x4-minmax-scalar-acc2.c
   src/f32-dwconv/gen/up2x9-minmax-scalar.c
+  src/f32-dwconv/gen/up2x9-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/up2x25-minmax-scalar.c
+  src/f32-dwconv/gen/up2x25-minmax-scalar-acc2.c
   src/f32-gavgpool-spchw/scalar-x1.c
   src/f32-gavgpool/7p7x-scalar-c1.c
   src/f32-gavgpool/7x-scalar-c1.c
+  src/f32-gemm/gen/1x4-scalar.c
+  src/f32-gemm/gen/2x4-scalar.c
+  src/f32-gemm/gen/4x2-scalar.c
+  src/f32-gemm/gen/4x4-scalar.c
   src/f32-gemm/gen/1x4-minmax-scalar.c
   src/f32-gemm/gen/2x4-minmax-scalar.c
   src/f32-gemm/gen/4x2-minmax-scalar.c
@@ -221,6 +237,10 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-ibilinear/gen/scalar-c1.c
   src/f32-ibilinear/gen/scalar-c2.c
   src/f32-ibilinear/gen/scalar-c4.c
+  src/f32-igemm/gen/1x4-scalar.c
+  src/f32-igemm/gen/2x4-scalar.c
+  src/f32-igemm/gen/4x2-scalar.c
+  src/f32-igemm/gen/4x4-scalar.c
   src/f32-igemm/gen/1x4-minmax-scalar.c
   src/f32-igemm/gen/2x4-minmax-scalar.c
   src/f32-igemm/gen/4x2-minmax-scalar.c
@@ -1954,14 +1974,23 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-dwconv-spchw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-dwconv-spchw-test f32-dwconv-spchw-test)
 
-  ADD_EXECUTABLE(f32-dwconv-minmax-test test/f32-dwconv-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-gemminc-minmax-test PROPERTIES
+  ADD_EXECUTABLE(f32-dwconv-test test/f32-dwconv.cc)
+  SET_TARGET_PROPERTIES(f32-dwconv-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemminc-minmax-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-gemminc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-gemminc-minmax-test f32-gemminc-minmax-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-dwconv-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-dwconv-test f32-dwconv-test)
+
+  ADD_EXECUTABLE(f32-dwconv-minmax-test test/f32-dwconv-minmax.cc)
+  SET_TARGET_PROPERTIES(f32-dwconv-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-dwconv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-dwconv-minmax-test f32-dwconv-minmax-test)
 
   ADD_EXECUTABLE(f32-gavgpool-spchw-test test/f32-gavgpool-spchw.cc)
   SET_TARGET_PROPERTIES(f32-gavgpool-spchw-test PROPERTIES
@@ -1980,6 +2009,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-gavgpool-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-gavgpool-test f32-gavgpool-test)
+
+  ADD_EXECUTABLE(f32-gemm-test test/f32-gemm.cc)
+  SET_TARGET_PROPERTIES(f32-gemm-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-gemm-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-gemm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-gemm-test f32-gemm-test)
 
   ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc)
   SET_TARGET_PROPERTIES(f32-gemm-minmax-test PROPERTIES
@@ -2016,6 +2054,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-ibilinear-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-ibilinear-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-ibilinear-test f32-ibilinear-test)
+
+  ADD_EXECUTABLE(f32-igemm-test test/f32-igemm.cc)
+  SET_TARGET_PROPERTIES(f32-igemm-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-igemm-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-igemm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-igemm-test f32-igemm-test)
 
   ADD_EXECUTABLE(f32-igemm-minmax-test test/f32-igemm-minmax.cc)
   SET_TARGET_PROPERTIES(f32-igemm-minmax-test PROPERTIES

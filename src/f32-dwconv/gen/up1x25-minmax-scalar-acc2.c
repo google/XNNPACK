@@ -192,7 +192,6 @@ void xnn_f32_dwconv_minmax_ukernel_up1x25__scalar_acc2(
 
       float vacc0 = math_max_f32(vacc0p0, vmin);
       vacc0 = math_min_f32(vacc0, vmax);
-
       *output++ = vacc0;
     } while (--c != 0);
 

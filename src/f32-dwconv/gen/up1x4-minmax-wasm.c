@@ -65,7 +65,6 @@ void xnn_f32_dwconv_minmax_ukernel_up1x4__wasm(
 
       float vacc0 = __builtin_wasm_max_f32(vacc0p0, vmin);
       vacc0 = __builtin_wasm_min_f32(vacc0, vmax);
-
       *output++ = vacc0;
     } while (--c != 0);
 

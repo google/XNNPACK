@@ -53,6 +53,8 @@ void xnn_f32_igemm_minmax_ukernel_4x2__wasm(
     c3 = c2;
   }
 
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
   do {
     float vacc00 = w[0];
     float vacc01 = w[1];
@@ -113,7 +115,6 @@ void xnn_f32_igemm_minmax_ukernel_4x2__wasm(
       p -= 4 * sizeof(void*);
     } while (p != 0);
 
-    const float vmin = params->scalar.min;
     vacc00 = __builtin_wasm_max_f32(vacc00, vmin);
     vacc01 = __builtin_wasm_max_f32(vacc01, vmin);
     vacc10 = __builtin_wasm_max_f32(vacc10, vmin);
@@ -123,7 +124,6 @@ void xnn_f32_igemm_minmax_ukernel_4x2__wasm(
     vacc30 = __builtin_wasm_max_f32(vacc30, vmin);
     vacc31 = __builtin_wasm_max_f32(vacc31, vmin);
 
-    const float vmax = params->scalar.max;
     vacc00 = __builtin_wasm_min_f32(vacc00, vmax);
     vacc01 = __builtin_wasm_min_f32(vacc01, vmax);
     vacc10 = __builtin_wasm_min_f32(vacc10, vmax);
