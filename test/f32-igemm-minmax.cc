@@ -7,7 +7,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/f32-igemm.yaml
+//   Specification: test/f32-igemm-minmax.yaml
 //   Generator: tools/generate-gemm-test.py
 
 
