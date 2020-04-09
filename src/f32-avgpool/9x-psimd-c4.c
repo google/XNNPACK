@@ -20,16 +20,16 @@ void xnn_f32_avgpool_ukernel_9x__psimd_c4(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_avgpool_params params[restrict static 1])
+    const union xnn_f32_scaleminmax_params params[restrict static 1])
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
   assert(kernel_elements <= 9);
   assert(channels != 0);
 
-  const psimd_f32 vmultiplier = psimd_load_splat_f32(&params->scalar.multiplier);
-  const psimd_f32 voutput_min = psimd_load_splat_f32(&params->scalar.output_min);
-  const psimd_f32 voutput_max = psimd_load_splat_f32(&params->scalar.output_max);
+  const psimd_f32 vscale = psimd_load_splat_f32(&params->scalar.scale);
+  const psimd_f32 vmin = psimd_load_splat_f32(&params->scalar.min);
+  const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
 
   do {
     const float* i0 = input[0];
@@ -133,9 +133,9 @@ void xnn_f32_avgpool_ukernel_9x__psimd_c4(
       const psimd_f32 vsum01678 = psimd_add_f32(vsum018, vsum67);
       const psimd_f32 vsum = psimd_add_f32(vsum2345, vsum01678);
 
-      psimd_f32 vout = psimd_mul_f32(vsum, vmultiplier);
-      vout = psimd_max_f32(vout, voutput_min);
-      vout = psimd_min_f32(vout, voutput_max);
+      psimd_f32 vout = psimd_mul_f32(vsum, vscale);
+      vout = psimd_max_f32(vout, vmin);
+      vout = psimd_min_f32(vout, vmax);
 
       psimd_store_f32(output, vout);
       output += 4;
@@ -162,9 +162,9 @@ void xnn_f32_avgpool_ukernel_9x__psimd_c4(
       const psimd_f32 vsum01678 = psimd_add_f32(vsum018, vsum67);
       const psimd_f32 vsum = psimd_add_f32(vsum2345, vsum01678);
 
-      psimd_f32 vout = psimd_mul_f32(vsum, vmultiplier);
-      vout = psimd_max_f32(vout, voutput_min);
-      vout = psimd_min_f32(vout, voutput_max);
+      psimd_f32 vout = psimd_mul_f32(vsum, vscale);
+      vout = psimd_max_f32(vout, vmin);
+      vout = psimd_min_f32(vout, vmax);
 
       if (c & 2) {
         psimd_store2_f32(output, vout);

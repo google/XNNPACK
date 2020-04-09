@@ -17,7 +17,7 @@ void xnn_f32_gavgpool_ukernel_7p7x__scalar_c1(
     const float* zero,
     float* buffer,
     float* output,
-    const union xnn_f32_avgpool_params params[restrict static 1])
+    const union xnn_f32_scaleminmax_params params[restrict static 1])
 {
   assert(rows > 7);
   assert(channels != 0);
@@ -114,9 +114,9 @@ void xnn_f32_gavgpool_ukernel_7p7x__scalar_c1(
   if (rows <= 6) {
     i6 = zero;
   }
-  const float vmultiplier = params->scalar.multiplier;
-  const float voutput_min = params->scalar.output_min;
-  const float voutput_max = params->scalar.output_max;
+  const float vscale = params->scalar.scale;
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
 
   b = buffer;
   do {
@@ -139,9 +139,9 @@ void xnn_f32_gavgpool_ukernel_7p7x__scalar_c1(
 
     const float vsum = vsum0123 + vsum456a;
 
-    float vout = vsum * vmultiplier;
-    vout = math_max_f32(vout, voutput_min);
-    vout = math_min_f32(vout, voutput_max);
+    float vout = vsum * vscale;
+    vout = math_max_f32(vout, vmin);
+    vout = math_min_f32(vout, vmax);
 
     *output++ = vout;
   } while (--channels != 0);

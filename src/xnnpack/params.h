@@ -78,26 +78,19 @@ union xnn_u8_minmax_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_f32_avgpool_params {
+union xnn_f32_scaleminmax_params {
   struct {
-    float multiplier;
-    float output_min;
-    float output_max;
+    float scale;
+    float min;
+    float max;
   } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    XNN_ALIGN(16) float multiplier[4];
-    XNN_ALIGN(16) float output_min[4];
-    XNN_ALIGN(16) float output_max[4];
+    XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) float min[4];
+    XNN_ALIGN(16) float max[4];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    XNN_ALIGN(16) float multiplier;
-    XNN_ALIGN(16) float output_min;
-    XNN_ALIGN(16) float output_max;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
 
 union xnn_f32_gavgpool_params {
@@ -761,7 +754,7 @@ typedef void (*xnn_f32_gavgpool_up_ukernel_function)(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_avgpool_params* params);
+    const union xnn_f32_scaleminmax_params* params);
 
 typedef void (*xnn_q8_gavgpool_up_ukernel_function)(
     size_t rows,
@@ -790,7 +783,7 @@ typedef void (*xnn_f32_gavgpool_mp_ukernel_function)(
     const float* zero,
     float* buffer,
     float* output,
-    const union xnn_f32_avgpool_params* params);
+    const union xnn_f32_scaleminmax_params* params);
 
 typedef void (*xnn_q8_gavgpool_mp_ukernel_function)(
     size_t rows,
@@ -838,7 +831,7 @@ typedef void (*xnn_f32_avgpool_up_ukernel_function)(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_avgpool_params* params);
+    const union xnn_f32_scaleminmax_params* params);
 
 typedef void (*xnn_q8_avgpool_up_ukernel_function)(
     size_t output_pixels,
@@ -876,7 +869,7 @@ typedef void (*xnn_f32_avgpool_mp_ukernel_function)(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_avgpool_params* params);
+    const union xnn_f32_scaleminmax_params* params);
 
 typedef void (*xnn_q8_avgpool_mp_ukernel_function)(
     size_t output_pixels,

@@ -248,35 +248,35 @@ static inline union xnn_q8_avgpool_params xnn_init_scalar_q8_avgpool_params(
   return params;
 }
 
-static inline void xnn_update_f32_avgpool_params(
-  union xnn_f32_avgpool_params* params,
-  float multiplier)
+static inline void xnn_update_f32_scaleminmax_params(
+  union xnn_f32_scaleminmax_params* params,
+  float scale)
 {
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 4; i++) {
-      params->sse2.multiplier[i] = multiplier;
+      params->sse2.scale[i] = scale;
     }
   #else
-    params->scalar.multiplier = multiplier;
+    params->scalar.scale = scale;
   #endif
 }
 
-static inline union xnn_f32_avgpool_params xnn_init_f32_avgpool_params(
-  float multiplier,
-  float output_min,
-  float output_max)
+static inline union xnn_f32_scaleminmax_params xnn_init_f32_scaleminmax_params(
+  float scale,
+  float min,
+  float max)
 {
-  union xnn_f32_avgpool_params params;
+  union xnn_f32_scaleminmax_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 4; i++) {
-      params.sse2.multiplier[i] = multiplier;
-      params.sse2.output_min[i] = output_min;
-      params.sse2.output_max[i] = output_max;
+      params.sse2.scale[i] = scale;
+      params.sse2.min[i] = min;
+      params.sse2.max[i] = max;
     }
   #else
-    params.scalar.multiplier = multiplier;
-    params.scalar.output_min = output_min;
-    params.scalar.output_max = output_max;
+    params.scalar.scale = scale;
+    params.scalar.min = min;
+    params.scalar.max = max;
   #endif
   return params;
 }
@@ -346,15 +346,15 @@ static inline void xnn_update_f32_gavgpool_params(
   #endif
 }
 
-static inline union xnn_f32_avgpool_params xnn_init_scalar_f32_avgpool_params(
-  float multiplier,
-  float output_min,
-  float output_max)
+static inline union xnn_f32_scaleminmax_params xnn_init_scalar_f32_scaleminmax_params(
+  float scale,
+  float min,
+  float max)
 {
-  union xnn_f32_avgpool_params params;
-  params.scalar.multiplier = multiplier;
-  params.scalar.output_min = output_min;
-  params.scalar.output_max = output_max;
+  union xnn_f32_scaleminmax_params params;
+  params.scalar.scale = scale;
+  params.scalar.min = min;
+  params.scalar.max = max;
   return params;
 }
 

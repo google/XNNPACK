@@ -221,7 +221,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
   global_average_pooling_op->channels = channels;
   global_average_pooling_op->input_pixel_stride = input_stride;
   global_average_pooling_op->output_pixel_stride = output_stride;
-  global_average_pooling_op->f32_avgpool_params = xnn_init_f32_avgpool_params(nanf(""), output_min, output_max);
+  global_average_pooling_op->f32_scaleminmax_params = xnn_init_f32_scaleminmax_params(nanf(""), output_min, output_max);
 
   global_average_pooling_op->type = xnn_operator_type_global_average_pooling_nwc_f32;
   global_average_pooling_op->ukernel.type = xnn_ukernel_type_global_average_pooling;
@@ -340,7 +340,7 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f32(
   global_average_pooling_op->input = input;
   global_average_pooling_op->output = output;
 
-  xnn_update_f32_avgpool_params(&global_average_pooling_op->f32_avgpool_params, 1.0f / (float) width);
+  xnn_update_f32_scaleminmax_params(&global_average_pooling_op->f32_scaleminmax_params, 1.0f / (float) width);
 
   const size_t input_stride_in_bytes = global_average_pooling_op->input_pixel_stride * sizeof(float);
   const size_t channels = global_average_pooling_op->channels;
@@ -353,7 +353,7 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f32(
       .channels = channels,
       .output = output,
       .output_batch_stride = global_average_pooling_op->output_pixel_stride * sizeof(float),
-      .params.f32 = global_average_pooling_op->f32_avgpool_params,
+      .params.f32 = global_average_pooling_op->f32_scaleminmax_params,
   };
   global_average_pooling_op->compute.type = xnn_parallelization_type_1d;
   global_average_pooling_op->compute.range[0] = batch_size;

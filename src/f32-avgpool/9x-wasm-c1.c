@@ -19,16 +19,16 @@ void xnn_f32_avgpool_ukernel_9x__wasm_c1(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_avgpool_params params[restrict static 1])
+    const union xnn_f32_scaleminmax_params params[restrict static 1])
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
   assert(kernel_elements <= 9);
   assert(channels != 0);
 
-  const float vmultiplier = params->scalar.multiplier;
-  const float voutput_min = params->scalar.output_min;
-  const float voutput_max = params->scalar.output_max;
+  const float vscale = params->scalar.scale;
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
 
   do {
     const float* i0 = input[0];
@@ -123,9 +123,9 @@ void xnn_f32_avgpool_ukernel_9x__wasm_c1(
       const float vsum01678 = vsum018 + vsum67;
       const float vsum = vsum2345 + vsum01678;
 
-      float vout = vsum * vmultiplier;
-      vout = __builtin_wasm_max_f32(vout, voutput_min);
-      vout = __builtin_wasm_min_f32(vout, voutput_max);
+      float vout = vsum * vscale;
+      vout = __builtin_wasm_max_f32(vout, vmin);
+      vout = __builtin_wasm_min_f32(vout, vmax);
 
       *output++ = vout;
     } while (--c != 0);

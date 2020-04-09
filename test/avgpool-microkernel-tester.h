@@ -467,14 +467,14 @@ class AvgPoolMicrokernelTester {
       }
 
       // Prepare output parameters.
-      xnn_f32_avgpool_params params = { };
+      xnn_f32_scaleminmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_avgpool_params(
+          params = xnn_init_f32_scaleminmax_params(
             1.0f / float(pooling_elements()), output_min, output_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_avgpool_params(
+          params = xnn_init_scalar_f32_scaleminmax_params(
             1.0f / float(pooling_elements()), output_min, output_max);
           break;
       }
@@ -564,14 +564,14 @@ class AvgPoolMicrokernelTester {
       }
 
       // Prepare output parameters.
-      xnn_f32_avgpool_params params = { };
+      xnn_f32_scaleminmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_avgpool_params(
+          params = xnn_init_f32_scaleminmax_params(
             1.0f / float(pooling_elements()), output_min, output_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_avgpool_params(
+          params = xnn_init_scalar_f32_scaleminmax_params(
             1.0f / float(pooling_elements()), output_min, output_max);
           break;
       }

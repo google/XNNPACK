@@ -31,7 +31,7 @@ extern "C" {
       float* output,                                            \
       size_t input_increment,                                   \
       size_t output_increment,                                  \
-      const union xnn_f32_avgpool_params* params);
+      const union xnn_f32_scaleminmax_params* params);
 
 DECLARE_F32_AVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_ukernel_9p8x__neon_c4)
 DECLARE_F32_AVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_ukernel_9p8x__sse_c4)
@@ -51,7 +51,7 @@ DECLARE_F32_AVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_ukernel_9p8x__sca
       float* output,                                          \
       size_t input_increment,                                 \
       size_t output_increment,                                \
-      const union xnn_f32_avgpool_params* params);
+      const union xnn_f32_scaleminmax_params* params);
 
 DECLARE_F32_AVGPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_ukernel_9x__neon_c4)
 DECLARE_F32_AVGPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_ukernel_9x__sse_c4)

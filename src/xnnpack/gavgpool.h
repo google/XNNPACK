@@ -28,7 +28,7 @@ extern "C" {
       const float* zero,                                         \
       float* buffer,                                             \
       float* output,                                             \
-      const union xnn_f32_avgpool_params* params);
+      const union xnn_f32_scaleminmax_params* params);
 
 DECLARE_F32_GAVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_gavgpool_ukernel_7p7x__neon_c4)
 DECLARE_F32_GAVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_gavgpool_ukernel_7p7x__sse_c4)
@@ -45,7 +45,7 @@ DECLARE_F32_GAVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_gavgpool_ukernel_7p7x__s
       size_t input_stride,                                     \
       const float* zero,                                       \
       float* output,                                           \
-      const union xnn_f32_avgpool_params* params);
+      const union xnn_f32_scaleminmax_params* params);
 
 DECLARE_F32_GAVGPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_gavgpool_ukernel_7x__neon_c4)
 DECLARE_F32_GAVGPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_gavgpool_ukernel_7x__sse_c4)

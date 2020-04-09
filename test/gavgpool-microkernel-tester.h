@@ -333,14 +333,14 @@ class GAvgPoolMicrokernelTester {
       }
 
       // Prepare micro-kernel parameters.
-      union xnn_f32_avgpool_params params = { };
+      union xnn_f32_scaleminmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_avgpool_params(
+          params = xnn_init_f32_scaleminmax_params(
             1.0f / float(rows()), output_min, output_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_avgpool_params(
+          params = xnn_init_scalar_f32_scaleminmax_params(
             1.0f / float(rows()), output_min, output_max);
           break;
       }
@@ -395,14 +395,14 @@ class GAvgPoolMicrokernelTester {
       const float output_max = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
 
       // Prepare micro-kernel parameters.
-      union xnn_f32_avgpool_params params = { };
+      union xnn_f32_scaleminmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_avgpool_params(
+          params = xnn_init_f32_scaleminmax_params(
             1.0f / float(rows()), output_min, output_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_avgpool_params(
+          params = xnn_init_scalar_f32_scaleminmax_params(
             1.0f / float(rows()), output_min, output_max);
           break;
       }

@@ -20,15 +20,15 @@ void xnn_f32_avgpool_ukernel_9p8x__scalar_c1(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_avgpool_params params[restrict static 1])
+    const union xnn_f32_scaleminmax_params params[restrict static 1])
 {
   assert(output_pixels != 0);
   assert(kernel_elements > 9);
   assert(channels != 0);
 
-  const float vmultiplier = params->scalar.multiplier;
-  const float voutput_min = params->scalar.output_min;
-  const float voutput_max = params->scalar.output_max;
+  const float vscale = params->scalar.scale;
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
 
   do {
     {
@@ -259,9 +259,9 @@ void xnn_f32_avgpool_ukernel_9p8x__scalar_c1(
         const float vsum0167a = vsum01a + vsum67;
         const float vsum = vsum2345 + vsum0167a;
 
-        float vout = vsum * vmultiplier;
-        vout = math_max_f32(vout, voutput_min);
-        vout = math_min_f32(vout, voutput_max);
+        float vout = vsum * vscale;
+        vout = math_max_f32(vout, vmin);
+        vout = math_min_f32(vout, vmax);
 
         *output++ = vout;
       } while (--c != 0);

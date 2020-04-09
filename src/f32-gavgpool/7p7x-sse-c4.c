@@ -19,7 +19,7 @@ void xnn_f32_gavgpool_ukernel_7p7x__sse_c4(
     const float* zero,
     float* buffer,
     float* output,
-    const union xnn_f32_avgpool_params params[restrict static 1])
+    const union xnn_f32_scaleminmax_params params[restrict static 1])
 {
   assert(rows > 7);
   assert(channels != 0);
@@ -129,9 +129,9 @@ void xnn_f32_gavgpool_ukernel_7p7x__sse_c4(
   if (rows <= 6) {
     i6 = zero;
   }
-  const __m128 vmultiplier = _mm_load_ps(params->sse2.multiplier);
-  const __m128 voutput_min = _mm_load_ps(params->sse2.output_min);
-  const __m128 voutput_max = _mm_load_ps(params->sse2.output_max);
+  const __m128 vscale = _mm_load_ps(params->sse2.scale);
+  const __m128 vmin = _mm_load_ps(params->sse2.min);
+  const __m128 vmax = _mm_load_ps(params->sse2.max);
 
   b = buffer;
   while (channels >= 4) {
@@ -162,9 +162,9 @@ void xnn_f32_gavgpool_ukernel_7p7x__sse_c4(
 
     const __m128 vsum = _mm_add_ps(vsum0123, vsum456a);
 
-    __m128 vout = _mm_mul_ps(vsum, vmultiplier);
-    vout = _mm_max_ps(vout, voutput_min);
-    vout = _mm_min_ps(vout, voutput_max);
+    __m128 vout = _mm_mul_ps(vsum, vscale);
+    vout = _mm_max_ps(vout, vmin);
+    vout = _mm_min_ps(vout, vmax);
 
     _mm_storeu_ps(output, vout);
     output += 4;
@@ -191,9 +191,9 @@ void xnn_f32_gavgpool_ukernel_7p7x__sse_c4(
 
     const __m128 vsum = _mm_add_ps(vsum0123, vsum456a);
 
-    __m128 vout = _mm_mul_ps(vsum, vmultiplier);
-    vout = _mm_max_ps(vout, voutput_min);
-    vout = _mm_min_ps(vout, voutput_max);
+    __m128 vout = _mm_mul_ps(vsum, vscale);
+    vout = _mm_max_ps(vout, vmin);
+    vout = _mm_min_ps(vout, vmax);
 
     if (channels & 2) {
       _mm_storel_pi((__m64*) output, vout);

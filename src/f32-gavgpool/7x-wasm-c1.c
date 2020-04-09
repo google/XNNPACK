@@ -16,7 +16,7 @@ void xnn_f32_gavgpool_ukernel_7x__wasm_c1(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_avgpool_params params[restrict static 1])
+    const union xnn_f32_scaleminmax_params params[restrict static 1])
 {
   assert(rows != 0);
   assert(rows <= 7);
@@ -48,9 +48,9 @@ void xnn_f32_gavgpool_ukernel_7x__wasm_c1(
     i6 = zero;
   }
 
-  const float vmultiplier = params->scalar.multiplier;
-  const float voutput_min = params->scalar.output_min;
-  const float voutput_max = params->scalar.output_max;
+  const float vscale = params->scalar.scale;
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
   do {
     const float vi0 = *i0++;
     const float vi1 = *i1++;
@@ -69,9 +69,9 @@ void xnn_f32_gavgpool_ukernel_7x__wasm_c1(
 
     const float vsum = vsum016 + vsum2345;
 
-    float vout = vsum * vmultiplier;
-    vout = __builtin_wasm_max_f32(vout, voutput_min);
-    vout = __builtin_wasm_min_f32(vout, voutput_max);
+    float vout = vsum * vscale;
+    vout = __builtin_wasm_max_f32(vout, vmin);
+    vout = __builtin_wasm_min_f32(vout, vmax);
 
     *output++ = vout;
   } while (--channels != 0);
