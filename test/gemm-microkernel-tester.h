@@ -520,7 +520,7 @@ class GemmMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_ppmm_ukernel_function ppmm, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_ppmm_minmax_ukernel_function ppmm, Variant variant = Variant::Native) const {
     ASSERT_LE(m(), mr());
     ASSERT_GE(cm_stride(), n());
 
@@ -602,7 +602,7 @@ class GemmMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_gemm_ukernel_function gemm, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_gemm_minmax_ukernel_function gemm, Variant variant = Variant::Native) const {
     ASSERT_LE(m(), mr());
     ASSERT_GE(a_stride(), k());
     ASSERT_GE(cm_stride(), n());
@@ -692,7 +692,7 @@ class GemmMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_gemminc_ukernel_function gemminc, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_gemminc_minmax_ukernel_function gemminc, Variant variant = Variant::Native) const {
     ASSERT_LE(m(), mr());
     ASSERT_GE(a_stride(), k());
     ASSERT_GE(cm_stride(), n());
@@ -784,7 +784,7 @@ class GemmMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_igemm_ukernel_function igemm, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_igemm_minmax_ukernel_function igemm, Variant variant = Variant::Native) const {
     ASSERT_LE(m(), mr());
 
     std::random_device random_device;

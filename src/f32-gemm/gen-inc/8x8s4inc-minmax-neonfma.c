@@ -15,7 +15,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemminc_ukernel_8x8s4__neonfma(
+void xnn_f32_gemminc_minmax_ukernel_8x8s4__neonfma(
     size_t mr,
     size_t nc,
     size_t kc,

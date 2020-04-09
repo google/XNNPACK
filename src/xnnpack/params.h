@@ -360,7 +360,7 @@ typedef void (*xnn_ppmm_ukernel_function)(
     size_t cn_stride,
     const void* params);
 
-typedef void (*xnn_f32_ppmm_ukernel_function)(
+typedef void (*xnn_f32_ppmm_minmax_ukernel_function)(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -394,7 +394,7 @@ typedef void (*xnn_gemm_ukernel_function)(
     size_t cn_stride,
     const void* params);
 
-typedef void (*xnn_f32_gemm_ukernel_function)(
+typedef void (*xnn_f32_gemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t k,
@@ -406,7 +406,7 @@ typedef void (*xnn_f32_gemm_ukernel_function)(
     size_t cn_stride,
     const union xnn_f32_minmax_params* params);
 
-typedef void (*xnn_f32_gemminc_ukernel_function)(
+typedef void (*xnn_f32_gemminc_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t k,
@@ -457,7 +457,7 @@ typedef void (*xnn_igemm_ukernel_function)(
     const void* zero,
     const void* params);
 
-typedef void (*xnn_f32_igemm_ukernel_function)(
+typedef void (*xnn_f32_igemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t kc,

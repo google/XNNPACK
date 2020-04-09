@@ -15,7 +15,7 @@
 #include <xnnpack/intrinsics-polyfill.h>
 
 
-void xnn_f32_gemminc_ukernel_6x16__avx512f_broadcast(
+void xnn_f32_gemminc_minmax_ukernel_6x16__avx512f_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,

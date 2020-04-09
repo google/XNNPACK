@@ -11,7 +11,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_q8_dwconv_ukernel_up8x9__sse2(
+void xnn_q8_dwconv_minmax_ukernel_up8x9__sse2(
     size_t channels,
     size_t output_width,
     const uint8_t** input,

@@ -14,7 +14,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_q8_gemm_ukernel_4x8__neon(
+void xnn_q8_gemm_minmax_ukernel_4x8__neon(
     size_t mr,
     size_t nc,
     size_t kc,

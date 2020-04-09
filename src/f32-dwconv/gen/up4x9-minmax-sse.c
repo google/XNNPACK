@@ -14,7 +14,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_f32_dwconv_ukernel_up4x9__sse(
+void xnn_f32_dwconv_minmax_ukernel_up4x9__sse(
     size_t channels,
     size_t output_width,
     const float** input,

@@ -14,7 +14,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm_ukernel_5x16__avx_broadcast(
+void xnn_f32_gemm_minmax_ukernel_5x16__avx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,

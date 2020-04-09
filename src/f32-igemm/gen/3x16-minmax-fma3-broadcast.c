@@ -14,7 +14,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_f32_igemm_ukernel_3x16__fma3_broadcast(
+void xnn_f32_igemm_minmax_ukernel_3x16__fma3_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,

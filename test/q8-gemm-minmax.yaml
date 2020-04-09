@@ -1,0 +1,14 @@
+# Copyright 2019 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_q8_gemm_minmax_ukernel_4x8__neon
+  k-block: 8
+- name: xnn_q8_gemm_minmax_ukernel_8x8__neon
+  k-block: 8
+- name: xnn_q8_gemm_minmax_ukernel_2x4c8__sse2
+  k-block: 8
+- name: xnn_q8_gemm_minmax_ukernel_4x4c2__sse2
+  k-block: 8
+- name: xnn_q8_gemm_minmax_ukernel_2x2__scalar
+  k-block: 1

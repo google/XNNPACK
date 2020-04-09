@@ -15,7 +15,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_f32_igemm_ukernel_6x8__neon_lane_ld128(
+void xnn_f32_igemm_minmax_ukernel_6x8__neon_lane_ld128(
     size_t mr,
     size_t nc,
     size_t kc,

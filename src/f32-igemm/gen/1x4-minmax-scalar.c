@@ -13,7 +13,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_igemm_ukernel_1x4__scalar(
+void xnn_f32_igemm_minmax_ukernel_1x4__scalar(
     size_t mr,
     size_t nc,
     size_t kc,

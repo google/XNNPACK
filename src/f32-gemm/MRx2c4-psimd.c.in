@@ -12,7 +12,7 @@ $assert MR % 2 == 0
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm_ukernel_${MR}x${NR}c4__psimd(
+void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}c4__psimd(
     size_t mr,
     size_t nc,
     size_t kc,

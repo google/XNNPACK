@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64(
+# void xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -58,7 +58,7 @@
 # unused A   v8 v9 v10 v11
 # unused B   v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64
+BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
 
         # Clamp A and C pointers
         CMP x0, 2                // if mr < 2
@@ -281,7 +281,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64
 8:
         RET
 
-END_FUNCTION xnn_f32_gemm_ukernel_6x8__aarch64_neonfma_ld64
+END_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

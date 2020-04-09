@@ -9,7 +9,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_q8_igemm_ukernel_2x2__scalar(
+void xnn_q8_igemm_minmax_ukernel_2x2__scalar(
     size_t mr,
     size_t nc,
     size_t kc,

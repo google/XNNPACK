@@ -7,7 +7,7 @@
 
 .syntax unified
 
-// void xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55(
+// void xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
@@ -37,7 +37,7 @@
 
 // Clamp (r5) d4 d5 d6 d7
 
-BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55
+BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         .arm
 #ifndef __APPLE__
         .arch armv7-a
@@ -413,7 +413,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55
         VPOP        {d8-d15}
         BX          lr
 
-END_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55
+END_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

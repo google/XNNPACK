@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a55(
+# void xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55(
 #     size_t mr,                         x0
 #     size_t nc,                         x1
 #     size_t kc,                         x2 / x0
@@ -60,7 +60,7 @@
 # C   v28 v29
 # C   v30 v31
 
-BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a55
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
 
         # Clamp C pointers
         CMP x0, 2                // if mr < 2
@@ -474,7 +474,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a55
         LDP d12, d13, [sp], 48
         RET
 
-END_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a55
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

@@ -13,7 +13,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_gemm_ukernel_4x2__wasm(
+void xnn_f32_gemm_minmax_ukernel_4x2__wasm(
     size_t mr,
     size_t nc,
     size_t kc,

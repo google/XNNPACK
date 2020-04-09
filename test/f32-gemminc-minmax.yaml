@@ -2,250 +2,250 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
-- name: xnn_f32_gemminc_ukernel_1x8__aarch64_neonfma_cortex_a53
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_1x8__aarch64_neonfma_cortex_a57
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_1x8__aarch64_neonfma_cortex_a75
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a53
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
   k-block: 4
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a55
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
   k-block: 4
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a57
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a57
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_cortex_a75
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a75
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_5x8__aarch64_neonfma_cortex_a75
+- name: xnn_f32_gemminc_minmax_ukernel_5x8__aarch64_neonfma_cortex_a75
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a53
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
   k-block: 4
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a55
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a55
   k-block: 4
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a57
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
   k-block: 4
   assembly: true
-- name: xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a73
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a73
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_cortex_a75
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ios
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_ios
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_1x12__aarch64_neonfma_cortex_a53
+- name: xnn_f32_gemminc_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53
   k-block: 4
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_4x12__aarch64_neonfma_cortex_a53
+- name: xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
   k-block: 4
   pipelined: true
   assembly: true
-- name: xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
   k-block: 2
   assembly: true
-- name: xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_ld128
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
   k-block: 4
   assembly: true
-- name: xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_ld64
   k-block: 2
   assembly: true
-- name: xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ld128
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_ld128
   k-block: 4
   assembly: true
-- name: xnn_f32_gemminc_ukernel_1x8__neon_lane_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__neon_lane_ld64
   k-block: 2
-- name: xnn_f32_gemminc_ukernel_4x8__neon_lane_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__neon_lane_ld64
   k-block: 2
-- name: xnn_f32_gemminc_ukernel_4x8__neon_lane_ld128
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__neon_lane_ld128
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_5x8__neon_lane_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_5x8__neon_lane_ld64
   k-block: 2
-- name: xnn_f32_gemminc_ukernel_6x8__neon_lane_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__neon_lane_ld64
   k-block: 2
-- name: xnn_f32_gemminc_ukernel_6x8__neon_lane_ld128
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__neon_lane_ld128
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_1x8__neonfma_lane_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__neonfma_lane_ld64
   k-block: 2
   arch:
     - aarch64
-- name: xnn_f32_gemminc_ukernel_4x8__neonfma_lane_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__neonfma_lane_ld64
   k-block: 2
   arch:
     - aarch64
-- name: xnn_f32_gemminc_ukernel_4x8__neonfma_lane_ld128
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__neonfma_lane_ld128
   k-block: 4
   arch:
     - aarch64
-- name: xnn_f32_gemminc_ukernel_5x8__neonfma_lane_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_5x8__neonfma_lane_ld64
   k-block: 2
   arch:
     - aarch64
-- name: xnn_f32_gemminc_ukernel_6x8__neonfma_lane_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__neonfma_lane_ld64
   k-block: 2
   arch:
     - aarch64
-- name: xnn_f32_gemminc_ukernel_6x8__neonfma_lane_ld128
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__neonfma_lane_ld128
   k-block: 4
   arch:
     - aarch64
-- name: xnn_f32_gemminc_ukernel_1x8__neon_dup_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__neon_dup_ld64
   k-block: 2
-- name: xnn_f32_gemminc_ukernel_4x8__neon_dup_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__neon_dup_ld64
   k-block: 2
-- name: xnn_f32_gemminc_ukernel_4x8__neon_dup_ld128
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__neon_dup_ld128
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_6x8__neon_dup_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__neon_dup_ld64
   k-block: 2
-- name: xnn_f32_gemminc_ukernel_6x8__neon_dup_ld128
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__neon_dup_ld128
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_1x8__neonfma_dup_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__neonfma_dup_ld64
   k-block: 2
-- name: xnn_f32_gemminc_ukernel_4x8__neonfma_dup_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__neonfma_dup_ld64
   k-block: 2
-- name: xnn_f32_gemminc_ukernel_4x8__neonfma_dup_ld128
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__neonfma_dup_ld128
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_6x8__neonfma_dup_ld64
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__neonfma_dup_ld64
   k-block: 2
-- name: xnn_f32_gemminc_ukernel_6x8__neonfma_dup_ld128
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__neonfma_dup_ld128
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_1x8s4__neon
+- name: xnn_f32_gemminc_minmax_ukernel_1x8s4__neon
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_4x8s4__neon
+- name: xnn_f32_gemminc_minmax_ukernel_4x8s4__neon
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_6x8s4__neon
+- name: xnn_f32_gemminc_minmax_ukernel_6x8s4__neon
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_8x8s4__neon
+- name: xnn_f32_gemminc_minmax_ukernel_8x8s4__neon
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_1x8s4__neonfma
+- name: xnn_f32_gemminc_minmax_ukernel_1x8s4__neonfma
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_4x8s4__neonfma
+- name: xnn_f32_gemminc_minmax_ukernel_4x8s4__neonfma
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_6x8s4__neonfma
+- name: xnn_f32_gemminc_minmax_ukernel_6x8s4__neonfma
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_8x8s4__neonfma
+- name: xnn_f32_gemminc_minmax_ukernel_8x8s4__neonfma
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_1x8__sse_load1
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__sse_load1
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_4x8__sse_load1
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__sse_load1
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_1x8__sse_dup
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__sse_dup
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_4x8__sse_dup
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__sse_dup
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_1x8s4__sse
+- name: xnn_f32_gemminc_minmax_ukernel_1x8s4__sse
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_4x8s4__sse
+- name: xnn_f32_gemminc_minmax_ukernel_4x8s4__sse
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_1x8__avx_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__avx_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_4x8__avx_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__avx_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_5x8__avx_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_5x8__avx_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_6x8__avx_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__avx_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_7x8__avx_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_7x8__avx_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_1x16__avx_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_1x16__avx_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_3x16__avx_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_3x16__avx_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_4x16__avx_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_4x16__avx_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_5x16__avx_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_5x16__avx_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_1x8__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__fma3_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_4x8__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__fma3_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_5x8__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_5x8__fma3_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_6x8__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__fma3_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_7x8__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_7x8__fma3_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_8x8__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_8x8__fma3_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_1x16__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_1x16__fma3_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_3x16__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_3x16__fma3_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_4x16__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_4x16__fma3_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_5x16__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_5x16__fma3_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_1x16s4__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_1x16s4__fma3_broadcast
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_3x16s4__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_3x16s4__fma3_broadcast
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_4x16s4__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_4x16s4__fma3_broadcast
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_5x16s4__fma3_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_5x16s4__fma3_broadcast
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_1x16__avx512f_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_1x16__avx512f_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_4x16__avx512f_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_4x16__avx512f_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_5x16__avx512f_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_5x16__avx512f_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_6x16__avx512f_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_6x16__avx512f_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_7x16__avx512f_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_7x16__avx512f_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_8x16__avx512f_broadcast
+- name: xnn_f32_gemminc_minmax_ukernel_8x16__avx512f_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_1x8__psimd_loadsplat
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__psimd_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_4x8__psimd_loadsplat
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__psimd_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_6x8__psimd_loadsplat
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__psimd_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_1x8__psimd_splat
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__psimd_splat
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_4x8__psimd_splat
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__psimd_splat
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_6x8__psimd_splat
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__psimd_splat
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_1x8s4__psimd
+- name: xnn_f32_gemminc_minmax_ukernel_1x8s4__psimd
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_4x8s4__psimd
+- name: xnn_f32_gemminc_minmax_ukernel_4x8s4__psimd
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_6x8s4__psimd
+- name: xnn_f32_gemminc_minmax_ukernel_6x8s4__psimd
   k-block: 4
-- name: xnn_f32_gemminc_ukernel_1x4__wasm
+- name: xnn_f32_gemminc_minmax_ukernel_1x4__wasm
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_2x4__wasm
+- name: xnn_f32_gemminc_minmax_ukernel_2x4__wasm
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_4x4__wasm
+- name: xnn_f32_gemminc_minmax_ukernel_4x4__wasm
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_1x4__scalar
+- name: xnn_f32_gemminc_minmax_ukernel_1x4__scalar
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_2x4__scalar
+- name: xnn_f32_gemminc_minmax_ukernel_2x4__scalar
   k-block: 1
-- name: xnn_f32_gemminc_ukernel_4x4__scalar
+- name: xnn_f32_gemminc_minmax_ukernel_4x4__scalar
   k-block: 1

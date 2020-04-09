@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/dwconv.h>
 
 
-void xnn_f32_dwconv_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__sse${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f32_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__sse${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t channels,
     size_t output_width,
     const float** input,

@@ -9,7 +9,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_q8_gemm_ukernel_2x2__scalar(
+void xnn_q8_gemm_minmax_ukernel_2x2__scalar(
     size_t mr,
     size_t nc,
     size_t kc,

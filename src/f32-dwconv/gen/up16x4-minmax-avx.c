@@ -16,7 +16,7 @@
 
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-void xnn_f32_dwconv_ukernel_up16x4__avx(
+void xnn_f32_dwconv_minmax_ukernel_up16x4__avx(
     size_t channels,
     size_t output_width,
     const float** input,

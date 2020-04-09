@@ -11,7 +11,7 @@
 
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-void xnn_f32_igemm_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}(
+void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}(
     size_t mr,
     size_t nc,
     size_t kc,

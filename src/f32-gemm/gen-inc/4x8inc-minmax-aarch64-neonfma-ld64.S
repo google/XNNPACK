@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_ld64(
+# void xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -37,7 +37,7 @@
 # x10 c2
 # x7  c3 / cm_stride
 
-BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_ld64
+BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
 
         # Load cn_stride, acc
         LDP x14, x15, [sp]
@@ -192,7 +192,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_ld64
 10:
         RET
 
-END_FUNCTION xnn_f32_gemminc_ukernel_4x8__aarch64_neonfma_ld64
+END_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

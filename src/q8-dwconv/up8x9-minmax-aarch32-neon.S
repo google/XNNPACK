@@ -10,7 +10,7 @@
 
 .syntax unified
 
-# void xnn_q8_dwconv_ukernel_up8x9__aarch32_neon(
+# void xnn_q8_dwconv_minmax_ukernel_up8x9__aarch32_neon(
 #     size_t channels,
 #     size_t output_width,
 #     const uint8_t** input,
@@ -19,7 +19,7 @@
 #     size_t input_stride,
 #     size_t output_increment,
 #     const union xnn_q8_gemm_params params[restrict static 1])
-BEGIN_FUNCTION xnn_q8_dwconv_ukernel_up8x9__aarch32_neon
+BEGIN_FUNCTION xnn_q8_dwconv_minmax_ukernel_up8x9__aarch32_neon
 	.arm
 #ifndef __APPLE__
 	.arch armv7-a
@@ -353,7 +353,7 @@ BEGIN_FUNCTION xnn_q8_dwconv_ukernel_up8x9__aarch32_neon
 
 	VPOP {d8-d15}
 	POP {r4, r5, r6, r7, r8, r9, r10, r11, pc}
-END_FUNCTION xnn_q8_dwconv_ukernel_up8x9__aarch32_neon
+END_FUNCTION xnn_q8_dwconv_minmax_ukernel_up8x9__aarch32_neon
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

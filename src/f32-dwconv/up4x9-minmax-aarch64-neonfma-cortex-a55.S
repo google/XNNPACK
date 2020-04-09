@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55(
+# void xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55(
 #     size_t channels,
 #     size_t output_width,
 #     const float** input,
@@ -14,7 +14,7 @@
 #     size_t input_stride,
 #     size_t output_increment,
 #     const union xnn_f32_minmax_params params[restrict static 1])
-BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
+BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
 
         # Save d10-d15 on stack
         STP d10, d11, [sp, -48]!
@@ -819,7 +819,7 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
         LDP d10, d11, [sp], 48
         RET
 
-END_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma_cortex_a55
+END_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

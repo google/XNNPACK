@@ -15,7 +15,7 @@
 #include <xnnpack/intrinsics-polyfill.h>
 
 
-void xnn_f32_dwconv_ukernel_up32x9__avx512f(
+void xnn_f32_dwconv_minmax_ukernel_up32x9__avx512f(
     size_t channels,
     size_t output_width,
     const float** input,

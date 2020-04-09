@@ -14,7 +14,7 @@
 #include <xnnpack/ppmm.h>
 
 
-void xnn_f32_ppmm_ukernel_4x8__sse(
+void xnn_f32_ppmm_minmax_ukernel_4x8__sse(
   size_t mr,
   size_t nc,
   size_t kc,

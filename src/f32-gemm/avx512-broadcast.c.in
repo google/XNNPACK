@@ -13,7 +13,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/intrinsics-polyfill.h>
 
 
-void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}__avx512f_broadcast(
+void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,

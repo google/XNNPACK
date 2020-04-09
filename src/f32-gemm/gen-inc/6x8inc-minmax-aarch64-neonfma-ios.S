@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ios(
+# void xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_ios(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -61,7 +61,7 @@
 # IOS microkernel is based on Cortex-A75 kernel but avoids X18 by
 # using X14 instead of X18, and reloading cn_stride into x0.
 
-BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ios
+BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_ios
 
         # Clamp A and C pointers / Save d8-d15 on stack
         STP  d8,  d9, [sp, -64]!
@@ -639,7 +639,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ios
         LDP  d8,  d9, [sp], 64
         RET
 
-END_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ios
+END_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_ios
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

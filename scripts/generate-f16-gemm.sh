@@ -11,4 +11,4 @@ tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=6 -D NR=8 -o src/f16-gemm
 tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=8 -D NR=8 -o src/f16-gemm/gen/8x8-neonfp16arith-ld64.c
 
 ################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/f16-gemm.yaml --output test/f16-gemm.cc
+tools/generate-gemm-test.py --spec test/f16-gemm-minmax.yaml --output test/f16-gemm-minmax.cc

@@ -14,7 +14,7 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}s4__${"neonfma" if FMA else "neon"}(
+void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}s4__${"neonfma" if FMA else "neon"}(
     size_t mr,
     size_t nc,
     size_t kc,

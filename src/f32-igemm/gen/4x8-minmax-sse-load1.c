@@ -14,7 +14,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_f32_igemm_ukernel_4x8__sse_load1(
+void xnn_f32_igemm_minmax_ukernel_4x8__sse_load1(
     size_t mr,
     size_t nc,
     size_t kc,

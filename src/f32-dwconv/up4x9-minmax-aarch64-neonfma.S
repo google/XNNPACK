@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma(
+# void xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma(
 #     size_t channels,
 #     size_t output_width,
 #     const float** input,
@@ -14,7 +14,7 @@
 #     size_t input_stride,
 #     size_t output_increment,
 #     const union xnn_f32_minmax_params params[restrict static 1])
-BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma
+BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
 
         # Save d8-d15 on stack
         STP  d8,  d9, [sp, -64]!
@@ -143,7 +143,7 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma
         LDP  d8,  d9, [sp], 64
         RET
 
-END_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma
+END_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

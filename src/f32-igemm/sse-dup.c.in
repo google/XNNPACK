@@ -12,7 +12,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/igemm.h>
 
 
-void xnn_f32_igemm_ukernel_${MR}x${NR}__sse_dup(
+void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__sse_dup(
     size_t mr,
     size_t nc,
     size_t kc,

@@ -14,7 +14,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_f32_igemm_ukernel_6x8__avx_broadcast(
+void xnn_f32_igemm_minmax_ukernel_6x8__avx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,

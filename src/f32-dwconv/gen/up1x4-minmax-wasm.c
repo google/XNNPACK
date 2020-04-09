@@ -13,7 +13,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_ukernel_up1x4__wasm(
+void xnn_f32_dwconv_minmax_ukernel_up1x4__wasm(
     size_t channels,
     size_t output_width,
     const float** input,

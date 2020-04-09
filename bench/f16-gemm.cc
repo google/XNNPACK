@@ -102,15 +102,15 @@ static void GEMMBenchmark(benchmark::State& state,
 
 #if XNN_ARCH_ARM64
   static void f16_gemm_4x8__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_f16_gemm_ukernel_4x8__neonfp16arith_ld64, 4, 8, 1);
+    GEMMBenchmark(state, xnn_f16_gemm_minmax_ukernel_4x8__neonfp16arith_ld64, 4, 8, 1);
   }
 
   static void f16_gemm_6x8__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_f16_gemm_ukernel_6x8__neonfp16arith_ld64, 6, 8, 1);
+    GEMMBenchmark(state, xnn_f16_gemm_minmax_ukernel_6x8__neonfp16arith_ld64, 6, 8, 1);
   }
 
   static void f16_gemm_8x8__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_f16_gemm_ukernel_8x8__neonfp16arith_ld64, 8, 8, 1);
+    GEMMBenchmark(state, xnn_f16_gemm_minmax_ukernel_8x8__neonfp16arith_ld64, 8, 8, 1);
   }
 
   BENCHMARK_GEMM(f16_gemm_4x8__neonfp16arith_ld64)

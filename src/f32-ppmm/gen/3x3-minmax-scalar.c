@@ -13,7 +13,7 @@
 #include <xnnpack/ppmm.h>
 
 
-void xnn_f32_ppmm_ukernel_3x3__scalar(
+void xnn_f32_ppmm_minmax_ukernel_3x3__scalar(
   size_t mr,
   size_t nc,
   size_t kc,

@@ -13,7 +13,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $ISA = {0: "avx", 3: "fma3"}[FMA]
-void xnn_f32_gemm${"inc" if INC else ""}_ukernel_${MR}x${NR}s4__${ISA}_broadcast(
+void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}s4__${ISA}_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,

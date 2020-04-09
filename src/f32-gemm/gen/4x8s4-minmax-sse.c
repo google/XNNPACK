@@ -14,7 +14,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm_ukernel_4x8s4__sse(
+void xnn_f32_gemm_minmax_ukernel_4x8s4__sse(
     size_t mr,
     size_t nc,
     size_t kc,

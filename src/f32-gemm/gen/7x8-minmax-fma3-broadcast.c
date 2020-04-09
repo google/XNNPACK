@@ -14,7 +14,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm_ukernel_7x8__fma3_broadcast(
+void xnn_f32_gemm_minmax_ukernel_7x8__fma3_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,

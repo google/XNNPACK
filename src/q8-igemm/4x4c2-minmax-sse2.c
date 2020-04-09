@@ -13,7 +13,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_q8_igemm_ukernel_4x4c2__sse2(
+void xnn_q8_igemm_minmax_ukernel_4x4c2__sse2(
     size_t mr,
     size_t nc,
     size_t kc,

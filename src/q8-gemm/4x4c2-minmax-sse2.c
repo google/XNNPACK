@@ -13,7 +13,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_q8_gemm_ukernel_4x4c2__sse2(
+void xnn_q8_gemm_minmax_ukernel_4x4c2__sse2(
     size_t mr,
     size_t nc,
     size_t kc,

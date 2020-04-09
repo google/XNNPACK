@@ -13,7 +13,7 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include <xnnpack/igemm.h>
 
 
-void xnn_f32_igemm_ukernel_${MR}x${NR}s4__${"neonfma" if FMA else "neon"}(
+void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}s4__${"neonfma" if FMA else "neon"}(
     size_t mr,
     size_t nc,
     size_t kc,

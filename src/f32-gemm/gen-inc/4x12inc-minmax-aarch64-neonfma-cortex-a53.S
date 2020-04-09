@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemminc_ukernel_4x12__aarch64_neonfma_cortex_a53(
+# void xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -59,7 +59,7 @@
 # Clamp v4 v5
 # v12 to v13 unused.
 
-BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x12__aarch64_neonfma_cortex_a53
+BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
 
         # Load cn_stride, acc
         LDP x14, x15, [sp]
@@ -557,7 +557,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_4x12__aarch64_neonfma_cortex_a53
         LDP  d8,  d9, [sp], 48
         RET
 
-END_FUNCTION xnn_f32_gemminc_ukernel_4x12__aarch64_neonfma_cortex_a53
+END_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
