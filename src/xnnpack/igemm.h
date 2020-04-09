@@ -32,7 +32,7 @@ extern "C" {
       size_t cn_stride,                             \
       size_t a_offset,                              \
       const float* zero,                            \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_4x2__neon_lane_ld64)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_4x4__neon_lane_ld64)

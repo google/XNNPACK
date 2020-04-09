@@ -370,8 +370,8 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
     xnn_init_f32_avgpool_params(1.0f / (float) pooling_size, output_min, output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   if (any_padding || tf_same_padding) {
-    average_pooling_op->f32_output_params =
-      xnn_init_f32_output_params(output_min, output_max);
+    average_pooling_op->f32_minmax_params =
+      xnn_init_f32_minmax_params(output_min, output_max);
     average_pooling_op->ukernel.type = xnn_ukernel_type_pixelwise_average_pooling;
   } else {
     average_pooling_op->ukernel.type = xnn_ukernel_type_average_pooling;
@@ -699,8 +699,8 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
     &xnn_params.f32.avgpool,
     &xnn_params.f32.pavgpool,
     &xnn_params.f32.gavgpool,
-    is_pixelwise ? (const void*) &average_pooling_op->f32_output_params : (const void*) &average_pooling_op->f32_avgpool_params,
-    is_pixelwise ? sizeof(average_pooling_op->f32_output_params) : sizeof(average_pooling_op->f32_avgpool_params),
+    is_pixelwise ? (const void*) &average_pooling_op->f32_minmax_params : (const void*) &average_pooling_op->f32_avgpool_params,
+    is_pixelwise ? sizeof(average_pooling_op->f32_minmax_params) : sizeof(average_pooling_op->f32_avgpool_params),
     &average_pooling_op->f32_avgpool_params,
     sizeof(average_pooling_op->f32_avgpool_params),
     pthreadpool_get_threads_count(threadpool),

@@ -29,7 +29,7 @@ extern "C" {
       float* output,                                             \
       size_t input_increment,                                    \
       size_t output_increment,                                   \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_PAVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_ukernel_9p8x__neon_c4)
 DECLARE_F32_PAVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_ukernel_9p8x__sse_c4)
@@ -50,7 +50,7 @@ DECLARE_F32_PAVGPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_ukernel_9p8x__s
       float* output,                                           \
       size_t input_increment,                                  \
       size_t output_increment,                                 \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_PAVGPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_ukernel_9x__neon_c4)
 DECLARE_F32_PAVGPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_ukernel_9x__sse_c4)

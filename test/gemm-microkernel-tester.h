@@ -568,13 +568,13 @@ class GemmMicrokernelTester {
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
       // Prepare output parameters.
-      xnn_f32_output_params output_params = { };
+      xnn_f32_minmax_params minmax_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_init_f32_output_params(c_min, c_max);
+          minmax_params = xnn_init_f32_minmax_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_init_scalar_f32_output_params(c_min, c_max);
+          minmax_params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
       }
 
@@ -585,7 +585,7 @@ class GemmMicrokernelTester {
       ppmm(m(), n(), k() * sizeof(float),
         a.data(), packed_w.data(),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
-        &output_params);
+        &minmax_params);
 
       // Validate micro-kernel outputs.
       for (size_t i = 0; i < m(); i++) {
@@ -647,13 +647,13 @@ class GemmMicrokernelTester {
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
       // Prepare output parameters.
-      xnn_f32_output_params output_params = { };
+      xnn_f32_minmax_params minmax_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_init_f32_output_params(c_min, c_max);
+          minmax_params = xnn_init_f32_minmax_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_init_scalar_f32_output_params(c_min, c_max);
+          minmax_params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
       }
 
@@ -667,7 +667,7 @@ class GemmMicrokernelTester {
         a.data(), a_stride() * sizeof(float),
         packed_w.data(),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
-        &output_params);
+        &minmax_params);
 
       // Validate micro-kernel outputs.
       for (size_t i = 0; i < m(); i++) {
@@ -738,13 +738,13 @@ class GemmMicrokernelTester {
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
       // Prepare output parameters.
-      xnn_f32_output_params output_params = { };
+      xnn_f32_minmax_params minmax_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_init_f32_output_params(c_min, c_max);
+          minmax_params = xnn_init_f32_minmax_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_init_scalar_f32_output_params(c_min, c_max);
+          minmax_params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
       }
 
@@ -759,7 +759,7 @@ class GemmMicrokernelTester {
         packed_w.data(),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
         acc.data(),
-        &output_params);
+        &minmax_params);
 
       // Validate micro-kernel outputs.
       for (size_t i = 0; i < m(); i++) {
@@ -867,13 +867,13 @@ class GemmMicrokernelTester {
       }
 
       // Prepare output parameters.
-      xnn_f32_output_params output_params = { };
+      xnn_f32_minmax_params minmax_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_init_f32_output_params(c_min, c_max);
+          minmax_params = xnn_init_f32_minmax_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_init_scalar_f32_output_params(c_min, c_max);
+          minmax_params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
       }
 
@@ -884,7 +884,7 @@ class GemmMicrokernelTester {
         im2col.data(), packed_w.data(),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
         a_offset() * sizeof(float), zero_pointer,
-        &output_params);
+        &minmax_params);
 
       for (size_t i = 0; i < m(); i++) {
         for (size_t j = 0; j < n(); j++) {

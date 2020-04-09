@@ -13,7 +13,7 @@
 #     float* output,
 #     size_t input_stride,
 #     size_t output_increment,
-#     const union xnn_f32_output_params params[restrict static 1])
+#     const union xnn_f32_minmax_params params[restrict static 1])
 BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma
 
         # Save d8-d15 on stack
@@ -22,7 +22,7 @@ BEGIN_FUNCTION xnn_f32_dwconv_ukernel_up4x9__aarch64_neonfma
         STP d12, d13, [sp, 32]
         STP d14, d15, [sp, 48]
 
-        # Load clamping_params values
+        # Load min/max values
         LD2R {v30.4s, v31.4s}, [x7]
 
 0:

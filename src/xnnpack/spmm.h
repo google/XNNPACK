@@ -25,7 +25,7 @@ extern "C" {
     const int32_t* dmap,                           \
     const uint32_t* nmap,                          \
     float* c,                                      \
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_SPMM_UKERNEL_FUNCTION(xnn_f32_spmm_ukernel_12x1__neonfma)
 DECLARE_F32_SPMM_UKERNEL_FUNCTION(xnn_f32_spmm_ukernel_12x2__neonfma)

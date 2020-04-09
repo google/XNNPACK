@@ -371,11 +371,11 @@ static inline union xnn_f32_gavgpool_params xnn_init_scalar_f32_gavgpool_params(
   return params;
 }
 
-static inline union xnn_f32_output_params xnn_init_f32_output_params(
+static inline union xnn_f32_minmax_params xnn_init_f32_minmax_params(
   float output_min,
   float output_max)
 {
-  union xnn_f32_output_params params;
+  union xnn_f32_minmax_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 4; i++) {
       params.sse.min[i] = output_min;
@@ -388,11 +388,11 @@ static inline union xnn_f32_output_params xnn_init_f32_output_params(
   return params;
 }
 
-static inline union xnn_f32_output_params xnn_init_scalar_f32_output_params(
+static inline union xnn_f32_minmax_params xnn_init_scalar_f32_minmax_params(
   float output_min,
   float output_max)
 {
-  union xnn_f32_output_params params;
+  union xnn_f32_minmax_params params;
   params.scalar.min = output_min;
   params.scalar.max = output_max;
   return params;
@@ -527,13 +527,13 @@ static inline union xnn_f32_spchw_params xnn_init_scalar_f32_spchw_params(
   return params;
 }
 
-static inline union xnn_u8_output_params xnn_init_u8_output_params(
+static inline union xnn_u8_minmax_params xnn_init_u8_minmax_params(
   uint8_t output_min,
   uint8_t output_max)
 {
   assert(output_min < output_max);
 
-  union xnn_u8_output_params params;
+  union xnn_u8_minmax_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 16; i++) {
       params.sse2.min[i] = output_min;
@@ -549,13 +549,13 @@ static inline union xnn_u8_output_params xnn_init_u8_output_params(
   return params;
 }
 
-static inline union xnn_u8_output_params xnn_init_scalar_u8_output_params(
+static inline union xnn_u8_minmax_params xnn_init_scalar_u8_minmax_params(
   uint8_t output_min,
   uint8_t output_max)
 {
   assert(output_min < output_max);
 
-  union xnn_u8_output_params params;
+  union xnn_u8_minmax_params params;
   params.scalar.min = (int32_t) (uint32_t) output_min;
   params.scalar.max = (int32_t) (uint32_t) output_max;
   return params;

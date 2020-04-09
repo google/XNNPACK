@@ -110,7 +110,7 @@ static void DWConvCHWBenchmark(benchmark::State& state,
   std::vector<float> output(o_elements * num_buffers);
   std::fill(output.begin(), output.end(), std::nanf(""));
 
-  xnn_f32_spchw_params output_params =
+  xnn_f32_spchw_params spchw_params =
     xnn_init_f32_spchw_params(input_width, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
@@ -128,7 +128,7 @@ static void DWConvCHWBenchmark(benchmark::State& state,
         output.data() + channel * output_size + buffer_index * o_elements,
         it * sizeof(float), ot * sizeof(float),
         input_width * sizeof(float), output_width * sizeof(float),
-        &output_params);
+        &spchw_params);
     }
   }
 
@@ -227,7 +227,7 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
   std::vector<float> output(o_elements * num_buffers);
   std::fill(output.begin(), output.end(), std::nanf(""));
 
-  xnn_f32_spchw_params output_params =
+  xnn_f32_spchw_params spchw_params =
     xnn_init_f32_spchw_params(input_width, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
@@ -246,7 +246,7 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
         it * channels * sizeof(float), ot * channels * sizeof(float),
         benchmark::utils::RoundUp<size_t>(input_width, it) * channels * sizeof(float),
         benchmark::utils::RoundUp<size_t>(output_width, ot) * channels * sizeof(float),
-        &output_params);
+        &spchw_params);
     }
   }
 

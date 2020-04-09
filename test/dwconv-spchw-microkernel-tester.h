@@ -266,13 +266,13 @@ class DWConvSpCHWMicrokernelTester {
       const float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
 
       // Prepare output parameters.
-      xnn_f32_spchw_params output_params = { };
+      xnn_f32_spchw_params spchw_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_init_f32_spchw_params(input_width(), output_min, output_max);
+          spchw_params = xnn_init_f32_spchw_params(input_width(), output_min, output_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_init_scalar_f32_spchw_params(input_width(), output_min, output_max);
+          spchw_params = xnn_init_scalar_f32_spchw_params(input_width(), output_min, output_max);
           break;
       }
 
@@ -287,7 +287,7 @@ class DWConvSpCHWMicrokernelTester {
         input.data(), packed_weights.data(), output.data(),
         input_tuple_stride() * sizeof(float), output_tuple_stride() * sizeof(float),
         input_width_stride() * sizeof(float), output_width_stride() * sizeof(float),
-        &output_params);
+        &spchw_params);
 
       // Verify results.
       for (size_t y = 0; y < output_height(); y++) {

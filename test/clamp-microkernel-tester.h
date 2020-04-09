@@ -94,13 +94,13 @@ class ClampMicrokernelTester {
       const uint8_t* x_data = inplace() ? y.data() : x.data();
 
       // Prepare clamping parameters.
-      union xnn_u8_output_params output_params = { };
+      union xnn_u8_minmax_params minmax_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_init_u8_output_params(qmin(), qmax());
+          minmax_params = xnn_init_u8_minmax_params(qmin(), qmax());
           break;
         case Variant::Scalar:
-          output_params = xnn_init_scalar_u8_output_params(qmin(), qmax());
+          minmax_params = xnn_init_scalar_u8_minmax_params(qmin(), qmax());
           break;
       }
 
@@ -110,7 +110,7 @@ class ClampMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      clamp(batch_size() * sizeof(uint8_t), x_data, y.data(), &output_params);
+      clamp(batch_size() * sizeof(uint8_t), x_data, y.data(), &minmax_params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -143,13 +143,13 @@ class ClampMicrokernelTester {
       const float* x_data = inplace() ? y.data() : x.data();
 
       // Prepare output parameters.
-      xnn_f32_output_params output_params = { };
+      xnn_f32_minmax_params minmax_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_init_f32_output_params(float(qmin()), float(qmax()));
+          minmax_params = xnn_init_f32_minmax_params(float(qmin()), float(qmax()));
           break;
         case Variant::Scalar:
-          output_params = xnn_init_scalar_f32_output_params(float(qmin()), float(qmax()));
+          minmax_params = xnn_init_scalar_f32_minmax_params(float(qmin()), float(qmax()));
           break;
       }
 
@@ -159,7 +159,7 @@ class ClampMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      clamp(batch_size() * sizeof(float), x_data, y.data(), &output_params);
+      clamp(batch_size() * sizeof(float), x_data, y.data(), &minmax_params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

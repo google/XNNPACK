@@ -21,7 +21,7 @@ void xnn_f32_vminc_ukernel__avx512f_x32(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_output_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict static 1])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

@@ -698,7 +698,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   convolution_op->input_pixel_stride = input_pixel_stride;
   convolution_op->output_pixel_stride = output_pixel_stride;
 
-  convolution_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
+  convolution_op->f32_minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
 
   convolution_op->type = xnn_operator_type_convolution_nhwc_f32;
   convolution_op->ukernel.type = ukernel_type;
@@ -1132,6 +1132,6 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f32(
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
-    &convolution_op->f32_output_params,
+    &convolution_op->f32_minmax_params,
     pthreadpool_get_threads_count(threadpool));
 }

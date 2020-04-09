@@ -27,7 +27,7 @@ void xnn_f32_igemm_ukernel_1x8__neon_dup_ld64(
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const union xnn_f32_output_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict static 1])
 {
   assert(mr != 0);
   assert(mr <= 1);

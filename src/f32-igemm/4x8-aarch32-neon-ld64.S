@@ -19,7 +19,7 @@
 //     size_t cn_stride,         sp + 128 -> (r7)
 //     size_t a_offset,          sp + 132 -> (r5)
 //     const float* zero,        sp + 136 -> (r7)
-//     output_params*params,     sp + 140 -> (r5)
+//     minmax_params*params,     sp + 140 -> (r5)
 
 // inner loop registers
 
@@ -54,7 +54,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_ld64
         LDR         r6, [sp, 124]    // cm_stride
         LDR         r2, [sp, 112]    // a
         LDR         r9, [sp, 116]    // w
-        LDR         r5, [sp, 140]    // clamping_params
+        LDR         r5, [sp, 140]    // params
         MOV        r14, r3           // p = ks
 
         // Clamp C pointers
@@ -68,7 +68,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_ld64
         ADD         r6, r8, r6            //   c3 = c2 + cm_stride
         MOVLO       r6, r8                // c3
 
-        // Load clamping_params values
+        // Load min/max values
         VLD1.32     {d4[], d5[]}, [r5]!
         VLD1.32     {d6[], d7[]}, [r5]
 

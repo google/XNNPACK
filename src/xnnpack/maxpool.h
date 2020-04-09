@@ -29,7 +29,7 @@ extern "C" {
       float* output,                                  \
       size_t input_increment,                         \
       size_t output_increment,                        \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_MAXPOOL_UKERNEL_FUNCTION(xnn_f32_maxpool_ukernel_9p8x__sse_c4)
 DECLARE_F32_MAXPOOL_UKERNEL_FUNCTION(xnn_f32_maxpool_ukernel_9p8x__neon_c4)
@@ -48,7 +48,7 @@ DECLARE_F32_MAXPOOL_UKERNEL_FUNCTION(xnn_f32_maxpool_ukernel_9p8x__scalar_c1)
       uint8_t* output,                               \
       size_t input_increment,                        \
       size_t output_increment,                       \
-      const union xnn_u8_output_params* params);
+      const union xnn_u8_minmax_params* params);
 
 DECLARE_U8_MAXPOOL_UKERNEL_FUNCTION(xnn_u8_maxpool_ukernel_9p8x__neon_c16)
 DECLARE_U8_MAXPOOL_UKERNEL_FUNCTION(xnn_u8_maxpool_ukernel_9p8x__sse2_c16)

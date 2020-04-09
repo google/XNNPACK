@@ -30,7 +30,7 @@ extern "C" {
       float* c,                                    \
       size_t cm_stride,                            \
       size_t cn_stride,                            \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_4x2__neon_lane_ld64)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_1x8__neon_lane_ld64)
@@ -178,7 +178,7 @@ DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_4x4__scalar)
       size_t cm_stride,                               \
       size_t cn_stride,                               \
       const float* acc,                               \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_1x8__neon_lane_ld64)
 DECLARE_F32_GEMMINC_UKERNEL_FUNCTION(xnn_f32_gemminc_ukernel_4x8__neon_lane_ld64)

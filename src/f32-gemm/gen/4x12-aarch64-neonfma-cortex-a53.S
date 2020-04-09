@@ -19,7 +19,7 @@
 #     uint8_t*restrict c,       x6
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> x14
-#     const union xnn_f32_output_params params[restrict static 1])  [sp + 8] -> x8
+#     const union xnn_f32_minmax_params params[restrict static 1])  [sp + 8] -> x8
 
 # d8-d15 need to be preserved if used.
 # x19-30 need to be preserved if used.
@@ -63,7 +63,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x12__aarch64_neonfma_cortex_a53
         # Load cn_stride, params pointer
         LDP x14, x8, [sp]
 
-        # Load clamping_params values
+        # Load min/max values
         LD2R {v4.4s, v5.4s}, [x8]
 
         # Save d8-d11,d14,d15 on stack

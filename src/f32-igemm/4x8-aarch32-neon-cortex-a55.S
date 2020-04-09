@@ -19,7 +19,7 @@
 //     size_t cn_stride,         sp + 120 -> (r0)
 //     size_t a_offset,          sp + 124 -> (r5)
 //     const float* zero,        sp + 128 -> (r0)
-//     output_params*params,     sp + 132 -> (r5)
+//     minmax_params*params,     sp + 132 -> (r5)
 
 // inner loop registers
 
@@ -309,9 +309,9 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55
         BHI 1b
 
         // Load params pointer
-        LDR          r0, [sp, 132]   // clamping_params
+        LDR          r0, [sp, 132]   // params
         LDR         r14, [sp, 64]    // p = ks
-        // Load clamping_params values
+        // Load min/max values
         VLD1.32     {d4[],d5[]}, [r0]!
         VLD1.32     {d6[],d7[]}, [r0]
         SUBS         r1, r1, 8

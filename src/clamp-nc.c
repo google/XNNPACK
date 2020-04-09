@@ -78,7 +78,7 @@ enum xnn_status xnn_create_clamp_nc_u8(
   clamp_op->channels = channels;
   clamp_op->input_pixel_stride = input_stride;
   clamp_op->output_pixel_stride = output_stride;
-  clamp_op->u8_output_params = xnn_init_u8_output_params(output_min, output_max);
+  clamp_op->u8_minmax_params = xnn_init_u8_minmax_params(output_min, output_max);
 
   clamp_op->type = xnn_operator_type_clamp_nc_u8;
   clamp_op->ukernel.type = xnn_ukernel_type_clamp;
@@ -164,7 +164,7 @@ enum xnn_status xnn_create_clamp_nc_f32(
   clamp_op->channels = channels;
   clamp_op->input_pixel_stride = input_stride;
   clamp_op->output_pixel_stride = output_stride;
-  clamp_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
+  clamp_op->f32_minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
 
   clamp_op->type = xnn_operator_type_clamp_nc_f32;
   clamp_op->ukernel.type = xnn_ukernel_type_clamp;
@@ -213,7 +213,7 @@ enum xnn_status xnn_setup_clamp_nc_u8(
       .y = output,
       .y_stride = output_stride * sizeof(uint8_t),
       .ukernel = xnn_params.u8.clamp,
-      .params.u8_output = clamp_op->u8_output_params,
+      .params.u8_output = clamp_op->u8_minmax_params,
     };
     clamp_op->compute.type = xnn_parallelization_type_1d_tile_1d;
     clamp_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
@@ -227,7 +227,7 @@ enum xnn_status xnn_setup_clamp_nc_u8(
       .y = output,
       .y_stride = output_stride * sizeof(uint8_t),
       .ukernel = xnn_params.u8.clamp,
-      .params.u8_output = clamp_op->u8_output_params,
+      .params.u8_output = clamp_op->u8_minmax_params,
     };
     clamp_op->compute.type = xnn_parallelization_type_1d_tile_1d;
     clamp_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_strided;
@@ -273,7 +273,7 @@ enum xnn_status xnn_setup_clamp_nc_f32(
       .y = output,
       .y_stride = output_stride * sizeof(float),
       .ukernel = xnn_params.f32.clamp,
-      .params.f32_output = clamp_op->f32_output_params,
+      .params.f32_output = clamp_op->f32_minmax_params,
     };
     clamp_op->compute.type = xnn_parallelization_type_1d_tile_1d;
     clamp_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
@@ -287,7 +287,7 @@ enum xnn_status xnn_setup_clamp_nc_f32(
       .y = output,
       .y_stride = output_stride * sizeof(float),
       .ukernel = xnn_params.f32.clamp,
-      .params.f32_output = clamp_op->f32_output_params,
+      .params.f32_output = clamp_op->f32_minmax_params,
     };
     clamp_op->compute.type = xnn_parallelization_type_1d_tile_1d;
     clamp_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_strided;

@@ -304,7 +304,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   fully_connected_op->input_pixel_stride = input_stride;
   fully_connected_op->output_pixel_stride = output_stride;
 
-  fully_connected_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
+  fully_connected_op->f32_minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
 
   fully_connected_op->type = xnn_operator_type_fully_connected_nc_f32;
 
@@ -450,6 +450,6 @@ enum xnn_status xnn_setup_fully_connected_nc_f32(
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
-    &fully_connected_op->f32_output_params,
+    &fully_connected_op->f32_minmax_params,
     pthreadpool_get_threads_count(threadpool));
 }

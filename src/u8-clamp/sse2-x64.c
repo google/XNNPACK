@@ -17,7 +17,7 @@ void xnn_u8_clamp_ukernel__sse2_x64(
     size_t n,
     const uint8_t* x,
     uint8_t* y,
-    const union xnn_u8_output_params params[restrict static 1])
+    const union xnn_u8_minmax_params params[restrict static 1])
 {
   assert(n != 0);
 

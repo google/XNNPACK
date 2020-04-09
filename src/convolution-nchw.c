@@ -452,7 +452,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   if (ukernel_type == xnn_ukernel_type_dwconv) {
     convolution_op->f32_spchw_params = xnn_init_f32_spchw_params(0, output_min, output_max);
   } else {
-    convolution_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
+    convolution_op->f32_minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
   }
 
   convolution_op->type = xnn_operator_type_convolution_nchw_f32;
@@ -481,7 +481,7 @@ static enum xnn_status setup_convolution2d_nchw(
   uint32_t log2_filter_element_size,
   uint32_t bias_element_size,
   uint32_t log2_output_element_size,
-  const void* output_params,
+  const void* minmax_params,
   const void* spchw_params,
   size_t num_threads)
 {
@@ -586,7 +586,7 @@ static enum xnn_status setup_convolution2d_nchw(
           .batched_c_stride = output_batch_stride << log2_output_element_size,
           .ukernel = convolution_op->ukernel.spmm.function,
       };
-      memcpy(&convolution_op->context.spmm.params, output_params, sizeof(convolution_op->context.spmm.params));
+      memcpy(&convolution_op->context.spmm.params, minmax_params, sizeof(convolution_op->context.spmm.params));
 
       const size_t mr = convolution_op->ukernel.spmm.mr;
       size_t mc = input_size;
@@ -632,7 +632,7 @@ static enum xnn_status setup_convolution2d_nchw(
         .output_channel_stride = output_height * output_width << log2_output_element_size,
         .hwc2spchw_ukernel = convolution_op->ukernel.dconv2d.hwc2spchw_function,
       };
-      memcpy(&convolution_op->context.dconv2d.params, output_params, sizeof(convolution_op->context.dconv2d.params));
+      memcpy(&convolution_op->context.dconv2d.params, minmax_params, sizeof(convolution_op->context.dconv2d.params));
 
       size_t output_height_slice = output_height;
       const size_t output_height_tile = convolution_op->ukernel.dconv2d.output_height_tile;
@@ -714,7 +714,7 @@ enum xnn_status xnn_setup_convolution2d_nchw_f32(
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
-    &convolution_op->f32_output_params,
+    &convolution_op->f32_minmax_params,
     &convolution_op->f32_spchw_params,
     pthreadpool_get_threads_count(threadpool));
 }

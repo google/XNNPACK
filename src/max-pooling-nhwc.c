@@ -167,7 +167,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
   max_pooling_op->input_pixel_stride = input_pixel_stride;
   max_pooling_op->output_pixel_stride = output_pixel_stride;
 
-  max_pooling_op->u8_output_params = xnn_init_u8_output_params(output_min, output_max);
+  max_pooling_op->u8_minmax_params = xnn_init_u8_minmax_params(output_min, output_max);
 
   max_pooling_op->type = xnn_operator_type_max_pooling_nhwc_u8;
   max_pooling_op->ukernel.type = xnn_ukernel_type_max_pooling;
@@ -320,7 +320,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
   max_pooling_op->input_pixel_stride = input_pixel_stride;
   max_pooling_op->output_pixel_stride = output_pixel_stride;
 
-  max_pooling_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
+  max_pooling_op->f32_minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
 
   max_pooling_op->type = xnn_operator_type_max_pooling_nhwc_f32;
   max_pooling_op->ukernel.type = xnn_ukernel_type_max_pooling;
@@ -487,7 +487,7 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_u8(
     0 /* log2(sizeof(input element)) = log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
     &xnn_params.u8.maxpool,
-    &max_pooling_op->u8_output_params,
+    &max_pooling_op->u8_minmax_params,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -512,7 +512,7 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f32(
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
     &xnn_params.f32.maxpool,
-    &max_pooling_op->f32_output_params,
+    &max_pooling_op->f32_minmax_params,
     pthreadpool_get_threads_count(threadpool));
 }
 

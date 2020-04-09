@@ -26,7 +26,7 @@ extern "C" {
       float* c,                                    \
       size_t cm_stride,                            \
       size_t cn_stride,                            \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_PPMM_UKERNEL_FUNCTION(xnn_f32_ppmm_ukernel_2x4__scalar)
 DECLARE_F32_PPMM_UKERNEL_FUNCTION(xnn_f32_ppmm_ukernel_3x3__scalar)

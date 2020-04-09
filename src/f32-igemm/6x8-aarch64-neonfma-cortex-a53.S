@@ -17,7 +17,7 @@
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const float* zero,                 [sp + 16] -> x12
-#     const xnn_f32_output_params params [sp + 24] -> x8
+#     const xnn_f32_minmax_params params [sp + 24] -> x8
 
 # d8-d15 need to be preserved if used.
 # x19-30 need to be preserved if used.
@@ -88,7 +88,7 @@ BEGIN_FUNCTION xnn_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
         # Load zero, clamping params pointer
         LDP x12, x8, [sp, 16]
 
-        # Load clamping_params values
+        # Load min/max values
         LD2R {v6.4s, v7.4s}, [x8]
 
         // Save x19-x23, d12-d15 on stack

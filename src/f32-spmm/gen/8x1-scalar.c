@@ -21,7 +21,7 @@ void xnn_f32_spmm_ukernel_8x1__scalar(
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
     float*restrict c,
-    const union xnn_f32_output_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict static 1])
 {
   assert(m != 0);
 

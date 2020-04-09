@@ -21,7 +21,7 @@ struct xnn_f16_output_params {
   uint16_t max;
 };
 
-union xnn_f32_output_params {
+union xnn_f32_minmax_params {
   struct {
     float min;
     float max;
@@ -59,7 +59,7 @@ union xnn_f32_spchw_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_u8_output_params {
+union xnn_u8_minmax_params {
   struct {
     int32_t min;
     int32_t max;
@@ -376,7 +376,7 @@ typedef void (*xnn_f32_ppmm_ukernel_function)(
     float* c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_f16_ppmm_ukernel_function)(
     size_t mr,
@@ -411,7 +411,7 @@ typedef void (*xnn_f32_gemm_ukernel_function)(
     float* c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_f32_gemminc_ukernel_function)(
     size_t mr,
@@ -424,7 +424,7 @@ typedef void (*xnn_f32_gemminc_ukernel_function)(
     size_t cm_stride,
     size_t cn_stride,
     const float* acc,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_f16_gemm_ukernel_function)(
     size_t mr,
@@ -476,7 +476,7 @@ typedef void (*xnn_f32_igemm_ukernel_function)(
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_q8_igemm_ukernel_function)(
     size_t mr,
@@ -520,7 +520,7 @@ typedef void (*xnn_f32_conv_hwc_ukernel_function)(
     size_t output_channels,
     size_t output_height_stride,
     size_t output_width_stride,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_conv_hwc2spchw_ukernel_function)(
     size_t input_height,
@@ -550,7 +550,7 @@ typedef void (*xnn_f32_conv_hwc2spchw_ukernel_function)(
     size_t output_channels,
     size_t output_height_stride,
     size_t output_channel_stride,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_spmm_ukernel_function)(
     uint32_t m,
@@ -580,7 +580,7 @@ typedef void (*xnn_f32_spmm_ukernel_function)(
     const int32_t* dmap,
     const uint32_t* nmap,
     float* c,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_packx_ukernel_function)(
     size_t m,
@@ -704,7 +704,7 @@ typedef void (*xnn_f32_dwconv_up_ukernel_function)(
     float* output,
     size_t input_stride,
     size_t output_increment,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_q8_dwconv_up_ukernel_function)(
     size_t channels,
@@ -915,7 +915,7 @@ typedef void (*xnn_f32_pavgpool_up_ukernel_function)(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_pavgpool_mp_ukernel_function)(
     size_t output_pixels,
@@ -943,7 +943,7 @@ typedef void (*xnn_f32_pavgpool_mp_ukernel_function)(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_maxpool_ukernel_function)(
     size_t output_pixels,
@@ -965,7 +965,7 @@ typedef void (*xnn_f32_maxpool_ukernel_function)(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_u8_maxpool_ukernel_function)(
     size_t output_pixels,
@@ -976,7 +976,7 @@ typedef void (*xnn_u8_maxpool_ukernel_function)(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_u8_output_params* params);
+    const union xnn_u8_minmax_params* params);
 
 typedef void (*xnn_argmaxpool_up_ukernel_function)(
     size_t output_pixels,
@@ -1000,7 +1000,7 @@ typedef void (*xnn_f32_argmaxpool_up_ukernel_function)(
     uint32_t* index,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_argmaxpool_mp_ukernel_function)(
     size_t output_pixels,
@@ -1028,7 +1028,7 @@ typedef void (*xnn_f32_argmaxpool_mp_ukernel_function)(
     uint32_t* index,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_univector_ukernel_function)(
     size_t n,
@@ -1040,13 +1040,13 @@ typedef void (*xnn_f32_clamp_ukernel_function)(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_u8_clamp_ukernel_function)(
     size_t n,
     const uint8_t* x,
     uint8_t* y,
-    const union xnn_u8_output_params* params);
+    const union xnn_u8_minmax_params* params);
 
 typedef void (*xnn_f32_hswish_ukernel_function)(
     size_t n,
@@ -1087,7 +1087,7 @@ typedef void (*xnn_f32_vadd_ukernel_function)(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_q8_vadd_ukernel_function)(
     size_t n,
@@ -1108,7 +1108,7 @@ typedef void (*xnn_f32_vbinary_ukernel_function)(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_vunary_ukernel_function)(
     size_t n,
@@ -1140,7 +1140,7 @@ typedef void (*xnn_f32_vmulcaddc_ukernel_function)(
     const float* w,
     float* y,
     size_t y_stride,
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_prelu_ukernel_function)(
     size_t mr,

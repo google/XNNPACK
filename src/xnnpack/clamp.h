@@ -24,7 +24,7 @@ extern "C" {
       size_t n,                                       \
       const float* x,                                 \
       float* y,                                       \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__neon_x4)
 DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__neon_x8)
@@ -49,7 +49,7 @@ DECLARE_F32_CLAMP_UKERNEL_FUNCTION(xnn_f32_clamp_ukernel__scalar_x4)
       size_t n,                                    \
       const uint8_t* x,                            \
       uint8_t* y,                                  \
-      const union xnn_u8_output_params* params);
+      const union xnn_u8_minmax_params* params);
 
 DECLARE_U8_CLAMP_UKERNEL_FUNCTION(xnn_u8_clamp_ukernel__neon_x64)
 DECLARE_U8_CLAMP_UKERNEL_FUNCTION(xnn_u8_clamp_ukernel__sse2_x64)

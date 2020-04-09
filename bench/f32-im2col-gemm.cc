@@ -86,8 +86,8 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
-  xnn_f32_output_params output_params =
-    xnn_init_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+  xnn_f32_minmax_params minmax_params =
+    xnn_init_f32_minmax_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -119,7 +119,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
           inputData + m * kernel_size * group_input_channels, kernel_size * group_input_channels * sizeof(float),
           w.data() + (buffer_index * nc_stride + n) * (kernel_size * kc_stride + 1),
           c.data() + (buffer_index * output_size + m) * group_output_channels + n, group_output_channels * sizeof(float), nr * sizeof(float),
-          &output_params);
+          &minmax_params);
       }
     }
   }

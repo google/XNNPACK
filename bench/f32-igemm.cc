@@ -121,8 +121,8 @@ static void IGEMMBenchmark(benchmark::State& state,
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
-  xnn_f32_output_params output_params =
-    xnn_init_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+  xnn_f32_minmax_params minmax_params =
+    xnn_init_f32_minmax_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -140,7 +140,7 @@ static void IGEMMBenchmark(benchmark::State& state,
           i.data() + buffer_index * i_elements + m,
           w.data() + buffer_index * w_elements + n * (kc_stride * kernel_size + 1),
           c.data() + buffer_index * c_elements + m * group_output_channels + n, group_output_channels * sizeof(float), nr * sizeof(float),
-          0, z.data(), &output_params);
+          0, z.data(), &minmax_params);
       }
     }
   }

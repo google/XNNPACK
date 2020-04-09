@@ -18,7 +18,7 @@ void xnn_f32_maxpool_ukernel_9p8x__scalar_c1(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_output_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict static 1])
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);

@@ -275,7 +275,7 @@ enum xnn_status xnn_setup_softmax_nc_f32(
     .rmax_ukernel = xnn_params.f32.rmax,
     .raddstoreexpminusmax_ukernel = xnn_params.f32.raddstoreexpminusmax,
     .vmulc_ukernel = xnn_params.f32.vmul.opc_ukernel,
-    .params = xnn_init_f32_output_params(-INFINITY, INFINITY),
+    .params = xnn_init_f32_minmax_params(-INFINITY, INFINITY),
   };
   softmax_op->compute.type = xnn_parallelization_type_1d;
   softmax_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_f32_three_pass_softmax;

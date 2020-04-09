@@ -20,7 +20,7 @@
 #     size_t cm_stride,         (x7) - unused
 #     size_t cn_stride,         [sp] -> x14
 #     const float*restrict acc,  [sp + 8] -> x15
-#     const union xnn_f32_output_params params[restrict static 1])  [sp + 16] -> x8
+#     const union xnn_f32_minmax_params params[restrict static 1])  [sp + 16] -> x8
 
 # d8-d15 need to be preserved if used.
 # x19-30 need to be preserved if used.
@@ -40,7 +40,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_1x8__aarch64_neonfma_cortex_a57
         # Load params pointer
         LDR x8, [sp, 16]
 
-        # Load clamping_params values
+        # Load min/max values
         LD2R {v4.4s, v5.4s}, [x8]
 0:
         # Load initial accumulators

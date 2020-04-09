@@ -61,7 +61,7 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     goto error;
   }
 
-  binary_elementwise_op->f32_output_params = xnn_init_f32_output_params(output_min, output_max);
+  binary_elementwise_op->f32_minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
 
   binary_elementwise_op->type = operator_type;
   binary_elementwise_op->ukernel.type = xnn_ukernel_type_binary_elementwise;
@@ -260,7 +260,7 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
     .b = input2,
     .y = output,
     .elements = compressed_output_shape[0] * sizeof(float),
-    .params.f32 = binary_elementwise_op->f32_output_params,
+    .params.f32 = binary_elementwise_op->f32_minmax_params,
   };
   const size_t* compressed_a_shape = compressed_input1_shape;
   const size_t* compressed_b_shape = compressed_input2_shape;

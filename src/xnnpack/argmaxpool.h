@@ -27,7 +27,7 @@ extern "C" {
       uint32_t* index,                                           \
       size_t input_increment,                                    \
       size_t output_increment,                                   \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__psimd_c4)
 DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__sse2_c4)
@@ -51,7 +51,7 @@ DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__s
       uint32_t* index,                                             \
       size_t input_increment,                                      \
       size_t output_increment,                                     \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__psimd_c4)
 DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4)

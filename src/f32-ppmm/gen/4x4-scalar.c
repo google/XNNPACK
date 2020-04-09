@@ -22,7 +22,7 @@ void xnn_f32_ppmm_ukernel_4x4__scalar(
   float*restrict c,
   size_t cm_stride,
   size_t cn_stride,
-  const union xnn_f32_output_params params[restrict static 1])
+  const union xnn_f32_minmax_params params[restrict static 1])
 {
   assert(mr != 0);
   assert(mr <= 4);

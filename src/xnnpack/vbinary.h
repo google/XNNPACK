@@ -25,7 +25,7 @@ extern "C" {
       const float* a,                                \
       const float* b,                                \
       float* y,                                      \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vadd_ukernel__neon_x4)
 DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vadd_ukernel__neon_x8)

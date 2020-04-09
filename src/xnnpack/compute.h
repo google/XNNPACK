@@ -70,7 +70,7 @@ struct gemm_context {
   struct xnn_hmp_gemm_ukernel ukernel;
   union {
     union xnn_q8_gemm_params q8;
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
 };
 
@@ -135,7 +135,7 @@ struct spmm_context {
   xnn_spmm_ukernel_function ukernel;
   // Output activation parameters.
   union {
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
 };
 
@@ -168,7 +168,7 @@ struct igemm_context {
   struct xnn_hmp_igemm_ukernel ukernel;
   union {
     union xnn_q8_gemm_params q8;
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
 };
 
@@ -230,7 +230,7 @@ struct subgemm_context {
   struct xnn_hmp_gemm_ukernel ukernel;
   union {
     union xnn_q8_gemm_params q8;
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
 };
 
@@ -274,7 +274,7 @@ struct subconv_context {
   struct xnn_hmp_igemm_ukernel ukernel;
   union {
     union xnn_q8_gemm_params q8;
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
 };
 
@@ -318,7 +318,7 @@ struct dconv2d_context {
     xnn_conv_hwc2spchw_ukernel_function hwc2spchw_ukernel;
   };
   union {
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
 };
 
@@ -342,7 +342,7 @@ struct dwconv_context {
   size_t output_col_increment;
   union {
     union xnn_q8_gemm_params q8;
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
   union {
     xnn_dwconv_up_ukernel_function unipass_ukernel;
@@ -399,8 +399,8 @@ struct max_pooling_context {
   size_t input_increment;
   size_t output_increment;
   union {
-    union xnn_u8_output_params u8;
-    union xnn_f32_output_params f32;
+    union xnn_u8_minmax_params u8;
+    union xnn_f32_minmax_params f32;
   } params;
   xnn_maxpool_ukernel_function ukernel;
 };
@@ -452,7 +452,7 @@ struct argmax_pooling_context {
   size_t input_increment;
   size_t output_increment;
   union {
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
   union {
     xnn_argmaxpool_up_ukernel_function unipass_ukernel;
@@ -525,8 +525,8 @@ struct pixelwise_average_pooling_context {
   size_t input_increment;
   size_t output_increment;
   union {
-    union xnn_u8_output_params u8;
-    union xnn_f32_output_params f32;
+    union xnn_u8_minmax_params u8;
+    union xnn_f32_minmax_params f32;
   } params;
   union {
     xnn_pavgpool_up_ukernel_function unipass_ukernel;
@@ -638,7 +638,7 @@ struct add_strided_context {
   size_t y_stride;
   union {
     union xnn_q8_add_params q8;
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
   xnn_vadd_ukernel_function ukernel;
 };
@@ -656,7 +656,7 @@ struct add_contiguous_context {
   void* y;
   union {
     union xnn_q8_add_params q8;
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
   xnn_vadd_ukernel_function ukernel;
 };
@@ -678,7 +678,7 @@ struct elementwise_binary_context {
   size_t elements;
   union {
     union xnn_q8_add_params q8;
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
   xnn_vbinary_ukernel_function ukernel;
 };
@@ -752,8 +752,8 @@ struct univector_strided_context {
   size_t y_stride;
   xnn_univector_ukernel_function ukernel;
   union {
-    union xnn_u8_output_params u8_output;
-    union xnn_f32_output_params f32_output;
+    union xnn_u8_minmax_params u8_output;
+    union xnn_f32_minmax_params f32_output;
     union xnn_f32_hswish_params f32_hswish;
   } params;
 };
@@ -772,8 +772,8 @@ struct univector_contiguous_context {
   size_t y_stride;
   xnn_univector_ukernel_function ukernel;
   union {
-    union xnn_u8_output_params u8_output;
-    union xnn_f32_output_params f32_output;
+    union xnn_u8_minmax_params u8_output;
+    union xnn_f32_minmax_params f32_output;
     union xnn_f32_hswish_params f32_hswish;
   } params;
 };
@@ -811,7 +811,7 @@ struct vmulcaddc_context {
   size_t y_stride;
   xnn_vmulcaddc_ukernel_function ukernel;
   union {
-    union xnn_f32_output_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
 };
 
@@ -867,7 +867,7 @@ struct f32_three_pass_softmax_context {
   xnn_f32_rmax_ukernel_function rmax_ukernel;
   xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax_ukernel;
   xnn_vbinary_ukernel_function vmulc_ukernel;
-  union xnn_f32_output_params params;
+  union xnn_f32_minmax_params params;
 };
 
 #ifndef __cplusplus

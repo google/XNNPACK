@@ -20,7 +20,7 @@
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> (x0)
 #     const float*restrict acc,  [sp + 8] -> x15
-#     const union xnn_f32_output_params params[restrict static 1])  [sp + 16] -> x8
+#     const union xnn_f32_minmax_params params[restrict static 1])  [sp + 16] -> x8
 
 # d8-d15 need to be preserved if used.
 # x19-30 need to be preserved if used.
@@ -377,7 +377,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ios
         FMLA v21.4s, v19.4s,  v6.s[3]
         FMLA v23.4s, v19.4s,  v7.s[3]
 
-        # Load clamping_params values
+        # Load min/max values
         LD2R {v6.4s, v7.4s}, [x8]
 
         FMLA v25.4s, v19.4s,  v8.s[3]
@@ -450,7 +450,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_ukernel_6x8__aarch64_neonfma_ios
         RET
 
 4:
-        # Load clamping_params values
+        # Load min/max values
         LD2R {v6.4s, v7.4s}, [x8]
 
         # Is there a remainder?- 4 floats of A (16 bytes)

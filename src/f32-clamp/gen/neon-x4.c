@@ -19,7 +19,7 @@ void xnn_f32_clamp_ukernel__neon_x4(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_output_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict static 1])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

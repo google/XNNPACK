@@ -361,13 +361,13 @@ public:
       }
 
       // Prepare output parameters.
-      xnn_f32_output_params output_params = { };
+      xnn_f32_minmax_params minmax_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_init_f32_output_params(output_min, output_max);
+          minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_init_scalar_f32_output_params(output_min, output_max);
+          minmax_params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
           break;
       }
 
@@ -379,7 +379,7 @@ public:
         padding_top(), output_channels(),
         output_pixel_stride() * output_width() * sizeof(float),
         output_pixel_stride() * sizeof(float),
-        &output_params);
+        &minmax_params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

@@ -17,7 +17,7 @@
 //     uint8_t*restrict c,       sp + 104 -> r11
 //     size_t cm_stride,         sp + 108 -> (r6)
 //     size_t cn_stride,         sp + 112 -> (r0)
-//     output_params*params,     sp + 116 -> (r5)
+//     minmax_params*params,     sp + 116 -> (r5)
 
 // inner loop registers
 // r14 (lr) unused
@@ -282,10 +282,10 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55
 4:
         // Load params pointer
         LDR          r0, [sp, 112]   // cn_stride
-        LDR          r5, [sp, 116]   // clamping_params
+        LDR          r5, [sp, 116]   // params
         SUBS         r1, r1, 8
 
-        // Load clamping_params values
+        // Load min/max values
         VLD1.32     {d4[],d5[]}, [r5]!
         VLD1.32     {d6[],d7[]}, [r5]
 

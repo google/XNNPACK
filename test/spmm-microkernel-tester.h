@@ -257,19 +257,19 @@ class SpMMMicrokernelTester {
       }
 
       // Prepare output parameters.
-      xnn_f32_output_params output_params = { };
+      xnn_f32_minmax_params minmax_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_init_f32_output_params(c_min, c_max);
+          minmax_params = xnn_init_f32_minmax_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_init_scalar_f32_output_params(c_min, c_max);
+          minmax_params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
       }
 
       spmm(m(), n(),
         a.data() + first_kk * m(), w.data(), dmap.data(), nmap.data(), c.data(),
-        &output_params);
+        &minmax_params);
 
       // Validate micro-kernel outputs.
       for (size_t pxb = 0; pxb < n(); pxb++) {

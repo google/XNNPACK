@@ -27,7 +27,7 @@ extern "C" {
     float* output,                                           \
     size_t input_stride,                                     \
     size_t output_increment,                                 \
-    const union xnn_f32_output_params* params);
+    const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x4__psimd)
 DECLARE_F32_DWCONV_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_up4x4__psimd_acc2)

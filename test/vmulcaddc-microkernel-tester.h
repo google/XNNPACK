@@ -162,13 +162,13 @@ class VMulCAddCMicrokernelTester {
       }
 
       // Prepare output parameters.
-      xnn_f32_output_params output_params = { };
+      xnn_f32_minmax_params minmax_params = { };
       switch (variant) {
         case Variant::Native:
-          output_params = xnn_init_f32_output_params(y_min, y_max);
+          minmax_params = xnn_init_f32_minmax_params(y_min, y_max);
           break;
         case Variant::Scalar:
-          output_params = xnn_init_scalar_f32_output_params(y_min, y_max);
+          minmax_params = xnn_init_scalar_f32_minmax_params(y_min, y_max);
           break;
       }
 
@@ -177,7 +177,7 @@ class VMulCAddCMicrokernelTester {
         x_data, input_stride() * sizeof(float),
         packed_w.data(),
         y.data(), output_stride() * sizeof(float),
-        &output_params);
+        &minmax_params);
 
       // Verify results.
       for (size_t i = 0; i < rows(); i++) {

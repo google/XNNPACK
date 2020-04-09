@@ -25,7 +25,7 @@ extern "C" {
       const float* w,                                   \
       float* y,                                         \
       size_t y_stride,                                  \
-      const union xnn_f32_output_params* params);
+      const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_VMULCADDC_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_ukernel_c4__neon_2x)
 DECLARE_F32_VMULCADDC_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_ukernel_c8__neon_2x)

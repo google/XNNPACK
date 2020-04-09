@@ -17,7 +17,7 @@
 //     uint8_t*restrict c,       sp + 104 -> r11
 //     size_t cm_stride,         sp + 108 -> (r6)
 //     size_t cn_stride,         sp + 112 -> r7
-//     const union xnn_f32_output_params params[restrict static 1])  sp + 116 -> (r7)
+//     const union xnn_f32_minmax_params params[restrict static 1])  sp + 116 -> (r7)
 
 
 // inner loop registers
@@ -51,7 +51,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
         LDR    r11, [sp, 104]        // c
         LDR     r6, [sp, 108]        // cm_stride
         LDR     r9, [sp, 100]        // w
-        LDR     r5, [sp, 116]        // clamping_params
+        LDR     r5, [sp, 116]        // params
 
         // Clamp A and C pointers
         CMP    r0, 2                 // if mr >= 2
@@ -71,7 +71,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x8__aarch32_neon_ld64
         MOVLO  r0, r10               // a3
         MOVLO  r6, r8                // c3
 
-        // Load clamping_params values
+        // Load min/max values
         VLD1.32     {d4[], d5[]}, [r5]!
         LDR         r7, [sp, 112]    // cn_stride
         VLD1.32     {d6[], d7[]}, [r5]

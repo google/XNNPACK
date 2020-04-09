@@ -76,8 +76,8 @@ static void GEMMBenchmark(benchmark::State& state,
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
-  xnn_f32_output_params output_params =
-    xnn_init_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+  xnn_f32_minmax_params minmax_params =
+    xnn_init_f32_minmax_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -97,7 +97,7 @@ static void GEMMBenchmark(benchmark::State& state,
         a.data() + m * kc, kc * sizeof(float),
         w.data() + buffer_index * nc_stride * (kc_stride + 1),
         c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float), nr * sizeof(float),
-        &output_params);
+        &minmax_params);
     }
   }
 
@@ -151,8 +151,8 @@ static void PPMM1PBenchmark(benchmark::State& state,
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
-  xnn_f32_output_params output_params =
-    xnn_init_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+  xnn_f32_minmax_params minmax_params =
+    xnn_init_f32_minmax_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -173,7 +173,7 @@ static void PPMM1PBenchmark(benchmark::State& state,
         reinterpret_cast<const float*>(t.data()),
         w.data() + nc_stride * buffer_index * (kc + 1),
         c.data() + (mc * buffer_index + m) * nc, nc * sizeof(float), nr * sizeof(float),
-        &output_params);
+        &minmax_params);
     }
   }
 
@@ -228,8 +228,8 @@ static void PPMM2PBenchmark(benchmark::State& state,
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
-  xnn_f32_output_params output_params =
-    xnn_init_f32_output_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+  xnn_f32_minmax_params minmax_params =
+    xnn_init_f32_minmax_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -253,7 +253,7 @@ static void PPMM2PBenchmark(benchmark::State& state,
         reinterpret_cast<const float*>(t.data() + m * kc),
         w.data() + nc_stride * buffer_index * (kc + 1),
         c.data() + (mc * buffer_index + m) * nc, nc * sizeof(float), nr * sizeof(float),
-        &output_params);
+        &minmax_params);
     }
   }
 
