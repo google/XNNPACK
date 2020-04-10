@@ -1293,6 +1293,7 @@ struct gemm_fused_ukernels {
 
 struct gemm_parameters {
   struct gemm_fused_ukernels minmax;
+  struct gemm_fused_ukernels linear;
   uint8_t mr;
   uint8_t nr;
   uint8_t log2_kr;
@@ -1355,6 +1356,7 @@ union dwconv_fused_ukernels {
 
 struct dwconv_parameters {
   union dwconv_fused_ukernels minmax;
+  union dwconv_fused_ukernels linear;
   uint8_t channel_tile;
   uint8_t primary_tile;
   uint8_t incremental_tile;

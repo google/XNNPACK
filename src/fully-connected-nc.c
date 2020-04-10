@@ -308,10 +308,16 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
 
   fully_connected_op->type = xnn_operator_type_fully_connected_nc_f32;
 
+  const struct gemm_fused_ukernels* ukernels = &xnn_params.f32.gemm.minmax;
+  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
+  if (linear_activation && xnn_params.f32.gemm.linear.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
+    ukernels = &xnn_params.f32.gemm.linear;
+  }
+
   fully_connected_op->ukernel.type = xnn_ukernel_type_gemm;
   fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
-    .general_case = xnn_params.f32.gemm.minmax.gemm,
-    .mr1_case = xnn_params.f32.gemm.minmax.gemm1,
+    .general_case = ukernels->gemm,
+    .mr1_case = ukernels->gemm1,
     .mr = xnn_params.f32.gemm.mr,
     .nr = nr,
     .kr = kr,

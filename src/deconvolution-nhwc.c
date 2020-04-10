@@ -427,23 +427,24 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     goto error;
   }
 
-  uint32_t mr = xnn_params.f32.gemm.mr;
-  uint32_t nr = xnn_params.f32.gemm.nr;
-  uint32_t kr = UINT32_C(1) << xnn_params.f32.gemm.log2_kr;
-  uint32_t sr = UINT32_C(1) << xnn_params.f32.gemm.log2_sr;
-  struct xnn_hmp_igemm_ukernel igemm_ukernel = xnn_params.f32.gemm.minmax.igemm;
-  struct xnn_hmp_gemm_ukernel gemm_ukernel = xnn_params.f32.gemm.minmax.gemm;
-  if (nr > group_output_channels) {
+  const struct gemm_parameters* gemm_params = &xnn_params.f32.gemm;
+  if (gemm_params->nr > group_output_channels) {
     // Default micro-kernel is suboptimal. Try to find a better micro-kernel.
     if (xnn_params.f32.gemm2.minmax.igemm.function[XNN_UARCH_DEFAULT] != NULL) {
-      mr = xnn_params.f32.gemm2.mr;
-      nr = xnn_params.f32.gemm2.nr;
-      kr = UINT32_C(1) << xnn_params.f32.gemm2.log2_kr;
-      sr = UINT32_C(1) << xnn_params.f32.gemm2.log2_sr;
-      igemm_ukernel = xnn_params.f32.gemm2.minmax.igemm;
-      gemm_ukernel = xnn_params.f32.gemm2.minmax.gemm;
+      gemm_params = &xnn_params.f32.gemm2;
     }
   }
+  const uint32_t mr = gemm_params->mr;
+  const uint32_t nr = gemm_params->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_params->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_params->log2_sr;
+  const struct gemm_fused_ukernels* ukernels = &gemm_params->minmax;
+  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
+  if (linear_activation && gemm_params->linear.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
+    ukernels = &gemm_params->linear;
+  }
+  struct xnn_hmp_igemm_ukernel igemm_ukernel = ukernels->igemm;
+  struct xnn_hmp_gemm_ukernel gemm_ukernel = ukernels->gemm;
 
   const uint32_t n_stride = round_up(group_output_channels, nr);
   const uint32_t k_stride = round_up_po2(group_input_channels, kr);

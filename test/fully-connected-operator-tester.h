@@ -295,8 +295,10 @@ class FullyConnectedOperatorTester {
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
 
-      const float output_min = accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
-      const float output_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
+      const float output_min = qmin() == 0 ? -std::numeric_limits<float>::infinity() :
+        accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
+      const float output_max = qmax() == 255 ? std::numeric_limits<float>::infinity() :
+        accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
       // Clamp reference results.
       for (float& value : output_ref) {
