@@ -58,7 +58,7 @@
 # unused A   v8 v9 v10 v11
 # unused B   v12 v13 v14 v15
 
-# clamp v6, (v4), (v5)
+# Clamp v6, (v4), (v5)
 
 BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32
         # Clamp A and C pointers

@@ -5,6 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 ############################### AArch64 assembly ##############################
+tools/xngen src/f16-gemm/1x16-aarch64-neonfp16arith-ld32.S.in        -D INC=0 -o src/f16-gemm/gen/1x16-minmax-aarch64-neonfp16arith-ld32.S
+tools/xngen src/f16-gemm/1x16-aarch64-neonfp16arith-ld32.S.in        -D INC=1 -o src/f16-gemm/gen-inc/1x16inc-minmax-aarch64-neonfp16arith-ld32.S
+
 tools/xngen src/f16-gemm/4x16-aarch64-neonfp16arith-ld32.S.in        -D INC=0 -o src/f16-gemm/gen/4x16-minmax-aarch64-neonfp16arith-ld32.S
 tools/xngen src/f16-gemm/4x16-aarch64-neonfp16arith-ld32.S.in        -D INC=1 -o src/f16-gemm/gen-inc/4x16inc-minmax-aarch64-neonfp16arith-ld32.S
 

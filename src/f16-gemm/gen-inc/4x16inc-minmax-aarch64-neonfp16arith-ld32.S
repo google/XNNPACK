@@ -37,7 +37,7 @@
 # x10 c2
 # x7  c3 / cm_stride
 
-# clamp v4, v5, v6
+# Clamp v4, v5, v6
 
 BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         # Load cn_stride, acc
