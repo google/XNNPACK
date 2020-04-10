@@ -131,6 +131,64 @@ class VBinOpCMicrokernelTester {
             break;
         }
       }
+      // Call optimized micro-kernel.
+      vbinaryc(batch_size() * sizeof(float), a_data, &b, y.data(), nullptr);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(y[i], y_ref[i], std::abs(y_ref[i]) * 1.0e-6f)
+          << "at " << i << " / " << batch_size();
+      }
+    }
+  }
+
+  void Test(xnn_f32_vbinary_minmax_ukernel_function vbinaryc_minmax, OpType op_type, Variant variant = Variant::Native) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+
+    std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    const float b = f32rng();
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(a.begin(), a.end(), std::ref(f32rng));
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f32rng));
+      } else {
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* a_data = inplace() ? y.data() : a.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        switch (op_type) {
+          case OpType::AddC:
+            y_ref[i] = a_data[i] + b;
+            break;
+          case OpType::DivC:
+            y_ref[i] = a_data[i] / b;
+            break;
+          case OpType::RDivC:
+            y_ref[i] = b / a_data[i];
+            break;
+          case OpType::MaxC:
+            y_ref[i] = std::max<float>(a_data[i], b);
+            break;
+          case OpType::MinC:
+            y_ref[i] = std::min<float>(a_data[i], b);
+            break;
+          case OpType::MulC:
+            y_ref[i] = a_data[i] * b;
+            break;
+          case OpType::SubC:
+            y_ref[i] = a_data[i] - b;
+            break;
+          case OpType::RSubC:
+            y_ref[i] = b - a_data[i];
+            break;
+        }
+      }
       const float accumulated_min = *std::min_element(y_ref.cbegin(), y_ref.cend());
       const float accumulated_max = *std::max_element(y_ref.cbegin(), y_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
@@ -156,7 +214,7 @@ class VBinOpCMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      vbinaryc(batch_size() * sizeof(float), a_data, &b, y.data(), &minmax_params);
+      vbinaryc_minmax(batch_size() * sizeof(float), a_data, &b, y.data(), &minmax_params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

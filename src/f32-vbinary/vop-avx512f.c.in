@@ -7,6 +7,7 @@ $assert BATCH_TILE % 16 == 0
 $assert BATCH_TILE >= 16
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include <immintrin.h>
@@ -24,18 +25,21 @@ $  "MIN": lambda x, y: "_mm512_min_ps(%s, %s)" % (x, y),
 $  "MUL": lambda x, y: "_mm512_mul_ps(%s, %s)" % (x, y),
 $  "SUB": lambda x, y: "_mm512_sub_ps(%s, %s)" % (x, y),
 $}[OP]
-void xnn_f32_v${OP.lower()}_ukernel__avx512f_x${BATCH_TILE}(
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx512f_x${BATCH_TILE}(
     size_t n,
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union ${PARAMS} params[restrict static 1])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m512 vy_min = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
-  const __m512 vy_max = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));
+  $if ACTIVATION == "MINMAX":
+    const __m512 vy_min = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
+    const __m512 vy_max = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));
 
   for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
     const __m512 va${ABC[0:16]} = _mm512_loadu_ps(a);
@@ -51,11 +55,12 @@ void xnn_f32_v${OP.lower()}_ukernel__avx512f_x${BATCH_TILE}(
     $for N in range(0, BATCH_TILE, 16):
       __m512 vy${ABC[N:N+16]} = ${_MM512_OP_PS("va" + ABC[N:N+16], "vb" + ABC[N:N+16])};
 
-    $for N in range(0, BATCH_TILE, 16):
-      vy${ABC[N:N+16]} = _mm512_max_ps(vy${ABC[N:N+16]}, vy_min);
+    $if ACTIVATION == "MINMAX":
+      $for N in range(0, BATCH_TILE, 16):
+        vy${ABC[N:N+16]} = _mm512_max_ps(vy${ABC[N:N+16]}, vy_min);
 
-    $for N in range(0, BATCH_TILE, 16):
-      vy${ABC[N:N+16]} = _mm512_min_ps(vy${ABC[N:N+16]}, vy_max);
+      $for N in range(0, BATCH_TILE, 16):
+        vy${ABC[N:N+16]} = _mm512_min_ps(vy${ABC[N:N+16]}, vy_max);
 
     _mm512_storeu_ps(y, vy${ABC[0:16]});
     $for N in range(16, BATCH_TILE, 16):
@@ -71,8 +76,9 @@ void xnn_f32_v${OP.lower()}_ukernel__avx512f_x${BATCH_TILE}(
       b += 16;
 
       __m512 vy = ${_MM512_OP_PS("va", "vb")};
-      vy = _mm512_max_ps(vy, vy_min);
-      vy = _mm512_min_ps(vy, vy_max);
+      $if ACTIVATION == "MINMAX":
+        vy = _mm512_max_ps(vy, vy_min);
+        vy = _mm512_min_ps(vy, vy_max);
       _mm512_storeu_ps(y, vy);
       y += 16;
     }
@@ -87,8 +93,9 @@ void xnn_f32_v${OP.lower()}_ukernel__avx512f_x${BATCH_TILE}(
     const __m512 vb = _mm512_maskz_loadu_ps(vmask, b);
 
     __m512 vy = ${_MM512_OP_PS("va", "vb")};
-    vy = _mm512_max_ps(vy, vy_min);
-    vy = _mm512_min_ps(vy, vy_max);
+    $if ACTIVATION == "MINMAX":
+      vy = _mm512_max_ps(vy, vy_min);
+      vy = _mm512_min_ps(vy, vy_max);
     _mm512_mask_storeu_ps(y, vmask, vy);
   }
 }

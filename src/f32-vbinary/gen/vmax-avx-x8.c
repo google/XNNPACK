@@ -22,13 +22,11 @@ void xnn_f32_vmax_ukernel__avx_x8(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_default_params params[restrict static 1])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m256 vy_min = _mm256_broadcast_ps((const __m128*) params->sse.min);
-  const __m256 vy_max = _mm256_broadcast_ps((const __m128*) params->sse.max);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const __m256 va01234567 = _mm256_loadu_ps(a);
@@ -39,9 +37,6 @@ void xnn_f32_vmax_ukernel__avx_x8(
 
     __m256 vy01234567 = _mm256_max_ps(va01234567, vb01234567);
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
 
     _mm256_storeu_ps(y, vy01234567);
     y += 8;
@@ -54,8 +49,6 @@ void xnn_f32_vmax_ukernel__avx_x8(
     b += 8;
 
     __m256 vy = _mm256_max_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
     _mm256_storeu_ps(y, vy);
     y += 8;
   }
@@ -68,8 +61,6 @@ void xnn_f32_vmax_ukernel__avx_x8(
     const __m256 vb = _mm256_maskload_ps(b, vmask);
 
     __m256 vy = _mm256_max_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
 
     // _mm256_maskstore_ps(y, vmask, vy) could be used here, but triggers msan failures (probably an msan bug).
     __m128 vy_lo = _mm256_castps256_ps128(vy);

@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_v(add|div|max|min|mul|sub|addc|divc|rdivc|maxc|minc|mulc|subc|rsubc)_ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_v(add|div|max|min|mul|sub|addc|divc|rdivc|maxc|minc|mulc|subc|rsubc)(_(minmax))?_ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
@@ -46,9 +46,9 @@ def split_ukernel_name(name):
     "subc": "SubC",
     "rsubc": "RSubC",
   }[match.group(2)]
-  batch_tile = int(match.group(4))
+  batch_tile = int(match.group(6))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(3))
+  arch, isa = xnncommon.parse_target_name(target_name=match.group(5))
   return op_type, batch_tile, arch, isa
 
 
@@ -204,7 +204,9 @@ def main(args):
     if not isinstance(spec_yaml, list):
       raise ValueError("expected a list of micro-kernels in the spec")
 
-    if os.path.splitext(options.spec)[0].endswith("c"):
+    spec_name = os.path.splitext(os.path.split(options.spec)[1])[0]
+    opname = spec_name.split("-")[1]
+    if opname.endswith("c"):
       header = "vbinaryc-microkernel-tester.h"
     else:
       header = "vbinary-microkernel-tester.h"

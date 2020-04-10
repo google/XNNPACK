@@ -19,20 +19,16 @@ void xnn_f32_vmaxc_ukernel__scalar_x1(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_default_params params[restrict static 1])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const float vy_min = params->scalar.min;
-  const float vy_max = params->scalar.max;
 
   const float vb = *b;
   for (; n >= sizeof(float); n -= sizeof(float)) {
     const float va = *a++;
     float vy = math_max_f32(va, vb);
-    vy = math_max_f32(vy, vy_min);
-    vy = math_min_f32(vy, vy_max);
     *y++ = vy;
   }
 }

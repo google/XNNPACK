@@ -1,0 +1,20 @@
+# Copyright 2019 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f32_vmulc_minmax_ukernel__neon_x4
+- name: xnn_f32_vmulc_minmax_ukernel__neon_x8
+- name: xnn_f32_vmulc_minmax_ukernel__sse_x4
+- name: xnn_f32_vmulc_minmax_ukernel__sse_x8
+- name: xnn_f32_vmulc_minmax_ukernel__avx_x8
+- name: xnn_f32_vmulc_minmax_ukernel__avx_x16
+- name: xnn_f32_vmulc_minmax_ukernel__avx512f_x16
+- name: xnn_f32_vmulc_minmax_ukernel__avx512f_x32
+- name: xnn_f32_vmulc_minmax_ukernel__psimd_x4
+- name: xnn_f32_vmulc_minmax_ukernel__psimd_x8
+- name: xnn_f32_vmulc_minmax_ukernel__wasm_x1
+- name: xnn_f32_vmulc_minmax_ukernel__wasm_x2
+- name: xnn_f32_vmulc_minmax_ukernel__wasm_x4
+- name: xnn_f32_vmulc_minmax_ukernel__scalar_x1
+- name: xnn_f32_vmulc_minmax_ukernel__scalar_x2
+- name: xnn_f32_vmulc_minmax_ukernel__scalar_x4

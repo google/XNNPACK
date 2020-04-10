@@ -20,13 +20,11 @@ void xnn_f32_vmin_ukernel__psimd_x4(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_default_params params[restrict static 1])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const psimd_f32 vy_min = psimd_load_splat_f32(&params->scalar.min);
-  const psimd_f32 vy_max = psimd_load_splat_f32(&params->scalar.max);
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const psimd_f32 va0123 = psimd_load_f32(a);
@@ -37,9 +35,6 @@ void xnn_f32_vmin_ukernel__psimd_x4(
 
     psimd_f32 vy0123 = psimd_min_f32(va0123, vb0123);
 
-    vy0123 = psimd_max_f32(vy0123, vy_min);
-
-    vy0123 = psimd_min_f32(vy0123, vy_max);
 
     psimd_store_f32(y, vy0123);
     y += 4;
@@ -52,8 +47,6 @@ void xnn_f32_vmin_ukernel__psimd_x4(
     b += 4;
 
     psimd_f32 vy0123 = psimd_min_f32(va0123, vb0123);
-    vy0123 = psimd_max_f32(vy0123, vy_min);
-    vy0123 = psimd_min_f32(vy0123, vy_max);
     psimd_store_f32(y, vy0123);
     y += 4;
   }
@@ -62,8 +55,6 @@ void xnn_f32_vmin_ukernel__psimd_x4(
     const psimd_f32 vb0123 = psimd_load_f32(b);
 
     psimd_f32 vy0123 = psimd_min_f32(va0123, vb0123);
-    vy0123 = psimd_max_f32(vy0123, vy_min);
-    vy0123 = psimd_min_f32(vy0123, vy_max);
     if (n & (2 * sizeof(float))) {
       psimd_store2_f32(y, vy0123);
       vy0123 = psimd_concat_hi_f32(vy0123, vy0123);

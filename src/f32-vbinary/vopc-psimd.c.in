@@ -7,6 +7,7 @@ $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include <psimd.h>
@@ -25,18 +26,21 @@ $  "MUL": lambda x: "psimd_mul_f32(%s, vb)" % x,
 $  "SUB": lambda x: "psimd_sub_f32(%s, vb)" % x,
 $  "RSUB": lambda x: "psimd_sub_f32(vb, %s)" % x,
 $}[OP]
-void xnn_f32_v${OP.lower()}c_ukernel__psimd_x${BATCH_TILE}(
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__psimd_x${BATCH_TILE}(
     size_t n,
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union ${PARAMS} params[restrict static 1])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const psimd_f32 vy_min = psimd_load_splat_f32(&params->scalar.min);
-  const psimd_f32 vy_max = psimd_load_splat_f32(&params->scalar.max);
+  $if ACTIVATION == "MINMAX":
+    const psimd_f32 vy_min = psimd_load_splat_f32(&params->scalar.min);
+    const psimd_f32 vy_max = psimd_load_splat_f32(&params->scalar.max);
 
   const psimd_f32 vb = psimd_load_splat_f32(b);
   for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
@@ -48,11 +52,12 @@ void xnn_f32_v${OP.lower()}c_ukernel__psimd_x${BATCH_TILE}(
     $for N in range(0, BATCH_TILE, 4):
       psimd_f32 vy${ABC[N:N+4]} = ${PSIMD_OP_F32("va" + ABC[N:N+4])};
 
-    $for N in range(0, BATCH_TILE, 4):
-      vy${ABC[N:N+4]} = psimd_max_f32(vy${ABC[N:N+4]}, vy_min);
+    $if ACTIVATION == "MINMAX":
+      $for N in range(0, BATCH_TILE, 4):
+        vy${ABC[N:N+4]} = psimd_max_f32(vy${ABC[N:N+4]}, vy_min);
 
-    $for N in range(0, BATCH_TILE, 4):
-      vy${ABC[N:N+4]} = psimd_min_f32(vy${ABC[N:N+4]}, vy_max);
+      $for N in range(0, BATCH_TILE, 4):
+        vy${ABC[N:N+4]} = psimd_min_f32(vy${ABC[N:N+4]}, vy_max);
 
     psimd_store_f32(y, vy${ABC[0:4]});
     $for N in range(4, BATCH_TILE, 4):
@@ -65,8 +70,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__psimd_x${BATCH_TILE}(
       a += 4;
 
       psimd_f32 vy0123 = ${PSIMD_OP_F32("va0123")};
-      vy0123 = psimd_max_f32(vy0123, vy_min);
-      vy0123 = psimd_min_f32(vy0123, vy_max);
+      $if ACTIVATION == "MINMAX":
+        vy0123 = psimd_max_f32(vy0123, vy_min);
+        vy0123 = psimd_min_f32(vy0123, vy_max);
       psimd_store_f32(y, vy0123);
       y += 4;
     }
@@ -74,8 +80,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__psimd_x${BATCH_TILE}(
     const psimd_f32 va0123 = psimd_load_f32(a);
 
     psimd_f32 vy0123 = ${PSIMD_OP_F32("va0123")};
-    vy0123 = psimd_max_f32(vy0123, vy_min);
-    vy0123 = psimd_min_f32(vy0123, vy_max);
+    $if ACTIVATION == "MINMAX":
+      vy0123 = psimd_max_f32(vy0123, vy_min);
+      vy0123 = psimd_min_f32(vy0123, vy_max);
     if (n & (2 * sizeof(float))) {
       psimd_store2_f32(y, vy0123);
       vy0123 = psimd_concat_hi_f32(vy0123, vy0123);

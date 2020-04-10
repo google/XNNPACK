@@ -19,13 +19,11 @@ void xnn_f32_vminc_ukernel__wasm_x2(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_default_params params[restrict static 1])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const float vy_min = params->scalar.min;
-  const float vy_max = params->scalar.max;
 
   const float vb = *b;
   for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
@@ -36,11 +34,6 @@ void xnn_f32_vminc_ukernel__wasm_x2(
     float vy0 = __builtin_wasm_min_f32(va0, vb);
     float vy1 = __builtin_wasm_min_f32(va1, vb);
 
-    vy0 = __builtin_wasm_max_f32(vy0, vy_min);
-    vy1 = __builtin_wasm_max_f32(vy1, vy_min);
-
-    vy0 = __builtin_wasm_min_f32(vy0, vy_max);
-    vy1 = __builtin_wasm_min_f32(vy1, vy_max);
 
     y[0] = vy0;
     y[1] = vy1;
@@ -49,8 +42,6 @@ void xnn_f32_vminc_ukernel__wasm_x2(
   if XNN_UNLIKELY(n != 0) {
     const float va = *a;
     float vy = __builtin_wasm_min_f32(va, vb);
-    vy = __builtin_wasm_max_f32(vy, vy_min);
-    vy = __builtin_wasm_min_f32(vy, vy_max);
     *y = vy;
   }
 }

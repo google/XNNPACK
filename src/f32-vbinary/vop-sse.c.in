@@ -7,6 +7,7 @@ $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include <xmmintrin.h>
@@ -23,18 +24,21 @@ $  "MIN": lambda x, y: "_mm_min_ps(%s, %s)" % (x, y),
 $  "MUL": lambda x, y: "_mm_mul_ps(%s, %s)" % (x, y),
 $  "SUB": lambda x, y: "_mm_sub_ps(%s, %s)" % (x, y),
 $}[OP]
-void xnn_f32_v${OP.lower()}_ukernel__sse_x${BATCH_TILE}(
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__sse_x${BATCH_TILE}(
     size_t n,
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union ${PARAMS} params[restrict static 1])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m128 vy_min = _mm_load_ps(params->sse.min);
-  const __m128 vy_max = _mm_load_ps(params->sse.max);
+  $if ACTIVATION == "MINMAX":
+    const __m128 vy_min = _mm_load_ps(params->sse.min);
+    const __m128 vy_max = _mm_load_ps(params->sse.max);
 
   for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
     const __m128 va${ABC[0:4]} = _mm_loadu_ps(a);
@@ -50,11 +54,12 @@ void xnn_f32_v${OP.lower()}_ukernel__sse_x${BATCH_TILE}(
     $for N in range(0, BATCH_TILE, 4):
       __m128 vy${ABC[N:N+4]} = ${_MM_OP_PS("va" + ABC[N:N+4], "vb" + ABC[N:N+4])};
 
-    $for N in range(0, BATCH_TILE, 4):
-      vy${ABC[N:N+4]} = _mm_max_ps(vy${ABC[N:N+4]}, vy_min);
+    $if ACTIVATION == "MINMAX":
+      $for N in range(0, BATCH_TILE, 4):
+        vy${ABC[N:N+4]} = _mm_max_ps(vy${ABC[N:N+4]}, vy_min);
 
-    $for N in range(0, BATCH_TILE, 4):
-      vy${ABC[N:N+4]} = _mm_min_ps(vy${ABC[N:N+4]}, vy_max);
+      $for N in range(0, BATCH_TILE, 4):
+        vy${ABC[N:N+4]} = _mm_min_ps(vy${ABC[N:N+4]}, vy_max);
 
     _mm_storeu_ps(y, vy${ABC[0:4]});
     $for N in range(4, BATCH_TILE, 4):
@@ -70,8 +75,9 @@ void xnn_f32_v${OP.lower()}_ukernel__sse_x${BATCH_TILE}(
       b += 4;
 
       __m128 vy0123 = ${_MM_OP_PS("va0123", "vb0123")};
-      vy0123 = _mm_max_ps(vy0123, vy_min);
-      vy0123 = _mm_min_ps(vy0123, vy_max);
+      $if ACTIVATION == "MINMAX":
+        vy0123 = _mm_max_ps(vy0123, vy_min);
+        vy0123 = _mm_min_ps(vy0123, vy_max);
       _mm_storeu_ps(y, vy0123);
       y += 4;
     }
@@ -80,8 +86,9 @@ void xnn_f32_v${OP.lower()}_ukernel__sse_x${BATCH_TILE}(
     const __m128 vb0123 = _mm_loadu_ps(b);
 
     __m128 vy0123 = ${_MM_OP_PS("va0123", "vb0123")};
-    vy0123 = _mm_max_ps(vy0123, vy_min);
-    vy0123 = _mm_min_ps(vy0123, vy_max);
+    $if ACTIVATION == "MINMAX":
+      vy0123 = _mm_max_ps(vy0123, vy_min);
+      vy0123 = _mm_min_ps(vy0123, vy_max);
     if (n & (2 * sizeof(float))) {
       _mm_storel_pi((__m64*) y, vy0123);
       vy0123 = _mm_movehl_ps(vy0123, vy0123);

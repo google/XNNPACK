@@ -7,6 +7,7 @@ $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include <immintrin.h>
@@ -27,18 +28,21 @@ $  "MUL": lambda x: "_mm256_mul_ps(%s, vb)" % x,
 $  "SUB": lambda x: "_mm256_sub_ps(%s, vb)" % x,
 $  "RSUB": lambda x: "_mm256_sub_ps(vb, %s)" % x,
 $}[OP]
-void xnn_f32_v${OP.lower()}c_ukernel__avx_x${BATCH_TILE}(
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx_x${BATCH_TILE}(
     size_t n,
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union ${PARAMS} params[restrict static 1])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m256 vy_min = _mm256_broadcast_ps((const __m128*) params->sse.min);
-  const __m256 vy_max = _mm256_broadcast_ps((const __m128*) params->sse.max);
+  $if ACTIVATION == "MINMAX":
+    const __m256 vy_min = _mm256_broadcast_ps((const __m128*) params->sse.min);
+    const __m256 vy_max = _mm256_broadcast_ps((const __m128*) params->sse.max);
 
   const __m256 vb = _mm256_broadcast_ss(b);
   for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
@@ -50,11 +54,12 @@ void xnn_f32_v${OP.lower()}c_ukernel__avx_x${BATCH_TILE}(
     $for N in range(0, BATCH_TILE, 8):
       __m256 vy${ABC[N:N+8]} = ${_MM256_OP_PS("va" + ABC[N:N+8])};
 
-    $for N in range(0, BATCH_TILE, 8):
-      vy${ABC[N:N+8]} = _mm256_max_ps(vy${ABC[N:N+8]}, vy_min);
+    $if ACTIVATION == "MINMAX":
+      $for N in range(0, BATCH_TILE, 8):
+        vy${ABC[N:N+8]} = _mm256_max_ps(vy${ABC[N:N+8]}, vy_min);
 
-    $for N in range(0, BATCH_TILE, 8):
-      vy${ABC[N:N+8]} = _mm256_min_ps(vy${ABC[N:N+8]}, vy_max);
+      $for N in range(0, BATCH_TILE, 8):
+        vy${ABC[N:N+8]} = _mm256_min_ps(vy${ABC[N:N+8]}, vy_max);
 
     _mm256_storeu_ps(y, vy${ABC[0:8]});
     $for N in range(8, BATCH_TILE, 8):
@@ -67,8 +72,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__avx_x${BATCH_TILE}(
       a += 8;
 
       __m256 vy = ${_MM256_OP_PS("va")};
-      vy = _mm256_max_ps(vy, vy_min);
-      vy = _mm256_min_ps(vy, vy_max);
+      $if ACTIVATION == "MINMAX":
+        vy = _mm256_max_ps(vy, vy_min);
+        vy = _mm256_min_ps(vy, vy_max);
       _mm256_storeu_ps(y, vy);
       y += 8;
     }
@@ -80,8 +86,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__avx_x${BATCH_TILE}(
     const __m256 va = _mm256_maskload_ps(a, vmask);
 
     __m256 vy = ${_MM256_OP_PS("va")};
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    $if ACTIVATION == "MINMAX":
+      vy = _mm256_max_ps(vy, vy_min);
+      vy = _mm256_min_ps(vy, vy_max);
 
     // _mm256_maskstore_ps(y, vmask, vy) could be used here, but triggers msan failures (probably an msan bug).
     __m128 vy_lo = _mm256_castps256_ps128(vy);
