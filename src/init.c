@@ -683,17 +683,17 @@ static void init(void) {
     };
     #ifndef XNN_NO_NCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_16x1__neonfma_pipelined,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_16x1__neonfma_pipelined,
         .mr = 16,
         .nr = 1,
       };
       xnn_params.f32.spmm2 = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_16x2__neonfma,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_16x2__neonfma,
         .mr = 16,
         .nr = 2,
       };
       xnn_params.f32.spmm4 = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_16x4__neonfma,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_16x4__neonfma,
         .mr = 16,
         .nr = 4,
       };
@@ -1106,7 +1106,7 @@ static void init(void) {
     };
     #ifndef XNN_NO_NCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_4x1__sse,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_4x1__sse,
         .mr = 4,
         .nr = 1,
       };
@@ -1540,17 +1540,17 @@ static void init(void) {
     };
     #ifndef XNN_NO_NCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_8x1__scalar,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_8x1__scalar,
         .mr = 8,
         .nr = 1,
       };
       xnn_params.f32.spmm2 = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_8x2__scalar,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_8x2__scalar,
         .mr = 8,
         .nr = 2,
       };
       xnn_params.f32.spmm4 = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_ukernel_8x4__scalar,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_8x4__scalar,
         .mr = 8,
         .nr = 4,
       };

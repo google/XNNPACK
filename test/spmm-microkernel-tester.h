@@ -116,7 +116,7 @@ class SpMMMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_spmm_ukernel_function spmm, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_spmm_minmax_ukernel_function spmm, Variant variant = Variant::Native) const {
     ASSERT_GE(m(), 1);
     ASSERT_GE(n(), 1);
     ASSERT_GE(k(), 1);
@@ -286,7 +286,7 @@ class SpMMMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_spmm_ukernel_function spmm) const {
+  void Test(xnn_f16_spmm_minmax_ukernel_function spmm) const {
     ASSERT_GE(m(), 1);
     ASSERT_GE(n(), 1);
     ASSERT_GE(k(), 1);

@@ -276,16 +276,16 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/scalar-p5-div-x1.c
   src/f32-sigmoid/gen/scalar-p5-div-x2.c
   src/f32-sigmoid/gen/scalar-p5-div-x4.c
-  src/f32-spmm/gen/1x1-scalar-pipelined.c
-  src/f32-spmm/gen/1x1-scalar.c
-  src/f32-spmm/gen/2x1-scalar-pipelined.c
-  src/f32-spmm/gen/2x1-scalar.c
-  src/f32-spmm/gen/4x1-scalar-pipelined.c
-  src/f32-spmm/gen/4x1-scalar.c
-  src/f32-spmm/gen/8x1-scalar-pipelined.c
-  src/f32-spmm/gen/8x1-scalar.c
-  src/f32-spmm/gen/8x2-scalar.c
-  src/f32-spmm/gen/8x4-scalar.c
+  src/f32-spmm/gen/1x1-minmax-scalar-pipelined.c
+  src/f32-spmm/gen/1x1-minmax-scalar.c
+  src/f32-spmm/gen/2x1-minmax-scalar-pipelined.c
+  src/f32-spmm/gen/2x1-minmax-scalar.c
+  src/f32-spmm/gen/4x1-minmax-scalar-pipelined.c
+  src/f32-spmm/gen/4x1-minmax-scalar.c
+  src/f32-spmm/gen/8x1-minmax-scalar-pipelined.c
+  src/f32-spmm/gen/8x1-minmax-scalar.c
+  src/f32-spmm/gen/8x2-minmax-scalar.c
+  src/f32-spmm/gen/8x4-minmax-scalar.c
   src/f32-vbinary/gen/vadd-scalar-x1.c
   src/f32-vbinary/gen/vadd-scalar-x2.c
   src/f32-vbinary/gen/vadd-scalar-x4.c
@@ -858,24 +858,24 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/neonfma-rr1-lut2048-p1-div-x16.c
   src/f32-sigmoid/gen/neonfma-rr1-lut2048-p1-div-x20.c
   src/f32-sigmoid/gen/neonfma-rr1-lut2048-p1-div-x24.c
-  src/f32-spmm/gen/12x1-neonfma.c
-  src/f32-spmm/gen/12x2-neonfma.c
-  src/f32-spmm/gen/12x4-neonfma.c
-  src/f32-spmm/gen/16x1-neonfma-pipelined.c
-  src/f32-spmm/gen/16x1-neonfma-unroll2.c
-  src/f32-spmm/gen/16x1-neonfma.c
-  src/f32-spmm/gen/16x2-neonfma.c
-  src/f32-spmm/gen/16x4-neonfma.c
-  src/f32-spmm/gen/4x1-neonfma-pipelined.c
-  src/f32-spmm/gen/4x1-neonfma-unroll2.c
-  src/f32-spmm/gen/4x1-neonfma.c
-  src/f32-spmm/gen/4x2-neonfma.c
-  src/f32-spmm/gen/4x4-neonfma.c
-  src/f32-spmm/gen/8x1-neonfma-pipelined.c
-  src/f32-spmm/gen/8x1-neonfma-unroll2.c
-  src/f32-spmm/gen/8x1-neonfma.c
-  src/f32-spmm/gen/8x2-neonfma.c
-  src/f32-spmm/gen/8x4-neonfma.c
+  src/f32-spmm/gen/12x1-minmax-neonfma.c
+  src/f32-spmm/gen/12x2-minmax-neonfma.c
+  src/f32-spmm/gen/12x4-minmax-neonfma.c
+  src/f32-spmm/gen/16x1-minmax-neonfma-pipelined.c
+  src/f32-spmm/gen/16x1-minmax-neonfma-unroll2.c
+  src/f32-spmm/gen/16x1-minmax-neonfma.c
+  src/f32-spmm/gen/16x2-minmax-neonfma.c
+  src/f32-spmm/gen/16x4-minmax-neonfma.c
+  src/f32-spmm/gen/4x1-minmax-neonfma-pipelined.c
+  src/f32-spmm/gen/4x1-minmax-neonfma-unroll2.c
+  src/f32-spmm/gen/4x1-minmax-neonfma.c
+  src/f32-spmm/gen/4x2-minmax-neonfma.c
+  src/f32-spmm/gen/4x4-minmax-neonfma.c
+  src/f32-spmm/gen/8x1-minmax-neonfma-pipelined.c
+  src/f32-spmm/gen/8x1-minmax-neonfma-unroll2.c
+  src/f32-spmm/gen/8x1-minmax-neonfma.c
+  src/f32-spmm/gen/8x2-minmax-neonfma.c
+  src/f32-spmm/gen/8x4-minmax-neonfma.c
   src/math/sigmoid-neonfma-rr1-lut2048-p1-div.c
   src/math/sigmoid-neonfma-rr1-lut64-p2-div.c
   src/math/sigmoid-neonfma-rr1-p5-div.c
@@ -886,7 +886,15 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
 SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-gemm/gen/4x8-neonfp16arith-ld64.c
   src/f16-gemm/gen/6x8-neonfp16arith-ld64.c
-  src/f16-gemm/gen/8x8-neonfp16arith-ld64.c)
+  src/f16-gemm/gen/8x8-neonfp16arith-ld64.c
+  src/f16-spmm/gen/8x1-minmax-neonfp16arith.c
+  src/f16-spmm/gen/8x1-minmax-neonfp16arith-unroll2.c
+  src/f16-spmm/gen/16x1-minmax-neonfp16arith.c
+  src/f16-spmm/gen/16x1-minmax-neonfp16arith-unroll2.c
+  src/f16-spmm/gen/24x1-minmax-neonfp16arith.c
+  src/f16-spmm/gen/24x1-minmax-neonfp16arith-unroll2.c
+  src/f16-spmm/gen/32x1-minmax-neonfp16arith.c
+  src/f16-spmm/gen/32x1-minmax-neonfp16arith-unroll2.c)
 
 SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-sse-c4.c
@@ -939,8 +947,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-pavgpool/9x-sse-c4.c
   src/f32-ppmm/gen/4x8-minmax-sse.c
   src/f32-rmax/sse.c
-  src/f32-spmm/gen/4x1-sse.c
-  src/f32-spmm/gen/8x1-sse.c
+  src/f32-spmm/gen/4x1-minmax-sse.c
+  src/f32-spmm/gen/8x1-minmax-sse.c
   src/f32-vbinary/gen/vadd-sse-x4.c
   src/f32-vbinary/gen/vadd-sse-x8.c
   src/f32-vbinary/gen/vaddc-sse-x4.c
@@ -1920,6 +1928,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f16-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f16-gemm-minmax-test f16-gemm-minmax-test)
 
+  ADD_EXECUTABLE(f16-spmm-minmax-test test/f16-spmm-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-spmm-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-spmm-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-spmm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-spmm-minmax-test f16-spmm-minmax-test)
+
   ADD_EXECUTABLE(f32-argmaxpool-test test/f32-argmaxpool.cc)
   SET_TARGET_PROPERTIES(f32-argmaxpool-test PROPERTIES
     CXX_STANDARD 11
@@ -2154,14 +2171,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-sigmoid-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-sigmoid-test f32-sigmoid-test)
 
-  ADD_EXECUTABLE(f32-spmm-test test/f32-spmm.cc)
-  SET_TARGET_PROPERTIES(f32-spmm-test PROPERTIES
+  ADD_EXECUTABLE(f32-spmm-minmax-test test/f32-spmm-minmax.cc)
+  SET_TARGET_PROPERTIES(f32-spmm-minmax-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-spmm-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-spmm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-spmm-test f32-spmm-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-spmm-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-spmm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-spmm-minmax-test f32-spmm-minmax-test)
 
   ADD_EXECUTABLE(f32-vadd-test test/f32-vadd.cc)
   SET_TARGET_PROPERTIES(f32-vadd-test PROPERTIES

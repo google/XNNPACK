@@ -1,0 +1,100 @@
+# Copyright 2019 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f32_spmm_minmax_ukernel_4x1__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_4x2__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_4x4__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_4x1__neonfma_pipelined
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_4x1__neonfma_unroll2
+  k-block: 2
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_8x2__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_8x4__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neonfma_pipelined
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neonfma_unroll2
+  k-block: 2
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_12x1__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_12x2__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_12x4__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_16x2__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_16x4__neonfma
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neonfma_pipelined
+  k-block: 1
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neonfma_unroll2
+  k-block: 2
+  arch:
+  - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_4x1__sse
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__sse
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_1x1__scalar
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_1x1__scalar_pipelined
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_2x1__scalar
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_2x1__scalar_pipelined
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_4x1__scalar
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_4x1__scalar_pipelined
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__scalar
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__scalar_pipelined
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x2__scalar
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x4__scalar
+  k-block: 1
