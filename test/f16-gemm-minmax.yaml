@@ -15,3 +15,11 @@
   k-block: 4
   arch:
   - aarch64
+- name: xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
+  k-block: 2
+  arch:
+  - aarch64
+- name: xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32
+  k-block: 2
+  arch:
+  - aarch64

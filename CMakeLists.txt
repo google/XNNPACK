@@ -1437,6 +1437,10 @@ SET(XNNPACK_AARCH32_ASM_MICROKERNEL_SRCS
   src/f32-igemm/4x8-minmax-aarch32-neon-cortex-a55.S)
 
 SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
+  src/f16-gemm/gen/4x16-minmax-aarch64-neonfp16arith-ld32.S
+  src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-ld32.S
+  src/f16-gemm/gen-inc/4x16inc-minmax-aarch64-neonfp16arith-ld32.S
+  src/f16-gemm/gen-inc/6x16inc-minmax-aarch64-neonfp16arith-ld32.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma.S
   src/f32-gemm/gen/1x12-minmax-aarch64-neonfma-cortex-a53.S
@@ -1550,6 +1554,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
 ENDIF()
 IF(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64" OR IOS_ARCH MATCHES "^arm64.*")
   SET_PROPERTY(SOURCE ${XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 ")
+  SET_PROPERTY(SOURCE ${XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 ")
   IF(IOS)
     SET_PROPERTY(SOURCE ${XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -arch ${IOS_ARCH} ")
   ENDIF()

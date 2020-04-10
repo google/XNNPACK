@@ -1459,6 +1459,10 @@ AARCH32_ASM_UKERNELS = [
 ]
 
 AARCH64_ASM_UKERNELS = [
+    "src/f16-gemm/gen/4x16-minmax-aarch64-neonfp16arith-ld32.S",
+    "src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-ld32.S",
+    "src/f16-gemm/gen-inc/4x16inc-minmax-aarch64-neonfp16arith-ld32.S",
+    "src/f16-gemm/gen-inc/6x16inc-minmax-aarch64-neonfp16arith-ld32.S",
     "src/f32-dwconv/up4x9-minmax-aarch64-neonfma-cortex-a55.S",
     "src/f32-dwconv/up4x9-minmax-aarch64-neonfma.S",
     "src/f32-gemm/gen/1x12-minmax-aarch64-neonfma-cortex-a53.S",
@@ -1840,6 +1844,7 @@ xnnpack_cc_library(
     name = "asm_ukernels",
     hdrs = ["src/xnnpack/assembly.h"],
     aarch32_srcs = AARCH32_ASM_UKERNELS,
+    aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = AARCH64_ASM_UKERNELS,
 )
 
