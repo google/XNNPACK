@@ -2,6 +2,9 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+- name: xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_ld64
+  k-block: 2
+  assembly: true
 - name: xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53
   k-block: 8
   pipelined: true

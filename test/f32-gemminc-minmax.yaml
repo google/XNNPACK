@@ -65,6 +65,9 @@
   k-block: 4
   pipelined: true
   assembly: true
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_ld64
+  k-block: 2
+  assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
   k-block: 2
   assembly: true

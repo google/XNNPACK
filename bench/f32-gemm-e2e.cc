@@ -118,7 +118,7 @@ static void GEMMEnd2EndBenchmark(
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_ld64,
       xnn_f32_igemm_minmax_ukernel_4x8__neonfma_lane_ld64,
-      xnn_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64,
+      xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       4 /* mr */, 8 /* nr */);
   }
@@ -127,7 +127,7 @@ static void GEMMEnd2EndBenchmark(
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_ld128,
       xnn_f32_igemm_minmax_ukernel_4x8__neonfma_lane_ld128,
-      xnn_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64,
+      xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       4 /* mr */, 8 /* nr */);
   }

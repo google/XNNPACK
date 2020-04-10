@@ -59,9 +59,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__aarch64_n
         MOVI v19.4s, 0
         $if PREFETCH:
           PRFM PLDL1KEEP, [x5, 64]
-        $if PREFETCH:
           PRFM PLDL1KEEP, [x5, 128]
-        $if PREFETCH:
           PRFM PLDL1KEEP, [x5, 192]
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
