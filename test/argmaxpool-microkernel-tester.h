@@ -162,7 +162,7 @@ class ArgMaxPoolMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_argmaxpool_up_ukernel_function argmaxpool, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_argmaxpool_unipass_ukernel_function argmaxpool, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
@@ -261,7 +261,7 @@ class ArgMaxPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_argmaxpool_mp_ukernel_function argmaxpool, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_argmaxpool_multipass_ukernel_function argmaxpool, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);

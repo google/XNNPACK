@@ -455,8 +455,8 @@ struct argmax_pooling_context {
     union xnn_f32_minmax_params f32;
   } params;
   union {
-    xnn_argmaxpool_up_ukernel_function unipass_ukernel;
-    xnn_argmaxpool_mp_ukernel_function multipass_ukernel;
+    xnn_argmaxpool_unipass_ukernel_function unipass_ukernel;
+    xnn_argmaxpool_multipass_ukernel_function multipass_ukernel;
   };
 };
 
@@ -491,8 +491,8 @@ struct average_pooling_context {
     union xnn_f32_scaleminmax_params f32;
   } params;
   union {
-    xnn_avgpool_up_ukernel_function unipass_ukernel;
-    xnn_avgpool_mp_ukernel_function multipass_ukernel;
+    xnn_avgpool_unipass_ukernel_function unipass_ukernel;
+    xnn_avgpool_multipass_ukernel_function multipass_ukernel;
   };
 };
 
@@ -529,8 +529,8 @@ struct pixelwise_average_pooling_context {
     union xnn_f32_minmax_params f32;
   } params;
   union {
-    xnn_pavgpool_up_ukernel_function unipass_ukernel;
-    xnn_pavgpool_mp_ukernel_function multipass_ukernel;
+    xnn_pavgpool_unipass_ukernel_function unipass_ukernel;
+    xnn_pavgpool_multipass_ukernel_function multipass_ukernel;
   };
 };
 
@@ -560,8 +560,8 @@ struct global_average_pooling_nwc_context {
     union xnn_f32_scaleminmax_params f32;
   } params;
   union {
-    xnn_gavgpool_up_ukernel_function unipass_ukernel;
-    xnn_gavgpool_mp_ukernel_function multipass_ukernel;
+    xnn_gavgpool_unipass_ukernel_function unipass_ukernel;
+    xnn_gavgpool_multipass_ukernel_function multipass_ukernel;
   };
 };
 

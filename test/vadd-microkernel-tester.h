@@ -146,7 +146,7 @@ class VAddMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_q8_vadd_ukernel_function vadd, Variant variant = Variant::Native) const {
+  void Test(xnn_q8_vadd_minmax_ukernel_function vadd_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
@@ -200,7 +200,7 @@ class VAddMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      vadd(n(), a_data, b_data, y.data(), &quantization_params);
+      vadd_minmax(n(), a_data, b_data, y.data(), &quantization_params);
 
       // Verify results.
       for (size_t i = 0; i < n(); i++) {

@@ -145,7 +145,7 @@ class GAvgPoolMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_q8_gavgpool_up_ukernel_function gavgpool, Variant variant = Variant::Native) const {
+  void Test(xnn_q8_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
@@ -197,7 +197,7 @@ class GAvgPoolMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      gavgpool(rows(), channels(),
+      gavgpool_minmax(rows(), channels(),
         input.data(), input_stride() * sizeof(uint8_t),
         zero.data(),
         output.data(),
@@ -219,7 +219,7 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_q8_gavgpool_mp_ukernel_function gavgpool, Variant variant = Variant::Native) const {
+  void Test(xnn_q8_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
@@ -273,7 +273,7 @@ class GAvgPoolMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      gavgpool(rows(), channels(),
+      gavgpool_minmax(rows(), channels(),
         input.data(), input_stride() * sizeof(uint8_t),
         zero.data(),
         buffer.data(),
@@ -296,7 +296,7 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_gavgpool_up_ukernel_function gavgpool, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
@@ -346,7 +346,7 @@ class GAvgPoolMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      gavgpool(rows(), channels(),
+      gavgpool_minmax(rows(), channels(),
         input.data(), input_stride() * sizeof(float),
         zero.data(),
         output.data(),
@@ -364,7 +364,7 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_gavgpool_mp_ukernel_function gavgpool, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
@@ -413,7 +413,7 @@ class GAvgPoolMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      gavgpool(rows(), channels(),
+      gavgpool_minmax(rows(), channels(),
         input.data(), input_stride() * sizeof(float),
         zero.data(),
         buffer.data(),

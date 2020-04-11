@@ -1,0 +1,14 @@
+# Copyright 2020 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f32_avgpool_minmax_ukernel_9p8x__neon_c4
+- name: xnn_f32_avgpool_minmax_ukernel_9p8x__sse_c4
+- name: xnn_f32_avgpool_minmax_ukernel_9p8x__psimd_c4
+- name: xnn_f32_avgpool_minmax_ukernel_9p8x__wasm_c1
+- name: xnn_f32_avgpool_minmax_ukernel_9p8x__scalar_c1
+- name: xnn_f32_avgpool_minmax_ukernel_9x__neon_c4
+- name: xnn_f32_avgpool_minmax_ukernel_9x__sse_c4
+- name: xnn_f32_avgpool_minmax_ukernel_9x__psimd_c4
+- name: xnn_f32_avgpool_minmax_ukernel_9x__wasm_c1
+- name: xnn_f32_avgpool_minmax_ukernel_9x__scalar_c1

@@ -16,15 +16,15 @@ tools/generate-clamp-test.py --spec test/u8-clamp.yaml --output test/u8-clamp.cc
 tools/generate-pack-test.py --spec test/x32-packx.yaml --output test/x32-packx.cc
 
 ### Tests for MaxPool micro-kernels
-tools/generate-maxpool-test.py --spec test/u8-maxpool.yaml --output test/u8-maxpool.cc
-tools/generate-maxpool-test.py --spec test/f32-maxpool.yaml --output test/f32-maxpool.cc
+tools/generate-maxpool-test.py --spec test/u8-maxpool-minmax.yaml --output test/u8-maxpool-minmax.cc
+tools/generate-maxpool-test.py --spec test/f32-maxpool-minmax.yaml --output test/f32-maxpool-minmax.cc
 
 ### Tests for AvgPool micro-kernels
-tools/generate-avgpool-test.py --spec test/q8-avgpool.yaml --output test/q8-avgpool.cc
-tools/generate-avgpool-test.py --spec test/f32-avgpool.yaml --output test/f32-avgpool.cc
+tools/generate-avgpool-test.py --spec test/q8-avgpool-minmax.yaml --output test/q8-avgpool-minmax.cc
+tools/generate-avgpool-test.py --spec test/f32-avgpool-minmax.yaml --output test/f32-avgpool-minmax.cc
 
 ### Tests for PAvgPool micro-kernels
-tools/generate-avgpool-test.py --spec test/f32-pavgpool.yaml --output test/f32-pavgpool.cc
+tools/generate-avgpool-test.py --spec test/f32-pavgpool-minmax.yaml --output test/f32-pavgpool-minmax.cc
 
 ### Tests for ArgMaxPool micro-kernels
 tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/f32-argmaxpool.cc

@@ -27,15 +27,15 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(s8|u8|s16|f16|f32)_maxpool_ukernel_(\d+)p(\d+)x__(.+)_c(\d+)$", name)
+  match = re.match(r"^xnn_(s8|u8|s16|f16|f32)_maxpool(_(minmax))?_ukernel_(\d+)p(\d+)x__(.+)_c(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
-  primary_tile = int(match.group(2))
-  incremental_tile = int(match.group(3))
-  channel_tile = int(match.group(5))
+  primary_tile = int(match.group(4))
+  incremental_tile = int(match.group(5))
+  channel_tile = int(match.group(7))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(4))
+  arch, isa = xnncommon.parse_target_name(target_name=match.group(6))
   return primary_tile, incremental_tile, channel_tile, arch, isa
 
 

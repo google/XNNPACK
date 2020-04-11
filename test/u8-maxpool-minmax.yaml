@@ -1,0 +1,7 @@
+# Copyright 2019 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16
+- name: xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16
+- name: xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1
