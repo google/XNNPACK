@@ -218,8 +218,8 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up2x25-minmax-scalar.c
   src/f32-dwconv/gen/up2x25-minmax-scalar-acc2.c
   src/f32-gavgpool-spchw/scalar-x1.c
-  src/f32-gavgpool/7p7x-scalar-c1.c
-  src/f32-gavgpool/7x-scalar-c1.c
+  src/f32-gavgpool/7p7x-minmax-scalar-c1.c
+  src/f32-gavgpool/7x-minmax-scalar-c1.c
   src/f32-gemm/gen/1x4-scalar.c
   src/f32-gemm/gen/2x4-scalar.c
   src/f32-gemm/gen/4x2-scalar.c
@@ -388,8 +388,8 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x4-minmax-psimd.c
   src/f32-dwconv/gen/up8x9-minmax-psimd-acc2.c
   src/f32-dwconv/gen/up8x9-minmax-psimd.c
-  src/f32-gavgpool/7p7x-psimd-c4.c
-  src/f32-gavgpool/7x-psimd-c4.c
+  src/f32-gavgpool/7p7x-minmax-psimd-c4.c
+  src/f32-gavgpool/7x-minmax-psimd-c4.c
   src/f32-gemm/gen/1x8-minmax-psimd-loadsplat.c
   src/f32-gemm/gen/1x8-minmax-psimd-splat.c
   src/f32-gemm/gen/1x8s4-minmax-psimd.c
@@ -501,8 +501,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x9-minmax-neon.c
   src/f32-dwconv/gen/up8x9-minmax-neon-acc2.c
   src/f32-gavgpool-spchw/neon-x4.c
-  src/f32-gavgpool/7p7x-neon-c4.c
-  src/f32-gavgpool/7x-neon-c4.c
+  src/f32-gavgpool/7p7x-minmax-neon-c4.c
+  src/f32-gavgpool/7x-minmax-neon-c4.c
   src/f32-gemm/gen/1x8-minmax-neon-lane-ld64.c
   src/f32-gemm/gen/4x2-minmax-neon-lane-ld64.c
   src/f32-gemm/gen/4x8-minmax-neon-lane-ld128.c
@@ -916,8 +916,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x9-minmax-sse-acc2.c
   src/f32-dwconv/gen/up8x9-minmax-sse.c
   src/f32-gavgpool-spchw/sse-x4.c
-  src/f32-gavgpool/7p7x-sse-c4.c
-  src/f32-gavgpool/7x-sse-c4.c
+  src/f32-gavgpool/7p7x-minmax-sse-c4.c
+  src/f32-gavgpool/7x-minmax-sse-c4.c
   src/f32-gemm/gen/1x8-minmax-sse-dup.c
   src/f32-gemm/gen/1x8-minmax-sse-load1.c
   src/f32-gemm/gen/1x8s4-minmax-sse.c
@@ -2288,14 +2288,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vmulc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vmulc-minmax-test f32-vmulc-minmax-test)
 
-  ADD_EXECUTABLE(f32-vmulcaddc-test test/f32-vmulcaddc.cc)
-  SET_TARGET_PROPERTIES(f32-vmulcaddc-test PROPERTIES
+  ADD_EXECUTABLE(f32-vmulcaddc-minmax-test test/f32-vmulcaddc-minmax.cc)
+  SET_TARGET_PROPERTIES(f32-vmulcaddc-minmax-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmulcaddc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-vmulcaddc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-vmulcaddc-test f32-vmulcaddc-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-vmulcaddc-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vmulcaddc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vmulcaddc-minmax-test f32-vmulcaddc-minmax-test)
 
   ADD_EXECUTABLE(f32-vscaleexpminusmax-test test/f32-vscaleexpminusmax.cc)
   SET_TARGET_PROPERTIES(f32-vscaleexpminusmax-test PROPERTIES
