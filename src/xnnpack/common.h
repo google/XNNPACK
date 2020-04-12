@@ -113,7 +113,13 @@
   #define XNN_UNREACHABLE do { } while (0)
 #endif
 
-#define XNN_ALIGN(alignment) __attribute__((__aligned__(alignment)))
+#if defined(__GNUC__)
+  #define XNN_ALIGN(alignment) __attribute__((__aligned__(alignment)))
+#elif defined(_MSC_VER)
+  #define XNN_ALIGN(alignment) __declspec(align(alignment))
+#else
+  #error "Platform-specific implementation of XNN_ALIGN required"
+#endif
 
 #define XNN_COUNT_OF(array) (sizeof(array) / sizeof(0[array]))
 
@@ -138,6 +144,8 @@
 
 #if defined(__GNUC__)
   #define XNN_INLINE inline __attribute__((__always_inline__))
+#elif defined(_MSC_VER)
+  #define XNN_INLINE __forceinline
 #else
   #define XNN_INLINE inline
 #endif

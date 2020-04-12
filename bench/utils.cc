@@ -3,18 +3,20 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <pthread.h>
-#include <sched.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <mutex>
+
+#ifdef __linux__
+  #include <sched.h>
+#endif
 #ifdef __ANDROID__
   #include <malloc.h>
 #endif
 #if defined(__SSE__) || defined(__x86_64__)
   #include <xmmintrin.h>
 #endif
-
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 
 #include <cpuinfo.h>
 
@@ -24,7 +26,7 @@
 static void* wipe_buffer = nullptr;
 static size_t wipe_buffer_size = 0;
 
-static pthread_once_t wipe_buffer_guard = PTHREAD_ONCE_INIT;
+static std::once_flag wipe_buffer_guard;
 
 static void InitWipeBuffer() {
   // Default: the largest know cache size (128 MB Intel Crystalwell L4 cache).
@@ -65,7 +67,7 @@ uint32_t PrefetchToL1(const void* ptr, size_t size) {
 }
 
 uint32_t WipeCache() {
-  pthread_once(&wipe_buffer_guard, &InitWipeBuffer);
+  std::call_once(wipe_buffer_guard, InitWipeBuffer);
   return PrefetchToL1(wipe_buffer, wipe_buffer_size);
 }
 

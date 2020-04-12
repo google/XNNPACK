@@ -15,6 +15,16 @@
 #include <xnnpack/common.h>
 
 
+// stdlib.h from Windows 10 SDK defines min & max macros.
+// Undefine them before defining the corresponding functions.
+#ifdef min
+  #undef min
+#endif
+#ifdef max
+  #undef max
+#endif
+
+
 inline static size_t min(size_t a, size_t b) {
   return XNN_UNPREDICTABLE(b < a) ? b : a;
 }
