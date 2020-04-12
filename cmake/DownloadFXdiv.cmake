@@ -12,8 +12,8 @@ PROJECT(fxdiv-download NONE)
 
 INCLUDE(ExternalProject)
 ExternalProject_Add(fxdiv
-  URL https://github.com/Maratyszcza/FXdiv/archive/f8c5354679ec2597792bc70a9e06eff50c508b9a.tar.gz
-  URL_HASH SHA256=7d3215bea832fe77091ec5666200b91156df6724da1e348205078346325fc45e
+  URL https://github.com/Maratyszcza/FXdiv/archive/f7dd0576a1c8289ef099d4fd8b136b1c4487a873.zip
+  URL_HASH SHA256=6e4b6e3c58e67c3bb090e286c4f235902c89b98cf3e67442a18f9167963aa286
   SOURCE_DIR "${CMAKE_BINARY_DIR}/FXdiv-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/FXdiv"
   CONFIGURE_COMMAND ""

@@ -2,21 +2,25 @@ workspace(name = "xnnpack")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# Bazel rule definitions
+http_archive(
+    name = "rules_cc",
+    strip_prefix = "rules_cc-master",
+    urls = ["https://github.com/bazelbuild/rules_cc/archive/master.zip"],
+)
+
 # Google Test framework, used by most unit-tests.
 http_archive(
-     name = "com_google_googletest",
-     urls = ["https://github.com/google/googletest/archive/master.zip"],
-     strip_prefix = "googletest-master",
+    name = "com_google_googletest",
+    strip_prefix = "googletest-master",
+    urls = ["https://github.com/google/googletest/archive/master.zip"],
 )
 
 # Google Benchmark library, used in micro-benchmarks.
 http_archive(
     name = "com_google_benchmark",
-    urls = [
-        "https://github.com/google/benchmark/archive/master.zip"
-    ],
     strip_prefix = "benchmark-master",
-    build_file = "@//third_party:benchmark.BUILD",
+    urls = ["https://github.com/google/benchmark/archive/master.zip"],
 )
 
 # FP16 library, used for half-precision conversions
@@ -33,23 +37,17 @@ http_archive(
 # FXdiv library, used for repeated integer division by the same factor
 http_archive(
     name = "FXdiv",
-    strip_prefix = "FXdiv-f8c5354679ec2597792bc70a9e06eff50c508b9a",
-    sha256 = "7d3215bea832fe77091ec5666200b91156df6724da1e348205078346325fc45e",
-    urls = [
-        "https://github.com/Maratyszcza/FXdiv/archive/f8c5354679ec2597792bc70a9e06eff50c508b9a.tar.gz",
-    ],
-    build_file = "@//third_party:FXdiv.BUILD",
+    strip_prefix = "FXdiv-f7dd0576a1c8289ef099d4fd8b136b1c4487a873",
+    sha256 = "6e4b6e3c58e67c3bb090e286c4f235902c89b98cf3e67442a18f9167963aa286",
+    urls = ["https://github.com/Maratyszcza/FXdiv/archive/f7dd0576a1c8289ef099d4fd8b136b1c4487a873.zip"],
 )
 
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    strip_prefix = "pthreadpool-fa67ff531c0f9999c742d500a4fa061b96937297",
-    sha256 = "6d9ead083d4f7f9efb0b7b1a2d212816f65eb536cef4a0bf640403309b793a15",
-    urls = [
-        "https://github.com/Maratyszcza/pthreadpool/archive/fa67ff531c0f9999c742d500a4fa061b96937297.tar.gz",
-    ],
-    build_file = "@//third_party:pthreadpool.BUILD",
+    strip_prefix = "pthreadpool-da486afd0f9e2b42ccb90940e2dfba6cfed38708",
+    sha256 = "8602a23e9d69cedf6054f428b3f8dbd935e1c5811df3adf38f0985ed1fed74ee",
+    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/da486afd0f9e2b42ccb90940e2dfba6cfed38708.zip"],
 )
 
 # clog library, used for logging
