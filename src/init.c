@@ -11,7 +11,11 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <pthread.h>
+#ifdef _WIN32
+  #include <windows.h>
+#else
+  #include <pthread.h>
+#endif
 
 #ifndef __EMSCRIPTEN__
   #include <cpuinfo.h>
@@ -51,7 +55,11 @@
   #define XNN_ENABLE_ASSEMBLY 1
 #endif
 
-static pthread_once_t init_guard = PTHREAD_ONCE_INIT;
+#ifdef _WIN32
+  static INIT_ONCE init_guard = INIT_ONCE_STATIC_INIT;
+#else
+  static pthread_once_t init_guard = PTHREAD_ONCE_INIT;
+#endif
 
 struct xnn_parameters xnn_params = {
   .initialized = false
@@ -1613,13 +1621,24 @@ static void init(void) {
   xnn_params.initialized = true;
 }
 
+#ifdef _WIN32
+  static BOOL CALLBACK init_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
+    init();
+    return TRUE;
+  }
+#endif
+
 enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
   #ifndef __EMSCRIPTEN__
     if (!cpuinfo_initialize()) {
       return xnn_status_out_of_memory;
     }
   #endif
-  pthread_once(&init_guard, &init);
+  #ifdef _WIN32
+    InitOnceExecuteOnce(&init_guard, &init_windows, NULL, NULL);
+  #else
+    pthread_once(&init_guard, &init);
+  #endif
   if (xnn_params.initialized) {
     if (allocator != NULL) {
       memcpy(&xnn_params.allocator, allocator, sizeof(struct xnn_allocator));
