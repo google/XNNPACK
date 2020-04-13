@@ -50,6 +50,10 @@ void* xnn_aligned_allocate(void* context, size_t alignment, size_t size) {
 
 void xnn_aligned_deallocate(void* context, void* pointer) {
   if XNN_LIKELY(pointer != NULL) {
-    free(pointer);
+    #if defined(_WIN32)
+      _aligned_free(pointer);
+    #else
+      free(pointer);
+    #endif
   }
 }
