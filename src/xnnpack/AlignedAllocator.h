@@ -97,7 +97,11 @@ class AlignedAllocator {
   }
 
   inline void deallocate(pointer p, size_type n) noexcept {
+#if defined(_WIN32)
+    _aligned_free(static_cast<void*>(p));
+#else
     free(static_cast<void*>(p));
+#endif
   }
 
   template <class U, class... Args>
