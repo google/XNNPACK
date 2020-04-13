@@ -305,7 +305,7 @@ void xnn_indirection_init_maxpool2d(
             }
 
             const size_t index = output_y * step_height + output_x * step_width * pooling_height + pooling_x * pooling_height + pooling_y;
-            indirection_buffer[index] = input + (input_y * input_width + input_x) * input_pixel_stride;
+            indirection_buffer[index] = (const void*) ((uintptr_t) input + (input_y * input_width + input_x) * input_pixel_stride);
           }
         }
       }
@@ -320,7 +320,7 @@ void xnn_indirection_init_maxpool2d(
           for (size_t pooling_x = 0; pooling_x < pooling_width; pooling_x++) {
             const size_t input_x = min(doz(output_x * stride_width + pooling_x * dilation_width, input_padding_left), input_x_max);
             const size_t index = output_y * step_height + output_x * step_width * pooling_height + pooling_x * pooling_height + pooling_y;
-            indirection_buffer[index] = input + (input_y * input_width + input_x) * input_pixel_stride;
+            indirection_buffer[index] = (const void*) ((uintptr_t) input + (input_y * input_width + input_x) * input_pixel_stride);
           }
         }
       }
@@ -449,7 +449,7 @@ void xnn_indirection_init_unpool2d(
           for (size_t pooling_x = 0; pooling_x < pooling_width; pooling_x++) {
             const size_t output_x = min(doz(input_x * pooling_width + pooling_x, output_padding_left), output_width - 1);
             indirection_buffer[(((image * input_height + input_y) * input_width + input_x) * pooling_width + pooling_x) * pooling_height + pooling_y] =
-              output + ((image * output_height + output_y) * output_width + output_x) * output_pixel_stride;
+              (const void*) ((uintptr_t) output + ((image * output_height + output_y) * output_width + output_x) * output_pixel_stride);
           }
         }
       }
