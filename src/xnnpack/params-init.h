@@ -589,8 +589,8 @@ static inline union xnn_q8_add_params xnn_init_q8_add_params(
   const float scale_multiplier = fp32_from_bits((uint32_t) (21 - max_scale_exponent + 127) << 23);
 
   // Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range.
-  const uint32_t a_multiplier = (uint32_t) (int32_t) __builtin_lrintf(a_output_scale * scale_multiplier);
-  const uint32_t b_multiplier = (uint32_t) (int32_t) __builtin_lrintf(b_output_scale * scale_multiplier);
+  const uint32_t a_multiplier = (uint32_t) (int32_t) lrintf(a_output_scale * scale_multiplier);
+  const uint32_t b_multiplier = (uint32_t) (int32_t) lrintf(b_output_scale * scale_multiplier);
   assert((a_multiplier > b_multiplier ? a_multiplier : b_multiplier) >= UINT32_C(0x00200000));
   assert(a_multiplier < UINT32_C(0x00400000));
   assert(b_multiplier < UINT32_C(0x00400000));
@@ -676,8 +676,8 @@ static inline union xnn_q8_add_params xnn_init_scalar_q8_add_params(
   assert(shift >= 13);
 
   // Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range.
-  const uint32_t a_multiplier = (uint32_t) (int32_t) __builtin_lrintf(fp32_from_bits(fp32_to_bits(a_output_scale) + (shift << 23)));
-  const uint32_t b_multiplier = (uint32_t) (int32_t) __builtin_lrintf(fp32_from_bits(fp32_to_bits(b_output_scale) + (shift << 23)));
+  const uint32_t a_multiplier = (uint32_t) (int32_t) lrintf(fp32_from_bits(fp32_to_bits(a_output_scale) + (shift << 23)));
+  const uint32_t b_multiplier = (uint32_t) (int32_t) lrintf(fp32_from_bits(fp32_to_bits(b_output_scale) + (shift << 23)));
   assert((a_multiplier > b_multiplier ? a_multiplier : b_multiplier) >= UINT32_C(0x00200000));
   assert(a_multiplier < UINT32_C(0x00400000));
   assert(b_multiplier < UINT32_C(0x00400000));
