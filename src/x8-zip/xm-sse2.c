@@ -145,7 +145,7 @@ void xnn_x8_zip_xm_ukernel__sse2(
         y -= address_decrement;
         z -= address_decrement;
         w -= address_decrement;
-        const __m128i vshift = _mm_cvtsi32_si128(8 * address_decrement);
+        const __m128i vshift = _mm_cvtsi32_si128((int) address_decrement * 8);
 
         const __m128i vx = _mm_srl_epi64(_mm_loadl_epi64((const __m128i*) x), vshift);
         const __m128i vy = _mm_srl_epi64(_mm_loadl_epi64((const __m128i*) y), vshift);
