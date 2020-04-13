@@ -8,8 +8,6 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5 FATAL_ERROR)
 
-INCLUDE(GNUInstallDirs)
-
 # ---[ Project and semantic versioning.
 PROJECT(XNNPACK C CXX ASM)
 
@@ -21,6 +19,8 @@ OPTION(XNNPACK_BUILD_TESTS "Build XNNPACK unit tests" ON)
 OPTION(XNNPACK_BUILD_BENCHMARKS "Build XNNPACK benchmarks" ON)
 
 # ---[ CMake options
+INCLUDE(GNUInstallDirs)
+
 IF(XNNPACK_BUILD_TESTS)
   ENABLE_TESTING()
 ENDIF()
