@@ -12,8 +12,8 @@ PROJECT(fp16-download NONE)
 
 INCLUDE(ExternalProject)
 ExternalProject_Add(fp16
-  URL https://github.com/Maratyszcza/FP16/archive/ba1d31f5eed2eb4a69e4dea3870a68c7c95f998f.tar.gz
-  URL_HASH SHA256=9764297a339ad73b0717331a2c3e9c42a52105cd04cab62cb160e2b4598d2ea6
+  URL https://github.com/Maratyszcza/FP16/archive/3c54eacb74f6f5e39077300c5564156c424d77ba.zip
+  URL_HASH SHA256=0d56bb92f649ec294dbccb13e04865e3c82933b6f6735d1d7145de45da700156
   SOURCE_DIR "${CMAKE_BINARY_DIR}/FP16-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/FP16"
   CONFIGURE_COMMAND ""
