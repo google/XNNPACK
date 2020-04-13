@@ -2313,7 +2313,7 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(f32-vscaleexpminusmax-test f32-vscaleexpminusmax-test)
 
   ADD_EXECUTABLE(f32-vscaleextexp-test test/f32-vscaleextexp.cc)
-  SET_TARGET_PROPERTIES(f32-vscaleexpminusmax-test PROPERTIES
+  SET_TARGET_PROPERTIES(f32-vscaleextexp-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
