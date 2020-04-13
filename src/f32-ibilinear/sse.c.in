@@ -9,7 +9,7 @@ $assert PIXEL_TILE == 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
-#include <xmmintrin.h>
+#include <immintrin.h>
 
 #include <xnnpack/ibilinear.h>
 

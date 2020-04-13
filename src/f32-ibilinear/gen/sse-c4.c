@@ -9,7 +9,7 @@
 
 #include <assert.h>
 
-#include <xmmintrin.h>
+#include <immintrin.h>
 
 #include <xnnpack/ibilinear.h>
 
