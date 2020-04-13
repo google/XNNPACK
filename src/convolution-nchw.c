@@ -577,7 +577,7 @@ static enum xnn_status setup_convolution2d_nchw(
 
       convolution_op->context.spmm = (struct spmm_context) {
           .n = group_output_channels,
-          .a = input + (convolution_op->first_input_channel * input_size * sizeof(float)),
+          .a = (const void*) ((uintptr_t) input + (convolution_op->first_input_channel * input_size * sizeof(float))),
           .packed_weights = nonzero_values,
           .input_increments = input_increments,
           .output_channel_nonzeros = output_channel_nonzeros,
