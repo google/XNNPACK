@@ -154,12 +154,13 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
     }
     resize_op->indirection_buffer = indirection_buffer;
 
-    float* packed_weights = (float*) xnn_reallocate_memory(resize_op->packed_weights, packed_weights_size);
-    if (packed_weights == NULL) {
+    // Note: packed weights must be SIMD-aligned, so we can't use xnn_reallocate_memory
+    xnn_release_simd_memory(resize_op->packed_weights);
+    resize_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
+    if (resize_op->packed_weights == NULL) {
       xnn_log_error("failed to allocate %zu bytes for packed weights", packed_weights_size);
       return xnn_status_out_of_memory;
     }
-    resize_op->packed_weights = packed_weights;
   }
 
   const size_t input_pixel_stride_in_bytes = resize_op->input_pixel_stride * sizeof(float);
