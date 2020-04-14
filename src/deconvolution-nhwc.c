@@ -205,7 +205,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
       (sizeof(uint8_t) * kernel_size * k_stride + sizeof(int32_t) * subkernels);
 
     const size_t subconvolution_buffer_size = sizeof(struct subconvolution_params) * subkernels;
-    deconvolution_op->subconvolution_buffer = xnn_allocate_zero_simd_memory(subconvolution_buffer_size);
+    deconvolution_op->subconvolution_buffer = xnn_allocate_zero_memory(subconvolution_buffer_size);
     if (deconvolution_op->subconvolution_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for subconvolution buffer", subconvolution_buffer_size);
       goto error;
@@ -458,7 +458,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
       (sizeof(float) * kernel_size * k_stride + sizeof(float) * subkernels);
 
     const size_t subconvolution_buffer_size = sizeof(struct subconvolution_params) * subkernels;
-    deconvolution_op->subconvolution_buffer = xnn_allocate_zero_simd_memory(subconvolution_buffer_size);
+    deconvolution_op->subconvolution_buffer = xnn_allocate_zero_memory(subconvolution_buffer_size);
     if (deconvolution_op->subconvolution_buffer == NULL) {
       xnn_log_error("failed to allocate %zu bytes for subconvolution buffer", subconvolution_buffer_size);
       goto error;
