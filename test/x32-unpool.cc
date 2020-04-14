@@ -12,6 +12,156 @@
 #include "unpool-microkernel-tester.h"
 
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(X32_UNPOOL__NEON, c_eq_4) {
+    TEST_REQUIRES_ARM_NEON;
+    UnpoolMicrokernelTester()
+      .p(10)
+      .c(4)
+      .Test(xnn_x32_unpool_ukernel__neon);
+  }
+
+  TEST(X32_UNPOOL__NEON, c_div_4) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t c = 8; c < 32; c += 4) {
+      UnpoolMicrokernelTester()
+        .p(10)
+        .c(c)
+        .Test(xnn_x32_unpool_ukernel__neon);
+    }
+  }
+
+  TEST(X32_UNPOOL__NEON, c_lt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t c = 1; c < 4; c++) {
+      UnpoolMicrokernelTester()
+        .p(10)
+        .c(c)
+        .Test(xnn_x32_unpool_ukernel__neon);
+    }
+  }
+
+  TEST(X32_UNPOOL__NEON, c_gt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t c = 5; c < 8; c++) {
+      UnpoolMicrokernelTester()
+        .p(10)
+        .c(4)
+        .Test(xnn_x32_unpool_ukernel__neon);
+    }
+  }
+
+  TEST(X32_UNPOOL__NEON, varying_p) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t p = 1; p < 20; p += 3) {
+      for (size_t c = 1; c < 32; c += 5) {
+        UnpoolMicrokernelTester()
+          .p(p)
+          .c(c)
+          .Test(xnn_x32_unpool_ukernel__neon);
+      }
+    }
+  }
+
+  TEST(X32_UNPOOL__NEON, varying_f) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t c = 1; c < 32; c += 5) {
+      UnpoolMicrokernelTester()
+        .p(10)
+        .c(c)
+        .f(0xDEADBEAF)
+        .Test(xnn_x32_unpool_ukernel__neon);
+    }
+  }
+
+  TEST(X32_UNPOOL__NEON, y_stride) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t c = 1; c < 32; c += 5) {
+      UnpoolMicrokernelTester()
+        .p(10)
+        .c(c)
+        .y_stride(c * 2 + 7)
+        .Test(xnn_x32_unpool_ukernel__neon);
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(X32_UNPOOL__SSE2, c_eq_4) {
+    TEST_REQUIRES_X86_SSE2;
+    UnpoolMicrokernelTester()
+      .p(10)
+      .c(4)
+      .Test(xnn_x32_unpool_ukernel__sse2);
+  }
+
+  TEST(X32_UNPOOL__SSE2, c_div_4) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t c = 8; c < 32; c += 4) {
+      UnpoolMicrokernelTester()
+        .p(10)
+        .c(c)
+        .Test(xnn_x32_unpool_ukernel__sse2);
+    }
+  }
+
+  TEST(X32_UNPOOL__SSE2, c_lt_4) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t c = 1; c < 4; c++) {
+      UnpoolMicrokernelTester()
+        .p(10)
+        .c(c)
+        .Test(xnn_x32_unpool_ukernel__sse2);
+    }
+  }
+
+  TEST(X32_UNPOOL__SSE2, c_gt_4) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t c = 5; c < 8; c++) {
+      UnpoolMicrokernelTester()
+        .p(10)
+        .c(4)
+        .Test(xnn_x32_unpool_ukernel__sse2);
+    }
+  }
+
+  TEST(X32_UNPOOL__SSE2, varying_p) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t p = 1; p < 20; p += 3) {
+      for (size_t c = 1; c < 32; c += 5) {
+        UnpoolMicrokernelTester()
+          .p(p)
+          .c(c)
+          .Test(xnn_x32_unpool_ukernel__sse2);
+      }
+    }
+  }
+
+  TEST(X32_UNPOOL__SSE2, varying_f) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t c = 1; c < 32; c += 5) {
+      UnpoolMicrokernelTester()
+        .p(10)
+        .c(c)
+        .f(0xDEADBEAF)
+        .Test(xnn_x32_unpool_ukernel__sse2);
+    }
+  }
+
+  TEST(X32_UNPOOL__SSE2, y_stride) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t c = 1; c < 32; c += 5) {
+      UnpoolMicrokernelTester()
+        .p(10)
+        .c(c)
+        .y_stride(c * 2 + 7)
+        .Test(xnn_x32_unpool_ukernel__sse2);
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
   TEST(X32_UNPOOL__PSIMD, c_eq_4) {
     TEST_REQUIRES_PSIMD;

@@ -644,6 +644,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/u8-rmax/neon.c
   src/x32-packx/x4-neon-st4.c
   src/x32-pad/x2-neon.c
+  src/x32-unpool/neon.c
   src/x32-zip/x2-neon.c
   src/x32-zip/x3-neon.c
   src/x32-zip/x4-neon.c
@@ -1019,6 +1020,7 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/x32-pad/x2-sse2.c
+  src/x32-unpool/sse2.c
   src/x32-zip/x2-sse2.c
   src/x32-zip/x3-sse2.c
   src/x32-zip/x4-sse2.c
