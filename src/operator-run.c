@@ -322,7 +322,7 @@ void xnn_compute_dwconv_unipass(
     context->output_width,
     context->indirection_buffer + output_y * context->indirection_buffer_row_stride,
     context->packed_weights,
-    context->output + output_y * context->output_row_stride,
+    (void*) ((uintptr_t) context->output + output_y * context->output_row_stride),
     context->indirection_buffer_col_stride,
     context->output_col_increment,
     &context->params);
@@ -583,7 +583,7 @@ void xnn_compute_resize_bilinear(
     context->scaled_channels,
     context->indirect_input + pixel_start * 4,
     context->input_offset + batch_index * context->input_batch_stride,
-    context->packed_weights + (pixel_start << context->log2_wsize),
+    (const void*) ((uintptr_t) context->packed_weights + (pixel_start << context->log2_wsize)),
     output,
     context->output_pixel_stride - context->scaled_channels);
 }
