@@ -123,7 +123,7 @@ class IBilinearMicrokernelTester {
           ASSERT_NEAR(
               output_ref[i * channels() + c],
               output[i * output_stride() + c],
-              std::abs(output_ref[i * channels() + c]) * 1.0e-5)
+              std::abs(output_ref[i * channels() + c]) * 1.0e-4)
             << "i = " << i << ", channel = " << c;
         }
       }
