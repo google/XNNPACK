@@ -1505,4 +1505,8 @@ struct xnn_parameters {
   } x32;
 };
 
+#ifdef __cplusplus
+extern "C" XNN_INTERNAL struct xnn_parameters xnn_params;
+#else
 extern XNN_INTERNAL struct xnn_parameters xnn_params;
+#endif
