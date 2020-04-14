@@ -35,8 +35,6 @@ void xnn_u8_clamp_ukernel__neon_x64(
     const uint8x16_t vy2 = vminq_u8(vmaxq_u8(vx2, voutput_min), voutput_max);
     const uint8x16_t vy3 = vminq_u8(vmaxq_u8(vx3, voutput_min), voutput_max);
 
-    __builtin_prefetch(x + 640);
-
     vst1q_u8(y, vy0); y += 16;
     vst1q_u8(y, vy1); y += 16;
     vst1q_u8(y, vy2); y += 16;

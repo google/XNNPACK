@@ -35,8 +35,6 @@ void xnn_u8_clamp_ukernel__sse2_x64(
     const __m128i vy2 = _mm_min_epu8(_mm_max_epu8(vx2, voutput_min), voutput_max);
     const __m128i vy3 = _mm_min_epu8(_mm_max_epu8(vx3, voutput_min), voutput_max);
 
-    __builtin_prefetch(x + 640);
-
     _mm_storeu_si128((__m128i*) y, vy0);
     _mm_storeu_si128((__m128i*) y + 1, vy1);
     _mm_storeu_si128((__m128i*) y + 2, vy2);
