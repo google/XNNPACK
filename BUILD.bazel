@@ -3360,6 +3360,11 @@ config_setting(
 )
 
 config_setting(
+    name = "linux_armhf",
+    values = {"cpu": "armhf"},
+)
+
+config_setting(
     name = "android",
     values = {"crosstool_top": "//external:android/crosstool"},
 )

@@ -116,6 +116,7 @@ def xnnpack_cc_library(
         srcs = srcs + select({
             ":linux_k8": x86_srcs,
             ":linux_aarch64": aarch64_srcs,
+            ":linux_armhf": aarch32_srcs,
             ":macos_x86_64": x86_srcs,
             ":windows_x86": x86_srcs,
             ":windows_x86_64": x86_srcs,
@@ -145,6 +146,7 @@ def xnnpack_cc_library(
         ] + copts + select({
             ":linux_k8": x86_copts,
             ":linux_aarch64": aarch64_copts,
+            ":linux_armhf": aarch32_copts,
             ":macos_x86_64": x86_copts,
             ":windows_x86": x86_copts,
             ":windows_x86_64": x86_copts,
@@ -176,6 +178,7 @@ def xnnpack_cc_library(
         linkopts = select({
             ":linux_k8": ["-lpthread"],
             ":linux_aarch64": ["-lpthread"],
+            ":linux_armhf": ["-lpthread"],
             ":android": ["-lm"],
             "//conditions:default": [],
         }),
@@ -209,6 +212,7 @@ def xnnpack_aggregate_library(
         deps = generic_deps + select({
             ":linux_k8": x86_deps,
             ":linux_aarch64": aarch64_deps,
+            ":linux_armhf": aarch32_deps,
             ":macos_x86_64": x86_deps,
             ":windows_x86": x86_deps,
             ":windows_x86_64": x86_deps,
