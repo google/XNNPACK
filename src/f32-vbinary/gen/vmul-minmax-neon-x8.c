@@ -30,8 +30,8 @@ void xnn_f32_vmul_minmax_ukernel__neon_x8(
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const float32x4_t va0123 = vld1q_f32(a); a += 4;
-    const float32x4_t vb0123 = vld1q_f32(b); b += 4;
     const float32x4_t va4567 = vld1q_f32(a); a += 4;
+    const float32x4_t vb0123 = vld1q_f32(b); b += 4;
     const float32x4_t vb4567 = vld1q_f32(b); b += 4;
 
     float32x4_t vy0123 = vmulq_f32(va0123, vb0123);

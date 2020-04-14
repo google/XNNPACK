@@ -43,6 +43,7 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__neon_x${BATCH_TILE}(
   for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
     $for N in range(0, BATCH_TILE, 4):
       const float32x4_t va${ABC[N:N+4]} = vld1q_f32(a); a += 4;
+    $for N in range(0, BATCH_TILE, 4):
       const float32x4_t vb${ABC[N:N+4]} = vld1q_f32(b); b += 4;
 
     $for N in range(0, BATCH_TILE, 4):
