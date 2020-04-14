@@ -884,6 +884,7 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/math/sigmoid-neonfma-rr2-p5-div.c)
 
 SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
+  src/f16-gemm/gen/1x8-neonfp16arith-ld64.c
   src/f16-gemm/gen/4x8-neonfp16arith-ld64.c
   src/f16-gemm/gen/6x8-neonfp16arith-ld64.c
   src/f16-gemm/gen/8x8-neonfp16arith-ld64.c

@@ -896,6 +896,7 @@ AARCH64_NEONFMA_UKERNELS = [
 ]
 
 AARCH64_NEONFP16ARITH_UKERNELS = [
+    "src/f16-gemm/gen/1x8-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/4x8-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/6x8-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/8x8-neonfp16arith-ld64.c",
