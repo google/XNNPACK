@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -54,7 +55,7 @@ class LUTNormMicrokernelTester {
   void Test(xnn_u8_lut32norm_ukernel_function lutnorm) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
     auto u32rng = std::bind(
       std::uniform_int_distribution<uint32_t>(1, std::numeric_limits<uint32_t>::max() / (257 * n())),
       rng);

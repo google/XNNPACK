@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -99,7 +100,7 @@ class ChannelShuffleOperatorTester {
   void TestX8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + (batch_size() - 1) * input_stride() + channels());
     std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());

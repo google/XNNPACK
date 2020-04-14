@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -45,7 +46,7 @@ class RMaxMicrokernelTester {
   void Test(xnn_u8_rmax_ukernel_function rmax) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
     std::vector<uint8_t> x(n());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

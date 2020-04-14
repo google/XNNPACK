@@ -10,6 +10,7 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -38,7 +39,7 @@ static void xnnpack_average_pooling_q8(benchmark::State& state, const char* net)
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
   const size_t output_height = (2 * padding_size + input_height - pooling_size) / stride + 1;
   const size_t output_width = (2 * padding_size + input_width - pooling_size) / stride + 1;

@@ -10,13 +10,13 @@
 
 #include <gtest/gtest.h>
 
-#include <cstddef>
-#include <cstdlib>
-
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
+#include <cstddef>
+#include <cstdlib>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -249,18 +249,18 @@ class RequantizationTester {
 
   void TestRandomCasesPrecise(requantization_function requantize) {
     std::random_device random_device;
-    std::mt19937 mtRng(random_device());
+    std::mt19937 rng(random_device());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      auto rng = std::bind(std::uniform_int_distribution<uint8_t>(), mtRng);
+      auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
       std::vector<int32_t> inputs(4096);
       std::vector<uint8_t> outputs(inputs.size());
 
       const uint8_t zero_point = UINT8_C(128);
       std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
-      const float scale = scale_distribution(mtRng);
+      const float scale = scale_distribution(rng);
       for (size_t i = 0; i < inputs.size(); i++) {
-        const uint8_t approximate_output = rng();
+        const uint8_t approximate_output = u8rng();
         const int32_t input = int32_t(double(approximate_output) / double(scale));
         inputs[i] = input;
       }
@@ -289,18 +289,18 @@ class RequantizationTester {
 
   void TestRandomCasesApproximate(requantization_function requantize) {
     std::random_device random_device;
-    std::mt19937 mtRng(random_device());
+    std::mt19937 rng(random_device());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      auto rng = std::bind(std::uniform_int_distribution<uint8_t>(), mtRng);
+      auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
       std::vector<int32_t> inputs(4096);
       std::vector<uint8_t> outputs(inputs.size());
 
       const uint8_t zero_point = UINT8_C(128);
       std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
-      const float scale = scale_distribution(mtRng);
+      const float scale = scale_distribution(rng);
       for (size_t i = 0; i < inputs.size(); i++) {
-        const uint8_t approximate_output = rng();
+        const uint8_t approximate_output = u8rng();
         const int32_t input = int32_t(double(approximate_output) / double(scale));
         inputs[i] = input;
       }
@@ -331,9 +331,9 @@ class RequantizationTester {
 
   void TestRandomCasesAgainstReference(requantization_function requantize, requantization_function requantize_reference) {
     std::random_device random_device;
-    std::mt19937 mtRng(random_device());
+    std::mt19937 rng(random_device());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      auto rng = std::bind(std::uniform_int_distribution<uint8_t>(), mtRng);
+      auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
       std::vector<int32_t> inputs(4096);
       std::vector<uint8_t> outputs(inputs.size());
@@ -341,9 +341,9 @@ class RequantizationTester {
 
       const uint8_t zero_point = UINT8_C(128);
       std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
-      const float scale = scale_distribution(mtRng);
+      const float scale = scale_distribution(rng);
       for (size_t i = 0; i < inputs.size(); i++) {
-        const uint8_t approximate_output = rng();
+        const uint8_t approximate_output = u8rng();
         const int32_t input = int32_t(double(approximate_output) / double(scale));
         inputs[i] = input;
       }

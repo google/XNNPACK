@@ -10,6 +10,7 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -27,7 +28,7 @@ static void global_average_pooling_q8(benchmark::State& state) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
   std::vector<uint8_t> input(batch_size * input_height * input_width * channels);
   std::generate(input.begin(), input.end(), std::ref(u8rng));

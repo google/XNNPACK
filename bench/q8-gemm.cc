@@ -11,6 +11,7 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <mutex>
 #include <random>
 #include <vector>
@@ -53,7 +54,7 @@ static void GEMMBenchmark(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-  auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
   std::vector<uint8_t> a(mc * kc);
   std::generate(a.begin(), a.end(), std::ref(u8rng));
@@ -155,7 +156,7 @@ static void GemmlowpBenchmark(benchmark::State& state, uint32_t threads)
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-  auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
   std::vector<uint8_t> a(mc * kc);
   std::generate(a.begin(), a.end(), std::ref(u8rng));
@@ -214,7 +215,7 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-  auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),

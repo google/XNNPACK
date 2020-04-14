@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -24,7 +25,7 @@ static void add_nc_q8(benchmark::State& state) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
   std::vector<uint8_t> a(batch_size * channels);
   std::vector<uint8_t> b(batch_size * channels);
@@ -92,7 +93,7 @@ static void add_nc_q8_inplace(benchmark::State& state) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
   std::vector<uint8_t> a(batch_size * channels);
   std::vector<uint8_t> y(batch_size * channels);

@@ -10,6 +10,7 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <ostream>
 #include <random>
 #include <string>
@@ -54,7 +55,7 @@ void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-  auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;

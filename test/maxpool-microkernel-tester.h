@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -160,7 +161,7 @@ class MaxPoolMicrokernelTester {
   void Test(xnn_u8_maxpool_ukernel_function maxpool, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
+    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
     std::vector<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
