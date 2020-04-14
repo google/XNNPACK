@@ -1918,10 +1918,7 @@ xnnpack_cc_library(
     name = "operator_run",
     srcs = ["src/operator-run.c"],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
-    copts = xnnpack_std_copts() + LOGGING_COPTS + [
-        # Wrappers for multi-pass microkernels use VLAs for temporary buffers.
-        "-Wno-vla",
-    ] + select({
+    copts = xnnpack_std_copts() + LOGGING_COPTS + select({
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),

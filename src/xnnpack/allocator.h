@@ -9,6 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_MSC_VER)
+  #include <malloc.h>
+#elif !defined(__GNUC__)
+  #include <alloca.h>
+#endif
+
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
 
@@ -57,3 +63,19 @@ inline static void* xnn_allocate_zero_simd_memory(size_t memory_size) {
 inline static void xnn_release_simd_memory(void* memory_pointer) {
   xnn_params.allocator.aligned_deallocate(xnn_params.allocator.context, memory_pointer);
 }
+
+#if defined(__GNUC__) && defined(__BIGGEST_ALIGNMENT__) && (__BIGGEST_ALIGNMENT__ >= XNN_ALLOCATION_ALIGNMENT)
+  #define XNN_SIMD_ALLOCA(size) __builtin_alloca((size))
+#elif (defined(__clang_major__) && (__clang_major__ >= 4)) || \
+    (defined(__GNUC__) && (__GNUC__ >= 5 || __GNUC__ == 4 && __GNUC_MINOR__ >= 7) && !defined(__INTEL_COMPILER))
+  #define XNN_SIMD_ALLOCA(size) __builtin_alloca_with_align((size), XNN_ALLOCATION_ALIGNMENT)
+#elif defined(__GNUC__)
+  #define XNN_SIMD_ALLOCA(size) \
+    ((void*) ((((uintptr_t) __builtin_alloca((size) + XNN_ALLOCATION_ALIGNMENT)) | (XNN_ALLOCATION_ALIGNMENT - 1)) + 1))
+#elif defined(_MSC_VER)
+  #define XNN_SIMD_ALLOCA(size) \
+    ((void*) ((((uintptr_t) _alloca((size) + XNN_ALLOCATION_ALIGNMENT)) | (XNN_ALLOCATION_ALIGNMENT - 1)) + 1))
+#else
+  #define XNN_SIMD_ALLOCA(size) \
+    ((void*) ((((uintptr_t) alloca((size) + XNN_ALLOCATION_ALIGNMENT)) | (XNN_ALLOCATION_ALIGNMENT - 1)) + 1))
+#endif

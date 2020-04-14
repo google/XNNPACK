@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include <xnnpack.h>
+#include <xnnpack/allocator.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/log.h>
 #include <xnnpack/common.h>
@@ -378,8 +379,8 @@ void xnn_compute_argmax_pooling_multipass(
   uint32_t* index = (uint32_t*) ((uintptr_t) context->index +
     batch_index * context->index_batch_stride + output_y * context->index_height_stride);
 
-  XNN_ALIGN(16) float multipass_accumulation_buffer[context->channels + XNN_EXTRA_BYTES / sizeof(float)];
-  XNN_ALIGN(16) uint32_t multipass_index_buffer[context->channels + XNN_EXTRA_BYTES / sizeof(uint32_t)];
+  void* multipass_accumulation_buffer = XNN_SIMD_ALLOCA(context->channels * sizeof(float) + XNN_EXTRA_BYTES);
+  void* multipass_index_buffer = XNN_SIMD_ALLOCA(context->channels * sizeof(uint32_t) + XNN_EXTRA_BYTES);
 
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
@@ -454,7 +455,9 @@ void xnn_compute_average_pooling_multipass(
   const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
   void* output = (void*) ((uintptr_t) context->output +
     batch_index * context->output_batch_stride + output_y * context->output_height_stride);
-  XNN_ALIGN(16) int32_t multipass_buffer[context->channels + XNN_EXTRA_BYTES / sizeof(uint8_t)];
+
+  void* multipass_buffer =
+    XNN_SIMD_ALLOCA(context->channels * sizeof(int32_t) + XNN_EXTRA_BYTES * sizeof(int32_t) / sizeof(uint8_t));
 
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
@@ -495,7 +498,8 @@ void xnn_compute_pixelwise_average_pooling_multipass(
     (const void*) ((uintptr_t) context->pixelwise_buffer + output_y * context->pixelwise_buffer_height_stride);
   void* output = (void*) ((uintptr_t) context->output +
     batch_index * context->output_batch_stride + output_y * context->output_height_stride);
-  XNN_ALIGN(16) int32_t multipass_buffer[context->channels + XNN_EXTRA_BYTES / sizeof(uint8_t)];
+
+  void* multipass_buffer = XNN_SIMD_ALLOCA(context->channels * sizeof(int32_t) + XNN_EXTRA_BYTES * sizeof(int32_t) / sizeof(uint8_t));
 
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
@@ -531,7 +535,9 @@ void xnn_compute_global_average_pooling_nwc_multipass(
     (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride);
   void* output =
     (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride);
-  XNN_ALIGN(16) int32_t multipass_buffer[context->channels + XNN_EXTRA_BYTES / sizeof(uint8_t)];
+
+  void* multipass_buffer =
+    XNN_SIMD_ALLOCA(context->channels * sizeof(int32_t) + XNN_EXTRA_BYTES * sizeof(int32_t) / sizeof(uint8_t));
 
   context->multipass_ukernel(
     context->input_elements,
