@@ -9251,7 +9251,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP4X25__PSIMD, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -9407,10 +9407,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__psimd, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP4X25__PSIMD_ACC2, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -9566,10 +9566,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__psimd_acc2, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP8X25__PSIMD, c_eq_8) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -9725,10 +9725,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__psimd, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP8X25__PSIMD_ACC2, c_eq_8) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -9884,10 +9884,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__psimd_acc2, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP4X9__PSIMD, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -10043,10 +10043,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__psimd, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP4X9__PSIMD_ACC2, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -10202,10 +10202,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__psimd_acc2, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP8X9__PSIMD, c_eq_8) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -10361,10 +10361,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__psimd, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP8X9__PSIMD_ACC2, c_eq_8) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -10520,10 +10520,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__psimd_acc2, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP4X4__PSIMD, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -10679,10 +10679,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__psimd, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP4X4__PSIMD_ACC2, c_eq_4) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -10838,10 +10838,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__psimd_acc2, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP8X4__PSIMD, c_eq_8) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -10997,10 +10997,10 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__psimd, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_MINMAX_UP8X4__PSIMD_ACC2, c_eq_8) {
     TEST_REQUIRES_PSIMD;
     DWConvMicrokernelTester()
@@ -11156,7 +11156,7 @@
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__psimd_acc2, DWConvMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 #if XNN_ARCH_WASM

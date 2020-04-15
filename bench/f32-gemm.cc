@@ -740,7 +740,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(f32_gemm_8x16__avx512f_broadcast)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   static void f32_gemm_4x8__psimd_loadsplat(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_4x8__psimd_loadsplat, 4, 8, 1, 1);
   }
@@ -781,7 +781,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(f32_gemm_6x8s4__psimd)
   BENCHMARK_GEMM(f32_ppmm_4x8_unipass__psimd)
   BENCHMARK_GEMM(f32_ppmm_4x8_twopass__psimd)
-#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 static void f32_gemm_1x4__scalar(benchmark::State& state, const char* net) {
   GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_1x4__scalar, 1, 4, 1, 1);

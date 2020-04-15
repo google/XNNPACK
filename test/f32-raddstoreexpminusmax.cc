@@ -3125,7 +3125,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X4, elements_eq_4) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3159,10 +3159,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x4);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X8, elements_eq_8) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3196,10 +3196,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x8);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X8_ACC2, elements_eq_8) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3233,10 +3233,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x8_acc2);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X12, elements_eq_12) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3270,10 +3270,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x12);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X12_ACC2, elements_eq_12) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3307,10 +3307,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x12_acc2);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X12_ACC3, elements_eq_12) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3344,10 +3344,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x12_acc3);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X16, elements_eq_16) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3381,10 +3381,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x16);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X16_ACC2, elements_eq_16) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3418,10 +3418,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x16_acc2);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X16_ACC4, elements_eq_16) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3455,10 +3455,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x16_acc4);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X20, elements_eq_20) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3492,10 +3492,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x20);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X20_ACC2, elements_eq_20) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3529,10 +3529,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x20_acc2);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_RADDSTOREEXPMINUSMAX__PSIMD_P5_X20_ACC5, elements_eq_20) {
     TEST_REQUIRES_PSIMD;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -3566,7 +3566,7 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x20_acc5);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X1, elements_eq_1) {

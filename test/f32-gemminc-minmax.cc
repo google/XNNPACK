@@ -37159,7 +37159,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_GEMMINC_MINMAX_1X8__PSIMD_LOADSPLAT, k_eq_1) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -37510,10 +37510,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_minmax_ukernel_1x8__psimd_loadsplat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_GEMMINC_MINMAX_4X8__PSIMD_LOADSPLAT, k_eq_1) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -37864,10 +37864,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_minmax_ukernel_4x8__psimd_loadsplat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_GEMMINC_MINMAX_6X8__PSIMD_LOADSPLAT, k_eq_1) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -38218,10 +38218,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_minmax_ukernel_6x8__psimd_loadsplat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_GEMMINC_MINMAX_1X8__PSIMD_SPLAT, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -38674,10 +38674,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_minmax_ukernel_1x8__psimd_splat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_GEMMINC_MINMAX_4X8__PSIMD_SPLAT, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -39130,10 +39130,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_minmax_ukernel_4x8__psimd_splat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_GEMMINC_MINMAX_6X8__PSIMD_SPLAT, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -39586,10 +39586,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_minmax_ukernel_6x8__psimd_splat, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_GEMMINC_MINMAX_1X8S4__PSIMD, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -40042,10 +40042,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_minmax_ukernel_1x8s4__psimd, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_GEMMINC_MINMAX_4X8S4__PSIMD, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -40498,10 +40498,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_minmax_ukernel_4x8s4__psimd, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_GEMMINC_MINMAX_6X8S4__PSIMD, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -40954,7 +40954,7 @@
       .cm_stride(11)
       .Test(xnn_f32_gemminc_minmax_ukernel_6x8s4__psimd, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 #if XNN_ARCH_WASM

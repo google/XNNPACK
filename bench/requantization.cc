@@ -128,7 +128,7 @@ BENCHMARK_F(Requantization, gemmlowp__scalar)(benchmark::State& state) {
   }
 }
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   BENCHMARK_F(Requantization, precise__psimd)(benchmark::State& state) {
     for (auto _ : state) {
       xnn_requantize_precise__psimd(
@@ -142,7 +142,7 @@ BENCHMARK_F(Requantization, gemmlowp__scalar)(benchmark::State& state) {
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

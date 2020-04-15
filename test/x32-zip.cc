@@ -504,7 +504,7 @@
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(X32_ZIP_X2__PSIMD, n_eq_4) {
     TEST_REQUIRES_PSIMD;
     ZipMicrokernelTester()
@@ -748,7 +748,7 @@
       }
     }
   }
-#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 TEST(X32_ZIP_X2__SCALAR, n_eq_1) {
   ZipMicrokernelTester()

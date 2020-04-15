@@ -320,7 +320,7 @@ TEST(GEMMLOWP__SCALAR, random_cases) {
 }
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   /*
    * Precise PSIMD implementation using unsigned 32-bit arithmetics.
    */
@@ -398,7 +398,7 @@ TEST(GEMMLOWP__SCALAR, random_cases) {
       .iterations(1000)
       .TestRandomCasesApproximate(xnn_requantize_fp32__psimd);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

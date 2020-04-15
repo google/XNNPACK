@@ -294,7 +294,7 @@ static void DWConvEnd2EndBenchmark(
   BENCHMARK_CAPTURE(f32_dwconv_up32x9__avx512f_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   static void f32_dwconv_up4x9__psimd(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_minmax_ukernel_up4x9__psimd,
@@ -330,7 +330,7 @@ static void DWConvEnd2EndBenchmark(
 
   BENCHMARK_CAPTURE(f32_dwconv_up8x9__psimd_acc2, mobilenet_v1, models::MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
   BENCHMARK_CAPTURE(f32_dwconv_up8x9__psimd_acc2, mobilenet_v2, models::MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 static void f32_dwconv_up1x9__scalar(benchmark::State& state, models::ExecutionPlanFactory model) {
   DWConvEnd2EndBenchmark(state, model,

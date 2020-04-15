@@ -581,7 +581,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_HSWISH__PSIMD_X4, batch_eq_4) {
     TEST_REQUIRES_PSIMD;
     HSwishMicrokernelTester()
@@ -625,10 +625,10 @@
         .Test(xnn_f32_hswish_ukernel__psimd_x4, HSwishMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_HSWISH__PSIMD_X8, batch_eq_8) {
     TEST_REQUIRES_PSIMD;
     HSwishMicrokernelTester()
@@ -672,7 +672,7 @@
         .Test(xnn_f32_hswish_ukernel__psimd_x8, HSwishMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 #if XNN_ARCH_WASM

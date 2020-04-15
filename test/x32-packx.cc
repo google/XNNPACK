@@ -231,7 +231,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(X32_PACKX_4X__PSIMD, k_eq_4) {
     TEST_REQUIRES_PSIMD;
     PackMicrokernelTester()
@@ -335,7 +335,7 @@
         .Test(xnn_x32_packx_ukernel_4x__psimd);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 TEST(X32_PACKX_2X__SCALAR, k_eq_1) {

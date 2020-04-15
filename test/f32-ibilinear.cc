@@ -671,7 +671,7 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_IBILINEAR__PSIMD_C4, channels_eq_4) {
     TEST_REQUIRES_PSIMD;
     IBilinearMicrokernelTester()
@@ -746,10 +746,10 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_IBILINEAR__PSIMD_C8, channels_eq_8) {
     TEST_REQUIRES_PSIMD;
     IBilinearMicrokernelTester()
@@ -824,4 +824,4 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC

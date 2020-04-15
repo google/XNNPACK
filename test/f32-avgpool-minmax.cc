@@ -1647,7 +1647,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_AVGPOOL_MINMAX_9P8X__PSIMD_C4, channels_eq_4_twopass_fulltile) {
     TEST_REQUIRES_PSIMD;
     AvgPoolMicrokernelTester()
@@ -2457,7 +2457,7 @@
       }
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 #if XNN_ARCH_WASM
@@ -4375,7 +4375,7 @@ TEST(F32_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_AVGPOOL_MINMAX_9X__PSIMD_C4, channels_eq_4_unipass_fulltile) {
     TEST_REQUIRES_PSIMD;
     AvgPoolMicrokernelTester()
@@ -4907,7 +4907,7 @@ TEST(F32_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
       }
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 #if XNN_ARCH_WASM

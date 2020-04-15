@@ -850,7 +850,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_GAVGPOOL_MINMAX_7X__PSIMD_C4, channels_eq_4_fulltile) {
     TEST_REQUIRES_PSIMD;
     GAvgPoolMicrokernelTester()
@@ -1266,7 +1266,7 @@
       }
     }
   }
-#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 #if XNN_ARCH_WASM

@@ -1712,7 +1712,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_PPMM_MINMAX_4X8__PSIMD, k_eq_1) {
     TEST_REQUIRES_PSIMD;
     GemmMicrokernelTester()
@@ -2047,7 +2047,7 @@
       .cm_stride(11)
       .Test(xnn_f32_ppmm_minmax_ukernel_4x8__psimd, GemmMicrokernelTester::Variant::Scalar);
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 TEST(F32_PPMM_MINMAX_4X2__SCALAR, k_eq_1) {

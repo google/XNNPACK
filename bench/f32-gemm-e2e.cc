@@ -835,7 +835,7 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_END2END(f32_gemm_8x16__avx512f_broadcast);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   static void f32_gemm_4x8__psimd_loadsplat(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_4x8__psimd_loadsplat,
@@ -898,7 +898,7 @@ static void GEMMEnd2EndBenchmark(
 
   BENCHMARK_END2END(f32_gemm_4x8s4__psimd);
   BENCHMARK_END2END(f32_gemm_6x8s4__psimd);
-#endif  // !XNN_ARCH_WASM && !XNN_ARCH_ASMJS
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 #if XNN_ARCH_WASM
   static void f32_gemm_2x4__wasm(benchmark::State& state, models::ExecutionPlanFactory model) {

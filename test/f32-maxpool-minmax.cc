@@ -1794,7 +1794,7 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_MAXPOOL_MINMAX_9P8X__PSIMD_C4, channels_eq_4_unipass_fulltile) {
     TEST_REQUIRES_PSIMD;
     MaxPoolMicrokernelTester()
@@ -2678,7 +2678,7 @@
       }
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 #if XNN_ARCH_WASM

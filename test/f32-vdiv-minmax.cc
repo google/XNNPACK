@@ -721,7 +721,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_VDIV_MINMAX__PSIMD_X4, batch_eq_4) {
     TEST_REQUIRES_PSIMD;
     VBinOpMicrokernelTester()
@@ -806,10 +806,10 @@
         .Test(xnn_f32_vdiv_minmax_ukernel__psimd_x4, VBinOpMicrokernelTester::OpType::Div, VBinOpMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_VDIV_MINMAX__PSIMD_X8, batch_eq_8) {
     TEST_REQUIRES_PSIMD;
     VBinOpMicrokernelTester()
@@ -894,7 +894,7 @@
         .Test(xnn_f32_vdiv_minmax_ukernel__psimd_x8, VBinOpMicrokernelTester::OpType::Div, VBinOpMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM
+#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
 #if XNN_ARCH_WASM
