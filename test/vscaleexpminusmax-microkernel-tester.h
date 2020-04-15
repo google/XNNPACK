@@ -38,7 +38,7 @@ class VScaleExpMinusMaxMicrokernelTester {
     return *this;
   }
 
-  inline size_t scale() const {
+  inline float scale() const {
     return this->scale_;
   }
 
