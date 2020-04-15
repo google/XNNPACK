@@ -171,6 +171,16 @@
   #define XNN_UNPREDICTABLE(condition) (!!(condition))
 #endif
 
+#if defined(__has_feature)
+  #if __has_feature(thread_sanitizer)
+    #define XNN_DISABLE_TSAN __attribute__((__no_sanitize__("thread")))
+  #else
+    #define XNN_DISABLE_TSAN
+  #endif
+#else
+    #define XNN_DISABLE_TSAN
+#endif
+
 #if defined(__GNUC__)
   #define XNN_INLINE inline __attribute__((__always_inline__))
 #elif defined(_MSC_VER)
