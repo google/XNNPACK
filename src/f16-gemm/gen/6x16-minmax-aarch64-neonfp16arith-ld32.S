@@ -95,7 +95,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32
         CSEL x4, x12, x4, LO     //   a5 = a4
         CSEL x7, x13, x7, LO     //   c5 = c4
 
-        # Load clamping_params scale value
+        # Load params scale value
         LD1R {v6.8h}, [x8]
         ADD x8, x8, 2
 
@@ -174,7 +174,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32
 3:
         # Scale and Clamp
         FMUL v20.8h, v20.8h, v6.8h
-        # Load clamping_params values
+        # Load params values
         LD2R {v4.8h, v5.8h}, [x8]
         FMUL v21.8h, v21.8h, v6.8h
         FMUL v22.8h, v22.8h, v6.8h

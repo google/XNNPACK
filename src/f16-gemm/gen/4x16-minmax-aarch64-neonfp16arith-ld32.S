@@ -42,7 +42,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         # Load cn_stride, params pointer
         LDP x14, x8, [sp]
 
-        # Load clamping_params values
+        # Load params values
         LD3R {v4.8h, v5.8h, v6.8h}, [x8]
 
         # Clamp A and C pointers
