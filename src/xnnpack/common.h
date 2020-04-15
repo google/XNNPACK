@@ -152,6 +152,12 @@
 
 #define XNN_COUNT_OF(array) (sizeof(array) / sizeof(0[array]))
 
+#if defined(__cplusplus) || XNN_COMPILER_MSVC
+  #define XNN_MIN_ELEMENTS(count) count
+#else
+  #define XNN_MIN_ELEMENTS(count) static count
+#endif
+
 #if defined(__GNUC__)
   #define XNN_LIKELY(condition) (__builtin_expect(!!(condition), 1))
   #define XNN_UNLIKELY(condition) (__builtin_expect(!!(condition), 0))

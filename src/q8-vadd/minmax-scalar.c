@@ -15,7 +15,7 @@ void xnn_q8_vadd_minmax_ukernel__scalar(
     const uint8_t* a,
     const uint8_t* b,
     uint8_t* y,
-    const union xnn_q8_add_params params[restrict static 1])
+    const union xnn_q8_add_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
 

@@ -22,7 +22,7 @@ void xnn_f32_spmm_minmax_ukernel_16x1__neonfma_pipelined(
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
     float*restrict c,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(m != 0);
 

@@ -42,7 +42,7 @@ void xnn_q8_gemm_minmax_ukernel_2x4c8__sse2(
     uint8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_q8_gemm_params params[restrict static 1])
+    const union xnn_q8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 2);

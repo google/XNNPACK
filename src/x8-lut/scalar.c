@@ -14,7 +14,7 @@
 void xnn_x8_lut_ukernel__scalar(
     size_t n,
     const uint8_t* x,
-    const uint8_t t[restrict static 256],
+    const uint8_t t[restrict XNN_MIN_ELEMENTS(256)],
     uint8_t* y)
 {
   assert(n != 0);

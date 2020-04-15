@@ -144,7 +144,7 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
     const float* input1,
     const float* input2,
     float* output,
-    const struct vbinary_parameters vbinary[restrict static 1],
+    const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
     size_t num_threads)
 {
   if (binary_elementwise_op->type != expected_operator_type) {

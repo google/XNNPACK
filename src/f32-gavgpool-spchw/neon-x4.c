@@ -16,7 +16,7 @@ void xnn_f32_gavgpool_spchw_ukernel__neon_x4(
     size_t channels,
     const float* input,
     float* output,
-    const union xnn_f32_gavgpool_params params[restrict static 1])
+    const union xnn_f32_gavgpool_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(elements != 0);
   assert(elements % sizeof(float) == 0);

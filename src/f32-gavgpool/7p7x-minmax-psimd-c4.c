@@ -19,7 +19,7 @@ void xnn_f32_gavgpool_minmax_ukernel_7p7x__psimd_c4(
     const float* zero,
     float* buffer,
     float* output,
-    const union xnn_f32_scaleminmax_params params[restrict static 1])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows > 7);
   assert(channels != 0);

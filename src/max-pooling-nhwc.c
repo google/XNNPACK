@@ -345,7 +345,7 @@ static enum xnn_status setup_max_pooling2d(
   void* output,
   uint32_t log2_input_element_size,
   uint32_t log2_output_element_size,
-  struct maxpool_parameters maxpool[restrict static 1],
+  struct maxpool_parameters maxpool[restrict XNN_MIN_ELEMENTS(1)],
   const void* params,
   size_t num_threads)
 {

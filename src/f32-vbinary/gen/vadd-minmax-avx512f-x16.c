@@ -21,7 +21,7 @@ void xnn_f32_vadd_minmax_ukernel__avx512f_x16(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

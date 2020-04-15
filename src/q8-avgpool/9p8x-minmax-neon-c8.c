@@ -25,7 +25,7 @@ void xnn_q8_avgpool_minmax_ukernel_9p8x__neon_c8(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_q8_avgpool_params params[restrict static 1])
+    const union xnn_q8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(output_pixels != 0);
   assert(kernel_elements > 9);

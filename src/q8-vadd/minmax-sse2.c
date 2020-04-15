@@ -18,7 +18,7 @@ void xnn_q8_vadd_minmax_ukernel__sse2(
     const uint8_t* a,
     const uint8_t* b,
     uint8_t* y,
-    const union xnn_q8_add_params params[restrict static 1])
+    const union xnn_q8_add_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const __m128i vzero_point_product = _mm_load_si128((const __m128i*) &params->sse2.zero_point_product);
   const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) &params->sse2.a_multiplier_lo);

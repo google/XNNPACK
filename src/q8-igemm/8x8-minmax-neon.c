@@ -26,7 +26,7 @@ void xnn_q8_igemm_minmax_ukernel_8x8__neon(
     size_t cn_stride,
     size_t a_offset,
     const uint8_t* zero,
-    const union xnn_q8_gemm_params params[restrict static 1])
+    const union xnn_q8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 8);

@@ -28,7 +28,7 @@ void xnn_f16_gemm_minmax_ukernel_6x8__neonfp16arith_ld64(
     void* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f16_output_params params[restrict static 1])
+    const struct xnn_f16_output_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 6);

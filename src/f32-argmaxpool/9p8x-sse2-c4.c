@@ -22,7 +22,7 @@ void xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4(
     uint32_t* index,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_minmax_params params[restrict static 1])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);

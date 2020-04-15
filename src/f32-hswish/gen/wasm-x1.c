@@ -18,7 +18,7 @@ void xnn_f32_hswish_ukernel__wasm_x1(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_hswish_params params[restrict static 1])
+    const union xnn_f32_hswish_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

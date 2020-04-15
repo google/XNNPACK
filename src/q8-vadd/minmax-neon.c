@@ -17,7 +17,7 @@ void xnn_q8_vadd_minmax_ukernel__neon(
     const uint8_t* a,
     const uint8_t* b,
     uint8_t* y,
-    const union xnn_q8_add_params params[restrict static 1])
+    const union xnn_q8_add_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const uint8x8_t va_zero_point = vld1_dup_u8(&params->neon.a_zero_point);
   const uint8x8_t vb_zero_point = vld1_dup_u8(&params->neon.b_zero_point);

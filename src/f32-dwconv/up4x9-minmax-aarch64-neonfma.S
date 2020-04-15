@@ -13,7 +13,7 @@
 #     float* output,
 #     size_t input_stride,
 #     size_t output_increment,
-#     const union xnn_f32_minmax_params params[restrict static 1])
+#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
 
         # Save d8-d15 on stack

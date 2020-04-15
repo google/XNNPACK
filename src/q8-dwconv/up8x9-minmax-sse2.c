@@ -19,7 +19,7 @@ void xnn_q8_dwconv_minmax_ukernel_up8x9__sse2(
     uint8_t* output,
     size_t input_stride,
     size_t output_increment,
-    const union xnn_q8_gemm_params params[restrict static 1])
+    const union xnn_q8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const __m128i vkernel_zero_point = _mm_load_si128((const __m128i*) params->sse2.kernel_zero_point);
   const __m128i vzero = _mm_setzero_si128();

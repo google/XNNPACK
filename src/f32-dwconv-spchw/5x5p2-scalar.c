@@ -19,7 +19,7 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__scalar(
     size_t output_tuple_stride,
     size_t input_width_stride,
     size_t output_width_stride,
-    const union xnn_f32_spchw_params params[restrict static 1])
+    const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
 

@@ -27,7 +27,7 @@ enum xnn_status xnn_create_runtime(
 
 // Product of all shape dimensions, except for the last (channel) one
 static size_t product_non_channel_dims(
-  const struct xnn_shape shape[restrict static 1])
+  const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)])
 {
   size_t batch_size = 1;
   for (size_t i = 0; i + 1 < shape->num_dims; i++) {

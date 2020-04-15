@@ -22,7 +22,7 @@ void xnn_q8_gavgpool_minmax_ukernel_7p7x__sse2_c8(
     const uint8_t* zero,
     int32_t* buffer,
     uint8_t* output,
-    const union xnn_q8_avgpool_params params[restrict static 1])
+    const union xnn_q8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows > 7);
   assert(channels != 0);
