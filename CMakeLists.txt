@@ -31,6 +31,11 @@ ELSE()
   ADD_DEFINITIONS(-DXNN_ENABLE_ASSEMBLY=0)
 ENDIF()
 
+IF(MSVC)
+  # Disable "unary minus operator applied to unsigned type, result still unsigned" warning
+  ADD_COMPILE_OPTIONS("/wd4146")
+ENDIF()
+
 # ---[ Build flags
 IF(NOT CMAKE_SYSTEM_PROCESSOR)
   IF(IOS)
