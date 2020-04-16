@@ -288,15 +288,15 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
 
   // Note: context must be static to avoid the cost of re-creating it for each benchmark.
   static ruy::Context context;
-  context.max_num_threads = threads;
+  context.set_max_num_threads(threads);
 
   ruy::Matrix<float> ruy_a;
-  ruy::MakeSimpleLayout(nc, kc, ruy::Order::kRowMajor, &ruy_a.layout);
+  ruy::MakeSimpleLayout(nc, kc, ruy::Order::kRowMajor, ruy_a.mutable_layout());
   ruy::Matrix<float> ruy_b;
-  ruy::MakeSimpleLayout(kc, mc, ruy::Order::kColMajor, &ruy_b.layout);
-  ruy_b.data = a.data();
+  ruy::MakeSimpleLayout(kc, mc, ruy::Order::kColMajor, ruy_b.mutable_layout());
+  ruy_b.set_data(a.data());
   ruy::Matrix<float> ruy_c;
-  ruy::MakeSimpleLayout(nc, mc, ruy::Order::kColMajor, &ruy_c.layout);
+  ruy::MakeSimpleLayout(nc, mc, ruy::Order::kColMajor, ruy_c.mutable_layout());
 
   ruy::BasicSpec<float, float> spec;
 
@@ -308,11 +308,11 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
   std::call_once(warmup, [&](){
     auto start = std::chrono::steady_clock::now();
     do {
-      ruy_a.data = k.data();
-      ruy_c.data = c.data();
-      spec.bias = b.data();
+      ruy_a.set_data(k.data());
+      ruy_c.set_data(c.data());
+      spec.set_bias(b.data());
 
-      ruy::Mul<ruy::kAllPaths>(ruy_a, ruy_b, spec, &context, &ruy_c);
+      ruy::Mul(ruy_a, ruy_b, spec, &context, &ruy_c);
     } while (std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count() < 0.5);
   });
 
@@ -328,11 +328,11 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    ruy_a.data = k.data() + buffer_index * nc * kc;
-    ruy_c.data = c.data() + buffer_index * mc * nc;
-    spec.bias = b.data() + buffer_index * nc;
+    ruy_a.set_data(k.data() + buffer_index * nc * kc);
+    ruy_c.set_data(c.data() + buffer_index * mc * nc);
+    spec.set_bias(b.data() + buffer_index * nc);
 
-    ruy::Mul<ruy::kAllPaths>(ruy_a, ruy_b, spec, &context, &ruy_c);
+    ruy::Mul(ruy_a, ruy_b, spec, &context, &ruy_c);
   }
 
   state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
