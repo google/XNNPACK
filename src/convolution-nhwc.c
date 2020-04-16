@@ -248,7 +248,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
       assert(dwconv_parameters != NULL);
       assert(dwconv_parameters->primary_tile == kernel_size);
 
-      const uint32_t c_stride = round_up_po2(groups, dwconv_parameters->channel_tile);
+      const size_t c_stride = round_up_po2(groups, dwconv_parameters->channel_tile);
       const size_t packed_weights_size = (sizeof(uint8_t) * kernel_size + sizeof(int32_t)) * c_stride;
       convolution_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights == NULL) {
@@ -284,8 +284,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
     {
       const uint32_t nr = xnn_params.q8.gemm.nr;
       const uint32_t kr = UINT32_C(1) << xnn_params.q8.gemm.log2_kr;
-      const uint32_t n_stride = round_up(group_output_channels, nr);
-      const uint32_t k_stride = round_up_po2(group_input_channels, kr);
+      const size_t n_stride = round_up(group_output_channels, nr);
+      const size_t k_stride = round_up_po2(group_input_channels, kr);
 
       const size_t packed_group_weights_size =
         (sizeof(uint8_t) * kernel_size * k_stride + sizeof(int32_t)) * n_stride;
@@ -558,7 +558,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   switch (ukernel_type) {
     case xnn_ukernel_type_vmulcaddc:
     {
-      const uint32_t c_stride = round_up_po2(groups, xnn_params.f32.vmulcaddc.channel_tile);
+      const size_t c_stride = round_up_po2(groups, xnn_params.f32.vmulcaddc.channel_tile);
       const size_t packed_weights_size = 2 * sizeof(float) * c_stride;
       convolution_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights == NULL) {
@@ -581,7 +581,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
       assert(dwconv_parameters != NULL);
       assert(dwconv_parameters->primary_tile == kernel_size);
 
-      const uint32_t c_stride = round_up_po2(groups, dwconv_parameters->channel_tile);
+      const size_t c_stride = round_up_po2(groups, dwconv_parameters->channel_tile);
       const size_t packed_weights_size = (kernel_size + 1) * sizeof(float) * c_stride;
       convolution_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights == NULL) {
@@ -620,8 +620,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
       const uint32_t nr = xnn_params.f32.gemm.nr;
       const uint32_t kr = UINT32_C(1) << xnn_params.f32.gemm.log2_kr;
       const uint32_t sr = UINT32_C(1) << xnn_params.f32.gemm.log2_sr;
-      const uint32_t n_stride = round_up(group_output_channels, nr);
-      const uint32_t k_stride = round_up_po2(group_input_channels, kr);
+      const size_t n_stride = round_up(group_output_channels, nr);
+      const size_t k_stride = round_up_po2(group_input_channels, kr);
 
       const size_t packed_group_weights_size = (kernel_size * k_stride + 1) * sizeof(float) * n_stride;
       convolution_op->packed_weights = xnn_allocate_simd_memory(packed_group_weights_size * groups);
@@ -771,9 +771,9 @@ static enum xnn_status setup_convolution2d_nhwc(
 
     const uint32_t effective_kernel_height = (convolution_op->kernel_height - 1) * convolution_op->dilation_height + 1;
     const uint32_t effective_kernel_width = (convolution_op->kernel_width - 1) * convolution_op->dilation_width + 1;
-    const uint32_t total_padding_height =
+    const size_t total_padding_height =
       (convolution_op->output_height - 1) * convolution_op->stride_height + effective_kernel_height - input_height;
-    const uint32_t total_padding_width =
+    const size_t total_padding_width =
       (convolution_op->output_width - 1) * convolution_op->stride_width + effective_kernel_width - input_width;
     convolution_op->padding_top = total_padding_height / 2;
     convolution_op->padding_left = total_padding_width / 2;
@@ -905,7 +905,7 @@ static enum xnn_status setup_convolution2d_nhwc(
       if (input_height != convolution_op->last_input_height ||
           input_width != convolution_op->last_input_width)
       {
-        const void** indirection_buffer = (const void**) xnn_reallocate_memory(convolution_op->indirection_buffer, indirection_buffer_size);
+        const void** indirection_buffer = (const void**) xnn_reallocate_memory((void*) convolution_op->indirection_buffer, indirection_buffer_size);
         if (indirection_buffer == NULL) {
           xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
           return xnn_status_out_of_memory;
@@ -1020,7 +1020,7 @@ static enum xnn_status setup_convolution2d_nhwc(
       const size_t indirection_buffer_size = sizeof(void*) * batch_size * output_height * step_height;
 
       const void** indirection_buffer =
-        (const void**) xnn_reallocate_memory(convolution_op->indirection_buffer, indirection_buffer_size);
+        (const void**) xnn_reallocate_memory((void*) convolution_op->indirection_buffer, indirection_buffer_size);
       if (indirection_buffer == NULL) {
         xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
         return xnn_status_out_of_memory;
