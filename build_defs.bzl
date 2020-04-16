@@ -89,6 +89,7 @@ def xnnpack_cc_library(
     Args:
       name: The name of the library target to define.
       srcs: The list of architecture-independent source files.
+      psimd_srcs: The list of psimd-specific source files.
       x86_srcs: The list of x86-specific source files.
       aarch32_srcs: The list of AArch32-specific source files.
       aarch64_srcs: The list of AArch64-specific source files.
@@ -114,30 +115,30 @@ def xnnpack_cc_library(
     native.cc_library(
         name = name,
         srcs = srcs + select({
-            ":linux_k8": x86_srcs,
-            ":linux_aarch64": aarch64_srcs,
-            ":linux_armhf": aarch32_srcs,
-            ":macos_x86_64": x86_srcs,
-            ":windows_x86": x86_srcs,
-            ":windows_x86_64": x86_srcs,
-            ":android_armv7": aarch32_srcs,
-            ":android_arm64": aarch64_srcs,
-            ":android_x86": x86_srcs,
-            ":android_x86_64": x86_srcs,
-            ":ios_armv7": aarch32_srcs,
-            ":ios_arm64": aarch64_srcs,
-            ":ios_arm64e": aarch64_srcs,
-            ":ios_x86": x86_srcs,
-            ":ios_x86_64": x86_srcs,
-            ":watchos_armv7k": aarch32_srcs,
-            ":watchos_arm64_32": aarch64_srcs,
-            ":watchos_x86": x86_srcs,
-            ":watchos_x86_64": x86_srcs,
-            ":tvos_arm64": aarch64_srcs,
-            ":tvos_x86_64": x86_srcs,
+            ":linux_k8": psimd_srcs + x86_srcs,
+            ":linux_aarch64": psimd_srcs + aarch64_srcs,
+            ":linux_armhf": psimd_srcs + aarch32_srcs,
+            ":macos_x86_64": psimd_srcs + x86_srcs,
+            ":windows_x86": psimd_srcs + x86_srcs,
+            ":windows_x86_64": psimd_srcs + x86_srcs,
+            ":android_armv7": psimd_srcs + aarch32_srcs,
+            ":android_arm64": psimd_srcs + aarch64_srcs,
+            ":android_x86": psimd_srcs + x86_srcs,
+            ":android_x86_64": psimd_srcs + x86_srcs,
+            ":ios_armv7": psimd_srcs + aarch32_srcs,
+            ":ios_arm64": psimd_srcs + aarch64_srcs,
+            ":ios_arm64e": psimd_srcs + aarch64_srcs,
+            ":ios_x86": psimd_srcs + x86_srcs,
+            ":ios_x86_64": psimd_srcs + x86_srcs,
+            ":watchos_armv7k": psimd_srcs + aarch32_srcs,
+            ":watchos_arm64_32": psimd_srcs + aarch64_srcs,
+            ":watchos_x86": psimd_srcs + x86_srcs,
+            ":watchos_x86_64": psimd_srcs + x86_srcs,
+            ":tvos_arm64": psimd_srcs + aarch64_srcs,
+            ":tvos_x86_64": psimd_srcs + x86_srcs,
             ":emscripten_asmjs": asmjs_srcs,
             ":emscripten_wasm": wasm_srcs,
-            ":emscripten_wasmsimd": wasmsimd_srcs,
+            ":emscripten_wasmsimd": psimd_srcs + wasmsimd_srcs,
             "//conditions:default": [],
         }),
         copts = [
@@ -189,6 +190,7 @@ def xnnpack_cc_library(
 def xnnpack_aggregate_library(
         name,
         generic_deps = [],
+        psimd_deps = [],
         x86_deps = [],
         aarch32_deps = [],
         aarch64_deps = [],
@@ -199,6 +201,7 @@ def xnnpack_aggregate_library(
     Args:
       name: The name of the library target to define.
       generic_deps: The list of libraries to link on all architectures.
+      psimd_deps: The list of libraries to link in psimd-enabled builds.
       x86_deps: The list of libraries to link in x86 and x86-64 builds.
       aarch32_deps: The list of libraries to link in AArch32 builds.
       aarch64_deps: The list of libraries to link in AArch32 builds.
@@ -210,29 +213,29 @@ def xnnpack_aggregate_library(
         name = name,
         linkstatic = True,
         deps = generic_deps + select({
-            ":linux_k8": x86_deps,
-            ":linux_aarch64": aarch64_deps,
-            ":linux_armhf": aarch32_deps,
-            ":macos_x86_64": x86_deps,
-            ":windows_x86": x86_deps,
-            ":windows_x86_64": x86_deps,
-            ":android_armv7": aarch32_deps,
-            ":android_arm64": aarch64_deps,
-            ":android_x86": x86_deps,
-            ":android_x86_64": x86_deps,
-            ":ios_armv7": aarch32_deps,
-            ":ios_arm64": aarch64_deps,
-            ":ios_arm64e": aarch64_deps,
-            ":ios_x86": x86_deps,
-            ":ios_x86_64": x86_deps,
-            ":watchos_armv7k": aarch32_deps,
-            ":watchos_arm64_32": aarch64_deps,
-            ":watchos_x86": x86_deps,
-            ":watchos_x86_64": x86_deps,
-            ":tvos_arm64": aarch64_deps,
-            ":tvos_x86_64": x86_deps,
+            ":linux_k8": psimd_deps + x86_deps,
+            ":linux_aarch64": psimd_deps + aarch64_deps,
+            ":linux_armhf": psimd_deps + aarch32_deps,
+            ":macos_x86_64": psimd_deps + x86_deps,
+            ":windows_x86": psimd_deps + x86_deps,
+            ":windows_x86_64": psimd_deps + x86_deps,
+            ":android_armv7": psimd_deps + aarch32_deps,
+            ":android_arm64": psimd_deps + aarch64_deps,
+            ":android_x86": psimd_deps + x86_deps,
+            ":android_x86_64": psimd_deps + x86_deps,
+            ":ios_armv7": psimd_deps + aarch32_deps,
+            ":ios_arm64": psimd_deps + aarch64_deps,
+            ":ios_arm64e": psimd_deps + aarch64_deps,
+            ":ios_x86": psimd_deps + x86_deps,
+            ":ios_x86_64": psimd_deps + x86_deps,
+            ":watchos_armv7k": psimd_deps + aarch32_deps,
+            ":watchos_arm64_32": psimd_deps + aarch64_deps,
+            ":watchos_x86": psimd_deps + x86_deps,
+            ":watchos_x86_64": psimd_deps + x86_deps,
+            ":tvos_arm64": psimd_deps + aarch64_deps,
+            ":tvos_x86_64": psimd_deps + x86_deps,
             ":emscripten_wasm": wasm_deps,
-            ":emscripten_wasmsimd": wasmsimd_deps,
+            ":emscripten_wasmsimd": psimd_deps + wasmsimd_deps,
             ":emscripten_asmjs": [],
         }),
     )

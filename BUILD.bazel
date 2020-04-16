@@ -1671,7 +1671,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "psimd_fastmath_ukernels",
-    srcs = PSIMD_FASTMATH_UKERNELS,
     hdrs = INTERNAL_HDRS,
     aarch32_copts = [
         "-marm",
@@ -1681,6 +1680,10 @@ xnnpack_cc_library(
     optimized_copts = [
         "-O3",
         "-ffast-math",
+    ],
+    psimd_srcs = PSIMD_FASTMATH_UKERNELS,
+    x86_copts = [
+        "-msse2",
     ],
     deps = [
         ":tables",
@@ -1692,7 +1695,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "psimd_accmath_ukernels",
-    srcs = PSIMD_ACCMATH_UKERNELS,
     hdrs = INTERNAL_HDRS,
     aarch32_copts = [
         "-marm",
@@ -1701,6 +1703,10 @@ xnnpack_cc_library(
     copts = xnnpack_std_copts(),
     optimized_copts = [
         "-O3",
+    ],
+    psimd_srcs = PSIMD_ACCMATH_UKERNELS,
+    x86_copts = [
+        "-msse2",
     ],
     deps = [
         ":tables",
@@ -1864,32 +1870,24 @@ xnnpack_cc_library(
 xnnpack_aggregate_library(
     name = "ukernels",
     aarch32_deps = [
-        ":psimd_fastmath_ukernels",
-        ":psimd_accmath_ukernels",
         ":neon_ukernels",
         ":neonfma_ukernels",
         ":asm_ukernels",
     ],
     aarch64_deps = [
-        ":psimd_fastmath_ukernels",
-        ":psimd_accmath_ukernels",
         ":neon_ukernels",
         ":neonfma_ukernels",
         ":neonfp16arith_ukernels",
         ":asm_ukernels",
     ],
     generic_deps = [":scalar_ukernels"],
-    wasm_deps = [
-        ":wasm_ukernels",
-    ],
-    wasmsimd_deps = [
-        ":wasm_ukernels",
+    psimd_deps = [
         ":psimd_fastmath_ukernels",
         ":psimd_accmath_ukernels",
     ],
+    wasm_deps = [":wasm_ukernels"],
+    wasmsimd_deps = [":wasm_ukernels"],
     x86_deps = [
-        ":psimd_fastmath_ukernels",
-        ":psimd_accmath_ukernels",
         ":sse2_ukernels",
         ":ssse3_ukernels",
         ":sse41_ukernels",
