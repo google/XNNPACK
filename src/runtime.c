@@ -311,7 +311,7 @@ enum xnn_status xnn_create_runtime_v2(
   runtime->num_blobs = subgraph->num_values;
 
   size_t buffer_size = 0;
-  for (size_t i = 0; i < subgraph->num_values; i++) {
+  for (uint32_t i = 0; i < subgraph->num_values; i++) {
     const struct xnn_value* value = &subgraph->values[i];
     struct xnn_blob* blob = &runtime->blobs[i];
     if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
