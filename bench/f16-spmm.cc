@@ -129,7 +129,7 @@ static void SpMMBenchmark(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::fill(c.begin(), c.end(), nanf(""));
 
-  xnn_f16_output_params output_params{
+  xnn_f16_scaleminmax_params output_params{
     0x3C00 /* 1.0 */, 0x7C00 /* inf */, 0xFC00 /* -inf */};
 
   size_t buffer_index = 0;

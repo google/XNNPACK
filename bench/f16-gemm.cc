@@ -67,7 +67,7 @@ static void GEMMBenchmark(benchmark::State& state,
   std::vector<uint16_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
 
-  xnn_f16_output_params output_params{
+  xnn_f16_scaleminmax_params output_params{
     0x3C00 /* 1.0 */, 0x7C00 /* inf */, 0xFC00 /* -inf */};
 
   size_t buffer_index = 0;

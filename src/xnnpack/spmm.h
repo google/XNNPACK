@@ -67,7 +67,7 @@ DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_8x1__sse)
     const int32_t* dmap,                                  \
     const uint32_t* nmap,                                 \
     void* c,                                              \
-    const struct xnn_f16_output_params* params);
+    const struct xnn_f16_scaleminmax_params* params);
 
 DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith)
 DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_unroll2)

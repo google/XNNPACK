@@ -15,7 +15,7 @@
 #include <xnnpack.h>
 #include <xnnpack/common.h>
 
-struct xnn_f16_output_params {
+struct xnn_f16_scaleminmax_params {
   uint16_t scale;
   uint16_t min;
   uint16_t max;
@@ -385,7 +385,7 @@ typedef void (*xnn_f16_ppmm_ukernel_function)(
     void* c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f16_output_params* params);
+    const struct xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_gemm_ukernel_function)(
     size_t mr,
@@ -446,7 +446,7 @@ typedef void (*xnn_f16_gemm_ukernel_function)(
     void* c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f16_output_params* params);
+    const struct xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_q8_gemm_ukernel_function)(
     size_t mr,
@@ -594,7 +594,7 @@ typedef void (*xnn_f16_spmm_minmax_ukernel_function)(
     const int32_t* dmap,
     const uint32_t* nmap,
     void* c,
-    const struct xnn_f16_output_params* params);
+    const struct xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_f32_spmm_minmax_ukernel_function)(
     uint32_t m,

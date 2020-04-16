@@ -459,7 +459,7 @@ class GemmMicrokernelTester {
     std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
 
-    xnn_f16_output_params output_params;
+    xnn_f16_scaleminmax_params output_params;
     output_params.scale = UINT16_C(0x3C00) /* 1.0 */;
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

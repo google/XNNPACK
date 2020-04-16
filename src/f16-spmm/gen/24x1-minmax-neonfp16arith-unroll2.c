@@ -22,7 +22,7 @@ void xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_unroll2(
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
     void*restrict output,
-    const struct xnn_f16_output_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(m != 0);
 

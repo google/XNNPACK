@@ -429,7 +429,7 @@ class SpMMMicrokernelTester {
       }
 
       // Prepare output parameters.
-      xnn_f16_output_params output_params;
+      xnn_f16_scaleminmax_params output_params;
       output_params.scale = UINT16_C(0x3C00) /* 1.0 */;
       output_params.max = fp16_ieee_from_fp32_value(c_max);
       output_params.min = fp16_ieee_from_fp32_value(c_min);
