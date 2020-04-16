@@ -86,10 +86,10 @@ http_archive(
 # Ruy library, used to benchmark against
 http_archive(
    name = "ruy",
-   strip_prefix = "ruy-d4dccd67e0d50d4bf381462e92b1004f9aa07faa",
-   sha256 = "b9e627a7aa7941d54d292e41311a16e99d7b421aec889bf324e223d894661694",
+   strip_prefix = "ruy-9f53ba413e6fc879236dcaa3e008915973d67a4f",
+   sha256 = "fe8345f521bb378745ebdd0f8c5937414849936851d2ec2609774eb2d7098e54",
    urls = [
-       "https://github.com/google/ruy/archive/d4dccd67e0d50d4bf381462e92b1004f9aa07faa.zip",
+       "https://github.com/google/ruy/archive/9f53ba413e6fc879236dcaa3e008915973d67a4f.zip",
    ],
 )
 

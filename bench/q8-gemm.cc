@@ -245,8 +245,8 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
   ruy::MakeSimpleLayout(nc, mc, ruy::Order::kColMajor, ruy_c.mutable_layout());
   ruy_c.set_zero_point(127);
 
-  ruy::BasicSpec<int32_t, uint8_t> spec;
-  spec.set_multiplier_fixedpoint(0x40000000);
+  ruy::MulParams<int32_t, uint8_t> mul_params;
+  mul_params.set_multiplier_fixedpoint(0x40000000);
 
   // ruy::Context uses deferred initialization, which affects percieved GEMM performance. Initialization happens during
   // the first GEMM calls, and per Benoit Jacob it takes up to ~250 milliseconds for performance to stabilize.
@@ -258,9 +258,9 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
     do {
       ruy_a.set_data(k.data());
       ruy_c.set_data(c.data());
-      spec.set_bias(b.data());
+      mul_params.set_bias(b.data());
 
-      ruy::Mul(ruy_a, ruy_b, spec, &context, &ruy_c);
+      ruy::Mul(ruy_a, ruy_b, mul_params, &context, &ruy_c);
     } while (std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count() < 0.5);
   });
 
@@ -278,9 +278,9 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
 
     ruy_a.set_data(k.data() + buffer_index * nc * kc);
     ruy_c.set_data(c.data() + buffer_index * mc * nc);
-    spec.set_bias(b.data() + buffer_index * nc);
+    mul_params.set_bias(b.data() + buffer_index * nc);
 
-    ruy::Mul(ruy_a, ruy_b, spec, &context, &ruy_c);
+    ruy::Mul(ruy_a, ruy_b, mul_params, &context, &ruy_c);
   }
 
   state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
