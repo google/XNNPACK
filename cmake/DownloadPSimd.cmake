@@ -12,8 +12,8 @@ PROJECT(psimd-download NONE)
 
 INCLUDE(ExternalProject)
 ExternalProject_Add(psimd
-  URL https://github.com/Maratyszcza/psimd/archive/10b4ffc6ea9e2e11668f86969586f88bc82aaefa.tar.gz
-  URL_HASH SHA256=1fefd66702cb2eb3462b962f33d4fb23d59a55d5889ee6372469d286c4512df4
+  URL https://github.com/Maratyszcza/psimd/archive/85427dd4c8521cc037a1ffa6fcd25c55fafc8a00.zip
+  URL_HASH SHA256=db23c2bc4a58d6f40c181797e43103300edac7cf9d286ca81590543f66ab95d2
   SOURCE_DIR "${CMAKE_BINARY_DIR}/psimd-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/psimd"
   CONFIGURE_COMMAND ""

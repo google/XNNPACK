@@ -14,9 +14,13 @@ def xnnpack_min_size_copts():
     """Compiler flags for size-optimized builds."""
     return ["-Os"]
 
-def xnnpack_std_copts():
-    """Compiler flags to specify language standard for C sources."""
+def xnnpack_gcc_std_copts():
+    """GCC-like compiler flags to specify language standard for C sources."""
     return ["-std=c99"]
+
+def xnnpack_msvc_std_copts():
+    """MSVC compiler flags to specify language standard for C sources."""
+    return ["/Drestrict="]
 
 def xnnpack_std_cxxopts():
     """Compiler flags to specify language standard for C++ sources."""
@@ -65,6 +69,7 @@ def xnnpack_optional_dnnl_deps():
 def xnnpack_cc_library(
         name,
         srcs = [],
+        psimd_srcs = [],
         x86_srcs = [],
         aarch32_srcs = [],
         aarch64_srcs = [],
@@ -72,7 +77,13 @@ def xnnpack_cc_library(
         wasm_srcs = [],
         wasmsimd_srcs = [],
         copts = [],
-        x86_copts = [],
+        gcc_copts = [],
+        msvc_copts = [],
+        mingw_copts = [],
+        msys_copts = [],
+        gcc_x86_copts = [],
+        msvc_x86_32_copts = [],
+        msvc_x86_64_copts = [],
         aarch32_copts = [],
         aarch64_copts = [],
         asmjs_copts = [],
@@ -80,7 +91,10 @@ def xnnpack_cc_library(
         wasmsimd_copts = [],
         optimized_copts = ["-O2"],
         hdrs = [],
-        deps = []):
+        defines = [],
+        includes = [],
+        deps = [],
+        visibility = []):
     """C/C++/assembly library with architecture-specific configuration.
 
     Define a static library with architecture- and instruction-specific
@@ -99,7 +113,13 @@ def xnnpack_cc_library(
       copts: The list of compiler flags to use in all builds. -I flags for
              include/ and src/ directories of XNNPACK are always prepended
              before these user-specified flags.
-      x86_copts: The list of compiler flags to use in x86 builds.
+      gcc_copts: The list of compiler flags to use with GCC-like compilers.
+      msvc_copts: The list of compiler flags to use with MSVC compiler.
+      mingw_copts: The list of compiler flags to use with MinGW GCC compilers.
+      msys_copts: The list of compiler flags to use with MSYS (Cygwin) GCC compilers.
+      gcc_x86_copts: The list of GCC-like compiler flags to use in x86 (32-bit and 64-bit) builds.
+      msvc_x86_32_copts: The list of MSVC compiler flags to use in x86 (32-bit) builds.
+      msvc_x86_64_copts: The list of MSVC compiler flags to use in x86 (64-bit) builds.
       aarch32_copts: The list of compiler flags to use in AArch32 builds.
       aarch64_copts: The list of compiler flags to use in AArch64 builds.
       asmjs_copts: The list of compiler flags to use in Asm.js builds.
@@ -110,7 +130,10 @@ def xnnpack_cc_library(
                        Defaults to -O2.
       hdrs: The list of header files published by this library to be textually
             included by sources in dependent rules.
+      defines: List of predefines macros to be added to the compile line.
+      includes: List of include dirs to be added to the compile line.
       deps: The list of other libraries to be linked.
+      visibility: The list of packages that can depend on this target.
     """
     native.cc_library(
         name = name,
@@ -119,8 +142,10 @@ def xnnpack_cc_library(
             ":linux_aarch64": psimd_srcs + aarch64_srcs,
             ":linux_armhf": psimd_srcs + aarch32_srcs,
             ":macos_x86_64": psimd_srcs + x86_srcs,
-            ":windows_x86": psimd_srcs + x86_srcs,
-            ":windows_x86_64": psimd_srcs + x86_srcs,
+            ":windows_x86_64_clang": psimd_srcs + x86_srcs,
+            ":windows_x86_64_mingw": psimd_srcs + x86_srcs,
+            ":windows_x86_64_msys": psimd_srcs + x86_srcs,
+            ":windows_x86_64": x86_srcs,
             ":android_armv7": psimd_srcs + aarch32_srcs,
             ":android_arm64": psimd_srcs + aarch64_srcs,
             ":android_x86": psimd_srcs + x86_srcs,
@@ -145,36 +170,46 @@ def xnnpack_cc_library(
             "-Iinclude",
             "-Isrc",
         ] + copts + select({
-            ":linux_k8": x86_copts,
+            ":linux_k8": gcc_x86_copts,
             ":linux_aarch64": aarch64_copts,
             ":linux_armhf": aarch32_copts,
-            ":macos_x86_64": x86_copts,
-            ":windows_x86": x86_copts,
-            ":windows_x86_64": x86_copts,
+            ":macos_x86_64": gcc_x86_copts,
+            ":windows_x86_64_clang": ["/clang:" + opt for opt in gcc_x86_copts],
+            ":windows_x86_64_mingw": mingw_copts + gcc_x86_copts,
+            ":windows_x86_64_msys": msys_copts + gcc_x86_copts,
+            ":windows_x86_64": msvc_x86_64_copts,
             ":android_armv7": aarch32_copts,
             ":android_arm64": aarch64_copts,
-            ":android_x86": x86_copts,
-            ":android_x86_64": x86_copts,
+            ":android_x86": gcc_x86_copts,
+            ":android_x86_64": gcc_x86_copts,
             ":ios_armv7": aarch32_copts,
             ":ios_arm64": aarch64_copts,
             ":ios_arm64e": aarch64_copts,
-            ":ios_x86": x86_copts,
-            ":ios_x86_64": x86_copts,
+            ":ios_x86": gcc_x86_copts,
+            ":ios_x86_64": gcc_x86_copts,
             ":watchos_armv7k": aarch32_copts,
             ":watchos_arm64_32": aarch64_copts,
-            ":watchos_x86": x86_copts,
-            ":watchos_x86_64": x86_copts,
+            ":watchos_x86": gcc_x86_copts,
+            ":watchos_x86_64": gcc_x86_copts,
             ":tvos_arm64": aarch64_copts,
-            ":tvos_x86_64": x86_copts,
+            ":tvos_x86_64": gcc_x86_copts,
             ":emscripten_asmjs": asmjs_copts,
             ":emscripten_wasm": wasm_copts,
             ":emscripten_wasmsimd": wasmsimd_copts,
             "//conditions:default": [],
         }) + select({
+            ":windows_x86_64_clang": ["/clang:" + opt for opt in gcc_copts],
+            ":windows_x86_64_mingw": gcc_copts,
+            ":windows_x86_64_msys": gcc_copts,
+            ":windows_x86_64": msvc_copts,
+            "//conditions:default": gcc_copts,
+        }) + select({
             ":optimized_build": optimized_copts,
             "//conditions:default": [],
         }),
-        includes = ["include", "src"],
+        defines = defines,
+        deps = deps,
+        includes = ["include", "src"] + includes,
         linkstatic = True,
         linkopts = select({
             ":linux_k8": ["-lpthread"],
@@ -184,7 +219,7 @@ def xnnpack_cc_library(
             "//conditions:default": [],
         }),
         textual_hdrs = hdrs,
-        deps = deps,
+        visibility = visibility,
     )
 
 def xnnpack_aggregate_library(
@@ -217,8 +252,10 @@ def xnnpack_aggregate_library(
             ":linux_aarch64": psimd_deps + aarch64_deps,
             ":linux_armhf": psimd_deps + aarch32_deps,
             ":macos_x86_64": psimd_deps + x86_deps,
-            ":windows_x86": psimd_deps + x86_deps,
-            ":windows_x86_64": psimd_deps + x86_deps,
+            ":windows_x86_64_clang": psimd_deps + x86_deps,
+            ":windows_x86_64_mingw": psimd_deps + x86_deps,
+            ":windows_x86_64_msys": psimd_deps + x86_deps,
+            ":windows_x86_64": x86_deps,
             ":android_armv7": psimd_deps + aarch32_deps,
             ":android_arm64": psimd_deps + aarch64_deps,
             ":android_x86": psimd_deps + x86_deps,
@@ -240,7 +277,7 @@ def xnnpack_aggregate_library(
         }),
     )
 
-def xnnpack_unit_test(name, srcs, copts = [], deps = []):
+def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = []):
     """Unit test binary based on Google Test.
 
     Args:
@@ -249,6 +286,8 @@ def xnnpack_unit_test(name, srcs, copts = [], deps = []):
       copts: The list of additional compiler flags for the target. -I flags
              for include/ and src/ directories of XNNPACK are always prepended
              before these user-specified flags.
+      mingw_copts: The list of compiler flags to use with MinGW GCC compilers.
+      msys_copts: The list of compiler flags to use with MSYS (Cygwin) GCC compilers.
       deps: The list of additional libraries to be linked. Google Test library
             (with main() function) is always added as a dependency and does not
             need to be explicitly specified.
@@ -260,7 +299,11 @@ def xnnpack_unit_test(name, srcs, copts = [], deps = []):
         copts = xnnpack_std_cxxopts() + [
             "-Iinclude",
             "-Isrc",
-        ] + copts,
+        ] + copts + select({
+            ":windows_x86_64_mingw": mingw_copts,
+            ":windows_x86_64_msys": msys_copts,
+            "//conditions:default": [],
+        }),
         linkopts = select({
             ":emscripten": xnnpack_emscripten_test_linkopts(),
             "//conditions:default": [],
@@ -300,7 +343,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = []):
         deps = deps,
     )
 
-def xnnpack_benchmark(name, srcs, copts = [], deps = []):
+def xnnpack_benchmark(name, srcs, copts = [], gcc_copts = [], msvc_copts = [], deps = []):
     """Microbenchmark binary based on Google Benchmark
 
     Args:
@@ -309,6 +352,8 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = []):
       copts: The list of additional compiler flags for the target. -I flags
              for include/ and src/ directories of XNNPACK are always prepended
              before these user-specified flags.
+      gcc_copts: The list of compiler flags to use with GCC-like compilers.
+      msvc_copts: The list of compiler flags to use with MSVC compiler.
       deps: The list of additional libraries to be linked. Google Benchmark
             library is always added as a dependency and does not need to be
             explicitly specified.
@@ -319,9 +364,17 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = []):
         copts = xnnpack_std_cxxopts() + [
             "-Iinclude",
             "-Isrc",
-        ] + copts,
+        ] + copts + select({
+            ":windows_x86_64_clang": ["/clang:" + opt for opt in gcc_copts],
+            ":windows_x86_64_mingw": gcc_copts,
+            ":windows_x86_64_msys": gcc_copts,
+            ":windows_x86_64": msvc_copts,
+            "//conditions:default": gcc_copts,
+        }),
         linkopts = select({
             ":emscripten": xnnpack_emscripten_benchmark_linkopts(),
+            ":windows_x86_64_mingw": ["-lshlwapi"],
+            ":windows_x86_64_msys": ["-lshlwapi"],
             "//conditions:default": [],
         }),
         linkstatic = True,

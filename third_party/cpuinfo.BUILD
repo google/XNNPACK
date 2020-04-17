@@ -99,6 +99,7 @@ cc_library(
         ":linux_x86_64": COMMON_SRCS + X86_SRCS + LINUX_SRCS + LINUX_X86_SRCS,
         ":linux_aarch64": COMMON_SRCS + ARM_SRCS + LINUX_SRCS + LINUX_ARM64_SRCS,
         ":macos_x86_64": COMMON_SRCS + X86_SRCS + MACH_SRCS + MACH_X86_SRCS,
+        ":windows_x86_64": COMMON_SRCS + X86_SRCS + WINDOWS_X86_SRCS,
         ":android_armv7": COMMON_SRCS + ARM_SRCS + LINUX_SRCS + LINUX_ARM32_SRCS + ANDROID_ARM_SRCS,
         ":android_arm64": COMMON_SRCS + ARM_SRCS + LINUX_SRCS + LINUX_ARM64_SRCS + ANDROID_ARM_SRCS,
         ":android_x86": COMMON_SRCS + X86_SRCS + LINUX_SRCS + LINUX_X86_SRCS,
@@ -115,7 +116,10 @@ cc_library(
         ":tvos_x86_64": COMMON_SRCS + X86_SRCS + MACH_SRCS + MACH_X86_SRCS,
         ":tvos_arm64": COMMON_SRCS + MACH_SRCS + MACH_ARM_SRCS,
     }),
-    copts = C99OPTS + [
+    copts = select({
+        ":windows_x86_64": [],
+        "//conditions:default": C99OPTS,
+    }) + [
         "-Iexternal/cpuinfo/include",
         "-Iexternal/cpuinfo/src",
     ],
@@ -172,6 +176,11 @@ config_setting(
         "apple_platform_type": "macos",
         "cpu": "darwin",
     },
+)
+
+config_setting(
+    name = "windows_x86_64",
+    values = {"cpu": "x64_windows"},
 )
 
 config_setting(

@@ -6,7 +6,7 @@
 # Description:
 #   XNNPACK - optimized floating-point neural network operators library
 
-load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_min_size_copts", "xnnpack_optional_armcl_copts", "xnnpack_optional_armcl_deps", "xnnpack_optional_dnnl_copts", "xnnpack_optional_dnnl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_copts", "xnnpack_std_cxxopts", "xnnpack_unit_test", "xnnpack_visibility")
+load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_gcc_std_copts", "xnnpack_min_size_copts", "xnnpack_msvc_std_copts", "xnnpack_optional_armcl_copts", "xnnpack_optional_armcl_deps", "xnnpack_optional_dnnl_copts", "xnnpack_optional_dnnl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_cxxopts", "xnnpack_unit_test", "xnnpack_visibility")
 
 licenses(["notice"])
 
@@ -1639,7 +1639,8 @@ xnnpack_cc_library(
     name = "tables",
     srcs = TABLE_SRCS,
     hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
 )
 
 xnnpack_cc_library(
@@ -1647,7 +1648,8 @@ xnnpack_cc_library(
     srcs = SCALAR_UKERNELS,
     hdrs = INTERNAL_HDRS,
     aarch32_copts = ["-marm"],
-    copts = xnnpack_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":tables",
         "@FP16",
@@ -1659,7 +1661,8 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "wasm_ukernels",
     hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = WASM_UKERNELS,
     deps = [
         ":tables",
@@ -1676,15 +1679,14 @@ xnnpack_cc_library(
         "-marm",
         "-mfpu=neon",
     ],
-    copts = xnnpack_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse2"],
+    msvc_copts = xnnpack_msvc_std_copts(),
     optimized_copts = [
         "-O3",
         "-ffast-math",
     ],
     psimd_srcs = PSIMD_FASTMATH_UKERNELS,
-    x86_copts = [
-        "-msse2",
-    ],
     deps = [
         ":tables",
         "@FP16",
@@ -1700,14 +1702,13 @@ xnnpack_cc_library(
         "-marm",
         "-mfpu=neon",
     ],
-    copts = xnnpack_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse2"],
+    msvc_copts = xnnpack_msvc_std_copts(),
     optimized_copts = [
         "-O3",
     ],
     psimd_srcs = PSIMD_ACCMATH_UKERNELS,
-    x86_copts = [
-        "-msse2",
-    ],
     deps = [
         ":tables",
         "@FP16",
@@ -1725,7 +1726,8 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = NEON_UKERNELS,
     aarch64_srcs = NEON_UKERNELS,
-    copts = xnnpack_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":tables",
         "@FP16",
@@ -1742,7 +1744,8 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = NEONFMA_UKERNELS,
     aarch64_srcs = NEONFMA_UKERNELS + AARCH64_NEONFMA_UKERNELS,
-    copts = xnnpack_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":tables",
         "@FP16",
@@ -1755,7 +1758,8 @@ xnnpack_cc_library(
     hdrs = INTERNAL_HDRS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = AARCH64_NEONFP16ARITH_UKERNELS,
-    copts = xnnpack_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":tables",
         "@FP16",
@@ -1766,8 +1770,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "sse2_ukernels",
     hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts(),
-    x86_copts = ["-msse2"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse2"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = SSE_UKERNELS + SSE2_UKERNELS,
     deps = [
         ":tables",
@@ -1779,8 +1785,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "ssse3_ukernels",
     hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts(),
-    x86_copts = ["-mssse3"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mssse3"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = SSSE3_UKERNELS,
     deps = [
         ":tables",
@@ -1792,8 +1800,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "sse41_ukernels",
     hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts(),
-    x86_copts = ["-msse4.1"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse4.1"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = SSE41_UKERNELS,
     deps = [
         ":tables",
@@ -1805,8 +1815,11 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "avx_ukernels",
     hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts(),
-    x86_copts = ["-mavx"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mavx"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = AVX_UKERNELS,
     deps = [
         ":tables",
@@ -1818,10 +1831,11 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fma3_ukernels",
     hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts(),
-    x86_copts = [
-        "-mfma",
-    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mfma"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = FMA3_UKERNELS,
     deps = [
         ":tables",
@@ -1833,11 +1847,14 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "avx2_ukernels",
     hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts(),
-    x86_copts = [
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = [
         "-mfma",
         "-mavx2",
     ],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX2"],
+    msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = AVX2_UKERNELS,
     deps = [
         ":tables",
@@ -1849,8 +1866,13 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "avx512f_ukernels",
     hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts(),
-    x86_copts = ["-mavx512f"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mavx512f"],
+    mingw_copts = ["-fno-asynchronous-unwind-tables"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX512"],
+    msvc_x86_64_copts = ["/arch:AVX512"],
+    msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = AVX512F_UKERNELS,
     deps = [
         ":tables",
@@ -1905,14 +1927,16 @@ xnnpack_cc_library(
         "src/xnnpack/common.h",
         "src/xnnpack/im2col.h",
     ],
-    copts = xnnpack_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
 )
 
 xnnpack_cc_library(
     name = "indirection",
     srcs = ["src/indirection.c"],
     hdrs = INTERNAL_HDRS,
-    copts = xnnpack_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         "@FP16",
         "@FXdiv",
@@ -1924,10 +1948,12 @@ xnnpack_cc_library(
     name = "operator_run",
     srcs = ["src/operator-run.c"],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
-    copts = xnnpack_std_copts() + LOGGING_COPTS + select({
+    copts = LOGGING_COPTS + select({
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         "@FP16",
         "@FXdiv",
@@ -1952,7 +1978,7 @@ xnnpack_cc_library(
         "src/operator-delete.c",
     ],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
-    copts = xnnpack_std_copts() + LOGGING_COPTS + [
+    copts = LOGGING_COPTS + [
         "-Isrc",
         "-Iinclude",
     ] + select({
@@ -1962,6 +1988,8 @@ xnnpack_cc_library(
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = ["src/wasm-stubs.c"],
     wasmsimd_srcs = ["src/wasm-stubs.c"],
     deps = [
@@ -1973,7 +2001,7 @@ xnnpack_cc_library(
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "XNNPACK",
     srcs = [
         "src/init.c",
@@ -1981,7 +2009,8 @@ cc_library(
         "src/subgraph.c",
         "src/tensor.c",
     ],
-    copts = xnnpack_std_copts() + LOGGING_COPTS + [
+    hdrs = ["include/xnnpack.h"],
+    copts = LOGGING_COPTS + [
         "-Isrc",
         "-Iinclude",
     ] + select({
@@ -1991,9 +2020,9 @@ cc_library(
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
+    gcc_copts = xnnpack_gcc_std_copts(),
     includes = ["include"],
-    linkstatic = True,
-    textual_hdrs = ["include/xnnpack.h"],
+    msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
         ":enable_assembly",
@@ -2008,12 +2037,13 @@ cc_library(
     }),
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "xnnpack_operators_nhwc_f32",
     srcs = [
         "src/init.c",
     ],
-    copts = xnnpack_std_copts() + LOGGING_COPTS + [
+    hdrs = ["include/xnnpack.h"],
+    copts = LOGGING_COPTS + [
         "-Isrc",
         "-Iinclude",
     ] + select({
@@ -2029,9 +2059,9 @@ cc_library(
         "XNN_NO_X8_OPERATORS",
         "XNN_NO_NCHW_OPERATORS",
     ],
+    gcc_copts = xnnpack_gcc_std_copts(),
     includes = ["include"],
-    linkstatic = True,
-    textual_hdrs = ["include/xnnpack.h"],
+    msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
         ":enable_assembly",
@@ -2050,7 +2080,7 @@ xnnpack_cc_library(
     name = "bench_utils",
     srcs = ["bench/utils.cc"],
     hdrs = ["bench/utils.h"],
-    copts = ["-Wno-unused-result"],
+    gcc_copts = ["-Wno-unused-result"],
     deps = [
         "@com_google_benchmark//:benchmark",
         "@cpuinfo",
@@ -2066,7 +2096,8 @@ xnnpack_benchmark(
         "bench/q8-gemm.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"] + xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
+    copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
 )
 
@@ -2077,7 +2108,7 @@ xnnpack_benchmark(
         "bench/gemm.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"],
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2086,10 +2117,9 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-spmm.cc",
         "bench/gemm.h",
-        "bench/google/gemm.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"],
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2110,7 +2140,7 @@ xnnpack_benchmark(
         "bench/dconv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"],
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2121,7 +2151,7 @@ xnnpack_benchmark(
         "bench/dconv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"],
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2152,7 +2182,8 @@ xnnpack_benchmark(
         "bench/gemm.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"] + xnnpack_optional_ruy_copts(),
+    copts = xnnpack_optional_ruy_copts(),
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_ruy_deps(),
 )
 
@@ -2198,7 +2229,7 @@ xnnpack_benchmark(
         "bench/f32-sigmoid.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"],
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2209,7 +2240,7 @@ xnnpack_benchmark(
         "bench/gemm.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"],
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2218,7 +2249,8 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-softmax.cc",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"] + xnnpack_optional_dnnl_copts(),
+    copts = xnnpack_optional_dnnl_copts(),
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps(),
 )
 
@@ -2384,7 +2416,7 @@ xnnpack_benchmark(
         "bench/f32-dwconv-e2e.cc",
         "bench/end2end.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"],
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":mobilenet_v1",
@@ -2400,7 +2432,7 @@ xnnpack_benchmark(
         "bench/f32-gemm-e2e.cc",
         "bench/end2end.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    copts = ["-Wno-unused-function"],
+    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":mobilenet_v1",
@@ -2540,6 +2572,9 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    # Work-around for "too many sections" error
+    mingw_copts = ["-Wa,-mbig-obj"],
+    msys_copts = ["-Wa,-mbig-obj"],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -3408,13 +3443,32 @@ config_setting(
 )
 
 config_setting(
-    name = "windows_x86",
-    values = {"cpu": "win_x86"},
+    name = "windows_x86_64",
+    values = {"cpu": "x64_windows"},
 )
 
 config_setting(
-    name = "windows_x86_64",
-    values = {"cpu": "win_x64"},
+    name = "windows_x86_64_clang",
+    values = {
+        "compiler": "clang-cl",
+        "cpu": "x64_windows",
+    },
+)
+
+config_setting(
+    name = "windows_x86_64_mingw",
+    values = {
+        "compiler": "mingw-gcc",
+        "cpu": "x64_windows",
+    },
+)
+
+config_setting(
+    name = "windows_x86_64_msys",
+    values = {
+        "compiler": "msys-gcc",
+        "cpu": "x64_windows",
+    },
 )
 
 config_setting(

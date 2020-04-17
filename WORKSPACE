@@ -37,17 +37,17 @@ http_archive(
 # FXdiv library, used for repeated integer division by the same factor
 http_archive(
     name = "FXdiv",
-    strip_prefix = "FXdiv-f7dd0576a1c8289ef099d4fd8b136b1c4487a873",
-    sha256 = "6e4b6e3c58e67c3bb090e286c4f235902c89b98cf3e67442a18f9167963aa286",
-    urls = ["https://github.com/Maratyszcza/FXdiv/archive/f7dd0576a1c8289ef099d4fd8b136b1c4487a873.zip"],
+    strip_prefix = "FXdiv-b408327ac2a15ec3e43352421954f5b1967701d1",
+    sha256 = "ab7dfb08829bee33dca38405d647868fb214ac685e379ec7ef2bebcd234cd44d",
+    urls = ["https://github.com/Maratyszcza/FXdiv/archive/b408327ac2a15ec3e43352421954f5b1967701d1.zip"],
 )
 
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    strip_prefix = "pthreadpool-a61ed1ab70389c62f6f699ca1a30a2421d3ea594",
-    sha256 = "27c039e73846d0bdfe393833e91afafe45e61ba792cc60e1c62808090554ce4d",
-    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/a61ed1ab70389c62f6f699ca1a30a2421d3ea594.zip"],
+    strip_prefix = "pthreadpool-e918b206d26b1f3b2100b0edabf445c18708d2b7",
+    sha256 = "c4b148fba41fc937fdf96bc195caadf0cf0be83f1c3e335ef5355934d4501f83",
+    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/e918b206d26b1f3b2100b0edabf445c18708d2b7.zip"],
 )
 
 # clog library, used for logging
@@ -75,11 +75,9 @@ http_archive(
 # psimd library, used for fallback 128-bit SIMD micro-kernels
 http_archive(
     name = "psimd",
-    strip_prefix = "psimd-88882f601f8179e1987b7e7cf4a8012c9080ad44",
-    sha256 = "c621f9bb1ff9ab8f0fa4a04f3239d13b345a6e865318d7b464aa80531a1abb2c",
-    urls = [
-        "https://github.com/Maratyszcza/psimd/archive/88882f601f8179e1987b7e7cf4a8012c9080ad44.tar.gz",
-    ],
+    strip_prefix = "psimd-85427dd4c8521cc037a1ffa6fcd25c55fafc8a00",
+    sha256 = "db23c2bc4a58d6f40c181797e43103300edac7cf9d286ca81590543f66ab95d2",
+    urls = ["https://github.com/Maratyszcza/psimd/archive/85427dd4c8521cc037a1ffa6fcd25c55fafc8a00.zip"],
     build_file = "@//third_party:psimd.BUILD",
 )
 
