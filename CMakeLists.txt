@@ -1454,9 +1454,11 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen/1x8-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen/4x8-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen/6x8-minmax-aarch64-neonfp16arith-ld64.S
+  src/f16-gemm/gen/8x8-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen-inc/1x8inc-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen-inc/4x8inc-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen-inc/6x8inc-minmax-aarch64-neonfp16arith-ld64.S
+  src/f16-gemm/gen-inc/8x8inc-minmax-aarch64-neonfp16arith-ld64.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma.S
   src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-ld64.S

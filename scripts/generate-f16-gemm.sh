@@ -15,9 +15,11 @@ tools/xngen src/f16-gemm/6x16-aarch64-neonfp16arith-ld32.S.in -D INC=1 -o src/f1
 tools/xngen src/f16-gemm/1x8-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/1x8-minmax-aarch64-neonfp16arith-ld64.S
 tools/xngen src/f16-gemm/4x8-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/4x8-minmax-aarch64-neonfp16arith-ld64.S
 tools/xngen src/f16-gemm/6x8-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/6x8-minmax-aarch64-neonfp16arith-ld64.S
+tools/xngen src/f16-gemm/8x8-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/8x8-minmax-aarch64-neonfp16arith-ld64.S
 tools/xngen src/f16-gemm/1x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16-gemm/gen-inc/1x8inc-minmax-aarch64-neonfp16arith-ld64.S
 tools/xngen src/f16-gemm/4x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16-gemm/gen-inc/4x8inc-minmax-aarch64-neonfp16arith-ld64.S
 tools/xngen src/f16-gemm/6x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16-gemm/gen-inc/6x8inc-minmax-aarch64-neonfp16arith-ld64.S
+tools/xngen src/f16-gemm/8x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16-gemm/gen-inc/8x8inc-minmax-aarch64-neonfp16arith-ld64.S
 
 ########################## ARM NEON with FP16 compute #########################
 ### LD64 micro-kernels
