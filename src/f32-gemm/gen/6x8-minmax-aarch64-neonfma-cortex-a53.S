@@ -83,7 +83,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
 
         ADD x12, x11, x4         // a4 = a3 + a_stride
         ADD x13, x18, x7         // c4 = c3 + cm_stride
-                                 // if mr <= 5
+                                 // if mr <= 4
         CSEL x12, x11, x12, LS   //   a4 = a3
         CSEL x13, x18, x13, LS   //   c4 = c3
 

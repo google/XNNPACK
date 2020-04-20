@@ -82,7 +82,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
         # Load zero, clamping params pointer
         LDP x12, x8, [sp, 80]
         ADD x7, x13, x7          // c4 = c3 + cm_stride
-                                 // if mr <= 5
+                                 // if mr <= 4
         CSEL x7, x13, x7, LS     //   c4 = c3
 
         # Save x20,x21 on stack

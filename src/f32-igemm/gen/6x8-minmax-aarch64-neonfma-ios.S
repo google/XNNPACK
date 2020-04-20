@@ -79,7 +79,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ios
 
         STP d14, d15, [sp, 48]
         ADD x13, x10, x7         // c4 = c3 + cm_stride
-                                 // if mr <= 5
+                                 // if mr <= 4
         CSEL x13, x10, x13, LS   //   c4 = c3
 
         # Save x20,x21,x22,x23 on stack
