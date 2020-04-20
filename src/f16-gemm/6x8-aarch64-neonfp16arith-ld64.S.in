@@ -111,34 +111,14 @@ BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x8__aarch64_n
           LDP q20, q22, [x15], 32
           LDP q24, q26, [x15], 32
           LDP q28, q30, [x15], 32
-          #PRFM PLDL1KEEP, [x5, 0]  // Prefetch B
-          #PRFM PLDL1KEEP, [x5, 64]
-          #PRFM PLDL1KEEP, [x5, 128]
-          #PRFM PLDL1KEEP, [x5, 192]
-          #PRFM PLDL1KEEP,  [x3]    // Prefetch A
-          #PRFM PLDL1KEEP,  [x9]
-          #PRFM PLDL1KEEP, [x10]
-          #PRFM PLDL1KEEP, [x11]
-          #PRFM PLDL1KEEP, [x12]
-          #PRFM PLDL1KEEP,  [x4]
         $else:
           # Load initial bias from w into accumulators
           LDR q20, [x5], 16
           MOV v22.16b, v20.16b
-          #PRFM PLDL1KEEP, [x5, 0]  // Prefetch B
-          #PRFM PLDL1KEEP, [x5, 64]
           MOV v24.16b, v20.16b
-          #PRFM PLDL1KEEP, [x5, 128]
-          #PRFM PLDL1KEEP, [x5, 192]
           MOV v26.16b, v20.16b
-          #PRFM PLDL1KEEP,  [x3]    // Prefetch A
-          #PRFM PLDL1KEEP,  [x9]
           MOV v28.16b, v20.16b
-          #PRFM PLDL1KEEP, [x10]
-          #PRFM PLDL1KEEP, [x11]
           MOV v30.16b, v20.16b
-          #PRFM PLDL1KEEP, [x12]
-          #PRFM PLDL1KEEP,  [x4]
 
          # Is there at least 4 halffloats (8 bytes)?
         SUBS x0, x2, 8  // k = kc - 8

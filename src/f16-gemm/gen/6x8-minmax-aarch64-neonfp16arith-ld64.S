@@ -103,20 +103,10 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x8__aarch64_neonfp16arith_ld64
         # Load initial bias from w into accumulators
         LDR q20, [x5], 16
         MOV v22.16b, v20.16b
-        #PRFM PLDL1KEEP, [x5, 0]  // Prefetch B
-        #PRFM PLDL1KEEP, [x5, 64]
         MOV v24.16b, v20.16b
-        #PRFM PLDL1KEEP, [x5, 128]
-        #PRFM PLDL1KEEP, [x5, 192]
         MOV v26.16b, v20.16b
-        #PRFM PLDL1KEEP,  [x3]    // Prefetch A
-        #PRFM PLDL1KEEP,  [x9]
         MOV v28.16b, v20.16b
-        #PRFM PLDL1KEEP, [x10]
-        #PRFM PLDL1KEEP, [x11]
         MOV v30.16b, v20.16b
-        #PRFM PLDL1KEEP, [x12]
-        #PRFM PLDL1KEEP,  [x4]
 
          # Is there at least 4 halffloats (8 bytes)?
         SUBS x0, x2, 8  // k = kc - 8
