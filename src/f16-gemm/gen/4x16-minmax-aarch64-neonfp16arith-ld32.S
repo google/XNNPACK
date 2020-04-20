@@ -39,6 +39,7 @@
 # Clamp v4, v5, v6
 
 BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
+
         # Load cn_stride, params pointer
         LDP x14, x8, [sp]
 

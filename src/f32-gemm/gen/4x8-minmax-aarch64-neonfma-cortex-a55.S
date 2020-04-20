@@ -63,6 +63,9 @@
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
 
+        # Load cn_stride, params pointer
+        LDP x14, x8, [sp]
+
         # Clamp A and C pointers
         CMP x0, 2                // if mr < 2
         ADD x9, x3, x4           // a1 = a0 + a_stride
@@ -82,14 +85,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         CSEL x11, x10, x11, LO   //   a3 = a2
         CSEL x18, x17, x18, LO   //   c3 = c2
 
-        # Load params pointer
-        LDR x8, [sp, 8]
-
         # Load min/max values
         LD2R {v6.4s, v7.4s}, [x8]
-
-        # Load cn_stride
-        LDR x14, [sp]
 
         // Save d12-d15 on stack
         STP d12, d13, [sp, -32]!

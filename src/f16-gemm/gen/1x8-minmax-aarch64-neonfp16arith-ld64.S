@@ -35,7 +35,6 @@
 # B   v20 v21 v22 v23
 # C   v16 v18
 # Clamp v4, v5, v6
-# Clamp v4, v5, v6
 
 
 BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64

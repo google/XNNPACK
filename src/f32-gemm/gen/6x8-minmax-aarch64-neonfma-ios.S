@@ -62,6 +62,9 @@
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ios
 
+        # Load params pointer
+        LDR x8, [sp, 8]
+
         # Clamp A and C pointers / Save d8-d15 on stack
         STP  d8,  d9, [sp, -64]!
         CMP x0, 2                // if mr < 2
@@ -90,9 +93,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ios
                                  // if mr <= 4
         CSEL x12, x11, x12, LS   //   a4 = a3
         CSEL x13, x14, x13, LS   //   c4 = c3
-
-        # Load params pointer
-        LDR x8, [sp, 72]
 
         CMP x0, 6                // if mr < 6
         ADD x4, x12, x4          // a5 = a4 + a_stride

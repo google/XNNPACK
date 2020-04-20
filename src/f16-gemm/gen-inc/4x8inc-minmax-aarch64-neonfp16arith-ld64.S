@@ -52,6 +52,7 @@
 # unused B   v19
 
 BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_4x8__aarch64_neonfp16arith_ld64
+
         # Load cn_stride, acc
         LDP x14, x15, [sp]
         # Load params pointer

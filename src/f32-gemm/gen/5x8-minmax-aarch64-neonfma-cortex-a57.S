@@ -61,6 +61,9 @@
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
 
+        # Load cn_stride, params pointer
+        LDP x14, x8, [sp]
+
         # Clamp A and C pointers / Save d8-d15 on stack
         STP  d8,  d9, [sp, -48]!
         CMP x0, 2                // if mr < 2
@@ -83,9 +86,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
         CSEL x11, x10, x11, LO   //   a3 = a2
         CSEL x13, x17, x13, LO   //   c3 = c2
 
-        # Load params pointer
-        LDR x8, [sp, 56]
-
         ADD x12, x11, x4         // a4 = a3 + a_stride
         ADD x7, x13, x7         // c4 = c3 + cm_stride
                                  // if mr <= 4
@@ -94,9 +94,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
 
         # Load clamp values
         LD2R {v30.4s, v31.4s}, [x8]
-
-        # Load cn_stride
-        LDR x14, [sp, 48]
 
 0:
         # Load initial bias from w into accumulators
