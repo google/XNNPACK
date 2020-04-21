@@ -1,22 +1,21 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
-// All rights reserved.
-//
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 8 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 #include <assert.h>
 
 #include <arm_neon.h>
 
 #include <xnnpack/common.h>
+
 #include <xnnpack/gemm.h>
 
 
-void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
+void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -26,6 +25,8 @@ void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
     void* restrict c,
     size_t cm_stride,
     size_t cn_stride,
+    $if INC:
+      const void*restrict acc,
     const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -33,6 +34,11 @@ void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(__fp16) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+  $if INC:
+    assert(acc != NULL);
 
   const __fp16* a0 = a;
   __fp16* c0 = c;
@@ -56,11 +62,16 @@ void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
       }
 
   do {
-    $for N in range(0, NR, 8):
-      float16x8_t vacc0x${ABC[N:N+8]} = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
-    $for M in range(1, MR):
+    $if INC:
+      $for M in range(MR):
+        $for N in range(0, NR, 8):
+          float16x8_t vacc${M}x${ABC[N:N+8]} = vld1q_f16(acc); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
+    $else:
       $for N in range(0, NR, 8):
-        float16x8_t vacc${M}x${ABC[N:N+8]} = vacc0x${ABC[N:N+8]};
+        float16x8_t vacc0x${ABC[N:N+8]} = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+      $for M in range(1, MR):
+        $for N in range(0, NR, 8):
+          float16x8_t vacc${M}x${ABC[N:N+8]} = vacc0x${ABC[N:N+8]};
 
     size_t k = kc;
     while (k >= 4 * sizeof(__fp16)) {

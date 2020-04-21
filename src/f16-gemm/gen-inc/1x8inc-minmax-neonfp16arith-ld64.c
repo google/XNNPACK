@@ -2,23 +2,22 @@
 //   Template: src/f16-gemm/neonfp16arith-ld64.c.in
 //   Generator: tools/xngen
 //
-// Copyright (c) Facebook, Inc. and its affiliates.
-// All rights reserved.
-//
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+
 
 #include <assert.h>
 
 #include <arm_neon.h>
 
 #include <xnnpack/common.h>
+
 #include <xnnpack/gemm.h>
 
 
-void xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64(
+void xnn_f16_gemminc_minmax_ukernel_1x8__neonfp16arith_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -28,6 +27,7 @@ void xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64(
     void* restrict c,
     size_t cm_stride,
     size_t cn_stride,
+    const void*restrict acc,
     const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -35,12 +35,16 @@ void xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64(
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(__fp16) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+  assert(acc != NULL);
 
   const __fp16* a0 = a;
   __fp16* c0 = c;
 
   do {
-    float16x8_t vacc0x01234567 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+    float16x8_t vacc0x01234567 = vld1q_f16(acc); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
 
     size_t k = kc;
     while (k >= 4 * sizeof(__fp16)) {

@@ -2,19 +2,18 @@
 //   Template: src/f16-gemm/neonfp16arith-ld64.c.in
 //   Generator: tools/xngen
 //
-// Copyright (c) Facebook, Inc. and its affiliates.
-// All rights reserved.
-//
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+
 
 #include <assert.h>
 
 #include <arm_neon.h>
 
 #include <xnnpack/common.h>
+
 #include <xnnpack/gemm.h>
 
 
@@ -35,6 +34,9 @@ void xnn_f16_gemm_minmax_ukernel_6x8__neonfp16arith_ld64(
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(__fp16) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
 
   const __fp16* a0 = a;
   __fp16* c0 = c;
