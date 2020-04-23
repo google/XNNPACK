@@ -545,7 +545,7 @@ enum xnn_status xnn_delete_runtime(
       xnn_release_memory(runtime->ops);
 
       xnn_release_memory(runtime->blobs);
-      xnn_release_memory(runtime->workspace);
+      xnn_release_simd_memory(runtime->workspace);
     }
     xnn_release_memory(runtime);
   }
