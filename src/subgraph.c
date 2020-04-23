@@ -253,11 +253,11 @@ enum xnn_status xnn_define_convolution_2d(
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 3;
-  node->inputs.raw[0] = input_id;
-  node->inputs.raw[1] = filter_id;
-  node->inputs.raw[2] = bias_id;
+  node->inputs[0] = input_id;
+  node->inputs[1] = filter_id;
+  node->inputs[2] = bias_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;
@@ -398,11 +398,11 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 3;
-  node->inputs.raw[0] = input_id;
-  node->inputs.raw[1] = filter_id;
-  node->inputs.raw[2] = bias_id;
+  node->inputs[0] = input_id;
+  node->inputs[1] = filter_id;
+  node->inputs[2] = bias_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;
@@ -513,9 +513,9 @@ enum xnn_status xnn_define_average_pooling_2d(
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 1;
-  node->inputs.raw[0] = input_id;
+  node->inputs[0] = input_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;
@@ -638,9 +638,9 @@ enum xnn_status xnn_define_max_pooling_2d(
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 1;
-  node->inputs.raw[0] = input_id;
+  node->inputs[0] = input_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;
@@ -710,10 +710,10 @@ enum xnn_status xnn_define_add2(
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 2;
-  node->inputs.raw[0] = input1_id;
-  node->inputs.raw[1] = input2_id;
+  node->inputs[0] = input1_id;
+  node->inputs[1] = input2_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;
@@ -783,10 +783,10 @@ enum xnn_status xnn_define_multiply2(
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 2;
-  node->inputs.raw[0] = input1_id;
-  node->inputs.raw[1] = input2_id;
+  node->inputs[0] = input1_id;
+  node->inputs[1] = input2_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;
@@ -832,10 +832,10 @@ enum xnn_status xnn_define_prelu(
 
   node->type = xnn_node_type_prelu;
   node->num_inputs = 2;
-  node->inputs.raw[0] = input_id;
-  node->inputs.raw[1] = slope_id;
+  node->inputs[0] = input_id;
+  node->inputs[1] = slope_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;
@@ -877,9 +877,9 @@ enum xnn_status xnn_define_clamp(
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 1;
-  node->inputs.raw[0] = input_id;
+  node->inputs[0] = input_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;
@@ -917,9 +917,9 @@ enum xnn_status xnn_define_hardswish(
 
   node->type = xnn_node_type_hardswish;
   node->num_inputs = 1;
-  node->inputs.raw[0] = input_id;
+  node->inputs[0] = input_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;
@@ -957,9 +957,9 @@ enum xnn_status xnn_define_sigmoid(
 
   node->type = xnn_node_type_sigmoid;
   node->num_inputs = 1;
-  node->inputs.raw[0] = input_id;
+  node->inputs[0] = input_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;
@@ -997,9 +997,9 @@ enum xnn_status xnn_define_softmax(
 
   node->type = xnn_node_type_softmax;
   node->num_inputs = 1;
-  node->inputs.raw[0] = input_id;
+  node->inputs[0] = input_id;
   node->num_outputs = 1;
-  node->outputs.raw[0] = output_id;
+  node->outputs[0] = output_id;
   node->flags = flags;
 
   return xnn_status_success;

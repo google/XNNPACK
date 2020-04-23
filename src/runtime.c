@@ -79,13 +79,13 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].shape1.num_dims = values[node->inputs.raw[0]].shape.num_dims;
-        runtime->ops[i].shape2.num_dims = values[node->inputs.raw[1]].shape.num_dims;
-        memcpy(runtime->ops[i].shape1.dim, values[node->inputs.raw[0]].shape.dim, values[node->inputs.raw[0]].shape.num_dims * sizeof(size_t));
-        memcpy(runtime->ops[i].shape2.dim, values[node->inputs.raw[1]].shape.dim, values[node->inputs.raw[1]].shape.num_dims * sizeof(size_t));
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].inputs[1] = node->inputs.raw[1];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].shape1.num_dims = values[node->inputs[0]].shape.num_dims;
+        runtime->ops[i].shape2.num_dims = values[node->inputs[1]].shape.num_dims;
+        memcpy(runtime->ops[i].shape1.dim, values[node->inputs[0]].shape.dim, values[node->inputs[0]].shape.num_dims * sizeof(size_t));
+        memcpy(runtime->ops[i].shape2.dim, values[node->inputs[1]].shape.dim, values[node->inputs[1]].shape.num_dims * sizeof(size_t));
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].inputs[1] = node->inputs[1];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_average_pooling_2d:
         status = xnn_create_average_pooling2d_nhwc_f32(
@@ -97,9 +97,9 @@ enum xnn_status xnn_create_runtime_v2(
           node->params.pooling_2d.pooling_width,
           node->params.pooling_2d.stride_height,
           node->params.pooling_2d.stride_width,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* channels */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* output stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
           node->activation.output_min,
           node->activation.output_max,
           node->flags,
@@ -107,11 +107,11 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = values[node->inputs.raw[0]].shape.dim[0];
-        runtime->ops[i].input_height = values[node->inputs.raw[0]].shape.dim[1];
-        runtime->ops[i].input_width = values[node->inputs.raw[0]].shape.dim[2];
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].batch_size = values[node->inputs[0]].shape.dim[0];
+        runtime->ops[i].input_height = values[node->inputs[0]].shape.dim[1];
+        runtime->ops[i].input_width = values[node->inputs[0]].shape.dim[2];
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_convolution_2d:
         status = xnn_create_convolution2d_nhwc_f32(
@@ -130,8 +130,8 @@ enum xnn_status xnn_create_runtime_v2(
           node->params.convolution_2d.group_output_channels,
           node->params.convolution_2d.group_input_channels * node->params.convolution_2d.groups /* input_pixel_stride */,
           node->params.convolution_2d.group_output_channels * node->params.convolution_2d.groups /* output_pixel_stride */,
-          values[node->inputs.convolution_2d.filter].data,
-          values[node->inputs.convolution_2d.bias].data,
+          values[node->inputs[1]].data,
+          values[node->inputs[2]].data,
           node->activation.output_min,
           node->activation.output_max,
           node->flags,
@@ -139,17 +139,17 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = values[node->inputs.raw[0]].shape.dim[0];
-        runtime->ops[i].input_height = values[node->inputs.raw[0]].shape.dim[1];
-        runtime->ops[i].input_width = values[node->inputs.raw[0]].shape.dim[2];
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].batch_size = values[node->inputs[0]].shape.dim[0];
+        runtime->ops[i].input_height = values[node->inputs[0]].shape.dim[1];
+        runtime->ops[i].input_width = values[node->inputs[0]].shape.dim[2];
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_clamp:
         status = xnn_create_clamp_nc_f32(
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* channels */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* output stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
           node->activation.output_min,
           node->activation.output_max,
           node->flags,
@@ -157,9 +157,9 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs[0]].shape);
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_depthwise_convolution_2d:
         status = xnn_create_convolution2d_nhwc_f32(
@@ -178,8 +178,8 @@ enum xnn_status xnn_create_runtime_v2(
           node->params.depthwise_convolution_2d.depth_multiplier /* group_output_channels */,
           node->params.depthwise_convolution_2d.input_channels /* input_pixel_stride */,
           node->params.depthwise_convolution_2d.input_channels * node->params.depthwise_convolution_2d.depth_multiplier /* output_pixel_stride */,
-          values[node->inputs.convolution_2d.filter].data,
-          values[node->inputs.convolution_2d.bias].data,
+          values[node->inputs[1]].data,
+          values[node->inputs[2]].data,
           node->activation.output_min,
           node->activation.output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
@@ -187,25 +187,25 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = values[node->inputs.raw[0]].shape.dim[0];
-        runtime->ops[i].input_height = values[node->inputs.raw[0]].shape.dim[1];
-        runtime->ops[i].input_width = values[node->inputs.raw[0]].shape.dim[2];
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].batch_size = values[node->inputs[0]].shape.dim[0];
+        runtime->ops[i].input_height = values[node->inputs[0]].shape.dim[1];
+        runtime->ops[i].input_width = values[node->inputs[0]].shape.dim[2];
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_hardswish:
         status = xnn_create_hardswish_nc_f32(
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* channels */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* output stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
           node->flags,
           &runtime->ops[i].op);
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs[0]].shape);
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_max_pooling_2d:
         status = xnn_create_max_pooling2d_nhwc_f32(
@@ -219,9 +219,9 @@ enum xnn_status xnn_create_runtime_v2(
           node->params.pooling_2d.stride_width,
           node->params.pooling_2d.dilation_height,
           node->params.pooling_2d.dilation_width,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* channels */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* output stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
           node->activation.output_min,
           node->activation.output_max,
           node->flags,
@@ -229,11 +229,11 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = values[node->inputs.raw[0]].shape.dim[0];
-        runtime->ops[i].input_height = values[node->inputs.raw[0]].shape.dim[1];
-        runtime->ops[i].input_width = values[node->inputs.raw[0]].shape.dim[2];
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].batch_size = values[node->inputs[0]].shape.dim[0];
+        runtime->ops[i].input_height = values[node->inputs[0]].shape.dim[1];
+        runtime->ops[i].input_width = values[node->inputs[0]].shape.dim[2];
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_multiply2:
         status = xnn_create_multiply_nd_f32(
@@ -244,56 +244,56 @@ enum xnn_status xnn_create_runtime_v2(
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].shape1.num_dims = values[node->inputs.raw[0]].shape.num_dims;
-        runtime->ops[i].shape2.num_dims = values[node->inputs.raw[1]].shape.num_dims;
-        memcpy(runtime->ops[i].shape1.dim, values[node->inputs.raw[0]].shape.dim, values[node->inputs.raw[0]].shape.num_dims * sizeof(size_t));
-        memcpy(runtime->ops[i].shape2.dim, values[node->inputs.raw[1]].shape.dim, values[node->inputs.raw[1]].shape.num_dims * sizeof(size_t));
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].inputs[1] = node->inputs.raw[1];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].shape1.num_dims = values[node->inputs[0]].shape.num_dims;
+        runtime->ops[i].shape2.num_dims = values[node->inputs[1]].shape.num_dims;
+        memcpy(runtime->ops[i].shape1.dim, values[node->inputs[0]].shape.dim, values[node->inputs[0]].shape.num_dims * sizeof(size_t));
+        memcpy(runtime->ops[i].shape2.dim, values[node->inputs[1]].shape.dim, values[node->inputs[1]].shape.num_dims * sizeof(size_t));
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].inputs[1] = node->inputs[1];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_prelu:
         status = xnn_create_prelu_nc_f32(
-          values[node->inputs.raw[1]].shape.dim[values[node->inputs.raw[1]].shape.num_dims - 1] /* channels */,
-          values[node->inputs.raw[1]].shape.dim[values[node->inputs.raw[1]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs.raw[1]].shape.dim[values[node->inputs.raw[1]].shape.num_dims - 1] /* output stride */,
-          values[node->inputs.raw[1]].data /* negative slope */,
+          values[node->inputs[1]].shape.dim[values[node->inputs[1]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[1]].shape.dim[values[node->inputs[1]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[1]].shape.dim[values[node->inputs[1]].shape.num_dims - 1] /* output stride */,
+          values[node->inputs[1]].data /* negative slope */,
           node->flags,
           &runtime->ops[i].op);
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs[0]].shape);
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_sigmoid:
         status = xnn_create_sigmoid_nc_f32(
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* channels */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* output stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
           node->flags,
           &runtime->ops[i].op);
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs[0]].shape);
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_softmax:
         status = xnn_create_softmax_nc_f32(
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* channels */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs.raw[0]].shape.dim[values[node->inputs.raw[0]].shape.num_dims - 1] /* output stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
           node->flags,
           &runtime->ops[i].op);
         if (status != xnn_status_success) {
           goto error;
         }
-        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs.raw[0]].shape);
-        runtime->ops[i].inputs[0] = node->inputs.raw[0];
-        runtime->ops[i].outputs[0] = node->outputs.raw[0];
+        runtime->ops[i].batch_size = product_non_channel_dims(&values[node->inputs[0]].shape);
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_invalid:
         xnn_log_fatal("unexpected node type %d in node #%zu", node->type, i);

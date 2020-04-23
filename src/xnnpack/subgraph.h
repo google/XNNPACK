@@ -122,22 +122,10 @@ struct xnn_node {
     float output_max;
   } activation;
   /// Value IDs for node inputs.
-  union {
-    uint32_t raw[XNN_MAX_INPUTS];
-    struct {
-      uint32_t input;
-      uint32_t filter;
-      uint32_t bias;
-    } convolution_2d;
-  } inputs;
+  uint32_t inputs[XNN_MAX_INPUTS];
   uint32_t num_inputs;
   /// Value IDs for node outputs.
-  union {
-    struct {
-      uint32_t output;
-    } convolution_2d;
-    uint32_t raw[XNN_MAX_OUTPUTS];
-  } outputs;
+  uint32_t outputs[XNN_MAX_INPUTS];
   uint32_t num_outputs;
   uint32_t flags;
 };
