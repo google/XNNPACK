@@ -25,6 +25,17 @@ enum xnn_status xnn_create_runtime(
   return xnn_create_runtime_v2(subgraph, NULL /* threadpool */, 0 /* flags */, runtime_out);
 }
 
+// Product of all shape dimensions
+static size_t product_all_dims(
+  const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)])
+{
+  size_t batch_size = 1;
+  for (size_t i = 0; i < shape->num_dims; i++) {
+    batch_size *= shape->dim[i];
+  }
+  return batch_size;
+}
+
 // Product of all shape dimensions, except for the last (channel) one
 static size_t product_non_channel_dims(
   const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)])
@@ -193,6 +204,30 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->ops[i].inputs[0] = node->inputs[0];
         runtime->ops[i].outputs[0] = node->outputs[0];
         break;
+      case xnn_node_type_fully_connected:
+      {
+        const size_t num_input_elements = product_all_dims(&values[node->inputs[0]].shape);
+        const size_t output_channels = values[node->inputs[1]].shape.dim[0];
+        const size_t input_channels = values[node->inputs[1]].shape.dim[1];
+        status = xnn_create_fully_connected_nc_f32(
+          input_channels,
+          output_channels,
+          input_channels /* input stride */,
+          output_channels /* output stride */,
+          values[node->inputs[1]].data,
+          values[node->inputs[2]].data,
+          node->activation.output_min,
+          node->activation.output_max,
+          0 /* flags */,
+          &runtime->ops[i].op);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->ops[i].batch_size = num_input_elements / input_channels;
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
+        break;
+      }
       case xnn_node_type_hardswish:
         status = xnn_create_hardswish_nc_f32(
           values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
@@ -436,6 +471,16 @@ enum xnn_status xnn_setup_runtime(
         assert(runtime->blobs[op->inputs[0]].data != NULL);
         assert(runtime->blobs[op->outputs[0]].data != NULL);
         status = xnn_setup_clamp_nc_f32(
+          op->op,
+          op->batch_size,
+          runtime->blobs[op->inputs[0]].data,
+          runtime->blobs[op->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_fully_connected_nc_f32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
+        status = xnn_setup_fully_connected_nc_f32(
           op->op,
           op->batch_size,
           runtime->blobs[op->inputs[0]].data,
