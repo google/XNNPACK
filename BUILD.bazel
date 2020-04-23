@@ -2236,6 +2236,7 @@ xnnpack_benchmark(
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     gcc_copts = ["-Wno-unused-function"],
+    tags = ["nowin32"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2257,6 +2258,7 @@ xnnpack_benchmark(
     ] + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_dnnl_copts(),
     gcc_copts = ["-Wno-unused-function"],
+    tags = ["nowin32"],
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps(),
 )
 
@@ -2310,6 +2312,7 @@ xnnpack_benchmark(
     name = "average_pooling_bench",
     srcs = ["bench/average-pooling.cc"],
     copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 
@@ -2323,6 +2326,7 @@ xnnpack_benchmark(
     name = "convolution_bench",
     srcs = ["bench/convolution.cc"],
     copts = xnnpack_optional_tflite_copts() + xnnpack_optional_armcl_copts(),
+    tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + xnnpack_optional_armcl_deps(),
 )
 
@@ -2330,6 +2334,7 @@ xnnpack_benchmark(
     name = "deconvolution_bench",
     srcs = ["bench/deconvolution.cc"],
     copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 
@@ -2356,6 +2361,7 @@ xnnpack_benchmark(
     name = "prelu_bench",
     srcs = ["bench/prelu.cc"],
     copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 

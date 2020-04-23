@@ -343,7 +343,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = []):
         deps = deps,
     )
 
-def xnnpack_benchmark(name, srcs, copts = [], gcc_copts = [], msvc_copts = [], deps = []):
+def xnnpack_benchmark(name, srcs, copts = [], gcc_copts = [], msvc_copts = [], deps = [], tags = []):
     """Microbenchmark binary based on Google Benchmark
 
     Args:
@@ -384,4 +384,5 @@ def xnnpack_benchmark(name, srcs, copts = [], gcc_copts = [], msvc_copts = [], d
             ":emscripten": xnnpack_emscripten_deps(),
             "//conditions:default": [],
         }),
+	tags = tags,
     )
