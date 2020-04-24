@@ -57,9 +57,11 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
 
         # Main loop - 4 halffloats of A (8 bytes)
 1:
-        LDR d0, [x3], 8
-        LDP q20, q21, [x5], 32
-        LDP q22, q23, [x5], 32
+        LDR  d0, [x3], 8
+        LDR q20, [x5], 16
+        LDR q21, [x5], 16
+        LDR q22, [x5], 16
+        LDR q23, [x5], 16
         SUBS x0, x0, 8
         FMLA v16.8h, v20.8h, v0.h[0]
         FMLA v18.8h, v21.8h, v0.h[1]
@@ -94,8 +96,9 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         TBZ x0, 2, 8f
 7:
         # Remainder- 2 halffloats of A (4 bytes)
-        LDR s0, [x3], 4
-        LDP q20, q21, [x5], 32
+        LDR  s0, [x3], 4
+        LDR q20, [x5], 16
+        LDR q21, [x5], 16
         FMLA v16.8h, v20.8h, v0.h[0]
         FMLA v18.8h, v21.8h, v0.h[1]
         TBZ x0, 1, 4b

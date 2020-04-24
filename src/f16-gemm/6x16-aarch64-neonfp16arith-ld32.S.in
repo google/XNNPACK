@@ -133,20 +133,23 @@ BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x16__aarch64_
         B.LO 4f
 
         # Main loop - 2 halffloats of A (4 bytes)
-        # 24 FMA + 6 ld32 A + 2 LDP B
+        # 24 FMA + 6 ld32 A + 4 LDR B
 1:
         LDR   s0,  [x3], 4
-        LDP  q16,  q17, [x5], 32
+        LDR  q16, [x5], 16
+        LDR  q17, [x5], 16
         LDR   s1,  [x9], 4
         LDR   s2, [x10], 4
         LDR   s3, [x11], 4
         LDR   s4, [x12], 4
         LDR   s5,  [x4], 4
+        SUBS x0, x0, 4
         FMLA v20.8h, v16.8h,  v0.h[0]
         FMLA v22.8h, v16.8h,  v1.h[0]
         FMLA v24.8h, v16.8h,  v2.h[0]
         FMLA v26.8h, v16.8h,  v3.h[0]
-        LDP  q18,  q19, [x5], 32
+        LDR  q18, [x5], 16
+        LDR  q19, [x5], 16
         FMLA v28.8h, v16.8h,  v4.h[0]
         FMLA v30.8h, v16.8h,  v5.h[0]
         FMLA v21.8h, v17.8h,  v0.h[0]
@@ -166,7 +169,6 @@ BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x16__aarch64_
         FMLA v23.8h, v19.8h,  v1.h[1]
         FMLA v25.8h, v19.8h,  v2.h[1]
         FMLA v27.8h, v19.8h,  v3.h[1]
-        SUBS x0, x0, 4
         FMLA v29.8h, v19.8h,  v4.h[1]
         FMLA v31.8h, v19.8h,  v5.h[1]
         B.HS 1b
@@ -251,7 +253,8 @@ BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x16__aarch64_
 4:
         # Remainder- 1 halffloat of A (2 bytes)
         LDR   h0,  [x3], 2
-        LDP  q16,  q17, [x5], 32
+        LDR  q16, [x5], 16
+        LDR  q17, [x5], 16
         LDR   h1,  [x9], 2
         LDR   h2, [x10], 2
         LDR   h3, [x11], 2

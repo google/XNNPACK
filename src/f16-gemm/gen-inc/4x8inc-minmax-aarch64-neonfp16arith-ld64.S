@@ -91,17 +91,19 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_4x8__aarch64_neonfp16arith_ld64
 
         # Main loop - 4 halffloats of A (8 bytes)
 1:
-        LDR d0,  [x3], 8
-        LDP q20, q21, [x5], 32
-        LDR d1, [x11], 8
-        LDR d2, [x12], 8
-        LDR d3,  [x4], 8
-
+        LDR  d0,  [x3], 8
+        LDR q20,  [x5], 16
+        LDR q21,  [x5], 16
+        LDR  d1, [x11], 8
+        LDR  d2, [x12], 8
+        LDR  d3,  [x4], 8
+        SUBS x0, x0, 8
         FMLA v16.8h, v20.8h, v0.h[0]
         FMLA v18.8h, v20.8h, v1.h[0]
         FMLA v28.8h, v20.8h, v2.h[0]
         FMLA v30.8h, v20.8h, v3.h[0]
-        LDP q22, q23, [x5], 32
+        LDR q22, [x5], 16
+        LDR q23, [x5], 16
 
         FMLA v16.8h, v21.8h, v0.h[1]
         FMLA v18.8h, v21.8h, v1.h[1]
@@ -112,7 +114,6 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_4x8__aarch64_neonfp16arith_ld64
         FMLA v18.8h, v22.8h, v1.h[2]
         FMLA v28.8h, v22.8h, v2.h[2]
         FMLA v30.8h, v22.8h, v3.h[2]
-        SUBS x0, x0, 8
 
         FMLA v16.8h, v23.8h, v0.h[3]
         FMLA v18.8h, v23.8h, v1.h[3]
@@ -160,7 +161,8 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_4x8__aarch64_neonfp16arith_ld64
 6:
         # Remainder- 2 halffloats of A (4 bytes)
         LDR s0,  [x3], 4
-        LDP q20, q21, [x5], 32
+        LDR q20, [x5], 16
+        LDR q21, [x5], 16
         LDR s1, [x11], 4
         LDR s2, [x12], 4
         LDR s3,  [x4], 4
