@@ -6,14 +6,30 @@
 - name: xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
   pipelined: true
   assembly: true
+- name: xnn_f32_dwconv_minmax_ukernel_up4x25__neonfma
+- name: xnn_f32_dwconv_minmax_ukernel_up4x25__neonfma_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_up8x25__neonfma
+- name: xnn_f32_dwconv_minmax_ukernel_up8x25__neonfma_acc2
 - name: xnn_f32_dwconv_minmax_ukernel_up4x9__neonfma
 - name: xnn_f32_dwconv_minmax_ukernel_up4x9__neonfma_acc2
 - name: xnn_f32_dwconv_minmax_ukernel_up8x9__neonfma
 - name: xnn_f32_dwconv_minmax_ukernel_up8x9__neonfma_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_up4x4__neonfma
+- name: xnn_f32_dwconv_minmax_ukernel_up4x4__neonfma_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_up8x4__neonfma
+- name: xnn_f32_dwconv_minmax_ukernel_up8x4__neonfma_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_up4x25__neon
+- name: xnn_f32_dwconv_minmax_ukernel_up4x25__neon_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_up8x25__neon
+- name: xnn_f32_dwconv_minmax_ukernel_up8x25__neon_acc2
 - name: xnn_f32_dwconv_minmax_ukernel_up4x9__neon
 - name: xnn_f32_dwconv_minmax_ukernel_up4x9__neon_acc2
 - name: xnn_f32_dwconv_minmax_ukernel_up8x9__neon
 - name: xnn_f32_dwconv_minmax_ukernel_up8x9__neon_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_up4x4__neon
+- name: xnn_f32_dwconv_minmax_ukernel_up4x4__neon_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_up8x4__neon
+- name: xnn_f32_dwconv_minmax_ukernel_up8x4__neon_acc2
 - name: xnn_f32_dwconv_minmax_ukernel_up4x25__sse
 - name: xnn_f32_dwconv_minmax_ukernel_up4x25__sse_acc2
 - name: xnn_f32_dwconv_minmax_ukernel_up8x25__sse

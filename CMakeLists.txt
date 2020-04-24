@@ -501,10 +501,18 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-avgpool/9x-minmax-neon-c4.c
   src/f32-clamp/gen/neon-x4.c
   src/f32-clamp/gen/neon-x8.c
+  src/f32-dwconv/gen/up4x4-minmax-neon.c
+  src/f32-dwconv/gen/up4x4-minmax-neon-acc2.c
+  src/f32-dwconv/gen/up8x4-minmax-neon.c
+  src/f32-dwconv/gen/up8x4-minmax-neon-acc2.c
   src/f32-dwconv/gen/up4x9-minmax-neon.c
   src/f32-dwconv/gen/up4x9-minmax-neon-acc2.c
   src/f32-dwconv/gen/up8x9-minmax-neon.c
   src/f32-dwconv/gen/up8x9-minmax-neon-acc2.c
+  src/f32-dwconv/gen/up4x25-minmax-neon.c
+  src/f32-dwconv/gen/up4x25-minmax-neon-acc2.c
+  src/f32-dwconv/gen/up8x25-minmax-neon.c
+  src/f32-dwconv/gen/up8x25-minmax-neon-acc2.c
   src/f32-gavgpool-spchw/neon-x4.c
   src/f32-gavgpool/7p7x-minmax-neon-c4.c
   src/f32-gavgpool/7x-minmax-neon-c4.c
@@ -682,10 +690,18 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8s4-minmax-neonfma.c
   src/f32-igemm/gen/6x8s4-minmax-neonfma.c
   src/f32-igemm/gen/8x8s4-minmax-neonfma.c
+  src/f32-dwconv/gen/up4x4-minmax-neonfma.c
+  src/f32-dwconv/gen/up4x4-minmax-neonfma-acc2.c
+  src/f32-dwconv/gen/up8x4-minmax-neonfma.c
+  src/f32-dwconv/gen/up8x4-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/up4x9-minmax-neonfma.c
   src/f32-dwconv/gen/up4x9-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/up8x9-minmax-neonfma.c
   src/f32-dwconv/gen/up8x9-minmax-neonfma-acc2.c
+  src/f32-dwconv/gen/up4x25-minmax-neonfma.c
+  src/f32-dwconv/gen/up4x25-minmax-neonfma-acc2.c
+  src/f32-dwconv/gen/up8x25-minmax-neonfma.c
+  src/f32-dwconv/gen/up8x25-minmax-neonfma-acc2.c
   src/f32-gemm/gen/1x8-minmax-neonfma-dup-ld64.c
   src/f32-gemm/gen/4x8-minmax-neonfma-dup-ld128.c
   src/f32-gemm/gen/4x8-minmax-neonfma-dup-ld64.c

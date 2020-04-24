@@ -236,7 +236,7 @@ static void init(void) {
     xnn_params.f32.gemm2.mr = 4;
     xnn_params.f32.gemm2.nr = 2;
 
-    xnn_params.f32.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up4x4__psimd;
+    xnn_params.f32.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up4x4__neon;
     xnn_params.f32.dwconv[0].channel_tile = 4,
     xnn_params.f32.dwconv[0].primary_tile = 4,
 
@@ -244,7 +244,7 @@ static void init(void) {
     xnn_params.f32.dwconv[1].channel_tile = 4;
     xnn_params.f32.dwconv[1].primary_tile = 9;
 
-    xnn_params.f32.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up4x25__psimd;
+    xnn_params.f32.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up4x25__neon_acc2;
     xnn_params.f32.dwconv[2].channel_tile = 4;
     xnn_params.f32.dwconv[2].primary_tile = 25;
 
@@ -562,8 +562,8 @@ static void init(void) {
     xnn_params.f32.gemm2.mr = 4;
     xnn_params.f32.gemm2.nr = 2;
 
-    xnn_params.f32.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up4x4__psimd;
-    xnn_params.f32.dwconv[0].channel_tile = 4;
+    xnn_params.f32.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up8x4__neonfma;
+    xnn_params.f32.dwconv[0].channel_tile = 8;
     xnn_params.f32.dwconv[0].primary_tile = 4;
 
     #if XNN_PLATFORM_IOS
@@ -594,7 +594,7 @@ static void init(void) {
       }
     #endif  // XNN_PLATFORM_IOS
 
-    xnn_params.f32.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up4x25__psimd;
+    xnn_params.f32.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up4x25__neonfma_acc2;
     xnn_params.f32.dwconv[2].channel_tile = 4;
     xnn_params.f32.dwconv[2].primary_tile = 25;
 
