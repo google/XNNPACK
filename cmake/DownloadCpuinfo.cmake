@@ -12,7 +12,7 @@ PROJECT(cpuinfo-download NONE)
 
 INCLUDE(ExternalProject)
 ExternalProject_Add(cpuinfo
-  URL https://github.com/pytorch/cpuinfo/archive/a1e0b9571b51131cf80613d061d2aa123876bd0a.tar.gz
+  URL https://github.com/pytorch/cpuinfo/archive/a1e0b9571b51131cf80613d061d2aa123876bd0a.zip
   URL_HASH SHA256=18918d39a77616bdcf948c99ed57d03d52109a820487fcda9fb5ee9b530d3d64
   SOURCE_DIR "${CMAKE_BINARY_DIR}/cpuinfo-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/cpuinfo"
