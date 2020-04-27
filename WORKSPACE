@@ -45,9 +45,9 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    strip_prefix = "pthreadpool-e918b206d26b1f3b2100b0edabf445c18708d2b7",
-    sha256 = "c4b148fba41fc937fdf96bc195caadf0cf0be83f1c3e335ef5355934d4501f83",
-    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/e918b206d26b1f3b2100b0edabf445c18708d2b7.zip"],
+    strip_prefix = "pthreadpool-9b2c0caf7d9843f25709178b0cd7030892a1ff88",
+    sha256 = "ad6b6b2da1e10d3d33ad9b5f61aca30b73ce7b45d15e77cb295c4860460d7ee7",
+    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/9b2c0caf7d9843f25709178b0cd7030892a1ff88.zip"],
 )
 
 # clog library, used for logging
