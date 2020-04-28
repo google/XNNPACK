@@ -168,6 +168,15 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
     goto error;
   }
 
+  const bool any_padding = (output_padding_left | output_padding_top | output_padding_right | output_padding_bottom) != 0;
+  if (any_padding && (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
+    xnn_log_error(
+      "failed to create Deconvolution operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+      "TensorFlow SAME padding can't be combined with explicit padding specification",
+      output_padding_top, output_padding_left, output_padding_bottom, output_padding_right);
+    goto error;
+  }
+
   status = xnn_status_unsupported_parameter;
 
   const float deconvolution_scale = input_scale * kernel_scale / output_scale;
@@ -294,6 +303,24 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
     .kr = kr,
   };
 
+  if (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
+    if ((stride_height | stride_width) == 1) {
+      // Padding can be computed statically
+      const uint32_t padding_height = (kernel_height - 1) * dilation_height;
+      const uint32_t padding_width = (kernel_width - 1) * dilation_width;
+
+      const uint32_t padding_top = padding_height / 2;
+      const uint32_t padding_left = padding_width / 2;
+
+      deconvolution_op->padding_top = padding_top;
+      deconvolution_op->padding_left = padding_left;
+      deconvolution_op->padding_bottom = padding_height - padding_top;
+      deconvolution_op->padding_right = padding_width - padding_left;
+    } else {
+      deconvolution_op->flags = XNN_FLAG_TENSORFLOW_SAME_PADDING;
+    }
+  }
+
   deconvolution_op->state = xnn_run_state_invalid;
 
   *deconvolution_op_out = deconvolution_op;
@@ -419,6 +446,15 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     goto error;
   }
 
+  const bool any_padding = (output_padding_left | output_padding_top | output_padding_right | output_padding_bottom) != 0;
+  if (any_padding && (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
+    xnn_log_error(
+      "failed to create Deconvolution operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+      "TensorFlow SAME padding can't be combined with explicit padding specification",
+      output_padding_top, output_padding_left, output_padding_bottom, output_padding_right);
+    goto error;
+  }
+
   status = xnn_status_out_of_memory;
 
   deconvolution_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -538,6 +574,24 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     .nr = nr,
     .kr = kr,
   };
+
+  if (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
+    if ((stride_height | stride_width) == 1) {
+      // Padding can be computed statically
+      const uint32_t padding_height = (kernel_height - 1) * dilation_height;
+      const uint32_t padding_width = (kernel_width - 1) * dilation_width;
+
+      const uint32_t padding_top = padding_height / 2;
+      const uint32_t padding_left = padding_width / 2;
+
+      deconvolution_op->padding_top = padding_top;
+      deconvolution_op->padding_left = padding_left;
+      deconvolution_op->padding_bottom = padding_height - padding_top;
+      deconvolution_op->padding_right = padding_width - padding_left;
+    } else {
+      deconvolution_op->flags = XNN_FLAG_TENSORFLOW_SAME_PADDING;
+    }
+  }
 
   deconvolution_op->state = xnn_run_state_invalid;
 
@@ -878,6 +932,20 @@ static enum xnn_status setup_deconvolution2d(
   deconvolution_op->input_width = input_width;
   deconvolution_op->input = input;
   deconvolution_op->output = output;
+
+  if (deconvolution_op->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
+    // Recompute padding for the input size.
+    const uint32_t dilated_kernel_height_minus_1 = (deconvolution_op->kernel_height - 1) * deconvolution_op->dilation_height;
+    const uint32_t dilated_kernel_width_minus_1 = (deconvolution_op->kernel_width - 1) * deconvolution_op->dilation_width;
+
+    const size_t total_padding_height = doz(dilated_kernel_height_minus_1, (input_height - 1) % deconvolution_op->stride_height);
+    const size_t total_padding_width = doz(dilated_kernel_width_minus_1, (input_width - 1) % deconvolution_op->stride_width);
+
+    const uint32_t padding_top = deconvolution_op->padding_top = total_padding_height / 2;
+    const uint32_t padding_left = deconvolution_op->padding_left = total_padding_width / 2;
+    deconvolution_op->padding_bottom = total_padding_height - padding_top;
+    deconvolution_op->padding_right = total_padding_width - padding_left;
+  }
 
   const size_t output_height = deconvolution_op->output_height = compute_output_dimension(
     input_height, deconvolution_op->padding_top + deconvolution_op->padding_bottom,
