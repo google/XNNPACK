@@ -252,6 +252,61 @@ enum xnn_status xnn_define_convolution_2d(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a 2D Deconvolution (Transposed Convolution) Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param padding_top - implicit padding above 2D output data.
+/// @param padding_right - implicit padding to the right of 2D output data.
+/// @param padding_bottom - implicit padding below 2D output data.
+/// @param padding_left - implicit padding to the left of 2D output data.
+/// @param adjustment_height - additional elements in the bottom of the 2D output data.
+/// @param adjustment_width - additional elements to the right of the 2D output data.
+/// @param kernel_height - kernel (filter) height.
+/// @param kernel_width - kernel (filter) width.
+/// @param upsampling_height - height of upsampling region for deconvolution input (deconvolution height stride).
+/// @param upsampling_width - width of upsampling region for deconvolution input (deconvolution width stride).
+/// @param dilation_height - dilation of kernel elements along the height dimension.
+/// @param dilation_width - dilation of kernel elements along the width dimension.
+/// @param groups - number of convolution groups.
+/// @param group_input_channels - number of input channels per group.
+/// @param group_output_channels - number of output channels per group.
+/// @param output_min - lower bound for clipping output values.
+/// @param output_max - upper bound for clipping output values.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, IH, IW, groups * group_input_channels] dimensions
+/// @param filter_id - Value ID for the filter tensor. The filter tensor must ge a 4D tensor defined in the @a subgraph
+///                    with [groups * group_output_channels, kernel_height, kernel_width, group_input_channels]
+///                    dimensions.
+/// @param bias_id - Value ID for the bias tensor. The bias tensor must be a 1D tensor defined in the @a subgraph with
+///                  [groups * group_output_channels] dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, OH, OW, groups * group_output_channels] dimensions.
+/// @param flags - binary features of the 2D Deconvolution Node. No supported flags are currently defined.
+enum xnn_status xnn_define_deconvolution_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t padding_top,
+  uint32_t padding_right,
+  uint32_t padding_bottom,
+  uint32_t padding_left,
+  uint32_t adjustment_height,
+  uint32_t adjustment_width,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t upsampling_height,
+  uint32_t upsampling_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t groups,
+  size_t group_input_channels,
+  size_t group_output_channels,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
+  uint32_t filter_id,
+  uint32_t bias_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a 2D Depthwise Convolution Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

@@ -61,6 +61,7 @@ enum xnn_node_type {
   xnn_node_type_average_pooling_2d,
   xnn_node_type_clamp,
   xnn_node_type_convolution_2d,
+  xnn_node_type_deconvolution_2d,
   xnn_node_type_depthwise_convolution_2d,
   xnn_node_type_fully_connected,
   xnn_node_type_hardswish,
@@ -91,6 +92,23 @@ struct xnn_node {
       size_t group_input_channels;
       size_t group_output_channels;
     } convolution_2d;
+    struct {
+      uint32_t padding_top;
+      uint32_t padding_right;
+      uint32_t padding_bottom;
+      uint32_t padding_left;
+      uint32_t adjustment_height;
+      uint32_t adjustment_width;
+      uint32_t kernel_height;
+      uint32_t kernel_width;
+      uint32_t upsampling_height;
+      uint32_t upsampling_width;
+      uint32_t dilation_height;
+      uint32_t dilation_width;
+      uint32_t groups;
+      size_t group_input_channels;
+      size_t group_output_channels;
+    } deconvolution_2d;
     struct {
       uint32_t input_padding_top;
       uint32_t input_padding_right;
@@ -138,6 +156,8 @@ struct xnn_operator_data {
   size_t input_width;
   struct xnn_shape shape1;
   struct xnn_shape shape2;
+  uint32_t adjustment_height;
+  uint32_t adjustment_width;
   uint32_t inputs[XNN_MAX_RUNTIME_INPUTS];
   uint32_t outputs[XNN_MAX_RUNTIME_OUTPUTS];
 };

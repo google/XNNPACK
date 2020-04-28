@@ -172,6 +172,40 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->ops[i].inputs[0] = node->inputs[0];
         runtime->ops[i].outputs[0] = node->outputs[0];
         break;
+      case xnn_node_type_deconvolution_2d:
+        status = xnn_create_deconvolution2d_nhwc_f32(
+          node->params.deconvolution_2d.padding_top,
+          node->params.deconvolution_2d.padding_right,
+          node->params.deconvolution_2d.padding_bottom,
+          node->params.deconvolution_2d.padding_left,
+          node->params.deconvolution_2d.kernel_height,
+          node->params.deconvolution_2d.kernel_width,
+          node->params.deconvolution_2d.upsampling_height,
+          node->params.deconvolution_2d.upsampling_width,
+          node->params.deconvolution_2d.dilation_height,
+          node->params.deconvolution_2d.dilation_width,
+          node->params.deconvolution_2d.groups,
+          node->params.deconvolution_2d.group_input_channels,
+          node->params.deconvolution_2d.group_output_channels,
+          node->params.deconvolution_2d.group_input_channels * node->params.deconvolution_2d.groups /* input_pixel_stride */,
+          node->params.deconvolution_2d.group_output_channels * node->params.deconvolution_2d.groups /* output_pixel_stride */,
+          values[node->inputs[1]].data,
+          values[node->inputs[2]].data,
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags,
+          &runtime->ops[i].op);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->ops[i].batch_size = values[node->inputs[0]].shape.dim[0];
+        runtime->ops[i].input_height = values[node->inputs[0]].shape.dim[1];
+        runtime->ops[i].input_width = values[node->inputs[0]].shape.dim[2];
+        runtime->ops[i].adjustment_height = node->params.deconvolution_2d.adjustment_height;
+        runtime->ops[i].adjustment_width = node->params.deconvolution_2d.adjustment_width;
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
+        break;
       case xnn_node_type_depthwise_convolution_2d:
         status = xnn_create_convolution2d_nhwc_f32(
           node->params.depthwise_convolution_2d.input_padding_top,
@@ -473,6 +507,20 @@ enum xnn_status xnn_setup_runtime(
         status = xnn_setup_clamp_nc_f32(
           op->op,
           op->batch_size,
+          runtime->blobs[op->inputs[0]].data,
+          runtime->blobs[op->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_deconvolution_nhwc_f32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
+        status = xnn_setup_deconvolution2d_nhwc_f32(
+          op->op,
+          op->batch_size,
+          op->input_height,
+          op->input_width,
+          op->adjustment_height,
+          op->adjustment_width,
           runtime->blobs[op->inputs[0]].data,
           runtime->blobs[op->outputs[0]].data,
           runtime->threadpool);
