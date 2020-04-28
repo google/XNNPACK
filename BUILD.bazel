@@ -2012,8 +2012,6 @@ xnnpack_cc_library(
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    wasm_srcs = ["src/wasm-stubs.c"],
-    wasmsimd_srcs = ["src/wasm-stubs.c"],
     deps = [
         ":indirection",
         "@FP16",
