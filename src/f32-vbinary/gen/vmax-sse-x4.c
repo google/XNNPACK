@@ -12,6 +12,7 @@
 #include <xmmintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vbinary.h>
 
 
@@ -51,8 +52,8 @@ void xnn_f32_vmax_ukernel__sse_x4(
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const __m128 va0123 = _mm_loadu_ps(a);
-    const __m128 vb0123 = _mm_loadu_ps(b);
+    const __m128 va0123 = _mm_loadu_ps_notsan(a);
+    const __m128 vb0123 = _mm_loadu_ps_notsan(b);
 
     __m128 vy0123 = _mm_max_ps(va0123, vb0123);
     if (n & (2 * sizeof(float))) {

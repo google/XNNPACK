@@ -10,10 +10,11 @@
 
 #include <emmintrin.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/maxpool.h>
 
 
-XNN_DISABLE_TSAN void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
+void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
@@ -102,15 +103,15 @@ XNN_DISABLE_TSAN void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
         _mm_storeu_si128((__m128i*) o, vout); o += 16;
       }
       if (c != 0) {
-        const __m128i vi0 = _mm_loadu_si128((const __m128i*) i0);
-        const __m128i vi1 = _mm_loadu_si128((const __m128i*) i1);
-        const __m128i vi2 = _mm_loadu_si128((const __m128i*) i2);
-        const __m128i vi3 = _mm_loadu_si128((const __m128i*) i3);
-        const __m128i vi4 = _mm_loadu_si128((const __m128i*) i4);
-        const __m128i vi5 = _mm_loadu_si128((const __m128i*) i5);
-        const __m128i vi6 = _mm_loadu_si128((const __m128i*) i6);
-        const __m128i vi7 = _mm_loadu_si128((const __m128i*) i7);
-        const __m128i vi8 = _mm_loadu_si128((const __m128i*) i8);
+        const __m128i vi0 = _mm_loadu_si128_notsan((const __m128i*) i0);
+        const __m128i vi1 = _mm_loadu_si128_notsan((const __m128i*) i1);
+        const __m128i vi2 = _mm_loadu_si128_notsan((const __m128i*) i2);
+        const __m128i vi3 = _mm_loadu_si128_notsan((const __m128i*) i3);
+        const __m128i vi4 = _mm_loadu_si128_notsan((const __m128i*) i4);
+        const __m128i vi5 = _mm_loadu_si128_notsan((const __m128i*) i5);
+        const __m128i vi6 = _mm_loadu_si128_notsan((const __m128i*) i6);
+        const __m128i vi7 = _mm_loadu_si128_notsan((const __m128i*) i7);
+        const __m128i vi8 = _mm_loadu_si128_notsan((const __m128i*) i8);
 
         const __m128i vmax018 = _mm_max_epu8(_mm_max_epu8(vi0, vi1), vi8);
         const __m128i vmax23 = _mm_max_epu8(vi2, vi3);
@@ -210,15 +211,15 @@ XNN_DISABLE_TSAN void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
         o += 16;
       }
       if (c != 0) {
-        const __m128i vi0 = _mm_loadu_si128((const __m128i*) i0);
-        const __m128i vi1 = _mm_loadu_si128((const __m128i*) i1);
-        const __m128i vi2 = _mm_loadu_si128((const __m128i*) i2);
-        const __m128i vi3 = _mm_loadu_si128((const __m128i*) i3);
-        const __m128i vi4 = _mm_loadu_si128((const __m128i*) i4);
-        const __m128i vi5 = _mm_loadu_si128((const __m128i*) i5);
-        const __m128i vi6 = _mm_loadu_si128((const __m128i*) i6);
-        const __m128i vi7 = _mm_loadu_si128((const __m128i*) i7);
-        const __m128i vo = _mm_loadu_si128((const __m128i*) o);
+        const __m128i vi0 = _mm_loadu_si128_notsan((const __m128i*) i0);
+        const __m128i vi1 = _mm_loadu_si128_notsan((const __m128i*) i1);
+        const __m128i vi2 = _mm_loadu_si128_notsan((const __m128i*) i2);
+        const __m128i vi3 = _mm_loadu_si128_notsan((const __m128i*) i3);
+        const __m128i vi4 = _mm_loadu_si128_notsan((const __m128i*) i4);
+        const __m128i vi5 = _mm_loadu_si128_notsan((const __m128i*) i5);
+        const __m128i vi6 = _mm_loadu_si128_notsan((const __m128i*) i6);
+        const __m128i vi7 = _mm_loadu_si128_notsan((const __m128i*) i7);
+        const __m128i vo = _mm_loadu_si128_notsan((const __m128i*) o);
 
         const __m128i vmax01 = _mm_max_epu8(_mm_max_epu8(vi0, vi1), vo);
         const __m128i vmax23 = _mm_max_epu8(vi2, vi3);

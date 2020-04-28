@@ -12,6 +12,7 @@
 #include <xmmintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vbinary.h>
 
 
@@ -49,7 +50,7 @@ void xnn_f32_vminc_ukernel__sse_x8(
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const __m128 va0123 = _mm_loadu_ps(a);
+    const __m128 va0123 = _mm_loadu_ps_notsan(a);
 
     __m128 vy0123 = _mm_min_ps(va0123, vb);
     if (n & (2 * sizeof(float))) {

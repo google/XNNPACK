@@ -12,6 +12,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vunary.h>
 
 
@@ -270,7 +271,7 @@ void xnn_f32_sigmoid_ukernel__sse2_p5_div_x24(
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const __m128 vx = _mm_loadu_ps(x);
+    const __m128 vx = _mm_loadu_ps_notsan(x);
 
     // General structure of the algorithm:
     //           / exp(x) / (1 + exp(x)) if x <= 0

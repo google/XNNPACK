@@ -7,10 +7,11 @@
 
 #include <xmmintrin.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/maxpool.h>
 
 
-XNN_DISABLE_TSAN void xnn_f32_maxpool_minmax_ukernel_9p8x__sse_c4(
+void xnn_f32_maxpool_minmax_ukernel_9p8x__sse_c4(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
@@ -108,23 +109,23 @@ XNN_DISABLE_TSAN void xnn_f32_maxpool_minmax_ukernel_9p8x__sse_c4(
         o += 4;
       }
       if (c != 0) {
-        const __m128 vi0 = _mm_loadu_ps(i0);
+        const __m128 vi0 = _mm_loadu_ps_notsan(i0);
         i0 += 4;
-        const __m128 vi1 = _mm_loadu_ps(i1);
+        const __m128 vi1 = _mm_loadu_ps_notsan(i1);
         i1 += 4;
-        const __m128 vi2 = _mm_loadu_ps(i2);
+        const __m128 vi2 = _mm_loadu_ps_notsan(i2);
         i2 += 4;
-        const __m128 vi3 = _mm_loadu_ps(i3);
+        const __m128 vi3 = _mm_loadu_ps_notsan(i3);
         i3 += 4;
-        const __m128 vi4 = _mm_loadu_ps(i4);
+        const __m128 vi4 = _mm_loadu_ps_notsan(i4);
         i4 += 4;
-        const __m128 vi5 = _mm_loadu_ps(i5);
+        const __m128 vi5 = _mm_loadu_ps_notsan(i5);
         i5 += 4;
-        const __m128 vi6 = _mm_loadu_ps(i6);
+        const __m128 vi6 = _mm_loadu_ps_notsan(i6);
         i6 += 4;
-        const __m128 vi7 = _mm_loadu_ps(i7);
+        const __m128 vi7 = _mm_loadu_ps_notsan(i7);
         i7 += 4;
-        const __m128 vi8 = _mm_loadu_ps(i8);
+        const __m128 vi8 = _mm_loadu_ps_notsan(i8);
         i8 += 4;
 
         const __m128 vmax018 = _mm_max_ps(_mm_max_ps(vi0, vi1), vi8);
@@ -223,15 +224,15 @@ XNN_DISABLE_TSAN void xnn_f32_maxpool_minmax_ukernel_9p8x__sse_c4(
         o += 4;
       }
       if (c != 0) {
-        const __m128 vi0 = _mm_loadu_ps(i0);
-        const __m128 vi1 = _mm_loadu_ps(i1);
-        const __m128 vi2 = _mm_loadu_ps(i2);
-        const __m128 vi3 = _mm_loadu_ps(i3);
-        const __m128 vi4 = _mm_loadu_ps(i4);
-        const __m128 vi5 = _mm_loadu_ps(i5);
-        const __m128 vi6 = _mm_loadu_ps(i6);
-        const __m128 vi7 = _mm_loadu_ps(i7);
-        const __m128 vo = _mm_loadu_ps(o);
+        const __m128 vi0 = _mm_loadu_ps_notsan(i0);
+        const __m128 vi1 = _mm_loadu_ps_notsan(i1);
+        const __m128 vi2 = _mm_loadu_ps_notsan(i2);
+        const __m128 vi3 = _mm_loadu_ps_notsan(i3);
+        const __m128 vi4 = _mm_loadu_ps_notsan(i4);
+        const __m128 vi5 = _mm_loadu_ps_notsan(i5);
+        const __m128 vi6 = _mm_loadu_ps_notsan(i6);
+        const __m128 vi7 = _mm_loadu_ps_notsan(i7);
+        const __m128 vo = _mm_loadu_ps_notsan(o);
 
         const __m128 vmax01 = _mm_max_ps(_mm_max_ps(vi0, vi1), vo);
         const __m128 vmax23 = _mm_max_ps(vi2, vi3);

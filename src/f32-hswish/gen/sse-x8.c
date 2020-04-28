@@ -12,6 +12,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vbinary.h>
 
 
@@ -65,7 +66,7 @@ void xnn_f32_hswish_ukernel__sse_x8(
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const __m128 vx0123 = _mm_loadu_ps(x);
+    const __m128 vx0123 = _mm_loadu_ps_notsan(x);
     __m128 vacc0123 = _mm_mul_ps(vx0123, vsixth);
     vacc0123 = _mm_add_ps(vacc0123, vhalf);
     vacc0123 = _mm_max_ps(vacc0123, vzero);

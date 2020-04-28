@@ -188,6 +188,14 @@
 #endif
 
 #if defined(__GNUC__)
+  #define XNN_INTRINSIC inline __attribute__((__always_inline__, __artificial__))
+#elif defined(_MSC_VER)
+  #define XNN_INTRINSIC __forceinline
+#else
+  #define XNN_INTRINSIC inline
+#endif
+
+#if defined(__GNUC__)
   #define XNN_INLINE inline __attribute__((__always_inline__))
 #elif defined(_MSC_VER)
   #define XNN_INLINE __forceinline
