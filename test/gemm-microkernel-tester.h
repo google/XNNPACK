@@ -470,7 +470,7 @@ class GemmMicrokernelTester {
       std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
       std::fill(packed_w.begin(), packed_w.end(), 0);
-      xnn_pack_f16_gemm_goi_w(1, n(), k(), nr(), kr(), b.data(), bias.data(), packed_w.data());
+      xnn_pack_f16_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data());
 
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
