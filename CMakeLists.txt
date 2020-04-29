@@ -146,27 +146,27 @@ ENDIF()
 
 # ---[ XNNPACK library
 SET(XNNPACK_OPERATOR_SRCS
-  src/add-nc.c
-  src/argmax-pooling-nhwc.c
-  src/average-pooling-nhwc.c
-  src/binary-elementwise-nd.c
-  src/channel-pad-nc.c
-  src/channel-shuffle-nc.c
-  src/clamp-nc.c
-  src/convolution-nchw.c
-  src/convolution-nhwc.c
-  src/deconvolution-nhwc.c
-  src/fully-connected-nc.c
-  src/global-average-pooling-ncw.c
-  src/global-average-pooling-nwc.c
-  src/hardswish-nc.c
-  src/leaky-relu-nc.c
-  src/max-pooling-nhwc.c
-  src/prelu-nc.c
-  src/resize-bilinear-nhwc.c
-  src/sigmoid-nc.c
-  src/softmax-nc.c
-  src/unpooling-nhwc.c)
+  src/operators/add-nc.c
+  src/operators/argmax-pooling-nhwc.c
+  src/operators/average-pooling-nhwc.c
+  src/operators/binary-elementwise-nd.c
+  src/operators/channel-pad-nc.c
+  src/operators/channel-shuffle-nc.c
+  src/operators/clamp-nc.c
+  src/operators/convolution-nchw.c
+  src/operators/convolution-nhwc.c
+  src/operators/deconvolution-nhwc.c
+  src/operators/fully-connected-nc.c
+  src/operators/global-average-pooling-ncw.c
+  src/operators/global-average-pooling-nwc.c
+  src/operators/hardswish-nc.c
+  src/operators/leaky-relu-nc.c
+  src/operators/max-pooling-nhwc.c
+  src/operators/prelu-nc.c
+  src/operators/resize-bilinear-nhwc.c
+  src/operators/sigmoid-nc.c
+  src/operators/softmax-nc.c
+  src/operators/unpooling-nhwc.c)
 
 SET(XNNPACK_COLD_SRCS ${XNNPACK_OPERATOR_SRCS})
 LIST(APPEND XNNPACK_COLD_SRCS
