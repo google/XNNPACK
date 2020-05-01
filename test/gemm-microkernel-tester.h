@@ -459,8 +459,8 @@ class GemmMicrokernelTester {
     std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
 
-    xnn_f16_scaleminmax_params output_params;
-    output_params.scale = UINT16_C(0x3C00) /* 1.0 */;
+    xnn_f16_scaleminmax_params params;
+    params.scale = UINT16_C(0x3C00) /* 1.0 */;
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(a.begin(), a.end(), std::ref(f16rng));
@@ -493,8 +493,8 @@ class GemmMicrokernelTester {
       const float accumulated_max = *std::max_element(c_ref.cbegin(), c_ref.cend());
       const float c_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin())));
       const float c_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax())));
-      output_params.max = fp16_ieee_from_fp32_value(c_max);
-      output_params.min = fp16_ieee_from_fp32_value(c_min);
+      params.max = fp16_ieee_from_fp32_value(c_max);
+      params.min = fp16_ieee_from_fp32_value(c_min);
 
       for (float& c_value : c_ref) {
         c_value = std::max(std::min(c_value, c_max), c_min);
@@ -504,7 +504,7 @@ class GemmMicrokernelTester {
         a.data(), a_stride() * sizeof(uint16_t),
         packed_w.data(),
         c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t),
-        &output_params);
+        &params);
 
       // Validate micro-kernel outputs.
       for (size_t i = 0; i < m(); i++) {
@@ -569,13 +569,13 @@ class GemmMicrokernelTester {
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
       // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(c_min, c_max);
+          params = xnn_init_f32_minmax_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
+          params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
       }
 
@@ -586,9 +586,9 @@ class GemmMicrokernelTester {
       ppmm(m(), n(), k() * sizeof(float),
         a.data(), packed_w.data(),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
-        &minmax_params);
+        &params);
 
-      // Validate micro-kernel outputs.
+      // Validate micro-kernel minmaxs.
       for (size_t i = 0; i < m(); i++) {
         for (size_t j = 0; j < n(); j++) {
           ASSERT_NEAR(
@@ -707,14 +707,14 @@ class GemmMicrokernelTester {
       const float c_min = accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
-      // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      // Prepare minmax parameters.
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(c_min, c_max);
+          params = xnn_init_f32_minmax_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
+          params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
       }
 
@@ -728,7 +728,7 @@ class GemmMicrokernelTester {
         a.data(), a_stride() * sizeof(float),
         packed_w.data(),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
-        &minmax_params);
+        &params);
 
       // Validate micro-kernel outputs.
       for (size_t i = 0; i < m(); i++) {
@@ -799,13 +799,13 @@ class GemmMicrokernelTester {
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
       // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(c_min, c_max);
+          params = xnn_init_f32_minmax_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
+          params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
       }
 
@@ -820,7 +820,7 @@ class GemmMicrokernelTester {
         packed_w.data(),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
         acc.data(),
-        &minmax_params);
+        &params);
 
       // Validate micro-kernel outputs.
       for (size_t i = 0; i < m(); i++) {
@@ -1022,13 +1022,13 @@ class GemmMicrokernelTester {
       }
 
       // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(c_min, c_max);
+          params = xnn_init_f32_minmax_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
+          params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
       }
 
@@ -1039,7 +1039,7 @@ class GemmMicrokernelTester {
         im2col.data(), packed_w.data(),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
         a_offset() * sizeof(float), zero_pointer,
-        &minmax_params);
+        &params);
 
       for (size_t i = 0; i < m(); i++) {
         for (size_t j = 0; j < n(); j++) {

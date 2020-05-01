@@ -256,22 +256,22 @@ class SpMMMicrokernelTester {
         c_value = std::min(std::max(c_value, c_min), c_max);
       }
 
-      // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      // Prepare minmax parameters.
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(c_min, c_max);
+          params = xnn_init_f32_minmax_params(c_min, c_max);
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
+          params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
       }
 
       spmm(m(), n(),
         a.data() + first_kk * m(), w.data(), dmap.data(), nmap.data(), c.data(),
-        &minmax_params);
+        &params);
 
-      // Validate micro-kernel outputs.
+      // Validate micro-kernel minmaxs.
       for (size_t pxb = 0; pxb < n(); pxb++) {
         for (size_t oc = 0; oc < m(); oc++) {
           ASSERT_NEAR(
@@ -428,15 +428,15 @@ class SpMMMicrokernelTester {
         c_value = std::min(std::max(c_value, c_min), c_max);
       }
 
-      // Prepare output parameters.
-      xnn_f16_scaleminmax_params output_params;
-      output_params.scale = UINT16_C(0x3C00) /* 1.0 */;
-      output_params.max = fp16_ieee_from_fp32_value(c_max);
-      output_params.min = fp16_ieee_from_fp32_value(c_min);
+      // Prepare scaleminmax parameters.
+      xnn_f16_scaleminmax_params params;
+      params.scale = UINT16_C(0x3C00) /* 1.0 */;
+      params.max = fp16_ieee_from_fp32_value(c_max);
+      params.min = fp16_ieee_from_fp32_value(c_min);
 
       spmm(m(), n(),
         a.data() + first_kk * m(), w.data(), dmap.data(), nmap.data(), c.data(),
-        &output_params);
+        &params);
 
       // Validate micro-kernel outputs.
       for (size_t pxb = 0; pxb < n(); pxb++) {
