@@ -3422,13 +3422,18 @@ config_setting(
 )
 
 config_setting(
-    name = "linux_aarch64",
-    values = {"cpu": "aarch64"},
+    name = "linux_arm",
+    values = {"cpu": "arm"},
 )
 
 config_setting(
     name = "linux_armhf",
     values = {"cpu": "armhf"},
+)
+
+config_setting(
+    name = "linux_aarch64",
+    values = {"cpu": "aarch64"},
 )
 
 config_setting(
