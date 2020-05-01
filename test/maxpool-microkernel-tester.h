@@ -182,13 +182,13 @@ class MaxPoolMicrokernelTester {
         indirect_input.begin() + (output_pixels() - 1) * step() + pooling_elements(), rng);
 
       // Prepare output parameters.
-      xnn_u8_minmax_params minmax_params = { };
+      xnn_u8_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_u8_minmax_params(qmin(), qmax());
+          params = xnn_init_u8_minmax_params(qmin(), qmax());
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_u8_minmax_params(qmin(), qmax());
+          params = xnn_init_scalar_u8_minmax_params(qmin(), qmax());
           break;
       }
 
@@ -210,7 +210,7 @@ class MaxPoolMicrokernelTester {
         indirect_input.data(), input_offset() * sizeof(uint8_t), output.data(),
         (step() - packed_pooling_elements()) * sizeof(void*),
         (output_stride() - channels()) * sizeof(uint8_t),
-        &minmax_params);
+        &params);
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
@@ -273,13 +273,13 @@ class MaxPoolMicrokernelTester {
 
 
       // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
+          params = xnn_init_f32_minmax_params(output_min, output_max);
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
+          params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
           break;
       }
 
@@ -293,7 +293,7 @@ class MaxPoolMicrokernelTester {
         indirect_input.data(), input_offset() * sizeof(float), output.data(),
         (step() - packed_pooling_elements()) * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
-        &minmax_params);
+        &params);
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {

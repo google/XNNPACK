@@ -95,13 +95,13 @@ class ClampMicrokernelTester {
       const uint8_t* x_data = inplace() ? y.data() : x.data();
 
       // Prepare clamping parameters.
-      union xnn_u8_minmax_params minmax_params = { };
+      union xnn_u8_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_u8_minmax_params(qmin(), qmax());
+          params = xnn_init_u8_minmax_params(qmin(), qmax());
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_u8_minmax_params(qmin(), qmax());
+          params = xnn_init_scalar_u8_minmax_params(qmin(), qmax());
           break;
       }
 
@@ -111,7 +111,7 @@ class ClampMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      clamp(batch_size() * sizeof(uint8_t), x_data, y.data(), &minmax_params);
+      clamp(batch_size() * sizeof(uint8_t), x_data, y.data(), &params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -144,13 +144,13 @@ class ClampMicrokernelTester {
       const float* x_data = inplace() ? y.data() : x.data();
 
       // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(float(qmin()), float(qmax()));
+          params = xnn_init_f32_minmax_params(float(qmin()), float(qmax()));
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(float(qmin()), float(qmax()));
+          params = xnn_init_scalar_f32_minmax_params(float(qmin()), float(qmax()));
           break;
       }
 
@@ -160,7 +160,7 @@ class ClampMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      clamp(batch_size() * sizeof(float), x_data, y.data(), &minmax_params);
+      clamp(batch_size() * sizeof(float), x_data, y.data(), &params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

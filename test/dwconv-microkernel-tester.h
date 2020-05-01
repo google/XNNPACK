@@ -364,13 +364,13 @@ class DWConvMicrokernelTester {
       const float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
 
       // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
+          params = xnn_init_f32_minmax_params(output_min, output_max);
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
+          params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
           break;
       }
 
@@ -385,7 +385,7 @@ class DWConvMicrokernelTester {
         indirection.data(), packed_weights.data(), output.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
-        &minmax_params);
+        &params);
 
       // Verify results.
       for (size_t x = 0; x < width(); x++) {

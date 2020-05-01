@@ -271,7 +271,7 @@ class SpMMMicrokernelTester {
         a.data() + first_kk * m(), w.data(), dmap.data(), nmap.data(), c.data(),
         &params);
 
-      // Validate micro-kernel minmaxs.
+      // Validate micro-kernel outputs.
       for (size_t pxb = 0; pxb < n(); pxb++) {
         for (size_t oc = 0; oc < m(); oc++) {
           ASSERT_NEAR(

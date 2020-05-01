@@ -78,7 +78,7 @@ static void DConv3X3S2P1Benchmark(benchmark::State& state,
   std::vector<float> output(output_elements * num_buffers);
   std::fill(output.begin(), output.end(), std::nanf(""));
 
-  xnn_f32_minmax_params minmax_params =
+  xnn_f32_minmax_params params =
     xnn_init_f32_minmax_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
@@ -97,7 +97,7 @@ static void DConv3X3S2P1Benchmark(benchmark::State& state,
       padding, output_channels,
       output_channels * output_width * sizeof(float),
       output_channels * sizeof(float),
-      &minmax_params);
+      &params);
   }
 
   state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();

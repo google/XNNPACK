@@ -122,7 +122,7 @@ static void DWConvBenchmark(benchmark::State& state,
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
-  xnn_f32_minmax_params minmax_params =
+  xnn_f32_minmax_params params =
     xnn_init_f32_minmax_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
@@ -138,7 +138,7 @@ static void DWConvBenchmark(benchmark::State& state,
         w.data() + buffer_index * w_elements,
         c.data() + buffer_index * c_elements + y * output_width * channels,
         kernel_height * step_width * sizeof(void*), 0,
-        &minmax_params);
+        &params);
     }
   }
 

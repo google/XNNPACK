@@ -209,13 +209,13 @@ class ArgMaxPoolMicrokernelTester {
       const float output_max = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
 
       // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
+          params = xnn_init_f32_minmax_params(output_min, output_max);
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
+          params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
           break;
       }
 
@@ -229,7 +229,7 @@ class ArgMaxPoolMicrokernelTester {
         indirect_input.data(), input_offset() * sizeof(float), output.data(), index.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
-        &minmax_params);
+        &params);
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
@@ -312,13 +312,13 @@ class ArgMaxPoolMicrokernelTester {
       const float output_max = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
 
       // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
+          params = xnn_init_f32_minmax_params(output_min, output_max);
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
+          params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
           break;
       }
 
@@ -334,7 +334,7 @@ class ArgMaxPoolMicrokernelTester {
         output.data(), index.data(),
         (step() - (packed_pooling_elements() - incremental_pooling_tile())) * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
-        &minmax_params);
+        &params);
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {

@@ -203,18 +203,18 @@ class VBinOpMicrokernelTester {
       }
 
       // Prepare output parameters.
-      xnn_f32_minmax_params minmax_params = { };
+      xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
-          minmax_params = xnn_init_f32_minmax_params(y_min, y_max);
+          params = xnn_init_f32_minmax_params(y_min, y_max);
           break;
         case Variant::Scalar:
-          minmax_params = xnn_init_scalar_f32_minmax_params(y_min, y_max);
+          params = xnn_init_scalar_f32_minmax_params(y_min, y_max);
           break;
       }
 
       // Call optimized micro-kernel.
-      vbinary_minmax(batch_size() * sizeof(float), a_data, b_data, y.data(), &minmax_params);
+      vbinary_minmax(batch_size() * sizeof(float), a_data, b_data, y.data(), &params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

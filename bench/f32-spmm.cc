@@ -127,7 +127,7 @@ static void SpMMBenchmark(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::fill(c.begin(), c.end(), nanf(""));
 
-  xnn_f32_minmax_params minmax_params =
+  xnn_f32_minmax_params params =
     xnn_init_f32_minmax_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
@@ -147,7 +147,7 @@ static void SpMMBenchmark(benchmark::State& state,
       dmap.data() + buffer_index * dmap_elements,
       nmap.data() + buffer_index * nmap_elements,
       c.data() + buffer_index * c_elements,
-      &minmax_params);
+      &params);
   }
 
   state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();

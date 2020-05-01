@@ -588,7 +588,7 @@ class GemmMicrokernelTester {
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
         &params);
 
-      // Validate micro-kernel minmaxs.
+      // Validate micro-kernel outputs.
       for (size_t i = 0; i < m(); i++) {
         for (size_t j = 0; j < n(); j++) {
           ASSERT_NEAR(
