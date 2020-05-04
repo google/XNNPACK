@@ -917,6 +917,10 @@ SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-gemm/gen-inc/4x8inc-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen-inc/6x8inc-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen-inc/8x8inc-minmax-neonfp16arith-ld64.c
+  src/f16-igemm/gen/1x8-minmax-neonfp16arith-ld64.c
+  src/f16-igemm/gen/4x8-minmax-neonfp16arith-ld64.c
+  src/f16-igemm/gen/6x8-minmax-neonfp16arith-ld64.c
+  src/f16-igemm/gen/8x8-minmax-neonfp16arith-ld64.c
   src/f16-spmm/gen/8x1-minmax-neonfp16arith.c
   src/f16-spmm/gen/8x1-minmax-neonfp16arith-unroll2.c
   src/f16-spmm/gen/16x1-minmax-neonfp16arith.c
@@ -2218,6 +2222,15 @@ IF(XNNPACK_BUILD_TESTS)
   ENDIF()
   TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-igemm-minmax-test f32-igemm-minmax-test)
+
+  ADD_EXECUTABLE(f16-igemm-minmax-test test/f16-igemm-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-igemm-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-igemm-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-igemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-igemm-minmax-test f16-igemm-minmax-test)
 
   ADD_EXECUTABLE(f32-maxpool-minmax-test test/f32-maxpool-minmax.cc)
   SET_TARGET_PROPERTIES(f32-maxpool-minmax-test PROPERTIES

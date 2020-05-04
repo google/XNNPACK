@@ -448,6 +448,20 @@ typedef void (*xnn_f16_gemm_minmax_ukernel_function)(
     size_t cn_stride,
     const struct xnn_f16_scaleminmax_params* params);
 
+typedef void (*xnn_f16_igemm_minmax_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t kc,
+    size_t ks,
+    const void** a,
+    const void* w,
+    void* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const void* zero,
+    const struct xnn_f16_scaleminmax_params* params);
+
 typedef void (*xnn_q8_gemm_ukernel_function)(
     size_t mr,
     size_t nr,

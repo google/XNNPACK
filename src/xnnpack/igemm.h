@@ -190,6 +190,26 @@ DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_1x4__scal
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_2x4__scalar)
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_4x4__scalar)
 
+#define DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                               \
+      size_t mr,                                           \
+      size_t nr,                                           \
+      size_t kc,                                           \
+      size_t ks,                                           \
+      const void** a,                                      \
+      const void* w,                                       \
+      void* c,                                             \
+      size_t cm_stride,                                    \
+      size_t cn_stride,                                    \
+      size_t a_offset,                                     \
+      const void* zero,                                    \
+      const struct xnn_f16_scaleminmax_params* params);
+
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_igemm_minmax_ukernel_4x8__neonfp16arith_ld64)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_igemm_minmax_ukernel_6x8__neonfp16arith_ld64)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_igemm_minmax_ukernel_8x8__neonfp16arith_ld64)
+
 #define DECLARE_Q8_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
       size_t mr,                                          \

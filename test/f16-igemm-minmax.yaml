@@ -1,0 +1,20 @@
+# Copyright 2020 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64
+  k-block: 4
+  arch:
+  - aarch64
+- name: xnn_f16_igemm_minmax_ukernel_4x8__neonfp16arith_ld64
+  k-block: 4
+  arch:
+  - aarch64
+- name: xnn_f16_igemm_minmax_ukernel_6x8__neonfp16arith_ld64
+  k-block: 4
+  arch:
+  - aarch64
+- name: xnn_f16_igemm_minmax_ukernel_8x8__neonfp16arith_ld64
+  k-block: 4
+  arch:
+  - aarch64

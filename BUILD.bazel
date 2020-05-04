@@ -921,6 +921,10 @@ AARCH64_NEONFP16ARITH_UKERNELS = [
     "src/f16-gemm/gen-inc/4x8inc-minmax-neonfp16arith-ld64.c",
     "src/f16-gemm/gen-inc/6x8inc-minmax-neonfp16arith-ld64.c",
     "src/f16-gemm/gen-inc/8x8inc-minmax-neonfp16arith-ld64.c",
+    "src/f16-igemm/gen/1x8-minmax-neonfp16arith-ld64.c",
+    "src/f16-igemm/gen/4x8-minmax-neonfp16arith-ld64.c",
+    "src/f16-igemm/gen/6x8-minmax-neonfp16arith-ld64.c",
+    "src/f16-igemm/gen/8x8-minmax-neonfp16arith-ld64.c",
     "src/f16-spmm/gen/8x1-minmax-neonfp16arith.c",
     "src/f16-spmm/gen/8x1-minmax-neonfp16arith-unroll2.c",
     "src/f16-spmm/gen/16x1-minmax-neonfp16arith.c",
@@ -2601,6 +2605,16 @@ xnnpack_unit_test(
     # Work-around for "too many sections" error
     mingw_copts = ["-Wa,-mbig-obj"],
     msys_copts = ["-Wa,-mbig-obj"],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_igemm_minmax_test",
+    srcs = [
+        "test/f16-igemm-minmax.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
 
