@@ -498,10 +498,6 @@ class GemmMicrokernelTester {
         fp16_ieee_from_fp32_value(c_min),
         fp16_ieee_from_fp32_value(c_max));
 
-      for (float& c_value : c_ref) {
-        c_value = std::max(std::min(c_value, c_max), c_min);
-      }
-
       gemm_minmax(m(), n(), k() * sizeof(uint16_t),
         a.data(), a_stride() * sizeof(uint16_t),
         packed_w.data(),
@@ -579,10 +575,6 @@ class GemmMicrokernelTester {
         case Variant::Scalar:
           params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
           break;
-      }
-
-      for (float& c_value : c_ref) {
-        c_value = std::max(std::min(c_value, c_max), c_min);
       }
 
       ppmm(m(), n(), k() * sizeof(float),
