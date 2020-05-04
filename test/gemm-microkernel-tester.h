@@ -904,12 +904,12 @@ class GemmMicrokernelTester {
                 ASSERT_LT(k_block_start + k_block_offset, a_stride());
                 if (im2col[ks_index * mr() + m_index] == a.data()) {
                   c_ref[m_index * n() + n_index] +=
-                    double(im2col[ks_index * mr() + m_index][k_block_start + k_block_offset]) *
-                    double(b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
+                    (im2col[ks_index * mr() + m_index][k_block_start + k_block_offset]) *
+                    (b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
                 } else {
                   c_ref[m_index * n() + n_index] +=
-                    double(im2col[ks_index * mr() + m_index][k_block_start + k_block_offset + a_offset()]) *
-                    double(b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
+                    (im2col[ks_index * mr() + m_index][k_block_start + k_block_offset + a_offset()]) *
+                    (b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
                 }
               }
             }
@@ -998,12 +998,12 @@ class GemmMicrokernelTester {
                 ASSERT_LT(k_block_start + k_block_offset, a_stride());
                 if (im2col[ks_index * mr() + m_index] == a.data()) {
                   c_ref[m_index * n() + n_index] +=
-                    double(im2col[ks_index * mr() + m_index][k_block_start + k_block_offset]) *
-                    double(b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
+                    (im2col[ks_index * mr() + m_index][k_block_start + k_block_offset]) *
+                    (b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
                 } else {
                   c_ref[m_index * n() + n_index] +=
-                    double(im2col[ks_index * mr() + m_index][k_block_start + k_block_offset + a_offset()]) *
-                    double(b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
+                    (im2col[ks_index * mr() + m_index][k_block_start + k_block_offset + a_offset()]) *
+                    (b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
                 }
               }
             }
