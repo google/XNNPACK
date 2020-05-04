@@ -441,7 +441,7 @@ class GemmMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_gemm_ukernel_function gemm, Variant variant = Variant::Native) const
+  void Test(xnn_f16_gemm_minmax_ukernel_function gemm_minmax, Variant variant = Variant::Native) const
   {
     ASSERT_LE(m(), mr());
     ASSERT_GE(a_stride(), k());
@@ -500,7 +500,7 @@ class GemmMicrokernelTester {
         c_value = std::max(std::min(c_value, c_max), c_min);
       }
 
-      gemm(m(), n(), k() * sizeof(uint16_t),
+      gemm_minmax(m(), n(), k() * sizeof(uint16_t),
         a.data(), a_stride() * sizeof(uint16_t),
         packed_w.data(),
         c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t),

@@ -436,7 +436,7 @@ typedef void (*xnn_f32_gemminc_minmax_ukernel_function)(
     const float* acc,
     const union xnn_f32_minmax_params* params);
 
-typedef void (*xnn_f16_gemm_ukernel_function)(
+typedef void (*xnn_f16_gemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t k,
