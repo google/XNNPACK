@@ -459,9 +459,6 @@ class GemmMicrokernelTester {
     std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
 
-    xnn_f16_scaleminmax_params params;
-    params.scale = UINT16_C(0x3C00) /* 1.0 */;
-
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(a.begin(), a.end(), std::ref(f16rng));
       std::generate(b.begin(), b.end(), std::ref(f16rng));
@@ -493,8 +490,13 @@ class GemmMicrokernelTester {
       const float accumulated_max = *std::max_element(c_ref.cbegin(), c_ref.cend());
       const float c_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin())));
       const float c_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax())));
-      params.max = fp16_ieee_from_fp32_value(c_max);
-      params.min = fp16_ieee_from_fp32_value(c_min);
+
+      // Prepare minmax parameters.
+      xnn_f16_scaleminmax_params params;
+      params = xnn_init_f16_scaleminmax_params(
+        UINT16_C(0x3C00) /* 1.0 */,
+        fp16_ieee_from_fp32_value(c_min),
+        fp16_ieee_from_fp32_value(c_max));
 
       for (float& c_value : c_ref) {
         c_value = std::max(std::min(c_value, c_max), c_min);
