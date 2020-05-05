@@ -303,11 +303,17 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
         copts = xnnpack_std_cxxopts() + [
             "-Iinclude",
             "-Isrc",
-        ] + copts + select({
+        ] + select({
             ":windows_x86_64_mingw": mingw_copts,
             ":windows_x86_64_msys": msys_copts,
             "//conditions:default": [],
-        }),
+        }) + select({
+            ":windows_x86_64_clang": ["/clang:-Wno-unused-function"],
+            ":windows_x86_64_mingw": ["-Wno-unused-function"],
+            ":windows_x86_64_msys": ["-Wno-unused-function"],
+            ":windows_x86_64": [],
+            "//conditions:default": ["-Wno-unused-function"],
+        }) + copts,
         linkopts = select({
             ":emscripten": xnnpack_emscripten_test_linkopts(),
             "//conditions:default": [],
@@ -347,7 +353,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = []):
         deps = deps,
     )
 
-def xnnpack_benchmark(name, srcs, copts = [], gcc_copts = [], msvc_copts = [], deps = [], tags = []):
+def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
     """Microbenchmark binary based on Google Benchmark
 
     Args:
@@ -356,8 +362,6 @@ def xnnpack_benchmark(name, srcs, copts = [], gcc_copts = [], msvc_copts = [], d
       copts: The list of additional compiler flags for the target. -I flags
              for include/ and src/ directories of XNNPACK are always prepended
              before these user-specified flags.
-      gcc_copts: The list of compiler flags to use with GCC-like compilers.
-      msvc_copts: The list of compiler flags to use with MSVC compiler.
       deps: The list of additional libraries to be linked. Google Benchmark
             library is always added as a dependency and does not need to be
             explicitly specified.
@@ -368,13 +372,13 @@ def xnnpack_benchmark(name, srcs, copts = [], gcc_copts = [], msvc_copts = [], d
         copts = xnnpack_std_cxxopts() + [
             "-Iinclude",
             "-Isrc",
-        ] + copts + select({
-            ":windows_x86_64_clang": ["/clang:" + opt for opt in gcc_copts],
-            ":windows_x86_64_mingw": gcc_copts,
-            ":windows_x86_64_msys": gcc_copts,
-            ":windows_x86_64": msvc_copts,
-            "//conditions:default": gcc_copts,
-        }),
+        ] + select({
+            ":windows_x86_64_clang": ["/clang:-Wno-unused-function"],
+            ":windows_x86_64_mingw": ["-Wno-unused-function"],
+            ":windows_x86_64_msys": ["-Wno-unused-function"],
+            ":windows_x86_64": [],
+            "//conditions:default": ["-Wno-unused-function"],
+        }) + copts,
         linkopts = select({
             ":emscripten": xnnpack_emscripten_benchmark_linkopts(),
             ":windows_x86_64_mingw": ["-lshlwapi"],

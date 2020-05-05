@@ -2104,7 +2104,6 @@ xnnpack_cc_library(
     name = "bench_utils",
     srcs = ["bench/utils.cc"],
     hdrs = ["bench/utils.h"],
-    gcc_copts = ["-Wno-unused-result"],
     deps = [
         "@com_google_benchmark//:benchmark",
         "@cpuinfo",
@@ -2121,7 +2120,6 @@ xnnpack_benchmark(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
 )
 
@@ -2132,7 +2130,6 @@ xnnpack_benchmark(
         "bench/gemm.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2143,7 +2140,6 @@ xnnpack_benchmark(
         "bench/gemm.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2164,7 +2160,6 @@ xnnpack_benchmark(
         "bench/dconv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2175,7 +2170,6 @@ xnnpack_benchmark(
         "bench/dconv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2207,7 +2201,6 @@ xnnpack_benchmark(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_ruy_copts(),
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_ruy_deps(),
 )
 
@@ -2253,7 +2246,6 @@ xnnpack_benchmark(
         "bench/f32-sigmoid.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2264,7 +2256,6 @@ xnnpack_benchmark(
         "bench/gemm.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -2274,7 +2265,6 @@ xnnpack_benchmark(
         "bench/f32-softmax.cc",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_dnnl_copts(),
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps(),
 )
 
@@ -2446,7 +2436,6 @@ xnnpack_benchmark(
         "bench/f32-dwconv-e2e.cc",
         "bench/end2end.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":mobilenet_v1",
@@ -2462,7 +2451,6 @@ xnnpack_benchmark(
         "bench/f32-gemm-e2e.cc",
         "bench/end2end.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    gcc_copts = ["-Wno-unused-function"],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":mobilenet_v1",
