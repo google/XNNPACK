@@ -382,9 +382,9 @@ static enum xnn_status setup_max_pooling2d(
     const uint32_t effective_kernel_height = (max_pooling_op->kernel_height - 1) * max_pooling_op->dilation_height + 1;
     const uint32_t effective_kernel_width = (max_pooling_op->kernel_width - 1) * max_pooling_op->dilation_width + 1;
     const uint32_t total_padding_height =
-      (max_pooling_op->output_height - 1) * max_pooling_op->stride_height + effective_kernel_height - input_height;
+      doz((max_pooling_op->output_height - 1) * max_pooling_op->stride_height + effective_kernel_height, input_height);
     const uint32_t total_padding_width =
-      (max_pooling_op->output_width - 1) * max_pooling_op->stride_width + effective_kernel_width - input_width;
+      doz((max_pooling_op->output_width - 1) * max_pooling_op->stride_width + effective_kernel_width, input_width);
     max_pooling_op->padding_top = total_padding_height / 2;
     max_pooling_op->padding_left = total_padding_width / 2;
     max_pooling_op->padding_bottom = total_padding_height - max_pooling_op->padding_top;

@@ -126,6 +126,17 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
     goto error;
   }
 
+  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
+  if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
+    if (any_padding) {
+      xnn_log_error(
+        "failed to create Argmax Pooling operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "TensorFlow SAME padding can't be combined with explicit padding specification",
+        input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+      goto error;
+    }
+  }
+
   status = xnn_status_out_of_memory;
 
   argmax_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -153,6 +164,7 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
 
   argmax_pooling_op->type = xnn_operator_type_argmax_pooling_nhwc_f32;
   argmax_pooling_op->ukernel.type = xnn_ukernel_type_argmax_pooling;
+  argmax_pooling_op->flags = flags;
 
   argmax_pooling_op->state = xnn_run_state_invalid;
 
@@ -202,15 +214,28 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->input_width = input_width;
   argmax_pooling_op->input = input;
 
-  argmax_pooling_op->output_height = compute_output_dimension(
-      argmax_pooling_op->padding_top + input_height + argmax_pooling_op->padding_bottom,
-      argmax_pooling_op->kernel_height);
-  argmax_pooling_op->output_width = compute_output_dimension(
-      argmax_pooling_op->padding_left + input_width + argmax_pooling_op->padding_right,
-      argmax_pooling_op->kernel_width);
-
   const size_t pooling_height = argmax_pooling_op->kernel_height;
   const size_t pooling_width = argmax_pooling_op->kernel_width;
+
+  if (argmax_pooling_op->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
+    argmax_pooling_op->output_height = divide_round_up(input_height, pooling_height);
+    argmax_pooling_op->output_width = divide_round_up(input_width, pooling_width);
+
+    const uint32_t padding_height = argmax_pooling_op->output_height * pooling_height - input_height;
+    const uint32_t padding_width = argmax_pooling_op->output_width * pooling_width - input_width;
+    argmax_pooling_op->padding_top = padding_height / 2;
+    argmax_pooling_op->padding_left = padding_width / 2;
+    argmax_pooling_op->padding_bottom = padding_height - argmax_pooling_op->padding_top;
+    argmax_pooling_op->padding_right = padding_width - argmax_pooling_op->padding_left;
+  } else {
+    argmax_pooling_op->output_height = compute_output_dimension(
+        argmax_pooling_op->padding_top + input_height + argmax_pooling_op->padding_bottom,
+        argmax_pooling_op->kernel_height);
+    argmax_pooling_op->output_width = compute_output_dimension(
+        argmax_pooling_op->padding_left + input_width + argmax_pooling_op->padding_right,
+        argmax_pooling_op->kernel_width);
+  }
+
   const size_t pooling_size = pooling_height * pooling_width;
   const size_t output_height = argmax_pooling_op->output_height;
   const size_t output_width = argmax_pooling_op->output_width;
