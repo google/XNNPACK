@@ -368,17 +368,15 @@ class GemmMicrokernelTester {
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
           for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
-            for (size_t k_block_start = 0; k_block_start < k(); k_block_start += kr()) {
-              for (size_t k_block_offset = 0; k_block_offset < std::min(k() - k_block_start, kr()); k_block_offset++) {
-                if (im2col[ks_index * mr() + m_index] == a.data()) {
-                  acc[m_index * n() + n_index] +=
-                    (int32_t(im2col[ks_index * mr() + m_index][k_block_start + k_block_offset]) - int32_t(a_zero_point())) *
-                    (int32_t(b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]) - int32_t(b_zero_point()));
-                } else {
-                  acc[m_index * n() + n_index] +=
-                    (int32_t(im2col[ks_index * mr() + m_index][k_block_start + k_block_offset + a_offset()]) - int32_t(a_zero_point())) *
-                    (int32_t(b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]) - int32_t(b_zero_point()));
-                }
+            for (size_t k_index = 0; k_index < k(); k_index++) {
+              if (im2col[ks_index * mr() + m_index] == a.data()) {
+                acc[m_index * n() + n_index] +=
+                  (int32_t(im2col[ks_index * mr() + m_index][k_index]) - int32_t(a_zero_point())) *
+                  (int32_t(b[(n_index * ks() + ks_index) * k() + k_index]) - int32_t(b_zero_point()));
+              } else {
+                acc[m_index * n() + n_index] +=
+                  (int32_t(im2col[ks_index * mr() + m_index][k_index + a_offset()]) - int32_t(a_zero_point())) *
+                  (int32_t(b[(n_index * ks() + ks_index) * k() + k_index]) - int32_t(b_zero_point()));
               }
             }
           }
@@ -471,16 +469,13 @@ class GemmMicrokernelTester {
 
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
-          for (size_t k_block_start = 0; k_block_start < k(); k_block_start += kr()) {
-            for (size_t k_block_offset = 0; k_block_offset < std::min(k() - k_block_start, kr()); k_block_offset++) {
-              ASSERT_LE(n(), packed_n());
-              ASSERT_LT(m_index * n() + n_index, c_ref.size());
-              ASSERT_LT(m_index * k() + k_block_start + k_block_offset, a.size());
-
-              c_ref[m_index * n() + n_index] +=
-                fp16_ieee_to_fp32_value(a[m_index * a_stride() + k_block_start + k_block_offset]) *
-                fp16_ieee_to_fp32_value(b[n_index * k() + k_block_start + k_block_offset]);
-            }
+          for (size_t k_index = 0; k_index < k(); k_index++) {
+            ASSERT_LE(n(), packed_n());
+            ASSERT_LT(m_index * n() + n_index, c_ref.size());
+            ASSERT_LT(m_index * k() + k_index, a.size());
+            c_ref[m_index * n() + n_index] +=
+              fp16_ieee_to_fp32_value(a[m_index * a_stride() + k_index]) *
+              fp16_ieee_to_fp32_value(b[n_index * k() + k_index]);
           }
           c_ref[m_index * n() + n_index] += fp16_ieee_to_fp32_value(bias[n_index]);
         }
@@ -574,20 +569,18 @@ class GemmMicrokernelTester {
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
           for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
-            for (size_t k_block_start = 0; k_block_start < k(); k_block_start += kr()) {
-              for (size_t k_block_offset = 0; k_block_offset < std::min(k() - k_block_start, kr()); k_block_offset++) {
-                ASSERT_LT(ks_index * mr() + m_index, im2col.size());
-                ASSERT_LT(k_block_start + k_block_offset, k());
-                ASSERT_LT(k_block_start + k_block_offset, a_stride());
-                if (im2col[ks_index * mr() + m_index] == a.data()) {
-                  c_ref[m_index * n() + n_index] +=
-                    fp16_ieee_to_fp32_value(im2col[ks_index * mr() + m_index][k_block_start + k_block_offset]) *
-                    fp16_ieee_to_fp32_value(b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
-                } else {
-                  c_ref[m_index * n() + n_index] +=
-                    fp16_ieee_to_fp32_value(im2col[ks_index * mr() + m_index][k_block_start + k_block_offset + a_offset()]) *
-                    fp16_ieee_to_fp32_value(b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
-                }
+            for (size_t k_index = 0; k_index < k(); k_index++) {
+              ASSERT_LT(ks_index * mr() + m_index, im2col.size());
+              ASSERT_LT(k_index, k());
+              ASSERT_LT(k_index, a_stride());
+              if (im2col[ks_index * mr() + m_index] == a.data()) {
+                c_ref[m_index * n() + n_index] +=
+                  fp16_ieee_to_fp32_value(im2col[ks_index * mr() + m_index][k_index]) *
+                  fp16_ieee_to_fp32_value(b[(n_index * ks() + ks_index) * k() + k_index]);
+              } else {
+                c_ref[m_index * n() + n_index] +=
+                  fp16_ieee_to_fp32_value(im2col[ks_index * mr() + m_index][k_index + a_offset()]) *
+                  fp16_ieee_to_fp32_value(b[(n_index * ks() + ks_index) * k() + k_index]);
               }
             }
           }
@@ -1022,20 +1015,18 @@ class GemmMicrokernelTester {
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
           for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
-            for (size_t k_block_start = 0; k_block_start < k(); k_block_start += kr()) {
-              for (size_t k_block_offset = 0; k_block_offset < std::min(k() - k_block_start, kr()); k_block_offset++) {
-                ASSERT_LT(ks_index * mr() + m_index, im2col.size());
-                ASSERT_LT(k_block_start + k_block_offset, k());
-                ASSERT_LT(k_block_start + k_block_offset, a_stride());
-                if (im2col[ks_index * mr() + m_index] == a.data()) {
-                  c_ref[m_index * n() + n_index] +=
-                    (im2col[ks_index * mr() + m_index][k_block_start + k_block_offset]) *
-                    (b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
-                } else {
-                  c_ref[m_index * n() + n_index] +=
-                    (im2col[ks_index * mr() + m_index][k_block_start + k_block_offset + a_offset()]) *
-                    (b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
-                }
+            for (size_t k_index = 0; k_index < k(); k_index++) {
+              ASSERT_LT(ks_index * mr() + m_index, im2col.size());
+              ASSERT_LT(k_index, k());
+              ASSERT_LT(k_index, a_stride());
+              if (im2col[ks_index * mr() + m_index] == a.data()) {
+                c_ref[m_index * n() + n_index] +=
+                  (im2col[ks_index * mr() + m_index][k_index]) *
+                  (b[(n_index * ks() + ks_index) * k() + k_index]);
+              } else {
+                c_ref[m_index * n() + n_index] +=
+                  (im2col[ks_index * mr() + m_index][k_index + a_offset()]) *
+                  (b[(n_index * ks() + ks_index) * k() + k_index]);
               }
             }
           }
@@ -1116,20 +1107,18 @@ class GemmMicrokernelTester {
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
           for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
-            for (size_t k_block_start = 0; k_block_start < k(); k_block_start += kr()) {
-              for (size_t k_block_offset = 0; k_block_offset < std::min(k() - k_block_start, kr()); k_block_offset++) {
-                ASSERT_LT(ks_index * mr() + m_index, im2col.size());
-                ASSERT_LT(k_block_start + k_block_offset, k());
-                ASSERT_LT(k_block_start + k_block_offset, a_stride());
-                if (im2col[ks_index * mr() + m_index] == a.data()) {
-                  c_ref[m_index * n() + n_index] +=
-                    (im2col[ks_index * mr() + m_index][k_block_start + k_block_offset]) *
-                    (b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
-                } else {
-                  c_ref[m_index * n() + n_index] +=
-                    (im2col[ks_index * mr() + m_index][k_block_start + k_block_offset + a_offset()]) *
-                    (b[(n_index * ks() + ks_index) * k() + k_block_start + k_block_offset]);
-                }
+            for (size_t k_index = 0; k_index < k(); k_index++) {
+              ASSERT_LT(ks_index * mr() + m_index, im2col.size());
+              ASSERT_LT(k_index, k());
+              ASSERT_LT(k_index, a_stride());
+              if (im2col[ks_index * mr() + m_index] == a.data()) {
+                c_ref[m_index * n() + n_index] +=
+                  (im2col[ks_index * mr() + m_index][k_index]) *
+                  (b[(n_index * ks() + ks_index) * k() + k_index]);
+              } else {
+                c_ref[m_index * n() + n_index] +=
+                  (im2col[ks_index * mr() + m_index][k_index + a_offset()]) *
+                  (b[(n_index * ks() + ks_index) * k() + k_index]);
               }
             }
           }
