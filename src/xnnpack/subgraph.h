@@ -11,10 +11,10 @@
 #include <xnnpack.h>
 
 #define XNN_MAX_INPUTS 3
-#define XNN_MAX_OUTPUTS 1
+#define XNN_MAX_OUTPUTS 2
 
 #define XNN_MAX_RUNTIME_INPUTS 2
-#define XNN_MAX_RUNTIME_OUTPUTS 1
+#define XNN_MAX_RUNTIME_OUTPUTS 2
 
 struct xnn_shape {
   size_t num_dims;
@@ -58,6 +58,7 @@ struct xnn_blob {
 enum xnn_node_type {
   xnn_node_type_invalid = 0,
   xnn_node_type_add2,
+  xnn_node_type_argmax_pooling_2d,
   xnn_node_type_average_pooling_2d,
   xnn_node_type_clamp,
   xnn_node_type_convolution_2d,
@@ -70,6 +71,7 @@ enum xnn_node_type {
   xnn_node_type_prelu,
   xnn_node_type_sigmoid,
   xnn_node_type_softmax,
+  xnn_node_type_unpooling_2d,
 };
 
 struct xnn_node {

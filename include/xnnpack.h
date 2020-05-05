@@ -496,6 +496,66 @@ enum xnn_status xnn_define_max_pooling_2d(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a 2D ArgMax Pooling Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_padding_top - implicit zero-padding above 2D input data.
+/// @param input_padding_right - implicit zero-padding to the right of 2D input data.
+/// @param input_padding_bottom - implicit zero-padding below 2D input data.
+/// @param input_padding_left - implicit zero-padding to the left of 2D input data.
+/// @param pooling_height - pooling (kernel) height. Vertical stride between pooling regions match this value.
+/// @param pooling_width - pooling (kernel) width. Horizontal stride between pooling regions match this value.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, IH, IW, channels] dimensions
+/// @param output_value_id - Value ID for the output tensor with the maximum values in the pools. The output tensor must
+///                          be a 4D tensor defined in the @a subgraph with [N, OH, OW, channels] dimensions.
+/// @param output_index_id - Value ID for the output tensor with the indexes of the maximum values in the pools. The
+///                          output tensor must be a 4D tensor defined in the @a subgraph with [N, OH, OW, channels]
+///                          dimensions.
+/// @param flags - binary features of the 2D ArgMax Pooling Node. No supported flags are currently defined.
+enum xnn_status xnn_define_argmax_pooling_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t pooling_height,
+  uint32_t pooling_width,
+  uint32_t input_id,
+  uint32_t output_value_id,
+  uint32_t output_index_id,
+  uint32_t flags);
+
+/// Define a 2D UnPooling Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param padding_top - implicit padding above 2D output data.
+/// @param padding_right - implicit padding to the right of 2D output data.
+/// @param padding_bottom - implicit padding below 2D output data.
+/// @param padding_left - implicit padding to the left of 2D output data.
+/// @param pooling_height - height of the pooling window.
+/// @param pooling_width - width of the pooling window.
+/// @param input_value_id - Value ID for the input tensor with the max-pooling values to invert. The input value tensor
+///                         must be a 4D tensor defined in the @a subgraph with [N, IH, IW, channels] dimensions.
+/// @param input_index_id - Value ID for the input tensor with the indices of the per-pool maximum values produced by
+///                         a 2D UnPooling Node. The input tensor must be a 4D tensor defined in the @a subgraph with
+///                         [N, IH, IW, channels] dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, OH, OW, channels] dimensions.
+/// @param flags - binary features of the 2D UnPooling Node. No supported flags are currently defined.
+enum xnn_status xnn_define_unpooling_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t padding_top,
+  uint32_t padding_right,
+  uint32_t padding_bottom,
+  uint32_t padding_left,
+  uint32_t pooling_height,
+  uint32_t pooling_width,
+  uint32_t input_value_id,
+  uint32_t input_index_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a 2-Input Add Node and add it to a Subgraph.
 ///
 /// The 2-Input Add Node computes elementwise addition of two tensor inputs with numpy broadcasting rules.

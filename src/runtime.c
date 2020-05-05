@@ -98,6 +98,31 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->ops[i].inputs[1] = node->inputs[1];
         runtime->ops[i].outputs[0] = node->outputs[0];
         break;
+      case xnn_node_type_argmax_pooling_2d:
+        status = xnn_create_argmax_pooling2d_nhwc_f32(
+          node->params.pooling_2d.input_padding_top,
+          node->params.pooling_2d.input_padding_right,
+          node->params.pooling_2d.input_padding_bottom,
+          node->params.pooling_2d.input_padding_left,
+          node->params.pooling_2d.pooling_height,
+          node->params.pooling_2d.pooling_width,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+          -INFINITY,
+          INFINITY,
+          node->flags,
+          &runtime->ops[i].op);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->ops[i].batch_size = values[node->inputs[0]].shape.dim[0];
+        runtime->ops[i].input_height = values[node->inputs[0]].shape.dim[1];
+        runtime->ops[i].input_width = values[node->inputs[0]].shape.dim[2];
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
+        runtime->ops[i].outputs[1] = node->outputs[1];
+        break;
       case xnn_node_type_average_pooling_2d:
         status = xnn_create_average_pooling2d_nhwc_f32(
           node->params.pooling_2d.input_padding_top,
@@ -364,6 +389,29 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->ops[i].inputs[0] = node->inputs[0];
         runtime->ops[i].outputs[0] = node->outputs[0];
         break;
+      case xnn_node_type_unpooling_2d:
+        status = xnn_create_unpooling2d_nhwc_x32(
+          node->params.pooling_2d.input_padding_top,
+          node->params.pooling_2d.input_padding_right,
+          node->params.pooling_2d.input_padding_bottom,
+          node->params.pooling_2d.input_padding_left,
+          node->params.pooling_2d.pooling_height,
+          node->params.pooling_2d.pooling_width,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+          node->flags,
+          &runtime->ops[i].op);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->ops[i].batch_size = values[node->inputs[0]].shape.dim[0];
+        runtime->ops[i].input_height = values[node->inputs[0]].shape.dim[1];
+        runtime->ops[i].input_width = values[node->inputs[0]].shape.dim[2];
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].inputs[1] = node->inputs[1];
+        runtime->ops[i].outputs[0] = node->outputs[0];
+        break;
       case xnn_node_type_invalid:
         xnn_log_fatal("unexpected node type %d in node #%zu", node->type, i);
         XNN_UNREACHABLE;
@@ -475,6 +523,20 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[op->inputs[0]].data,
           runtime->blobs[op->inputs[1]].data,
           runtime->blobs[op->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_argmax_pooling_nhwc_f32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
+        assert(runtime->blobs[op->outputs[1]].data != NULL);
+        status = xnn_setup_argmax_pooling2d_nhwc_f32(
+          op->op,
+          op->batch_size,
+          op->input_height,
+          op->input_width,
+          runtime->blobs[op->inputs[0]].data,
+          runtime->blobs[op->outputs[0]].data,
+          runtime->blobs[op->outputs[1]].data,
           runtime->threadpool);
         break;
       case xnn_operator_type_average_pooling_nhwc_f32:
@@ -599,6 +661,20 @@ enum xnn_status xnn_setup_runtime(
           op->op,
           op->batch_size,
           runtime->blobs[op->inputs[0]].data,
+          runtime->blobs[op->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_unpooling_nhwc_x32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->inputs[1]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
+        status = xnn_setup_unpooling2d_nhwc_x32(
+          op->op,
+          op->batch_size,
+          op->input_height,
+          op->input_width,
+          runtime->blobs[op->inputs[0]].data,
+          runtime->blobs[op->inputs[1]].data,
           runtime->blobs[op->outputs[0]].data,
           runtime->threadpool);
         break;
