@@ -2799,6 +2799,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
 
   # ---[ Build microkernel-level microbenchmarks
+  ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc)
+  SET_TARGET_PROPERTIES(f16-igemm-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE src)
+  TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+
   ADD_EXECUTABLE(f16-gemm-bench bench/f16-gemm.cc)
   SET_TARGET_PROPERTIES(f16-gemm-bench PROPERTIES
     CXX_STANDARD 11

@@ -2124,6 +2124,17 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_igemm_bench",
+    srcs = [
+        "bench/f16-igemm.cc",
+        "bench/conv.h",
+        "bench/google/conv.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":indirection"],
+)
+
+xnnpack_benchmark(
     name = "f16_gemm_bench",
     srcs = [
         "bench/f16-gemm.cc",
