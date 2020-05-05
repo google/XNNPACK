@@ -622,7 +622,7 @@ class GemmMicrokernelTester {
       igemm_minmax(
         m(), n(), k() * sizeof(uint16_t), ks() * mr() * sizeof(void*),
         reinterpret_cast<const void**>(im2col.data()), packed_w.data(),
-        reinterpret_cast<void*>(c.data()), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t),
+        c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t),
         a_offset() * sizeof(uint16_t), zero_pointer,
         &params);
 
