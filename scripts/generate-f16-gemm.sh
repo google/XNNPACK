@@ -32,5 +32,14 @@ tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=4 -D NR=8 -D INC=1 -o src
 tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=6 -D NR=8 -D INC=1 -o src/f16-gemm/gen-inc/6x8inc-minmax-neonfp16arith-ld64.c
 tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=8 -D NR=8 -D INC=1 -o src/f16-gemm/gen-inc/8x8inc-minmax-neonfp16arith-ld64.c
 
+tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=1 -D NR=16 -D INC=0 -o src/f16-gemm/gen/1x16-minmax-neonfp16arith-ld64.c
+tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=4 -D NR=16 -D INC=0 -o src/f16-gemm/gen/4x16-minmax-neonfp16arith-ld64.c
+tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=6 -D NR=16 -D INC=0 -o src/f16-gemm/gen/6x16-minmax-neonfp16arith-ld64.c
+tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=8 -D NR=16 -D INC=0 -o src/f16-gemm/gen/8x16-minmax-neonfp16arith-ld64.c
+tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=1 -D NR=16 -D INC=1 -o src/f16-gemm/gen-inc/1x16inc-minmax-neonfp16arith-ld64.c
+tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=4 -D NR=16 -D INC=1 -o src/f16-gemm/gen-inc/4x16inc-minmax-neonfp16arith-ld64.c
+tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=6 -D NR=16 -D INC=1 -o src/f16-gemm/gen-inc/6x16inc-minmax-neonfp16arith-ld64.c
+tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=8 -D NR=16 -D INC=1 -o src/f16-gemm/gen-inc/8x16inc-minmax-neonfp16arith-ld64.c
+
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/f16-gemm-minmax.yaml --output test/f16-gemm-minmax.cc

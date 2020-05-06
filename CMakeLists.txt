@@ -921,6 +921,18 @@ SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-igemm/gen/4x8-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/6x8-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/8x8-minmax-neonfp16arith-ld64.c
+  src/f16-gemm/gen/1x16-minmax-neonfp16arith-ld64.c
+  src/f16-gemm/gen/4x16-minmax-neonfp16arith-ld64.c
+  src/f16-gemm/gen/6x16-minmax-neonfp16arith-ld64.c
+  src/f16-gemm/gen/8x16-minmax-neonfp16arith-ld64.c
+  src/f16-gemm/gen-inc/1x16inc-minmax-neonfp16arith-ld64.c
+  src/f16-gemm/gen-inc/4x16inc-minmax-neonfp16arith-ld64.c
+  src/f16-gemm/gen-inc/6x16inc-minmax-neonfp16arith-ld64.c
+  src/f16-gemm/gen-inc/8x16inc-minmax-neonfp16arith-ld64.c
+  src/f16-igemm/gen/1x16-minmax-neonfp16arith-ld64.c
+  src/f16-igemm/gen/4x16-minmax-neonfp16arith-ld64.c
+  src/f16-igemm/gen/6x16-minmax-neonfp16arith-ld64.c
+  src/f16-igemm/gen/8x16-minmax-neonfp16arith-ld64.c
   src/f16-spmm/gen/8x1-minmax-neonfp16arith.c
   src/f16-spmm/gen/8x1-minmax-neonfp16arith-unroll2.c
   src/f16-spmm/gen/16x1-minmax-neonfp16arith.c

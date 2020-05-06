@@ -176,10 +176,31 @@ static void IGEMMBenchmark(benchmark::State& state,
     IGEMMBenchmark(state, xnn_f16_igemm_minmax_ukernel_8x8__neonfp16arith_ld64, 8, 8, 1, 1);
   }
 
+  static void f16_igemm_1x16__neonfp16arith_ld64(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64, 1, 16, 1, 1);
+  }
+
+  static void f16_igemm_4x16__neonfp16arith_ld64(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f16_igemm_minmax_ukernel_4x16__neonfp16arith_ld64, 4, 16, 1, 1);
+  }
+
+  static void f16_igemm_6x16__neonfp16arith_ld64(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f16_igemm_minmax_ukernel_6x16__neonfp16arith_ld64, 6, 16, 1, 1);
+  }
+
+  static void f16_igemm_8x16__neonfp16arith_ld64(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f16_igemm_minmax_ukernel_8x16__neonfp16arith_ld64, 8, 16, 1, 1);
+  }
+
   BENCHMARK_CONV(f16_igemm_1x8__neonfp16arith_ld64)
   BENCHMARK_CONV(f16_igemm_4x8__neonfp16arith_ld64)
   BENCHMARK_CONV(f16_igemm_6x8__neonfp16arith_ld64)
   BENCHMARK_CONV(f16_igemm_8x8__neonfp16arith_ld64)
+
+  BENCHMARK_CONV(f16_igemm_1x16__neonfp16arith_ld64)
+  BENCHMARK_CONV(f16_igemm_4x16__neonfp16arith_ld64)
+  BENCHMARK_CONV(f16_igemm_6x16__neonfp16arith_ld64)
+  BENCHMARK_CONV(f16_igemm_8x16__neonfp16arith_ld64)
 #endif  /* XNN_ARCH_ARM64 */
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
