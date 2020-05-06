@@ -83,6 +83,7 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
           const float16x8_t vb${ABC[N:N+8]}c${L} = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
         #if XNN_ARCH_ARM64
+          $for N in range(0, NR, 8):
             $for M in range(MR):
               vacc${M}x${ABC[N:N+8]} = vfmaq_lane_f16(vacc${M}x${ABC[N:N+8]}, vb${ABC[N:N+8]}c${L}, va${M}, ${L});
         #else
@@ -148,8 +149,8 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
                   vst1q_f16(c${M}, vacc${M}x${ABC[N:N+8]}); c${M} += 8;
 
               $for M in range(MR):
-                $for N in range(0, 1 << (LOG2N - 1), 4):
-                  vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
+                $for N in range(0, 1 << (LOG2N - 1), 8):
+                  vacc${M}x${ABC[N:N+8]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+8]};
             $elif LOG2N == 2:
               $for M in range(MR):
                 vst1_f16(c${M}, vacc${M}x${ABC[0:4]}); c${M} += 4;
