@@ -168,7 +168,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     ukernel_type = xnn_ukernel_type_dwconv;
     dwconv_parameters = &xnn_params.f32.spchw_dwconv3x3;
   } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
-    (input_padding_top == 0 || input_padding_top == 1)&& input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
+    (input_padding_top == 0 || input_padding_top == 1) && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
     !nhwc_input && group_input_channels == 1 && group_output_channels == 1 && xnn_params.f32.spchw_dwconv3x3s2.ukernel != NULL)
   {
     ukernel_type = xnn_ukernel_type_dwconv;
@@ -650,7 +650,7 @@ static enum xnn_status setup_convolution2d_nchw(
     }
     case xnn_ukernel_type_dwconv:
     {
-      const size_t zero_size = input_width + XNN_EXTRA_BYTES;
+      const size_t zero_size = (input_width << log2_input_element_size) + XNN_EXTRA_BYTES;
       void* zero_buffer = xnn_reallocate_memory(convolution_op->zero_buffer, zero_size);
       if (zero_buffer == NULL) {
         xnn_log_error("failed to allocate %zu bytes for zero padding", sizeof(struct xnn_operator));
@@ -658,6 +658,7 @@ static enum xnn_status setup_convolution2d_nchw(
       }
       memset(zero_buffer, 0, zero_size);
       convolution_op->zero_buffer = zero_buffer;
+
       xnn_update_f32_spchw_params((union xnn_f32_spchw_params*) spchw_params, (uint32_t) input_width);
       convolution_op->context.dwconv2d = (struct dwconv2d_context) {
         .output_height = output_height,
