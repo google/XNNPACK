@@ -281,7 +281,7 @@ def xnnpack_aggregate_library(
         }),
     )
 
-def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = []):
+def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = []):
     """Unit test binary based on Google Test.
 
     Args:
@@ -325,6 +325,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             ":emscripten": xnnpack_emscripten_deps(),
             "//conditions:default": [],
         }),
+        tags = tags,
     )
 
 def xnnpack_binary(name, srcs, copts = [], deps = []):

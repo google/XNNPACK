@@ -342,6 +342,7 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/math/expminus-scalar-lut2048-p1.c
   src/math/expminus-scalar-lut64-p2.c
   src/math/expminus-scalar-p5.c
+  src/math/roundne-scalar.c
   src/math/sigmoid-scalar-lut2048-p1-div.c
   src/math/sigmoid-scalar-lut64-p2-div.c
   src/math/sigmoid-scalar-p5-div.c
@@ -497,6 +498,7 @@ SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/psimd-p5-div-x16.c
   src/f32-sigmoid/gen/psimd-p5-div-x20.c
   src/f32-sigmoid/gen/psimd-p5-div-x24.c
+  src/math/roundne-psimd.c
   src/math/sigmoid-psimd-p5-div.c)
 
 SET(XNNPACK_NEON_MICROKERNEL_SRCS
@@ -669,6 +671,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/x8-zip/x3-neon.c
   src/x8-zip/x4-neon.c
   src/x8-zip/xm-neon.c
+  src/math/roundne-neon.c
   src/math/sigmoid-neon-frac-p9-p10-nr1recps.c
   src/math/sigmoid-neon-rr1-lut2048-p1-nr2recps.c
   src/math/sigmoid-neon-rr1-lut64-p2-nr2recps.c
@@ -830,6 +833,9 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/math/sigmoid-neonfma-rr2-p5-nr1recps1fma.c
   src/math/sigmoid-neonfma-rr2-p5-nr2fma.c
   src/math/sigmoid-neonfma-rr2-p5-nr2recps.c)
+
+SET(XNNPACK_NEONV8_MICROKERNEL_SRCS
+  src/math/roundne-neonv8.c)
 
 SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vdiv-minmax-neon-x4.c
@@ -1025,7 +1031,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsubc-minmax-sse-x8.c
   src/f32-vmulcaddc/gen/c4-minmax-sse-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-sse-2x.c
-  src/x32-packx/x4-sse.c)
+  src/x32-packx/x4-sse.c
+  src/math/roundne-sse.c)
 
 SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-sse2-c4.c
@@ -1075,6 +1082,7 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/x8-zip/xm-sse2.c
   src/math/exp-sse2-p5.c
   src/math/expminus-sse2-p5.c
+  src/math/roundne-sse2.c
   src/math/sigmoid-sse2-p5-div.c
   src/requantization/precise-sse2.c
   src/requantization/fp32-sse2.c
@@ -1095,6 +1103,7 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/sse41-p5-div-x16.c
   src/f32-sigmoid/gen/sse41-p5-div-x20.c
   src/f32-sigmoid/gen/sse41-p5-div-x24.c
+  src/math/roundne-sse41.c
   src/requantization/precise-sse4.c
   src/requantization/q31-sse4.c
   src/requantization/gemmlowp-sse4.c)
@@ -1570,11 +1579,13 @@ ENDIF()
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_NEON_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_NEONFMA_MICROKERNEL_SRCS})
+  LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_NEONV8_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AARCH32_ASM_MICROKERNEL_SRCS})
 ENDIF()
 IF(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64" OR IOS_ARCH MATCHES "^arm64.*")
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_NEON_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_NEONFMA_MICROKERNEL_SRCS})
+  LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_NEONV8_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS})
@@ -1604,9 +1615,10 @@ SET_TARGET_PROPERTIES(XNNPACK PROPERTIES
   C_EXTENSIONS YES)
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   SET_PROPERTY(SOURCE ${XNNPACK_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -marm ")
-  SET_PROPERTY(SOURCE ${XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS} ${XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon ")
-  SET_PROPERTY(SOURCE ${XNNPACK_NEON_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon ")
-  SET_PROPERTY(SOURCE ${XNNPACK_NEONFMA_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon-vfpv4 ")
+  SET_PROPERTY(SOURCE ${XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS} ${XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv7-a -mfpu=neon ")
+  SET_PROPERTY(SOURCE ${XNNPACK_NEON_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv7-a -mfpu=neon ")
+  SET_PROPERTY(SOURCE ${XNNPACK_NEONFMA_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv7-a -mfpu=neon-vfpv4 ")
+  SET_PROPERTY(SOURCE ${XNNPACK_NEONV8_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8-a -mfpu=neon-fp-armv8 ")
   IF(IOS)
     SET_PROPERTY(SOURCE ${XNNPACK_AARCH32_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -arch ${IOS_ARCH} ")
   ENDIF()
