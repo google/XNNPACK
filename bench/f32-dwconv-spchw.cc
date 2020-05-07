@@ -88,6 +88,7 @@ static void DWConvCHWBenchmark(benchmark::State& state,
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
   std::vector<float> kernel(channels * kernel_size);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
+  std::vector<float> zero(input_width + padding_width);
 
   const size_t w_elements = (kernel_size + 1) * channels;
   const size_t o_elements = output_size * channels;
@@ -125,7 +126,9 @@ static void DWConvCHWBenchmark(benchmark::State& state,
         output_height, input_width,
         input.data() + channel * inputSize,
         packed_weights.data() + channel * (kernel_size + 1) + buffer_index * w_elements,
+        zero.data(),
         output.data() + channel * output_size + buffer_index * o_elements,
+        padding_height / 2,  // padding_top
         it * sizeof(float), ot * sizeof(float),
         input_width * sizeof(float), output_width * sizeof(float),
         &spchw_params);
@@ -205,6 +208,7 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
   std::vector<float> kernel(channels * kernel_size);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
+  std::vector<float> zero(input_width + padding_width);
 
   const size_t w_elements = (kernel_size + 1) * channels;
   const size_t o_elements = output_height * benchmark::utils::RoundUp<size_t>(output_width, ot) * channels;
@@ -242,7 +246,9 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
         output_height, input_width,
         input.data() + channel * it,
         packed_weights.data() + channel * (kernel_size + 1) + buffer_index * w_elements,
+        zero.data(),
         output.data() + channel * ot + buffer_index * o_elements,
+        padding_height / 2,   // padding_top
         it * channels * sizeof(float), ot * channels * sizeof(float),
         benchmark::utils::RoundUp<size_t>(input_width, it) * channels * sizeof(float),
         benchmark::utils::RoundUp<size_t>(output_width, ot) * channels * sizeof(float),

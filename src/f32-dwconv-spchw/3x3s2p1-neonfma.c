@@ -16,7 +16,9 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
     size_t n,
     const float* input,
     const float* weights,
+    const float* zero,
     float* output,
+    uint32_t padding_top,
     size_t input_tuple_stride,
     size_t output_tuple_stride,
     size_t input_width_stride,
@@ -24,19 +26,33 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
     const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
+  assert(padding_top >= 0 && padding_top <= 1);
 
   const uint32x4_t vmask_even = vld1q_u32(params->neon.mask_even);
   const uint32x4_t vmask_odd  = vld1q_u32(params->neon.mask_odd);
   const float32x4_t vmax = vld1q_dup_f32(&params->neon.max);
   const float32x4_t vmin = vld1q_dup_f32(&params->neon.min);
 
-  const size_t input_width_increment = input_width_stride * 2 - n / 8 * input_tuple_stride * 2;
+  const size_t input_width_decrement_single = n / 8  * input_tuple_stride * 2;
+  const size_t input_width_increment = input_width_stride * 2 - input_width_decrement_single;
   const size_t output_width_increment = output_width_stride - n / 8 * output_tuple_stride;
 
-  // No vertical padding.
-  const float* i0 = input;
-  const float* i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
-  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  const float* i0;
+  const float* i1;
+  const float* i2;
+
+  if (padding_top == 0) {
+    i0 = input;
+    i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
+    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  } else {
+    i0 = zero;
+    i1 = input;
+    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  }
+  if (m == 1) {
+    i2 = zero;
+  }
 
   const float32x4_t vw0123 = vld1q_f32(weights);
   const float32x4_t vw4567 = vld1q_f32(weights + 4);
@@ -162,9 +178,14 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
       }
     }
 
-    i0 = (const float*) ((uintptr_t) i0 + input_width_increment);
+    i0 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
+    m -= 1;
+    if (m == 1) {
+      i2 = zero;
+    }
+
     output = (float*) ((uintptr_t) output + output_width_increment);
-  } while (--m != 0);
+  } while (m != 0);
 }

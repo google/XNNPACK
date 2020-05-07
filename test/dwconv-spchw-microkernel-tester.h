@@ -70,8 +70,26 @@ class DWConvSpCHWMicrokernelTester {
     return this->padding_right_;
   }
 
+  inline DWConvSpCHWMicrokernelTester& padding_top(uint32_t padding_top) {
+    this->padding_top_ = padding_top;
+    return *this;
+  }
+
+  inline uint32_t padding_top() const {
+    return this->padding_top_;
+  }
+
+
+  inline DWConvSpCHWMicrokernelTester& padding_bottom(uint32_t padding_bottom) {
+    this->padding_bottom_ = padding_bottom;
+    return *this;
+  }
+  inline uint32_t padding_bottom() const {
+    return this->padding_bottom_;
+  }
+
   inline uint32_t input_height() const {
-    return (output_height() - 1) * subsampling() + kernel_height();
+    return (output_height() - 1) * subsampling() + kernel_height() - padding_top() - padding_bottom();
   }
 
   inline DWConvSpCHWMicrokernelTester& input_width(uint32_t input_width) {
@@ -230,6 +248,7 @@ class DWConvSpCHWMicrokernelTester {
 
     std::vector<float, AlignedAllocator<float, 64>> input((input_height() - 1) * input_width_stride() +
       (input_width() - 1) / input_tuple_size() * input_tuple_stride() + input_tuple_stride() + input_tuple_size());
+    std::vector<float> zero((input_width() - 1) / input_tuple_size() * input_tuple_stride() + input_tuple_stride() + input_tuple_size());
     std::vector<float> packed_weights(kernel_size() + 1);
     std::vector<float, AlignedAllocator<float, 64>> output((output_height() - 1) * output_width_stride() +
       (output_width() - 1) / output_tuple_size() * output_tuple_stride() + output_tuple_size());
@@ -244,13 +263,13 @@ class DWConvSpCHWMicrokernelTester {
         for (size_t ox = 0; ox < output_width(); ox++) {
           float acc = packed_weights[0];
           for (size_t ky = 0; ky < kernel_height(); ky++) {
-            const size_t iy = oy * subsampling() + ky;
+            const size_t iy = oy * subsampling() + ky - padding_top();
             for (size_t kx = 0; kx < kernel_width(); kx++) {
               const size_t ix = ox * subsampling() + kx - padding_left();
-              if (ix < input_width()) {
-                acc +=
-                  input[iy * input_width_stride() + ix / input_tuple_size() * input_tuple_stride() + ix % input_tuple_size()] *
-                  packed_weights[1 + ky * kernel_width() + kx];
+              if (ix < input_width() && iy <= input_height() - 1) {
+                float input_val = input[ iy * input_width_stride() + ix / input_tuple_size() * input_tuple_stride() + ix % input_tuple_size()];
+                float kernel_val = packed_weights[1 + ky * kernel_width() + kx];
+                acc += input_val * kernel_val;
               }
             }
           }
@@ -284,7 +303,8 @@ class DWConvSpCHWMicrokernelTester {
       // Call optimized micro-kernel.
       dwconv(
         output_height(), input_width(),
-        input.data(), packed_weights.data(), output.data(),
+        input.data(), packed_weights.data(), zero.data(), output.data(),
+        padding_top(),
         input_tuple_stride() * sizeof(float), output_tuple_stride() * sizeof(float),
         input_width_stride() * sizeof(float), output_width_stride() * sizeof(float),
         &spchw_params);
@@ -315,6 +335,8 @@ class DWConvSpCHWMicrokernelTester {
   uint32_t output_tuple_size_{1};
   uint32_t padding_left_{0};
   uint32_t padding_right_{0};
+  uint32_t padding_top_{0};
+  uint32_t padding_bottom_{0};
   uint32_t output_height_{1};
   uint32_t input_width_{1};
   uint32_t subsampling_{1};

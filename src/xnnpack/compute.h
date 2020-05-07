@@ -359,6 +359,8 @@ struct dwconv2d_context {
   size_t output_height;
   size_t input_width;
   const void* input;
+  const void* zero;
+  uint32_t input_padding_top;
   size_t input_channel_stride;
   size_t input_batch_stride;
   const void* packed_weights;

@@ -16,7 +16,9 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__sse(
     size_t n,
     const float* input,
     const float* weights,
+    const float* zero,
     float* output,
+    uint32_t padding_top,
     size_t input_tuple_stride,
     size_t output_tuple_stride,
     size_t input_width_stride,
@@ -24,18 +26,23 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__sse(
     const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
+  assert(padding_top == 1);
 
   const __m128 vmask = _mm_load_ps((const float*) params->sse.mask);
   const __m128 vmax = _mm_load_ps(params->sse.max);
   const __m128 vmin = _mm_load_ps(params->sse.min);
 
-  const size_t input_width_increment = input_width_stride - round_up_po2(n, 4) / 4 * input_tuple_stride;
+  const size_t input_width_decrement = round_up_po2(n, 4) / 4 * input_tuple_stride;
+  const size_t input_width_increment = input_width_stride - input_width_decrement;
   const size_t output_width_increment = output_width_stride - (n - 1) / 4 * output_tuple_stride;
 
-  // No vertical padding.
-  const float* i0 = input;
-  const float* i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
+  const float* i0 = zero;
+  const float* i1 = input;
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+
+  if (m == 1) {
+    i2 = zero;
+  }
 
   const __m128 vbias = _mm_load1_ps(weights);
   const __m128 vk00 = _mm_load1_ps(weights + 1);
@@ -208,9 +215,13 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__sse(
       }
     }
 
-    i0 = (const float*) ((uintptr_t) i0 + input_width_increment);
+    i0 = (const float*) ((uintptr_t) i1 - input_width_decrement);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
     output = (float*) ((uintptr_t) output + output_width_increment);
-  } while (--m != 0);
+    m -= 1;
+    if (m == 1) {
+      i2 = zero;
+    }
+  } while (m != 0);
 }

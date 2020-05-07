@@ -14,7 +14,9 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__scalar(
     size_t n,
     const float* input,
     const float* weights,
+    const float* zero,
     float* output,
+    uint32_t padding_top,
     size_t input_tuple_stride,
     size_t output_tuple_stride,
     size_t input_width_stride,
@@ -22,17 +24,34 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__scalar(
     const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
+  assert(padding_top <= 1);
 
-  const size_t input_width_increment = 2 * input_width_stride - (n/2) * 2 * input_tuple_stride;
+  const size_t input_width_decrement_single = (n/2) * 2 * input_tuple_stride;;
+  const size_t input_width_increment = 2 * input_width_stride - input_width_decrement_single;
   const size_t output_width_increment = output_width_stride - (n/2) * output_tuple_stride;
 
   const float params_min = params->scalar.min;
   const float params_max = params->scalar.max;
 
-  // No vertical padding.
-  const float* i0 = input;
-  const float* i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
-  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  const float* i0;
+  const float* i1;
+  const float* i2;
+
+  if (padding_top == 0) {
+    i0 = input;
+    i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
+    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+    if (m == 1) {
+      i2 = zero;
+    }
+  } else {
+    i0 = zero;
+    i1 = input;
+    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+    if (m == 1) {
+      i2 = zero;
+    }
+  }
 
   float* output0 = output;
 
@@ -93,10 +112,13 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__scalar(
       *output0 = voutput;
     }
 
-    i0 = (const float*) ((uintptr_t) i0 + input_width_increment);
+    i0 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
     output0 = (float*) ((uintptr_t) output0 + output_width_increment);
-    m--;
+    m -= 1;
+    if (m == 1) {
+      i2 = zero;
+    }
   }
 }

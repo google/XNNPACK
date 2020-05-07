@@ -213,7 +213,9 @@ DECLARE_Q8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_q8_dwconv_minmax_ukernel_u
     size_t n,                                              \
     const float* input,                                    \
     const float* weights,                                  \
+    const float* zero,                                     \
     float* output,                                         \
+    uint32_t padding_top,                                  \
     size_t input_tuple_stride,                             \
     size_t output_tuple_stride,                            \
     size_t input_height_stride,                            \

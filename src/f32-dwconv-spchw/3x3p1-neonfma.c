@@ -16,7 +16,9 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
     size_t n,
     const float* input,
     const float* weights,
+    const float* zero,
     float* output,
+    uint32_t padding_top,
     size_t input_tuple_stride,
     size_t output_tuple_stride,
     size_t input_width_stride,
@@ -24,6 +26,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
     const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
+  assert(padding_top == 1);
 
   const uint32x4_t vmask = vld1q_u32(params->neon.mask);
   const float32x4_t vmax = vld1q_dup_f32(&params->neon.max);
@@ -33,13 +36,18 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
   const size_t output_width_increment = 3 * output_width_stride - (n - 1) / 4 * output_tuple_stride;
   const size_t input_width_increment_single = input_width_stride - round_up_po2(n, 4) / 4 * input_tuple_stride;
   const size_t output_width_increment_single = output_width_stride - (n - 1) / 4 * output_tuple_stride;
+  const size_t input_width_increment_single_backward = round_up_po2(n, 4) / 4 * input_tuple_stride;
 
-  // No vertical padding.
-  const float* i0 = input;
-  const float* i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
+  const float* i0 = zero;
+  const float* i1 = input;
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
   const float* i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
   const float* i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
+  if (m == 3) {
+    i4 = zero;
+  } else if (m == 1) {
+    i2 = zero;
+  }
 
   float* output0 = output;
   float* output1 = (float *)((uintptr_t)output0 + output_width_stride);
@@ -249,7 +257,8 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
       }
     }
 
-    i0 = (const float*) ((uintptr_t) i0 + input_width_increment);
+    m -= 3;
+    i0 = (const float*) ((uintptr_t) i2 + input_width_increment_single);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
     i3 = (const float*) ((uintptr_t) i3 + input_width_increment);
@@ -257,7 +266,13 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
     output0 = (float*) ((uintptr_t) output0 + output_width_increment);
     output1 = (float*) ((uintptr_t) output1 + output_width_increment);
     output2 = (float*) ((uintptr_t) output2 + output_width_increment);
-    m -= 3;
+    if (m == 3) {
+      i3 = i4 = zero;
+    }
+  }
+
+  if (m == 1) {
+    i2 = zero;
   }
 
   while (m != 0) {
@@ -364,9 +379,9 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
       }
     }
 
-    i0 = (const float*) ((uintptr_t) i0 + input_width_increment_single);
+    i0 = (const float*) ((uintptr_t) i1 - input_width_increment_single_backward);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment_single);
-    i2 = (const float*) ((uintptr_t) i2 + input_width_increment_single);
+    i2 = zero;
     output0 = (float*) ((uintptr_t) output0 + output_width_increment_single);
     m -= 1;
   }
