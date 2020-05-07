@@ -146,7 +146,7 @@ struct xnn_node {
   uint32_t inputs[XNN_MAX_INPUTS];
   uint32_t num_inputs;
   /// Value IDs for node outputs.
-  uint32_t outputs[XNN_MAX_INPUTS];
+  uint32_t outputs[XNN_MAX_OUTPUTS];
   uint32_t num_outputs;
   uint32_t flags;
 };
