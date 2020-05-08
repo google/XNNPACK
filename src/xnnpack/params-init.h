@@ -383,6 +383,16 @@ static inline struct xnn_f16_scaleminmax_params xnn_init_f16_scaleminmax_params(
   return params;
 }
 
+static inline struct xnn_f16_minmax_params xnn_init_f16_minmax_params(
+  uint16_t min,
+  uint16_t max)
+{
+  struct xnn_f16_minmax_params params;
+  params.min = min;
+  params.max = max;
+  return params;
+}
+
 static inline union xnn_f32_minmax_params xnn_init_f32_minmax_params(
   float output_min,
   float output_max)

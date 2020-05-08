@@ -915,6 +915,34 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/math/sigmoid-neonfma-rr2-p5-div.c)
 
 SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
+  src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vmaxc-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vmaxc-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vminc-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vminc-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vmin-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vmin-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vmulc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vmulc-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vmul-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vmul-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vrdivc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vrdivc-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vrsubc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vrsubc-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vsub-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vsub-minmax-neonfp16arith-x8.c
   src/f16-gemm/gen/1x8-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen/4x8-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen/6x8-minmax-neonfp16arith-ld64.c
@@ -2345,6 +2373,132 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-spmm-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-spmm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-spmm-minmax-test f32-spmm-minmax-test)
+
+  ADD_EXECUTABLE(f16-vadd-minmax-test test/f16-vadd-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-vadd-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vadd-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vadd-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vadd-minmax-test f16-vadd-minmax-test)
+
+  ADD_EXECUTABLE(f16-vaddc-minmax-test test/f16-vaddc-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-vaddc-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vaddc-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vaddc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vaddc-minmax-test f16-vaddc-minmax-test)
+
+  ADD_EXECUTABLE(f16-vdiv-minmax-test test/f16-vdiv-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-vdiv-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vdiv-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vdiv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vdiv-minmax-test f16-vdiv-minmax-test)
+
+  ADD_EXECUTABLE(f16-vdivc-minmax-test test/f16-vdivc-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-vdivc-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vdivc-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vdivc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vdivc-minmax-test f16-vdivc-minmax-test)
+
+  ADD_EXECUTABLE(f16-vrdivc-minmax-test test/f16-vrdivc-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-vrdivc-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vrdivc-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vrdivc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vrdivc-minmax-test f16-vrdivc-minmax-test)
+
+  ADD_EXECUTABLE(f16-vmax-test test/f16-vmax.cc)
+  SET_TARGET_PROPERTIES(f16-vmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vmax-test f16-vmax-test)
+
+  ADD_EXECUTABLE(f16-vmaxc-test test/f16-vmaxc.cc)
+  SET_TARGET_PROPERTIES(f16-vmaxc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vmaxc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vmaxc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vmaxc-test f16-vmaxc-test)
+
+  ADD_EXECUTABLE(f16-vmin-test test/f16-vmin.cc)
+  SET_TARGET_PROPERTIES(f16-vmin-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vmin-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vmin-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vmin-test f16-vmin-test)
+
+  ADD_EXECUTABLE(f16-vminc-test test/f16-vminc.cc)
+  SET_TARGET_PROPERTIES(f16-vminc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vminc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vminc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vminc-test f16-vminc-test)
+
+  ADD_EXECUTABLE(f16-vmul-minmax-test test/f16-vmul-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-vmul-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vmul-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vmul-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vmul-minmax-test f16-vmul-minmax-test)
+
+  ADD_EXECUTABLE(f16-vmulc-minmax-test test/f16-vmulc-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-vmulc-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vmulc-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vmulc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vmulc-minmax-test f16-vmulc-minmax-test)
+
+  ADD_EXECUTABLE(f16-vsub-minmax-test test/f16-vsub-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-vsub-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vsub-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vsub-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vsub-minmax-test f16-vsub-minmax-test)
+
+  ADD_EXECUTABLE(f16-vsubc-minmax-test test/f16-vsubc-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-vsubc-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vsubc-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vsubc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vsubc-minmax-test f16-vsubc-minmax-test)
+
+  ADD_EXECUTABLE(f16-vrsubc-minmax-test test/f16-vrsubc-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-vrsubc-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vrsubc-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-vrsubc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-vrsubc-minmax-test f16-vrsubc-minmax-test)
 
   ADD_EXECUTABLE(f32-vadd-minmax-test test/f32-vadd-minmax.cc)
   SET_TARGET_PROPERTIES(f32-vadd-minmax-test PROPERTIES

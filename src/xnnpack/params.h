@@ -15,8 +15,19 @@
 #include <xnnpack.h>
 #include <xnnpack/common.h>
 
+struct xnn_f16_default_params {
+  // Empty; serves to differentiate pointer types for micro-kernels without fused activation.
+  char _; // Dummy member variable to comply with the C standard
+};
+
+// scaleminmax is used for gemm/igemm ukernels.
 struct xnn_f16_scaleminmax_params {
   uint16_t scale;
+  uint16_t min;
+  uint16_t max;
+};
+
+struct xnn_f16_minmax_params {
   uint16_t min;
   uint16_t max;
 };
@@ -1147,6 +1158,20 @@ typedef void (*xnn_vbinary_ukernel_function)(
     const void* b,
     void* y,
     const void* params);
+
+typedef void (*xnn_f16_vbinary_ukernel_function)(
+    size_t n,
+    const void* a,
+    const void* b,
+    void* y,
+    const struct xnn_f16_default_params* params);
+
+typedef void (*xnn_f16_vbinary_minmax_ukernel_function)(
+    size_t n,
+    const void* a,
+    const void* b,
+    void* y,
+    const struct xnn_f16_minmax_params* params);
 
 typedef void (*xnn_f32_vbinary_ukernel_function)(
     size_t n,

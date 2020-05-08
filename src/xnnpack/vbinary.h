@@ -18,6 +18,50 @@
 extern "C" {
 #endif
 
+#define DECLARE_F16_VBINOP_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                         \
+      size_t n,                                      \
+      const void* a,                                \
+      const void* b,                                \
+      void* y,                                      \
+      const struct xnn_f16_default_params* params);
+
+#define DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                \
+      size_t n,                                             \
+      const void* a,                                       \
+      const void* b,                                       \
+      void* y,                                             \
+      const struct xnn_f16_minmax_params* params);
+
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmax_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmin_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmin_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vadd_minmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vadd_minmax_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vdiv_minmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vdiv_minmax_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vmul_minmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vmul_minmax_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vsub_minmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vsub_minmax_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmaxc_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmaxc_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vminc_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vminc_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vdivc_minmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vdivc_minmax_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vrdivc_minmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vrdivc_minmax_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vmulc_minmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vmulc_minmax_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vsubc_minmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vsubc_minmax_ukernel__neonfp16arith_x16)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_x8)
+DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_x16)
 
 #define DECLARE_F32_VBINOP_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \

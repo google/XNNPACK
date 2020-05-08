@@ -920,6 +920,34 @@ NEONV8_UKERNELS = [
 ]
 
 AARCH64_NEONFP16ARITH_UKERNELS = [
+    "src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vmaxc-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vmaxc-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vmax-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vminc-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vminc-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vmin-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vmin-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vmulc-minmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vmulc-minmax-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vmul-minmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vmul-minmax-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vrdivc-minmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vrdivc-minmax-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vrsubc-minmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vrsubc-minmax-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x8.c",
+    "src/f16-vbinary/gen/vsub-minmax-neonfp16arith-x16.c",
+    "src/f16-vbinary/gen/vsub-minmax-neonfp16arith-x8.c",
     "src/f16-gemm/gen/1x8-minmax-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/4x8-minmax-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/6x8-minmax-neonfp16arith-ld64.c",
@@ -2874,6 +2902,132 @@ xnnpack_unit_test(
         "test/f32-spmm-minmax.cc",
         "test/spmm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vadd_minmax_test",
+    srcs = [
+        "test/f16-vadd-minmax.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vaddc_minmax_test",
+    srcs = [
+        "test/f16-vaddc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vdiv_minmax_test",
+    srcs = [
+        "test/f16-vdiv-minmax.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vdivc_minmax_test",
+    srcs = [
+        "test/f16-vdivc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vrdivc_minmax_test",
+    srcs = [
+        "test/f16-vrdivc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vmax_test",
+    srcs = [
+        "test/f16-vmax.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vmaxc_test",
+    srcs = [
+        "test/f16-vmaxc.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vmin_test",
+    srcs = [
+        "test/f16-vmin.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vminc_test",
+    srcs = [
+        "test/f16-vminc.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vmul_minmax_test",
+    srcs = [
+        "test/f16-vmul-minmax.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vmulc_minmax_test",
+    srcs = [
+        "test/f16-vmulc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vsub_minmax_test",
+    srcs = [
+        "test/f16-vsub-minmax.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vsubc_minmax_test",
+    srcs = [
+        "test/f16-vsubc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vrsubc_minmax_test",
+    srcs = [
+        "test/f16-vrsubc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
