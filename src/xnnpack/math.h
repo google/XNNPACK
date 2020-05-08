@@ -81,8 +81,15 @@ inline static float math_nonsign_mask_f32() {
   #if defined(__INTEL_COMPILER)
     // Suprisingly, Intel compiler ignores __builtin_nanf payload
     return _castu32_f32(0x7FFFFFFF);
-  #else
-    // Suprisingly, Microsoft compiler correctly supports __builtin_nanf
+  #elif defined(__GNUC__)
     return __builtin_nanf("0x7FFFFF");
+  #else
+    union {
+      uint32_t as_word;
+      float as_float;
+    } f;
+    f.as_word = 0x7FFFFFFF;
+    return f.as_float;
   #endif
 }
+
