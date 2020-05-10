@@ -32,9 +32,14 @@ ELSE()
   ADD_DEFINITIONS(-DXNN_ENABLE_ASSEMBLY=0)
 ENDIF()
 
-IF(MSVC)
+IF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   # Disable "unary minus operator applied to unsigned type, result still unsigned" warning
   ADD_COMPILE_OPTIONS("/wd4146")
+ENDIF()
+
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # Disable "note: parameter passing for argument of type ... changed/will change in ..."
+  ADD_COMPILE_OPTIONS("-Wno-psabi")
 ENDIF()
 
 # ---[ Build flags
