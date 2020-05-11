@@ -77,7 +77,7 @@ static void init(void) {
 #endif
 
 #if XNN_ARCH_ARM
-  #if XNN_PLATFORM_MOBILE  
+  #if XNN_PLATFORM_MOBILE
     if (!cpuinfo_has_arm_neon()) {
       xnn_log_error("XNNPACK initialization failed: NEON is not supported");
       return;
@@ -97,15 +97,9 @@ static void init(void) {
       xnn_params.q8.gemm.mr = 4;
       xnn_params.q8.gemm.nr = 8;
 
-      #if XNN_ENABLE_ASSEMBLY
-        xnn_params.q8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_q8_dwconv_minmax_ukernel_up8x9__aarch32_neon;
-        xnn_params.q8.dwconv[0].channel_tile = 8;
-        xnn_params.q8.dwconv[0].primary_tile = 9;
-      #else
-        xnn_params.q8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_q8_dwconv_minmax_ukernel_up8x9__neon;
-        xnn_params.q8.dwconv[0].channel_tile = 8;
-        xnn_params.q8.dwconv[0].primary_tile = 9;
-      #endif
+      xnn_params.q8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_q8_dwconv_minmax_ukernel_up8x9__neon;
+      xnn_params.q8.dwconv[0].channel_tile = 8;
+      xnn_params.q8.dwconv[0].primary_tile = 9;
       xnn_params.q8.avgpool = (struct avgpool_parameters) {
         .up = (xnn_avgpool_unipass_ukernel_function) xnn_q8_avgpool_minmax_ukernel_9x__neon_c8,
         .mp = (xnn_avgpool_multipass_ukernel_function) xnn_q8_avgpool_minmax_ukernel_9p8x__neon_c8,

@@ -1522,7 +1522,6 @@ AVX512F_UKERNELS = [
 ]
 
 AARCH32_ASM_UKERNELS = [
-    "src/q8-dwconv/up8x9-minmax-aarch32-neon.S",
     "src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S",
     "src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a55.S",
     "src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a75.S",
