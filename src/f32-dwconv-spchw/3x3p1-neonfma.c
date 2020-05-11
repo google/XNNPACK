@@ -12,8 +12,8 @@
 
 
 void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
-    size_t m,
-    size_t n,
+    size_t input_height,
+    size_t input_width,
     const float* input,
     const float* weights,
     const float* zero,
@@ -25,27 +25,35 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
     size_t output_width_stride,
     const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
+  assert(input_width != 0);
+  assert(input_height != 0);
   assert(padding_top == 1);
+
+  const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
+  const size_t output_height = padded_input_height - 3 + 1;
 
   const uint32x4_t vmask = vld1q_u32(params->neon.mask);
   const float32x4_t vmax = vld1q_dup_f32(&params->neon.max);
   const float32x4_t vmin = vld1q_dup_f32(&params->neon.min);
 
-  const size_t input_width_increment = 3 * input_width_stride - round_up_po2(n, 4) / 4 * input_tuple_stride;
-  const size_t output_width_increment = 3 * output_width_stride - (n - 1) / 4 * output_tuple_stride;
-  const size_t input_width_increment_single = input_width_stride - round_up_po2(n, 4) / 4 * input_tuple_stride;
-  const size_t output_width_increment_single = output_width_stride - (n - 1) / 4 * output_tuple_stride;
-  const size_t input_width_increment_single_backward = round_up_po2(n, 4) / 4 * input_tuple_stride;
+  const size_t input_width_increment = 3 * input_width_stride - round_up_po2(input_width, 4) / 4 * input_tuple_stride;
+  const size_t output_width_increment = 3 * output_width_stride - (input_width - 1) / 4 * output_tuple_stride;
+  const size_t input_width_increment_single = input_width_stride - round_up_po2(input_width, 4) / 4 * input_tuple_stride;
+  const size_t output_width_increment_single = output_width_stride - (input_width - 1) / 4 * output_tuple_stride;
+  const size_t input_width_increment_single_backward = round_up_po2(input_width, 4) / 4 * input_tuple_stride;
 
   const float* i0 = zero;
   const float* i1 = input;
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
   const float* i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
   const float* i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
-  if (m == 3) {
+  if (input_height <= 3) {
     i4 = zero;
-  } else if (m == 1) {
+  }
+  if (input_height <= 2) {
+    i3 = zero;
+  }
+  if (input_height == 1) {
     i2 = zero;
   }
 
@@ -57,6 +65,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
   const float32x4_t vw4567 = vld1q_f32(weights + 4);
   const float32x2_t vw89 = vld1_f32(weights + 8);
 
+  size_t m = output_height;
   while (m >= 3) {
     float32x4_t vi0x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi1x0123 = vmovq_n_f32(0.0f);
@@ -69,7 +78,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
     float32x4_t vi3x4567 = vld1q_f32(i3); i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
     float32x4_t vi4x4567 = vld1q_f32(i4); i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
 
-    size_t k = n;
+    size_t k = input_width;
     for (; k > 4; k -= 4) {
       float32x4_t vo4567p00 = vdupq_laneq_f32(vw0123, 0);
       float32x4_t vo4567p01 = vdupq_laneq_f32(vw0123, 0);
@@ -267,7 +276,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
     output1 = (float*) ((uintptr_t) output1 + output_width_increment);
     output2 = (float*) ((uintptr_t) output2 + output_width_increment);
     if (m == 3) {
-      i3 = i4 = zero;
+      i4 = zero;
     }
   }
 
@@ -283,7 +292,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma(
     float32x4_t vi1x4567 = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
     float32x4_t vi2x4567 = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
 
-    size_t k = n;
+    size_t k = input_width;
     for (; k > 4; k -= 4) {
       float32x4_t vo4567p0 = vdupq_laneq_f32(vw0123, 0);
 

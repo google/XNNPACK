@@ -712,7 +712,7 @@ typedef void (*xnn_x8_lut_ukernel_function)(
     uint8_t* y);
 
 typedef void (*xnn_dwconv_spchw_ukernel_function)(
-    size_t output_height,
+    size_t input_height,
     size_t input_width,
     const void* input,
     const void* weights,
@@ -726,7 +726,7 @@ typedef void (*xnn_dwconv_spchw_ukernel_function)(
     const void* params);
 
 typedef void (*xnn_f32_dwconv_spchw_ukernel_function)(
-    size_t output_height,
+    size_t input_height,
     size_t input_width,
     const float* input,
     const float* weights,

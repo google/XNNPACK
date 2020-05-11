@@ -661,7 +661,7 @@ static enum xnn_status setup_convolution2d_nchw(
 
       xnn_update_f32_spchw_params((union xnn_f32_spchw_params*) spchw_params, (uint32_t) input_width);
       convolution_op->context.dwconv2d = (struct dwconv2d_context) {
-        .output_height = output_height,
+        .input_height = input_height,
         .input_width = input_width,
         .input = input,
         .zero = zero_buffer,

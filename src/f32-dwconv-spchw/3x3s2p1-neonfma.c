@@ -12,8 +12,8 @@
 
 
 void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
-    size_t m,
-    size_t n,
+    size_t input_height,
+    size_t input_width,
     const float* input,
     const float* weights,
     const float* zero,
@@ -25,17 +25,21 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
     size_t output_width_stride,
     const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
+  assert(input_height!= 0);
+  assert(input_width != 0);
   assert(padding_top >= 0 && padding_top <= 1);
+
+  const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
+  const size_t output_height = (padded_input_height - 3) / 2 + 1;
 
   const uint32x4_t vmask_even = vld1q_u32(params->neon.mask_even);
   const uint32x4_t vmask_odd  = vld1q_u32(params->neon.mask_odd);
   const float32x4_t vmax = vld1q_dup_f32(&params->neon.max);
   const float32x4_t vmin = vld1q_dup_f32(&params->neon.min);
 
-  const size_t input_width_decrement_single = n / 8  * input_tuple_stride * 2;
+  const size_t input_width_decrement_single = input_width / 8  * input_tuple_stride * 2;
   const size_t input_width_increment = input_width_stride * 2 - input_width_decrement_single;
-  const size_t output_width_increment = output_width_stride - n / 8 * output_tuple_stride;
+  const size_t output_width_increment = output_width_stride - input_width / 8 * output_tuple_stride;
 
   const float* i0;
   const float* i1;
@@ -45,25 +49,32 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
     i0 = input;
     i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
     i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+    if (input_height <= 2) {
+      i2 = zero;
+    }
+    if (input_height == 1) {
+      i1 = zero;
+    }
   } else {
     i0 = zero;
     i1 = input;
     i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
-  }
-  if (m == 1) {
-    i2 = zero;
+    if (input_height == 1) {
+      i2 = zero;
+    }
   }
 
   const float32x4_t vw0123 = vld1q_f32(weights);
   const float32x4_t vw4567 = vld1q_f32(weights + 4);
   const float32x2_t vw89 = vld1_f32(weights + 8);
 
+  size_t m = output_height;
   do {
     float32x4_t vi0x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi1x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi2x0123 = vmovq_n_f32(0.0f);
 
-    size_t k = n;
+    size_t k = input_width;
     for (; k >= 8; k -= 8) {
       float32x4_t vo468Ap0 = vdupq_laneq_f32(vw0123, 0);
 
@@ -182,7 +193,14 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma(
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
     m -= 1;
-    if (m == 1) {
+    if (m == 1 && padding_top == input_height % 2) {
+      // to mimic the following code with only one if, we do some small
+      // shenanigans...
+      // if (padding_top == 0 && input_height % 2 == 0) {
+      //   i2 = zero;
+      // } else if (padding_top == 1 && input_height % 2 == 1) {
+      //   i2 = zero;
+      // }
       i2 = zero;
     }
 

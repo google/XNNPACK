@@ -356,7 +356,7 @@ struct dwconv_context {
 #endif
 
 struct dwconv2d_context {
-  size_t output_height;
+  size_t input_height;
   size_t input_width;
   const void* input;
   const void* zero;

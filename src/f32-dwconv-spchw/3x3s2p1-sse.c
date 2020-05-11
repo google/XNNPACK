@@ -12,8 +12,8 @@
 
 
 void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__sse(
-    size_t m,
-    size_t n,
+    size_t input_height,
+    size_t input_width,
     const float* input,
     const float* weights,
     const float* zero,
@@ -25,17 +25,21 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__sse(
     size_t output_width_stride,
     const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
+  assert(input_height!= 0);
+  assert(input_width != 0);
   assert(padding_top >= 0 && padding_top <= 1);
+
+  const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
+  const size_t output_height = (padded_input_height - 3) / 2 + 1;
 
   const __m128 vmask_even = _mm_load_ps((const float*) params->sse.mask_even);
   const __m128 vmask_odd  = _mm_load_ps((const float*) params->sse.mask_odd);
   const __m128 vmax = _mm_load_ps(params->sse.max);
   const __m128 vmin = _mm_load_ps(params->sse.min);
 
-  const size_t input_width_decrement_single = n / 8  * input_tuple_stride * 2;
+  const size_t input_width_decrement_single = input_width / 8  * input_tuple_stride * 2;
   const size_t input_width_increment = input_width_stride * 2 - input_width_decrement_single;
-  const size_t output_width_increment = output_width_stride - n / 8 * output_tuple_stride;
+  const size_t output_width_increment = output_width_stride - input_width / 8 * output_tuple_stride;
 
   const float* i0;
   const float* i1;
@@ -45,13 +49,19 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__sse(
     i0 = input;
     i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
     i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+    if (input_height <= 2) {
+      i2 = zero;
+    }
+    if (input_height == 1) {
+      i1 = zero;
+    }
   } else {
     i0 = zero;
     i1 = input;
     i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
-  }
-  if (m == 1) {
-    i2 = zero;
+    if (input_height == 1) {
+      i2 = zero;
+    }
   }
 
   const __m128 vbias = _mm_load1_ps(weights);
@@ -65,12 +75,13 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__sse(
   const __m128 vk21 = _mm_load1_ps(weights + 8);
   const __m128 vk22 = _mm_load1_ps(weights + 9);
 
+  size_t m = output_height;
   do {
     __m128 vi0x7531 = _mm_setzero_ps();
     __m128 vi1x7531 = _mm_setzero_ps();
     __m128 vi2x7531 = _mm_setzero_ps();
 
-    size_t k = n;
+    size_t k = input_width;
     for (; k >= 8; k -= 8) {
       __m128 vo8ACEp0 = vbias;
 
@@ -195,7 +206,14 @@ void xnn_f32_dwconv_spchw_ukernel_3x3s2p1__sse(
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
     output = (float*) ((uintptr_t) output + output_width_increment);
     m -= 1;
-    if (m == 1) {
+    if (m == 1 && padding_top == input_height % 2) {
+      // to mimic the following code with only one if, we do some small
+      // shenanigans...
+      // if (padding_top == 0 && input_height % 2 == 0) {
+      //   i2 = zero;
+      // } else if (padding_top == 1 && input_height % 2 == 1) {
+      //   i2 = zero;
+      // }
       i2 = zero;
     }
   } while (m != 0);

@@ -209,8 +209,8 @@ DECLARE_Q8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_q8_dwconv_minmax_ukernel_u
 
 #define DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                               \
-    size_t m,                                              \
-    size_t n,                                              \
+    size_t input_height,                                   \
+    size_t input_width,                                    \
     const float* input,                                    \
     const float* weights,                                  \
     const float* zero,                                     \

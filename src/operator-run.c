@@ -334,7 +334,7 @@ void xnn_compute_dwconv2d_spchw(
     size_t channel)
 {
   context->spchw_ukernel(
-    context->output_height,
+    context->input_height,
     context->input_width,
     (const void*) ((uintptr_t) context->input + channel * context->input_channel_stride + batch_index * context->input_batch_stride),
     (const void*) ((uintptr_t) context->packed_weights + channel * context->weights_channel_stride),

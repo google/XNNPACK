@@ -10,8 +10,8 @@
 
 
 void xnn_f32_dwconv_spchw_ukernel_3x3p1__scalar(
-    size_t m,
-    size_t n,
+    size_t input_height,
+    size_t input_width,
     const float* input,
     const float* weights,
     const float* zero,
@@ -23,12 +23,16 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__scalar(
     size_t output_width_stride,
     const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
+  assert(input_width != 0);
+  assert(input_height != 0);
   assert(padding_top == 1);
 
-  const size_t input_width_decrement = n * input_tuple_stride;
+  const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
+  const size_t output_height = padded_input_height - 3 + 1;
+
+  const size_t input_width_decrement = input_width * input_tuple_stride;
   const size_t input_width_increment = input_width_stride - input_width_decrement;
-  const size_t output_width_increment = output_width_stride - (n - 1) * output_tuple_stride;
+  const size_t output_width_increment = output_width_stride - (input_width - 1) * output_tuple_stride;
 
   const float params_min = params->scalar.min;
   const float params_max = params->scalar.max;
@@ -37,7 +41,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__scalar(
   const float* i1 = input;
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
 
-  if (m == 1) {
+  if (input_height == 1) {
     i2 = zero;
   }
 
@@ -54,6 +58,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__scalar(
   const float vw8 = weights[8];
   const float vw9 = weights[9];
 
+  size_t m = output_height;
   while (m > 0) {
     float vi0x0 = 0.0f;
     float vi1x0 = 0.0f;
@@ -62,7 +67,7 @@ void xnn_f32_dwconv_spchw_ukernel_3x3p1__scalar(
     float vi1x1 = *i1; i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
     float vi2x1 = *i2; i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
 
-    size_t k = n;
+    size_t k = input_width;
     for (; k > 1; k--) {
       const float vi0x2 = *i0; i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
       const float vi1x2 = *i1; i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
