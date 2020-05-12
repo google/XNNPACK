@@ -32,10 +32,14 @@ void xnn_math_f32_roundne__scalar(
     const float vabsx = fabsf(vx);
     // Addition-subtraction trick with the magic number to cause rounding to integer for abs(x).
     // Note: the result is valid only for 0 <= abs(x) < 2**23.
+    // Note: addition-subtraction implicitly converts SNaN inputs to QNaNs.
     const float vrndabsx = (vabsx + vmagic_number) - vmagic_number;
 
-    // Select between the value rounded using addition-subtraction trick on its validity interval and the abs(x) value.
-    const float vabsy = XNN_UNPREDICTABLE(vabsx < vmagic_number) ? vrndabsx : vabsx;
+    // Select between the abs(x) rounded using addition-subtraction trick and the abs(x) value.
+    // For abs(x) < 2**23, the result is abs(x) rounded via addition-subtraction trick.
+    // For abs(x) >= 2**23, the result is x itself (already an integer).
+    // For NaN inputs, the result is abs(x) converted to QNaN as a side-effect of addition-subtraction.
+    const float vabsy = XNN_UNPREDICTABLE(vabsx >= vmagic_number) ? vabsx : vrndabsx;
     // Restore the sign of the rounded value.
     const float vy = copysignf(vabsy, vx);
 
