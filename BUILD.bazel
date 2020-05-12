@@ -2593,9 +2593,7 @@ xnnpack_unit_test(
         "src/xnnpack/AlignedAllocator.h",
         "src/xnnpack/math-stubs.h",
     ] + MICROKERNEL_TEST_HDRS,
-    tags = [
-        "notap",
-    ],
+    automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
 

@@ -281,7 +281,7 @@ def xnnpack_aggregate_library(
         }),
     )
 
-def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = []):
+def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], automatic = True):
     """Unit test binary based on Google Test.
 
     Args:
@@ -297,36 +297,69 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             need to be explicitly specified.
     """
 
-    native.cc_test(
-        name = name,
-        srcs = srcs,
-        copts = xnnpack_std_cxxopts() + [
-            "-Iinclude",
-            "-Isrc",
-        ] + select({
-            ":windows_x86_64_mingw": mingw_copts,
-            ":windows_x86_64_msys": msys_copts,
-            "//conditions:default": [],
-        }) + select({
-            ":windows_x86_64_clang": ["/clang:-Wno-unused-function"],
-            ":windows_x86_64_mingw": ["-Wno-unused-function"],
-            ":windows_x86_64_msys": ["-Wno-unused-function"],
-            ":windows_x86_64": [],
-            "//conditions:default": ["-Wno-unused-function"],
-        }) + copts,
-        linkopts = select({
-            ":emscripten": xnnpack_emscripten_test_linkopts(),
-            "//conditions:default": [],
-        }),
-        linkstatic = True,
-        deps = [
-            "@com_google_googletest//:gtest_main",
-        ] + deps + select({
-            ":emscripten": xnnpack_emscripten_deps(),
-            "//conditions:default": [],
-        }),
-        tags = tags,
-    )
+    if automatic:
+        native.cc_test(
+            name = name,
+            srcs = srcs,
+            copts = xnnpack_std_cxxopts() + [
+                "-Iinclude",
+                "-Isrc",
+            ] + select({
+                ":windows_x86_64_mingw": mingw_copts,
+                ":windows_x86_64_msys": msys_copts,
+                "//conditions:default": [],
+            }) + select({
+                ":windows_x86_64_clang": ["/clang:-Wno-unused-function"],
+                ":windows_x86_64_mingw": ["-Wno-unused-function"],
+                ":windows_x86_64_msys": ["-Wno-unused-function"],
+                ":windows_x86_64": [],
+                "//conditions:default": ["-Wno-unused-function"],
+            }) + copts,
+            linkopts = select({
+                ":emscripten": xnnpack_emscripten_test_linkopts(),
+                "//conditions:default": [],
+            }),
+            linkstatic = True,
+            deps = [
+                "@com_google_googletest//:gtest_main",
+            ] + deps + select({
+                ":emscripten": xnnpack_emscripten_deps(),
+                "//conditions:default": [],
+            }),
+            tags = tags,
+        )
+    else:
+        native.cc_binary(
+            name = name,
+            srcs = srcs,
+            copts = xnnpack_std_cxxopts() + [
+                "-Iinclude",
+                "-Isrc",
+            ] + select({
+                ":windows_x86_64_mingw": mingw_copts,
+                ":windows_x86_64_msys": msys_copts,
+                "//conditions:default": [],
+            }) + select({
+                ":windows_x86_64_clang": ["/clang:-Wno-unused-function"],
+                ":windows_x86_64_mingw": ["-Wno-unused-function"],
+                ":windows_x86_64_msys": ["-Wno-unused-function"],
+                ":windows_x86_64": [],
+                "//conditions:default": ["-Wno-unused-function"],
+            }) + copts,
+            linkopts = select({
+                ":emscripten": xnnpack_emscripten_test_linkopts(),
+                "//conditions:default": [],
+            }),
+            linkstatic = True,
+            deps = [
+                "@com_google_googletest//:gtest_main",
+            ] + deps + select({
+                ":emscripten": xnnpack_emscripten_deps(),
+                "//conditions:default": [],
+            }),
+            testonly = True,
+            tags = tags,
+        )
 
 def xnnpack_binary(name, srcs, copts = [], deps = []):
     """Minimal binary
