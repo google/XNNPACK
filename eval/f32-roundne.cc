@@ -190,7 +190,7 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, DISABLED_snan_positive_qnan) {
+  TEST(ROUNDNE__SSE, snan_positive_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
@@ -208,7 +208,7 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, DISABLED_snan_negative_qnan) {
+  TEST(ROUNDNE__SSE, snan_negative_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {

@@ -36,16 +36,18 @@ void xnn_math_f32_roundne__sse(
     const __m128 vabsx = _mm_and_ps(vx, vnonsign_mask);
 
     // Compute bitmask for the bits we want to copy from the rounded abs(x). Other bits will be copied from x.
-    // If abs(x) < 2**23, we want all but the sign bit from the rounded abs(x) and the sign bit from x.
-    // Otherwise (abs(x) >= 2**23 or x is NaN), we want all bits from x.
-    const __m128 vrndmask = _mm_and_ps(vnonsign_mask, _mm_cmplt_ps(vabsx, vmagic_number));
+    // If abs(x) >= 2**23, we want all bits from x.
+    // If abs(x) < 2**23 or x is NaN, we want all but the sign bit from the rounded abs(x) and the sign bit from x.
+    const __m128 vrndmask = _mm_andnot_ps(_mm_cmpge_ps(vabsx, vmagic_number), vnonsign_mask);
     // Addition-subtraction trick with the magic number to cause rounding to integer for abs(x).
     // Note: the result is valid only for 0 <= abs(x) < 2**23.
+    // Note: addition-subtraction implicitly converts SNaN inputs to QNaNs.
     const __m128 vrndabsx = _mm_sub_ps(_mm_add_ps(vabsx, vmagic_number), vmagic_number);
 
     // Combine abs(x) rounded via addition-subtraction trick and the input x value.
     // For abs(x) < 2**23, the result is abs(x) rounded via addition-subtraction trick with the sign of x.
-    // For abs(x) >= 2**23 and NaN inputs, the result is x itself.
+    // For NaN inputs, the result is x converted to QNaN as a side-effect of addition-subtraction.
+    // For abs(x) >= 2**23, the result is x itself.
     const __m128 vy = _mm_or_ps(_mm_and_ps(vrndabsx, vrndmask), _mm_andnot_ps(vrndmask, vx));
 
     _mm_store_ps(output, vy);
