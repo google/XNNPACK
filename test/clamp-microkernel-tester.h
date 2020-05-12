@@ -19,6 +19,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
@@ -122,6 +124,50 @@ class ClampMicrokernelTester {
         ASSERT_EQ(uint32_t(y_ref[i]), uint32_t(y[i]))
           << "at position " << i << ", batch_size = " << batch_size()
           << ", qmin = " << uint32_t(qmin()) << ", qmax = " << uint32_t(qmax());
+      }
+    }
+  }
+
+  void Test(xnn_f16_clamp_ukernel_function clamp) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), rng);
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), std::ref(f16rng));
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f16rng));
+      } else {
+        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+      }
+      const uint16_t* x_data = inplace() ? y.data() : x.data();
+
+      // Prepare output parameters.
+      xnn_f16_minmax_params params = xnn_init_f16_minmax_params(
+        fp16_ieee_from_fp32_value(float(qmin())),
+        fp16_ieee_from_fp32_value(float(qmax())));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = std::max(std::min(fp16_ieee_to_fp32_value(x_data[i]), float(qmax())), float(qmin()));
+      }
+
+      // Call optimized micro-kernel.
+      clamp(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_LE(fp16_ieee_to_fp32_value(y[i]), float(qmax()))
+          << "at position " << i << ", batch_size = " << batch_size();
+        ASSERT_GE(fp16_ieee_to_fp32_value(y[i]), float(qmin()))
+          << "at position " << i << ", batch_size = " << batch_size();
+        ASSERT_EQ(y_ref[i], fp16_ieee_to_fp32_value(y[i]))
+          << "at position " << i << ", batch_size = " << batch_size()
+          << ", qmin = " << float(qmin()) << ", qmax = " << float(qmax());
       }
     }
   }

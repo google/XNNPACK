@@ -420,6 +420,15 @@ static inline union xnn_f32_minmax_params xnn_init_scalar_f32_minmax_params(
   return params;
 }
 
+static inline struct xnn_f16_hswish_params xnn_init_f16_hswish_params(void)
+{
+  struct xnn_f16_hswish_params params;
+  params.sixth = fp16_ieee_from_fp32_value(0x1.555556p-3f);
+  params.half = fp16_ieee_from_fp32_value(0.5f);
+  params.one = fp16_ieee_from_fp32_value(1.0f);
+  return params;
+}
+
 static inline union xnn_f32_hswish_params xnn_init_f32_hswish_params(void)
 {
   union xnn_f32_hswish_params params;

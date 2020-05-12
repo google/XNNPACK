@@ -16,6 +16,19 @@ extern "C" {
 #endif
 
 
+#define DECLARE_F16_PRELU_UKERNEL_FUNCTION(fn_name)            \
+  XNN_INTERNAL void fn_name(                                   \
+      size_t rows,                                             \
+      size_t channels,                                         \
+      const void* input,                                       \
+      size_t input_stride,                                     \
+      const void* weights,                                     \
+      void* output,                                            \
+      size_t output_stride);
+
+DECLARE_F16_PRELU_UKERNEL_FUNCTION(xnn_f16_prelu_ukernel__neonfp16arith_2x8)
+DECLARE_F16_PRELU_UKERNEL_FUNCTION(xnn_f16_prelu_ukernel__neonfp16arith_2x16)
+
 #define DECLARE_F32_PRELU_UKERNEL_FUNCTION(fn_name)            \
   XNN_INTERNAL void fn_name(                                   \
       size_t rows,                                             \

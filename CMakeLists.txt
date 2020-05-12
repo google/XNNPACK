@@ -920,6 +920,12 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/math/sigmoid-neonfma-rr2-p5-div.c)
 
 SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
+  src/f16-clamp/gen/neonfp16arith-x16.c
+  src/f16-clamp/gen/neonfp16arith-x8.c
+  src/f16-hswish/gen/neonfp16arith-x16.c
+  src/f16-hswish/gen/neonfp16arith-x8.c
+  src/f16-prelu/gen/neonfp16arith-2x16.c
+  src/f16-prelu/gen/neonfp16arith-2x8.c
   src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x16.c
@@ -2140,6 +2146,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-avgpool-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-avgpool-minmax-test f32-avgpool-minmax-test)
 
+  ADD_EXECUTABLE(f16-clamp-test test/f16-clamp.cc)
+  SET_TARGET_PROPERTIES(f16-clamp-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-clamp-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-clamp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-clamp-test f16-clamp-test)
+
   ADD_EXECUTABLE(f32-clamp-test test/f32-clamp.cc)
   SET_TARGET_PROPERTIES(f32-clamp-test PROPERTIES
     CXX_STANDARD 11
@@ -2239,6 +2254,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-gemminc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-gemminc-minmax-test f32-gemminc-minmax-test)
 
+  ADD_EXECUTABLE(f16-hswish-test test/f16-hswish.cc)
+  SET_TARGET_PROPERTIES(f16-hswish-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-hswish-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-hswish-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-hswish-test f16-hswish-test)
+
   ADD_EXECUTABLE(f32-hswish-test test/f32-hswish.cc)
   SET_TARGET_PROPERTIES(f32-hswish-test PROPERTIES
     CXX_STANDARD 11
@@ -2314,6 +2338,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-ppmm-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-ppmm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-ppmm-minmax-test f32-ppmm-minmax-test)
+
+  ADD_EXECUTABLE(f16-prelu-test test/f16-prelu.cc)
+  SET_TARGET_PROPERTIES(f16-prelu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-prelu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-prelu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-prelu-test f16-prelu-test)
 
   ADD_EXECUTABLE(f32-prelu-test test/f32-prelu.cc)
   SET_TARGET_PROPERTIES(f32-prelu-test PROPERTIES

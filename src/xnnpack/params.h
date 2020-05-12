@@ -133,6 +133,12 @@ union xnn_f32_gavgpool_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
 };
 
+struct xnn_f16_hswish_params {
+  uint16_t sixth;
+  uint16_t half;
+  uint16_t one;
+};
+
 union xnn_f32_hswish_params {
   struct {
     float sixth;
@@ -1099,6 +1105,12 @@ typedef void (*xnn_univector_ukernel_function)(
     void* y,
     const void* params);
 
+typedef void (*xnn_f16_clamp_ukernel_function)(
+    size_t n,
+    const void* x,
+    void* y,
+    const struct xnn_f16_minmax_params* params);
+
 typedef void (*xnn_f32_clamp_ukernel_function)(
     size_t n,
     const float* x,
@@ -1110,6 +1122,12 @@ typedef void (*xnn_u8_clamp_ukernel_function)(
     const uint8_t* x,
     uint8_t* y,
     const union xnn_u8_minmax_params* params);
+
+typedef void (*xnn_f16_hswish_ukernel_function)(
+    size_t n,
+    const void* x,
+    void* y,
+    const struct xnn_f16_hswish_params* params);
 
 typedef void (*xnn_f32_hswish_ukernel_function)(
     size_t n,
@@ -1220,6 +1238,15 @@ typedef void (*xnn_f32_vmulcaddc_ukernel_function)(
     const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_prelu_ukernel_function)(
+    size_t mr,
+    size_t n,
+    const void* x,
+    size_t x_stride,
+    const void* w,
+    void* y,
+    size_t y_stride);
+
+typedef void (*xnn_f16_prelu_ukernel_function)(
     size_t mr,
     size_t n,
     const void* x,

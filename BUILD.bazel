@@ -920,6 +920,12 @@ NEONV8_UKERNELS = [
 ]
 
 AARCH64_NEONFP16ARITH_UKERNELS = [
+    "src/f16-clamp/gen/neonfp16arith-x16.c",
+    "src/f16-clamp/gen/neonfp16arith-x8.c",
+    "src/f16-hswish/gen/neonfp16arith-x16.c",
+    "src/f16-hswish/gen/neonfp16arith-x8.c",
+    "src/f16-prelu/gen/neonfp16arith-2x16.c",
+    "src/f16-prelu/gen/neonfp16arith-2x8.c",
     "src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x16.c",
     "src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x8.c",
     "src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x16.c",
@@ -2659,6 +2665,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_clamp_test",
+    srcs = [
+        "test/f16-clamp.cc",
+        "test/clamp-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_clamp_test",
     srcs = [
         "test/f32-clamp.cc",
@@ -2801,6 +2816,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_hswish_test",
+    srcs = [
+        "test/f16-hswish.cc",
+        "test/hswish-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_hswish_test",
     srcs = [
         "test/f32-hswish.cc",
@@ -2835,6 +2859,16 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_prelu_test",
+    srcs = [
+        "test/f16-prelu.cc",
+        "test/prelu-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
 
