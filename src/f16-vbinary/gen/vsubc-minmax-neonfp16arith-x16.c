@@ -17,25 +17,25 @@
 
 void xnn_f16_vsubc_minmax_ukernel__neonfp16arith_x16(
     size_t n,
-    const void* restrict a,
-    const void* restrict b,
-    void* restrict y,
+    const void* restrict a_ptr,
+    const void* restrict b_ptr,
+    void* restrict y_ptr,
     const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(__fp16) == 0);
 
-  const __fp16* a0 = a;
-  const __fp16* b0 = b;
-  __fp16* y0 = y;
+  const __fp16* a = a_ptr;
+  const __fp16* b = b_ptr;
+  __fp16* y = y_ptr;
 
   const float16x8_t vy_min = vld1q_dup_f16(&params->min);
   const float16x8_t vy_max = vld1q_dup_f16(&params->max);
 
-  const float16x8_t vb = vld1q_dup_f16(b0);
+  const float16x8_t vb = vld1q_dup_f16(b);
   for (; n >= 16 * sizeof(__fp16); n -= 16 * sizeof(__fp16)) {
-    const float16x8_t va01234567 = vld1q_f16(a0); a0 += 8;
-    const float16x8_t va456789AB = vld1q_f16(a0); a0 += 8;
+    const float16x8_t va01234567 = vld1q_f16(a); a += 8;
+    const float16x8_t va456789AB = vld1q_f16(a); a += 8;
 
     float16x8_t vy01234567 = vsubq_f16(va01234567, vb);
     float16x8_t vy456789AB = vsubq_f16(va456789AB, vb);
@@ -46,19 +46,19 @@ void xnn_f16_vsubc_minmax_ukernel__neonfp16arith_x16(
     vy01234567 = vminq_f16(vy01234567, vy_max);
     vy456789AB = vminq_f16(vy456789AB, vy_max);
 
-    vst1q_f16(y0, vy01234567); y0 += 8;
-    vst1q_f16(y0, vy456789AB); y0 += 8;
+    vst1q_f16(y, vy01234567); y += 8;
+    vst1q_f16(y, vy456789AB); y += 8;
   }
   for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
-    const float16x8_t va01234567 = vld1q_f16(a0); a0 += 8;
+    const float16x8_t va01234567 = vld1q_f16(a); a += 8;
 
     float16x8_t vy01234567 = vsubq_f16(va01234567, vb);
     vy01234567 = vmaxq_f16(vy01234567, vy_min);
     vy01234567 = vminq_f16(vy01234567, vy_max);
-    vst1q_f16(y0, vy01234567); y0 += 8;
+    vst1q_f16(y, vy01234567); y += 8;
   }
   if XNN_UNLIKELY(n != 0) {
-    const float16x8_t va01234567 = vld1q_f16(a0);
+    const float16x8_t va01234567 = vld1q_f16(a);
 
     float16x8_t vy01234567 = vsubq_f16(va01234567, vb);
     vy01234567 = vmaxq_f16(vy01234567, vy_min);
@@ -66,17 +66,17 @@ void xnn_f16_vsubc_minmax_ukernel__neonfp16arith_x16(
 
     float16x4_t vy0123 = vget_low_f16(vy01234567);
     if (n & (4 * sizeof(__fp16))) {
-      vst1_f16(y0, vy0123); y0 += 4;
+      vst1_f16(y, vy0123); y += 4;
       vy0123 = vget_high_f16(vy01234567);
     }
 
     if (n & (2 * sizeof(__fp16))) {
-      vst1_lane_u32(__builtin_assume_aligned(y0, 1), vreinterpret_u32_f16(vy0123), 0); y0 += 2;
+      vst1_lane_u32(__builtin_assume_aligned(y, 1), vreinterpret_u32_f16(vy0123), 0); y += 2;
       vy0123 = vext_f16(vy0123, vy0123, 2);
     }
 
     if (n & (1 * sizeof(__fp16))) {
-      vst1_lane_f16(y0, vy0123, 0);
+      vst1_lane_f16(y, vy0123, 0);
     }
   }
 }
