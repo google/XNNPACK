@@ -32,20 +32,23 @@ void xnn_math_f32_roundne__neon(
     const float32x4_t vabsx = vabsq_f32(vx);
     // Compute bitmask for selection between the value rounded with addition-subtraction trick and the abs(x) value.
     // We use the result of the addition-subtraction trick only on its validity interval, i.e. 0 <= abs(x) < 2**23.
-    // Note: we do vcageq_f32(vmagic_number, vx) instead of vcgeq_f32(vmagic_number, vabsx) to reduce dependency chain.
-    const uint32x4_t vrndmask = vcageq_f32(vmagic_number, vx);
+    // Note: we do vcaltq_f32(vmagic_number, vx) instead of vcltq_f32(vmagic_number, vabsx) to reduce dependency chain.
+    const uint32x4_t vrndmask = vcaltq_f32(vmagic_number, vx);
 
     // Addition-subtraction trick with the magic number to cause rounding to integer for abs(x).
     // Note: the result is valid only for 0 <= abs(x) < 2**23.
+    // Note: addition-subtraction implicitly converts SNaN inputs to QNaNs.
     const float32x4_t vrndabsx = vsubq_f32(vaddq_f32(vabsx, vmagic_number), vmagic_number);
-    // Compute bitmask for the sign of x.
+    // Extract bitmask for the sign of x.
     // The bitmask is 0x00000000 when x is positive (including +0) and 0x80000000 when x is negative (including -0).
     const uint32x4_t vsignx = veorq_u32(vreinterpretq_u32_f32(vabsx), vreinterpretq_u32_f32(vx));
 
     // Combine abs(x) rounded via addition-subtraction trick and the input x value.
-    // For abs(x) < 2**23, the result is abs(x) rounded via addition-subtraction trick with the sign of x.
-    // For abs(x) >= 2**23 and NaN inputs, the result is x itself.
-    const float32x4_t vy = vbslq_f32(vbicq_u32(vrndmask, vsignx), vrndabsx, vx);
+    // For 0.0 <= x < 2**23, the result is abs(x) rounded via addition-subtraction trick.
+    // For -2**23 < x <= -0.0, the result is abs(x) rounded via addition-subtraction trick with the sign of x.
+    // For NaN inputs, the result is x converted to QNaN as a side-effect of addition-subtraction.
+    // For abs(x) >= 2**23, the result is x itself.
+    const float32x4_t vy = vbslq_f32(vorrq_u32(vrndmask, vsignx), vx, vrndabsx);
 
     vst1q_f32(output, vy); output += 4;
   }
