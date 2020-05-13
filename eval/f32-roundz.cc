@@ -1016,7 +1016,7 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDZ__NEON_CVT, positive_snan_to_qnan) {
+  TEST(ROUNDZ__NEON_CVT, DISABLED_positive_snan_to_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
@@ -1034,7 +1034,7 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDZ__NEON_CVT, negative_snan_to_qnan) {
+  TEST(ROUNDZ__NEON_CVT, DISABLED_negative_snan_to_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {

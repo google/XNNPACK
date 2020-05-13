@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include <arm_neon.h>
 
@@ -30,19 +31,17 @@ void xnn_math_f32_roundz__neon_cvt(
     // Convert floating-point value x to integer, with rounding towards zero, and then back to floating-point.
     // Note: the result is valid only for abs(x) < 2**31, but we further restrict its use to 2**23.
     const float32x4_t vrndx = vcvtq_f32_s32(vcvtq_s32_f32(vx));
-    // Extract the sign of the input.
-    // We need the sign to preserve negative zero value, which would otherwise get lost in FP->INT->FP conversion.
-    const uint32x4_t vsignx = vandq_u32(vreinterpretq_u32_f32(vrndx), vsign_mask);
 
-    // Compute bitmask for non-integral input.
-    // The bitmask is set to all ones when x is potentially non-integral, and we round it using FP->INT->FP conversion.
-    const uint32x4_t vrndmask = vcaltq_f32(vx, vintegral_threshold);
+    // Compute bitmask for the bits we want to copy from the rounded x. Other bits will be copied from x.
+    // If abs(x) is below the integral threshold, use all but the sign bit from the rounded x and the sign bit from x.
+    // If x is guaranteed integral or NaN, use all bits from x.
+    const uint32x4_t vrndmask = vbicq_u32(vcaltq_f32(vx, vintegral_threshold), vsign_mask);
 
     // Combine x rounded towardz zero via FP->INT->FP conversion and the input x value.
     // For 0.0 <= x < 2**23, the result is x rounded via FP->INT->FP conversion.
     // For -2**23 < x <= -0.0, the result is abs(x) rounded via FP->INT->FP conversion with the sign of x.
     // For abs(x) >= 2**23 or NaN inputs, the result is x itself.
-    const float32x4_t vy = vbslq_f32(vbicq_u32(vrndmask, vsignx), vrndx, vx);
+    const float32x4_t vy = vbslq_f32(vrndmask, vrndx, vx);
 
     vst1q_f32(output, vy); output += 4;
   }
