@@ -28,8 +28,7 @@
 # A5  v10 v11
 # C   v30 v31
 
-# d8-d15 need to be preserved if used.
-# x19-x30 need to be preserved if used.  x18 is reserved for OS.
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved on iOS.
 
 # A pointers
 #  x3 a0

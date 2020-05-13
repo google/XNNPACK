@@ -29,8 +29,7 @@
 # A5  v10 v11
 # C   v30 v31
 
-# d8-d15 need to be preserved if used.
-# x19-x30 need to be preserved if used.  x18 is reserved for OS.
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved on iOS.
 
 # A pointers
 # x14 a0
@@ -79,7 +78,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a75
         ADD x13, x17, x7         // c3 = c2 + cm_stride
         CSEL x13, x17, x13, LO   //   c3 = c2
 
-        # Load zero, clamping params pointer
+        # Load zero, params pointer
         LDP x12, x8, [sp, 80]
         ADD x7, x13, x7          // c4 = c3 + cm_stride
                                  // if mr <= 4
