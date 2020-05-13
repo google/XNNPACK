@@ -37,7 +37,7 @@ void xnn_math_f32_roundne__scalar_addsub(
 
     // Select between the abs(x) rounded using addition-subtraction trick and the abs(x) value.
     // For abs(x) < 2**23, the result is abs(x) rounded via addition-subtraction trick.
-    // For abs(x) >= 2**23, the result is x itself (already an integer).
+    // For abs(x) >= 2**23, the result is abs(x) itself (already an integer).
     // For NaN inputs, the result is abs(x) converted to QNaN as a side-effect of addition-subtraction.
     const float vabsy = XNN_UNPREDICTABLE(vabsx >= vmagic_number) ? vabsx : vrndabsx;
     // Restore the sign of the rounded value.
