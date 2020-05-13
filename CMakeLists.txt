@@ -347,7 +347,7 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/math/expminus-scalar-lut2048-p1.c
   src/math/expminus-scalar-lut64-p2.c
   src/math/expminus-scalar-p5.c
-  src/math/roundne-scalar.c
+  src/math/roundne-scalar-addsub.c
   src/math/sigmoid-scalar-lut2048-p1-div.c
   src/math/sigmoid-scalar-lut64-p2-div.c
   src/math/sigmoid-scalar-p5-div.c
@@ -503,7 +503,7 @@ SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/psimd-p5-div-x16.c
   src/f32-sigmoid/gen/psimd-p5-div-x20.c
   src/f32-sigmoid/gen/psimd-p5-div-x24.c
-  src/math/roundne-psimd.c
+  src/math/roundne-psimd-addsub.c
   src/math/sigmoid-psimd-p5-div.c)
 
 SET(XNNPACK_NEON_MICROKERNEL_SRCS
@@ -676,7 +676,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/x8-zip/x3-neon.c
   src/x8-zip/x4-neon.c
   src/x8-zip/xm-neon.c
-  src/math/roundne-neon.c
+  src/math/roundne-neon-addsub.c
   src/math/sigmoid-neon-frac-p9-p10-nr1recps.c
   src/math/sigmoid-neon-rr1-lut2048-p1-nr2recps.c
   src/math/sigmoid-neon-rr1-lut64-p2-nr2recps.c
@@ -1071,7 +1071,7 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vmulcaddc/gen/c4-minmax-sse-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-sse-2x.c
   src/x32-packx/x4-sse.c
-  src/math/roundne-sse.c)
+  src/math/roundne-sse-addsub.c)
 
 SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-sse2-c4.c
@@ -1121,7 +1121,7 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/x8-zip/xm-sse2.c
   src/math/exp-sse2-p5.c
   src/math/expminus-sse2-p5.c
-  src/math/roundne-sse2.c
+  src/math/roundne-sse2-cvt.c
   src/math/sigmoid-sse2-p5-div.c
   src/requantization/precise-sse2.c
   src/requantization/fp32-sse2.c

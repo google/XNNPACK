@@ -24,14 +24,14 @@
 constexpr int kBlockSize = 1024;
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(ROUNDNE__SSE, positive_normal) {
+  TEST(ROUNDNE__SSE_ADDSUB, positive_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x00000000); n < UINT32_C(0x4B800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -42,14 +42,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, negative_normal) {
+  TEST(ROUNDNE__SSE_ADDSUB, negative_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x80000000); n < UINT32_C(0xCB800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -60,14 +60,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, positive_integral) {
+  TEST(ROUNDNE__SSE_ADDSUB, positive_integral) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x4B800000); n < UINT32_C(0x7F800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -78,14 +78,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, negative_integral) {
+  TEST(ROUNDNE__SSE_ADDSUB, negative_integral) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0xCB800000); n < UINT32_C(0xFF800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -96,11 +96,11 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, positive_infinity) {
+  TEST(ROUNDNE__SSE_ADDSUB, positive_infinity) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT32_C(0x7F800000));
-    xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[0]));
     ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
       << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[0])
@@ -108,11 +108,11 @@ constexpr int kBlockSize = 1024;
       << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
   }
 
-  TEST(ROUNDNE__SSE, negative_infinity) {
+  TEST(ROUNDNE__SSE_ADDSUB, negative_infinity) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT32_C(0xFF800000));
-    xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[0]));
     ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
       << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[0])
@@ -120,14 +120,14 @@ constexpr int kBlockSize = 1024;
       << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
   }
 
-  TEST(ROUNDNE__SSE, positive_qnan) {
+  TEST(ROUNDNE__SSE_ADDSUB, positive_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7FC00000); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -138,14 +138,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, negative_qnan) {
+  TEST(ROUNDNE__SSE_ADDSUB, negative_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7FC00000); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | (n + i));
       }
-      xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -156,14 +156,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, positive_snan) {
+  TEST(ROUNDNE__SSE_ADDSUB, positive_snan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output & UINT32_C(0xFFBFFFFF), fp32_to_bits(outputs[i]) & UINT32_C(0xFFBFFFFF))
@@ -174,14 +174,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, negative_snan) {
+  TEST(ROUNDNE__SSE_ADDSUB, negative_snan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output & UINT32_C(0xFFBFFFFF), fp32_to_bits(outputs[i]) & UINT32_C(0xFFBFFFFF))
@@ -192,14 +192,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, positive_snan_to_qnan) {
+  TEST(ROUNDNE__SSE_ADDSUB, positive_snan_to_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -210,14 +210,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE, negative_snan_to_qnan) {
+  TEST(ROUNDNE__SSE_ADDSUB, negative_snan_to_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__sse(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -230,14 +230,14 @@ constexpr int kBlockSize = 1024;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(ROUNDNE__SSE2, positive_normal) {
+  TEST(ROUNDNE__SSE2_CVT, positive_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x00000000); n < UINT32_C(0x4B800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -248,14 +248,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE2, negative_normal) {
+  TEST(ROUNDNE__SSE2_CVT, negative_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x80000000); n < UINT32_C(0xCB800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -266,14 +266,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE2, positive_integral) {
+  TEST(ROUNDNE__SSE2_CVT, positive_integral) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x4B800000); n < UINT32_C(0x7F800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -284,14 +284,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE2, negative_integral) {
+  TEST(ROUNDNE__SSE2_CVT, negative_integral) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0xCB800000); n < UINT32_C(0xFF800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -302,11 +302,11 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE2, positive_infinity) {
+  TEST(ROUNDNE__SSE2_CVT, positive_infinity) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT32_C(0x7F800000));
-    xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[0]));
     ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
       << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[0])
@@ -314,11 +314,11 @@ constexpr int kBlockSize = 1024;
       << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
   }
 
-  TEST(ROUNDNE__SSE2, negative_infinity) {
+  TEST(ROUNDNE__SSE2_CVT, negative_infinity) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT32_C(0xFF800000));
-    xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[0]));
     ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
       << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[0])
@@ -326,14 +326,14 @@ constexpr int kBlockSize = 1024;
       << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
   }
 
-  TEST(ROUNDNE__SSE2, positive_qnan) {
+  TEST(ROUNDNE__SSE2_CVT, positive_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7FC00000); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -344,14 +344,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE2, negative_qnan) {
+  TEST(ROUNDNE__SSE2_CVT, negative_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7FC00000); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | (n + i));
       }
-      xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -362,14 +362,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE2, positive_snan) {
+  TEST(ROUNDNE__SSE2_CVT, positive_snan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output & UINT32_C(0xFFBFFFFF), fp32_to_bits(outputs[i]) & UINT32_C(0xFFBFFFFF))
@@ -380,14 +380,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE2, negative_snan) {
+  TEST(ROUNDNE__SSE2_CVT, negative_snan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output & UINT32_C(0xFFBFFFFF), fp32_to_bits(outputs[i]) & UINT32_C(0xFFBFFFFF))
@@ -398,14 +398,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE2, DISABLED_positive_snan_to_qnan) {
+  TEST(ROUNDNE__SSE2_CVT, DISABLED_positive_snan_to_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -416,14 +416,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__SSE2, DISABLED_negative_snan_to_qnan) {
+  TEST(ROUNDNE__SSE2_CVT, DISABLED_negative_snan_to_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__sse2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__sse2_cvt(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -642,14 +642,14 @@ constexpr int kBlockSize = 1024;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(ROUNDNE__NEON, positive_normal) {
+  TEST(ROUNDNE__NEON_ADDSUB, positive_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x00000000); n < UINT32_C(0x4B800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -660,14 +660,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__NEON, negative_normal) {
+  TEST(ROUNDNE__NEON_ADDSUB, negative_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x80000000); n < UINT32_C(0xCB800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -678,14 +678,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__NEON, positive_integral) {
+  TEST(ROUNDNE__NEON_ADDSUB, positive_integral) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x4B800000); n < UINT32_C(0x7F800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -696,14 +696,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__NEON, negative_integral) {
+  TEST(ROUNDNE__NEON_ADDSUB, negative_integral) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0xCB800000); n < UINT32_C(0xFF800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -714,11 +714,11 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__NEON, positive_infinity) {
+  TEST(ROUNDNE__NEON_ADDSUB, positive_infinity) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT32_C(0x7F800000));
-    xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[0]));
     ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
       << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[0])
@@ -726,11 +726,11 @@ constexpr int kBlockSize = 1024;
       << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
   }
 
-  TEST(ROUNDNE__NEON, negative_infinity) {
+  TEST(ROUNDNE__NEON_ADDSUB, negative_infinity) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT32_C(0xFF800000));
-    xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[0]));
     ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
       << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[0])
@@ -738,14 +738,14 @@ constexpr int kBlockSize = 1024;
       << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
   }
 
-  TEST(ROUNDNE__NEON, positive_qnan) {
+  TEST(ROUNDNE__NEON_ADDSUB, positive_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7FC00000); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -756,14 +756,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__NEON, negative_qnan) {
+  TEST(ROUNDNE__NEON_ADDSUB, negative_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7FC00000); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | (n + i));
       }
-      xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -774,14 +774,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__NEON, positive_snan) {
+  TEST(ROUNDNE__NEON_ADDSUB, positive_snan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output & UINT32_C(0xFFBFFFFF), fp32_to_bits(outputs[i]) & UINT32_C(0xFFBFFFFF))
@@ -792,14 +792,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__NEON, negative_snan) {
+  TEST(ROUNDNE__NEON_ADDSUB, negative_snan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output & UINT32_C(0xFFBFFFFF), fp32_to_bits(outputs[i]) & UINT32_C(0xFFBFFFFF))
@@ -810,14 +810,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__NEON, positive_snan_to_qnan) {
+  TEST(ROUNDNE__NEON_ADDSUB, positive_snan_to_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -828,14 +828,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__NEON, negative_snan_to_qnan) {
+  TEST(ROUNDNE__NEON_ADDSUB, negative_snan_to_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__neon(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__neon_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1054,14 +1054,14 @@ constexpr int kBlockSize = 1024;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  TEST(ROUNDNE__PSIMD, positive_normal) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, positive_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x00000000); n < UINT32_C(0x4B800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1072,14 +1072,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__PSIMD, negative_normal) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, negative_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x80000000); n < UINT32_C(0xCB800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1090,14 +1090,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__PSIMD, positive_integral) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, positive_integral) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x4B800000); n < UINT32_C(0x7F800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1108,14 +1108,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__PSIMD, negative_integral) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, negative_integral) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0xCB800000); n < UINT32_C(0xFF800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1126,11 +1126,11 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__PSIMD, positive_infinity) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, positive_infinity) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT32_C(0x7F800000));
-    xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[0]));
     ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
       << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[0])
@@ -1138,11 +1138,11 @@ constexpr int kBlockSize = 1024;
       << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
   }
 
-  TEST(ROUNDNE__PSIMD, negative_infinity) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, negative_infinity) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT32_C(0xFF800000));
-    xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[0]));
     ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
       << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[0])
@@ -1150,14 +1150,14 @@ constexpr int kBlockSize = 1024;
       << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
   }
 
-  TEST(ROUNDNE__PSIMD, positive_qnan) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, positive_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7FC00000); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(n + i);
       }
-      xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1168,14 +1168,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__PSIMD, negative_qnan) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, negative_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7FC00000); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | (n + i));
       }
-      xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1186,14 +1186,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__PSIMD, positive_snan) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, positive_snan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output & UINT32_C(0xFFBFFFFF), fp32_to_bits(outputs[i]) & UINT32_C(0xFFBFFFFF))
@@ -1204,14 +1204,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__PSIMD, negative_snan) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, negative_snan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output & UINT32_C(0xFFBFFFFF), fp32_to_bits(outputs[i]) & UINT32_C(0xFFBFFFFF))
@@ -1222,14 +1222,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__PSIMD, positive_snan_to_qnan) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, positive_snan_to_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1240,14 +1240,14 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(ROUNDNE__PSIMD, negative_snan_to_qnan) {
+  TEST(ROUNDNE__PSIMD_ADDSUB, negative_snan_to_qnan) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
       }
-      xnn_math_f32_roundne__psimd(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_roundne__psimd_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
         ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1259,14 +1259,14 @@ constexpr int kBlockSize = 1024;
   }
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
-TEST(ROUNDNE__SCALAR, positive_normal) {
+TEST(ROUNDNE__SCALAR_ADDSUB, positive_normal) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x00000000); n < UINT32_C(0x4B800000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
       inputs[i] = fp32_from_bits(n + i);
     }
-    xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
       ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1277,14 +1277,14 @@ TEST(ROUNDNE__SCALAR, positive_normal) {
   }
 }
 
-TEST(ROUNDNE__SCALAR, negative_normal) {
+TEST(ROUNDNE__SCALAR_ADDSUB, negative_normal) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x80000000); n < UINT32_C(0xCB800000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
       inputs[i] = fp32_from_bits(n + i);
     }
-    xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
       ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1295,14 +1295,14 @@ TEST(ROUNDNE__SCALAR, negative_normal) {
   }
 }
 
-TEST(ROUNDNE__SCALAR, positive_integral) {
+TEST(ROUNDNE__SCALAR_ADDSUB, positive_integral) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x4B800000); n < UINT32_C(0x7F800000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
       inputs[i] = fp32_from_bits(n + i);
     }
-    xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
       ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1313,14 +1313,14 @@ TEST(ROUNDNE__SCALAR, positive_integral) {
   }
 }
 
-TEST(ROUNDNE__SCALAR, negative_integral) {
+TEST(ROUNDNE__SCALAR_ADDSUB, negative_integral) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0xCB800000); n < UINT32_C(0xFF800000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
       inputs[i] = fp32_from_bits(n + i);
     }
-    xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
       ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1331,11 +1331,11 @@ TEST(ROUNDNE__SCALAR, negative_integral) {
   }
 }
 
-TEST(ROUNDNE__SCALAR, positive_infinity) {
+TEST(ROUNDNE__SCALAR_ADDSUB, positive_infinity) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   std::fill(inputs.begin(), inputs.end(), UINT32_C(0x7F800000));
-  xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+  xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
   const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[0]));
   ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
     << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[0])
@@ -1343,11 +1343,11 @@ TEST(ROUNDNE__SCALAR, positive_infinity) {
     << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
 }
 
-TEST(ROUNDNE__SCALAR, negative_infinity) {
+TEST(ROUNDNE__SCALAR_ADDSUB, negative_infinity) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   std::fill(inputs.begin(), inputs.end(), UINT32_C(0xFF800000));
-  xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+  xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
   const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[0]));
   ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
     << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[0])
@@ -1355,14 +1355,14 @@ TEST(ROUNDNE__SCALAR, negative_infinity) {
     << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
 }
 
-TEST(ROUNDNE__SCALAR, positive_qnan) {
+TEST(ROUNDNE__SCALAR_ADDSUB, positive_qnan) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7FC00000); n < UINT32_C(0x80000000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
       inputs[i] = fp32_from_bits(n + i);
     }
-    xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
       ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1373,14 +1373,14 @@ TEST(ROUNDNE__SCALAR, positive_qnan) {
   }
 }
 
-TEST(ROUNDNE__SCALAR, negative_qnan) {
+TEST(ROUNDNE__SCALAR_ADDSUB, negative_qnan) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7FC00000); n < UINT32_C(0x80000000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
       inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | (n + i));
     }
-    xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
       ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1391,14 +1391,14 @@ TEST(ROUNDNE__SCALAR, negative_qnan) {
   }
 }
 
-TEST(ROUNDNE__SCALAR, positive_snan) {
+TEST(ROUNDNE__SCALAR_ADDSUB, positive_snan) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
       inputs[i] = fp32_from_bits(std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
     }
-    xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
       ASSERT_EQ(reference_output & UINT32_C(0xFFBFFFFF), fp32_to_bits(outputs[i]) & UINT32_C(0xFFBFFFFF))
@@ -1409,14 +1409,14 @@ TEST(ROUNDNE__SCALAR, positive_snan) {
   }
 }
 
-TEST(ROUNDNE__SCALAR, negative_snan) {
+TEST(ROUNDNE__SCALAR_ADDSUB, negative_snan) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
       inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
     }
-    xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
       ASSERT_EQ(reference_output & UINT32_C(0xFFBFFFFF), fp32_to_bits(outputs[i]) & UINT32_C(0xFFBFFFFF))
@@ -1427,14 +1427,14 @@ TEST(ROUNDNE__SCALAR, negative_snan) {
   }
 }
 
-TEST(ROUNDNE__SCALAR, positive_snan_to_qnan) {
+TEST(ROUNDNE__SCALAR_ADDSUB, positive_snan_to_qnan) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
       inputs[i] = fp32_from_bits(std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
     }
-    xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
       ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
@@ -1445,14 +1445,14 @@ TEST(ROUNDNE__SCALAR, positive_snan_to_qnan) {
   }
 }
 
-TEST(ROUNDNE__SCALAR, negative_snan_to_qnan) {
+TEST(ROUNDNE__SCALAR_ADDSUB, negative_snan_to_qnan) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7F800000); n < UINT32_C(0x7FC00000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
       inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::max<uint32_t>(n + i, UINT32_C(0x7F800001)));
     }
-    xnn_math_f32_roundne__scalar(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    xnn_math_f32_roundne__scalar_addsub(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       const uint32_t reference_output = fp32_to_bits(std::nearbyint(inputs[i]));
       ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))

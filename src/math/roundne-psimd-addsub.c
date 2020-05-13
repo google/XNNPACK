@@ -12,7 +12,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_roundne__psimd(
+void xnn_math_f32_roundne__psimd_addsub(
     size_t n,
     const float* input,
     float* output)

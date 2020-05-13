@@ -36,13 +36,13 @@ typedef void (*xnn_f32_ext_unary_math_function)(
     float* output_mantissa,                          \
     float* output_exponent);
 
-DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__neon)
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__neon_addsub)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__neonv8)
-DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__sse)
-DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__sse2)
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__sse_addsub)
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__sse2_cvt)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__sse41)
-DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__psimd)
-DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__scalar)
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__psimd_addsub)
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__scalar_addsub)
 
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__neonfma_lut64_p2)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__neonfma_p5)

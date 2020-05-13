@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_roundne__sse2(
+void xnn_math_f32_roundne__sse2_cvt(
     size_t n,
     const float* input,
     float* output)
