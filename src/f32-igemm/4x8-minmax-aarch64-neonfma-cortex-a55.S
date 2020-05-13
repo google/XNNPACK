@@ -86,7 +86,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         // Save x19, d12-d15 on stack
         STP d12, d13, [sp, -48]!
         STP d14, d15, [sp, 16]
-        STP x19, x19, [sp, 32]
+        STR x19,      [sp, 32]
 
 0:
         # Load initial bias from w into accumulators
@@ -116,7 +116,6 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         # Load next 4 A pointers
         LDP x13, x14, [x4], 16
         LDP x15, x8, [x4], 16
-
 
         CMP x13, x12            // if a0 == zero
         ADD x13, x13, x11       // a0 += a_offset
