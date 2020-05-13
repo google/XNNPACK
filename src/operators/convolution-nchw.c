@@ -650,7 +650,7 @@ static enum xnn_status setup_convolution2d_nchw(
     }
     case xnn_ukernel_type_dwconv:
     {
-      const size_t zero_size = (input_width << log2_input_element_size) + XNN_EXTRA_BYTES;
+      const size_t zero_size = (input_width << log2_input_element_size) + 2 * XNN_EXTRA_BYTES;
       void* zero_buffer = xnn_reallocate_memory(convolution_op->zero_buffer, zero_size);
       if (zero_buffer == NULL) {
         xnn_log_error("failed to allocate %zu bytes for zero padding", sizeof(struct xnn_operator));
