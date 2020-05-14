@@ -101,10 +101,10 @@ enum xnn_status xnn_create_runtime_v2(
         break;
       case xnn_node_type_argmax_pooling_2d:
         status = xnn_create_argmax_pooling2d_nhwc_f32(
-          node->params.pooling_2d.input_padding_top,
-          node->params.pooling_2d.input_padding_right,
-          node->params.pooling_2d.input_padding_bottom,
-          node->params.pooling_2d.input_padding_left,
+          node->params.pooling_2d.padding_top,
+          node->params.pooling_2d.padding_right,
+          node->params.pooling_2d.padding_bottom,
+          node->params.pooling_2d.padding_left,
           node->params.pooling_2d.pooling_height,
           node->params.pooling_2d.pooling_width,
           values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
@@ -126,10 +126,10 @@ enum xnn_status xnn_create_runtime_v2(
         break;
       case xnn_node_type_average_pooling_2d:
         status = xnn_create_average_pooling2d_nhwc_f32(
-          node->params.pooling_2d.input_padding_top,
-          node->params.pooling_2d.input_padding_right,
-          node->params.pooling_2d.input_padding_bottom,
-          node->params.pooling_2d.input_padding_left,
+          node->params.pooling_2d.padding_top,
+          node->params.pooling_2d.padding_right,
+          node->params.pooling_2d.padding_bottom,
+          node->params.pooling_2d.padding_left,
           node->params.pooling_2d.pooling_height,
           node->params.pooling_2d.pooling_width,
           node->params.pooling_2d.stride_height,
@@ -304,10 +304,10 @@ enum xnn_status xnn_create_runtime_v2(
         break;
       case xnn_node_type_max_pooling_2d:
         status = xnn_create_max_pooling2d_nhwc_f32(
-          node->params.pooling_2d.input_padding_top,
-          node->params.pooling_2d.input_padding_right,
-          node->params.pooling_2d.input_padding_bottom,
-          node->params.pooling_2d.input_padding_left,
+          node->params.pooling_2d.padding_top,
+          node->params.pooling_2d.padding_right,
+          node->params.pooling_2d.padding_bottom,
+          node->params.pooling_2d.padding_left,
           node->params.pooling_2d.pooling_height,
           node->params.pooling_2d.pooling_width,
           node->params.pooling_2d.stride_height,
@@ -392,10 +392,10 @@ enum xnn_status xnn_create_runtime_v2(
         break;
       case xnn_node_type_unpooling_2d:
         status = xnn_create_unpooling2d_nhwc_x32(
-          node->params.pooling_2d.input_padding_top,
-          node->params.pooling_2d.input_padding_right,
-          node->params.pooling_2d.input_padding_bottom,
-          node->params.pooling_2d.input_padding_left,
+          node->params.pooling_2d.padding_top,
+          node->params.pooling_2d.padding_right,
+          node->params.pooling_2d.padding_bottom,
+          node->params.pooling_2d.padding_left,
           node->params.pooling_2d.pooling_height,
           node->params.pooling_2d.pooling_width,
           values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,

@@ -126,10 +126,10 @@ struct xnn_node {
       size_t input_channels;
     } depthwise_convolution_2d;
     struct {
-      uint32_t input_padding_top;
-      uint32_t input_padding_right;
-      uint32_t input_padding_bottom;
-      uint32_t input_padding_left;
+      uint32_t padding_top;
+      uint32_t padding_right;
+      uint32_t padding_bottom;
+      uint32_t padding_left;
       uint32_t pooling_height;
       uint32_t pooling_width;
       uint32_t stride_height;

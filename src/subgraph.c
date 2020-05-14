@@ -739,10 +739,10 @@ enum xnn_status xnn_define_average_pooling_2d(
   }
 
   node->type = xnn_node_type_average_pooling_2d;
-  node->params.pooling_2d.input_padding_top = input_padding_top;
-  node->params.pooling_2d.input_padding_right = input_padding_right;
-  node->params.pooling_2d.input_padding_bottom = input_padding_bottom;
-  node->params.pooling_2d.input_padding_left = input_padding_left;
+  node->params.pooling_2d.padding_top = input_padding_top;
+  node->params.pooling_2d.padding_right = input_padding_right;
+  node->params.pooling_2d.padding_bottom = input_padding_bottom;
+  node->params.pooling_2d.padding_left = input_padding_left;
   node->params.pooling_2d.pooling_height = pooling_height;
   node->params.pooling_2d.pooling_width = pooling_width;
   node->params.pooling_2d.stride_height = stride_height;
@@ -862,10 +862,10 @@ enum xnn_status xnn_define_max_pooling_2d(
   }
 
   node->type = xnn_node_type_max_pooling_2d;
-  node->params.pooling_2d.input_padding_top = input_padding_top;
-  node->params.pooling_2d.input_padding_right = input_padding_right;
-  node->params.pooling_2d.input_padding_bottom = input_padding_bottom;
-  node->params.pooling_2d.input_padding_left = input_padding_left;
+  node->params.pooling_2d.padding_top = input_padding_top;
+  node->params.pooling_2d.padding_right = input_padding_right;
+  node->params.pooling_2d.padding_bottom = input_padding_bottom;
+  node->params.pooling_2d.padding_left = input_padding_left;
   node->params.pooling_2d.pooling_height = pooling_height;
   node->params.pooling_2d.pooling_width = pooling_width;
   node->params.pooling_2d.stride_height = stride_height;
@@ -943,10 +943,10 @@ enum xnn_status xnn_define_argmax_pooling_2d(
   }
 
   node->type = xnn_node_type_argmax_pooling_2d;
-  node->params.pooling_2d.input_padding_top = input_padding_top;
-  node->params.pooling_2d.input_padding_right = input_padding_right;
-  node->params.pooling_2d.input_padding_bottom = input_padding_bottom;
-  node->params.pooling_2d.input_padding_left = input_padding_left;
+  node->params.pooling_2d.padding_top = input_padding_top;
+  node->params.pooling_2d.padding_right = input_padding_right;
+  node->params.pooling_2d.padding_bottom = input_padding_bottom;
+  node->params.pooling_2d.padding_left = input_padding_left;
   node->params.pooling_2d.pooling_height = pooling_height;
   node->params.pooling_2d.pooling_width = pooling_width;
   node->num_inputs = 1;
@@ -1019,10 +1019,10 @@ enum xnn_status xnn_define_unpooling_2d(
   }
 
   node->type = xnn_node_type_unpooling_2d;
-  node->params.pooling_2d.input_padding_top = padding_top;
-  node->params.pooling_2d.input_padding_right = padding_right;
-  node->params.pooling_2d.input_padding_bottom = padding_bottom;
-  node->params.pooling_2d.input_padding_left = padding_left;
+  node->params.pooling_2d.padding_top = padding_top;
+  node->params.pooling_2d.padding_right = padding_right;
+  node->params.pooling_2d.padding_bottom = padding_bottom;
+  node->params.pooling_2d.padding_left = padding_left;
   node->params.pooling_2d.pooling_height = pooling_height;
   node->params.pooling_2d.pooling_width = pooling_width;
   node->num_inputs = 2;
