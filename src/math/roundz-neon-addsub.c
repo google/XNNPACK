@@ -28,7 +28,7 @@ void xnn_math_f32_roundz__neon_addsub(
   const uint32x4_t vsign_mask = vmovq_n_u32(UINT32_C(0x80000000));
   // Unit constant to decrement absolute values rounded "wrong way" (i.e. away from zero) in the round-to-nearest-even
   // operation.
-  const float32x4_t vone = vmovq_n_f32(1.0f);
+  const uint32x4_t vone = vmovq_n_u32(UINT32_C(0x3F800000));
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     const float32x4_t vx = vld1q_f32(input); input += 4;
@@ -49,8 +49,7 @@ void xnn_math_f32_roundz__neon_addsub(
 
     // Compute adjustment to be subtracted from the rounded-to-nearest-even abs(x) value.
     // Adjustment is one if the rounded value is greater than the abs(x) value and zero otherwise (including NaN input).
-    const float32x4_t vadjustment =
-      vreinterpretq_f32_u32(vandq_u32(vone, vreinterpretq_u32_f32(vcgtq_f32(vrndabsx, vabsx))));
+    const float32x4_t vadjustment = vreinterpretq_f32_u32(vandq_u32(vone, vcgtq_f32(vrndabsx, vabsx)));
     // Adjust abs(x) rounded to nearest-even via the addition-subtraction trick to get abs(x) rounded down.
     // Note: subtraction implicitly converts SNaN inputs to QNaNs.
     const float32x4_t vflrabsx = vsubq_f32(vrndabsx, vadjustment);
