@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_roundz__sse2_cvt(
+void xnn_math_f32_roundd__sse2_cvt(
     size_t n,
     const float* input,
     float* output)
@@ -22,6 +22,8 @@ void xnn_math_f32_roundz__sse2_cvt(
   // 1. Set the bit corresponding to the sign of a floating-point number in a bitmask.
   // 2. Check if the input to CVTTPS2DQ (_mm_cvttps_epi32) is out-of-range, which results in 0x80000000 output.
   const __m128i vmagic = _mm_set1_epi32(0x80000000);
+  // Unit constant to decrement results rounded "wrong way" (i.e. up) in the round-towards-zero operation.
+  const __m128 vone = _mm_set1_ps(1.0f);
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     const __m128 vx = _mm_load_ps(input);
@@ -38,12 +40,16 @@ void xnn_math_f32_roundz__sse2_cvt(
 
     // Convert integer back to floating-point.
     // We binary OR the result with the sign of x to restore the sign of negative zero.
-    const __m128 vrndx = _mm_cvtepi32_ps(vintx);
+    const __m128 vprerndx = _mm_cvtepi32_ps(vintx);
 
     // Combine x rounded via conversion to integer and the initial x value.
     // For -2**31 < x < 2**31, the result is x rounded via conversion to integer.
     // Otherwise (including NaN inputs), the result is x itself.
-    const __m128 vy = _mm_or_ps(_mm_and_ps(vx, vrndmask), _mm_andnot_ps(vrndmask, vrndx));
+    const __m128 vrndx = _mm_or_ps(_mm_and_ps(vx, vrndmask), _mm_andnot_ps(vrndmask, vprerndx));
+
+    // Adjust x rounded towards zero to get x rounded down.
+    // Note: subtraction implicitly converts SNaN inputs to QNaNs.
+    const __m128 vy = _mm_sub_ps(vrndx, _mm_and_ps(_mm_cmpgt_ps(vrndx, vx), vone));
 
     _mm_store_ps(output, vy);
     output += 4;

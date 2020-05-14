@@ -348,6 +348,10 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/math/expminus-scalar-lut64-p2.c
   src/math/expminus-scalar-p5.c
   src/math/roundne-scalar-addsub.c
+  src/math/roundd-scalar-addsub.c
+  src/math/roundd-scalar-cvt.c
+  src/math/roundu-scalar-addsub.c
+  src/math/roundu-scalar-cvt.c
   src/math/roundz-scalar-addsub.c
   src/math/roundz-scalar-cvt.c
   src/math/sigmoid-scalar-lut2048-p1-div.c
@@ -506,6 +510,8 @@ SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/psimd-p5-div-x20.c
   src/f32-sigmoid/gen/psimd-p5-div-x24.c
   src/math/roundne-psimd-addsub.c
+  src/math/roundd-psimd-addsub.c
+  src/math/roundu-psimd-addsub.c
   src/math/roundz-psimd-addsub.c
   src/math/sigmoid-psimd-p5-div.c)
 
@@ -680,6 +686,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/x8-zip/x4-neon.c
   src/x8-zip/xm-neon.c
   src/math/roundne-neon-addsub.c
+  src/math/roundd-neon-addsub.c
+  src/math/roundd-neon-cvt.c
+  src/math/roundu-neon-addsub.c
+  src/math/roundu-neon-cvt.c
   src/math/roundz-neon-addsub.c
   src/math/roundz-neon-cvt.c
   src/math/sigmoid-neon-frac-p9-p10-nr1recps.c
@@ -846,6 +856,8 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
 
 SET(XNNPACK_NEONV8_MICROKERNEL_SRCS
   src/math/roundne-neonv8.c
+  src/math/roundd-neonv8.c
+  src/math/roundu-neonv8.c
   src/math/roundz-neonv8.c)
 
 SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
@@ -1078,6 +1090,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vmulcaddc/gen/c8-minmax-sse-2x.c
   src/x32-packx/x4-sse.c
   src/math/roundne-sse-addsub.c
+  src/math/roundd-sse-addsub.c
+  src/math/roundu-sse-addsub.c
   src/math/roundz-sse-addsub.c)
 
 SET(XNNPACK_SSE2_MICROKERNEL_SRCS
@@ -1129,6 +1143,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/math/exp-sse2-p5.c
   src/math/expminus-sse2-p5.c
   src/math/roundne-sse2-cvt.c
+  src/math/roundd-sse2-cvt.c
+  src/math/roundu-sse2-cvt.c
   src/math/roundz-sse2-cvt.c
   src/math/sigmoid-sse2-p5-div.c
   src/requantization/precise-sse2.c
@@ -1151,6 +1167,8 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/sse41-p5-div-x20.c
   src/f32-sigmoid/gen/sse41-p5-div-x24.c
   src/math/roundne-sse41.c
+  src/math/roundd-sse41.c
+  src/math/roundu-sse41.c
   src/math/roundz-sse41.c
   src/requantization/precise-sse4.c
   src/requantization/q31-sse4.c
@@ -2903,6 +2921,22 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(f32-roundne-eval PRIVATE src)
   TARGET_LINK_LIBRARIES(f32-roundne-eval PRIVATE XNNPACK fp16 gtest gtest_main)
+
+  ADD_EXECUTABLE(f32-roundd-eval eval/f32-roundd.cc)
+  SET_TARGET_PROPERTIES(f32-roundd-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-roundd-eval PRIVATE src)
+  TARGET_LINK_LIBRARIES(f32-roundd-eval PRIVATE XNNPACK fp16 gtest gtest_main)
+
+  ADD_EXECUTABLE(f32-roundu-eval eval/f32-roundu.cc)
+  SET_TARGET_PROPERTIES(f32-roundu-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-roundu-eval PRIVATE src)
+  TARGET_LINK_LIBRARIES(f32-roundu-eval PRIVATE XNNPACK fp16 gtest gtest_main)
 
   ADD_EXECUTABLE(f32-roundz-eval eval/f32-roundz.cc)
   SET_TARGET_PROPERTIES(f32-roundz-eval PROPERTIES
