@@ -13,6 +13,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
+#include <xnnpack/memory-planner.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
@@ -427,7 +428,9 @@ enum xnn_status xnn_create_runtime_v2(
   }
   runtime->num_blobs = subgraph->num_values;
 
-  size_t buffer_size = 0;
+  struct xnn_value_allocation_tracker mem_alloc_tracker;
+  xnn_init_value_allocation_tracker(&mem_alloc_tracker, subgraph);
+
   for (uint32_t i = 0; i < subgraph->num_values; i++) {
     const struct xnn_value* value = &subgraph->values[i];
     struct xnn_blob* blob = &runtime->blobs[i];
@@ -437,7 +440,7 @@ enum xnn_status xnn_create_runtime_v2(
       if (blob->data == NULL) {
         if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
           // Value is purely internal to the runtime, and must be allocated in its workspace.
-          buffer_size = round_up_po2(buffer_size + blob->size, XNN_EXTRA_BYTES);
+          xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, round_up_po2(blob->size, XNN_EXTRA_BYTES));
         } else {
           // Value is non-static and external to the runtime: must be specified via a call to xnn_setup_runtime.
           blob->external = true;
@@ -445,25 +448,25 @@ enum xnn_status xnn_create_runtime_v2(
       }
     }
   }
+  xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
 
-  runtime->workspace = xnn_allocate_simd_memory(buffer_size);
+  runtime->workspace = xnn_allocate_simd_memory(mem_alloc_tracker.mem_arena_size);
   if (runtime->workspace == NULL) {
-    xnn_log_error("failed to allocate %zu bytes to runtime workspace", buffer_size);
+    xnn_log_error("failed to allocate %zu bytes to runtime workspace", mem_alloc_tracker.mem_arena_size);
+    xnn_release_value_allocation_tracker(&mem_alloc_tracker);
     goto error;
   }
-
-  size_t buffer_offset = 0;
   for (size_t i = 0; i < subgraph->num_values; i++) {
     const struct xnn_value* value = &subgraph->values[i];
     struct xnn_blob* blob = &runtime->blobs[i];
     if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
       if (value->data == NULL && !blob->external) {
         // Value is purely internal to the runtime, allocate it in the workspace.
-        blob->data = (void*) ((uintptr_t) runtime->workspace + buffer_offset);
-        buffer_offset = round_up_po2(buffer_offset + blob->size, XNN_EXTRA_BYTES);
+        blob->data = (void*) ((uintptr_t) runtime->workspace + mem_alloc_tracker.usage[i].alloc_offset);
       }
     }
   }
+  xnn_release_value_allocation_tracker(&mem_alloc_tracker);
 
   runtime->threadpool = threadpool;
 

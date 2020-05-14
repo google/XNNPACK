@@ -1695,6 +1695,7 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/im2col.h",
     "src/xnnpack/indirection.h",
     "src/xnnpack/math-stubs.h",
+    "src/xnnpack/memory-planner.h",
     "src/xnnpack/operator.h",
     "src/xnnpack/pack.h",
     "src/xnnpack/params-init.h",
@@ -2093,6 +2094,22 @@ xnnpack_cc_library(
     ],
 )
 
+xnnpack_cc_library(
+    name = "memory_planner",
+    srcs = ["src/memory-planner.c"],
+    hdrs = INTERNAL_HDRS,
+    defines = select({
+        ":xnn_enable_memopt_explicit_true": ["XNN_ENABLE_MEMOPT=1"],
+        ":xnn_enable_memopt_explicit_false": ["XNN_ENABLE_MEMOPT=0"],
+        "//conditions:default": ["XNN_ENABLE_MEMOPT=1"],
+    }),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        "@pthreadpool",
+    ],
+)
+
 cc_library(
     name = "enable_assembly",
     defines = select({
@@ -2155,6 +2172,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":enable_assembly",
+        ":memory_planner",
         ":ukernels",
         ":operator_run",
         ":operators",
@@ -3696,6 +3714,19 @@ xnnpack_unit_test(
     deps = OPERATOR_TEST_DEPS,
 )
 
+############################### Misc unit tests ###############################
+
+xnnpack_unit_test(
+    name = "memory_planner_test",
+    srcs = [
+        "test/memory-planner-test.cc",
+    ],
+    deps = [
+        ":XNNPACK",
+        ":memory_planner",
+    ],
+)
+
 ############################# Build configurations #############################
 
 # Enables usage of assembly kernels.
@@ -3714,6 +3745,18 @@ config_setting(
 config_setting(
     name = "xnn_enable_hmp_explicit_false",
     define_values = {"xnn_enable_hmp": "false"},
+)
+
+# Enable usage of optimized memory allocation
+config_setting(
+    name = "xnn_enable_memopt_explicit_true",
+    define_values = {"xnnpack_enable_memopt": "true"},
+)
+
+# Disable usage of optimized memory allocation
+config_setting(
+    name = "xnn_enable_memopt_explicit_false",
+    define_values = {"xnnpack_enable_memopt": "false"},
 )
 
 # Builds with -c dbg
