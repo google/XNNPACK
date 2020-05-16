@@ -900,6 +900,7 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/6x8-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/6x8-minmax-neonfma-lane-ld128.c
+  src/f32-conv-hwc/3x3s2p0p1c3x4-neonfma-2x2.c
   src/f32-conv-hwc/3x3s2p1c3x4-neonfma-2x2.c
   src/f32-conv-hwc/3x3s2p1c3x8-neonfma-2x2.c
   src/f32-conv-hwc2spchw/3x3s2p1c3x4-neonfma-2x2.c

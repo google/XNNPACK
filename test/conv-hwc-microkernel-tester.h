@@ -244,20 +244,14 @@ public:
 
   inline size_t output_height() const {
     const size_t padded_input_height = padding_top() + input_height() + padding_bottom();
-    if (padded_input_height < kernel_height()) {
-      return 0;
-    } else {
-      return (padded_input_height - kernel_height()) / subsampling_height() + 1;
-    }
+    return (std::max<size_t>(padded_input_height + subsampling_height(), kernel_height()) - kernel_height())
+      / subsampling_height();
   }
 
   inline size_t output_width() const {
     const size_t padded_input_width = padding_left() + input_width() + padding_right();
-    if (padded_input_width < kernel_width()) {
-      return 0;
-    } else {
-      return (padded_input_width - kernel_width()) / subsampling_width() + 1;
-    }
+    return (std::max<size_t>(padded_input_width + subsampling_width(), kernel_width()) - kernel_width())
+      / subsampling_width();
   }
 
   inline ConvHWCMicrokernelTester& qmin(uint8_t qmin) {
