@@ -385,7 +385,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_without_bias) {
     .TestNCHWxF32();
 }
 
-/**************************** DConv 3x3c3s2 HWC->SpCHW path, batched ****************************/
+/**************************** DConv 3x3c3s2 HWC->CHW path, batched ****************************/
 
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));

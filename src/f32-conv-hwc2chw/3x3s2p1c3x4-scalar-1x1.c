@@ -9,7 +9,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1(
+void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1(
     size_t input_height,
     size_t input_width,
     size_t output_y_start,

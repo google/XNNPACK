@@ -291,13 +291,13 @@ void xnn_compute_subconv2d(
       &context->params);
 }
 
-void xnn_compute_dconv2d_hwc2spchw(
-      const struct dconv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
+void xnn_compute_conv2d_hwc2chw(
+      const struct conv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t output_y_start,
       size_t output_y_slice)
 {
-  context->hwc2spchw_ukernel(
+  context->hwc2chw_ukernel(
       context->input_height,
       context->input_width,
       output_y_start,
@@ -328,12 +328,12 @@ void xnn_compute_dwconv_unipass(
     &context->params);
 }
 
-void xnn_compute_dwconv2d_spchw(
+void xnn_compute_dwconv2d_chw(
     const struct dwconv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
     size_t channel)
 {
-  context->spchw_ukernel(
+  context->chw_ukernel(
     context->input_height,
     context->input_width,
     (const void*) ((uintptr_t) context->input + channel * context->input_channel_stride + batch_index * context->input_batch_stride),

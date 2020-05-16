@@ -22,14 +22,14 @@
 #include <xnnpack/params.h>
 
 
-class GAvgPoolSpCHWMicrokernelTester {
+class GAvgPoolCWMicrokernelTester {
  public:
   enum class Variant {
     Native,
     Scalar,
   };
 
-  inline GAvgPoolSpCHWMicrokernelTester& elements(size_t elements) {
+  inline GAvgPoolCWMicrokernelTester& elements(size_t elements) {
     assert(elements != 0);
     this->elements_ = elements;
     return *this;
@@ -39,7 +39,7 @@ class GAvgPoolSpCHWMicrokernelTester {
     return this->elements_;
   }
 
-  inline GAvgPoolSpCHWMicrokernelTester& channels(size_t channels) {
+  inline GAvgPoolCWMicrokernelTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
@@ -49,7 +49,7 @@ class GAvgPoolSpCHWMicrokernelTester {
     return this->channels_;
   }
 
-  inline GAvgPoolSpCHWMicrokernelTester& qmin(uint8_t qmin) {
+  inline GAvgPoolCWMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
@@ -58,7 +58,7 @@ class GAvgPoolSpCHWMicrokernelTester {
     return this->qmin_;
   }
 
-  inline GAvgPoolSpCHWMicrokernelTester& qmax(uint8_t qmax) {
+  inline GAvgPoolCWMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
@@ -67,7 +67,7 @@ class GAvgPoolSpCHWMicrokernelTester {
     return this->qmax_;
   }
 
-  inline GAvgPoolSpCHWMicrokernelTester& iterations(size_t iterations) {
+  inline GAvgPoolCWMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -77,7 +77,7 @@ class GAvgPoolSpCHWMicrokernelTester {
   }
 
 
-  void Test(xnn_f32_gavgpool_spchw_ukernel_function gavgpool, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_gavgpool_cw_ukernel_function gavgpool, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);

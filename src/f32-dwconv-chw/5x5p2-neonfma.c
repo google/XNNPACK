@@ -11,7 +11,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma(
+void xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma(
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -23,7 +23,7 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma(
     size_t output_tuple_stride,
     size_t input_width_stride,
     size_t output_width_stride,
-    const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(input_width != 0);
   assert(input_height != 0);

@@ -209,11 +209,11 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-clamp/gen/scalar-x4.c
   src/f32-conv-hwc/3x3s2p1c3x4-scalar-1x1.c
   src/f32-conv-hwc/3x3s2p0p1c3x4-scalar-1x1.c
-  src/f32-conv-hwc2spchw/3x3s2p1c3x4-scalar-1x1.c
-  src/f32-dwconv-spchw/3x3p1-scalar.c
-  src/f32-dwconv-spchw/3x3s2p1-scalar.c
-  src/f32-dwconv-spchw/5x5p2-scalar.c
-  src/f32-dwconv-spchw/5x5s2p2-scalar.c
+  src/f32-conv-hwc2chw/3x3s2p1c3x4-scalar-1x1.c
+  src/f32-dwconv-chw/3x3p1-scalar.c
+  src/f32-dwconv-chw/3x3s2p1-scalar.c
+  src/f32-dwconv-chw/5x5p2-scalar.c
+  src/f32-dwconv-chw/5x5s2p2-scalar.c
   src/f32-dwconv/gen/up1x4-scalar.c
   src/f32-dwconv/gen/up1x4-scalar-acc2.c
   src/f32-dwconv/gen/up1x9-scalar.c
@@ -238,7 +238,7 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up2x9-minmax-scalar-acc2.c
   src/f32-dwconv/gen/up2x25-minmax-scalar.c
   src/f32-dwconv/gen/up2x25-minmax-scalar-acc2.c
-  src/f32-gavgpool-spchw/scalar-x1.c
+  src/f32-gavgpool-cw/scalar-x1.c
   src/f32-gavgpool/7p7x-minmax-scalar-c1.c
   src/f32-gavgpool/7x-minmax-scalar-c1.c
   src/f32-gemm/gen/1x4-scalar.c
@@ -545,7 +545,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up4x25-minmax-neon-acc2.c
   src/f32-dwconv/gen/up8x25-minmax-neon.c
   src/f32-dwconv/gen/up8x25-minmax-neon-acc2.c
-  src/f32-gavgpool-spchw/neon-x4.c
+  src/f32-gavgpool-cw/neon-x4.c
   src/f32-gavgpool/7p7x-minmax-neon-c4.c
   src/f32-gavgpool/7x-minmax-neon-c4.c
   src/f32-gemm/gen/1x8-minmax-neon-lane-ld64.c
@@ -903,11 +903,11 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-conv-hwc/3x3s2p0p1c3x4-neonfma-2x2.c
   src/f32-conv-hwc/3x3s2p1c3x4-neonfma-2x2.c
   src/f32-conv-hwc/3x3s2p1c3x8-neonfma-2x2.c
-  src/f32-conv-hwc2spchw/3x3s2p1c3x4-neonfma-2x2.c
-  src/f32-dwconv-spchw/3x3p1-neonfma.c
-  src/f32-dwconv-spchw/5x5p2-neonfma.c
-  src/f32-dwconv-spchw/3x3s2p1-neonfma.c
-  src/f32-dwconv-spchw/5x5s2p2-neonfma.c
+  src/f32-conv-hwc2chw/3x3s2p1c3x4-neonfma-2x2.c
+  src/f32-dwconv-chw/3x3p1-neonfma.c
+  src/f32-dwconv-chw/5x5p2-neonfma.c
+  src/f32-dwconv-chw/3x3s2p1-neonfma.c
+  src/f32-dwconv-chw/5x5s2p2-neonfma.c
   src/f32-sigmoid/gen/neonfma-rr1-p5-div-x4.c
   src/f32-sigmoid/gen/neonfma-rr1-p5-div-x8.c
   src/f32-sigmoid/gen/neonfma-rr1-p5-div-x12.c
@@ -1024,8 +1024,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/9x-minmax-sse-c4.c
   src/f32-clamp/gen/sse-x4.c
   src/f32-clamp/gen/sse-x8.c
-  src/f32-dwconv-spchw/3x3p1-sse.c
-  src/f32-dwconv-spchw/3x3s2p1-sse.c
+  src/f32-dwconv-chw/3x3p1-sse.c
+  src/f32-dwconv-chw/3x3s2p1-sse.c
   src/f32-dwconv/gen/up4x25-minmax-sse-acc2.c
   src/f32-dwconv/gen/up4x25-minmax-sse.c
   src/f32-dwconv/gen/up4x4-minmax-sse-acc2.c
@@ -1038,7 +1038,7 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x4-minmax-sse.c
   src/f32-dwconv/gen/up8x9-minmax-sse-acc2.c
   src/f32-dwconv/gen/up8x9-minmax-sse.c
-  src/f32-gavgpool-spchw/sse-x4.c
+  src/f32-gavgpool-cw/sse-x4.c
   src/f32-gavgpool/7p7x-minmax-sse-c4.c
   src/f32-gavgpool/7x-minmax-sse-c4.c
   src/f32-gemm/gen/1x8-minmax-sse-dup.c
@@ -2214,23 +2214,23 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-conv-hwc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-conv-hwc-test f32-conv-hwc-test)
 
-  ADD_EXECUTABLE(f32-conv-hwc2spchw-test test/f32-conv-hwc2spchw.cc)
-  SET_TARGET_PROPERTIES(f32-conv-hwc2spchw-test PROPERTIES
+  ADD_EXECUTABLE(f32-conv-hwc2chw-test test/f32-conv-hwc2chw.cc)
+  SET_TARGET_PROPERTIES(f32-conv-hwc2chw-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc2spchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc2spchw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-conv-hwc2spchw-test f32-conv-hwc2spchw-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc2chw-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-conv-hwc2chw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-conv-hwc2chw-test f32-conv-hwc2chw-test)
 
-  ADD_EXECUTABLE(f32-dwconv-spchw-test test/f32-dwconv-spchw.cc)
-  SET_TARGET_PROPERTIES(f32-dwconv-spchw-test PROPERTIES
+  ADD_EXECUTABLE(f32-dwconv-chw-test test/f32-dwconv-chw.cc)
+  SET_TARGET_PROPERTIES(f32-dwconv-chw-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-spchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-dwconv-spchw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-dwconv-spchw-test f32-dwconv-spchw-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-chw-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-dwconv-chw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-dwconv-chw-test f32-dwconv-chw-test)
 
   ADD_EXECUTABLE(f32-dwconv-test test/f32-dwconv.cc)
   SET_TARGET_PROPERTIES(f32-dwconv-test PROPERTIES
@@ -2250,14 +2250,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-dwconv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-dwconv-minmax-test f32-dwconv-minmax-test)
 
-  ADD_EXECUTABLE(f32-gavgpool-spchw-test test/f32-gavgpool-spchw.cc)
-  SET_TARGET_PROPERTIES(f32-gavgpool-spchw-test PROPERTIES
+  ADD_EXECUTABLE(f32-gavgpool-chw-test test/f32-gavgpool-chw.cc)
+  SET_TARGET_PROPERTIES(f32-gavgpool-chw-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-spchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-gavgpool-spchw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-gavgpool-spchw-test f32-gavgpool-spchw-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-chw-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-gavgpool-chw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-gavgpool-chw-test f32-gavgpool-chw-test)
 
   ADD_EXECUTABLE(f32-gavgpool-minmax-test test/f32-gavgpool-minmax.cc)
   SET_TARGET_PROPERTIES(f32-gavgpool-minmax-test PROPERTIES
@@ -3114,14 +3114,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-conv-hwc-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-dwconv-spchw-bench bench/f32-dwconv-spchw.cc)
-  SET_TARGET_PROPERTIES(f32-dwconv-spchw-bench PROPERTIES
+  ADD_EXECUTABLE(f32-dwconv-chw-bench bench/f32-dwconv-chw.cc)
+  SET_TARGET_PROPERTIES(f32-dwconv-chw-bench PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-spchw-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-spchw-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-dwconv-spchw-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-chw-bench PRIVATE src)
+  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-chw-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(f32-dwconv-chw-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc)
   SET_TARGET_PROPERTIES(f32-dwconv-bench PROPERTIES

@@ -23,8 +23,8 @@
 #include <xnnpack/params.h>
 
 
-static void DConvHWC2SpCHW3X3S2P1Benchmark(benchmark::State& state,
-  xnn_f32_conv_hwc2spchw_ukernel_function conv,
+static void DConvHWC2CHW3X3S2P1Benchmark(benchmark::State& state,
+  xnn_f32_conv_hwc2chw_ukernel_function conv,
   uint32_t output_channels_tile)
 {
   if (!cpuinfo_initialize()) {
@@ -110,17 +110,17 @@ static void DConvHWC2SpCHW3X3S2P1Benchmark(benchmark::State& state,
 }
 
 #if XNN_ARCH_ARM64
-  static void f32_conv_hwc2spchw_3x3s2p1c3x4__neonfma_2x2(benchmark::State& state, const char* net) {
-    DConvHWC2SpCHW3X3S2P1Benchmark(state, xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__neonfma_2x2, 4);
+  static void f32_conv_hwc2chw_3x3s2p1c3x4__neonfma_2x2(benchmark::State& state, const char* net) {
+    DConvHWC2CHW3X3S2P1Benchmark(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfma_2x2, 4);
   }
 
-  BENCHMARK_DCONV(f32_conv_hwc2spchw_3x3s2p1c3x4__neonfma_2x2);
+  BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__neonfma_2x2);
 #endif
-  static void f32_conv_hwc2spchw_3x3s2p1c3x4__scalar_1x1(benchmark::State& state, const char* net) {
-    DConvHWC2SpCHW3X3S2P1Benchmark(state, xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1, 4);
+  static void f32_conv_hwc2chw_3x3s2p1c3x4__scalar_1x1(benchmark::State& state, const char* net) {
+    DConvHWC2CHW3X3S2P1Benchmark(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1, 4);
   }
 
-  BENCHMARK_DCONV(f32_conv_hwc2spchw_3x3s2p1c3x4__scalar_1x1);
+  BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__scalar_1x1);
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

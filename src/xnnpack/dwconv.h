@@ -206,31 +206,31 @@ DECLARE_Q8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_q8_dwconv_minmax_ukernel_u
 DECLARE_Q8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_q8_dwconv_minmax_ukernel_up8x9__sse2)
 
 
-#define DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                               \
-    size_t input_height,                                   \
-    size_t input_width,                                    \
-    const float* input,                                    \
-    const float* weights,                                  \
-    const float* zero,                                     \
-    float* output,                                         \
-    uint32_t padding_top,                                  \
-    size_t input_tuple_stride,                             \
-    size_t output_tuple_stride,                            \
-    size_t input_height_stride,                            \
-    size_t output_height_stride,                           \
-    const union xnn_f32_spchw_params* params);
+#define DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                             \
+    size_t input_height,                                 \
+    size_t input_width,                                  \
+    const float* input,                                  \
+    const float* weights,                                \
+    const float* zero,                                   \
+    float* output,                                       \
+    uint32_t padding_top,                                \
+    size_t input_tuple_stride,                           \
+    size_t output_tuple_stride,                          \
+    size_t input_height_stride,                          \
+    size_t output_height_stride,                         \
+    const union xnn_f32_chw_params* params);
 
-DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_3x3p1__scalar)
-DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_5x5p2__scalar)
-DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_3x3s2p1__scalar)
-DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_5x5s2p2__scalar)
-DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma)
-DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma)
-DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_3x3p1__sse)
-DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma)
-DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_5x5s2p2__neonfma)
-DECLARE_F32_DWCONV_SPCHW_UKERNEL_FUNCTION(xnn_f32_dwconv_spchw_ukernel_3x3s2p1__sse)
+DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3p1__scalar)
+DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_5x5p2__scalar)
+DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar)
+DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar)
+DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma)
+DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma)
+DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3p1__sse)
+DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma)
+DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma)
+DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse)
 
 
 #ifdef __cplusplus

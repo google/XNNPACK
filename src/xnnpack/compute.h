@@ -301,7 +301,7 @@ struct subconv_context {
       size_t nr_block_size);
 #endif
 
-struct dconv2d_context {
+struct conv2d_context {
   size_t input_height;
   size_t input_width;
   const void* input;
@@ -315,7 +315,7 @@ struct dconv2d_context {
   size_t output_height_stride;
   size_t output_channel_stride;
   union {
-    xnn_conv_hwc2spchw_ukernel_function hwc2spchw_ukernel;
+    xnn_conv_hwc2chw_ukernel_function hwc2chw_ukernel;
   };
   union {
     union xnn_f32_minmax_params f32;
@@ -323,8 +323,8 @@ struct dconv2d_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_dconv2d_hwc2spchw(
-      const struct dconv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
+  XNN_PRIVATE void xnn_compute_conv2d_hwc2chw(
+      const struct conv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t output_y_start,
       size_t output_y_slice);
@@ -373,15 +373,15 @@ struct dwconv2d_context {
   size_t input_pixel_stride;
   size_t output_pixel_stride;
   union {
-    union xnn_f32_spchw_params f32;
+    union xnn_f32_chw_params f32;
   } params;
   union {
-    xnn_dwconv_spchw_ukernel_function spchw_ukernel;
+    xnn_dwconv_chw_ukernel_function chw_ukernel;
   };
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_dwconv2d_spchw(
+  XNN_PRIVATE void xnn_compute_dwconv2d_chw(
       const struct dwconv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t channel);
@@ -585,7 +585,7 @@ struct global_average_pooling_ncw_context {
   void* output;
   size_t output_channel_stride;
   size_t output_batch_stride;
-  xnn_gavgpool_spchw_ukernel_function ukernel;
+  xnn_gavgpool_cw_ukernel_function ukernel;
   union {
     union xnn_f32_gavgpool_params f32;
   } params;

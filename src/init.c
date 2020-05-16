@@ -551,39 +551,39 @@ static void init(void) {
           .mr = 8,
           .nr = 4,
         };
-        xnn_params.f32.hwc2spchw_dconv3x3c3s2 = (struct hwc2spchw_dconv_parameters) {
+        xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
           .ukernel_with_symm_padding =
-            (xnn_conv_hwc2spchw_ukernel_function) xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1,
+            (xnn_conv_hwc2chw_ukernel_function) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1,
           .output_channel_tile = 4,
           .output_height_tile = 1,
           .output_width_tile = 1,
         };
-        xnn_params.f32.spchw_dwconv3x3 = (struct spchw_dwconv_parameters) {
-          .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_3x3p1__scalar,
+        xnn_params.f32.dwconv_chw_3x3 = (struct dwconv_chw_parameters) {
+          .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_3x3p1__scalar,
           .input_width_tile = 1,
           .output_width_tile = 1,
           .output_height_tile = 1,
         };
-        xnn_params.f32.spchw_dwconv3x3s2 = (struct spchw_dwconv_parameters) {
-          .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_3x3s2p1__scalar,
+        xnn_params.f32.dwconv_chw_3x3s2 = (struct dwconv_chw_parameters) {
+          .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar,
           .input_width_tile = 1,
           .output_width_tile = 1,
           .output_height_tile = 1,
         };
-        xnn_params.f32.spchw_dwconv5x5 = (struct spchw_dwconv_parameters) {
-          .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_5x5p2__scalar,
+        xnn_params.f32.dwconv_chw_5x5 = (struct dwconv_chw_parameters) {
+          .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_5x5p2__scalar,
           .input_width_tile = 1,
           .output_width_tile = 1,
           .output_height_tile = 1,
         };
-        xnn_params.f32.spchw_dwconv5x5s2 = (struct spchw_dwconv_parameters) {
-          .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_5x5s2p2__scalar,
+        xnn_params.f32.dwconv_chw_5x5s2 = (struct dwconv_chw_parameters) {
+          .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar,
           .input_width_tile = 1,
           .output_width_tile = 1,
           .output_height_tile = 1,
         };
-        xnn_params.f32.spchw_gavgpool = (struct spchw_gavgpool_parameters) {
-          .ukernel = (xnn_gavgpool_spchw_ukernel_function) xnn_f32_gavgpool_spchw_ukernel__scalar_x1,
+        xnn_params.f32.gavgpool_cw = (struct gavgpool_cw_parameters) {
+          .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f32_gavgpool_cw_ukernel__scalar_x1,
           .channel_tile = 1,
         };
       #endif  // XNN_NO_NCHW_OPERATORS
@@ -954,39 +954,39 @@ static void init(void) {
         .mr = 16,
         .nr = 4,
       };
-      xnn_params.f32.hwc2spchw_dconv3x3c3s2 = (struct hwc2spchw_dconv_parameters) {
+      xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
         .ukernel_with_symm_padding =
-          (xnn_conv_hwc2spchw_ukernel_function) xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__neonfma_2x2,
+          (xnn_conv_hwc2chw_ukernel_function) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfma_2x2,
         .output_channel_tile = 4,
         .output_height_tile = 2,
         .output_width_tile = 2,
       };
-      xnn_params.f32.spchw_dwconv3x3 = (struct spchw_dwconv_parameters) {
-        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_3x3p1__neonfma,
+      xnn_params.f32.dwconv_chw_3x3 = (struct dwconv_chw_parameters) {
+        .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma,
         .input_width_tile = 4,
         .output_width_tile = 4,
         .output_height_tile = 3,
       };
-      xnn_params.f32.spchw_dwconv3x3s2 = (struct spchw_dwconv_parameters) {
-        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_3x3s2p1__neonfma,
+      xnn_params.f32.dwconv_chw_3x3s2 = (struct dwconv_chw_parameters) {
+        .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma,
         .input_width_tile = 4,
         .output_width_tile = 4,
         .output_height_tile = 1,
       };
-      xnn_params.f32.spchw_dwconv5x5 = (struct spchw_dwconv_parameters) {
-        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_5x5p2__neonfma,
+      xnn_params.f32.dwconv_chw_5x5 = (struct dwconv_chw_parameters) {
+        .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma,
         .input_width_tile = 4,
         .output_width_tile = 4,
         .output_height_tile = 3,
       };
-      xnn_params.f32.spchw_dwconv5x5s2 = (struct spchw_dwconv_parameters) {
-        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_5x5s2p2__neonfma,
+      xnn_params.f32.dwconv_chw_5x5s2 = (struct dwconv_chw_parameters) {
+        .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma,
         .input_width_tile = 4,
         .output_width_tile = 4,
         .output_height_tile = 1,
       };
-      xnn_params.f32.spchw_gavgpool = (struct spchw_gavgpool_parameters) {
-        .ukernel = (xnn_gavgpool_spchw_ukernel_function) xnn_f32_gavgpool_spchw_ukernel__neon_x4,
+      xnn_params.f32.gavgpool_cw = (struct gavgpool_cw_parameters) {
+        .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f32_gavgpool_cw_ukernel__neon_x4,
         .channel_tile = 4,
       };
     #endif  // XNN_NO_NCHW_OPERATORS
@@ -1367,20 +1367,20 @@ static void init(void) {
         .mr = 4,
         .nr = 1,
       };
-      xnn_params.f32.spchw_dwconv3x3 = (struct spchw_dwconv_parameters) {
-        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_3x3p1__sse,
+      xnn_params.f32.dwconv_chw_3x3 = (struct dwconv_chw_parameters) {
+        .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_3x3p1__sse,
         .input_width_tile = 4,
         .output_width_tile = 4,
         .output_height_tile = 1,
       };
-      xnn_params.f32.spchw_dwconv3x3s2 = (struct spchw_dwconv_parameters) {
-        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_3x3s2p1__sse,
+      xnn_params.f32.dwconv_chw_3x3s2 = (struct dwconv_chw_parameters) {
+        .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse,
         .input_width_tile = 4,
         .output_width_tile = 4,
         .output_height_tile = 1,
       };
-      xnn_params.f32.spchw_gavgpool = (struct spchw_gavgpool_parameters) {
-        .ukernel = (xnn_gavgpool_spchw_ukernel_function) xnn_f32_gavgpool_spchw_ukernel__sse_x4,
+      xnn_params.f32.gavgpool_cw = (struct gavgpool_cw_parameters) {
+        .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f32_gavgpool_cw_ukernel__sse_x4,
         .channel_tile = 4,
       };
     #endif  // XNN_NO_NCHW_OPERATORS
@@ -1797,39 +1797,39 @@ static void init(void) {
         .mr = 8,
         .nr = 4,
       };
-      xnn_params.f32.hwc2spchw_dconv3x3c3s2 = (struct hwc2spchw_dconv_parameters) {
+      xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
         .ukernel_with_symm_padding =
-          (xnn_conv_hwc2spchw_ukernel_function) xnn_f32_conv_hwc2spchw_ukernel_3x3s2p1c3x4__scalar_1x1,
+          (xnn_conv_hwc2chw_ukernel_function) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1,
         .output_channel_tile = 4,
         .output_height_tile = 1,
         .output_width_tile = 1,
       };
-      xnn_params.f32.spchw_dwconv3x3 = (struct spchw_dwconv_parameters) {
-        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_3x3p1__scalar,
+      xnn_params.f32.dwconv_chw_3x3 = (struct dwconv_chw_parameters) {
+        .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_3x3p1__scalar,
         .input_width_tile = 1,
         .output_width_tile = 1,
         .output_height_tile = 1,
       };
-      xnn_params.f32.spchw_dwconv3x3s2 = (struct spchw_dwconv_parameters) {
-        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_3x3s2p1__scalar,
+      xnn_params.f32.dwconv_chw_3x3s2 = (struct dwconv_chw_parameters) {
+        .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar,
         .input_width_tile = 1,
         .output_width_tile = 1,
         .output_height_tile = 1,
       };
-      xnn_params.f32.spchw_dwconv5x5 = (struct spchw_dwconv_parameters) {
-        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_5x5p2__scalar,
+      xnn_params.f32.dwconv_chw_5x5 = (struct dwconv_chw_parameters) {
+        .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_5x5p2__scalar,
         .input_width_tile = 1,
         .output_width_tile = 1,
         .output_height_tile = 1,
       };
-      xnn_params.f32.spchw_dwconv5x5s2 = (struct spchw_dwconv_parameters) {
-        .ukernel = (xnn_dwconv_spchw_ukernel_function) xnn_f32_dwconv_spchw_ukernel_5x5s2p2__scalar,
+      xnn_params.f32.dwconv_chw_5x5s2 = (struct dwconv_chw_parameters) {
+        .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar,
         .input_width_tile = 1,
         .output_width_tile = 1,
         .output_height_tile = 1,
       };
-      xnn_params.f32.spchw_gavgpool = (struct spchw_gavgpool_parameters) {
-        .ukernel = (xnn_gavgpool_spchw_ukernel_function) xnn_f32_gavgpool_spchw_ukernel__scalar_x1,
+      xnn_params.f32.gavgpool_cw = (struct gavgpool_cw_parameters) {
+        .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f32_gavgpool_cw_ukernel__scalar_x1,
         .channel_tile = 1,
       };
     #endif  // XNN_NO_NCHW_OPERATORS

@@ -778,7 +778,7 @@ static inline void xnn_pack_f16_dwconv_hwg_w(
   }
 }
 
-static inline void xnn_pack_f16_spchw_dwconv_ghw_w(
+static inline void xnn_pack_f16_chw_dwconv_ghw_w(
   size_t kernel_size,
   size_t groups,
   const uint16_t* kernel,
@@ -1205,7 +1205,7 @@ static inline void xnn_pack_f32_dwconv_hwg_w(
   }
 }
 
-static inline void xnn_pack_f32_spchw_dwconv_ghw_w(
+static inline void xnn_pack_f32_chw_dwconv_ghw_w(
   size_t kernel_size,
   size_t groups,
   const float* kernel,

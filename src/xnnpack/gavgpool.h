@@ -84,17 +84,17 @@ DECLARE_Q8_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_q8_gavgpool_minmax_ukern
 DECLARE_Q8_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_q8_gavgpool_minmax_ukernel_7x__scalar_c1)
 
 
-#define DECLARE_F32_GAVGPOOL_SPCHW_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                 \
-      size_t elements,                                       \
-      size_t channels,                                       \
-      const float* input,                                    \
-      float* output,                                         \
+#define DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                               \
+      size_t elements,                                     \
+      size_t channels,                                     \
+      const float* input,                                  \
+      float* output,                                       \
       const union xnn_f32_gavgpool_params* params);
 
-DECLARE_F32_GAVGPOOL_SPCHW_UKERNEL_FUNCTION(xnn_f32_gavgpool_spchw_ukernel__neon_x4)
-DECLARE_F32_GAVGPOOL_SPCHW_UKERNEL_FUNCTION(xnn_f32_gavgpool_spchw_ukernel__sse_x4)
-DECLARE_F32_GAVGPOOL_SPCHW_UKERNEL_FUNCTION(xnn_f32_gavgpool_spchw_ukernel__scalar_x1)
+DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__neon_x4)
+DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__sse_x4)
+DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__scalar_x1)
 
 
 #ifdef __cplusplus

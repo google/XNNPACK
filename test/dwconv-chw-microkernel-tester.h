@@ -27,14 +27,14 @@
 #include <xnnpack/params.h>
 
 
-class DWConvSpCHWMicrokernelTester {
+class DWConvCHWMicrokernelTester {
  public:
   enum class Variant {
     Native,
     Scalar,
   };
 
-  inline DWConvSpCHWMicrokernelTester& input_tuple_size(uint32_t input_tuple_size) {
+  inline DWConvCHWMicrokernelTester& input_tuple_size(uint32_t input_tuple_size) {
     this->input_tuple_size_ = input_tuple_size;
     return *this;
   }
@@ -43,7 +43,7 @@ class DWConvSpCHWMicrokernelTester {
     return this->input_tuple_size_;
   }
 
-  inline DWConvSpCHWMicrokernelTester& output_tuple_size(uint32_t output_tuple_size) {
+  inline DWConvCHWMicrokernelTester& output_tuple_size(uint32_t output_tuple_size) {
     this->output_tuple_size_ = output_tuple_size;
     return *this;
   }
@@ -52,7 +52,7 @@ class DWConvSpCHWMicrokernelTester {
     return this->output_tuple_size_;
   }
 
-  inline DWConvSpCHWMicrokernelTester& padding_left(uint32_t padding_left) {
+  inline DWConvCHWMicrokernelTester& padding_left(uint32_t padding_left) {
     this->padding_left_ = padding_left;
     return *this;
   }
@@ -61,7 +61,7 @@ class DWConvSpCHWMicrokernelTester {
     return this->padding_left_;
   }
 
-  inline DWConvSpCHWMicrokernelTester& padding_right(uint32_t padding_right) {
+  inline DWConvCHWMicrokernelTester& padding_right(uint32_t padding_right) {
     this->padding_right_ = padding_right;
     return *this;
   }
@@ -70,7 +70,7 @@ class DWConvSpCHWMicrokernelTester {
     return this->padding_right_;
   }
 
-  inline DWConvSpCHWMicrokernelTester& padding_top(uint32_t padding_top) {
+  inline DWConvCHWMicrokernelTester& padding_top(uint32_t padding_top) {
     this->padding_top_ = padding_top;
     return *this;
   }
@@ -80,7 +80,7 @@ class DWConvSpCHWMicrokernelTester {
   }
 
 
-  inline DWConvSpCHWMicrokernelTester& padding_bottom(uint32_t padding_bottom) {
+  inline DWConvCHWMicrokernelTester& padding_bottom(uint32_t padding_bottom) {
     this->padding_bottom_ = padding_bottom;
     return *this;
   }
@@ -92,7 +92,7 @@ class DWConvSpCHWMicrokernelTester {
     return (output_height() - 1) * subsampling() + kernel_height() - padding_top() - padding_bottom();
   }
 
-  inline DWConvSpCHWMicrokernelTester& input_width(uint32_t input_width) {
+  inline DWConvCHWMicrokernelTester& input_width(uint32_t input_width) {
     assert(input_width >= 1);
     this->input_width_ = input_width;
     return *this;
@@ -102,7 +102,7 @@ class DWConvSpCHWMicrokernelTester {
     return this->input_width_;
   }
 
-  inline DWConvSpCHWMicrokernelTester& subsampling(uint32_t subsampling) {
+  inline DWConvCHWMicrokernelTester& subsampling(uint32_t subsampling) {
     assert(subsampling >= 1);
     this->subsampling_ = subsampling;
     return *this;
@@ -112,7 +112,7 @@ class DWConvSpCHWMicrokernelTester {
     return this->subsampling_;
   }
 
-  inline DWConvSpCHWMicrokernelTester& kernel_height(uint32_t kernel_height) {
+  inline DWConvCHWMicrokernelTester& kernel_height(uint32_t kernel_height) {
     assert(kernel_height != 0);
     this->kernel_height_ = kernel_height;
     return *this;
@@ -122,7 +122,7 @@ class DWConvSpCHWMicrokernelTester {
     return this->kernel_height_;
   }
 
-  inline DWConvSpCHWMicrokernelTester& kernel_width(uint32_t kernel_width) {
+  inline DWConvCHWMicrokernelTester& kernel_width(uint32_t kernel_width) {
     assert(kernel_width != 0);
     this->kernel_width_ = kernel_width;
     return *this;
@@ -136,7 +136,7 @@ class DWConvSpCHWMicrokernelTester {
     return kernel_height() * kernel_width();
   }
 
-  inline DWConvSpCHWMicrokernelTester& output_height(uint32_t output_height) {
+  inline DWConvCHWMicrokernelTester& output_height(uint32_t output_height) {
     assert(output_height >= 1);
     this->output_height_ = output_height;
     return *this;
@@ -155,7 +155,7 @@ class DWConvSpCHWMicrokernelTester {
     }
   }
 
-  inline DWConvSpCHWMicrokernelTester& input_tuple_stride(uint32_t input_tuple_stride) {
+  inline DWConvCHWMicrokernelTester& input_tuple_stride(uint32_t input_tuple_stride) {
     assert(input_tuple_stride != 0);
     this->input_tuple_stride_ = input_tuple_stride;
     return *this;
@@ -169,7 +169,7 @@ class DWConvSpCHWMicrokernelTester {
     }
   }
 
-  inline DWConvSpCHWMicrokernelTester& output_tuple_stride(uint32_t output_tuple_stride) {
+  inline DWConvCHWMicrokernelTester& output_tuple_stride(uint32_t output_tuple_stride) {
     assert(output_tuple_stride != 0);
     this->output_tuple_stride_ = output_tuple_stride;
     return *this;
@@ -183,7 +183,7 @@ class DWConvSpCHWMicrokernelTester {
     }
   }
 
-  inline DWConvSpCHWMicrokernelTester& input_width_stride(uint32_t input_width_stride) {
+  inline DWConvCHWMicrokernelTester& input_width_stride(uint32_t input_width_stride) {
     assert(input_width_stride != 0);
     this->input_width_stride_ = input_width_stride;
     return *this;
@@ -197,7 +197,7 @@ class DWConvSpCHWMicrokernelTester {
     }
   }
 
-  inline DWConvSpCHWMicrokernelTester& output_width_stride(uint32_t output_width_stride) {
+  inline DWConvCHWMicrokernelTester& output_width_stride(uint32_t output_width_stride) {
     assert(output_width_stride != 0);
     this->output_width_stride_ = output_width_stride;
     return *this;
@@ -211,7 +211,7 @@ class DWConvSpCHWMicrokernelTester {
     }
   }
 
-  inline DWConvSpCHWMicrokernelTester& qmin(uint8_t qmin) {
+  inline DWConvCHWMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
@@ -220,7 +220,7 @@ class DWConvSpCHWMicrokernelTester {
     return this->qmin_;
   }
 
-  inline DWConvSpCHWMicrokernelTester& qmax(uint8_t qmax) {
+  inline DWConvCHWMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
@@ -229,7 +229,7 @@ class DWConvSpCHWMicrokernelTester {
     return this->qmax_;
   }
 
-  inline DWConvSpCHWMicrokernelTester& iterations(size_t iterations) {
+  inline DWConvCHWMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -238,7 +238,7 @@ class DWConvSpCHWMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_dwconv_spchw_ukernel_function dwconv, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_dwconv_chw_ukernel_function dwconv, Variant variant = Variant::Native) const {
     ASSERT_EQ(0, input_tuple_stride() % input_tuple_size());
     ASSERT_EQ(0, output_tuple_stride() % output_tuple_size());
 
@@ -285,13 +285,13 @@ class DWConvSpCHWMicrokernelTester {
       const float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
 
       // Prepare output parameters.
-      xnn_f32_spchw_params spchw_params = { };
+      xnn_f32_chw_params chw_params = { };
       switch (variant) {
         case Variant::Native:
-          spchw_params = xnn_init_f32_spchw_params(input_width(), output_min, output_max);
+          chw_params = xnn_init_f32_chw_params(input_width(), output_min, output_max);
           break;
         case Variant::Scalar:
-          spchw_params = xnn_init_scalar_f32_spchw_params(input_width(), output_min, output_max);
+          chw_params = xnn_init_scalar_f32_chw_params(input_width(), output_min, output_max);
           break;
       }
 
@@ -307,7 +307,7 @@ class DWConvSpCHWMicrokernelTester {
         padding_top(),
         input_tuple_stride() * sizeof(float), output_tuple_stride() * sizeof(float),
         input_width_stride() * sizeof(float), output_width_stride() * sizeof(float),
-        &spchw_params);
+        &chw_params);
 
       // Verify results.
       for (size_t y = 0; y < output_height(); y++) {

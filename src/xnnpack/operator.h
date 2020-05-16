@@ -25,7 +25,7 @@ enum xnn_ukernel_type {
   xnn_ukernel_type_binary_elementwise,
   xnn_ukernel_type_channel_shuffle,
   xnn_ukernel_type_clamp,
-  xnn_ukernel_type_dconv2d_hwc2spchw,
+  xnn_ukernel_type_conv2d_hwc2chw,
   xnn_ukernel_type_dwconv,
   xnn_ukernel_type_gemm,
   xnn_ukernel_type_global_average_pooling,
@@ -85,9 +85,9 @@ enum xnn_operator_type {
   xnn_operator_type_unpooling_nhwc_x32,
 };
 
-struct xnn_ukernel_dconv2d {
+struct xnn_ukernel_conv2d {
   union {
-    xnn_conv_hwc2spchw_ukernel_function hwc2spchw_function;
+    xnn_conv_hwc2chw_ukernel_function hwc2chw_function;
     xnn_conv_hwc_ukernel_function hwc_function;
   };
   uint8_t output_height_tile;
@@ -106,7 +106,7 @@ struct xnn_ukernel_dwconv {
 // Direct 2D Depthwise Convolution
 struct xnn_ukernel_dwconv2d {
   union {
-    xnn_dwconv_spchw_ukernel_function spchw_function;
+    xnn_dwconv_chw_ukernel_function chw_function;
   };
   uint8_t input_width_tile;
   uint8_t output_width_tile;
@@ -142,7 +142,7 @@ struct xnn_ukernel_vmulcaddc {
 struct xnn_ukernel {
   enum xnn_ukernel_type type;
   union {
-    struct xnn_ukernel_dconv2d dconv2d;
+    struct xnn_ukernel_conv2d conv2d;
     struct xnn_ukernel_dwconv dwconv;
     struct xnn_ukernel_dwconv2d dwconv2d;
     struct xnn_ukernel_gemm gemm;
@@ -249,7 +249,7 @@ struct xnn_operator {
       union xnn_f32_scaleminmax_params f32_scaleminmax_params;
       union xnn_f32_minmax_params f32_minmax_params;
     };
-    union xnn_f32_spchw_params f32_spchw_params;
+    union xnn_f32_chw_params f32_chw_params;
     union xnn_q8_add_params q8_add_params;
     union xnn_q8_gemm_params q8_gemm_params;
     // Average Pooling normally use q8_avgpool_params, but also initialize q8_gavgpool_params in case it needs to switch
@@ -272,7 +272,7 @@ struct xnn_operator {
     struct average_pooling_context average_pooling;
     struct channel_pad_context channel_pad;
     struct channel_shuffle_context channel_shuffle;
-    struct dconv2d_context dconv2d;
+    struct conv2d_context conv2d;
     struct dwconv2d_context dwconv2d;
     struct dwconv_context dwconv;
     struct elementwise_binary_context elementwise_binary;

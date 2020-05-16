@@ -89,11 +89,11 @@ SCALAR_UKERNELS = [
     "src/f32-clamp/gen/scalar-x4.c",
     "src/f32-conv-hwc/3x3s2p0p1c3x4-scalar-1x1.c",
     "src/f32-conv-hwc/3x3s2p1c3x4-scalar-1x1.c",
-    "src/f32-conv-hwc2spchw/3x3s2p1c3x4-scalar-1x1.c",
-    "src/f32-dwconv-spchw/3x3p1-scalar.c",
-    "src/f32-dwconv-spchw/3x3s2p1-scalar.c",
-    "src/f32-dwconv-spchw/5x5p2-scalar.c",
-    "src/f32-dwconv-spchw/5x5s2p2-scalar.c",
+    "src/f32-conv-hwc2chw/3x3s2p1c3x4-scalar-1x1.c",
+    "src/f32-dwconv-chw/3x3p1-scalar.c",
+    "src/f32-dwconv-chw/3x3s2p1-scalar.c",
+    "src/f32-dwconv-chw/5x5p2-scalar.c",
+    "src/f32-dwconv-chw/5x5s2p2-scalar.c",
     "src/f32-dwconv/gen/up1x4-scalar-acc2.c",
     "src/f32-dwconv/gen/up1x4-scalar.c",
     "src/f32-dwconv/gen/up1x9-scalar-acc2.c",
@@ -118,7 +118,7 @@ SCALAR_UKERNELS = [
     "src/f32-dwconv/gen/up2x9-minmax-scalar.c",
     "src/f32-dwconv/gen/up2x25-minmax-scalar-acc2.c",
     "src/f32-dwconv/gen/up2x25-minmax-scalar.c",
-    "src/f32-gavgpool-spchw/scalar-x1.c",
+    "src/f32-gavgpool-cw/scalar-x1.c",
     "src/f32-gavgpool/7p7x-minmax-scalar-c1.c",
     "src/f32-gavgpool/7x-minmax-scalar-c1.c",
     "src/f32-gemm/gen-inc/1x4inc-minmax-scalar.c",
@@ -533,7 +533,7 @@ NEON_UKERNELS = [
     "src/f32-dwconv/gen/up4x25-minmax-neon-acc2.c",
     "src/f32-dwconv/gen/up8x25-minmax-neon.c",
     "src/f32-dwconv/gen/up8x25-minmax-neon-acc2.c",
-    "src/f32-gavgpool-spchw/neon-x4.c",
+    "src/f32-gavgpool-cw/neon-x4.c",
     "src/f32-gavgpool/7p7x-minmax-neon-c4.c",
     "src/f32-gavgpool/7x-minmax-neon-c4.c",
     "src/f32-gemm/gen/1x8-minmax-neon-lane-ld64.c",
@@ -887,11 +887,11 @@ AARCH64_NEONFMA_UKERNELS = [
     "src/f32-conv-hwc/3x3s2p0p1c3x4-neonfma-2x2.c",
     "src/f32-conv-hwc/3x3s2p1c3x4-neonfma-2x2.c",
     "src/f32-conv-hwc/3x3s2p1c3x8-neonfma-2x2.c",
-    "src/f32-conv-hwc2spchw/3x3s2p1c3x4-neonfma-2x2.c",
-    "src/f32-dwconv-spchw/3x3p1-neonfma.c",
-    "src/f32-dwconv-spchw/5x5p2-neonfma.c",
-    "src/f32-dwconv-spchw/3x3s2p1-neonfma.c",
-    "src/f32-dwconv-spchw/5x5s2p2-neonfma.c",
+    "src/f32-conv-hwc2chw/3x3s2p1c3x4-neonfma-2x2.c",
+    "src/f32-dwconv-chw/3x3p1-neonfma.c",
+    "src/f32-dwconv-chw/5x5p2-neonfma.c",
+    "src/f32-dwconv-chw/3x3s2p1-neonfma.c",
+    "src/f32-dwconv-chw/5x5s2p2-neonfma.c",
     "src/f32-sigmoid/gen/neonfma-rr1-p5-div-x4.c",
     "src/f32-sigmoid/gen/neonfma-rr1-p5-div-x8.c",
     "src/f32-sigmoid/gen/neonfma-rr1-p5-div-x12.c",
@@ -1017,8 +1017,8 @@ SSE_UKERNELS = [
     "src/f32-avgpool/9x-minmax-sse-c4.c",
     "src/f32-clamp/gen/sse-x4.c",
     "src/f32-clamp/gen/sse-x8.c",
-    "src/f32-dwconv-spchw/3x3p1-sse.c",
-    "src/f32-dwconv-spchw/3x3s2p1-sse.c",
+    "src/f32-dwconv-chw/3x3p1-sse.c",
+    "src/f32-dwconv-chw/3x3s2p1-sse.c",
     "src/f32-dwconv/gen/up4x25-minmax-sse-acc2.c",
     "src/f32-dwconv/gen/up4x25-minmax-sse.c",
     "src/f32-dwconv/gen/up4x4-minmax-sse-acc2.c",
@@ -1031,7 +1031,7 @@ SSE_UKERNELS = [
     "src/f32-dwconv/gen/up8x4-minmax-sse.c",
     "src/f32-dwconv/gen/up8x9-minmax-sse-acc2.c",
     "src/f32-dwconv/gen/up8x9-minmax-sse.c",
-    "src/f32-gavgpool-spchw/sse-x4.c",
+    "src/f32-gavgpool-cw/sse-x4.c",
     "src/f32-gavgpool/7p7x-minmax-sse-c4.c",
     "src/f32-gavgpool/7x-minmax-sse-c4.c",
     "src/f32-gemm/gen/1x8-minmax-sse-dup.c",
@@ -2304,9 +2304,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_conv_hwc2spchw_bench",
+    name = "f32_conv_hwc2chw_bench",
     srcs = [
-        "bench/f32-conv-hwc2spchw.cc",
+        "bench/f32-conv-hwc2chw.cc",
         "bench/dconv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
@@ -2324,9 +2324,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_dwconv_spchw_bench",
+    name = "f32_dwconv_chw_bench",
     srcs = [
-        "bench/f32-dwconv-spchw.cc",
+        "bench/f32-dwconv-chw.cc",
         "bench/dwconv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
@@ -2820,10 +2820,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f32_conv_hwc2spchw_test",
+    name = "f32_conv_hwc2chw_test",
     srcs = [
-        "test/f32-conv-hwc2spchw.cc",
-        "test/conv-hwc2spchw-microkernel-tester.h",
+        "test/f32-conv-hwc2chw.cc",
+        "test/conv-hwc2chw-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
@@ -2850,10 +2850,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f32_dwconv_spchw_test",
+    name = "f32_dwconv_chw_test",
     srcs = [
-        "test/f32-dwconv-spchw.cc",
-        "test/dwconv-spchw-microkernel-tester.h",
+        "test/f32-dwconv-chw.cc",
+        "test/dwconv-chw-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
@@ -2870,10 +2870,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f32_gavgpool_spchw_test",
+    name = "f32_gavgpool_cw_test",
     srcs = [
-        "test/f32-gavgpool-spchw.cc",
-        "test/gavgpool-spchw-microkernel-tester.h",
+        "test/f32-gavgpool-cw.cc",
+        "test/gavgpool-cw-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,

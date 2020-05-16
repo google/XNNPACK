@@ -62,7 +62,7 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f32(
   }
 
   status = xnn_status_unsupported_parameter;
-  if (xnn_params.f32.spchw_gavgpool.ukernel == NULL) {
+  if (xnn_params.f32.gavgpool_cw.ukernel == NULL) {
     xnn_log_error(
       "failed to create Global Average Pooling operator: "
       "only selected configurations parameters are supported");
@@ -133,7 +133,7 @@ enum xnn_status xnn_setup_global_average_pooling_ncw_f32(
     .output = output,
     .output_channel_stride = sizeof(float),
     .output_batch_stride = global_average_pooling_op->channels * sizeof(float),
-    .ukernel = xnn_params.f32.spchw_gavgpool.ukernel,
+    .ukernel = xnn_params.f32.gavgpool_cw.ukernel,
     .params.f32 = global_average_pooling_op->f32_gavgpool_params,
   };
 
@@ -142,7 +142,7 @@ enum xnn_status xnn_setup_global_average_pooling_ncw_f32(
     (pthreadpool_task_2d_tile_1d_t) xnn_compute_global_average_pooling_ncw;
   global_average_pooling_op->compute.range[0] = batch_size;
   global_average_pooling_op->compute.range[1] = global_average_pooling_op->channels;
-  global_average_pooling_op->compute.tile[0] = global_average_pooling_op->channels; //xnn_params.f32.spchw_gavgpool.channel_tile;
+  global_average_pooling_op->compute.tile[0] = global_average_pooling_op->channels; //xnn_params.f32.gavgpool_cw.channel_tile;
 
   global_average_pooling_op->state = xnn_run_state_ready;
 

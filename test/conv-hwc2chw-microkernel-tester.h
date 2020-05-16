@@ -24,14 +24,14 @@
 #include <xnnpack.h>
 
 
-class ConvHWC2SpCHWMicrokernelTester {
+class ConvHWC2CHWMicrokernelTester {
 public:
   enum class Variant {
     Native,
     Scalar,
   };
 
-  inline ConvHWC2SpCHWMicrokernelTester& output_channels_tile(uint32_t output_channels_tile) {
+  inline ConvHWC2CHWMicrokernelTester& output_channels_tile(uint32_t output_channels_tile) {
     this->output_channels_tile_ = output_channels_tile;
     return *this;
   }
@@ -40,7 +40,7 @@ public:
     return this->output_channels_tile_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& padding(uint32_t padding) {
+  inline ConvHWC2CHWMicrokernelTester& padding(uint32_t padding) {
     this->padding_top_ = padding;
     this->padding_right_ = padding;
     this->padding_bottom_ = padding;
@@ -48,19 +48,19 @@ public:
     return *this;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& padding_height(uint32_t padding_height) {
+  inline ConvHWC2CHWMicrokernelTester& padding_height(uint32_t padding_height) {
     this->padding_top_ = padding_height;
     this->padding_bottom_ = padding_height;
     return *this;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& padding_width(uint32_t padding_width) {
+  inline ConvHWC2CHWMicrokernelTester& padding_width(uint32_t padding_width) {
     this->padding_right_ = padding_width;
     this->padding_left_ = padding_width;
     return *this;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& padding_top(uint32_t padding_top) {
+  inline ConvHWC2CHWMicrokernelTester& padding_top(uint32_t padding_top) {
     this->padding_top_ = padding_top;
     return *this;
   }
@@ -69,7 +69,7 @@ public:
     return this->padding_top_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& padding_right(uint32_t padding_right) {
+  inline ConvHWC2CHWMicrokernelTester& padding_right(uint32_t padding_right) {
     this->padding_right_ = padding_right;
     return *this;
   }
@@ -78,7 +78,7 @@ public:
     return this->padding_right_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& padding_bottom(uint32_t padding_bottom) {
+  inline ConvHWC2CHWMicrokernelTester& padding_bottom(uint32_t padding_bottom) {
     this->padding_bottom_ = padding_bottom;
     return *this;
   }
@@ -87,7 +87,7 @@ public:
     return this->padding_bottom_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& padding_left(uint32_t padding_left) {
+  inline ConvHWC2CHWMicrokernelTester& padding_left(uint32_t padding_left) {
     this->padding_left_ = padding_left;
     return *this;
   }
@@ -96,7 +96,7 @@ public:
     return this->padding_left_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& input_size(uint32_t input_height, uint32_t input_width) {
+  inline ConvHWC2CHWMicrokernelTester& input_size(uint32_t input_height, uint32_t input_width) {
     assert(input_height >= 1);
     assert(input_width >= 1);
     this->input_height_ = input_height;
@@ -104,7 +104,7 @@ public:
     return *this;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& input_height(uint32_t input_height) {
+  inline ConvHWC2CHWMicrokernelTester& input_height(uint32_t input_height) {
     assert(input_height >= 1);
     this->input_height_ = input_height;
     return *this;
@@ -114,7 +114,7 @@ public:
     return this->input_height_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& input_width(uint32_t input_width) {
+  inline ConvHWC2CHWMicrokernelTester& input_width(uint32_t input_width) {
     assert(input_width >= 1);
     this->input_width_ = input_width;
     return *this;
@@ -124,7 +124,7 @@ public:
     return this->input_width_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& input_channels(size_t input_channels) {
+  inline ConvHWC2CHWMicrokernelTester& input_channels(size_t input_channels) {
     assert(input_channels >= 1);
     this->input_channels_ = input_channels;
     return *this;
@@ -134,7 +134,7 @@ public:
     return this->input_channels_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& output_channels(size_t output_channels) {
+  inline ConvHWC2CHWMicrokernelTester& output_channels(size_t output_channels) {
     assert(output_channels >= 1);
     this->output_channels_ = output_channels;
     return *this;
@@ -148,7 +148,7 @@ public:
     return output_channels() % output_channels_tile() == 0 ? output_channels() : output_channels() / output_channels_tile() * output_channels_tile() + output_channels_tile();
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& batch_size(size_t batch_size) {
+  inline ConvHWC2CHWMicrokernelTester& batch_size(size_t batch_size) {
     assert(batch_size >= 1);
     this->batch_size_ = batch_size;
     return *this;
@@ -158,14 +158,14 @@ public:
     return this->batch_size_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& kernel_size(uint32_t kernel_size) {
+  inline ConvHWC2CHWMicrokernelTester& kernel_size(uint32_t kernel_size) {
     assert(kernel_size >= 1);
     this->kernel_height_ = kernel_size;
     this->kernel_width_ = kernel_size;
     return *this;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& kernel_height(uint32_t kernel_height) {
+  inline ConvHWC2CHWMicrokernelTester& kernel_height(uint32_t kernel_height) {
     assert(kernel_height >= 1);
     this->kernel_height_ = kernel_height;
     return *this;
@@ -175,7 +175,7 @@ public:
     return this->kernel_height_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& kernel_width(uint32_t kernel_width) {
+  inline ConvHWC2CHWMicrokernelTester& kernel_width(uint32_t kernel_width) {
     assert(kernel_width >= 1);
     this->kernel_width_ = kernel_width;
     return *this;
@@ -185,14 +185,14 @@ public:
     return this->kernel_width_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& subsampling(uint32_t subsampling) {
+  inline ConvHWC2CHWMicrokernelTester& subsampling(uint32_t subsampling) {
     assert(subsampling >= 1);
     this->subsampling_height_ = subsampling;
     this->subsampling_width_ = subsampling;
     return *this;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& subsampling_height(uint32_t subsampling_height) {
+  inline ConvHWC2CHWMicrokernelTester& subsampling_height(uint32_t subsampling_height) {
     assert(subsampling_height >= 1);
     this->subsampling_height_ = subsampling_height;
     return *this;
@@ -202,7 +202,7 @@ public:
     return this->subsampling_height_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& subsampling_width(uint32_t subsampling_width) {
+  inline ConvHWC2CHWMicrokernelTester& subsampling_width(uint32_t subsampling_width) {
     assert(subsampling_width >= 1);
     this->subsampling_width_ = subsampling_width;
     return *this;
@@ -212,7 +212,7 @@ public:
     return this->subsampling_width_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& output_y_start(uint32_t output_y_start) {
+  inline ConvHWC2CHWMicrokernelTester& output_y_start(uint32_t output_y_start) {
     this->output_y_start_ = output_y_start;
     return *this;
   }
@@ -221,7 +221,7 @@ public:
     return this->output_y_start_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& output_y_end(uint32_t output_y_end) {
+  inline ConvHWC2CHWMicrokernelTester& output_y_end(uint32_t output_y_end) {
     this->output_y_end_ = output_y_end;
     return *this;
   }
@@ -260,7 +260,7 @@ public:
     }
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& qmin(uint8_t qmin) {
+  inline ConvHWC2CHWMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
@@ -269,7 +269,7 @@ public:
     return this->qmin_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& qmax(uint8_t qmax) {
+  inline ConvHWC2CHWMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
@@ -278,7 +278,7 @@ public:
     return this->qmax_;
   }
 
-  inline ConvHWC2SpCHWMicrokernelTester& iterations(size_t iterations) {
+  inline ConvHWC2CHWMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -287,7 +287,7 @@ public:
     return this->iterations_;
   }
 
-  void Test(xnn_f32_conv_hwc2spchw_ukernel_function conv, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_conv_hwc2chw_ukernel_function conv, Variant variant = Variant::Native) const {
     ASSERT_LT(output_y_start(), output_height());
     ASSERT_LE(output_y_end(), output_height());
     ASSERT_GT(output_y_end(), output_y_start());

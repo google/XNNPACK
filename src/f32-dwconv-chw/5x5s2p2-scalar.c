@@ -9,7 +9,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_spchw_ukernel_5x5p2__scalar(
+void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -21,32 +21,56 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__scalar(
     size_t output_tuple_stride,
     size_t input_width_stride,
     size_t output_width_stride,
-    const union xnn_f32_spchw_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(input_width != 0);
   assert(input_height != 0);
-  assert(padding_top == 2);
+  assert(padding_top >= 1 && padding_top <= 2);
 
   const size_t padded_input_height = input_height + padding_top + 2 /* padding_bottom */;
-  const size_t output_height = padded_input_height - 5 + 1;
+  const size_t output_height = (padded_input_height - 5) / 2 + 1;
 
   const float params_max = params->scalar.max;
   const float params_min = params->scalar.min;
 
-  const size_t input_width_decrement_single = input_width * input_tuple_stride;
+  const size_t input_width_decrement_single = (1 + 2 * ((input_width-1) / 2)) * input_tuple_stride;;
   const size_t input_width_increment_single = input_width_stride - input_width_decrement_single;;
-  const size_t output_width_increment_single = output_width_stride - (input_width - 1) * output_tuple_stride;
+  const size_t input_width_increment = input_width_stride * 2 - input_width_decrement_single;;
+  const size_t output_width_increment = output_width_stride - (input_width - 1) / 2 * output_tuple_stride;
 
-  const float* i0 = zero;
-  const float* i1 = zero;;
-  const float* i2 = input;
-  const float* i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
-  const float* i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
-  if (input_height <= 2) {
-    i4 = zero;
-  }
-  if (input_height == 1) {
-    i3 = zero;
+  const float* i0;
+  const float* i1;
+  const float* i2;
+  const float* i3;
+  const float* i4;
+
+  if (padding_top == 1) {
+    i0 = zero;
+    i1 = input;
+    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+    i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
+    i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
+    if (input_height <= 3) {
+      i4 = zero;
+    }
+    if (input_height <= 2) {
+      i3 = zero;
+    }
+    if (input_height == 1) {
+      i2 = zero;
+    }
+  } else {
+    i0 = zero;
+    i1 = zero;
+    i2 = input;
+    i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
+    i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
+    if (input_height <= 2) {
+      i4 = zero;
+    }
+    if (input_height == 1) {
+      i3 = zero;
+    }
   }
 
   float* output0 = output;
@@ -98,21 +122,15 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__scalar(
     float vi3x2 = *i3; i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
     float vi4x2 = *i4; i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
 
-    float vi0x3;
-    float vi1x3;
-    float vi2x3;
-    float vi3x3;
-    float vi4x3;
-    if XNN_LIKELY(input_width > 1) {
-      vi0x3 = *i0; i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      vi1x3 = *i1; i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      vi2x3 = *i2; i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-      vi3x3 = *i3; i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-      vi4x3 = *i4; i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
-    }
 
     size_t k = input_width;
-    for (; k > 2; k -= 1) {
+    for (; k > 2; k -= 2) {
+      const float vi0x3 = *i0; i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
+      const float vi1x3 = *i1; i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
+      const float vi2x3 = *i2; i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
+      const float vi3x3 = *i3; i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
+      const float vi4x3 = *i4; i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+
       const float vi0x4 = *i0; i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
       const float vi1x4 = *i1; i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
       const float vi2x4 = *i2; i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
@@ -120,30 +138,25 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__scalar(
       const float vi4x4 = *i4; i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
 
       const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2 + vw4  * vi0x3 + vw5  * vi0x4;
-      vi0x0 = vi0x1;
-      vi0x1 = vi0x2;
-      vi0x2 = vi0x3;
-      vi0x3 = vi0x4;
+      vi0x0 = vi0x2;
+      vi0x1 = vi0x3;
+      vi0x2 = vi0x4;
       const float vrow1_accum = vw6  * vi1x0 + vw7  * vi1x1 + vw8  * vi1x2 + vw9  * vi1x3 + vw10 * vi1x4;
-      vi1x0 = vi1x1;
-      vi1x1 = vi1x2;
-      vi1x2 = vi1x3;
-      vi1x3 = vi1x4;
+      vi1x0 = vi1x2;
+      vi1x1 = vi1x3;
+      vi1x2 = vi1x4;
       const float vrow2_accum = vw11 * vi2x0 + vw12 * vi2x1 + vw13 * vi2x2 + vw14 * vi2x3 + vw15 * vi2x4;
-      vi2x0 = vi2x1;
-      vi2x1 = vi2x2;
-      vi2x2 = vi2x3;
-      vi2x3 = vi2x4;
+      vi2x0 = vi2x2;
+      vi2x1 = vi2x3;
+      vi2x2 = vi2x4;
       const float vrow3_accum = vw16 * vi3x0 + vw17 * vi3x1 + vw18 * vi3x2 + vw19 * vi3x3 + vw20 * vi3x4;
-      vi3x0 = vi3x1;
-      vi3x1 = vi3x2;
-      vi3x2 = vi3x3;
-      vi3x3 = vi3x4;
+      vi3x0 = vi3x2;
+      vi3x1 = vi3x3;
+      vi3x2 = vi3x4;
       const float vrow4_accum = vw21 * vi4x0 + vw22 * vi4x1 + vw23 * vi4x2 + vw24 * vi4x3 + vw25 * vi4x4;
-      vi4x0 = vi4x1;
-      vi4x1 = vi4x2;
-      vi4x2 = vi4x3;
-      vi4x3 = vi4x4;
+      vi4x0 = vi4x2;
+      vi4x1 = vi4x3;
+      vi4x2 = vi4x4;
 
       float voutput = (vw0 + vrow0_accum) + (vrow1_accum + vrow2_accum) + (vrow3_accum + vrow4_accum);
 
@@ -152,38 +165,27 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__scalar(
 
       *output0 = voutput; output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
     }
-    if XNN_LIKELY(k > 1) {
+    if XNN_UNPREDICTABLE(k == 2) {
+      const float vi0x3 = *i0;
+      const float vi1x3 = *i1;
+      const float vi2x3 = *i2;
+      const float vi3x3 = *i3;
+      const float vi4x3 = *i4;
+
       const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2 + vw4  * vi0x3;
-      vi0x0 = vi0x1;
-      vi0x1 = vi0x2;
-      vi0x2 = vi0x3;
       const float vrow1_accum = vw6  * vi1x0 + vw7  * vi1x1 + vw8  * vi1x2 + vw9  * vi1x3;
-      vi1x0 = vi1x1;
-      vi1x1 = vi1x2;
-      vi1x2 = vi1x3;
       const float vrow2_accum = vw11 * vi2x0 + vw12 * vi2x1 + vw13 * vi2x2 + vw14 * vi2x3;
-      vi2x0 = vi2x1;
-      vi2x1 = vi2x2;
-      vi2x2 = vi2x3;
       const float vrow3_accum = vw16 * vi3x0 + vw17 * vi3x1 + vw18 * vi3x2 + vw19 * vi3x3;
-      vi3x0 = vi3x1;
-      vi3x1 = vi3x2;
-      vi3x2 = vi3x3;
       const float vrow4_accum = vw21 * vi4x0 + vw22 * vi4x1 + vw23 * vi4x2 + vw24 * vi4x3;
-      vi4x0 = vi4x1;
-      vi4x1 = vi4x2;
-      vi4x2 = vi4x3;
 
       float voutput = (vw0 + vrow0_accum) + (vrow1_accum + vrow2_accum) + (vrow3_accum + vrow4_accum);
 
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput; output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
-      k -= 1;
+      *output0 = voutput;
     }
-    assert(k == 1);
-    {
+    else {
       const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2;
       const float vrow1_accum = vw6  * vi1x0 + vw7  * vi1x1 + vw8  * vi1x2;
       const float vrow2_accum = vw11 * vi2x0 + vw12 * vi2x1 + vw13 * vi2x2;
@@ -195,21 +197,28 @@ void xnn_f32_dwconv_spchw_ukernel_5x5p2__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput;;
+      *output0 = voutput;
     }
 
-    i0 = (const float*) ((uintptr_t) i1 - input_width_decrement_single);
-    i1 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
-    i2 = (const float*) ((uintptr_t) i2 + input_width_increment_single);
-    i3 = (const float*) ((uintptr_t) i3 + input_width_increment_single);
-    i4 = (const float*) ((uintptr_t) i4 + input_width_increment_single);
-    output0 = (float*) ((uintptr_t) output0 + output_width_increment_single);
+    i0 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
+    i1 = (const float*) ((uintptr_t) i2 + input_width_increment_single);
+    i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
+    i3 = (const float*) ((uintptr_t) i3 + input_width_increment);
+    i4 = (const float*) ((uintptr_t) i4 + input_width_increment);
+    output0 = (float*) ((uintptr_t) output0 + output_width_increment);
     m -= 1;
-    if (m <= 2) {
-      i4 = zero;
-    }
     if (m == 1) {
-      i3 = zero;
+      i4 = zero;
+      // we mimic the following logic:
+      // if (padding_top == 2 && input_height % 2 == 1) {
+      //   i3 = zero;
+      // } else if (padding_top == 1 && input_height % 2 == 0) {
+      //   i3 = zero;
+      // }
+      // with: padding_top - 1 == input_height % 2
+      if (padding_top - 1 == input_height % 2) {
+        i3 = zero;
+      }
     }
   } while (m > 0);
 }
