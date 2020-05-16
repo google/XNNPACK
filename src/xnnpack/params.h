@@ -1390,6 +1390,21 @@ struct spmm_parameters {
   uint8_t nr;
 };
 
+struct conv_parameters {
+  // Micro-kernel with symmetric SAME padding
+  xnn_conv_hwc_ukernel_function ukernel_with_same_padding;
+  // Micro-kernel with TF-style SAME padding (left padding one smaller than SAME).
+  xnn_conv_hwc_ukernel_function ukernel_with_tf_same_padding;
+  // Number of output channels in a tile.
+  // This parameter must be passed as is to weight packing function.
+  uint8_t output_channel_tile;
+  // Number of output height pixels in a tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  uint8_t output_height_tile;
+  // Number of output width pixes in a tile.
+  uint8_t output_width_tile;
+};
+
 struct hwc2spchw_dconv_parameters {
   xnn_conv_hwc2spchw_ukernel_function ukernel_with_symm_padding;
   // Number of output channels in a tile.
@@ -1530,6 +1545,8 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct dwconv_parameters dwconv[XNN_MAX_F32_DWCONV_UKERNELS];
+    // Direct 3x3 stride-2 Convolution with 3 input channels and SAME / TF-SAME padding.
+    struct conv_parameters conv3x3c3s2;
     struct avgpool_parameters avgpool;
     struct pavgpool_parameters pavgpool;
     struct gavgpool_parameters gavgpool;

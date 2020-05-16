@@ -44,7 +44,7 @@ static inline size_t compute_output_dimension_with_tf_same_padding(
   return divide_round_up(input_dimension, subsampling_dimension);
 }
 
-static const struct dwconv_parameters* find_dwigemm_ukernel(
+static const struct dwconv_parameters* find_dwconv_ukernel(
     size_t kernel_size,
     const struct dwconv_parameters* ukernel,
     size_t num_ukernels)
@@ -232,7 +232,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
   enum xnn_ukernel_type ukernel_type = xnn_ukernel_type_none;
   const struct dwconv_parameters* dwconv_parameters = NULL;
   if (group_input_channels == 1 && group_output_channels == 1 && groups > 1 &&
-      (dwconv_parameters = find_dwigemm_ukernel(kernel_size, xnn_params.q8.dwconv, XNN_MAX_Q8_DWCONV_UKERNELS)) != NULL)
+      (dwconv_parameters = find_dwconv_ukernel(kernel_size, xnn_params.q8.dwconv, XNN_MAX_Q8_DWCONV_UKERNELS)) != NULL)
   {
     ukernel_type = xnn_ukernel_type_dwconv;
   } else if (kernel_size == 1 && subsampling_height == 1 && subsampling_width == 1 && !any_padding) {
@@ -544,14 +544,25 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   if (group_input_channels == 1 && group_output_channels == 1 && kernel_size == 1 && unit_subsampling && !any_padding) {
     ukernel_type = xnn_ukernel_type_vmulcaddc;
   } else if (group_input_channels == 1 && group_output_channels == 1 && (dwconv_parameters =
-               find_dwigemm_ukernel(kernel_size, xnn_params.f32.dwconv, XNN_MAX_F32_DWCONV_UKERNELS)) != NULL)
+               find_dwconv_ukernel(kernel_size, xnn_params.f32.dwconv, XNN_MAX_F32_DWCONV_UKERNELS)) != NULL)
   {
     ukernel_type = xnn_ukernel_type_dwconv;
   } else if (kernel_size == 1 && unit_subsampling && !any_padding) {
     ukernel_type = xnn_ukernel_type_gemm;
   } else {
-    ukernel_type = xnn_ukernel_type_igemm;
+    const bool unit_dilation = (dilation_height | dilation_width) == 1;
+    const bool is_3x3s2 = kernel_height == 3 && kernel_width == 3 && (subsampling_width | subsampling_height) == 2;
+    if (group_input_channels == 3 && groups == 1 && input_pixel_stride == 3 && is_3x3s2 && unit_dilation &&
+      ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 ||
+        (input_padding_top <= 1 && input_padding_left <= 1 && input_padding_bottom == 1 && input_padding_right == 1)) &&
+      xnn_params.f32.conv3x3c3s2.ukernel_with_same_padding != NULL)
+    {
+      ukernel_type = xnn_ukernel_type_conv2d_hwc;
+    } else {
+      ukernel_type = xnn_ukernel_type_igemm;
+    }
   }
+
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
 
   size_t zero_size = 0;
@@ -612,6 +623,29 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
       };
 
       zero_size = sizeof(float) * c_stride;
+      break;
+    }
+    case xnn_ukernel_type_conv2d_hwc:
+    {
+      const size_t packed_output_channels = round_up_po2(group_output_channels, xnn_params.f32.conv3x3c3s2.output_channel_tile);
+      const size_t packed_weights_size = (kernel_size * group_input_channels + 1) * packed_output_channels * sizeof(float);
+      convolution_op->packed_weights = xnn_allocate_memory(packed_weights_size);
+      if (convolution_op->packed_weights == NULL) {
+        xnn_log_error("failed to allocate %zu bytes for packed weights", packed_weights_size);
+        goto error;
+      }
+
+      xnn_pack_f32_dconv_oki_w(
+        group_output_channels, group_input_channels, xnn_params.f32.conv3x3c3s2.output_channel_tile,
+        kernel_height, kernel_width,
+        kernel, bias, convolution_op->packed_weights);
+
+      convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d_hwc) {
+        .same_padding_function = xnn_params.f32.conv3x3c3s2.ukernel_with_same_padding,
+        .tf_same_padding_function = xnn_params.f32.conv3x3c3s2.ukernel_with_tf_same_padding,
+        .output_channel_tile = xnn_params.f32.conv3x3c3s2.output_channel_tile,
+        .output_height_tile = xnn_params.f32.conv3x3c3s2.output_height_tile,
+      };
       break;
     }
     case xnn_ukernel_type_gemm:
@@ -990,6 +1024,65 @@ static enum xnn_status setup_convolution2d_nhwc(
         convolution_op->compute.tile[0] = mr;
         convolution_op->compute.tile[1] = nc;
       }
+      convolution_op->state = xnn_run_state_ready;
+
+      return xnn_status_success;
+    }
+    case xnn_ukernel_type_conv2d_hwc:
+    {
+      if (input_width != convolution_op->last_input_width) {
+        const size_t zero_buffer_size = (input_width * convolution_op->group_input_channels << log2_input_element_size) + XNN_EXTRA_BYTES;
+        const void** zero_buffer = (const void**) xnn_reallocate_memory(convolution_op->zero_buffer, zero_buffer_size);
+        if (zero_buffer == NULL) {
+          xnn_log_error("failed to allocate %zu bytes for zero buffer", zero_buffer_size);
+          return xnn_status_out_of_memory;
+        }
+        convolution_op->zero_buffer = zero_buffer;
+        convolution_op->last_input_width = input_width;
+
+        memset(zero_buffer, 0, zero_buffer_size);
+      }
+
+      const size_t output_height = convolution_op->output_height;
+      const size_t output_width = convolution_op->output_width;
+
+      const size_t input_pixel_stride = convolution_op->input_pixel_stride << log2_input_element_size;
+      const size_t output_pixel_stride = convolution_op->output_pixel_stride << log2_output_element_size;
+      convolution_op->context.conv2d_hwc = (struct conv2d_hwc_context) {
+          .input_height = input_height,
+          .input_width = input_width,
+          .input = input,
+          .input_batch_stride = input_pixel_stride * input_height * input_width,
+          .zero = convolution_op->zero_buffer,
+          .packed_weights = convolution_op->packed_weights,
+          .output = output,
+          .output_batch_stride = output_pixel_stride * output_height * output_width,
+          .input_padding_top = convolution_op->padding_top,
+          .output_channels = convolution_op->group_output_channels,
+          .output_height_stride = output_pixel_stride * output_width,
+          .output_width_stride = output_pixel_stride,
+          .ukernel = (convolution_op->padding_left == convolution_op->kernel_width / 2) ?
+            convolution_op->ukernel.conv2d.same_padding_function :
+            convolution_op->ukernel.conv2d.tf_same_padding_function,
+      };
+      memcpy(&convolution_op->context.conv2d_hwc.params, params, sizeof(convolution_op->context.conv2d_hwc.params));
+
+      size_t output_height_tile = output_height;
+      if (num_threads > 1) {
+        const size_t target_tiles_per_thread = 5;
+        const size_t max_output_height_tile = divide_round_up(output_height * batch_size, num_threads * target_tiles_per_thread);
+        if (max_output_height_tile < output_height_tile) {
+          const uint32_t output_height_subtile = convolution_op->ukernel.conv2d.output_height_tile;
+          output_height_tile =
+            min(output_height_tile,
+              divide_round_up(output_height_tile, max_output_height_tile * output_height_subtile) * output_height_subtile);
+        }
+      }
+      convolution_op->compute.type = xnn_parallelization_type_2d_tile_1d;
+      convolution_op->compute.task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_conv2d_hwc;
+      convolution_op->compute.range[0] = batch_size;
+      convolution_op->compute.range[1] = output_height;
+      convolution_op->compute.tile[0] = output_height_tile;
       convolution_op->state = xnn_run_state_ready;
 
       return xnn_status_success;

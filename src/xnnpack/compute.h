@@ -301,6 +301,33 @@ struct subconv_context {
       size_t nr_block_size);
 #endif
 
+struct conv2d_hwc_context {
+  size_t input_height;
+  size_t input_width;
+  const void* input;
+  size_t input_batch_stride;
+  const void* zero;
+  const void* packed_weights;
+  void* output;
+  size_t output_batch_stride;
+  size_t input_padding_top;
+  size_t output_channels;
+  size_t output_height_stride;
+  size_t output_width_stride;
+  xnn_conv_hwc_ukernel_function ukernel;
+  union {
+    union xnn_f32_minmax_params f32;
+  } params;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_conv2d_hwc(
+      const struct conv2d_hwc_context context[restrict static 1],
+      size_t batch_index,
+      size_t output_y_start,
+      size_t output_y_slice);
+#endif
+
 struct dconv2d_context {
   size_t input_height;
   size_t input_width;

@@ -847,6 +847,14 @@ static void init(void) {
     xnn_params.f32.dwconv[2].channel_tile = 4;
     xnn_params.f32.dwconv[2].primary_tile = 25;
 
+    xnn_params.f32.conv3x3c3s2 = (struct conv_parameters) {
+      .ukernel_with_same_padding = (xnn_conv_hwc_ukernel_function) xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x2,
+      .ukernel_with_tf_same_padding = (xnn_conv_hwc_ukernel_function) xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neonfma_2x2,
+      .output_channel_tile = 4,
+      .output_height_tile = 1,
+      .output_width_tile = 1,
+    };
+
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
       .up = (xnn_avgpool_unipass_ukernel_function) xnn_f32_avgpool_minmax_ukernel_9x__neon_c4,
       .mp = (xnn_avgpool_multipass_ukernel_function) xnn_f32_avgpool_minmax_ukernel_9p8x__neon_c4,
