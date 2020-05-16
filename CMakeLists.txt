@@ -2250,14 +2250,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-dwconv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-dwconv-minmax-test f32-dwconv-minmax-test)
 
-  ADD_EXECUTABLE(f32-gavgpool-chw-test test/f32-gavgpool-chw.cc)
-  SET_TARGET_PROPERTIES(f32-gavgpool-chw-test PROPERTIES
+  ADD_EXECUTABLE(f32-gavgpool-cw-test test/f32-gavgpool-cw.cc)
+  SET_TARGET_PROPERTIES(f32-gavgpool-cw-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-chw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-gavgpool-chw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-gavgpool-chw-test f32-gavgpool-chw-test)
+  TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-cw-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-gavgpool-cw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-gavgpool-cw-test f32-gavgpool-cw-test)
 
   ADD_EXECUTABLE(f32-gavgpool-minmax-test test/f32-gavgpool-minmax.cc)
   SET_TARGET_PROPERTIES(f32-gavgpool-minmax-test PROPERTIES
