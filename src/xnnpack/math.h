@@ -70,11 +70,23 @@ inline static uint32_t math_max_u32(uint32_t a, uint32_t b) {
 }
 
 inline static float math_min_f32(float a, float b) {
-  return XNN_UNPREDICTABLE(b < a) ? b : a;
+  #if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
+    return __builtin_fminf(a, b);
+  #elif defined(__clang__) && defined(__riscv)
+    return __builtin_fminf(a, b);
+  #else
+    return XNN_UNPREDICTABLE(b < a) ? b : a;
+  #endif
 }
 
 inline static float math_max_f32(float a, float b) {
-  return XNN_UNPREDICTABLE(b < a) ? a : b;
+  #if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
+    return __builtin_fmaxf(a, b);
+  #elif defined(__clang__) && defined(__riscv)
+    return __builtin_fmaxf(a, b);
+  #else
+    return XNN_UNPREDICTABLE(b < a) ? a : b;
+  #endif
 }
 
 inline static float math_nonsign_mask_f32() {
