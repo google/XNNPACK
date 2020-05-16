@@ -25,6 +25,7 @@ enum xnn_ukernel_type {
   xnn_ukernel_type_binary_elementwise,
   xnn_ukernel_type_channel_shuffle,
   xnn_ukernel_type_clamp,
+  xnn_ukernel_type_conv2d_hwc,
   xnn_ukernel_type_dconv2d_hwc2spchw,
   xnn_ukernel_type_dwconv,
   xnn_ukernel_type_gemm,
@@ -94,6 +95,13 @@ struct xnn_ukernel_dconv2d {
   uint8_t output_channel_tile;
 };
 
+struct xnn_ukernel_conv2d_hwc {
+  xnn_conv_hwc_ukernel_function same_padding_function;
+  xnn_conv_hwc_ukernel_function tf_same_padding_function;
+  uint8_t output_height_tile;
+  uint8_t output_channel_tile;
+};
+
 struct xnn_ukernel_dwconv {
   union {
     xnn_dwconv_unipass_ukernel_function unipass_function;
@@ -142,6 +150,7 @@ struct xnn_ukernel_vmulcaddc {
 struct xnn_ukernel {
   enum xnn_ukernel_type type;
   union {
+    struct xnn_ukernel_conv2d_hwc conv2d;
     struct xnn_ukernel_dconv2d dconv2d;
     struct xnn_ukernel_dwconv dwconv;
     struct xnn_ukernel_dwconv2d dwconv2d;
@@ -272,6 +281,7 @@ struct xnn_operator {
     struct average_pooling_context average_pooling;
     struct channel_pad_context channel_pad;
     struct channel_shuffle_context channel_shuffle;
+    struct conv2d_hwc_context conv2d_hwc;
     struct dconv2d_context dconv2d;
     struct dwconv2d_context dwconv2d;
     struct dwconv_context dwconv;
