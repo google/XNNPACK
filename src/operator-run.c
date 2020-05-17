@@ -325,6 +325,8 @@ void xnn_compute_dwconv_unipass(
     (void*) ((uintptr_t) context->output + output_y * context->output_row_stride),
     context->indirection_buffer_col_stride,
     context->output_col_increment,
+    context->input_offset,
+    context->zero,
     &context->params);
 }
 
@@ -375,7 +377,7 @@ void xnn_compute_argmax_pooling_multipass(
 {
   const void** indirect_input = (const void**) ((uintptr_t) context->indirect_input +
     output_y * context->indirect_input_height_stride);
-  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;  
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
   void* output = (void*) ((uintptr_t) context->output +
     batch_index * context->output_batch_stride + output_y * context->output_height_stride);
   uint32_t* index = (uint32_t*) ((uintptr_t) context->index +

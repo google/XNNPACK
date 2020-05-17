@@ -138,7 +138,7 @@ static void DWConvBenchmark(benchmark::State& state,
         w.data() + buffer_index * w_elements,
         c.data() + buffer_index * c_elements + y * output_width * channels,
         kernel_height * step_width * sizeof(void*), 0,
-        &params);
+        0, z.data(), &params);
     }
   }
 

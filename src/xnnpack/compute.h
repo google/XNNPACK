@@ -340,6 +340,8 @@ struct dwconv_context {
   size_t output_width;
   size_t output_row_stride;
   size_t output_col_increment;
+  size_t input_offset;
+  const void* zero;
   union {
     union xnn_q8_gemm_params q8;
     union xnn_f32_minmax_params f32;

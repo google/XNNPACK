@@ -753,6 +753,8 @@ typedef void (*xnn_dwconv_unipass_ukernel_function)(
     void* output,
     size_t input_stride,
     size_t output_increment,
+    size_t input_offset,
+    const void* zero,
     const void* params);
 
 typedef void (*xnn_f32_dwconv_unipass_ukernel_function)(
@@ -763,6 +765,8 @@ typedef void (*xnn_f32_dwconv_unipass_ukernel_function)(
     float* output,
     size_t input_stride,
     size_t output_increment,
+    size_t input_offset,
+    const float* zero,
     const union xnn_f32_default_params* params);
 
 typedef void (*xnn_f32_dwconv_minmax_unipass_ukernel_function)(
@@ -773,6 +777,8 @@ typedef void (*xnn_f32_dwconv_minmax_unipass_ukernel_function)(
     float* output,
     size_t input_stride,
     size_t output_increment,
+    size_t input_offset,
+    const float* zero,
     const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_q8_dwconv_minmax_unipass_ukernel_function)(
@@ -783,6 +789,8 @@ typedef void (*xnn_q8_dwconv_minmax_unipass_ukernel_function)(
     uint8_t* output,
     size_t input_stride,
     size_t output_increment,
+    size_t input_offset,
+    const uint8_t* zero,
     const union xnn_q8_gemm_params* params);
 
 typedef void (*xnn_dwconv_multipass_ukernel_function)(
@@ -794,6 +802,8 @@ typedef void (*xnn_dwconv_multipass_ukernel_function)(
     void* output,
     size_t input_stride,
     size_t output_increment,
+    size_t input_offset,
+    const void* zero,
     const void* params);
 
 typedef void (*xnn_f32_ibilinear_ukernel_function)(

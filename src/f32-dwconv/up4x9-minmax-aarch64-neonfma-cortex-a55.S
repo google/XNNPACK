@@ -6,23 +6,33 @@
 #include <xnnpack/assembly.h>
 
 # void xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55(
-#     size_t channels,
-#     size_t output_width,
-#     const float** input,
-#     const float* weights,
-#     float* output,
-#     size_t input_stride,
-#     size_t output_increment,
-#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+#     size_t channels,                   x0
+#     size_t output_width,               x1
+#     const float** input,               x2
+#     const float* weights,              x3
+#     float* output,                     x4
+#     size_t input_stride,               x5
+#     size_t output_increment,           x6
+#     size_t input_offset,               (x7) -> x20
+#     const float* zero,                 [sp + 64] -> x19
+#     const xnn_f32_minmax_params params [sp + 72] -> (x20)
+
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved on iOS.
+
 BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
 
-        # Save d10-d15 on stack
-        STP d10, d11, [sp, -48]!
-        STP d12, d13, [sp, 16]
-        STP d14, d15, [sp, 32]
+        # Save x19-x20,d10-d15 on stack
+        STP x19, x20, [sp, -64]!
+        STP d10, d11, [sp, 16]
+        STP d12, d13, [sp, 32]
+        STP d14, d15, [sp, 48]
+
+        # Load zero, params pointer
+        LDP x19, x20, [sp, 64]
 
         # Load min/max values
-        LD2R {v30.4s, v31.4s}, [x7]
+        LD2R {v30.4s, v31.4s}, [x20]
+        MOV x20, x7                     // input_offset
 
 0:
         #  x7 := i0
@@ -39,6 +49,35 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
         LDP x13, x14, [x2, 48]
         # x15 := i8
         LDR x15, [x2, 64]
+
+        CMP x7, x19               // if i0 == zero
+        ADD x7, x7, x20           // i0 += input_offset
+        CSEL x7, x19, x7, EQ      //   i0 = zero, else += i0 + input_offset
+        CMP x8, x19               // if i1 == zero
+        ADD x8, x8, x20           // i1 += input_offset
+        CSEL x8, x19, x8, EQ      //   i1 = zero, else += i1 + input_offset
+        CMP x9, x19               // if i2 == zero
+        ADD x9, x9, x20           // i2 += input_offset
+        CSEL x9, x19, x9, EQ      //   i2 = zero, else += i2 + input_offset
+        CMP x10, x19              // if i3 == zero
+        ADD x10, x10, x20         // i3 += input_offset
+        CSEL x10, x19, x10, EQ    //   i3 = zero, else += i3 + input_offset
+        CMP x11, x19              // if i4 == zero
+        ADD x11, x11, x20         // i4 += input_offset
+        CSEL x11, x19, x11, EQ    //   i4 = zero, else += i4 + input_offset
+        CMP x12, x19              // if i5 == zero
+        ADD x12, x12, x20         // i5 += input_offset
+        CSEL x12, x19, x12, EQ    //   i5 = zero, else += i5 + input_offset
+        CMP x13, x19              // if i6 == zero
+        ADD x13, x13, x20         // i6 += input_offset
+        CSEL x13, x19, x13, EQ    //   i6 = zero, else += i6 + input_offset
+        CMP x14, x19              // if i7 == zero
+        ADD x14, x14, x20         // i7 += input_offset
+        CSEL x14, x19, x14, EQ    //   i7 = zero, else += i7 + input_offset
+        CMP x15, x19              // if i8 == zero
+        ADD x15, x15, x20         // i8 += input_offset
+        CSEL x15, x19, x15, EQ    //   i8 = zero, else += i8 + input_offset
+
         # input += input_stride
         ADD x2, x2, x5
 
@@ -813,10 +852,11 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
         # process next pixel if output_width != 0
         B.NE 0b
 
-        # Restore d10-d15 from stack
-        LDP d14, d15, [sp, 32]
-        LDP d12, d13, [sp, 16]
-        LDP d10, d11, [sp], 48
+        # Restore x19-x20,d10-d15 from stack
+        LDP d14, d15, [sp, 48]
+        LDP d12, d13, [sp, 32]
+        LDP d10, d11, [sp, 16]
+        LDP x19, x20, [sp], 64
         RET
 
 END_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55

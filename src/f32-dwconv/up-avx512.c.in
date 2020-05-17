@@ -23,6 +23,8 @@ void xnn_f32_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx512f${""
     float* output,
     size_t input_stride,
     size_t output_increment,
+    size_t input_offset,
+    const float* zero,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(channels != 0);
@@ -34,6 +36,9 @@ void xnn_f32_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx512f${""
     $for K in range(KERNEL_TILE):
       const float* i${K} = input[${K}];
       assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != zero) {
+        i${K} = (const float*) ((uintptr_t) i${K} + input_offset);
+      }
     input = (const float**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;

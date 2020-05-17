@@ -251,8 +251,36 @@ $if DATATYPE == "q8":
         .Test(${", ".join(TEST_ARGS)});
     }
   }
-"""
 
+TEST(${TEST_NAME}, input_offset) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (uint32_t channels = ${ADJCBLOCK + CBLOCK}; channels < ${CR * 16}; channels += ${CR * 3}) {
+    DWConvMicrokernelTester()
+      .cr(${CR})
+      .kr(${KR})
+      .channels(channels)
+      .input_offset(${next_prime(CR + 1) * 16})
+      .Test(${", ".join(TEST_ARGS)});
+  }
+}
+
+TEST(${TEST_NAME}, zero) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (uint32_t mz = 0; mz < ${KR}; mz++) {
+    for (uint32_t channels = ${ADJCBLOCK + CBLOCK}; channels < ${CR * 16}; channels += ${CR * 3}) {
+      DWConvMicrokernelTester()
+        .cr(${CR})
+        .kr(${KR})
+        .channels(channels)
+        .input_offset(${next_prime(CR + 1) * 16})
+        .zero_index(mz)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+}
+"""
 
 def generate_test_cases(ukernel, cr, kr, c_block, is_pipelined, isa):
   """Generates all tests cases for a DWCONV micro-kernel.

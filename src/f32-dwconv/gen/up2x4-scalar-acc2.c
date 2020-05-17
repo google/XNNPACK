@@ -21,6 +21,8 @@ void xnn_f32_dwconv_ukernel_up2x4__scalar_acc2(
     float* output,
     size_t input_stride,
     size_t output_increment,
+    size_t input_offset,
+    const float* zero,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(channels != 0);
@@ -29,12 +31,24 @@ void xnn_f32_dwconv_ukernel_up2x4__scalar_acc2(
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);
+    if XNN_UNPREDICTABLE(i0 != zero) {
+      i0 = (const float*) ((uintptr_t) i0 + input_offset);
+    }
     const float* i1 = input[1];
     assert(i1 != NULL);
+    if XNN_UNPREDICTABLE(i1 != zero) {
+      i1 = (const float*) ((uintptr_t) i1 + input_offset);
+    }
     const float* i2 = input[2];
     assert(i2 != NULL);
+    if XNN_UNPREDICTABLE(i2 != zero) {
+      i2 = (const float*) ((uintptr_t) i2 + input_offset);
+    }
     const float* i3 = input[3];
     assert(i3 != NULL);
+    if XNN_UNPREDICTABLE(i3 != zero) {
+      i3 = (const float*) ((uintptr_t) i3 + input_offset);
+    }
     input = (const float**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;

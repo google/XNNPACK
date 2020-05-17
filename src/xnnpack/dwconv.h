@@ -27,6 +27,8 @@ extern "C" {
     float* output,                                           \
     size_t input_stride,                                     \
     size_t output_increment,                                 \
+    size_t input_offset,                                     \
+    const float* zero,                                       \
     const union xnn_f32_default_params* params);
 
 #define DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(fn_name) \
@@ -38,6 +40,8 @@ extern "C" {
     float* output,                                                  \
     size_t input_stride,                                            \
     size_t output_increment,                                        \
+    size_t input_offset,                                            \
+    const float* zero,                                              \
     const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_up4x4__neon)
@@ -199,6 +203,8 @@ DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel
     uint8_t* output,                                               \
     size_t input_stride,                                           \
     size_t output_increment,                                       \
+    size_t input_offset,                                           \
+    const uint8_t* zero,                                           \
     const union xnn_q8_gemm_params* params);
 
 DECLARE_Q8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_q8_dwconv_minmax_ukernel_up1x9__scalar)
