@@ -32,14 +32,14 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1(
   const size_t input_height_stride = input_width * 3 /* channels */ * sizeof(float);
   const size_t input_width_decrement = round_down_po2(input_width, 2) * 3 /* channels */ * sizeof(float);
   const size_t output_width = (input_width + 1) / 2;
-  const size_t output_channel_increment = 4 * sizeof(float) - output_width * output_width_stride;
-
+  const size_t output_channel_decrement = output_width * output_width_stride - 4 * sizeof(float);
+  const size_t output_height_increment = output_height_stride - round_up_po2(output_channels, 4) * sizeof(float);
 
   // Adjustment for padding processed below
   const float* i0 = (const float*) ((uintptr_t) input + input_height_stride * (output_y_start * 2 - input_padding_top));
   const float* i1 = (const float*) ((uintptr_t) i0 + input_height_stride);
   const float* i2 = (const float*) ((uintptr_t) i1 + input_height_stride);
-  float* output0 = (float*) ((uintptr_t) output + output_height_stride * output_y_start);
+  float* o0 = (float*) ((uintptr_t) output + output_height_stride * output_y_start);
 
   if XNN_UNPREDICTABLE(output_y_start < input_padding_top) {
     i0 = zero;
@@ -56,7 +56,6 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1(
 
     const float* w = weights;
     size_t c = output_channels;
-    float* o0 = output0;
     do {
       float vi00c0 = 0.0f;
       float vi00c1 = 0.0f;
@@ -665,7 +664,7 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1(
       }
       // Move output pointers back to the position of the first pixel in a row,
       // and forward to the next block of output channels
-      o0 = (float*) ((uintptr_t) o0 + output_channel_increment);
+      o0 = (float*) ((uintptr_t) o0 - output_channel_decrement);
       // Revert input pointers to the position of the first pixel in a row
       i0 = (const float*) ((uintptr_t) i0 - input_width_decrement);
       i1 = (const float*) ((uintptr_t) i1 - input_width_decrement);
@@ -674,8 +673,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1(
       w += 112;
       c = doz(c, 4);
     } while (c != 0);
-    // Move output pointers forward to the next row
-    output0 = (float*) ((uintptr_t) output0 + output_height_stride);
+    // Move output pointers back to the position of the first channel, and forward to the next block of rows
+    o0 = (float*) ((uintptr_t) o0 + output_height_increment);
     // Move input pointers forward to the next row
     i0 = i2;
     i1 = (const float*) ((uintptr_t) i0 + input_height_stride);

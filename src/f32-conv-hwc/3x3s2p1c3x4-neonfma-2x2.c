@@ -34,7 +34,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x2(
   const size_t input_height_stride = input_width * 3 /* channels */ * sizeof(float);
   const size_t input_width_decrement = input_width * 3 /* channels */ * sizeof(float);
   const size_t output_width = (input_width + 1) / 2;
-  const size_t output_channel_increment = 4 * sizeof(float) - output_width * output_width_stride;
+  const size_t output_channel_decrement = output_width * output_width_stride - 4 * sizeof(float);
+  const size_t output_height_increment = output_height_stride * 2 - round_up_po2(output_channels, 4) * sizeof(float);
 
   // Adjustment for padding processed below
   const float* i0 = (const float*) ((uintptr_t) input + input_height_stride * (output_y_start * 2 - input_padding_top));
@@ -42,8 +43,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x2(
   const float* i2 = (const float*) ((uintptr_t) i1 + input_height_stride);
   const float* i3 = (const float*) ((uintptr_t) i2 + input_height_stride);
   const float* i4 = (const float*) ((uintptr_t) i3 + input_height_stride);
-  float* output0 = (float*) ((uintptr_t) output + output_height_stride * output_y_start);
-  float* output1 = (float*) ((uintptr_t) output0 + output_height_stride);
+  float* o0 = (float*) ((uintptr_t) output + output_height_stride * output_y_start);
+  float* o1 = (float*) ((uintptr_t) o0 + output_height_stride);
 
   if XNN_UNPREDICTABLE(output_y_start < input_padding_top) {
     i0 = zero;
@@ -65,13 +66,11 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x2(
       i4 = zero;
     }
     if XNN_UNPREDICTABLE(output_y + 2 > output_y_end) {
-      output1 = output0;
+      o1 = o0;
     }
 
     const float* w = weights;
     size_t c = output_channels;
-    float* o0 = output0;
-    float* o1 = output1;
     do {
       // viMx0 = ( iM0c2, iM0c1, iM0c0, --- )
       float32x4_t vi0x0 = vmovq_n_f32(0.0f);
@@ -675,8 +674,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x2(
       }
       // Move output pointers back to the position of the first pixel in a row,
       // and forward to the next block of output channels
-      o0 = (float*) ((uintptr_t) o0 + output_channel_increment);
-      o1 = (float*) ((uintptr_t) o1 + output_channel_increment);
+      o0 = (float*) ((uintptr_t) o0 - output_channel_decrement);
+      o1 = (float*) ((uintptr_t) o1 - output_channel_decrement);
       // Revert input pointers to the position of the first pixel in a row
       i0 = (const float*) ((uintptr_t) i0 - input_width_decrement);
       i1 = (const float*) ((uintptr_t) i1 - input_width_decrement);
@@ -687,9 +686,9 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x2(
       w += 112;
       c = doz(c, 4);
     } while (c != 0);
-    // Move output pointers forward to the next two rows
-    output0 = (float*) ((uintptr_t) output1 + output_height_stride);
-    output1 = (float*) ((uintptr_t) output0 + output_height_stride);
+    // Move output pointers back to the position of the first channel, and forward to the next block of rows
+    o0 = (float*) ((uintptr_t) o0 + output_height_increment);
+    o1 = (float*) ((uintptr_t) o1 + output_height_increment);
     // Move input pointers forward to the next four rows
     i0 = i4;
     i1 = (const float*) ((uintptr_t) i0 + input_height_stride);
