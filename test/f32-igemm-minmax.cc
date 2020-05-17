@@ -3515,7 +3515,7 @@
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_ARM
+#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   TEST(F32_IGEMM_MINMAX_4X8__AARCH32_NEON_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -3980,10 +3980,10 @@
       .cm_stride(11)
       .Test(xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64);
   }
-#endif  // XNN_ARCH_ARM
+#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_ARM
+#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   TEST(F32_IGEMM_MINMAX_4X8__AARCH32_NEON_CORTEX_A75, k_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -4479,7 +4479,7 @@
       .cm_stride(11)
       .Test(xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a75);
   }
-#endif  // XNN_ARCH_ARM
+#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ARCH_ARM
