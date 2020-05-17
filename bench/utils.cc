@@ -165,6 +165,14 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
 }
 
 
+bool CheckVFP(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !(cpuinfo_has_arm_vfpv2() || cpuinfo_has_arm_vfpv3())) {
+    state.SkipWithError("no VFP extension");
+    return false;
+  }
+  return true;
+}
+
 bool CheckNEON(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon()) {
     state.SkipWithError("no NEON extension");
