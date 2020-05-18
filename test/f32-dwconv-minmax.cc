@@ -20,7 +20,7 @@
 #include "dwconv-microkernel-tester.h"
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(F32_DWCONV_MINMAX_UP4X9__AARCH64_NEONFMA, c_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvMicrokernelTester()
@@ -203,7 +203,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
