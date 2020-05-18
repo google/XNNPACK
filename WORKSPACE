@@ -61,13 +61,14 @@ http_archive(
     build_file = "@//third_party:clog.BUILD",
 )
 
+
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    strip_prefix = "cpuinfo-2b14e445016dd46f7de821cdf3093e2823b9ab21",
-    sha256 = "599ec5036fd225de01a866e7226ba6a5bca480d841ff0a0bede9138db7a655be",
+    strip_prefix = "cpuinfo-c2092219e7c874783a00a62edb94ddc672f57ab3",
+    sha256 = "ea56c399a4f6ca5f749e71acb6a7bfdc653eb65d8f658cb2e414a2fcdca1fe8b",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/2b14e445016dd46f7de821cdf3093e2823b9ab21.zip",
+        "https://github.com/pytorch/cpuinfo/archive/c2092219e7c874783a00a62edb94ddc672f57ab3.zip",
     ],
     build_file = "@//third_party:cpuinfo.BUILD",
     patches = ["@//third_party:cpuinfo.patch"],
