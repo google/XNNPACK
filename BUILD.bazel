@@ -1561,6 +1561,7 @@ AVX512F_UKERNELS = [
 ]
 
 AARCH32_ASM_UKERNELS = [
+    "src/f32-gemm/4x4-aarch32-vfp-ld64.S",
     "src/f32-gemm/4x4-minmax-aarch32-vfp-ld64.S",
     "src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S",
     "src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a55.S",

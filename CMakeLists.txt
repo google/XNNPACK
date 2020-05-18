@@ -1560,6 +1560,7 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/math/extexp-avx512f-p5.c)
 
 SET(XNNPACK_AARCH32_ASM_MICROKERNEL_SRCS
+  src/f32-gemm/4x4-aarch32-vfp-ld64.S
   src/f32-gemm/4x4-minmax-aarch32-vfp-ld64.S
   src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S
   src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a55.S

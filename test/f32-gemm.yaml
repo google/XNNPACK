@@ -2,6 +2,9 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+- name: xnn_f32_gemm_ukernel_4x4__aarch32_vfp_ld64
+  k-block: 2
+  assembly: true
 - name: xnn_f32_gemm_ukernel_1x4__wasm
   k-block: 1
 - name: xnn_f32_gemm_ukernel_2x4__wasm
