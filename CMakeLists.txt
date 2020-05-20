@@ -382,6 +382,8 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/u8-lut32norm/scalar.c
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c
+  src/x32-fill/scalar-float.c
+  src/x32-fill/scalar-int.c
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
@@ -493,6 +495,7 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsubc-minmax-psimd-x8.c
   src/f32-vmulcaddc/gen/c4-minmax-psimd-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-psimd-2x.c
+  src/x32-fill/psimd.c
   src/x32-packx/x4-psimd.c
   src/x32-pad/x2-psimd.c
   src/x32-unpool/psimd.c
@@ -691,6 +694,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/u8-clamp/neon-x64.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
+  src/x32-fill/neon.c
   src/x32-packx/x4-neon-st4.c
   src/x32-pad/x2-neon.c
   src/x32-unpool/neon.c
@@ -1107,6 +1111,7 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsubc-minmax-sse-x8.c
   src/f32-vmulcaddc/gen/c4-minmax-sse-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-sse-2x.c
+  src/x32-fill/sse.c
   src/x32-packx/x4-sse.c
   src/math/roundne-sse-addsub.c
   src/math/roundd-sse-addsub.c
@@ -2827,6 +2832,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(u8-rmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(u8-rmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(u8-rmax-test u8-rmax-test)
+
+  ADD_EXECUTABLE(x32-fill-test test/x32-fill.cc)
+  SET_TARGET_PROPERTIES(x32-fill-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x32-fill-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(x32-fill-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(x32-fill-test x32-fill-test)
 
   ADD_EXECUTABLE(x32-packx-test test/x32-packx.cc)
   SET_TARGET_PROPERTIES(x32-packx-test PROPERTIES

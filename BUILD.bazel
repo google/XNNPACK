@@ -262,6 +262,8 @@ SCALAR_UKERNELS = [
     "src/u8-lut32norm/scalar.c",
     "src/u8-maxpool/9p8x-minmax-scalar-c1.c",
     "src/u8-rmax/scalar.c",
+    "src/x32-fill/scalar-float.c",
+    "src/x32-fill/scalar-int.c",
     "src/x32-packx/x2-scalar.c",
     "src/x32-packx/x3-scalar.c",
     "src/x32-packx/x4-scalar.c",
@@ -478,6 +480,7 @@ PSIMD_FASTMATH_UKERNELS = [
     "src/f32-vbinary/gen/vsubc-minmax-psimd-x8.c",
     "src/f32-vmulcaddc/gen/c4-minmax-psimd-2x.c",
     "src/f32-vmulcaddc/gen/c8-minmax-psimd-2x.c",
+    "src/x32-fill/psimd.c",
     "src/x32-packx/x4-psimd.c",
     "src/x32-pad/x2-psimd.c",
     "src/x32-unpool/psimd.c",
@@ -683,6 +686,7 @@ NEON_UKERNELS = [
     "src/u8-clamp/neon-x64.c",
     "src/u8-maxpool/9p8x-minmax-neon-c16.c",
     "src/u8-rmax/neon.c",
+    "src/x32-fill/neon.c",
     "src/x32-packx/x4-neon-st4.c",
     "src/x32-pad/x2-neon.c",
     "src/x32-unpool/neon.c",
@@ -1108,6 +1112,7 @@ SSE_UKERNELS = [
     "src/f32-vbinary/gen/vsubc-minmax-sse-x8.c",
     "src/f32-vmulcaddc/gen/c4-minmax-sse-2x.c",
     "src/f32-vmulcaddc/gen/c8-minmax-sse-2x.c",
+    "src/x32-fill/sse.c",
     "src/x32-packx/x4-sse.c",
     "src/math/roundne-sse-addsub.c",
     "src/math/roundd-sse-addsub.c",
@@ -1678,6 +1683,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/dwconv.h",
     "src/xnnpack/gavgpool.h",
     "src/xnnpack/gemm.h",
+    "src/xnnpack/fill.h",
     "src/xnnpack/hswish.h",
     "src/xnnpack/ibilinear.h",
     "src/xnnpack/igemm.h",
@@ -3426,6 +3432,15 @@ xnnpack_unit_test(
     srcs = [
         "test/u8-rmax.cc",
         "test/rmax-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "x32_fill_test",
+    srcs = [
+        "test/x32-fill.cc",
+        "test/fill-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

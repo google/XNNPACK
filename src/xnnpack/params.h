@@ -651,6 +651,20 @@ typedef void (*xnn_x32_packx_ukernel_function)(
     size_t x_stride,
     uint32_t* y);
 
+typedef void (*xnn_fill_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    void* output,
+    size_t output_stride,
+    const void* fill_value);
+
+typedef void (*xnn_x32_fill_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    uint32_t* output,
+    size_t output_stride,
+    const uint32_t* fill_value);
+
 typedef void (*xnn_pad_ukernel_function)(
     size_t m,
     size_t n,
