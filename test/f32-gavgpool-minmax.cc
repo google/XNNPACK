@@ -240,6 +240,7 @@
       GAvgPoolMicrokernelTester()
         .rows(rows)
         .channels(4)
+        .input_stride(11)
         .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__neon_c4);
     }
   }
