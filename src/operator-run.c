@@ -605,6 +605,44 @@ void xnn_compute_prelu(
   context->ukernel(batch_range, context->n, x, x_stride, context->w, y, y_stride);
 }
 
+void xnn_compute_pad_5d(
+    const struct pad_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t i, size_t j, size_t k, size_t l, size_t m,
+    size_t l_range, size_t m_range)
+{
+  assert(l_range == 1);
+  assert(m_range == 1);
+
+  const void* input = (const void*) ((uintptr_t) context->input +
+    i * context->input_stride[4] + j * context->input_stride[3] + k * context->input_stride[2] + l * context->input_stride[1] + m * context->input_stride[0]);
+  void* output = (void*) ((uintptr_t) context->output +
+    i * context->output_stride[4] + j * context->output_stride[3] + k * context->output_stride[2] + l * context->output_stride[1] + m * context->output_stride[0]);
+
+  const size_t i_padding = context->pre_paddings[5];
+  const size_t j_padding = context->pre_paddings[4];
+  const size_t k_padding = context->pre_paddings[3];
+  const size_t l_padding = context->pre_paddings[2];
+  const size_t m_padding = context->pre_paddings[1];
+
+  const size_t i_size = context->input_size[5];
+  const size_t j_size = context->input_size[4];
+  const size_t k_size = context->input_size[3];
+  const size_t l_size = context->input_size[2];
+  const size_t m_size = context->input_size[1];
+
+  if XNN_LIKELY(i - i_padding < i_size && j - j_padding < j_size && k - k_padding < k_size &&
+                l - l_padding < l_size && m - m_padding < m_size)
+  {
+    context->pad_ukernel(
+      1 /* rows */,
+      context->input_size[0], context->pre_paddings[0], context->post_paddings[0],
+      context->padding_value,
+      input, 0 /* input stride */, output, 0 /* output stride */);
+  } else {
+    context->fill_ukernel(1 /* rows */, context->output_size[0], output, 0 /* output stride */, &context->padding_value);
+  }
+}
+
 void xnn_compute_channel_pad(
     const struct channel_pad_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_start,

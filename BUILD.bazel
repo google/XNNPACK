@@ -66,6 +66,7 @@ OPERATOR_SRCS = [
     "src/operators/hardswish-nc.c",
     "src/operators/leaky-relu-nc.c",
     "src/operators/max-pooling-nhwc.c",
+    "src/operators/pad-nd.c",
     "src/operators/prelu-nc.c",
     "src/operators/resize-bilinear-nhwc.c",
     "src/operators/sigmoid-nc.c",
@@ -3702,6 +3703,15 @@ xnnpack_unit_test(
     srcs = [
         "test/binary-elementwise-operator-tester.h",
         "test/multiply-nd.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "pad_nd_test",
+    srcs = [
+        "test/pad-nd.cc",
+        "test/pad-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )

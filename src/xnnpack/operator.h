@@ -75,6 +75,7 @@ enum xnn_operator_type {
   xnn_operator_type_maximum_nd_f32,
   xnn_operator_type_minimum_nd_f32,
   xnn_operator_type_multiply_nd_f32,
+  xnn_operator_type_pad_nd_x32,
   xnn_operator_type_prelu_nc_f32,
   xnn_operator_type_resize_bilinear_nhwc_f32,
   xnn_operator_type_sigmoid_nc_f32,
@@ -283,6 +284,7 @@ struct xnn_operator {
     struct lut_contiguous_context lut_contiguous;
     struct lut_strided_context lut_strided;
     struct max_pooling_context max_pooling;
+    struct pad_context pad;
     struct pixelwise_average_pooling_context pixelwise_average_pooling;
     struct prelu_context prelu;
     struct resize_bilinear_context resize_bilinear;

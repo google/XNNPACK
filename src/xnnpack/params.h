@@ -1515,6 +1515,13 @@ struct prelu_parameters {
   uint16_t channel_tile;
 };
 
+struct fill_parameters {
+  xnn_fill_ukernel_function ukernel;
+  // Number of rows of inputs processed in one tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  uint8_t row_tile;
+};
+
 struct pad_parameters {
   xnn_pad_ukernel_function ukernel;
   uint8_t mr;
@@ -1595,6 +1602,7 @@ struct xnn_parameters {
   } f32;
   struct {
     struct pad_parameters pad;
+    struct fill_parameters fill;
     xnn_unpool_ukernel_function unpool;
     struct zip_parameters zip;
   } x32;

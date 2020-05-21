@@ -31,6 +31,7 @@
 #include <xnnpack/dwconv.h>
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/fill.h>
 #include <xnnpack/hswish.h>
 #include <xnnpack/ibilinear.h>
 #include <xnnpack/igemm.h>
@@ -348,6 +349,10 @@ static void init(void) {
 
     /**************************** X32 micro-kernels ****************************/
     #ifndef XNN_NO_X32_OPERATORS
+      xnn_params.x32.fill = (struct fill_parameters) {
+        .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__neon,
+        .row_tile = 1,
+      };
       xnn_params.x32.pad = (struct pad_parameters) {
         .ukernel = xnn_x32_pad_x2__neon,
         .mr = 2,
@@ -591,6 +596,10 @@ static void init(void) {
 
     /**************************** X32 micro-kernels ****************************/
     #ifndef XNN_NO_X32_OPERATORS
+      xnn_params.x32.fill = (struct fill_parameters) {
+        .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__scalar_int,
+        .row_tile = 1,
+      };
       xnn_params.x32.pad = (struct pad_parameters) {
         .ukernel = xnn_x32_pad_x2__scalar,
         .mr = 2,
@@ -994,6 +1003,10 @@ static void init(void) {
 
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
+    xnn_params.x32.fill = (struct fill_parameters) {
+      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__neon,
+      .row_tile = 1,
+    };
     xnn_params.x32.pad = (struct pad_parameters) {
       .ukernel = xnn_x32_pad_x2__neon,
       .mr = 2,
@@ -1388,6 +1401,10 @@ static void init(void) {
 
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
+    xnn_params.x32.fill = (struct fill_parameters) {
+      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__sse,
+      .row_tile = 1,
+    };
     xnn_params.x32.pad = (struct pad_parameters) {
       .ukernel = xnn_x32_pad_x2__sse2,
       .mr = 2,
@@ -1581,6 +1598,10 @@ static void init(void) {
 
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
+    xnn_params.x32.fill = (struct fill_parameters) {
+      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__psimd,
+      .row_tile = 1,
+    };
     xnn_params.x32.pad = (struct pad_parameters) {
       .ukernel = xnn_x32_pad_x2__psimd,
       .mr = 2,
@@ -1837,6 +1858,10 @@ static void init(void) {
 
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
+    xnn_params.x32.fill = (struct fill_parameters) {
+      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__scalar_float,
+      .row_tile = 1,
+    };
     xnn_params.x32.pad = (struct pad_parameters) {
       .ukernel = xnn_x32_pad_x2__scalar,
       .mr = 2,

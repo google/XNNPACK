@@ -826,6 +826,26 @@ struct vmulcaddc_context {
       size_t batch_size);
 #endif
 
+struct pad_context {
+  const void* input;
+  size_t input_stride[XNN_MAX_TENSOR_DIMS - 1];
+  void* output;
+  size_t output_stride[XNN_MAX_TENSOR_DIMS - 1];
+  size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
+  size_t post_paddings[1];
+  size_t input_size[XNN_MAX_TENSOR_DIMS];
+  size_t output_size[1];
+  uint32_t padding_value;
+  xnn_pad_ukernel_function pad_ukernel;
+  xnn_fill_ukernel_function fill_ukernel;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_pad_5d(
+      const struct pad_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t i, size_t j, size_t k, size_t l, size_t m, size_t l_range, size_t m_range);
+#endif
+
 struct channel_pad_context {
   size_t n;
   size_t l;
