@@ -30,6 +30,85 @@ index 1a8bf91..666ad78 100644
  			 */
  			uint32_t l2_size;
  			switch (chipset->series) {
+diff --git src/arm/linux/aarch32-isa.c src/arm/linux/aarch32-isa.c
+index 6aedda3..64dd168 100644
+--- src/arm/linux/aarch32-isa.c
++++ src/arm/linux/aarch32-isa.c
+@@ -77,18 +77,24 @@ void cpuinfo_arm_linux_decode_isa_from_proc_cpuinfo(
+ 
+ 		/*
+ 		 * NEON VDOT instructions are not indicated in /proc/cpuinfo.
+-		 * Use a MIDR-based heuristic to whitelist processors known to support it:
+-		 * - Processors with Qualcomm-modified Cortex-A76 cores
+-		 * - Kirin 980 processor
++		 * Use a MIDR-based heuristic to whitelist processors known to support it.
+ 		 */
+ 		switch (midr & (CPUINFO_ARM_MIDR_IMPLEMENTER_MASK | CPUINFO_ARM_MIDR_PART_MASK)) {
++			case UINT32_C(0x4100D0B0): /* Cortex-A76 */
++			case UINT32_C(0x4100D0D0): /* Cortex-A77 */
++			case UINT32_C(0x4100D0E0): /* Cortex-A76AE */
++			case UINT32_C(0x4800D400): /* Cortex-A76 (HiSilicon) */
+ 			case UINT32_C(0x51008040): /* Kryo 485 Gold (Cortex-A76) */
++			case UINT32_C(0x51008050): /* Kryo 485 Silver (Cortex-A55) */
++			case UINT32_C(0x53000030): /* Exynos-M4 */
++			case UINT32_C(0x53000040): /* Exynos-M5 */
+ 				isa->dot = true;
+ 				break;
+-			default:
+-				if (chipset->series == cpuinfo_arm_chipset_series_hisilicon_kirin && chipset->model == 980) {
+-					isa->dot = true;
+-				}
++			case UINT32_C(0x4100D050): /* Cortex A55: revision 1 or later only */
++				isa->dot = !!(midr_get_variant(midr) >= 1);
++				break;
++			case UINT32_C(0x4100D0A0): /* Cortex A75: revision 2 or later only */
++				isa->dot = !!(midr_get_variant(midr) >= 2);
+ 				break;
+ 		}
+ 	} else {
+diff --git src/arm/linux/aarch64-isa.c src/arm/linux/aarch64-isa.c
+index f193e81..619cda5 100644
+--- src/arm/linux/aarch64-isa.c
++++ src/arm/linux/aarch64-isa.c
+@@ -67,21 +67,32 @@ void cpuinfo_arm64_linux_decode_isa_from_proc_cpuinfo(
+ 	}
+ 	/*
+ 	 * Many phones ship with an old kernel configuration that doesn't report UDOT/SDOT instructions.
+-	 * Use a MIDR-based heuristic to whitelist processors known to support it:
+-	 * - Processors with Qualcomm-modified Cortex-A76 cores
+-	 * - Kirin 980 processor
++	 * Use a MIDR-based heuristic to whitelist processors known to support it.
+ 	 */
+ 	switch (midr & (CPUINFO_ARM_MIDR_IMPLEMENTER_MASK | CPUINFO_ARM_MIDR_PART_MASK)) {
++		case UINT32_C(0x4100D060): /* Cortex-A65 */
++		case UINT32_C(0x4100D0B0): /* Cortex-A76 */
++		case UINT32_C(0x4100D0C0): /* Neoverse N1 */
++		case UINT32_C(0x4100D0D0): /* Cortex-A77 */
++		case UINT32_C(0x4100D0E0): /* Cortex-A76AE */
++		case UINT32_C(0x4100D4A0): /* Neoverse E1 */
++		case UINT32_C(0x4800D400): /* Cortex-A76 (HiSilicon) */
+ 		case UINT32_C(0x51008040): /* Kryo 485 Gold (Cortex-A76) */
++		case UINT32_C(0x51008050): /* Kryo 485 Silver (Cortex-A55) */
++		case UINT32_C(0x53000030): /* Exynos-M4 */
++		case UINT32_C(0x53000040): /* Exynos-M5 */
+ 			isa->dot = true;
+ 			break;
++		case UINT32_C(0x4100D050): /* Cortex A55: revision 1 or later only */
++			isa->dot = !!(midr_get_variant(midr) >= 1);
++			break;
++		case UINT32_C(0x4100D0A0): /* Cortex A75: revision 2 or later only */
++			isa->dot = !!(midr_get_variant(midr) >= 2);
++			break;
+ 		default:
+ 			if (features & CPUINFO_ARM_LINUX_FEATURE_ASIMDDP) {
+ 				isa->dot = true;
+ 			}
+-			if (chipset->series == cpuinfo_arm_chipset_series_hisilicon_kirin && chipset->model == 980) {
+-				isa->dot = true;
+-			}
+ 			break;
+ 	}
+ 	if (features & CPUINFO_ARM_LINUX_FEATURE_JSCVT) {
 diff --git src/arm/linux/api.h src/arm/linux/api.h
 index f99da66..2597e49 100644
 --- src/arm/linux/api.h
