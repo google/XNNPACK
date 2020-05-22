@@ -358,7 +358,7 @@ void xnn_indirection_init_resize_bilinear2d_f32(
 
   const uint32_t input_y_max = (uint32_t) input_height - 1;
   const uint32_t input_x_max = (uint32_t) input_width - 1;
-  if (tensorflow_legacy) {
+  if (tensorflow_legacy || align_corners) {
     for (size_t output_y = 0; output_y < output_height; output_y++) {
       const float input_y = (float) (int32_t) output_y * height_scale;
       assert(input_y >= 0.0f);

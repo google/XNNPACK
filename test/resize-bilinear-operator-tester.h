@@ -221,6 +221,10 @@ class ResizeBilinearOperatorTester {
   }
 
   void TestF32() const {
+    if (align_corners()) {
+      ASSERT_FALSE(tf_legacy_mode());
+    }
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
@@ -233,7 +237,7 @@ class ResizeBilinearOperatorTester {
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
-      const float offset = tf_legacy_mode() ? 0.0f : 0.5f;
+      const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
       for (size_t batch_index = 0; batch_index < batch_size(); batch_index++) {
         for (size_t output_y = 0; output_y < output_height(); output_y++) {
           const float input_y = (float(output_y) + offset) * height_scale() - offset;
