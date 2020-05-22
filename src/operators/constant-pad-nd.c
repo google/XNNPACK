@@ -17,54 +17,54 @@
 #include <xnnpack/params.h>
 
 
-static enum xnn_status create_pad_nd(
+static enum xnn_status create_constant_pad_nd(
     uint32_t padding_value,
     uint32_t flags,
     enum xnn_operator_type operator_type,
-    xnn_operator_t* pad_op_out)
+    xnn_operator_t* constant_pad_op_out)
 {
-  xnn_operator_t pad_op = NULL;
+  xnn_operator_t constant_pad_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Pad operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create Constant Pad operator: XNNPACK is not initialized");
     goto error;
   }
 
   status = xnn_status_out_of_memory;
 
-  pad_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
-  if (pad_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Pad operator descriptor", sizeof(struct xnn_operator));
+  constant_pad_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
+  if (constant_pad_op == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for Constant Pad operator descriptor", sizeof(struct xnn_operator));
     goto error;
   }
 
-  pad_op->pad_value = padding_value;
+  constant_pad_op->pad_value = padding_value;
 
-  pad_op->type = operator_type;
-  pad_op->ukernel.type = xnn_ukernel_type_pad;
+  constant_pad_op->type = operator_type;
+  constant_pad_op->ukernel.type = xnn_ukernel_type_pad;
 
-  pad_op->state = xnn_run_state_invalid;
+  constant_pad_op->state = xnn_run_state_invalid;
 
-  *pad_op_out = pad_op;
+  *constant_pad_op_out = constant_pad_op;
   return xnn_status_success;
 
 error:
-  xnn_delete_operator(pad_op);
+  xnn_delete_operator(constant_pad_op);
   return status;
 }
 
-enum xnn_status xnn_create_pad_nd_x32(
+enum xnn_status xnn_create_constant_pad_nd_x32(
   const void* padding_value,
   uint32_t flags,
-  xnn_operator_t* pad_op_out)
+  xnn_operator_t* constant_pad_op_out)
 {
-  return create_pad_nd(
-    *((uint32_t*) padding_value), flags, xnn_operator_type_pad_nd_x32, pad_op_out);
+  return create_constant_pad_nd(
+    *((uint32_t*) padding_value), flags, xnn_operator_type_constant_pad_nd_x32, constant_pad_op_out);
 }
 
-static enum xnn_status setup_pad_nd(
-    xnn_operator_t pad_op,
+static enum xnn_status setup_constant_pad_nd(
+    xnn_operator_t constant_pad_op,
     enum xnn_operator_type expected_operator_type,
     size_t num_dims,
     const size_t* input_shape,
@@ -74,20 +74,20 @@ static enum xnn_status setup_pad_nd(
     void* output,
     size_t num_threads)
 {
-  if (pad_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup Pad (ND, X32) operator: operator type mismatch");
+  if (constant_pad_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup Constant Pad (ND, X32) operator: operator type mismatch");
     return xnn_status_invalid_parameter;
   }
-  pad_op->state = xnn_run_state_invalid;
+  constant_pad_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Pad operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup Constant Pad operator: XNNPACK is not initialized");
     return xnn_status_uninitialized;
   }
 
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
-      "failed to setup Pad operator with %zu dimensions in input shape: "
+      "failed to setup Constant Pad operator with %zu dimensions in input shape: "
       "the number of input dimensions must not exceed %d",
       num_dims, XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
@@ -95,7 +95,7 @@ static enum xnn_status setup_pad_nd(
 
   for (size_t i = 0; i < num_dims; i++) {
     if (input_shape[i] == 0) {
-      xnn_log_error("failed to setup Pad operator: input shape dimension #%zu is zero", i);
+      xnn_log_error("failed to setup Constant Pad operator: input shape dimension #%zu is zero", i);
       return xnn_status_invalid_parameter;
     }
   }
@@ -135,50 +135,50 @@ static enum xnn_status setup_pad_nd(
     }
   }
 
-  pad_op->context.pad = (struct pad_context) {
+  constant_pad_op->context.pad = (struct pad_context) {
     .input = input,
     .output = output,
-    .padding_value = pad_op->pad_value,
+    .padding_value = constant_pad_op->pad_value,
     .fill_ukernel = xnn_params.x32.fill.ukernel,
     .pad_ukernel = xnn_params.x32.pad.ukernel,
   };
 
   for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
-    pad_op->context.pad.pre_paddings[i] = normalized_pre_paddings[XNN_MAX_TENSOR_DIMS - 1 - i];
-    pad_op->context.pad.input_size[i] = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
+    constant_pad_op->context.pad.pre_paddings[i] = normalized_pre_paddings[XNN_MAX_TENSOR_DIMS - 1 - i];
+    constant_pad_op->context.pad.input_size[i] = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
   }
   size_t input_stride = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1];
   size_t output_stride = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1];
   for (size_t i = 1; i < XNN_MAX_TENSOR_DIMS; i++) {
-    pad_op->context.pad.input = (const void*)
-      ((uintptr_t) pad_op->context.pad.input - pad_op->context.pad.pre_paddings[i] * input_stride * sizeof(float));
-    pad_op->context.pad.input_stride[i - 1] = input_stride * sizeof(float);
-    pad_op->context.pad.output_stride[i - 1] = output_stride * sizeof(float);
+    constant_pad_op->context.pad.input = (const void*)
+      ((uintptr_t) constant_pad_op->context.pad.input - constant_pad_op->context.pad.pre_paddings[i] * input_stride * sizeof(float));
+    constant_pad_op->context.pad.input_stride[i - 1] = input_stride * sizeof(float);
+    constant_pad_op->context.pad.output_stride[i - 1] = output_stride * sizeof(float);
     input_stride *= normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
     output_stride *= normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
   }
-  pad_op->context.pad.input_size[0] *= sizeof(float);
-  pad_op->context.pad.output_size[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1] * sizeof(float);
-  pad_op->context.pad.pre_paddings[0] *= sizeof(float);
-  pad_op->context.pad.post_paddings[0] =
-    pad_op->context.pad.output_size[0] - pad_op->context.pad.pre_paddings[0] - pad_op->context.pad.input_size[0];
+  constant_pad_op->context.pad.input_size[0] *= sizeof(float);
+  constant_pad_op->context.pad.output_size[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1] * sizeof(float);
+  constant_pad_op->context.pad.pre_paddings[0] *= sizeof(float);
+  constant_pad_op->context.pad.post_paddings[0] =
+    constant_pad_op->context.pad.output_size[0] - constant_pad_op->context.pad.pre_paddings[0] - constant_pad_op->context.pad.input_size[0];
 
-  pad_op->compute.type = xnn_parallelization_type_5d_tile_2d;
-  pad_op->compute.task_5d_tile_2d = (pthreadpool_task_5d_tile_2d_t) xnn_compute_pad_5d;
-  pad_op->compute.range[0] = normalized_output_shape[0];
-  pad_op->compute.range[1] = normalized_output_shape[1];
-  pad_op->compute.range[2] = normalized_output_shape[2];
-  pad_op->compute.range[3] = normalized_output_shape[3];
-  pad_op->compute.range[4] = normalized_output_shape[4];
-  pad_op->compute.tile[0] = 1;
-  pad_op->compute.tile[1] = 1;
-  pad_op->state = xnn_run_state_ready;
+  constant_pad_op->compute.type = xnn_parallelization_type_5d_tile_2d;
+  constant_pad_op->compute.task_5d_tile_2d = (pthreadpool_task_5d_tile_2d_t) xnn_compute_pad_5d;
+  constant_pad_op->compute.range[0] = normalized_output_shape[0];
+  constant_pad_op->compute.range[1] = normalized_output_shape[1];
+  constant_pad_op->compute.range[2] = normalized_output_shape[2];
+  constant_pad_op->compute.range[3] = normalized_output_shape[3];
+  constant_pad_op->compute.range[4] = normalized_output_shape[4];
+  constant_pad_op->compute.tile[0] = 1;
+  constant_pad_op->compute.tile[1] = 1;
+  constant_pad_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
 }
 
-enum xnn_status xnn_setup_pad_nd_x32(
-    xnn_operator_t pad_op,
+enum xnn_status xnn_setup_constant_pad_nd_x32(
+    xnn_operator_t constant_pad_op,
     size_t num_dims,
     const size_t* input_shape,
     const size_t* pre_padding,
@@ -187,8 +187,8 @@ enum xnn_status xnn_setup_pad_nd_x32(
     void* output,
     pthreadpool_t threadpool)
 {
-  return setup_pad_nd(
-    pad_op, xnn_operator_type_pad_nd_x32,
+  return setup_constant_pad_nd(
+    constant_pad_op, xnn_operator_type_constant_pad_nd_x32,
     num_dims, input_shape, pre_padding, post_padding,
     input, output,
     pthreadpool_get_threads_count(threadpool));

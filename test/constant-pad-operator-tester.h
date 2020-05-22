@@ -20,9 +20,9 @@
 #include <xnnpack.h>
 
 
-class PadOperatorTester {
+class ConstantPadOperatorTester {
  public:
-  inline PadOperatorTester& input_shape(std::initializer_list<size_t> input_shape) {
+  inline ConstantPadOperatorTester& input_shape(std::initializer_list<size_t> input_shape) {
     assert(input_shape.size() <= XNN_MAX_TENSOR_DIMS);
     input_shape_ = std::vector<size_t>(input_shape);
     return *this;
@@ -45,7 +45,7 @@ class PadOperatorTester {
       input_shape_.cbegin(), input_shape_.cend(), size_t(1), std::multiplies<size_t>());
   }
 
-  inline PadOperatorTester& pre_paddings(std::initializer_list<size_t> pre_paddings) {
+  inline ConstantPadOperatorTester& pre_paddings(std::initializer_list<size_t> pre_paddings) {
     assert(pre_paddings.size() <= XNN_MAX_TENSOR_DIMS);
     pre_paddings_ = std::vector<size_t>(pre_paddings);
     return *this;
@@ -63,7 +63,7 @@ class PadOperatorTester {
     return pre_paddings_.size();
   }
 
-  inline PadOperatorTester& post_paddings(std::initializer_list<size_t> post_paddings) {
+  inline ConstantPadOperatorTester& post_paddings(std::initializer_list<size_t> post_paddings) {
     assert(post_paddings.size() <= XNN_MAX_TENSOR_DIMS);
     post_paddings_ = std::vector<size_t>(post_paddings);
     return *this;
@@ -93,7 +93,7 @@ class PadOperatorTester {
     return elements;
   }
 
-  inline PadOperatorTester& iterations(size_t iterations) {
+  inline ConstantPadOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -176,7 +176,7 @@ class PadOperatorTester {
       xnn_operator_t pad_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_pad_nd_x32(
+        xnn_create_constant_pad_nd_x32(
           &padding_value, 0, &pad_op));
       ASSERT_NE(nullptr, pad_op);
 
@@ -184,7 +184,7 @@ class PadOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(pad_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_pad_nd_x32(
+        xnn_setup_constant_pad_nd_x32(
           pad_op,
           num_dims(),
           input_shape().data(), pre_paddings().data(), post_paddings().data(),

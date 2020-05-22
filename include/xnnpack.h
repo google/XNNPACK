@@ -1246,13 +1246,13 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x32(
   void* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_pad_nd_x32(
+enum xnn_status xnn_create_constant_pad_nd_x32(
   const void* padding_value,
   uint32_t flags,
-  xnn_operator_t* pad_op_out);
+  xnn_operator_t* constant_pad_op_out);
 
-enum xnn_status xnn_setup_pad_nd_x32(
-  xnn_operator_t pad_op,
+enum xnn_status xnn_setup_constant_pad_nd_x32(
+  xnn_operator_t constant_pad_op,
   size_t num_dims,
   const size_t* input_shape,
   const size_t* pre_padding,
