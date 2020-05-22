@@ -150,6 +150,20 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->ops[i].inputs[0] = node->inputs[0];
         runtime->ops[i].outputs[0] = node->outputs[0];
         break;
+      case xnn_node_type_constant_pad:
+        status = xnn_create_pad_nd_x32(
+          &node->params.static_pad.padding_value,
+          node->flags,
+          &runtime->ops[i].op);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->ops[i].shape1 = values[node->inputs[0]].shape;
+        memcpy(runtime->ops[i].pre_paddings, node->params.static_pad.pre_paddings, sizeof(size_t) * XNN_MAX_TENSOR_DIMS);
+        memcpy(runtime->ops[i].post_paddings, node->params.static_pad.post_paddings, sizeof(size_t) * XNN_MAX_TENSOR_DIMS);
+        runtime->ops[i].inputs[0] = node->inputs[0];
+        runtime->ops[i].outputs[0] = node->outputs[0];
+        break;
       case xnn_node_type_convolution_2d:
         status = xnn_create_convolution2d_nhwc_f32(
           node->params.convolution_2d.input_padding_top,
@@ -634,6 +648,19 @@ enum xnn_status xnn_setup_runtime(
           op->shape2.dim,
           runtime->blobs[op->inputs[0]].data,
           runtime->blobs[op->inputs[1]].data,
+          runtime->blobs[op->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_pad_nd_x32:
+        assert(runtime->blobs[op->inputs[0]].data != NULL);
+        assert(runtime->blobs[op->outputs[0]].data != NULL);
+        status = xnn_setup_pad_nd_x32(
+          op->op,
+          op->shape1.num_dims,
+          op->shape1.dim,
+          op->pre_paddings,
+          op->post_paddings,
+          runtime->blobs[op->inputs[0]].data,
           runtime->blobs[op->outputs[0]].data,
           runtime->threadpool);
         break;

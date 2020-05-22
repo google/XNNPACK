@@ -612,6 +612,28 @@ enum xnn_status xnn_define_multiply2(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Constant Pad Node with static padding specification and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param pre_paddings - number of padding elements to insert before input elements for every dimension. This array
+///                       must have as many elements as the the number of dimensions in the input tensor.
+/// @param post_paddings - number of padding elements to insert after input elements for every dimension. This array
+///                       must have as many elements as the the number of dimensions in the input tensor.
+/// @param padding_value - constant value used to initialize padding elements.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor with padding.
+/// @param flags - binary features of the 2D Depthwise Convolution Node. The only currently supported values is
+///                XNN_FLAG_TENSORFLOW_SAME_PADDING.
+enum xnn_status xnn_define_static_constant_pad(
+  xnn_subgraph_t subgraph,
+  const size_t* pre_paddings,
+  const size_t* post_paddings,
+  float padding_value,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a PReLU (Parametric ReLU) Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

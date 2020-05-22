@@ -61,6 +61,7 @@ enum xnn_node_type {
   xnn_node_type_argmax_pooling_2d,
   xnn_node_type_average_pooling_2d,
   xnn_node_type_clamp,
+  xnn_node_type_constant_pad,
   xnn_node_type_convolution_2d,
   xnn_node_type_deconvolution_2d,
   xnn_node_type_depthwise_convolution_2d,
@@ -137,6 +138,11 @@ struct xnn_node {
       uint32_t dilation_height;
       uint32_t dilation_width;
     } pooling_2d;
+    struct {
+      size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
+      size_t post_paddings[XNN_MAX_TENSOR_DIMS];
+      uint32_t padding_value;
+    } static_pad;
   } params;
   struct {
     float output_min;
@@ -158,6 +164,8 @@ struct xnn_operator_data {
   size_t input_width;
   struct xnn_shape shape1;
   struct xnn_shape shape2;
+  size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
+  size_t post_paddings[XNN_MAX_TENSOR_DIMS];
   uint32_t adjustment_height;
   uint32_t adjustment_width;
   uint32_t inputs[XNN_MAX_RUNTIME_INPUTS];

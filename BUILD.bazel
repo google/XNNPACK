@@ -2205,6 +2205,7 @@ xnnpack_cc_library(
         ":operator_run",
         ":operators",
         "@clog",
+        "@FP16",
         "@pthreadpool",
     ] + select({
         ":emscripten": [],
