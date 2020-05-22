@@ -150,7 +150,8 @@ static enum xnn_status setup_pad_nd(
   size_t input_stride = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1];
   size_t output_stride = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1];
   for (size_t i = 1; i < XNN_MAX_TENSOR_DIMS; i++) {
-    pad_op->context.pad.input -= pad_op->context.pad.pre_paddings[i] * input_stride * sizeof(float);
+    pad_op->context.pad.input = (const void*)
+      ((uintptr_t) pad_op->context.pad.input - pad_op->context.pad.pre_paddings[i] * input_stride * sizeof(float));
     pad_op->context.pad.input_stride[i - 1] = input_stride * sizeof(float);
     pad_op->context.pad.output_stride[i - 1] = output_stride * sizeof(float);
     input_stride *= normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
