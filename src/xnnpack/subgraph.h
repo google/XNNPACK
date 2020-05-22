@@ -158,7 +158,7 @@ struct xnn_node {
 };
 
 struct xnn_operator_data {
-  xnn_operator_t op;
+  xnn_operator_t operator_object;
   size_t batch_size;
   size_t input_height;
   size_t input_width;
@@ -191,7 +191,7 @@ struct xnn_runtime {
   uint32_t num_external_values;
 
   /// List of operators in the execution plan, in execution order.
-  struct xnn_operator_data* ops;
+  struct xnn_operator_data* opdata;
   /// Number of operators in the execution plan.
   size_t num_ops;
 
