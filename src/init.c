@@ -354,8 +354,8 @@ static void init(void) {
         .row_tile = 1,
       };
       xnn_params.x32.pad = (struct pad_parameters) {
-        .ukernel = xnn_x32_pad_x2__neon,
-        .mr = 2,
+        .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__neon,
+        .row_tile = 1,
       };
       xnn_params.x32.unpool = (xnn_unpool_ukernel_function) xnn_x32_unpool_ukernel__neon;
       xnn_params.x32.zip = (struct zip_parameters) {
@@ -601,8 +601,8 @@ static void init(void) {
         .row_tile = 1,
       };
       xnn_params.x32.pad = (struct pad_parameters) {
-        .ukernel = xnn_x32_pad_x2__scalar,
-        .mr = 2,
+        .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__scalar_int,
+        .row_tile = 1,
       };
       xnn_params.x32.unpool = (xnn_unpool_ukernel_function) xnn_x32_unpool_ukernel__scalar;
       xnn_params.x32.zip = (struct zip_parameters) {
@@ -1008,8 +1008,8 @@ static void init(void) {
       .row_tile = 1,
     };
     xnn_params.x32.pad = (struct pad_parameters) {
-      .ukernel = xnn_x32_pad_x2__neon,
-      .mr = 2,
+      .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__neon,
+      .row_tile = 1,
     };
     xnn_params.x32.unpool = (xnn_unpool_ukernel_function) xnn_x32_unpool_ukernel__neon;
     xnn_params.x32.zip = (struct zip_parameters) {
@@ -1406,8 +1406,8 @@ static void init(void) {
       .row_tile = 1,
     };
     xnn_params.x32.pad = (struct pad_parameters) {
-      .ukernel = xnn_x32_pad_x2__sse2,
-      .mr = 2,
+      .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__sse,
+      .row_tile = 1,
     };
     xnn_params.x32.unpool = (xnn_unpool_ukernel_function) xnn_x32_unpool_ukernel__sse2;
     xnn_params.x32.zip = (struct zip_parameters) {
@@ -1603,8 +1603,8 @@ static void init(void) {
       .row_tile = 1,
     };
     xnn_params.x32.pad = (struct pad_parameters) {
-      .ukernel = xnn_x32_pad_x2__psimd,
-      .mr = 2,
+      .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__psimd,
+      .row_tile = 1,
     };
     xnn_params.x32.unpool = (xnn_unpool_ukernel_function) xnn_x32_unpool_ukernel__psimd;
     xnn_params.x32.zip = (struct zip_parameters) {
@@ -1863,8 +1863,8 @@ static void init(void) {
       .row_tile = 1,
     };
     xnn_params.x32.pad = (struct pad_parameters) {
-      .ukernel = xnn_x32_pad_x2__scalar,
-      .mr = 2,
+      .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__scalar_float,
+      .row_tile = 1,
     };
     xnn_params.x32.unpool = (xnn_unpool_ukernel_function) xnn_x32_unpool_ukernel__scalar;
     xnn_params.x32.zip = (struct zip_parameters) {

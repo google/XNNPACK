@@ -666,15 +666,26 @@ typedef void (*xnn_x32_fill_ukernel_function)(
     const uint32_t* fill_value);
 
 typedef void (*xnn_pad_ukernel_function)(
-    size_t m,
-    size_t n,
-    size_t l,
-    size_t r,
-    uint32_t c,
-    const void* x,
-    size_t x_stride,
-    void* y,
-    size_t y_stride);
+    size_t rows,
+    size_t channels,
+    size_t pre_padding,
+    size_t post_padding,
+    const void* fill_value,
+    const void* input,
+    size_t input_stride,
+    void* output,
+    size_t output_stride);
+
+typedef void (*xnn_x32_pad_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    size_t pre_padding,
+    size_t post_padding,
+    const uint32_t* fill_value,
+    const uint32_t* input,
+    size_t input_stride,
+    uint32_t* output,
+    size_t output_stride);
 
 typedef void (*xnn_unpool_ukernel_function)(
     size_t p,
@@ -1524,7 +1535,9 @@ struct fill_parameters {
 
 struct pad_parameters {
   xnn_pad_ukernel_function ukernel;
-  uint8_t mr;
+  // Number of rows of inputs processed in one tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  uint8_t row_tile;
 };
 
 struct vmulcaddc_parameters {

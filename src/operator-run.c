@@ -636,7 +636,7 @@ void xnn_compute_pad_5d(
     context->pad_ukernel(
       1 /* rows */,
       context->input_size[0], context->pre_paddings[0], context->post_paddings[0],
-      context->padding_value,
+      &context->padding_value,
       input, 0 /* input stride */, output, 0 /* output stride */);
   } else {
     context->fill_ukernel(1 /* rows */, context->output_size[0], output, 0 /* output stride */, &context->padding_value);
@@ -653,7 +653,7 @@ void xnn_compute_channel_pad(
   const void* x = (const void*) ((uintptr_t) context->x + x_stride * batch_start);
   void* y = (void*) ((uintptr_t) context->y + y_stride * batch_start);
 
-  context->ukernel(batch_range, context->n, context->l, context->r, context->c, x, x_stride, y, y_stride);
+  context->ukernel(batch_range, context->n, context->l, context->r, &context->c, x, x_stride, y, y_stride);
 }
 
 void xnn_compute_add_strided(

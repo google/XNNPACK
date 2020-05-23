@@ -130,7 +130,7 @@ enum xnn_status xnn_setup_channel_pad_nc_x32(
   channel_pad_op->compute.task_1d_tile_1d =
       (pthreadpool_task_1d_tile_1d_t) xnn_compute_channel_pad;
   channel_pad_op->compute.range[0] = batch_size;
-  channel_pad_op->compute.tile[0] = xnn_params.x32.pad.mr;
+  channel_pad_op->compute.tile[0] = xnn_params.x32.pad.row_tile;
   channel_pad_op->state = xnn_run_state_ready;
 
   return xnn_status_success;

@@ -16,22 +16,23 @@ extern "C" {
 #endif
 
 
-#define DECLARE_PAD_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                  \
-    size_t m,                                 \
-    size_t n,                                 \
-    size_t l,                                 \
-    size_t r,                                 \
-    uint32_t c,                               \
-    const void* input,                        \
-    size_t input_stride,                      \
-    void* output,                             \
+#define DECLARE_X32_PAD_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                      \
+    size_t rows,                                  \
+    size_t channels,                              \
+    size_t pre_padding,                           \
+    size_t post_padding,                          \
+    const uint32_t* fill_value,                   \
+    const uint32_t* input,                        \
+    size_t input_stride,                          \
+    uint32_t* output,                             \
     size_t output_stride);
 
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_x32_pad_x2__neon)
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_x32_pad_x2__psimd)
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_x32_pad_x2__scalar)
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_x32_pad_x2__sse2)
+DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__neon)
+DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__psimd)
+DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__sse)
+DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__scalar_float)
+DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__scalar_int)
 
 
 #ifdef __cplusplus

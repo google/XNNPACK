@@ -64,7 +64,7 @@ TEST(CHANNEL_PAD_NC_X32, small_batch) {
   for (size_t input_channels = 1; input_channels < 100; input_channels += 15) {
     for (size_t pad_channels = 1; pad_channels < 50; pad_channels += 7) {
       ChannelPadOperatorTester()
-        .batch_size(xnn_params.x32.pad.mr)
+        .batch_size(xnn_params.x32.pad.row_tile)
         .input_channels(input_channels)
         .pad_before(pad_channels)
         .pad_after(pad_channels + 1)
@@ -78,7 +78,7 @@ TEST(CHANNEL_PAD_NC_X32, small_batch_with_x_stride) {
   for (size_t input_channels = 1; input_channels < 100; input_channels += 15) {
     for (size_t pad_channels = 1; pad_channels < 50; pad_channels += 7) {
       ChannelPadOperatorTester()
-        .batch_size(xnn_params.x32.pad.mr)
+        .batch_size(xnn_params.x32.pad.row_tile)
         .input_channels(input_channels)
         .pad_before(pad_channels)
         .pad_after(pad_channels + 1)
@@ -93,7 +93,7 @@ TEST(CHANNEL_PAD_NC_X32, small_batch_with_y_stride) {
   for (size_t input_channels = 1; input_channels < 100; input_channels += 15) {
     for (size_t pad_channels = 1; pad_channels < 50; pad_channels += 7) {
       ChannelPadOperatorTester()
-        .batch_size(xnn_params.x32.pad.mr)
+        .batch_size(xnn_params.x32.pad.row_tile)
         .input_channels(input_channels)
         .pad_before(pad_channels)
         .pad_after(pad_channels + 1)
@@ -108,7 +108,7 @@ TEST(CHANNEL_PAD_NC_X32, small_batch_with_x_stride_and_y_stride) {
   for (size_t input_channels = 1; input_channels < 100; input_channels += 15) {
     for (size_t pad_channels = 1; pad_channels < 50; pad_channels += 7) {
       ChannelPadOperatorTester()
-        .batch_size(xnn_params.x32.pad.mr)
+        .batch_size(xnn_params.x32.pad.row_tile)
         .input_channels(input_channels)
         .pad_before(pad_channels)
         .pad_after(pad_channels + 1)
@@ -124,7 +124,7 @@ TEST(CHANNEL_PAD_NC_X32, large_batch) {
   for (size_t input_channels = 1; input_channels < 100; input_channels += 15) {
     for (size_t pad_channels = 1; pad_channels < 50; pad_channels += 7) {
       ChannelPadOperatorTester()
-        .batch_size(3 * xnn_params.x32.pad.mr + 1)
+        .batch_size(3 * xnn_params.x32.pad.row_tile + 1)
         .input_channels(input_channels)
         .pad_before(pad_channels)
         .pad_after(pad_channels + 1)
@@ -138,7 +138,7 @@ TEST(CHANNEL_PAD_NC_X32, large_batch_with_x_stride) {
   for (size_t input_channels = 1; input_channels < 100; input_channels += 15) {
     for (size_t pad_channels = 1; pad_channels < 50; pad_channels += 7) {
       ChannelPadOperatorTester()
-        .batch_size(3 * xnn_params.x32.pad.mr + 1)
+        .batch_size(3 * xnn_params.x32.pad.row_tile + 1)
         .input_channels(input_channels)
         .pad_before(pad_channels)
         .pad_after(pad_channels + 1)
@@ -153,7 +153,7 @@ TEST(CHANNEL_PAD_NC_X32, large_batch_with_y_stride) {
   for (size_t input_channels = 1; input_channels < 100; input_channels += 15) {
     for (size_t pad_channels = 1; pad_channels < 50; pad_channels += 7) {
       ChannelPadOperatorTester()
-        .batch_size(3 * xnn_params.x32.pad.mr + 1)
+        .batch_size(3 * xnn_params.x32.pad.row_tile + 1)
         .input_channels(input_channels)
         .pad_before(pad_channels)
         .pad_after(pad_channels + 1)
