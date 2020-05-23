@@ -781,6 +781,70 @@ class GemmMicrokernelTester {
     }
   }
 
+  void Test(xnn_f32_gemm_relu_ukernel_function gemm_relu) const {
+    ASSERT_LE(m(), mr());
+    ASSERT_GE(a_stride(), k());
+    ASSERT_GE(cm_stride(), n());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+
+    std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> b(n() * k());
+    std::vector<float> bias(n());
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + bias_n());
+    std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+    std::vector<float> c_ref(m() * n());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(a.begin(), a.end(), std::ref(f32rng));
+      std::generate(b.begin(), b.end(), std::ref(f32rng));
+      std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+      std::fill(c.begin(), c.end(), nanf(""));
+      std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+
+      std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+      xnn_pack_f32_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data());
+
+      for (size_t m_index = 0; m_index < m(); m_index++) {
+        for (size_t n_index = 0; n_index < n(); n_index++) {
+          for (size_t k_index = 0; k_index < k(); k_index++) {
+            ASSERT_LE(n(), packed_n());
+            ASSERT_LT(m_index * n() + n_index, c_ref.size());
+            c_ref[m_index * n() + n_index] +=
+              a[m_index * a_stride() + k_index] *
+              b[n_index * k() + k_index];
+          }
+          c_ref[m_index * n() + n_index] = std::max(0.0f, c_ref[m_index * n() + n_index] + bias[n_index]);
+        }
+      }
+
+      gemm_relu(m(), n(), k() * sizeof(float),
+        a.data(), a_stride() * sizeof(float),
+        packed_w.data(),
+        c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
+        nullptr);
+
+      // Validate micro-kernel outputs.
+      for (size_t i = 0; i < m(); i++) {
+        for (size_t j = 0; j < n(); j++) {
+          ASSERT_GE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], 0.0f)
+              << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+              << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+              << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+          ASSERT_NEAR(
+              c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
+              c_ref[i * n() + j],
+              std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+              << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+              << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+              << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+        }
+      }
+    }
+  }
+
   void Test(xnn_f32_gemm_minmax_ukernel_function gemm_minmax, Variant variant = Variant::Native) const {
     ASSERT_LE(m(), mr());
     ASSERT_GE(a_stride(), k());
@@ -851,14 +915,14 @@ class GemmMicrokernelTester {
       // Validate micro-kernel outputs.
       for (size_t i = 0; i < m(); i++) {
         for (size_t j = 0; j < n(); j++) {
-          // ASSERT_LE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_max)
-          //     << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-          //     << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
-          //     << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-          // ASSERT_GE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_min)
-          //     << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-          //     << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
-          //     << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+          ASSERT_LE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_max)
+              << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+              << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+              << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+          ASSERT_GE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_min)
+              << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+              << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+              << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
           ASSERT_NEAR(
               c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
               c_ref[i * n() + j],
@@ -1043,6 +1107,102 @@ class GemmMicrokernelTester {
 
       for (size_t i = 0; i < m(); i++) {
         for (size_t j = 0; j < n(); j++) {
+          ASSERT_NEAR(
+              c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
+              c_ref[i * n() + j],
+              std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+              << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
+              << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+              << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
+        }
+      }
+    }
+  }
+
+  void Test(xnn_f32_igemm_relu_ukernel_function igemm_relu) const {
+    ASSERT_LE(m(), mr());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+
+    std::vector<float> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> b(n() * ks() * k());
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + bias_n());
+    std::vector<float> bias(n());
+    std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+    std::vector<float> c_ref(m() * n());
+    std::vector<float> junk(k() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<const float*> im2col(mr() * ks());
+    std::fill(junk.begin(), junk.end(), nanf(""));
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(a.begin(), a.end(), std::ref(f32rng));
+      std::generate(b.begin(), b.end(), std::ref(f32rng));
+      std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+      std::fill(c.begin(), c.end(), nanf(""));
+      std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+
+      std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+      xnn_pack_f32_conv_goki_w(
+        1, n(), ks(), k(), nr(), kr(), sr(),
+        b.data(), bias.data(), packed_w.data());
+
+      for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+        for (size_t m_index = 0; m_index < mr(); m_index++) {
+          im2col[ks_index * mr() + m_index] = a.data() + a_stride() * m_index - a_offset();
+        }
+      }
+      std::shuffle(im2col.begin(), im2col.end(), rng);
+      if (zero_index() != SIZE_MAX) {
+        for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+          im2col[ks_index * mr() + zero_index()] = a.data();
+        }
+      }
+      for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+        for (size_t m_index = m(); m_index < mr(); m_index++) {
+          im2col[ks_index * mr() + m_index] = junk.data();
+        }
+      }
+
+      std::fill(c_ref.begin(), c_ref.end(), 0.0);
+      for (size_t m_index = 0; m_index < m(); m_index++) {
+        for (size_t n_index = 0; n_index < n(); n_index++) {
+          for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+            for (size_t k_index = 0; k_index < k(); k_index++) {
+              ASSERT_LT(ks_index * mr() + m_index, im2col.size());
+              ASSERT_LT(k_index, k());
+              ASSERT_LT(k_index, a_stride());
+              if (im2col[ks_index * mr() + m_index] == a.data()) {
+                c_ref[m_index * n() + n_index] +=
+                  (im2col[ks_index * mr() + m_index][k_index]) *
+                  (b[(n_index * ks() + ks_index) * k() + k_index]);
+              } else {
+                c_ref[m_index * n() + n_index] +=
+                  (im2col[ks_index * mr() + m_index][k_index + a_offset()]) *
+                  (b[(n_index * ks() + ks_index) * k() + k_index]);
+              }
+            }
+          }
+          c_ref[m_index * n() + n_index] = std::max(0.0f, bias[n_index] + c_ref[m_index * n() + n_index]);
+        }
+      }
+
+      const float* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
+
+      igemm_relu(
+        m(), n(), k() * sizeof(float), ks() * mr() * sizeof(void*),
+        im2col.data(), packed_w.data(),
+        c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
+        a_offset() * sizeof(float), zero_pointer,
+        nullptr);
+
+      for (size_t i = 0; i < m(); i++) {
+        for (size_t j = 0; j < n(); j++) {
+          ASSERT_GE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], 0.0f)
+              << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
+              << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+              << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
           ASSERT_NEAR(
               c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
               c_ref[i * n() + j],

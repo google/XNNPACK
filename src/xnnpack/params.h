@@ -37,6 +37,11 @@ union xnn_f32_default_params {
   char _; // Dummy member variable to comply with the C standard
 };
 
+union xnn_f32_relu_params {
+  // Empty; serves to differentiate pointer types for micro-kernels with different fused activations.
+  char _; // Dummy member variable to comply with the C standard
+};
+
 union xnn_f32_minmax_params {
   struct {
     float min;
@@ -428,6 +433,18 @@ typedef void (*xnn_f32_gemm_ukernel_function)(
     size_t cn_stride,
     const union xnn_f32_default_params* params);
 
+typedef void (*xnn_f32_gemm_relu_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const float* a,
+    size_t a_stride,
+    const float* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_f32_relu_params* params);
+
 typedef void (*xnn_f32_gemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
@@ -518,6 +535,20 @@ typedef void (*xnn_f32_igemm_ukernel_function)(
     size_t a_offset,
     const float* zero,
     const union xnn_f32_default_params* params);
+
+typedef void (*xnn_f32_igemm_relu_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t kc,
+    size_t ks,
+    const float** a,
+    const float* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const float* zero,
+    const union xnn_f32_relu_params* params);
 
 typedef void (*xnn_f32_igemm_minmax_ukernel_function)(
     size_t mr,
@@ -1399,6 +1430,7 @@ struct gemm_fused_ukernels {
 
 struct gemm_parameters {
   struct gemm_fused_ukernels minmax;
+  struct gemm_fused_ukernels relu;
   struct gemm_fused_ukernels linear;
   uint8_t mr;
   uint8_t nr;

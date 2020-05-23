@@ -129,6 +129,10 @@ SCALAR_UKERNELS = [
     "src/f32-gemm/gen/2x4-scalar.c",
     "src/f32-gemm/gen/4x2-scalar.c",
     "src/f32-gemm/gen/4x4-scalar.c",
+    "src/f32-gemm/gen/1x4-relu-scalar.c",
+    "src/f32-gemm/gen/2x4-relu-scalar.c",
+    "src/f32-gemm/gen/4x2-relu-scalar.c",
+    "src/f32-gemm/gen/4x4-relu-scalar.c",
     "src/f32-gemm/gen/1x4-minmax-scalar.c",
     "src/f32-gemm/gen/2x4-minmax-scalar.c",
     "src/f32-gemm/gen/4x2-minmax-scalar.c",
@@ -143,6 +147,10 @@ SCALAR_UKERNELS = [
     "src/f32-igemm/gen/2x4-scalar.c",
     "src/f32-igemm/gen/4x2-scalar.c",
     "src/f32-igemm/gen/4x4-scalar.c",
+    "src/f32-igemm/gen/1x4-relu-scalar.c",
+    "src/f32-igemm/gen/2x4-relu-scalar.c",
+    "src/f32-igemm/gen/4x2-relu-scalar.c",
+    "src/f32-igemm/gen/4x4-relu-scalar.c",
     "src/f32-igemm/gen/1x4-minmax-scalar.c",
     "src/f32-igemm/gen/2x4-minmax-scalar.c",
     "src/f32-igemm/gen/4x2-minmax-scalar.c",
@@ -325,6 +333,10 @@ WASM_UKERNELS = [
     "src/f32-gemm/gen/2x4-wasm.c",
     "src/f32-gemm/gen/4x2-wasm.c",
     "src/f32-gemm/gen/4x4-wasm.c",
+    "src/f32-gemm/gen/1x4-relu-wasm.c",
+    "src/f32-gemm/gen/2x4-relu-wasm.c",
+    "src/f32-gemm/gen/4x2-relu-wasm.c",
+    "src/f32-gemm/gen/4x4-relu-wasm.c",
     "src/f32-gemm/gen/1x4-minmax-wasm.c",
     "src/f32-gemm/gen/2x4-minmax-wasm.c",
     "src/f32-gemm/gen/4x2-minmax-wasm.c",
@@ -336,6 +348,10 @@ WASM_UKERNELS = [
     "src/f32-igemm/gen/2x4-wasm.c",
     "src/f32-igemm/gen/4x2-wasm.c",
     "src/f32-igemm/gen/4x4-wasm.c",
+    "src/f32-igemm/gen/1x4-relu-wasm.c",
+    "src/f32-igemm/gen/2x4-relu-wasm.c",
+    "src/f32-igemm/gen/4x2-relu-wasm.c",
+    "src/f32-igemm/gen/4x4-relu-wasm.c",
     "src/f32-igemm/gen/1x4-minmax-wasm.c",
     "src/f32-igemm/gen/2x4-minmax-wasm.c",
     "src/f32-igemm/gen/4x2-minmax-wasm.c",
@@ -2811,15 +2827,12 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f32_igemm_minmax_test",
+    name = "f32_igemm_relu_test",
     srcs = [
-        "test/f32-igemm-minmax.cc",
+        "test/f32-igemm-relu.cc",
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    # Work-around for "too many sections" error
-    mingw_copts = ["-Wa,-mbig-obj"],
-    msys_copts = ["-Wa,-mbig-obj"],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -2907,6 +2920,16 @@ xnnpack_unit_test(
     name = "f32_gemm_test",
     srcs = [
         "test/f32-gemm.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_gemm_relu_test",
+    srcs = [
+        "test/f32-gemm-relu.cc",
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,

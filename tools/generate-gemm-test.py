@@ -785,7 +785,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr,
   if activation == "ukernel":
     activation = "linear"
   test_args = [ukernel]
-  if activation != "linear" and (not isa or isa == "psimd"):
+  if activation not in ["linear", "relu"] and (not isa or isa == "psimd"):
     test_args.append("GemmMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(GEMM_TEST_CODE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),

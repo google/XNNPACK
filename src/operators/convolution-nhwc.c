@@ -553,6 +553,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     ukernel_type = xnn_ukernel_type_igemm;
   }
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
+  const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
 
   size_t zero_size = 0;
   switch (ukernel_type) {
@@ -634,6 +635,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
       const struct gemm_fused_ukernels* ukernels = &xnn_params.f32.gemm.minmax;
       if (linear_activation && xnn_params.f32.gemm.linear.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
         ukernels = &xnn_params.f32.gemm.linear;
+      } else if (relu_activation && xnn_params.f32.gemm.relu.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
+        ukernels = &xnn_params.f32.gemm.relu;
       }
       switch (ukernel_type) {
         case xnn_ukernel_type_gemm:

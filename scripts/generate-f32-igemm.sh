@@ -11,6 +11,11 @@ tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D ACTIVATION=LI
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/4x2-scalar.c
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/4x4-scalar.c
 
+tools/xngen src/f32-igemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D ACTIVATION=RELU   -o src/f32-igemm/gen/1x4-relu-scalar.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D ACTIVATION=RELU   -o src/f32-igemm/gen/2x4-relu-scalar.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D ACTIVATION=RELU   -o src/f32-igemm/gen/4x2-relu-scalar.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D ACTIVATION=RELU   -o src/f32-igemm/gen/4x4-relu-scalar.c
+
 tools/xngen src/f32-igemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/1x4-minmax-scalar.c
 tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/2x4-minmax-scalar.c
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/4x2-minmax-scalar.c
@@ -21,6 +26,11 @@ tools/xngen src/f32-igemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D ACTIVATION=LI
 tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/2x4-wasm.c
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=1 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/4x2-wasm.c
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/4x4-wasm.c
+
+tools/xngen src/f32-igemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D ACTIVATION=RELU   -o src/f32-igemm/gen/1x4-relu-wasm.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D ACTIVATION=RELU   -o src/f32-igemm/gen/2x4-relu-wasm.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=1 -D ACTIVATION=RELU   -o src/f32-igemm/gen/4x2-relu-wasm.c
+tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D ACTIVATION=RELU   -o src/f32-igemm/gen/4x4-relu-wasm.c
 
 tools/xngen src/f32-igemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/1x4-minmax-wasm.c
 tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/2x4-minmax-wasm.c
@@ -151,4 +161,5 @@ tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -o src/f32-igem
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/f32-igemm.yaml --output test/f32-igemm.cc
+tools/generate-gemm-test.py --spec test/f32-igemm-relu.yaml --output test/f32-igemm-relu.cc
 tools/generate-gemm-test.py --spec test/f32-igemm-minmax.yaml --output test/f32-igemm-minmax.cc

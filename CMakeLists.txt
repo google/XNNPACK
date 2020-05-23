@@ -246,6 +246,10 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-gemm/gen/2x4-scalar.c
   src/f32-gemm/gen/4x2-scalar.c
   src/f32-gemm/gen/4x4-scalar.c
+  src/f32-gemm/gen/1x4-relu-scalar.c
+  src/f32-gemm/gen/2x4-relu-scalar.c
+  src/f32-gemm/gen/4x2-relu-scalar.c
+  src/f32-gemm/gen/4x4-relu-scalar.c
   src/f32-gemm/gen/1x4-minmax-scalar.c
   src/f32-gemm/gen/2x4-minmax-scalar.c
   src/f32-gemm/gen/4x2-minmax-scalar.c
@@ -263,6 +267,10 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-igemm/gen/2x4-scalar.c
   src/f32-igemm/gen/4x2-scalar.c
   src/f32-igemm/gen/4x4-scalar.c
+  src/f32-igemm/gen/1x4-relu-scalar.c
+  src/f32-igemm/gen/2x4-relu-scalar.c
+  src/f32-igemm/gen/4x2-relu-scalar.c
+  src/f32-igemm/gen/4x4-relu-scalar.c
   src/f32-igemm/gen/1x4-minmax-scalar.c
   src/f32-igemm/gen/2x4-minmax-scalar.c
   src/f32-igemm/gen/4x2-minmax-scalar.c
@@ -2299,6 +2307,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-gemm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-gemm-test f32-gemm-test)
 
+  ADD_EXECUTABLE(f32-gemm-relu-test test/f32-gemm-relu.cc)
+  SET_TARGET_PROPERTIES(f32-gemm-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-gemm-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-gemm-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-gemm-relu-test f32-gemm-relu-test)
+
   ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc)
   SET_TARGET_PROPERTIES(f32-gemm-minmax-test PROPERTIES
     CXX_STANDARD 11
@@ -2352,6 +2369,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-igemm-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-igemm-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-igemm-test f32-igemm-test)
+
+  ADD_EXECUTABLE(f32-igemm-relu-test test/f32-igemm-relu.cc)
+  SET_TARGET_PROPERTIES(f32-igemm-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-igemm-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-igemm-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-igemm-relu-test f32-igemm-relu-test)
 
   ADD_EXECUTABLE(f32-igemm-minmax-test test/f32-igemm-minmax.cc)
   SET_TARGET_PROPERTIES(f32-igemm-minmax-test PROPERTIES
