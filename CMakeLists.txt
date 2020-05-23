@@ -396,7 +396,8 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
-  src/x32-pad/x2-scalar.c
+  src/x32-pad/scalar-float.c
+  src/x32-pad/scalar-int.c
   src/x32-unpool/scalar.c
   src/x32-zip/x2-scalar.c
   src/x32-zip/x3-scalar.c
@@ -506,7 +507,7 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-vmulcaddc/gen/c8-minmax-psimd-2x.c
   src/x32-fill/psimd.c
   src/x32-packx/x4-psimd.c
-  src/x32-pad/x2-psimd.c
+  src/x32-pad/psimd.c
   src/x32-unpool/psimd.c
   src/x32-zip/x2-psimd.c
   src/x32-zip/x3-psimd.c
@@ -705,7 +706,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/u8-rmax/neon.c
   src/x32-fill/neon.c
   src/x32-packx/x4-neon-st4.c
-  src/x32-pad/x2-neon.c
+  src/x32-pad/neon.c
   src/x32-unpool/neon.c
   src/x32-zip/x2-neon.c
   src/x32-zip/x3-neon.c
@@ -1122,6 +1123,7 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vmulcaddc/gen/c8-minmax-sse-2x.c
   src/x32-fill/sse.c
   src/x32-packx/x4-sse.c
+  src/x32-pad/sse.c
   src/math/roundne-sse-addsub.c
   src/math/roundd-sse-addsub.c
   src/math/roundu-sse-addsub.c
@@ -1163,7 +1165,6 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/u8-clamp/sse2-x64.c
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
-  src/x32-pad/x2-sse2.c
   src/x32-unpool/sse2.c
   src/x32-zip/x2-sse2.c
   src/x32-zip/x3-sse2.c
