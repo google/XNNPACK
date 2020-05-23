@@ -17,7 +17,7 @@ ExternalProject_Add(cpuinfo
   SOURCE_DIR "${CMAKE_BINARY_DIR}/cpuinfo-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/cpuinfo"
   CONFIGURE_COMMAND ""
-  PATCH_COMMAND "patch -p0 -i ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpuinfo.patch"
+  PATCH_COMMAND patch -p0 -i "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpuinfo.patch"
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
   TEST_COMMAND ""
