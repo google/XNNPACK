@@ -36,7 +36,7 @@ ACCURACY_EVAL_DEPS = [
 ]
 
 MICROKERNEL_TEST_DEPS = [
-    ":ukernels",
+    ":ukernels_test_mode",
     ":enable_assembly",
     "@cpuinfo",
     "@FP16",
@@ -44,7 +44,7 @@ MICROKERNEL_TEST_DEPS = [
 ]
 
 OPERATOR_TEST_DEPS = [
-    ":XNNPACK",
+    ":XNNPACK_test_mode",
     "@pthreadpool",
     "@FP16",
 ]
@@ -1813,8 +1813,45 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "scalar_ukernels_test_mode",
+    srcs = SCALAR_UKERNELS,
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = ["-marm"],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":tables",
+        "@FP16",
+        "@FXdiv",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "wasm_ukernels",
     hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    wasm_srcs = WASM_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@FXdiv",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "wasm_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = WASM_UKERNELS,
@@ -1832,6 +1869,33 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-mfpu=neon",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse2"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    optimized_copts = [
+        "-O3",
+        "-ffast-math",
+    ],
+    psimd_srcs = PSIMD_FASTMATH_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@psimd",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "psimd_fastmath_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = [
+        "-marm",
+        "-mfpu=neon",
+    ],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-msse2"],
@@ -1872,6 +1936,32 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "psimd_accmath_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = [
+        "-marm",
+        "-mfpu=neon",
+    ],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse2"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    optimized_copts = [
+        "-O3",
+    ],
+    psimd_srcs = PSIMD_ACCMATH_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@psimd",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "neon_ukernels",
     hdrs = INTERNAL_HDRS,
     aarch32_copts = [
@@ -1881,6 +1971,29 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = NEON_UKERNELS,
     aarch64_srcs = NEON_UKERNELS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neon_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = [
+        "-marm",
+        "-march=armv7-a",
+        "-mfpu=neon",
+    ],
+    aarch32_srcs = NEON_UKERNELS,
+    aarch64_srcs = NEON_UKERNELS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -1910,6 +2023,29 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "neonfma_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = [
+        "-marm",
+        "-march=armv7-a",
+        "-mfpu=neon-vfpv4",
+    ],
+    aarch32_srcs = NEONFMA_UKERNELS,
+    aarch64_srcs = NEONFMA_UKERNELS + AARCH64_NEONFMA_UKERNELS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "neonv8_ukernels",
     hdrs = INTERNAL_HDRS,
     aarch32_copts = [
@@ -1919,6 +2055,29 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = NEONV8_UKERNELS,
     aarch64_srcs = NEONV8_UKERNELS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neonv8_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8-a",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = NEONV8_UKERNELS,
+    aarch64_srcs = NEONV8_UKERNELS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -1943,8 +2102,45 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "neonfp16arith_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    aarch64_copts = ["-march=armv8.2-a+fp16"],
+    aarch64_srcs = AARCH64_NEONFP16ARITH_UKERNELS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "sse2_ukernels",
     hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse2"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:SSE2"],
+    x86_srcs = SSE_UKERNELS + SSE2_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "sse2_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-msse2"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -1973,8 +2169,46 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "ssse3_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mssse3"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:SSE2"],
+    x86_srcs = SSSE3_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "sse41_ukernels",
     hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse4.1"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:SSE2"],
+    x86_srcs = SSE41_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "sse41_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-msse4.1"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2004,8 +2238,48 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "avx_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mavx"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs = AVX_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "fma3_ukernels",
     hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mfma"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs = FMA3_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fma3_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mfma"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2039,8 +2313,53 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "avx2_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = [
+        "-mfma",
+        "-mavx2",
+    ],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX2"],
+    msvc_x86_64_copts = ["/arch:AVX2"],
+    x86_srcs = AVX2_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "avx512f_ukernels",
     hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mavx512f"],
+    mingw_copts = ["-fno-asynchronous-unwind-tables"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX512"],
+    msvc_x86_64_copts = ["/arch:AVX512"],
+    msys_copts = ["-fno-asynchronous-unwind-tables"],
+    x86_srcs = AVX512F_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "avx512f_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mavx512f"],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
@@ -2079,13 +2398,19 @@ xnnpack_aggregate_library(
         ":neonfp16arith_ukernels",
         ":asm_ukernels",
     ],
-    generic_deps = [":scalar_ukernels"],
+    generic_deps = [
+        ":scalar_ukernels",
+    ],
     psimd_deps = [
         ":psimd_fastmath_ukernels",
         ":psimd_accmath_ukernels",
     ],
-    wasm_deps = [":wasm_ukernels"],
-    wasmsimd_deps = [":wasm_ukernels"],
+    wasm_deps = [
+        ":wasm_ukernels",
+    ],
+    wasmsimd_deps = [
+        ":wasm_ukernels",
+    ],
     x86_deps = [
         ":sse2_ukernels",
         ":ssse3_ukernels",
@@ -2094,6 +2419,45 @@ xnnpack_aggregate_library(
         ":fma3_ukernels",
         ":avx2_ukernels",
         ":avx512f_ukernels",
+    ],
+)
+
+xnnpack_aggregate_library(
+    name = "ukernels_test_mode",
+    aarch32_deps = [
+        ":neon_ukernels_test_mode",
+        ":neonfma_ukernels_test_mode",
+        ":neonv8_ukernels_test_mode",
+        ":asm_ukernels",
+    ],
+    aarch64_deps = [
+        ":neon_ukernels_test_mode",
+        ":neonfma_ukernels_test_mode",
+        ":neonv8_ukernels_test_mode",
+        ":neonfp16arith_ukernels_test_mode",
+        ":asm_ukernels",
+    ],
+    generic_deps = [
+        ":scalar_ukernels_test_mode",
+    ],
+    psimd_deps = [
+        ":psimd_fastmath_ukernels_test_mode",
+        ":psimd_accmath_ukernels_test_mode",
+    ],
+    wasm_deps = [
+        ":wasm_ukernels_test_mode",
+    ],
+    wasmsimd_deps = [
+        ":wasm_ukernels_test_mode",
+    ],
+    x86_deps = [
+        ":sse2_ukernels_test_mode",
+        ":ssse3_ukernels_test_mode",
+        ":sse41_ukernels_test_mode",
+        ":avx_ukernels_test_mode",
+        ":fma3_ukernels_test_mode",
+        ":avx2_ukernels_test_mode",
+        ":avx512f_ukernels_test_mode",
     ],
 )
 
@@ -2122,6 +2486,23 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "indirection_test_mode",
+    srcs = ["src/indirection.c"],
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        "@FP16",
+        "@FXdiv",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "operator_run",
     srcs = ["src/operator-run.c"],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
@@ -2140,9 +2521,50 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "operator_run_test_mode",
+    srcs = ["src/operator-run.c"],
+    hdrs = INTERNAL_HDRS + LOGGING_HDRS,
+    copts = LOGGING_COPTS + [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ] + select({
+        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
+        "//conditions:default": [],
+    }),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        "@FP16",
+        "@FXdiv",
+        "@clog",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "memory_planner",
     srcs = ["src/memory-planner.c"],
     hdrs = INTERNAL_HDRS,
+    defines = select({
+        ":xnn_enable_memopt_explicit_true": ["XNN_ENABLE_MEMOPT=1"],
+        ":xnn_enable_memopt_explicit_false": ["XNN_ENABLE_MEMOPT=0"],
+        "//conditions:default": ["XNN_ENABLE_MEMOPT=1"],
+    }),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "memory_planner_test_mode",
+    srcs = ["src/memory-planner.c"],
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
     defines = select({
         ":xnn_enable_memopt_explicit_true": ["XNN_ENABLE_MEMOPT=1"],
         ":xnn_enable_memopt_explicit_false": ["XNN_ENABLE_MEMOPT=0"],
@@ -2193,6 +2615,36 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "operators_test_mode",
+    srcs = OPERATOR_SRCS + [
+        "src/memory.c",
+        "src/operator-delete.c",
+    ],
+    hdrs = INTERNAL_HDRS + LOGGING_HDRS,
+    copts = LOGGING_COPTS + [
+        "-Isrc",
+        "-Iinclude",
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ] + select({
+        ":debug_build": [],
+        "//conditions:default": xnnpack_min_size_copts(),
+    }) + select({
+        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
+        "//conditions:default": [],
+    }),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":indirection_test_mode",
+        "@FP16",
+        "@FXdiv",
+        "@clog",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "XNNPACK",
     srcs = [
         "src/init.c",
@@ -2221,6 +2673,46 @@ xnnpack_cc_library(
         ":ukernels",
         ":operator_run",
         ":operators",
+        "@clog",
+        "@FP16",
+        "@pthreadpool",
+    ] + select({
+        ":emscripten": [],
+        "//conditions:default": ["@cpuinfo"],
+    }),
+)
+
+xnnpack_cc_library(
+    name = "XNNPACK_test_mode",
+    srcs = [
+        "src/init.c",
+        "src/runtime.c",
+        "src/subgraph.c",
+        "src/tensor.c",
+    ],
+    hdrs = ["include/xnnpack.h"],
+    copts = LOGGING_COPTS + [
+        "-Isrc",
+        "-Iinclude",
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ] + select({
+        ":debug_build": [],
+        "//conditions:default": xnnpack_min_size_copts(),
+    }) + select({
+        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
+        "//conditions:default": [],
+    }),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    includes = ["include"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    visibility = xnnpack_visibility(),
+    deps = [
+        ":enable_assembly",
+        ":memory_planner_test_mode",
+        ":ukernels_test_mode",
+        ":operator_run_test_mode",
+        ":operators_test_mode",
         "@clog",
         "@FP16",
         "@pthreadpool",
