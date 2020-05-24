@@ -86,6 +86,18 @@ struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph)
   return new_value;
 }
 
+void xnn_node_clear(struct xnn_node* node) {
+  assert(node != NULL);
+  assert(node->type != xnn_node_type_invalid);
+  memset(node, 0, sizeof(struct xnn_node));
+}
+
+void xnn_value_clear(struct xnn_value* value) {
+  assert(value != NULL);
+  assert(value->type != xnn_value_type_invalid);
+  memset(value, 0, sizeof(struct xnn_value));
+}
+
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
 {
   struct xnn_node* nodes = subgraph->nodes;
@@ -110,6 +122,116 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
   struct xnn_node* new_node = nodes + size;
   new_node->id = size;
   return new_node;
+}
+
+enum xnn_status xnn_subgraph_optimize(
+  xnn_subgraph_t subgraph,
+  uint32_t flags)
+{
+  // Initialize producer/consumer fields to safe defaults.
+  for (uint32_t i = 0; i < subgraph->num_values; i++) {
+    struct xnn_value* value = &subgraph->values[i];
+    value->producer = XNN_INVALID_NODE_ID;
+    value->first_consumer = XNN_INVALID_NODE_ID;
+    value->num_consumers = 0;
+  }
+
+  // Analyse Nodes' inputs and output and update Values' producer/consumer fields
+  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+    struct xnn_node* node = &subgraph->nodes[n];
+
+    for (uint32_t i = 0; i < node->num_inputs; i++) {
+      const uint32_t input_id = node->inputs[i];
+      assert(input_id < subgraph->num_values);
+
+      if (subgraph->values[input_id].num_consumers++ == 0) {
+        assert(subgraph->values[input_id].first_consumer == XNN_INVALID_NODE_ID);
+        subgraph->values[input_id].first_consumer = n;
+      }
+    }
+
+    for (uint32_t o = 0; o < node->num_outputs; o++) {
+      const uint32_t output_id = node->outputs[o];
+      assert(output_id < subgraph->num_values);
+
+      assert(subgraph->values[output_id].producer == XNN_INVALID_NODE_ID);
+      subgraph->values[output_id].producer = n;
+    }
+  }
+
+  // Count extra consumer for Values which are external outputs.
+  // Remove unreferenced values.
+  for (uint32_t i = 0; i < subgraph->num_values; i++) {
+    struct xnn_value* value = &subgraph->values[i];
+    if (value->type == xnn_value_type_invalid) {
+      continue;
+    }
+
+    if (value->flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT) {
+      value->num_consumers += 1;
+    }
+    if ((value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) == 0 && value->num_consumers == 0) {
+      xnn_value_clear(value);
+    }
+  }
+
+  // Fuse Nodes where possible
+  for (uint32_t i = 0; i < subgraph->num_values; i++) {
+    struct xnn_value* value = &subgraph->values[i];
+    if (value->num_consumers == 1) {
+      const uint32_t producer_id = value->producer;
+      if (producer_id == XNN_INVALID_NODE_ID) {
+        continue;
+      }
+      assert(producer_id < subgraph->num_nodes);
+
+      const uint32_t consumer_id = value->first_consumer;
+      if (consumer_id == XNN_INVALID_NODE_ID) {
+        continue;
+      }
+      assert(consumer_id < subgraph->num_nodes);
+
+      struct xnn_node* producer = &subgraph->nodes[producer_id];
+      assert(producer->type != xnn_node_type_invalid);
+      struct xnn_node* consumer = &subgraph->nodes[consumer_id];
+      assert(consumer->type != xnn_node_type_invalid);
+
+      // Try to fuse Clamp Node upstream into producer Node
+      if (consumer->type == xnn_node_type_clamp) {
+        switch (producer->type) {
+          case xnn_node_type_add2:
+          case xnn_node_type_average_pooling_2d:
+          case xnn_node_type_clamp:
+          case xnn_node_type_convolution_2d:
+          case xnn_node_type_depthwise_convolution_2d:
+          case xnn_node_type_fully_connected:
+          case xnn_node_type_multiply2:
+          case xnn_node_type_max_pooling_2d:
+            xnn_log_info("fuse Clamp Node #%"PRIu32" into upstream Node #%"PRIu32, consumer_id, producer_id);
+            assert(producer->num_outputs == 1);
+            assert(consumer->num_inputs == 1);
+            assert(consumer->num_outputs == 1);
+
+            const uint32_t fused_output_id = consumer->outputs[0];
+            assert(fused_output_id < subgraph->num_values);
+            subgraph->values[fused_output_id].producer = producer_id;
+            producer->outputs[0] = fused_output_id;
+
+            producer->activation.output_min =
+              math_max_f32(producer->activation.output_min, consumer->activation.output_min);
+            producer->activation.output_max =
+              math_min_f32(producer->activation.output_max, consumer->activation.output_max);
+
+            xnn_node_clear(consumer);
+            xnn_value_clear(value);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+  return xnn_status_success;
 }
 
 enum xnn_status xnn_define_convolution_2d(

@@ -62,6 +62,8 @@ enum xnn_status xnn_create_runtime_v2(
     goto error;
   }
 
+  xnn_subgraph_optimize(subgraph, 0 /* flags */);
+
   status = xnn_status_out_of_memory;
 
   runtime = xnn_allocate_zero_memory(sizeof(struct xnn_runtime));
@@ -82,6 +84,9 @@ enum xnn_status xnn_create_runtime_v2(
   for (size_t i = 0; i < subgraph->num_nodes; i++) {
     const struct xnn_node* node = subgraph->nodes + i;
     switch (node->type) {
+      case xnn_node_type_invalid:
+        // Node was fused
+        continue;
       case xnn_node_type_add2:
         status = xnn_create_add_nd_f32(
           node->activation.output_min,
@@ -427,10 +432,6 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].inputs[1] = node->inputs[1];
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
-      case xnn_node_type_invalid:
-        xnn_log_fatal("unexpected node type %d in node #%zu", node->type, i);
-        XNN_UNREACHABLE;
-        break;
     }
   }
 
@@ -525,6 +526,11 @@ enum xnn_status xnn_setup_runtime(
 
   for (size_t i = 0; i < runtime->num_ops; i++) {
     const struct xnn_operator_data* opdata = &runtime->opdata[i];
+    if (opdata->operator_object == NULL) {
+      // Operator was removed during optimization
+      continue;
+    }
+
     enum xnn_status status = xnn_status_success;
     switch (opdata->operator_object->type) {
       case xnn_operator_type_add_nd_f32:
@@ -725,6 +731,11 @@ enum xnn_status xnn_invoke_runtime(
   xnn_runtime_t runtime)
 {
   for (size_t i = 0; i < runtime->num_ops; i++) {
+    if (runtime->opdata[i].operator_object == NULL) {
+      // Operator was removed after fusion
+      continue;
+    }
+
     const enum xnn_status status = xnn_run_operator(runtime->opdata[i].operator_object, runtime->threadpool);
     if (status != xnn_status_success) {
       return status;

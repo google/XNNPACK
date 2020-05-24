@@ -16,6 +16,8 @@
 #define XNN_MAX_RUNTIME_INPUTS 2
 #define XNN_MAX_RUNTIME_OUTPUTS 2
 
+#define XNN_INVALID_NODE_ID UINT32_MAX
+
 struct xnn_shape {
   size_t num_dims;
   size_t dim[XNN_MAX_TENSOR_DIMS];
@@ -45,6 +47,15 @@ struct xnn_value {
   uint32_t flags;
   /// Static initialization data. Must be null for non-static values.
   const void* data;
+  /// Index of the Subgraph node that produced the value, or XNN_INVALID_NODE_ID is the Value is an external input.
+  uint32_t producer;
+  /// Index of the first Node that consume the value, or XNN_INVALID_NODE_ID if the Value has no consumers within the
+  /// graph (e.g. Value is an external output).
+  uint32_t first_consumer;
+  /// Number of Nodes that consume the value.
+  /// If multiple inputs in a Node refer to this Value as input, the Node is counted as consumer multiple times.
+  /// If the Value is an external output, it counts as having an extra consumer.
+  uint32_t num_consumers;
 };
 
 struct xnn_blob {
@@ -210,3 +221,8 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);
 size_t xnn_tensor_get_size(
   xnn_subgraph_t subgraph,
   uint32_t value_id);
+
+enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
+
+void xnn_node_clear(struct xnn_node* node);
+void xnn_value_clear(struct xnn_value* value);
