@@ -229,6 +229,70 @@ enum xnn_status xnn_subgraph_optimize(
             break;
         }
       }
+      // Try to fuse Constant Pad node downstream into [Depthwise] Convolution 2D Node
+      if (producer->type == xnn_node_type_constant_pad) {
+        assert(producer->num_inputs == 1);
+        assert(producer->num_outputs == 1);
+        const bool is_spatial_2d_padding = value->shape.num_dims == 4 &&
+          (producer->params.static_pad.pre_paddings[0] | producer->params.static_pad.post_paddings[0] |
+           producer->params.static_pad.pre_paddings[3] | producer->params.static_pad.post_paddings[3]) == 0;
+        switch (consumer->type) {
+          case xnn_node_type_convolution_2d:
+            if (is_spatial_2d_padding && !(consumer->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING)) {
+              xnn_log_info("fuse Constant Pad Node #%"PRIu32" into Convolution 2D Node #%"PRIu32,
+                consumer_id, producer_id);
+              assert(consumer->num_inputs >= 1);
+              assert(consumer->inputs[0] == producer->outputs[0]);
+
+              consumer->params.convolution_2d.input_padding_top    += producer->params.static_pad.pre_paddings[1];
+              consumer->params.convolution_2d.input_padding_right  += producer->params.static_pad.pre_paddings[2];
+              consumer->params.convolution_2d.input_padding_bottom += producer->params.static_pad.post_paddings[1];
+              consumer->params.convolution_2d.input_padding_left   += producer->params.static_pad.post_paddings[2];
+
+              consumer->inputs[0] = producer->inputs[0];
+
+              const uint32_t fused_input_id = producer->inputs[0];
+              assert(fused_input_id < subgraph->num_values);
+              if (subgraph->values[fused_input_id].first_consumer == producer_id) {
+                subgraph->values[fused_input_id].first_consumer = consumer_id;
+              }
+
+              xnn_node_clear(producer);
+              xnn_value_clear(value);
+            }
+            break;
+          case xnn_node_type_depthwise_convolution_2d:
+            if (is_spatial_2d_padding && !(consumer->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING)) {
+              xnn_log_info("fuse Constant Pad Node #%"PRIu32" into Depthwise Convolution 2D Node #%"PRIu32,
+                consumer_id, producer_id);
+              assert(consumer->num_inputs >= 1);
+              assert(consumer->inputs[0] == producer->outputs[0]);
+
+              consumer->params.depthwise_convolution_2d.input_padding_top +=
+                producer->params.static_pad.pre_paddings[1];
+              consumer->params.depthwise_convolution_2d.input_padding_right +=
+                producer->params.static_pad.pre_paddings[2];
+              consumer->params.depthwise_convolution_2d.input_padding_bottom +=
+                producer->params.static_pad.post_paddings[1];
+              consumer->params.depthwise_convolution_2d.input_padding_left +=
+                producer->params.static_pad.post_paddings[2];
+
+              consumer->inputs[0] = producer->inputs[0];
+
+              const uint32_t fused_input_id = producer->inputs[0];
+              assert(fused_input_id < subgraph->num_values);
+              if (subgraph->values[fused_input_id].first_consumer == producer_id) {
+                subgraph->values[fused_input_id].first_consumer = consumer_id;
+              }
+
+              xnn_node_clear(producer);
+              xnn_value_clear(value);
+            }
+            break;
+          default:
+            break;
+        }
+      }
     }
   }
   return xnn_status_success;
