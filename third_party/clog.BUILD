@@ -12,17 +12,18 @@ cc_library(
     srcs = [
         "deps/clog/src/clog.c",
     ],
+    hdrs = [
+        "deps/clog/include/clog.h",
+    ],
     copts = select({
         ":windows": [],
         "//conditions:default": ["-Wno-unused-result"],
     }),
-    hdrs = [
-        "deps/clog/include/clog.h",
-    ],
     linkopts = select({
         ":android": ["-llog"],
         "//conditions:default": [],
     }),
+    linkstatic = True,
     strip_include_prefix = "deps/clog/include",
 )
 
