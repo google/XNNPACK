@@ -3329,6 +3329,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_igemm_minmax_test",
+    srcs = [
+        "test/f32-igemm-minmax.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f16_igemm_minmax_test",
     srcs = [
         "test/f16-igemm-minmax.cc",
