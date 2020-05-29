@@ -4470,7 +4470,7 @@ config_setting(
     values = {
         "crosstool_top": "//toolchain:emscripten",
         "cpu": "wasm",
-        "features": "wasm_simd",
+        "copt": "-msimd128",
     },
 )
 
