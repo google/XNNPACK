@@ -22,7 +22,7 @@ void xnn_f32_prelu_ukernel__neon_${ROW_TILE}x${CHANNEL_TILE}(
     size_t input_stride,
     const float*restrict weights,
     float*restrict output,
-    size_t output_stride)
+    size_t output_stride) XNN_DISABLE_TSAN
 {
   assert(rows != 0);
   assert(channels != 0);

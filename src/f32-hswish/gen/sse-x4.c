@@ -12,7 +12,6 @@
 #include <emmintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vbinary.h>
 
 
@@ -20,7 +19,7 @@ void xnn_f32_hswish_ukernel__sse_x4(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_hswish_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_hswish_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
@@ -59,7 +58,7 @@ void xnn_f32_hswish_ukernel__sse_x4(
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const __m128 vx0123 = _mm_loadu_ps_notsan(x);
+    const __m128 vx0123 = _mm_loadu_ps(x);
     __m128 vacc0123 = _mm_mul_ps(vx0123, vsixth);
     vacc0123 = _mm_add_ps(vacc0123, vhalf);
     vacc0123 = _mm_max_ps(vacc0123, vzero);

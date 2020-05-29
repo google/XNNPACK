@@ -20,7 +20,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x${ELEMENTS_TILE}${"" if ACC
     const float* input,
     float* output,
     float* sum,
-    float max)
+    float max) XNN_DISABLE_TSAN
 {
   assert(elements % sizeof(float) == 0);
 

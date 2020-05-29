@@ -21,7 +21,7 @@ void xnn_f32_sigmoid_ukernel__neonfma_rr1_lut64_p2_div_x24(
     size_t n,
     const float* x,
     float* y,
-    const void* params)
+    const void* params) XNN_DISABLE_TSAN
 {
   assert(n % sizeof(float) == 0);
 

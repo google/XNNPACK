@@ -12,7 +12,6 @@
 #include <emmintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/raddstoreexpminusmax.h>
 
 
@@ -21,7 +20,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_p5_x20_acc2(
     const float* input,
     float* output,
     float* sum,
-    float max)
+    float max) XNN_DISABLE_TSAN
 {
   assert(elements % sizeof(float) == 0);
 
@@ -214,7 +213,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_p5_x20_acc2(
     assert(elements >= 1 * sizeof(float));
     assert(elements <= 3 * sizeof(float));
     // Load 4 inputs at a time.
-    const __m128 vi = _mm_loadu_ps_notsan(input);
+    const __m128 vi = _mm_loadu_ps(input);
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
     const __m128 vx = _mm_sub_ps(vi, vi_max);

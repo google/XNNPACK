@@ -8,25 +8,6 @@
 #include <xnnpack/common.h>
 
 
-#if defined(__SSE__) || defined(_M_X64) || (defined(_M_IX86_FP) && (_M_IX86_FP >= 1))
-#include <xmmintrin.h>
-
-static XNN_INTRINSIC XNN_DISABLE_TSAN
-__m128 _mm_loadu_ps_notsan(const float* address) {
-  return _mm_loadu_ps(address);
-}
-#endif
-
-#if defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && (_M_IX86_FP >= 2))
-#include <emmintrin.h>
-
-static XNN_INTRINSIC XNN_DISABLE_TSAN
-__m128i _mm_loadu_si128_notsan(const __m128i* address) {
-  return _mm_loadu_si128(address);
-}
-#endif
-
-
 #ifdef __AVX512F__
 #include <immintrin.h>
 

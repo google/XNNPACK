@@ -22,7 +22,7 @@ void xnn_f16_prelu_ukernel__neonfp16arith_2x8(
     size_t input_stride,
     const void* restrict weights,
     void* restrict output,
-    size_t output_stride)
+    size_t output_stride) XNN_DISABLE_TSAN
 {
   assert(rows != 0);
   assert(channels != 0);

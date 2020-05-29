@@ -20,7 +20,7 @@ void xnn_f32_argmaxpool_ukernel_4x__sse2_c4(
     uint32_t* index,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);

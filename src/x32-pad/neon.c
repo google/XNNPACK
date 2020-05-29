@@ -19,7 +19,7 @@ void xnn_x32_pad_ukernel__neon(
     const uint32_t* input,
     size_t input_stride,
     uint32_t* output,
-    size_t output_stride)
+    size_t output_stride) XNN_DISABLE_TSAN
 {
   assert(channels % sizeof(uint32_t) == 0);
   assert(pre_padding % sizeof(uint32_t) == 0);

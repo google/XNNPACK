@@ -21,7 +21,7 @@ void xnn_f32_vrsubc_minmax_ukernel__sse_x8(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
@@ -59,7 +59,7 @@ void xnn_f32_vrsubc_minmax_ukernel__sse_x8(
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const __m128 va0123 = _mm_loadu_ps_notsan(a);
+    const __m128 va0123 = _mm_loadu_ps(a);
 
     __m128 vy0123 = _mm_sub_ps(vb, va0123);
     vy0123 = _mm_max_ps(vy0123, vy_min);

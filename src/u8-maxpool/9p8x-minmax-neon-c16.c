@@ -22,7 +22,7 @@ XNN_DISABLE_TSAN void xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);

@@ -22,7 +22,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neonfma_lut64_p2_x12_acc2(
     const float* input,
     float* output,
     float* sum,
-    float max)
+    float max) XNN_DISABLE_TSAN
 {
   assert(elements % sizeof(float) == 0);
 

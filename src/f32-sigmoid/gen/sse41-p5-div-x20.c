@@ -12,7 +12,6 @@
 #include <smmintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vunary.h>
 
 
@@ -20,7 +19,7 @@ void xnn_f32_sigmoid_ukernel__sse41_p5_div_x20(
     size_t n,
     const float* x,
     float* y,
-    const void* params)
+    const void* params) XNN_DISABLE_TSAN
 {
   assert(n % sizeof(float) == 0);
 
@@ -245,7 +244,7 @@ void xnn_f32_sigmoid_ukernel__sse41_p5_div_x20(
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const __m128 vx = _mm_loadu_ps_notsan(x);
+    const __m128 vx = _mm_loadu_ps(x);
 
     // General structure of the algorithm:
     //           / exp(x) / (1 + exp(x)) if x <= 0

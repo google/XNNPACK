@@ -31,7 +31,7 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__neonfp16arith_x${BATCH_TILE}(
     const void* restrict a_ptr,
     const void* restrict b_ptr,
     void* restrict y_ptr,
-    const struct ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
   assert(n % sizeof(__fp16) == 0);

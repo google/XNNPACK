@@ -23,7 +23,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_lut64
     const float* input,
     float* output,
     float* sum,
-    float max)
+    float max) XNN_DISABLE_TSAN
 {
   assert(elements % sizeof(float) == 0);
 
