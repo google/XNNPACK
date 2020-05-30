@@ -35,6 +35,9 @@ static void GEMMBenchmark(benchmark::State& state,
     state.SkipWithError("cpuinfo initialization failed");
     return;
   }
+  if (!benchmark::utils::CheckNEONFP16ARITH(state)) {
+    return;
+  }
 
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);

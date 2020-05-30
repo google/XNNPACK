@@ -173,6 +173,14 @@ bool CheckVFP(benchmark::State& state) {
   return true;
 }
 
+bool CheckNEONFP16ARITH(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fp16_arith()) {
+    state.SkipWithError("no NEON-FP16-ARITH extension");
+    return false;
+  }
+  return true;
+}
+
 bool CheckNEON(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon()) {
     state.SkipWithError("no NEON extension");

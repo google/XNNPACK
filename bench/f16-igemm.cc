@@ -27,13 +27,12 @@
 
 static void IGEMMBenchmark(benchmark::State& state,
   xnn_f16_igemm_minmax_ukernel_function f16_igemm,
-  uint32_t mr, uint32_t nr, uint32_t kr, uint32_t sr,
-  benchmark::utils::IsaCheckFunction isa_check = nullptr)
+  uint32_t mr, uint32_t nr, uint32_t kr, uint32_t sr)
 {
   if (!cpuinfo_initialize()) {
     state.SkipWithError("cpuinfo initialization failed");
   }
-  if (isa_check && !isa_check(state)) {
+  if (!benchmark::utils::CheckNEONFP16ARITH(state)) {
     return;
   }
 
