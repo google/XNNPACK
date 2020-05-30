@@ -1585,6 +1585,7 @@ struct vmulcaddc_parameters {
 struct xnn_parameters {
   bool initialized;
   struct xnn_allocator allocator;
+  size_t llc_size;
   struct {
     struct gemm_parameters gemm;
     struct dwconv_parameters dwconv[XNN_MAX_Q8_DWCONV_UKERNELS];

@@ -18,10 +18,6 @@
   #include <pthread.h>
 #endif
 
-#ifndef __EMSCRIPTEN__
-  #include <cpuinfo.h>
-#endif
-
 #include <xnnpack.h>
 #include <xnnpack/argmaxpool.h>
 #include <xnnpack/avgpool.h>
@@ -53,6 +49,10 @@
 #include <xnnpack/vunary.h>
 #include <xnnpack/zip.h>
 
+#if !XNN_PLATFORM_WEB
+  #include <cpuinfo.h>
+#endif
+
 #ifndef XNN_ENABLE_ASSEMBLY
   #define XNN_ENABLE_ASSEMBLY 1
 #endif
@@ -67,16 +67,18 @@ struct xnn_parameters xnn_params = {
   .initialized = false
 };
 
-static void init(void) {
-#if XNN_ARCH_ASMJS || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_PLATFORM_WEB
+static inline bool detect_x86(void) {
   // Unlike most other architectures, on x86/x86-64 when floating-point instructions
   // have no NaN arguments, but produce NaN output, the output NaN has sign bit set.
   // We use it to distinguish x86/x86-64 from other architectures, by doing subtraction
   // of two infinities (must produce NaN per IEEE 754 standard).
   static const volatile float inf = INFINITY;
-  const bool is_wasm_x86 = signbit(inf - inf);
+  return signbit(inf - inf);
+}
 #endif
 
+static void init(void) {
 #if XNN_ARCH_ARM
   #if XNN_PLATFORM_MOBILE
     if (!cpuinfo_has_arm_neon()) {
@@ -1423,6 +1425,8 @@ static void init(void) {
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASMSIMD
+  const bool is_x86 = detect_x86();
+
   /**************************** Q8 micro-kernels ****************************/
   #ifndef XNN_NO_Q8_OPERATORS
     xnn_params.q8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_q8_gemm_minmax_ukernel_2x2__scalar);
@@ -1473,7 +1477,7 @@ static void init(void) {
 
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
-    if (is_wasm_x86) {
+    if (is_x86) {
       xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_4x8__psimd_splat);
       xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_4x8__psimd_splat);
       xnn_params.f32.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_1x8__psimd_splat);
@@ -1620,6 +1624,8 @@ static void init(void) {
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASM || XNN_ARCH_ASMJS
+  const bool is_x86 = detect_x86();
+
   /**************************** Q8 micro-kernels ****************************/
   #ifndef XNN_NO_Q8_OPERATORS
     xnn_params.q8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_q8_gemm_minmax_ukernel_2x2__scalar);
@@ -1670,7 +1676,7 @@ static void init(void) {
 
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
-    if (is_wasm_x86) {
+    if (is_x86) {
       xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_2x4__scalar);
       xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_2x4__scalar);
       xnn_params.f32.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_1x4__wasm);
@@ -1901,7 +1907,7 @@ static void init(void) {
 #endif
 
 enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
-  #ifndef __EMSCRIPTEN__
+  #if !XNN_PLATFORM_WEB
     if (!cpuinfo_initialize()) {
       return xnn_status_out_of_memory;
     }
@@ -1921,6 +1927,32 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
       xnn_params.allocator.aligned_allocate = &xnn_aligned_allocate;
       xnn_params.allocator.aligned_deallocate = &xnn_aligned_deallocate;
     }
+    #if XNN_PLATFORM_WEB
+      if (detect_x86()) {
+        // Assume x86 processors have 2MB L3 cache.
+        // This is a conservative estimate based on Intel Braswell, a popular low-end x86 core.
+        xnn_params.llc_size = 2 * 1024 * 1024;
+      } else {
+        // Assume ARM processors have 512K L3 cache.
+        // This is a conservative estimate based on Snapdragon 410, a popular low-end ARM SoC.
+        xnn_params.llc_size = 512 * 1024;
+      }
+    #else
+      const struct cpuinfo_processor* processor = cpuinfo_get_processor(0);
+      if (processor != NULL) {
+        if (processor->cache.l3 != NULL) {
+          xnn_params.llc_size = processor->cache.l3->size;
+        } else if (processor->cache.l2 != NULL) {
+          xnn_params.llc_size = processor->cache.l2->size;
+        } else {
+          // Safe default: 256K
+          xnn_params.llc_size = 256 * 1024;
+        }
+      } else {
+        // Safe default: 256K
+        xnn_params.llc_size = 256 * 1024;
+      }
+    #endif
     return xnn_status_success;
   } else {
     return xnn_status_unsupported_hardware;
@@ -1928,7 +1960,7 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
 }
 
 enum xnn_status xnn_deinitialize(void) {
-  #ifndef __EMSCRIPTEN__
+  #if !XNN_PLATFORM_WEB
     cpuinfo_deinitialize();
   #endif
   return xnn_status_success;
