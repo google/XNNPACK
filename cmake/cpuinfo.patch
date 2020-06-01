@@ -1,503 +1,191 @@
+diff --git include/cpuinfo.h include/cpuinfo.h
+index e89a4c1..6c67c34 100644
+--- include/cpuinfo.h
++++ include/cpuinfo.h
+@@ -46,14 +46,6 @@
+ 	#endif
+ #endif
+ 
+-#if CPUINFO_ARCH_X86 && defined(_MSC_VER)
+-	#define CPUINFO_ABI __cdecl
+-#elif CPUINFO_ARCH_X86 && defined(__GNUC__)
+-	#define CPUINFO_ABI __attribute__((__cdecl__))
+-#else
+-	#define CPUINFO_ABI
+-#endif
+-
+ /* Define other architecture-specific macros as 0 */
+ 
+ #ifndef CPUINFO_ARCH_X86
+@@ -88,6 +80,14 @@
+ 	#define CPUINFO_ARCH_WASMSIMD 0
+ #endif
+ 
++#if CPUINFO_ARCH_X86 && defined(_MSC_VER)
++	#define CPUINFO_ABI __cdecl
++#elif CPUINFO_ARCH_X86 && defined(__GNUC__)
++	#define CPUINFO_ABI __attribute__((__cdecl__))
++#else
++	#define CPUINFO_ABI
++#endif
++
+ #define CPUINFO_CACHE_UNIFIED          0x00000001
+ #define CPUINFO_CACHE_INCLUSIVE        0x00000002
+ #define CPUINFO_CACHE_COMPLEX_INDEXING 0x00000004
+@@ -415,8 +415,6 @@ enum cpuinfo_uarch {
+ 	cpuinfo_uarch_cortex_a75   = 0x00300375,
+ 	/** ARM Cortex-A76. */
+ 	cpuinfo_uarch_cortex_a76   = 0x00300376,
+-	/** ARM Cortex-A76AE. */
+-	cpuinfo_uarch_cortex_a76ae = 0x00300378,
+ 	/** ARM Cortex-A77. */
+ 	cpuinfo_uarch_cortex_a77   = 0x00300377,
+ 
+@@ -454,7 +452,9 @@ enum cpuinfo_uarch {
+ 	/** Samsung Exynos M5 (Exynos 9830 big cores). */
+ 	cpuinfo_uarch_exynos_m5  = 0x00600104,
+ 
+-	/* Old names for Exynos. */
++	/* Deprecated synonym for Cortex-A76 */
++	cpuinfo_uarch_cortex_a76ae = 0x00300376,
++	/* Deprecated names for Exynos. */
+ 	cpuinfo_uarch_mongoose_m1 = 0x00600100,
+ 	cpuinfo_uarch_mongoose_m2 = 0x00600101,
+ 	cpuinfo_uarch_meerkat_m3  = 0x00600102,
+diff --git src/api.c src/api.c
+index 832b085..f91b421 100644
+--- src/api.c
++++ src/api.c
+@@ -314,7 +314,8 @@ const struct cpuinfo_processor* CPUINFO_ABI cpuinfo_get_current_processor(void)
+ 		cpuinfo_log_fatal("cpuinfo_get_%s called before cpuinfo is initialized", "current_processor");
+ 	}
+ 	#ifdef __linux__
+-		unsigned cpu;
++		/* Initializing this variable silences a MemorySanitizer error. */
++		unsigned cpu = 0;
+ 		if CPUINFO_UNLIKELY(syscall(__NR_getcpu, &cpu, NULL, NULL) != 0) {
+ 			return 0;
+ 		}
+@@ -332,7 +333,8 @@ const struct cpuinfo_core* CPUINFO_ABI cpuinfo_get_current_core(void) {
+ 		cpuinfo_log_fatal("cpuinfo_get_%s called before cpuinfo is initialized", "current_core");
+ 	}
+ 	#ifdef __linux__
+-		unsigned cpu;
++		/* Initializing this variable silences a MemorySanitizer error. */
++		unsigned cpu = 0;
+ 		if CPUINFO_UNLIKELY(syscall(__NR_getcpu, &cpu, NULL, NULL) != 0) {
+ 			return 0;
+ 		}
+@@ -357,7 +359,8 @@ uint32_t CPUINFO_ABI cpuinfo_get_current_uarch_index(void) {
+ 			}
+ 
+ 			/* General case */
+-			unsigned cpu;
++			/* Initializing this variable silences a MemorySanitizer error. */
++			unsigned cpu = 0;
+ 			if CPUINFO_UNLIKELY(syscall(__NR_getcpu, &cpu, NULL, NULL) != 0) {
+ 				return 0;
+ 			}
+@@ -387,7 +390,8 @@ uint32_t CPUINFO_ABI cpuinfo_get_current_uarch_index_with_default(uint32_t defau
+ 			}
+ 
+ 			/* General case */
+-			unsigned cpu;
++			/* Initializing this variable silences a MemorySanitizer error. */
++			unsigned cpu = 0;
+ 			if CPUINFO_UNLIKELY(syscall(__NR_getcpu, &cpu, NULL, NULL) != 0) {
+ 				return default_uarch_index;
+ 			}
 diff --git src/arm/cache.c src/arm/cache.c
-index 1a8bf91..666ad78 100644
+index 666ad78..446b02b 100644
 --- src/arm/cache.c
 +++ src/arm/cache.c
-@@ -635,6 +635,13 @@ void cpuinfo_arm_decode_cache(
- 								break;
- 						}
- 						break;
-+					case cpuinfo_arm_chipset_series_broadcom_bcm:
-+						switch (chipset->model) {
-+							case 2837: /* BCM2837 */
-+								l2_size = 512 * 1024;
-+								break;
-+						}
-+						break;
- 					case cpuinfo_arm_chipset_series_samsung_exynos:
- 						l1_size = 32 * 1024;
- 						break;
-@@ -922,11 +929,13 @@ void cpuinfo_arm_decode_cache(
- 			 *  | MediaTek Helio X23  | 2(+4+4) |     ?     |     ?     |     ?      |           |
- 			 *  | MediaTek Helio X25  | 2(+4+4) |     ?     |     ?     |     ?      |           |
- 			 *  | MediaTek Helio X27  | 2(+4+4) |     ?     |     ?     |     ?      |           |
-+			 *  | Broadcom BCM2711    |    4    |    32K    |    48K    |     1M     |    [4]    |
- 			 *  +---------------------+---------+-----------+-----------+------------+-----------+
- 			 *
- 			 * [1] http://pdadb.net/index.php?m=processor&id=578&c=qualcomm_snapdragon_618_msm8956__snapdragon_650
- 			 * [2] http://pdadb.net/index.php?m=processor&id=667&c=qualcomm_snapdragon_620_apq8076__snapdragon_652
- 			 * [3] http://pdadb.net/index.php?m=processor&id=692&c=qualcomm_snapdragon_653_msm8976sg__msm8976_pro
-+			 * [4] https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711/README.md
- 			 */
- 			uint32_t l2_size;
- 			switch (chipset->series) {
-diff --git src/arm/linux/aarch32-isa.c src/arm/linux/aarch32-isa.c
-index 6aedda3..64dd168 100644
---- src/arm/linux/aarch32-isa.c
-+++ src/arm/linux/aarch32-isa.c
-@@ -77,18 +77,24 @@ void cpuinfo_arm_linux_decode_isa_from_proc_cpuinfo(
- 
- 		/*
- 		 * NEON VDOT instructions are not indicated in /proc/cpuinfo.
--		 * Use a MIDR-based heuristic to whitelist processors known to support it:
--		 * - Processors with Qualcomm-modified Cortex-A76 cores
--		 * - Kirin 980 processor
-+		 * Use a MIDR-based heuristic to whitelist processors known to support it.
- 		 */
- 		switch (midr & (CPUINFO_ARM_MIDR_IMPLEMENTER_MASK | CPUINFO_ARM_MIDR_PART_MASK)) {
-+			case UINT32_C(0x4100D0B0): /* Cortex-A76 */
-+			case UINT32_C(0x4100D0D0): /* Cortex-A77 */
-+			case UINT32_C(0x4100D0E0): /* Cortex-A76AE */
-+			case UINT32_C(0x4800D400): /* Cortex-A76 (HiSilicon) */
- 			case UINT32_C(0x51008040): /* Kryo 485 Gold (Cortex-A76) */
-+			case UINT32_C(0x51008050): /* Kryo 485 Silver (Cortex-A55) */
-+			case UINT32_C(0x53000030): /* Exynos-M4 */
-+			case UINT32_C(0x53000040): /* Exynos-M5 */
- 				isa->dot = true;
- 				break;
--			default:
--				if (chipset->series == cpuinfo_arm_chipset_series_hisilicon_kirin && chipset->model == 980) {
--					isa->dot = true;
--				}
-+			case UINT32_C(0x4100D050): /* Cortex A55: revision 1 or later only */
-+				isa->dot = !!(midr_get_variant(midr) >= 1);
-+				break;
-+			case UINT32_C(0x4100D0A0): /* Cortex A75: revision 2 or later only */
-+				isa->dot = !!(midr_get_variant(midr) >= 2);
- 				break;
- 		}
- 	} else {
-diff --git src/arm/linux/aarch64-isa.c src/arm/linux/aarch64-isa.c
-index f193e81..619cda5 100644
---- src/arm/linux/aarch64-isa.c
-+++ src/arm/linux/aarch64-isa.c
-@@ -67,21 +67,32 @@ void cpuinfo_arm64_linux_decode_isa_from_proc_cpuinfo(
- 	}
- 	/*
- 	 * Many phones ship with an old kernel configuration that doesn't report UDOT/SDOT instructions.
--	 * Use a MIDR-based heuristic to whitelist processors known to support it:
--	 * - Processors with Qualcomm-modified Cortex-A76 cores
--	 * - Kirin 980 processor
-+	 * Use a MIDR-based heuristic to whitelist processors known to support it.
- 	 */
- 	switch (midr & (CPUINFO_ARM_MIDR_IMPLEMENTER_MASK | CPUINFO_ARM_MIDR_PART_MASK)) {
-+		case UINT32_C(0x4100D060): /* Cortex-A65 */
-+		case UINT32_C(0x4100D0B0): /* Cortex-A76 */
-+		case UINT32_C(0x4100D0C0): /* Neoverse N1 */
-+		case UINT32_C(0x4100D0D0): /* Cortex-A77 */
-+		case UINT32_C(0x4100D0E0): /* Cortex-A76AE */
-+		case UINT32_C(0x4100D4A0): /* Neoverse E1 */
-+		case UINT32_C(0x4800D400): /* Cortex-A76 (HiSilicon) */
- 		case UINT32_C(0x51008040): /* Kryo 485 Gold (Cortex-A76) */
-+		case UINT32_C(0x51008050): /* Kryo 485 Silver (Cortex-A55) */
-+		case UINT32_C(0x53000030): /* Exynos-M4 */
-+		case UINT32_C(0x53000040): /* Exynos-M5 */
- 			isa->dot = true;
+@@ -1115,7 +1115,6 @@ void cpuinfo_arm_decode_cache(
  			break;
-+		case UINT32_C(0x4100D050): /* Cortex A55: revision 1 or later only */
-+			isa->dot = !!(midr_get_variant(midr) >= 1);
-+			break;
-+		case UINT32_C(0x4100D0A0): /* Cortex A75: revision 2 or later only */
-+			isa->dot = !!(midr_get_variant(midr) >= 2);
-+			break;
- 		default:
- 			if (features & CPUINFO_ARM_LINUX_FEATURE_ASIMDDP) {
- 				isa->dot = true;
- 			}
--			if (chipset->series == cpuinfo_arm_chipset_series_hisilicon_kirin && chipset->model == 980) {
--				isa->dot = true;
--			}
- 			break;
- 	}
- 	if (features & CPUINFO_ARM_LINUX_FEATURE_JSCVT) {
-diff --git src/arm/linux/api.h src/arm/linux/api.h
-index f99da66..2597e49 100644
---- src/arm/linux/api.h
-+++ src/arm/linux/api.h
-@@ -11,6 +11,8 @@
- 
- /* No hard limit in the kernel, maximum length observed on non-rogue kernels is 64 */
- #define CPUINFO_HARDWARE_VALUE_MAX 64
-+/* No hard limit in the kernel, maximum length on Raspberry Pi is 8. Add 1 symbol to detect overly large revision strings */
-+#define CPUINFO_REVISION_VALUE_MAX 9
- 
- #ifdef __ANDROID__
- 	/* As per include/sys/system_properties.h in Android NDK */
-@@ -259,6 +261,7 @@ static inline bool cpuinfo_arm_linux_processor_not_equals(
- 
- CPUINFO_INTERNAL bool cpuinfo_arm_linux_parse_proc_cpuinfo(
- 	char hardware[restrict static CPUINFO_HARDWARE_VALUE_MAX],
-+	char revision[restrict static CPUINFO_REVISION_VALUE_MAX],
- 	uint32_t max_processors_count,
- 	struct cpuinfo_arm_linux_processor processors[restrict static max_processors_count]);
- 
-@@ -297,6 +300,7 @@ CPUINFO_INTERNAL bool cpuinfo_arm_linux_parse_proc_cpuinfo(
- 	CPUINFO_INTERNAL struct cpuinfo_arm_chipset
- 		cpuinfo_arm_linux_decode_chipset(
- 			const char hardware[restrict static CPUINFO_HARDWARE_VALUE_MAX],
-+			const char revision[restrict static CPUINFO_REVISION_VALUE_MAX],
- 			uint32_t cores,
- 			uint32_t max_cpu_freq_max);
- #endif
-@@ -327,6 +331,10 @@ CPUINFO_INTERNAL struct cpuinfo_arm_chipset
- 	CPUINFO_INTERNAL struct cpuinfo_arm_chipset
- 		cpuinfo_arm_android_decode_chipset_from_ro_hardware_chipname(
- 			const char ro_hardware_chipname[restrict static CPUINFO_BUILD_PROP_VALUE_MAX]);
-+#else
-+	CPUINFO_INTERNAL struct cpuinfo_arm_chipset
-+		cpuinfo_arm_linux_decode_chipset_from_proc_cpuinfo_revision(
-+			const char proc_cpuinfo_revision[restrict static CPUINFO_REVISION_VALUE_MAX]);
- #endif
- 
- CPUINFO_INTERNAL bool cpuinfo_arm_linux_detect_core_clusters_by_heuristic(
-diff --git src/arm/linux/chipset.c src/arm/linux/chipset.c
-index 35058d9..e36283c 100644
---- src/arm/linux/chipset.c
-+++ src/arm/linux/chipset.c
-@@ -1011,12 +1011,59 @@ write_chipset:
- 	return true;
- }
- 
-+/**
-+ * Tries to match /BCM\d{4}$/ signature for Broadcom BCM chipsets.
-+ * If match successful, extracts model information into \p chipset argument.
-+ *
-+ * @param start - start of the /proc/cpuinfo Hardware string to match.
-+ * @param end - end of the /proc/cpuinfo Hardware string to match.
-+ * @param[out] chipset - location where chipset information will be stored upon a successful match.
-+ *
-+ * @returns true if signature matched, false otherwise.
-+ */
-+static bool match_bcm(
-+	const char* start, const char* end,
-+	struct cpuinfo_arm_chipset chipset[restrict static 1])
-+{
-+	/* Expect exactly 7 symbols: "BCM" (3 symbols) + 4-digit model number */
-+	if (start + 7 != end) {
-+		return false;
-+	}
-+
-+	/* Check that the string starts with "BCM".
-+	 * The first three characters are loaded and compared as a 24-bit little endian word.
-+	 */
-+	const uint32_t expected_bcm = load_u24le(start);
-+	if (expected_bcm != UINT32_C(0x004D4342) /* "MCB" = reverse("BCM") */) {
-+		return false;
-+	}
-+
-+	/* Validate and parse 4-digit model number */
-+	uint32_t model = 0;
-+	for (uint32_t i = 3; i < 7; i++) {
-+		const uint32_t digit = (uint32_t) (uint8_t) start[i] - '0';
-+		if (digit >= 10) {
-+			/* Not really a digit */
-+			return false;
-+		}
-+		model = model * 10 + digit;
-+	}
-+
-+	/* Return parsed chipset. */
-+	*chipset = (struct cpuinfo_arm_chipset) {
-+		.vendor = cpuinfo_arm_chipset_vendor_broadcom,
-+		.series = cpuinfo_arm_chipset_series_broadcom_bcm,
-+		.model = model,
-+	};
-+	return true;
-+}
-+
- /**
-  * Tries to match /OMAP\d{4}$/ signature for Texas Instruments OMAP chipsets.
-  * If match successful, extracts model information into \p chipset argument.
-  *
-  * @param start - start of the /proc/cpuinfo Hardware string to match.
-- * @param end - end of the /proc/cpuinfo Hardaware string to match.
-+ * @param end - end of the /proc/cpuinfo Hardware string to match.
-  * @param[out] chipset - location where chipset information will be stored upon a successful match.
-  *
-  * @returns true if signature matched, false otherwise.
-@@ -2328,6 +2375,14 @@ struct cpuinfo_arm_chipset cpuinfo_arm_linux_decode_chipset_from_proc_cpuinfo_ha
- 			return chipset;
  		}
- 
-+		/* Check Broadcom BCM signature */
-+		if (match_bcm(hardware, hardware_end, &chipset)) {
-+			cpuinfo_log_debug(
-+				"matched Broadcom BCM signature in /proc/cpuinfo Hardware string \"%.*s\"",
-+				(int) hardware_length, hardware);
-+			return chipset;
-+		}
-+
- 		#if CPUINFO_ARCH_ARM
- 			/* Check Texas Instruments OMAP signature */
- 			if (match_omap(hardware, hardware_end, &chipset)) {
-@@ -3713,6 +3768,62 @@ void cpuinfo_arm_chipset_to_string(
- 		return chipset;
+ 		case cpuinfo_uarch_cortex_a76:
+-		case cpuinfo_uarch_cortex_a76ae:
+ 		{
+ 			/*
+ 			 * ARM Cortex-A76 Core Technical Reference Manual
+diff --git src/arm/mach/init.c src/arm/mach/init.c
+index bd27259..058cfc2 100644
+--- src/arm/mach/init.c
++++ src/arm/mach/init.c
+@@ -347,6 +347,15 @@ void cpuinfo_arm_mach_init(void) {
+ 			cpuinfo_isa.fp16arith = true;
  	}
- #else /* !defined(__ANDROID__) */
+ 
 +	/*
-+	 * Fix commonly misreported Broadcom BCM models on Raspberry Pi boards.
-+	 *
-+	 * @param[in,out] chipset - chipset name to fix.
-+	 * @param[in] revision - /proc/cpuinfo Revision string.
++	 * There does not yet seem to exist an OS mechanism to detect support for
++	 * ARMv8.2 optional dot-product instructions, so we currently whitelist CPUs
++	 * known to support these instruction.
 +	 */
-+	void cpuinfo_arm_fixup_raspberry_pi_chipset(
-+		struct cpuinfo_arm_chipset chipset[restrict static 1],
-+		const char revision[restrict static CPUINFO_HARDWARE_VALUE_MAX])
-+	{
-+		const size_t revision_length = strnlen(revision, CPUINFO_REVISION_VALUE_MAX);
-+
-+		/* Parse revision codes according to https://www.raspberrypi.org/documentation/hardware/raspberrypi/revision-codes/README.md */
-+		#if CPUINFO_ARCH_ARM
-+			if (revision_length == 4) {
-+				/*
-+				 * Old-style revision codes.
-+				 * All Raspberry Pi models with old-style revision code use Broadcom BCM2835.
-+				 */
-+
-+				/* BCM2835 often misreported as BCM2708 */
-+				if (chipset->model == 2708) {
-+					chipset->model = 2835;
-+				}
-+				return;
-+			}
-+		#endif
-+		if ((size_t) (revision_length - 5) <= (size_t) (8 - 5) /* 5 <= length(revision) <= 8 */) {
-+			/* New-style revision codes */
-+
-+			uint32_t model = 0;
-+			switch (revision[revision_length - 4]) {
-+				case '0':
-+					/* BCM2835 */
-+					model = 2835;
-+					break;
-+				case '1':
-+					/* BCM2836 */
-+					model = 2836;
-+					break;
-+				case '2':
-+					/* BCM2837 */
-+					model = 2837;
-+					break;
-+				case '3':
-+					/* BCM2711 */
-+					model = 2711;
-+					break;
-+			}
-+
-+			if (model != 0) {
-+				chipset->model = model;
-+				chipset->suffix[0] = 0;
-+			}
-+		}
++	if (cpu_family == CPUFAMILY_ARM_LIGHTNING_THUNDER) {
++		cpuinfo_isa.dot = true;
 +	}
- 
- 	/*
- 	 * Decodes chipset name from /proc/cpuinfo Hardware string.
-@@ -3727,6 +3838,7 @@ void cpuinfo_arm_chipset_to_string(
- 	 */
- 	struct cpuinfo_arm_chipset cpuinfo_arm_linux_decode_chipset(
- 		const char hardware[restrict static CPUINFO_HARDWARE_VALUE_MAX],
-+		const char revision[restrict static CPUINFO_REVISION_VALUE_MAX],
- 		uint32_t cores,
- 		uint32_t max_cpu_freq_max)
- 	{
-@@ -3736,6 +3848,9 @@ void cpuinfo_arm_chipset_to_string(
- 		if (chipset.vendor == cpuinfo_arm_chipset_vendor_unknown) {
- 			cpuinfo_log_warning(
- 				"chipset detection failed: /proc/cpuinfo Hardware string did not match known signatures");
-+		} else if (chipset.vendor == cpuinfo_arm_chipset_vendor_broadcom) {
-+			/* Raspberry Pi kernel reports bogus chipset models; detect chipset from RPi revision */
-+			cpuinfo_arm_fixup_raspberry_pi_chipset(&chipset, revision);
- 		} else {
- 			cpuinfo_arm_fixup_chipset(&chipset, cores, max_cpu_freq_max);
- 		}
-diff --git src/arm/linux/cpuinfo.c src/arm/linux/cpuinfo.c
-index c70055f..90e1631 100644
---- src/arm/linux/cpuinfo.c
-+++ src/arm/linux/cpuinfo.c
-@@ -631,6 +631,7 @@ static void parse_cache_number(
- 
- struct proc_cpuinfo_parser_state {
- 	char* hardware;
-+	char* revision;
- 	uint32_t processor_index;
- 	uint32_t max_processors_count;
- 	struct cpuinfo_arm_linux_processor* processors;
-@@ -791,7 +792,17 @@ static bool parse_line(
- 				memcpy(state->hardware, value_start, value_length);
- 				cpuinfo_log_debug("parsed /proc/cpuinfo Hardware = \"%.*s\"", (int) value_length, value_start);
- 			} else if (memcmp(line_start, "Revision", key_length) == 0) {
--				/* Board revision, no use for now */
-+				size_t value_length = value_end - value_start;
-+				if (value_length > CPUINFO_REVISION_VALUE_MAX) {
-+					cpuinfo_log_info(
-+						"length of Revision value \"%.*s\" in /proc/cpuinfo exceeds limit (%d): truncating to the limit",
-+						(int) value_length, value_start, CPUINFO_REVISION_VALUE_MAX);
-+					value_length = CPUINFO_REVISION_VALUE_MAX;
-+				} else {
-+					state->revision[value_length] = '\0';
-+				}
-+				memcpy(state->revision, value_start, value_length);
-+				cpuinfo_log_debug("parsed /proc/cpuinfo Revision = \"%.*s\"", (int) value_length, value_start);
- 			} else {
- 				goto unknown;
- 			}
-@@ -881,11 +892,13 @@ static bool parse_line(
- 
- bool cpuinfo_arm_linux_parse_proc_cpuinfo(
- 	char hardware[restrict static CPUINFO_HARDWARE_VALUE_MAX],
-+	char revision[restrict static CPUINFO_REVISION_VALUE_MAX],
- 	uint32_t max_processors_count,
- 	struct cpuinfo_arm_linux_processor processors[restrict static max_processors_count])
- {
- 	struct proc_cpuinfo_parser_state state = {
- 		.hardware = hardware,
-+		.revision = revision,
- 		.processor_index = 0,
- 		.max_processors_count = max_processors_count,
- 		.processors = processors,
-diff --git src/arm/linux/init.c src/arm/linux/init.c
-index 6272abf..89d957e 100644
---- src/arm/linux/init.c
-+++ src/arm/linux/init.c
-@@ -167,8 +167,9 @@ void cpuinfo_arm_linux_init(void) {
- 	struct cpuinfo_android_properties android_properties;
- 	cpuinfo_arm_android_parse_properties(&android_properties);
- #else
--	char proc_cpuinfo_hardware[CPUINFO_HARDWARE_VALUE_MAX] = { 0 };
-+	char proc_cpuinfo_hardware[CPUINFO_HARDWARE_VALUE_MAX];
- #endif
-+	char proc_cpuinfo_revision[CPUINFO_REVISION_VALUE_MAX];
- 
- 	if (!cpuinfo_arm_linux_parse_proc_cpuinfo(
- #if defined(__ANDROID__)
-@@ -176,6 +177,7 @@ void cpuinfo_arm_linux_init(void) {
- #else
- 			proc_cpuinfo_hardware,
- #endif
-+			proc_cpuinfo_revision,
- 			arm_linux_processors_count,
- 			arm_linux_processors)) {
- 		cpuinfo_log_error("failed to parse processor information from /proc/cpuinfo");
-@@ -228,10 +230,8 @@ void cpuinfo_arm_linux_init(void) {
- 	const struct cpuinfo_arm_chipset chipset =
- 		cpuinfo_arm_android_decode_chipset(&android_properties, valid_processors, 0);
- #else
--	const struct cpuinfo_arm_chipset chipset = {
--		.vendor = cpuinfo_arm_chipset_vendor_unknown,
--		.series = cpuinfo_arm_chipset_series_unknown,
--	};
-+	const struct cpuinfo_arm_chipset chipset =
-+		cpuinfo_arm_linux_decode_chipset(proc_cpuinfo_hardware, proc_cpuinfo_revision, valid_processors, 0);
- #endif
- 
- 	#if CPUINFO_ARCH_ARM
-diff --git test/arm-cache.cc test/arm-cache.cc
-index 7d2e4a4..4d6218b 100644
---- test/arm-cache.cc
-+++ test/arm-cache.cc
-@@ -1664,3 +1664,91 @@ TEST(ROCKCHIP, rk3368) {
- 	EXPECT_EQ(256 * 1024, little_l2.size);
- 	EXPECT_EQ(0, little_l3.size);
- }
 +
-+TEST(BROADCOM, bcm2835) {
-+	const struct cpuinfo_arm_chipset chipset = {
-+		.vendor = cpuinfo_arm_chipset_vendor_broadcom,
-+		.series = cpuinfo_arm_chipset_series_broadcom_bcm,
-+		.model = 2835,
-+	};
-+
-+	struct cpuinfo_cache l1i = { 0 };
-+	struct cpuinfo_cache l1d = { 0 };
-+	struct cpuinfo_cache l2 = { 0 };
-+	struct cpuinfo_cache l3 = { 0 };
-+	cpuinfo_arm_decode_cache(
-+		cpuinfo_uarch_arm11, 4, UINT32_C(0x410FB767),
-+		&chipset, 0, 4,
-+		&l1i, &l1d, &l2, &l3);
-+
-+	EXPECT_EQ(16 * 1024, l1i.size);
-+	EXPECT_EQ(16 * 1024, l1d.size);
-+	EXPECT_EQ(0, l2.size);
-+	EXPECT_EQ(0, big_l3.size);
-+}
-+
-+TEST(BROADCOM, bcm2836) {
-+	const struct cpuinfo_arm_chipset chipset = {
-+		.vendor = cpuinfo_arm_chipset_vendor_broadcom,
-+		.series = cpuinfo_arm_chipset_series_broadcom_bcm,
-+		.model = 2836,
-+	};
-+
-+	struct cpuinfo_cache l1i = { 0 };
-+	struct cpuinfo_cache l1d = { 0 };
-+	struct cpuinfo_cache l2 = { 0 };
-+	struct cpuinfo_cache l3 = { 0 };
-+	cpuinfo_arm_decode_cache(
-+		cpuinfo_uarch_cortex_a7, 4, UINT32_C(0x410FC075),
-+		&chipset, 0, 4,
-+		&l1i, &l1d, &l2, &l3);
-+
-+	EXPECT_EQ(32 * 1024, l1i.size);
-+	EXPECT_EQ(32 * 1024, l1d.size);
-+	EXPECT_EQ(512 * 1024, l2.size);
-+	EXPECT_EQ(0, big_l3.size);
-+}
-+
-+TEST(BROADCOM, bcm2837) {
-+	const struct cpuinfo_arm_chipset chipset = {
-+		.vendor = cpuinfo_arm_chipset_vendor_broadcom,
-+		.series = cpuinfo_arm_chipset_series_broadcom_bcm,
-+		.model = 2837,
-+	};
-+
-+	struct cpuinfo_cache l1i = { 0 };
-+	struct cpuinfo_cache l1d = { 0 };
-+	struct cpuinfo_cache l2 = { 0 };
-+	struct cpuinfo_cache l3 = { 0 };
-+	cpuinfo_arm_decode_cache(
-+		cpuinfo_uarch_cortex_a53, 4, UINT32_C(0x410FD034),
-+		&chipset, 0, 4,
-+		&l1i, &l1d, &l2, &l3);
-+
-+	EXPECT_EQ(16 * 1024, l1i.size);
-+	EXPECT_EQ(16 * 1024, l1d.size);
-+	EXPECT_EQ(512 * 1024, l2.size);
-+	EXPECT_EQ(0, big_l3.size);
-+}
-+
-+TEST(BROADCOM, bcm2711) {
-+	const struct cpuinfo_arm_chipset chipset = {
-+		.vendor = cpuinfo_arm_chipset_vendor_broadcom,
-+		.series = cpuinfo_arm_chipset_series_broadcom_bcm,
-+		.model = 2711,
-+	};
-+
-+	struct cpuinfo_cache l1i = { 0 };
-+	struct cpuinfo_cache l1d = { 0 };
-+	struct cpuinfo_cache l2 = { 0 };
-+	struct cpuinfo_cache l3 = { 0 };
-+	cpuinfo_arm_decode_cache(
-+		cpuinfo_uarch_cortex_a72, 4, UINT32_C(0x410FD083),
-+		&chipset, 0, 4,
-+		&l1i, &l1d, &l2, &l3);
-+
-+	EXPECT_EQ(48 * 1024, l1i.size);
-+	EXPECT_EQ(32 * 1024, l1d.size);
-+	EXPECT_EQ(1024 * 1024, l2.size);
-+	EXPECT_EQ(0, big_l3.size);
-+}
-diff --git test/get-current.cc test/get-current.cc
-index f410b12..96b11dc 100644
---- test/get-current.cc
-+++ test/get-current.cc
-@@ -36,3 +36,9 @@ TEST(CURRENT_UARCH_INDEX, within_bounds) {
- 
- 	ASSERT_LT(cpuinfo_get_current_uarch_index(), cpuinfo_get_uarchs_count());
- }
-+
-+TEST(CURRENT_UARCH_INDEX_WITH_DEFAULT, within_bounds) {
-+	ASSERT_TRUE(cpuinfo_initialize());
-+
-+	ASSERT_LE(cpuinfo_get_current_uarch_index_with_default(cpuinfo_get_uarchs_count()), cpuinfo_get_uarchs_count());
-+}
+ 	uint32_t num_clusters = 1;
+ 	for (uint32_t i = 0; i < mach_topology.cores; i++) {
+ 		cores[i] = (struct cpuinfo_core) {
+diff --git src/arm/midr.h src/arm/midr.h
+index d5a28e3..34d7780 100644
+--- src/arm/midr.h
++++ src/arm/midr.h
+@@ -189,22 +189,28 @@ inline static uint32_t midr_score_core(uint32_t midr) {
+ 		case UINT32_C(0x4100D0A0): /* Cortex-A75 */
+ 		case UINT32_C(0x4100D090): /* Cortex-A73 */
+ 		case UINT32_C(0x4100D080): /* Cortex-A72 */
++#if CPUINFO_ARCH_ARM
+ 		case UINT32_C(0x4100C0F0): /* Cortex-A15 */
+ 		case UINT32_C(0x4100C0E0): /* Cortex-A17 */
+ 		case UINT32_C(0x4100C0D0): /* Rockchip RK3288 cores */
+ 		case UINT32_C(0x4100C0C0): /* Cortex-A12 */
++#endif /* CPUINFO_ARCH_ARM */
+ 			/* These cores are always in big role */
+ 			return 5;
+ 		case UINT32_C(0x4100D070): /* Cortex-A57 */
+ 			/* Cortex-A57 can be in LITTLE role w.r.t. Denver 2, or in big role w.r.t. Cortex-A53 */
+ 			return 4;
++#if CPUINFO_ARCH_ARM64
+ 		case UINT32_C(0x4100D060): /* Cortex-A65 */
++#endif /* CPUINFO_ARCH_ARM64 */
+ 		case UINT32_C(0x4100D050): /* Cortex-A55 */
+ 		case UINT32_C(0x4100D030): /* Cortex-A53 */
+ 			/* Cortex-A53 is usually in LITTLE role, but can be in big role w.r.t. Cortex-A35 */
+ 			return 2;
+ 		case UINT32_C(0x4100D040): /* Cortex-A35 */
++#if CPUINFO_ARCH_ARM
+ 		case UINT32_C(0x4100C070): /* Cortex-A7 */
++#endif /* CPUINFO_ARCH_ARM */
+ 		case UINT32_C(0x51008050): /* Kryo 485 Silver */
+ 		case UINT32_C(0x51008030): /* Kryo 385 Silver */
+ 		case UINT32_C(0x51008010): /* Kryo 260 / 280 Silver */
+diff --git src/arm/uarch.c src/arm/uarch.c
+index 63b1a55..55b61df 100644
+--- src/arm/uarch.c
++++ src/arm/uarch.c
+@@ -88,8 +88,8 @@ void cpuinfo_arm_decode_vendor_uarch(
+ 				case 0xD0D:
+ 					*uarch = cpuinfo_uarch_cortex_a77;
+ 					break;
+-				case 0xD0E:
+-					*uarch = cpuinfo_uarch_cortex_a76ae;
++				case 0xD0E: /* Cortex-A76AE */
++					*uarch = cpuinfo_uarch_cortex_a76;
+ 					break;
+ #if CPUINFO_ARCH_ARM64 && !defined(__ANDROID__)
+ 				case 0xD4A:
+diff --git tools/cpu-info.c tools/cpu-info.c
+index 4453d88..2759068 100644
+--- tools/cpu-info.c
++++ tools/cpu-info.c
+@@ -181,8 +181,6 @@ static const char* uarch_to_string(enum cpuinfo_uarch uarch) {
+ 			return "Cortex-A75";
+ 		case cpuinfo_uarch_cortex_a76:
+ 			return "Cortex-A76";
+-		case cpuinfo_uarch_cortex_a76ae:
+-			return "Cortex-A76AE";
+ 		case cpuinfo_uarch_cortex_a77:
+ 			return "Cortex-A77";
+ 		case cpuinfo_uarch_scorpion:
