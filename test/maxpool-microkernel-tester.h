@@ -181,7 +181,7 @@ class MaxPoolMicrokernelTester {
       std::shuffle(indirect_input.begin(),
         indirect_input.begin() + (output_pixels() - 1) * step() + pooling_elements(), rng);
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_u8_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
@@ -272,7 +272,7 @@ class MaxPoolMicrokernelTester {
       const float output_max = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
 
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:

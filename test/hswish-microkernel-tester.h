@@ -75,7 +75,7 @@ class HSwishMicrokernelTester {
       }
       const uint16_t* x_data = inplace() ? y.data() : x.data();
 
-      // Prepare micro-kernel parameters.
+      // Prepare parameters.
       struct xnn_f16_hswish_params params = xnn_init_f16_hswish_params();
 
       // Compute reference results.
@@ -111,7 +111,7 @@ class HSwishMicrokernelTester {
       }
       const float* x_data = inplace() ? y.data() : x.data();
 
-      // Prepare micro-kernel parameters.
+      // Prepare parameters.
       union xnn_f32_hswish_params params = { };
       switch (variant) {
         case Variant::Native:

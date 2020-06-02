@@ -240,7 +240,7 @@ class AvgPoolMicrokernelTester {
         indirect_input[zero_index()] = zero.data();
       }
 
-      // Prepare quantization parameters.
+      // Prepare parameters.
       xnn_q8_avgpool_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
@@ -343,7 +343,7 @@ class AvgPoolMicrokernelTester {
         indirect_input[zero_index()] = zero.data();
       }
 
-      // Prepare quantization parameters.
+      // Prepare parameters.
       xnn_q8_avgpool_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
@@ -467,7 +467,7 @@ class AvgPoolMicrokernelTester {
         output_value = std::max(std::min(output_value, output_max), output_min);
       }
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_scaleminmax_params params = { };
       switch (variant) {
         case Variant::Native:
@@ -564,7 +564,7 @@ class AvgPoolMicrokernelTester {
         output_value = std::max(std::min(output_value, output_max), output_min);
       }
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_scaleminmax_params params = { };
       switch (variant) {
         case Variant::Native:
@@ -663,7 +663,7 @@ class AvgPoolMicrokernelTester {
         output_value = std::max(std::min(output_value, output_max), output_min);
       }
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
@@ -761,7 +761,7 @@ class AvgPoolMicrokernelTester {
         output_value = std::max(std::min(output_value, output_max), output_min);
       }
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:

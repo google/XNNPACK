@@ -234,7 +234,7 @@ class DWConvMicrokernelTester {
         lrint(127.5 - 0.5 * double(accumulated_min + accumulated_max) / output_scale),
         long(std::numeric_limits<uint8_t>::max())), long(std::numeric_limits<uint8_t>::min())));
 
-      // Prepare convolution parameters.
+      // Prepare parameters.
       const float requantization_scale = 1.0f / float(output_scale);
       union xnn_q8_gemm_params quantization_params = { };
       switch (variant) {
@@ -410,7 +410,7 @@ class DWConvMicrokernelTester {
       const float output_min = accumulated_min + accumulated_range / 255.0f * float(qmin());
       const float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:

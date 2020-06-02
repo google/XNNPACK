@@ -105,7 +105,7 @@ class GAvgPoolCWMicrokernelTester {
       const float y_min = accumulated_min + float(qmin()) / 255.0f * accumulated_range;
       const float y_max = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
 
-      // Prepare micro-kernel parameters.
+      // Prepare parameters.
       union xnn_f32_gavgpool_params params = { };
       switch (variant) {
         case Variant::Native:

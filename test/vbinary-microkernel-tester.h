@@ -205,7 +205,7 @@ class VBinOpMicrokernelTester {
         y_ref[i] = std::max<float>(std::min<float>(y_ref[i], y_max), y_min);
       }
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f16_minmax_params params = xnn_init_f16_minmax_params(
         fp16_ieee_from_fp32_value(y_min),
         fp16_ieee_from_fp32_value(y_max));
@@ -332,7 +332,7 @@ class VBinOpMicrokernelTester {
         y_ref[i] = std::max<float>(std::min<float>(y_ref[i], y_max), y_min);
       }
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:

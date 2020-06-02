@@ -208,7 +208,7 @@ class ArgMaxPoolMicrokernelTester {
       const float output_min = accumulated_min + float(qmin()) / 255.0f * accumulated_range;
       const float output_max = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
@@ -311,7 +311,7 @@ class ArgMaxPoolMicrokernelTester {
       const float output_min = accumulated_min + float(qmin()) / 255.0f * accumulated_range;
       const float output_max = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:

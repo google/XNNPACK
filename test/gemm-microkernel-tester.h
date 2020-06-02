@@ -486,7 +486,7 @@ class GemmMicrokernelTester {
       const float c_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin())));
       const float c_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax())));
 
-      // Prepare minmax parameters.
+      // Prepare parameters.
       xnn_f16_scaleminmax_params params = xnn_init_f16_scaleminmax_params(
         UINT16_C(0x3C00) /* 1.0 */,
         fp16_ieee_from_fp32_value(c_min),
@@ -598,7 +598,7 @@ class GemmMicrokernelTester {
         }
       }
 
-      // Prepare minmax parameters.
+      // Prepare parameters.
       xnn_f16_scaleminmax_params params = xnn_init_f16_scaleminmax_params(
         UINT16_C(0x3C00) /* 1.0 */,
         fp16_ieee_from_fp32_value(c_min),
@@ -686,7 +686,7 @@ class GemmMicrokernelTester {
       const float c_min = accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
@@ -889,7 +889,7 @@ class GemmMicrokernelTester {
       const float c_min = accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
-      // Prepare minmax parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
@@ -980,7 +980,7 @@ class GemmMicrokernelTester {
       const float c_min = accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
@@ -1295,7 +1295,7 @@ class GemmMicrokernelTester {
         }
       }
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:

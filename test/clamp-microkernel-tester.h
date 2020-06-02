@@ -96,7 +96,7 @@ class ClampMicrokernelTester {
       }
       const uint8_t* x_data = inplace() ? y.data() : x.data();
 
-      // Prepare clamping parameters.
+      // Prepare parameters.
       union xnn_u8_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
@@ -146,7 +146,7 @@ class ClampMicrokernelTester {
       }
       const uint16_t* x_data = inplace() ? y.data() : x.data();
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f16_minmax_params params = xnn_init_f16_minmax_params(
         fp16_ieee_from_fp32_value(float(qmin())),
         fp16_ieee_from_fp32_value(float(qmax())));
@@ -189,7 +189,7 @@ class ClampMicrokernelTester {
       }
       const float* x_data = inplace() ? y.data() : x.data();
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:

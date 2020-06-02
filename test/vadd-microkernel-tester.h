@@ -168,7 +168,7 @@ class VAddMicrokernelTester {
       const uint8_t* a_data = inplace_a() ? y.data() : a.data();
       const uint8_t* b_data = inplace_b() ? y.data() : b.data();
 
-      // Prepare quantization parameters.
+      // Prepare parameters.
       xnn_q8_add_params quantization_params = { };
       switch (variant) {
         case Variant::Native:

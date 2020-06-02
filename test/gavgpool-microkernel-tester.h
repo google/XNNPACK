@@ -162,7 +162,7 @@ class GAvgPoolMicrokernelTester {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
-      // Prepare quantization parameters.
+      // Prepare parameters.
       union xnn_q8_avgpool_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
@@ -237,7 +237,7 @@ class GAvgPoolMicrokernelTester {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
-      // Prepare quantization parameters.
+      // Prepare parameters.
       union xnn_q8_avgpool_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
@@ -333,7 +333,7 @@ class GAvgPoolMicrokernelTester {
         output_values = std::max(std::min(output_values, output_max), output_min);
       }
 
-      // Prepare micro-kernel parameters.
+      // Prepare parameters.
       union xnn_f32_scaleminmax_params params = { };
       switch (variant) {
         case Variant::Native:
@@ -395,7 +395,7 @@ class GAvgPoolMicrokernelTester {
       const float output_min = accumulated_min + float(qmin()) / 255.0f * accumulated_range;
       const float output_max = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
 
-      // Prepare micro-kernel parameters.
+      // Prepare parameters.
       union xnn_f32_scaleminmax_params params = { };
       switch (variant) {
         case Variant::Native:

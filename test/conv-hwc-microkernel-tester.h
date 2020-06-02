@@ -354,7 +354,7 @@ public:
         value = std::max(std::min(value, output_max), output_min);
       }
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:

@@ -284,7 +284,7 @@ class DWConvCHWMicrokernelTester {
       const float output_min = accumulated_min + accumulated_range / 255.0f * float(qmin());
       const float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_chw_params chw_params = { };
       switch (variant) {
         case Variant::Native:

@@ -161,7 +161,7 @@ class VMulCAddCMicrokernelTester {
         y_value = std::max<float>(std::min<float>(y_value, y_max), y_min);
       }
 
-      // Prepare output parameters.
+      // Prepare parameters.
       xnn_f32_minmax_params params = { };
       switch (variant) {
         case Variant::Native:
