@@ -1013,6 +1013,8 @@ AARCH64_NEONFP16ARITH_UKERNELS = [
     "src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x8.c",
     "src/f16-vbinary/gen/vsub-minmax-neonfp16arith-x16.c",
     "src/f16-vbinary/gen/vsub-minmax-neonfp16arith-x8.c",
+    "src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c",
+    "src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c",
     "src/f16-gemm/gen/1x8-minmax-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/4x8-minmax-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/6x8-minmax-neonfp16arith-ld64.c",
@@ -3802,6 +3804,16 @@ xnnpack_unit_test(
         "test/f32-vmulc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vmulcaddc_minmax_test",
+    srcs = [
+        "test/f16-vmulcaddc-minmax.cc",
+        "test/vmulcaddc-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
 

@@ -47,6 +47,19 @@ DECLARE_F32_VMULCADDC_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_ukernel_c1__scalar_2x)
 DECLARE_F32_VMULCADDC_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_ukernel_c2__scalar_2x)
 DECLARE_F32_VMULCADDC_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_ukernel_c4__scalar_2x)
 
+#define DECLARE_F16_VMULCADDC_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                            \
+      size_t m,                                         \
+      size_t c,                                         \
+      const void* x,                                    \
+      size_t x_stride,                                  \
+      const void* w,                                    \
+      void* y,                                          \
+      size_t y_stride,                                  \
+      const struct xnn_f16_minmax_params* params);
+
+DECLARE_F16_VMULCADDC_UKERNEL_FUNCTION(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x)
+DECLARE_F16_VMULCADDC_UKERNEL_FUNCTION(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x)
 
 #ifdef __cplusplus
 }  // extern "C"

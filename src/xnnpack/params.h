@@ -1293,6 +1293,16 @@ typedef void (*xnn_vmulcaddc_ukernel_function)(
     size_t y_stride,
     const void* params);
 
+typedef void (*xnn_f16_vmulcaddc_ukernel_function)(
+    size_t m,
+    size_t c,
+    const void* x,
+    size_t x_stride,
+    const void* w,
+    void* y,
+    size_t y_stride,
+    const struct xnn_f16_minmax_params* params);
+
 typedef void (*xnn_f32_vmulcaddc_ukernel_function)(
     size_t m,
     size_t c,

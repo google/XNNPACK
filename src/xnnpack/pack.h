@@ -1225,6 +1225,33 @@ static inline void xnn_pack_f32_chw_dwconv_ghw_w(
   }
 }
 
+static inline void xnn_pack_f16_vmulcaddc_w(
+  size_t c,
+  size_t cr,
+  const uint16_t* s,
+  const uint16_t* b,
+  uint16_t* packed_w)
+{
+  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
+    const size_t cr_block_size = min(c - cr_block_start, cr);
+    for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
+      *packed_w++ = s[cr_block_start + cr_block_offset];
+    }
+    packed_w += cr - cr_block_size;
+    if XNN_LIKELY(b != NULL) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
+        *packed_w++ = b[cr_block_start + cr_block_offset];
+      }
+    } else {
+      size_t n = cr_block_size;
+      do {
+        *packed_w++ = 0;
+      } while (--n != 0);
+    }
+    packed_w += cr - cr_block_size;
+  }
+}
+
 static inline void xnn_pack_f32_vmulcaddc_w(
   size_t c,
   size_t cr,
