@@ -1,0 +1,65 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
+#include <fp16.h>
+
+#include <xnnpack.h>
+#include <xnnpack/log.h>
+#include <xnnpack/params.h>
+#include <xnnpack/subgraph.h>
+
+
+enum xnn_status xnn_define_static_constant_pad(
+  xnn_subgraph_t subgraph,
+  const size_t* pre_paddings,
+  const size_t* post_paddings,
+  float padding_value,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags)
+{
+  if (!xnn_params.initialized) {
+    xnn_log_error("failed to define Constant Pad operator: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Constant Pad operator with input ID #%" PRIu32 ": invalid Value ID",
+      input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define Constant Pad operator with output ID #%" PRIu32 ": invalid Value ID",
+      output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  if (node == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
+  const size_t num_dims = subgraph->values[input_id].shape.num_dims;
+  memcpy(&node->params.static_pad.pre_paddings, pre_paddings, num_dims * sizeof(size_t));
+  memcpy(&node->params.static_pad.post_paddings, post_paddings, num_dims * sizeof(size_t));
+  node->params.static_pad.padding_value = fp32_to_bits(padding_value);
+
+  node->type = xnn_node_type_constant_pad;
+  node->num_inputs = 1;
+  node->inputs[0] = input_id;
+  node->num_outputs = 1;
+  node->outputs[0] = output_id;
+  node->flags = flags;
+
+  return xnn_status_success;
+}

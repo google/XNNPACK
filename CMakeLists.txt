@@ -181,6 +181,24 @@ SET(XNNPACK_OPERATOR_SRCS
   src/operators/softmax-nc.c
   src/operators/unpooling-nhwc.c)
 
+SET(XNNPACK_SUBGRAPH_SRCS
+  src/subgraph/add2.c
+  src/subgraph/argmax-pooling-2d.c
+  src/subgraph/average-pooling-2d.c
+  src/subgraph/clamp.c
+  src/subgraph/convolution-2d.c
+  src/subgraph/deconvolution-2d.c
+  src/subgraph/depthwise-convolution-2d.c
+  src/subgraph/fully-connected.c
+  src/subgraph/hardswish.c
+  src/subgraph/max-pooling-2d.c
+  src/subgraph/multiply2.c
+  src/subgraph/prelu.c
+  src/subgraph/sigmoid.c
+  src/subgraph/softmax.c
+  src/subgraph/static-constant-pad.c
+  src/subgraph/unpooling-2d.c)
+
 SET(XNNPACK_COLD_SRCS ${XNNPACK_OPERATOR_SRCS})
 LIST(APPEND XNNPACK_COLD_SRCS
   src/init.c
