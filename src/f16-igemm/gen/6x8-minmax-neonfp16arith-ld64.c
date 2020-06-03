@@ -41,7 +41,7 @@ void xnn_f16_igemm_minmax_ukernel_6x8__neonfp16arith_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
-  __fp16* c0 = c;
+  __fp16* c0 = (__fp16*) c;
   __fp16* c1 = (__fp16*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
     c1 = c0;
@@ -73,32 +73,32 @@ void xnn_f16_igemm_minmax_ukernel_6x8__neonfp16arith_ld64(
 
     size_t p = ks;
     do {
-      const __fp16* restrict a0 = a[0];
+      const __fp16* restrict a0 = (const __fp16*) a[0];
       assert(a0 != NULL);
       if XNN_UNPREDICTABLE(a0 != zero) {
         a0 = (const __fp16*) ((uintptr_t) a0 + a_offset);
       }
-      const __fp16* restrict a1 = a[1];
+      const __fp16* restrict a1 = (const __fp16*) a[1];
       assert(a1 != NULL);
       if XNN_UNPREDICTABLE(a1 != zero) {
         a1 = (const __fp16*) ((uintptr_t) a1 + a_offset);
       }
-      const __fp16* restrict a2 = a[2];
+      const __fp16* restrict a2 = (const __fp16*) a[2];
       assert(a2 != NULL);
       if XNN_UNPREDICTABLE(a2 != zero) {
         a2 = (const __fp16*) ((uintptr_t) a2 + a_offset);
       }
-      const __fp16* restrict a3 = a[3];
+      const __fp16* restrict a3 = (const __fp16*) a[3];
       assert(a3 != NULL);
       if XNN_UNPREDICTABLE(a3 != zero) {
         a3 = (const __fp16*) ((uintptr_t) a3 + a_offset);
       }
-      const __fp16* restrict a4 = a[4];
+      const __fp16* restrict a4 = (const __fp16*) a[4];
       assert(a4 != NULL);
       if XNN_UNPREDICTABLE(a4 != zero) {
         a4 = (const __fp16*) ((uintptr_t) a4 + a_offset);
       }
-      const __fp16* restrict a5 = a[5];
+      const __fp16* restrict a5 = (const __fp16*) a[5];
       assert(a5 != NULL);
       if XNN_UNPREDICTABLE(a5 != zero) {
         a5 = (const __fp16*) ((uintptr_t) a5 + a_offset);

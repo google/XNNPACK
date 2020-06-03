@@ -38,8 +38,8 @@ void xnn_f16_gemm_minmax_ukernel_8x8__neonfp16arith_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
-  const __fp16* a0 = a;
-  __fp16* c0 = c;
+  const __fp16* a0 = (const __fp16*) a;
+  __fp16* c0 = (__fp16*) c;
   const __fp16* a1 = (const __fp16*) ((uintptr_t) a0 + a_stride);
   __fp16* c1 = (__fp16*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {

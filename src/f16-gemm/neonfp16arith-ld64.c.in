@@ -40,8 +40,8 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
   $if INC:
     assert(acc != NULL);
 
-  const __fp16* a0 = a;
-  __fp16* c0 = c;
+  const __fp16* a0 = (const __fp16*) a;
+  __fp16* c0 = (__fp16*) c;
   $for M in range(1, MR):
     const __fp16* a${M} = (const __fp16*) ((uintptr_t) a${M-1} + a_stride);
     __fp16* c${M} = (__fp16*) ((uintptr_t) c${M-1} + cm_stride);

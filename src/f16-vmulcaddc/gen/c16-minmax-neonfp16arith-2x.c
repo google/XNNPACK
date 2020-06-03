@@ -29,8 +29,8 @@ void xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x(
   assert(channels != 0);
   assert(channels % sizeof(__fp16) == 0);
 
-  const __fp16* i0 = input;
-  __fp16* o0 = output;
+  const __fp16* i0 = (const __fp16*) input;
+  __fp16* o0 = (__fp16*) output;
   const __fp16* i1 = (const __fp16*) ((uintptr_t) i0 + input_stride);
   __fp16* o1 = (__fp16*) ((uintptr_t) o0 + output_stride);
   if XNN_UNPREDICTABLE(rows < 2) {

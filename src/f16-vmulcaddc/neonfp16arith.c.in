@@ -29,8 +29,8 @@ void xnn_f16_vmulcaddc_ukernel_c${CHANNEL_TILE}__neonfp16arith_${ROW_TILE}x(
   assert(channels != 0);
   assert(channels % sizeof(__fp16) == 0);
 
-  const __fp16* i0 = input;
-  __fp16* o0 = output;
+  const __fp16* i0 = (const __fp16*) input;
+  __fp16* o0 = (__fp16*) output;
   $for M in range(1, ROW_TILE):
     const __fp16* i${M} = (const __fp16*) ((uintptr_t) i${M-1} + input_stride);
     __fp16* o${M} = (__fp16*) ((uintptr_t) o${M-1} + output_stride);

@@ -39,7 +39,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
-  __fp16* c0 = c;
+  __fp16* c0 = (__fp16*) c;
   $for M in range(1, MR):
     __fp16* c${M} = (__fp16*) ((uintptr_t) c${M-1} + cm_stride);
     $if M % 2 == 0:
@@ -65,7 +65,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
     size_t p = ks;
     do {
       $for M in range(MR):
-        const __fp16* restrict a${M} = a[${M}];
+        const __fp16* restrict a${M} = (const __fp16*) a[${M}];
         assert(a${M} != NULL);
         if XNN_UNPREDICTABLE(a${M} != zero) {
           a${M} = (const __fp16*) ((uintptr_t) a${M} + a_offset);

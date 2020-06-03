@@ -26,8 +26,8 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith(
 {
   assert(m != 0);
 
-  const __fp16*restrict a = input;
-  __fp16*restrict c = output;
+  const __fp16*restrict a = (const __fp16*) input;
+  __fp16*restrict c = (__fp16*) output;
 
   const float16x8_t vscale = vld1q_dup_f16((const __fp16*) &params->scale);
   const float16x8_t vmax = vld1q_dup_f16((const __fp16*) &params->max);
@@ -35,7 +35,7 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith(
 
   size_t i = m;
   while XNN_LIKELY(i >= 32) {
-    const __fp16*restrict w = weights;
+    const __fp16*restrict w = (const __fp16*) weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
     size_t j = n;
@@ -85,7 +85,7 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith(
   }
   if XNN_UNLIKELY(i != 0) {
     if (i & 16) {
-      const __fp16*restrict w = weights;
+      const __fp16*restrict w = (const __fp16*) weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t j = n;
@@ -117,7 +117,7 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith(
       a += 16;
     }
     if (i & 8) {
-      const __fp16*restrict w = weights;
+      const __fp16*restrict w = (const __fp16*) weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t j = n;
@@ -143,7 +143,7 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith(
       a += 8;
     }
     if (i & 4) {
-      const __fp16*restrict w = weights;
+      const __fp16*restrict w = (const __fp16*) weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t j = n;
@@ -169,7 +169,7 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith(
       a += 4;
     }
     if (i & 2) {
-      const __fp16*restrict w = weights;
+      const __fp16*restrict w = (const __fp16*) weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t j = n;
@@ -195,7 +195,7 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith(
       a += 2;
     }
     if (i & 1) {
-      const __fp16*restrict w = weights;
+      const __fp16*restrict w = (const __fp16*) weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t j = n;

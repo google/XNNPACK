@@ -38,8 +38,8 @@ void xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
-  const __fp16* a0 = a;
-  __fp16* c0 = c;
+  const __fp16* a0 = (const __fp16*) a;
+  __fp16* c0 = (__fp16*) c;
 
   do {
     float16x8_t vacc0x01234567 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));

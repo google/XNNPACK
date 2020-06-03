@@ -25,9 +25,9 @@ void xnn_f16_vdiv_minmax_ukernel__neonfp16arith_x16(
   assert(n != 0);
   assert(n % sizeof(__fp16) == 0);
 
-  const __fp16* a = a_ptr;
-  const __fp16* b = b_ptr;
-  __fp16* y = y_ptr;
+  const __fp16* a = (const __fp16*) a_ptr;
+  const __fp16* b = (const __fp16*) b_ptr;
+  __fp16* y = (__fp16*) y_ptr;
 
   const float16x8_t vy_min = vld1q_dup_f16(&params->min);
   const float16x8_t vy_max = vld1q_dup_f16(&params->max);
