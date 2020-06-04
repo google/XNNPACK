@@ -889,6 +889,15 @@ typedef void (*xnn_gavgpool_unipass_ukernel_function)(
     void* output,
     const void* params);
 
+typedef void (*xnn_f16_gavgpool_minmax_unipass_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
+    const void* zero,
+    void* output,
+    const struct xnn_f16_scaleminmax_params* params);
+
 typedef void (*xnn_f32_gavgpool_minmax_unipass_ukernel_function)(
     size_t rows,
     size_t channels,
@@ -916,6 +925,16 @@ typedef void (*xnn_gavgpool_multipass_ukernel_function)(
     void* buffer,
     void* output,
     const void* params);
+
+typedef void (*xnn_f16_gavgpool_minmax_multipass_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
+    const void* zero,
+    void* buffer,
+    void* output,
+    const struct xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_f32_gavgpool_minmax_multipass_ukernel_function)(
     size_t rows,

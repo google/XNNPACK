@@ -53,6 +53,32 @@ DECLARE_F32_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_gavgpool_minmax_uke
 DECLARE_F32_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1)
 DECLARE_F32_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_gavgpool_minmax_ukernel_7x__scalar_c1)
 
+#define DECLARE_F16_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                            \
+      size_t rows,                                                      \
+      size_t channels,                                                  \
+      const void* input,                                                \
+      size_t input_stride,                                              \
+      const void* zero,                                                 \
+      void* buffer,                                                     \
+      void* output,                                                     \
+      const struct xnn_f16_scaleminmax_params* params);
+
+DECLARE_F16_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8)
+
+
+#define DECLARE_F16_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                          \
+      size_t rows,                                                    \
+      size_t channels,                                                \
+      const void* input,                                              \
+      size_t input_stride,                                            \
+      const void* zero,                                               \
+      void* output,                                                   \
+      const struct xnn_f16_scaleminmax_params* params);
+
+DECLARE_F16_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8)
+
 #define DECLARE_Q8_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                           \
       size_t rows,                                                     \

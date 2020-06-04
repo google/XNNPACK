@@ -1003,6 +1003,8 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
 SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-clamp/gen/neonfp16arith-x16.c
   src/f16-clamp/gen/neonfp16arith-x8.c
+  src/f16-gavgpool/7p7x-minmax-neonfp16arith-c8.c
+  src/f16-gavgpool/7x-minmax-neonfp16arith-c8.c
   src/f16-hswish/gen/neonfp16arith-x16.c
   src/f16-hswish/gen/neonfp16arith-x8.c
   src/f16-prelu/gen/neonfp16arith-2x16.c
@@ -2321,6 +2323,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-cw-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-gavgpool-cw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-gavgpool-cw-test f32-gavgpool-cw-test)
+
+  ADD_EXECUTABLE(f16-gavgpool-minmax-test test/f16-gavgpool-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-gavgpool-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-gavgpool-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-gavgpool-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-gavgpool-minmax-test f16-gavgpool-minmax-test)
 
   ADD_EXECUTABLE(f32-gavgpool-minmax-test test/f32-gavgpool-minmax.cc)
   SET_TARGET_PROPERTIES(f32-gavgpool-minmax-test PROPERTIES

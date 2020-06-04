@@ -1000,6 +1000,8 @@ NEONV8_UKERNELS = [
 AARCH64_NEONFP16ARITH_UKERNELS = [
     "src/f16-clamp/gen/neonfp16arith-x16.c",
     "src/f16-clamp/gen/neonfp16arith-x8.c",
+    "src/f16-gavgpool/7p7x-minmax-neonfp16arith-c8.c",
+    "src/f16-gavgpool/7x-minmax-neonfp16arith-c8.c",
     "src/f16-hswish/gen/neonfp16arith-x16.c",
     "src/f16-hswish/gen/neonfp16arith-x8.c",
     "src/f16-prelu/gen/neonfp16arith-2x16.c",
@@ -3455,6 +3457,16 @@ xnnpack_unit_test(
         "test/dwconv-chw-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_gavgpool_minmax_test",
+    srcs = [
+        "test/f16-gavgpool-minmax.cc",
+        "test/gavgpool-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
 

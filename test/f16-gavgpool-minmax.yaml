@@ -1,0 +1,10 @@
+# Copyright 2020 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8
+  arch:
+    - aarch64
+- name: xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8
+  arch:
+    - aarch64

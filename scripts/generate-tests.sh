@@ -24,6 +24,7 @@ tools/generate-avgpool-test.py --spec test/q8-avgpool-minmax.yaml --output test/
 tools/generate-avgpool-test.py --spec test/f32-avgpool-minmax.yaml --output test/f32-avgpool-minmax.cc
 
 ### Tests for GAvgPool micro-kernels
+tools/generate-gavgpool-test.py --spec test/f16-gavgpool-minmax.yaml --output test/f16-gavgpool-minmax.cc
 tools/generate-gavgpool-test.py --spec test/f32-gavgpool-minmax.yaml --output test/f32-gavgpool-minmax.cc
 
 ### Tests for PAvgPool micro-kernels
