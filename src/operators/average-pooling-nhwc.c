@@ -218,7 +218,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
   // Number of rows read in the AVGPOOL micro-kernel.
   const size_t avgpool_nrows =
     round_up(doz(pooling_size, xnn_params.q8.avgpool.mr), xnn_params.q8.avgpool.qr) + xnn_params.q8.avgpool.mr;
-  average_pooling_op->q8_avgpool_params =
+  average_pooling_op->params.q8_avgpool =
     xnn_init_q8_avgpool_params(
       (int32_t) -((uint32_t) input_zero_point * (uint32_t) avgpool_nrows),
       input_scale / (output_scale * (float) pooling_size),
@@ -379,11 +379,11 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   average_pooling_op->output_pixel_stride = output_pixel_stride;
 
   average_pooling_op->type = xnn_operator_type_average_pooling_nhwc_f32;
-  average_pooling_op->f32_scaleminmax_params =
+  average_pooling_op->params.f32_scaleminmax =
     xnn_init_f32_scaleminmax_params(1.0f / (float) pooling_size, output_min, output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   if (any_padding || tf_same_padding) {
-    average_pooling_op->f32_minmax_params =
+    average_pooling_op->params.f32_minmax =
       xnn_init_f32_minmax_params(output_min, output_max);
     average_pooling_op->ukernel.type = xnn_ukernel_type_pixelwise_average_pooling;
   } else {
@@ -620,7 +620,7 @@ static enum xnn_status setup_average_pooling2d(
         .zero = average_pooling_op->zero_buffer,
         .input_increment = (pooling_height * step_width - multipass_adjustment) * sizeof(void*),
         .output_increment = output_width_stride - (channels << log2_output_element_size),
-        .params.f32 = average_pooling_op->f32_scaleminmax_params,
+        .params.f32 = average_pooling_op->params.f32_scaleminmax,
       };
       memcpy(&average_pooling_op->context.average_pooling.params, params, params_size);
       if (pooling_size <= mr) {
@@ -662,7 +662,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
   const size_t input_size = input_height * input_width;
   const size_t pooling_size = average_pooling_op->kernel_height * average_pooling_op->kernel_width;
   const size_t gavgpool_nrows = round_up(input_size, xnn_params.q8.gavgpool.mr);
-  average_pooling_op->q8_gavgpool_params =
+  average_pooling_op->params.q8_gavgpool =
     xnn_init_q8_avgpool_params(
       (int32_t) -((uint32_t) average_pooling_op->input_zero_point * (uint32_t) gavgpool_nrows),
       average_pooling_op->input_scale / (average_pooling_op->output_scale * (float) pooling_size),
@@ -679,10 +679,10 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
     &xnn_params.q8.avgpool,
     NULL /* no PAVGPOOL micro-kernel */,
     &xnn_params.q8.gavgpool,
-    &average_pooling_op->q8_avgpool_params,
-    sizeof(average_pooling_op->q8_avgpool_params),
-    &average_pooling_op->q8_gavgpool_params,
-    sizeof(average_pooling_op->q8_gavgpool_params),
+    &average_pooling_op->params.q8_avgpool,
+    sizeof(average_pooling_op->params.q8_avgpool),
+    &average_pooling_op->params.q8_gavgpool,
+    sizeof(average_pooling_op->params.q8_gavgpool),
     pthreadpool_get_threads_count(threadpool),
     false /* pixelwise not supported */);
 }
@@ -709,7 +709,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
   const bool is_pixelwise = average_pooling_op->ukernel.type == xnn_ukernel_type_pixelwise_average_pooling;
   if (is_pixelwise) {
     const size_t input_size = input_height * input_width;
-    xnn_update_f32_scaleminmax_params(&average_pooling_op->f32_scaleminmax_params, 1.0f / (float) input_size);
+    xnn_update_f32_scaleminmax_params(&average_pooling_op->params.f32_scaleminmax, 1.0f / (float) input_size);
   }
 
   return setup_average_pooling2d(
@@ -721,10 +721,10 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
     &xnn_params.f32.avgpool,
     &xnn_params.f32.pavgpool,
     &xnn_params.f32.gavgpool,
-    is_pixelwise ? (const void*) &average_pooling_op->f32_minmax_params : (const void*) &average_pooling_op->f32_scaleminmax_params,
-    is_pixelwise ? sizeof(average_pooling_op->f32_minmax_params) : sizeof(average_pooling_op->f32_scaleminmax_params),
-    &average_pooling_op->f32_scaleminmax_params,
-    sizeof(average_pooling_op->f32_scaleminmax_params),
+    is_pixelwise ? (const void*) &average_pooling_op->params.f32_minmax : (const void*) &average_pooling_op->params.f32_scaleminmax,
+    is_pixelwise ? sizeof(average_pooling_op->params.f32_minmax) : sizeof(average_pooling_op->params.f32_scaleminmax),
+    &average_pooling_op->params.f32_scaleminmax,
+    sizeof(average_pooling_op->params.f32_scaleminmax),
     pthreadpool_get_threads_count(threadpool),
     is_pixelwise);
 }

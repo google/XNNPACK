@@ -138,7 +138,7 @@ enum xnn_status xnn_create_add_nc_q8(
   add_op->input_pixel_stride = a_stride;
   add_op->input2_pixel_stride = b_stride;
   add_op->output_pixel_stride = sum_stride;
-  add_op->q8_add_params =
+  add_op->params.q8_add =
     xnn_init_q8_add_params(
       a_zero_point, b_zero_point, sum_zero_point,
       a_scale / sum_scale, b_scale / sum_scale,
@@ -244,7 +244,7 @@ enum xnn_status xnn_create_add_nc_f32(
   add_op->input_pixel_stride = a_stride;
   add_op->input2_pixel_stride = b_stride;
   add_op->output_pixel_stride = sum_stride;
-  add_op->f32_minmax_params = xnn_init_f32_minmax_params(sum_min, sum_max);
+  add_op->params.f32_minmax = xnn_init_f32_minmax_params(sum_min, sum_max);
 
   add_op->type = xnn_operator_type_add_nc_f32;
   add_op->ukernel.type = xnn_ukernel_type_add;
@@ -296,7 +296,7 @@ enum xnn_status xnn_setup_add_nc_q8(
       .a = a,
       .b = b,
       .y = sum,
-      .params.q8 = add_op->q8_add_params,
+      .params.q8 = add_op->params.q8_add,
       .ukernel = xnn_params.q8.vadd,
     };
     add_op->compute.type = xnn_parallelization_type_1d_tile_1d;
@@ -312,7 +312,7 @@ enum xnn_status xnn_setup_add_nc_q8(
       .y = sum,
       .y_stride = sum_stride * sizeof(uint8_t),
       .n = channels,
-      .params.q8 = add_op->q8_add_params,
+      .params.q8 = add_op->params.q8_add,
       .ukernel = xnn_params.q8.vadd,
     };
     add_op->compute.type = xnn_parallelization_type_1d_tile_1d;
@@ -362,7 +362,7 @@ enum xnn_status xnn_setup_add_nc_f32(
       .a = a,
       .b = b,
       .y = sum,
-      .params.f32 = add_op->f32_minmax_params,
+      .params.f32 = add_op->params.f32_minmax,
       .ukernel = xnn_params.f32.vadd.op_ukernel,
     };
     add_op->compute.type = xnn_parallelization_type_1d_tile_1d;
@@ -378,7 +378,7 @@ enum xnn_status xnn_setup_add_nc_f32(
       .y = sum,
       .y_stride = sum_stride * sizeof(float),
       .n = channels * sizeof(float),
-      .params.f32 = add_op->f32_minmax_params,
+      .params.f32 = add_op->params.f32_minmax,
       .ukernel = xnn_params.f32.vadd.op_ukernel,
     };
     add_op->compute.type = xnn_parallelization_type_1d_tile_1d;

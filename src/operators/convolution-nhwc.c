@@ -381,7 +381,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
 
   convolution_op->kernel_zero_point = kernel_zero_point;
 
-  convolution_op->q8_gemm_params =
+  convolution_op->params.q8_gemm =
     xnn_init_q8_gemm_params(
       input_zero_point, kernel_zero_point,
       convolution_scale, output_zero_point, output_min, output_max);
@@ -732,7 +732,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   convolution_op->input_pixel_stride = input_pixel_stride;
   convolution_op->output_pixel_stride = output_pixel_stride;
 
-  convolution_op->f32_minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
+  convolution_op->params.f32_minmax = xnn_init_f32_minmax_params(output_min, output_max);
 
   convolution_op->type = xnn_operator_type_convolution_nhwc_f32;
   convolution_op->ukernel.type = ukernel_type;
@@ -1148,7 +1148,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_q8(
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
-    &convolution_op->q8_gemm_params,
+    &convolution_op->params.q8_gemm,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -1176,6 +1176,6 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f32(
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
-    &convolution_op->f32_minmax_params,
+    &convolution_op->params.f32_minmax,
     pthreadpool_get_threads_count(threadpool));
 }

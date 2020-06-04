@@ -56,7 +56,6 @@ OPERATOR_SRCS = [
     "src/operators/binary-elementwise-nd.c",
     "src/operators/channel-pad-nc.c",
     "src/operators/channel-shuffle-nc.c",
-    "src/operators/clamp-nc.c",
     "src/operators/constant-pad-nd.c",
     "src/operators/convolution-nchw.c",
     "src/operators/convolution-nhwc.c",
@@ -64,13 +63,13 @@ OPERATOR_SRCS = [
     "src/operators/fully-connected-nc.c",
     "src/operators/global-average-pooling-ncw.c",
     "src/operators/global-average-pooling-nwc.c",
-    "src/operators/hardswish-nc.c",
     "src/operators/leaky-relu-nc.c",
     "src/operators/max-pooling-nhwc.c",
     "src/operators/prelu-nc.c",
     "src/operators/resize-bilinear-nhwc.c",
     "src/operators/sigmoid-nc.c",
     "src/operators/softmax-nc.c",
+    "src/operators/unary-elementwise-nc.c",
     "src/operators/unpooling-nhwc.c",
 ]
 

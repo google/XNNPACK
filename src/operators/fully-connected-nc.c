@@ -169,7 +169,7 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
 
   fully_connected_op->kernel_zero_point = kernel_zero_point;
 
-  fully_connected_op->q8_gemm_params =
+  fully_connected_op->params.q8_gemm =
     xnn_init_q8_gemm_params(
       input_zero_point, kernel_zero_point,
       requantization_scale, output_zero_point, output_min, output_max);
@@ -314,7 +314,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   fully_connected_op->input_pixel_stride = input_stride;
   fully_connected_op->output_pixel_stride = output_stride;
 
-  fully_connected_op->f32_minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
+  fully_connected_op->params.f32_minmax = xnn_init_f32_minmax_params(output_min, output_max);
 
   fully_connected_op->type = xnn_operator_type_fully_connected_nc_f32;
 
@@ -445,7 +445,7 @@ enum xnn_status xnn_setup_fully_connected_nc_q8(
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
-    &fully_connected_op->q8_gemm_params,
+    &fully_connected_op->params.q8_gemm,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -471,6 +471,6 @@ enum xnn_status xnn_setup_fully_connected_nc_f32(
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
-    &fully_connected_op->f32_minmax_params,
+    &fully_connected_op->params.f32_minmax,
     pthreadpool_get_threads_count(threadpool));
 }

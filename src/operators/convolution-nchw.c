@@ -458,9 +458,9 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   convolution_op->group_output_channels = group_output_channels;
 
   if (ukernel_type == xnn_ukernel_type_dwconv) {
-    convolution_op->f32_chw_params = xnn_init_f32_chw_params(0, output_min, output_max);
+    convolution_op->params.f32_chw = xnn_init_f32_chw_params(0, output_min, output_max);
   } else {
-    convolution_op->f32_minmax_params = xnn_init_f32_minmax_params(output_min, output_max);
+    convolution_op->params.f32_minmax = xnn_init_f32_minmax_params(output_min, output_max);
   }
 
   convolution_op->type = xnn_operator_type_convolution_nchw_f32;
@@ -738,7 +738,7 @@ enum xnn_status xnn_setup_convolution2d_nchw_f32(
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
-    &convolution_op->f32_minmax_params,
-    &convolution_op->f32_chw_params,
+    &convolution_op->params.f32_minmax,
+    &convolution_op->params.f32_chw,
     pthreadpool_get_threads_count(threadpool));
 }
