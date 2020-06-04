@@ -37,100 +37,99 @@ enum xnn_status xnn_define_convolution_2d(
   uint32_t flags)
 {
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to define Convolution operator: XNNPACK is not initialized");
+    xnn_log_error("failed to define %s operator: XNNPACK is not initialized",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d));
     return xnn_status_uninitialized;
   }
 
   if (kernel_width == 0 || kernel_height == 0) {
     xnn_log_error(
-      "failed to define Convolution operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
-      kernel_width, kernel_height);
+      "failed to define %s operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), kernel_width, kernel_height);
     return xnn_status_invalid_parameter;
   }
 
   if (subsampling_width == 0 || subsampling_height == 0) {
     xnn_log_error(
-      "failed to define Convolution operator with %" PRIu32 "x%" PRIu32 " subsampling: "
-      "subsampling dimensions must be non-zero",
-      subsampling_width, subsampling_height);
+      "failed to define %s operator with %" PRIu32 "x%" PRIu32 " subsampling: subsampling dimensions must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), subsampling_width, subsampling_height);
     return xnn_status_invalid_parameter;
   }
 
   if (dilation_width == 0 || dilation_height == 0) {
     xnn_log_error(
-      "failed to define Convolution operator with %" PRIu32 "x%" PRIu32 " dilation: "
-      "dilation dimensions must be non-zero",
-      dilation_width, dilation_height);
+      "failed to define %s operator with %" PRIu32 "x%" PRIu32 " dilation: dilation dimensions must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), dilation_width, dilation_height);
     return xnn_status_invalid_parameter;
   }
 
   if (groups == 0) {
     xnn_log_error(
-      "failed to define Convolution operator with %" PRIu32 " groups: number of groups must be non-zero", groups);
+      "failed to define %s operator with %" PRIu32 " groups: number of groups must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), groups);
     return xnn_status_invalid_parameter;
   }
 
   if (group_input_channels == 0) {
     xnn_log_error(
-      "failed to define Convolution operator with %zu input channels per group: "
-      "number of channels must be non-zero",
-      group_input_channels);
+      "failed to define %s operator with %zu input channels per group: number of channels must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), group_input_channels);
     return xnn_status_invalid_parameter;
   }
 
   if (group_output_channels == 0) {
     xnn_log_error(
-      "failed to define Convolution operator with %zu output channels per group: "
-      "number of channels must be non-zero",
-      group_output_channels);
+      "failed to define %s operator with %zu output channels per group: number of channels must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), group_output_channels);
     return xnn_status_invalid_parameter;
   }
 
   if (isnan(output_min)) {
     xnn_log_error(
-      "failed to define Convolution operator with NaN output lower bound: lower bound must be non-NaN");
+      "failed to define %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d));
     return xnn_status_invalid_parameter;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
-      "failed to define Convolution operator with NaN output upper bound: upper bound must be non-NaN");
+      "failed to define %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d));
     return xnn_status_invalid_parameter;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to define Convolution operator with [%.7g, %.7g] output range: "
-      "lower bound must be below upper bound",
-      output_min, output_max);
+      "failed to define %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define Convolution operator with input ID #%" PRIu32 ": invalid Value ID",
-      input_id);
+      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), input_id);
     return xnn_status_invalid_parameter;
   }
 
   if (filter_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define Convolution operator with filter ID #%" PRIu32 ": invalid Value ID",
-      filter_id);
+      "failed to define %s operator with filter ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), filter_id);
     return xnn_status_invalid_parameter;
   }
 
   if (bias_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define Convolution operator with bias ID #%" PRIu32 ": invalid Value ID",
-      bias_id);
+      "failed to define %s operator with bias ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), bias_id);
     return xnn_status_invalid_parameter;
   }
 
   if (output_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define Convolution operator with output ID #%" PRIu32 ": invalid Value ID",
-      output_id);
+      "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), output_id);
     return xnn_status_invalid_parameter;
   }
 

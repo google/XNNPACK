@@ -32,57 +32,59 @@ enum xnn_status xnn_define_max_pooling_2d(
   uint32_t flags)
 {
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to define Max Pooling operator: XNNPACK is not initialized");
+    xnn_log_error("failed to define %s operator: XNNPACK is not initialized",
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d));
     return xnn_status_uninitialized;
   }
 
   const uint32_t pooling_size = pooling_height * pooling_width;
   if (pooling_size == 0) {
     xnn_log_error(
-      "failed to define Max Pooling operator with %" PRIu32 "x%" PRIu32 " pooling size: "
+      "failed to define %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
       "pooling size dimensions must be non-zero",
-      pooling_width, pooling_height);
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), pooling_width, pooling_height);
     return xnn_status_invalid_parameter;
   }
 
   if (pooling_size == 1) {
     xnn_log_error(
-      "failed to define Max Pooling operator with 1 pooling element: 1x1 pooling is meaningless");
+      "failed to define %s operator with 1 pooling element: 1x1 pooling is meaningless",
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d));
     return xnn_status_invalid_parameter;
   }
 
   if (stride_height == 0 || stride_width == 0) {
     xnn_log_error(
-      "failed to define Max Pooling operator with %" PRIu32 "x%" PRIu32 " stride: "
-      "stride dimensions must be non-zero",
-      stride_width, stride_height);
+      "failed to define %s operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), stride_width, stride_height);
     return xnn_status_invalid_parameter;
   }
 
   if (dilation_height == 0 || dilation_width == 0) {
     xnn_log_error(
-      "failed to define Max Pooling operator with %" PRIu32 "x%" PRIu32 " dilation: "
-      "dilation dimensions must be non-zero",
-      dilation_width, dilation_height);
+      "failed to define %s operator with %" PRIu32 "x%" PRIu32 " dilation: dilation dimensions must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), dilation_width, dilation_height);
     return xnn_status_invalid_parameter;
   }
 
   if (isnan(output_min)) {
     xnn_log_error(
-      "failed to define Max Pooling with NaN output lower bound: lower bound must be non-NaN");
+      "failed to define %s with NaN output lower bound: lower bound must be non-NaN",
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d));
     return xnn_status_invalid_parameter;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
-      "failed to define Max Pooling with NaN output upper bound: upper bound must be non-NaN");
+      "failed to define %s with NaN output upper bound: upper bound must be non-NaN",
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d));
     return xnn_status_invalid_parameter;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to define Max Pooling with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      output_min, output_max);
+      "failed to define %s with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -90,8 +92,9 @@ enum xnn_status xnn_define_max_pooling_2d(
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     if (any_padding) {
       xnn_log_error(
-        "failed to define Max Pooling operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "failed to define %s operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
         "TensorFlow SAME padding can't be combined with explicit padding specification",
+        xnn_node_type_to_string(xnn_node_type_max_pooling_2d),
         input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
       return xnn_status_invalid_parameter;
     }
@@ -99,15 +102,15 @@ enum xnn_status xnn_define_max_pooling_2d(
 
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define Max Pooling operator with input ID #%" PRIu32 ": invalid Value ID",
-      input_id);
+      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), input_id);
     return xnn_status_invalid_parameter;
   }
 
   if (output_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define Max Pooling operator with output ID #%" PRIu32 ": invalid Value ID",
-      output_id);
+      "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), output_id);
     return xnn_status_invalid_parameter;
   }
 

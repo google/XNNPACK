@@ -32,7 +32,8 @@ enum xnn_status xnn_create_clamp_nc_u8(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Clamp operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8));
     goto error;
   }
 
@@ -40,30 +41,31 @@ enum xnn_status xnn_create_clamp_nc_u8(
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create Clamp operator with %zu channels: number of channels must be non-zero", channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8), channels);
     goto error;
   }
 
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to create Clamp operator with input element stride of %zu: "
+      "failed to create %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      input_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8), input_stride, channels);
     goto error;
   }
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to create Clamp operator with output element stride of %zu: "
+      "failed to create %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      output_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8), output_stride, channels);
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Clamp operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
-      output_min, output_max);
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8), output_min, output_max);
     goto error;
   }
 
@@ -71,7 +73,9 @@ enum xnn_status xnn_create_clamp_nc_u8(
 
   clamp_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (clamp_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Clamp operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8));
     goto error;
   }
 
@@ -106,7 +110,8 @@ enum xnn_status xnn_create_clamp_nc_f32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Clamp operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
     goto error;
   }
 
@@ -114,42 +119,45 @@ enum xnn_status xnn_create_clamp_nc_f32(
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create Clamp operator with %zu channels: number of channels must be non-zero", channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32), channels);
     goto error;
   }
 
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to create Clamp operator with input element stride of %zu: "
+      "failed to create %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      input_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32), input_stride, channels);
     goto error;
   }
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to create Clamp operator with output element stride of %zu: "
+      "failed to create %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      output_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32), output_stride, channels);
     goto error;
   }
 
   if (isnan(output_min)) {
     xnn_log_error(
-      "failed to create Clamp operator with NaN output lower bound: lower bound must be non-NaN");
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
     goto error;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
-      "failed to create Clamp operator with NaN output upper bound: upper bound must be non-NaN");
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Clamp operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      output_min, output_max);
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32), output_min, output_max);
     goto error;
   }
 
@@ -157,7 +165,9 @@ enum xnn_status xnn_create_clamp_nc_f32(
 
   clamp_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (clamp_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Clamp operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
     goto error;
   }
 
@@ -187,13 +197,16 @@ enum xnn_status xnn_setup_clamp_nc_u8(
     pthreadpool_t threadpool)
 {
   if (clamp_op->type != xnn_operator_type_clamp_nc_u8) {
-    xnn_log_error("failed to setup Clamp (NC, U8) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8),
+      xnn_operator_type_to_string(clamp_op->type));
     return xnn_status_invalid_parameter;
   }
   clamp_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Clamp operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8));
     return xnn_status_uninitialized;
   }
 
@@ -247,13 +260,16 @@ enum xnn_status xnn_setup_clamp_nc_f32(
     pthreadpool_t threadpool)
 {
   if (clamp_op->type != xnn_operator_type_clamp_nc_f32) {
-    xnn_log_error("failed to setup Clamp (NC, F32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32),
+      xnn_operator_type_to_string(clamp_op->type));
     return xnn_status_invalid_parameter;
   }
   clamp_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Clamp operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8));
     return xnn_status_uninitialized;
   }
 

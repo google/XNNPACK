@@ -31,7 +31,8 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Resize Bilinear operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32));
     goto error;
   }
 
@@ -39,24 +40,24 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create Resize Bilinear operator with %zu channels: number of channels must be non-zero",
-      channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32), channels);
     goto error;
   }
 
   if (input_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create Resize Bilinear operator with input pixel stride of %zu: "
+      "failed to create %s operator with input pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      input_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32), input_pixel_stride, channels);
     goto error;
   }
 
   if (output_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create Resize Bilinear operator with output pixel stride of %zu: "
+      "failed to create %s operator with output pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      output_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32), output_pixel_stride, channels);
     goto error;
   }
 
@@ -64,7 +65,9 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
 
   resize_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (resize_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Resize Bilinear operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32));
     goto error;
   }
 
@@ -98,43 +101,44 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
     pthreadpool_t threadpool)
 {
   if (resize_op->type != xnn_operator_type_resize_bilinear_nhwc_f32) {
-    xnn_log_error("failed to setup Resize Bilinear (NHWC, F32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32),
+      xnn_operator_type_to_string(resize_op->type));
     return xnn_status_invalid_parameter;
   }
   resize_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Resize Bilinear operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to setup Resize Bilinear operator with %zux%zu input: input dimensions must be non-zero",
-      input_width, input_height);
+      "failed to setup %s operator with %zux%zu input: input dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
 
   if (max(input_width, input_height) >= 16777216) {
     xnn_log_error(
-      "failed to setup Resize Bilinear operator with %zux%zu input: "
-      "input dimensions must be below 2**24",
-      input_width, input_height);
+      "failed to setup %s operator with %zux%zu input: input dimensions must be below 2**24",
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32), input_width, input_height);
     return xnn_status_unsupported_parameter;
   }
 
   if (output_width == 0 || output_height == 0) {
     xnn_log_error(
-      "failed to setup Resize Bilinear operator with %zux%zu output: output dimensions must be non-zero",
-      output_width, output_height);
+      "failed to setup %s operator with %zux%zu output: output dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32), output_width, output_height);
     return xnn_status_invalid_parameter;
   }
 
   if (max(output_width, output_height) >= 16777216) {
     xnn_log_error(
-      "failed to setup Resize Bilinear operator with %zux%zu output: "
-      "output dimensions must be below 2**24",
-      output_width, output_height);
+      "failed to setup %s operator with %zux%zu output: output dimensions must be below 2**24",
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32), output_width, output_height);
     return xnn_status_unsupported_parameter;
   }
 
@@ -149,7 +153,9 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
 
     const void** indirection_buffer = (const void**) xnn_reallocate_memory(resize_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
-      xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
+      xnn_log_error(
+        "failed to allocate %zu bytes for %s operator indirection buffer",
+        indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32));
       return xnn_status_out_of_memory;
     }
     resize_op->indirection_buffer = indirection_buffer;
@@ -158,7 +164,9 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
     xnn_release_simd_memory(resize_op->packed_weights);
     resize_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
     if (resize_op->packed_weights == NULL) {
-      xnn_log_error("failed to allocate %zu bytes for packed weights", packed_weights_size);
+      xnn_log_error(
+        "failed to allocate %zu bytes for %s operator packed weights",
+        packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32));
       return xnn_status_out_of_memory;
     }
   }

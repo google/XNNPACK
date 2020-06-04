@@ -199,7 +199,11 @@ SET(XNNPACK_SUBGRAPH_SRCS
   src/subgraph/static-constant-pad.c
   src/subgraph/unpooling-2d.c)
 
-SET(XNNPACK_COLD_SRCS ${XNNPACK_OPERATOR_SRCS})
+SET(XNNPACK_LOGGING_SRCS
+  src/operator-strings.c
+  src/subgraph-strings.c)
+
+SET(XNNPACK_COLD_SRCS ${XNNPACK_OPERATOR_SRCS} ${XNNPACK_SUBGRAPH_SRCS} ${XNNPACK_LOGGING_SRCS})
 LIST(APPEND XNNPACK_COLD_SRCS
   src/init.c
   src/memory.c

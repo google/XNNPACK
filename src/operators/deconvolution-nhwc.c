@@ -71,7 +71,8 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Deconvolution operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8));
     goto error;
   }
 
@@ -79,53 +80,52 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
 
   if (kernel_width == 0 || kernel_height == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
-      kernel_width, kernel_height);
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8), kernel_width, kernel_height);
     goto error;
   }
 
   if (stride_width == 0 || stride_height == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
-      stride_width, stride_height);
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8), stride_width, stride_height);
     goto error;
   }
 
   if (dilation_width == 0 || dilation_height == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %" PRIu32 "x%" PRIu32 " dilation: "
-      "dilation dimensions must be non-zero",
-      dilation_width, dilation_height);
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " dilation: dilation dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8), dilation_width, dilation_height);
     goto error;
   }
 
   if (groups == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %" PRIu32 " groups: number of groups must be non-zero", groups);
+      "failed to create %s operator with %" PRIu32 " groups: number of groups must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8), groups);
     goto error;
   }
 
   if (group_input_channels == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %zu input channels per group: "
-      "number of channels must be non-zero",
-      group_input_channels);
+      "failed to create %s operator with %zu input channels per group: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8), group_input_channels);
     goto error;
   }
 
   if (group_output_channels == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %zu output channels per group: "
-      "number of channels must be non-zero",
-      group_output_channels);
+      "failed to create %s operator with %zu output channels per group: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8), group_output_channels);
     goto error;
   }
 
   const size_t input_channels = groups * group_input_channels;
   if (input_pixel_stride < input_channels) {
     xnn_log_error(
-      "failed to create Deconvolution operator with input pixel stride of %zu: "
+      "failed to create %s operator with input pixel stride of %zu: "
       "stride must be at least as large as the number of output channels (%" PRIu32 "x%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8),
       input_pixel_stride, groups, group_input_channels);
     goto error;
   }
@@ -133,46 +133,47 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   const size_t output_channels = groups * group_output_channels;
   if (output_pixel_stride < output_channels) {
     xnn_log_error(
-      "failed to create Deconvolution operator with output pixel stride of %zu: "
+      "failed to create %s operator with output pixel stride of %zu: "
       "stride must be at least as large as the number of output channels (%" PRIu32 "x%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8),
       output_pixel_stride, groups, group_output_channels);
     goto error;
   }
 
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %.7g input scale: scale must be finite, normalized, and positive",
-      input_scale);
+      "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8), input_scale);
     goto error;
   }
 
   if (kernel_scale <= 0.0f || !isnormal(kernel_scale)) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %.7g kernel scale: scale must be finite, normalized, and positive",
-      kernel_scale);
+      "failed to create %s operator with %.7g kernel scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8), kernel_scale);
     goto error;
   }
 
   if (output_scale <= 0.0f || !isnormal(output_scale)) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %.7g output scale: scale must be finite, normalized, and positive",
-      output_scale);
+      "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8), output_scale);
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Deconvolution operator with [%" PRIu8 ", %" PRIu8 "] output range: "
-      "range min must be below range max",
-      output_min, output_max);
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8), output_min, output_max);
     goto error;
   }
 
   const bool any_padding = (output_padding_left | output_padding_top | output_padding_right | output_padding_bottom) != 0;
   if (any_padding && (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+      "failed to create %s operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
       "TensorFlow SAME padding can't be combined with explicit padding specification",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8),
       output_padding_top, output_padding_left, output_padding_bottom, output_padding_right);
     goto error;
   }
@@ -182,8 +183,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   const float deconvolution_scale = input_scale * kernel_scale / output_scale;
   if (deconvolution_scale >= 1.0f) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
-      "Deconvolution operator scale %.7g is greater or equal to 1.0",
+      "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
+      "deconvolution scale %.7g is greater or equal to 1.0",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8),
       input_scale, kernel_scale, output_scale, deconvolution_scale);
     goto error;
   }
@@ -192,7 +194,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
 
   deconvolution_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (deconvolution_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Deconvolution operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8));
     goto error;
   }
 
@@ -216,7 +220,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
     const size_t subconvolution_buffer_size = sizeof(struct subconvolution_params) * subkernels;
     deconvolution_op->subconvolution_buffer = xnn_allocate_zero_memory(subconvolution_buffer_size);
     if (deconvolution_op->subconvolution_buffer == NULL) {
-      xnn_log_error("failed to allocate %zu bytes for subconvolution buffer", subconvolution_buffer_size);
+      xnn_log_error(
+        "failed to allocate %zu bytes for %s operator subconvolution buffer",
+        subconvolution_buffer_size, xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8));
       goto error;
     }
 
@@ -235,7 +241,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   }
   deconvolution_op->packed_weights = xnn_allocate_simd_memory(packed_group_weights_size * groups);
   if (deconvolution_op->packed_weights == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for packed weights", packed_group_weights_size * groups);
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator packed weights",
+      packed_group_weights_size * groups, xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8));
     goto error;
   }
   memset(deconvolution_op->packed_weights, kernel_zero_point, packed_group_weights_size * groups);
@@ -263,7 +271,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   size_t zero_size = sizeof(uint8_t) * k_stride + XNN_EXTRA_BYTES;
   void* zero_buffer = xnn_allocate_simd_memory(zero_size);
   if (zero_buffer == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for zero padding", zero_size);
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator zero padding",
+      zero_size, xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8));
     goto error;
   }
   memset(zero_buffer, input_zero_point, zero_size);
@@ -358,7 +368,8 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Deconvolution operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32));
     goto error;
   }
 
@@ -366,53 +377,52 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
 
   if (kernel_width == 0 || kernel_height == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
-      kernel_width, kernel_height);
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32), kernel_width, kernel_height);
     goto error;
   }
 
   if (stride_width == 0 || stride_height == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
-      stride_width, stride_height);
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32), stride_width, stride_height);
     goto error;
   }
 
   if (dilation_width == 0 || dilation_height == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %" PRIu32 "x%" PRIu32 " dilation: "
-      "dilation dimensions must be non-zero",
-      dilation_width, dilation_height);
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " dilation: dilation dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32), dilation_width, dilation_height);
     goto error;
   }
 
   if (groups == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %" PRIu32 " groups: number of groups must be non-zero", groups);
+      "failed to create %s operator with %" PRIu32 " groups: number of groups must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32), groups);
     goto error;
   }
 
   if (group_input_channels == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %zu input channels per group: "
-      "number of channels must be non-zero",
-      group_input_channels);
+      "failed to create %s operator with %zu input channels per group: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32), group_input_channels);
     goto error;
   }
 
   if (group_output_channels == 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %zu output channels per group: "
-      "number of channels must be non-zero",
-      group_output_channels);
+      "failed to create %s operator with %zu output channels per group: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32), group_output_channels);
     goto error;
   }
 
   const size_t input_channels = groups * group_input_channels;
   if (input_pixel_stride < input_channels) {
     xnn_log_error(
-      "failed to create Deconvolution operator with input pixel stride of %zu: "
+      "failed to create %s operator with input pixel stride of %zu: "
       "stride must be at least as large as the number of output channels (%" PRIu32 "x%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32),
       input_pixel_stride, groups, group_input_channels);
     goto error;
   }
@@ -420,37 +430,40 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   const size_t output_channels = groups * group_output_channels;
   if (output_pixel_stride < output_channels) {
     xnn_log_error(
-      "failed to create Deconvolution operator with output pixel stride of %zu: "
+      "failed to create %s operator with output pixel stride of %zu: "
       "stride must be at least as large as the number of output channels (%" PRIu32 "x%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32),
       output_pixel_stride, groups, group_output_channels);
     goto error;
   }
 
   if (isnan(output_min)) {
     xnn_log_error(
-      "failed to create Deconvolution operator with NaN output lower bound: lower bound must be non-NaN");
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32));
     goto error;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
-      "failed to create Deconvolution operator with NaN output upper bound: upper bound must be non-NaN");
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32));
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Deconvolution operator with [%.7g, %.7g] output range: "
-      "lower bound must be below upper bound",
-      output_min, output_max);
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32), output_min, output_max);
     goto error;
   }
 
   const bool any_padding = (output_padding_left | output_padding_top | output_padding_right | output_padding_bottom) != 0;
   if (any_padding && (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     xnn_log_error(
-      "failed to create Deconvolution operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+      "failed to create %s operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
       "TensorFlow SAME padding can't be combined with explicit padding specification",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32),
       output_padding_top, output_padding_left, output_padding_bottom, output_padding_right);
     goto error;
   }
@@ -459,7 +472,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
 
   deconvolution_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (deconvolution_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Deconvolution operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32));
     goto error;
   }
 
@@ -496,7 +511,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     const size_t subconvolution_buffer_size = sizeof(struct subconvolution_params) * subkernels;
     deconvolution_op->subconvolution_buffer = xnn_allocate_zero_memory(subconvolution_buffer_size);
     if (deconvolution_op->subconvolution_buffer == NULL) {
-      xnn_log_error("failed to allocate %zu bytes for subconvolution buffer", subconvolution_buffer_size);
+      xnn_log_error(
+        "failed to allocate %zu bytes for %s operator subconvolution buffer",
+        subconvolution_buffer_size, xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32));
       goto error;
     }
 
@@ -515,7 +532,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   }
   deconvolution_op->packed_weights = xnn_allocate_simd_memory(packed_group_weights_size * groups);
   if (deconvolution_op->packed_weights == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for packed weights", packed_group_weights_size * groups);
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator packed weights",
+      packed_group_weights_size * groups, xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32));
     goto error;
   }
   memset(deconvolution_op->packed_weights, 0, packed_group_weights_size * groups);
@@ -541,7 +560,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   const size_t zero_size = k_stride * sizeof(float) + XNN_EXTRA_BYTES;
   void* zero_buffer = xnn_allocate_zero_simd_memory(zero_size);
   if (zero_buffer == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for zero padding", zero_size);
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator zero padding",
+      zero_size, xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32));
     goto error;
   }
   deconvolution_op->zero_buffer = zero_buffer;
@@ -636,7 +657,9 @@ static enum xnn_status setup_conv_path(
   {
     const void** indirection_buffer = (const void**) xnn_reallocate_memory(deconvolution_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
-      xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
+      xnn_log_error(
+        "failed to allocate %zu bytes for %s operator indirection buffer",
+        indirection_buffer_size, xnn_operator_type_to_string(deconvolution_op->type));
       return xnn_status_out_of_memory;
     }
     deconvolution_op->indirection_buffer = indirection_buffer;
@@ -774,7 +797,9 @@ static enum xnn_status setup_subconv2d_path(
       const void** indirection_buffer =
         (const void**) xnn_reallocate_memory(deconvolution_op->indirection_buffer, indirection_buffer_size);
       if (indirection_buffer == NULL) {
-        xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
+        xnn_log_error(
+          "failed to allocate %zu bytes for %s operator indirection buffer",
+          indirection_buffer_size, xnn_operator_type_to_string(deconvolution_op->type));
         return xnn_status_out_of_memory;
       }
       deconvolution_op->indirection_buffer = indirection_buffer;
@@ -895,30 +920,31 @@ static enum xnn_status setup_deconvolution2d(
   deconvolution_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Deconvolution operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(deconvolution_op->type));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to setup Deconvolution with %zux%zu input: input dimensions must be non-zero",
-      input_width, input_height);
+      "failed to setup %s operator with %zux%zu input: input dimensions must be non-zero",
+      xnn_operator_type_to_string(deconvolution_op->type), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
 
   if (adjustment_height >= deconvolution_op->stride_height) {
     xnn_log_error(
-      "failed to setup Deconvolution with %" PRIu32 " height adjustment: "
+      "failed to setup %s operator with %" PRIu32 " height adjustment: "
       "height adjustment must be smaller than height stride (%" PRIu32 ")",
-      adjustment_height, deconvolution_op->stride_height);
+      xnn_operator_type_to_string(deconvolution_op->type), adjustment_height, deconvolution_op->stride_height);
     return xnn_status_invalid_parameter;
   }
 
   if (adjustment_width >= deconvolution_op->stride_width) {
     xnn_log_error(
-      "failed to setup Deconvolution with %" PRIu32 " width adjustment: "
+      "failed to setup %s operator with %" PRIu32 " width adjustment: "
       "width adjustment must be smaller than width stride (%" PRIu32 ")",
-      adjustment_width, deconvolution_op->stride_width);
+      xnn_operator_type_to_string(deconvolution_op->type), adjustment_width, deconvolution_op->stride_width);
     return xnn_status_invalid_parameter;
   }
 
@@ -996,7 +1022,9 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_q8(
     pthreadpool_t threadpool)
 {
   if (deconvolution_op->type != xnn_operator_type_deconvolution_nhwc_q8) {
-    xnn_log_error("failed to setup Deconvolution (NHWC, Q8) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_q8),
+      xnn_operator_type_to_string(deconvolution_op->type));
     return xnn_status_invalid_parameter;
   }
 
@@ -1025,7 +1053,9 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_f32(
     pthreadpool_t threadpool)
 {
   if (deconvolution_op->type != xnn_operator_type_deconvolution_nhwc_f32) {
-    xnn_log_error("failed to setup Deconvolution (NHWC, F32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32),
+      xnn_operator_type_to_string(deconvolution_op->type));
     return xnn_status_invalid_parameter;
   }
 

@@ -27,43 +27,45 @@ enum xnn_status xnn_define_argmax_pooling_2d(
   uint32_t flags)
 {
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to define ArgMax Pooling: XNNPACK is not initialized");
+    xnn_log_error("failed to define %s operator: XNNPACK is not initialized",
+      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d));
     return xnn_status_uninitialized;
   }
 
   const uint32_t pooling_size = pooling_height * pooling_width;
   if (pooling_size == 0) {
     xnn_log_error(
-      "failed to define ArgMax Pooling with %" PRIu32 "x%" PRIu32 " pooling size: "
+      "failed to define %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
       "pooling size dimensions must be non-zero",
-      pooling_width, pooling_height);
+      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), pooling_width, pooling_height);
     return xnn_status_invalid_parameter;
   }
 
   if (pooling_size == 1) {
     xnn_log_error(
-      "failed to define ArgMax Pooling with 1 pooling element: 1x1 pooling is meaningless");
+      "failed to define %s operator with 1 pooling element: 1x1 pooling is meaningless",
+      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d));
     return xnn_status_invalid_parameter;
   }
 
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define ArgMax Pooling with input ID #%" PRIu32 ": invalid Value ID",
-      input_id);
+      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), input_id);
     return xnn_status_invalid_parameter;
   }
 
   if (output_value_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define ArgMax Pooling with output value ID #%" PRIu32 ": invalid Value ID",
-      output_value_id);
+      "failed to define %s operator with output value ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), output_value_id);
     return xnn_status_invalid_parameter;
   }
 
   if (output_index_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define ArgMax Pooling with output index ID #%" PRIu32 ": invalid Value ID",
-      output_index_id);
+      "failed to define %s operator with output index ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), output_index_id);
     return xnn_status_invalid_parameter;
   }
 

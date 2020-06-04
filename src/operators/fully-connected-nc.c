@@ -45,7 +45,8 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Fully Connected operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8));
     goto error;
   }
 
@@ -53,60 +54,59 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
 
   if (input_channels == 0) {
     xnn_log_error(
-      "failed to create Fully Connected operator with %zu input channels: number of channels must be non-zero",
-      input_channels);
+      "failed to create %s operator with %zu input channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), input_channels);
     goto error;
   }
 
   if (output_channels == 0) {
     xnn_log_error(
-      "failed to create Fully Connected operator with %zu output channels: number of channels must be non-zero",
-      output_channels);
+      "failed to create %s operator with %zu output channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), output_channels);
     goto error;
   }
 
   if (input_stride < input_channels) {
     xnn_log_error(
-      "failed to create Fully Connected operator with input element stride of %zu: "
+      "failed to create %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of input channels (%zu)",
-      input_stride, input_channels);
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), input_stride, input_channels);
     goto error;
   }
 
   if (output_stride < output_channels) {
     xnn_log_error(
-      "failed to create Fully Connected operator with output element stride of %zu: "
+      "failed to create %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of output channels (%zu)",
-      output_stride, output_channels);
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), output_stride, output_channels);
     goto error;
   }
 
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
     xnn_log_error(
-      "failed to create Fully Connected operator with %.7g input scale: scale must be finite, normalized, and positive",
-      input_scale);
+      "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), input_scale);
     goto error;
   }
 
   if (kernel_scale <= 0.0f || !isnormal(kernel_scale)) {
     xnn_log_error(
-      "failed to create Fully Connected operator with %.7g kernel scale: scale must be finite, normalized, and positive",
-      kernel_scale);
+      "failed to create %s operator with %.7g kernel scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), kernel_scale);
     goto error;
   }
 
   if (output_scale <= 0.0f || !isnormal(output_scale)) {
     xnn_log_error(
-      "failed to create Fully Connected operator with %.7g output scale: scale must be finite, normalized, and positive",
-      output_scale);
+      "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), output_scale);
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Fully Connected operator with [%" PRIu8 ", %" PRIu8 "] output range: "
-      "range min must be below range max",
-      output_min, output_max);
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), output_min, output_max);
     goto error;
   }
 
@@ -115,8 +115,9 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
   const float requantization_scale = input_scale * kernel_scale / output_scale;
   if (requantization_scale >= 1.0f) {
     xnn_log_error(
-      "failed to create Fully Connected operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
+      "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
       "requantization scale %.7g is greater or equal to 1.0",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8),
       input_scale, kernel_scale, output_scale, requantization_scale);
     goto error;
   }
@@ -125,7 +126,8 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
 
   fully_connected_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (fully_connected_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Fully Connected operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8));
     goto error;
   }
 
@@ -135,10 +137,11 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
   const size_t n_stride = round_up(output_channels, nr);
   const size_t k_stride = round_up_po2(input_channels, kr);
 
-  fully_connected_op->packed_weights = xnn_allocate_simd_memory(n_stride * (k_stride * sizeof(uint8_t) + sizeof(int32_t)));
+  const size_t packed_weights_size = n_stride * (k_stride * sizeof(uint8_t) + sizeof(int32_t));
+  fully_connected_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
   if (fully_connected_op->packed_weights == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for packed weights",
-      n_stride * (k_stride * sizeof(uint8_t) + sizeof(int32_t)));
+    xnn_log_error("failed to allocate %zu bytes for %s operator packed weights",
+      packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8));
     goto error;
   }
   memset(fully_connected_op->packed_weights, kernel_zero_point, n_stride * (k_stride * sizeof(uint8_t) + sizeof(int32_t)));
@@ -207,7 +210,8 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Fully Connected operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
     goto error;
   }
 
@@ -215,50 +219,52 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
 
   if (input_channels == 0) {
     xnn_log_error(
-      "failed to create Fully Connected operator with %zu input channels: number of channels must be non-zero",
-      input_channels);
+      "failed to create %s operator with %zu input channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32), input_channels);
     goto error;
   }
 
   if (output_channels == 0) {
     xnn_log_error(
-      "failed to create Fully Connected operator with %zu output channels: number of channels must be non-zero",
-      output_channels);
+      "failed to create %s operator with %zu output channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32), output_channels);
     goto error;
   }
 
   if (input_stride < input_channels) {
     xnn_log_error(
-      "failed to create Fully Connected operator with input element stride of %zu: "
+      "failed to create %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of input channels (%zu)",
-      input_stride, input_channels);
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32), input_stride, input_channels);
     goto error;
   }
 
   if (output_stride < output_channels) {
     xnn_log_error(
-      "failed to create Fully Connected operator with output element stride of %zu: "
+      "failed to create %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of output channels (%zu)",
-      output_stride, output_channels);
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32), output_stride, output_channels);
     goto error;
   }
 
   if (isnan(output_min)) {
     xnn_log_error(
-      "failed to create Fully Connected operator with NaN output lower bound: lower bound must be non-NaN");
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
     goto error;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
-      "failed to create Fully Connected operator with NaN output upper bound: upper bound must be non-NaN");
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Fully Connected operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      output_min, output_max);
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32), output_min, output_max);
     goto error;
   }
 
@@ -266,7 +272,9 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
 
   fully_connected_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (fully_connected_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Fully Connected operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
     goto error;
   }
 
@@ -277,10 +285,12 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   const size_t n_stride = round_up(output_channels, nr);
   const size_t k_stride = round_up_po2(input_channels, kr);
 
-  fully_connected_op->packed_weights = xnn_allocate_simd_memory(n_stride * (k_stride * sizeof(float) + sizeof(float)));
+  const size_t packed_weights_size = n_stride * (k_stride * sizeof(float) + sizeof(float));
+  fully_connected_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
   if (fully_connected_op->packed_weights == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for packed weights",
-      n_stride * (k_stride * sizeof(float) + sizeof(float)));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator packed weights",
+      packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
     goto error;
   }
   memset(fully_connected_op->packed_weights, 0, n_stride * (k_stride * sizeof(float) + sizeof(float)));
@@ -348,7 +358,8 @@ static enum xnn_status setup_fully_connected_nc(
   fully_connected_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Fully Connected operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(fully_connected_op->type));
     return xnn_status_uninitialized;
   }
 
@@ -420,7 +431,9 @@ enum xnn_status xnn_setup_fully_connected_nc_q8(
     pthreadpool_t threadpool)
 {
   if (fully_connected_op->type != xnn_operator_type_fully_connected_nc_q8) {
-    xnn_log_error("failed to setup Fully Connected (NC, Q8) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8),
+      xnn_operator_type_to_string(fully_connected_op->type));
     return xnn_status_invalid_parameter;
   }
 
@@ -444,7 +457,9 @@ enum xnn_status xnn_setup_fully_connected_nc_f32(
     pthreadpool_t threadpool)
 {
   if (fully_connected_op->type != xnn_operator_type_fully_connected_nc_f32) {
-    xnn_log_error("failed to setup Fully Connected (NC, F32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32),
+      xnn_operator_type_to_string(fully_connected_op->type));
     return xnn_status_invalid_parameter;
   }
 

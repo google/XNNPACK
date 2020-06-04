@@ -30,7 +30,8 @@ enum xnn_status xnn_create_channel_pad_nc_x32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Channel Pad operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_channel_pad_nc_x32));
     goto error;
   }
 
@@ -38,24 +39,25 @@ enum xnn_status xnn_create_channel_pad_nc_x32(
 
   if (input_channels == 0) {
     xnn_log_error(
-      "failed to create Channel Pad operator with %zu input channels: number of channels must be non-zero",
-      input_channels);
+      "failed to create %s operator with %zu input channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_channel_pad_nc_x32), input_channels);
     goto error;
   }
 
   if (input_stride < input_channels) {
     xnn_log_error(
-      "failed to create Channel Pad operator with input element stride of %zu: "
+      "failed to create %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of input channels (%zu)",
-      input_stride, input_channels);
+      xnn_operator_type_to_string(xnn_operator_type_channel_pad_nc_x32), input_stride, input_channels);
     goto error;
   }
 
   const size_t output_channels = pad_before_channels + input_channels + pad_after_channels;
   if (output_stride < output_channels) {
     xnn_log_error(
-      "failed to create Channel Pad operator with output element stride of %zu: "
+      "failed to create %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of output channels (%zu+%zu+%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_channel_pad_nc_x32),
       output_stride, pad_before_channels, input_channels, pad_after_channels);
     goto error;
   }
@@ -64,7 +66,9 @@ enum xnn_status xnn_create_channel_pad_nc_x32(
 
   channel_pad_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (channel_pad_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Channel Pad operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_channel_pad_nc_x32));
     goto error;
   }
 
@@ -96,13 +100,16 @@ enum xnn_status xnn_setup_channel_pad_nc_x32(
     pthreadpool_t threadpool)
 {
   if (channel_pad_op->type != xnn_operator_type_channel_pad_nc_x32) {
-    xnn_log_error("failed to setup Channel Pad (X32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_channel_pad_nc_x32),
+      xnn_operator_type_to_string(channel_pad_op->type));
     return xnn_status_invalid_parameter;
   }
   channel_pad_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Channel Pad operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_channel_pad_nc_x32));
     return xnn_status_uninitialized;
   }
 

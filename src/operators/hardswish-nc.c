@@ -27,7 +27,8 @@ enum xnn_status xnn_create_hardswish_nc_f32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create HardSwish operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f32));
     goto error;
   }
 
@@ -35,23 +36,24 @@ enum xnn_status xnn_create_hardswish_nc_f32(
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create HardSwish operator with %zu channels: number of channels must be non-zero", channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f32), channels);
     goto error;
   }
 
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to create HardSwish operator with input element stride of %zu: "
+      "failed to create %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      input_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f32), input_stride, channels);
     goto error;
   }
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to create HardSwish operator with output element stride of %zu: "
+      "failed to create %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      output_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f32), output_stride, channels);
     goto error;
   }
 
@@ -59,7 +61,9 @@ enum xnn_status xnn_create_hardswish_nc_f32(
 
   hardswish_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (hardswish_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for xnn_operator structure", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f32));
     goto error;
   }
 
@@ -89,13 +93,16 @@ enum xnn_status xnn_setup_hardswish_nc_f32(
     pthreadpool_t threadpool)
 {
   if (hardswish_op->type != xnn_operator_type_hardswish_nc_f32) {
-    xnn_log_error("failed to setup HardSwish (F32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f32),
+      xnn_operator_type_to_string(hardswish_op->type));
     return xnn_status_invalid_parameter;
   }
   hardswish_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup HardSwish operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f32));
     return xnn_status_uninitialized;
   }
 

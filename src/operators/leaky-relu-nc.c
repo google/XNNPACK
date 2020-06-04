@@ -36,7 +36,8 @@ enum xnn_status xnn_create_leaky_relu_nc_q8(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Leaky ReLU operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8));
     goto error;
   }
 
@@ -44,58 +45,59 @@ enum xnn_status xnn_create_leaky_relu_nc_q8(
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create Leaky ReLU operator with %zu channels: number of channels must be non-zero", channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8), channels);
     goto error;
   }
 
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to create Leaky ReLU operator with input element stride of %zu: "
+      "failed to create %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      input_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8), input_stride, channels);
     goto error;
   }
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to create Leaky ReLU operator with output element stride of %zu: "
+      "failed to create %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      output_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8), output_stride, channels);
     goto error;
   }
 
   if (negative_slope <= 0.0f || !isnormal(negative_slope)) {
     xnn_log_error(
-      "failed to create Leaky ReLU operator with %.7g negative slope: slope must be finite, normalized, and positive",
-      negative_slope);
+      "failed to create %s operator with %.7g negative slope: slope must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8), negative_slope);
     goto error;
   }
 
   if (negative_slope > 1.0f) {
     xnn_log_error(
-      "failed to create Leaky ReLU operator with %.7g negative slope: slope must not exceed 1.0", negative_slope);
+      "failed to create %s operator with %.7g negative slope: slope must not exceed 1.0",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8), negative_slope);
     goto error;
   }
 
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
     xnn_log_error(
-      "failed to create Leaky ReLU operator with %.7g input scale: scale must be finite, normalized, and positive",
-      input_scale);
+      "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8), input_scale);
     goto error;
   }
 
   if (output_scale <= 0.0f || !isnormal(output_scale)) {
     xnn_log_error(
-      "failed to create Leaky ReLU operator with %.7g output scale: scale must be finite, normalized, and positive",
-      output_scale);
+      "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8), output_scale);
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Leaky ReLU operator with [%" PRIu8 ", %" PRIu8 "] output range: "
-      "range min must be below range max",
-      output_min, output_max);
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8), output_min, output_max);
     goto error;
   }
 
@@ -104,9 +106,9 @@ enum xnn_status xnn_create_leaky_relu_nc_q8(
   const float input_output_scale = input_scale / output_scale;
   if (input_output_scale < 0x1.0p-8f || input_output_scale >= 0x1.0p+8f) {
     xnn_log_error(
-      "failed to create Leaky ReLU operator with %.7g input-to-output scale ratio: "
+      "failed to create %s operator with %.7g input-to-output scale ratio: "
       "scale ratio must be in [2**-8, 2**8) range",
-      input_output_scale);
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8), input_output_scale);
     goto error;
   }
 
@@ -114,13 +116,17 @@ enum xnn_status xnn_create_leaky_relu_nc_q8(
 
   leaky_relu_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (leaky_relu_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Leaky ReLU operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8));
     goto error;
   }
 
   leaky_relu_op->lookup_table = xnn_allocate_simd_memory(256 * sizeof(uint8_t));
   if (leaky_relu_op->lookup_table == NULL) {
-    xnn_log_error("failed to allocate 256 bytes for Leaky ReLU lookup table");
+    xnn_log_error(
+      "failed to allocate 256 bytes for %s operator lookup table",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8));
     goto error;
   }
 
@@ -164,13 +170,17 @@ enum xnn_status xnn_setup_leaky_relu_nc_q8(
     pthreadpool_t threadpool)
 {
   if (leaky_relu_op->type != xnn_operator_type_leaky_relu_nc_q8) {
-    xnn_log_error("failed to setup Leaky ReLU (NC, Q8) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8),
+      xnn_operator_type_to_string(leaky_relu_op->type));
     return xnn_status_invalid_parameter;
   }
   leaky_relu_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Leaky ReLU operator: XNNPACK is not initialized");
+    xnn_log_error(
+      "failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_q8));
     return xnn_status_uninitialized;
   }
 

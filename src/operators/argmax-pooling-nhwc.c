@@ -58,7 +58,8 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Argmax Pooling operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
     goto error;
   }
 
@@ -67,62 +68,61 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   const uint32_t pooling_size = pooling_height * pooling_width;
   if (pooling_size == 0) {
     xnn_log_error(
-      "failed to create Argmax Pooling operator with %" PRIu32 "x%" PRIu32 " pooling size: "
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
       "pooling size dimensions must be non-zero",
-      pooling_width, pooling_height);
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), pooling_width, pooling_height);
     goto error;
   }
 
   if (pooling_size == 1) {
     xnn_log_error(
-      "failed to create Argmax Pooling operator with 1 pooling element: "
-      "1x1 pooling is meaningless");
+      "failed to create %s operator with 1 pooling element: 1x1 pooling is meaningless",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
     goto error;
   }
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create Argmax Pooling operator with %zu channels: "
-      "number of channels must be non-zero",
-      channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), channels);
     goto error;
   }
 
   if (input_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create Argmax Pooling operator with input pixel stride of %zu: "
+      "failed to create %s operator with input pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      input_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), input_pixel_stride, channels);
     goto error;
   }
 
   if (output_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create Argmax Pooling operator with output pixel stride of %zu: "
+      "failed to create %s operator with output pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      output_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), output_pixel_stride, channels);
     goto error;
   }
 
   if (isnan(output_min)) {
     xnn_log_error(
-      "failed to create Argmax Pooling operator with NaN output lower bound: "
-      "lower bound must be non-NaN");
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
     goto error;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
-      "failed to create Argmax Pooling operator with NaN output upper bound: "
-      "upper bound must be non-NaN");
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Argmax Pooling operator with [%.7g, %.7g] output range: "
+      "failed to create %s operator with [%.7g, %.7g] output range: "
       "lower bound must be below upper bound",
-      output_min, output_max);
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), output_min, output_max);
     goto error;
   }
 
@@ -130,8 +130,9 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     if (any_padding) {
       xnn_log_error(
-        "failed to create Argmax Pooling operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "failed to create %s operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
         "TensorFlow SAME padding can't be combined with explicit padding specification",
+        xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
         input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
       goto error;
     }
@@ -141,7 +142,9 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
 
   argmax_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (argmax_pooling_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Argmax Pooling operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
     goto error;
   }
 
@@ -187,20 +190,23 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
     pthreadpool_t threadpool)
 {
   if (argmax_pooling_op->type != xnn_operator_type_argmax_pooling_nhwc_f32) {
-    xnn_log_error("failed to setup Argmax Pooling (NHWC, F32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
+      xnn_operator_type_to_string(argmax_pooling_op->type));
     return xnn_status_invalid_parameter;
   }
   argmax_pooling_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Argmax Pooling operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to setup Argmax Pooling operator with %zux%zu input: input dimensions must be non-zero",
-      input_width, input_height);
+      "failed to setup %s operator with %zux%zu input: input dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
 
@@ -251,9 +257,12 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
     // Micro-kernel may read up to (mr - 1) elements after the end of indirection buffer.
     const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + output_height * step_height);
 
-    const void** indirection_buffer = (const void**) xnn_reallocate_memory(argmax_pooling_op->indirection_buffer, indirection_buffer_size);
+    const void** indirection_buffer =
+      (const void**) xnn_reallocate_memory(argmax_pooling_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
-      xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
+      xnn_log_error(
+        "failed to allocate %zu bytes for %s operator indirection buffer",
+        indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
       return xnn_status_out_of_memory;
     }
     argmax_pooling_op->indirection_buffer = indirection_buffer;

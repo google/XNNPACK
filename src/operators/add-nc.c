@@ -40,7 +40,8 @@ enum xnn_status xnn_create_add_nc_q8(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Add operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8));
     goto error;
   }
 
@@ -48,57 +49,60 @@ enum xnn_status xnn_create_add_nc_q8(
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create Add operator with %zu channels: number of channels must be non-zero", channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8), channels);
     goto error;
   }
 
   if (a_stride < channels) {
     xnn_log_error(
-      "failed to create Add operator with A element stride of %zu: "
+      "failed to create %s operator with A element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      a_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8), a_stride, channels);
     goto error;
   }
 
   if (b_stride < channels) {
     xnn_log_error(
-      "failed to create Add operator with B element stride of %zu: "
+      "failed to create %s operator with B element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      b_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8), b_stride, channels);
     goto error;
   }
 
   if (sum_stride < channels) {
     xnn_log_error(
-      "failed to create Add operator with Sum element stride of %zu: "
+      "failed to create %s operator with Sum element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      sum_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8), sum_stride, channels);
     goto error;
   }
 
   if (a_scale <= 0.0f || !isnormal(a_scale)) {
     xnn_log_error(
-      "failed to create Add operator with %.7g A scale: scale must be finite, normalized, and positive", a_scale);
+      "failed to create %s operator with %.7g A scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8), a_scale);
     goto error;
   }
 
   if (b_scale <= 0.0f || !isnormal(b_scale)) {
     xnn_log_error(
-      "failed to create Add operator with %.7g B scale: scale must be finite, normalized, and positive", b_scale);
+      "failed to create %s operator with %.7g B scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8), b_scale);
     goto error;
   }
 
   if (sum_scale <= 0.0f || !isnormal(sum_scale)) {
     xnn_log_error(
-      "failed to create Add operator with %.7g output scale: scale must be finite, normalized, and positive",
-      sum_scale);
+      "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8), sum_scale);
     goto error;
   }
 
   if (sum_min >= sum_max) {
     xnn_log_error(
-      "failed to create Add operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
-      sum_min, sum_max);
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8), sum_min, sum_max);
     goto error;
   }
 
@@ -107,16 +111,16 @@ enum xnn_status xnn_create_add_nc_q8(
   const float a_output_scale = a_scale / sum_scale;
   if (a_output_scale < 0x1.0p-14f || a_output_scale >= 0x1.0p+8f) {
     xnn_log_error(
-      "failed to create Add operator with %.7g A-to-output scale ratio: scale ratio must be in [2**-14, 2**8) range",
-      a_output_scale);
+      "failed to create %s operator with %.7g A-to-output scale ratio: scale ratio must be in [2**-14, 2**8) range",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8), a_output_scale);
     goto error;
   }
 
   const float b_output_scale = b_scale / sum_scale;
   if (b_output_scale < 0x1.0p-14f || b_output_scale >= 0x1.0p+8f) {
     xnn_log_error(
-      "failed to create Add operator with %.7g A-to-output scale ratio: scale ratio must be in [2**-14, 2**8) range",
-      b_output_scale);
+      "failed to create %s operator with %.7g A-to-output scale ratio: scale ratio must be in [2**-14, 2**8) range",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8), b_output_scale);
     goto error;
   }
 
@@ -124,7 +128,9 @@ enum xnn_status xnn_create_add_nc_q8(
 
   add_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (add_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Add operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_add_nc_q8));
     goto error;
   }
 
@@ -165,7 +171,8 @@ enum xnn_status xnn_create_add_nc_f32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Add operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_f32));
     goto error;
   }
 
@@ -173,50 +180,53 @@ enum xnn_status xnn_create_add_nc_f32(
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create add operator with %zu channels: number of channels must be non-zero", channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_f32), channels);
     goto error;
   }
 
   if (a_stride < channels) {
     xnn_log_error(
-      "failed to create Add operator with A element stride of %zu: "
+      "failed to create %s operator with A element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      a_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_f32), a_stride, channels);
     goto error;
   }
 
   if (b_stride < channels) {
     xnn_log_error(
-      "failed to create Add operator with B element stride of %zu: "
+      "failed to create %s operator with B element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      b_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_f32), b_stride, channels);
     goto error;
   }
 
   if (sum_stride < channels) {
     xnn_log_error(
-      "failed to create Add operator with Sum element stride of %zu: "
+      "failed to create %s operator with Sum element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      sum_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_f32), sum_stride, channels);
     goto error;
   }
 
   if (isnan(sum_min)) {
     xnn_log_error(
-      "failed to create Add operator with NaN output lower bound: lower bound must be non-NaN");
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_f32));
     goto error;
   }
 
   if (isnan(sum_max)) {
     xnn_log_error(
-      "failed to create Add operator with NaN output upper bound: upper bound must be non-NaN");
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_f32));
     goto error;
   }
 
   if (sum_min >= sum_max) {
     xnn_log_error(
-      "failed to create Add operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      sum_min, sum_max);
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_f32), sum_min, sum_max);
     goto error;
   }
 
@@ -224,7 +234,9 @@ enum xnn_status xnn_create_add_nc_f32(
 
   add_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (add_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Add operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_add_nc_f32));
     goto error;
   }
 
@@ -256,13 +268,16 @@ enum xnn_status xnn_setup_add_nc_q8(
     pthreadpool_t threadpool)
 {
   if (add_op->type != xnn_operator_type_add_nc_q8) {
-    xnn_log_error("failed to setup Add (NC, Q8) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8),
+      xnn_operator_type_to_string(add_op->type));
     return xnn_status_invalid_parameter;
   }
   add_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Add operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_q8));
     return xnn_status_uninitialized;
   }
 
@@ -319,13 +334,16 @@ enum xnn_status xnn_setup_add_nc_f32(
     pthreadpool_t threadpool)
 {
   if (add_op->type != xnn_operator_type_add_nc_f32) {
-    xnn_log_error("failed to setup Add (NC, F32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_f32),
+      xnn_operator_type_to_string(add_op->type));
     return xnn_status_invalid_parameter;
   }
   add_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Add operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_add_nc_f32));
     return xnn_status_uninitialized;
   }
 

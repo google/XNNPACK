@@ -21,28 +21,29 @@ enum xnn_status xnn_define_prelu(
   uint32_t flags)
 {
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to define PReLU operator: XNNPACK is not initialized");
+    xnn_log_error("failed to define %s operator: XNNPACK is not initialized",
+      xnn_node_type_to_string(xnn_node_type_prelu));
     return xnn_status_uninitialized;
   }
 
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define PReLU operator with input ID #%" PRIu32 ": invalid Value ID",
-      input_id);
+      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_prelu), input_id);
     return xnn_status_invalid_parameter;
   }
 
   if (slope_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define PReLU operator with slope ID #%" PRIu32 ": invalid Value ID",
-      slope_id);
+      "failed to define %s operator with slope ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_prelu), slope_id);
     return xnn_status_invalid_parameter;
   }
 
   if (output_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define PReLU operator with output ID #%" PRIu32 ": invalid Value ID",
-      output_id);
+      "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_prelu), output_id);
     return xnn_status_invalid_parameter;
   }
 

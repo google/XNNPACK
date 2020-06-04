@@ -27,7 +27,9 @@ static enum xnn_status create_constant_pad_nd(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Constant Pad operator: XNNPACK is not initialized");
+    xnn_log_error(
+      "failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_constant_pad_nd_x32));
     goto error;
   }
 
@@ -35,7 +37,9 @@ static enum xnn_status create_constant_pad_nd(
 
   constant_pad_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (constant_pad_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Constant Pad operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_constant_pad_nd_x32));
     goto error;
   }
 
@@ -75,27 +79,32 @@ static enum xnn_status setup_constant_pad_nd(
     size_t num_threads)
 {
   if (constant_pad_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup Constant Pad (ND, X32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(constant_pad_op->type));
     return xnn_status_invalid_parameter;
   }
   constant_pad_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Constant Pad operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(constant_pad_op->type));
     return xnn_status_uninitialized;
   }
 
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
-      "failed to setup Constant Pad operator with %zu dimensions in input shape: "
+      "failed to setup %s operator with %zu dimensions in input shape: "
       "the number of input dimensions must not exceed %d",
-      num_dims, XNN_MAX_TENSOR_DIMS);
+      xnn_operator_type_to_string(constant_pad_op->type), num_dims, XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
   }
 
   for (size_t i = 0; i < num_dims; i++) {
     if (input_shape[i] == 0) {
-      xnn_log_error("failed to setup Constant Pad operator: input shape dimension #%zu is zero", i);
+      xnn_log_error(
+        "failed to setup %s operator: input shape dimension #%zu is zero",
+        xnn_operator_type_to_string(constant_pad_op->type), i);
       return xnn_status_invalid_parameter;
     }
   }

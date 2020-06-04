@@ -1,0 +1,98 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/log.h>
+#include <xnnpack/subgraph.h>
+
+
+const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
+  switch (type) {
+    case xnn_operator_type_invalid:
+      return "Invalid";
+    case xnn_operator_type_add_nc_f32:
+      return "Add (NC, F32)";
+    case xnn_operator_type_add_nd_f32:
+      return "Add (ND, F32)";
+    case xnn_operator_type_add_nc_q8:
+      return "Add (NC, Q8)";
+    case xnn_operator_type_argmax_pooling_nhwc_f32:
+      return "ArgMax Pooling (NHWC, F32)";
+    case xnn_operator_type_average_pooling_nhwc_f32:
+      return "Average Pooling (NHWC, F32)";
+    case xnn_operator_type_average_pooling_nhwc_q8:
+      return "Average Pooling (NHWC, Q8)";
+    case xnn_operator_type_channel_pad_nc_x32:
+      return "Channel Pad (NC, X32)";
+    case xnn_operator_type_channel_shuffle_nc_x32:
+      return "Channel Shuffle (NC, X32)";
+    case xnn_operator_type_channel_shuffle_nc_x8:
+      return "Channel Shuffle (NC, X8)";
+    case xnn_operator_type_clamp_nc_f32:
+      return "Clamp (NC, F32)";
+    case xnn_operator_type_clamp_nc_u8:
+      return "Clamp (NC, U8)";
+    case xnn_operator_type_constant_pad_nd_x32:
+      return "Constant Pad (ND, X32)";
+    case xnn_operator_type_convolution_nhwc_f32:
+      return "Convolution (NHWC, F32)";
+    case xnn_operator_type_convolution_nhwc_q8:
+      return "Convolution (NHWC, Q8)";
+    case xnn_operator_type_convolution_nchw_f32:
+      return "Convolution (NCHW, F32)";
+    case xnn_operator_type_deconvolution_nhwc_f32:
+      return "Deconvolution (NHWC, F32)";
+    case xnn_operator_type_deconvolution_nhwc_q8:
+      return "Deconvolution (NHWC, Q8)";
+    case xnn_operator_type_divide_nd_f32:
+      return "Divide (ND, F32)";
+    case xnn_operator_type_fully_connected_nc_f32:
+      return "Fully Connected (NC, F32)";
+    case xnn_operator_type_fully_connected_nc_q8:
+      return "Fully Connected (NC, Q8)";
+    case xnn_operator_type_global_average_pooling_nwc_f32:
+      return "Global Average Pooling (NWC, F32)";
+    case xnn_operator_type_global_average_pooling_nwc_q8:
+      return "Global Average Pooling (NWC, Q8)";
+    case xnn_operator_type_global_average_pooling_ncw_f32:
+      return "Global Average Pooling (NCW, F32)";
+    case xnn_operator_type_hardswish_nc_f32:
+      return "HardSwish (NC, F32)";
+    case xnn_operator_type_leaky_relu_nc_q8:
+      return "Leaky ReLU (NC, Q8)";
+    case xnn_operator_type_max_pooling_nhwc_f32:
+      return "Max Pooling (NHWC, F32)";
+    case xnn_operator_type_max_pooling_nhwc_u8:
+      return "Max Pooling (NHWC, U8)";
+    case xnn_operator_type_maximum_nd_f32:
+      return "Maximum (ND, F32)";
+    case xnn_operator_type_minimum_nd_f32:
+      return "Minimum (ND, F32)";
+    case xnn_operator_type_multiply_nd_f32:
+      return "Multiply (ND, F32)";
+    case xnn_operator_type_prelu_nc_f32:
+      return "PReLU (NC, F32)";
+    case xnn_operator_type_resize_bilinear_nhwc_f32:
+      return "Resize Bilinear (NHWC, F32)";
+    case xnn_operator_type_sigmoid_nc_f32:
+      return "Sigmoid (NC, F32)";
+    case xnn_operator_type_sigmoid_nc_q8:
+      return "Sigmoid (NC, Q8)";
+    case xnn_operator_type_softmax_nc_f32:
+      return "Softmax (NC, F32)";
+    case xnn_operator_type_softmax_nc_q8:
+      return "Softmax (NC, Q8)";
+    case xnn_operator_type_subtract_nd_f32:
+      return "Subtract (ND, F32)";
+    case xnn_operator_type_unpooling_nhwc_x32:
+      return "Unpooling (NHWC, X32)";
+  }
+  XNN_UNREACHABLE;
+  return NULL;
+}

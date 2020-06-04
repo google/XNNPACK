@@ -65,7 +65,8 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Average Pooling operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8));
     goto error;
   }
 
@@ -74,70 +75,67 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
   const uint32_t pooling_size = pooling_height * pooling_width;
   if (pooling_size == 0) {
     xnn_log_error(
-      "failed to create Average Pooling operator with %" PRIu32 "x%" PRIu32 " pooling size: "
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
       "pooling size dimensions must be non-zero",
-      pooling_width, pooling_height);
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8), pooling_width, pooling_height);
     goto error;
   }
 
   if (pooling_size == 1) {
     xnn_log_error(
-      "failed to create Average Pooling operator with 1 pooling element: 1x1 pooling is meaningless");
+      "failed to create %s operator with 1 pooling element: 1x1 pooling is meaningless",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8));
     goto error;
   }
 
   if (stride_height == 0 || stride_width == 0) {
     xnn_log_error(
-      "failed to create Average Pooling operator with %" PRIu32 "x%" PRIu32 " stride: "
-      "stride dimensions must be non-zero",
-      stride_width, stride_height);
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8), stride_width, stride_height);
     goto error;
   }
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create Average Pooling operator with %zu channels: number of channels must be non-zero",
-      channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8), channels);
     goto error;
   }
 
   if (input_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create Average Pooling operator with input pixel stride of %zu: "
+      "failed to create %s operator with input pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      input_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8), input_pixel_stride, channels);
     goto error;
   }
 
   if (output_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create Average Pooling operator with output pixel stride of %zu: "
+      "failed to create %s operator with output pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      output_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8), output_pixel_stride, channels);
     goto error;
   }
 
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
     xnn_log_error(
-      "failed to create Average Pooling operator with %.7g input scale: "
-      "scale must be finite, normalized, and positive",
-      input_scale);
+      "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8), input_scale);
     goto error;
   }
 
   if (output_scale <= 0.0f || !isnormal(output_scale)) {
     xnn_log_error(
-      "failed to create Average Pooling operator with %.7g output scale: "
-      "scale must be finite, normalized, and positive",
-      output_scale);
+      "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8), output_scale);
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Average Pooling operator with [%" PRIu8 ", %" PRIu8 "] output range: "
-      "range min must be below range max",
-      output_min, output_max);
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8), output_min, output_max);
     goto error;
   }
 
@@ -145,8 +143,9 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     if (any_padding) {
       xnn_log_error(
-        "failed to create Average Pooling operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "failed to create %s operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
         "TensorFlow SAME padding can't be combined with explicit padding specification",
+        xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8),
         input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
       goto error;
     }
@@ -157,16 +156,18 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
   const float input_output_scale = input_scale / output_scale;
   if (input_output_scale < 0x1.0p-8f || input_output_scale >= 0x1.0p+8f) {
     xnn_log_error(
-      "failed to create Average Pooling operator with %.7g input scale and %.7g output scale: "
+      "failed to create %s operator with %.7g input scale and %.7g output scale: "
       "input-to-output scale ratio (%.7f) must be in [2**-8, 2**8) range",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8),
       input_scale, output_scale, input_output_scale);
     goto error;
   }
 
   if (pooling_size >= 16777216) {
     xnn_log_error(
-      "failed to create Average Pooling operator with %"PRIu32" (%" PRIu32 "x%" PRIu32 ") pooling elements: "
+      "failed to create %s operator with %"PRIu32" (%" PRIu32 "x%" PRIu32 ") pooling elements: "
       "the number of elements in the pooling area must be below 2**24",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8),
       pooling_size, pooling_width, pooling_height);
     goto error;
   }
@@ -175,14 +176,18 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
 
   average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (average_pooling_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Average Pooling operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8));
     goto error;
   }
 
-  void* zero_buffer = xnn_allocate_simd_memory(channels * sizeof(uint8_t) + XNN_EXTRA_BYTES);
+  const size_t zero_bytes = channels * sizeof(uint8_t) + XNN_EXTRA_BYTES;
+  void* zero_buffer = xnn_allocate_simd_memory(zero_bytes);
   if (zero_buffer == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Average Pooling zero padding",
-      channels * sizeof(uint8_t) + XNN_EXTRA_BYTES);
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator zero padding",
+      zero_bytes, xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8));
     goto error;
   }
   memset(zero_buffer, input_zero_point, channels * sizeof(uint8_t));
@@ -252,7 +257,8 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Average Pooling operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32));
     goto error;
   }
 
@@ -261,65 +267,67 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   const uint32_t pooling_size = pooling_height * pooling_width;
   if (pooling_size == 0) {
     xnn_log_error(
-      "failed to create Average Pooling operator with %" PRIu32 "x%" PRIu32 " pooling size: "
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
       "pooling size dimensions must be non-zero",
-      pooling_width, pooling_height);
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32), pooling_width, pooling_height);
     goto error;
   }
 
   if (pooling_size == 1) {
     xnn_log_error(
-      "failed to create Average Pooling operator with 1 pooling element: 1x1 pooling is meaningless");
+      "failed to create %s operator with 1 pooling element: 1x1 pooling is meaningless",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32));
     goto error;
   }
 
   if (stride_height == 0 || stride_width == 0) {
     xnn_log_error(
-      "failed to create Average Pooling operator with %" PRIu32 "x%" PRIu32 " stride: "
-      "stride dimensions must be non-zero",
-      stride_width, stride_height);
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32), stride_width, stride_height);
     goto error;
   }
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create Average Pooling operator with %zu channels: number of channels must be non-zero",
-      channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32), channels);
     goto error;
   }
 
   if (input_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create Average Pooling operator with input pixel stride of %zu: "
+      "failed to create %s operator with input pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      input_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32), input_pixel_stride, channels);
     goto error;
   }
 
   if (output_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create Average Pooling operator with output pixel stride of %zu: "
+      "failed to create %s operator with output pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      output_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32), output_pixel_stride, channels);
     goto error;
   }
 
   if (isnan(output_min)) {
     xnn_log_error(
-      "failed to create Average Pooling operator with NaN output lower bound: lower bound must be non-NaN");
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32));
     goto error;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
-      "failed to create Average Pooling operator with NaN output upper bound: upper bound must be non-NaN");
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32));
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to create Average Pooling operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      output_min, output_max);
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32), output_min, output_max);
     goto error;
   }
 
@@ -327,8 +335,9 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     if (any_padding) {
       xnn_log_error(
-        "failed to create Average Pooling operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+        "failed to create %s operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
         "TensorFlow SAME padding can't be combined with explicit padding specification",
+        xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32),
         input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
       goto error;
     }
@@ -338,14 +347,18 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
 
   average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (average_pooling_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Average Pooling operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32));
     goto error;
   }
 
-  void* zero_buffer = xnn_allocate_zero_simd_memory(channels * sizeof(float) + XNN_EXTRA_BYTES);
+  const size_t zero_bytes = channels * sizeof(float) + XNN_EXTRA_BYTES;
+  void* zero_buffer = xnn_allocate_zero_simd_memory(zero_bytes);
   if (zero_buffer == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Average Pooling zero padding",
-      channels * sizeof(float) + XNN_EXTRA_BYTES);
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator zero padding",
+      zero_bytes, xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32));
     goto error;
   }
   average_pooling_op->zero_buffer = zero_buffer;
@@ -410,14 +423,15 @@ static enum xnn_status setup_average_pooling2d(
   average_pooling_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Average Pooling operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(average_pooling_op->type));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to setup Average Pooling operator with %zux%zu input: input dimensions must be non-zero",
-      input_width, input_height);
+      "failed to setup %s operator with %zux%zu input: input dimensions must be non-zero",
+      xnn_operator_type_to_string(average_pooling_op->type), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
 
@@ -506,9 +520,11 @@ static enum xnn_status setup_average_pooling2d(
       // Micro-kernel may read up to (mr - 1) elements after the end of indirection buffer.
       const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
 
-      const void** indirection_buffer = (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
+      const void** indirection_buffer =
+        (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
       if (indirection_buffer == NULL) {
-        xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
+        xnn_log_error("failed to allocate %zu bytes for %s operator indirection buffer",
+          indirection_buffer_size, xnn_operator_type_to_string(average_pooling_op->type));
         return xnn_status_out_of_memory;
       }
       average_pooling_op->indirection_buffer = indirection_buffer;
@@ -533,9 +549,11 @@ static enum xnn_status setup_average_pooling2d(
       /* This part is specific to FP32, needs revision if Q8 gets a PAVGPOOL micro-kernel */
       if (input_height != last_input_height || input_width != last_input_width) {
         const size_t pixelwise_buffer_size = output_height * output_width * sizeof(float);
-        float* pixelwise_buffer = (float*) xnn_reallocate_memory(average_pooling_op->pixelwise_buffer, pixelwise_buffer_size);
+        float* pixelwise_buffer =
+          (float*) xnn_reallocate_memory(average_pooling_op->pixelwise_buffer, pixelwise_buffer_size);
         if (pixelwise_buffer == NULL) {
-          xnn_log_error("failed to allocate %zu bytes for pixelwise buffer", pixelwise_buffer_size);
+          xnn_log_error("failed to allocate %zu bytes for %s operator pixelwise buffer",
+            pixelwise_buffer_size, xnn_operator_type_to_string(average_pooling_op->type));
           return xnn_status_out_of_memory;
         }
         average_pooling_op->pixelwise_buffer = pixelwise_buffer;
@@ -632,7 +650,9 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
     pthreadpool_t threadpool)
 {
   if (average_pooling_op->type != xnn_operator_type_average_pooling_nhwc_q8) {
-    xnn_log_error("failed to setup Average Pooling (Q8) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_q8),
+      xnn_operator_type_to_string(average_pooling_op->type));
     return xnn_status_invalid_parameter;
   }
 
@@ -677,7 +697,9 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
     pthreadpool_t threadpool)
 {
   if (average_pooling_op->type != xnn_operator_type_average_pooling_nhwc_f32) {
-    xnn_log_error("failed to setup Average Pooling (F32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32),
+      xnn_operator_type_to_string(average_pooling_op->type));
     return xnn_status_invalid_parameter;
   }
 

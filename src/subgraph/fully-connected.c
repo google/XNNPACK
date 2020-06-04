@@ -24,55 +24,57 @@ enum xnn_status xnn_define_fully_connected(
   uint32_t flags)
 {
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to define Fully Connected operator: XNNPACK is not initialized");
+    xnn_log_error("failed to define %s operator: XNNPACK is not initialized",
+      xnn_node_type_to_string(xnn_node_type_fully_connected));
     return xnn_status_uninitialized;
   }
 
   if (isnan(output_min)) {
     xnn_log_error(
-      "failed to define Fully Connected operator with NaN output lower bound: lower bound must be non-NaN");
+      "failed to define %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_node_type_to_string(xnn_node_type_fully_connected));
     return xnn_status_invalid_parameter;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
-      "failed to define Fully Connected operator with NaN output upper bound: upper bound must be non-NaN");
+      "failed to define %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_node_type_to_string(xnn_node_type_fully_connected));
     return xnn_status_invalid_parameter;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
-      "failed to define Fully Connected operator with [%.7g, %.7g] output range: "
-      "lower bound must be below upper bound",
-      output_min, output_max);
+      "failed to define %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define Fully Connected operator with input ID #%" PRIu32 ": invalid Value ID",
-      input_id);
+      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), input_id);
     return xnn_status_invalid_parameter;
   }
 
   if (filter_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define Fully Connected operator with filter ID #%" PRIu32 ": invalid Value ID",
-      filter_id);
+      "failed to define %s operator with filter ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id);
     return xnn_status_invalid_parameter;
   }
 
   if (bias_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define Fully Connected operator with bias ID #%" PRIu32 ": invalid Value ID",
-      bias_id);
+      "failed to define %s operator with bias ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id);
     return xnn_status_invalid_parameter;
   }
 
   if (output_id >= subgraph->num_values) {
     xnn_log_error(
-      "failed to define Fully Connected operator with output ID #%" PRIu32 ": invalid Value ID",
-      output_id);
+      "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), output_id);
     return xnn_status_invalid_parameter;
   }
 

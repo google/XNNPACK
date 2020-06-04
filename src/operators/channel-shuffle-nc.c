@@ -32,7 +32,8 @@ static enum xnn_status create_channel_shuffle_nc(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Channel Shuffle operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -40,31 +41,32 @@ static enum xnn_status create_channel_shuffle_nc(
 
   if (groups <= 1) {
     xnn_log_error(
-      "failed to create Channel Shuffle operator with %zu groups: at least two groups required", groups);
+      "failed to create %s operator with %zu groups: at least two groups required",
+      xnn_operator_type_to_string(operator_type), groups);
     goto error;
   }
 
   if (group_channels == 0) {
     xnn_log_error(
-      "failed to create Channel Shuffle operator with %zu group channels: number of group channels must be non-zero",
-      group_channels);
+      "failed to create %s operator with %zu group channels: number of group channels must be non-zero",
+      xnn_operator_type_to_string(operator_type), group_channels);
     goto error;
   }
 
   const size_t channels = groups * group_channels;
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to create Channel Shuffle operator with input element stride of %zu: "
+      "failed to create %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of channels (%zux%zu)",
-      input_stride, groups, group_channels);
+      xnn_operator_type_to_string(operator_type), input_stride, groups, group_channels);
     goto error;
   }
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to create Channel Shuffle operator with output element stride of %zu: "
+      "failed to create %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of channels (%zux%zu)",
-      output_stride, groups, group_channels);
+      xnn_operator_type_to_string(operator_type), output_stride, groups, group_channels);
     goto error;
   }
 
@@ -72,7 +74,9 @@ static enum xnn_status create_channel_shuffle_nc(
 
   channel_shuffle_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (channel_shuffle_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Channel Shuffle operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -142,7 +146,8 @@ static enum xnn_status setup_channel_shuffle_nc(
   channel_shuffle_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Channel Shuffle operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(channel_shuffle_op->type));
     return xnn_status_uninitialized;
   }
 
@@ -200,7 +205,9 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x8(
     pthreadpool_t threadpool)
 {
   if (channel_shuffle_op->type != xnn_operator_type_channel_shuffle_nc_x8) {
-    xnn_log_error("failed to setup Channel Shuffle (NC, X8) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_channel_shuffle_nc_x8),
+      xnn_operator_type_to_string(channel_shuffle_op->type));
     return xnn_status_invalid_parameter;
   }
 
@@ -221,7 +228,9 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x32(
     pthreadpool_t threadpool)
 {
   if (channel_shuffle_op->type != xnn_operator_type_channel_shuffle_nc_x32) {
-    xnn_log_error("failed to setup Channel Shuffle (NC, X32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_channel_shuffle_nc_x32),
+      xnn_operator_type_to_string(channel_shuffle_op->type));
     return xnn_status_invalid_parameter;
   }
 

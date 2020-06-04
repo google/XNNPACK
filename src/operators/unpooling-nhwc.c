@@ -46,7 +46,8 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   enum xnn_status status = xnn_status_uninitialized;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to create Unpooling operator: XNNPACK is not initialized");
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
     goto error;
   }
 
@@ -55,38 +56,39 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   const uint32_t pooling_size = pooling_height * pooling_width;
   if (pooling_size == 0) {
     xnn_log_error(
-      "failed to create Unpooling operator with %" PRIu32 "x%" PRIu32 " pooling size: "
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
       "pooling size dimensions must be non-zero",
-      pooling_width, pooling_height);
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), pooling_width, pooling_height);
     goto error;
   }
 
   if (pooling_size == 1) {
     xnn_log_error(
-      "failed to create Unpooling operator with 1 pooling element: 1x1 unpooling is meaningless");
+      "failed to create %s operator with 1 pooling element: 1x1 unpooling is meaningless",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
     goto error;
   }
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to create Unpooling operator with %zu channels: number of channels must be non-zero",
-      channels);
+      "failed to create %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), channels);
     goto error;
   }
 
   if (input_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create Unpooling operator with input pixel stride of %zu: "
+      "failed to create %s operator with input pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      input_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), input_pixel_stride, channels);
     goto error;
   }
 
   if (output_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create Unpooling operator with output pixel stride of %zu: "
+      "failed to create %s operator with output pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      output_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), output_pixel_stride, channels);
     goto error;
   }
 
@@ -94,7 +96,9 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
 
   unpooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (unpooling_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for Unpooling operator descriptor", sizeof(struct xnn_operator));
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
     goto error;
   }
 
@@ -133,20 +137,23 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
     pthreadpool_t threadpool)
 {
   if (unpooling_op->type != xnn_operator_type_unpooling_nhwc_x32) {
-    xnn_log_error("failed to setup Unpooling (X32) operator: operator type mismatch");
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
+      xnn_operator_type_to_string(unpooling_op->type));
     return xnn_status_invalid_parameter;
   }
   unpooling_op->state = xnn_run_state_invalid;
 
   if (!xnn_params.initialized) {
-    xnn_log_error("failed to setup Unpooling operator: XNNPACK is not initialized");
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to setup Unpooling operator with %zux%zu input: input dimensions must be non-zero",
-      input_width, input_height);
+      "failed to setup %s operator with %zux%zu input: input dimensions must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
 
@@ -186,10 +193,11 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
   const size_t pooling_size = pooling_height * pooling_width;
 
   const size_t indirection_buffer_size = sizeof(void*) * (batch_size * input_height * input_width * pooling_size);
-
   void** indirection_buffer = (void**) xnn_reallocate_memory(unpooling_op->indirection_buffer, indirection_buffer_size);
   if (indirection_buffer == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator indirection buffer",
+      indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
     return xnn_status_out_of_memory;
   }
   unpooling_op->indirection_buffer = (const void**) indirection_buffer;
