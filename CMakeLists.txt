@@ -1001,6 +1001,18 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
 SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-clamp/gen/neonfp16arith-x16.c
   src/f16-clamp/gen/neonfp16arith-x8.c
+  src/f16-dwconv/gen/up16x25-minmax-neonfp16arith-acc2.c
+  src/f16-dwconv/gen/up16x25-minmax-neonfp16arith.c
+  src/f16-dwconv/gen/up16x4-minmax-neonfp16arith-acc2.c
+  src/f16-dwconv/gen/up16x4-minmax-neonfp16arith.c
+  src/f16-dwconv/gen/up16x9-minmax-neonfp16arith-acc2.c
+  src/f16-dwconv/gen/up16x9-minmax-neonfp16arith.c
+  src/f16-dwconv/gen/up8x25-minmax-neonfp16arith-acc2.c
+  src/f16-dwconv/gen/up8x25-minmax-neonfp16arith.c
+  src/f16-dwconv/gen/up8x4-minmax-neonfp16arith-acc2.c
+  src/f16-dwconv/gen/up8x4-minmax-neonfp16arith.c
+  src/f16-dwconv/gen/up8x9-minmax-neonfp16arith-acc2.c
+  src/f16-dwconv/gen/up8x9-minmax-neonfp16arith.c
   src/f16-gavgpool/7p7x-minmax-neonfp16arith-c8.c
   src/f16-gavgpool/7x-minmax-neonfp16arith-c8.c
   src/f16-hswish/gen/neonfp16arith-x16.c
@@ -2304,6 +2316,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-dwconv-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-dwconv-test f32-dwconv-test)
 
+  ADD_EXECUTABLE(f16-dwconv-minmax-test test/f16-dwconv-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-dwconv-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-dwconv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-dwconv-minmax-test f16-dwconv-minmax-test)
+
   ADD_EXECUTABLE(f32-dwconv-minmax-test test/f32-dwconv-minmax.cc)
   SET_TARGET_PROPERTIES(f32-dwconv-minmax-test PROPERTIES
     CXX_STANDARD 11
@@ -3222,6 +3243,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv-chw-bench PRIVATE src)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv-chw-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-dwconv-chw-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+
+  ADD_EXECUTABLE(f16-dwconv-bench bench/f16-dwconv.cc)
+  SET_TARGET_PROPERTIES(f16-dwconv-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE src)
+  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(f16-dwconv-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc)
   SET_TARGET_PROPERTIES(f32-dwconv-bench PROPERTIES
