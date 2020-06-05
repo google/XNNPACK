@@ -36,6 +36,7 @@ void xnn_f32_vsubc_minmax_ukernel__neon_x8(
     float32x4_t vy0123 = vsubq_f32(va0123, vb);
     float32x4_t vy4567 = vsubq_f32(va4567, vb);
 
+
     vy0123 = vmaxq_f32(vy0123, vy_min);
     vy4567 = vmaxq_f32(vy4567, vy_min);
 

@@ -35,6 +35,7 @@ void xnn_f32_vminc_ukernel__scalar_x2(
     float vy1 = math_min_f32(va1, vb);
 
 
+
     y[0] = vy0;
     y[1] = vy1;
     y += 2;

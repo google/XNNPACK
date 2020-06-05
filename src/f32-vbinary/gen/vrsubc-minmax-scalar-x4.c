@@ -40,6 +40,7 @@ void xnn_f32_vrsubc_minmax_ukernel__scalar_x4(
     float vy2 = vb - va2;
     float vy3 = vb - va3;
 
+
     vy0 = math_max_f32(vy0, vy_min);
     vy1 = math_max_f32(vy1, vy_min);
     vy2 = math_max_f32(vy2, vy_min);

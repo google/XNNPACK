@@ -44,6 +44,7 @@ void xnn_f32_vmax_ukernel__scalar_x4(
     float vy3 = math_max_f32(va3, vb3);
 
 
+
     y[0] = vy0;
     y[1] = vy1;
     y[2] = vy2;

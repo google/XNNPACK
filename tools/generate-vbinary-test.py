@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_v(add|div|max|min|mul|sub|addc|divc|rdivc|maxc|minc|mulc|subc|rsubc)(_(minmax))?_ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_v(add|div|max|min|mul|sqrdiff|sub|addc|divc|rdivc|maxc|minc|mulc|sqrdiffc|rsqrdiffc|subc|rsubc)(_(minmax))?_ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
@@ -36,6 +36,7 @@ def split_ukernel_name(name):
     "max": "Max",
     "min": "Min",
     "mul": "Mul",
+    "sqrdiff": "SqrDiff",
     "sub": "Sub",
     "addc": "AddC",
     "divc": "DivC",
@@ -43,13 +44,21 @@ def split_ukernel_name(name):
     "maxc": "MaxC",
     "minc": "MinC",
     "mulc": "MulC",
+    "sqrdiffc": "SqrDiffC",
+    "rsqrdiffc": "RSqrDiffC",
     "subc": "SubC",
     "rsubc": "RSubC",
   }[match.group(2)]
   batch_tile = int(match.group(6))
 
+  activation_type = match.group(4)
+  if activation_type is None:
+    activation_type = "LINEAR"
+  else:
+    activation_type = activation_type.upper()
+
   arch, isa = xnncommon.parse_target_name(target_name=match.group(5))
-  return op_type, batch_tile, arch, isa
+  return op_type, activation_type, batch_tile, arch, isa
 
 
 BINOP_TEST_TEMPLATE = """\
@@ -138,36 +147,38 @@ $else:
     }
   }
 
-TEST(${TEST_NAME}, qmin) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-    ${TESTER}()
-      .batch_size(batch_size)
-      .qmin(128)
-      .Test(${", ".join(TEST_ARGS)});
+$if ACTIVATION_TYPE == "MINMAX":
+  TEST(${TEST_NAME}, qmin) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      ${TESTER}()
+        .batch_size(batch_size)
+        .qmin(128)
+        .Test(${", ".join(TEST_ARGS)});
+    }
   }
-}
 
-TEST(${TEST_NAME}, qmax) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-    ${TESTER}()
-      .batch_size(batch_size)
-      .qmax(128)
-      .Test(${", ".join(TEST_ARGS)});
+  TEST(${TEST_NAME}, qmax) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      ${TESTER}()
+        .batch_size(batch_size)
+        .qmax(128)
+        .Test(${", ".join(TEST_ARGS)});
+    }
   }
-}
 """
 
 
-def generate_test_cases(ukernel, op_type, batch_tile, isa):
+def generate_test_cases(ukernel, op_type, activation_type, batch_tile, isa):
   """Generates all tests cases for a Vector Binary Operation micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     op_type: Operation type (ADD/MUL/SUB/etc).
+    activation_type: Activation type (LINEAR/MINMAX/RELU).
     batch_tile: Number of batch elements processed per one iteration of the
                 inner loop of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
@@ -192,6 +203,7 @@ def generate_test_cases(ukernel, op_type, batch_tile, isa):
       "DATATYPE": datatype,
       "BATCH_TILE": batch_tile,
       "OP_TYPE": op_type,
+      "ACTIVATION_TYPE": activation_type,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
     })
 
@@ -232,12 +244,13 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      op_type, batch_tile, arch, isa = split_ukernel_name(name)
+      op_type, activation_type, batch_tile, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, op_type, batch_tile, isa)
+      test_case = generate_test_cases(name, op_type, activation_type,
+                                      batch_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     with codecs.open(options.output, "w", encoding="utf-8") as output_file:

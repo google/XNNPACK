@@ -45,6 +45,7 @@ void xnn_f32_vmul_minmax_ukernel__wasm_x4(
     float vy2 = va2 * vb2;
     float vy3 = va3 * vb3;
 
+
     vy0 = __builtin_wasm_max_f32(vy0, vy_min);
     vy1 = __builtin_wasm_max_f32(vy1, vy_min);
     vy2 = __builtin_wasm_max_f32(vy2, vy_min);

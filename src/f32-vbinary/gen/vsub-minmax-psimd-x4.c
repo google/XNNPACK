@@ -37,6 +37,7 @@ void xnn_f32_vsub_minmax_ukernel__psimd_x4(
 
     psimd_f32 vy0123 = psimd_sub_f32(va0123, vb0123);
 
+
     vy0123 = psimd_max_f32(vy0123, vy_min);
 
     vy0123 = psimd_min_f32(vy0123, vy_max);

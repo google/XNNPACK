@@ -39,6 +39,7 @@ void xnn_f32_vsubc_minmax_ukernel__avx_x16(
     __m256 vy01234567 = _mm256_sub_ps(va01234567, vb);
     __m256 vy89ABCDEF = _mm256_sub_ps(va89ABCDEF, vb);
 
+
     vy01234567 = _mm256_max_ps(vy01234567, vy_min);
     vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
 

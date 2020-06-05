@@ -35,6 +35,7 @@ void xnn_f32_vminc_ukernel__neon_x8(
     float32x4_t vy4567 = vminq_f32(va4567, vb);
 
 
+
     vst1q_f32(y, vy0123); y += 4;
     vst1q_f32(y, vy4567); y += 4;
   }

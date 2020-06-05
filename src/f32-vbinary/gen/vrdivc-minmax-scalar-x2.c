@@ -36,6 +36,7 @@ void xnn_f32_vrdivc_minmax_ukernel__scalar_x2(
     float vy0 = vb / va0;
     float vy1 = vb / va1;
 
+
     vy0 = math_max_f32(vy0, vy_min);
     vy1 = math_max_f32(vy1, vy_min);
 

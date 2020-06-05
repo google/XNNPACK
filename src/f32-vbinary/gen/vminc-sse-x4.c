@@ -35,6 +35,7 @@ void xnn_f32_vminc_ukernel__sse_x4(
     __m128 vy0123 = _mm_min_ps(va0123, vb);
 
 
+
     _mm_storeu_ps(y, vy0123);
     y += 4;
   }

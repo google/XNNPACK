@@ -37,6 +37,7 @@ void xnn_f32_vaddc_minmax_ukernel__psimd_x8(
     psimd_f32 vy0123 = psimd_add_f32(va0123, vb);
     psimd_f32 vy4567 = psimd_add_f32(va4567, vb);
 
+
     vy0123 = psimd_max_f32(vy0123, vy_min);
     vy4567 = psimd_max_f32(vy4567, vy_min);
 

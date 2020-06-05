@@ -6,7 +6,7 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB"]
+$assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -23,6 +23,7 @@ $  "MAX": lambda x, y: "psimd_max_f32(%s, %s)" % (x, y),
 $  "MIN": lambda x, y: "psimd_min_f32(%s, %s)" % (x, y),
 $  "MUL": lambda x, y: "psimd_mul_f32(%s, %s)" % (x, y),
 $  "SUB": lambda x, y: "psimd_sub_f32(%s, %s)" % (x, y),
+$  "SQRDIFF": lambda x, y: "psimd_sub_f32(%s, %s)" % (x, y),
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
@@ -54,6 +55,10 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__psimd_x${BATCH_TILE}(
     $for N in range(0, BATCH_TILE, 4):
       psimd_f32 vy${ABC[N:N+4]} = ${PSIMD_OP_F32("va" + ABC[N:N+4], "vb" + ABC[N:N+4])};
 
+    $if OP == "SQRDIFF":
+      $for N in range(0, BATCH_TILE, 4):
+        vy${ABC[N:N+4]} = psimd_mul_f32(vy${ABC[N:N+4]}, vy${ABC[N:N+4]});
+
     $if ACTIVATION == "MINMAX":
       $for N in range(0, BATCH_TILE, 4):
         vy${ABC[N:N+4]} = psimd_max_f32(vy${ABC[N:N+4]}, vy_min);
@@ -75,6 +80,8 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__psimd_x${BATCH_TILE}(
       b += 4;
 
       psimd_f32 vy0123 = ${PSIMD_OP_F32("va0123", "vb0123")};
+      $if OP == "SQRDIFF":
+        vy0123 = psimd_mul_f32(vy0123, vy0123);
       $if ACTIVATION == "MINMAX":
         vy0123 = psimd_max_f32(vy0123, vy_min);
         vy0123 = psimd_min_f32(vy0123, vy_max);
@@ -86,6 +93,8 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__psimd_x${BATCH_TILE}(
     const psimd_f32 vb0123 = psimd_load_f32(b);
 
     psimd_f32 vy0123 = ${PSIMD_OP_F32("va0123", "vb0123")};
+    $if OP == "SQRDIFF":
+      vy0123 = psimd_mul_f32(vy0123, vy0123);
     $if ACTIVATION == "MINMAX":
       vy0123 = psimd_max_f32(vy0123, vy_min);
       vy0123 = psimd_min_f32(vy0123, vy_max);

@@ -39,6 +39,7 @@ void xnn_f16_vmaxc_ukernel__neonfp16arith_x16(
     float16x8_t vy456789AB = vmaxq_f16(va456789AB, vb);
 
 
+
     vst1q_f16(y, vy01234567); y += 8;
     vst1q_f16(y, vy456789AB); y += 8;
   }

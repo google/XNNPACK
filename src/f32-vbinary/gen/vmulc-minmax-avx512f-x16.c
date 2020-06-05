@@ -36,6 +36,7 @@ void xnn_f32_vmulc_minmax_ukernel__avx512f_x16(
 
     __m512 vy0123456789ABCDEF = _mm512_mul_ps(va0123456789ABCDEF, vb);
 
+
     vy0123456789ABCDEF = _mm512_max_ps(vy0123456789ABCDEF, vy_min);
 
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);

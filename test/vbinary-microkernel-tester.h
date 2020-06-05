@@ -31,6 +31,7 @@ class VBinOpMicrokernelTester {
     Min,
     Mul,
     Sub,
+    SqrDiff,
   };
 
   enum class Variant {
@@ -132,6 +133,12 @@ class VBinOpMicrokernelTester {
           case OpType::Mul:
             y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) * fp16_ieee_to_fp32_value(b_data[i]);
             break;
+          case OpType::SqrDiff:
+          {
+            const float diff = fp16_ieee_to_fp32_value(a_data[i]) - fp16_ieee_to_fp32_value(b_data[i]);
+            y_ref[i] = diff * diff;
+            break;
+          }
           case OpType::Sub:
             y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) - fp16_ieee_to_fp32_value(b_data[i]);
             break;
@@ -188,6 +195,12 @@ class VBinOpMicrokernelTester {
           case OpType::Mul:
             y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) * fp16_ieee_to_fp32_value(b_data[i]);
             break;
+          case OpType::SqrDiff:
+          {
+            const float diff = fp16_ieee_to_fp32_value(a_data[i]) - fp16_ieee_to_fp32_value(b_data[i]);
+            y_ref[i] = diff * diff;
+            break;
+          }
           case OpType::Sub:
             y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) - fp16_ieee_to_fp32_value(b_data[i]);
             break;
@@ -261,6 +274,12 @@ class VBinOpMicrokernelTester {
           case OpType::Mul:
             y_ref[i] = a_data[i] * b_data[i];
             break;
+          case OpType::SqrDiff:
+          {
+            const float diff = a_data[i] - b_data[i];
+            y_ref[i] = diff * diff;
+            break;
+          }
           case OpType::Sub:
             y_ref[i] = a_data[i] - b_data[i];
             break;
@@ -316,6 +335,12 @@ class VBinOpMicrokernelTester {
           case OpType::Mul:
             y_ref[i] = a_data[i] * b_data[i];
             break;
+          case OpType::SqrDiff:
+          {
+            const float diff = a_data[i] - b_data[i];
+            y_ref[i] = diff * diff;
+            break;
+          }
           case OpType::Sub:
             y_ref[i] = a_data[i] - b_data[i];
             break;

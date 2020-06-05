@@ -34,6 +34,7 @@ void xnn_f32_vmaxc_ukernel__psimd_x4(
     psimd_f32 vy0123 = psimd_max_f32(va0123, vb);
 
 
+
     psimd_store_f32(y, vy0123);
     y += 4;
   }

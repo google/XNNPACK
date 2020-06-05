@@ -38,6 +38,7 @@ void xnn_f32_vrdivc_minmax_ukernel__avx512f_x32(
     __m512 vy0123456789ABCDEF = _mm512_div_ps(vb, va0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_div_ps(vb, vaGHIJKLMNOPQRSTUV);
 
+
     vy0123456789ABCDEF = _mm512_max_ps(vy0123456789ABCDEF, vy_min);
     vyGHIJKLMNOPQRSTUV = _mm512_max_ps(vyGHIJKLMNOPQRSTUV, vy_min);
 

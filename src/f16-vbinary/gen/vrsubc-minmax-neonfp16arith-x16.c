@@ -40,6 +40,7 @@ void xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_x16(
     float16x8_t vy01234567 = vsubq_f16(vb, va01234567);
     float16x8_t vy456789AB = vsubq_f16(vb, va456789AB);
 
+
     vy01234567 = vmaxq_f16(vy01234567, vy_min);
     vy456789AB = vmaxq_f16(vy456789AB, vy_min);
 

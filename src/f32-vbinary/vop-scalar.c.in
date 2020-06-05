@@ -5,7 +5,7 @@
 
 $assert BATCH_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB"]
+$assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -23,6 +23,7 @@ $  "MAX": lambda x, y: "%s(%s, %s)" % (MAX_F32, x, y),
 $  "MIN": lambda x, y: "%s(%s, %s)" % (MIN_F32, x, y),
 $  "MUL": lambda x, y: "%s * %s" % (x, y),
 $  "SUB": lambda x, y: "%s - %s" % (x, y),
+$  "SQRDIFF": lambda x, y: "%s - %s" % (x, y),
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
@@ -53,6 +54,10 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_x$
       $for N in range(BATCH_TILE):
         float vy${ABC[N]} = ${OP_FUNC("va" + ABC[N], "vb" + ABC[N])};
 
+      $if OP == "SQRDIFF":
+        $for N in range(BATCH_TILE):
+          vy${ABC[N]} = vy${ABC[N]} * vy${ABC[N]};
+
       $if ACTIVATION == "MINMAX":
         $for N in range(BATCH_TILE):
           vy${ABC[N]} = ${MAX_F32}(vy${ABC[N]}, vy_min);
@@ -70,6 +75,8 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_x$
           const float va = *a++;
           const float vb = *b++;
           float vy = ${OP_FUNC("va", "vb")};
+          $if OP == "SQRDIFF":
+            vy = vy * vy;
           $if ACTIVATION == "MINMAX":
             vy = ${MAX_F32}(vy, vy_min);
             vy = ${MIN_F32}(vy, vy_max);
@@ -80,6 +87,8 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_x$
         const float va = *a;
         const float vb = *b;
         float vy = ${OP_FUNC("va", "vb")};
+        $if OP == "SQRDIFF":
+          vy = vy * vy;
         $if ACTIVATION == "MINMAX":
           vy = ${MAX_F32}(vy, vy_min);
           vy = ${MIN_F32}(vy, vy_max);
@@ -90,6 +99,8 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_x$
       const float va = *a++;
       const float vb = *b++;
       float vy = ${OP_FUNC("va", "vb")};
+      $if OP == "SQRDIFF":
+        vy = vy * vy;
       $if ACTIVATION == "MINMAX":
         vy = ${MAX_F32}(vy, vy_min);
         vy = ${MIN_F32}(vy, vy_max);

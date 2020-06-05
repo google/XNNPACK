@@ -36,6 +36,7 @@ void xnn_f32_vminc_ukernel__psimd_x8(
     psimd_f32 vy4567 = psimd_min_f32(va4567, vb);
 
 
+
     psimd_store_f32(y, vy0123);
     psimd_store_f32(y + 4, vy4567);
     y += 8;

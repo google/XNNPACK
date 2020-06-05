@@ -61,26 +61,6 @@
         .Test(xnn_f32_vminc_ukernel__neon_x4, VBinOpCMicrokernelTester::OpType::MinC);
     }
   }
-
-  TEST(F32_VMINC__NEON_X4, qmin) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__neon_x4, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__NEON_X4, qmax) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
-        .Test(xnn_f32_vminc_ukernel__neon_x4, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
@@ -125,26 +105,6 @@
       VBinOpCMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vminc_ukernel__neon_x8, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__NEON_X8, qmin) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__neon_x8, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__NEON_X8, qmax) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
         .Test(xnn_f32_vminc_ukernel__neon_x8, VBinOpCMicrokernelTester::OpType::MinC);
     }
   }
@@ -195,26 +155,6 @@
         .Test(xnn_f32_vminc_ukernel__sse_x4, VBinOpCMicrokernelTester::OpType::MinC);
     }
   }
-
-  TEST(F32_VMINC__SSE_X4, qmin) {
-    TEST_REQUIRES_X86_SSE;
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__sse_x4, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__SSE_X4, qmax) {
-    TEST_REQUIRES_X86_SSE;
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
-        .Test(xnn_f32_vminc_ukernel__sse_x4, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
@@ -259,26 +199,6 @@
       VBinOpCMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vminc_ukernel__sse_x8, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__SSE_X8, qmin) {
-    TEST_REQUIRES_X86_SSE;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__sse_x8, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__SSE_X8, qmax) {
-    TEST_REQUIRES_X86_SSE;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
         .Test(xnn_f32_vminc_ukernel__sse_x8, VBinOpCMicrokernelTester::OpType::MinC);
     }
   }
@@ -329,26 +249,6 @@
         .Test(xnn_f32_vminc_ukernel__avx_x8, VBinOpCMicrokernelTester::OpType::MinC);
     }
   }
-
-  TEST(F32_VMINC__AVX_X8, qmin) {
-    TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__avx_x8, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__AVX_X8, qmax) {
-    TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
-        .Test(xnn_f32_vminc_ukernel__avx_x8, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
@@ -393,26 +293,6 @@
       VBinOpCMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vminc_ukernel__avx_x16, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__AVX_X16, qmin) {
-    TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__avx_x16, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__AVX_X16, qmax) {
-    TEST_REQUIRES_X86_AVX;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
         .Test(xnn_f32_vminc_ukernel__avx_x16, VBinOpCMicrokernelTester::OpType::MinC);
     }
   }
@@ -463,26 +343,6 @@
         .Test(xnn_f32_vminc_ukernel__avx512f_x16, VBinOpCMicrokernelTester::OpType::MinC);
     }
   }
-
-  TEST(F32_VMINC__AVX512F_X16, qmin) {
-    TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__avx512f_x16, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__AVX512F_X16, qmax) {
-    TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
-        .Test(xnn_f32_vminc_ukernel__avx512f_x16, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
@@ -527,26 +387,6 @@
       VBinOpCMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vminc_ukernel__avx512f_x32, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__AVX512F_X32, qmin) {
-    TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__avx512f_x32, VBinOpCMicrokernelTester::OpType::MinC);
-    }
-  }
-
-  TEST(F32_VMINC__AVX512F_X32, qmax) {
-    TEST_REQUIRES_X86_AVX512F;
-    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
         .Test(xnn_f32_vminc_ukernel__avx512f_x32, VBinOpCMicrokernelTester::OpType::MinC);
     }
   }
@@ -597,26 +437,6 @@
         .Test(xnn_f32_vminc_ukernel__psimd_x4, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
     }
   }
-
-  TEST(F32_VMINC__PSIMD_X4, qmin) {
-    TEST_REQUIRES_PSIMD;
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__psimd_x4, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-    }
-  }
-
-  TEST(F32_VMINC__PSIMD_X4, qmax) {
-    TEST_REQUIRES_PSIMD;
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
-        .Test(xnn_f32_vminc_ukernel__psimd_x4, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-    }
-  }
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
@@ -664,26 +484,6 @@
         .Test(xnn_f32_vminc_ukernel__psimd_x8, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
     }
   }
-
-  TEST(F32_VMINC__PSIMD_X8, qmin) {
-    TEST_REQUIRES_PSIMD;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__psimd_x8, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-    }
-  }
-
-  TEST(F32_VMINC__PSIMD_X8, qmax) {
-    TEST_REQUIRES_PSIMD;
-    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
-        .Test(xnn_f32_vminc_ukernel__psimd_x8, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-    }
-  }
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
@@ -707,24 +507,6 @@
       VBinOpCMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f32_vminc_ukernel__wasm_x1, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-    }
-  }
-
-  TEST(F32_VMINC__WASM_X1, qmin) {
-    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__wasm_x1, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-    }
-  }
-
-  TEST(F32_VMINC__WASM_X1, qmax) {
-    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
         .Test(xnn_f32_vminc_ukernel__wasm_x1, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
     }
   }
@@ -770,24 +552,6 @@
         .Test(xnn_f32_vminc_ukernel__wasm_x2, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
     }
   }
-
-  TEST(F32_VMINC__WASM_X2, qmin) {
-    for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__wasm_x2, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-    }
-  }
-
-  TEST(F32_VMINC__WASM_X2, qmax) {
-    for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
-        .Test(xnn_f32_vminc_ukernel__wasm_x2, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-    }
-  }
 #endif  // XNN_ARCH_WASM
 
 
@@ -830,24 +594,6 @@
         .Test(xnn_f32_vminc_ukernel__wasm_x4, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
     }
   }
-
-  TEST(F32_VMINC__WASM_X4, qmin) {
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmin(128)
-        .Test(xnn_f32_vminc_ukernel__wasm_x4, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-    }
-  }
-
-  TEST(F32_VMINC__WASM_X4, qmax) {
-    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-      VBinOpCMicrokernelTester()
-        .batch_size(batch_size)
-        .qmax(128)
-        .Test(xnn_f32_vminc_ukernel__wasm_x4, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-    }
-  }
 #endif  // XNN_ARCH_WASM
 
 
@@ -874,23 +620,6 @@ TEST(F32_VMINC__SCALAR_X1, inplace) {
   }
 }
 
-TEST(F32_VMINC__SCALAR_X1, qmin) {
-  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
-    VBinOpCMicrokernelTester()
-      .batch_size(batch_size)
-      .qmin(128)
-      .Test(xnn_f32_vminc_ukernel__scalar_x1, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-  }
-}
-
-TEST(F32_VMINC__SCALAR_X1, qmax) {
-  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
-    VBinOpCMicrokernelTester()
-      .batch_size(batch_size)
-      .qmax(128)
-      .Test(xnn_f32_vminc_ukernel__scalar_x1, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-  }
-}
 
 TEST(F32_VMINC__SCALAR_X2, batch_eq_2) {
   VBinOpCMicrokernelTester()
@@ -931,23 +660,6 @@ TEST(F32_VMINC__SCALAR_X2, inplace) {
   }
 }
 
-TEST(F32_VMINC__SCALAR_X2, qmin) {
-  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
-    VBinOpCMicrokernelTester()
-      .batch_size(batch_size)
-      .qmin(128)
-      .Test(xnn_f32_vminc_ukernel__scalar_x2, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-  }
-}
-
-TEST(F32_VMINC__SCALAR_X2, qmax) {
-  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
-    VBinOpCMicrokernelTester()
-      .batch_size(batch_size)
-      .qmax(128)
-      .Test(xnn_f32_vminc_ukernel__scalar_x2, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-  }
-}
 
 TEST(F32_VMINC__SCALAR_X4, batch_eq_4) {
   VBinOpCMicrokernelTester()
@@ -984,24 +696,6 @@ TEST(F32_VMINC__SCALAR_X4, inplace) {
     VBinOpCMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
-      .Test(xnn_f32_vminc_ukernel__scalar_x4, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-  }
-}
-
-TEST(F32_VMINC__SCALAR_X4, qmin) {
-  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-    VBinOpCMicrokernelTester()
-      .batch_size(batch_size)
-      .qmin(128)
-      .Test(xnn_f32_vminc_ukernel__scalar_x4, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
-  }
-}
-
-TEST(F32_VMINC__SCALAR_X4, qmax) {
-  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-    VBinOpCMicrokernelTester()
-      .batch_size(batch_size)
-      .qmax(128)
       .Test(xnn_f32_vminc_ukernel__scalar_x4, VBinOpCMicrokernelTester::OpType::MinC, VBinOpCMicrokernelTester::Variant::Scalar);
   }
 }

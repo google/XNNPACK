@@ -38,6 +38,7 @@ void xnn_f32_vmaxc_ukernel__avx_x16(
     __m256 vy89ABCDEF = _mm256_max_ps(va89ABCDEF, vb);
 
 
+
     _mm256_storeu_ps(y, vy01234567);
     _mm256_storeu_ps(y + 8, vy89ABCDEF);
     y += 16;

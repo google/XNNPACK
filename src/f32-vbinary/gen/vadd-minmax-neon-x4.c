@@ -34,6 +34,7 @@ void xnn_f32_vadd_minmax_ukernel__neon_x4(
 
     float32x4_t vy0123 = vaddq_f32(va0123, vb0123);
 
+
     vy0123 = vmaxq_f32(vy0123, vy_min);
 
     vy0123 = vminq_f32(vy0123, vy_max);

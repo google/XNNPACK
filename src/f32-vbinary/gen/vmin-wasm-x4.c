@@ -44,6 +44,7 @@ void xnn_f32_vmin_ukernel__wasm_x4(
     float vy3 = __builtin_wasm_min_f32(va3, vb3);
 
 
+
     y[0] = vy0;
     y[1] = vy1;
     y[2] = vy2;

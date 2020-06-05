@@ -38,6 +38,7 @@ void xnn_f32_vmax_ukernel__wasm_x2(
     float vy1 = __builtin_wasm_max_f32(va1, vb1);
 
 
+
     y[0] = vy0;
     y[1] = vy1;
     y += 2;

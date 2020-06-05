@@ -6,7 +6,7 @@
 $assert BATCH_TILE % 16 == 0
 $assert BATCH_TILE >= 16
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "RSQRDIFF"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -26,6 +26,8 @@ $  "MIN": lambda x: "_mm512_min_ps(%s, vb)" % x,
 $  "MUL": lambda x: "_mm512_mul_ps(%s, vb)" % x,
 $  "SUB": lambda x: "_mm512_sub_ps(%s, vb)" % x,
 $  "RSUB": lambda x: "_mm512_sub_ps(vb, %s)" % x,
+$  "SQRDIFF": lambda x: "_mm512_sub_ps(%s, vb)" % x,
+$  "RSQRDIFF": lambda x: "_mm512_sub_ps(vb, %s)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
@@ -53,6 +55,10 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx512f_x${BATCH_TILE}(
     $for N in range(0, BATCH_TILE, 16):
       __m512 vy${ABC[N:N+16]} = ${_MM512_OP_PS("va" + ABC[N:N+16])};
 
+    $if OP in ["SQRDIFF", "RSQRDIFF"]:
+      $for N in range(0, BATCH_TILE, 16):
+        vy${ABC[N:N+16]} = _mm512_mul_ps(vy${ABC[N:N+16]}, vy${ABC[N:N+16]});
+
     $if ACTIVATION == "MINMAX":
       $for N in range(0, BATCH_TILE, 16):
         vy${ABC[N:N+16]} = _mm512_max_ps(vy${ABC[N:N+16]}, vy_min);
@@ -71,6 +77,8 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx512f_x${BATCH_TILE}(
       a += 16;
 
       __m512 vy = ${_MM512_OP_PS("va")};
+      $if OP in ["SQRDIFF", "RSQRDIFF"]:
+        vy = _mm512_mul_ps(vy, vy);
       $if ACTIVATION == "MINMAX":
         vy = _mm512_max_ps(vy, vy_min);
         vy = _mm512_min_ps(vy, vy_max);
@@ -87,6 +95,8 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx512f_x${BATCH_TILE}(
     const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
 
     __m512 vy = ${_MM512_OP_PS("va")};
+    $if OP in ["SQRDIFF", "RSQRDIFF"]:
+      vy = _mm512_mul_ps(vy, vy);
     $if ACTIVATION == "MINMAX":
       vy = _mm512_max_ps(vy, vy_min);
       vy = _mm512_min_ps(vy, vy_max);

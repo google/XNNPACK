@@ -41,6 +41,7 @@ void xnn_f16_vadd_minmax_ukernel__neonfp16arith_x16(
     float16x8_t vy01234567 = vaddq_f16(va01234567, vb01234567);
     float16x8_t vy456789AB = vaddq_f16(va456789AB, vb456789AB);
 
+
     vy01234567 = vmaxq_f16(vy01234567, vy_min);
     vy456789AB = vmaxq_f16(vy456789AB, vy_min);
 

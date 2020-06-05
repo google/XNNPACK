@@ -38,6 +38,7 @@ void xnn_f32_vaddc_minmax_ukernel__sse_x8(
     __m128 vy0123 = _mm_add_ps(va0123, vb);
     __m128 vy4567 = _mm_add_ps(va4567, vb);
 
+
     vy0123 = _mm_max_ps(vy0123, vy_min);
     vy4567 = _mm_max_ps(vy4567, vy_min);
 

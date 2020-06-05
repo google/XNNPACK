@@ -36,6 +36,7 @@ void xnn_f32_vmin_ukernel__psimd_x4(
     psimd_f32 vy0123 = psimd_min_f32(va0123, vb0123);
 
 
+
     psimd_store_f32(y, vy0123);
     y += 4;
   }

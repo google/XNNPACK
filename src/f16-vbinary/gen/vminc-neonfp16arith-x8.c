@@ -37,6 +37,7 @@ void xnn_f16_vminc_ukernel__neonfp16arith_x8(
     float16x8_t vy01234567 = vminq_f16(va01234567, vb);
 
 
+
     vst1q_f16(y, vy01234567); y += 8;
   }
   for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {

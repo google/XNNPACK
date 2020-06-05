@@ -37,6 +37,7 @@ void xnn_f32_vaddc_minmax_ukernel__avx_x8(
 
     __m256 vy01234567 = _mm256_add_ps(va01234567, vb);
 
+
     vy01234567 = _mm256_max_ps(vy01234567, vy_min);
 
     vy01234567 = _mm256_min_ps(vy01234567, vy_max);

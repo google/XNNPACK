@@ -40,6 +40,7 @@ void xnn_f32_vmax_ukernel__sse_x8(
     __m128 vy4567 = _mm_max_ps(va4567, vb4567);
 
 
+
     _mm_storeu_ps(y, vy0123);
     _mm_storeu_ps(y + 4, vy4567);
     y += 8;

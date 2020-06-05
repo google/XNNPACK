@@ -36,6 +36,7 @@ void xnn_f32_vaddc_minmax_ukernel__wasm_x2(
     float vy0 = va0 + vb;
     float vy1 = va1 + vb;
 
+
     vy0 = __builtin_wasm_max_f32(vy0, vy_min);
     vy1 = __builtin_wasm_max_f32(vy1, vy_min);
 

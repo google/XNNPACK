@@ -35,6 +35,7 @@ void xnn_f32_vrdivc_minmax_ukernel__psimd_x4(
 
     psimd_f32 vy0123 = psimd_div_f32(vb, va0123);
 
+
     vy0123 = psimd_max_f32(vy0123, vy_min);
 
     vy0123 = psimd_min_f32(vy0123, vy_max);

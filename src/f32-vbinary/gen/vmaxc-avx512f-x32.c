@@ -37,6 +37,7 @@ void xnn_f32_vmaxc_ukernel__avx512f_x32(
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_max_ps(vaGHIJKLMNOPQRSTUV, vb);
 
 
+
     _mm512_storeu_ps(y, vy0123456789ABCDEF);
     _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
     y += 32;
