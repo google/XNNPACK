@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -107,6 +107,35 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f), rng);
   std::generate(v0, v0 + 150528, std::ref(f32rng));
+  std::generate(v1, v1 + 401408, std::ref(f32rng));
+  std::generate(v2, v2 + 401408, std::ref(f32rng));
+  std::generate(v3, v3 + 802816, std::ref(f32rng));
+  std::generate(v4, v4 + 200704, std::ref(f32rng));
+  std::generate(v5, v5 + 401408, std::ref(f32rng));
+  std::generate(v6, v6 + 401408, std::ref(f32rng));
+  std::generate(v7, v7 + 401408, std::ref(f32rng));
+  std::generate(v8, v8 + 100352, std::ref(f32rng));
+  std::generate(v9, v9 + 200704, std::ref(f32rng));
+  std::generate(v10, v10 + 200704, std::ref(f32rng));
+  std::generate(v11, v11 + 200704, std::ref(f32rng));
+  std::generate(v12, v12 + 50176, std::ref(f32rng));
+  std::generate(v13, v13 + 100352, std::ref(f32rng));
+  std::generate(v14, v14 + 100352, std::ref(f32rng));
+  std::generate(v15, v15 + 100352, std::ref(f32rng));
+  std::generate(v16, v16 + 100352, std::ref(f32rng));
+  std::generate(v17, v17 + 100352, std::ref(f32rng));
+  std::generate(v18, v18 + 100352, std::ref(f32rng));
+  std::generate(v19, v19 + 100352, std::ref(f32rng));
+  std::generate(v20, v20 + 100352, std::ref(f32rng));
+  std::generate(v21, v21 + 100352, std::ref(f32rng));
+  std::generate(v22, v22 + 100352, std::ref(f32rng));
+  std::generate(v23, v23 + 100352, std::ref(f32rng));
+  std::generate(v24, v24 + 25088, std::ref(f32rng));
+  std::generate(v25, v25 + 50176, std::ref(f32rng));
+  std::generate(v26, v26 + 50176, std::ref(f32rng));
+  std::generate(v27, v27 + 50176, std::ref(f32rng));
+  std::generate(v28, v28 + 1024, std::ref(f32rng));
+  std::generate(v29, v29 + 1001, std::ref(f32rng));
   std::generate(w30, w30 + 864, std::ref(f32rng));
   std::generate(w31, w31 + 32, std::ref(f32rng));
   std::generate(w32, w32 + 288, std::ref(f32rng));
@@ -800,7 +829,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op0,
     1 /* batch size */, 224 /* input height */, 224 /* input width */,
-    &v0[0] /* input */, &v1[0] /* output */,
+    v0 /* input */, v1 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #0" << std::endl;
@@ -810,7 +839,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op1,
     1 /* batch size */, 112 /* input height */, 112 /* input width */,
-    &v1[0] /* input */, &v2[0] /* output */,
+    v1 /* input */, v2 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #1" << std::endl;
@@ -820,7 +849,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op2,
     1 /* batch size */, 112 /* input height */, 112 /* input width */,
-    &v2[0] /* input */, &v3[0] /* output */,
+    v2 /* input */, v3 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #2" << std::endl;
@@ -830,7 +859,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op3,
     1 /* batch size */, 112 /* input height */, 112 /* input width */,
-    &v3[0] /* input */, &v4[0] /* output */,
+    v3 /* input */, v4 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #3" << std::endl;
@@ -840,7 +869,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op4,
     1 /* batch size */, 56 /* input height */, 56 /* input width */,
-    &v4[0] /* input */, &v5[0] /* output */,
+    v4 /* input */, v5 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #4" << std::endl;
@@ -850,7 +879,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op5,
     1 /* batch size */, 56 /* input height */, 56 /* input width */,
-    &v5[0] /* input */, &v6[0] /* output */,
+    v5 /* input */, v6 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #5" << std::endl;
@@ -860,7 +889,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op6,
     1 /* batch size */, 56 /* input height */, 56 /* input width */,
-    &v6[0] /* input */, &v7[0] /* output */,
+    v6 /* input */, v7 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #6" << std::endl;
@@ -870,7 +899,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op7,
     1 /* batch size */, 56 /* input height */, 56 /* input width */,
-    &v7[0] /* input */, &v8[0] /* output */,
+    v7 /* input */, v8 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #7" << std::endl;
@@ -880,7 +909,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op8,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    &v8[0] /* input */, &v9[0] /* output */,
+    v8 /* input */, v9 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #8" << std::endl;
@@ -890,7 +919,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op9,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    &v9[0] /* input */, &v10[0] /* output */,
+    v9 /* input */, v10 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #9" << std::endl;
@@ -900,7 +929,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op10,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    &v10[0] /* input */, &v11[0] /* output */,
+    v10 /* input */, v11 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #10" << std::endl;
@@ -910,7 +939,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op11,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    &v11[0] /* input */, &v12[0] /* output */,
+    v11 /* input */, v12 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #11" << std::endl;
@@ -920,7 +949,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op12,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v12[0] /* input */, &v13[0] /* output */,
+    v12 /* input */, v13 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #12" << std::endl;
@@ -930,7 +959,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op13,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v13[0] /* input */, &v14[0] /* output */,
+    v13 /* input */, v14 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #13" << std::endl;
@@ -940,7 +969,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op14,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v14[0] /* input */, &v15[0] /* output */,
+    v14 /* input */, v15 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #14" << std::endl;
@@ -950,7 +979,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op15,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v15[0] /* input */, &v16[0] /* output */,
+    v15 /* input */, v16 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #15" << std::endl;
@@ -960,7 +989,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op16,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v16[0] /* input */, &v17[0] /* output */,
+    v16 /* input */, v17 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #16" << std::endl;
@@ -970,7 +999,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op17,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v17[0] /* input */, &v18[0] /* output */,
+    v17 /* input */, v18 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #17" << std::endl;
@@ -980,7 +1009,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op18,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v18[0] /* input */, &v19[0] /* output */,
+    v18 /* input */, v19 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #18" << std::endl;
@@ -990,7 +1019,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op19,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v19[0] /* input */, &v20[0] /* output */,
+    v19 /* input */, v20 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #19" << std::endl;
@@ -1000,7 +1029,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op20,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v20[0] /* input */, &v21[0] /* output */,
+    v20 /* input */, v21 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #20" << std::endl;
@@ -1010,7 +1039,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op21,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v21[0] /* input */, &v22[0] /* output */,
+    v21 /* input */, v22 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #21" << std::endl;
@@ -1020,7 +1049,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op22,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v22[0] /* input */, &v23[0] /* output */,
+    v22 /* input */, v23 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #22" << std::endl;
@@ -1030,7 +1059,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op23,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    &v23[0] /* input */, &v24[0] /* output */,
+    v23 /* input */, v24 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #23" << std::endl;
@@ -1040,7 +1069,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op24,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    &v24[0] /* input */, &v25[0] /* output */,
+    v24 /* input */, v25 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #24" << std::endl;
@@ -1050,7 +1079,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op25,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    &v25[0] /* input */, &v26[0] /* output */,
+    v25 /* input */, v26 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #25" << std::endl;
@@ -1060,7 +1089,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op26,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    &v26[0] /* input */, &v27[0] /* output */,
+    v26 /* input */, v27 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #26" << std::endl;
@@ -1070,7 +1099,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op27,
     1 /* batch size */, 49 /* width */,
-    &v27[0] /* input */, &v28[0] /* output */,
+    v27 /* input */, v28 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #27" << std::endl;
@@ -1080,7 +1109,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op28,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    &v28[0] /* input */, &v29[0] /* output */,
+    v28 /* input */, v29 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #28" << std::endl;
