@@ -632,46 +632,6 @@ struct resize_bilinear_context {
       size_t pixel_range);
 #endif
 
-struct add_strided_context {
-  size_t n;
-  const void* a;
-  size_t a_stride;
-  const void* b;
-  size_t b_stride;
-  const void* y;
-  size_t y_stride;
-  union {
-    union xnn_q8_add_params q8;
-    union xnn_f32_minmax_params f32;
-  } params;
-  xnn_vadd_ukernel_function ukernel;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_add_strided(
-      const struct add_strided_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t batch_range);
-#endif
-
-struct add_contiguous_context {
-  const void* a;
-  const void* b;
-  void* y;
-  union {
-    union xnn_q8_add_params q8;
-    union xnn_f32_minmax_params f32;
-  } params;
-  xnn_vadd_ukernel_function ukernel;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_add_contiguous(
-      const struct add_contiguous_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t offset,
-      size_t size);
-#endif
-
 struct elementwise_binary_context {
   const void* a;
   size_t a_stride[XNN_MAX_TENSOR_DIMS - 1];

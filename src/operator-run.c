@@ -656,35 +656,6 @@ void xnn_compute_channel_pad(
   context->ukernel(batch_range, context->n, context->l, context->r, &context->c, x, x_stride, y, y_stride);
 }
 
-void xnn_compute_add_strided(
-    const struct add_strided_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index,
-    size_t batch_range /* always 1 */)
-{
-  assert(batch_range == 1);
-
-  const size_t n = context->n;
-  const size_t a_stride = context->a_stride;
-  const size_t b_stride = context->b_stride;
-  const size_t y_stride = context->y_stride;
-  const void* a = (const void*) ((uintptr_t) context->a + a_stride * batch_index);
-  const void* b = (const void*) ((uintptr_t) context->b + b_stride * batch_index);
-  void* y = (void*) ((uintptr_t) context->y + y_stride * batch_index);
-
-  context->ukernel(n, a, b, y, &context->params);
-}
-
-void xnn_compute_add_contiguous(
-    const struct add_contiguous_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t offset,
-    size_t size)
-{
-  const void* a = (const void*) ((uintptr_t) context->a + offset);
-  const void* b = (const void*) ((uintptr_t) context->b + offset);
-  void* y = (void*) ((uintptr_t) context->y + offset);
-  context->ukernel(size, a, b, y, &context->params);
-}
-
 void xnn_compute_elementwise_binary_5d(
     const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t i, size_t j, size_t k, size_t l, size_t m,

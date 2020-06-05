@@ -50,7 +50,6 @@ OPERATOR_TEST_DEPS = [
 ]
 
 OPERATOR_SRCS = [
-    "src/operators/add-nc.c",
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
     "src/operators/binary-elementwise-nd.c",
@@ -3052,12 +3051,6 @@ xnnpack_benchmark(
 ########################### Benchmarks for operators ###########################
 
 xnnpack_benchmark(
-    name = "add_bench",
-    srcs = ["bench/add.cc"],
-    deps = OPERATOR_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
     name = "average_pooling_bench",
     srcs = ["bench/average-pooling.cc"],
     copts = xnnpack_optional_tflite_copts(),
@@ -4134,15 +4127,6 @@ xnnpack_binary(
 )
 
 ########################### Unit tests for operators ##########################
-
-xnnpack_unit_test(
-    name = "add_nc_test",
-    srcs = [
-        "test/add-nc.cc",
-        "test/add-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
 
 xnnpack_unit_test(
     name = "add_nd_test",

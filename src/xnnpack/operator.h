@@ -266,8 +266,6 @@ struct xnn_operator {
   struct compute_parameters compute;
   struct compute_parameters compute2;
   union {
-    struct add_contiguous_context add_contiguous;
-    struct add_strided_context add_strided;
     struct argmax_pooling_context argmax_pooling;
     struct average_pooling_context average_pooling;
     struct channel_pad_context channel_pad;

@@ -158,7 +158,6 @@ ENDIF()
 
 # ---[ XNNPACK library
 SET(XNNPACK_OPERATOR_SRCS
-  src/operators/add-nc.c
   src/operators/argmax-pooling-nhwc.c
   src/operators/average-pooling-nhwc.c
   src/operators/binary-elementwise-nd.c
@@ -1971,15 +1970,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
 
   # ---[ Build operator-level unit tests
-  ADD_EXECUTABLE(add-nc-test test/add-nc.cc)
-  SET_TARGET_PROPERTIES(add-nc-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(add-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(add-nc-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(add-nc-test add-nc-test)
-
   ADD_EXECUTABLE(add-nd-test test/add-nd.cc)
   SET_TARGET_PROPERTIES(add-nd-test PROPERTIES
     CXX_STANDARD 11
@@ -3124,14 +3114,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK benchmark bench-models bench-utils)
 
   # ---[ Build operator-level microbenchmarks
-  ADD_EXECUTABLE(add-bench bench/add.cc)
-  SET_TARGET_PROPERTIES(add-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(add-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(add-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
-
   ADD_EXECUTABLE(average-pooling-bench bench/average-pooling.cc)
   SET_TARGET_PROPERTIES(average-pooling-bench PROPERTIES
     CXX_STANDARD 11
