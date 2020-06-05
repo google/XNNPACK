@@ -48,6 +48,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Convolution (NHWC, Q8)";
     case xnn_operator_type_convolution_nchw_f32:
       return "Convolution (NCHW, F32)";
+    case xnn_operator_type_copy_nc_x32:
+      return "Copy (NC, X32)";
     case xnn_operator_type_deconvolution_nhwc_f32:
       return "Deconvolution (NHWC, F32)";
     case xnn_operator_type_deconvolution_nhwc_q8:

@@ -206,6 +206,20 @@ enum xnn_status xnn_create_clamp_nc_f32(
     clamp_op_out);
 }
 
+enum xnn_status xnn_create_copy_nc_x32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* copy_op_out)
+{
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    NULL, 0,
+    xnn_operator_type_copy_nc_x32,
+    copy_op_out);
+}
+
 enum xnn_status xnn_create_hardswish_nc_f32(
     size_t channels,
     size_t input_stride,
@@ -279,6 +293,33 @@ enum xnn_status xnn_setup_clamp_nc_f32(
     xnn_params.f32.clamp,
     2 /* log2(sizeof(float)) */,
     &clamp_op->params.f32_minmax, sizeof(clamp_op->params.f32_minmax));
+}
+
+static void memcpy_ukernel(size_t size, const void* input, void* output, const void* params) {
+  memcpy(output, input, size);
+}
+
+enum xnn_status xnn_setup_copy_nc_x32(
+    xnn_operator_t copy_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  if (copy_op->type != xnn_operator_type_copy_nc_x32) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_copy_nc_x32),
+      xnn_operator_type_to_string(copy_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  copy_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    copy_op,
+    batch_size, input, output,
+    memcpy_ukernel,
+    2 /* log2(sizeof(uint32_t)) */,
+    NULL, 0);
 }
 
 enum xnn_status xnn_setup_hardswish_nc_f32(

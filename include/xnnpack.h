@@ -1261,6 +1261,20 @@ enum xnn_status xnn_setup_constant_pad_nd_x32(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_copy_nc_x32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* copy_op_out);
+
+enum xnn_status xnn_setup_copy_nc_x32(
+  xnn_operator_t copy_op,
+  size_t batch_size,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   uint32_t input_padding_top,
   uint32_t input_padding_right,

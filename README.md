@@ -31,6 +31,7 @@ XNNPACK implements the following neural network operators:
 - Channel Shuffle
 - Fully Connected
 - Clamp (includes ReLU and ReLU6)
+- Copy
 - HardSwish
 - Sigmoid
 - Softmax

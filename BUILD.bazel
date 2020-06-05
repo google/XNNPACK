@@ -4226,6 +4226,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "copy_nc_test",
+    srcs = [
+        "test/copy-nc.cc",
+        "test/copy-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "deconvolution_nhwc_test",
     srcs = [
         "test/deconvolution-nhwc.cc",

@@ -2061,6 +2061,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(convolution-nchw-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(convolution-nchw-test convolution-nchw-test)
 
+  ADD_EXECUTABLE(copy-nc-test test/copy-nc.cc)
+  SET_TARGET_PROPERTIES(copy-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(copy-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(copy-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(copy-nc-test copy-nc-test)
+
   ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc)
   SET_TARGET_PROPERTIES(deconvolution-nhwc-test PROPERTIES
     CXX_STANDARD 11
