@@ -13,6 +13,7 @@
 #include <cpuinfo.h>
 
 #include <benchmark/benchmark.h>
+#include <fp16/fp16.h>
 #include "bench/conv.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
