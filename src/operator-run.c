@@ -643,19 +643,6 @@ void xnn_compute_pad_5d(
   }
 }
 
-void xnn_compute_channel_pad(
-    const struct channel_pad_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_start,
-    size_t batch_range)
-{
-  const size_t x_stride = context->x_stride;
-  const size_t y_stride = context->y_stride;
-  const void* x = (const void*) ((uintptr_t) context->x + x_stride * batch_start);
-  void* y = (void*) ((uintptr_t) context->y + y_stride * batch_start);
-
-  context->ukernel(batch_range, context->n, context->l, context->r, &context->c, x, x_stride, y, y_stride);
-}
-
 void xnn_compute_elementwise_binary_5d(
     const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t i, size_t j, size_t k, size_t l, size_t m,

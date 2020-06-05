@@ -806,25 +806,6 @@ struct pad_context {
       size_t i, size_t j, size_t k, size_t l, size_t m, size_t l_range, size_t m_range);
 #endif
 
-struct channel_pad_context {
-  size_t n;
-  size_t l;
-  size_t r;
-  uint32_t c;
-  const void* x;
-  size_t x_stride;
-  void* y;
-  size_t y_stride;
-  xnn_pad_ukernel_function ukernel;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_channel_pad(
-      const struct channel_pad_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_start,
-      size_t batch_range);
-#endif
-
 struct u8_softmax_context {
   size_t n;
   const uint8_t* x;

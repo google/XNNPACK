@@ -161,7 +161,6 @@ SET(XNNPACK_OPERATOR_SRCS
   src/operators/argmax-pooling-nhwc.c
   src/operators/average-pooling-nhwc.c
   src/operators/binary-elementwise-nd.c
-  src/operators/channel-pad-nc.c
   src/operators/channel-shuffle-nc.c
   src/operators/constant-pad-nd.c
   src/operators/convolution-nchw.c
@@ -2047,15 +2046,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(average-pooling-nhwc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(average-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(average-pooling-nhwc-test average-pooling-nhwc-test)
-
-  ADD_EXECUTABLE(channel-pad-nc-test test/channel-pad-nc.cc)
-  SET_TARGET_PROPERTIES(channel-pad-nc-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(channel-pad-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(channel-pad-nc-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(channel-pad-nc-test channel-pad-nc-test)
 
   ADD_EXECUTABLE(channel-shuffle-nc-test test/channel-shuffle-nc.cc)
   SET_TARGET_PROPERTIES(channel-shuffle-nc-test PROPERTIES

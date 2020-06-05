@@ -50,7 +50,6 @@ enum xnn_operator_type {
   xnn_operator_type_argmax_pooling_nhwc_f32,
   xnn_operator_type_average_pooling_nhwc_f32,
   xnn_operator_type_average_pooling_nhwc_q8,
-  xnn_operator_type_channel_pad_nc_x32,
   xnn_operator_type_channel_shuffle_nc_x32,
   xnn_operator_type_channel_shuffle_nc_x8,
   xnn_operator_type_clamp_nc_f32,
@@ -268,7 +267,6 @@ struct xnn_operator {
   union {
     struct argmax_pooling_context argmax_pooling;
     struct average_pooling_context average_pooling;
-    struct channel_pad_context channel_pad;
     struct channel_shuffle_context channel_shuffle;
     struct conv2d_context conv2d;
     struct dwconv2d_context dwconv2d;

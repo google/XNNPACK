@@ -30,8 +30,6 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Average Pooling (NHWC, F32)";
     case xnn_operator_type_average_pooling_nhwc_q8:
       return "Average Pooling (NHWC, Q8)";
-    case xnn_operator_type_channel_pad_nc_x32:
-      return "Channel Pad (NC, X32)";
     case xnn_operator_type_channel_shuffle_nc_x32:
       return "Channel Shuffle (NC, X32)";
     case xnn_operator_type_channel_shuffle_nc_x8:

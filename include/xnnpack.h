@@ -1214,23 +1214,6 @@ enum xnn_status xnn_setup_global_average_pooling_ncw_f32(
 
 #ifndef XNN_NO_X32_OPERATORS
 
-enum xnn_status xnn_create_channel_pad_nc_x32(
-  size_t input_channels,
-  size_t pad_before_channels,
-  size_t pad_after_channels,
-  size_t input_stride,
-  size_t output_stride,
-  const void* pad_value,
-  uint32_t flags,
-  xnn_operator_t* channel_pad_op_out);
-
-enum xnn_status xnn_setup_channel_pad_nc_x32(
-  xnn_operator_t channel_pad_op,
-  size_t batch_size,
-  const void* input,
-  void* output,
-  pthreadpool_t threadpool);
-
 enum xnn_status xnn_create_channel_shuffle_nc_x32(
   size_t groups,
   size_t group_channels,

@@ -53,7 +53,6 @@ OPERATOR_SRCS = [
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
     "src/operators/binary-elementwise-nd.c",
-    "src/operators/channel-pad-nc.c",
     "src/operators/channel-shuffle-nc.c",
     "src/operators/constant-pad-nd.c",
     "src/operators/convolution-nchw.c",
@@ -4250,15 +4249,6 @@ xnnpack_unit_test(
     srcs = [
         "test/average-pooling-nhwc.cc",
         "test/average-pooling-operator-tester.h",
-    ] + OPERATOR_TEST_PARAMS_HDRS,
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "channel_pad_nc_test",
-    srcs = [
-        "test/channel-pad-nc.cc",
-        "test/channel-pad-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )

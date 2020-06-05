@@ -242,34 +242,23 @@ int main(int argc, char** argv) {
         NULL, NULL, NULL, NULL);
       break;
     case 39:
-      xnn_create_channel_pad_nc_x32(
-        0, 0, 0, 0, 0,
-        NULL,
-        0, &op);
-      break;
-    case 40:
-      xnn_setup_channel_pad_nc_x32(
-        op, 0,
-        NULL, NULL, NULL);
-      break;
-    case 41:
       xnn_create_channel_shuffle_nc_x32(
         0, 0, 0, 0,
         0, &op);
       break;
-    case 42:
+    case 40:
       xnn_setup_channel_shuffle_nc_x32(
         op, 0,
         NULL, NULL, NULL);
       break;
-    case 43:
+    case 41:
       xnn_create_unpooling2d_nhwc_x32(
         0, 0, 0, 0,
         0, 0,
         0, 0, 0,
         0, &op);
       break;
-    case 44:
+    case 42:
       xnn_setup_unpooling2d_nhwc_x32(
         op, 0, 0, 0,
         NULL, NULL, NULL, NULL);
