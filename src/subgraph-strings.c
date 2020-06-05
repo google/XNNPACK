@@ -34,10 +34,16 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Deconvolution 2D";
     case xnn_node_type_depthwise_convolution_2d:
       return "Depthwise Convolution 2D";
+    case xnn_node_type_divide:
+      return "Divide";
     case xnn_node_type_fully_connected:
       return "Fully Connected";
     case xnn_node_type_hardswish:
       return "HardSwish";
+    case xnn_node_type_maximum2:
+      return "Maximum2";
+    case xnn_node_type_minimum2:
+      return "Minimum2";
     case xnn_node_type_multiply2:
       return "Multiply2";
     case xnn_node_type_max_pooling_2d:
@@ -48,6 +54,10 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Sigmoid";
     case xnn_node_type_softmax:
       return "Softmax";
+    case xnn_node_type_squared_difference:
+      return "Squared Difference";
+    case xnn_node_type_subtract:
+      return "Subtract";
     case xnn_node_type_unpooling_2d:
       return "Unpooling 2D";
   }
