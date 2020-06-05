@@ -2236,6 +2236,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(softmax-nc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(softmax-nc-test softmax-nc-test)
 
+  ADD_EXECUTABLE(squared-difference-nd-test test/squared-difference-nd.cc)
+  SET_TARGET_PROPERTIES(squared-difference-nd-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(squared-difference-nd-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(squared-difference-nd-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(squared-difference-nd-test squared-difference-nd-test)
+
   ADD_EXECUTABLE(subtract-nd-test test/subtract-nd.cc)
   SET_TARGET_PROPERTIES(subtract-nd-test PROPERTIES
     CXX_STANDARD 11

@@ -80,6 +80,7 @@ enum xnn_operator_type {
   xnn_operator_type_sigmoid_nc_q8,
   xnn_operator_type_softmax_nc_f32,
   xnn_operator_type_softmax_nc_q8,
+  xnn_operator_type_squared_difference_nd_f32,
   xnn_operator_type_subtract_nd_f32,
   xnn_operator_type_unpooling_nhwc_x32,
 };

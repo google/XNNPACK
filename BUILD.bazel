@@ -4443,6 +4443,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "squared_difference_nd_test",
+    srcs = [
+        "test/binary-elementwise-operator-tester.h",
+        "test/squared-difference-nd.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "subtract_nd_test",
     srcs = [
         "test/binary-elementwise-operator-tester.h",

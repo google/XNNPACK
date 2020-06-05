@@ -27,6 +27,7 @@ XNNPACK implements the following neural network operators:
 - Maximum (including broadcasting)
 - Minimum (including broadcasting)
 - Multiply (including broadcasting)
+- Squared Difference (including broadcasting)
 - Global Average Pooling
 - Channel Shuffle
 - Fully Connected

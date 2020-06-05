@@ -1664,6 +1664,7 @@ struct xnn_parameters {
     struct vbinary_parameters vmin;
     struct vbinary_parameters vmul;
     struct vbinary_parameters vsub;
+    struct vbinary_parameters vsqrdiff;
     struct vmulcaddc_parameters vmulcaddc;
     xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax;
     xnn_f32_rmax_ukernel_function rmax;
