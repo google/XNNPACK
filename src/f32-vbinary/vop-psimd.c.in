@@ -71,7 +71,7 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__psimd_x${BATCH_TILE}(
       psimd_store_f32(y + ${N}, vy${ABC[N:N+4]});
     y += ${BATCH_TILE};
   }
-  $if BATCH_TILE >= 4:
+  $if BATCH_TILE > 4:
     for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
       const psimd_f32 va0123 = psimd_load_f32(a);
       a += 4;

@@ -71,7 +71,7 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__sse_x${BATCH_TILE}(
       _mm_storeu_ps(y + ${N}, vy${ABC[N:N+4]});
     y += ${BATCH_TILE};
   }
-  $if BATCH_TILE >= 4:
+  $if BATCH_TILE > 4:
     for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
       const __m128 va0123 = _mm_loadu_ps(a);
       a += 4;

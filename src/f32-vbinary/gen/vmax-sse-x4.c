@@ -41,17 +41,6 @@ void xnn_f32_vmax_ukernel__sse_x4(
     _mm_storeu_ps(y, vy0123);
     y += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const __m128 va0123 = _mm_loadu_ps(a);
-    a += 4;
-
-    const __m128 vb0123 = _mm_loadu_ps(b);
-    b += 4;
-
-    __m128 vy0123 = _mm_max_ps(va0123, vb0123);
-    _mm_storeu_ps(y, vy0123);
-    y += 4;
-  }
   if XNN_UNLIKELY(n != 0) {
     const __m128 va0123 = _mm_loadu_ps(a);
     const __m128 vb0123 = _mm_loadu_ps(b);

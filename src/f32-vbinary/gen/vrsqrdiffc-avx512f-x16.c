@@ -40,15 +40,6 @@ void xnn_f32_vrsqrdiffc_ukernel__avx512f_x16(
     _mm512_storeu_ps(y, vy0123456789ABCDEF);
     y += 16;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
-
-    __m512 vy = _mm512_sub_ps(vb, va);
-    vy = _mm512_mul_ps(vy, vy);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
-  }
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 15 * sizeof(float));

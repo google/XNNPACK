@@ -40,17 +40,6 @@ void xnn_f32_vmax_ukernel__psimd_x4(
     psimd_store_f32(y, vy0123);
     y += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const psimd_f32 va0123 = psimd_load_f32(a);
-    a += 4;
-
-    const psimd_f32 vb0123 = psimd_load_f32(b);
-    b += 4;
-
-    psimd_f32 vy0123 = psimd_max_f32(va0123, vb0123);
-    psimd_store_f32(y, vy0123);
-    y += 4;
-  }
   if XNN_UNLIKELY(n != 0) {
     const psimd_f32 va0123 = psimd_load_f32(a);
     const psimd_f32 vb0123 = psimd_load_f32(b);

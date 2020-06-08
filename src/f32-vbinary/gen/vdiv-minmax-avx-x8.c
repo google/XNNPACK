@@ -47,19 +47,6 @@ void xnn_f32_vdiv_minmax_ukernel__avx_x8(
     _mm256_storeu_ps(y, vy01234567);
     y += 8;
   }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(a);
-    a += 8;
-
-    const __m256 vb = _mm256_loadu_ps(b);
-    b += 8;
-
-    __m256 vy = _mm256_div_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(y, vy);
-    y += 8;
-  }
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));

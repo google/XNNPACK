@@ -72,7 +72,7 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx_x${BATCH_TILE}(
       _mm256_storeu_ps(y + ${N}, vy${ABC[N:N+8]});
     y += ${BATCH_TILE};
   }
-  $if BATCH_TILE >= 8:
+  $if BATCH_TILE > 8:
     for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
       const __m256 va = _mm256_loadu_ps(a);
       a += 8;

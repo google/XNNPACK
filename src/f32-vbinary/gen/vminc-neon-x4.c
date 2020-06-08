@@ -36,12 +36,6 @@ void xnn_f32_vminc_ukernel__neon_x4(
 
     vst1q_f32(y, vy0123); y += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const float32x4_t va0123 = vld1q_f32(a); a += 4;
-
-    float32x4_t vy0123 = vminq_f32(va0123, vb);
-    vst1q_f32(y, vy0123); y += 4;
-  }
   if XNN_UNLIKELY(n != 0) {
     const float32x4_t va0123 = vld1q_f32(a);
 
