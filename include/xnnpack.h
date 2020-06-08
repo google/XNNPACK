@@ -900,24 +900,6 @@ enum xnn_status xnn_delete_operator(
 
 #ifndef XNN_NO_F32_OPERATORS
 
-enum xnn_status xnn_create_add_nc_f32(
-  size_t channels,
-  size_t a_stride,
-  size_t b_stride,
-  size_t sum_stride,
-  float sum_min,
-  float sum_max,
-  uint32_t flags,
-  xnn_operator_t* add_op_out);
-
-enum xnn_status xnn_setup_add_nc_f32(
-  xnn_operator_t add_op,
-  size_t batch_size,
-  const float* a,
-  const float* b,
-  float* sum,
-  pthreadpool_t threadpool);
-
 enum xnn_status xnn_create_add_nd_f32(
   float output_min,
   float output_max,
@@ -1428,30 +1410,6 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
 #endif  // XNN_NO_X32_OPERATORS
 
 #ifndef XNN_NO_Q8_OPERATORS
-
-enum xnn_status xnn_create_add_nc_q8(
-  size_t channels,
-  size_t a_stride,
-  size_t b_stride,
-  size_t sum_stride,
-  uint8_t a_zero_point,
-  float a_scale,
-  uint8_t b_zero_point,
-  float b_scale,
-  uint8_t sum_zero_point,
-  float sum_scale,
-  uint8_t sum_min,
-  uint8_t sum_max,
-  uint32_t flags,
-  xnn_operator_t* add_op_out);
-
-enum xnn_status xnn_setup_add_nc_q8(
-  xnn_operator_t add_op,
-  size_t batch_size,
-  const uint8_t* a,
-  const uint8_t* b,
-  uint8_t* sum,
-  pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
   uint32_t input_padding_top,

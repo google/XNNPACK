@@ -18,12 +18,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
   switch (type) {
     case xnn_operator_type_invalid:
       return "Invalid";
-    case xnn_operator_type_add_nc_f32:
-      return "Add (NC, F32)";
     case xnn_operator_type_add_nd_f32:
       return "Add (ND, F32)";
-    case xnn_operator_type_add_nc_q8:
-      return "Add (NC, Q8)";
     case xnn_operator_type_argmax_pooling_nhwc_f32:
       return "ArgMax Pooling (NHWC, F32)";
     case xnn_operator_type_average_pooling_nhwc_f32:

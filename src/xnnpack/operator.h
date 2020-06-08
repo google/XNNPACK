@@ -44,9 +44,7 @@ enum xnn_ukernel_type {
 
 enum xnn_operator_type {
   xnn_operator_type_invalid = 0,
-  xnn_operator_type_add_nc_f32,
   xnn_operator_type_add_nd_f32,
-  xnn_operator_type_add_nc_q8,
   xnn_operator_type_argmax_pooling_nhwc_f32,
   xnn_operator_type_average_pooling_nhwc_f32,
   xnn_operator_type_average_pooling_nhwc_q8,
