@@ -70,7 +70,7 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__neonfp16arith_x${BATCH_TILE}(
     $for N in range(0, BATCH_TILE, 8):
       vst1q_f16(y, vy${ABC[N:N+8]}); y += 8;
   }
-  $if BATCH_TILE >= 8:
+  $if BATCH_TILE > 8:
     for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
       const float16x8_t va01234567 = vld1q_f16(a); a += 8;
 
