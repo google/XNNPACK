@@ -206,6 +206,21 @@ enum xnn_status xnn_create_clamp_nc_f32(
     clamp_op_out);
 }
 
+enum xnn_status xnn_create_abs_nc_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* abs_op_out)
+{
+  const union xnn_f32_abs_params params = xnn_init_f32_abs_params();
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_abs_nc_f32,
+    abs_op_out);
+}
+
 enum xnn_status xnn_create_copy_nc_x32(
     size_t channels,
     size_t input_stride,
@@ -235,6 +250,21 @@ enum xnn_status xnn_create_hardswish_nc_f32(
     hardswish_op_out);
 }
 
+enum xnn_status xnn_create_negate_nc_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* negate_op_out)
+{
+  const union xnn_f32_neg_params params = xnn_init_f32_neg_params();
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_negate_nc_f32,
+    negate_op_out);
+}
+
 enum xnn_status xnn_create_sigmoid_nc_f32(
     size_t channels,
     size_t input_stride,
@@ -247,6 +277,43 @@ enum xnn_status xnn_create_sigmoid_nc_f32(
     NULL, 0,
     xnn_operator_type_sigmoid_nc_f32,
     sigmoid_op_out);
+}
+
+enum xnn_status xnn_create_square_nc_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* square_op_out)
+{
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    NULL, 0,
+    xnn_operator_type_square_nc_f32,
+    square_op_out);
+}
+
+enum xnn_status xnn_setup_abs_nc_f32(
+    xnn_operator_t abs_op,
+    size_t batch_size,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  if (abs_op->type != xnn_operator_type_abs_nc_f32) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_abs_nc_f32),
+      xnn_operator_type_to_string(abs_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  abs_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    abs_op,
+    batch_size, input, output,
+    xnn_params.f32.abs,
+    2 /* log2(sizeof(float)) */,
+    &abs_op->params.f32_abs, sizeof(abs_op->params.f32_abs));
 }
 
 enum xnn_status xnn_setup_clamp_nc_u8(
@@ -345,6 +412,29 @@ enum xnn_status xnn_setup_hardswish_nc_f32(
     &hardswish_op->params.f32_hswish, sizeof(hardswish_op->params.f32_hswish));
 }
 
+enum xnn_status xnn_setup_negate_nc_f32(
+    xnn_operator_t negate_op,
+    size_t batch_size,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  if (negate_op->type != xnn_operator_type_negate_nc_f32) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_negate_nc_f32),
+      xnn_operator_type_to_string(negate_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  negate_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    negate_op,
+    batch_size, input, output,
+    xnn_params.f32.neg,
+    2 /* log2(sizeof(float)) */,
+    &negate_op->params.f32_neg, sizeof(negate_op->params.f32_neg));
+}
+
 enum xnn_status xnn_setup_sigmoid_nc_f32(
     xnn_operator_t sigmoid_op,
     size_t batch_size,
@@ -364,6 +454,29 @@ enum xnn_status xnn_setup_sigmoid_nc_f32(
     sigmoid_op,
     batch_size, input, output,
     xnn_params.f32.sigmoid,
+    2 /* log2(sizeof(float)) */,
+    NULL, 0);
+}
+
+enum xnn_status xnn_setup_square_nc_f32(
+    xnn_operator_t square_op,
+    size_t batch_size,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  if (square_op->type != xnn_operator_type_square_nc_f32) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_square_nc_f32),
+      xnn_operator_type_to_string(square_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  square_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    square_op,
+    batch_size, input, output,
+    xnn_params.f32.sqr,
     2 /* log2(sizeof(float)) */,
     NULL, 0);
 }

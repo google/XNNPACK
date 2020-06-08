@@ -18,6 +18,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
   switch (type) {
     case xnn_operator_type_invalid:
       return "Invalid";
+    case xnn_operator_type_abs_nc_f32:
+      return "Abs (NC, F32)";
     case xnn_operator_type_add_nd_f32:
       return "Add (ND, F32)";
     case xnn_operator_type_argmax_pooling_nhwc_f32:
@@ -74,6 +76,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Minimum (ND, F32)";
     case xnn_operator_type_multiply_nd_f32:
       return "Multiply (ND, F32)";
+    case xnn_operator_type_negate_nc_f32:
+      return "Negate (NC, F32)";
     case xnn_operator_type_prelu_nc_f32:
       return "PReLU (NC, F32)";
     case xnn_operator_type_resize_bilinear_nhwc_f32:
@@ -86,6 +90,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Softmax (NC, F32)";
     case xnn_operator_type_softmax_nc_q8:
       return "Softmax (NC, Q8)";
+    case xnn_operator_type_square_nc_f32:
+      return "Square (NC, F32)";
     case xnn_operator_type_squared_difference_nd_f32:
       return "Squared Difference (NC, F32)";
     case xnn_operator_type_subtract_nd_f32:

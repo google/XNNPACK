@@ -900,6 +900,20 @@ enum xnn_status xnn_delete_operator(
 
 #ifndef XNN_NO_F32_OPERATORS
 
+enum xnn_status xnn_create_abs_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* abs_op_out);
+
+enum xnn_status xnn_setup_abs_nc_f32(
+  xnn_operator_t abs_op,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_add_nd_f32(
   float output_min,
   float output_max,
@@ -1192,6 +1206,20 @@ enum xnn_status xnn_setup_multiply_nd_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_negate_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* negate_op_out);
+
+enum xnn_status xnn_setup_negate_nc_f32(
+  xnn_operator_t negate_op,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_prelu_nc_f32(
   size_t channels,
   size_t input_stride,
@@ -1248,6 +1276,20 @@ enum xnn_status xnn_create_softmax_nc_f32(
 
 enum xnn_status xnn_setup_softmax_nc_f32(
   xnn_operator_t softmax_op,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_square_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* square_op_out);
+
+enum xnn_status xnn_setup_square_nc_f32(
+  xnn_operator_t square_op,
   size_t batch_size,
   const float* input,
   float* output,
