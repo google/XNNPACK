@@ -394,6 +394,15 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vmulcaddc/gen/c1-minmax-scalar-2x.c
   src/f32-vmulcaddc/gen/c2-minmax-scalar-2x.c
   src/f32-vmulcaddc/gen/c4-minmax-scalar-2x.c
+  src/f32-vunary/gen/vabs-scalar-x1.c
+  src/f32-vunary/gen/vabs-scalar-x2.c
+  src/f32-vunary/gen/vabs-scalar-x4.c
+  src/f32-vunary/gen/vneg-scalar-x1.c
+  src/f32-vunary/gen/vneg-scalar-x2.c
+  src/f32-vunary/gen/vneg-scalar-x4.c
+  src/f32-vunary/gen/vsqr-scalar-x1.c
+  src/f32-vunary/gen/vsqr-scalar-x2.c
+  src/f32-vunary/gen/vsqr-scalar-x4.c
   src/math/expminus-scalar-lut2048-p1.c
   src/math/expminus-scalar-lut64-p2.c
   src/math/expminus-scalar-p5.c
@@ -544,6 +553,12 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsubc-minmax-psimd-x8.c
   src/f32-vmulcaddc/gen/c4-minmax-psimd-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-psimd-2x.c
+  src/f32-vunary/gen/vabs-psimd-x4.c
+  src/f32-vunary/gen/vabs-psimd-x8.c
+  src/f32-vunary/gen/vneg-psimd-x4.c
+  src/f32-vunary/gen/vneg-psimd-x8.c
+  src/f32-vunary/gen/vsqr-psimd-x4.c
+  src/f32-vunary/gen/vsqr-psimd-x8.c
   src/x32-fill/psimd.c
   src/x32-packx/x4-psimd.c
   src/x32-pad/psimd.c
@@ -740,6 +755,12 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsubc-minmax-neon-x8.c
   src/f32-vmulcaddc/gen/c4-minmax-neon-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-neon-2x.c
+  src/f32-vunary/gen/vabs-neon-x4.c
+  src/f32-vunary/gen/vabs-neon-x8.c
+  src/f32-vunary/gen/vneg-neon-x4.c
+  src/f32-vunary/gen/vneg-neon-x8.c
+  src/f32-vunary/gen/vsqr-neon-x4.c
+  src/f32-vunary/gen/vsqr-neon-x8.c
   src/q8-avgpool/9p8x-minmax-neon-c8.c
   src/q8-avgpool/9x-minmax-neon-c8.c
   src/q8-dwconv/up8x9-minmax-neon.c
@@ -1196,6 +1217,12 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsubc-minmax-sse-x8.c
   src/f32-vmulcaddc/gen/c4-minmax-sse-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-sse-2x.c
+  src/f32-vunary/gen/vabs-sse-x4.c
+  src/f32-vunary/gen/vabs-sse-x8.c
+  src/f32-vunary/gen/vneg-sse-x4.c
+  src/f32-vunary/gen/vneg-sse-x8.c
+  src/f32-vunary/gen/vsqr-sse-x4.c
+  src/f32-vunary/gen/vsqr-sse-x8.c
   src/x32-fill/sse.c
   src/x32-packx/x4-sse.c
   src/x32-pad/sse.c
@@ -1364,7 +1391,13 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsub-minmax-avx-x16.c
   src/f32-vbinary/gen/vsubc-minmax-avx-x8.c
   src/f32-vbinary/gen/vsubc-minmax-avx-x16.c
-  src/f32-vscale/avx-unroll32.c)
+  src/f32-vscale/avx-unroll32.c
+  src/f32-vunary/gen/vabs-avx-x8.c
+  src/f32-vunary/gen/vabs-avx-x16.c
+  src/f32-vunary/gen/vneg-avx-x8.c
+  src/f32-vunary/gen/vneg-avx-x16.c
+  src/f32-vunary/gen/vsqr-avx-x8.c
+  src/f32-vunary/gen/vsqr-avx-x16.c)
 
 SET(XNNPACK_FMA3_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up16x4-minmax-fma3-acc2.c
@@ -1660,6 +1693,12 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-vscaleextexp/gen/avx512f-p5-scalef-x160.c
   src/f32-vscaleextexp/gen/avx512f-p5-scalef-x176.c
   src/f32-vscaleextexp/gen/avx512f-p5-scalef-x192.c
+  src/f32-vunary/gen/vabs-avx512f-x16.c
+  src/f32-vunary/gen/vabs-avx512f-x32.c
+  src/f32-vunary/gen/vneg-avx512f-x16.c
+  src/f32-vunary/gen/vneg-avx512f-x32.c
+  src/f32-vunary/gen/vsqr-avx512f-x16.c
+  src/f32-vunary/gen/vsqr-avx512f-x32.c
   src/math/exp-avx512f-p5-scalef.c
   src/math/exp-avx512f-p5.c
   src/math/exp-avx512f-perm-p3.c

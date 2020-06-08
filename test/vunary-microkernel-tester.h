@@ -23,6 +23,9 @@
 class VUnOpMicrokernelTester {
  public:
   enum class OpType {
+    Abs,
+    Neg,
+    Sqr,
     Sigmoid,
   };
 
@@ -97,6 +100,15 @@ class VUnOpMicrokernelTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         switch (op_type) {
+          case OpType::Abs:
+            y_ref[i] = std::fabsf(x_data[i]);
+            break;
+          case OpType::Neg:
+            y_ref[i] = -x_data[i];
+            break;
+          case OpType::Sqr:
+            y_ref[i] = double(x_data[i]) * double(x_data[i]);
+            break;
           case OpType::Sigmoid:
           {
             const double e = std::exp(double(x_data[i]));
@@ -105,27 +117,35 @@ class VUnOpMicrokernelTester {
           }
         }
       }
-      const float accumulated_min = *std::min_element(y_ref.cbegin(), y_ref.cend());
-      const float accumulated_max = *std::max_element(y_ref.cbegin(), y_ref.cend());
-      const float accumulated_range = accumulated_max - accumulated_min;
-      const float y_max = accumulated_range > 0.0f ?
-        (accumulated_max - accumulated_range / 255.0f * float(255 - qmax())) :
-        +std::numeric_limits<float>::infinity();
-      const float y_min = accumulated_range > 0.0f ?
-        (accumulated_min + accumulated_range / 255.0f * float(qmin())) :
-        -std::numeric_limits<float>::infinity();
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::max<float>(std::min<float>(y_ref[i], y_max), y_min);
-      }
 
       // Prepare parameters.
-      xnn_f32_minmax_params params = { };
-      switch (variant) {
-        case Variant::Native:
-          params = xnn_init_f32_minmax_params(y_min, y_max);
+      union {
+        union xnn_f32_abs_params abs;
+        union xnn_f32_neg_params neg;
+      } params;
+      switch (op_type) {
+        case OpType::Abs:
+          switch (variant) {
+            case Variant::Native:
+              params.abs = xnn_init_f32_abs_params();
+              break;
+            case Variant::Scalar:
+              params.abs = xnn_init_scalar_f32_abs_params();
+              break;
+          }
           break;
-        case Variant::Scalar:
-          params = xnn_init_scalar_f32_minmax_params(y_min, y_max);
+        case OpType::Neg:
+          switch (variant) {
+            case Variant::Native:
+              params.neg = xnn_init_f32_neg_params();
+              break;
+            case Variant::Scalar:
+              params.neg = xnn_init_scalar_f32_neg_params();
+              break;
+          }
+          break;
+        case OpType::Sigmoid:
+        case OpType::Sqr:
           break;
       }
 
@@ -134,7 +154,7 @@ class VUnOpMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y[i], y_ref[i], 5.0e-6)
+        ASSERT_NEAR(y[i], y_ref[i], std::max(1.0e-5 * std::abs(y_ref[i]), 5.0e-6))
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }

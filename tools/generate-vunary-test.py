@@ -27,11 +27,14 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_(sigmoid)_(fact_)?ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_(sigmoid|vabs|vneg|vsqr)_(fact_)?ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
+    "vabs": "Abs",
+    "vneg": "Neg",
     "sigmoid": "Sigmoid",
+    "vsqr": "Sqr",
   }[match.group(2)]
   batch_tile = int(match.group(5))
 
@@ -109,7 +112,7 @@ def generate_test_cases(ukernel, op_type, batch_tile, isa):
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
   test_args = [
-    ukernel,
+    "xnn_f32_vunary_ukernel_function(%s)" % ukernel,
     "VUnOpMicrokernelTester::OpType::%s" % op_type,
   ]
   if not isa or isa == "psimd":
