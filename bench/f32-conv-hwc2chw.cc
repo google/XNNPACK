@@ -116,6 +116,19 @@ static void DConvHWC2CHW3X3S2P1Benchmark(benchmark::State& state,
 
   BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__neonfma_2x2);
 #endif
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  static void f32_conv_hwc2chw_3x3s2p1c3x4__sse_1x1(benchmark::State& state, const char* net) {
+    DConvHWC2CHW3X3S2P1Benchmark(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_1x1, 4);
+  }
+
+  BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__sse_1x1);
+
+  static void f32_conv_hwc2chw_3x3s2p1c3x4__sse_2x2(benchmark::State& state, const char* net) {
+    DConvHWC2CHW3X3S2P1Benchmark(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_2x2, 4);
+  }
+
+  BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__sse_2x2);
+#endif
   static void f32_conv_hwc2chw_3x3s2p1c3x4__scalar_1x1(benchmark::State& state, const char* net) {
     DConvHWC2CHW3X3S2P1Benchmark(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1, 4);
   }

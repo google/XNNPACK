@@ -1131,6 +1131,8 @@ SSE_UKERNELS = [
     "src/f32-avgpool/9x-minmax-sse-c4.c",
     "src/f32-clamp/gen/sse-x4.c",
     "src/f32-clamp/gen/sse-x8.c",
+    "src/f32-conv-hwc2chw/3x3s2p1c3x4-sse-1x1.c",
+    "src/f32-conv-hwc2chw/3x3s2p1c3x4-sse-2x2.c",
     "src/f32-dwconv-chw/3x3p1-sse.c",
     "src/f32-dwconv-chw/3x3s2p1-sse.c",
     "src/f32-dwconv/gen/up4x25-minmax-sse-acc2.c",
