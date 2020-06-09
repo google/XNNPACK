@@ -1450,6 +1450,13 @@ static void init(void) {
         .mr = 4,
         .nr = 1,
       };
+      xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
+        .ukernel_with_symm_padding =
+          (xnn_conv_hwc2chw_ukernel_function) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_2x2,
+        .output_channel_tile = 4,
+        .output_height_tile = 2,
+        .output_width_tile = 2,
+      };
       xnn_params.f32.dwconv_chw_3x3 = (struct dwconv_chw_parameters) {
         .ukernel = (xnn_dwconv_chw_ukernel_function) xnn_f32_dwconv_chw_ukernel_3x3p1__sse,
         .input_width_tile = 4,
