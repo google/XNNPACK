@@ -1144,3 +1144,15 @@ TEST(GEMMLOWP__SCALAR, random_cases) {
       .TestRandomCasesApproximate(xnn_requantize_gemmlowp__neon);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_WASMSIMD
+  /*
+   * FP32-based ARM NEON implementation.
+   */
+
+  TEST(FP32__WASMSIMD, random_cases) {
+    RequantizationTester()
+      .iterations(1000)
+      .TestRandomCasesApproximate(xnn_requantize_fp32__wasmsimd);
+  }
+#endif  // XNN_ARCH_WASMSIMD

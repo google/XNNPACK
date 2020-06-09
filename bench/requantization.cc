@@ -145,6 +145,16 @@ BENCHMARK_F(Requantization, gemmlowp__scalar)(benchmark::State& state) {
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
+#if XNN_ARCH_WASMSIMD
+  BENCHMARK_F(Requantization, fp32__wasmsimd)(benchmark::State& state) {
+    for (auto _ : state) {
+      xnn_requantize_fp32__wasmsimd(
+          n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
+    }
+  }
+#endif
+
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_F(Requantization, precise__neon)(benchmark::State& state) {
     for (auto _ : state) {

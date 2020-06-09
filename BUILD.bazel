@@ -457,6 +457,10 @@ WASM_UKERNELS = [
     "src/f32-vmulcaddc/gen/c4-minmax-wasm-2x.c",
 ]
 
+WASMSIMD_UKERNELS = [
+    "src/requantization/fp32-wasmsimd.c",
+]
+
 PSIMD_FASTMATH_UKERNELS = [
     "src/f32-argmaxpool/4x-psimd-c4.c",
     "src/f32-argmaxpool/9p8x-psimd-c4.c",
@@ -2031,6 +2035,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = WASM_UKERNELS,
+    wasmsimd_srcs = WASMSIMD_UKERNELS,
     deps = [
         ":tables",
         "@FP16",
@@ -2049,6 +2054,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = WASM_UKERNELS,
+    wasmsimd_srcs = WASMSIMD_UKERNELS,
     deps = [
         ":tables",
         "@FP16",
