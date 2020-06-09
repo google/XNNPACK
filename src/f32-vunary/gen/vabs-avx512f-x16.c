@@ -27,12 +27,12 @@ void xnn_f32_vabs_ukernel__avx512f_x16(
 
   const __m512i vnonsign_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse.nonsign_mask));
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512i vx0123456789ABCDEF = _mm512_loadu_epi32(x);
+    const __m512i vx0123456789ABCDEF = _mm512_loadu_si512(x);
     x += 16;
 
     const __m512i vy0123456789ABCDEF = _mm512_and_epi32(vx0123456789ABCDEF, vnonsign_mask);
 
-    _mm512_storeu_epi32(y, vy0123456789ABCDEF);
+    _mm512_storeu_si512(y, vy0123456789ABCDEF);
     y += 16;
   }
   if XNN_UNLIKELY(n != 0) {

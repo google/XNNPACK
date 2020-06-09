@@ -101,7 +101,7 @@ class VUnOpMicrokernelTester {
       for (size_t i = 0; i < batch_size(); i++) {
         switch (op_type) {
           case OpType::Abs:
-            y_ref[i] = std::fabsf(x_data[i]);
+            y_ref[i] = std::abs(x_data[i]);
             break;
           case OpType::Neg:
             y_ref[i] = -x_data[i];

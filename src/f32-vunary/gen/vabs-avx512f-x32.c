@@ -27,24 +27,24 @@ void xnn_f32_vabs_ukernel__avx512f_x32(
 
   const __m512i vnonsign_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse.nonsign_mask));
   for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512i vx0123456789ABCDEF = _mm512_loadu_epi32(x);
-    const __m512i vxGHIJKLMNOPQRSTUV = _mm512_loadu_epi32(x + 16);
+    const __m512i vx0123456789ABCDEF = _mm512_loadu_si512(x);
+    const __m512i vxGHIJKLMNOPQRSTUV = _mm512_loadu_si512(x + 16);
     x += 32;
 
     const __m512i vy0123456789ABCDEF = _mm512_and_epi32(vx0123456789ABCDEF, vnonsign_mask);
     const __m512i vyGHIJKLMNOPQRSTUV = _mm512_and_epi32(vxGHIJKLMNOPQRSTUV, vnonsign_mask);
 
-    _mm512_storeu_epi32(y, vy0123456789ABCDEF);
-    _mm512_storeu_epi32(y + 16, vyGHIJKLMNOPQRSTUV);
+    _mm512_storeu_si512(y, vy0123456789ABCDEF);
+    _mm512_storeu_si512(y + 16, vyGHIJKLMNOPQRSTUV);
     y += 32;
   }
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512i vx = _mm512_loadu_epi32(x);
+    const __m512i vx = _mm512_loadu_si512(x);
     x += 16;
 
     const __m512i vy = _mm512_and_epi32(vx, vnonsign_mask);
 
-    _mm512_storeu_epi32(y, vy);
+    _mm512_storeu_si512(y, vy);
     y += 16;
   }
   if XNN_UNLIKELY(n != 0) {

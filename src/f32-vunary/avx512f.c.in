@@ -22,8 +22,8 @@ $  "NEG": "__m512i",
 $  "SQR": "__m512",
 $}[OP]
 $_MM512_LOADU = {
-$  "ABS": "_mm512_loadu_epi32",
-$  "NEG": "_mm512_loadu_epi32",
+$  "ABS": "_mm512_loadu_si512",
+$  "NEG": "_mm512_loadu_si512",
 $  "SQR": "_mm512_loadu_ps",
 $}[OP]
 $_MM512_MASK_LOADU = {
@@ -32,8 +32,8 @@ $  "NEG": "_mm512_maskz_loadu_epi32",
 $  "SQR": "_mm512_maskz_loadu_ps",
 $}[OP]
 $_MM512_STOREU = {
-$  "ABS": "_mm512_storeu_epi32",
-$  "NEG": "_mm512_storeu_epi32",
+$  "ABS": "_mm512_storeu_si512",
+$  "NEG": "_mm512_storeu_si512",
 $  "SQR": "_mm512_storeu_ps",
 $}[OP]
 $_MM512_MASK_STOREU = {
