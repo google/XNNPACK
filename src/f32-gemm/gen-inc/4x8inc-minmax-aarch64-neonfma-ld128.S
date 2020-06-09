@@ -22,7 +22,7 @@
 #     const float*restrict acc,  [sp + 8] -> x15
 #     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 16] -> x8
 
-# d8-d15, x19-x30 need to be preserved if used. x18 is reserved on iOS.
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # A pointers
 # x3  a0

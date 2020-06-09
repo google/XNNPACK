@@ -17,7 +17,7 @@
 #     const float* zero,                 [sp + 80] -> x19
 #     const xnn_f32_minmax_params params [sp + 88] -> (x20)
 
-# d8-d15, x19-x30 need to be preserved if used. x18 is reserved on iOS.
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
 

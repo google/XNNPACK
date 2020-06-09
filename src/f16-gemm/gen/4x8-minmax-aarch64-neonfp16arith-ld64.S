@@ -21,7 +21,7 @@
 #     size_t cn_stride,         [sp] -> x14
 #     const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> x8
 
-# d8-d15, x19-x30 need to be preserved if used. x18 is reserved on iOS.
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # A pointers
 # x3  a0
