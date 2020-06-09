@@ -40,16 +40,6 @@ void xnn_f32_clamp_ukernel__avx_x8(
     _mm256_storeu_ps(y, vacc01234567);
     y += 8;
   }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    __m256 vacc = _mm256_loadu_ps(x);
-    x += 8;
-
-    vacc = _mm256_max_ps(vacc, vy_min);
-    vacc = _mm256_min_ps(vacc, vy_max);
-
-    _mm256_storeu_ps(y, vacc);
-    y += 8;
-  }
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));

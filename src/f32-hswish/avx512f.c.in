@@ -52,7 +52,7 @@ void xnn_f32_hswish_ukernel__avx512f_x${BATCH_TILE}(
       _mm512_storeu_ps(y + ${N}, vacc${ABC[N:N+16]});
     y += ${BATCH_TILE};
   }
-  $if BATCH_TILE >= 16:
+  $if BATCH_TILE > 16:
     for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
       const __m512 vx = _mm512_loadu_ps(x);
       x += 16;

@@ -39,12 +39,6 @@ void xnn_f16_clamp_ukernel__neonfp16arith_x8(
 
     vst1q_f16(y, vacc01234567); y += 8;
   }
-  for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
-    float16x8_t vacc = vld1q_f16(x); x += 8;
-    vacc = vmaxq_f16(vacc, vy_min);
-    vacc = vminq_f16(vacc, vy_max);
-    vst1q_f16(y, vacc); y += 8;
-  }
   if XNN_UNLIKELY(n != 0) {
     float16x8_t vacc = vld1q_f16(x);
     vacc = vmaxq_f16(vacc, vy_min);

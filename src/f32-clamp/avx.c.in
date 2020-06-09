@@ -45,7 +45,7 @@ void xnn_f32_clamp_ukernel__avx_x${BATCH_TILE}(
       _mm256_storeu_ps(y + ${N}, vacc${ABC[N:N+8]});
     y += ${BATCH_TILE};
   }
-  $if BATCH_TILE >= 8:
+  $if BATCH_TILE > 8:
     for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
       __m256 vacc = _mm256_loadu_ps(x);
       x += 8;

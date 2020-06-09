@@ -38,16 +38,6 @@ void xnn_f32_clamp_ukernel__psimd_x4(
     psimd_store_f32(y, vacc0123);
     y += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    psimd_f32 vacc = psimd_load_f32(x);
-    x += 4;
-
-    vacc = psimd_max_f32(vacc, vy_min);
-    vacc = psimd_min_f32(vacc, vy_max);
-
-    psimd_store_f32(y, vacc);
-    y += 4;
-  }
   if XNN_UNLIKELY(n != 0) {
     psimd_f32 vacc = psimd_load_f32(x);
     vacc = psimd_max_f32(vacc, vy_min);

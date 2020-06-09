@@ -36,12 +36,6 @@ void xnn_f32_clamp_ukernel__neon_x4(
 
     vst1q_f32(y, vacc0123); y += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    float32x4_t vacc = vld1q_f32(x); x += 4;
-    vacc = vmaxq_f32(vacc, vy_min);
-    vacc = vminq_f32(vacc, vy_max);
-    vst1q_f32(y, vacc); y += 4;
-  }
   if XNN_UNLIKELY(n != 0) {
     float32x4_t vacc = vld1q_f32(x);
     vacc = vmaxq_f32(vacc, vy_min);

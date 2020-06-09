@@ -61,7 +61,7 @@ void xnn_f32_hswish_ukernel__${ISA}_x${BATCH_TILE}(
       _mm256_storeu_ps(y + ${N}, vacc${ABC[N:N+8]});
     y += ${BATCH_TILE};
   }
-  $if BATCH_TILE >= 8:
+  $if BATCH_TILE > 8:
     for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
       const __m256 vx = _mm256_loadu_ps(x);
       x += 8;

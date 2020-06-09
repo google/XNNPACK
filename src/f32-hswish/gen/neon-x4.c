@@ -42,14 +42,6 @@ void xnn_f32_hswish_ukernel__neon_x4(
 
     vst1q_f32(y, vacc0123); y += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const float32x4_t vx0123 = vld1q_f32(x); x += 4;
-    float32x4_t vacc0123 = vmlaq_f32(vhalf, vx0123, vsixth);
-    vacc0123 = vmaxq_f32(vacc0123, vzero);
-    vacc0123 = vminq_f32(vacc0123, vone);
-    vacc0123 = vmulq_f32(vacc0123, vx0123);
-    vst1q_f32(y, vacc0123); y += 4;
-  }
   if XNN_UNLIKELY(n != 0) {
     const float32x4_t vx0123 = vld1q_f32(x);
     float32x4_t vacc0123 = vmlaq_f32(vhalf, vx0123, vsixth);

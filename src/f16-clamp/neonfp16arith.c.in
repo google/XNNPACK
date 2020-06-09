@@ -42,7 +42,7 @@ void xnn_f16_clamp_ukernel__neonfp16arith_x${BATCH_TILE}(
     $for N in range(0, BATCH_TILE, 8):
       vst1q_f16(y, vacc${ABC[N:N+8]}); y += 8;
   }
-  $if BATCH_TILE >= 8:
+  $if BATCH_TILE > 8:
     for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
       float16x8_t vacc = vld1q_f16(x); x += 8;
       vacc = vmaxq_f16(vacc, vy_min);

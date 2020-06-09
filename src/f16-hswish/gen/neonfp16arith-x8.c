@@ -45,14 +45,6 @@ void xnn_f16_hswish_ukernel__neonfp16arith_x8(
 
     vst1q_f16(y, vacc01234567); y += 8;
   }
-  for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
-    const float16x8_t vx1234567 = vld1q_f16(x); x += 8;
-    float16x8_t vacc01234567 = vfmaq_f16(vhalf, vx1234567, vsixth);
-    vacc01234567 = vmaxq_f16(vacc01234567, vzero);
-    vacc01234567 = vminq_f16(vacc01234567, vone);
-    vacc01234567 = vmulq_f16(vacc01234567, vx1234567);
-    vst1q_f16(y, vacc01234567); y += 8;
-  }
   if XNN_UNLIKELY(n != 0) {
     const float16x8_t vx1234567 = vld1q_f16(x);
     float16x8_t vacc01234567 = vfmaq_f16(vhalf, vx1234567, vsixth);

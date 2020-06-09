@@ -46,17 +46,6 @@ void xnn_f32_hswish_ukernel__sse_x4(
     _mm_storeu_ps(y, vacc0123);
     y += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const __m128 vx0123 = _mm_loadu_ps(x);
-    x += 4;
-    __m128 vacc0123 = _mm_mul_ps(vx0123, vsixth);
-    vacc0123 = _mm_add_ps(vacc0123, vhalf);
-    vacc0123 = _mm_max_ps(vacc0123, vzero);
-    vacc0123 = _mm_min_ps(vacc0123, vone);
-    vacc0123 = _mm_mul_ps(vacc0123, vx0123);
-    _mm_storeu_ps(y, vacc0123);
-    y += 4;
-  }
   if XNN_UNLIKELY(n != 0) {
     const __m128 vx0123 = _mm_loadu_ps(x);
     __m128 vacc0123 = _mm_mul_ps(vx0123, vsixth);

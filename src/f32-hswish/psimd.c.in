@@ -51,7 +51,7 @@ void xnn_f32_hswish_ukernel__psimd_x${BATCH_TILE}(
       psimd_store_f32(y + ${N}, vacc${ABC[N:N+4]});
     y += ${BATCH_TILE};
   }
-  $if BATCH_TILE >= 4:
+  $if BATCH_TILE > 4:
     for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
       const psimd_f32 vx0123 = psimd_load_f32(x);
       x += 4;

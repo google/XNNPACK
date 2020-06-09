@@ -54,7 +54,7 @@ void xnn_f32_hswish_ukernel__sse_x${BATCH_TILE}(
       _mm_storeu_ps(y + ${N}, vacc${ABC[N:N+4]});
     y += ${BATCH_TILE};
   }
-  $if BATCH_TILE >= 4:
+  $if BATCH_TILE > 4:
     for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
       const __m128 vx0123 = _mm_loadu_ps(x);
       x += 4;
