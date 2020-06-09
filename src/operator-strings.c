@@ -28,6 +28,10 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Average Pooling (NHWC, F32)";
     case xnn_operator_type_average_pooling_nhwc_q8:
       return "Average Pooling (NHWC, Q8)";
+    case xnn_operator_type_bankers_rounding_nc_f32:
+      return "Bankers Rounding (NC, F32)";
+    case xnn_operator_type_ceiling_nc_f32:
+      return "Ceiling (NC, F32)";
     case xnn_operator_type_channel_shuffle_nc_x32:
       return "Channel Shuffle (NC, X32)";
     case xnn_operator_type_channel_shuffle_nc_x8:
@@ -52,6 +56,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Deconvolution (NHWC, Q8)";
     case xnn_operator_type_divide_nd_f32:
       return "Divide (ND, F32)";
+    case xnn_operator_type_floor_nc_f32:
+      return "Floor (NC, F32)";
     case xnn_operator_type_fully_connected_nc_f32:
       return "Fully Connected (NC, F32)";
     case xnn_operator_type_fully_connected_nc_q8:
@@ -96,6 +102,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Squared Difference (NC, F32)";
     case xnn_operator_type_subtract_nd_f32:
       return "Subtract (ND, F32)";
+    case xnn_operator_type_truncation_nc_f32:
+      return "Truncation (NC, F32)";
     case xnn_operator_type_unpooling_nhwc_x32:
       return "Unpooling (NHWC, X32)";
   }

@@ -19,9 +19,9 @@
 #include <xnnpack.h>
 
 
-class AbsOperatorTester {
+class CeilingOperatorTester {
  public:
-  inline AbsOperatorTester& channels(size_t channels) {
+  inline CeilingOperatorTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
@@ -31,7 +31,7 @@ class AbsOperatorTester {
     return this->channels_;
   }
 
-  inline AbsOperatorTester& input_stride(size_t input_stride) {
+  inline CeilingOperatorTester& input_stride(size_t input_stride) {
     assert(input_stride != 0);
     this->input_stride_ = input_stride;
     return *this;
@@ -46,7 +46,7 @@ class AbsOperatorTester {
     }
   }
 
-  inline AbsOperatorTester& output_stride(size_t output_stride) {
+  inline CeilingOperatorTester& output_stride(size_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
@@ -61,7 +61,7 @@ class AbsOperatorTester {
     }
   }
 
-  inline AbsOperatorTester& batch_size(size_t batch_size) {
+  inline CeilingOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
@@ -71,7 +71,7 @@ class AbsOperatorTester {
     return this->batch_size_;
   }
 
-  inline AbsOperatorTester& iterations(size_t iterations) {
+  inline CeilingOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -96,32 +96,32 @@ class AbsOperatorTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = std::fabs(input[i * input_stride() + c]);
+          output_ref[i * channels() + c] = std::ceil(input[i * input_stride() + c]);
         }
       }
 
-      // Create, setup, run, and destroy Abs operator.
+      // Create, setup, run, and destroy Ceiling operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-      xnn_operator_t abs_op = nullptr;
+      xnn_operator_t ceiling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_abs_nc_f32(
+        xnn_create_ceiling_nc_f32(
           channels(), input_stride(), output_stride(),
-          0, &abs_op));
-      ASSERT_NE(nullptr, abs_op);
+          0, &ceiling_op));
+      ASSERT_NE(nullptr, ceiling_op);
 
-      // Smart pointer to automatically delete abs_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_abs_op(abs_op, xnn_delete_operator);
+      // Smart pointer to automatically delete ceiling_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_ceiling_op(ceiling_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_abs_nc_f32(
-          abs_op,
+        xnn_setup_ceiling_nc_f32(
+          ceiling_op,
           batch_size(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(abs_op, nullptr /* thread pool */));
+        xnn_run_operator(ceiling_op, nullptr /* thread pool */));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

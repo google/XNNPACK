@@ -2134,6 +2134,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
 
   # ---[ Build operator-level unit tests
+  ADD_EXECUTABLE(abs-nc-test test/abs-nc.cc)
+  SET_TARGET_PROPERTIES(abs-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(abs-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(abs-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(abs-nc-test abs-nc-test)
+
   ADD_EXECUTABLE(add-nd-test test/add-nd.cc)
   SET_TARGET_PROPERTIES(add-nd-test PROPERTIES
     CXX_STANDARD 11
@@ -2160,6 +2169,24 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(average-pooling-nhwc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(average-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(average-pooling-nhwc-test average-pooling-nhwc-test)
+
+  ADD_EXECUTABLE(bankers-rounding-nc-test test/bankers-rounding-nc.cc)
+  SET_TARGET_PROPERTIES(bankers-rounding-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(bankers-rounding-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(bankers-rounding-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(bankers-rounding-nc-test bankers-rounding-nc-test)
+
+  ADD_EXECUTABLE(ceiling-nc-test test/ceiling-nc.cc)
+  SET_TARGET_PROPERTIES(ceiling-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(ceiling-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(ceiling-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(ceiling-nc-test ceiling-nc-test)
 
   ADD_EXECUTABLE(channel-shuffle-nc-test test/channel-shuffle-nc.cc)
   SET_TARGET_PROPERTIES(channel-shuffle-nc-test PROPERTIES
@@ -2242,6 +2269,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(fully-connected-nc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(fully-connected-nc-test fully-connected-nc-test)
 
+  ADD_EXECUTABLE(floor-nc-test test/floor-nc.cc)
+  SET_TARGET_PROPERTIES(floor-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(floor-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(floor-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(floor-nc-test floor-nc-test)
+
   ADD_EXECUTABLE(global-average-pooling-nwc-test test/global-average-pooling-nwc.cc)
   SET_TARGET_PROPERTIES(global-average-pooling-nwc-test PROPERTIES
     CXX_STANDARD 11
@@ -2314,6 +2350,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(multiply-nd-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(multiply-nd-test multiply-nd-test)
 
+  ADD_EXECUTABLE(negate-nc-test test/negate-nc.cc)
+  SET_TARGET_PROPERTIES(negate-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(negate-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(negate-nc-test negate-nc-test)
+
   ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
   SET_TARGET_PROPERTIES(prelu-nc-test PROPERTIES
     CXX_STANDARD 11
@@ -2350,6 +2395,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(softmax-nc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(softmax-nc-test softmax-nc-test)
 
+  ADD_EXECUTABLE(square-nc-test test/square-nc.cc)
+  SET_TARGET_PROPERTIES(square-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(square-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(square-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(square-nc-test square-nc-test)
+
   ADD_EXECUTABLE(squared-difference-nd-test test/squared-difference-nd.cc)
   SET_TARGET_PROPERTIES(squared-difference-nd-test PROPERTIES
     CXX_STANDARD 11
@@ -2367,6 +2421,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(subtract-nd-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(subtract-nd-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(subtract-nd-test subtract-nd-test)
+
+  ADD_EXECUTABLE(truncation-nc-test test/truncation-nc.cc)
+  SET_TARGET_PROPERTIES(truncation-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(truncation-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(truncation-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(truncation-nc-test truncation-nc-test)
 
   ADD_EXECUTABLE(unpooling-nhwc-test test/unpooling-nhwc.cc)
   SET_TARGET_PROPERTIES(unpooling-nhwc-test PROPERTIES

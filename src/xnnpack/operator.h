@@ -49,10 +49,12 @@ enum xnn_operator_type {
   xnn_operator_type_argmax_pooling_nhwc_f32,
   xnn_operator_type_average_pooling_nhwc_f32,
   xnn_operator_type_average_pooling_nhwc_q8,
+  xnn_operator_type_bankers_rounding_nc_f32,
   xnn_operator_type_channel_shuffle_nc_x32,
   xnn_operator_type_channel_shuffle_nc_x8,
   xnn_operator_type_clamp_nc_f32,
   xnn_operator_type_clamp_nc_u8,
+  xnn_operator_type_ceiling_nc_f32,
   xnn_operator_type_constant_pad_nd_x32,
   xnn_operator_type_convolution_nchw_f32,
   xnn_operator_type_convolution_nhwc_f32,
@@ -63,6 +65,7 @@ enum xnn_operator_type {
   xnn_operator_type_divide_nd_f32,
   xnn_operator_type_fully_connected_nc_f32,
   xnn_operator_type_fully_connected_nc_q8,
+  xnn_operator_type_floor_nc_f32,
   xnn_operator_type_global_average_pooling_nwc_f32,
   xnn_operator_type_global_average_pooling_nwc_q8,
   xnn_operator_type_global_average_pooling_ncw_f32,
@@ -83,6 +86,7 @@ enum xnn_operator_type {
   xnn_operator_type_square_nc_f32,
   xnn_operator_type_squared_difference_nd_f32,
   xnn_operator_type_subtract_nd_f32,
+  xnn_operator_type_truncation_nc_f32,
   xnn_operator_type_unpooling_nhwc_x32,
 };
 
@@ -243,6 +247,7 @@ struct xnn_operator {
   union {
     union xnn_f32_abs_params f32_abs;
     union xnn_f32_neg_params f32_neg;
+    union xnn_f32_rnd_params f32_rnd;
     // Parameters for Global Average Pooling in CHW layout
     union xnn_f32_gavgpool_params f32_gavgpool;
     union xnn_f32_hswish_params f32_hswish;

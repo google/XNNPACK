@@ -31,11 +31,18 @@ XNNPACK implements the following neural network operators:
 - Global Average Pooling
 - Channel Shuffle
 - Fully Connected
+- Abs (absolute value)
+- Bankers' Rounding (rounding to nearest, ties to even)
+- Ceiling (rounding to integer above)
 - Clamp (includes ReLU and ReLU6)
 - Copy
+- Floor (rounding to integer below)
 - HardSwish
+- Negate
 - Sigmoid
 - Softmax
+- Square
+- Truncation (rounding to integer towards zero)
 - PReLU
 
 All operators in XNNPACK support NHWC layout, but additionally allow custom stride along the **C**hannel dimension. Thus, operators can consume a subset of channels in the input tensor, and produce a subset of channels in the output tensor, providing a zero-cost Channel Split and Channel Concatenation operations.

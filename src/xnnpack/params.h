@@ -1686,6 +1686,10 @@ struct xnn_parameters {
     xnn_univector_ukernel_function clamp;
     xnn_univector_ukernel_function hswish;
     xnn_univector_ukernel_function neg;
+    xnn_univector_ukernel_function rndne;
+    xnn_univector_ukernel_function rndz;
+    xnn_univector_ukernel_function rndu;
+    xnn_univector_ukernel_function rndd;
     xnn_univector_ukernel_function sigmoid;
     xnn_univector_ukernel_function sqr;
     struct prelu_parameters prelu;

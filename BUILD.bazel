@@ -4446,6 +4446,24 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "bankers_rounding_nc_test",
+    srcs = [
+        "test/bankers-rounding-nc.cc",
+        "test/bankers-rounding-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "ceiling_nc_test",
+    srcs = [
+        "test/ceiling-nc.cc",
+        "test/ceiling-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "channel_shuffle_nc_test",
     srcs = [
         "test/channel-shuffle-nc.cc",
@@ -4522,6 +4540,15 @@ xnnpack_unit_test(
     srcs = [
         "test/fully-connected-nc.cc",
         "test/fully-connected-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "floor_nc_test",
+    srcs = [
+        "test/floor-nc.cc",
+        "test/floor-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
@@ -4666,6 +4693,15 @@ xnnpack_unit_test(
     srcs = [
         "test/binary-elementwise-operator-tester.h",
         "test/subtract-nd.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "truncation_nc_test",
+    srcs = [
+        "test/truncation-nc.cc",
+        "test/truncation-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )
