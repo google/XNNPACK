@@ -24,8 +24,12 @@ class VUnOpMicrokernelTester {
  public:
   enum class OpType {
     Abs,
-    Neg,
-    Sqr,
+    Negate,
+    RoundToNearestEven,
+    RoundTowardsZero,
+    RoundUp,
+    RoundDown,
+    Square,
     Sigmoid,
   };
 
@@ -103,10 +107,22 @@ class VUnOpMicrokernelTester {
           case OpType::Abs:
             y_ref[i] = std::abs(x_data[i]);
             break;
-          case OpType::Neg:
+          case OpType::Negate:
             y_ref[i] = -x_data[i];
             break;
-          case OpType::Sqr:
+          case OpType::RoundToNearestEven:
+            y_ref[i] = std::nearbyint(double(x_data[i]));
+            break;
+          case OpType::RoundTowardsZero:
+            y_ref[i] = std::trunc(double(x_data[i]));
+            break;
+          case OpType::RoundUp:
+            y_ref[i] = std::ceil(double(x_data[i]));
+            break;
+          case OpType::RoundDown:
+            y_ref[i] = std::floor(double(x_data[i]));
+            break;
+          case OpType::Square:
             y_ref[i] = double(x_data[i]) * double(x_data[i]);
             break;
           case OpType::Sigmoid:
@@ -122,6 +138,7 @@ class VUnOpMicrokernelTester {
       union {
         union xnn_f32_abs_params abs;
         union xnn_f32_neg_params neg;
+        union xnn_f32_rnd_params rnd;
       } params;
       switch (op_type) {
         case OpType::Abs:
@@ -134,7 +151,7 @@ class VUnOpMicrokernelTester {
               break;
           }
           break;
-        case OpType::Neg:
+        case OpType::Negate:
           switch (variant) {
             case Variant::Native:
               params.neg = xnn_init_f32_neg_params();
@@ -144,8 +161,21 @@ class VUnOpMicrokernelTester {
               break;
           }
           break;
+        case OpType::RoundToNearestEven:
+        case OpType::RoundTowardsZero:
+        case OpType::RoundUp:
+        case OpType::RoundDown:
+          switch (variant) {
+            case Variant::Native:
+              params.rnd = xnn_init_f32_rnd_params();
+              break;
+            case Variant::Scalar:
+              params.rnd = xnn_init_scalar_f32_rnd_params();
+              break;
+          }
+          break;
         case OpType::Sigmoid:
-        case OpType::Sqr:
+        case OpType::Square:
           break;
       }
 

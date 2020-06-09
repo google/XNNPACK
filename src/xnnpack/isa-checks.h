@@ -87,6 +87,13 @@
     } \
   } while (0)
 
+#define TEST_REQUIRES_ARM_NEON_V8 \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_v8()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
+
 #define TEST_REQUIRES_ARM_NEON_FP16_ARITH \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fp16_arith()) { \

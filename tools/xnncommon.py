@@ -31,6 +31,7 @@ _ARCH_TO_MACRO_MAP = {
 _ISA_TO_ARCH_MAP = {
   "neon": ["aarch32", "aarch64"],
   "neonfma": ["aarch32", "aarch64"],
+  "neonv8": ["aarch32", "aarch64"],
   "neonfp16arith": ["aarch32", "aarch64"],
   "sse": ["x86", "x86-64"],
   "sse2": ["x86", "x86-64"],
@@ -46,6 +47,7 @@ _ISA_TO_ARCH_MAP = {
 _ISA_TO_CHECK_MAP = {
   "neon": "TEST_REQUIRES_ARM_NEON",
   "neonfma": "TEST_REQUIRES_ARM_NEON_FMA",
+  "neonv8": "TEST_REQUIRES_ARM_NEON_V8",
   "neonfp16arith": "TEST_REQUIRES_ARM_NEON_FP16_ARITH",
   "sse": "TEST_REQUIRES_X86_SSE",
   "sse2": "TEST_REQUIRES_X86_SSE2",

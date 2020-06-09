@@ -490,6 +490,26 @@ static inline union xnn_f32_neg_params xnn_init_scalar_f32_neg_params(void)
   return params;
 }
 
+static inline union xnn_f32_rnd_params xnn_init_f32_rnd_params(void)
+{
+  union xnn_f32_rnd_params params = { 0 };
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse2.sign_mask[i] = -0.0f;
+    }
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse2.one[i] = 1.0f;
+    }
+  #endif
+  return params;
+}
+
+static inline union xnn_f32_rnd_params xnn_init_scalar_f32_rnd_params(void)
+{
+  union xnn_f32_rnd_params params = { 0 };
+  return params;
+}
+
 static inline union xnn_f32_chw_params xnn_init_f32_chw_params(
   uint32_t width,
   float output_min,

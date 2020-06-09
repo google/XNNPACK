@@ -1,0 +1,76 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+#include <xnnpack/vunary.h>
+
+
+void xnn_f32_vrndz_ukernel__neon_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+
+  const float32x4_t vintegral_threshold = vreinterpretq_f32_u32(vmovq_n_u32(UINT32_C(0x4B000000)));
+  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+    $for N in range(0, BATCH_TILE, 4):
+      const float32x4_t vx${ABC[N:N+4]} = vld1q_f32(x); x += 4;
+
+    $for N in range(0, BATCH_TILE, 4):
+      const int32x4_t vintx${ABC[N:N+4]} = vcvtq_s32_f32(vx${ABC[N:N+4]});
+
+    $for N in range(0, BATCH_TILE, 4):
+      uint32x4_t vrndmask${ABC[N:N+4]} = vcaltq_f32(vx${ABC[N:N+4]}, vintegral_threshold);
+
+    $for N in range(0, BATCH_TILE, 4):
+      const float32x4_t vrndx${ABC[N:N+4]} = vcvtq_f32_s32(vintx${ABC[N:N+4]});
+
+    $for N in range(0, BATCH_TILE, 4):
+      vrndmask${ABC[N:N+4]} = vbicq_u32(vrndmask${ABC[N:N+4]}, vmovq_n_u32(UINT32_C(0x80000000)));
+
+    $for N in range(0, BATCH_TILE, 4):
+      const float32x4_t vy${ABC[N:N+4]} = vbslq_f32(vrndmask${ABC[N:N+4]}, vrndx${ABC[N:N+4]}, vx${ABC[N:N+4]});
+
+    $for N in range(0, BATCH_TILE, 4):
+      vst1q_f32(y, vy${ABC[N:N+4]}); y += 4;
+  }
+  $if BATCH_TILE > 4:
+    for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
+      const float32x4_t vx = vld1q_f32(x); x += 4;
+      const int32x4_t vintx = vcvtq_s32_f32(vx);
+      uint32x4_t vrndmask = vcaltq_f32(vx, vintegral_threshold);
+      const float32x4_t vrndx = vcvtq_f32_s32(vintx);
+      vrndmask = vbicq_u32(vrndmask, vmovq_n_u32(UINT32_C(0x80000000)));
+      const float32x4_t vy = vbslq_f32(vrndmask, vrndx, vx);
+      vst1q_f32(y, vy); y += 4;
+    }
+  if XNN_UNLIKELY(n != 0) {
+    const float32x4_t vx = vld1q_f32(x);
+    const int32x4_t vintx = vcvtq_s32_f32(vx);
+    uint32x4_t vrndmask = vcaltq_f32(vx, vintegral_threshold);
+    const float32x4_t vrndx = vcvtq_f32_s32(vintx);
+    vrndmask = vbicq_u32(vrndmask, vmovq_n_u32(UINT32_C(0x80000000)));
+    const float32x4_t vy = vbslq_f32(vrndmask, vrndx, vx);
+    float32x2_t vy_lo = vget_low_f32(vy);
+    if (n & (2 * sizeof(float))) {
+      vst1_f32(y, vy_lo); y += 2;
+      vy_lo = vget_high_f32(vy);
+    }
+    if (n & (1 * sizeof(float))) {
+      vst1_lane_f32(y, vy_lo, 0);
+    }
+  }
+}
