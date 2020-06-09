@@ -46,6 +46,13 @@ tools/xngen src/f32-spmm/neon-pipelined.c.in -D MR=16 -D NR=1 -D FMA=1 -o src/f3
 ### Microkernels without unrolling
 tools/xngen src/f32-spmm/sse.c.in -D MR=4 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/4x1-minmax-sse.c
 tools/xngen src/f32-spmm/sse.c.in -D MR=8 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/8x1-minmax-sse.c
+tools/xngen src/f32-spmm/sse.c.in -D MR=16 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/16x1-minmax-sse.c
+
+################################### PSIMD ###################################
+### Microkernels without unrolling
+tools/xngen src/f32-spmm/psimd.c.in -D MR=4 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/4x1-minmax-psimd.c
+tools/xngen src/f32-spmm/psimd.c.in -D MR=8 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/8x1-minmax-psimd.c
+tools/xngen src/f32-spmm/psimd.c.in -D MR=16 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/16x1-minmax-psimd.c
 
 ################################## Unit tests #################################
 tools/generate-spmm-test.py --spec test/f32-spmm-minmax.yaml --output test/f32-spmm-minmax.cc

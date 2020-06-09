@@ -1486,8 +1486,8 @@ static void init(void) {
     };
     #ifndef XNN_NO_NCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_4x1__sse,
-        .mr = 4,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_16x1__sse,
+        .mr = 16,
         .nr = 1,
       };
       xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
@@ -1724,6 +1724,13 @@ static void init(void) {
       .channel_tile = 4,
       .row_tile = 2,
     };
+    #ifndef XNN_NO_NCHW_OPERATORS
+      xnn_params.f32.spmm = (struct spmm_parameters) {
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_16x1__psimd,
+        .mr = 16,
+        .nr = 1,
+      };
+    #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
   /**************************** X32 micro-kernels ****************************/

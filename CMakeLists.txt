@@ -529,6 +529,9 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-prelu/gen/psimd-2x4.c
   src/f32-prelu/gen/psimd-2x8.c
   src/f32-rmax/psimd.c
+  src/f32-spmm/gen/4x1-minmax-psimd.c
+  src/f32-spmm/gen/8x1-minmax-psimd.c
+  src/f32-spmm/gen/16x1-minmax-psimd.c
   src/f32-vbinary/gen/vadd-minmax-psimd-x4.c
   src/f32-vbinary/gen/vadd-minmax-psimd-x8.c
   src/f32-vbinary/gen/vaddc-minmax-psimd-x4.c
@@ -1219,6 +1222,7 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-rmax/sse.c
   src/f32-spmm/gen/4x1-minmax-sse.c
   src/f32-spmm/gen/8x1-minmax-sse.c
+  src/f32-spmm/gen/16x1-minmax-sse.c
   src/f32-vbinary/gen/vadd-minmax-sse-x4.c
   src/f32-vbinary/gen/vadd-minmax-sse-x8.c
   src/f32-vbinary/gen/vaddc-minmax-sse-x4.c

@@ -1,0 +1,156 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert MR % 4 == 0
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <psimd.h>
+
+#include <xnnpack/spmm.h>
+
+
+void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__psimd${"_unroll" + str(UNROLL) if UNROLL > 1 else ""}(
+    uint32_t m,
+    uint32_t n,
+    const float*restrict a,
+    const float*restrict weights,
+    const int32_t*restrict widx_dmap,
+    const uint32_t*restrict nidx_nnzmap,
+    float*restrict c,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(m != 0);
+
+  const psimd_f32 vmin = psimd_load_splat_f32(&params->scalar.min);
+  const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
+  size_t i = m;
+  while XNN_LIKELY(i >= ${MR}) {
+    const float*restrict w = weights;
+    const int32_t* dmap = widx_dmap;
+    const uint32_t* nnzmap = nidx_nnzmap;
+    size_t j = n;
+    do {
+      uint32_t nnz = *nnzmap++;
+      $if UNROLL > 1:
+        psimd_f32 vacc0123x0 = psimd_load_splat_f32(w);
+        w += 1;
+        $for K in range(1, UNROLL):
+          psimd_f32 vacc0123x${K} = psimd_zero_f32();
+        $for M in range(4, MR, 4):
+          psimd_f32 vacc${ABC[M:M+4]}x0 = vacc0123x0;
+          $for K in range(1, UNROLL):
+            psimd_f32 vacc${ABC[M:M+4]}x${K} = psimd_zero_f32();
+        for (; nnz >= ${UNROLL}; nnz -= ${UNROLL}) {
+          $for K in range(UNROLL):
+            const intptr_t diff${K} = dmap[${K}];
+          dmap += ${UNROLL};
+          $for K in range(UNROLL):
+            const psimd_f32 va0123x${K} = psimd_load_f32(a);
+            $for M in range(4, MR, 4):
+              const psimd_f32 va${ABC[M:M+4]}x${K} = psimd_load_f32(a + ${M});
+            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff${K});
+            const psimd_f32 vb${K} = psimd_load_splat_f32(w);
+            w += 1;
+            $for M in range(0, MR, 4):
+              vacc${ABC[M:M+4]}x${K} = psimd_qfma_f32(vacc${ABC[M:M+4]}x${K}, va${ABC[M:M+4]}x${K}, vb${K});
+        }
+        $for M in range(0, MR, 4):
+          psimd_f32 vacc${ABC[M:M+4]} = vacc${ABC[M:M+4]}x0;
+        $for K in range(1, UNROLL):
+          $for M in range(0, MR, 4):
+            vacc${ABC[M:M+4]} = psimd_add_f32(vacc${ABC[M:M+4]}, vacc${ABC[M:M+4]}x${K});
+      $else:
+        psimd_f32 vacc0123 = psimd_load_splat_f32(w); w += 1;
+        $for M in range(4, MR, 4):
+          psimd_f32 vacc${ABC[M:M+4]} = vacc0123;
+      if XNN_LIKELY(nnz != 0) {
+        do {
+          const intptr_t diff = *dmap++;
+          const psimd_f32 va0123 = psimd_load_f32(a);
+          $for M in range(4, MR, 4):
+            const psimd_f32 va${ABC[M:M+4]} = psimd_load_f32(a + ${M});
+          a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+          const psimd_f32 vb = psimd_load_splat_f32(w); w += 1;
+          $for M in range(0, MR, 4):
+            vacc${ABC[M:M+4]} = psimd_qfma_f32(vacc${ABC[M:M+4]}, va${ABC[M:M+4]}, vb);
+        } while (--nnz != 0);
+      }
+      $for M in range(0, MR, 4):
+        psimd_f32 vout${ABC[M:M+4]} = psimd_min_f32(vacc${ABC[M:M+4]}, vmax);
+      $for M in range(0, MR, 4):
+        vout${ABC[M:M+4]} = psimd_max_f32(vout${ABC[M:M+4]}, vmin);
+      psimd_store_f32(c, vout0123);
+      $for M in range(4, MR, 4):
+        psimd_store_f32(c + ${M}, vout${ABC[M:M+4]});
+      c += ${NR} * m;
+    } while (--j != 0);
+    c -= m * n;
+    c += ${MR};
+    a += ${MR};
+    i -= ${MR};
+  }
+  if XNN_UNLIKELY(i != 0) {
+    $for LOG2M in reversed(range((MR - 1).bit_length())):
+      $SUBMR = 1 << LOG2M
+      if (i & ${SUBMR}) {
+        const float*restrict w = weights;
+        const int32_t* dmap = widx_dmap;
+        const uint32_t* nnzmap = nidx_nnzmap;
+        size_t j = n;
+        do {
+          uint32_t nnz = *nnzmap++;
+          $if SUBMR == 1:
+            psimd_f32 vacc0 = psimd_load_splat_f32(w); w += 1;
+          $elif SUBMR == 2:
+            psimd_f32 vacc01 = psimd_load_splat_f32(w); w += 1;
+          $else:
+            psimd_f32 vacc0123 = psimd_load_splat_f32(w); w += 1;
+          $for M in range(4, SUBMR, 4):
+            psimd_f32 vacc${ABC[M:M+4]} = vacc0123;
+          if XNN_LIKELY(nnz != 0) {
+            do {
+              const intptr_t diff = *dmap++;
+              $if SUBMR >= 4:
+                const psimd_f32 va0123 = psimd_load_f32(a);
+              $elif SUBMR == 2:
+                const psimd_f32 va01 = psimd_load2_f32(a);
+              $elif SUBMR == 1:
+                const psimd_f32 va0 = psimd_load_splat_f32(a);
+              $for M in range(4, SUBMR, 4):
+                const psimd_f32 va${ABC[M:M+4]} = psimd_load_f32(a + ${M});
+              a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+              const psimd_f32 vb = psimd_load_splat_f32(w); w += 1;
+              $if SUBMR == 1:
+                vacc${ABC[0]} = psimd_qfma_f32(vacc${ABC[0]}, va${ABC[0]}, vb);
+              $else:
+                $for M in range(0, SUBMR, 4):
+                  vacc${ABC[M:min(M+4,SUBMR)]} = psimd_qfma_f32(vacc${ABC[M:min(M+4,SUBMR)]}, va${ABC[M:min(M+4,SUBMR)]}, vb);
+            } while (--nnz != 0);
+          }
+          $if SUBMR == 1:
+            psimd_f32 vout${ABC[0]} = psimd_min_f32(vacc${ABC[0]}, vmax);
+            vout${ABC[0]} = psimd_max_f32(vout${ABC[0]}, vmin);
+          $else:
+            $for M in range(0, SUBMR, 4):
+              psimd_f32 vout${ABC[M:min(M+4,SUBMR)]} = psimd_min_f32(vacc${ABC[M:min(M+4,SUBMR)]}, vmax);
+            $for M in range(0, SUBMR, 4):
+              vout${ABC[M:min(M+4,SUBMR)]} = psimd_max_f32(vout${ABC[M:min(M+4,SUBMR)]}, vmin);
+          $if SUBMR >= 4:
+            psimd_store_f32(c, vout0123);
+          $elif SUBMR == 2:
+            psimd_store2_f32(c, vout01);
+          $elif SUBMR == 1:
+            psimd_store1_f32(c, vout0);
+          $for M in range(4, SUBMR, 4):
+            psimd_store_f32(c + ${M}, vout${ABC[M:M+4]});
+          c += ${NR} * m;
+        } while (--j != 0);
+        c -= m * n;
+        c += ${SUBMR};
+        a += ${SUBMR};
+      }
+  }
+}
