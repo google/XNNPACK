@@ -84,6 +84,7 @@ def xnnpack_cc_library(
         gcc_x86_copts = [],
         msvc_x86_32_copts = [],
         msvc_x86_64_copts = [],
+        apple_aarch32_copts = [],
         aarch32_copts = [],
         aarch64_copts = [],
         asmjs_copts = [],
@@ -116,10 +117,16 @@ def xnnpack_cc_library(
       gcc_copts: The list of compiler flags to use with GCC-like compilers.
       msvc_copts: The list of compiler flags to use with MSVC compiler.
       mingw_copts: The list of compiler flags to use with MinGW GCC compilers.
-      msys_copts: The list of compiler flags to use with MSYS (Cygwin) GCC compilers.
-      gcc_x86_copts: The list of GCC-like compiler flags to use in x86 (32-bit and 64-bit) builds.
-      msvc_x86_32_copts: The list of MSVC compiler flags to use in x86 (32-bit) builds.
-      msvc_x86_64_copts: The list of MSVC compiler flags to use in x86 (64-bit) builds.
+      msys_copts: The list of compiler flags to use with MSYS (Cygwin) GCC
+                  compilers.
+      gcc_x86_copts: The list of GCC-like compiler flags to use in x86 (32-bit
+                     and 64-bit) builds.
+      msvc_x86_32_copts: The list of MSVC compiler flags to use in x86 (32-bit)
+                         builds.
+      msvc_x86_64_copts: The list of MSVC compiler flags to use in x86 (64-bit)
+                         builds.
+      apple_aarch32_copts: The list of compiler flags to use in AArch32 builds
+                           with Apple Clang.
       aarch32_copts: The list of compiler flags to use in AArch32 builds.
       aarch64_copts: The list of compiler flags to use in AArch64 builds.
       asmjs_copts: The list of compiler flags to use in Asm.js builds.
@@ -184,12 +191,12 @@ def xnnpack_cc_library(
             ":android_arm64": aarch64_copts,
             ":android_x86": gcc_x86_copts,
             ":android_x86_64": gcc_x86_copts,
-            ":ios_armv7": aarch32_copts,
+            ":ios_armv7": apple_aarch32_copts,
             ":ios_arm64": aarch64_copts,
             ":ios_arm64e": aarch64_copts,
             ":ios_x86": gcc_x86_copts,
             ":ios_x86_64": gcc_x86_copts,
-            ":watchos_armv7k": aarch32_copts,
+            ":watchos_armv7k": apple_aarch32_copts,
             ":watchos_arm64_32": aarch64_copts,
             ":watchos_x86": gcc_x86_copts,
             ":watchos_x86_64": gcc_x86_copts,
