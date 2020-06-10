@@ -4819,6 +4819,11 @@ config_setting(
 )
 
 config_setting(
+    name = "linux_armv7a",
+    values = {"cpu": "armv7a"},
+)
+
+config_setting(
     name = "linux_aarch64",
     values = {"cpu": "aarch64"},
 )
