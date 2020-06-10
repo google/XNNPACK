@@ -488,6 +488,7 @@ PSIMD_FASTMATH_UKERNELS = [
     "src/f32-dwconv/gen/up8x4-minmax-psimd.c",
     "src/f32-dwconv/gen/up8x9-minmax-psimd-acc2.c",
     "src/f32-dwconv/gen/up8x9-minmax-psimd.c",
+    "src/f32-gavgpool-cw/psimd-x4.c",
     "src/f32-gavgpool/7p7x-minmax-psimd-c4.c",
     "src/f32-gavgpool/7x-minmax-psimd-c4.c",
     "src/f32-gemm/gen/1x8-minmax-psimd-loadsplat.c",

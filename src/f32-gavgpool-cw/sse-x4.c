@@ -71,7 +71,7 @@ void xnn_f32_gavgpool_cw_ukernel__sse_x4(
       vsum3 = _mm_add_ps(vsum3, vi3);
     }
 
-    // Having exaclty 4 rows makes this work out nicely as we end up with
+    // Having exactly 4 rows makes this work out nicely as we end up with
     // the 4 totals in 4 different lanes of the same vector.
     const __m128 vsum01 = _mm_add_ps(_mm_unpacklo_ps(vsum0, vsum1), _mm_unpackhi_ps(vsum0, vsum1));
     const __m128 vsum23 = _mm_add_ps(_mm_unpacklo_ps(vsum2, vsum3), _mm_unpackhi_ps(vsum2, vsum3));

@@ -144,6 +144,7 @@ union xnn_f32_scaleminmax_params {
 
 union xnn_f32_gavgpool_params {
   struct {
+    XNN_ALIGN(16) int32_t mask[4];
     float multiplier;
     float output_min;
     float output_max;
