@@ -305,6 +305,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-igemm/gen/2x4-minmax-scalar.c
   src/f32-igemm/gen/4x2-minmax-scalar.c
   src/f32-igemm/gen/4x4-minmax-scalar.c
+  src/f32-lrelu/gen/scalar-x1.c
+  src/f32-lrelu/gen/scalar-x2.c
+  src/f32-lrelu/gen/scalar-x4.c
   src/f32-maxpool/9p8x-minmax-scalar-c1.c
   src/f32-pavgpool/9p8x-minmax-scalar-c1.c
   src/f32-pavgpool/9x-minmax-scalar-c1.c
@@ -530,6 +533,8 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-igemm/gen/6x8-minmax-psimd-loadsplat.c
   src/f32-igemm/gen/6x8-minmax-psimd-splat.c
   src/f32-igemm/gen/6x8s4-minmax-psimd.c
+  src/f32-lrelu/gen/psimd-x4.c
+  src/f32-lrelu/gen/psimd-x8.c
   src/f32-maxpool/9p8x-minmax-psimd-c4.c
   src/f32-pavgpool/9p8x-minmax-psimd-c4.c
   src/f32-pavgpool/9x-minmax-psimd-c4.c
@@ -705,6 +710,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8s4-minmax-neon.c
   src/f32-igemm/gen/6x8s4-minmax-neon.c
   src/f32-igemm/gen/8x8s4-minmax-neon.c
+  src/f32-lrelu/gen/neon-x4.c
+  src/f32-lrelu/gen/neon-x8.c
   src/f32-maxpool/9p8x-minmax-neon-c4.c
   src/f32-pavgpool/9p8x-minmax-neon-c4.c
   src/f32-pavgpool/9x-minmax-neon-c4.c
@@ -1223,6 +1230,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8-minmax-sse-dup.c
   src/f32-igemm/gen/4x8-minmax-sse-load1.c
   src/f32-igemm/gen/4x8s4-minmax-sse.c
+  src/f32-lrelu/gen/sse-x4.c
+  src/f32-lrelu/gen/sse-x8.c
   src/f32-maxpool/9p8x-minmax-sse-c4.c
   src/f32-pavgpool/9p8x-minmax-sse-c4.c
   src/f32-pavgpool/9x-minmax-sse-c4.c
@@ -1420,6 +1429,8 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/3x16-minmax-avx-broadcast.c
   src/f32-igemm/gen/4x16-minmax-avx-broadcast.c
   src/f32-igemm/gen/5x16-minmax-avx-broadcast.c
+  src/f32-lrelu/gen/avx-x8.c
+  src/f32-lrelu/gen/avx-x16.c
   src/f32-prelu/gen/avx-2x8.c
   src/f32-prelu/gen/avx-2x16.c
   src/f32-rmax/avx.c
@@ -1669,6 +1680,8 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-igemm/gen/6x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/7x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/8x16-minmax-avx512f-broadcast.c
+  src/f32-lrelu/gen/avx512f-x16.c
+  src/f32-lrelu/gen/avx512f-x32.c
   src/f32-prelu/gen/avx512f-2x16.c
   src/f32-prelu/gen/avx512f-2x32.c
   src/f32-raddexpminusmax/gen/avx512f-p5-scalef-x128.c
@@ -2969,6 +2982,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vrdivc-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vrdivc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vrdivc-minmax-test f32-vrdivc-minmax-test)
+
+  ADD_EXECUTABLE(f32-vlrelu-test test/f32-vlrelu.cc)
+  SET_TARGET_PROPERTIES(f32-vlrelu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vlrelu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vlrelu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vlrelu-test f32-vlrelu-test)
 
   ADD_EXECUTABLE(f32-vmax-test test/f32-vmax.cc)
   SET_TARGET_PROPERTIES(f32-vmax-test PROPERTIES

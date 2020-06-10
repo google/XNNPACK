@@ -24,6 +24,7 @@ class VUnOpMicrokernelTester {
  public:
   enum class OpType {
     Abs,
+    LeakyReLU,
     Negate,
     RoundToNearestEven,
     RoundTowardsZero,
@@ -55,6 +56,15 @@ class VUnOpMicrokernelTester {
 
   inline bool inplace() const {
     return this->inplace_;
+  }
+
+  inline VUnOpMicrokernelTester& slope(float slope) {
+    this->slope_ = slope;
+    return *this;
+  }
+
+  inline float slope() const {
+    return this->slope_;
   }
 
   inline VUnOpMicrokernelTester& qmin(uint8_t qmin) {
@@ -107,6 +117,9 @@ class VUnOpMicrokernelTester {
           case OpType::Abs:
             y_ref[i] = std::abs(x_data[i]);
             break;
+          case OpType::LeakyReLU:
+            y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * slope() : x_data[i];
+            break;
           case OpType::Negate:
             y_ref[i] = -x_data[i];
             break;
@@ -137,6 +150,7 @@ class VUnOpMicrokernelTester {
       // Prepare parameters.
       union {
         union xnn_f32_abs_params abs;
+        union xnn_f32_lrelu_params lrelu;
         union xnn_f32_neg_params neg;
         union xnn_f32_rnd_params rnd;
       } params;
@@ -148,6 +162,16 @@ class VUnOpMicrokernelTester {
               break;
             case Variant::Scalar:
               params.abs = xnn_init_scalar_f32_abs_params();
+              break;
+          }
+          break;
+        case OpType::LeakyReLU:
+          switch (variant) {
+            case Variant::Native:
+              params.lrelu = xnn_init_f32_lrelu_params(slope());
+              break;
+            case Variant::Scalar:
+              params.lrelu = xnn_init_scalar_f32_lrelu_params(slope());
               break;
           }
           break;
@@ -193,6 +217,7 @@ class VUnOpMicrokernelTester {
  private:
   size_t batch_size_{1};
   bool inplace_{false};
+  float slope_{0.5f};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   size_t iterations_{15};

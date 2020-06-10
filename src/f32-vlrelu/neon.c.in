@@ -1,0 +1,65 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vunary.h>
+
+
+void xnn_f32_vlrelu_ukernel__neon_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+
+  const float32x4_t vslope = vld1q_dup_f32(&params->scalar.slope);
+
+  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+    $for N in range(0, BATCH_TILE, 4):
+      const float32x4_t vx${ABC[N:N+4]} = vld1q_f32(x); x += 4;
+
+    $for N in range(0, BATCH_TILE, 4):
+      float32x4_t vacc${ABC[N:N+4]} = vmulq_f32(vx${ABC[N:N+4]}, vslope);
+      const uint32x4_t vmask${ABC[N:N+4]} = vcltq_s32(vreinterpretq_s32_f32(vx${ABC[N:N+4]}), vmovq_n_s32(0));
+
+    $for N in range(0, BATCH_TILE, 4):
+      vacc${ABC[N:N+4]} = vbslq_f32(vmask${ABC[N:N+4]}, vacc${ABC[N:N+4]}, vx${ABC[N:N+4]});
+
+    $for N in range(0, BATCH_TILE, 4):
+      vst1q_f32(y, vacc${ABC[N:N+4]}); y += 4;
+  }
+  $if BATCH_TILE > 4:
+    for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
+      const float32x4_t vx = vld1q_f32(x); x += 4;
+      float32x4_t vacc = vmulq_f32(vx, vslope);
+      const uint32x4_t vmask = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
+      vacc = vbslq_f32(vmask, vacc, vx);
+      vst1q_f32(y, vacc); y += 4;
+    }
+  if XNN_UNLIKELY(n != 0) {
+    const float32x4_t vx = vld1q_f32(x);
+    float32x4_t vacc = vmulq_f32(vx, vslope);
+    const uint32x4_t vmask = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
+    vacc = vbslq_f32(vmask, vacc, vx);
+
+    float32x2_t vacc_lo = vget_low_f32(vacc);
+    if (n & (2 * sizeof(float))) {
+      vst1_f32(y, vacc_lo); y += 2;
+      vacc_lo = vget_high_f32(vacc);
+    }
+    if (n & (1 * sizeof(float))) {
+      vst1_lane_f32(y, vacc_lo, 0);
+    }
+  }
+}

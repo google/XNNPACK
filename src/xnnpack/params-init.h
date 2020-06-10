@@ -528,6 +528,26 @@ static inline union xnn_f32_rnd_params xnn_init_scalar_f32_rnd_params(void)
   return params;
 }
 
+static inline union xnn_f32_lrelu_params xnn_init_f32_lrelu_params(float slope)
+{
+  union xnn_f32_lrelu_params params;
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse.slope[i] = slope;
+    }
+  #else
+    params.scalar.slope = slope;
+  #endif
+  return params;
+}
+
+static inline union xnn_f32_lrelu_params xnn_init_scalar_f32_lrelu_params(float slope)
+{
+  union xnn_f32_lrelu_params params;
+  params.scalar.slope = slope;
+  return params;
+}
+
 static inline union xnn_f32_chw_params xnn_init_f32_chw_params(
   uint32_t width,
   float output_min,

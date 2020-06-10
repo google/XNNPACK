@@ -27,11 +27,12 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_(sigmoid|vabs|vneg|vsqr|vrndne|vrndz|vrndd|vrndu)_(fact_)?ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_(sigmoid|vabs|vlrelu|vneg|vsqr|vrndne|vrndz|vrndd|vrndu)_(fact_)?ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
     "vabs": "Abs",
+    "vlrelu": "LeakyReLU",
     "vneg": "Negate",
     "sigmoid": "Sigmoid",
     "vrndne": "RoundToNearestEven",
@@ -96,6 +97,20 @@ TEST(${TEST_NAME}, inplace) {
       .Test(${", ".join(TEST_ARGS)});
   }
 }
+
+$if OP_TYPE == "LeakyReLU":
+  TEST(${TEST_NAME}, slope) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VUnOpMicrokernelTester()
+          .batch_size(batch_size)
+          .slope(slope)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
 """
 
 

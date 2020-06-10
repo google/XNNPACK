@@ -1,0 +1,64 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vunary.h>
+
+
+void xnn_f32_vlrelu_ukernel__scalar_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+
+  const float vslope = params->scalar.slope;
+
+  $if BATCH_TILE > 1:
+    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(BATCH_TILE):
+        const float vx${ABC[N]} = x[${N}];
+      x += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        float vacc${ABC[N]} = vx${ABC[N]} * vslope;
+
+      $for N in range(BATCH_TILE):
+        vacc${ABC[N]} = XNN_UNPREDICTABLE(vx${ABC[N]} < 0.0f) ? vacc${ABC[N]} : vx${ABC[N]};
+
+      $for N in range(BATCH_TILE):
+        y[${N}] = vacc${ABC[N]};
+      y += ${BATCH_TILE};
+    }
+    if XNN_UNLIKELY(n != 0) {
+      $if BATCH_TILE > 2:
+        do {
+          const float vx = *x++;
+          float vacc = vx * vslope;
+          vacc = XNN_UNPREDICTABLE(vx < 0.0f) ? vacc : vx;
+          *y++ = vacc;
+          n -= sizeof(float);
+        } while (n != 0);
+      $else:
+        const float vx = *x;
+        float vacc = vx * vslope;
+        vacc = XNN_UNPREDICTABLE(vx < 0.0f) ? vacc : vx;
+        *y = vacc;
+    }
+  $else:
+    do {
+      const float vx = *x++;
+      float vacc = vx * vslope;
+      vacc = XNN_UNPREDICTABLE(vx < 0.0f) ? vacc : vx;
+      *y++ = vacc;
+      n -= sizeof(float);
+    } while (n != 0);
+}
