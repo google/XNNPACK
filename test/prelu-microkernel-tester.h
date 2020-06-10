@@ -119,7 +119,8 @@ class PReLUMicrokernelTester {
       for (size_t n = 0; n < rows(); n++) {
         for (size_t c = 0; c < channels(); c++) {
           const float x_value = fp16_ieee_to_fp32_value(x_data[n * input_stride() + c]);
-          y_ref[n * channels() + c] = std::signbit(x_value) ? x_value * fp16_ieee_to_fp32_value(w[c]) : x_value;
+          y_ref[n * channels() + c] = std::signbit(x_value) ?
+              fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(x_value * fp16_ieee_to_fp32_value(w[c]))) : x_value;
         }
       }
 
@@ -132,10 +133,7 @@ class PReLUMicrokernelTester {
       // Verify results.
       for (size_t n = 0; n < rows(); n++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(
-              fp16_ieee_to_fp32_value(y[n * output_stride() + c]),
-              y_ref[n * channels() + c],
-              1.0e-1f * std::abs(y_ref[n * channels() + c]))  // typically 1.0e-2f
+          ASSERT_EQ(fp16_ieee_to_fp32_value(y[n * output_stride() + c]), y_ref[n * channels() + c])
             << "at row " << n << " / " << rows()
             << ", channel " << c << " / " << channels();
         }
@@ -180,10 +178,7 @@ class PReLUMicrokernelTester {
       // Verify results.
       for (size_t n = 0; n < rows(); n++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(
-              y[n * output_stride() + c],
-              y_ref[n * channels() + c],
-              1.0e-6f * std::abs(y_ref[n * channels() + c]))
+          ASSERT_EQ(y[n * output_stride() + c], y_ref[n * channels() + c])
             << "at row " << n << " / " << rows()
             << ", channel " << c << " / " << channels();
         }
