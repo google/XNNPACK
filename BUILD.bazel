@@ -2905,7 +2905,7 @@ xnnpack_cc_library(
         "src/runtime.c",
         "src/subgraph.c",
         "src/tensor.c",
-    ] + SUBGRAPH_SRCS + LOGGING_SRCS,
+    ] + SUBGRAPH_SRCS,
     hdrs = ["include/xnnpack.h"],
     copts = LOGGING_COPTS + [
         "-Isrc",
@@ -2944,7 +2944,7 @@ xnnpack_cc_library(
         "src/runtime.c",
         "src/subgraph.c",
         "src/tensor.c",
-    ] + SUBGRAPH_SRCS + LOGGING_SRCS,
+    ] + SUBGRAPH_SRCS,
     hdrs = ["include/xnnpack.h"],
     copts = LOGGING_COPTS + [
         "-Isrc",
