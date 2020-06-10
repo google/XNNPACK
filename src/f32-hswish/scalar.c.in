@@ -9,7 +9,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
-#include <xnnpack/vbinary.h>
+#include <xnnpack/hswish.h>
 
 
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"

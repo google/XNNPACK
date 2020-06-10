@@ -11,7 +11,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
-#include <xnnpack/vbinary.h>
+#include <xnnpack/hswish.h>
 
 
 void xnn_f32_hswish_ukernel__scalar_x4(

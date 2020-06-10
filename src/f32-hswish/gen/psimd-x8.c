@@ -12,7 +12,7 @@
 #include <psimd.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/vbinary.h>
+#include <xnnpack/hswish.h>
 
 
 void xnn_f32_hswish_ukernel__psimd_x8(
