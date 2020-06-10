@@ -18,12 +18,18 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
   switch (type) {
     case xnn_node_type_invalid:
       return "Invalid";
+    case xnn_node_type_abs:
+      return "Abs";
     case xnn_node_type_add2:
       return "Add2";
     case xnn_node_type_argmax_pooling_2d:
       return "ArgMax Pooling 2D";
     case xnn_node_type_average_pooling_2d:
       return "Average Pooling 2D";
+    case xnn_node_type_bankers_rounding:
+      return "Bankers Rounding";
+    case xnn_node_type_ceiling:
+      return "Ceiling";
     case xnn_node_type_clamp:
       return "Clamp";
     case xnn_node_type_constant_pad:
@@ -38,6 +44,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Divide";
     case xnn_node_type_fully_connected:
       return "Fully Connected";
+    case xnn_node_type_floor:
+      return "Floor";
     case xnn_node_type_hardswish:
       return "HardSwish";
     case xnn_node_type_maximum2:
@@ -48,12 +56,16 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Multiply2";
     case xnn_node_type_max_pooling_2d:
       return "Max Pooling 2D";
+    case xnn_node_type_negate:
+      return "Negate";
     case xnn_node_type_prelu:
       return "PReLU";
     case xnn_node_type_sigmoid:
       return "Sigmoid";
     case xnn_node_type_softmax:
       return "Softmax";
+    case xnn_node_type_square:
+      return "Square";
     case xnn_node_type_squared_difference:
       return "Squared Difference";
     case xnn_node_type_subtract:
