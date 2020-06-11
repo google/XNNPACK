@@ -14,7 +14,7 @@
 #     const float*restrict w,            x5
 #     float*restrict c,                  x6
 #     size_t cm_stride,                  x7
-#     size_t cn_stride,                  [sp] -> x10
+#     size_t cn_stride,                  [sp] -> (x0)
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const float* zero,                 [sp + 16] -> x12
 #     const xnn_f32_minmax_params params [sp + 24] -> (x8)
@@ -30,7 +30,7 @@
 # C pointers
 # x6  c0
 # x17 c1
-# x18 c2
+# x10 c2
 # x7  c3 / cm_stride
 
 # x8 temporary vector shadow register
@@ -57,8 +57,8 @@
 
 BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
 
-        # Load cn_stride, a_offset
-        LDP x10, x11, [sp]
+        # Load a_offset
+        LDR x11, [sp, 8]
 
         # Load zero, params pointer
         LDP x12, x8, [sp, 16]
@@ -76,14 +76,14 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         ADD x17, x6, x7          // c1 = c0 + cm_stride
         CSEL x17, x6, x17, LO    //   c1 = c0
 
-        ADD x18, x17, x7         // c2 = c1 + cm_stride
+        ADD x10, x17, x7         // c2 = c1 + cm_stride
                                  // if mr <= 2
 
-        CSEL x18, x17, x18, LS   //   c2 = c1
+        CSEL x10, x17, x10, LS   //   c2 = c1
 
         CMP x0, 4                // if mr < 4
-        ADD x7, x18, x7          // c3 = c2 + cm_stride
-        CSEL x7, x18, x7, LO     //   c3 = c2
+        ADD x7, x10, x7          // c3 = c2 + cm_stride
+        CSEL x7, x10, x7, LO     //   c3 = c2
 
 0:
         # Load initial bias from w into accumulators
@@ -425,7 +425,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
 
         # Clamp
         FMAX v20.4s, v20.4s, v4.4s
-        SUBS x1, x1, 12
+        # Load cn_stride
+        LDR x0, [sp, 48]
         FMAX v21.4s, v21.4s, v4.4s
         FMAX v22.4s, v22.4s, v4.4s
         FMAX v23.4s, v23.4s, v4.4s
@@ -437,6 +438,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMAX v29.4s, v29.4s, v4.4s
         FMAX v30.4s, v30.4s, v4.4s
         FMAX v31.4s, v31.4s, v4.4s
+        SUBS x1, x1, 12
         FMIN v20.4s, v20.4s, v5.4s
         FMIN v21.4s, v21.4s, v5.4s
         FMIN v22.4s, v22.4s, v5.4s
@@ -453,10 +455,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         # Store full 4 x 12
         B.LO 8f
 
-        ST1 {v29.16b, v30.16b, v31.16b},  [x7], x10
-        ST1 {v26.16b, v27.16b, v28.16b}, [x18], x10
-        ST1 {v23.16b, v24.16b, v25.16b}, [x17], x10
-        ST1 {v20.16b, v21.16b, v22.16b},  [x6], x10
+        ST1 {v29.16b, v30.16b, v31.16b},  [x7], x0
+        ST1 {v26.16b, v27.16b, v28.16b}, [x10], x0
+        ST1 {v23.16b, v24.16b, v25.16b}, [x17], x0
+        ST1 {v20.16b, v21.16b, v22.16b},  [x6], x0
         SUB x4, x4, x3  // a -= ks
 
         # nc loop
@@ -538,7 +540,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         TBZ x1, 3, 9f
         STP q29, q30,  [x7], 32
         MOV v29.16b, v31.16b
-        STP q26, q27, [x18], 32
+        STP q26, q27, [x10], 32
         MOV v26.16b, v28.16b
         STP q23, q24, [x17], 32
         MOV v23.16b, v25.16b
@@ -549,7 +551,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         TBZ x1, 2, 10f
         STR q29,  [x7], 16
         MOV v29.16b, v30.16b
-        STR q26, [x18], 16
+        STR q26, [x10], 16
         MOV v26.16b, v27.16b
         STR q23,  [x17], 16
         MOV v23.16b, v24.16b
@@ -560,7 +562,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         TBZ x1, 1, 11f
         STR d29,  [x7], 8
         DUP d29, v29.d[1]
-        STR d26, [x18], 8
+        STR d26, [x10], 8
         DUP d26, v26.d[1]
         STR d23, [x17], 8
         DUP d23, v23.d[1]
@@ -570,7 +572,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
 11:
         TBZ x1, 0, 12f
         STR s29,  [x7]
-        STR s26, [x18]
+        STR s26, [x10]
         STR s23, [x17]
         STR s20,  [x6]
 12:

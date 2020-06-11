@@ -14,7 +14,7 @@
 #     const void*restrict w,             x5
 #     uint8_t*restrict c,                x6
 #     size_t cm_stride,                  x7
-#     size_t cn_stride,                  [sp] -> x10
+#     size_t cn_stride,                  [sp] -> (x0)
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const float* zero,                 [sp + 16] -> x12
 #     const xnn_f32_minmax_params params [sp + 24] -> x8
@@ -33,7 +33,7 @@
 #  x6 c0
 # x16 c1
 # x17 c2
-# x18 c3
+# x10 c3
 # x13 c4
 #  x7 c5
 
@@ -69,20 +69,20 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         CSEL x17, x16, x17, LS   //   c2 = c1
 
         CMP x0, 4                // if mr < 4
-        ADD x18, x17, x7         // c3 = c2 + cm_stride
-        CSEL x18, x17, x18, LO   //   c3 = c2
+        ADD x10, x17, x7         // c3 = c2 + cm_stride
+        CSEL x10, x17, x10, LO   //   c3 = c2
 
-        ADD x13, x18, x7         // c4 = c3 + cm_stride
+        ADD x13, x10, x7         // c4 = c3 + cm_stride
                                  // if mr <= 4
-        CSEL x13, x18, x13, LS   //   c4 = c3
+        CSEL x13, x10, x13, LS   //   c4 = c3
 
 
         CMP x0, 6                // if mr < 6
         ADD x7, x13, x7          // c5 = c4 + cm_stride
         CSEL x7, x13, x7, LO     //   c5 = c4
 
-        # Load cn_stride, a_offset
-        LDP x10, x11, [sp]
+        # Load a_offset
+        LDR x11, [sp, 8]
 
         # Load zero, params pointer
         LDP x12, x8, [sp, 16]
@@ -338,7 +338,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         LDR  x19, [x23], 8             // a5
         FMLA v29.4s, v17.4s,  v2.s[0]
         FMLA v31.4s, v17.4s,  v2.s[2]
-        PRFM PSTL1KEEP, [x18]          // Prefetch C3
+        PRFM PSTL1KEEP, [x10]          // Prefetch C3
 
         // BLOCK 4
         LDR  d13, [x5, 16]
@@ -425,7 +425,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
 
         # Clamp
         FMAX v20.4s, v20.4s, v6.4s
-        SUBS x1, x1, 8
+        # Load cn_stride
+        LDR x0, [sp, 80]
         FMAX v21.4s, v21.4s, v6.4s
         FMAX v22.4s, v22.4s, v6.4s
         FMAX v23.4s, v23.4s, v6.4s
@@ -437,6 +438,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMAX v29.4s, v29.4s, v6.4s
         FMAX v30.4s, v30.4s, v6.4s
         FMAX v31.4s, v31.4s, v6.4s
+        SUBS x1, x1, 8
         FMIN v20.4s, v20.4s, v7.4s
         FMIN v21.4s, v21.4s, v7.4s
         FMIN v22.4s, v22.4s, v7.4s
@@ -454,17 +456,17 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         B.LO 8f
 
         STP q30, q31,  [x7]
-        ADD x7, x7, x10
+        ADD x7, x7, x0
         STP q28, q29, [x13]
-        ADD x13, x13, x10
-        STP q26, q27, [x18]
-        ADD x18, x18, x10
+        ADD x13, x13, x0
+        STP q26, q27, [x10]
+        ADD x10, x10, x0
         STP q24, q25, [x17]
-        ADD x17, x17, x10
+        ADD x17, x17, x0
         STP q22, q23, [x16]
-        ADD x16, x16, x10
+        ADD x16, x16, x0
         STP q20, q21,  [x6]
-        ADD  x6,  x6, x10
+        ADD  x6,  x6, x0
 
         SUB x4, x4, x3  // a -= ks
 
@@ -554,7 +556,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         MOV v30.16b, v31.16b
         STR q28, [x13], 16
         MOV v28.16b, v29.16b
-        STR q26, [x18], 16
+        STR q26, [x10], 16
         MOV v26.16b, v27.16b
         STR q24, [x17], 16
         MOV v24.16b, v25.16b
@@ -568,7 +570,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         DUP d30, v30.d[1]
         STR d28, [x13], 8
         DUP d28, v28.d[1]
-        STR d26, [x18], 8
+        STR d26, [x10], 8
         DUP d26, v26.d[1]
         STR d24, [x17], 8
         DUP d24, v24.d[1]
@@ -581,7 +583,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         TBZ x1, 0, 11f
         STR s30,  [x7]
         STR s28, [x13]
-        STR s26, [x18]
+        STR s26, [x10]
         STR s24, [x17]
         STR s22, [x16]
         STR s20,  [x6]

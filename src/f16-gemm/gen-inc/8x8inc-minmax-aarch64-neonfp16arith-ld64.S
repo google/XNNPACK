@@ -18,7 +18,7 @@
 #     const void*restrict w,    x5
 #     uint8_t*restrict c,       x6
 #     size_t cm_stride,         x7
-#     size_t cn_stride,         [sp] -> x14
+#     size_t cn_stride,         [sp] -> (x0)
 #     const float*restrict acc,  [sp + 8] -> x15
 #     const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 16] -> x8
 
@@ -38,7 +38,7 @@
 #  x6 c0
 # x16 c1
 # x17 c2
-# x18 c3
+# x14 c3
 # x13 c4
 # x21 c5
 # x22 c6
@@ -69,10 +69,8 @@
 
 BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
 
-        # Load cn_stride, acc
-        LDP x14, x15, [sp]
-        # Load params pointer
-        LDR x8, [sp, 16]
+        # Load acc, params pointer
+        LDP x15, x8, [sp, 8]
 
         # Save x19,x20,x21,x22 on stack
         STP x19, x20, [sp, -32]!
@@ -93,15 +91,15 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
 
         CMP x0, 4                // if mr < 4
         ADD x11, x10, x4         // a3 = a2 + a_stride
-        ADD x18, x17, x7         // c3 = c2 + cm_stride
+        ADD x14, x17, x7         // c3 = c2 + cm_stride
         CSEL x11, x10, x11, LO   //   a3 = a2
-        CSEL x18, x17, x18, LO   //   c3 = c2
+        CSEL x14, x17, x14, LO   //   c3 = c2
 
         ADD x12, x11, x4         // a4 = a3 + a_stride
-        ADD x13, x18, x7         // c4 = c3 + cm_stride
+        ADD x13, x14, x7         // c4 = c3 + cm_stride
                                  // if mr <= 4
         CSEL x12, x11, x12, LS   //   a4 = a3
-        CSEL x13, x18, x13, LS   //   c4 = c3
+        CSEL x13, x14, x13, LS   //   c4 = c3
 
         CMP x0, 6                // if mr < 6
         ADD x19, x12, x4         // a5 = a4 + a_stride
@@ -202,8 +200,8 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         FMUL v29.8h, v29.8h, v20.8h
         FMUL v30.8h, v30.8h, v20.8h
         FMUL v31.8h, v31.8h, v20.8h
-
-        SUBS x1, x1, 8
+        # Load cn_stride
+        LDR x0, [sp, 32]
         FMAX v24.8h, v24.8h, v21.8h
         FMAX v25.8h, v25.8h, v21.8h
         FMAX v26.8h, v26.8h, v21.8h
@@ -212,7 +210,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         FMAX v29.8h, v29.8h, v21.8h
         FMAX v30.8h, v30.8h, v21.8h
         FMAX v31.8h, v31.8h, v21.8h
-
+        SUBS x1, x1, 8
         FMIN v24.8h, v24.8h, v22.8h
         FMIN v25.8h, v25.8h, v22.8h
         FMIN v26.8h, v26.8h, v22.8h
@@ -225,21 +223,21 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         # Store full 8 x 8
         B.LO 8f
 
-        ST1 {v31.16b},  [x7], x14
+        ST1 {v31.16b},  [x7], x0
         SUB  x3,  x3, x2 // a0 -= kc
-        ST1 {v30.16b}, [x22], x14
+        ST1 {v30.16b}, [x22], x0
         SUB  x9,  x9, x2 // a1 -= kc
-        ST1 {v29.16b}, [x21], x14
+        ST1 {v29.16b}, [x21], x0
         SUB x10, x10, x2 // a2 -= kc
-        ST1 {v28.16b}, [x13], x14
+        ST1 {v28.16b}, [x13], x0
         SUB x11, x11, x2 // a3 -= kc
-        ST1 {v27.16b}, [x18], x14
+        ST1 {v27.16b}, [x14], x0
         SUB x12, x12, x2 // a4 -= kc
-        ST1 {v26.16b}, [x17], x14
+        ST1 {v26.16b}, [x17], x0
         SUB x19, x19, x2 // a6 -= kc
-        ST1 {v25.16b}, [x16], x14
+        ST1 {v25.16b}, [x16], x0
         SUB x20, x20, x2 // a6 -= kc
-        ST1 {v24.16b},  [x6], x14
+        ST1 {v24.16b},  [x6], x0
         SUB  x4,  x4, x2 // a7 -= kc
 
         B.HI 0b
@@ -317,7 +315,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         DUP d29, v29.d[1]
         STR d28, [x13], 8
         DUP d28, v28.d[1]
-        STR d27, [x18], 8
+        STR d27, [x14], 8
         DUP d27, v27.d[1]
         STR d26, [x17], 8
         DUP d26, v26.d[1]
@@ -335,7 +333,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         DUP s29, v29.s[1]
         STR s28, [x13], 4
         DUP s28, v28.s[1]
-        STR s27, [x18], 4
+        STR s27, [x14], 4
         DUP s27, v27.s[1]
         STR s26, [x17], 4
         DUP s26, v26.s[1]
@@ -350,7 +348,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         STR h30, [x22]
         STR h29, [x21]
         STR h28, [x13]
-        STR h27, [x18]
+        STR h27, [x14]
         STR h26, [x17]
         STR h25, [x16]
         STR h24,  [x6]

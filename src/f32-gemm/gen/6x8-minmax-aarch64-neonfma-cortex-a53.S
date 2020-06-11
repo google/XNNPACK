@@ -18,7 +18,7 @@
 #     const void*restrict w,    x5
 #     uint8_t*restrict c,       x6
 #     size_t cm_stride,         x7
-#     size_t cn_stride,         [sp] -> x14
+#     size_t cn_stride,         [sp] -> (x0)
 #     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> x8
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
@@ -35,7 +35,7 @@
 #  x6 c0
 # x16 c1
 # x17 c2
-# x18 c3
+# x14 c3
 # x13 c4
 #  x7 c5
 
@@ -61,8 +61,8 @@
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
 
-        # Load cn_stride, params pointer
-        LDP x14, x8, [sp]
+        # Load params pointer
+        LDR x8, [sp, 8]
 
         # Clamp A and C pointers
         CMP x0, 2                // if mr < 2
@@ -79,15 +79,15 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
 
         CMP x0, 4                // if mr < 4
         ADD x11, x10, x4         // a3 = a2 + a_stride
-        ADD x18, x17, x7         // c3 = c2 + cm_stride
+        ADD x14, x17, x7         // c3 = c2 + cm_stride
         CSEL x11, x10, x11, LO   //   a3 = a2
-        CSEL x18, x17, x18, LO   //   c3 = c2
+        CSEL x14, x17, x14, LO   //   c3 = c2
 
         ADD x12, x11, x4         // a4 = a3 + a_stride
-        ADD x13, x18, x7         // c4 = c3 + cm_stride
+        ADD x13, x14, x7         // c4 = c3 + cm_stride
                                  // if mr <= 4
         CSEL x12, x11, x12, LS   //   a4 = a3
-        CSEL x13, x18, x13, LS   //   c4 = c3
+        CSEL x13, x14, x13, LS   //   c4 = c3
 
         CMP x0, 6                // if mr < 6
         ADD x4, x12, x4          // a5 = a4 + a_stride
@@ -328,7 +328,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         LDR   x8, [x4], 8              // a5
         FMLA v29.4s, v17.4s,  v2.s[0]
         FMLA v31.4s, v17.4s,  v2.s[2]
-        PRFM PSTL1KEEP, [x18]          // Prefetch C3
+        PRFM PSTL1KEEP, [x14]          // Prefetch C3
 
         // BLOCK 4
         LDR  d13, [x5, 16]
@@ -410,7 +410,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
 4:
         # Clamp
         FMAX v20.4s, v20.4s, v6.4s
-        SUBS x1, x1, 8
+        # Load cn_stride
+        LDR x0, [sp, 32]
         FMAX v21.4s, v21.4s, v6.4s
         FMAX v22.4s, v22.4s, v6.4s
         FMAX v23.4s, v23.4s, v6.4s
@@ -422,6 +423,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMAX v29.4s, v29.4s, v6.4s
         FMAX v30.4s, v30.4s, v6.4s
         FMAX v31.4s, v31.4s, v6.4s
+        SUBS x1, x1, 8
         FMIN v20.4s, v20.4s, v7.4s
         FMIN v21.4s, v21.4s, v7.4s
         FMIN v22.4s, v22.4s, v7.4s
@@ -438,17 +440,17 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         # Store full 6 x 8
         B.LO 8f
 
-        ST1 {v20.16b, v21.16b},  [x6], x14
+        ST1 {v20.16b, v21.16b},  [x6], x0
         SUB  x3,  x3, x2 // a0 -= kc
-        ST1 {v22.16b, v23.16b}, [x16], x14
+        ST1 {v22.16b, v23.16b}, [x16], x0
         SUB  x9,  x9, x2 // a1 -= kc
-        ST1 {v24.16b, v25.16b}, [x17], x14
+        ST1 {v24.16b, v25.16b}, [x17], x0
         SUB x10, x10, x2 // a2 -= kc
-        ST1 {v26.16b, v27.16b}, [x18], x14
+        ST1 {v26.16b, v27.16b}, [x14], x0
         SUB x11, x11, x2 // a3 -= kc
-        ST1 {v28.16b, v29.16b}, [x13], x14
+        ST1 {v28.16b, v29.16b}, [x13], x0
         SUB x12, x12, x2 // a4 -= kc
-        ST1 {v30.16b, v31.16b},  [x7], x14
+        ST1 {v30.16b, v31.16b},  [x7], x0
         SUB  x4,  x4, x2 // a5 -= kc
 
         B.HI 0b
@@ -536,7 +538,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         MOV v22.16b, v23.16b
         STR q24, [x17], 16
         MOV v24.16b, v25.16b
-        STR q26, [x18], 16
+        STR q26, [x14], 16
         MOV v26.16b, v27.16b
         STR q28, [x13], 16
         MOV v28.16b, v29.16b
@@ -551,7 +553,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         DUP d22, v22.d[1]
         STR d24, [x17], 8
         DUP d24, v24.d[1]
-        STR d26, [x18], 8
+        STR d26, [x14], 8
         DUP d26, v26.d[1]
         STR d28, [x13], 8
         DUP d28, v28.d[1]
@@ -563,7 +565,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         STR s20,  [x6]
         STR s22, [x16]
         STR s24, [x17]
-        STR s26, [x18]
+        STR s26, [x14]
         STR s28, [x13]
         STR s30,  [x7]
 11:
