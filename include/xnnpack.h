@@ -360,6 +360,27 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a 2D Global Average Pooling Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param output_min - lower bound for clipping output values.
+/// @param output_max - upper bound for clipping output values.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a
+///                   4D tensor defined in the @a subgraph with [N, H, W, C]
+///                   dimensions
+/// @param output_id - Value ID for the output tensor. The output tensor must be
+///                    a 4D tensor defined in the @a subgraph with [N, 1, 1, C]
+///                    dimensions.
+/// @param flags - binary features of the 2D Global Average Pooling Node. No
+///                supported flags are currently defined.
+enum xnn_status xnn_define_global_average_pooling_2d(
+  xnn_subgraph_t subgraph,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a 2D Average Pooling Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -443,8 +464,7 @@ enum xnn_status xnn_define_average_pooling_2d(
 ///                    output_channels] dimensions where num_input_elements is
 ///                    the total number of elements in the input tensor.
 /// @param flags - binary features of the Fully Connected Node. The only
-/// currently supported value is
-///                XNN_FLAG_TENSORFLOW_RESHAPE_2D.
+///                currently supported value is XNN_FLAG_TENSORFLOW_RESHAPE_2D.
 enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                                            float output_min, float output_max,
                                            uint32_t input_id,
