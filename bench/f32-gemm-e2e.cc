@@ -195,15 +195,6 @@ static void GEMMEnd2EndBenchmark(
       6 /* mr */, 8 /* nr */);
   }
 
-  static void f32_gemm_6x8__aarch64_neonfma_ios(benchmark::State& state, models::ExecutionPlanFactory model) {
-    GEMMEnd2EndBenchmark(state, model,
-      xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ios,
-      xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ios,
-      xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57,
-      xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57,
-      6 /* mr */, 8 /* nr */);
-  }
-
   static void f32_gemm_6x8__aarch64_neonfma_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64,
@@ -273,7 +264,6 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_END2END(f32_gemm_6x8__aarch64_neonfma_cortex_a73);
   BENCHMARK_END2END(f32_gemm_6x8__aarch64_neonfma_cortex_a57);
   BENCHMARK_END2END(f32_gemm_6x8__aarch64_neonfma_cortex_a75);
-  BENCHMARK_END2END(f32_gemm_6x8__aarch64_neonfma_ios);
   BENCHMARK_END2END(f32_gemm_4x12__aarch64_neonfma_cortex_a53)
 
   BENCHMARK_END2END(f32_gemm_4x8__neonfma_lane_ld64);

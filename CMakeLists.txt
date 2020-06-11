@@ -1854,7 +1854,6 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-cortex-a73.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S
-  src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-ios.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-ld128.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-ld64.S
   src/f32-gemm/gen-inc/1x8inc-minmax-aarch64-neonfma-ld64.S
@@ -1876,7 +1875,6 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-cortex-a73.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-cortex-a75.S
-  src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-ios.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-ld128.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-ld64.S
   src/f32-igemm/1x12-minmax-aarch64-neonfma-cortex-a53.S
@@ -1894,8 +1892,7 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-igemm/6x8-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-igemm/6x8-minmax-aarch64-neonfma-cortex-a73.S
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a57.S
-  src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S
-  src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-ios.S)
+  src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S)
 
 SET(XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SCALAR_MICROKERNEL_SRCS})
 IF(NOT EMSCRIPTEN AND NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
