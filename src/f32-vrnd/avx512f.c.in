@@ -12,6 +12,7 @@ $assert OP in ["RNDNE", "RNDZ", "RNDU", "RNDD"]
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
 

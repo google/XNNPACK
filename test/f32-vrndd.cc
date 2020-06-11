@@ -698,6 +698,7 @@ TEST(F32_VRNDD__SCALAR_LIBM_X1, inplace) {
   }
 }
 
+
 TEST(F32_VRNDD__SCALAR_LIBM_X2, batch_eq_2) {
   VUnOpMicrokernelTester()
     .batch_size(2)
@@ -736,6 +737,7 @@ TEST(F32_VRNDD__SCALAR_LIBM_X2, inplace) {
       .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vrndd_ukernel__scalar_libm_x2), VUnOpMicrokernelTester::OpType::RoundDown, VUnOpMicrokernelTester::Variant::Scalar);
   }
 }
+
 
 TEST(F32_VRNDD__SCALAR_LIBM_X4, batch_eq_4) {
   VUnOpMicrokernelTester()
