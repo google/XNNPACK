@@ -297,6 +297,7 @@ static void init(void) {
       xnn_params.f32.abs = (xnn_univector_ukernel_function) xnn_f32_vabs_ukernel__neon_x8;
       xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__neon_x8;
       xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__neon_x8;
+      xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__neon_x8;
       xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__neon_x8;
       if (cpuinfo_has_arm_neon_v8()) {
         xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__neonv8_x8;
@@ -516,6 +517,7 @@ static void init(void) {
       xnn_params.f32.abs = (xnn_univector_ukernel_function) xnn_f32_vabs_ukernel__scalar_x4;
       xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__scalar_x4;
       xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__scalar_x4;
+      xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__scalar_x4;
       xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__scalar_x4;
       xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__scalar_libm_x1;
       xnn_params.f32.rndz  = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__scalar_libm_x1;
@@ -936,6 +938,7 @@ static void init(void) {
     xnn_params.f32.abs = (xnn_univector_ukernel_function) xnn_f32_vabs_ukernel__neon_x8;
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__neon_x8;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__neonfma_x8;
+    xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__neon_x8;
     xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__neon_x8;
     xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__neonv8_x8;
     xnn_params.f32.rndz = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__neonv8_x8;
@@ -1287,6 +1290,13 @@ static void init(void) {
       xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__avx_x16;
     } else {
       xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__sse_x8;
+    }
+    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+      xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__avx512f_x16;
+    } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx()) {
+      xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__avx_x16;
+    } else {
+      xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__sse_x8;
     }
     if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
       xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__avx512f_x16;
@@ -1663,6 +1673,7 @@ static void init(void) {
     xnn_params.f32.abs = (xnn_univector_ukernel_function) xnn_f32_vabs_ukernel__psimd_x8;
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__psimd_x8;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__psimd_x8;
+    xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__psimd_x8;
     xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__psimd_x8;
     xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__psimd_x8;
     xnn_params.f32.rndz  = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__psimd_x8;
@@ -1906,6 +1917,7 @@ static void init(void) {
     xnn_params.f32.abs = (xnn_univector_ukernel_function) xnn_f32_vabs_ukernel__scalar_x4;
     xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__wasm_x4;
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__wasm_x4;
+    xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__scalar_x4;
     xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__scalar_x4;
     xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__scalar_libm_x4;
     xnn_params.f32.rndz  = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__scalar_libm_x4;

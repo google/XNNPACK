@@ -70,6 +70,7 @@ enum xnn_operator_type {
   xnn_operator_type_global_average_pooling_nwc_q8,
   xnn_operator_type_global_average_pooling_ncw_f32,
   xnn_operator_type_hardswish_nc_f32,
+  xnn_operator_type_leaky_relu_nc_f32,
   xnn_operator_type_leaky_relu_nc_q8,
   xnn_operator_type_max_pooling_nhwc_f32,
   xnn_operator_type_max_pooling_nhwc_u8,
@@ -246,6 +247,7 @@ struct xnn_operator {
 
   union {
     union xnn_f32_abs_params f32_abs;
+    union xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_neg_params f32_neg;
     union xnn_f32_rnd_params f32_rnd;
     // Parameters for Global Average Pooling in CHW layout

@@ -38,6 +38,7 @@ XNNPACK implements the following neural network operators:
 - Copy
 - Floor (rounding to integer below)
 - HardSwish
+- Leaky ReLU
 - Negate
 - Sigmoid
 - Softmax

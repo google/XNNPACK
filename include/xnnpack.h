@@ -1251,6 +1251,21 @@ enum xnn_status xnn_setup_hardswish_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_leaky_relu_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float negative_slope,
+  uint32_t flags,
+  xnn_operator_t* leaky_relu_op_out);
+
+enum xnn_status xnn_setup_leaky_relu_nc_f32(
+  xnn_operator_t leaky_relu_op,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
   uint32_t input_padding_top,
   uint32_t input_padding_right,

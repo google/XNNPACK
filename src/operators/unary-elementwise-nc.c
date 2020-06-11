@@ -295,6 +295,30 @@ enum xnn_status xnn_create_hardswish_nc_f32(
     hardswish_op_out);
 }
 
+enum xnn_status xnn_create_leaky_relu_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float negative_slope,
+  uint32_t flags,
+  xnn_operator_t* leaky_relu_op_out)
+{
+  if (!isfinite(negative_slope)) {
+    xnn_log_error(
+      "failed to create %s operator with %f negative slope: finite number expected",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f32),
+      negative_slope);
+    return xnn_status_invalid_parameter;
+  }
+
+  const union xnn_f32_lrelu_params params = xnn_init_f32_lrelu_params(negative_slope);
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_leaky_relu_nc_f32,
+    leaky_relu_op_out);
+}
+
 enum xnn_status xnn_create_negate_nc_f32(
     size_t channels,
     size_t input_stride,
@@ -539,6 +563,29 @@ enum xnn_status xnn_setup_hardswish_nc_f32(
     xnn_params.f32.hswish,
     2 /* log2(sizeof(float)) */,
     &hardswish_op->params.f32_hswish, sizeof(hardswish_op->params.f32_hswish));
+}
+
+enum xnn_status xnn_setup_leaky_relu_nc_f32(
+  xnn_operator_t leaky_relu_op,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool)
+{
+  if (leaky_relu_op->type != xnn_operator_type_leaky_relu_nc_f32) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f32),
+      xnn_operator_type_to_string(leaky_relu_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  leaky_relu_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    leaky_relu_op,
+    batch_size, input, output,
+    xnn_params.f32.lrelu,
+    2 /* log2(sizeof(float)) */,
+    &leaky_relu_op->params.f32_lrelu, sizeof(leaky_relu_op->params.f32_lrelu));
 }
 
 enum xnn_status xnn_setup_negate_nc_f32(
