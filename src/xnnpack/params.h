@@ -96,6 +96,7 @@ union xnn_f32_lrelu_params {
 
 union xnn_f32_chw_params {
   struct {
+    XNN_ALIGN(16) int32_t mask[4]; // used by stride 1 kernels
     float min;
     float max;
   } scalar;

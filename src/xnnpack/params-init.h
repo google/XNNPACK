@@ -597,6 +597,12 @@ static inline union xnn_f32_chw_params xnn_init_f32_chw_params(
   #else
     params.scalar.min = output_min;
     params.scalar.max = output_max;
+
+    const uint32_t w4 = (width - 1) & 3;
+    params.scalar.mask[0] = INT32_C(0xFFFFFFFF);
+    params.scalar.mask[1] = -(int32_t) (w4 >= 1);
+    params.scalar.mask[2] = -(int32_t) (w4 >= 2);
+    params.scalar.mask[3] = -(int32_t) (w4 >= 3);
   #endif
   return params;
 }
@@ -648,6 +654,12 @@ static inline union xnn_f32_chw_params xnn_init_scalar_f32_chw_params(
   union xnn_f32_chw_params params;
   params.scalar.min = output_min;
   params.scalar.max = output_max;
+
+  const uint32_t w4 = (width - 1) & 3;
+  params.scalar.mask[0] = INT32_C(0xFFFFFFFF);
+  params.scalar.mask[1] = -(int32_t) (w4 >= 1);
+  params.scalar.mask[2] = -(int32_t) (w4 >= 2);
+  params.scalar.mask[3] = -(int32_t) (w4 >= 3);
   return params;
 }
 
