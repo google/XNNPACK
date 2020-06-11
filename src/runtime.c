@@ -394,6 +394,21 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].inputs[0] = node->inputs[0];
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
+      case xnn_node_type_leaky_relu:
+        status = xnn_create_leaky_relu_nc_f32(
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+          node->params.leaky_relu.negative_slope,
+          node->flags,
+          &runtime->opdata[i].operator_object);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->opdata[i].batch_size = product_non_channel_dims(&values[node->inputs[0]].shape);
+        runtime->opdata[i].inputs[0] = node->inputs[0];
+        runtime->opdata[i].outputs[0] = node->outputs[0];
+        break;
       case xnn_node_type_max_pooling_2d:
         status = xnn_create_max_pooling2d_nhwc_f32(
           node->params.pooling_2d.padding_top,
@@ -855,6 +870,16 @@ enum xnn_status xnn_setup_runtime(
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->outputs[0]].data != NULL);
         status = xnn_setup_hardswish_nc_f32(
+          opdata->operator_object,
+          opdata->batch_size,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_leaky_relu_nc_f32:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_leaky_relu_nc_f32(
           opdata->operator_object,
           opdata->batch_size,
           runtime->blobs[opdata->inputs[0]].data,

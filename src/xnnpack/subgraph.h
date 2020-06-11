@@ -83,6 +83,7 @@ enum xnn_node_type {
   xnn_node_type_fully_connected,
   xnn_node_type_floor,
   xnn_node_type_hardswish,
+  xnn_node_type_leaky_relu,
   xnn_node_type_max_pooling_2d,
   xnn_node_type_maximum2,
   xnn_node_type_minimum2,
@@ -160,6 +161,9 @@ struct xnn_node {
       uint32_t dilation_height;
       uint32_t dilation_width;
     } pooling_2d;
+    struct {
+      float negative_slope;
+    } leaky_relu;
     struct {
       size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
       size_t post_paddings[XNN_MAX_TENSOR_DIMS];

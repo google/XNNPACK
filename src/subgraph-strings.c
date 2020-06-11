@@ -48,6 +48,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Floor";
     case xnn_node_type_hardswish:
       return "HardSwish";
+    case xnn_node_type_leaky_relu:
+      return "Leaky ReLU";
     case xnn_node_type_maximum2:
       return "Maximum2";
     case xnn_node_type_minimum2:
