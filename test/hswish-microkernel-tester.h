@@ -88,7 +88,7 @@ class HSwishMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::abs(y_ref[i]) * 1.0e-2f)
+        ASSERT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::abs(y_ref[i]) * 1.0e-1f)
           << "at position " << i << ", batch_size = " << batch_size();
       }
     }
