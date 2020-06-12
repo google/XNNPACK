@@ -66,6 +66,7 @@ enum xnn_operator_type {
   xnn_operator_type_fully_connected_nc_f32,
   xnn_operator_type_fully_connected_nc_q8,
   xnn_operator_type_floor_nc_f32,
+  xnn_operator_type_global_average_pooling_nwc_f16,
   xnn_operator_type_global_average_pooling_nwc_f32,
   xnn_operator_type_global_average_pooling_nwc_q8,
   xnn_operator_type_global_average_pooling_ncw_f32,
@@ -253,6 +254,7 @@ struct xnn_operator {
     // Parameters for Global Average Pooling in CHW layout
     union xnn_f32_gavgpool_params f32_gavgpool;
     union xnn_f32_hswish_params f32_hswish;
+    struct xnn_f16_scaleminmax_params f16_scaleminmax;
     // Pixelwise Average Pooling normally use f32_minmax_params, but also initialize
     // f32_scaleminmax_params in case it needs to switch to Global Average Pooling operation.
     struct {

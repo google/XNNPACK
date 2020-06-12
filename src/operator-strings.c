@@ -62,6 +62,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Fully Connected (NC, F32)";
     case xnn_operator_type_fully_connected_nc_q8:
       return "Fully Connected (NC, Q8)";
+    case xnn_operator_type_global_average_pooling_nwc_f16:
+      return "Global Average Pooling (NWC, F16)";
     case xnn_operator_type_global_average_pooling_nwc_f32:
       return "Global Average Pooling (NWC, F32)";
     case xnn_operator_type_global_average_pooling_nwc_q8:

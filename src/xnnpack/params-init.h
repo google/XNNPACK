@@ -249,6 +249,13 @@ static inline union xnn_q8_avgpool_params xnn_init_scalar_q8_avgpool_params(
   return params;
 }
 
+static inline void xnn_update_f16_scaleminmax_params(
+  struct xnn_f16_scaleminmax_params* params,
+  uint16_t scale)
+{
+  params->scale = scale;
+}
+
 static inline void xnn_update_f32_scaleminmax_params(
   union xnn_f32_scaleminmax_params* params,
   float scale)
@@ -260,6 +267,18 @@ static inline void xnn_update_f32_scaleminmax_params(
   #else
     params->scalar.scale = scale;
   #endif
+}
+
+static inline struct xnn_f16_scaleminmax_params xnn_init_f16_scaleminmax_params(
+  uint16_t scale,
+  uint16_t min,
+  uint16_t max)
+{
+  struct xnn_f16_scaleminmax_params params;
+  params.scale = scale;
+  params.min = min;
+  params.max = max;
+  return params;
 }
 
 static inline union xnn_f32_scaleminmax_params xnn_init_f32_scaleminmax_params(
@@ -387,18 +406,6 @@ static inline union xnn_f32_gavgpool_params xnn_init_scalar_f32_gavgpool_params(
   params.scalar.mask[1] = -(int32_t) (w >= 1);
   params.scalar.mask[2] = -(int32_t) (w >= 2);
   params.scalar.mask[3] = -(int32_t) (w >= 3);
-  return params;
-}
-
-static inline struct xnn_f16_scaleminmax_params xnn_init_f16_scaleminmax_params(
-  uint16_t scale,
-  uint16_t min,
-  uint16_t max)
-{
-  struct xnn_f16_scaleminmax_params params;
-  params.scale = scale;
-  params.min = min;
-  params.max = max;
   return params;
 }
 

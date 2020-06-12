@@ -333,6 +333,200 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_Q8, small_batch_large_width_with_output_stride) 
   }
 }
 
+#if XNN_ARCH_ARM64
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(1)
+        .width(width)
+        .channels(channels)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width_with_input_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(1)
+        .width(width)
+        .channels(channels)
+        .input_stride(5 * channels)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width_with_qmin) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(1)
+        .width(width)
+        .channels(channels)
+        .qmin(128)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width_with_qmax) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(1)
+        .width(width)
+        .channels(channels)
+        .qmax(128)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(1)
+        .width(width)
+        .channels(channels)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width_with_input_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(1)
+        .width(width)
+        .channels(channels)
+        .input_stride(5 * channels)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width_with_qmin) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(1)
+        .width(width)
+        .channels(channels)
+        .qmin(128)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width_with_qmax) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(1)
+        .width(width)
+        .channels(channels)
+        .qmax(128)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_small_width) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(3)
+        .width(width)
+        .channels(channels)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_small_width_with_input_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(3)
+        .width(width)
+        .channels(channels)
+        .input_stride(5 * channels)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_small_width_with_output_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(3)
+        .width(width)
+        .channels(channels)
+        .output_stride(5 * channels)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_large_width) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(3)
+        .width(width)
+        .channels(channels)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_large_width_with_input_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(3)
+        .width(width)
+        .channels(channels)
+        .input_stride(5 * channels)
+        .TestNWCxF16();
+    }
+  }
+}
+
+TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_large_width_with_output_stride) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 100; channels += 15) {
+    for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
+      GlobalAveragePoolingOperatorTester()
+        .batch_size(3)
+        .width(width)
+        .channels(channels)
+        .output_stride(5 * channels)
+        .TestNWCxF16();
+    }
+  }
+}
+#endif  // XNN_ARCH_ARM64
+
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F32, unit_batch_small_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {

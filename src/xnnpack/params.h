@@ -1687,6 +1687,9 @@ struct xnn_parameters {
     struct zip_parameters zip;
   } x8;
   struct {
+    struct gavgpool_parameters gavgpool;
+  } f16;
+  struct {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct dwconv_parameters dwconv[XNN_MAX_F32_DWCONV_UKERNELS];

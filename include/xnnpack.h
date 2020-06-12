@@ -1255,6 +1255,23 @@ enum xnn_status xnn_setup_floor_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_global_average_pooling_nwc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* global_average_pooling_op_out);
+
+enum xnn_status xnn_setup_global_average_pooling_nwc_f16(
+  xnn_operator_t global_average_pooling_op,
+  size_t batch_size,
+  size_t width,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_global_average_pooling_nwc_f32(
   size_t channels,
   size_t input_stride,

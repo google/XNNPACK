@@ -703,6 +703,15 @@ static void init(void) {
     };
   #endif  // XNN_NO_X8_OPERATORS
 
+  /**************************** F16 micro-kernels ****************************/
+  #ifndef XNN_NO_F16_OPERATORS
+    xnn_params.f16.gavgpool = (struct gavgpool_parameters) {
+      .up = (xnn_gavgpool_unipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8,
+      .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8,
+      .mr = 7,
+    };
+  #endif  // XNN_NO_F16_OPERATORS
+
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
     #if XNN_PLATFORM_IOS
