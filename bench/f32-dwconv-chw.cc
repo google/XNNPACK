@@ -343,11 +343,16 @@ static void DWConvHWoTCTBenchmark(benchmark::State& state,
   static void CHW_5x5p2__psimd(benchmark::State& state, const char* net) {
     DWConvCHWBenchmark(state, xnn_f32_dwconv_chw_ukernel_5x5p2__psimd, 4, 4, 5, 5, 2, 1);
   }
+  static void CHW_5x5s2p2__psimd(benchmark::State& state, const char* net) {
+    DWConvCHWBenchmark(state, xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd, 4, 4, 5, 5, 2, 2);
+  }
+
 
 
   BENCHMARK_DWCONV(CHW_3x3p1__psimd)
   BENCHMARK_DWCONV(CHW_3x3s2p1__psimd)
   BENCHMARK_DWCONV(CHW_5x5p2__psimd)
+  BENCHMARK_DWCONV(CHW_5x5s2p2__psimd)
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
   static void CHW_3x3p1__scalar(benchmark::State& state, const char* net) {
