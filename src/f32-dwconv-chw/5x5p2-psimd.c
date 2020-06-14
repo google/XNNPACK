@@ -73,7 +73,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
   const size_t padded_input_height = input_height + padding_top + 2 /* padding_bottom */;
   const size_t output_height = padded_input_height - 5 + 1;
 
-  const psimd_s32 vmask = psimd_load_f32(params->scalar.mask);
+  const psimd_s32 vmask = psimd_load_s32(params->scalar.mask);
   const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
   const psimd_f32 vmin = psimd_load_splat_f32(&params->scalar.min);
 
