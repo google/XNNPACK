@@ -184,7 +184,7 @@ SET(XNNPACK_SUBGRAPH_SRCS
   src/subgraph/argmax-pooling-2d.c
   src/subgraph/average-pooling-2d.c
   src/subgraph/bankers-rounding.c
-  src/subgraph/ceil.c
+  src/subgraph/ceiling.c
   src/subgraph/clamp.c
   src/subgraph/convolution-2d.c
   src/subgraph/deconvolution-2d.c
@@ -307,9 +307,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-igemm/gen/2x4-minmax-scalar.c
   src/f32-igemm/gen/4x2-minmax-scalar.c
   src/f32-igemm/gen/4x4-minmax-scalar.c
-  src/f32-lrelu/gen/scalar-x1.c
-  src/f32-lrelu/gen/scalar-x2.c
-  src/f32-lrelu/gen/scalar-x4.c
+  src/f32-vlrelu/gen/scalar-x1.c
+  src/f32-vlrelu/gen/scalar-x2.c
+  src/f32-vlrelu/gen/scalar-x4.c
   src/f32-maxpool/9p8x-minmax-scalar-c1.c
   src/f32-pavgpool/9p8x-minmax-scalar-c1.c
   src/f32-pavgpool/9x-minmax-scalar-c1.c
@@ -539,8 +539,8 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-igemm/gen/6x8-minmax-psimd-loadsplat.c
   src/f32-igemm/gen/6x8-minmax-psimd-splat.c
   src/f32-igemm/gen/6x8s4-minmax-psimd.c
-  src/f32-lrelu/gen/psimd-x4.c
-  src/f32-lrelu/gen/psimd-x8.c
+  src/f32-vlrelu/gen/psimd-x4.c
+  src/f32-vlrelu/gen/psimd-x8.c
   src/f32-maxpool/9p8x-minmax-psimd-c4.c
   src/f32-pavgpool/9p8x-minmax-psimd-c4.c
   src/f32-pavgpool/9x-minmax-psimd-c4.c
@@ -716,8 +716,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8s4-minmax-neon.c
   src/f32-igemm/gen/6x8s4-minmax-neon.c
   src/f32-igemm/gen/8x8s4-minmax-neon.c
-  src/f32-lrelu/gen/neon-x4.c
-  src/f32-lrelu/gen/neon-x8.c
+  src/f32-vlrelu/gen/neon-x4.c
+  src/f32-vlrelu/gen/neon-x8.c
   src/f32-maxpool/9p8x-minmax-neon-c4.c
   src/f32-pavgpool/9p8x-minmax-neon-c4.c
   src/f32-pavgpool/9x-minmax-neon-c4.c
@@ -1236,8 +1236,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8-minmax-sse-dup.c
   src/f32-igemm/gen/4x8-minmax-sse-load1.c
   src/f32-igemm/gen/4x8s4-minmax-sse.c
-  src/f32-lrelu/gen/sse-x4.c
-  src/f32-lrelu/gen/sse-x8.c
+  src/f32-vlrelu/gen/sse-x4.c
+  src/f32-vlrelu/gen/sse-x8.c
   src/f32-maxpool/9p8x-minmax-sse-c4.c
   src/f32-pavgpool/9p8x-minmax-sse-c4.c
   src/f32-pavgpool/9x-minmax-sse-c4.c
@@ -1435,8 +1435,8 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/3x16-minmax-avx-broadcast.c
   src/f32-igemm/gen/4x16-minmax-avx-broadcast.c
   src/f32-igemm/gen/5x16-minmax-avx-broadcast.c
-  src/f32-lrelu/gen/avx-x8.c
-  src/f32-lrelu/gen/avx-x16.c
+  src/f32-vlrelu/gen/avx-x8.c
+  src/f32-vlrelu/gen/avx-x16.c
   src/f32-prelu/gen/avx-2x8.c
   src/f32-prelu/gen/avx-2x16.c
   src/f32-rmax/avx.c
@@ -1686,8 +1686,8 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-igemm/gen/6x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/7x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/8x16-minmax-avx512f-broadcast.c
-  src/f32-lrelu/gen/avx512f-x16.c
-  src/f32-lrelu/gen/avx512f-x32.c
+  src/f32-vlrelu/gen/avx512f-x16.c
+  src/f32-vlrelu/gen/avx512f-x32.c
   src/f32-prelu/gen/avx512f-2x16.c
   src/f32-prelu/gen/avx512f-2x32.c
   src/f32-raddexpminusmax/gen/avx512f-p5-scalef-x128.c
@@ -2312,7 +2312,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(global-average-pooling-nwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(global-average-pooling-nwc-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(global-average-pooling-nwc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(global-average-pooling-nwc-test global-average-pooling-nwc-test)
 
   ADD_EXECUTABLE(global-average-pooling-ncw-test test/global-average-pooling-ncw.cc)
@@ -2321,7 +2321,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(global-average-pooling-ncw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(global-average-pooling-ncw-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(global-average-pooling-ncw-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(global-average-pooling-ncw-test global-average-pooling-ncw-test)
 
   ADD_EXECUTABLE(hardswish-nc-test test/hardswish-nc.cc)
