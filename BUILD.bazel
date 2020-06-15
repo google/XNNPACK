@@ -4928,6 +4928,11 @@ config_setting(
 )
 
 config_setting(
+    name = "linux_armeabi",
+    values = {"cpu": "armeabi"},
+)
+
+config_setting(
     name = "linux_armhf",
     values = {"cpu": "armhf"},
 )

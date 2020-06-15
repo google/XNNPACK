@@ -147,6 +147,7 @@ def xnnpack_cc_library(
         srcs = srcs + select({
             ":linux_k8": psimd_srcs + x86_srcs,
             ":linux_arm": psimd_srcs + aarch32_srcs,
+            ":linux_armeabi": psimd_srcs + aarch32_srcs,
             ":linux_armhf": psimd_srcs + aarch32_srcs,
             ":linux_armv7a": psimd_srcs + aarch32_srcs,
             ":linux_aarch64": psimd_srcs + aarch64_srcs,
@@ -181,6 +182,7 @@ def xnnpack_cc_library(
         ] + copts + select({
             ":linux_k8": gcc_x86_copts,
             ":linux_arm": aarch32_copts,
+            ":linux_armeabi": aarch32_copts,
             ":linux_armhf": aarch32_copts,
             ":linux_armv7a": aarch32_copts,
             ":linux_aarch64": aarch64_copts,
@@ -225,6 +227,7 @@ def xnnpack_cc_library(
         linkopts = select({
             ":linux_k8": ["-lpthread"],
             ":linux_arm": ["-lpthread"],
+            ":linux_armeabi": ["-lpthread"],
             ":linux_armhf": ["-lpthread"],
             ":linux_armv7a": ["-lpthread"],
             ":linux_aarch64": ["-lpthread"],
@@ -263,6 +266,7 @@ def xnnpack_aggregate_library(
         deps = generic_deps + select({
             ":linux_k8": psimd_deps + x86_deps,
             ":linux_arm": psimd_deps + aarch32_deps,
+            ":linux_armeabi": psimd_deps + aarch32_deps,
             ":linux_armhf": psimd_deps + aarch32_deps,
             ":linux_armv7a": psimd_deps + aarch32_deps,
             ":linux_aarch64": psimd_deps + aarch64_deps,
