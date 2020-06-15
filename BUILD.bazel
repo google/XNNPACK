@@ -2730,6 +2730,44 @@ xnnpack_aggregate_library(
     ],
 )
 
+xnnpack_aggregate_library(
+    name = "ukernels_no_f16",
+    aarch32_deps = [
+        ":neon_ukernels",
+        ":neonfma_ukernels",
+        ":neonv8_ukernels",
+        ":asm_ukernels",
+    ],
+    aarch64_deps = [
+        ":neon_ukernels",
+        ":neonfma_ukernels",
+        ":neonv8_ukernels",
+        ":asm_ukernels",
+    ],
+    generic_deps = [
+        ":scalar_ukernels",
+    ],
+    psimd_deps = [
+        ":psimd_fastmath_ukernels",
+        ":psimd_accmath_ukernels",
+    ],
+    wasm_deps = [
+        ":wasm_ukernels",
+    ],
+    wasmsimd_deps = [
+        ":wasm_ukernels",
+    ],
+    x86_deps = [
+        ":sse2_ukernels",
+        ":ssse3_ukernels",
+        ":sse41_ukernels",
+        ":avx_ukernels",
+        ":fma3_ukernels",
+        ":avx2_ukernels",
+        ":avx512f_ukernels",
+    ],
+)
+
 xnnpack_cc_library(
     name = "im2col",
     srcs = ["src/im2col.c"],
@@ -2990,6 +3028,52 @@ xnnpack_cc_library(
         ":operator_run_test_mode",
         ":operators_test_mode",
         ":ukernels_test_mode",
+        "@clog",
+        "@FP16",
+        "@pthreadpool",
+    ] + select({
+        ":emscripten": [],
+        "//conditions:default": ["@cpuinfo"],
+    }),
+)
+
+xnnpack_cc_library(
+    name = "xnnpack_f32",
+    srcs = [
+        "src/init.c",
+        "src/runtime.c",
+        "src/subgraph.c",
+        "src/tensor.c",
+    ] + SUBGRAPH_SRCS,
+    hdrs = ["include/xnnpack.h"],
+    copts = LOGGING_COPTS + [
+        "-Isrc",
+        "-Iinclude",
+    ] + select({
+        ":debug_build": [],
+        "//conditions:default": xnnpack_min_size_copts(),
+    }) + select({
+        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
+        "//conditions:default": [],
+    }),
+    defines = [
+        "XNN_NO_Q8_OPERATORS",
+        "XNN_NO_U8_OPERATORS",
+        "XNN_NO_X8_OPERATORS",
+        "XNN_NO_F16_OPERATORS",
+        "XNN_NO_X16_OPERATORS",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    includes = ["include"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    visibility = xnnpack_visibility(),
+    deps = [
+        ":enable_assembly",
+        ":logging_utils",
+        ":memory_planner",
+        ":operator_run",
+        ":operators",
+        ":ukernels_no_f16",
         "@clog",
         "@FP16",
         "@pthreadpool",
