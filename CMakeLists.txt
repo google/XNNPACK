@@ -3483,7 +3483,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(average-pooling-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(average-pooling-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(average-pooling-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(channel-shuffle-bench bench/channel-shuffle.cc)
   SET_TARGET_PROPERTIES(channel-shuffle-bench PROPERTIES
@@ -3491,7 +3491,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(channel-shuffle-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(channel-shuffle-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(channel-shuffle-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(convolution-bench bench/convolution.cc)
   SET_TARGET_PROPERTIES(convolution-bench PROPERTIES
@@ -3499,7 +3499,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(convolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(deconvolution-bench bench/deconvolution.cc)
   SET_TARGET_PROPERTIES(deconvolution-bench PROPERTIES
@@ -3507,7 +3507,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(deconvolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(global-average-pooling-bench bench/global-average-pooling.cc)
   SET_TARGET_PROPERTIES(global-average-pooling-bench PROPERTIES
@@ -3523,7 +3523,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(max-pooling-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(max-pooling-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(max-pooling-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(prelu-bench bench/prelu.cc)
   SET_TARGET_PROPERTIES(prelu-bench PROPERTIES
@@ -3531,7 +3531,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(prelu-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(prelu-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(prelu-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(sigmoid-bench bench/sigmoid.cc)
   SET_TARGET_PROPERTIES(sigmoid-bench PROPERTIES
@@ -3539,7 +3539,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(sigmoid-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(softmax-bench bench/softmax.cc)
   SET_TARGET_PROPERTIES(softmax-bench PROPERTIES
@@ -3547,7 +3547,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(softmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK cpuinfo benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK benchmark bench-utils)
 
   # ---[ Build microkernel-level microbenchmarks
   ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc)

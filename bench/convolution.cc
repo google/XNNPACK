@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 
-#include <cpuinfo.h>
 #include <xnnpack.h>
 
 #ifdef BENCHMARK_ARM_COMPUTE_LIBRARY
@@ -82,10 +81,6 @@ void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
     return;
   }
 
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
-    return;
-  }
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(uint8_t) * kernel.size() + sizeof(int32_t) * bias.size() + sizeof(uint8_t) * output_elements);
@@ -199,10 +194,6 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
     return;
   }
 
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
-    return;
-  }
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (kernel.size() + bias.size() + output_elements));
