@@ -72,13 +72,13 @@ void xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_loadsplat_arm(
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
-    vacc0x0123 = wasm_f32x4_min(vacc0x0123, vmax);
-    vacc0x4567 = wasm_f32x4_min(vacc0x4567, vmax);
-
     const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
     vacc0x0123 = wasm_f32x4_max(vacc0x0123, vmin);
     vacc0x4567 = wasm_f32x4_max(vacc0x4567, vmin);
+
+    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+    vacc0x0123 = wasm_f32x4_min(vacc0x0123, vmax);
+    vacc0x4567 = wasm_f32x4_min(vacc0x4567, vmax);
 
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c0, vacc0x0123);

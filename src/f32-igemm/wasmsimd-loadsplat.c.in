@@ -92,14 +92,6 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__wasmsimd_loadsplat_${"x86" if X86
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
-    $for N in range(0, NR, 4):
-      $for M in range(MR):
-        $if X86:
-          vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vacc${M}x${ABC[N:N+4]}, vmax, wasm_f32x4_le(vacc${M}x${ABC[N:N+4]}, vmax));
-        $else:
-          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_min(vacc${M}x${ABC[N:N+4]}, vmax);
-
     const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
@@ -107,6 +99,14 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__wasmsimd_loadsplat_${"x86" if X86
           vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vmin, vacc${M}x${ABC[N:N+4]}, wasm_f32x4_lt(vacc${M}x${ABC[N:N+4]}, vmin));
         $else:
           vacc${M}x${ABC[N:N+4]} = wasm_f32x4_max(vacc${M}x${ABC[N:N+4]}, vmin);
+
+    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        $if X86:
+          vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vacc${M}x${ABC[N:N+4]}, vmax, wasm_f32x4_le(vacc${M}x${ABC[N:N+4]}, vmax));
+        $else:
+          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_min(vacc${M}x${ABC[N:N+4]}, vmax);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
