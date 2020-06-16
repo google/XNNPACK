@@ -2,6 +2,12 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+- name: xnn_f32_dwconv_ukernel_up4x25__wasmsimd
+- name: xnn_f32_dwconv_ukernel_up8x25__wasmsimd
+- name: xnn_f32_dwconv_ukernel_up4x9__wasmsimd
+- name: xnn_f32_dwconv_ukernel_up8x9__wasmsimd
+- name: xnn_f32_dwconv_ukernel_up4x4__wasmsimd
+- name: xnn_f32_dwconv_ukernel_up8x4__wasmsimd
 - name: xnn_f32_dwconv_ukernel_up1x4__wasm
 - name: xnn_f32_dwconv_ukernel_up1x4__wasm_acc2
 - name: xnn_f32_dwconv_ukernel_up2x4__wasm

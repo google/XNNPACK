@@ -473,6 +473,12 @@ WASM_UKERNELS = [
 ]
 
 WASMSIMD_UKERNELS = [
+    "src/f32-dwconv/gen/up4x25-wasmsimd.c",
+    "src/f32-dwconv/gen/up4x4-wasmsimd.c",
+    "src/f32-dwconv/gen/up4x9-wasmsimd.c",
+    "src/f32-dwconv/gen/up8x25-wasmsimd.c",
+    "src/f32-dwconv/gen/up8x4-wasmsimd.c",
+    "src/f32-dwconv/gen/up8x9-wasmsimd.c",
     "src/f32-dwconv/gen/up4x25-minmax-wasmsimd-acc2-arm.c",
     "src/f32-dwconv/gen/up4x25-minmax-wasmsimd-arm.c",
     "src/f32-dwconv/gen/up4x4-minmax-wasmsimd-acc2-arm.c",
