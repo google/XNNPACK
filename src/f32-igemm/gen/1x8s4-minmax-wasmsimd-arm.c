@@ -42,6 +42,8 @@ void xnn_f32_igemm_minmax_ukernel_1x8s4__wasmsimd_arm(
 
   float* c0 = c;
 
+  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   do {
     v128_t vacc0x0123 = wasm_v128_load(w);
     v128_t vacc0x4567 = wasm_v128_load(w + 4);
@@ -113,11 +115,9 @@ void xnn_f32_igemm_minmax_ukernel_1x8s4__wasmsimd_arm(
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
     vacc0x0123 = wasm_f32x4_max(vacc0x0123, vmin);
     vacc0x4567 = wasm_f32x4_max(vacc0x4567, vmin);
 
-    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
     vacc0x0123 = wasm_f32x4_min(vacc0x0123, vmax);
     vacc0x4567 = wasm_f32x4_min(vacc0x4567, vmax);
 

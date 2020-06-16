@@ -64,6 +64,8 @@ void xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_loadsplat_arm(
     c4 = c3;
   }
 
+  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   do {
     v128_t vacc0x0123 = wasm_v128_load(acc + 0);
     v128_t vacc0x4567 = wasm_v128_load(acc + 4);
@@ -108,7 +110,6 @@ void xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_loadsplat_arm(
       k -= sizeof(float);
     } while (k != 0);
 
-    const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
     vacc0x0123 = wasm_f32x4_max(vacc0x0123, vmin);
     vacc1x0123 = wasm_f32x4_max(vacc1x0123, vmin);
     vacc2x0123 = wasm_f32x4_max(vacc2x0123, vmin);
@@ -120,7 +121,6 @@ void xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_loadsplat_arm(
     vacc3x4567 = wasm_f32x4_max(vacc3x4567, vmin);
     vacc4x4567 = wasm_f32x4_max(vacc4x4567, vmin);
 
-    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
     vacc0x0123 = wasm_f32x4_min(vacc0x0123, vmax);
     vacc1x0123 = wasm_f32x4_min(vacc1x0123, vmax);
     vacc2x0123 = wasm_f32x4_min(vacc2x0123, vmax);

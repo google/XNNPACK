@@ -14,7 +14,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_splat_arm(
+void xnn_f32_igemm_ukernel_4x8__wasmsimd_splat(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -26,7 +26,7 @@ void xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_splat_arm(
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 4);
@@ -54,8 +54,6 @@ void xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_splat_arm(
     c3 = c2;
   }
 
-  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   do {
     v128_t vacc0x0123 = wasm_v128_load(w);
     v128_t vacc0x4567 = wasm_v128_load(w + 4);
@@ -199,23 +197,6 @@ void xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_splat_arm(
       p -= 4 * sizeof(void*);
     } while (p != 0);
 
-    vacc0x0123 = wasm_f32x4_max(vacc0x0123, vmin);
-    vacc1x0123 = wasm_f32x4_max(vacc1x0123, vmin);
-    vacc2x0123 = wasm_f32x4_max(vacc2x0123, vmin);
-    vacc3x0123 = wasm_f32x4_max(vacc3x0123, vmin);
-    vacc0x4567 = wasm_f32x4_max(vacc0x4567, vmin);
-    vacc1x4567 = wasm_f32x4_max(vacc1x4567, vmin);
-    vacc2x4567 = wasm_f32x4_max(vacc2x4567, vmin);
-    vacc3x4567 = wasm_f32x4_max(vacc3x4567, vmin);
-
-    vacc0x0123 = wasm_f32x4_min(vacc0x0123, vmax);
-    vacc1x0123 = wasm_f32x4_min(vacc1x0123, vmax);
-    vacc2x0123 = wasm_f32x4_min(vacc2x0123, vmax);
-    vacc3x0123 = wasm_f32x4_min(vacc3x0123, vmax);
-    vacc0x4567 = wasm_f32x4_min(vacc0x4567, vmax);
-    vacc1x4567 = wasm_f32x4_min(vacc1x4567, vmax);
-    vacc2x4567 = wasm_f32x4_min(vacc2x4567, vmax);
-    vacc3x4567 = wasm_f32x4_min(vacc3x4567, vmax);
 
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c3, vacc3x0123);

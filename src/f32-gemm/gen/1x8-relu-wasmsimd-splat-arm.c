@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/wasmsimd-s4.c.in
+//   Template: src/f32-gemm/wasmsimd-splat.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -14,7 +14,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_arm(
+void xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat_arm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -24,7 +24,7 @@ void xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_arm(
     float*restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -38,8 +38,6 @@ void xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_arm(
   const float* a0 = a;
   float* c0 = c;
 
-  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   do {
     v128_t vacc0x0123 = wasm_v128_load(w + 0);
     v128_t vacc0x4567 = wasm_v128_load(w + 4);
@@ -47,40 +45,37 @@ void xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_arm(
 
     size_t k = kc;
     while (k >= 4 * sizeof(float)) {
-      v128_t va0 = wasm_v128_load(a0);
+      const v128_t va0 = wasm_v128_load(a0);
       a0 += 4;
 
+      const v128_t va0c0 = wasm_v32x4_shuffle(va0, va0, 0, 0, 0, 0);
 
       const v128_t vb0123c0 = wasm_v128_load(w + 0);
       const v128_t vb4567c0 = wasm_v128_load(w + 4);
 
-      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0, vb0123c0));
-      vacc0x4567 = wasm_f32x4_add(vacc0x4567, wasm_f32x4_mul(va0, vb4567c0));
-
-      va0 = wasm_v32x4_shuffle(va0, va0, 1, 2, 3, 0);
+      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0c0, vb0123c0));
+      vacc0x4567 = wasm_f32x4_add(vacc0x4567, wasm_f32x4_mul(va0c0, vb4567c0));
+      const v128_t va0c1 = wasm_v32x4_shuffle(va0, va0, 1, 1, 1, 1);
 
       const v128_t vb0123c1 = wasm_v128_load(w + 8);
       const v128_t vb4567c1 = wasm_v128_load(w + 12);
 
-      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0, vb0123c1));
-      vacc0x4567 = wasm_f32x4_add(vacc0x4567, wasm_f32x4_mul(va0, vb4567c1));
-
-      va0 = wasm_v32x4_shuffle(va0, va0, 1, 2, 3, 0);
+      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0c1, vb0123c1));
+      vacc0x4567 = wasm_f32x4_add(vacc0x4567, wasm_f32x4_mul(va0c1, vb4567c1));
+      const v128_t va0c2 = wasm_v32x4_shuffle(va0, va0, 2, 2, 2, 2);
 
       const v128_t vb0123c2 = wasm_v128_load(w + 16);
       const v128_t vb4567c2 = wasm_v128_load(w + 20);
 
-      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0, vb0123c2));
-      vacc0x4567 = wasm_f32x4_add(vacc0x4567, wasm_f32x4_mul(va0, vb4567c2));
-
-      va0 = wasm_v32x4_shuffle(va0, va0, 1, 2, 3, 0);
+      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0c2, vb0123c2));
+      vacc0x4567 = wasm_f32x4_add(vacc0x4567, wasm_f32x4_mul(va0c2, vb4567c2));
+      const v128_t va0c3 = wasm_v32x4_shuffle(va0, va0, 3, 3, 3, 3);
 
       const v128_t vb0123c3 = wasm_v128_load(w + 24);
       const v128_t vb4567c3 = wasm_v128_load(w + 28);
 
-      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0, vb0123c3));
-      vacc0x4567 = wasm_f32x4_add(vacc0x4567, wasm_f32x4_mul(va0, vb4567c3));
-
+      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0c3, vb0123c3));
+      vacc0x4567 = wasm_f32x4_add(vacc0x4567, wasm_f32x4_mul(va0c3, vb4567c3));
 
       w += 32;
       k -= 4 * sizeof(float);
@@ -101,11 +96,9 @@ void xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_arm(
       } while (k != 0);
     }
 
-    vacc0x0123 = wasm_f32x4_max(vacc0x0123, vmin);
-    vacc0x4567 = wasm_f32x4_max(vacc0x4567, vmin);
-
-    vacc0x0123 = wasm_f32x4_min(vacc0x0123, vmax);
-    vacc0x4567 = wasm_f32x4_min(vacc0x4567, vmax);
+    const v128_t vzero = wasm_f32x4_splat(0.0f);
+    vacc0x0123 = wasm_f32x4_max(vacc0x0123, vzero);
+    vacc0x4567 = wasm_f32x4_max(vacc0x4567, vzero);
 
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c0, vacc0x0123);
