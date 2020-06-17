@@ -2874,8 +2874,11 @@ xnnpack_aggregate_library(
     ],
 )
 
+# This target must be compatible with Android NDK r17 and compile with Clang 6.
+# It is similar to :ukernels target, but excludes microkernels which require
+# NEON FP16 arithmetics, NEON Dot Product, and newer intrinsics.
 xnnpack_aggregate_library(
-    name = "ukernels_no_f16",
+    name = "ukernels_max_compatibility",
     aarch32_deps = [
         ":neon_ukernels",
         ":neonfma_ukernels",
@@ -3217,7 +3220,7 @@ xnnpack_cc_library(
         ":memory_planner",
         ":operator_run",
         ":operators",
-        ":ukernels_no_f16",
+        ":ukernels_max_compatibility",
         "@clog",
         "@FP16",
         "@pthreadpool",
