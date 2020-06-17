@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-igemm/4x8-minmax-aarch32-neon-ld64.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -7,7 +11,7 @@
 
 .syntax unified
 
-// void xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64(
+// void xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_pld_ld64(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5 -> sp + 68
@@ -38,7 +42,7 @@
 
 // Clamp (r5) d4 d5 d6 d7
 
-BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_pld_ld64
         .arm
 #ifndef __APPLE__
         .arch armv7-a
@@ -82,6 +86,14 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VMOV       q14, q8
         VMOV       q15, q9
 
+        PLD         [r9,   0]  // Prefetch B
+        PLD         [r9,  64]
+        PLD         [r9, 128]
+        PLD         [r9, 192]
+        PLD         [r9, 256]
+        PLD         [r9, 320]
+        PLD         [r9, 384]
+        PLD         [r9, 448]
 1:
         # Load next 4 A pointers
         LDR         r3, [r2,  0]
@@ -107,6 +119,15 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         LDR         r5, [sp, 68]     // kc
         MOVEQ       r0,  r7          //   a3 = zero, else += a3 + a_offset
 
+        PLD         [r3,  0]    // Prefetch A
+        PLD         [r3, 64]
+        PLD         [r12,  0]
+        PLD         [r12, 64]
+        PLD         [r10,  0]
+        PLD         [r10, 64]
+        PLD         [r0,  0]
+        PLD         [r0, 64]
+
         SUBS        r5, r5, 8        // kc - 8
         BLO         5f               // less than 2 channels?
 
@@ -120,17 +141,22 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
 
         VMLA.F32     q8, q4, d0[0]
         VMLA.F32     q9, q5, d0[0]
+        PLD         [r3, 128]        // Prefetch A0
         VMLA.F32    q10, q4, d1[0]
         VMLA.F32    q11, q5, d1[0]
         VLDM        r9!, {d12-d15}   // B1
         VMLA.F32    q12, q4, d2[0]
         VMLA.F32    q13, q5, d2[0]
+        PLD         [r12, 128]       // Prefetch A1
         VMLA.F32    q14, q4, d3[0]
         VMLA.F32    q15, q5, d3[0]
+        PLD         [r10, 128]       // Prefetch A2
         VMLA.F32     q8, q6, d0[1]
         VMLA.F32     q9, q7, d0[1]
+        PLD         [r0, 128]        // Prefetch A3
         VMLA.F32    q10, q6, d1[1]
         VMLA.F32    q11, q7, d1[1]
+        PLD         [r9, 448]        // Prefetch B
         VMLA.F32    q12, q6, d2[1]
         VMLA.F32    q13, q7, d2[1]
         SUBS         r5, r5, 8
@@ -237,7 +263,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         ADD         sp, sp, 12  // skip pad, r2, r3
         POP         {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-END_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_pld_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

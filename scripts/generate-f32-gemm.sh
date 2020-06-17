@@ -113,6 +113,9 @@ tools/xngen src/f32-gemm/6x8-aarch64-neonfma-ld128.S.in       -D INC=1 -o src/f3
 tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a75.S.in  -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a75.S
 tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a75.S.in  -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S
 
+tools/xngen src/f32-gemm/4x8-minmax-aarch32-neon-ld64.S.in -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-ld64.S
+tools/xngen src/f32-gemm/4x8-minmax-aarch32-neon-ld64.S.in -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-pld-ld64.S
+
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/gen/1x8-minmax-neon-lane-ld64.c

@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-gemm/4x8-minmax-aarch32-neon-ld64.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -86,6 +90,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VMOV        q13, q9
         VMOV        q14, q8
         VMOV        q15, q9
+
         BLO         5f               // less than 2 channels?
 
         // Main loop - 2 floats of A (8 bytes)
