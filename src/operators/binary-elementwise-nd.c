@@ -18,54 +18,24 @@
 
 
 static enum xnn_status create_binary_elementwise_nd(
-    float output_min,
-    float output_max,
     uint32_t flags,
     const void* params,
     size_t params_size,
     enum xnn_operator_type operator_type,
     xnn_operator_t* binary_elementwise_op_out)
 {
-  xnn_operator_t binary_elementwise_op = NULL;
-  enum xnn_status status = xnn_status_uninitialized;
-
   if (!xnn_params.initialized) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));
-    goto error;
+    return xnn_status_uninitialized;
   }
 
-  status = xnn_status_invalid_parameter;
-
-  if (isnan(output_min)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  if (isnan(output_max)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  if (output_min >= output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      xnn_operator_type_to_string(operator_type), output_min, output_max);
-    goto error;
-  }
-
-  status = xnn_status_out_of_memory;
-
-  binary_elementwise_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
+  xnn_operator_t binary_elementwise_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (binary_elementwise_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
-    goto error;
+    return xnn_status_out_of_memory;
   }
 
   if (params_size != 0) {
@@ -79,10 +49,38 @@ static enum xnn_status create_binary_elementwise_nd(
 
   *binary_elementwise_op_out = binary_elementwise_op;
   return xnn_status_success;
+}
 
-error:
-  xnn_delete_operator(binary_elementwise_op);
-  return status;
+static enum xnn_status create_binary_elementwise_nd_f32(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    enum xnn_operator_type operator_type,
+    xnn_operator_t* binary_elementwise_op_out)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(operator_type), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
+  return create_binary_elementwise_nd(flags, &params, sizeof(params), operator_type, binary_elementwise_op_out);
 }
 
 enum xnn_status xnn_create_add_nd_f32(
@@ -91,11 +89,8 @@ enum xnn_status xnn_create_add_nd_f32(
     uint32_t flags,
     xnn_operator_t* add_op_out)
 {
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
-
-  return create_binary_elementwise_nd(
-    output_min, output_max, flags, &params, sizeof(params),
-    xnn_operator_type_add_nd_f32, add_op_out);
+  return create_binary_elementwise_nd_f32(
+    output_min, output_max, flags, xnn_operator_type_add_nd_f32, add_op_out);
 }
 
 enum xnn_status xnn_create_divide_nd_f32(
@@ -104,35 +99,24 @@ enum xnn_status xnn_create_divide_nd_f32(
     uint32_t flags,
     xnn_operator_t* divide_op_out)
 {
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
-
-  return create_binary_elementwise_nd(
-    output_min, output_max, flags, &params, sizeof(params),
-    xnn_operator_type_divide_nd_f32, divide_op_out);
+  return create_binary_elementwise_nd_f32(
+    output_min, output_max, flags, xnn_operator_type_divide_nd_f32, divide_op_out);
 }
 
 enum xnn_status xnn_create_maximum_nd_f32(
     uint32_t flags,
     xnn_operator_t* maximum_op_out)
 {
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(-INFINITY /* output_min */, INFINITY /* output_max */);
-
   return create_binary_elementwise_nd(
-    -INFINITY /* output_min */, INFINITY /* output_max */,
-    flags, &params, sizeof(params),
-    xnn_operator_type_maximum_nd_f32, maximum_op_out);
+    flags, NULL /* params */, 0 /* params size */, xnn_operator_type_maximum_nd_f32, maximum_op_out);
 }
 
 enum xnn_status xnn_create_minimum_nd_f32(
     uint32_t flags,
     xnn_operator_t* minimum_op_out)
 {
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(-INFINITY /* output_min */, INFINITY /* output_max */);
-
   return create_binary_elementwise_nd(
-    -INFINITY /* output_min */, INFINITY /* output_max */,
-    flags, &params, sizeof(params),
-    xnn_operator_type_minimum_nd_f32, minimum_op_out);
+    flags, NULL /* params */, 0 /* params size */, xnn_operator_type_minimum_nd_f32, minimum_op_out);
 }
 
 enum xnn_status xnn_create_multiply_nd_f32(
@@ -141,22 +125,16 @@ enum xnn_status xnn_create_multiply_nd_f32(
     uint32_t flags,
     xnn_operator_t* multiply_op_out)
 {
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
-
-  return create_binary_elementwise_nd(
-    output_min, output_max, flags, &params, sizeof(params),
-    xnn_operator_type_multiply_nd_f32, multiply_op_out);
+  return create_binary_elementwise_nd_f32(
+    output_min, output_max, flags, xnn_operator_type_multiply_nd_f32, multiply_op_out);
 }
 
 enum xnn_status xnn_create_squared_difference_nd_f32(
     uint32_t flags,
     xnn_operator_t* squared_difference_op_out)
 {
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(-INFINITY /* output_min */, INFINITY /* output_max */);
-
   return create_binary_elementwise_nd(
-    -INFINITY /* output_min */, INFINITY /* output_max */,
-    flags, &params, sizeof(params),
+    flags, NULL /* params */, 0 /* params size */,
     xnn_operator_type_squared_difference_nd_f32, squared_difference_op_out);
 }
 
@@ -166,11 +144,8 @@ enum xnn_status xnn_create_subtract_nd_f32(
     uint32_t flags,
     xnn_operator_t* subtract_op_out)
 {
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
-
-  return create_binary_elementwise_nd(
-    output_min, output_max, flags, &params, sizeof(params),
-    xnn_operator_type_subtract_nd_f32, subtract_op_out);
+  return create_binary_elementwise_nd_f32(
+    output_min, output_max, flags, xnn_operator_type_subtract_nd_f32, subtract_op_out);
 }
 
 static enum xnn_status setup_binary_elementwise_nd_f32(
