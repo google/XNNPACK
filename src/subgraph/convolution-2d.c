@@ -105,6 +105,36 @@ enum xnn_status xnn_define_convolution_2d(
     return xnn_status_invalid_parameter;
   }
 
+  const uint32_t supported_flags = XNN_FLAG_TENSORFLOW_SAME_PADDING;
+  const uint32_t invalid_flags = flags & ~supported_flags;
+  if (invalid_flags != 0) {
+    xnn_log_error(
+      "failed to define %s operator with 0x%08" PRIx32 " flags: invalid flags 0x%08" PRIx32,
+      xnn_node_type_to_string(xnn_node_type_convolution_2d), flags, invalid_flags);
+    return xnn_status_invalid_parameter;
+  }
+
+  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
+  if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && any_padding) {
+    xnn_log_error(
+      "failed to define %s operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
+      "TensorFlow SAME padding can't be combined with explicit padding specification",
+      xnn_node_type_to_string(xnn_node_type_convolution_2d),
+      input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+    return xnn_status_invalid_parameter;
+  }
+
+  // Convert TensorFlow SAME padding to explicit padding specification whenever possible
+  if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && (subsampling_height | subsampling_width) == 1) {
+    flags &= ~XNN_FLAG_TENSORFLOW_SAME_PADDING;
+    const uint32_t padding_height = (kernel_height - 1) * dilation_height;
+    const uint32_t padding_width = (kernel_width - 1) * dilation_width;
+    input_padding_left = padding_width / 2;
+    input_padding_top = padding_height / 2;
+    input_padding_right = padding_width - input_padding_left;
+    input_padding_bottom = padding_height - input_padding_top;
+  }
+
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
