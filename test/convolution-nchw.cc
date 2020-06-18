@@ -1452,3 +1452,347 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_without_bias) {
     .iterations(3)
     .TestNCHWxF32();
 }
+
+/**************************** DWCONV 3x3 path ****************************/
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionOperatorTester()
+      .depthwise_layout(true)
+      .input_size(27, 29)
+      .kernel_size(3, 3)
+      .padding(1)
+      .groups(channels)
+      .iterations(1)
+      .TestNCHWxF32();
+  }
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3_without_bias) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+/**************************** DWCONV 3x3 path, batched ****************************/
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionOperatorTester()
+      .depthwise_layout(true)
+      .batch_size(2)
+      .input_size(27, 29)
+      .kernel_size(3, 3)
+      .padding(1)
+      .groups(channels)
+      .iterations(1)
+      .TestNCHWxF32();
+  }
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3_without_bias) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+/**************************** DWCONV 3x3 stride-2 path ****************************/
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3s2_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionOperatorTester()
+      .depthwise_layout(true)
+      .input_size(27, 29)
+      .kernel_size(3, 3)
+      .padding(1)
+      .subsampling(2)
+      .groups(channels)
+      .iterations(1)
+      .TestNCHWxF32();
+  }
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3s2_without_bias) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+/**************************** DWCONV 3x3 stride-2 path, batched ****************************/
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3s2_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionOperatorTester()
+      .depthwise_layout(true)
+      .batch_size(2)
+      .input_size(27, 29)
+      .kernel_size(3, 3)
+      .padding(1)
+      .subsampling(2)
+      .groups(channels)
+      .iterations(1)
+      .TestNCHWxF32();
+  }
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3s2_without_bias) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+/**************************** DWCONV 5x5 path ****************************/
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionOperatorTester()
+      .depthwise_layout(true)
+      .input_size(27, 29)
+      .kernel_size(5, 5)
+      .padding(2)
+      .groups(channels)
+      .iterations(1)
+      .TestNCHWxF32();
+  }
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5_without_bias) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+/**************************** DWCONV 5x5 path, batched ****************************/
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionOperatorTester()
+      .depthwise_layout(true)
+      .batch_size(2)
+      .input_size(27, 29)
+      .kernel_size(5, 5)
+      .padding(2)
+      .groups(channels)
+      .iterations(1)
+      .TestNCHWxF32();
+  }
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5_without_bias) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+/**************************** DWCONV 5x5 stride-2 path ****************************/
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding(2)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5s2_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionOperatorTester()
+      .depthwise_layout(true)
+      .input_size(27, 29)
+      .kernel_size(5, 5)
+      .padding(2)
+      .subsampling(2)
+      .groups(channels)
+      .iterations(1)
+      .TestNCHWxF32();
+  }
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5s2_without_bias) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .has_bias(false)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding(2)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+/**************************** DWCONV 5x5 stride-2 path, batched ****************************/
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding(2)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5s2_varying_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels <= 16; channels *= 4) {
+    ConvolutionOperatorTester()
+      .depthwise_layout(true)
+      .batch_size(2)
+      .input_size(27, 29)
+      .kernel_size(5, 5)
+      .padding(2)
+      .subsampling(2)
+      .groups(channels)
+      .iterations(1)
+      .TestNCHWxF32();
+  }
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5s2_without_bias) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .has_bias(false)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(5, 5)
+    .padding(2)
+    .subsampling(2)
+    .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}

@@ -1225,6 +1225,26 @@ static inline void xnn_pack_f32_chw_dwconv_ghw_w(
   }
 }
 
+static inline void xnn_pack_f32_chw_dwconv_hwg_w(
+  size_t kernel_size,
+  size_t groups,
+  const float* kernel,
+  const float* bias,
+  float* packed_weights)
+{
+  for (size_t g = 0; g < groups; g++) {
+    if XNN_LIKELY(bias != NULL) {
+      *packed_weights = *bias++;
+    } else {
+      *packed_weights = 0.0f;
+    }
+    packed_weights += 1;
+    for (size_t i = 0; i < kernel_size; i++) {
+      *packed_weights++ = kernel[i * groups + g];
+    }
+  }
+}
+
 static inline void xnn_pack_f16_vmulcaddc_w(
   size_t c,
   size_t cr,

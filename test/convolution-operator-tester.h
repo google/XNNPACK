@@ -825,8 +825,6 @@ class ConvolutionOperatorTester {
   }
 
   void TestNCHWxF32() const {
-    ASSERT_FALSE(depthwise_layout());
-
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
@@ -886,6 +884,32 @@ class ConvolutionOperatorTester {
                               input[((((i * input_height() + iy) * input_width() + ix) * groups() + g) * group_input_channels() + ic)] *
                               kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic];
                           }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else if (depthwise_layout()) {
+        ASSERT_EQ(group_input_channels(), 1);
+
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t ky = 0; ky < kernel_height(); ky++) {
+                const size_t iy = oy * subsampling_height() + ky * dilation_height() - padding_top();
+                if (iy < input_height()) {
+                  for (size_t kx = 0; kx < kernel_width(); kx++) {
+                    const size_t ix = ox * subsampling_width() + kx * dilation_width() - padding_left();
+                    if (ix < input_width()) {
+                      for (size_t g = 0; g < groups(); g++) {
+                        for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                          output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] +=
+                            input[((i * input_channel_stride() + g) * input_height() + iy) * input_width() + ix] *
+                            kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc];
                         }
                       }
                     }
