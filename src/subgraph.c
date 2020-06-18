@@ -122,6 +122,320 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
   return new_node;
 }
 
+#define XNN_LAYOUT_FLAG_COMPATIBLE_NCHW      1
+#define XNN_LAYOUT_FLAG_COMPATIBLE_NHWC2NCHW 2
+#define XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC 4
+#define XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER 8
+
+#if XNN_ENABLE_SPARSE
+uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* node) {
+  switch (node->type) {
+    case xnn_node_type_convolution_2d:
+      // Supported cases:
+      // - 1x1 convolution (no stride, no dilation, no padding, no groups)
+      // - 3x3 stride-2 convolution (no dilation, padding 1 on each side, no groups, 3 input channels)
+      if (node->params.convolution_2d.groups != 1) {
+        return 0;
+      }
+      if ((node->params.convolution_2d.dilation_height | node->params.convolution_2d.dilation_width) != 1) {
+        return 0;
+      }
+      if ((node->params.convolution_2d.kernel_height | node->params.convolution_2d.kernel_width) == 1) {
+        if ((node->params.convolution_2d.input_padding_top | node->params.convolution_2d.input_padding_right |
+             node->params.convolution_2d.input_padding_bottom | node->params.convolution_2d.input_padding_left) != 0)
+        {
+          return 0;
+        }
+        if ((node->params.convolution_2d.subsampling_height | node->params.convolution_2d.subsampling_width) != 1) {
+          return 0;
+        }
+        return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
+      } else if (node->params.convolution_2d.kernel_height == 3 && node->params.convolution_2d.kernel_width == 3) {
+        if (node->params.convolution_2d.input_padding_top != 1 || node->params.convolution_2d.input_padding_right != 1 ||
+            node->params.convolution_2d.input_padding_bottom != 1 || node->params.convolution_2d.input_padding_left != 1)
+        {
+          return 0;
+        }
+        if ((node->params.convolution_2d.subsampling_height | node->params.convolution_2d.subsampling_width) != 2) {
+          return 0;
+        }
+        if (node->params.convolution_2d.group_input_channels != 3) {
+          return 0;
+        }
+        return XNN_LAYOUT_FLAG_COMPATIBLE_NHWC2NCHW;
+      }
+      return 0;
+    case xnn_node_type_depthwise_convolution_2d:
+      // Supported cases:
+      // - 3x3 stride-1 convolution (no dilation, padding 1 on each side)
+      // - 3x3 stride-2 convolution (no dilation, padding 1 on each side)
+      // - 5x5 stride-1 convolution (no dilation, padding 2 on each side)
+      // - 5x5 stride-2 convolution (no dilation, padding 2 on each side)
+      if ((node->params.depthwise_convolution_2d.dilation_height | node->params.depthwise_convolution_2d.dilation_width) != 1) {
+        return 0;
+      }
+      if (node->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
+        return 0;
+      }
+      if (node->params.depthwise_convolution_2d.depth_multiplier != 1) {
+        return 0;
+      }
+      if (node->params.depthwise_convolution_2d.subsampling_height != node->params.depthwise_convolution_2d.subsampling_width) {
+        return 0;
+      }
+      switch (node->params.depthwise_convolution_2d.subsampling_height) {
+        case 1:
+        case 2:
+          break;
+        default:
+          return 0;
+      }
+      if (node->params.depthwise_convolution_2d.kernel_height != node->params.depthwise_convolution_2d.kernel_width) {
+        return 0;
+      }
+      switch (node->params.depthwise_convolution_2d.kernel_height) {
+        case 3:
+          return node->params.depthwise_convolution_2d.input_padding_top == 1 &&
+                 node->params.depthwise_convolution_2d.input_padding_right == 1 &&
+                 node->params.depthwise_convolution_2d.input_padding_bottom == 1 &&
+                 node->params.depthwise_convolution_2d.input_padding_left == 1 ? XNN_LAYOUT_FLAG_COMPATIBLE_NCHW : 0;
+        case 5:
+          return node->params.depthwise_convolution_2d.input_padding_top == 2 &&
+                 node->params.depthwise_convolution_2d.input_padding_right == 2 &&
+                 node->params.depthwise_convolution_2d.input_padding_bottom == 2 &&
+                 node->params.depthwise_convolution_2d.input_padding_left == 2 ? XNN_LAYOUT_FLAG_COMPATIBLE_NCHW : 0;
+        default:
+          return 0;
+      }
+    case xnn_node_type_global_average_pooling_2d:
+      return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
+    case xnn_node_type_add2:
+    case xnn_node_type_multiply2:
+      assert(node->num_inputs == 2);
+      assert(node->num_outputs == 1);
+      if (subgraph->values[node->inputs[0]].shape.num_dims != 4 ||
+          subgraph->values[node->inputs[1]].shape.num_dims != 4)
+      {
+        return 0;
+      }
+
+      if (subgraph->values[node->inputs[0]].data != NULL) {
+        // Check that the first input is representable as either a scalar, or a vector
+        size_t num_nonunit_dims = 0;
+        for (uint32_t i = 0; i < subgraph->values[node->inputs[0]].shape.num_dims; i++) {
+          if (subgraph->values[node->inputs[0]].shape.dim[i] != 1) {
+            num_nonunit_dims += 1;
+          }
+        }
+        if (num_nonunit_dims > 1) {
+          return 0;
+        }
+      }
+
+      if (subgraph->values[node->inputs[1]].data != NULL) {
+        // Check that the second input is representable as either a scalar, or a vector
+        size_t num_nonunit_dims = 0;
+        for (uint32_t i = 0; i < subgraph->values[node->inputs[0]].shape.num_dims; i++) {
+          if (subgraph->values[node->inputs[0]].shape.dim[i] != 1) {
+            num_nonunit_dims += 1;
+          }
+        }
+        if (num_nonunit_dims > 1) {
+          return 0;
+        }
+      }
+
+      return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
+    case xnn_node_type_abs:
+    case xnn_node_type_bankers_rounding:
+    case xnn_node_type_ceiling:
+    case xnn_node_type_clamp:
+    case xnn_node_type_floor:
+    case xnn_node_type_hardswish:
+    case xnn_node_type_leaky_relu:
+    case xnn_node_type_negate:
+    case xnn_node_type_sigmoid:
+    case xnn_node_type_square:
+      assert(node->num_inputs == 1);
+      assert(node->num_outputs == 1);
+      return subgraph->values[node->inputs[0]].shape.num_dims == 4 ? XNN_LAYOUT_FLAG_COMPATIBLE_NCHW : 0;
+    default:
+      return false;
+  }
+}
+
+static void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
+{
+  // Convert parts of the subgraph to NCHW for sparse inference
+  // Step 1: detect NCHW-compatible Nodes
+  // Step 2: detect NCHW-compatible clusters (run connected components graph algorithm)
+  // Step 3: check that all NCHW-compatible Values are consumed only by NCHW-compatible Nodes
+  // Step 4: switch Values' layout to NCHW
+  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+    struct xnn_node* node = &subgraph->nodes[n];
+    node->layout_flags = xnn_check_nchw_compatibility(subgraph, node);
+    xnn_log_debug("Node #%" PRIu32 ": %s (NCHW: %s, NHWC->NCHW: %s, NCHW->NHWC: %s)",
+      n, xnn_node_type_to_string(node->type),
+      node->layout_flags & XNN_LAYOUT_FLAG_COMPATIBLE_NCHW ? "yes" : "no",
+      node->layout_flags & XNN_LAYOUT_FLAG_COMPATIBLE_NHWC2NCHW ? "yes" : "no",
+      node->layout_flags & XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC ? "yes" : "no");
+  }
+
+  // Run Shiloach-Vishkin connected components algorithm
+  bool update = false;
+  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+    struct xnn_node* node = &subgraph->nodes[n];
+    node->cluster_leader = n;
+    if (node->layout_flags & XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC) {
+      for (uint32_t i = 0; i < node->num_inputs; i++) {
+        const struct xnn_value* value = &subgraph->values[node->inputs[i]];
+        if (value->data != NULL) {
+          // Static data, skip this input value. Compatibility of this static input with NCHW layout was validated
+          // during the initial NCHW compatibility check for the Node.
+          continue;
+        }
+        if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0) {
+          // External value, invalid cluster
+          node->layout_flags |= XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER;
+          continue;
+        }
+        const uint32_t producer_id = value->producer;
+        assert(producer_id != XNN_INVALID_NODE_ID);
+        assert(producer_id < n);
+        struct xnn_node* producer_node = &subgraph->nodes[producer_id];
+        if ((producer_node->layout_flags & (XNN_LAYOUT_FLAG_COMPATIBLE_NHWC2NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW)) != 0 &&
+            (producer_node->layout_flags & XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER) == 0)
+        {
+          producer_node->layout_flags &= ~XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
+          if (producer_node->cluster_leader != node->cluster_leader) {
+            producer_node->cluster_leader = node->cluster_leader = math_max_u32(producer_node->cluster_leader, node->cluster_leader);
+            update = true;
+          }
+        } else {
+          node->layout_flags |= XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER;
+        }
+      }
+    }
+  }
+  while (update) {
+    update = false;
+    for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+      struct xnn_node* node = &subgraph->nodes[n];
+      if (node->layout_flags & XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER) {
+        continue;
+      }
+
+      if ((node->layout_flags & (XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC)) == 0) {
+        continue;
+      }
+
+      for (uint32_t i = 0; i < node->num_inputs; i++) {
+        const struct xnn_value* value = &subgraph->values[node->inputs[i]];
+        if (value->data != NULL) {
+          // Static data, skip this input value. Compatibility of this static input with NCHW layout was validated
+          // during the initial NCHW compatibility check for the Node.
+          continue;
+        }
+        if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0) {
+          // External value, invalid cluster
+          node->layout_flags |= XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER;
+          continue;
+        }
+        const uint32_t producer_id = value->producer;
+        assert(producer_id != XNN_INVALID_NODE_ID);
+        assert(producer_id < n);
+        struct xnn_node* producer_node = &subgraph->nodes[producer_id];
+        if ((producer_node->layout_flags & (XNN_LAYOUT_FLAG_COMPATIBLE_NHWC2NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW)) != 0 &&
+            (producer_node->layout_flags & XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER) == 0)
+        {
+          producer_node->layout_flags &= ~XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
+          if (producer_node->cluster_leader != node->cluster_leader) {
+            producer_node->cluster_leader = node->cluster_leader = math_max_u32(producer_node->cluster_leader, node->cluster_leader);
+            update = true;
+          }
+        } else {
+          node->layout_flags |= XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER;
+        }
+      }
+    }
+  }
+  // Propagate XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER flags up to the cluster leaders
+  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+    struct xnn_node* node = &subgraph->nodes[n];
+    subgraph->nodes[node->cluster_leader].layout_flags |= node->layout_flags & XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER;
+  }
+  // Check that all Values consumed by NCHW-compatible cluster don't have NCHW-incompatible consumers
+  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+    struct xnn_node* node = &subgraph->nodes[n];
+    if ((subgraph->nodes[node->cluster_leader].layout_flags & XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER) != 0) {
+      continue;
+    }
+
+    if ((node->layout_flags & (XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW)) == 0) {
+      continue;
+    }
+
+    for (uint32_t i = 0; i < node->num_inputs; i++) {
+      struct xnn_value* value = &subgraph->values[node->inputs[i]];
+      if (value->data != NULL) {
+        // Static data, skip this input value because it doesn't have a producer Node.
+        continue;
+      }
+      assert((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0);
+      value->num_nchw_compatible_consumers += 1;
+    }
+  }
+  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+    struct xnn_node* node = &subgraph->nodes[n];
+    if ((subgraph->nodes[node->cluster_leader].layout_flags & XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER) != 0) {
+      continue;
+    }
+
+    if ((node->layout_flags & (XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW)) == 0) {
+      continue;
+    }
+
+    for (uint32_t i = 0; i < node->num_inputs; i++) {
+      const struct xnn_value* value = &subgraph->values[node->inputs[i]];
+      if (value->data != NULL) {
+        // Static data, skip this input value because it doesn't have a producer Node.
+        continue;
+      }
+      assert((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0);
+      assert(value->num_nchw_compatible_consumers > 0);
+      if (value->num_nchw_compatible_consumers != value->num_consumers) {
+        subgraph->nodes[node->cluster_leader].layout_flags |= XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER;
+      }
+    }
+  }
+  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+    struct xnn_node* node = &subgraph->nodes[n];
+    if ((subgraph->nodes[node->cluster_leader].layout_flags & XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER) != 0) {
+      continue;
+    }
+
+    if ((node->layout_flags & (XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW)) == 0) {
+      continue;
+    }
+
+    for (uint32_t i = 0; i < node->num_inputs; i++) {
+      struct xnn_value* value = &subgraph->values[node->inputs[i]];
+      if (value->data != NULL) {
+        // Static data, skip this input value because it doesn't have a producer Node.
+        continue;
+      }
+      assert((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0);
+      assert(value->num_nchw_compatible_consumers > 0);
+      assert(value->num_nchw_compatible_consumers == value->num_consumers);
+      if (value->layout != xnn_layout_type_nchw) {
+        value->layout = xnn_layout_type_nchw;
+        xnn_log_info("set Value #%"PRIu32" layout to NCHW", node->inputs[i]);
+      }
+    }
+  }
+}
+#endif  // XNN_ENABLE_SPARSE
+
 enum xnn_status xnn_subgraph_optimize(
   xnn_subgraph_t subgraph,
   uint32_t flags)
@@ -294,6 +608,11 @@ enum xnn_status xnn_subgraph_optimize(
       }
     }
   }
+
+  #if XNN_ENABLE_SPARSE
+    xnn_subgraph_rewrite_for_nchw(subgraph);
+  #endif
+
   return xnn_status_success;
 }
 

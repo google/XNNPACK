@@ -28,6 +28,11 @@ enum xnn_value_type {
   xnn_value_type_dense_tensor = 1,
 };
 
+enum xnn_layout_type {
+  xnn_layout_type_nhwc = 0,
+  xnn_layout_type_nchw = 1,
+};
+
 /// Abstraction for a collections of elements produced and consumed by nodes.
 struct xnn_value {
   /// Unique ID for the value.
@@ -56,6 +61,8 @@ struct xnn_value {
   /// If multiple inputs in a Node refer to this Value as input, the Node is counted as consumer multiple times.
   /// If the Value is an external output, it counts as having an extra consumer.
   uint32_t num_consumers;
+  uint32_t num_nchw_compatible_consumers;
+  enum xnn_layout_type layout;
 };
 
 struct xnn_blob {
@@ -182,6 +189,8 @@ struct xnn_node {
   uint32_t outputs[XNN_MAX_OUTPUTS];
   uint32_t num_outputs;
   uint32_t flags;
+  uint32_t layout_flags;
+  uint32_t cluster_leader;
 };
 
 struct xnn_operator_data {

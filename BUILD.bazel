@@ -3044,6 +3044,15 @@ cc_library(
     }),
 )
 
+cc_library(
+    name = "enable_sparse",
+    defines = select({
+        ":xnn_enable_sparse_explicit_true": ["XNN_ENABLE_SPARSE=1"],
+        ":xnn_enable_sparse_explicit_false": ["XNN_ENABLE_SPARSE=0"],
+        "//conditions:default": ["XNN_ENABLE_SPARSE=1"],
+    }),
+)
+
 xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS + [
@@ -3129,6 +3138,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":enable_assembly",
+        ":enable_sparse",
         ":logging_utils",
         ":memory_planner",
         ":operator_run",
@@ -3170,6 +3180,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":enable_assembly",
+        ":enable_sparse",
         ":logging_utils",
         ":memory_planner_test_mode",
         ":operator_run_test_mode",
@@ -3216,6 +3227,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":enable_assembly",
+        ":enable_sparse",
         ":logging_utils",
         ":memory_planner",
         ":operator_run",
@@ -5028,6 +5040,18 @@ config_setting(
 config_setting(
     name = "xnn_enable_assembly_explicit_false",
     define_values = {"xnn_enable_assembly": "false"},
+)
+
+# Enables usage of sparse inference.
+config_setting(
+    name = "xnn_enable_sparse_explicit_true",
+    define_values = {"xnn_enable_sparse": "true"},
+)
+
+# Disables usage of sparse inference.
+config_setting(
+    name = "xnn_enable_sparse_explicit_false",
+    define_values = {"xnn_enable_sparse": "false"},
 )
 
 # Disables usage of HMP-aware optimizations.

@@ -167,9 +167,9 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   // + 1x1 convolution (no groups)
   // + 3x3 stride-2 with 3 input channels and NHWC input layout
   // + 3x3 stride-2 depthwise convolution with horizontal padding 1 & no vertical padding
-  // - 3x3 stride-1 depthwise convolution with horizontal padding 1 & no vertical padding
-  // - 5x5 stride-2 depthwise convolution with horizontal padding 2 & no vertical padding
-  // - 5x5 stride-1 depthwise convolution with horizontal padding 2 & no vertical padding
+  // + 3x3 stride-1 depthwise convolution with horizontal padding 1 & no vertical padding
+  // + 5x5 stride-2 depthwise convolution with horizontal padding 2 & no vertical padding
+  // + 5x5 stride-1 depthwise convolution with horizontal padding 2 & no vertical padding
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   const bool is_1x1 = kernel_width == 1 && kernel_height == 1 && subsampling_height == 1 && subsampling_width == 1;
   const bool is_3x3 = kernel_width == 3 && kernel_height == 3 && dilation_height == 1 && dilation_width == 1;
