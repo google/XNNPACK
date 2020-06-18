@@ -309,63 +309,33 @@ class ConvolutionOperatorTester {
     return this->subsampling_width_;
   }
 
-  inline ConvolutionOperatorTester& input_pixel_stride(size_t input_pixel_stride) {
-    assert(input_pixel_stride >= 1);
-    this->input_pixel_stride_ = input_pixel_stride;
+  inline ConvolutionOperatorTester& input_channel_stride(size_t input_channel_stride) {
+    assert(input_channel_stride >= 1);
+    this->input_channel_stride_ = input_channel_stride;
     return *this;
   }
 
-  inline size_t input_pixel_stride() const {
-    if (this->input_pixel_stride_ == 0) {
+  inline size_t input_channel_stride() const {
+    if (this->input_channel_stride_ == 0) {
       return group_input_channels() * groups();
     } else {
-      assert(this->input_pixel_stride_ >= group_input_channels() * groups());
-      return this->input_pixel_stride_;
+      assert(this->input_channel_stride_ >= group_input_channels() * groups());
+      return this->input_channel_stride_;
     }
   }
 
-  inline ConvolutionOperatorTester& output_pixel_stride(size_t output_pixel_stride) {
-    assert(output_pixel_stride >= 1);
-    this->output_pixel_stride_ = output_pixel_stride;
+  inline ConvolutionOperatorTester& output_channel_stride(size_t output_channel_stride) {
+    assert(output_channel_stride >= 1);
+    this->output_channel_stride_ = output_channel_stride;
     return *this;
   }
 
-  inline size_t output_pixel_stride() const {
-    if (this->output_pixel_stride_ == 0) {
+  inline size_t output_channel_stride() const {
+    if (this->output_channel_stride_ == 0) {
       return group_output_channels() * groups();
     } else {
-      assert(this->output_pixel_stride_ >= group_output_channels() * groups());
-      return this->output_pixel_stride_;
-    }
-  }
-
-  inline ConvolutionOperatorTester& input_batch_stride(size_t input_batch_stride) {
-    assert(input_batch_stride >= 1);
-    this->input_batch_stride_ = input_batch_stride;
-    return *this;
-  }
-
-  inline size_t input_batch_stride() const {
-    if (this->input_batch_stride_ == 0) {
-      return groups() * group_input_channels() * input_height() * input_width();
-    } else {
-      assert(this->input_batch_stride_ >= groups() * group_input_channels() * input_height() * input_width());
-      return this->input_batch_stride_;
-    }
-  }
-
-  inline ConvolutionOperatorTester& output_batch_stride(size_t output_batch_stride) {
-    assert(output_batch_stride >= 1);
-    this->output_batch_stride_ = output_batch_stride;
-    return *this;
-  }
-
-  inline size_t output_batch_stride() const {
-    if (this->output_batch_stride_ == 0) {
-      return groups() * group_output_channels() * output_height() * output_width();
-    } else {
-      assert(this->output_batch_stride_ >= groups() * group_output_channels() * output_height() * output_width());
-      return this->output_batch_stride_;
+      assert(this->output_channel_stride_ >= group_output_channels() * groups());
+      return this->output_channel_stride_;
     }
   }
 
@@ -541,10 +511,10 @@ class ConvolutionOperatorTester {
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
-      batch_size() * ((input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels()) + 8);
+      batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()) + 8);
     std::vector<uint8_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     std::vector<int32_t> bias(groups() * group_output_channels());
-    std::vector<uint8_t> output(batch_size() * ((output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels()));
+    std::vector<uint8_t> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
     std::vector<int32_t> accumulators(batch_size() * output_height() * output_width() * groups() * group_output_channels());
     std::vector<double> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
 
@@ -589,7 +559,7 @@ class ConvolutionOperatorTester {
                       for (size_t g = 0; g < groups(); g++) {
                         for (size_t oc = 0; oc < group_output_channels(); oc++) {
                           accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + g]) - int32_t(input_zero_point)) *
+                            (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g]) - int32_t(input_zero_point)) *
                             (int32_t(kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc]) - int32_t(kernel_zero_point));
                         }
                       }
@@ -614,7 +584,7 @@ class ConvolutionOperatorTester {
                         for (size_t oc = 0; oc < group_output_channels(); oc++) {
                           for (size_t ic = 0; ic < group_input_channels(); ic++) {
                             accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                              (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic]) - int32_t(input_zero_point)) *
+                              (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) - int32_t(input_zero_point)) *
                               (int32_t(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]) - int32_t(kernel_zero_point));
                           }
                         }
@@ -655,7 +625,7 @@ class ConvolutionOperatorTester {
           subsampling_height(), subsampling_width(),
           dilation_height(), dilation_width(),
           groups(), group_input_channels(), group_output_channels(),
-          input_pixel_stride(), output_pixel_stride(),
+          input_channel_stride(), output_channel_stride(),
           input_zero_point, 1.0f /* input scale */,
           kernel_zero_point, 1.0f /* kernel scale */,
           kernel.data(), has_bias() ? bias.data() : nullptr,
@@ -682,13 +652,13 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
+                ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
+                ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 ASSERT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                    double(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
+                    double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               }
@@ -705,10 +675,10 @@ class ConvolutionOperatorTester {
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-      batch_size() * ((input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels()));
+      batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
     std::vector<float> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     std::vector<float> bias(groups() * group_output_channels());
-    std::vector<float> output(batch_size() * ((output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels()));
+    std::vector<float> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -749,7 +719,7 @@ class ConvolutionOperatorTester {
                       for (size_t g = 0; g < groups(); g++) {
                         for (size_t oc = 0; oc < group_output_channels(); oc++) {
                           output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + g] *
+                            input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g] *
                             kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc];
                         }
                       }
@@ -774,7 +744,7 @@ class ConvolutionOperatorTester {
                         for (size_t oc = 0; oc < group_output_channels(); oc++) {
                           for (size_t ic = 0; ic < group_input_channels(); ic++) {
                             output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                              input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic] *
+                              input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic] *
                               kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic];
                           }
                         }
@@ -812,7 +782,7 @@ class ConvolutionOperatorTester {
           subsampling_height(), subsampling_width(),
           dilation_height(), dilation_width(),
           groups(), group_input_channels(), group_output_channels(),
-          input_pixel_stride(), output_pixel_stride(),
+          input_channel_stride(), output_channel_stride(),
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
@@ -837,13 +807,13 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_min)
+                ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_max)
+                ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 ASSERT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                    output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
+                    output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c],
                     1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               }
@@ -862,13 +832,13 @@ class ConvolutionOperatorTester {
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
     auto prng = std::bind(std::uniform_real_distribution<float>(), rng);
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-      batch_size() * input_batch_stride() + groups() * group_input_channels() * input_height() * input_width());
+    std::vector<float> input(2 * XNN_EXTRA_BYTES / sizeof(float) +
+      ((batch_size() - 1) * input_channel_stride() + groups() * group_input_channels()) * input_height() * input_width());
     std::vector<float> kernel(
       groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     std::vector<float> bias(groups() * group_output_channels());
     std::vector<float> output(
-      batch_size() * output_batch_stride() + groups() * group_output_channels() * output_height() * output_width());
+      ((batch_size() - 1) * output_channel_stride() + groups() * group_output_channels()) * output_height() * output_width());
     std::vector<float> output_ref(batch_size() * groups() * group_output_channels() * output_height() * output_width());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -939,8 +909,7 @@ class ConvolutionOperatorTester {
                         for (size_t oc = 0; oc < group_output_channels(); oc++) {
                           for (size_t ic = 0; ic < group_input_channels(); ic++) {
                             output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] +=
-                              input[i * input_batch_stride() +
-                                    ((g * group_input_channels() + ic) * input_height() + iy) * input_width() + ix] *
+                              input[((i * input_channel_stride() + g * group_input_channels() + ic) * input_height() + iy) * input_width() + ix] *
                               kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic];
                           }
                         }
@@ -978,6 +947,7 @@ class ConvolutionOperatorTester {
         subsampling_height(), subsampling_width(),
         dilation_height(), dilation_width(),
         groups(), group_input_channels(), group_output_channels(),
+        input_channel_stride(), output_channel_stride(),
         kernel.data(), has_bias() ? bias.data() : nullptr,
         output_min, output_max,
         (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (force_nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
@@ -993,7 +963,7 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_setup_convolution2d_nchw_f32(
           convolution_op,
-          batch_size(), input_batch_stride(), output_batch_stride(), input_height(), input_width(),
+          batch_size(), input_height(), input_width(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 
@@ -1006,13 +976,13 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_GE(output[i * output_batch_stride() + ((g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_min)
+                ASSERT_GE(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
-                ASSERT_LE(output[i * output_batch_stride() + ((g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_max)
+                ASSERT_LE(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
                 ASSERT_NEAR(
                     output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x],
-                    output[i * output_batch_stride() + ((g * group_output_channels() + c) * output_height() + y) * output_width() + x],
+                    output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x],
                     1.0e-4 * std::abs(output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x]))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
               }
@@ -1032,13 +1002,13 @@ class ConvolutionOperatorTester {
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max(
-      batch_size() * ((input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels()),
-      next_batch_size() * ((next_input_height() * next_input_width() - 1) * input_pixel_stride() + groups() * group_input_channels())) + 8);
+      batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
+      next_batch_size() * ((next_input_height() * next_input_width() - 1) * input_channel_stride() + groups() * group_input_channels())) + 8);
     std::vector<uint8_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     std::vector<int32_t> bias(groups() * group_output_channels());
     std::vector<uint8_t> output(std::max(
-      batch_size() * ((output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels()),
-      next_batch_size() * ((next_output_height() * next_output_width() - 1) * output_pixel_stride() + groups() * group_output_channels())));
+      batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()),
+      next_batch_size() * ((next_output_height() * next_output_width() - 1) * output_channel_stride() + groups() * group_output_channels())));
     std::vector<int32_t> accumulators(batch_size() * output_height() * output_width() * groups() * group_output_channels());
     std::vector<double> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
     std::vector<int32_t> next_accumulators(next_batch_size() * next_output_height() * next_output_width() * groups() * group_output_channels());
@@ -1083,7 +1053,7 @@ class ConvolutionOperatorTester {
                       for (size_t oc = 0; oc < group_output_channels(); oc++) {
                         for (size_t ic = 0; ic < group_input_channels(); ic++) {
                           accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic]) - int32_t(input_zero_point)) *
+                            (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) - int32_t(input_zero_point)) *
                             (int32_t(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]) - int32_t(kernel_zero_point));
                         }
                       }
@@ -1122,7 +1092,7 @@ class ConvolutionOperatorTester {
           subsampling_height(), subsampling_width(),
           dilation_height(), dilation_width(),
           groups(), group_input_channels(), group_output_channels(),
-          input_pixel_stride(), output_pixel_stride(),
+          input_channel_stride(), output_channel_stride(),
           input_zero_point, 1.0f /* input scale */,
           kernel_zero_point, 1.0f /* kernel scale */,
           kernel.data(), has_bias() ? bias.data() : nullptr,
@@ -1148,13 +1118,13 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
+                ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
+                ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 ASSERT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                    double(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
+                    double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               }
@@ -1197,7 +1167,7 @@ class ConvolutionOperatorTester {
                       for (size_t oc = 0; oc < group_output_channels(); oc++) {
                         for (size_t ic = 0; ic < group_input_channels(); ic++) {
                           next_accumulators[(((i * next_output_height() + oy) * next_output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            (int32_t(input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic]) - int32_t(input_zero_point)) *
+                            (int32_t(input[((i * next_input_height() + iy) * next_input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) - int32_t(input_zero_point)) *
                             (int32_t(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]) - int32_t(kernel_zero_point));
                         }
                       }
@@ -1231,13 +1201,13 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
+                ASSERT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
+                ASSERT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 ASSERT_NEAR(
                     next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
-                    double(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
+                    double(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               }
@@ -1256,13 +1226,13 @@ class ConvolutionOperatorTester {
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max(
-      batch_size() * ((input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels()),
-      next_batch_size() * ((next_input_height() * next_input_width() - 1) * input_pixel_stride() + groups() * group_input_channels())));
+      batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
+      next_batch_size() * ((next_input_height() * next_input_width() - 1) * input_channel_stride() + groups() * group_input_channels())));
     std::vector<float> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     std::vector<float> bias(groups() * group_output_channels());
     std::vector<float> output(std::max(
-      batch_size() * ((output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels()),
-      next_batch_size() * ((next_output_height() * next_output_width() - 1) * output_pixel_stride() + groups() * group_output_channels())));
+      batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()),
+      next_batch_size() * ((next_output_height() * next_output_width() - 1) * output_channel_stride() + groups() * group_output_channels())));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
     std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * groups() * group_output_channels());
 
@@ -1302,7 +1272,7 @@ class ConvolutionOperatorTester {
                       for (size_t oc = 0; oc < group_output_channels(); oc++) {
                         for (size_t ic = 0; ic < group_input_channels(); ic++) {
                           output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic] *
+                            input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic] *
                             kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic];
                         }
                       }
@@ -1338,7 +1308,7 @@ class ConvolutionOperatorTester {
           subsampling_height(), subsampling_width(),
           dilation_height(), dilation_width(),
           groups(), group_input_channels(), group_output_channels(),
-          input_pixel_stride(), output_pixel_stride(),
+          input_channel_stride(), output_channel_stride(),
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           0, &convolution_op));
@@ -1362,13 +1332,13 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_min)
+                ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_max)
+                ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 ASSERT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                    output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
+                    output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c],
                     1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               }
@@ -1411,7 +1381,7 @@ class ConvolutionOperatorTester {
                       for (size_t oc = 0; oc < group_output_channels(); oc++) {
                         for (size_t ic = 0; ic < group_input_channels(); ic++) {
                           next_output_ref[(((i * next_output_height() + oy) * next_output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic] *
+                            input[((i * next_input_height() + iy) * next_input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic] *
                             kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic];
                         }
                       }
@@ -1444,13 +1414,13 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_min)
+                ASSERT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_max)
+                ASSERT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 ASSERT_NEAR(
                     next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
-                    output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
+                    output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c],
                     1.0e-4 * std::abs(next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c]))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               }
@@ -1471,11 +1441,9 @@ class ConvolutionOperatorTester {
   size_t input_width_{1};
   uint32_t groups_{1};
   size_t group_input_channels_{1};
-  size_t input_pixel_stride_{0};
-  size_t input_batch_stride_{0};
+  size_t input_channel_stride_{0};
   size_t group_output_channels_{1};
-  size_t output_pixel_stride_{0};
-  size_t output_batch_stride_{0};
+  size_t output_channel_stride_{0};
   size_t batch_size_{1};
   uint32_t kernel_height_{1};
   uint32_t kernel_width_{1};

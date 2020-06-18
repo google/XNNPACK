@@ -48,6 +48,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     uint32_t groups,
     size_t group_input_channels,
     size_t group_output_channels,
+    size_t input_channel_stride,
+    size_t output_channel_stride,
     const float* kernel,
     const float* bias,
     float output_min,
@@ -105,6 +107,26 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     xnn_log_error(
       "failed to create %s operator with %zu output channels per group: number of channels must be non-zero",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32), group_output_channels);
+    goto error;
+  }
+
+  const size_t input_channels = groups * group_input_channels;
+  if (input_channel_stride < input_channels) {
+    xnn_log_error(
+      "failed to create %s operator with input channel stride of %zu: "
+      "stride must be at least as large as the number of input channels (%" PRIu32 "x%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32),
+      input_channel_stride, groups, group_input_channels);
+    goto error;
+  }
+
+  const size_t output_channels = groups * group_output_channels;
+  if (output_channel_stride < output_channels) {
+    xnn_log_error(
+      "failed to create %s operator with output channel stride of %zu: "
+      "stride must be at least as large as the number of output channels (%" PRIu32 "x%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32),
+      output_channel_stride, groups, group_output_channels);
     goto error;
   }
 
@@ -456,6 +478,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   convolution_op->groups = groups;
   convolution_op->group_input_channels = group_input_channels;
   convolution_op->group_output_channels = group_output_channels;
+  convolution_op->input_pixel_stride = input_channel_stride;
+  convolution_op->output_pixel_stride = output_channel_stride;
 
   if (ukernel_type == xnn_ukernel_type_dwconv) {
     convolution_op->params.f32_chw = xnn_init_f32_chw_params(0, output_min, output_max);
@@ -479,8 +503,6 @@ error:
 static enum xnn_status setup_convolution2d_nchw(
   xnn_operator_t convolution_op,
   size_t batch_size,
-  size_t input_batch_stride,
-  size_t output_batch_stride,
   size_t input_height,
   size_t input_width,
   const void* input,
@@ -508,17 +530,16 @@ static enum xnn_status setup_convolution2d_nchw(
     return xnn_status_invalid_parameter;
   }
 
-  const uint32_t groups = convolution_op->groups;
-  const size_t group_input_channels = convolution_op->group_input_channels;
-  const size_t input_neurons = groups * group_input_channels * input_height * input_width;
-  if (input_batch_stride < input_neurons) {
-    xnn_log_error(
-      "failed to setup %s operator with input batch stride of %zu: "
-      "stride must be at least as large as the number of input neurons (%" PRIu32 "x%zux%zux%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32),
-      input_batch_stride, groups, group_input_channels, input_height, input_width);
-    return xnn_status_invalid_parameter;
+  if (batch_size == 0) {
+    convolution_op->state = xnn_run_state_skip;
+    return xnn_status_success;
   }
+
+  convolution_op->batch_size = batch_size;
+  convolution_op->input_height = input_height;
+  convolution_op->input_width = input_width;
+  convolution_op->input = input;
+  convolution_op->output = output;
 
   const size_t output_height = compute_output_dimension(
       convolution_op->padding_top + input_height + convolution_op->padding_bottom,
@@ -531,28 +552,8 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->dilation_width,
       convolution_op->stride_width);
 
-  const size_t group_output_channels = convolution_op->group_output_channels;
-  const size_t output_neurons = groups * group_output_channels * output_height * output_width;
-  if (output_batch_stride < output_neurons) {
-    xnn_log_error(
-      "failed to setup %s operator with output batch stride of %zu: "
-      "stride must be at least as large as the number of output neurons (%" PRIu32 "x%zux%zux%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32),
-      output_batch_stride, groups, group_output_channels, output_height, output_width);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (batch_size == 0) {
-    convolution_op->state = xnn_run_state_skip;
-    return xnn_status_success;
-  }
-
-  convolution_op->batch_size = batch_size;
-  convolution_op->input_height = input_height;
-  convolution_op->input_width = input_width;
-  convolution_op->input = input;
-  convolution_op->output = output;
-
+  const size_t input_batch_stride = (input_height * input_width * convolution_op->input_pixel_stride) << log2_input_element_size;
+  const size_t output_batch_stride = (output_height * output_width * convolution_op->output_pixel_stride) << log2_output_element_size;
   switch (convolution_op->ukernel.type) {
     case xnn_ukernel_type_spmm:
     {
@@ -583,14 +584,14 @@ static enum xnn_status setup_convolution2d_nchw(
       }
 
       convolution_op->context.spmm = (struct spmm_context) {
-          .n = group_output_channels,
+          .n = convolution_op->group_output_channels,
           .a = (const void*) ((uintptr_t) input + (convolution_op->first_input_channel * input_size * sizeof(float))),
           .packed_weights = nonzero_values,
           .input_increments = input_increments,
           .output_channel_nonzeros = output_channel_nonzeros,
           .c = output,
-          .batched_a_stride = input_batch_stride << log2_input_element_size,
-          .batched_c_stride = output_batch_stride << log2_output_element_size,
+          .batched_a_stride = input_batch_stride,
+          .batched_c_stride = output_batch_stride,
           .ukernel = convolution_op->ukernel.spmm.function,
       };
       memcpy(&convolution_op->context.spmm.params, params, sizeof(convolution_op->context.spmm.params));
@@ -630,11 +631,11 @@ static enum xnn_status setup_convolution2d_nchw(
         .input_height = input_height,
         .input_width = input_width,
         .input = input,
-        .input_batch_stride = input_batch_stride << log2_input_element_size,
+        .input_batch_stride = input_batch_stride,
         .zero = zero_buffer,
         .packed_weights = convolution_op->packed_weights,
         .output = output,
-        .output_batch_stride = output_batch_stride << log2_input_element_size,
+        .output_batch_stride = output_batch_stride,
         .input_padding_top = convolution_op->padding_top,
         .output_channels = convolution_op->group_output_channels,
         .output_height_stride = output_width << log2_output_element_size,
@@ -683,13 +684,13 @@ static enum xnn_status setup_convolution2d_nchw(
         .zero = zero_buffer,
         .input_padding_top = convolution_op->padding_top,
         .input_channel_stride = input_height * input_width << log2_input_element_size,
-        .input_batch_stride = input_batch_stride << log2_input_element_size,
+        .input_batch_stride = input_batch_stride,
         .packed_weights = convolution_op->packed_weights,
         .weights_channel_stride = bias_element_size +
           (convolution_op->kernel_height * convolution_op->kernel_width << log2_filter_element_size),
         .output = output,
         .output_channel_stride = output_height * output_width << log2_output_element_size,
-        .output_batch_stride = output_batch_stride << log2_output_element_size,
+        .output_batch_stride = output_batch_stride,
         .input_tuple_stride = convolution_op->ukernel.dwconv2d.input_width_tile << log2_input_element_size,
         .output_tuple_stride = convolution_op->ukernel.dwconv2d.output_width_tile << log2_output_element_size,
         .input_pixel_stride = input_width << log2_input_element_size,
@@ -701,7 +702,7 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->compute.type = xnn_parallelization_type_2d;
       convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv2d_chw;
       convolution_op->compute.range[0] = batch_size;
-      convolution_op->compute.range[1] = groups;
+      convolution_op->compute.range[1] = convolution_op->groups;
       convolution_op->state = xnn_run_state_ready;
 
       return xnn_status_success;
@@ -714,8 +715,6 @@ static enum xnn_status setup_convolution2d_nchw(
 enum xnn_status xnn_setup_convolution2d_nchw_f32(
     xnn_operator_t convolution_op,
     size_t batch_size,
-    size_t input_batch_stride,
-    size_t output_batch_stride,
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -731,8 +730,7 @@ enum xnn_status xnn_setup_convolution2d_nchw_f32(
 
   return setup_convolution2d_nchw(
     convolution_op,
-    batch_size, input_batch_stride, output_batch_stride,
-    input_height, input_width,
+    batch_size, input_height, input_width,
     input, output,
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,

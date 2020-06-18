@@ -72,8 +72,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
     uint32_t groups,
     size_t group_input_channels,
     size_t group_output_channels,
-    size_t input_pixel_stride,
-    size_t output_pixel_stride,
+    size_t input_channel_stride,
+    size_t output_channel_stride,
     uint8_t input_zero_point,
     float input_scale,
     uint8_t kernel_zero_point,
@@ -141,22 +141,22 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
   }
 
   const size_t input_channels = groups * group_input_channels;
-  if (input_pixel_stride < input_channels) {
+  if (input_channel_stride < input_channels) {
     xnn_log_error(
-      "failed to create %s operator with input pixel stride of %zu: "
+      "failed to create %s operator with input channel stride of %zu: "
       "stride must be at least as large as the number of input channels (%" PRIu32 "x%zu)",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_q8),
-      input_pixel_stride, groups, group_input_channels);
+      input_channel_stride, groups, group_input_channels);
     goto error;
   }
 
   const size_t output_channels = groups * group_output_channels;
-  if (output_pixel_stride < output_channels) {
+  if (output_channel_stride < output_channels) {
     xnn_log_error(
-      "failed to create %s operator with output pixel stride of %zu: "
+      "failed to create %s operator with output channel stride of %zu: "
       "stride must be at least as large as the number of output channels (%" PRIu32 "x%zu)",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_q8),
-      output_pixel_stride, groups, group_output_channels);
+      output_channel_stride, groups, group_output_channels);
     goto error;
   }
 
@@ -376,8 +376,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
   convolution_op->groups = groups;
   convolution_op->group_input_channels = group_input_channels;
   convolution_op->group_output_channels = group_output_channels;
-  convolution_op->input_pixel_stride = input_pixel_stride;
-  convolution_op->output_pixel_stride = output_pixel_stride;
+  convolution_op->input_pixel_stride = input_channel_stride;
+  convolution_op->output_pixel_stride = output_channel_stride;
 
   convolution_op->kernel_zero_point = kernel_zero_point;
 
@@ -416,8 +416,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     uint32_t groups,
     size_t group_input_channels,
     size_t group_output_channels,
-    size_t input_pixel_stride,
-    size_t output_pixel_stride,
+    size_t input_channel_stride,
+    size_t output_channel_stride,
     const float* kernel,
     const float* bias,
     float output_min,
@@ -480,22 +480,22 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   }
 
   const size_t input_channels = groups * group_input_channels;
-  if (input_pixel_stride < input_channels) {
+  if (input_channel_stride < input_channels) {
     xnn_log_error(
-      "failed to create %s operator with input pixel stride of %zu: "
+      "failed to create %s operator with input channel stride of %zu: "
       "stride must be at least as large as the number of input channels (%" PRIu32 "x%zu)",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32),
-      input_pixel_stride, groups, group_input_channels);
+      input_channel_stride, groups, group_input_channels);
     goto error;
   }
 
   const size_t output_channels = groups * group_output_channels;
-  if (output_pixel_stride < output_channels) {
+  if (output_channel_stride < output_channels) {
     xnn_log_error(
-      "failed to create %s operator with output pixel stride of %zu: "
+      "failed to create %s operator with output channel stride of %zu: "
       "stride must be at least as large as the number of output channels (%" PRIu32 "x%zu)",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32),
-      output_pixel_stride, groups, group_output_channels);
+      output_channel_stride, groups, group_output_channels);
     goto error;
   }
 
@@ -729,8 +729,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   convolution_op->groups = groups;
   convolution_op->group_input_channels = group_input_channels;
   convolution_op->group_output_channels = group_output_channels;
-  convolution_op->input_pixel_stride = input_pixel_stride;
-  convolution_op->output_pixel_stride = output_pixel_stride;
+  convolution_op->input_pixel_stride = input_channel_stride;
+  convolution_op->output_pixel_stride = output_channel_stride;
 
   convolution_op->params.f32_minmax = xnn_init_f32_minmax_params(output_min, output_max);
 

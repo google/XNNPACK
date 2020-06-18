@@ -219,7 +219,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_with_input_stride) {
     .batch_size(2)
     .input_size(27, 29)
     .kernel_size(1, 1)
-    .input_batch_stride(18013)
+    .input_channel_stride(25)
     .group_input_channels(23)
     .group_output_channels(19)
     .sparsity(0.5f)
@@ -232,7 +232,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_with_output_stride) {
     .batch_size(2)
     .input_size(27, 29)
     .kernel_size(1, 1)
-    .output_batch_stride(14879)
+    .output_channel_stride(21)
     .group_input_channels(23)
     .group_output_channels(19)
     .sparsity(0.5f)
@@ -460,7 +460,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_with_output_stride) {
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
-    .output_batch_stride(4001)
+    .output_channel_stride(21)
     .group_input_channels(3)
     .group_output_channels(19)
     .force_nhwc_input(true)
@@ -685,7 +685,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_with_input_stride) {
     .input_size(27, 29)
     .kernel_size(3, 3)
     .padding(1)
-    .input_batch_stride(14879)
+    .input_channel_stride(21)
     .groups(19)
     .iterations(3)
     .TestNCHWxF32();
@@ -697,7 +697,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_with_output_stride) {
     .input_size(27, 29)
     .kernel_size(3, 3)
     .padding(1)
-    .output_batch_stride(14879)
+    .output_channel_stride(23)
     .groups(19)
     .iterations(3)
     .TestNCHWxF32();
@@ -925,7 +925,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_with_input_stride) {
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
-    .input_batch_stride(14879)
+    .input_channel_stride(21)
     .groups(19)
     .iterations(3)
     .TestNCHWxF32();
@@ -938,7 +938,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_with_output_stride) {
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
-    .output_batch_stride(14879)
+    .output_channel_stride(23)
     .groups(19)
     .iterations(3)
     .TestNCHWxF32();
@@ -1155,7 +1155,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_with_input_stride) {
     .input_size(27, 29)
     .kernel_size(5, 5)
     .padding(2)
-    .input_batch_stride(14879)
+    .input_channel_stride(21)
     .groups(19)
     .iterations(3)
     .TestNCHWxF32();
@@ -1167,7 +1167,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_with_output_stride) {
     .input_size(27, 29)
     .kernel_size(5, 5)
     .padding(2)
-    .output_batch_stride(14879)
+    .output_channel_stride(23)
     .groups(19)
     .iterations(3)
     .TestNCHWxF32();
@@ -1395,7 +1395,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_with_input_stride) {
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
-    .input_batch_stride(14879)
+    .input_channel_stride(21)
     .groups(19)
     .iterations(3)
     .TestNCHWxF32();
@@ -1408,7 +1408,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_with_output_stride) {
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
-    .output_batch_stride(14879)
+    .output_channel_stride(23)
     .groups(19)
     .iterations(3)
     .TestNCHWxF32();
