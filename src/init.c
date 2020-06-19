@@ -732,13 +732,15 @@ static void init(void) {
 
   /**************************** F16 micro-kernels ****************************/
   #ifndef XNN_NO_F16_OPERATORS
-    init_flags |= XNN_INIT_FLAG_F16;
+    if (cpuinfo_has_arm_neon_fp16_arith()) {
+      init_flags |= XNN_INIT_FLAG_F16;
 
-    xnn_params.f16.gavgpool = (struct gavgpool_parameters) {
-      .up = (xnn_gavgpool_unipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8,
-      .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8,
-      .mr = 7,
-    };
+      xnn_params.f16.gavgpool = (struct gavgpool_parameters) {
+        .up = (xnn_gavgpool_unipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8,
+        .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8,
+        .mr = 7,
+      };
+    }
   #endif  // XNN_NO_F16_OPERATORS
 
   /**************************** F32 micro-kernels ****************************/
