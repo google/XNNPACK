@@ -46,6 +46,7 @@ MICROKERNEL_TEST_DEPS = [
 
 OPERATOR_TEST_DEPS = [
     ":XNNPACK_test_mode",
+    "@cpuinfo",
     "@pthreadpool",
     "@FP16",
 ]
@@ -2120,6 +2121,12 @@ MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/params-init.h",
     "src/xnnpack/requantization.h",
     "include/xnnpack.h",
+]
+
+OPERATOR_TEST_HDRS = [
+    "src/xnnpack/isa-checks.h",
+    "src/xnnpack/params.h",
+    "src/xnnpack/common.h",
 ]
 
 OPERATOR_TEST_PARAMS_HDRS = [
@@ -4858,7 +4865,7 @@ xnnpack_unit_test(
     srcs = [
         "test/global-average-pooling-nwc.cc",
         "test/global-average-pooling-operator-tester.h",
-    ] + OPERATOR_TEST_PARAMS_HDRS,
+    ] + OPERATOR_TEST_HDRS,
     deps = OPERATOR_TEST_DEPS,
 )
 

@@ -8,6 +8,9 @@
 
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
+#include <xnnpack/isa-checks.h>
+
 #include "global-average-pooling-operator-tester.h"
 
 #include <xnnpack/params.h>
@@ -335,6 +338,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_Q8, small_batch_large_width_with_output_stride) 
 
 #if XNN_ARCH_ARM64
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
@@ -348,6 +352,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width_with_input_stride) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
@@ -362,6 +367,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width_with_input_stride) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width_with_qmin) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
@@ -376,6 +382,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width_with_qmin) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width_with_qmax) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
@@ -390,6 +397,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_small_width_with_qmax) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
@@ -403,6 +411,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width_with_input_stride) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
@@ -417,6 +426,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width_with_input_stride) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width_with_qmin) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
@@ -431,6 +441,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width_with_qmin) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width_with_qmax) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
@@ -445,6 +456,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, unit_batch_large_width_with_qmax) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_small_width) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
@@ -458,6 +470,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_small_width) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_small_width_with_input_stride) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
@@ -472,6 +485,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_small_width_with_input_stride) 
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_small_width_with_output_stride) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = 1; width <= xnn_params.f16.gavgpool.mr; width++) {
@@ -486,6 +500,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_small_width_with_output_stride)
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_large_width) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
@@ -499,6 +514,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_large_width) {
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_large_width_with_input_stride) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
@@ -513,6 +529,7 @@ TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_large_width_with_input_stride) 
 }
 
 TEST(GLOBAL_AVERAGE_POOLING_NWC_F16, small_batch_large_width_with_output_stride) {
+  TEST_REQUIRES_ARM_NEON_FP16_ARITH;
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t width = xnn_params.f16.gavgpool.mr; width <= 4 * xnn_params.f16.gavgpool.mr; width++) {
