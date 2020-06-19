@@ -161,6 +161,14 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
     goto error;
   }
 
+  status = xnn_status_unsupported_hardware;
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) == 0) {
+    xnn_log_error("failed to create %s operator: FP16 operations are not supported",
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_f16));
+    goto error;
+  }
+
   status = xnn_status_invalid_parameter;
 
   if (channels == 0) {
@@ -444,6 +452,12 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f16(
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_f16));
     return xnn_status_uninitialized;
+  }
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) == 0) {
+    xnn_log_error("failed to setup %s operator: FP16 operations are not supported",
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_f16));
+    return xnn_status_unsupported_hardware;
   }
 
   if (width == 0) {

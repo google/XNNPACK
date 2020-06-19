@@ -261,11 +261,14 @@ class GlobalAveragePoolingOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t global_average_pooling_op = nullptr;
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_create_global_average_pooling_nwc_f16(
+      xnn_status status = xnn_create_global_average_pooling_nwc_f16(
           channels(), input_stride(), output_stride(),
           output_min, output_max,
-          0, &global_average_pooling_op));
+          0, &global_average_pooling_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, global_average_pooling_op);
 
       // Smart pointer to automatically delete global_average_pooling_op.
