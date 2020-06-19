@@ -14,6 +14,8 @@
 #include <random>
 #include <vector>
 
+#include <xnnpack/common.h>
+
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
@@ -77,6 +79,7 @@ static void global_average_pooling_q8(benchmark::State& state) {
     benchmark::Counter::kIsRate);
 }
 
+#if XNN_ARCH_ARM64
 static void global_average_pooling_f16(benchmark::State& state) {
   if (!benchmark::utils::CheckNEONFP16ARITH(state)) {
     return;
@@ -134,6 +137,7 @@ static void global_average_pooling_f16(benchmark::State& state) {
       batch_size * (input_height * input_width + 1) * channels * sizeof(uint16_t),
     benchmark::Counter::kIsRate);
 }
+#endif  // XNN_ARCH_ARM64
 
 static void global_average_pooling_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
@@ -198,7 +202,9 @@ static void ImageNetArguments(benchmark::internal::Benchmark* b) {
 }
 
 BENCHMARK(global_average_pooling_q8)->Apply(ImageNetArguments)->UseRealTime();
+#if XNN_ARCH_ARM64
 BENCHMARK(global_average_pooling_f16)->Apply(ImageNetArguments)->UseRealTime();
+#endif
 BENCHMARK(global_average_pooling_f32)->Apply(ImageNetArguments)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
