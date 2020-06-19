@@ -64,7 +64,7 @@
 #endif
 
 struct xnn_parameters xnn_params = {
-  .initialized = false
+  .init_flags = 0
 };
 
 static void init(void) {
@@ -76,6 +76,7 @@ static void init(void) {
   static const volatile float inf = INFINITY;
   const bool is_wasm_x86 = signbit(inf - inf);
 #endif
+  uint32_t init_flags = XNN_INIT_FLAG_XNNPACK;
 
 #if XNN_ARCH_ARM
   #if XNN_PLATFORM_MOBILE
@@ -93,6 +94,8 @@ static void init(void) {
   if (cpuinfo_has_arm_neon()) {
     /**************************** Q8 micro-kernels ****************************/
     #ifndef XNN_NO_Q8_OPERATORS
+      init_flags |= XNN_INIT_FLAG_Q8;
+
       xnn_params.q8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_q8_gemm_minmax_ukernel_4x8__neon);
       xnn_params.q8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_q8_igemm_minmax_ukernel_4x8__neon);
       xnn_params.q8.gemm.mr = 4;
@@ -117,6 +120,8 @@ static void init(void) {
 
     /**************************** U8 micro-kernels ****************************/
     #ifndef XNN_NO_U8_OPERATORS
+      init_flags |= XNN_INIT_FLAG_U8;
+
       xnn_params.u8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16,
         .mr = 9,
@@ -129,6 +134,8 @@ static void init(void) {
 
     /**************************** X8 micro-kernels ****************************/
     #ifndef XNN_NO_X8_OPERATORS
+      init_flags |= XNN_INIT_FLAG_X8;
+
       xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
       xnn_params.x8.zip = (struct zip_parameters) {
         .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__neon,
@@ -140,6 +147,8 @@ static void init(void) {
 
     /**************************** F32 micro-kernels ****************************/
     #ifndef XNN_NO_F32_OPERATORS
+      init_flags |= XNN_INIT_FLAG_F32;
+
       #if XNN_ENABLE_ASSEMBLY
         switch (cpuinfo_get_uarch(0)->uarch) {
           case cpuinfo_uarch_cortex_a5:
@@ -370,6 +379,8 @@ static void init(void) {
 
     /**************************** X32 micro-kernels ****************************/
     #ifndef XNN_NO_X32_OPERATORS
+      init_flags |= XNN_INIT_FLAG_X32;
+
       xnn_params.x32.fill = (struct fill_parameters) {
         .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__neon,
         .row_tile = 1,
@@ -389,6 +400,8 @@ static void init(void) {
   } else if (!XNN_PLATFORM_MOBILE) {
     /**************************** Q8 micro-kernels ****************************/
     #ifndef XNN_NO_Q8_OPERATORS
+      init_flags |= XNN_INIT_FLAG_Q8;
+
       xnn_params.q8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_q8_gemm_minmax_ukernel_2x2__scalar);
       xnn_params.q8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_q8_igemm_minmax_ukernel_2x2__scalar);
       xnn_params.q8.gemm.mr = 2;
@@ -414,6 +427,8 @@ static void init(void) {
 
     /**************************** U8 micro-kernels ****************************/
     #ifndef XNN_NO_U8_OPERATORS
+      init_flags |= XNN_INIT_FLAG_U8;
+
       xnn_params.u8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
         .mr = 9,
@@ -426,6 +441,8 @@ static void init(void) {
 
     /**************************** X8 micro-kernels ****************************/
     #ifndef XNN_NO_X8_OPERATORS
+      init_flags |= XNN_INIT_FLAG_X8;
+
       xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
       xnn_params.x8.zip = (struct zip_parameters) {
         .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__scalar,
@@ -437,6 +454,8 @@ static void init(void) {
 
     /**************************** F32 micro-kernels ****************************/
     #ifndef XNN_NO_F32_OPERATORS
+      init_flags |= XNN_INIT_FLAG_F32;
+
       xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_4x4__scalar);
       xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_4x4__scalar);
       xnn_params.f32.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_1x4__scalar);
@@ -635,6 +654,8 @@ static void init(void) {
 
     /**************************** X32 micro-kernels ****************************/
     #ifndef XNN_NO_X32_OPERATORS
+      init_flags |= XNN_INIT_FLAG_X32;
+
       xnn_params.x32.fill = (struct fill_parameters) {
         .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__scalar_int,
         .row_tile = 1,
@@ -657,6 +678,8 @@ static void init(void) {
 
   /**************************** Q8 micro-kernels ****************************/
   #ifndef XNN_NO_Q8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_Q8;
+
     xnn_params.q8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_q8_gemm_minmax_ukernel_8x8__neon);
     xnn_params.q8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_q8_igemm_minmax_ukernel_8x8__neon);
     xnn_params.q8.gemm.mr = 8;
@@ -682,6 +705,8 @@ static void init(void) {
 
   /**************************** U8 micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_U8;
+
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16,
       .mr = 9,
@@ -694,6 +719,8 @@ static void init(void) {
 
   /**************************** X8 micro-kernels ****************************/
   #ifndef XNN_NO_X8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_X8;
+
     xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__neon,
@@ -705,6 +732,8 @@ static void init(void) {
 
   /**************************** F16 micro-kernels ****************************/
   #ifndef XNN_NO_F16_OPERATORS
+    init_flags |= XNN_INIT_FLAG_F16;
+
     xnn_params.f16.gavgpool = (struct gavgpool_parameters) {
       .up = (xnn_gavgpool_unipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8,
       .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8,
@@ -714,6 +743,8 @@ static void init(void) {
 
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
+    init_flags |= XNN_INIT_FLAG_F32;
+
     #if XNN_PLATFORM_IOS
       #if XNN_ENABLE_ASSEMBLY
         xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75);
@@ -1065,6 +1096,8 @@ static void init(void) {
 
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
+    init_flags |= XNN_INIT_FLAG_X32;
+
     xnn_params.x32.fill = (struct fill_parameters) {
       .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__neon,
       .row_tile = 1,
@@ -1090,6 +1123,8 @@ static void init(void) {
 
   /**************************** Q8 micro-kernels ****************************/
   #ifndef XNN_NO_Q8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_Q8;
+
     xnn_params.q8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_q8_gemm_minmax_ukernel_4x4c2__sse2);
     xnn_params.q8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_q8_igemm_minmax_ukernel_4x4c2__sse2);
     xnn_params.q8.gemm.mr = 4;
@@ -1116,6 +1151,8 @@ static void init(void) {
 
   /**************************** U8 micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_U8;
+
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16,
       .mr = 9,
@@ -1128,6 +1165,8 @@ static void init(void) {
 
   /**************************** X8 micro-kernels ****************************/
   #ifndef XNN_NO_X8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_X8;
+
     xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__sse2,
@@ -1139,6 +1178,8 @@ static void init(void) {
 
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
+    init_flags |= XNN_INIT_FLAG_F32;
+
     if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
       xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_7x16__avx512f_broadcast);
       xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_7x16__avx512f_broadcast);
@@ -1537,6 +1578,8 @@ static void init(void) {
 
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
+    init_flags |= XNN_INIT_FLAG_X32;
+
     xnn_params.x32.fill = (struct fill_parameters) {
       .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__sse,
       .row_tile = 1,
@@ -1557,6 +1600,8 @@ static void init(void) {
 #elif XNN_ARCH_WASMSIMD
   /**************************** Q8 micro-kernels ****************************/
   #ifndef XNN_NO_Q8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_Q8;
+
     xnn_params.q8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_q8_gemm_minmax_ukernel_2x2__scalar);
     xnn_params.q8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_q8_igemm_minmax_ukernel_2x2__scalar);
     xnn_params.q8.gemm.mr = 2;
@@ -1582,6 +1627,8 @@ static void init(void) {
 
   /**************************** U8 micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_U8;
+
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
       .mr = 9,
@@ -1594,6 +1641,8 @@ static void init(void) {
 
   /**************************** X8 micro-kernels ****************************/
   #ifndef XNN_NO_X8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_X8;
+
     xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__scalar,
@@ -1605,6 +1654,8 @@ static void init(void) {
 
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
+    init_flags |= XNN_INIT_FLAG_F32;
+
     if (is_wasm_x86) {
       xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_4x8__wasmsimd_splat_x86);
       xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_splat_x86);
@@ -1820,6 +1871,8 @@ static void init(void) {
 
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
+    init_flags |= XNN_INIT_FLAG_X32;
+
     xnn_params.x32.fill = (struct fill_parameters) {
       .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__psimd,
       .row_tile = 1,
@@ -1840,6 +1893,8 @@ static void init(void) {
 #elif XNN_ARCH_WASM || XNN_ARCH_ASMJS
   /**************************** Q8 micro-kernels ****************************/
   #ifndef XNN_NO_Q8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_Q8;
+
     xnn_params.q8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_q8_gemm_minmax_ukernel_2x2__scalar);
     xnn_params.q8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_q8_igemm_minmax_ukernel_2x2__scalar);
     xnn_params.q8.gemm.mr = 2;
@@ -1865,6 +1920,8 @@ static void init(void) {
 
   /**************************** U8 micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_U8;
+
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
       .mr = 9,
@@ -1877,6 +1934,8 @@ static void init(void) {
 
   /**************************** X8 micro-kernels ****************************/
   #ifndef XNN_NO_X8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_X8;
+
     xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__scalar,
@@ -1888,6 +1947,8 @@ static void init(void) {
 
   /**************************** F32 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
+    init_flags |= XNN_INIT_FLAG_F32;
+
     if (is_wasm_x86) {
       xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_2x4__scalar);
       xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_2x4__scalar);
@@ -2102,6 +2163,8 @@ static void init(void) {
 
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
+    init_flags |= XNN_INIT_FLAG_X32;
+
     xnn_params.x32.fill = (struct fill_parameters) {
       .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__scalar_float,
       .row_tile = 1,
@@ -2122,7 +2185,7 @@ static void init(void) {
 #else
   #error "Unsupported architecture"
 #endif
-  xnn_params.initialized = true;
+  xnn_params.init_flags = init_flags;
 }
 
 #ifdef _WIN32
@@ -2143,7 +2206,7 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
   #else
     pthread_once(&init_guard, &init);
   #endif
-  if (xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) != 0) {
     if (allocator != NULL) {
       memcpy(&xnn_params.allocator, allocator, sizeof(struct xnn_allocator));
     } else {

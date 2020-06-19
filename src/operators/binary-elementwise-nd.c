@@ -24,7 +24,7 @@ static enum xnn_status create_binary_elementwise_nd(
     enum xnn_operator_type operator_type,
     xnn_operator_t* binary_elementwise_op_out)
 {
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));
     return xnn_status_uninitialized;
@@ -169,7 +169,7 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
   }
   binary_elementwise_op->state = xnn_run_state_invalid;
 
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(binary_elementwise_op->type));
     return xnn_status_uninitialized;

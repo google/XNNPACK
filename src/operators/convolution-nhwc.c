@@ -90,7 +90,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
   xnn_operator_t convolution_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_q8));
     goto error;
@@ -428,7 +428,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   xnn_operator_t convolution_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error(
       "failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
@@ -766,7 +766,7 @@ static enum xnn_status setup_convolution2d_nhwc(
 {
   convolution_op->state = xnn_run_state_invalid;
 
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(convolution_op->type));
     return xnn_status_uninitialized;

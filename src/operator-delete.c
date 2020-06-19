@@ -17,7 +17,7 @@
 
 enum xnn_status xnn_delete_operator(xnn_operator_t op)
 {
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to delete operator: XNNPACK is not initialized");
     return xnn_status_uninitialized;
   }

@@ -1666,8 +1666,27 @@ struct vmulcaddc_parameters {
 #define XNN_MAX_F32_DWCONV_UKERNELS 3
 #define XNN_MAX_F32_ARGMAXPOOL_UKERNELS 3
 
+// Indicates that XNNPACK as a whole has initialized.
+// This does not guarantee that any particular microkernels are available.
+#define XNN_INIT_FLAG_XNNPACK 0x00000001
+// Indicates that F32 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_F32     0x00000002
+// Indicates that X32 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_X32     0x00000004
+// Indicates that F16 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_F16     0x00000008
+// Indicates that X16 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_X16     0x00000010
+// Indicates that Q8 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_Q8      0x00000020
+// Indicates that U8 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_U8      0x00000040
+// Indicates that X8 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_X8      0x00000080
+
 struct xnn_parameters {
-  bool initialized;
+  // Bitwise combination of XNN_INIT_FLAG_* flags
+  uint32_t init_flags;
   struct xnn_allocator allocator;
   struct {
     struct gemm_parameters gemm;

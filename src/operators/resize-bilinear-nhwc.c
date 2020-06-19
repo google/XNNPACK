@@ -30,7 +30,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
   xnn_operator_t resize_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32));
     goto error;
@@ -108,7 +108,7 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
   }
   resize_op->state = xnn_run_state_invalid;
 
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc_f32));
     return xnn_status_uninitialized;

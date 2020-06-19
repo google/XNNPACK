@@ -24,7 +24,7 @@ enum xnn_status xnn_create_subgraph(
   struct xnn_subgraph* subgraph = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create subgraph: XNNPACK is not initialized");
     goto error;
   }

@@ -19,7 +19,7 @@ enum xnn_status xnn_define_hardswish(
   uint32_t output_id,
   uint32_t flags)
 {
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to define %s operator: XNNPACK is not initialized",
       xnn_node_type_to_string(xnn_node_type_hardswish));
     return xnn_status_uninitialized;

@@ -888,7 +888,7 @@ void xnn_compute_vmulcaddc(
 
 enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
 {
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to run operator: XNNPACK is not initialized");
     return xnn_status_uninitialized;
   }

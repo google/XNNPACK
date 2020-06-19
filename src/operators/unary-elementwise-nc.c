@@ -29,7 +29,7 @@ static enum xnn_status create_unary_elementwise_nc(
 {
   xnn_operator_t unary_elementwise_op = NULL;
 
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));
     return xnn_status_uninitialized;
@@ -92,7 +92,7 @@ static enum xnn_status setup_unary_elementwise_nc(
     const void* params,
     size_t params_size)
 {
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(unary_elementwise_op->type));
     return xnn_status_uninitialized;

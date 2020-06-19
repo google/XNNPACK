@@ -57,7 +57,7 @@ enum xnn_status xnn_create_runtime_v2(
   struct xnn_runtime* runtime = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
-  if (!xnn_params.initialized) {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create runtime: XNNPACK is not initialized");
     goto error;
   }
