@@ -20,6 +20,7 @@
 #include <fp16.h>
 #include "bench/utils.h"
 
+#ifndef XNN_NO_Q8_OPERATORS
 
 static void global_average_pooling_q8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
@@ -76,6 +77,10 @@ static void global_average_pooling_q8(benchmark::State& state) {
       batch_size * (input_height * input_width + 1) * channels * sizeof(uint8_t),
     benchmark::Counter::kIsRate);
 }
+
+#endif  // XNN_NO_Q8_OPERATORS
+
+#ifndef XNN_NO_F16_OPERATORS
 
 static void global_average_pooling_f16(benchmark::State& state) {
   if (!benchmark::utils::CheckNEONFP16ARITH(state)) {
@@ -134,6 +139,8 @@ static void global_average_pooling_f16(benchmark::State& state) {
       batch_size * (input_height * input_width + 1) * channels * sizeof(uint16_t),
     benchmark::Counter::kIsRate);
 }
+
+#endif  // XNN_NO_F16_OPERATORS
 
 static void global_average_pooling_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
@@ -197,8 +204,12 @@ static void ImageNetArguments(benchmark::internal::Benchmark* b) {
   b->Args({1, 13, 13, 1000});
 }
 
+#ifndef XNN_NO_Q8_OPERATORS
 BENCHMARK(global_average_pooling_q8)->Apply(ImageNetArguments)->UseRealTime();
+#endif  // XNN_NO_Q8_OPERATORS
+#ifndef XNN_NO_F16_OPERATORS
 BENCHMARK(global_average_pooling_f16)->Apply(ImageNetArguments)->UseRealTime();
+#endif  // XNN_NO_F16_OPERATORS
 BENCHMARK(global_average_pooling_f32)->Apply(ImageNetArguments)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

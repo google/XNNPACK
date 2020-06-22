@@ -153,6 +153,8 @@ class GlobalAveragePoolingOperatorTester {
     return this->iterations_;
   }
 
+  #ifndef XNN_NO_Q8_OPERATORS
+
   void TestNWCxQ8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -216,6 +218,10 @@ class GlobalAveragePoolingOperatorTester {
       }
     }
   }
+
+  #endif  // XNN_NO_Q8_OPERATORS
+
+  #ifndef XNN_NO_F16_OPERATORS
 
   void TestNWCxF16() const {
     std::random_device random_device;
@@ -293,6 +299,8 @@ class GlobalAveragePoolingOperatorTester {
       }
     }
   }
+
+  #endif  // XNN_NO_F16_OPERATORS
 
   void TestNWCxF32() const {
     std::random_device random_device;
