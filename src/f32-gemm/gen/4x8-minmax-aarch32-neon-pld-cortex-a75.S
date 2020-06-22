@@ -102,6 +102,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_pld_cortex_a75
         PLD         [r9, 192]
         PLD         [r9, 256]
         PLD         [r9, 320]
+        PLD         [r9, 384]
 
         BLO         5f               // less than 4 channels?
 
@@ -161,9 +162,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_pld_cortex_a75
         VMLA.F32     q8, q6, d4[1]
         VLD1.32    {d3}, [ r0]!      // A3
         VMLA.F32    q10, q6, d5[1]
-        PLD         [r9, 384]        // Prefetch B
+        PLD         [r9, 352]        // Prefetch B
         VMLA.F32    q12, q6, d6[1]
-        PLD         [r9, 448]        // Prefetch B
+        PLD         [r9, 416]        // Prefetch B
         VMLA.F32    q14, q6, d7[1]
         VLDM        r9!, {d8-d11}    // B0
         VMLA.F32     q9, q7, d4[1]
