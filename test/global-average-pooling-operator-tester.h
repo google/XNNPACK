@@ -245,12 +245,10 @@ class GlobalAveragePoolingOperatorTester {
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
-      const float output_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_range == 0.0f ?
-        -std::numeric_limits<float>::infinity() :
-        accumulated_min + accumulated_range / 255.0f * float(qmin())));
-      const float output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_range == 0.0f ?
-        +std::numeric_limits<float>::infinity() :
-        accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+      const float scaled_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + accumulated_range / 255.0f * float(qmin())));
+      const float scaled_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+      const float output_min = scaled_min == scaled_max ? -std::numeric_limits<float>::infinity() : scaled_min;
+      const float output_max = scaled_min == scaled_max ? +std::numeric_limits<float>::infinity() : scaled_max;
 
       // Clamp reference results.
       for (float& value : output_ref) {
