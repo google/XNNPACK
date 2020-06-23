@@ -148,25 +148,23 @@ enum xnn_status xnn_create_subtract_nd_f32(
     output_min, output_max, flags, xnn_operator_type_subtract_nd_f32, subtract_op_out);
 }
 
-static enum xnn_status setup_binary_elementwise_nd_f32(
+static enum xnn_status setup_binary_elementwise_nd(
     xnn_operator_t binary_elementwise_op,
     enum xnn_operator_type expected_operator_type,
     size_t num_input1_dims,
     const size_t* input1_shape,
     size_t num_input2_dims,
     const size_t* input2_shape,
-    const float* input1,
-    const float* input2,
-    float* output,
+    const void* input1,
+    const void* input2,
+    void* output,
+    uint32_t init_flag,
+    uint32_t log2_element_size,
+    const void* params,
+    size_t params_size,
     const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
     size_t num_threads)
 {
-  if (binary_elementwise_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(binary_elementwise_op->type));
-    return xnn_status_invalid_parameter;
-  }
   binary_elementwise_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -174,6 +172,20 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
       xnn_operator_type_to_string(binary_elementwise_op->type));
     return xnn_status_uninitialized;
   }
+
+  if ((xnn_params.init_flags & init_flag) != init_flag) {
+    xnn_log_error("failed to create %s operator: hardware operations are not supported",
+      xnn_operator_type_to_string(binary_elementwise_op->type));
+    return xnn_status_unsupported_hardware;
+  }
+
+  if (binary_elementwise_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(binary_elementwise_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  binary_elementwise_op->state = xnn_run_state_invalid;
 
   if (max(num_input1_dims, num_input2_dims) > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
@@ -282,9 +294,12 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
     .a = input1,
     .b = input2,
     .y = output,
-    .elements = compressed_output_shape[0] * sizeof(float),
-    .params.f32 = binary_elementwise_op->params.f32_minmax,
+    .elements = compressed_output_shape[0] << log2_element_size,
   };
+  if (params_size != 0) {
+    memcpy(&binary_elementwise_op->context.elementwise_binary.params, params, params_size);
+  }
+
   const size_t* compressed_a_shape = compressed_input1_shape;
   const size_t* compressed_b_shape = compressed_input2_shape;
   if (compressed_input1_shape[0] == 1) {
@@ -301,12 +316,12 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
   size_t a_stride = compressed_a_shape[0], b_stride = compressed_b_shape[0], y_stride = compressed_output_shape[0];
   for (size_t i = 1; i < num_compressed_dims; i++) {
     if (compressed_a_shape[i] != 1) {
-      binary_elementwise_op->context.elementwise_binary.a_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = a_stride * sizeof(float);
+      binary_elementwise_op->context.elementwise_binary.a_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = a_stride << log2_element_size;
     }
     if (compressed_b_shape[i] != 1) {
-      binary_elementwise_op->context.elementwise_binary.b_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = b_stride * sizeof(float);
+      binary_elementwise_op->context.elementwise_binary.b_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = b_stride << log2_element_size;
     }
-    binary_elementwise_op->context.elementwise_binary.y_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = y_stride * sizeof(float);
+    binary_elementwise_op->context.elementwise_binary.y_stride[XNN_MAX_TENSOR_DIMS - 1 - i] = y_stride << log2_element_size;
     a_stride *= compressed_a_shape[i];
     b_stride *= compressed_b_shape[i];
     y_stride *= compressed_output_shape[i];
@@ -324,6 +339,36 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
   binary_elementwise_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
+}
+
+static enum xnn_status setup_binary_elementwise_nd_f32(
+    xnn_operator_t binary_elementwise_op,
+    enum xnn_operator_type expected_operator_type,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+    size_t num_threads)
+{
+  return setup_binary_elementwise_nd(
+    binary_elementwise_op,
+    expected_operator_type,
+    num_input1_dims,
+    input1_shape,
+    num_input2_dims,
+    input2_shape,
+    input1,
+    input2,
+    output,
+    XNN_INIT_FLAG_F32,
+    2 /* log2(sizeof(float)) */,
+    &binary_elementwise_op->params.f32_minmax, sizeof(binary_elementwise_op->params.f32_minmax),
+    vbinary,
+    num_threads);
 }
 
 enum xnn_status xnn_setup_add_nd_f32(
