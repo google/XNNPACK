@@ -28,11 +28,13 @@ constexpr size_t kDim6PostPad = kDim6 / 2 + 1;
 
 
 TEST(CONSTANT_PAD_ND_X32, 0d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConstantPadOperatorTester()
     .TestX32();
 }
 
 TEST(CONSTANT_PAD_ND_X32, 1d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dim1_pre_pad = 0; dim1_pre_pad <= kDim1PrePad; dim1_pre_pad += kDim1PrePad) {
     for (size_t dim1_post_pad = 0; dim1_post_pad <= kDim1PostPad; dim1_post_pad += kDim1PostPad) {
       ConstantPadOperatorTester()
@@ -45,6 +47,7 @@ TEST(CONSTANT_PAD_ND_X32, 1d) {
 }
 
 TEST(CONSTANT_PAD_ND_X32, 2d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dim1_pre_pad = 0; dim1_pre_pad <= kDim1PrePad; dim1_pre_pad += kDim1PrePad) {
     for (size_t dim1_post_pad = 0; dim1_post_pad <= kDim1PostPad; dim1_post_pad += kDim1PostPad) {
       for (size_t dim2_pre_pad = 0; dim2_pre_pad <= kDim2PrePad; dim2_pre_pad += kDim2PrePad) {
@@ -61,6 +64,7 @@ TEST(CONSTANT_PAD_ND_X32, 2d) {
 }
 
 TEST(CONSTANT_PAD_ND_X32, 3d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dim1_pre_pad = 0; dim1_pre_pad <= kDim1PrePad; dim1_pre_pad += kDim1PrePad) {
     for (size_t dim1_post_pad = 0; dim1_post_pad <= kDim1PostPad; dim1_post_pad += kDim1PostPad) {
       for (size_t dim2_pre_pad = 0; dim2_pre_pad <= kDim2PrePad; dim2_pre_pad += kDim2PrePad) {
@@ -81,6 +85,7 @@ TEST(CONSTANT_PAD_ND_X32, 3d) {
 }
 
 TEST(CONSTANT_PAD_ND_X32, 4d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dim1_pre_pad = 0; dim1_pre_pad <= kDim1PrePad; dim1_pre_pad += kDim1PrePad) {
     for (size_t dim1_post_pad = 0; dim1_post_pad <= kDim1PostPad; dim1_post_pad += kDim1PostPad) {
       for (size_t dim2_pre_pad = 0; dim2_pre_pad <= kDim2PrePad; dim2_pre_pad += kDim2PrePad) {
@@ -105,6 +110,7 @@ TEST(CONSTANT_PAD_ND_X32, 4d) {
 }
 
 TEST(CONSTANT_PAD_ND_X32, 5d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dim1_pre_pad = 0; dim1_pre_pad <= kDim1PrePad; dim1_pre_pad += kDim1PrePad) {
     for (size_t dim1_post_pad = 0; dim1_post_pad <= kDim1PostPad; dim1_post_pad += kDim1PostPad) {
       for (size_t dim2_pre_pad = 0; dim2_pre_pad <= kDim2PrePad; dim2_pre_pad += kDim2PrePad) {
@@ -133,6 +139,7 @@ TEST(CONSTANT_PAD_ND_X32, 5d) {
 }
 
 TEST(CONSTANT_PAD_ND_X32, 6d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dim1_pre_pad = 0; dim1_pre_pad <= kDim1PrePad; dim1_pre_pad += kDim1PrePad) {
     for (size_t dim1_post_pad = 0; dim1_post_pad <= kDim1PostPad; dim1_post_pad += kDim1PostPad) {
       for (size_t dim2_pre_pad = 0; dim2_pre_pad <= kDim2PrePad; dim2_pre_pad += kDim2PrePad) {

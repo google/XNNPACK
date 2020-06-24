@@ -16,12 +16,14 @@ constexpr size_t kDim6 = 7;
 
 
 TEST(SUBTRACT_ND_F32, 0d_x_0d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   BinaryElementwiseOperatorTester()
     .operation_type(BinaryElementwiseOperatorTester::OperationType::Subtract)
     .TestF32();
 }
 
 TEST(SUBTRACT_ND_F32, 1d_x_0d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
@@ -33,6 +35,7 @@ TEST(SUBTRACT_ND_F32, 1d_x_0d) {
 }
 
 TEST(SUBTRACT_ND_F32, 0d_x_1d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
     const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -44,6 +47,7 @@ TEST(SUBTRACT_ND_F32, 0d_x_1d) {
 }
 
 TEST(SUBTRACT_ND_F32, 1d_x_1d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -60,6 +64,7 @@ TEST(SUBTRACT_ND_F32, 1d_x_1d) {
 }
 
 TEST(SUBTRACT_ND_F32, 0d_x_2d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
     const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
     const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
@@ -73,6 +78,7 @@ TEST(SUBTRACT_ND_F32, 0d_x_2d) {
 }
 
 TEST(SUBTRACT_ND_F32, 1d_x_2d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -91,6 +97,7 @@ TEST(SUBTRACT_ND_F32, 1d_x_2d) {
 }
 
 TEST(SUBTRACT_ND_F32, 2d_x_0d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
     const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
@@ -104,6 +111,7 @@ TEST(SUBTRACT_ND_F32, 2d_x_0d) {
 }
 
 TEST(SUBTRACT_ND_F32, 2d_x_1d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -122,6 +130,7 @@ TEST(SUBTRACT_ND_F32, 2d_x_1d) {
 }
 
 TEST(SUBTRACT_ND_F32, 2d_x_2d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -142,6 +151,7 @@ TEST(SUBTRACT_ND_F32, 2d_x_2d) {
 }
 
 TEST(SUBTRACT_ND_F32, 0d_x_3d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
     const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
     const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
@@ -157,6 +167,7 @@ TEST(SUBTRACT_ND_F32, 0d_x_3d) {
 }
 
 TEST(SUBTRACT_ND_F32, 1d_x_3d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -177,6 +188,7 @@ TEST(SUBTRACT_ND_F32, 1d_x_3d) {
 }
 
 TEST(SUBTRACT_ND_F32, 2d_x_3d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -199,6 +211,7 @@ TEST(SUBTRACT_ND_F32, 2d_x_3d) {
 }
 
 TEST(SUBTRACT_ND_F32, 3d_x_0d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
     const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
@@ -214,6 +227,7 @@ TEST(SUBTRACT_ND_F32, 3d_x_0d) {
 }
 
 TEST(SUBTRACT_ND_F32, 3d_x_1d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -234,6 +248,7 @@ TEST(SUBTRACT_ND_F32, 3d_x_1d) {
 }
 
 TEST(SUBTRACT_ND_F32, 3d_x_2d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -256,6 +271,7 @@ TEST(SUBTRACT_ND_F32, 3d_x_2d) {
 }
 
 TEST(SUBTRACT_ND_F32, 3d_x_3d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -280,6 +296,7 @@ TEST(SUBTRACT_ND_F32, 3d_x_3d) {
 }
 
 TEST(SUBTRACT_ND_F32, 0d_x_4d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
     const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
     const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
@@ -297,6 +314,7 @@ TEST(SUBTRACT_ND_F32, 0d_x_4d) {
 }
 
 TEST(SUBTRACT_ND_F32, 1d_x_4d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -319,6 +337,7 @@ TEST(SUBTRACT_ND_F32, 1d_x_4d) {
 }
 
 TEST(SUBTRACT_ND_F32, 2d_x_4d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -343,6 +362,7 @@ TEST(SUBTRACT_ND_F32, 2d_x_4d) {
 }
 
 TEST(SUBTRACT_ND_F32, 3d_x_4d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -369,6 +389,7 @@ TEST(SUBTRACT_ND_F32, 3d_x_4d) {
 }
 
 TEST(SUBTRACT_ND_F32, 4d_x_0d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
     const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
@@ -386,6 +407,7 @@ TEST(SUBTRACT_ND_F32, 4d_x_0d) {
 }
 
 TEST(SUBTRACT_ND_F32, 4d_x_1d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -408,6 +430,7 @@ TEST(SUBTRACT_ND_F32, 4d_x_1d) {
 }
 
 TEST(SUBTRACT_ND_F32, 4d_x_2d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -432,6 +455,7 @@ TEST(SUBTRACT_ND_F32, 4d_x_2d) {
 }
 
 TEST(SUBTRACT_ND_F32, 4d_x_3d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -458,6 +482,7 @@ TEST(SUBTRACT_ND_F32, 4d_x_3d) {
 }
 
 TEST(SUBTRACT_ND_F32, 4d_x_4d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -486,6 +511,7 @@ TEST(SUBTRACT_ND_F32, 4d_x_4d) {
 }
 
 TEST(SUBTRACT_ND_F32, 0d_x_5d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
     const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
     const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
@@ -505,6 +531,7 @@ TEST(SUBTRACT_ND_F32, 0d_x_5d) {
 }
 
 TEST(SUBTRACT_ND_F32, 1d_x_5d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -529,6 +556,7 @@ TEST(SUBTRACT_ND_F32, 1d_x_5d) {
 }
 
 TEST(SUBTRACT_ND_F32, 2d_x_5d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -555,6 +583,7 @@ TEST(SUBTRACT_ND_F32, 2d_x_5d) {
 }
 
 TEST(SUBTRACT_ND_F32, 3d_x_5d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -583,6 +612,7 @@ TEST(SUBTRACT_ND_F32, 3d_x_5d) {
 }
 
 TEST(SUBTRACT_ND_F32, 4d_x_5d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -613,6 +643,7 @@ TEST(SUBTRACT_ND_F32, 4d_x_5d) {
 }
 
 TEST(SUBTRACT_ND_F32, 5d_x_0d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
     const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
@@ -632,6 +663,7 @@ TEST(SUBTRACT_ND_F32, 5d_x_0d) {
 }
 
 TEST(SUBTRACT_ND_F32, 5d_x_1d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -656,6 +688,7 @@ TEST(SUBTRACT_ND_F32, 5d_x_1d) {
 }
 
 TEST(SUBTRACT_ND_F32, 5d_x_2d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -682,6 +715,7 @@ TEST(SUBTRACT_ND_F32, 5d_x_2d) {
 }
 
 TEST(SUBTRACT_ND_F32, 5d_x_3d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -710,6 +744,7 @@ TEST(SUBTRACT_ND_F32, 5d_x_3d) {
 }
 
 TEST(SUBTRACT_ND_F32, 5d_x_4d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -740,6 +775,7 @@ TEST(SUBTRACT_ND_F32, 5d_x_4d) {
 }
 
 TEST(SUBTRACT_ND_F32, 5d_x_5d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -773,6 +809,7 @@ TEST(SUBTRACT_ND_F32, 5d_x_5d) {
 }
 
 TEST(SUBTRACT_ND_F32, 0d_x_6d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
     const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
     const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
@@ -794,6 +831,7 @@ TEST(SUBTRACT_ND_F32, 0d_x_6d) {
 }
 
 TEST(SUBTRACT_ND_F32, 1d_x_6d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -820,6 +858,7 @@ TEST(SUBTRACT_ND_F32, 1d_x_6d) {
 }
 
 TEST(SUBTRACT_ND_F32, 2d_x_6d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -848,6 +887,7 @@ TEST(SUBTRACT_ND_F32, 2d_x_6d) {
 }
 
 TEST(SUBTRACT_ND_F32, 3d_x_6d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -878,6 +918,7 @@ TEST(SUBTRACT_ND_F32, 3d_x_6d) {
 }
 
 TEST(SUBTRACT_ND_F32, 4d_x_6d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -910,6 +951,7 @@ TEST(SUBTRACT_ND_F32, 4d_x_6d) {
 }
 
 TEST(SUBTRACT_ND_F32, 5d_x_6d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -945,6 +987,7 @@ TEST(SUBTRACT_ND_F32, 5d_x_6d) {
 }
 
 TEST(SUBTRACT_ND_F32, 6d_x_0d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
     const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
@@ -966,6 +1009,7 @@ TEST(SUBTRACT_ND_F32, 6d_x_0d) {
 }
 
 TEST(SUBTRACT_ND_F32, 6d_x_1d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -992,6 +1036,7 @@ TEST(SUBTRACT_ND_F32, 6d_x_1d) {
 }
 
 TEST(SUBTRACT_ND_F32, 6d_x_2d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -1020,6 +1065,7 @@ TEST(SUBTRACT_ND_F32, 6d_x_2d) {
 }
 
 TEST(SUBTRACT_ND_F32, 6d_x_3d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -1050,6 +1096,7 @@ TEST(SUBTRACT_ND_F32, 6d_x_3d) {
 }
 
 TEST(SUBTRACT_ND_F32, 6d_x_4d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -1082,6 +1129,7 @@ TEST(SUBTRACT_ND_F32, 6d_x_4d) {
 }
 
 TEST(SUBTRACT_ND_F32, 6d_x_5d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
@@ -1117,6 +1165,7 @@ TEST(SUBTRACT_ND_F32, 6d_x_5d) {
 }
 
 TEST(SUBTRACT_ND_F32, 6d_x_6d) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
       const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
