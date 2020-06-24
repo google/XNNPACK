@@ -16,11 +16,13 @@ tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -o src/f32-p
 tools/xngen src/f32-prelu/psimd.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32-prelu/gen/psimd-2x4.c
 tools/xngen src/f32-prelu/psimd.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -o src/f32-prelu/gen/psimd-2x8.c
 
-################################### x86 SSE2 ##################################
-tools/xngen src/f32-prelu/sse.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D BLEND=0 -o src/f32-prelu/gen/sse2-2x4.c
-tools/xngen src/f32-prelu/sse.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D BLEND=0 -o src/f32-prelu/gen/sse2-2x8.c
-tools/xngen src/f32-prelu/sse.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D BLEND=1 -o src/f32-prelu/gen/sse41-2x4.c
-tools/xngen src/f32-prelu/sse.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D BLEND=1 -o src/f32-prelu/gen/sse41-2x8.c
+############################# x86 SSE/SSE2/SSE4.1 #############################
+tools/xngen src/f32-prelu/sse.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D SSE=1 -o src/f32-prelu/gen/sse-2x4.c
+tools/xngen src/f32-prelu/sse.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D SSE=1 -o src/f32-prelu/gen/sse-2x8.c
+tools/xngen src/f32-prelu/sse.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D SSE=2 -o src/f32-prelu/gen/sse2-2x4.c
+tools/xngen src/f32-prelu/sse.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D SSE=2 -o src/f32-prelu/gen/sse2-2x8.c
+tools/xngen src/f32-prelu/sse.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D SSE=4 -o src/f32-prelu/gen/sse41-2x4.c
+tools/xngen src/f32-prelu/sse.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D SSE=4 -o src/f32-prelu/gen/sse41-2x8.c
 
 ################################### x86 AVX ###################################
 tools/xngen src/f32-prelu/avx.c.in -D CHANNEL_TILE=8  -D ROW_TILE=2 -o src/f32-prelu/gen/avx-2x8.c

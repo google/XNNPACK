@@ -60,10 +60,10 @@ void xnn_f32_prelu_ukernel__sse41_2x8(
       const __m128 vprod1x0123 = _mm_mul_ps(vi1x0123, vw0123);
       const __m128 vprod1x4567 = _mm_mul_ps(vi1x4567, vw4567);
 
-      __m128 vacc0x0123 = _mm_blendv_ps(vi0x0123, vprod0x0123, vi0x0123);
-      __m128 vacc0x4567 = _mm_blendv_ps(vi0x4567, vprod0x4567, vi0x4567);
-      __m128 vacc1x0123 = _mm_blendv_ps(vi1x0123, vprod1x0123, vi1x0123);
-      __m128 vacc1x4567 = _mm_blendv_ps(vi1x4567, vprod1x4567, vi1x4567);
+      const __m128 vacc0x0123 = _mm_blendv_ps(vi0x0123, vprod0x0123, vi0x0123);
+      const __m128 vacc0x4567 = _mm_blendv_ps(vi0x4567, vprod0x4567, vi0x4567);
+      const __m128 vacc1x0123 = _mm_blendv_ps(vi1x0123, vprod1x0123, vi1x0123);
+      const __m128 vacc1x4567 = _mm_blendv_ps(vi1x4567, vprod1x4567, vi1x4567);
 
       _mm_storeu_ps(o0, vacc0x0123);
       _mm_storeu_ps(o0 + 4, vacc0x4567);

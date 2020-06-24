@@ -1242,6 +1242,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-pavgpool/9p8x-minmax-sse-c4.c
   src/f32-pavgpool/9x-minmax-sse-c4.c
   src/f32-ppmm/gen/4x8-minmax-sse.c
+  src/f32-prelu/gen/sse-2x4.c
+  src/f32-prelu/gen/sse-2x8.c
   src/f32-rmax/sse.c
   src/f32-spmm/gen/4x1-minmax-sse.c
   src/f32-spmm/gen/8x1-minmax-sse.c

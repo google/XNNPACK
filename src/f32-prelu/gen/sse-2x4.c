@@ -9,13 +9,13 @@
 
 #include <assert.h>
 
-#include <emmintrin.h>
+#include <xmmintrin.h>
 
 #include <xnnpack/math.h>
 #include <xnnpack/prelu.h>
 
 
-void xnn_f32_prelu_ukernel__sse2_2x4(
+void xnn_f32_prelu_ukernel__sse_2x4(
     size_t rows,
     size_t channels,
     const float*restrict input,
@@ -40,6 +40,7 @@ void xnn_f32_prelu_ukernel__sse2_2x4(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
+  const __m128 vzero = _mm_setzero_ps();
   do {
     const float* w = weights;
     size_t c = channels;
@@ -52,13 +53,11 @@ void xnn_f32_prelu_ukernel__sse2_2x4(
       const __m128 vi1x0123 = _mm_loadu_ps(i1);
       i1 += 4;
 
-      const __m128 vprod0x0123 = _mm_mul_ps(vi0x0123, vw0123);
-      const __m128 vmask0x0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi0x0123)));
-      const __m128 vprod1x0123 = _mm_mul_ps(vi1x0123, vw0123);
-      const __m128 vmask1x0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi1x0123)));
+      const __m128 vprod0x0123 = _mm_mul_ps(_mm_min_ps(vi0x0123, vzero), vw0123);
+      const __m128 vprod1x0123 = _mm_mul_ps(_mm_min_ps(vi1x0123, vzero), vw0123);
 
-      const __m128 vacc0x0123 = _mm_or_ps(_mm_and_ps(vprod0x0123, vmask0x0123), _mm_andnot_ps(vmask0x0123, vi0x0123));
-      const __m128 vacc1x0123 = _mm_or_ps(_mm_and_ps(vprod1x0123, vmask1x0123), _mm_andnot_ps(vmask1x0123, vi1x0123));
+      const __m128 vacc0x0123 = _mm_add_ps(vprod0x0123, _mm_max_ps(vi0x0123, vzero));
+      const __m128 vacc1x0123 = _mm_add_ps(vprod1x0123, _mm_max_ps(vi1x0123, vzero));
 
       _mm_storeu_ps(o0, vacc0x0123);
       o0 += 4;
@@ -74,13 +73,11 @@ void xnn_f32_prelu_ukernel__sse2_2x4(
       const __m128 vi1x0123 = _mm_loadu_ps(i1);
       i1 = (const float*) ((uintptr_t) i1 + c);
 
-      const __m128 vprod0x0123 = _mm_mul_ps(vi0x0123, vw0123);
-      const __m128 vmask0x0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi0x0123)));
-      const __m128 vprod1x0123 = _mm_mul_ps(vi1x0123, vw0123);
-      const __m128 vmask1x0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi1x0123)));
+      const __m128 vprod0x0123 = _mm_mul_ps(_mm_min_ps(vi0x0123, vzero), vw0123);
+      const __m128 vprod1x0123 = _mm_mul_ps(_mm_min_ps(vi1x0123, vzero), vw0123);
 
-      __m128 vacc0x0123 = _mm_or_ps(_mm_and_ps(vprod0x0123, vmask0x0123), _mm_andnot_ps(vmask0x0123, vi0x0123));
-      __m128 vacc1x0123 = _mm_or_ps(_mm_and_ps(vprod1x0123, vmask1x0123), _mm_andnot_ps(vmask1x0123, vi1x0123));
+      __m128 vacc0x0123 = _mm_add_ps(vprod0x0123, _mm_max_ps(vi0x0123, vzero));
+      __m128 vacc1x0123 = _mm_add_ps(vprod1x0123, _mm_max_ps(vi1x0123, vzero));
 
       if (c & (2 * sizeof(float))) {
         _mm_storel_pi((__m64*) o0, vacc0x0123);

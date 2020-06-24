@@ -1408,6 +1408,12 @@ static void init(void) {
         .row_tile = 2,
         .channel_tile = 16,
       };
+    } else if (cpuinfo_has_x86_sse4_1()) {
+      xnn_params.f32.prelu = (struct prelu_parameters) {
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__sse41_2x8,
+        .row_tile = 2,
+        .channel_tile = 8,
+      };
     } else {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__sse2_2x8,

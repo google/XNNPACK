@@ -6,19 +6,19 @@
 $assert CHANNEL_TILE % 4 == 0
 $assert CHANNEL_TILE >= 4
 $assert ROW_TILE >= 1
+$assert SSE in [1, 2, 4]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$SSE_HEADER = {1: "xmmintrin.h", 2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 #include <assert.h>
 
-$if BLEND:
-  #include <smmintrin.h>
-$else:
-  #include <emmintrin.h>
+#include <${SSE_HEADER}>
 
 #include <xnnpack/math.h>
 #include <xnnpack/prelu.h>
 
 
-void xnn_f32_prelu_ukernel__${"sse41" if BLEND else "sse2"}_${ROW_TILE}x${CHANNEL_TILE}(
+$ISA = {1: "sse", 2: "sse2", 4: "sse41"}[SSE]
+void xnn_f32_prelu_ukernel__${ISA}_${ROW_TILE}x${CHANNEL_TILE}(
     size_t rows,
     size_t channels,
     const float*restrict input,
@@ -50,6 +50,8 @@ void xnn_f32_prelu_ukernel__${"sse41" if BLEND else "sse2"}_${ROW_TILE}x${CHANNE
   const size_t input_increment = input_stride * ${ROW_TILE} - channels;
   const size_t output_increment = output_stride * ${ROW_TILE} - channels;
 
+  $if SSE == 1:
+    const __m128 vzero = _mm_setzero_ps();
   do {
     const float* w = weights;
     size_t c = channels;
@@ -67,16 +69,21 @@ void xnn_f32_prelu_ukernel__${"sse41" if BLEND else "sse2"}_${ROW_TILE}x${CHANNE
 
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
-          const __m128 vprod${M}x${ABC[C:C+4]} = _mm_mul_ps(vi${M}x${ABC[C:C+4]}, vw${ABC[C:C+4]});
-          $if not BLEND:
-            const __m128 vmask${M}x${ABC[C:C+4]} = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi${M}x${ABC[C:C+4]})));
+          $if SSE == 1:
+            const __m128 vprod${M}x${ABC[C:C+4]} = _mm_mul_ps(_mm_min_ps(vi${M}x${ABC[C:C+4]}, vzero), vw${ABC[C:C+4]});
+          $else:
+            const __m128 vprod${M}x${ABC[C:C+4]} = _mm_mul_ps(vi${M}x${ABC[C:C+4]}, vw${ABC[C:C+4]});
+            $if SSE == 2:
+              const __m128 vmask${M}x${ABC[C:C+4]} = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi${M}x${ABC[C:C+4]})));
 
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
-          $if BLEND:
-            __m128 vacc${M}x${ABC[C:C+4]} = _mm_blendv_ps(vi${M}x${ABC[C:C+4]}, vprod${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]});
-          $else:
-            __m128 vacc${M}x${ABC[C:C+4]} = _mm_or_ps(_mm_and_ps(vprod${M}x${ABC[C:C+4]}, vmask${M}x${ABC[C:C+4]}), _mm_andnot_ps(vmask${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]}));
+          $if SSE == 1:
+            const __m128 vacc${M}x${ABC[C:C+4]} = _mm_add_ps(vprod${M}x${ABC[C:C+4]}, _mm_max_ps(vi${M}x${ABC[C:C+4]}, vzero));
+          $elif SSE == 2:
+            const __m128 vacc${M}x${ABC[C:C+4]} = _mm_or_ps(_mm_and_ps(vprod${M}x${ABC[C:C+4]}, vmask${M}x${ABC[C:C+4]}), _mm_andnot_ps(vmask${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]}));
+          $elif SSE == 4:
+            const __m128 vacc${M}x${ABC[C:C+4]} = _mm_blendv_ps(vi${M}x${ABC[C:C+4]}, vprod${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]});
 
       $for M in range(ROW_TILE):
         _mm_storeu_ps(o${M}, vacc${M}x${ABC[0:4]});
@@ -94,15 +101,20 @@ void xnn_f32_prelu_ukernel__${"sse41" if BLEND else "sse2"}_${ROW_TILE}x${CHANNE
           i${M} += 4;
 
         $for M in range(ROW_TILE):
-          const __m128 vprod${M}x0123 = _mm_mul_ps(vi${M}x0123, vw0123);
-          $if not BLEND:
-            const __m128 vmask${M}x0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi${M}x0123)));
+          $if SSE == 1:
+            const __m128 vprod${M}x0123 = _mm_mul_ps(_mm_min_ps(vi${M}x0123, vzero), vw0123);
+          $else:
+            const __m128 vprod${M}x0123 = _mm_mul_ps(vi${M}x0123, vw0123);
+            $if SSE == 2:
+              const __m128 vmask${M}x0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi${M}x0123)));
 
         $for M in range(ROW_TILE):
-          $if BLEND:
-            __m128 vacc${M}x0123 = _mm_blendv_ps(vi${M}x0123, vprod${M}x0123, vi${M}x0123);
-          $else:
+          $if SSE == 1:
+            __m128 vacc${M}x0123 = _mm_add_ps(vprod${M}x0123, _mm_max_ps(vi${M}x0123, vzero));
+          $elif SSE == 2:
             __m128 vacc${M}x0123 = _mm_or_ps(_mm_and_ps(vprod${M}x0123, vmask${M}x0123), _mm_andnot_ps(vmask${M}x0123, vi${M}x0123));
+          $elif SSE == 4:
+            __m128 vacc${M}x0123 = _mm_blendv_ps(vi${M}x0123, vprod${M}x0123, vi${M}x0123);
 
         $for M in range(ROW_TILE):
           _mm_storeu_ps(o${M}, vacc${M}x0123);
@@ -117,15 +129,20 @@ void xnn_f32_prelu_ukernel__${"sse41" if BLEND else "sse2"}_${ROW_TILE}x${CHANNE
         i${M} = (const float*) ((uintptr_t) i${M} + c);
 
       $for M in range(ROW_TILE):
-        const __m128 vprod${M}x0123 = _mm_mul_ps(vi${M}x0123, vw0123);
-        $if not BLEND:
-          const __m128 vmask${M}x0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi${M}x0123)));
+        $if SSE == 1:
+          const __m128 vprod${M}x0123 = _mm_mul_ps(_mm_min_ps(vi${M}x0123, vzero), vw0123);
+        $else:
+          const __m128 vprod${M}x0123 = _mm_mul_ps(vi${M}x0123, vw0123);
+          $if SSE == 2:
+            const __m128 vmask${M}x0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vi${M}x0123)));
 
       $for M in range(ROW_TILE):
-        $if BLEND:
-          __m128 vacc${M}x0123 = _mm_blendv_ps(vi${M}x0123, vprod${M}x0123, vi${M}x0123);
-        $else:
+        $if SSE == 1:
+          __m128 vacc${M}x0123 = _mm_add_ps(vprod${M}x0123, _mm_max_ps(vi${M}x0123, vzero));
+        $elif SSE == 2:
           __m128 vacc${M}x0123 = _mm_or_ps(_mm_and_ps(vprod${M}x0123, vmask${M}x0123), _mm_andnot_ps(vmask${M}x0123, vi${M}x0123));
+        $elif SSE == 4:
+          __m128 vacc${M}x0123 = _mm_blendv_ps(vi${M}x0123, vprod${M}x0123, vi${M}x0123);
 
       if (c & (2 * sizeof(float))) {
         $for M in range(ROW_TILE):
