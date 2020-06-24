@@ -1986,7 +1986,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i[3-6]86|x86|x86_64|AMD64)$" OR IOS_ARCH MA
     ENDIF()
   ENDIF()
 ENDIF()
-TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE "XNN_LOG_LEVEL=$<IF:$<CONFIG:Debug>,5,0>")
+TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 IF(MSVC)
   # Even though MSVC has __restrict, it can't be used in all the same contexts as the C99 restrict keyword
   TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE "restrict=")
@@ -2323,7 +2323,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(global-average-pooling-ncw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(global-average-pooling-ncw-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(global-average-pooling-ncw-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(global-average-pooling-ncw-test global-average-pooling-ncw-test)
 
   ADD_EXECUTABLE(hardswish-nc-test test/hardswish-nc.cc)
