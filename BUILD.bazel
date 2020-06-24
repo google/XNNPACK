@@ -607,6 +607,10 @@ WASMSIMD_UKERNELS = [
     "src/f32-igemm/gen/6x8-minmax-wasmsimd-loadsplat-x86.c",
     "src/f32-igemm/gen/6x8-minmax-wasmsimd-splat-x86.c",
     "src/f32-igemm/gen/6x8s4-minmax-wasmsimd-x86.c",
+    "src/math/roundne-wasmsimd-addsub.c",
+    "src/math/roundd-wasmsimd-addsub.c",
+    "src/math/roundu-wasmsimd-addsub.c",
+    "src/math/roundz-wasmsimd-addsub.c",
     "src/requantization/fp32-wasmsimd.c",
 ]
 
