@@ -208,10 +208,12 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
     goto error;
   }
 
-  if (output_min >= output_max) {
+  if (fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min)) >= fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max))) {
     xnn_log_error(
       "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_f16), output_min, output_max);
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_f16),
+      fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min)),
+      fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max)));
     goto error;
   }
 
