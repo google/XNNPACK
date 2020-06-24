@@ -3537,6 +3537,22 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "bankers_rounding_bench",
+    srcs = ["bench/bankers-rounding.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "ceiling_bench",
+    srcs = ["bench/ceiling.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "channel_shuffle_bench",
     srcs = ["bench/channel-shuffle.cc"],
     deps = OPERATOR_BENCHMARK_DEPS,
@@ -3553,6 +3569,14 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "deconvolution_bench",
     srcs = ["bench/deconvolution.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "floor_bench",
+    srcs = ["bench/floor.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
@@ -3592,6 +3616,12 @@ xnnpack_benchmark(
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "truncation_bench",
+    srcs = ["bench/truncation.cc"],
+    deps = OPERATOR_BENCHMARK_DEPS,
 )
 
 ############################# End-to-end benchmarks ############################

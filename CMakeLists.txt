@@ -3489,6 +3489,22 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(average-pooling-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(average-pooling-bench PRIVATE XNNPACK benchmark bench-utils)
 
+  ADD_EXECUTABLE(bankers-rounding-bench bench/bankers-rounding.cc)
+  SET_TARGET_PROPERTIES(bankers-rounding-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(bankers-rounding-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(bankers-rounding-bench PRIVATE XNNPACK benchmark bench-utils)
+
+  ADD_EXECUTABLE(ceiling-bench bench/ceiling.cc)
+  SET_TARGET_PROPERTIES(ceiling-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(ceiling-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(ceiling-bench PRIVATE XNNPACK benchmark bench-utils)
+
   ADD_EXECUTABLE(channel-shuffle-bench bench/channel-shuffle.cc)
   SET_TARGET_PROPERTIES(channel-shuffle-bench PROPERTIES
     CXX_STANDARD 11
@@ -3512,6 +3528,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(deconvolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark bench-utils)
+
+  ADD_EXECUTABLE(floor-bench bench/floor.cc)
+  SET_TARGET_PROPERTIES(floor-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(floor-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(floor-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(global-average-pooling-bench bench/global-average-pooling.cc)
   SET_TARGET_PROPERTIES(global-average-pooling-bench PROPERTIES
@@ -3552,6 +3576,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(softmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK benchmark bench-utils)
+
+  ADD_EXECUTABLE(truncation-bench bench/truncation.cc)
+  SET_TARGET_PROPERTIES(truncation-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(truncation-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK benchmark bench-utils)
 
   # ---[ Build microkernel-level microbenchmarks
   ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc)
