@@ -740,6 +740,12 @@ static void init(void) {
         .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8,
         .mr = 7,
       };
+      xnn_params.f16.vadd = (struct vbinary_parameters) {
+        .op_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vadd_minmax_ukernel__neonfp16arith_x16,
+        .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x16,
+        .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x16,
+        .element_tile = 16,
+      };
     }
   #endif  // XNN_NO_F16_OPERATORS
 

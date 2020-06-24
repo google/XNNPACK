@@ -643,6 +643,7 @@ struct elementwise_binary_context {
   size_t elements;
   union {
     union xnn_q8_add_params q8;
+    struct xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
   xnn_vbinary_ukernel_function ukernel;

@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/log.h>
@@ -58,6 +60,43 @@ static enum xnn_status create_binary_elementwise_nd(
   return xnn_status_success;
 }
 
+static enum xnn_status create_binary_elementwise_nd_f16(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    enum xnn_operator_type operator_type,
+    xnn_operator_t* binary_elementwise_op_out)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min)) >= fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max))) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(operator_type),
+      fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min)),
+      fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max)));
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_f16_minmax_params params = xnn_init_f16_minmax_params(
+    fp16_ieee_from_fp32_value(output_min),
+    fp16_ieee_from_fp32_value(output_max));
+
+  return create_binary_elementwise_nd(flags, &params, sizeof(params), XNN_INIT_FLAG_F16, operator_type, binary_elementwise_op_out);
+}
+
 static enum xnn_status create_binary_elementwise_nd_f32(
     float output_min,
     float output_max,
@@ -65,6 +104,12 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     enum xnn_operator_type operator_type,
     xnn_operator_t* binary_elementwise_op_out)
 {
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_uninitialized;
+  }
+
   if (isnan(output_min)) {
     xnn_log_error(
       "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
@@ -88,6 +133,16 @@ static enum xnn_status create_binary_elementwise_nd_f32(
 
   const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
   return create_binary_elementwise_nd(flags, &params, sizeof(params), XNN_INIT_FLAG_F32, operator_type, binary_elementwise_op_out);
+}
+
+enum xnn_status xnn_create_add_nd_f16(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* add_op_out)
+{
+  return create_binary_elementwise_nd_f16(
+    output_min, output_max, flags, xnn_operator_type_add_nd_f16, add_op_out);
 }
 
 enum xnn_status xnn_create_add_nd_f32(
@@ -347,6 +402,7 @@ static enum xnn_status setup_binary_elementwise_nd(
   return xnn_status_success;
 }
 
+
 static enum xnn_status setup_binary_elementwise_nd_f32(
     xnn_operator_t binary_elementwise_op,
     enum xnn_operator_type expected_operator_type,
@@ -375,6 +431,56 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
     &binary_elementwise_op->params.f32_minmax, sizeof(binary_elementwise_op->params.f32_minmax),
     vbinary,
     num_threads);
+}
+
+static enum xnn_status setup_binary_elementwise_nd_f16(
+    xnn_operator_t binary_elementwise_op,
+    enum xnn_operator_type expected_operator_type,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const void* input1,
+    const void* input2,
+    void* output,
+    const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+    size_t num_threads)
+{
+  return setup_binary_elementwise_nd(
+    binary_elementwise_op,
+    expected_operator_type,
+    num_input1_dims,
+    input1_shape,
+    num_input2_dims,
+    input2_shape,
+    input1,
+    input2,
+    output,
+    XNN_INIT_FLAG_F16,
+    1 /* log2(sizeof(float)) */,
+    &binary_elementwise_op->params.f16_minmax, sizeof(binary_elementwise_op->params.f16_minmax),
+    vbinary,
+    num_threads);
+}
+
+enum xnn_status xnn_setup_add_nd_f16(
+    xnn_operator_t add_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const void* input1,
+    const void* input2,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f16(
+    add_op, xnn_operator_type_add_nd_f16,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f16.vadd,
+    pthreadpool_get_threads_count(threadpool));
 }
 
 enum xnn_status xnn_setup_add_nd_f32(

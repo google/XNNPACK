@@ -20,6 +20,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Invalid";
     case xnn_operator_type_abs_nc_f32:
       return "Abs (NC, F32)";
+    case xnn_operator_type_add_nd_f16:
+      return "Add (ND, F16)";
     case xnn_operator_type_add_nd_f32:
       return "Add (ND, F32)";
     case xnn_operator_type_argmax_pooling_nhwc_f32:

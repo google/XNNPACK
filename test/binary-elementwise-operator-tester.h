@@ -19,6 +19,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 
 
@@ -138,6 +140,144 @@ class BinaryElementwiseOperatorTester {
     }
   }
 
+
+  void TestF16() const {
+    ASSERT_NE(operation_type(), OperationType::Unknown);
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    // Compute generalized shapes.
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_dims;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> output_dims;
+    std::fill(input1_dims.begin(), input1_dims.end(), 1);
+    std::fill(input2_dims.begin(), input2_dims.end(), 1);
+    std::fill(output_dims.begin(), output_dims.end(), 1);
+    std::copy(input1_shape().cbegin(), input1_shape().cend(), input1_dims.end() - num_input1_dims());
+    std::copy(input2_shape().cbegin(), input2_shape().cend(), input2_dims.end() - num_input2_dims());
+    for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
+      if (input1_dims[i] != 1 && input2_dims[i] != 1) {
+        ASSERT_EQ(input1_dims[i], input2_dims[i]);
+      }
+      output_dims[i] = std::max(input1_dims[i], input2_dims[i]);
+    }
+    const size_t num_output_elements =
+      std::accumulate(output_dims.begin(), output_dims.end(), size_t(1), std::multiplies<size_t>());
+
+    // Compute generalized strides.
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_strides;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_strides;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> output_strides;
+    size_t input1_stride = 1, input2_stride = 1, output_stride = 1;
+    for (size_t i = XNN_MAX_TENSOR_DIMS; i != 0; i--) {
+      input1_strides[i - 1] = input1_dims[i - 1] == 1 ? 0 : input1_stride;
+      input2_strides[i - 1] = input2_dims[i - 1] == 1 ? 0 : input2_stride;
+      output_strides[i - 1] = output_stride;
+      input1_stride *= input1_dims[i - 1];
+      input2_stride *= input2_dims[i - 1];
+      output_stride *= output_dims[i - 1];
+    }
+
+    std::vector<uint16_t> input1(XNN_EXTRA_BYTES / sizeof(uint16_t) + num_input1_elements());
+    std::vector<uint16_t> input2(XNN_EXTRA_BYTES / sizeof(uint16_t) + num_input2_elements());
+    std::vector<uint16_t> output(num_output_elements);
+    std::vector<float> output_ref(num_output_elements);
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input1.begin(), input1.end(), std::ref(f16rng));
+      std::generate(input2.begin(), input2.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results.
+      for (size_t i = 0; i < output_dims[0]; i++) {
+        for (size_t j = 0; j < output_dims[1]; j++) {
+          for (size_t k = 0; k < output_dims[2]; k++) {
+            for (size_t l = 0; l < output_dims[3]; l++) {
+              for (size_t m = 0; m < output_dims[4]; m++) {
+                for (size_t n = 0; n < output_dims[5]; n++) {
+                  output_ref[i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5]] = Compute(
+                    fp16_ieee_to_fp32_value(input1[i * input1_strides[0] + j * input1_strides[1] + k * input1_strides[2] + l * input1_strides[3] + m * input1_strides[4] + n * input1_strides[5]]),
+                    fp16_ieee_to_fp32_value(input2[i * input2_strides[0] + j * input2_strides[1] + k * input2_strides[2] + l * input2_strides[3] + m * input2_strides[4] + n * input2_strides[5]]));
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      const float scaled_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + accumulated_range / 255.0f * float(qmin())));
+      const float scaled_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+      const float output_min = scaled_min == scaled_max ? -std::numeric_limits<float>::infinity() : scaled_min;
+      const float output_max = scaled_min == scaled_max ? +std::numeric_limits<float>::infinity() : scaled_max;
+
+      for (float& output_value : output_ref) {
+        output_value = std::min(std::max(output_value, output_min), output_max);
+      }
+
+      // Create, setup, run, and destroy a binary elementwise operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t binary_elementwise_op = nullptr;
+      xnn_status status = xnn_status_unsupported_parameter;
+      switch (operation_type()) {
+        case OperationType::Add:
+          status = xnn_create_add_nd_f16(output_min, output_max, 0, &binary_elementwise_op);
+          break;
+        default:
+          FAIL() << "Unsupported operation type";
+      }
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, binary_elementwise_op);
+
+      // Smart pointer to automatically delete binary_elementwise_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_binary_elementwise_op(binary_elementwise_op, xnn_delete_operator);
+
+      switch (operation_type()) {
+        case OperationType::Add:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_add_nd_f16(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        default:
+          FAIL() << "Unsupported operation type";
+      }
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(binary_elementwise_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < output_dims[0]; i++) {
+        for (size_t j = 0; j < output_dims[1]; j++) {
+          for (size_t k = 0; k < output_dims[2]; k++) {
+            for (size_t l = 0; l < output_dims[3]; l++) {
+              for (size_t m = 0; m < output_dims[4]; m++) {
+                for (size_t n = 0; n < output_dims[5]; n++) {
+                  const size_t index =
+                    i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
+                  ASSERT_NEAR(fp16_ieee_to_fp32_value(output[index]), output_ref[index], 1.0e-2f * std::abs(output_ref[index]))
+                    << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")";
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   void TestF32() const {
     ASSERT_NE(operation_type(), OperationType::Unknown);
 

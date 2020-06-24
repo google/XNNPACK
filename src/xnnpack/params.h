@@ -1707,6 +1707,7 @@ struct xnn_parameters {
   } x8;
   struct {
     struct gavgpool_parameters gavgpool;
+    struct vbinary_parameters vadd;
   } f16;
   struct {
     struct gemm_parameters gemm;
