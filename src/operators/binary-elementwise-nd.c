@@ -21,6 +21,7 @@ static enum xnn_status create_binary_elementwise_nd(
     uint32_t flags,
     const void* params,
     size_t params_size,
+    uint32_t init_flag,
     enum xnn_operator_type operator_type,
     xnn_operator_t* binary_elementwise_op_out)
 {
@@ -28,6 +29,12 @@ static enum xnn_status create_binary_elementwise_nd(
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));
     return xnn_status_uninitialized;
+  }
+
+  if ((xnn_params.init_flags & init_flag) != init_flag) {
+    xnn_log_error("failed to create %s operator: hardware operations are not supported",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
   }
 
   xnn_operator_t binary_elementwise_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -80,7 +87,7 @@ static enum xnn_status create_binary_elementwise_nd_f32(
   }
 
   const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
-  return create_binary_elementwise_nd(flags, &params, sizeof(params), operator_type, binary_elementwise_op_out);
+  return create_binary_elementwise_nd(flags, &params, sizeof(params), XNN_INIT_FLAG_F32, operator_type, binary_elementwise_op_out);
 }
 
 enum xnn_status xnn_create_add_nd_f32(
@@ -108,7 +115,7 @@ enum xnn_status xnn_create_maximum_nd_f32(
     xnn_operator_t* maximum_op_out)
 {
   return create_binary_elementwise_nd(
-    flags, NULL /* params */, 0 /* params size */, xnn_operator_type_maximum_nd_f32, maximum_op_out);
+    flags, NULL /* params */, 0 /* params size */, XNN_INIT_FLAG_F32, xnn_operator_type_maximum_nd_f32, maximum_op_out);
 }
 
 enum xnn_status xnn_create_minimum_nd_f32(
@@ -116,7 +123,7 @@ enum xnn_status xnn_create_minimum_nd_f32(
     xnn_operator_t* minimum_op_out)
 {
   return create_binary_elementwise_nd(
-    flags, NULL /* params */, 0 /* params size */, xnn_operator_type_minimum_nd_f32, minimum_op_out);
+    flags, NULL /* params */, 0 /* params size */, XNN_INIT_FLAG_F32, xnn_operator_type_minimum_nd_f32, minimum_op_out);
 }
 
 enum xnn_status xnn_create_multiply_nd_f32(
@@ -134,7 +141,7 @@ enum xnn_status xnn_create_squared_difference_nd_f32(
     xnn_operator_t* squared_difference_op_out)
 {
   return create_binary_elementwise_nd(
-    flags, NULL /* params */, 0 /* params size */,
+    flags, NULL /* params */, 0 /* params size */, XNN_INIT_FLAG_F32,
     xnn_operator_type_squared_difference_nd_f32, squared_difference_op_out);
 }
 
@@ -185,7 +192,6 @@ static enum xnn_status setup_binary_elementwise_nd(
       xnn_operator_type_to_string(binary_elementwise_op->type));
     return xnn_status_invalid_parameter;
   }
-  binary_elementwise_op->state = xnn_run_state_invalid;
 
   if (max(num_input1_dims, num_input2_dims) > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
