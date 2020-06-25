@@ -1322,6 +1322,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/sse2-p5-div-x16.c
   src/f32-sigmoid/gen/sse2-p5-div-x20.c
   src/f32-sigmoid/gen/sse2-p5-div-x24.c
+  src/f32-vlrelu/gen/sse2-x4.c
+  src/f32-vlrelu/gen/sse2-x8.c
   src/f32-vrnd/gen/vrndne-sse2-x4.c
   src/f32-vrnd/gen/vrndne-sse2-x8.c
   src/f32-vrnd/gen/vrndz-sse2-x4.c
@@ -1377,6 +1379,8 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/sse41-p5-div-x16.c
   src/f32-sigmoid/gen/sse41-p5-div-x20.c
   src/f32-sigmoid/gen/sse41-p5-div-x24.c
+  src/f32-vlrelu/gen/sse41-x4.c
+  src/f32-vlrelu/gen/sse41-x8.c
   src/f32-vrnd/gen/vrndne-sse41-x4.c
   src/f32-vrnd/gen/vrndne-sse41-x8.c
   src/f32-vrnd/gen/vrndz-sse41-x4.c

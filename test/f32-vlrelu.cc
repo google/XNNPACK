@@ -254,6 +254,242 @@
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F32_VLRELU__SSE2_X4, batch_eq_4) {
+    TEST_REQUIRES_X86_SSE2;
+    VUnOpMicrokernelTester()
+      .batch_size(4)
+      .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+  }
+
+  TEST(F32_VLRELU__SSE2_X4, batch_div_4) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE2_X4, batch_lt_4) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE2_X4, batch_gt_4) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE2_X4, inplace) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE2_X4, slope) {
+    TEST_REQUIRES_X86_SSE2;
+    for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
+      for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+        VUnOpMicrokernelTester()
+          .batch_size(batch_size)
+          .slope(slope)
+          .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F32_VLRELU__SSE2_X8, batch_eq_8) {
+    TEST_REQUIRES_X86_SSE2;
+    VUnOpMicrokernelTester()
+      .batch_size(8)
+      .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+  }
+
+  TEST(F32_VLRELU__SSE2_X8, batch_div_8) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE2_X8, batch_lt_8) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE2_X8, batch_gt_8) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 9; batch_size < 16; batch_size++) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE2_X8, inplace) {
+    TEST_REQUIRES_X86_SSE2;
+    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE2_X8, slope) {
+    TEST_REQUIRES_X86_SSE2;
+    for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
+      for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+        VUnOpMicrokernelTester()
+          .batch_size(batch_size)
+          .slope(slope)
+          .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse2_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F32_VLRELU__SSE41_X4, batch_eq_4) {
+    TEST_REQUIRES_X86_SSE41;
+    VUnOpMicrokernelTester()
+      .batch_size(4)
+      .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+  }
+
+  TEST(F32_VLRELU__SSE41_X4, batch_div_4) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE41_X4, batch_lt_4) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE41_X4, batch_gt_4) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE41_X4, inplace) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE41_X4, slope) {
+    TEST_REQUIRES_X86_SSE41;
+    for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
+      for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+        VUnOpMicrokernelTester()
+          .batch_size(batch_size)
+          .slope(slope)
+          .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x4), VUnOpMicrokernelTester::OpType::LeakyReLU);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F32_VLRELU__SSE41_X8, batch_eq_8) {
+    TEST_REQUIRES_X86_SSE41;
+    VUnOpMicrokernelTester()
+      .batch_size(8)
+      .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+  }
+
+  TEST(F32_VLRELU__SSE41_X8, batch_div_8) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE41_X8, batch_lt_8) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE41_X8, batch_gt_8) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 9; batch_size < 16; batch_size++) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE41_X8, inplace) {
+    TEST_REQUIRES_X86_SSE41;
+    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+    }
+  }
+
+  TEST(F32_VLRELU__SSE41_X8, slope) {
+    TEST_REQUIRES_X86_SSE41;
+    for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
+      for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+        VUnOpMicrokernelTester()
+          .batch_size(batch_size)
+          .slope(slope)
+          .Test(xnn_f32_vunary_ukernel_function(xnn_f32_vlrelu_ukernel__sse41_x8), VUnOpMicrokernelTester::OpType::LeakyReLU);
+      }
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_VLRELU__AVX_X8, batch_eq_8) {
     TEST_REQUIRES_X86_AVX;
     VUnOpMicrokernelTester()

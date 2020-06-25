@@ -23,8 +23,14 @@ tools/xngen src/f32-vlrelu/psimd.c.in -D BATCH_TILE=4 -o src/f32-vlrelu/gen/psim
 tools/xngen src/f32-vlrelu/psimd.c.in -D BATCH_TILE=8 -o src/f32-vlrelu/gen/psimd-x8.c
 
 ################################# x86 128-bit #################################
-tools/xngen src/f32-vlrelu/sse.c.in -D BATCH_TILE=4 -o src/f32-vlrelu/gen/sse-x4.c
-tools/xngen src/f32-vlrelu/sse.c.in -D BATCH_TILE=8 -o src/f32-vlrelu/gen/sse-x8.c
+tools/xngen src/f32-vlrelu/sse.c.in -D BATCH_TILE=4 -D SSE=1 -o src/f32-vlrelu/gen/sse-x4.c
+tools/xngen src/f32-vlrelu/sse.c.in -D BATCH_TILE=8 -D SSE=1 -o src/f32-vlrelu/gen/sse-x8.c
+
+tools/xngen src/f32-vlrelu/sse.c.in -D BATCH_TILE=4 -D SSE=2 -o src/f32-vlrelu/gen/sse2-x4.c
+tools/xngen src/f32-vlrelu/sse.c.in -D BATCH_TILE=8 -D SSE=2 -o src/f32-vlrelu/gen/sse2-x8.c
+
+tools/xngen src/f32-vlrelu/sse.c.in -D BATCH_TILE=4 -D SSE=4 -o src/f32-vlrelu/gen/sse41-x4.c
+tools/xngen src/f32-vlrelu/sse.c.in -D BATCH_TILE=8 -D SSE=4 -o src/f32-vlrelu/gen/sse41-x8.c
 
 ################################# x86 256-bit #################################
 tools/xngen src/f32-vlrelu/avx.c.in -D BATCH_TILE=8  -o src/f32-vlrelu/gen/avx-x8.c
