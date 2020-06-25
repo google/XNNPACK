@@ -48,16 +48,18 @@ void xnn_f32_prelu_ukernel__sse_2x4(
       const __m128 vw0123 = _mm_load_ps(w);
       w += 4;
 
-      const __m128 vi0x0123 = _mm_loadu_ps(i0);
+      __m128 vi0x0123 = _mm_loadu_ps(i0);
       i0 += 4;
-      const __m128 vi1x0123 = _mm_loadu_ps(i1);
+      __m128 vi1x0123 = _mm_loadu_ps(i1);
       i1 += 4;
 
-      const __m128 vprod0x0123 = _mm_mul_ps(_mm_min_ps(vi0x0123, vzero), vw0123);
-      const __m128 vprod1x0123 = _mm_mul_ps(_mm_min_ps(vi1x0123, vzero), vw0123);
+      __m128 vacc0x0123 = _mm_max_ps(_mm_setzero_ps(), vi0x0123);
+      vi0x0123 = _mm_min_ps(vi0x0123, vzero);
+      __m128 vacc1x0123 = _mm_max_ps(_mm_setzero_ps(), vi1x0123);
+      vi1x0123 = _mm_min_ps(vi1x0123, vzero);
 
-      const __m128 vacc0x0123 = _mm_add_ps(vprod0x0123, _mm_max_ps(vi0x0123, vzero));
-      const __m128 vacc1x0123 = _mm_add_ps(vprod1x0123, _mm_max_ps(vi1x0123, vzero));
+      vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(vi0x0123, vw0123));
+      vacc1x0123 = _mm_add_ps(vacc1x0123, _mm_mul_ps(vi1x0123, vw0123));
 
       _mm_storeu_ps(o0, vacc0x0123);
       o0 += 4;
@@ -68,16 +70,18 @@ void xnn_f32_prelu_ukernel__sse_2x4(
       const __m128 vw0123 = _mm_load_ps(w);
       w = (const float*) ((uintptr_t) w + c);
 
-      const __m128 vi0x0123 = _mm_loadu_ps(i0);
+      __m128 vi0x0123 = _mm_loadu_ps(i0);
       i0 = (const float*) ((uintptr_t) i0 + c);
-      const __m128 vi1x0123 = _mm_loadu_ps(i1);
+      __m128 vi1x0123 = _mm_loadu_ps(i1);
       i1 = (const float*) ((uintptr_t) i1 + c);
 
-      const __m128 vprod0x0123 = _mm_mul_ps(_mm_min_ps(vi0x0123, vzero), vw0123);
-      const __m128 vprod1x0123 = _mm_mul_ps(_mm_min_ps(vi1x0123, vzero), vw0123);
+      __m128 vacc0x0123 = _mm_max_ps(_mm_setzero_ps(), vi0x0123);
+      vi0x0123 = _mm_min_ps(vi0x0123, vzero);
+      __m128 vacc1x0123 = _mm_max_ps(_mm_setzero_ps(), vi1x0123);
+      vi1x0123 = _mm_min_ps(vi1x0123, vzero);
 
-      __m128 vacc0x0123 = _mm_add_ps(vprod0x0123, _mm_max_ps(vi0x0123, vzero));
-      __m128 vacc1x0123 = _mm_add_ps(vprod1x0123, _mm_max_ps(vi1x0123, vzero));
+      vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(vi0x0123, vw0123));
+      vacc1x0123 = _mm_add_ps(vacc1x0123, _mm_mul_ps(vi1x0123, vw0123));
 
       if (c & (2 * sizeof(float))) {
         _mm_storel_pi((__m64*) o0, vacc0x0123);
