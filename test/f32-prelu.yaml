@@ -20,5 +20,7 @@
 - name: xnn_f32_prelu_ukernel__wasmsimd_bitselect_2x8
 - name: xnn_f32_prelu_ukernel__wasmsimd_minmax_2x4
 - name: xnn_f32_prelu_ukernel__wasmsimd_minmax_2x8
+- name: xnn_f32_prelu_ukernel__wasm_2x1
+- name: xnn_f32_prelu_ukernel__wasm_2x4
 - name: xnn_f32_prelu_ukernel__scalar_2x1
 - name: xnn_f32_prelu_ukernel__scalar_2x4

@@ -2119,6 +2119,206 @@
 #endif  // XNN_ARCH_WASMSIMD
 
 
+#if XNN_ARCH_WASM
+  TEST(F32_PRELU__WASM_2X1, channels_eq_1) {
+    PReLUMicrokernelTester()
+      .rows(2)
+      .channels(1)
+      .Test(xnn_f32_prelu_ukernel__wasm_2x1);
+  }
+
+  TEST(F32_PRELU__WASM_2X1, channels_gt_1) {
+    for (size_t channels = 2; channels < 10; channels++) {
+      PReLUMicrokernelTester()
+        .rows(2)
+        .channels(channels)
+        .Test(xnn_f32_prelu_ukernel__wasm_2x1);
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X1, rows_lt_2) {
+    for (size_t rows = 1; rows < 2; rows++) {
+      for (size_t channels = 1; channels <= 5; channels += 1) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x1);
+      }
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X1, rows_div_2) {
+    for (size_t rows = 4; rows <= 8; rows += 2) {
+      for (size_t channels = 1; channels <= 5; channels += 1) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x1);
+      }
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X1, rows_gt_2) {
+    for (size_t rows = 3; rows < 4; rows++) {
+      for (size_t channels = 1; channels <= 5; channels += 1) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x1);
+      }
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X1, input_stride) {
+    for (size_t rows = 1; rows <= 6; rows += 1) {
+      for (size_t channels = 1; channels <= 5; channels += 1) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(7)
+          .iterations(1)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x1);
+      }
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X1, output_stride) {
+    for (size_t rows = 1; rows <= 6; rows += 1) {
+      for (size_t channels = 1; channels <= 5; channels += 1) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .output_stride(7)
+          .iterations(1)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x1);
+      }
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X1, inplace) {
+    for (size_t rows = 1; rows <= 6; rows += 1) {
+      for (size_t channels = 1; channels <= 5; channels += 1) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .inplace(true)
+          .iterations(1)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x1);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASM
+
+
+#if XNN_ARCH_WASM
+  TEST(F32_PRELU__WASM_2X4, channels_eq_4) {
+    PReLUMicrokernelTester()
+      .rows(2)
+      .channels(4)
+      .Test(xnn_f32_prelu_ukernel__wasm_2x4);
+  }
+
+  TEST(F32_PRELU__WASM_2X4, channels_div_4) {
+    for (size_t channels = 8; channels < 40; channels += 4) {
+      PReLUMicrokernelTester()
+        .rows(2)
+        .channels(channels)
+        .Test(xnn_f32_prelu_ukernel__wasm_2x4);
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X4, channels_lt_4) {
+    for (size_t channels = 1; channels < 4; channels++) {
+      PReLUMicrokernelTester()
+        .rows(2)
+        .channels(channels)
+        .Test(xnn_f32_prelu_ukernel__wasm_2x4);
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X4, channels_gt_4) {
+    for (size_t channels = 5; channels < 8; channels++) {
+      PReLUMicrokernelTester()
+        .rows(2)
+        .channels(channels)
+        .Test(xnn_f32_prelu_ukernel__wasm_2x4);
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X4, rows_lt_2) {
+    for (size_t rows = 1; rows < 2; rows++) {
+      for (size_t channels = 1; channels <= 20; channels += 3) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x4);
+      }
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X4, rows_div_2) {
+    for (size_t rows = 4; rows <= 8; rows += 2) {
+      for (size_t channels = 1; channels <= 20; channels += 3) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x4);
+      }
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X4, rows_gt_2) {
+    for (size_t rows = 3; rows < 4; rows++) {
+      for (size_t channels = 1; channels <= 20; channels += 3) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x4);
+      }
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X4, input_stride) {
+    for (size_t rows = 1; rows <= 6; rows += 1) {
+      for (size_t channels = 1; channels <= 20; channels += 3) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(23)
+          .iterations(1)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x4);
+      }
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X4, output_stride) {
+    for (size_t rows = 1; rows <= 6; rows += 1) {
+      for (size_t channels = 1; channels <= 20; channels += 3) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .output_stride(23)
+          .iterations(1)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x4);
+      }
+    }
+  }
+
+  TEST(F32_PRELU__WASM_2X4, inplace) {
+    for (size_t rows = 1; rows <= 6; rows += 1) {
+      for (size_t channels = 1; channels <= 20; channels += 3) {
+        PReLUMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .inplace(true)
+          .iterations(1)
+          .Test(xnn_f32_prelu_ukernel__wasm_2x4);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASM
+
+
 TEST(F32_PRELU__SCALAR_2X1, channels_eq_1) {
   PReLUMicrokernelTester()
     .rows(2)

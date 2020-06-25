@@ -2075,11 +2075,19 @@ static void init(void) {
     xnn_params.f32.rndd  = (xnn_univector_ukernel_function) xnn_f32_vrndd_ukernel__scalar_libm_x4;
     xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x2;
     xnn_params.f32.sqr = (xnn_univector_ukernel_function) xnn_f32_vsqr_ukernel__scalar_x4;
-    xnn_params.f32.prelu = (struct prelu_parameters) {
-      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__scalar_2x4,
-      .row_tile = 4,
-      .channel_tile = 4,
-    };
+    if (is_wasm_x86) {
+      xnn_params.f32.prelu = (struct prelu_parameters) {
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__scalar_2x4,
+        .row_tile = 2,
+        .channel_tile = 4,
+      };
+    } else {
+      xnn_params.f32.prelu = (struct prelu_parameters) {
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__wasm_2x4,
+        .row_tile = 2,
+        .channel_tile = 4,
+      };
+    }
     xnn_params.f32.raddstoreexpminusmax = xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc2;
     xnn_params.f32.rmax = xnn_f32_rmax_ukernel__scalar;
     xnn_params.f32.vadd = (struct vbinary_parameters) {
