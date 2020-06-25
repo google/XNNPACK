@@ -1785,11 +1785,19 @@ static void init(void) {
     xnn_params.f32.rndd  = (xnn_univector_ukernel_function) xnn_f32_vrndd_ukernel__psimd_x8;
     xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__psimd_p5_div_x16;
     xnn_params.f32.sqr = (xnn_univector_ukernel_function) xnn_f32_vsqr_ukernel__psimd_x8;
-    xnn_params.f32.prelu = (struct prelu_parameters) {
-      .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__psimd_2x8,
-      .row_tile = 2,
-      .channel_tile = 8,
-    };
+    if (is_wasm_x86) {
+      xnn_params.f32.prelu = (struct prelu_parameters) {
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__wasmsimd_bitselect_2x8,
+        .row_tile = 2,
+        .channel_tile = 8,
+      };
+    } else {
+      xnn_params.f32.prelu = (struct prelu_parameters) {
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__wasmsimd_minmax_2x8,
+        .row_tile = 2,
+        .channel_tile = 8,
+      };
+    }
     xnn_params.f32.raddstoreexpminusmax = xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x16_acc2;
     xnn_params.f32.rmax = xnn_f32_rmax_ukernel__psimd;
     xnn_params.f32.vadd = (struct vbinary_parameters) {
