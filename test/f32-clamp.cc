@@ -747,7 +747,7 @@
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_CLAMP__WASM_X1, batch_eq_1) {
     ClampMicrokernelTester()
       .batch_size(1)
@@ -794,10 +794,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_CLAMP__WASM_X2, batch_eq_2) {
     ClampMicrokernelTester()
       .batch_size(2)
@@ -860,10 +860,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_CLAMP__WASM_X4, batch_eq_4) {
     ClampMicrokernelTester()
       .batch_size(4)
@@ -926,7 +926,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
 TEST(F32_CLAMP__SCALAR_X1, batch_eq_1) {

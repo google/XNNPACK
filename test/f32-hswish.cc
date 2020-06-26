@@ -927,7 +927,7 @@
 #endif  // XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_HSWISH__WASM_X1, batch_eq_1) {
     HSwishMicrokernelTester()
       .batch_size(1)
@@ -950,10 +950,10 @@
         .Test(xnn_f32_hswish_ukernel__wasm_x1, HSwishMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_HSWISH__WASM_X2, batch_eq_2) {
     HSwishMicrokernelTester()
       .batch_size(2)
@@ -992,10 +992,10 @@
         .Test(xnn_f32_hswish_ukernel__wasm_x2, HSwishMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_HSWISH__WASM_X4, batch_eq_4) {
     HSwishMicrokernelTester()
       .batch_size(4)
@@ -1034,7 +1034,7 @@
         .Test(xnn_f32_hswish_ukernel__wasm_x4, HSwishMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
 TEST(F32_HSWISH__SCALAR_X1, batch_eq_1) {

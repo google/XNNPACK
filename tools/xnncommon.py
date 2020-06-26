@@ -41,7 +41,7 @@ _ISA_TO_ARCH_MAP = {
   "fma3": ["x86-32", "x86-64"],
   "avx2": ["x86-32", "x86-64"],
   "avx512f": ["x86-32", "x86-64"],
-  "wasm": ["wasm"],
+  "wasm": ["wasm", "wasmsimd"],
   "wasmsimd": ["wasmsimd"],
   "psimd": [],
 }
@@ -67,7 +67,10 @@ def parse_target_name(target_name):
   isa = None
   for target_part in target_name.split("_"):
     if target_part in _ARCH_TO_MACRO_MAP:
-      arch = [target_part]
+      if target_part in _ISA_TO_ARCH_MAP:
+        arch = _ISA_TO_ARCH_MAP[target_part]
+      else:
+        arch = [target_part]
     elif target_part in _ISA_TO_ARCH_MAP:
       isa = target_part
   if isa and not arch:

@@ -1249,7 +1249,7 @@
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_VMULCADDC_C1__WASM_2X, channels_eq_1) {
     VMulCAddCMicrokernelTester()
       .channel_tile(1)
@@ -1368,10 +1368,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_VMULCADDC_C2__WASM_2X, channels_eq_2) {
     VMulCAddCMicrokernelTester()
       .channel_tile(2)
@@ -1510,10 +1510,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_VMULCADDC_C4__WASM_2X, channels_eq_4) {
     VMulCAddCMicrokernelTester()
       .channel_tile(4)
@@ -1652,7 +1652,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
 TEST(F32_VMULCADDC_C1__SCALAR_2X, channels_eq_1) {

@@ -20129,7 +20129,7 @@
 #endif  // XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP1X4__WASM, c_eq_1) {
     DWConvMicrokernelTester()
       .cr(1)
@@ -20255,10 +20255,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP1X4__WASM_ACC2, c_eq_1) {
     DWConvMicrokernelTester()
       .cr(1)
@@ -20384,10 +20384,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP2X4__WASM, c_eq_2) {
     DWConvMicrokernelTester()
       .cr(2)
@@ -20555,10 +20555,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP2X4__WASM_ACC2, c_eq_2) {
     DWConvMicrokernelTester()
       .cr(2)
@@ -20726,10 +20726,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP1X9__WASM, c_eq_1) {
     DWConvMicrokernelTester()
       .cr(1)
@@ -20855,10 +20855,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP1X9__WASM_ACC2, c_eq_1) {
     DWConvMicrokernelTester()
       .cr(1)
@@ -20984,10 +20984,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP2X9__WASM, c_eq_2) {
     DWConvMicrokernelTester()
       .cr(2)
@@ -21155,10 +21155,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP2X9__WASM_ACC2, c_eq_2) {
     DWConvMicrokernelTester()
       .cr(2)
@@ -21326,10 +21326,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP1X25__WASM, c_eq_1) {
     DWConvMicrokernelTester()
       .cr(1)
@@ -21455,10 +21455,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP1X25__WASM_ACC2, c_eq_1) {
     DWConvMicrokernelTester()
       .cr(1)
@@ -21584,10 +21584,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP2X25__WASM, c_eq_2) {
     DWConvMicrokernelTester()
       .cr(2)
@@ -21755,10 +21755,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_DWCONV_MINMAX_UP2X25__WASM_ACC2, c_eq_2) {
     DWConvMicrokernelTester()
       .cr(2)
@@ -21926,7 +21926,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
 TEST(F32_DWCONV_MINMAX_UP1X4__SCALAR, c_eq_1) {
