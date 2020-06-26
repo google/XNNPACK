@@ -3429,6 +3429,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_hswish_bench",
+    srcs = [
+        "bench/f32-hswish.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_raddexpminusmax_bench",
     srcs = [
         "bench/f32-raddexpminusmax.cc",
