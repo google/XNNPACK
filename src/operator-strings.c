@@ -6,7 +6,7 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-
+#include <stdlib.h>
 #include <xnnpack/common.h>
 #include <xnnpack/log.h>
 #include <xnnpack/subgraph.h>
