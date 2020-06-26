@@ -3603,6 +3603,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "hardswish_bench",
+    srcs = ["bench/hardswish.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "max_pooling_bench",
     srcs = ["bench/max-pooling.cc"],
     deps = OPERATOR_BENCHMARK_DEPS,

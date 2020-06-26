@@ -3549,6 +3549,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(global-average-pooling-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(global-average-pooling-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
+  ADD_EXECUTABLE(hardswish-bench bench/hardswish.cc)
+  SET_TARGET_PROPERTIES(hardswish-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(hardswish-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(hardswish-bench PRIVATE XNNPACK benchmark bench-utils)
+
   ADD_EXECUTABLE(max-pooling-bench bench/max-pooling.cc)
   SET_TARGET_PROPERTIES(max-pooling-bench PROPERTIES
     CXX_STANDARD 11
