@@ -382,6 +382,8 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_q8(
     return xnn_status_uninitialized;
   }
 
+  assert(xnn_params.q8.gavgpool.mr != 0);
+
   if (width == 0) {
     xnn_log_error("failed to setup %s operator with width %zu: width must be non-zero",
       xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8), width);
@@ -456,6 +458,8 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f16(
     return xnn_status_uninitialized;
   }
 
+  assert(xnn_params.f16.gavgpool.mr != 0);
+
   if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) == 0) {
     xnn_log_error("failed to setup %s operator: FP16 operations are not supported",
       xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_f16));
@@ -529,6 +533,8 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f32(
       xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_f32));
     return xnn_status_uninitialized;
   }
+
+  assert(xnn_params.f32.gavgpool.mr != 0);
 
   if (width == 0) {
     xnn_log_error("failed to setup %s operator with width %zu: width must be non-zero",
