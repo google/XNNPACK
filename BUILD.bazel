@@ -2227,7 +2227,7 @@ xnnpack_cc_library(
         "-msimd128",
         "-munimplemented-simd128",
     ],
-    wasmsimd_srcs = WASMSIMD_UKERNELS,
+    wasmsimd_srcs = WASM_UKERNELS + WASMSIMD_UKERNELS,
     deps = [
         ":tables",
         "@FP16",
