@@ -1,0 +1,158 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vbinary.h>
+
+
+$WASM_F32X4_OP = {
+$  "ADD": "wasm_f32x4_add",
+$  "DIV": "wasm_f32x4_div",
+$  "MAX": "wasm_f32x4_max",
+$  "MIN": "wasm_f32x4_min",
+$  "MUL": "wasm_f32x4_mul",
+$  "SUB": "wasm_f32x4_sub",
+$  "SQRDIFF": "wasm_f32x4_sub",
+$}[OP]
+$ARCH_SUFFIX = "" if ACTIVATION == "LINEAR" and OP not in ["MIN", "MAX"] else "_x86" if X86 else "_arm"
+$ACTIVATION_SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_x${BATCH_TILE}(
+    size_t n,
+    const float* a,
+    const float* b,
+    float* y,
+    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+
+  $if ACTIVATION == "MINMAX":
+    const v128_t vy_min = wasm_v32x4_load_splat(&params->scalar.min);
+    const v128_t vy_max = wasm_v32x4_load_splat(&params->scalar.max);
+
+  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+    const v128_t va${ABC[0:4]} = wasm_v128_load(a);
+    $for N in range(4, BATCH_TILE, 4):
+      const v128_t va${ABC[N:N+4]} = wasm_v128_load(a + ${N});
+    a += ${BATCH_TILE};
+
+    const v128_t vb${ABC[0:4]} = wasm_v128_load(b);
+    $for N in range(4, BATCH_TILE, 4):
+      const v128_t vb${ABC[N:N+4]} = wasm_v128_load(b + ${N});
+    b += ${BATCH_TILE};
+
+    $if OP == "MIN" and X86:
+      $for N in range(0, BATCH_TILE, 4):
+        const v128_t vm${ABC[N:N+4]} = wasm_f32x4_lt(va${ABC[N:N+4]}, vb${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        v128_t vy${ABC[N:N+4]} = wasm_v128_bitselect(va${ABC[N:N+4]}, vb${ABC[N:N+4]}, vm${ABC[N:N+4]});
+    $elif OP == "MAX" and X86:
+      $for N in range(0, BATCH_TILE, 4):
+        const v128_t vm${ABC[N:N+4]} = wasm_f32x4_le(va${ABC[N:N+4]}, vb${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        v128_t vy${ABC[N:N+4]} = wasm_v128_bitselect(vb${ABC[N:N+4]}, va${ABC[N:N+4]}, vm${ABC[N:N+4]});
+    $else:
+      $for N in range(0, BATCH_TILE, 4):
+        v128_t vy${ABC[N:N+4]} = ${WASM_F32X4_OP}(va${ABC[N:N+4]}, vb${ABC[N:N+4]});
+
+      $if OP == "SQRDIFF":
+        $for N in range(0, BATCH_TILE, 4):
+          vy${ABC[N:N+4]} = wasm_f32x4_mul(vy${ABC[N:N+4]}, vy${ABC[N:N+4]});
+
+    $if ACTIVATION == "MINMAX":
+      $if X86:
+        $for N in range(0, BATCH_TILE, 4):
+          const v128_t vltmask${ABC[N:N+4]} = wasm_f32x4_lt(vy${ABC[N:N+4]}, vy_min);
+
+        $for N in range(0, BATCH_TILE, 4):
+          const v128_t vngtmask${ABC[N:N+4]} = wasm_f32x4_le(vy${ABC[N:N+4]}, vy_max);
+          vy${ABC[N:N+4]} = wasm_v128_bitselect(vy_min, vy${ABC[N:N+4]}, vltmask${ABC[N:N+4]});
+
+        $for N in range(0, BATCH_TILE, 4):
+          vy${ABC[N:N+4]} = wasm_v128_bitselect(vy${ABC[N:N+4]}, vy_max, vngtmask${ABC[N:N+4]});
+      $else:
+        $for N in range(0, BATCH_TILE, 4):
+          vy${ABC[N:N+4]} = wasm_f32x4_max(vy${ABC[N:N+4]}, vy_min);
+
+        $for N in range(0, BATCH_TILE, 4):
+          vy${ABC[N:N+4]} = wasm_f32x4_min(vy${ABC[N:N+4]}, vy_max);
+
+    wasm_v128_store(y, vy${ABC[0:4]});
+    $for N in range(4, BATCH_TILE, 4):
+      wasm_v128_store(y + ${N}, vy${ABC[N:N+4]});
+    y += ${BATCH_TILE};
+  }
+  $if BATCH_TILE > 4:
+    for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
+      const v128_t va = wasm_v128_load(a);
+      a += 4;
+
+      const v128_t vb = wasm_v128_load(b);
+      b += 4;
+
+      $if OP == "MIN" and X86:
+        const v128_t vm = wasm_f32x4_lt(va, vb);
+        v128_t vy = wasm_v128_bitselect(va, vb, vm);
+      $elif OP == "MAX" and X86:
+        const v128_t vm = wasm_f32x4_le(va, vb);
+        v128_t vy = wasm_v128_bitselect(vb, va, vm);
+      $else:
+        v128_t vy = ${WASM_F32X4_OP}(va, vb);
+        $if OP == "SQRDIFF":
+          vy = wasm_f32x4_mul(vy, vy);
+
+      $if ACTIVATION == "MINMAX":
+        $if X86:
+          const v128_t vltmask = wasm_f32x4_lt(vy, vy_min);
+          const v128_t vngtmask = wasm_f32x4_le(vy, vy_max);
+          vy = wasm_v128_bitselect(vy_min, vy, vltmask);
+          vy = wasm_v128_bitselect(vy, vy_max, vngtmask);
+        $else:
+          vy = wasm_f32x4_max(vy, vy_min);
+          vy = wasm_f32x4_min(vy, vy_max);
+
+      wasm_v128_store(y, vy);
+      y += 4;
+    }
+  if XNN_UNLIKELY(n != 0) {
+    const v128_t va = wasm_v128_load(a);
+    const v128_t vb = wasm_v128_load(b);
+
+    v128_t vy = ${WASM_F32X4_OP}(va, vb);
+    $if OP == "SQRDIFF":
+      vy = wasm_f32x4_mul(vy, vy);
+
+    $if ACTIVATION == "MINMAX":
+      $if X86:
+        const v128_t vltmask = wasm_f32x4_lt(vy, vy_min);
+        const v128_t vngtmask = wasm_f32x4_le(vy, vy_max);
+        vy = wasm_v128_bitselect(vy_min, vy, vltmask);
+        vy = wasm_v128_bitselect(vy, vy_max, vngtmask);
+      $else:
+        vy = wasm_f32x4_max(vy, vy_min);
+        vy = wasm_f32x4_min(vy, vy_max);
+
+    if (n & (2 * sizeof(float))) {
+      *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+      vy = wasm_v32x4_shuffle(vy, vy, 2, 3, 2, 3);
+      y += 2;
+    }
+    if (n & (1 * sizeof(float))) {
+      *y = wasm_f32x4_extract_lane(vy, 0);
+    }
+  }
+}

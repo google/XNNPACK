@@ -104,6 +104,36 @@ tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=1 -D WASM=
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vrsubc-minmax-wasm-x2.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vrsubc-minmax-wasm-x4.c
 
+################################## WAsm SIMD ##################################
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vadd-minmax-wasmsimd-arm-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vadd-minmax-wasmsimd-arm-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=DIV     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vdiv-minmax-wasmsimd-arm-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=DIV     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vdiv-minmax-wasmsimd-arm-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MAX     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vmax-wasmsimd-arm-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MAX     -D BATCH_TILE=8 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vmax-wasmsimd-arm-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MIN     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vmin-wasmsimd-arm-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MIN     -D BATCH_TILE=8 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vmin-wasmsimd-arm-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MUL     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vmul-minmax-wasmsimd-arm-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MUL     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vmul-minmax-wasmsimd-arm-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SUB     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vsub-minmax-wasmsimd-arm-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SUB     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vsub-minmax-wasmsimd-arm-x8.c
+
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=DIV     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vdiv-minmax-wasmsimd-x86-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=DIV     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vdiv-minmax-wasmsimd-x86-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MAX     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -D X86=1 -o src/f32-vbinary/gen/vmax-wasmsimd-x86-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MAX     -D BATCH_TILE=8 -D ACTIVATION=LINEAR -D X86=1 -o src/f32-vbinary/gen/vmax-wasmsimd-x86-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MIN     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -D X86=1 -o src/f32-vbinary/gen/vmin-wasmsimd-x86-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MIN     -D BATCH_TILE=8 -D ACTIVATION=LINEAR -D X86=1 -o src/f32-vbinary/gen/vmin-wasmsimd-x86-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MUL     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vmul-minmax-wasmsimd-x86-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MUL     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vmul-minmax-wasmsimd-x86-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SUB     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SUB     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x8.c
+
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SQRDIFF -D BATCH_TILE=4 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vsqrdiff-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SQRDIFF -D BATCH_TILE=8 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vsqrdiff-wasmsimd-x8.c
+
 ################################### ARM NEON ##################################
 tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=ADD     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vadd-minmax-neon-x4.c
 tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=ADD     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vadd-minmax-neon-x8.c
