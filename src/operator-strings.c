@@ -44,6 +44,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Clamp (NC, U8)";
     case xnn_operator_type_constant_pad_nd_x32:
       return "Constant Pad (ND, X32)";
+    case xnn_operator_type_convolution_nhwc_f16:
+      return "Convolution (NHWC, F16)";
     case xnn_operator_type_convolution_nhwc_f32:
       return "Convolution (NHWC, F32)";
     case xnn_operator_type_convolution_nhwc_q8:

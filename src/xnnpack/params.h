@@ -1663,6 +1663,7 @@ struct vmulcaddc_parameters {
 };
 
 #define XNN_MAX_Q8_DWCONV_UKERNELS 1
+#define XNN_MAX_F16_DWCONV_UKERNELS 3
 #define XNN_MAX_F32_DWCONV_UKERNELS 3
 #define XNN_MAX_F32_ARGMAXPOOL_UKERNELS 3
 
@@ -1707,7 +1708,11 @@ struct xnn_parameters {
   } x8;
   struct {
     struct gavgpool_parameters gavgpool;
+    struct gemm_parameters gemm;
+    struct gemm_parameters gemm2;
+    struct dwconv_parameters dwconv[XNN_MAX_F16_DWCONV_UKERNELS];
     struct vbinary_parameters vadd;
+    struct vmulcaddc_parameters vmulcaddc;
   } f16;
   struct {
     struct gemm_parameters gemm;

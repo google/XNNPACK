@@ -735,6 +735,25 @@ static void init(void) {
     if (cpuinfo_has_arm_neon_fp16_arith()) {
       init_flags |= XNN_INIT_FLAG_F16;
 
+      xnn_params.f16.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_6x16__neonfp16arith_ld64);
+      xnn_params.f16.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_6x16__neonfp16arith_ld64);
+      xnn_params.f16.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64);
+      xnn_params.f16.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64);
+      xnn_params.f16.gemm.mr = 6;
+      xnn_params.f16.gemm.nr = 16;
+
+      xnn_params.f16.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith;
+      xnn_params.f16.dwconv[0].channel_tile = 16;
+      xnn_params.f16.dwconv[0].primary_tile = 4;
+
+      xnn_params.f16.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up16x9__neonfp16arith;
+      xnn_params.f16.dwconv[1].channel_tile = 16;
+      xnn_params.f16.dwconv[1].primary_tile = 9;
+
+      xnn_params.f16.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith_acc2;
+      xnn_params.f16.dwconv[2].channel_tile = 8;
+      xnn_params.f16.dwconv[2].primary_tile = 25;
+
       xnn_params.f16.gavgpool = (struct gavgpool_parameters) {
         .up = (xnn_gavgpool_unipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8,
         .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8,
@@ -745,6 +764,11 @@ static void init(void) {
         .opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x16,
         .ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x16,
         .element_tile = 16,
+      };
+      xnn_params.f16.vmulcaddc = (struct vmulcaddc_parameters) {
+        .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x,
+        .channel_tile = 8,
+        .row_tile = 2,
       };
     }
   #endif  // XNN_NO_F16_OPERATORS

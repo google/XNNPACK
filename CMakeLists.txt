@@ -2257,7 +2257,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(convolution-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(convolution-nhwc-test convolution-nhwc-test)
 
   ADD_EXECUTABLE(convolution-nchw-test test/convolution-nchw.cc)
@@ -3523,7 +3523,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(convolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(deconvolution-bench bench/deconvolution.cc)
   SET_TARGET_PROPERTIES(deconvolution-bench PROPERTIES

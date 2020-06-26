@@ -70,6 +70,7 @@ struct gemm_context {
   struct xnn_hmp_gemm_ukernel ukernel;
   union {
     union xnn_q8_gemm_params q8;
+    struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
 };
@@ -344,6 +345,7 @@ struct dwconv_context {
   const void* zero;
   union {
     union xnn_q8_gemm_params q8;
+    struct xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
   union {
@@ -777,6 +779,7 @@ struct vmulcaddc_context {
   size_t y_stride;
   xnn_vmulcaddc_ukernel_function ukernel;
   union {
+    struct xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
 };

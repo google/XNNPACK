@@ -1654,6 +1654,38 @@ enum xnn_status xnn_setup_add_nd_f16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_convolution2d_nhwc_f16(
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t subsampling_height,
+  uint32_t subsampling_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t groups,
+  size_t group_input_channels,
+  size_t group_output_channels,
+  size_t input_channel_stride,
+  size_t output_channel_stride,
+  const void* kernel,
+  const void* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* convolution_op_out);
+
+enum xnn_status xnn_setup_convolution2d_nhwc_f16(
+  xnn_operator_t convolution_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_global_average_pooling_nwc_f16(
   size_t channels,
   size_t input_stride,
