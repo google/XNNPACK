@@ -135,12 +135,20 @@ static void f32_hswish(
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
     ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_arm_x16, xnn_f32_hswish_ukernel__wasmsimd_arm_x16)
+    ->RangeMultiplier(10)
+    ->Range(1000, 1000000)
+    ->UseRealTime();
 
   BENCHMARK_CAPTURE(f32_hswish, wasmsimd_x86_x4, xnn_f32_hswish_ukernel__wasmsimd_x86_x4)
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_hswish, wasmsimd_x86_x8, xnn_f32_hswish_ukernel__wasmsimd_x86_x8)
+    ->RangeMultiplier(10)
+    ->Range(1000, 1000000)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_x86_x16, xnn_f32_hswish_ukernel__wasmsimd_x86_x16)
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
     ->UseRealTime();
