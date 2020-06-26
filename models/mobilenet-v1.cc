@@ -105,7 +105,7 @@ ExecutionPlan MobileNetV1(pthreadpool_t threadpool) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f), std::ref(rng));
   std::generate(v0, v0 + 150528, std::ref(f32rng));
   std::generate(v1, v1 + 401408, std::ref(f32rng));
   std::generate(v2, v2 + 401408, std::ref(f32rng));
