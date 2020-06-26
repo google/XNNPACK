@@ -3686,8 +3686,8 @@ xnnpack_benchmark(
 ############################# End-to-end benchmarks ############################
 
 cc_library(
-    name = "mobilenet_v1",
-    srcs = ["models/mobilenet-v1.cc"],
+    name = "fp32_mobilenet_v1",
+    srcs = ["models/fp32-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     linkstatic = True,
@@ -3698,8 +3698,21 @@ cc_library(
 )
 
 cc_library(
-    name = "mobilenet_v2",
-    srcs = ["models/mobilenet-v2.cc"],
+    name = "fp16_mobilenet_v1",
+    srcs = ["models/fp16-mobilenet-v1.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
+    name = "fp32_mobilenet_v2",
+    srcs = ["models/fp32-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     linkstatic = True,
@@ -3710,8 +3723,21 @@ cc_library(
 )
 
 cc_library(
-    name = "mobilenet_v3_large",
-    srcs = ["models/mobilenet-v3-large.cc"],
+    name = "fp16_mobilenet_v2",
+    srcs = ["models/fp16-mobilenet-v2.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
+    name = "fp32_mobilenet_v3_large",
+    srcs = ["models/fp32-mobilenet-v3-large.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     linkstatic = True,
@@ -3722,8 +3748,8 @@ cc_library(
 )
 
 cc_library(
-    name = "mobilenet_v3_small",
-    srcs = ["models/mobilenet-v3-small.cc"],
+    name = "fp32_mobilenet_v3_small",
+    srcs = ["models/fp32-mobilenet-v3-small.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     linkstatic = True,
@@ -3741,10 +3767,10 @@ xnnpack_benchmark(
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
-        ":mobilenet_v1",
-        ":mobilenet_v2",
-        ":mobilenet_v3_large",
-        ":mobilenet_v3_small",
+        ":fp32_mobilenet_v1",
+        ":fp32_mobilenet_v2",
+        ":fp32_mobilenet_v3_large",
+        ":fp32_mobilenet_v3_small",
     ],
 )
 
@@ -3756,10 +3782,10 @@ xnnpack_benchmark(
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
-        ":mobilenet_v1",
-        ":mobilenet_v2",
-        ":mobilenet_v3_large",
-        ":mobilenet_v3_small",
+        ":fp32_mobilenet_v1",
+        ":fp32_mobilenet_v2",
+        ":fp32_mobilenet_v3_large",
+        ":fp32_mobilenet_v3_small",
     ],
 )
 
@@ -3769,10 +3795,12 @@ xnnpack_benchmark(
     deps = [
         ":XNNPACK",
         ":bench_utils",
-        ":mobilenet_v1",
-        ":mobilenet_v2",
-        ":mobilenet_v3_large",
-        ":mobilenet_v3_small",
+        ":fp16_mobilenet_v1",
+        ":fp16_mobilenet_v2",
+        ":fp32_mobilenet_v1",
+        ":fp32_mobilenet_v2",
+        ":fp32_mobilenet_v3_large",
+        ":fp32_mobilenet_v3_small",
         "@pthreadpool",
     ],
 )

@@ -15,9 +15,14 @@ namespace models {
 typedef std::vector<std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>> ExecutionPlan;
 typedef ExecutionPlan (*ExecutionPlanFactory)(pthreadpool_t threadpool);
 
-ExecutionPlan MobileNetV1(pthreadpool_t threadpool);
-ExecutionPlan MobileNetV2(pthreadpool_t threadpool);
-ExecutionPlan MobileNetV3Large(pthreadpool_t threadpool);
-ExecutionPlan MobileNetV3Small(pthreadpool_t threadpool);
+ExecutionPlan FP32MobileNetV1(pthreadpool_t threadpool);
+ExecutionPlan FP32MobileNetV2(pthreadpool_t threadpool);
+ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool);
+ExecutionPlan FP32MobileNetV3Small(pthreadpool_t threadpool);
+
+ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool);
+ExecutionPlan FP16MobileNetV2(pthreadpool_t threadpool);
+ExecutionPlan FP16MobileNetV3Large(pthreadpool_t threadpool);
+ExecutionPlan FP16MobileNetV3Small(pthreadpool_t threadpool);
 
 }  // namespace models

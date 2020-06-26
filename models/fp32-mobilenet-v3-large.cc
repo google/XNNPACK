@@ -15,7 +15,7 @@
 
 namespace models {
 
-ExecutionPlan MobileNetV3Large(pthreadpool_t threadpool) {
+ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   alignas(16) static float v0[150528];
   alignas(16) static float v1[200704];
   alignas(16) static float v2[200704];
