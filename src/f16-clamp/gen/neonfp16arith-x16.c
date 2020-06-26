@@ -8,9 +8,9 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-
+#include <stdlib.h>
 #include <arm_neon.h>
-
+#include <stdio.h>
 #include <xnnpack/clamp.h>
 #include <xnnpack/common.h>
 
