@@ -146,7 +146,7 @@ static void f32_hswish(
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   BENCHMARK_CAPTURE(f32_hswish, wasm_x1, xnn_f32_hswish_ukernel__wasm_x1)
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
@@ -159,7 +159,7 @@ static void f32_hswish(
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 BENCHMARK_CAPTURE(f32_hswish, scalar_x1, xnn_f32_hswish_ukernel__scalar_x1)
   ->RangeMultiplier(10)
