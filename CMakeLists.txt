@@ -384,9 +384,6 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vrsqrdiffc-scalar-x1.c
-  src/f32-vbinary/gen/vrsqrdiffc-scalar-x2.c
-  src/f32-vbinary/gen/vrsqrdiffc-scalar-x4.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x4.c
@@ -573,8 +570,6 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmulc-minmax-psimd-x8.c
   src/f32-vbinary/gen/vrdivc-minmax-psimd-x4.c
   src/f32-vbinary/gen/vrdivc-minmax-psimd-x8.c
-  src/f32-vbinary/gen/vrsqrdiffc-psimd-x4.c
-  src/f32-vbinary/gen/vrsqrdiffc-psimd-x8.c
   src/f32-vbinary/gen/vrsubc-minmax-psimd-x4.c
   src/f32-vbinary/gen/vrsubc-minmax-psimd-x8.c
   src/f32-vbinary/gen/vsqrdiff-psimd-x4.c
@@ -785,8 +780,6 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmul-minmax-neon-x8.c
   src/f32-vbinary/gen/vmulc-minmax-neon-x4.c
   src/f32-vbinary/gen/vmulc-minmax-neon-x8.c
-  src/f32-vbinary/gen/vrsqrdiffc-neon-x4.c
-  src/f32-vbinary/gen/vrsqrdiffc-neon-x8.c
   src/f32-vbinary/gen/vrsubc-minmax-neon-x4.c
   src/f32-vbinary/gen/vrsubc-minmax-neon-x8.c
   src/f32-vbinary/gen/vsqrdiff-neon-x4.c
@@ -1270,8 +1263,6 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmulc-minmax-sse-x8.c
   src/f32-vbinary/gen/vrdivc-minmax-sse-x4.c
   src/f32-vbinary/gen/vrdivc-minmax-sse-x8.c
-  src/f32-vbinary/gen/vrsqrdiffc-sse-x4.c
-  src/f32-vbinary/gen/vrsqrdiffc-sse-x8.c
   src/f32-vbinary/gen/vrsubc-minmax-sse-x4.c
   src/f32-vbinary/gen/vrsubc-minmax-sse-x8.c
   src/f32-vbinary/gen/vsqrdiff-sse-x4.c
@@ -1468,8 +1459,6 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmulc-minmax-avx-x16.c
   src/f32-vbinary/gen/vrdivc-minmax-avx-x8.c
   src/f32-vbinary/gen/vrdivc-minmax-avx-x16.c
-  src/f32-vbinary/gen/vrsqrdiffc-avx-x8.c
-  src/f32-vbinary/gen/vrsqrdiffc-avx-x16.c
   src/f32-vbinary/gen/vrsubc-minmax-avx-x8.c
   src/f32-vbinary/gen/vrsubc-minmax-avx-x16.c
   src/f32-vbinary/gen/vsqrdiff-avx-x8.c
@@ -1755,8 +1744,6 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmulc-minmax-avx512f-x32.c
   src/f32-vbinary/gen/vrdivc-minmax-avx512f-x16.c
   src/f32-vbinary/gen/vrdivc-minmax-avx512f-x32.c
-  src/f32-vbinary/gen/vrsqrdiffc-avx512f-x16.c
-  src/f32-vbinary/gen/vrsqrdiffc-avx512f-x32.c
   src/f32-vbinary/gen/vrsubc-minmax-avx512f-x16.c
   src/f32-vbinary/gen/vrsubc-minmax-avx512f-x32.c
   src/f32-vbinary/gen/vsqrdiff-avx512f-x16.c
@@ -3164,15 +3151,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vsqrdiffc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vsqrdiffc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vsqrdiffc-test f32-vsqrdiffc-test)
-
-  ADD_EXECUTABLE(f32-vrsqrdiffc-test test/f32-vrsqrdiffc.cc)
-  SET_TARGET_PROPERTIES(f32-vrsqrdiffc-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrsqrdiffc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-vrsqrdiffc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-vrsqrdiffc-test f32-vrsqrdiffc-test)
 
   ADD_EXECUTABLE(f32-vsub-minmax-test test/f32-vsub-minmax.cc)
   SET_TARGET_PROPERTIES(f32-vsub-minmax-test PROPERTIES

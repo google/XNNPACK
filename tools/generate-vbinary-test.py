@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_v(add|div|max|min|mul|sqrdiff|sub|addc|divc|rdivc|maxc|minc|mulc|sqrdiffc|rsqrdiffc|subc|rsubc)(_(minmax))?_ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_v(add|div|max|min|mul|sqrdiff|sub|addc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax))?_ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
@@ -45,7 +45,6 @@ def split_ukernel_name(name):
     "minc": "MinC",
     "mulc": "MulC",
     "sqrdiffc": "SqrDiffC",
-    "rsqrdiffc": "RSqrDiffC",
     "subc": "SubC",
     "rsubc": "RSubC",
   }[match.group(2)]

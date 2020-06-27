@@ -6,7 +6,7 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "RSQRDIFF"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -26,7 +26,6 @@ $  "MUL": lambda x: "psimd_mul_f32(%s, vb)" % x,
 $  "SUB": lambda x: "psimd_sub_f32(%s, vb)" % x,
 $  "RSUB": lambda x: "psimd_sub_f32(vb, %s)" % x,
 $  "SQRDIFF": lambda x: "psimd_sub_f32(%s, vb)" % x,
-$  "RSQRDIFF": lambda x: "psimd_sub_f32(vb, %s)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
@@ -54,7 +53,7 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__psimd_x${BATCH_TILE}(
     $for N in range(0, BATCH_TILE, 4):
       psimd_f32 vy${ABC[N:N+4]} = ${PSIMD_OP_F32("va" + ABC[N:N+4])};
 
-    $if OP in ["SQRDIFF", "RSQRDIFF"]:
+    $if OP == "SQRDIFF":
       $for N in range(0, BATCH_TILE, 4):
         vy${ABC[N:N+4]} = psimd_mul_f32(vy${ABC[N:N+4]}, vy${ABC[N:N+4]});
 
@@ -76,7 +75,7 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__psimd_x${BATCH_TILE}(
       a += 4;
 
       psimd_f32 vy0123 = ${PSIMD_OP_F32("va0123")};
-      $if OP in ["SQRDIFF", "RSQRDIFF"]:
+      $if OP == "SQRDIFF":
         vy0123 = psimd_mul_f32(vy0123, vy0123);
       $if ACTIVATION == "MINMAX":
         vy0123 = psimd_max_f32(vy0123, vy_min);
@@ -88,7 +87,7 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__psimd_x${BATCH_TILE}(
     const psimd_f32 va0123 = psimd_load_f32(a);
 
     psimd_f32 vy0123 = ${PSIMD_OP_F32("va0123")};
-    $if OP in ["SQRDIFF", "RSQRDIFF"]:
+    $if OP == "SQRDIFF":
       vy0123 = psimd_mul_f32(vy0123, vy0123);
     $if ACTIVATION == "MINMAX":
       vy0123 = psimd_max_f32(vy0123, vy_min);

@@ -49,9 +49,6 @@ tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL      -D BATCH_TILE=4 -D W
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SQRDIFF  -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-scalar-x1.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SQRDIFF  -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-scalar-x2.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SQRDIFF  -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-scalar-x4.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSQRDIFF -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-scalar-x1.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSQRDIFF -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-scalar-x2.c
-tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSQRDIFF -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-scalar-x4.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB      -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-scalar-x1.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB      -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-scalar-x2.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB      -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-scalar-x4.c
@@ -169,8 +166,6 @@ tools/xngen src/f32-vbinary/vop-wasmsimd.c.in  -D OP=SQRDIFF  -D BATCH_TILE=4 -D
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in  -D OP=SQRDIFF  -D BATCH_TILE=8 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vsqrdiff-wasmsimd-x8.c
 tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=SQRDIFF  -D BATCH_TILE=4 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vsqrdiffc-wasmsimd-x4.c
 tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=SQRDIFF  -D BATCH_TILE=8 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vsqrdiffc-wasmsimd-x8.c
-tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=RSQRDIFF -D BATCH_TILE=4 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vrsqrdiffc-wasmsimd-x4.c
-tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=RSQRDIFF -D BATCH_TILE=8 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vrsqrdiffc-wasmsimd-x8.c
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=ADD     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vadd-minmax-neon-x4.c
@@ -202,8 +197,6 @@ tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=MUL      -D BATCH_TILE=4 -D ACT
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=MUL      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vmulc-minmax-neon-x8.c
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=SQRDIFF  -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-neon-x4.c
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=SQRDIFF  -D BATCH_TILE=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-neon-x8.c
-tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=RSQRDIFF -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-neon-x4.c
-tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=RSQRDIFF -D BATCH_TILE=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-neon-x8.c
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=SUB      -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-neon-x4.c
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=SUB      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-neon-x8.c
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=RSUB     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vrsubc-minmax-neon-x4.c
@@ -239,8 +232,6 @@ tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=MUL      -D BATCH_TILE=4 -D AC
 tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=MUL      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vmulc-minmax-psimd-x8.c
 tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=SQRDIFF  -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-psimd-x4.c
 tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=SQRDIFF  -D BATCH_TILE=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-psimd-x8.c
-tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=RSQRDIFF -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-psimd-x4.c
-tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=RSQRDIFF -D BATCH_TILE=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-psimd-x8.c
 tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=SUB      -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-psimd-x4.c
 tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=SUB      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-psimd-x8.c
 tools/xngen src/f32-vbinary/vopc-psimd.c.in -D OP=RSUB     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vrsubc-minmax-psimd-x4.c
@@ -276,8 +267,6 @@ tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=MUL      -D BATCH_TILE=4 -D ACTI
 tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=MUL      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vmulc-minmax-sse-x8.c
 tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=SQRDIFF  -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-sse-x4.c
 tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=SQRDIFF  -D BATCH_TILE=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-sse-x8.c
-tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=RSQRDIFF -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-sse-x4.c
-tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=RSQRDIFF -D BATCH_TILE=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-sse-x8.c
 tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=SUB      -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-sse-x4.c
 tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=SUB      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-sse-x8.c
 tools/xngen src/f32-vbinary/vopc-sse.c.in -D OP=RSUB     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vrsubc-minmax-sse-x4.c
@@ -313,8 +302,6 @@ tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=MUL      -D BATCH_TILE=8  -D ACT
 tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=MUL      -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vmulc-minmax-avx-x16.c
 tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=SQRDIFF  -D BATCH_TILE=8  -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-avx-x8.c
 tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=SQRDIFF  -D BATCH_TILE=16 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-avx-x16.c
-tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=RSQRDIFF -D BATCH_TILE=8  -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-avx-x8.c
-tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=RSQRDIFF -D BATCH_TILE=16 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-avx-x16.c
 tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=SUB      -D BATCH_TILE=8  -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-avx-x8.c
 tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=SUB      -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-avx-x16.c
 tools/xngen src/f32-vbinary/vopc-avx.c.in -D OP=RSUB     -D BATCH_TILE=8  -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vrsubc-minmax-avx-x8.c
@@ -350,8 +337,6 @@ tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=MUL      -D BATCH_TILE=16 -D
 tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=MUL      -D BATCH_TILE=32 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vmulc-minmax-avx512f-x32.c
 tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SQRDIFF  -D BATCH_TILE=16 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-avx512f-x16.c
 tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SQRDIFF  -D BATCH_TILE=32 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vsqrdiffc-avx512f-x32.c
-tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=RSQRDIFF -D BATCH_TILE=16 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-avx512f-x16.c
-tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=RSQRDIFF -D BATCH_TILE=32 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vrsqrdiffc-avx512f-x32.c
 tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SUB      -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-avx512f-x16.c
 tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SUB      -D BATCH_TILE=32 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-avx512f-x32.c
 tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=RSUB     -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vrsubc-minmax-avx512f-x16.c
@@ -372,6 +357,5 @@ tools/generate-vbinary-test.py --spec test/f32-vmaxc.yaml --output test/f32-vmax
 tools/generate-vbinary-test.py --spec test/f32-vminc.yaml --output test/f32-vminc.cc
 tools/generate-vbinary-test.py --spec test/f32-vmulc-minmax.yaml --output test/f32-vmulc-minmax.cc
 tools/generate-vbinary-test.py --spec test/f32-vsqrdiffc.yaml --output test/f32-vsqrdiffc.cc
-tools/generate-vbinary-test.py --spec test/f32-vrsqrdiffc.yaml --output test/f32-vrsqrdiffc.cc
 tools/generate-vbinary-test.py --spec test/f32-vsubc-minmax.yaml --output test/f32-vsubc-minmax.cc
 tools/generate-vbinary-test.py --spec test/f32-vrsubc-minmax.yaml --output test/f32-vrsubc-minmax.cc

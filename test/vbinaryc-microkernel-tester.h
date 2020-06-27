@@ -32,7 +32,6 @@ class VBinOpCMicrokernelTester {
     MinC,
     MulC,
     SqrDiffC,
-    RSqrDiffC,
     SubC,
     RSubC,
   };
@@ -134,12 +133,6 @@ class VBinOpCMicrokernelTester {
             y_ref[i] = diff * diff;
             break;
           }
-          case OpType::RSqrDiffC:
-          {
-            const float diff = fp16_ieee_to_fp32_value(b) - fp16_ieee_to_fp32_value(a_data[i]);
-            y_ref[i] = diff * diff;
-            break;
-          }
           case OpType::SubC:
             y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) - fp16_ieee_to_fp32_value(b);
             break;
@@ -202,12 +195,6 @@ class VBinOpCMicrokernelTester {
           case OpType::SqrDiffC:
           {
             const float diff = fp16_ieee_to_fp32_value(a_data[i]) - fp16_ieee_to_fp32_value(b);
-            y_ref[i] = diff * diff;
-            break;
-          }
-          case OpType::RSqrDiffC:
-          {
-            const float diff = fp16_ieee_to_fp32_value(b) - fp16_ieee_to_fp32_value(a_data[i]);
             y_ref[i] = diff * diff;
             break;
           }
@@ -293,12 +280,6 @@ class VBinOpCMicrokernelTester {
             y_ref[i] = diff * diff;
             break;
           }
-          case OpType::RSqrDiffC:
-          {
-            const float diff = b - a_data[i];
-            y_ref[i] = diff * diff;
-            break;
-          }
           case OpType::SubC:
             y_ref[i] = a_data[i] - b;
             break;
@@ -360,12 +341,6 @@ class VBinOpCMicrokernelTester {
           case OpType::SqrDiffC:
           {
             const float diff = a_data[i] - b;
-            y_ref[i] = diff * diff;
-            break;
-          }
-          case OpType::RSqrDiffC:
-          {
-            const float diff = b - a_data[i];
             y_ref[i] = diff * diff;
             break;
           }

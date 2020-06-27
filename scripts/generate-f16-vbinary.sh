@@ -34,8 +34,6 @@ tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=MUL      -D BATCH_TILE
 tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=MUL      -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vmulc-minmax-neonfp16arith-x16.c
 tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=SQRDIFF  -D BATCH_TILE=8  -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vsqrdiffc-neonfp16arith-x8.c
 tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=SQRDIFF  -D BATCH_TILE=16 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vsqrdiffc-neonfp16arith-x16.c
-tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=RSQRDIFF -D BATCH_TILE=8  -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vrsqrdiffc-neonfp16arith-x8.c
-tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=RSQRDIFF -D BATCH_TILE=16 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vrsqrdiffc-neonfp16arith-x16.c
 tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=SUB      -D BATCH_TILE=8  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x8.c
 tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=SUB      -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x16.c
 tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=RSUB     -D BATCH_TILE=8  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vrsubc-minmax-neonfp16arith-x8.c
@@ -56,6 +54,5 @@ tools/generate-vbinary-test.py --spec test/f16-vmaxc.yaml --output test/f16-vmax
 tools/generate-vbinary-test.py --spec test/f16-vminc.yaml --output test/f16-vminc.cc
 tools/generate-vbinary-test.py --spec test/f16-vmulc-minmax.yaml --output test/f16-vmulc-minmax.cc
 tools/generate-vbinary-test.py --spec test/f16-vsqrdiffc.yaml --output test/f16-vsqrdiffc.cc
-tools/generate-vbinary-test.py --spec test/f16-vrsqrdiffc.yaml --output test/f16-vrsqrdiffc.cc
 tools/generate-vbinary-test.py --spec test/f16-vsubc-minmax.yaml --output test/f16-vsubc-minmax.cc
 tools/generate-vbinary-test.py --spec test/f16-vrsubc-minmax.yaml --output test/f16-vrsubc-minmax.cc

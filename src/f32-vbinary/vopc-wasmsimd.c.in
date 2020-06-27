@@ -6,7 +6,7 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "RSQRDIFF"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -26,7 +26,6 @@ $  "MUL": lambda x: "wasm_f32x4_mul(%s, vb)" % x,
 $  "SUB": lambda x: "wasm_f32x4_sub(%s, vb)" % x,
 $  "RSUB": lambda x: "wasm_f32x4_sub(vb, %s)" % x,
 $  "SQRDIFF": lambda x: "wasm_f32x4_sub(%s, vb)" % x,
-$  "RSQRDIFF": lambda x: "wasm_f32x4_sub(vb, %s)" % x,
 $}[OP]
 $ARCH_SUFFIX = "" if ACTIVATION == "LINEAR" and OP not in ["MIN", "MAX"] else "_x86" if X86 else "_arm"
 $ACTIVATION_SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
@@ -55,7 +54,7 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}
     $for N in range(0, BATCH_TILE, 4):
       v128_t vy${ABC[N:N+4]} = ${WASM_F32X4_OP("va" + ABC[N:N+4])};
 
-    $if OP in ["SQRDIFF", "RSQRDIFF"]:
+    $if OP == "SQRDIFF":
       $for N in range(0, BATCH_TILE, 4):
         vy${ABC[N:N+4]} = wasm_f32x4_mul(vy${ABC[N:N+4]}, vy${ABC[N:N+4]});
 
@@ -95,7 +94,7 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}
         v128_t vy = wasm_v128_bitselect(vb, va, vm);
       $else:
         v128_t vy = ${WASM_F32X4_OP("va")};
-        $if OP in ["SQRDIFF", "RSQRDIFF"]:
+        $if OP == "SQRDIFF":
           vy = wasm_f32x4_mul(vy, vy);
 
       $if ACTIVATION == "MINMAX":
@@ -122,7 +121,7 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}
       v128_t vy = wasm_v128_bitselect(vb, va, vm);
     $else:
       v128_t vy = ${WASM_F32X4_OP("va")};
-      $if OP in ["SQRDIFF", "RSQRDIFF"]:
+      $if OP == "SQRDIFF":
         vy = wasm_f32x4_mul(vy, vy);
 
     $if ACTIVATION == "MINMAX":
