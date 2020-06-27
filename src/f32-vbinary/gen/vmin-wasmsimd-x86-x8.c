@@ -64,7 +64,8 @@ void xnn_f32_vmin_ukernel__wasmsimd_x86_x8(
     const v128_t va = wasm_v128_load(a);
     const v128_t vb = wasm_v128_load(b);
 
-    v128_t vy = wasm_f32x4_min(va, vb);
+    const v128_t vm = wasm_f32x4_lt(va, vb);
+    v128_t vy = wasm_v128_bitselect(va, vb, vm);
 
 
     if (n & (2 * sizeof(float))) {

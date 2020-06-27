@@ -32,9 +32,11 @@ void xnn_f32_vminc_ukernel__wasmsimd_x86_x8(
     const v128_t va4567 = wasm_v128_load(a + 4);
     a += 8;
 
-    v128_t vy0123 = wasm_f32x4_min(va0123, vb);
-    v128_t vy4567 = wasm_f32x4_min(va4567, vb);
+    const v128_t vm0123 = wasm_f32x4_lt(va0123, vb);
+    const v128_t vm4567 = wasm_f32x4_lt(va4567, vb);
 
+    v128_t vy0123 = wasm_v128_bitselect(va0123, vb, vm0123);
+    v128_t vy4567 = wasm_v128_bitselect(va4567, vb, vm4567);
 
 
     wasm_v128_store(y, vy0123);

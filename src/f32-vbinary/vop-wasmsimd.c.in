@@ -132,9 +132,16 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
     const v128_t va = wasm_v128_load(a);
     const v128_t vb = wasm_v128_load(b);
 
-    v128_t vy = ${WASM_F32X4_OP}(va, vb);
-    $if OP == "SQRDIFF":
-      vy = wasm_f32x4_mul(vy, vy);
+    $if OP == "MIN" and X86:
+      const v128_t vm = wasm_f32x4_lt(va, vb);
+      v128_t vy = wasm_v128_bitselect(va, vb, vm);
+    $elif OP == "MAX" and X86:
+      const v128_t vm = wasm_f32x4_le(va, vb);
+      v128_t vy = wasm_v128_bitselect(vb, va, vm);
+    $else:
+      v128_t vy = ${WASM_F32X4_OP}(va, vb);
+      $if OP == "SQRDIFF":
+        vy = wasm_f32x4_mul(vy, vy);
 
     $if ACTIVATION == "MINMAX":
       $if X86:
