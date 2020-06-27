@@ -40,15 +40,13 @@ void xnn_f32_hswish_ukernel__wasmsimd_${"x86" if X86 else "arm"}_x${BATCH_TILE}(
 
       $if X86:
         $for N in range(0, BATCH_TILE, 4):
-          const v128_t vmasklt${ABC[N:N+4]} = wasm_f32x4_lt(vacc${ABC[N:N+4]}, vzero);
-          vacc${ABC[N:N+4]} = wasm_v128_andnot(vacc${ABC[N:N+4]}, vmasklt${ABC[N:N+4]});
+          vacc${ABC[N:N+4]} = wasm_f32x4_pmax(vacc${ABC[N:N+4]}, vzero);
 
         $for N in range(0, BATCH_TILE, 4):
-          const v128_t vmaskge${ABC[N:N+4]} = wasm_f32x4_ge(vacc${ABC[N:N+4]}, vone);
+          vacc${ABC[N:N+4]} = wasm_f32x4_pmin(vacc${ABC[N:N+4]}, vone);
+
+        $for N in range(0, BATCH_TILE, 4):
           vacc${ABC[N:N+4]} = wasm_f32x4_mul(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]});
-
-        $for N in range(0, BATCH_TILE, 4):
-          vacc${ABC[N:N+4]} = wasm_v128_bitselect(vx${ABC[N:N+4]}, vacc${ABC[N:N+4]}, vmaskge${ABC[N:N+4]});
       $else:
         $for N in range(0, BATCH_TILE, 4):
           vacc${ABC[N:N+4]} = wasm_f32x4_max(vacc${ABC[N:N+4]}, vzero);
@@ -70,11 +68,9 @@ void xnn_f32_hswish_ukernel__wasmsimd_${"x86" if X86 else "arm"}_x${BATCH_TILE}(
     v128_t vacc = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx, vsixth));
 
     $if X86:
-      const v128_t vmasklt = wasm_f32x4_lt(vacc, vzero);
-      vacc = wasm_v128_andnot(vacc, vmasklt);
-      const v128_t vmaskge = wasm_f32x4_ge(vacc, vone);
+      vacc = wasm_f32x4_pmax(vacc, vzero);
+      vacc = wasm_f32x4_pmin(vacc, vone);
       vacc = wasm_f32x4_mul(vacc, vx);
-      vacc = wasm_v128_bitselect(vx, vacc, vmaskge);
     $else:
       vacc = wasm_f32x4_max(vacc, vzero);
       vacc = wasm_f32x4_min(vacc, vone);
@@ -88,11 +84,9 @@ void xnn_f32_hswish_ukernel__wasmsimd_${"x86" if X86 else "arm"}_x${BATCH_TILE}(
     v128_t vacc = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx, vsixth));
 
     $if X86:
-      const v128_t vmasklt = wasm_f32x4_lt(vacc, vzero);
-      vacc = wasm_v128_andnot(vacc, vmasklt);
-      const v128_t vmaskge = wasm_f32x4_ge(vacc, vone);
+      vacc = wasm_f32x4_pmax(vacc, vzero);
+      vacc = wasm_f32x4_pmin(vacc, vone);
       vacc = wasm_f32x4_mul(vacc, vx);
-      vacc = wasm_v128_bitselect(vx, vacc, vmaskge);
     $else:
       vacc = wasm_f32x4_max(vacc, vzero);
       vacc = wasm_f32x4_min(vacc, vone);

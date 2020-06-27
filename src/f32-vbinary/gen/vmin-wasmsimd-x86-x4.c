@@ -33,9 +33,7 @@ void xnn_f32_vmin_ukernel__wasmsimd_x86_x4(
     const v128_t vb0123 = wasm_v128_load(b);
     b += 4;
 
-    const v128_t vm0123 = wasm_f32x4_lt(va0123, vb0123);
-
-    v128_t vy0123 = wasm_v128_bitselect(va0123, vb0123, vm0123);
+    v128_t vy0123 = wasm_f32x4_pmin(va0123, vb0123);
 
 
     wasm_v128_store(y, vy0123);
@@ -45,7 +43,7 @@ void xnn_f32_vmin_ukernel__wasmsimd_x86_x4(
     const v128_t va = wasm_v128_load(a);
     const v128_t vb = wasm_v128_load(b);
 
-    v128_t vy = wasm_f32x4_min(va, vb);
+    v128_t vy = wasm_f32x4_pmin(va, vb);
 
 
     if (n & (2 * sizeof(float))) {

@@ -198,14 +198,14 @@ void xnn_f32_igemm_relu_ukernel_4x8__wasmsimd_splat_x86(
     } while (p != 0);
 
     const v128_t vzero = wasm_f32x4_splat(0.0f);
-    vacc0x0123 = wasm_v128_andnot(vacc0x0123, wasm_f32x4_le(vacc0x0123, vzero));
-    vacc1x0123 = wasm_v128_andnot(vacc1x0123, wasm_f32x4_le(vacc1x0123, vzero));
-    vacc2x0123 = wasm_v128_andnot(vacc2x0123, wasm_f32x4_le(vacc2x0123, vzero));
-    vacc3x0123 = wasm_v128_andnot(vacc3x0123, wasm_f32x4_le(vacc3x0123, vzero));
-    vacc0x4567 = wasm_v128_andnot(vacc0x4567, wasm_f32x4_le(vacc0x4567, vzero));
-    vacc1x4567 = wasm_v128_andnot(vacc1x4567, wasm_f32x4_le(vacc1x4567, vzero));
-    vacc2x4567 = wasm_v128_andnot(vacc2x4567, wasm_f32x4_le(vacc2x4567, vzero));
-    vacc3x4567 = wasm_v128_andnot(vacc3x4567, wasm_f32x4_le(vacc3x4567, vzero));
+    vacc0x0123 = wasm_f32x4_pmax(vacc0x0123, vzero);
+    vacc1x0123 = wasm_f32x4_pmax(vacc1x0123, vzero);
+    vacc2x0123 = wasm_f32x4_pmax(vacc2x0123, vzero);
+    vacc3x0123 = wasm_f32x4_pmax(vacc3x0123, vzero);
+    vacc0x4567 = wasm_f32x4_pmax(vacc0x4567, vzero);
+    vacc1x4567 = wasm_f32x4_pmax(vacc1x4567, vzero);
+    vacc2x4567 = wasm_f32x4_pmax(vacc2x4567, vzero);
+    vacc3x4567 = wasm_f32x4_pmax(vacc3x4567, vzero);
 
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c3, vacc3x0123);

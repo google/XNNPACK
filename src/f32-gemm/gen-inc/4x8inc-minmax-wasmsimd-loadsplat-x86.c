@@ -97,24 +97,24 @@ void xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_loadsplat_x86(
     } while (k != 0);
 
     const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-    vacc0x0123 = wasm_v128_bitselect(vmin, vacc0x0123, wasm_f32x4_lt(vacc0x0123, vmin));
-    vacc1x0123 = wasm_v128_bitselect(vmin, vacc1x0123, wasm_f32x4_lt(vacc1x0123, vmin));
-    vacc2x0123 = wasm_v128_bitselect(vmin, vacc2x0123, wasm_f32x4_lt(vacc2x0123, vmin));
-    vacc3x0123 = wasm_v128_bitselect(vmin, vacc3x0123, wasm_f32x4_lt(vacc3x0123, vmin));
-    vacc0x4567 = wasm_v128_bitselect(vmin, vacc0x4567, wasm_f32x4_lt(vacc0x4567, vmin));
-    vacc1x4567 = wasm_v128_bitselect(vmin, vacc1x4567, wasm_f32x4_lt(vacc1x4567, vmin));
-    vacc2x4567 = wasm_v128_bitselect(vmin, vacc2x4567, wasm_f32x4_lt(vacc2x4567, vmin));
-    vacc3x4567 = wasm_v128_bitselect(vmin, vacc3x4567, wasm_f32x4_lt(vacc3x4567, vmin));
+    vacc0x0123 = wasm_f32x4_pmax(vacc0x0123, vmin);
+    vacc1x0123 = wasm_f32x4_pmax(vacc1x0123, vmin);
+    vacc2x0123 = wasm_f32x4_pmax(vacc2x0123, vmin);
+    vacc3x0123 = wasm_f32x4_pmax(vacc3x0123, vmin);
+    vacc0x4567 = wasm_f32x4_pmax(vacc0x4567, vmin);
+    vacc1x4567 = wasm_f32x4_pmax(vacc1x4567, vmin);
+    vacc2x4567 = wasm_f32x4_pmax(vacc2x4567, vmin);
+    vacc3x4567 = wasm_f32x4_pmax(vacc3x4567, vmin);
 
     const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
-    vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vmax, wasm_f32x4_le(vacc0x0123, vmax));
-    vacc1x0123 = wasm_v128_bitselect(vacc1x0123, vmax, wasm_f32x4_le(vacc1x0123, vmax));
-    vacc2x0123 = wasm_v128_bitselect(vacc2x0123, vmax, wasm_f32x4_le(vacc2x0123, vmax));
-    vacc3x0123 = wasm_v128_bitselect(vacc3x0123, vmax, wasm_f32x4_le(vacc3x0123, vmax));
-    vacc0x4567 = wasm_v128_bitselect(vacc0x4567, vmax, wasm_f32x4_le(vacc0x4567, vmax));
-    vacc1x4567 = wasm_v128_bitselect(vacc1x4567, vmax, wasm_f32x4_le(vacc1x4567, vmax));
-    vacc2x4567 = wasm_v128_bitselect(vacc2x4567, vmax, wasm_f32x4_le(vacc2x4567, vmax));
-    vacc3x4567 = wasm_v128_bitselect(vacc3x4567, vmax, wasm_f32x4_le(vacc3x4567, vmax));
+    vacc0x0123 = wasm_f32x4_pmin(vacc0x0123, vmax);
+    vacc1x0123 = wasm_f32x4_pmin(vacc1x0123, vmax);
+    vacc2x0123 = wasm_f32x4_pmin(vacc2x0123, vmax);
+    vacc3x0123 = wasm_f32x4_pmin(vacc3x0123, vmax);
+    vacc0x4567 = wasm_f32x4_pmin(vacc0x4567, vmax);
+    vacc1x4567 = wasm_f32x4_pmin(vacc1x4567, vmax);
+    vacc2x4567 = wasm_f32x4_pmin(vacc2x4567, vmax);
+    vacc3x4567 = wasm_f32x4_pmin(vacc3x4567, vmax);
 
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c3, vacc3x0123);

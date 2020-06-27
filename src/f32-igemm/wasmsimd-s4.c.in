@@ -127,7 +127,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}s4__wasmsimd${ARCH_SUF
         const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
         $for N in range(0, NR, 4):
           $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vmin, vacc${M}x${ABC[N:N+4]}, wasm_f32x4_lt(vacc${M}x${ABC[N:N+4]}, vmin));
+            vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmax(vacc${M}x${ABC[N:N+4]}, vmin);
       $else:
         $for N in range(0, NR, 4):
           $for M in range(MR):
@@ -137,7 +137,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}s4__wasmsimd${ARCH_SUF
         const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
         $for N in range(0, NR, 4):
           $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vacc${M}x${ABC[N:N+4]}, vmax, wasm_f32x4_le(vacc${M}x${ABC[N:N+4]}, vmax));
+            vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmin(vacc${M}x${ABC[N:N+4]}, vmax);
       $else:
         $for N in range(0, NR, 4):
           $for M in range(MR):
@@ -147,7 +147,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}s4__wasmsimd${ARCH_SUF
       $if X86:
         $for N in range(0, NR, 4):
           $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_v128_andnot(vacc${M}x${ABC[N:N+4]}, wasm_f32x4_le(vacc${M}x${ABC[N:N+4]}, vzero));
+            vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmax(vacc${M}x${ABC[N:N+4]}, vzero);
       $else:
         $for N in range(0, NR, 4):
           $for M in range(MR):

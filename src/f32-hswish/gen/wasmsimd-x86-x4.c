@@ -34,11 +34,9 @@ void xnn_f32_hswish_ukernel__wasmsimd_x86_x4(
     x += 4;
     v128_t vacc = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx, vsixth));
 
-    const v128_t vmasklt = wasm_f32x4_lt(vacc, vzero);
-    vacc = wasm_v128_andnot(vacc, vmasklt);
-    const v128_t vmaskge = wasm_f32x4_ge(vacc, vone);
+    vacc = wasm_f32x4_pmax(vacc, vzero);
+    vacc = wasm_f32x4_pmin(vacc, vone);
     vacc = wasm_f32x4_mul(vacc, vx);
-    vacc = wasm_v128_bitselect(vx, vacc, vmaskge);
 
     wasm_v128_store(y, vacc);
     y += 4;
@@ -47,11 +45,9 @@ void xnn_f32_hswish_ukernel__wasmsimd_x86_x4(
     const v128_t vx = wasm_v128_load(x);
     v128_t vacc = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx, vsixth));
 
-    const v128_t vmasklt = wasm_f32x4_lt(vacc, vzero);
-    vacc = wasm_v128_andnot(vacc, vmasklt);
-    const v128_t vmaskge = wasm_f32x4_ge(vacc, vone);
+    vacc = wasm_f32x4_pmax(vacc, vzero);
+    vacc = wasm_f32x4_pmin(vacc, vone);
     vacc = wasm_f32x4_mul(vacc, vx);
-    vacc = wasm_v128_bitselect(vx, vacc, vmaskge);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vacc, 0);
