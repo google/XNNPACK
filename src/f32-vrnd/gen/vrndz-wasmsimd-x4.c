@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vrnd/vrndz-wasmsimd.c.in
+//   Template: src/f32-vrnd/wasmsimd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -25,19 +25,11 @@ void xnn_f32_vrndz_ukernel__wasmsimd_x4(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const v128_t vsign_mask = wasm_i32x4_splat(INT32_C(0x80000000));
-  const v128_t vmagic_number = wasm_f32x4_splat(0x1.000000p+23f);
-  const v128_t vone = wasm_f32x4_splat(1.0f);
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(x);
     x += 4;
 
-    const v128_t vabsx = wasm_v128_andnot(vx, vsign_mask);
-    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx));
-    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_number), vmagic_number);
-    const v128_t vadjustment = wasm_v128_and(wasm_f32x4_lt(vabsx, vrndabsx), vone);
-    const v128_t vflrabsx = wasm_f32x4_sub(vrndabsx, vadjustment);
-    const v128_t vy = wasm_v128_bitselect(vx, vflrabsx, vrndmask);
+    const v128_t vy = __builtin_wasm_trunc_f32x4(vx);
 
     wasm_v128_store(y, vy);
     y += 4;
@@ -45,12 +37,7 @@ void xnn_f32_vrndz_ukernel__wasmsimd_x4(
   if XNN_UNLIKELY(n != 0) {
     const v128_t vx = wasm_v128_load(x);
 
-    const v128_t vabsx = wasm_v128_andnot(vx, vsign_mask);
-    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx));
-    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_number), vmagic_number);
-    const v128_t vadjustment = wasm_v128_and(wasm_f32x4_lt(vabsx, vrndabsx), vone);
-    const v128_t vflrabsx = wasm_f32x4_sub(vrndabsx, vadjustment);
-    v128_t vy = wasm_v128_bitselect(vx, vflrabsx, vrndmask);
+    v128_t vy = __builtin_wasm_trunc_f32x4(vx);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
