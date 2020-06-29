@@ -2280,10 +2280,6 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = WASM_UKERNELS,
-    wasmsimd_copts = [
-        "-msimd128",
-        "-munimplemented-simd128",
-    ],
     wasmsimd_srcs = WASM_UKERNELS + WASMSIMD_UKERNELS,
     deps = [
         ":tables",
@@ -2303,10 +2299,6 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = WASM_UKERNELS,
-    wasmsimd_copts = [
-        "-msimd128",
-        "-munimplemented-simd128",
-    ],
     wasmsimd_srcs = WASM_UKERNELS + WASMSIMD_UKERNELS,
     deps = [
         ":tables",
