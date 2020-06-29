@@ -69,6 +69,7 @@ def parse_target_name(target_name):
     if target_part in _ARCH_TO_MACRO_MAP:
       if target_part in _ISA_TO_ARCH_MAP:
         arch = _ISA_TO_ARCH_MAP[target_part]
+        isa = target_part
       else:
         arch = [target_part]
     elif target_part in _ISA_TO_ARCH_MAP:
