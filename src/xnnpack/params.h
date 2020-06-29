@@ -62,6 +62,11 @@ union xnn_f32_abs_params {
     XNN_ALIGN(16) float nonsign_mask[4];
   } sse;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    float nonsign_mask;
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD
 };
 
 union xnn_f32_neg_params {
@@ -71,6 +76,11 @@ union xnn_f32_neg_params {
     XNN_ALIGN(16) float sign_mask[4];
   } sse;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    float sign_mask;
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD
 };
 
 union xnn_f32_rnd_params {

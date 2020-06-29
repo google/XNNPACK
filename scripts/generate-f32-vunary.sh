@@ -16,6 +16,14 @@ tools/xngen src/f32-vunary/scalar.c.in -D OP=SQR -D BATCH_TILE=1 -o src/f32-vuna
 tools/xngen src/f32-vunary/scalar.c.in -D OP=SQR -D BATCH_TILE=2 -o src/f32-vunary/gen/vsqr-scalar-x2.c
 tools/xngen src/f32-vunary/scalar.c.in -D OP=SQR -D BATCH_TILE=4 -o src/f32-vunary/gen/vsqr-scalar-x4.c
 
+################################## WAsm SIMD ##################################
+tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=ABS -D BATCH_TILE=4 -o src/f32-vunary/gen/vabs-wasmsimd-x4.c
+tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=ABS -D BATCH_TILE=8 -o src/f32-vunary/gen/vabs-wasmsimd-x8.c
+tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=NEG -D BATCH_TILE=4 -o src/f32-vunary/gen/vneg-wasmsimd-x4.c
+tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=NEG -D BATCH_TILE=8 -o src/f32-vunary/gen/vneg-wasmsimd-x8.c
+tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=SQR -D BATCH_TILE=4 -o src/f32-vunary/gen/vsqr-wasmsimd-x4.c
+tools/xngen src/f32-vunary/wasmsimd.c.in -D OP=SQR -D BATCH_TILE=8 -o src/f32-vunary/gen/vsqr-wasmsimd-x8.c
+
 ################################### ARM NEON ##################################
 tools/xngen src/f32-vunary/neon.c.in -D OP=ABS -D BATCH_TILE=4 -o src/f32-vunary/gen/vabs-neon-x4.c
 tools/xngen src/f32-vunary/neon.c.in -D OP=ABS -D BATCH_TILE=8 -o src/f32-vunary/gen/vabs-neon-x8.c
