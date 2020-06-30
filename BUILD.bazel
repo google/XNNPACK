@@ -1070,6 +1070,9 @@ NEON_UKERNELS = [
     "src/math/sigmoid-neon-rr2-lut2048-p1-nr2recps.c",
     "src/math/sigmoid-neon-rr2-lut64-p2-nr2recps.c",
     "src/math/sigmoid-neon-rr2-p5-nr2recps.c",
+    "src/math/sqrt-neon-nr1rsqrts.c",
+    "src/math/sqrt-neon-nr2rsqrts.c",
+    "src/math/sqrt-neon-nr3rsqrts.c",
     "src/requantization/precise-neon.c",
     "src/requantization/fp32-neon.c",
     "src/requantization/q31-neon.c",
@@ -1225,6 +1228,11 @@ NEONFMA_UKERNELS = [
     "src/math/sigmoid-neonfma-rr2-p5-nr1recps1fma.c",
     "src/math/sigmoid-neonfma-rr2-p5-nr2fma.c",
     "src/math/sigmoid-neonfma-rr2-p5-nr2recps.c",
+    "src/math/sqrt-neonfma-nr1fma.c",
+    "src/math/sqrt-neonfma-nr2fma.c",
+    "src/math/sqrt-neonfma-nr3fma.c",
+    "src/math/sqrt-neonfma-nr2fma1adj.c",
+    "src/math/sqrt-neonfma-nr1rsqrts1fma1adj.c",
 ]
 
 AARCH64_NEONFMA_UKERNELS = [
@@ -1518,6 +1526,9 @@ SSE_UKERNELS = [
     "src/math/roundd-sse-addsub.c",
     "src/math/roundu-sse-addsub.c",
     "src/math/roundz-sse-addsub.c",
+    "src/math/sqrt-sse-hh1mac.c",
+    "src/math/sqrt-sse-nr1mac.c",
+    "src/math/sqrt-sse-nr2mac.c",
 ]
 
 SSE2_UKERNELS = [
@@ -1777,6 +1788,9 @@ FMA3_UKERNELS = [
     "src/f32-igemm/gen/3x16s4-minmax-fma3-broadcast.c",
     "src/f32-igemm/gen/4x16s4-minmax-fma3-broadcast.c",
     "src/f32-igemm/gen/5x16s4-minmax-fma3-broadcast.c",
+    "src/math/sqrt-fma3-nr1fma.c",
+    "src/math/sqrt-fma3-nr2fma.c",
+    "src/math/sqrt-fma3-nr1fma1adj.c",
 ]
 
 AVX2_UKERNELS = [
@@ -2035,6 +2049,9 @@ AVX512F_UKERNELS = [
     "src/math/exp-avx512f-perm-p3.c",
     "src/math/exp-avx512f-perm2-p2.c",
     "src/math/extexp-avx512f-p5.c",
+    "src/math/sqrt-avx512f-nr1fma.c",
+    "src/math/sqrt-avx512f-nr2fma.c",
+    "src/math/sqrt-avx512f-nr1fma1adj.c",
 ]
 
 AARCH32_ASM_UKERNELS = [
@@ -3912,6 +3929,17 @@ xnnpack_benchmark(
         "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_sqrt_eval",
+    srcs = [
+        "eval/f32-sqrt.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + ACCURACY_EVAL_HDRS,
+    deps = ACCURACY_EVAL_DEPS + [
+        ":bench_utils",
+    ],
 )
 
 ######################### Unit tests for micro-kernels #########################

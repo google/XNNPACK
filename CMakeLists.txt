@@ -845,6 +845,9 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/math/sigmoid-neon-rr2-lut2048-p1-nr2recps.c
   src/math/sigmoid-neon-rr2-lut64-p2-nr2recps.c
   src/math/sigmoid-neon-rr2-p5-nr2recps.c
+  src/math/sqrt-neon-nr1rsqrts.c
+  src/math/sqrt-neon-nr2rsqrts.c
+  src/math/sqrt-neon-nr3rsqrts.c
   src/requantization/precise-neon.c
   src/requantization/fp32-neon.c
   src/requantization/q31-neon.c
@@ -998,7 +1001,12 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/math/sigmoid-neonfma-rr2-lut64-p2-nr2recps.c
   src/math/sigmoid-neonfma-rr2-p5-nr1recps1fma.c
   src/math/sigmoid-neonfma-rr2-p5-nr2fma.c
-  src/math/sigmoid-neonfma-rr2-p5-nr2recps.c)
+  src/math/sigmoid-neonfma-rr2-p5-nr2recps.c
+  src/math/sqrt-neonfma-nr1fma.c
+  src/math/sqrt-neonfma-nr2fma.c
+  src/math/sqrt-neonfma-nr3fma.c
+  src/math/sqrt-neonfma-nr2fma1adj.c
+  src/math/sqrt-neonfma-nr1rsqrts1fma1adj.c)
 
 SET(XNNPACK_NEONV8_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndne-neonv8-x4.c
@@ -1287,7 +1295,10 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/math/roundne-sse-addsub.c
   src/math/roundd-sse-addsub.c
   src/math/roundu-sse-addsub.c
-  src/math/roundz-sse-addsub.c)
+  src/math/roundz-sse-addsub.c
+  src/math/sqrt-sse-hh1mac.c
+  src/math/sqrt-sse-nr1mac.c
+  src/math/sqrt-sse-nr2mac.c)
 
 SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-sse2-c4.c
@@ -1541,7 +1552,10 @@ SET(XNNPACK_FMA3_MICROKERNEL_SRCS
   src/f32-igemm/gen/1x16s4-minmax-fma3-broadcast.c
   src/f32-igemm/gen/3x16s4-minmax-fma3-broadcast.c
   src/f32-igemm/gen/4x16s4-minmax-fma3-broadcast.c
-  src/f32-igemm/gen/5x16s4-minmax-fma3-broadcast.c)
+  src/f32-igemm/gen/5x16s4-minmax-fma3-broadcast.c
+  src/math/sqrt-fma3-nr1fma.c
+  src/math/sqrt-fma3-nr2fma.c
+  src/math/sqrt-fma3-nr1fma1adj.c)
 
 SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/f32-raddexpminusmax/gen/avx2-p5-x64.c
@@ -1797,7 +1811,10 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/math/exp-avx512f-p5.c
   src/math/exp-avx512f-perm-p3.c
   src/math/exp-avx512f-perm2-p2.c
-  src/math/extexp-avx512f-p5.c)
+  src/math/extexp-avx512f-p5.c
+  src/math/sqrt-avx512f-nr1fma.c
+  src/math/sqrt-avx512f-nr2fma.c
+  src/math/sqrt-avx512f-nr1fma1adj.c)
 
 SET(XNNPACK_AARCH32_ASM_MICROKERNEL_SRCS
   src/f32-gemm/4x4-aarch32-vfp-ld64.S
@@ -3424,6 +3441,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-eval PRIVATE src)
   TARGET_LINK_LIBRARIES(f32-sigmoid-eval PRIVATE XNNPACK benchmark fp16)
+
+  ADD_EXECUTABLE(f32-sqrt-eval eval/f32-sqrt.cc)
+  SET_TARGET_PROPERTIES(f32-sqrt-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-sqrt-eval PRIVATE src)
+  TARGET_LINK_LIBRARIES(f32-sqrt-eval PRIVATE XNNPACK benchmark bench-utils fp16)
 
   # ---[ Build end-to-end microbenchmarks
   ADD_LIBRARY(bench-models STATIC
