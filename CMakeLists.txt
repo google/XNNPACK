@@ -2234,7 +2234,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(add-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(add-nd-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(add-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(add-nd-test add-nd-test)
 
   ADD_EXECUTABLE(argmax-pooling-nhwc-test test/argmax-pooling-nhwc.cc)
@@ -2315,7 +2315,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(convolution-nchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(convolution-nchw-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(convolution-nchw-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(convolution-nchw-test convolution-nchw-test)
 
   ADD_EXECUTABLE(copy-nc-test test/copy-nc.cc)
@@ -2342,7 +2342,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(divide-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(divide-nd-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(divide-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(divide-nd-test divide-nd-test)
 
   ADD_EXECUTABLE(fully-connected-nc-test test/fully-connected-nc.cc)
@@ -2408,22 +2408,22 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(max-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(max-pooling-nhwc-test max-pooling-nhwc-test)
 
-  ADD_EXECUTABLE(maximum-nd-test test/multiply-nd.cc)
+  ADD_EXECUTABLE(maximum-nd-test test/maximum-nd.cc)
   SET_TARGET_PROPERTIES(maximum-nd-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(maximum-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(maximum-nd-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(maximum-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(maximum-nd-test maximum-nd-test)
 
-  ADD_EXECUTABLE(minimum-nd-test test/multiply-nd.cc)
+  ADD_EXECUTABLE(minimum-nd-test test/minimum-nd.cc)
   SET_TARGET_PROPERTIES(minimum-nd-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(minimum-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(minimum-nd-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(minimum-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(minimum-nd-test minimum-nd-test)
 
   ADD_EXECUTABLE(multiply-nd-test test/multiply-nd.cc)
@@ -2432,7 +2432,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(multiply-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(multiply-nd-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(multiply-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(multiply-nd-test multiply-nd-test)
 
   ADD_EXECUTABLE(negate-nc-test test/negate-nc.cc)
@@ -2495,7 +2495,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(squared-difference-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(squared-difference-nd-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(squared-difference-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(squared-difference-nd-test squared-difference-nd-test)
 
   ADD_EXECUTABLE(subtract-nd-test test/subtract-nd.cc)
@@ -2504,7 +2504,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(subtract-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(subtract-nd-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(subtract-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(subtract-nd-test subtract-nd-test)
 
   ADD_EXECUTABLE(truncation-nc-test test/truncation-nc.cc)
@@ -3494,28 +3494,30 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-sigmoid-eval PRIVATE XNNPACK benchmark fp16)
+  TARGET_LINK_LIBRARIES(f32-sigmoid-eval PRIVATE XNNPACK fp16 benchmark)
 
   ADD_EXECUTABLE(f32-sqrt-eval eval/f32-sqrt.cc)
   SET_TARGET_PROPERTIES(f32-sqrt-eval PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-sqrt-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-sqrt-eval PRIVATE XNNPACK benchmark bench-utils fp16)
+  TARGET_INCLUDE_DIRECTORIES(f32-sqrt-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-sqrt-eval PRIVATE XNNPACK fp16 benchmark bench-utils)
 
   # ---[ Build end-to-end microbenchmarks
   ADD_LIBRARY(bench-models STATIC
-    models/mobilenet-v1.cc
-    models/mobilenet-v2.cc
-    models/mobilenet-v3-large.cc
-    models/mobilenet-v3-small.cc)
+    models/fp16-mobilenet-v1.cc
+    models/fp32-mobilenet-v1.cc
+    models/fp16-mobilenet-v2.cc
+    models/fp32-mobilenet-v2.cc
+    models/fp32-mobilenet-v3-large.cc
+    models/fp32-mobilenet-v3-small.cc)
   SET_TARGET_PROPERTIES(bench-models PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(bench-models PRIVATE XNNPACK benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(bench-models PRIVATE XNNPACK fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(end2end-bench bench/end2end.cc)
   SET_TARGET_PROPERTIES(end2end-bench PROPERTIES
@@ -3725,7 +3727,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-hswish-bench PRIVATE src)
   TARGET_INCLUDE_DIRECTORIES(f32-hswish-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-hswish-bench PRIVATE XNNPACK benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(f32-hswish-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(f32-igemm-bench bench/f32-igemm.cc)
   SET_TARGET_PROPERTIES(f32-igemm-bench PROPERTIES
@@ -3791,7 +3793,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE src)
   TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE XNNPACK benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(q8-gemm-bench bench/q8-gemm.cc)
   SET_TARGET_PROPERTIES(q8-gemm-bench PROPERTIES
