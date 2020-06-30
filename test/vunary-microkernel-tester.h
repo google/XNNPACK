@@ -31,6 +31,7 @@ class VUnOpMicrokernelTester {
     RoundUp,
     RoundDown,
     Square,
+    SquareRoot,
     Sigmoid,
   };
 
@@ -97,7 +98,15 @@ class VUnOpMicrokernelTester {
   void Test(xnn_f32_vunary_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-125.0f, 125.0f), rng);
+    auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
+    switch (op_type) {
+      case OpType::SquareRoot:
+        distribution = std::uniform_real_distribution<float>(0.0f, 10.0f);
+        break;
+      default:
+        break;
+    }
+    auto f32rng = std::bind(distribution, std::ref(rng));
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
@@ -138,6 +147,9 @@ class VUnOpMicrokernelTester {
           case OpType::Square:
             y_ref[i] = double(x_data[i]) * double(x_data[i]);
             break;
+          case OpType::SquareRoot:
+            y_ref[i] = std::sqrt(double(x_data[i]));
+            break;
           case OpType::Sigmoid:
           {
             const double e = std::exp(double(x_data[i]));
@@ -153,6 +165,7 @@ class VUnOpMicrokernelTester {
         union xnn_f32_lrelu_params lrelu;
         union xnn_f32_neg_params neg;
         union xnn_f32_rnd_params rnd;
+        union xnn_f32_sqrt_params sqrt;
       } params;
       switch (op_type) {
         case OpType::Abs:
@@ -200,6 +213,16 @@ class VUnOpMicrokernelTester {
           break;
         case OpType::Sigmoid:
         case OpType::Square:
+          break;
+        case OpType::SquareRoot:
+          switch (variant) {
+            case Variant::Native:
+              params.sqrt = xnn_init_f32_sqrt_params();
+              break;
+            case Variant::Scalar:
+              params.sqrt = xnn_init_scalar_f32_sqrt_params();
+              break;
+          }
           break;
       }
 

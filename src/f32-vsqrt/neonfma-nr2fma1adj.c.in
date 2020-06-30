@@ -1,0 +1,71 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+#include <math.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vunary.h>
+
+
+void xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+
+  $if BATCH_TILE > 4:
+    const float32x4_t vhalf = vmovq_n_f32(0.5f);
+    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(0, BATCH_TILE, 4):
+        const float32x4_t vx${ABC[N:N+4]} = vld1q_f32(x); x += 4;
+
+      $for N in range(0, BATCH_TILE, 4):
+        const float32x4_t vrsqrtx${ABC[N:N+4]} = vrsqrteq_f32(vx${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        float32x4_t vsqrtx${ABC[N:N+4]} = vmulq_f32(vrsqrtx${ABC[N:N+4]}, vx${ABC[N:N+4]});
+        float32x4_t vhalfrsqrtx${ABC[N:N+4]} = vmulq_f32(vrsqrtx${ABC[N:N+4]}, vhalf);
+
+      $for N in range(0, BATCH_TILE, 4):
+        float32x4_t vresidual${ABC[N:N+4]} = vfmsq_f32(vhalf, vsqrtx${ABC[N:N+4]}, vhalfrsqrtx${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vhalfrsqrtx${ABC[N:N+4]} = vfmaq_f32(vhalfrsqrtx${ABC[N:N+4]}, vresidual${ABC[N:N+4]}, vhalfrsqrtx${ABC[N:N+4]});
+        vsqrtx${ABC[N:N+4]} = vfmaq_f32(vsqrtx${ABC[N:N+4]}, vresidual${ABC[N:N+4]}, vsqrtx${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vresidual${ABC[N:N+4]} = vfmsq_f32(vhalf, vsqrtx${ABC[N:N+4]}, vhalfrsqrtx${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vhalfrsqrtx${ABC[N:N+4]} = vfmaq_f32(vhalfrsqrtx${ABC[N:N+4]}, vresidual${ABC[N:N+4]}, vhalfrsqrtx${ABC[N:N+4]});
+        vsqrtx${ABC[N:N+4]} = vfmaq_f32(vsqrtx${ABC[N:N+4]}, vresidual${ABC[N:N+4]}, vsqrtx${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        const float32x4_t vadjustment${ABC[N:N+4]} = vfmsq_f32(vx${ABC[N:N+4]}, vsqrtx${ABC[N:N+4]}, vsqrtx${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        const float32x4_t vy${ABC[N:N+4]} = vfmaq_f32(vsqrtx${ABC[N:N+4]}, vhalfrsqrtx${ABC[N:N+4]}, vadjustment${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vst1q_f32(y, vy${ABC[N:N+4]}); y += 4;
+    }
+  if XNN_UNLIKELY(n != 0) {
+    do {
+      const float vx = *x++;
+      const float vy = sqrtf(vx);
+      *y++ = vy;
+      n -= sizeof(float);
+    } while (n != 0);
+  }
+}

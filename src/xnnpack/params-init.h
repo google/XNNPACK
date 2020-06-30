@@ -559,6 +559,21 @@ static inline union xnn_f32_lrelu_params xnn_init_scalar_f32_lrelu_params(float 
   return params;
 }
 
+static inline union xnn_f32_sqrt_params xnn_init_f32_sqrt_params(void)
+{
+  union xnn_f32_sqrt_params params = { 0 };
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    params.fma.half = 0.5f;
+  #endif
+  return params;
+}
+
+static inline union xnn_f32_sqrt_params xnn_init_scalar_f32_sqrt_params(void)
+{
+  union xnn_f32_sqrt_params params = { 0 };
+  return params;
+}
+
 static inline union xnn_f32_chw_params xnn_init_f32_chw_params(
   uint32_t width,
   float output_min,

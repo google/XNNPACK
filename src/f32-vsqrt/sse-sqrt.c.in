@@ -1,0 +1,56 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <xmmintrin.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vunary.h>
+
+
+void xnn_f32_vsqrt_ukernel__sse_sqrt_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+
+  $if BATCH_TILE > 4:
+    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+      const __m128 vx${ABC[0:4]} = _mm_loadu_ps(x);
+      $for N in range(4, BATCH_TILE, 4):
+        const __m128 vx${ABC[N:N+4]} = _mm_loadu_ps(x + ${N});
+      x += ${BATCH_TILE};
+
+      $for N in range(0, BATCH_TILE, 4):
+        const __m128 vy${ABC[N:N+4]} = _mm_sqrt_ps(vx${ABC[N:N+4]});
+
+      _mm_storeu_ps(y, vy${ABC[0:4]});
+      $for N in range(4, BATCH_TILE, 4):
+        _mm_storeu_ps(y + ${N}, vy${ABC[N:N+4]});
+      y += ${BATCH_TILE};
+    }
+  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
+    const __m128 vx = _mm_loadu_ps(x);
+    x += 4;
+    const __m128 vy = _mm_sqrt_ps(vx);
+    _mm_storeu_ps(y, vy);
+    y += 4;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    do {
+      const __m128 vx = _mm_load_ss(x++);
+      const __m128 vy = _mm_sqrt_ss(vx);
+      _mm_store_ss(y++, vy);
+      n -= sizeof(float);
+    } while (n != 0);
+  }
+}

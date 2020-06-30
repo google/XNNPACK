@@ -104,6 +104,15 @@ union xnn_f32_lrelu_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+union xnn_f32_sqrt_params {
+  char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    float half;
+  } fma;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_f32_chw_params {
   struct {
     XNN_ALIGN(16) int32_t mask_even[4]; // used by stride 2 kernels
@@ -1319,6 +1328,12 @@ typedef void (*xnn_q8_vadd_minmax_ukernel_function)(
     const uint8_t* b,
     uint8_t* y,
     const union xnn_q8_add_params* params);
+
+typedef void (*xnn_f32_vsqrt_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_sqrt_params* params);
 
 typedef void (*xnn_vbinary_ukernel_function)(
     size_t n,

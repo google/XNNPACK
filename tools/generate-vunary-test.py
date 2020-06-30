@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_(sigmoid|vabs|vlrelu|vneg|vsqr|vrndne|vrndz|vrndd|vrndu)_(fact_)?ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_(sigmoid|vabs|vlrelu|vneg|vsqr|vrndne|vrndz|vrndd|vrndu|vsqrt)_(fact_)?ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
@@ -40,6 +40,7 @@ def split_ukernel_name(name):
     "vrndu": "RoundUp",
     "vrndd": "RoundDown",
     "vsqr": "Square",
+    "vsqrt": "SquareRoot",
   }[match.group(2)]
   batch_tile = int(match.group(5))
 

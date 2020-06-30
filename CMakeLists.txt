@@ -414,6 +414,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndd-scalar-libm-x1.c
   src/f32-vrnd/gen/vrndd-scalar-libm-x2.c
   src/f32-vrnd/gen/vrndd-scalar-libm-x4.c
+  src/f32-vsqrt/gen/scalar-sqrt-x1.c
+  src/f32-vsqrt/gen/scalar-sqrt-x2.c
+  src/f32-vsqrt/gen/scalar-sqrt-x4.c
   src/f32-vunary/gen/vabs-scalar-x1.c
   src/f32-vunary/gen/vabs-scalar-x2.c
   src/f32-vunary/gen/vabs-scalar-x4.c
@@ -979,6 +982,26 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/neonfma-rr1-lut2048-p1-nr2recps-x24.c
   src/f32-vmulcaddc/gen/c4-minmax-neonfma-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-neonfma-2x.c
+  src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x4.c
+  src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x8.c
+  src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x12.c
+  src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x16.c
+  src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x20.c
+  src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x24.c
+  src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x28.c
+  src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x32.c
+  src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x36.c
+  src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x40.c
+  src/f32-vsqrt/gen/neonfma-nr2fma1adj-x4.c
+  src/f32-vsqrt/gen/neonfma-nr2fma1adj-x8.c
+  src/f32-vsqrt/gen/neonfma-nr2fma1adj-x12.c
+  src/f32-vsqrt/gen/neonfma-nr2fma1adj-x16.c
+  src/f32-vsqrt/gen/neonfma-nr2fma1adj-x20.c
+  src/f32-vsqrt/gen/neonfma-nr2fma1adj-x24.c
+  src/f32-vsqrt/gen/neonfma-nr2fma1adj-x28.c
+  src/f32-vsqrt/gen/neonfma-nr2fma1adj-x32.c
+  src/f32-vsqrt/gen/neonfma-nr2fma1adj-x36.c
+  src/f32-vsqrt/gen/neonfma-nr2fma1adj-x40.c
   src/math/exp-neonfma-lut64-p2.c
   src/math/exp-neonfma-p5.c
   src/math/expminus-neonfma-lut2048-p1.c
@@ -1098,6 +1121,8 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-spmm/gen/8x1-minmax-neonfma.c
   src/f32-spmm/gen/8x2-minmax-neonfma.c
   src/f32-spmm/gen/8x4-minmax-neonfma.c
+  src/f32-vsqrt/gen/neon-sqrt-x4.c
+  src/f32-vsqrt/gen/neon-sqrt-x8.c
   src/math/sigmoid-neonfma-rr1-lut2048-p1-div.c
   src/math/sigmoid-neonfma-rr1-lut64-p2-div.c
   src/math/sigmoid-neonfma-rr1-p5-div.c
@@ -1283,6 +1308,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsubc-minmax-sse-x8.c
   src/f32-vmulcaddc/gen/c4-minmax-sse-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-sse-2x.c
+  src/f32-vsqrt/gen/sse-sqrt-x4.c
+  src/f32-vsqrt/gen/sse-sqrt-x8.c
   src/f32-vunary/gen/vabs-sse-x4.c
   src/f32-vunary/gen/vabs-sse-x8.c
   src/f32-vunary/gen/vneg-sse-x4.c
@@ -1489,6 +1516,8 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndd-avx-x8.c
   src/f32-vrnd/gen/vrndd-avx-x16.c
   src/f32-vscale/avx-unroll32.c
+  src/f32-vsqrt/gen/avx-sqrt-x8.c
+  src/f32-vsqrt/gen/avx-sqrt-x16.c
   src/f32-vunary/gen/vabs-avx-x8.c
   src/f32-vunary/gen/vabs-avx-x16.c
   src/f32-vunary/gen/vneg-avx-x8.c
@@ -1553,6 +1582,14 @@ SET(XNNPACK_FMA3_MICROKERNEL_SRCS
   src/f32-igemm/gen/3x16s4-minmax-fma3-broadcast.c
   src/f32-igemm/gen/4x16s4-minmax-fma3-broadcast.c
   src/f32-igemm/gen/5x16s4-minmax-fma3-broadcast.c
+  src/f32-vsqrt/gen/fma3-nr1fma1adj-x8.c
+  src/f32-vsqrt/gen/fma3-nr1fma1adj-x16.c
+  src/f32-vsqrt/gen/fma3-nr1fma1adj-x24.c
+  src/f32-vsqrt/gen/fma3-nr1fma1adj-x32.c
+  src/f32-vsqrt/gen/fma3-nr1fma1adj-x40.c
+  src/f32-vsqrt/gen/fma3-nr1fma1adj-x48.c
+  src/f32-vsqrt/gen/fma3-nr1fma1adj-x56.c
+  src/f32-vsqrt/gen/fma3-nr1fma1adj-x64.c
   src/math/sqrt-fma3-nr1fma.c
   src/math/sqrt-fma3-nr2fma.c
   src/math/sqrt-fma3-nr1fma1adj.c)
@@ -1801,6 +1838,14 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-vscaleextexp/gen/avx512f-p5-scalef-x160.c
   src/f32-vscaleextexp/gen/avx512f-p5-scalef-x176.c
   src/f32-vscaleextexp/gen/avx512f-p5-scalef-x192.c
+  src/f32-vsqrt/gen/avx512f-nr1fma1adj-x16.c
+  src/f32-vsqrt/gen/avx512f-nr1fma1adj-x32.c
+  src/f32-vsqrt/gen/avx512f-nr1fma1adj-x48.c
+  src/f32-vsqrt/gen/avx512f-nr1fma1adj-x64.c
+  src/f32-vsqrt/gen/avx512f-nr1fma1adj-x80.c
+  src/f32-vsqrt/gen/avx512f-nr1fma1adj-x96.c
+  src/f32-vsqrt/gen/avx512f-nr1fma1adj-x112.c
+  src/f32-vsqrt/gen/avx512f-nr1fma1adj-x128.c
   src/f32-vunary/gen/vabs-avx512f-x16.c
   src/f32-vunary/gen/vabs-avx512f-x32.c
   src/f32-vunary/gen/vneg-avx512f-x16.c
@@ -3169,6 +3214,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vsqrdiffc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vsqrdiffc-test f32-vsqrdiffc-test)
 
+  ADD_EXECUTABLE(f32-vsqrt-test test/f32-vsqrt.cc)
+  SET_TARGET_PROPERTIES(f32-vsqrt-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vsqrt-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vsqrt-test f32-vsqrt-test)
+
   ADD_EXECUTABLE(f32-vsub-minmax-test test/f32-vsub-minmax.cc)
   SET_TARGET_PROPERTIES(f32-vsub-minmax-test PROPERTIES
     CXX_STANDARD 11
@@ -3729,6 +3783,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-softmax-bench PRIVATE src)
   TARGET_INCLUDE_DIRECTORIES(f32-softmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-softmax-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
+
+  ADD_EXECUTABLE(f32-vsqrt-bench bench/f32-vsqrt.cc)
+  SET_TARGET_PROPERTIES(f32-vsqrt-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE src)
+  TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(q8-gemm-bench bench/q8-gemm.cc)
   SET_TARGET_PROPERTIES(q8-gemm-bench PROPERTIES

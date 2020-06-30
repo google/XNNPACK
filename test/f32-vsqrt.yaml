@@ -1,0 +1,55 @@
+# Copyright 2020 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f32_vsqrt_ukernel__neon_sqrt_x4
+  arch:
+    - aarch64
+- name: xnn_f32_vsqrt_ukernel__neon_sqrt_x8
+  arch:
+    - aarch64
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x4
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x8
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x12
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x16
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x20
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x24
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x28
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x32
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x36
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x40
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x4
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x8
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x12
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x16
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x20
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x24
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x28
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x32
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x36
+- name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x40
+- name: xnn_f32_vsqrt_ukernel__sse_sqrt_x4
+- name: xnn_f32_vsqrt_ukernel__sse_sqrt_x8
+- name: xnn_f32_vsqrt_ukernel__avx_sqrt_x8
+- name: xnn_f32_vsqrt_ukernel__avx_sqrt_x16
+- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x8
+- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x16
+- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x24
+- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x32
+- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x40
+- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x48
+- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x56
+- name: xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x64
+- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x16
+- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x32
+- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x48
+- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x64
+- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x80
+- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x96
+- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x112
+- name: xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x128
+- name: xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x4
+- name: xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x8
+- name: xnn_f32_vsqrt_ukernel__scalar_sqrt_x1
+- name: xnn_f32_vsqrt_ukernel__scalar_sqrt_x2
+- name: xnn_f32_vsqrt_ukernel__scalar_sqrt_x4
