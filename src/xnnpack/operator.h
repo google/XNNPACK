@@ -88,6 +88,7 @@ enum xnn_operator_type {
   xnn_operator_type_softmax_nc_f32,
   xnn_operator_type_softmax_nc_q8,
   xnn_operator_type_square_nc_f32,
+  xnn_operator_type_square_root_nc_f32,
   xnn_operator_type_squared_difference_nd_f32,
   xnn_operator_type_subtract_nd_f32,
   xnn_operator_type_truncation_nc_f32,

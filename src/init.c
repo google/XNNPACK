@@ -321,6 +321,7 @@ static void init(void) {
       }
       xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__neon_rr2_lut64_p2_nr2recps_x8;
       xnn_params.f32.sqr = (xnn_univector_ukernel_function) xnn_f32_vsqr_ukernel__neon_x8;
+      xnn_params.f32.sqrt = (xnn_univector_ukernel_function) xnn_f32_vsqrt_ukernel__scalar_sqrt_x1;
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__neon_2x8,
         .row_tile = 2,
@@ -544,6 +545,7 @@ static void init(void) {
       xnn_params.f32.rndd  = (xnn_univector_ukernel_function) xnn_f32_vrndd_ukernel__scalar_libm_x1;
       xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x2;
       xnn_params.f32.sqr = (xnn_univector_ukernel_function) xnn_f32_vsqr_ukernel__scalar_x4;
+      xnn_params.f32.sqrt = (xnn_univector_ukernel_function) xnn_f32_vsqrt_ukernel__scalar_sqrt_x1;
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__scalar_2x4,
         .row_tile = 4,
@@ -1023,6 +1025,7 @@ static void init(void) {
     xnn_params.f32.rndd = (xnn_univector_ukernel_function) xnn_f32_vrndd_ukernel__neonv8_x8;
     xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__neonfma_rr1_lut64_p2_nr2recps_x16;
     xnn_params.f32.sqr = (xnn_univector_ukernel_function) xnn_f32_vsqr_ukernel__neon_x8;
+    xnn_params.f32.sqrt = (xnn_univector_ukernel_function) xnn_f32_vsqrt_ukernel__neon_sqrt_x4;
     xnn_params.f32.prelu = (struct prelu_parameters) {
       .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__neon_2x8,
       .row_tile = 2,
@@ -1427,6 +1430,11 @@ static void init(void) {
     } else {
       xnn_params.f32.sqr = (xnn_univector_ukernel_function) xnn_f32_vsqr_ukernel__sse_x8;
     }
+    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx()) {
+      xnn_params.f32.sqrt = (xnn_univector_ukernel_function) xnn_f32_vsqrt_ukernel__avx_sqrt_x8;
+    } else {
+      xnn_params.f32.sqrt = (xnn_univector_ukernel_function) xnn_f32_vsqrt_ukernel__sse_sqrt_x4;
+    }
     if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__avx512f_2x16,
@@ -1820,6 +1828,7 @@ static void init(void) {
     xnn_params.f32.rndd  = (xnn_univector_ukernel_function) xnn_f32_vrndd_ukernel__wasmsimd_x8;
     xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__psimd_p5_div_x16;
     xnn_params.f32.sqr = (xnn_univector_ukernel_function) xnn_f32_vsqr_ukernel__wasmsimd_x8;
+    xnn_params.f32.sqrt = (xnn_univector_ukernel_function) xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x8;
     if (is_wasm_x86) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__wasmsimd_bitselect_2x8,
@@ -2153,6 +2162,7 @@ static void init(void) {
     xnn_params.f32.rndd  = (xnn_univector_ukernel_function) xnn_f32_vrndd_ukernel__scalar_libm_x4;
     xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__scalar_lut64_p2_div_x2;
     xnn_params.f32.sqr = (xnn_univector_ukernel_function) xnn_f32_vsqr_ukernel__scalar_x4;
+    xnn_params.f32.sqrt = (xnn_univector_ukernel_function) xnn_f32_vsqrt_ukernel__scalar_sqrt_x1;
     if (is_wasm_x86) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__scalar_2x4,

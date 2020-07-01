@@ -1761,6 +1761,7 @@ struct xnn_parameters {
     xnn_univector_ukernel_function rndd;
     xnn_univector_ukernel_function sigmoid;
     xnn_univector_ukernel_function sqr;
+    xnn_univector_ukernel_function sqrt;
     struct prelu_parameters prelu;
     struct vbinary_parameters vadd;
     struct vbinary_parameters vdiv;

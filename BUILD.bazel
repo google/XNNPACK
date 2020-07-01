@@ -3778,6 +3778,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "square_root_bench",
+    srcs = ["bench/square-root.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "truncation_bench",
     srcs = ["bench/truncation.cc"],
     deps = OPERATOR_BENCHMARK_DEPS,
@@ -5209,6 +5217,15 @@ xnnpack_unit_test(
     srcs = [
         "test/square-nc.cc",
         "test/square-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "square_root_nc_test",
+    srcs = [
+        "test/square-root-nc.cc",
+        "test/square-root-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )

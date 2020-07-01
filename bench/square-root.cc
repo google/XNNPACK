@@ -25,13 +25,13 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 
-static void xnnpack_hardswish_f32(benchmark::State& state) {
+static void xnnpack_square_root_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
   const size_t channels = state.range(1);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 5.0f), std::ref(rng));
 
   std::vector<float> input(batch_size * channels);
   std::vector<float> output(batch_size * channels);
@@ -44,36 +44,36 @@ static void xnnpack_hardswish_f32(benchmark::State& state) {
     return;
   }
 
-  xnn_operator_t hardswish_op = nullptr;
-  status = xnn_create_hardswish_nc_f32(
+  xnn_operator_t sqrt_op = nullptr;
+  status = xnn_create_square_root_nc_f32(
     channels, channels /* input stride */, channels /* output stride */,
-    0 /* flags */, &hardswish_op);
-  if (status != xnn_status_success || hardswish_op == nullptr) {
-    state.SkipWithError("failed to create HardSwish operator");
+    0 /* flags */, &sqrt_op);
+  if (status != xnn_status_success || sqrt_op == nullptr) {
+    state.SkipWithError("failed to create Square Root operator");
     return;
   }
 
-  status = xnn_setup_hardswish_nc_f32(
-    hardswish_op,
+  status = xnn_setup_square_root_nc_f32(
+    sqrt_op,
     batch_size,
     input.data(), output.data(),
     nullptr /* thread pool */);
   if (status != xnn_status_success) {
-    state.SkipWithError("failed to setup HardSwish operator");
+    state.SkipWithError("failed to setup Square Root operator");
     return;
   }
 
   for (auto _ : state) {
-    status = xnn_run_operator(hardswish_op, nullptr /* thread pool */);
+    status = xnn_run_operator(sqrt_op, nullptr /* thread pool */);
     if (status != xnn_status_success) {
-      state.SkipWithError("failed to run HardSwish operator");
+      state.SkipWithError("failed to run Square Root operator");
       return;
     }
   }
 
-  status = xnn_delete_operator(hardswish_op);
+  status = xnn_delete_operator(sqrt_op);
   if (status != xnn_status_success) {
-    state.SkipWithError("failed to delete HardSwish operator");
+    state.SkipWithError("failed to delete Square Root operator");
     return;
   }
 
@@ -89,17 +89,17 @@ static void xnnpack_hardswish_f32(benchmark::State& state) {
 }
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
-static void tflite_hardswish_f32(benchmark::State& state) {
+static void tflite_square_root_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
   const size_t channels = state.range(1);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 5.0f), std::ref(rng));
 
   flatbuffers::FlatBufferBuilder builder;
   const flatbuffers::Offset<tflite::OperatorCode> operator_code =
-      CreateOperatorCode(builder, tflite::BuiltinOperator_HARD_SWISH);
+      CreateOperatorCode(builder, tflite::BuiltinOperator_SQRT);
 
   const std::array<flatbuffers::Offset<tflite::Buffer>, 1> buffers{{
     tflite::CreateBuffer(builder, builder.CreateVector({})),
@@ -148,7 +148,7 @@ static void tflite_hardswish_f32(benchmark::State& state) {
       TFLITE_SCHEMA_VERSION,
       builder.CreateVector(&operator_code, 1),
       builder.CreateVector(&subgraph, 1),
-      builder.CreateString("HardSwish model"),
+      builder.CreateString("Square Root model"),
       builder.CreateVector(buffers.data(), buffers.size()));
 
   builder.Finish(model_buffer);
@@ -209,10 +209,10 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b)
   }
 }
 
-BENCHMARK(xnnpack_hardswish_f32)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK(xnnpack_square_root_f32)->Apply(CharacteristicArguments)->UseRealTime();
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
-  BENCHMARK(tflite_hardswish_f32)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK(tflite_square_root_f32)->Apply(CharacteristicArguments)->UseRealTime();
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

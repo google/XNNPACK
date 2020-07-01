@@ -2489,6 +2489,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(square-nc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(square-nc-test square-nc-test)
 
+  ADD_EXECUTABLE(square-root-nc-test test/square-root-nc.cc)
+  SET_TARGET_PROPERTIES(square-root-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(square-root-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(square-root-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(square-root-nc-test square-root-nc-test)
+
   ADD_EXECUTABLE(squared-difference-nd-test test/squared-difference-nd.cc)
   SET_TARGET_PROPERTIES(squared-difference-nd-test PROPERTIES
     CXX_STANDARD 11
@@ -3647,6 +3656,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(softmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK benchmark bench-utils)
+
+  ADD_EXECUTABLE(square-root-bench bench/square-root.cc)
+  SET_TARGET_PROPERTIES(square-root-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(square-root-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(square-root-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(truncation-bench bench/truncation.cc)
   SET_TARGET_PROPERTIES(truncation-bench PROPERTIES

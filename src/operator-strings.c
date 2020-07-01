@@ -106,6 +106,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Softmax (NC, Q8)";
     case xnn_operator_type_square_nc_f32:
       return "Square (NC, F32)";
+    case xnn_operator_type_square_root_nc_f32:
+      return "Square Root (NC, F32)";
     case xnn_operator_type_squared_difference_nd_f32:
       return "Squared Difference (NC, F32)";
     case xnn_operator_type_subtract_nd_f32:

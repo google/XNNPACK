@@ -362,6 +362,21 @@ enum xnn_status xnn_create_square_nc_f32(
     square_op_out);
 }
 
+enum xnn_status xnn_create_square_root_nc_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* sqrt_op_out)
+{
+  const union xnn_f32_sqrt_params params = xnn_init_f32_sqrt_params();
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_square_root_nc_f32,
+    sqrt_op_out);
+}
+
 enum xnn_status xnn_create_truncation_nc_f32(
     size_t channels,
     size_t input_stride,
@@ -653,6 +668,29 @@ enum xnn_status xnn_setup_square_nc_f32(
     square_op,
     batch_size, input, output,
     xnn_params.f32.sqr,
+    2 /* log2(sizeof(float)) */,
+    NULL, 0);
+}
+
+enum xnn_status xnn_setup_square_root_nc_f32(
+    xnn_operator_t sqrt_op,
+    size_t batch_size,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  if (sqrt_op->type != xnn_operator_type_square_root_nc_f32) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_square_root_nc_f32),
+      xnn_operator_type_to_string(sqrt_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  sqrt_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    sqrt_op,
+    batch_size, input, output,
+    xnn_params.f32.sqrt,
     2 /* log2(sizeof(float)) */,
     NULL, 0);
 }
