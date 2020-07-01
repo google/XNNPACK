@@ -1289,12 +1289,12 @@
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_GAVGPOOL_MINMAX_7X__WASM_C1, channels_eq_1_fulltile) {
     GAvgPoolMicrokernelTester()
       .rows(7)
       .channels(1)
-      .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1);
   }
 
   TEST(F32_GAVGPOOL_MINMAX_7X__WASM_C1, channels_eq_1_subtile) {
@@ -1302,7 +1302,7 @@
       GAvgPoolMicrokernelTester()
         .rows(rows)
         .channels(1)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1);
     }
   }
 
@@ -1311,7 +1311,7 @@
       .rows(7)
       .channels(1)
       .input_stride(3)
-      .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1);
   }
 
   TEST(F32_GAVGPOOL_MINMAX_7X__WASM_C1, channels_eq_1_fulltile_with_qmax) {
@@ -1319,7 +1319,7 @@
       .rows(7)
       .channels(1)
       .qmax(128)
-      .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1);
   }
 
   TEST(F32_GAVGPOOL_MINMAX_7X__WASM_C1, channels_eq_1_fulltile_with_qmin) {
@@ -1327,7 +1327,7 @@
       .rows(7)
       .channels(1)
       .qmin(128)
-      .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1);
   }
 
   TEST(F32_GAVGPOOL_MINMAX_7X__WASM_C1, channels_gt_1_fulltile) {
@@ -1335,7 +1335,7 @@
       GAvgPoolMicrokernelTester()
         .rows(7)
         .channels(channels)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1);
     }
   }
 
@@ -1345,7 +1345,7 @@
         GAvgPoolMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1);
       }
     }
   }
@@ -1356,7 +1356,7 @@
         .rows(7)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1);
     }
   }
 
@@ -1366,18 +1366,18 @@
         .rows(7)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1);
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_GAVGPOOL_MINMAX_7P7X__WASM_C1, channels_eq_1_2pass_fulltile) {
     GAvgPoolMicrokernelTester()
       .rows(14)
       .channels(1)
-      .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
   }
 
   TEST(F32_GAVGPOOL_MINMAX_7P7X__WASM_C1, channels_eq_1_2pass_fulltile_with_input_stride) {
@@ -1385,7 +1385,7 @@
       .rows(14)
       .channels(1)
       .input_stride(3)
-      .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
   }
 
   TEST(F32_GAVGPOOL_MINMAX_7P7X__WASM_C1, channels_eq_1_2pass_fulltile_with_qmax) {
@@ -1393,7 +1393,7 @@
       .rows(14)
       .channels(1)
       .qmax(128)
-      .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
   }
 
   TEST(F32_GAVGPOOL_MINMAX_7P7X__WASM_C1, channels_eq_1_2pass_fulltile_with_qmin) {
@@ -1401,7 +1401,7 @@
       .rows(14)
       .channels(1)
       .qmin(128)
-      .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
   }
 
   TEST(F32_GAVGPOOL_MINMAX_7P7X__WASM_C1, channels_eq_1_2pass_subtile) {
@@ -1409,7 +1409,7 @@
       GAvgPoolMicrokernelTester()
         .rows(rows)
         .channels(1)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
     }
   }
 
@@ -1419,7 +1419,7 @@
         .rows(rows)
         .channels(1)
         .input_stride(3)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
     }
   }
 
@@ -1428,7 +1428,7 @@
       GAvgPoolMicrokernelTester()
         .rows(rows)
         .channels(1)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
     }
   }
 
@@ -1438,7 +1438,7 @@
         .rows(rows)
         .channels(1)
         .input_stride(3)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
     }
   }
 
@@ -1447,7 +1447,7 @@
       GAvgPoolMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
     }
   }
 
@@ -1457,7 +1457,7 @@
         GAvgPoolMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
       }
     }
   }
@@ -1468,7 +1468,7 @@
         GAvgPoolMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
       }
     }
   }
@@ -1480,7 +1480,7 @@
           .rows(rows)
           .channels(channels)
           .input_stride(19)
-          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
       }
     }
   }
@@ -1490,7 +1490,7 @@
       GAvgPoolMicrokernelTester()
         .rows(14)
         .channels(channels)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
     }
   }
 
@@ -1500,7 +1500,7 @@
         .rows(14)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
     }
   }
 
@@ -1510,7 +1510,7 @@
         .rows(14)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
     }
   }
 
@@ -1520,7 +1520,7 @@
         GAvgPoolMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
       }
     }
   }
@@ -1531,7 +1531,7 @@
         GAvgPoolMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
       }
     }
   }
@@ -1543,11 +1543,11 @@
           .rows(rows)
           .channels(channels)
           .input_stride(17)
-          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1, GAvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1);
       }
     }
   }
-#endif  // XNN_ARCH_WASM
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
 TEST(F32_GAVGPOOL_MINMAX_7X__SCALAR_C1, channels_eq_1_fulltile) {
