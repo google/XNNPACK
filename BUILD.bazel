@@ -623,18 +623,26 @@ WASMSIMD_UKERNELS = [
     "src/f32-vbinary/gen/vadd-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vadd-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vadd-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vaddc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vaddc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vaddc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vaddc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vaddc-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vaddc-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vdiv-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vdiv-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vdiv-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vdiv-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vdiv-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vdiv-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vdivc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vdivc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vdivc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vdivc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vdivc-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vdivc-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vmax-wasmsimd-x86-x4.c",
@@ -655,18 +663,26 @@ WASMSIMD_UKERNELS = [
     "src/f32-vbinary/gen/vmul-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vmul-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vmul-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vmul-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vmul-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vmulc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vmulc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vmulc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vmulc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vmulc-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vmulc-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vrdivc-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vrdivc-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vrsubc-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vrsubc-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vsqrdiff-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vsqrdiff-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vsqrdiffc-wasmsimd-x4.c",
@@ -675,10 +691,14 @@ WASMSIMD_UKERNELS = [
     "src/f32-vbinary/gen/vsub-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vsub-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vsub-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vsubc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vsubc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vsubc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vsubc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vsubc-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vsubc-wasmsimd-x8.c",
     "src/f32-vrnd/gen/vrndne-wasmsimd-x4.c",
     "src/f32-vrnd/gen/vrndne-wasmsimd-x8.c",
     "src/f32-vrnd/gen/vrndz-wasmsimd-x4.c",
@@ -4504,10 +4524,28 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vadd_test",
+    srcs = [
+        "test/f32-vadd.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vadd_minmax_test",
     srcs = [
         "test/f32-vadd-minmax.cc",
         "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vaddc_test",
+    srcs = [
+        "test/f32-vaddc.cc",
+        "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -4522,6 +4560,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vdiv_test",
+    srcs = [
+        "test/f32-vdiv.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vdiv_minmax_test",
     srcs = [
         "test/f32-vdiv-minmax.cc",
@@ -4531,9 +4578,27 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vdivc_test",
+    srcs = [
+        "test/f32-vdivc.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vdivc_minmax_test",
     srcs = [
         "test/f32-vdivc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vrdivc_test",
+    srcs = [
+        "test/f32-vrdivc.cc",
         "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
@@ -4585,10 +4650,28 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vmul_test",
+    srcs = [
+        "test/f32-vmul.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vmul_minmax_test",
     srcs = [
         "test/f32-vmul-minmax.cc",
         "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vmulc_test",
+    srcs = [
+        "test/f32-vmulc.cc",
+        "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -4740,6 +4823,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vsub_test",
+    srcs = [
+        "test/f32-vsub.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vsub_minmax_test",
     srcs = [
         "test/f32-vsub-minmax.cc",
@@ -4749,9 +4841,27 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vsubc_test",
+    srcs = [
+        "test/f32-vsubc.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vsubc_minmax_test",
     srcs = [
         "test/f32-vsubc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vrsubc_test",
+    srcs = [
+        "test/f32-vrsubc.cc",
         "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
