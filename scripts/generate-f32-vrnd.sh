@@ -20,14 +20,14 @@ tools/xngen src/f32-vrnd/scalar-libm.c.in -D OP=RNDD  -D BATCH_TILE=2 -o src/f32
 tools/xngen src/f32-vrnd/scalar-libm.c.in -D OP=RNDD  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndd-scalar-libm-x4.c
 
 ################################## WAsm SIMD ##################################
-tools/xngen src/f32-vrnd/vrndne-wasmsimd.c.in -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndne-wasmsimd-x4.c
-tools/xngen src/f32-vrnd/vrndne-wasmsimd.c.in -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndne-wasmsimd-x8.c
-tools/xngen src/f32-vrnd/vrndz-wasmsimd.c.in  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndz-wasmsimd-x4.c
-tools/xngen src/f32-vrnd/vrndz-wasmsimd.c.in  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndz-wasmsimd-x8.c
-tools/xngen src/f32-vrnd/vrndu-wasmsimd.c.in  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndu-wasmsimd-x4.c
-tools/xngen src/f32-vrnd/vrndu-wasmsimd.c.in  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndu-wasmsimd-x8.c
-tools/xngen src/f32-vrnd/vrndd-wasmsimd.c.in  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndd-wasmsimd-x4.c
-tools/xngen src/f32-vrnd/vrndd-wasmsimd.c.in  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndd-wasmsimd-x8.c
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D OP=RNDNE -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndne-wasmsimd-x4.c
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D OP=RNDNE -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndne-wasmsimd-x8.c
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D OP=RNDZ  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndz-wasmsimd-x4.c
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D OP=RNDZ  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndz-wasmsimd-x8.c
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D OP=RNDU  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndu-wasmsimd-x4.c
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D OP=RNDU  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndu-wasmsimd-x8.c
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D OP=RNDD  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndd-wasmsimd-x4.c
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D OP=RNDD  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndd-wasmsimd-x8.c
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-vrnd/vrndne-neon.c.in -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndne-neon-x4.c
