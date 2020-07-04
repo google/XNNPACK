@@ -25,6 +25,9 @@ void xnn_f32_vminc_ukernel__avx512f_x16(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   const __m512 vb = _mm512_set1_ps(*b);

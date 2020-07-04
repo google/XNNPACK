@@ -26,6 +26,9 @@ void xnn_f32_vadd_minmax_ukernel__avx_x16(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
   const __m256 vy_min = _mm256_broadcast_ps((const __m128*) params->sse.min);
   const __m256 vy_max = _mm256_broadcast_ps((const __m128*) params->sse.max);

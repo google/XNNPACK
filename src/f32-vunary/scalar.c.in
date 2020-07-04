@@ -33,6 +33,8 @@ void xnn_f32_v${OP.lower()}_ukernel__scalar_x${BATCH_TILE}(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   $if BATCH_TILE > 1:
     for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {

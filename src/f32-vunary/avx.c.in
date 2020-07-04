@@ -35,6 +35,8 @@ void xnn_f32_v${OP.lower()}_ukernel__avx_x${BATCH_TILE}(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   $if OP == "ABS":
     const __m256 vnonsign_mask = _mm256_broadcast_ps((const __m128*) params->sse.nonsign_mask);

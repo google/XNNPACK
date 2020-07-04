@@ -25,6 +25,8 @@ void xnn_f32_vsqr_ukernel__avx_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const __m256 vx01234567 = _mm256_loadu_ps(x);

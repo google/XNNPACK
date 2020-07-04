@@ -25,6 +25,8 @@ void xnn_f32_vneg_ukernel__avx_x16(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const __m256 vsign_mask = _mm256_broadcast_ps((const __m128*) params->sse.sign_mask);
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {

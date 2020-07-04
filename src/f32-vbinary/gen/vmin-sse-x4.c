@@ -25,6 +25,9 @@ void xnn_f32_vmin_ukernel__sse_x4(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {

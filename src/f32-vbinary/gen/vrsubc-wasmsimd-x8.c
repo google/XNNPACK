@@ -24,6 +24,9 @@ void xnn_f32_vrsubc_ukernel__wasmsimd_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   const v128_t vb = wasm_v32x4_load_splat(b);

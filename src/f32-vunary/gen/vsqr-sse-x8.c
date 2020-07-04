@@ -24,6 +24,8 @@ void xnn_f32_vsqr_ukernel__sse_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(x);

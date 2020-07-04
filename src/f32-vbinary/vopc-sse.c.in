@@ -39,6 +39,9 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__sse_x${BATCH_TILE}(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
   $if ACTIVATION == "MINMAX":
     const __m128 vy_min = _mm_load_ps(params->sse.min);

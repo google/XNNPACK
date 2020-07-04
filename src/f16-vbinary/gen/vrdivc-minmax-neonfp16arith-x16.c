@@ -24,6 +24,9 @@ void xnn_f16_vrdivc_minmax_ukernel__neonfp16arith_x16(
 {
   assert(n != 0);
   assert(n % sizeof(__fp16) == 0);
+  assert(a_ptr != NULL);
+  assert(b_ptr != NULL);
+  assert(y_ptr != NULL);
 
   const __fp16* a = (const __fp16*) a_ptr;
   const __fp16* b = (const __fp16*) b_ptr;

@@ -24,6 +24,9 @@ void xnn_f32_vsqrdiff_ukernel__neon_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {

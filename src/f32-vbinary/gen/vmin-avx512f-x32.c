@@ -25,6 +25,9 @@ void xnn_f32_vmin_ukernel__avx512f_x32(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {

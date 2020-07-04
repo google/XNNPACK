@@ -23,6 +23,8 @@ void xnn_f32_vneg_ukernel__neon_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const float32x4_t vx0123 = vld1q_f32(x); x += 4;

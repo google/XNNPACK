@@ -33,6 +33,8 @@ void xnn_f32_v${OP.lower()}_ukernel__neon_x${BATCH_TILE}(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
     $for N in range(0, BATCH_TILE, 4):

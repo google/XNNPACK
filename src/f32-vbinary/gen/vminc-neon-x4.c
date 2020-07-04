@@ -24,6 +24,9 @@ void xnn_f32_vminc_ukernel__neon_x4(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   const float32x4_t vb = vld1q_dup_f32(b);

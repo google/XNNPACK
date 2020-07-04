@@ -24,6 +24,8 @@ void xnn_f32_vneg_ukernel__sse_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const __m128 vsign_mask = _mm_load_ps(params->sse.sign_mask);
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {

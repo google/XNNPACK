@@ -26,6 +26,9 @@ void xnn_f32_vmin_ukernel__avx_x16(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {

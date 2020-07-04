@@ -34,6 +34,8 @@ void xnn_f32_v${OP.lower()}_ukernel__psimd_x${BATCH_TILE}(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
     const psimd_f32 vx${ABC[0:4]} = psimd_load_f32(x);

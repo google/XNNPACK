@@ -24,6 +24,8 @@ void xnn_f32_vsqr_ukernel__wasmsimd_x4(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(x);

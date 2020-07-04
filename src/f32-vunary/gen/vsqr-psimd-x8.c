@@ -24,6 +24,8 @@ void xnn_f32_vsqr_ukernel__psimd_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const psimd_f32 vx0123 = psimd_load_f32(x);

@@ -24,6 +24,9 @@ void xnn_f32_vaddc_minmax_ukernel__psimd_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
   const psimd_f32 vy_min = psimd_load_splat_f32(&params->scalar.min);
   const psimd_f32 vy_max = psimd_load_splat_f32(&params->scalar.max);

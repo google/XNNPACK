@@ -23,6 +23,8 @@ void xnn_f32_vabs_ukernel__scalar_x2(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
     const float vx0 = x[0];

@@ -26,6 +26,9 @@ void xnn_f32_vmaxc_ukernel__avx_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(b != NULL);
+  assert(y != NULL);
 
 
   const __m256 vb = _mm256_broadcast_ss(b);

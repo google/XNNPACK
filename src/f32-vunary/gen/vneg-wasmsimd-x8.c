@@ -24,6 +24,8 @@ void xnn_f32_vneg_ukernel__wasmsimd_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const v128_t vsign_mask = wasm_v32x4_load_splat(&params->wasmsimd.sign_mask);
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {

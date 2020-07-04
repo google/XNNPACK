@@ -59,6 +59,8 @@ void xnn_f32_v${OP.lower()}_ukernel__avx512f_x${BATCH_TILE}(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   $if OP == "ABS":
     const __m512i vnonsign_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse.nonsign_mask));

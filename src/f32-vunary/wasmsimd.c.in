@@ -34,6 +34,8 @@ void xnn_f32_v${OP.lower()}_ukernel__wasmsimd_x${BATCH_TILE}(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   $if OP == "ABS":
     const v128_t vnonsign_mask = wasm_v32x4_load_splat(&params->wasmsimd.nonsign_mask);

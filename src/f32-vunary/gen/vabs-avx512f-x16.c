@@ -24,6 +24,8 @@ void xnn_f32_vabs_ukernel__avx512f_x16(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const __m512i vnonsign_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse.nonsign_mask));
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
