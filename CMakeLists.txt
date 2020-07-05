@@ -354,23 +354,15 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vadd-minmax-scalar-x1.c
   src/f32-vbinary/gen/vadd-minmax-scalar-x2.c
   src/f32-vbinary/gen/vadd-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vadd-wasmsimd-x4.c
-  src/f32-vbinary/gen/vadd-wasmsimd-x8.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vaddc-wasmsimd-x4.c
-  src/f32-vbinary/gen/vaddc-wasmsimd-x8.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x1.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x2.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vdiv-wasmsimd-x4.c
-  src/f32-vbinary/gen/vdiv-wasmsimd-x8.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vdivc-wasmsimd-x4.c
-  src/f32-vbinary/gen/vdivc-wasmsimd-x8.c
   src/f32-vbinary/gen/vmax-scalar-x1.c
   src/f32-vbinary/gen/vmax-scalar-x2.c
   src/f32-vbinary/gen/vmax-scalar-x4.c
@@ -386,23 +378,15 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmul-minmax-scalar-x1.c
   src/f32-vbinary/gen/vmul-minmax-scalar-x2.c
   src/f32-vbinary/gen/vmul-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vmul-wasmsimd-x4.c
-  src/f32-vbinary/gen/vmul-wasmsimd-x8.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vmulc-wasmsimd-x4.c
-  src/f32-vbinary/gen/vmulc-wasmsimd-x8.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vrdivc-wasmsimd-x4.c
-  src/f32-vbinary/gen/vrdivc-wasmsimd-x8.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vrsubc-wasmsimd-x4.c
-  src/f32-vbinary/gen/vrsubc-wasmsimd-x8.c
   src/f32-vbinary/gen/vsqrdiff-scalar-x1.c
   src/f32-vbinary/gen/vsqrdiff-scalar-x2.c
   src/f32-vbinary/gen/vsqrdiff-scalar-x4.c
@@ -412,13 +396,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsub-minmax-scalar-x1.c
   src/f32-vbinary/gen/vsub-minmax-scalar-x2.c
   src/f32-vbinary/gen/vsub-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vsub-wasmsimd-x4.c
-  src/f32-vbinary/gen/vsub-wasmsimd-x8.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x4.c
-  src/f32-vbinary/gen/vsubc-wasmsimd-x4.c
-  src/f32-vbinary/gen/vsubc-wasmsimd-x8.c
   src/f32-vmulcaddc/gen/c1-minmax-scalar-2x.c
   src/f32-vmulcaddc/gen/c2-minmax-scalar-2x.c
   src/f32-vmulcaddc/gen/c4-minmax-scalar-2x.c
