@@ -208,8 +208,13 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     dwconv_parameters = &xnn_params.f32.dwconv_chw_5x5s2;
   } else {
     xnn_log_error(
-      "failed to create %s operator: only selected convolution parameters are supported",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel, %"PRIu32 "x%" PRIu32 " subsampling, %"PRIu32 "x%" PRIu32 " dilation"
+      ", %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding, %" PRIu32 "x%zu input channels, and %" PRIu32 "x%zu output channels: "
+      "only selected convolution parameters are supported",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32),
+      kernel_width, kernel_height, subsampling_width, subsampling_height, dilation_width, dilation_height,
+      input_padding_top, input_padding_left, input_padding_bottom, input_padding_right,
+      groups, group_input_channels, groups, group_output_channels);
     goto error;
   }
 
