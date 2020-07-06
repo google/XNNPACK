@@ -225,6 +225,7 @@ LIST(APPEND XNNPACK_COLD_SRCS
 
 SET(XNNPACK_HOT_SRCS
   src/indirection.c
+  src/packing.c
   src/operator-run.c)
 
 SET(XNNPACK_TABLE_SRCS
