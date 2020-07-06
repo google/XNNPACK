@@ -1547,10 +1547,15 @@ struct gemm_parameters {
   uint8_t log2_sr;
 };
 
-struct vbinary_parameters {
+struct vbinary_fused_ukernels {
   xnn_vbinary_ukernel_function op_ukernel;
   xnn_vbinary_ukernel_function opc_ukernel;
   xnn_vbinary_ukernel_function ropc_ukernel;
+};
+
+struct vbinary_parameters {
+  struct vbinary_fused_ukernels minmax;
+  struct vbinary_fused_ukernels linear;
   // Number of elements in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
   uint8_t element_tile;

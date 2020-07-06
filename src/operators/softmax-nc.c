@@ -289,7 +289,7 @@ enum xnn_status xnn_setup_softmax_nc_f32(
     .y_stride = softmax_op->output_pixel_stride * sizeof(float),
     .rmax_ukernel = xnn_params.f32.rmax,
     .raddstoreexpminusmax_ukernel = xnn_params.f32.raddstoreexpminusmax,
-    .vmulc_ukernel = xnn_params.f32.vmul.opc_ukernel,
+    .vmulc_ukernel = xnn_params.f32.vmul.minmax.opc_ukernel,
     .params = xnn_init_f32_minmax_params(-INFINITY, INFINITY),
   };
   softmax_op->compute.type = xnn_parallelization_type_1d;

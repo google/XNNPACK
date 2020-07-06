@@ -364,15 +364,15 @@ static enum xnn_status setup_binary_elementwise_nd(
   const size_t* compressed_a_shape = compressed_input1_shape;
   const size_t* compressed_b_shape = compressed_input2_shape;
   if (compressed_input1_shape[0] == 1) {
-    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->ropc_ukernel;
+    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->minmax.ropc_ukernel;
     binary_elementwise_op->context.elementwise_binary.a = input2;
     binary_elementwise_op->context.elementwise_binary.b = input1;
     compressed_a_shape = compressed_input2_shape;
     compressed_b_shape = compressed_input1_shape;
   } else if (compressed_input2_shape[0] == 1) {
-    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->opc_ukernel;
+    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->minmax.opc_ukernel;
   } else if (compressed_input1_shape[0] == compressed_input2_shape[0]) {
-    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->op_ukernel;
+    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->minmax.op_ukernel;
   }
   size_t a_stride = compressed_a_shape[0], b_stride = compressed_b_shape[0], y_stride = compressed_output_shape[0];
   for (size_t i = 1; i < num_compressed_dims; i++) {

@@ -149,6 +149,10 @@ struct xnn_ukernel_vmulcaddc {
   uint8_t mr;
 };
 
+struct xnn_ukernel_vbinary {
+  xnn_vbinary_ukernel_function function;
+};
+
 struct xnn_ukernel {
   enum xnn_ukernel_type type;
   union {
@@ -159,6 +163,7 @@ struct xnn_ukernel {
     struct xnn_ukernel_igemm igemm;
     struct xnn_ukernel_spmm spmm;
     struct xnn_ukernel_vmulcaddc vmulcaddc;
+    struct xnn_ukernel_vbinary vbinary;
   };
 };
 
