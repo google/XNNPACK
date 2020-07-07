@@ -355,15 +355,27 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vadd-minmax-scalar-x1.c
   src/f32-vbinary/gen/vadd-minmax-scalar-x2.c
   src/f32-vbinary/gen/vadd-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vadd-scalar-x1.c
+  src/f32-vbinary/gen/vadd-scalar-x2.c
+  src/f32-vbinary/gen/vadd-scalar-x4.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vaddc-scalar-x1.c
+  src/f32-vbinary/gen/vaddc-scalar-x2.c
+  src/f32-vbinary/gen/vaddc-scalar-x4.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x1.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x2.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vdiv-scalar-x1.c
+  src/f32-vbinary/gen/vdiv-scalar-x2.c
+  src/f32-vbinary/gen/vdiv-scalar-x4.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vdivc-scalar-x1.c
+  src/f32-vbinary/gen/vdivc-scalar-x2.c
+  src/f32-vbinary/gen/vdivc-scalar-x4.c
   src/f32-vbinary/gen/vmax-scalar-x1.c
   src/f32-vbinary/gen/vmax-scalar-x2.c
   src/f32-vbinary/gen/vmax-scalar-x4.c
@@ -379,15 +391,27 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmul-minmax-scalar-x1.c
   src/f32-vbinary/gen/vmul-minmax-scalar-x2.c
   src/f32-vbinary/gen/vmul-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vmul-scalar-x1.c
+  src/f32-vbinary/gen/vmul-scalar-x2.c
+  src/f32-vbinary/gen/vmul-scalar-x4.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vmulc-scalar-x1.c
+  src/f32-vbinary/gen/vmulc-scalar-x2.c
+  src/f32-vbinary/gen/vmulc-scalar-x4.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vrdivc-scalar-x1.c
+  src/f32-vbinary/gen/vrdivc-scalar-x2.c
+  src/f32-vbinary/gen/vrdivc-scalar-x4.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vrsubc-scalar-x1.c
+  src/f32-vbinary/gen/vrsubc-scalar-x2.c
+  src/f32-vbinary/gen/vrsubc-scalar-x4.c
   src/f32-vbinary/gen/vsqrdiff-scalar-x1.c
   src/f32-vbinary/gen/vsqrdiff-scalar-x2.c
   src/f32-vbinary/gen/vsqrdiff-scalar-x4.c
@@ -397,24 +421,30 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsub-minmax-scalar-x1.c
   src/f32-vbinary/gen/vsub-minmax-scalar-x2.c
   src/f32-vbinary/gen/vsub-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vsub-scalar-x1.c
+  src/f32-vbinary/gen/vsub-scalar-x2.c
+  src/f32-vbinary/gen/vsub-scalar-x4.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vsubc-scalar-x1.c
+  src/f32-vbinary/gen/vsubc-scalar-x2.c
+  src/f32-vbinary/gen/vsubc-scalar-x4.c
   src/f32-vmulcaddc/gen/c1-minmax-scalar-2x.c
   src/f32-vmulcaddc/gen/c2-minmax-scalar-2x.c
   src/f32-vmulcaddc/gen/c4-minmax-scalar-2x.c
-  src/f32-vrnd/gen/vrndne-scalar-libm-x1.c
-  src/f32-vrnd/gen/vrndne-scalar-libm-x2.c
-  src/f32-vrnd/gen/vrndne-scalar-libm-x4.c
-  src/f32-vrnd/gen/vrndz-scalar-libm-x1.c
-  src/f32-vrnd/gen/vrndz-scalar-libm-x2.c
-  src/f32-vrnd/gen/vrndz-scalar-libm-x4.c
-  src/f32-vrnd/gen/vrndu-scalar-libm-x1.c
-  src/f32-vrnd/gen/vrndu-scalar-libm-x2.c
-  src/f32-vrnd/gen/vrndu-scalar-libm-x4.c
   src/f32-vrnd/gen/vrndd-scalar-libm-x1.c
   src/f32-vrnd/gen/vrndd-scalar-libm-x2.c
   src/f32-vrnd/gen/vrndd-scalar-libm-x4.c
+  src/f32-vrnd/gen/vrndne-scalar-libm-x1.c
+  src/f32-vrnd/gen/vrndne-scalar-libm-x2.c
+  src/f32-vrnd/gen/vrndne-scalar-libm-x4.c
+  src/f32-vrnd/gen/vrndu-scalar-libm-x1.c
+  src/f32-vrnd/gen/vrndu-scalar-libm-x2.c
+  src/f32-vrnd/gen/vrndu-scalar-libm-x4.c
+  src/f32-vrnd/gen/vrndz-scalar-libm-x1.c
+  src/f32-vrnd/gen/vrndz-scalar-libm-x2.c
+  src/f32-vrnd/gen/vrndz-scalar-libm-x4.c
   src/f32-vsqrt/gen/scalar-sqrt-x1.c
   src/f32-vsqrt/gen/scalar-sqrt-x2.c
   src/f32-vsqrt/gen/scalar-sqrt-x4.c
