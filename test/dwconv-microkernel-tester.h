@@ -198,10 +198,13 @@ class DWConvMicrokernelTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
+      const xnn_q8_packing_params packing_params = {
+        .input_zero_point = input_zero_point(),
+        .kernel_zero_point = kernel_zero_point(),
+      };
       xnn_pack_q8_dwconv_ghw_w(
         kr(), 1, channels(), cr(),
-        input_zero_point(), kernel_zero_point(),
-        kernel.data(), bias.data(), packed_weights.data());
+        kernel.data(), bias.data(), packed_weights.data(), &packing_params);
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
       }
@@ -311,7 +314,7 @@ class DWConvMicrokernelTester {
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
       xnn_pack_f16_dwconv_ghw_w(
         kr(), 1, channels(), cr(),
-        kernel.data(), bias.data(), packed_weights.data());
+        kernel.data(), bias.data(), packed_weights.data(), nullptr);
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
       }
@@ -403,7 +406,7 @@ class DWConvMicrokernelTester {
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
       xnn_pack_f32_dwconv_ghw_w(
         kr(), 1, channels(), cr(),
-        kernel.data(), bias.data(), packed_weights.data());
+        kernel.data(), bias.data(), packed_weights.data(), nullptr);
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
       }
@@ -474,7 +477,7 @@ class DWConvMicrokernelTester {
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
       xnn_pack_f32_dwconv_ghw_w(
         kr(), 1, channels(), cr(),
-        kernel.data(), bias.data(), packed_weights.data());
+        kernel.data(), bias.data(), packed_weights.data(), nullptr);
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
       }

@@ -148,7 +148,7 @@ class VMulCAddCMicrokernelTester {
 
       std::fill(packed_w.begin(), packed_w.end(), UINT16_C(0x7E00) /* NaN */);
       xnn_pack_f16_vmulcaddc_w(channels(), channel_tile(),
-        scale.data(), bias.data(), packed_w.data());
+        scale.data(), bias.data(), packed_w.data(), nullptr);
 
       // Compute reference results.
       for (size_t i = 0; i < rows(); i++) {
@@ -217,7 +217,7 @@ class VMulCAddCMicrokernelTester {
 
       std::fill(packed_w.begin(), packed_w.end(), nanf(""));
       xnn_pack_f32_vmulcaddc_w(channels(), channel_tile(),
-        scale.data(), bias.data(), packed_w.data());
+        scale.data(), bias.data(), packed_w.data(), nullptr);
 
       // Compute reference results.
       for (size_t i = 0; i < rows(); i++) {

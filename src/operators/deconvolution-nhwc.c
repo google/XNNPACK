@@ -248,21 +248,25 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   }
   memset(deconvolution_op->packed_weights, kernel_zero_point, packed_group_weights_size * groups);
 
+  const struct xnn_q8_packing_params packing_params = {
+    .input_zero_point = input_zero_point,
+    .kernel_zero_point = kernel_zero_point,
+  };
   switch (ukernel_type) {
     case xnn_ukernel_type_igemm:
       xnn_pack_q8_conv_goki_w(
         groups, group_output_channels, kernel_size, group_input_channels,
         nr, kr,
-        input_zero_point, kernel_zero_point,
-        kernel, bias, deconvolution_op->packed_weights);
+        kernel, bias, deconvolution_op->packed_weights,
+        &packing_params);
       break;
     case xnn_ukernel_type_subconv2d:
       xnn_pack_q8_deconv_goki_w(
         groups, group_output_channels, kernel_height, kernel_width, group_input_channels,
         stride_height, stride_width,
         nr, kr,
-        input_zero_point, kernel_zero_point,
-        kernel, bias, deconvolution_op->packed_weights, deconvolution_op->subconvolution_buffer);
+        kernel, bias, deconvolution_op->packed_weights, deconvolution_op->subconvolution_buffer,
+        &packing_params);
       break;
     default:
       XNN_UNREACHABLE;
@@ -544,14 +548,16 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
       xnn_pack_f32_conv_goki_w(
         groups, group_output_channels, kernel_size, group_input_channels,
         nr, kr, sr,
-        kernel, bias, deconvolution_op->packed_weights);
+        kernel, bias, deconvolution_op->packed_weights,
+        NULL);
       break;
     case xnn_ukernel_type_subconv2d:
       xnn_pack_f32_deconv_goki_w(
         groups, group_output_channels, kernel_height, kernel_width, group_input_channels,
         stride_height, stride_width,
         nr, kr, sr,
-        kernel, bias, deconvolution_op->packed_weights, deconvolution_op->subconvolution_buffer);
+        kernel, bias, deconvolution_op->packed_weights, deconvolution_op->subconvolution_buffer,
+        NULL);
       break;
     default:
       XNN_UNREACHABLE;

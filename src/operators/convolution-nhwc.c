@@ -244,6 +244,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
     ukernel_type = xnn_ukernel_type_igemm;
   }
 
+  const struct xnn_q8_packing_params packing_params = {
+    .input_zero_point = input_zero_point,
+    .kernel_zero_point = kernel_zero_point,
+  };
   size_t zero_size = 0;
   switch (ukernel_type) {
     case xnn_ukernel_type_dwconv:
@@ -265,14 +269,14 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
         xnn_pack_q8_dwconv_hwg_w(
           kernel_height, kernel_width,
           groups, dwconv_parameters->channel_tile,
-          input_zero_point, kernel_zero_point,
-          kernel, bias, convolution_op->packed_weights);
+          kernel, bias, convolution_op->packed_weights,
+          &packing_params);
       } else {
         xnn_pack_q8_dwconv_ghw_w(
           kernel_height, kernel_width,
           groups, dwconv_parameters->channel_tile,
-          input_zero_point, kernel_zero_point,
-          kernel, bias, convolution_op->packed_weights);
+          kernel, bias, convolution_op->packed_weights,
+          &packing_params);
       }
 
       convolution_op->ukernel.dwconv = (struct xnn_ukernel_dwconv) {
@@ -308,8 +312,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
           xnn_pack_q8_gemm_goi_w(
               groups, group_output_channels, group_input_channels,
               nr, kr,
-              input_zero_point, kernel_zero_point,
-              kernel, bias, convolution_op->packed_weights);
+              kernel, bias, convolution_op->packed_weights,
+              &packing_params);
           convolution_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
             .mr = xnn_params.q8.gemm.mr,
             .nr = nr,
@@ -322,14 +326,14 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
             xnn_pack_q8_conv_kgo_w(
                 groups, group_output_channels, kernel_size,
                 nr, kr,
-                input_zero_point, kernel_zero_point,
-                kernel, bias, convolution_op->packed_weights);
+                kernel, bias, convolution_op->packed_weights,
+                &packing_params);
           } else {
             xnn_pack_q8_conv_goki_w(
                 groups, group_output_channels, kernel_size, group_input_channels,
                 nr, kr,
-                input_zero_point, kernel_zero_point,
-                kernel, bias, convolution_op->packed_weights);
+                kernel, bias, convolution_op->packed_weights,
+                &packing_params);
           }
           convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
             .mr = xnn_params.q8.gemm.mr,
@@ -596,7 +600,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
 
       xnn_pack_f16_vmulcaddc_w(
         groups, xnn_params.f16.vmulcaddc.channel_tile,
-        kernel, bias, convolution_op->packed_weights);
+        kernel, bias, convolution_op->packed_weights, NULL);
 
       convolution_op->ukernel.vmulcaddc = (struct xnn_ukernel_vmulcaddc) {
         .function = xnn_params.f16.vmulcaddc.ukernel,
@@ -623,12 +627,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
         xnn_pack_f16_dwconv_hwg_w(
           kernel_height, kernel_width,
           groups, dwconv_parameters->channel_tile,
-          kernel, bias, convolution_op->packed_weights);
+          kernel, bias, convolution_op->packed_weights, NULL);
       } else {
         xnn_pack_f16_dwconv_ghw_w(
           kernel_height, kernel_width,
           groups, dwconv_parameters->channel_tile,
-          kernel, bias, convolution_op->packed_weights);
+          kernel, bias, convolution_op->packed_weights, NULL);
       }
 
       const union dwconv_fused_ukernels* ukernels = &dwconv_parameters->minmax;
@@ -674,7 +678,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
           xnn_pack_f16_gemm_goi_w(
               groups, group_output_channels, group_input_channels,
               nr, kr, sr,
-              kernel, bias, convolution_op->packed_weights);
+              kernel, bias, convolution_op->packed_weights, NULL);
           convolution_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
             .mr = xnn_params.f16.gemm.mr,
             .nr = nr,
@@ -688,12 +692,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
             xnn_pack_f16_conv_kgo_w(
               groups, group_output_channels, kernel_size,
               nr, kr,
-              kernel, bias, convolution_op->packed_weights);
+              kernel, bias, convolution_op->packed_weights, NULL);
           } else {
             xnn_pack_f16_conv_goki_w(
               groups, group_output_channels, kernel_size, group_input_channels,
               nr, kr, sr,
-              kernel, bias, convolution_op->packed_weights);
+              kernel, bias, convolution_op->packed_weights, NULL);
           }
           convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
             .mr = xnn_params.f16.gemm.mr,
@@ -953,7 +957,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
 
       xnn_pack_f32_vmulcaddc_w(
         groups, xnn_params.f32.vmulcaddc.channel_tile,
-        kernel, bias, convolution_op->packed_weights);
+        kernel, bias, convolution_op->packed_weights, NULL);
 
       convolution_op->ukernel.vmulcaddc = (struct xnn_ukernel_vmulcaddc) {
         .function = xnn_params.f32.vmulcaddc.ukernel,
@@ -980,12 +984,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
         xnn_pack_f32_dwconv_hwg_w(
           kernel_height, kernel_width,
           groups, dwconv_parameters->channel_tile,
-          kernel, bias, convolution_op->packed_weights);
+          kernel, bias, convolution_op->packed_weights, NULL);
       } else {
         xnn_pack_f32_dwconv_ghw_w(
           kernel_height, kernel_width,
           groups, dwconv_parameters->channel_tile,
-          kernel, bias, convolution_op->packed_weights);
+          kernel, bias, convolution_op->packed_weights, NULL);
       }
 
       const union dwconv_fused_ukernels* ukernels = &dwconv_parameters->minmax;
@@ -1031,7 +1035,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
           xnn_pack_f32_gemm_goi_w(
               groups, group_output_channels, group_input_channels,
               nr, kr, sr,
-              kernel, bias, convolution_op->packed_weights);
+              kernel, bias, convolution_op->packed_weights, NULL);
           convolution_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
             .mr = xnn_params.f32.gemm.mr,
             .nr = nr,
@@ -1045,12 +1049,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
             xnn_pack_f32_conv_kgo_w(
               groups, group_output_channels, kernel_size,
               nr, kr,
-              kernel, bias, convolution_op->packed_weights);
+              kernel, bias, convolution_op->packed_weights, NULL);
           } else {
             xnn_pack_f32_conv_goki_w(
               groups, group_output_channels, kernel_size, group_input_channels,
               nr, kr, sr,
-              kernel, bias, convolution_op->packed_weights);
+              kernel, bias, convolution_op->packed_weights, NULL);
           }
           convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
             .mr = xnn_params.f32.gemm.mr,

@@ -313,7 +313,7 @@ public:
         input_channels(),
         output_channels_tile(),
         kernel_height(), kernel_width(),
-        kernel.data(), bias.data(), packed_weights.data());
+        kernel.data(), bias.data(), packed_weights.data(), nullptr);
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {

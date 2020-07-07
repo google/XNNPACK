@@ -428,7 +428,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
         group_input_channels,
         xnn_params.f32.conv_hwc2chw_3x3c3s2.output_channel_tile,
         kernel_height, kernel_width,
-        kernel, bias, convolution_op->packed_weights);
+        kernel, bias, convolution_op->packed_weights, NULL);
 
       convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d) {
         .hwc2chw_function = xnn_params.f32.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
@@ -456,11 +456,11 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
         xnn_pack_f32_chw_dwconv_hwg_w(
           kernel_height * kernel_width, groups,
-          kernel, bias, convolution_op->packed_weights);
+          kernel, bias, convolution_op->packed_weights, NULL);
       } else {
         xnn_pack_f32_chw_dwconv_ghw_w(
           kernel_height * kernel_width, groups,
-          kernel, bias, convolution_op->packed_weights);
+          kernel, bias, convolution_op->packed_weights, NULL);
       }
 
       convolution_op->ukernel.dwconv2d = (struct xnn_ukernel_dwconv2d) {

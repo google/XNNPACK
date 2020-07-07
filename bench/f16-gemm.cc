@@ -66,7 +66,7 @@ static void GEMMBenchmark(benchmark::State& state,
 
   std::vector<uint16_t, AlignedAllocator<uint16_t, 32>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0);
-  xnn_pack_f16_gemm_goi_w(1 /* groups */, nc, kc, nr, kr, sr, k.data(), b.data(), w.data());
+  xnn_pack_f16_gemm_goi_w(1 /* groups */, nc, kc, nr, kr, sr, k.data(), b.data(), w.data(), nullptr);
   std::vector<uint16_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
 

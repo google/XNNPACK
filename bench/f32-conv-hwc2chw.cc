@@ -68,7 +68,7 @@ static void DConvHWC2CHW3X3S2P1Benchmark(benchmark::State& state,
   xnn_pack_f32_dconv_oki_w(
     output_channels, input_channels, output_channels_tile,
     kernel_size /* kernel height */, kernel_size /* kernel width */,
-    kernel.data(), bias.data(), packed_weights.data());
+    kernel.data(), bias.data(), packed_weights.data(), NULL);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(packed_weights.cbegin(),
       packed_weights.cbegin() + weights_elements,
