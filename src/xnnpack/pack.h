@@ -26,6 +26,18 @@ struct xnn_q8_packing_params {
 };
 
 
+typedef void (*xnn_pack_gemm_goi_w_function)(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const void* k,
+  const void* b,
+  void* packed_w,
+  const void* params);
+
 XNN_INTERNAL void xnn_pack_f32_gemm_goi_w(
   size_t g,
   size_t nc,
@@ -56,11 +68,23 @@ XNN_INTERNAL void xnn_pack_q8_gemm_goi_w(
   size_t kc,
   size_t nr,
   size_t kr,
+  size_t sr,
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
   const struct xnn_q8_packing_params* params);
 
+
+typedef void (*xnn_pack_gemm_io_w_function)(
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const void* k,
+  const void* b,
+  void* packed_w,
+  const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_gemm_io_w(
   size_t nc,
@@ -89,6 +113,7 @@ XNN_INTERNAL void xnn_pack_q8_gemm_io_w(
   size_t kc,
   size_t nr,
   size_t kr,
+  size_t sr,
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,

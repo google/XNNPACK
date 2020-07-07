@@ -127,11 +127,13 @@ void xnn_pack_q8_gemm_goi_w(
   size_t kc,
   size_t nr,
   size_t kr,
+  size_t sr,
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
   const struct xnn_q8_packing_params* params)
 {
+  assert(sr == 1);
   const int32_t izp = (int32_t) params->input_zero_point;
   const int32_t boff = (int32_t) kc * izp * (int32_t) params->kernel_zero_point;
   do {
@@ -273,11 +275,13 @@ void xnn_pack_q8_gemm_io_w(
   size_t kc,
   size_t nr,
   size_t kr,
+  size_t sr,
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
   const struct xnn_q8_packing_params* params)
 {
+  assert(sr == 1);
   const int32_t izp = (int32_t) params->input_zero_point;
   const int32_t boff = (int32_t) kc * izp * (int32_t) params->kernel_zero_point;
   for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {

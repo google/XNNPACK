@@ -243,7 +243,7 @@ class GemmMicrokernelTester {
         .input_zero_point = a_zero_point(),
         .kernel_zero_point = b_zero_point(),
       };
-      xnn_pack_q8_gemm_goi_w(1, n(), k(), nr(), kr(),
+      xnn_pack_q8_gemm_goi_w(1, n(), k(), nr(), kr(), sr(),
         b.data(), bias.data(), packed_w.data(), &packing_params);
 
       // Compute 32-bit results and output quantization arguments.

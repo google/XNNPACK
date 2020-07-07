@@ -311,7 +311,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
         case xnn_ukernel_type_gemm:
           xnn_pack_q8_gemm_goi_w(
               groups, group_output_channels, group_input_channels,
-              nr, kr,
+              nr, kr, 1 /* sr */,
               kernel, bias, convolution_op->packed_weights,
               &packing_params);
           convolution_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
