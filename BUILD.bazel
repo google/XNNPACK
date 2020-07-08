@@ -649,6 +649,8 @@ WASMSIMD_UKERNELS = [
     "src/f32-prelu/gen/wasmsimd-bitselect-2x8.c",
     "src/f32-prelu/gen/wasmsimd-minmax-2x4.c",
     "src/f32-prelu/gen/wasmsimd-minmax-2x8.c",
+    "src/f32-rmax/wasmsimd-arm.c",
+    "src/f32-rmax/wasmsimd-x86.c",
     "src/f32-vbinary/gen/vadd-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vadd-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x4.c",

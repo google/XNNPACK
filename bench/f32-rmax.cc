@@ -67,6 +67,19 @@ static void f32_rmax(
     ->Range(1000, 100000000)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_WASMSIMD
+  BENCHMARK_CAPTURE(f32_rmax, wasmsimd_arm, xnn_f32_rmax_ukernel__wasmsimd_arm)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_rmax, wasmsimd_x86, xnn_f32_rmax_ukernel__wasmsimd_x86)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD
+
 BENCHMARK_CAPTURE(f32_rmax, scalar, xnn_f32_rmax_ukernel__scalar)
   ->RangeMultiplier(10)
   ->Range(1000, 100000000)

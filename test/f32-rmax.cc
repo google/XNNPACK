@@ -82,7 +82,9 @@
         .Test(xnn_f32_rmax_ukernel__sse);
     }
   }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_RMAX__AVX, n_lt_32) {
     TEST_REQUIRES_X86_AVX;
     for (size_t n = 1; n < 32; n++) {
@@ -116,7 +118,9 @@
         .Test(xnn_f32_rmax_ukernel__avx);
     }
   }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_RMAX__AVX512F, n_lt_64) {
     TEST_REQUIRES_X86_AVX512F;
     for (size_t n = 1; n < 64; n++) {
@@ -151,6 +155,70 @@
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD
+  TEST(F32_RMAX__WASMSIMD_ARM, n_lt_16) {
+    for (size_t n = 1; n < 16; n++) {
+      RMaxMicrokernelTester()
+        .n(n)
+        .Test(xnn_f32_rmax_ukernel__wasmsimd_arm);
+    }
+  }
+
+  TEST(F32_RMAX__WASMSIMD_ARM, n_eq_16) {
+    RMaxMicrokernelTester()
+      .n(16)
+      .Test(xnn_f32_rmax_ukernel__wasmsimd_arm);
+  }
+
+  TEST(F32_RMAX__WASMSIMD_ARM, n_div_16) {
+    for (size_t n = 16; n < 128; n += 16) {
+      RMaxMicrokernelTester()
+        .n(n)
+        .Test(xnn_f32_rmax_ukernel__wasmsimd_arm);
+    }
+  }
+
+  TEST(F32_RMAX__WASMSIMD_ARM, n_gt_16) {
+    for (size_t n = 16; n < 32; n++) {
+      RMaxMicrokernelTester()
+        .n(n)
+        .Test(xnn_f32_rmax_ukernel__wasmsimd_arm);
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD
+
+#if XNN_ARCH_WASMSIMD
+  TEST(F32_RMAX__WASMSIMD_X86, n_lt_16) {
+    for (size_t n = 1; n < 16; n++) {
+      RMaxMicrokernelTester()
+        .n(n)
+        .Test(xnn_f32_rmax_ukernel__wasmsimd_x86);
+    }
+  }
+
+  TEST(F32_RMAX__WASMSIMD_X86, n_eq_16) {
+    RMaxMicrokernelTester()
+      .n(16)
+      .Test(xnn_f32_rmax_ukernel__wasmsimd_x86);
+  }
+
+  TEST(F32_RMAX__WASMSIMD_X86, n_div_16) {
+    for (size_t n = 16; n < 128; n += 16) {
+      RMaxMicrokernelTester()
+        .n(n)
+        .Test(xnn_f32_rmax_ukernel__wasmsimd_x86);
+    }
+  }
+
+  TEST(F32_RMAX__WASMSIMD_X86, n_gt_16) {
+    for (size_t n = 16; n < 32; n++) {
+      RMaxMicrokernelTester()
+        .n(n)
+        .Test(xnn_f32_rmax_ukernel__wasmsimd_x86);
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD
 
 TEST(F32_RMAX__SCALAR, n_lt_4) {
   for (size_t n = 1; n < 4; n++) {
