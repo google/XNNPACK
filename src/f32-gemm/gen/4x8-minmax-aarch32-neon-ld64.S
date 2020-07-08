@@ -101,7 +101,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VLD1.32    {d2}, [r10]!      // A2
         VLD1.32    {d3}, [ r0]!      // A3
         VLDM        r9!, {d12-d15}   // B1
-
         VMLA.F32     q8, q4, d0[0]
         VMLA.F32     q9, q5, d0[0]
         VMLA.F32    q10, q4, d1[0]
@@ -114,11 +113,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VMLA.F32     q9, q7, d0[1]
         VMLA.F32    q10, q6, d1[1]
         VMLA.F32    q11, q7, d1[1]
-        SUBS         r5, r5, 8
         VMLA.F32    q12, q6, d2[1]
         VMLA.F32    q13, q7, d2[1]
         VMLA.F32    q14, q6, d3[1]
         VMLA.F32    q15, q7, d3[1]
+        SUBS         r5, r5, 8
         BHS         2b
 
         // Is there a remainder?- 1 floats of A (4 bytes)
