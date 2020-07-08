@@ -15,6 +15,13 @@ tools/xngen src/f32-clamp/scalar.c.in -D BATCH_TILE=1 -D WASM=1 -o src/f32-clamp
 tools/xngen src/f32-clamp/scalar.c.in -D BATCH_TILE=2 -D WASM=1 -o src/f32-clamp/gen/wasm-x2.c
 tools/xngen src/f32-clamp/scalar.c.in -D BATCH_TILE=4 -D WASM=1 -o src/f32-clamp/gen/wasm-x4.c
 
+################################## WAsm SIMD ##################################
+tools/xngen src/f32-clamp/wasmsimd.c.in -D BATCH_TILE=4 -D X86=0 -o src/f32-clamp/gen/wasmsimd-arm-x4.c
+tools/xngen src/f32-clamp/wasmsimd.c.in -D BATCH_TILE=8 -D X86=0 -o src/f32-clamp/gen/wasmsimd-arm-x8.c
+
+tools/xngen src/f32-clamp/wasmsimd.c.in -D BATCH_TILE=4 -D X86=1 -o src/f32-clamp/gen/wasmsimd-x86-x4.c
+tools/xngen src/f32-clamp/wasmsimd.c.in -D BATCH_TILE=8 -D X86=1 -o src/f32-clamp/gen/wasmsimd-x86-x8.c
+
 ################################### ARM NEON ##################################
 tools/xngen src/f32-clamp/neon.c.in -D BATCH_TILE=4 -o src/f32-clamp/gen/neon-x4.c
 tools/xngen src/f32-clamp/neon.c.in -D BATCH_TILE=8 -o src/f32-clamp/gen/neon-x8.c

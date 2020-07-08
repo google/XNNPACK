@@ -1814,10 +1814,11 @@ static void init(void) {
       .channel_tile = 8,
     };
     xnn_params.f32.abs = (xnn_univector_ukernel_function) xnn_f32_vabs_ukernel__wasmsimd_x8;
-    xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__psimd_x8;
     if (is_wasm_x86) {
+      xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__wasmsimd_x86_x8;
       xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__wasmsimd_x86_x16;
     } else {
+      xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_clamp_ukernel__wasmsimd_arm_x8;
       xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__wasmsimd_arm_x8;
     }
     xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__psimd_x8;

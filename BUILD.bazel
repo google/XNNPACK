@@ -505,6 +505,10 @@ WASM_UKERNELS = [
 ]
 
 WASMSIMD_UKERNELS = [
+    "src/f32-clamp/gen/wasmsimd-arm-x4.c",
+    "src/f32-clamp/gen/wasmsimd-arm-x8.c",
+    "src/f32-clamp/gen/wasmsimd-x86-x4.c",
+    "src/f32-clamp/gen/wasmsimd-x86-x8.c",
     "src/f32-dwconv/gen/up4x25-wasmsimd.c",
     "src/f32-dwconv/gen/up4x4-wasmsimd.c",
     "src/f32-dwconv/gen/up4x9-wasmsimd.c",
