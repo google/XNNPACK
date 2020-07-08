@@ -348,7 +348,7 @@ class GemmMicrokernelTester {
         .kernel_zero_point = b_zero_point(),
       };
       xnn_pack_q8_conv_goki_w(
-        1, n(), ks(), k(), nr(), kr(),
+        1, n(), ks(), k(), nr(), kr(), sr(),
         b.data(), bias.data(), packed_w.data(), &packing_params);
 
       for (size_t ks_index = 0; ks_index < ks(); ks_index++) {

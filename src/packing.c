@@ -439,11 +439,13 @@ void xnn_pack_q8_conv_goki_w(
   size_t kc,
   size_t nr,
   size_t kr,
+  size_t sr,
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
   const struct xnn_q8_packing_params* params)
 {
+  assert(sr == 1);
   const int32_t izp = (int32_t) params->input_zero_point;
   const int32_t boff = (int32_t) ks * (int32_t) kc * izp * (int32_t) params->kernel_zero_point;
   do {
@@ -757,12 +759,14 @@ void xnn_pack_q8_deconv_goki_w(
   size_t sw,
   size_t nr,
   size_t kr,
+  size_t sr,
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
   struct subconvolution_params* subconv_params,
   const struct xnn_q8_packing_params* params)
 {
+  assert(sr == 1);
   const int32_t izp = (int32_t) params->input_zero_point;
   const int32_t kzp = (int32_t) params->kernel_zero_point;
   for (size_t i = 0; i < g; i++) {
