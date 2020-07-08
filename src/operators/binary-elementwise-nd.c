@@ -23,7 +23,7 @@ static enum xnn_status create_binary_elementwise_nd(
     uint32_t flags,
     const void* params,
     size_t params_size,
-    uint32_t init_flag,
+    uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
     xnn_operator_t* binary_elementwise_op_out)
 {
@@ -33,8 +33,8 @@ static enum xnn_status create_binary_elementwise_nd(
     return xnn_status_uninitialized;
   }
 
-  if ((xnn_params.init_flags & init_flag) != init_flag) {
-    xnn_log_error("failed to create %s operator: hardware operations are not supported",
+  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
     return xnn_status_unsupported_hardware;
   }
@@ -220,7 +220,7 @@ static enum xnn_status setup_binary_elementwise_nd(
     const void* input1,
     const void* input2,
     void* output,
-    uint32_t init_flag,
+    uint32_t datatype_init_flags,
     uint32_t log2_element_size,
     const void* params,
     size_t params_size,
@@ -235,8 +235,8 @@ static enum xnn_status setup_binary_elementwise_nd(
     return xnn_status_uninitialized;
   }
 
-  if ((xnn_params.init_flags & init_flag) != init_flag) {
-    xnn_log_error("failed to create %s operator: hardware operations are not supported",
+  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
+    xnn_log_error("failed to setup %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(binary_elementwise_op->type));
     return xnn_status_unsupported_hardware;
   }
