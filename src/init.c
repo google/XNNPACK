@@ -1828,7 +1828,7 @@ static void init(void) {
       .qr = 8,
     };
     xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_function) xnn_f32_ibilinear_ukernel__psimd_c8,
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_f32_ibilinear_ukernel__wasmsimd_c8,
       .pixel_tile = 1,
       .channel_tile = 8,
     };

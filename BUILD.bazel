@@ -611,6 +611,8 @@ WASMSIMD_UKERNELS = [
     "src/f32-gemm/gen-inc/6x8inc-minmax-wasmsimd-loadsplat-x86.c",
     "src/f32-gemm/gen-inc/6x8inc-minmax-wasmsimd-splat-x86.c",
     "src/f32-gemm/gen-inc/6x8s4inc-minmax-wasmsimd-x86.c",
+    "src/f32-ibilinear/gen/wasmsimd-c4.c",
+    "src/f32-ibilinear/gen/wasmsimd-c8.c",
     "src/f32-igemm/gen/1x8-wasmsimd-splat.c",
     "src/f32-igemm/gen/4x8-wasmsimd-splat.c",
     "src/f32-igemm/gen/5x8-wasmsimd-splat.c",
