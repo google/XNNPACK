@@ -649,6 +649,8 @@ WASMSIMD_UKERNELS = [
     "src/f32-hswish/gen/wasmsimd-x86-x4.c",
     "src/f32-hswish/gen/wasmsimd-x86-x8.c",
     "src/f32-hswish/gen/wasmsimd-x86-x16.c",
+    "src/f32-maxpool/9p8x-minmax-wasmsimd-arm-c4.c",
+    "src/f32-maxpool/9p8x-minmax-wasmsimd-x86-c4.c",
     "src/f32-prelu/gen/wasmsimd-bitselect-2x4.c",
     "src/f32-prelu/gen/wasmsimd-bitselect-2x8.c",
     "src/f32-prelu/gen/wasmsimd-minmax-2x4.c",
