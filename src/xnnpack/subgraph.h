@@ -101,6 +101,7 @@ enum xnn_node_type {
   xnn_node_type_sigmoid,
   xnn_node_type_softmax,
   xnn_node_type_square,
+  xnn_node_type_square_root,
   xnn_node_type_squared_difference,
   xnn_node_type_subtract,
   xnn_node_type_unpooling_2d,

@@ -205,6 +205,7 @@ SET(XNNPACK_SUBGRAPH_SRCS
   src/subgraph/softmax.c
   src/subgraph/static-constant-pad.c
   src/subgraph/square.c
+  src/subgraph/square-root.c
   src/subgraph/squared-difference.c
   src/subgraph/subtract.c
   src/subgraph/unpooling-2d.c)

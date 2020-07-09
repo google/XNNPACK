@@ -70,6 +70,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Softmax";
     case xnn_node_type_square:
       return "Square";
+    case xnn_node_type_square_root:
+      return "Square Root";
     case xnn_node_type_squared_difference:
       return "Squared Difference";
     case xnn_node_type_subtract:
