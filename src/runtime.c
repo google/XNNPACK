@@ -667,6 +667,20 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].inputs[0] = node->inputs[0];
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
+      case xnn_node_type_static_reshape:
+        status = xnn_create_copy_nc_x32(
+          1 /* channels */,
+          1 /* input stride */,
+          1 /* output stride */,
+          node->flags,
+          &runtime->opdata[i].operator_object);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->opdata[i].batch_size = product_all_dims(&values[node->inputs[0]].shape);
+        runtime->opdata[i].inputs[0] = node->inputs[0];
+        runtime->opdata[i].outputs[0] = node->outputs[0];
+        break;
       case xnn_node_type_square:
         status = xnn_create_square_nc_f32(
           values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
@@ -955,6 +969,16 @@ enum xnn_status xnn_setup_runtime(
           opdata->batch_size,
           opdata->input_height,
           opdata->input_width,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_copy_nc_x32:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_copy_nc_x32(
+          opdata->operator_object,
+          opdata->batch_size,
           runtime->blobs[opdata->inputs[0]].data,
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);

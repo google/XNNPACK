@@ -772,13 +772,29 @@ enum xnn_status xnn_define_squared_difference(
 /// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor with padding.
-/// @param flags - binary features of the 2D Depthwise Convolution Node. The only currently supported values is
-///                XNN_FLAG_TENSORFLOW_SAME_PADDING.
+/// @param flags - binary features of the Constant Pad Node. No supported flags are currently defined.
 enum xnn_status xnn_define_static_constant_pad(
   xnn_subgraph_t subgraph,
   const size_t* pre_paddings,
   const size_t* post_paddings,
   float padding_value,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+/// Define a Reshape Node with static shape specification and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_dims - number of shape dimensions in the output tensor.
+/// @param new_shape - shape dimensions of the output tensor.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor with padding.
+/// @param flags - binary features of the Reshape Node. No supported flags are currently defined.
+enum xnn_status xnn_define_static_reshape(
+  xnn_subgraph_t subgraph,
+  size_t num_dims,
+  const size_t* new_shape,
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);

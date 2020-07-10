@@ -204,6 +204,7 @@ SET(XNNPACK_SUBGRAPH_SRCS
   src/subgraph/sigmoid.c
   src/subgraph/softmax.c
   src/subgraph/static-constant-pad.c
+  src/subgraph/static-reshape.c
   src/subgraph/square.c
   src/subgraph/square-root.c
   src/subgraph/squared-difference.c

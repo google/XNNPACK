@@ -100,6 +100,7 @@ enum xnn_node_type {
   xnn_node_type_prelu,
   xnn_node_type_sigmoid,
   xnn_node_type_softmax,
+  xnn_node_type_static_reshape,
   xnn_node_type_square,
   xnn_node_type_square_root,
   xnn_node_type_squared_difference,
@@ -178,6 +179,9 @@ struct xnn_node {
       size_t post_paddings[XNN_MAX_TENSOR_DIMS];
       uint32_t padding_value;
     } static_pad;
+    struct {
+      struct xnn_shape new_shape;
+    } static_reshape;
   } params;
   struct {
     float output_min;
