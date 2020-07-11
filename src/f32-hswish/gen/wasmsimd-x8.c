@@ -15,7 +15,7 @@
 #include <xnnpack/hswish.h>
 
 
-void xnn_f32_hswish_ukernel__wasmsimd_arm_x8(
+void xnn_f32_hswish_ukernel__wasmsimd_x8(
     size_t n,
     const float* x,
     float* y,
@@ -25,23 +25,25 @@ void xnn_f32_hswish_ukernel__wasmsimd_arm_x8(
   assert(n % sizeof(float) == 0);
 
   const v128_t vsixth = wasm_v32x4_load_splat(&params->scalar.sixth);
-  const v128_t vhalf = wasm_v32x4_load_splat(&params->scalar.half);
-  const v128_t vone = wasm_v32x4_load_splat(&params->scalar.one);
+  const v128_t vthree = wasm_v32x4_load_splat(&params->scalar.three);
+  const v128_t vsix = wasm_v32x4_load_splat(&params->scalar.six);
   const v128_t vzero = wasm_f32x4_splat(0.0f);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    const v128_t vx0123 = wasm_v128_load(x);
-    const v128_t vx4567 = wasm_v128_load(x + 4);
+    v128_t vx0123 = wasm_v128_load(x);
+    v128_t vx4567 = wasm_v128_load(x + 4);
     x += 8;
 
-    v128_t vacc0123 = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx0123, vsixth));
-    v128_t vacc4567 = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx4567, vsixth));
+    v128_t vacc0123 = wasm_f32x4_add(vx0123, vthree);
+    vx0123 = wasm_f32x4_mul(vx0123, vsixth);
+    v128_t vacc4567 = wasm_f32x4_add(vx4567, vthree);
+    vx4567 = wasm_f32x4_mul(vx4567, vsixth);
 
-    vacc0123 = wasm_f32x4_max(vacc0123, vzero);
-    vacc4567 = wasm_f32x4_max(vacc4567, vzero);
+    vacc0123 = wasm_i32x4_max(vacc0123, vzero);
+    vacc4567 = wasm_i32x4_max(vacc4567, vzero);
 
-    vacc0123 = wasm_f32x4_min(vacc0123, vone);
-    vacc4567 = wasm_f32x4_min(vacc4567, vone);
+    vacc0123 = wasm_i32x4_min(vacc0123, vsix);
+    vacc4567 = wasm_i32x4_min(vacc4567, vsix);
 
     vacc0123 = wasm_f32x4_mul(vacc0123, vx0123);
     vacc4567 = wasm_f32x4_mul(vacc4567, vx4567);
@@ -51,23 +53,25 @@ void xnn_f32_hswish_ukernel__wasmsimd_arm_x8(
     y += 8;
   }
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const v128_t vx = wasm_v128_load(x);
+    v128_t vx = wasm_v128_load(x);
     x += 4;
-    v128_t vacc = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx, vsixth));
 
-    vacc = wasm_f32x4_max(vacc, vzero);
-    vacc = wasm_f32x4_min(vacc, vone);
+    v128_t vacc = wasm_f32x4_add(vx, vthree);
+    vx = wasm_f32x4_mul(vx, vsixth);
+    vacc = wasm_i32x4_max(vacc, vzero);
+    vacc = wasm_i32x4_min(vacc, vsix);
     vacc = wasm_f32x4_mul(vacc, vx);
 
     wasm_v128_store(y, vacc);
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const v128_t vx = wasm_v128_load(x);
-    v128_t vacc = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx, vsixth));
+    v128_t vx = wasm_v128_load(x);
 
-    vacc = wasm_f32x4_max(vacc, vzero);
-    vacc = wasm_f32x4_min(vacc, vone);
+    v128_t vacc = wasm_f32x4_add(vx, vthree);
+    vx = wasm_f32x4_mul(vx, vsixth);
+    vacc = wasm_i32x4_max(vacc, vzero);
+    vacc = wasm_i32x4_min(vacc, vsix);
     vacc = wasm_f32x4_mul(vacc, vx);
 
     if (n & (2 * sizeof(float))) {

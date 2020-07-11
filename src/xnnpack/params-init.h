@@ -466,8 +466,8 @@ static inline union xnn_f32_hswish_params xnn_init_f32_hswish_params(void)
     }
   #else
     params.scalar.sixth = 0x1.555556p-3f;
-    params.scalar.half = 0.5f;
-    params.scalar.one = 1.0f;
+    params.scalar.three = 3.0f;
+    params.scalar.six = 6.0f;
   #endif
   return params;
 }
@@ -476,8 +476,8 @@ static inline union xnn_f32_hswish_params xnn_init_scalar_f32_hswish_params(void
 {
   union xnn_f32_hswish_params params;
   params.scalar.sixth = 0x1.555556p-3f;
-  params.scalar.half = 0.5f;
-  params.scalar.one = 1.0f;
+  params.scalar.three = 3.0f;
+  params.scalar.six = 6.0f;
   return params;
 }
 

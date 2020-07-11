@@ -66,15 +66,6 @@ static void f32_hswish(
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
     ->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_hswish, neonfma_x4, xnn_f32_hswish_ukernel__neonfma_x4, benchmark::utils::CheckNEONFMA)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_hswish, neonfma_x8, xnn_f32_hswish_ukernel__neonfma_x8, benchmark::utils::CheckNEONFMA)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
-    ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -115,40 +106,16 @@ static void f32_hswish(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  BENCHMARK_CAPTURE(f32_hswish, psimd_x4, xnn_f32_hswish_ukernel__psimd_x4)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_hswish, psimd_x8, xnn_f32_hswish_ukernel__psimd_x8)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
-    ->UseRealTime();
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-
 #if XNN_ARCH_WASMSIMD
-  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_arm_x4, xnn_f32_hswish_ukernel__wasmsimd_arm_x4)
+  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_x4, xnn_f32_hswish_ukernel__wasmsimd_x4)
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_arm_x8, xnn_f32_hswish_ukernel__wasmsimd_arm_x8)
+  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_x8, xnn_f32_hswish_ukernel__wasmsimd_x8)
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_arm_x16, xnn_f32_hswish_ukernel__wasmsimd_arm_x16)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
-    ->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_x86_x4, xnn_f32_hswish_ukernel__wasmsimd_x86_x4)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_x86_x8, xnn_f32_hswish_ukernel__wasmsimd_x86_x8)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_x86_x16, xnn_f32_hswish_ukernel__wasmsimd_x86_x16)
+  BENCHMARK_CAPTURE(f32_hswish, wasmsimd_x16, xnn_f32_hswish_ukernel__wasmsimd_x16)
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
     ->UseRealTime();

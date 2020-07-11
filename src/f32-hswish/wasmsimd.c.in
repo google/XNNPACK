@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/hswish.h>
 
 
-void xnn_f32_hswish_ukernel__wasmsimd_${"x86" if X86 else "arm"}_x${BATCH_TILE}(
+void xnn_f32_hswish_ukernel__wasmsimd_x${BATCH_TILE}(
     size_t n,
     const float* x,
     float* y,
@@ -24,40 +24,29 @@ void xnn_f32_hswish_ukernel__wasmsimd_${"x86" if X86 else "arm"}_x${BATCH_TILE}(
   assert(n % sizeof(float) == 0);
 
   const v128_t vsixth = wasm_v32x4_load_splat(&params->scalar.sixth);
-  const v128_t vhalf = wasm_v32x4_load_splat(&params->scalar.half);
-  const v128_t vone = wasm_v32x4_load_splat(&params->scalar.one);
+  const v128_t vthree = wasm_v32x4_load_splat(&params->scalar.three);
+  const v128_t vsix = wasm_v32x4_load_splat(&params->scalar.six);
   const v128_t vzero = wasm_f32x4_splat(0.0f);
 
   $if BATCH_TILE > 4:
     for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
-      const v128_t vx${ABC[0:4]} = wasm_v128_load(x);
+      v128_t vx${ABC[0:4]} = wasm_v128_load(x);
       $for N in range(4, BATCH_TILE, 4):
-        const v128_t vx${ABC[N:N+4]} = wasm_v128_load(x + ${N});
+        v128_t vx${ABC[N:N+4]} = wasm_v128_load(x + ${N});
       x += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 4):
-        v128_t vacc${ABC[N:N+4]} = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx${ABC[N:N+4]}, vsixth));
+        v128_t vacc${ABC[N:N+4]} = wasm_f32x4_add(vx${ABC[N:N+4]}, vthree);
+        vx${ABC[N:N+4]} = wasm_f32x4_mul(vx${ABC[N:N+4]}, vsixth);
 
-      $if X86:
-        $for N in range(0, BATCH_TILE, 4):
-          const v128_t vmasklt${ABC[N:N+4]} = wasm_f32x4_lt(vacc${ABC[N:N+4]}, vzero);
-          vacc${ABC[N:N+4]} = wasm_v128_andnot(vacc${ABC[N:N+4]}, vmasklt${ABC[N:N+4]});
+      $for N in range(0, BATCH_TILE, 4):
+        vacc${ABC[N:N+4]} = wasm_i32x4_max(vacc${ABC[N:N+4]}, vzero);
 
-        $for N in range(0, BATCH_TILE, 4):
-          const v128_t vmaskge${ABC[N:N+4]} = wasm_f32x4_ge(vacc${ABC[N:N+4]}, vone);
-          vacc${ABC[N:N+4]} = wasm_f32x4_mul(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]});
+      $for N in range(0, BATCH_TILE, 4):
+        vacc${ABC[N:N+4]} = wasm_i32x4_min(vacc${ABC[N:N+4]}, vsix);
 
-        $for N in range(0, BATCH_TILE, 4):
-          vacc${ABC[N:N+4]} = wasm_v128_bitselect(vx${ABC[N:N+4]}, vacc${ABC[N:N+4]}, vmaskge${ABC[N:N+4]});
-      $else:
-        $for N in range(0, BATCH_TILE, 4):
-          vacc${ABC[N:N+4]} = wasm_f32x4_max(vacc${ABC[N:N+4]}, vzero);
-
-        $for N in range(0, BATCH_TILE, 4):
-          vacc${ABC[N:N+4]} = wasm_f32x4_min(vacc${ABC[N:N+4]}, vone);
-
-        $for N in range(0, BATCH_TILE, 4):
-          vacc${ABC[N:N+4]} = wasm_f32x4_mul(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]});
+      $for N in range(0, BATCH_TILE, 4):
+        vacc${ABC[N:N+4]} = wasm_f32x4_mul(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]});
 
       wasm_v128_store(y, vacc${ABC[0:4]});
       $for N in range(4, BATCH_TILE, 4):
@@ -65,38 +54,26 @@ void xnn_f32_hswish_ukernel__wasmsimd_${"x86" if X86 else "arm"}_x${BATCH_TILE}(
       y += ${BATCH_TILE};
     }
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const v128_t vx = wasm_v128_load(x);
+    v128_t vx = wasm_v128_load(x);
     x += 4;
-    v128_t vacc = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx, vsixth));
 
-    $if X86:
-      const v128_t vmasklt = wasm_f32x4_lt(vacc, vzero);
-      vacc = wasm_v128_andnot(vacc, vmasklt);
-      const v128_t vmaskge = wasm_f32x4_ge(vacc, vone);
-      vacc = wasm_f32x4_mul(vacc, vx);
-      vacc = wasm_v128_bitselect(vx, vacc, vmaskge);
-    $else:
-      vacc = wasm_f32x4_max(vacc, vzero);
-      vacc = wasm_f32x4_min(vacc, vone);
-      vacc = wasm_f32x4_mul(vacc, vx);
+    v128_t vacc = wasm_f32x4_add(vx, vthree);
+    vx = wasm_f32x4_mul(vx, vsixth);
+    vacc = wasm_i32x4_max(vacc, vzero);
+    vacc = wasm_i32x4_min(vacc, vsix);
+    vacc = wasm_f32x4_mul(vacc, vx);
 
     wasm_v128_store(y, vacc);
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    const v128_t vx = wasm_v128_load(x);
-    v128_t vacc = wasm_f32x4_add(vhalf, wasm_f32x4_mul(vx, vsixth));
+    v128_t vx = wasm_v128_load(x);
 
-    $if X86:
-      const v128_t vmasklt = wasm_f32x4_lt(vacc, vzero);
-      vacc = wasm_v128_andnot(vacc, vmasklt);
-      const v128_t vmaskge = wasm_f32x4_ge(vacc, vone);
-      vacc = wasm_f32x4_mul(vacc, vx);
-      vacc = wasm_v128_bitselect(vx, vacc, vmaskge);
-    $else:
-      vacc = wasm_f32x4_max(vacc, vzero);
-      vacc = wasm_f32x4_min(vacc, vone);
-      vacc = wasm_f32x4_mul(vacc, vx);
+    v128_t vacc = wasm_f32x4_add(vx, vthree);
+    vx = wasm_f32x4_mul(vx, vsixth);
+    vacc = wasm_i32x4_max(vacc, vzero);
+    vacc = wasm_i32x4_min(vacc, vsix);
+    vacc = wasm_f32x4_mul(vacc, vx);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vacc, 0);

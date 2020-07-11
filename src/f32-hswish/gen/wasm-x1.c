@@ -24,17 +24,19 @@ void xnn_f32_hswish_ukernel__wasm_x1(
   assert(n % sizeof(float) == 0);
 
   const float vsixth = params->scalar.sixth;
-  const float vhalf = params->scalar.half;
-  const float vone = params->scalar.one;
-  assert(vhalf == 0.5f);
-  assert(vone == 1.0f);
+  const float vthree = params->scalar.three;
+  const float vsix = params->scalar.six;
+  const float vzero = 0.0f;
+  assert(vthree == 3.0f);
+  assert(vsix == 6.0f);
 
   for (; n >= sizeof(float); n -= sizeof(float)) {
-    const float vx = *x++;
-    float vacc = vx * vsixth + vhalf;
-    vacc = __builtin_wasm_max_f32(vacc, 0.0f);
-    vacc = __builtin_wasm_min_f32(vacc, vone);
-    vacc = vacc * vx;
+    float vx = *x++;
+    float vacc = vx + vthree;
+    vx *= vsixth;
+    vacc = __builtin_wasm_max_f32(vacc, vzero);
+    vacc = __builtin_wasm_min_f32(vacc, vsix);
+    vacc *= vx;
     *y++ = vacc;
   }
 }

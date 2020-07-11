@@ -209,8 +209,8 @@ struct xnn_f16_hswish_params {
 union xnn_f32_hswish_params {
   struct {
     float sixth;
-    float half;
-    float one;
+    float three;
+    float six;
   } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
