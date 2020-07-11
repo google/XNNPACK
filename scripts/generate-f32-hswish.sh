@@ -21,8 +21,9 @@ tools/xngen src/f32-hswish/wasmsimd.c.in -D BATCH_TILE=8  -o src/f32-hswish/gen/
 tools/xngen src/f32-hswish/wasmsimd.c.in -D BATCH_TILE=16 -o src/f32-hswish/gen/wasmsimd-x16.c
 
 ################################### ARM NEON ##################################
-tools/xngen src/f32-hswish/neon.c.in -D BATCH_TILE=4 -o src/f32-hswish/gen/neon-x4.c
-tools/xngen src/f32-hswish/neon.c.in -D BATCH_TILE=8 -o src/f32-hswish/gen/neon-x8.c
+tools/xngen src/f32-hswish/neon.c.in -D BATCH_TILE=4  -o src/f32-hswish/gen/neon-x4.c
+tools/xngen src/f32-hswish/neon.c.in -D BATCH_TILE=8  -o src/f32-hswish/gen/neon-x8.c
+tools/xngen src/f32-hswish/neon.c.in -D BATCH_TILE=16 -o src/f32-hswish/gen/neon-x16.c
 
 ################################# x86 128-bit #################################
 tools/xngen src/f32-hswish/sse.c.in -D BATCH_TILE=4 -o src/f32-hswish/gen/sse-x4.c

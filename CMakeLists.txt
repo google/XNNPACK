@@ -727,6 +727,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/8x8s4inc-minmax-neon.c
   src/f32-hswish/gen/neon-x4.c
   src/f32-hswish/gen/neon-x8.c
+  src/f32-hswish/gen/neon-x16.c
   src/f32-ibilinear/gen/neon-c4.c
   src/f32-ibilinear/gen/neon-c8.c
   src/f32-igemm/gen/1x8-minmax-neon-lane-ld64.c

@@ -111,6 +111,53 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_HSWISH__NEON_X16, batch_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    HSwishMicrokernelTester()
+      .batch_size(16)
+      .Test(xnn_f32_hswish_ukernel__neon_x16);
+  }
+
+  TEST(F32_HSWISH__NEON_X16, batch_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      HSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_hswish_ukernel__neon_x16);
+    }
+  }
+
+  TEST(F32_HSWISH__NEON_X16, batch_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      HSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_hswish_ukernel__neon_x16);
+    }
+  }
+
+  TEST(F32_HSWISH__NEON_X16, batch_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+      HSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_hswish_ukernel__neon_x16);
+    }
+  }
+
+  TEST(F32_HSWISH__NEON_X16, inplace) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      HSwishMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_hswish_ukernel__neon_x16);
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_HSWISH__SSE_X4, batch_eq_4) {
     TEST_REQUIRES_X86_SSE;

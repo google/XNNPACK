@@ -66,6 +66,10 @@ static void f32_hswish(
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)
     ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_hswish, neon_x16, xnn_f32_hswish_ukernel__neon_x16, benchmark::utils::CheckNEON)
+    ->RangeMultiplier(10)
+    ->Range(1000, 1000000)
+    ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

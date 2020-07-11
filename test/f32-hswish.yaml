@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 - name: xnn_f32_hswish_ukernel__neon_x4
 - name: xnn_f32_hswish_ukernel__neon_x8
+- name: xnn_f32_hswish_ukernel__neon_x16
 - name: xnn_f32_hswish_ukernel__sse_x4
 - name: xnn_f32_hswish_ukernel__sse_x8
 - name: xnn_f32_hswish_ukernel__avx_x8
