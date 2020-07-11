@@ -60,7 +60,7 @@ class HSwishMicrokernelTester {
   void Test(xnn_f16_hswish_ukernel_function hswish) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
@@ -80,7 +80,7 @@ class HSwishMicrokernelTester {
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = fp16_ieee_to_fp32_value(x_data[i]) * std::max(std::min(fp16_ieee_to_fp32_value(x_data[i]) + 3.0f, 6.0f), 0.0f) / 6.0f;
+        y_ref[i] = (fp16_ieee_to_fp32_value(x_data[i]) / 6.0f) * std::max(std::min(fp16_ieee_to_fp32_value(x_data[i]) + 3.0f, 6.0f), 0.0f);
       }
 
       // Call optimized micro-kernel.
@@ -124,7 +124,7 @@ class HSwishMicrokernelTester {
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = x_data[i] * std::max(std::min(x_data[i] + 3.0f, 6.0f), 0.0f) / 6.0f;
+        y_ref[i] = (x_data[i] / 6.0f) * std::max(std::min(x_data[i] + 3.0f, 6.0f), 0.0f);
       }
 
       // Call optimized micro-kernel.
