@@ -14,7 +14,7 @@ $assert MR % 2 == 0
 
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
-$ARCH_SUFFIX = "" if ACTIVATION == "LINEAR" else "_x86" if X86 else "_arm"
+$ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR", "RELU"] else "_x86" if X86 else "_arm"
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__wasmsimd${ARCH_SUFFIX}(
     size_t mr,
@@ -143,12 +143,8 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__wasmsimd${ARCH_SUF
           vacc${M}${M+1}x01 = wasm_f32x4_min(vacc${M}${M+1}x01, vmax);
     $elif ACTIVATION == "RELU":
       const v128_t vzero = wasm_f32x4_splat(0.0f);
-      $if X86:
-        $for M in range(0, MR, 2):
-          vacc${M}${M+1}x01 = wasm_v128_andnot(vacc${M}${M+1}x01, wasm_f32x4_le(vacc${M}${M+1}x01, vzero));
-      $else:
-        $for M in range(0, MR, 2):
-          vacc${M}${M+1}x01 = wasm_f32x4_max(vacc${M}${M+1}x01, vzero);
+      $for M in range(0, MR, 2):
+        vacc${M}${M+1}x01 = wasm_i32x4_max(vacc${M}${M+1}x01, vzero);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(0, MR, 2)):

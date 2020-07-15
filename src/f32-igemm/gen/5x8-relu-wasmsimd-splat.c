@@ -14,7 +14,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_f32_igemm_relu_ukernel_5x8__wasmsimd_splat_arm(
+void xnn_f32_igemm_relu_ukernel_5x8__wasmsimd_splat(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -227,16 +227,16 @@ void xnn_f32_igemm_relu_ukernel_5x8__wasmsimd_splat_arm(
     } while (p != 0);
 
     const v128_t vzero = wasm_f32x4_splat(0.0f);
-    vacc0x0123 = wasm_f32x4_max(vacc0x0123, vzero);
-    vacc1x0123 = wasm_f32x4_max(vacc1x0123, vzero);
-    vacc2x0123 = wasm_f32x4_max(vacc2x0123, vzero);
-    vacc3x0123 = wasm_f32x4_max(vacc3x0123, vzero);
-    vacc4x0123 = wasm_f32x4_max(vacc4x0123, vzero);
-    vacc0x4567 = wasm_f32x4_max(vacc0x4567, vzero);
-    vacc1x4567 = wasm_f32x4_max(vacc1x4567, vzero);
-    vacc2x4567 = wasm_f32x4_max(vacc2x4567, vzero);
-    vacc3x4567 = wasm_f32x4_max(vacc3x4567, vzero);
-    vacc4x4567 = wasm_f32x4_max(vacc4x4567, vzero);
+    vacc0x0123 = wasm_i32x4_max(vacc0x0123, vzero);
+    vacc1x0123 = wasm_i32x4_max(vacc1x0123, vzero);
+    vacc2x0123 = wasm_i32x4_max(vacc2x0123, vzero);
+    vacc3x0123 = wasm_i32x4_max(vacc3x0123, vzero);
+    vacc4x0123 = wasm_i32x4_max(vacc4x0123, vzero);
+    vacc0x4567 = wasm_i32x4_max(vacc0x4567, vzero);
+    vacc1x4567 = wasm_i32x4_max(vacc1x4567, vzero);
+    vacc2x4567 = wasm_i32x4_max(vacc2x4567, vzero);
+    vacc3x4567 = wasm_i32x4_max(vacc3x4567, vzero);
+    vacc4x4567 = wasm_i32x4_max(vacc4x4567, vzero);
 
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c4, vacc4x0123);

@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
-$ARCH_SUFFIX = "" if ACTIVATION == "LINEAR" else "_x86" if X86 else "_arm"
+$ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR", "RELU"] else "_x86" if X86 else "_arm"
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__wasmsimd_splat${ARCH_SUFFIX}(
     size_t mr,
@@ -141,14 +141,9 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__wasmsimd_splat${ARCH
             vacc${M}x${ABC[N:N+4]} = wasm_f32x4_min(vacc${M}x${ABC[N:N+4]}, vmax);
     $elif ACTIVATION == "RELU":
       const v128_t vzero = wasm_f32x4_splat(0.0f);
-      $if X86:
-        $for N in range(0, NR, 4):
-          $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_v128_andnot(vacc${M}x${ABC[N:N+4]}, wasm_f32x4_le(vacc${M}x${ABC[N:N+4]}, vzero));
-      $else:
-        $for N in range(0, NR, 4):
-          $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_f32x4_max(vacc${M}x${ABC[N:N+4]}, vzero);
+      $for N in range(0, NR, 4):
+        $for M in range(MR):
+          vacc${M}x${ABC[N:N+4]} = wasm_i32x4_max(vacc${M}x${ABC[N:N+4]}, vzero);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):

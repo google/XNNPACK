@@ -14,7 +14,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_f32_igemm_relu_ukernel_4x2c4__wasmsimd_arm(
+void xnn_f32_igemm_relu_ukernel_4x2c4__wasmsimd(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -160,8 +160,8 @@ void xnn_f32_igemm_relu_ukernel_4x2c4__wasmsimd_arm(
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 2, 3, 6, 7));
 
     const v128_t vzero = wasm_f32x4_splat(0.0f);
-    vacc01x01 = wasm_f32x4_max(vacc01x01, vzero);
-    vacc23x01 = wasm_f32x4_max(vacc23x01, vzero);
+    vacc01x01 = wasm_i32x4_max(vacc01x01, vzero);
+    vacc23x01 = wasm_i32x4_max(vacc23x01, vzero);
 
     if XNN_LIKELY(nc >= 2) {
       *((double*) c3) = wasm_f64x2_extract_lane(vacc23x01, 1);

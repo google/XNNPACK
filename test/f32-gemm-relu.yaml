@@ -2,17 +2,13 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
-- name: xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat_arm
+- name: xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat
   k-block: 4
-- name: xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat_arm
+- name: xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat
   k-block: 4
-- name: xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat_x86
+- name: xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat
   k-block: 4
-- name: xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat_x86
-  k-block: 4
-- name: xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd_arm
-  k-block: 4
-- name: xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd_x86
+- name: xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd
   k-block: 4
 - name: xnn_f32_gemm_relu_ukernel_1x4__wasm
   k-block: 1
