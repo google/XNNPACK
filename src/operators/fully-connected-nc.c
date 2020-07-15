@@ -236,7 +236,7 @@ static enum xnn_status setup_fully_connected_nc(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_create_fully_connected_nc_q8(
+enum xnn_status xnn_create_fully_connected_nc_qu8(
     size_t input_channels,
     size_t output_channels,
     size_t input_stride,
@@ -257,28 +257,28 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), input_scale);
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qu8), input_scale);
     return xnn_status_invalid_parameter;
   }
 
   if (kernel_scale <= 0.0f || !isnormal(kernel_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g kernel scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), kernel_scale);
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qu8), kernel_scale);
     return xnn_status_invalid_parameter;
   }
 
   if (output_scale <= 0.0f || !isnormal(output_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), output_scale);
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qu8), output_scale);
     return xnn_status_invalid_parameter;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
       "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
-      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8), output_min, output_max);
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -287,14 +287,14 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
     xnn_log_error(
       "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
       "requantization scale %.7g is greater or equal to 1.0",
-      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8),
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qu8),
       input_scale, kernel_scale, output_scale, requantization_scale);
     return xnn_status_unsupported_parameter;
   }
 
-  const union xnn_q8_gemm_params params = xnn_init_q8_gemm_params(
+  const union xnn_qu8_gemm_params params = xnn_init_qu8_gemm_params(
     input_zero_point, kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
-  const struct xnn_q8_packing_params packing_params = {
+  const struct xnn_qu8_packing_params packing_params = {
     .input_zero_point = input_zero_point,
     .kernel_zero_point = kernel_zero_point,
   };
@@ -304,12 +304,12 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
     kernel, bias, flags,
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
-    (xnn_pack_gemm_io_w_function) xnn_pack_q8_gemm_io_w,
-    (xnn_pack_gemm_goi_w_function) xnn_pack_q8_gemm_goi_w,
+    (xnn_pack_gemm_io_w_function) xnn_pack_qu8_gemm_io_w,
+    (xnn_pack_gemm_goi_w_function) xnn_pack_qu8_gemm_goi_w,
     &packing_params, kernel_zero_point /* packed weights padding byte */,
     &params, sizeof(params),
-    &xnn_params.q8.gemm, &xnn_params.q8.gemm.minmax,
-    xnn_operator_type_fully_connected_nc_q8,
+    &xnn_params.qu8.gemm, &xnn_params.qu8.gemm.minmax,
+    xnn_operator_type_fully_connected_nc_qu8,
     fully_connected_op_out);
 }
 
@@ -368,16 +368,16 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     fully_connected_op_out);
 }
 
-enum xnn_status xnn_setup_fully_connected_nc_q8(
+enum xnn_status xnn_setup_fully_connected_nc_qu8(
     xnn_operator_t fully_connected_op,
     size_t batch_size,
     const uint8_t* input,
     uint8_t* output,
     pthreadpool_t threadpool)
 {
-  if (fully_connected_op->type != xnn_operator_type_fully_connected_nc_q8) {
+  if (fully_connected_op->type != xnn_operator_type_fully_connected_nc_qu8) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_q8),
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qu8),
       xnn_operator_type_to_string(fully_connected_op->type));
     return xnn_status_invalid_parameter;
   }
@@ -390,8 +390,8 @@ enum xnn_status xnn_setup_fully_connected_nc_q8(
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
-    &fully_connected_op->params.q8_gemm,
-    sizeof(fully_connected_op->params.q8_gemm),
+    &fully_connected_op->params.qu8_gemm,
+    sizeof(fully_connected_op->params.qu8_gemm),
     pthreadpool_get_threads_count(threadpool));
 }
 

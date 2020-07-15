@@ -27,7 +27,7 @@
 #include <xnnpack/params.h>
 
 
-static inline union xnn_q8_gemm_params xnn_init_scalar_q8_gemm_params(
+static inline union xnn_qu8_gemm_params xnn_init_scalar_qu8_gemm_params(
   uint8_t input_zero_point,
   uint8_t kernel_zero_point,
   float scale,
@@ -51,7 +51,7 @@ static inline union xnn_q8_gemm_params xnn_init_scalar_q8_gemm_params(
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
 
-  union xnn_q8_gemm_params params;
+  union xnn_qu8_gemm_params params;
   params.scalar.input_zero_point = (int32_t) (uint32_t) input_zero_point;
   params.scalar.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
   params.scalar.multiplier = multiplier;
@@ -66,7 +66,7 @@ static inline union xnn_q8_gemm_params xnn_init_scalar_q8_gemm_params(
   return params;
 }
 
-static inline union xnn_q8_gemm_params xnn_init_q8_gemm_params(
+static inline union xnn_qu8_gemm_params xnn_init_qu8_gemm_params(
   uint8_t input_zero_point,
   uint8_t kernel_zero_point,
   float scale,
@@ -87,7 +87,7 @@ static inline union xnn_q8_gemm_params xnn_init_q8_gemm_params(
   assert(shift >= 0);
   assert(shift < 32);
 
-  union xnn_q8_gemm_params params;
+  union xnn_qu8_gemm_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
@@ -144,7 +144,7 @@ static inline union xnn_q8_gemm_params xnn_init_q8_gemm_params(
   return params;
 }
 
-static inline union xnn_q8_avgpool_params xnn_init_q8_avgpool_params(
+static inline union xnn_qu8_avgpool_params xnn_init_qu8_avgpool_params(
   int32_t bias,
   float scale,
   uint8_t output_zero_point,
@@ -166,7 +166,7 @@ static inline union xnn_q8_avgpool_params xnn_init_q8_avgpool_params(
   assert(shift >= 16);
   assert(shift < 64);
 
-  union xnn_q8_avgpool_params params;
+  union xnn_qu8_avgpool_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t right_shift = (uint32_t) shift;
     const uint64_t rounding = UINT64_C(1) << (right_shift - 1);
@@ -212,7 +212,7 @@ static inline union xnn_q8_avgpool_params xnn_init_q8_avgpool_params(
   return params;
 }
 
-static inline union xnn_q8_avgpool_params xnn_init_scalar_q8_avgpool_params(
+static inline union xnn_qu8_avgpool_params xnn_init_scalar_qu8_avgpool_params(
   int32_t bias,
   float scale,
   uint8_t output_zero_point,
@@ -234,7 +234,7 @@ static inline union xnn_q8_avgpool_params xnn_init_scalar_q8_avgpool_params(
   assert(shift >= 16);
   assert(shift < 64);
 
-  union xnn_q8_avgpool_params params;
+  union xnn_qu8_avgpool_params params;
   const uint32_t right_shift = (uint32_t) shift;
   const int64_t rounding = INT64_C(1) << (right_shift - 1);
   params.scalar.bias = bias;
@@ -760,7 +760,7 @@ static inline union xnn_u8_minmax_params xnn_init_scalar_u8_minmax_params(
   return params;
 }
 
-static inline union xnn_q8_add_params xnn_init_q8_add_params(
+static inline union xnn_qu8_add_params xnn_init_qu8_add_params(
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -794,7 +794,7 @@ static inline union xnn_q8_add_params xnn_init_q8_add_params(
   assert(a_multiplier < UINT32_C(0x00400000));
   assert(b_multiplier < UINT32_C(0x00400000));
 
-  union xnn_q8_add_params params;
+  union xnn_qu8_add_params params;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
@@ -849,7 +849,7 @@ static inline union xnn_q8_add_params xnn_init_q8_add_params(
   return params;
 }
 
-static inline union xnn_q8_add_params xnn_init_scalar_q8_add_params(
+static inline union xnn_qu8_add_params xnn_init_scalar_qu8_add_params(
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -881,7 +881,7 @@ static inline union xnn_q8_add_params xnn_init_scalar_q8_add_params(
   assert(a_multiplier < UINT32_C(0x00400000));
   assert(b_multiplier < UINT32_C(0x00400000));
 
-  union xnn_q8_add_params params;
+  union xnn_qu8_add_params params;
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
   params.scalar.zero_point_product =

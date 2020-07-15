@@ -38,7 +38,7 @@
 #include "bench/utils.h"
 
 
-void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
+void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
   const size_t input_height = state.range(1);
   const size_t input_width = state.range(2);
@@ -89,7 +89,7 @@ void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
 
   std::vector<xnn_operator_t> convolution_operators(num_buffers);
   for (xnn_operator_t& convolution_op : convolution_operators) {
-    status = xnn_create_convolution2d_nhwc_q8(
+    status = xnn_create_convolution2d_nhwc_qu8(
       padding_top, padding_right, padding_bottom, padding_left,
       kernel_height, kernel_width,
       subsampling, subsampling,
@@ -108,7 +108,7 @@ void xnnpack_convolution_q8(benchmark::State& state, const char* net) {
   }
 
   for (size_t i = 0; i < convolution_operators.size(); i++) {
-    status = xnn_setup_convolution2d_nhwc_q8(
+    status = xnn_setup_convolution2d_nhwc_qu8(
       convolution_operators[i],
       batch_size, input_height, input_width,
       input.data(), output.data() + i * output_elements,
@@ -1877,28 +1877,28 @@ BENCHMARK_CAPTURE(xnnpack_convolution_f32, srcnn915, "SRCNN (9-1-5)")->Apply(SRC
 BENCHMARK_CAPTURE(xnnpack_convolution_f32, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_f32, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
 
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3Small)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, mobilenet_v3_large, "MobileNet v3 Large")->Apply(MobileNetV3Large)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, shufflenet_v2_x05, "ShuffleNet v2 0.5X")->Apply(ShuffleNetV2X05)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, shufflenet_v2_x10, "ShuffleNet v2 1.0X")->Apply(ShuffleNetV2X10)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, shufflenet_v2_x15, "ShuffleNet v2 1.5X")->Apply(ShuffleNetV2X15)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, shufflenet_v2_x20, "ShuffleNet v2 2.0X")->Apply(ShuffleNetV2X20)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, squeezenet_v10, "SqueezeNet 1.0")->Apply(SqueezeNetV10)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, squeezenet_v11, "SqueezeNet 1.1")->Apply(SqueezeNetV11)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, inception_v3, "Inception v3")->Apply(InceptionV3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, resnet18, "ResNet-18")->Apply(ResNet18)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, resnet50, "ResNet-50")->Apply(ResNet50)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, vgg, "VGG")->Apply(VGG)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_q8, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3Small)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v3_large, "MobileNet v3 Large")->Apply(MobileNetV3Large)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v2_x05, "ShuffleNet v2 0.5X")->Apply(ShuffleNetV2X05)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v2_x10, "ShuffleNet v2 1.0X")->Apply(ShuffleNetV2X10)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v2_x15, "ShuffleNet v2 1.5X")->Apply(ShuffleNetV2X15)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v2_x20, "ShuffleNet v2 2.0X")->Apply(ShuffleNetV2X20)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, squeezenet_v10, "SqueezeNet 1.0")->Apply(SqueezeNetV10)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, squeezenet_v11, "SqueezeNet 1.1")->Apply(SqueezeNetV11)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, inception_v3, "Inception v3")->Apply(InceptionV3)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, resnet18, "ResNet-18")->Apply(ResNet18)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, resnet50, "ResNet-50")->Apply(ResNet50)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, vgg, "VGG")->Apply(VGG)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_convolution_qu8, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
   BENCHMARK_CAPTURE(tflite_convolution_f32, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();

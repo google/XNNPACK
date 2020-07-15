@@ -147,7 +147,7 @@ class VAddMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_q8_vadd_minmax_ukernel_function vadd_minmax, Variant variant = Variant::Native) const {
+  void Test(xnn_qu8_vadd_minmax_ukernel_function vadd_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -169,23 +169,23 @@ class VAddMicrokernelTester {
       const uint8_t* b_data = inplace_b() ? y.data() : b.data();
 
       // Prepare parameters.
-      xnn_q8_add_params quantization_params = { };
+      xnn_qu8_add_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_q8_add_params(
+          quantization_params = xnn_init_qu8_add_params(
             a_zero_point(), b_zero_point(), y_zero_point(),
             a_scale() / y_scale(), b_scale() / y_scale(),
             qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_q8_add_params(
+          quantization_params = xnn_init_scalar_qu8_add_params(
             a_zero_point(), b_zero_point(), y_zero_point(),
             a_scale() / y_scale(), b_scale() / y_scale(),
             qmin(), qmax());
           break;
       }
-      const xnn_q8_add_params scalar_quantization_params =
-          xnn_init_scalar_q8_add_params(
+      const xnn_qu8_add_params scalar_quantization_params =
+          xnn_init_scalar_qu8_add_params(
             a_zero_point(), b_zero_point(), y_zero_point(),
             a_scale() / y_scale(), b_scale() / y_scale(),
             qmin(), qmax());

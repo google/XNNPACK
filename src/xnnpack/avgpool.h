@@ -60,41 +60,41 @@ DECLARE_F32_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_minmax_ukern
 DECLARE_F32_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_minmax_ukernel_9x__scalar_c1)
 
 
-#define DECLARE_Q8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                          \
-      size_t output_pixels,                                           \
-      size_t kernel_elements,                                         \
-      size_t channels,                                                \
-      const uint8_t** input,                                          \
-      size_t input_offset,                                            \
-      const uint8_t* zero,                                            \
-      int32_t* buffer,                                                \
-      uint8_t* output,                                                \
-      size_t input_increment,                                         \
-      size_t output_increment,                                        \
-      const union xnn_q8_avgpool_params* params);
+#define DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                           \
+      size_t output_pixels,                                            \
+      size_t kernel_elements,                                          \
+      size_t channels,                                                 \
+      const uint8_t** input,                                           \
+      size_t input_offset,                                             \
+      const uint8_t* zero,                                             \
+      int32_t* buffer,                                                 \
+      uint8_t* output,                                                 \
+      size_t input_increment,                                          \
+      size_t output_increment,                                         \
+      const union xnn_qu8_avgpool_params* params);
 
-DECLARE_Q8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_q8_avgpool_minmax_ukernel_9p8x__neon_c8)
-DECLARE_Q8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_q8_avgpool_minmax_ukernel_9p8x__sse2_c8)
-DECLARE_Q8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_q8_avgpool_minmax_ukernel_9p8x__scalar_c1)
+DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8)
+DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8)
+DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1)
 
 
-#define DECLARE_Q8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                        \
-      size_t output_pixels,                                         \
-      size_t kernel_elements,                                       \
-      size_t channels,                                              \
-      const uint8_t** input,                                        \
-      size_t input_offset,                                          \
-      const uint8_t* zero,                                          \
-      uint8_t* output,                                              \
-      size_t input_increment,                                       \
-      size_t output_increment,                                      \
-      const union xnn_q8_avgpool_params* params);
+#define DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                         \
+      size_t output_pixels,                                          \
+      size_t kernel_elements,                                        \
+      size_t channels,                                               \
+      const uint8_t** input,                                         \
+      size_t input_offset,                                           \
+      const uint8_t* zero,                                           \
+      uint8_t* output,                                               \
+      size_t input_increment,                                        \
+      size_t output_increment,                                       \
+      const union xnn_qu8_avgpool_params* params);
 
-DECLARE_Q8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_q8_avgpool_minmax_ukernel_9x__neon_c8)
-DECLARE_Q8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_q8_avgpool_minmax_ukernel_9x__sse2_c8)
-DECLARE_Q8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_q8_avgpool_minmax_ukernel_9x__scalar_c1)
+DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8)
+DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8)
+DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1)
 
 
 #ifdef __cplusplus

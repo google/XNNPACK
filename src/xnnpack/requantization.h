@@ -47,7 +47,7 @@ static inline uint8_t xnn_q31_requantize(
 
 static inline uint8_t xnn_avgpool_quantize(
   int32_t n,
-  union xnn_q8_avgpool_params params)
+  union xnn_qu8_avgpool_params params)
 {
   const int64_t product = (int64_t) n * (int64_t) params.scalar.multiplier;
   const int64_t adjusted_product = product - (int64_t) (n < 0);
@@ -65,7 +65,7 @@ static inline uint8_t xnn_avgpool_quantize(
 
 static inline uint8_t xnn_add_quantize(
   uint8_t a, uint8_t b,
-  union xnn_q8_add_params params)
+  union xnn_qu8_add_params params)
 {
   // Multiply by factors and accumulate products.
   int32_t acc = params.scalar.zero_point_product +

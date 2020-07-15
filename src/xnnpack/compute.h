@@ -69,7 +69,7 @@ struct gemm_context {
   uint32_t log2_csize;
   struct xnn_hmp_gemm_ukernel ukernel;
   union {
-    union xnn_q8_gemm_params q8;
+    union xnn_qu8_gemm_params qu8;
     struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
@@ -168,7 +168,7 @@ struct igemm_context {
   uint32_t log2_csize;
   struct xnn_hmp_igemm_ukernel ukernel;
   union {
-    union xnn_q8_gemm_params q8;
+    union xnn_qu8_gemm_params qu8;
     union xnn_f32_minmax_params f32;
   } params;
 };
@@ -230,7 +230,7 @@ struct subgemm_context {
   uint32_t log2_csize;
   struct xnn_hmp_gemm_ukernel ukernel;
   union {
-    union xnn_q8_gemm_params q8;
+    union xnn_qu8_gemm_params qu8;
     union xnn_f32_minmax_params f32;
   } params;
 };
@@ -274,7 +274,7 @@ struct subconv_context {
   uint32_t log2_csize;
   struct xnn_hmp_igemm_ukernel ukernel;
   union {
-    union xnn_q8_gemm_params q8;
+    union xnn_qu8_gemm_params qu8;
     union xnn_f32_minmax_params f32;
   } params;
 };
@@ -344,7 +344,7 @@ struct dwconv_context {
   size_t input_offset;
   const void* zero;
   union {
-    union xnn_q8_gemm_params q8;
+    union xnn_qu8_gemm_params qu8;
     struct xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
@@ -493,7 +493,7 @@ struct average_pooling_context {
   size_t input_increment;
   size_t output_increment;
   union {
-    union xnn_q8_avgpool_params q8;
+    union xnn_qu8_avgpool_params qu8;
     union xnn_f32_scaleminmax_params f32;
   } params;
   union {
@@ -562,7 +562,7 @@ struct global_average_pooling_nwc_context {
   void* output;
   size_t output_batch_stride;
   union {
-    union xnn_q8_avgpool_params q8;
+    union xnn_qu8_avgpool_params qu8;
     struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_scaleminmax_params f32;
   } params;
@@ -644,7 +644,7 @@ struct elementwise_binary_context {
   size_t y_stride[XNN_MAX_TENSOR_DIMS - 1];
   size_t elements;
   union {
-    union xnn_q8_add_params q8;
+    union xnn_qu8_add_params qu8;
     struct xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;

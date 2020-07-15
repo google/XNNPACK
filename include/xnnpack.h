@@ -1748,9 +1748,9 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f16(
 
 #endif  // XNN_NO_F16_OPERATORS
 
-#ifndef XNN_NO_Q8_OPERATORS
+#ifndef XNN_NO_QU8_OPERATORS
 
-enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
+enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
   uint32_t input_padding_bottom,
@@ -1771,7 +1771,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_q8(
   uint32_t flags,
   xnn_operator_t* average_pooling_op_out);
 
-enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
+enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
   xnn_operator_t average_pooling_op,
   size_t batch_size,
   size_t input_height,
@@ -1780,7 +1780,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_q8(
   uint8_t* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_convolution2d_nhwc_q8(
+enum xnn_status xnn_create_convolution2d_nhwc_qu8(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
   uint32_t input_padding_bottom,
@@ -1794,8 +1794,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
   uint32_t groups,
   size_t group_input_channels,
   size_t group_output_channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
+  size_t input_channel_stride,
+  size_t output_channel_stride,
   uint8_t input_zero_point,
   float input_scale,
   uint8_t kernel_zero_point,
@@ -1809,7 +1809,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
   uint32_t flags,
   xnn_operator_t* convolution_op_out);
 
-enum xnn_status xnn_setup_convolution2d_nhwc_q8(
+enum xnn_status xnn_setup_convolution2d_nhwc_qu8(
   xnn_operator_t convolution_op,
   size_t batch_size,
   size_t input_height,
@@ -1818,7 +1818,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_q8(
   uint8_t* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
+enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
   uint32_t output_padding_top,
   uint32_t output_padding_right,
   uint32_t output_padding_bottom,
@@ -1847,7 +1847,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_q8(
   uint32_t flags,
   xnn_operator_t* deconvolution_op_out);
 
-enum xnn_status xnn_setup_deconvolution2d_nhwc_q8(
+enum xnn_status xnn_setup_deconvolution2d_nhwc_qu8(
   xnn_operator_t deconvolution_op,
   size_t batch_size,
   size_t input_height,
@@ -1858,7 +1858,7 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_q8(
   uint8_t* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_fully_connected_nc_q8(
+enum xnn_status xnn_create_fully_connected_nc_qu8(
   size_t input_channels,
   size_t output_channels,
   size_t input_stride,
@@ -1876,14 +1876,14 @@ enum xnn_status xnn_create_fully_connected_nc_q8(
   uint32_t flags,
   xnn_operator_t* fully_connected_op_out);
 
-enum xnn_status xnn_setup_fully_connected_nc_q8(
+enum xnn_status xnn_setup_fully_connected_nc_qu8(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
   const uint8_t* input,
   uint8_t* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_global_average_pooling_nwc_q8(
+enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
   size_t channels,
   size_t input_stride,
   size_t output_stride,
@@ -1896,7 +1896,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_q8(
   uint32_t flags,
   xnn_operator_t* global_average_pooling_op_out);
 
-enum xnn_status xnn_setup_global_average_pooling_nwc_q8(
+enum xnn_status xnn_setup_global_average_pooling_nwc_qu8(
   xnn_operator_t global_average_pooling_op,
   size_t batch_size,
   size_t width,
@@ -1904,7 +1904,7 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_q8(
   uint8_t* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_leaky_relu_nc_q8(
+enum xnn_status xnn_create_leaky_relu_nc_qu8(
   size_t channels,
   size_t input_stride,
   size_t output_stride,
@@ -1918,14 +1918,14 @@ enum xnn_status xnn_create_leaky_relu_nc_q8(
   uint32_t flags,
   xnn_operator_t* leaky_relu_op_out);
 
-enum xnn_status xnn_setup_leaky_relu_nc_q8(
+enum xnn_status xnn_setup_leaky_relu_nc_qu8(
   xnn_operator_t leaky_relu_op,
   size_t batch_size,
   const uint8_t* input,
   uint8_t* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_sigmoid_nc_q8(
+enum xnn_status xnn_create_sigmoid_nc_qu8(
   size_t channels,
   size_t input_stride,
   size_t output_stride,
@@ -1938,14 +1938,14 @@ enum xnn_status xnn_create_sigmoid_nc_q8(
   uint32_t flags,
   xnn_operator_t* sigmoid_op_out);
 
-enum xnn_status xnn_setup_sigmoid_nc_q8(
+enum xnn_status xnn_setup_sigmoid_nc_qu8(
   xnn_operator_t sigmoid_op,
   size_t batch_size,
   const uint8_t* input,
   uint8_t* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_softmax_nc_q8(
+enum xnn_status xnn_create_softmax_nc_qu8(
   size_t channels,
   size_t input_stride,
   size_t output_stride,
@@ -1955,14 +1955,14 @@ enum xnn_status xnn_create_softmax_nc_q8(
   uint32_t flags,
   xnn_operator_t* softmax_op_out);
 
-enum xnn_status xnn_setup_softmax_nc_q8(
+enum xnn_status xnn_setup_softmax_nc_qu8(
   xnn_operator_t softmax_op,
   size_t batch_size,
   const uint8_t* input,
   uint8_t* output,
   pthreadpool_t threadpool);
 
-#endif  // XNN_NO_Q8_OPERATORS
+#endif  // XNN_NO_QU8_OPERATORS
 
 #ifndef XNN_NO_U8_OPERATORS
 

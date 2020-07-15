@@ -20,9 +20,9 @@
 #include <fp16.h>
 #include "bench/utils.h"
 
-#ifndef XNN_NO_Q8_OPERATORS
+#ifndef XNN_NO_QU8_OPERATORS
 
-static void global_average_pooling_q8(benchmark::State& state) {
+static void global_average_pooling_qu8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
   const size_t input_height = state.range(1);
   const size_t input_width = state.range(2);
@@ -42,7 +42,7 @@ static void global_average_pooling_q8(benchmark::State& state) {
   }
 
   xnn_operator_t global_pooling_op = nullptr;
-  status = xnn_create_global_average_pooling_nwc_q8(
+  status = xnn_create_global_average_pooling_nwc_qu8(
     channels, channels /* input stride */, channels /* output stride */,
     127 /* input zero point */, 0.75f /* input scale */,
     127 /* output zero point */, 1.25f /* output scale */,
@@ -52,7 +52,7 @@ static void global_average_pooling_q8(benchmark::State& state) {
     state.SkipWithError("failed to create Global Average Pooling operator");
   }
 
-  status = xnn_setup_global_average_pooling_nwc_q8(
+  status = xnn_setup_global_average_pooling_nwc_qu8(
     global_pooling_op,
     batch_size, input_height * input_width,
     input.data(), output.data(),
@@ -78,7 +78,7 @@ static void global_average_pooling_q8(benchmark::State& state) {
     benchmark::Counter::kIsRate);
 }
 
-#endif  // XNN_NO_Q8_OPERATORS
+#endif  // XNN_NO_QU8_OPERATORS
 
 #ifndef XNN_NO_F16_OPERATORS
 
@@ -204,9 +204,9 @@ static void ImageNetArguments(benchmark::internal::Benchmark* b) {
   b->Args({1, 13, 13, 1000});
 }
 
-#ifndef XNN_NO_Q8_OPERATORS
-BENCHMARK(global_average_pooling_q8)->Apply(ImageNetArguments)->UseRealTime();
-#endif  // XNN_NO_Q8_OPERATORS
+#ifndef XNN_NO_QU8_OPERATORS
+BENCHMARK(global_average_pooling_qu8)->Apply(ImageNetArguments)->UseRealTime();
+#endif  // XNN_NO_QU8_OPERATORS
 #ifndef XNN_NO_F16_OPERATORS
 BENCHMARK(global_average_pooling_f16)->Apply(ImageNetArguments)->UseRealTime();
 #endif  // XNN_NO_F16_OPERATORS

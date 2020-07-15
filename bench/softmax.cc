@@ -24,7 +24,7 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 
-static void xnnpack_softmax_q8(benchmark::State& state) {
+static void xnnpack_softmax_qu8(benchmark::State& state) {
   const size_t batch_size = static_cast<size_t>(state.range(0));
   const size_t channels = static_cast<size_t>(state.range(1));
 
@@ -44,7 +44,7 @@ static void xnnpack_softmax_q8(benchmark::State& state) {
   }
 
   xnn_operator_t softmax_op = nullptr;
-  status = xnn_create_softmax_nc_q8(
+  status = xnn_create_softmax_nc_qu8(
     channels, channels /* input stride */, channels /* output stride */,
     1.0f /* input scale */,
     0 /* output zero point */, 1.0f / 256.0f /* output scale */,
@@ -54,7 +54,7 @@ static void xnnpack_softmax_q8(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_softmax_nc_q8(
+  status = xnn_setup_softmax_nc_qu8(
     softmax_op,
     batch_size,
     input.data(), output.data(),
@@ -284,7 +284,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b)
   b->Args({1, 21841});
 }
 
-BENCHMARK(xnnpack_softmax_q8)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK(xnnpack_softmax_qu8)->Apply(CharacteristicArguments)->UseRealTime();
 BENCHMARK(xnnpack_softmax_f32)->Apply(CharacteristicArguments)->UseRealTime();
 #ifdef BENCHMARK_TENSORFLOW_LITE
 BENCHMARK(tflite_softmax_f32)->Apply(CharacteristicArguments)->UseRealTime();

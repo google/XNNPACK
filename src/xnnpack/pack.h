@@ -20,7 +20,7 @@ extern "C" {
 #endif
 
 
-struct xnn_q8_packing_params {
+struct xnn_qu8_packing_params {
   uint8_t input_zero_point;
   uint8_t kernel_zero_point;
 };
@@ -62,7 +62,7 @@ XNN_INTERNAL void xnn_pack_f16_gemm_goi_w(
   uint16_t* packed_w,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_q8_gemm_goi_w(
+XNN_INTERNAL void xnn_pack_qu8_gemm_goi_w(
   size_t g,
   size_t nc,
   size_t kc,
@@ -72,7 +72,7 @@ XNN_INTERNAL void xnn_pack_q8_gemm_goi_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
-  const struct xnn_q8_packing_params* params);
+  const struct xnn_qu8_packing_params* params);
 
 
 typedef void (*xnn_pack_gemm_io_w_function)(
@@ -108,7 +108,7 @@ XNN_INTERNAL void xnn_pack_f16_gemm_io_w(
   uint16_t* packed_w,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_q8_gemm_io_w(
+XNN_INTERNAL void xnn_pack_qu8_gemm_io_w(
   size_t nc,
   size_t kc,
   size_t nr,
@@ -117,7 +117,7 @@ XNN_INTERNAL void xnn_pack_q8_gemm_io_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
-  const struct xnn_q8_packing_params* params);
+  const struct xnn_qu8_packing_params* params);
 
 
 typedef void (*xnn_pack_conv_goki_w_function)(
@@ -159,7 +159,7 @@ XNN_INTERNAL void xnn_pack_f16_conv_goki_w(
   uint16_t* packed_w,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_q8_conv_goki_w(
+XNN_INTERNAL void xnn_pack_qu8_conv_goki_w(
   size_t g,
   size_t nc,
   size_t ks,
@@ -170,7 +170,7 @@ XNN_INTERNAL void xnn_pack_q8_conv_goki_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
-  const struct xnn_q8_packing_params* params);
+  const struct xnn_qu8_packing_params* params);
 
 
 typedef void (*xnn_pack_conv_kgo_w_function)(
@@ -206,7 +206,7 @@ XNN_INTERNAL void xnn_pack_f16_conv_kgo_w(
   uint16_t* packed_w,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_q8_conv_kgo_w(
+XNN_INTERNAL void xnn_pack_qu8_conv_kgo_w(
   size_t g,
   size_t nc,
   size_t ks,
@@ -215,7 +215,7 @@ XNN_INTERNAL void xnn_pack_q8_conv_kgo_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
-  const struct xnn_q8_packing_params* params);
+  const struct xnn_qu8_packing_params* params);
 
 
 typedef void (*xnn_pack_deconv_goki_w_function)(
@@ -269,7 +269,7 @@ XNN_INTERNAL void xnn_pack_f16_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_q8_deconv_goki_w(
+XNN_INTERNAL void xnn_pack_qu8_deconv_goki_w(
   size_t g,
   size_t nc,
   size_t kh,
@@ -284,7 +284,7 @@ XNN_INTERNAL void xnn_pack_q8_deconv_goki_w(
   const int32_t* b,
   void* packed_w,
   struct subconvolution_params* subconv_params,
-  const struct xnn_q8_packing_params* params);
+  const struct xnn_qu8_packing_params* params);
 
 
 typedef void (*xnn_pack_dwconv_ghw_w_function)(
@@ -317,7 +317,7 @@ XNN_INTERNAL void xnn_pack_f16_dwconv_ghw_w(
   uint16_t* packed_w,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_q8_dwconv_ghw_w(
+XNN_INTERNAL void xnn_pack_qu8_dwconv_ghw_w(
   size_t h,
   size_t w,
   size_t c,
@@ -325,7 +325,7 @@ XNN_INTERNAL void xnn_pack_q8_dwconv_ghw_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
-  const struct xnn_q8_packing_params* params);
+  const struct xnn_qu8_packing_params* params);
 
 
 typedef void (*xnn_pack_dwconv_hwg_w_function)(
@@ -358,7 +358,7 @@ XNN_INTERNAL void xnn_pack_f16_dwconv_hwg_w(
   uint16_t* packed_w,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_q8_dwconv_hwg_w(
+XNN_INTERNAL void xnn_pack_qu8_dwconv_hwg_w(
   size_t h,
   size_t w,
   size_t c,
@@ -366,7 +366,7 @@ XNN_INTERNAL void xnn_pack_q8_dwconv_hwg_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
-  const struct xnn_q8_packing_params* params);
+  const struct xnn_qu8_packing_params* params);
 
 
 XNN_INTERNAL void xnn_pack_f32_gemminc_goi_w(

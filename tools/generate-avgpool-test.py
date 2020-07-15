@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(q8|f16|f32)_[p]?avgpool(_(minmax))?_ukernel_((\d+)p)?(\d+)x__(.+)_c(\d+)$", name)
+  match = re.match(r"^xnn_(qu8|f16|f32)_[p]?avgpool(_(minmax))?_ukernel_((\d+)p)?(\d+)x__(.+)_c(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
@@ -80,7 +80,7 @@ $if INCREMENTAL_TILE == 0:
     }
   }
 
-  $if DATATYPE == "q8":
+  $if DATATYPE == "qu8":
     TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_unipass_fulltile_with_input_scale) {
       $if ISA_CHECK:
         ${ISA_CHECK};
@@ -238,7 +238,7 @@ $if INCREMENTAL_TILE == 0:
       }
     }
 
-    $if DATATYPE == "q8":
+    $if DATATYPE == "qu8":
       TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_unipass_fulltile_with_input_scale) {
         $if ISA_CHECK:
           ${ISA_CHECK};
@@ -413,7 +413,7 @@ $if INCREMENTAL_TILE == 0:
       }
     }
 
-    $if DATATYPE == "q8":
+    $if DATATYPE == "qu8":
       TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_unipass_fulltile_with_input_scale) {
         $if ISA_CHECK:
           ${ISA_CHECK};
@@ -588,7 +588,7 @@ $if INCREMENTAL_TILE == 0:
     }
   }
 
-  $if DATATYPE == "q8":
+  $if DATATYPE == "qu8":
     TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_unipass_fulltile_with_input_scale) {
       $if ISA_CHECK:
         ${ISA_CHECK};
@@ -778,7 +778,7 @@ $if INCREMENTAL_TILE == 0:
     }
   }
 
-  $if DATATYPE == "q8":
+  $if DATATYPE == "qu8":
     TEST(${TEST_NAME}, few_output_pixels_with_input_scale) {
       $if ISA_CHECK:
         ${ISA_CHECK};
@@ -969,7 +969,7 @@ $else:
     }
   }
 
-  $if DATATYPE == "q8":
+  $if DATATYPE == "qu8":
     TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_twopass_fulltile_with_input_scale) {
       $if ISA_CHECK:
         ${ISA_CHECK};
@@ -1127,7 +1127,7 @@ $else:
       }
     }
 
-    $if DATATYPE == "q8":
+    $if DATATYPE == "qu8":
       TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_twopass_fulltile_with_input_scale) {
         $if ISA_CHECK:
           ${ISA_CHECK};
@@ -1302,7 +1302,7 @@ $else:
       }
     }
 
-    $if DATATYPE == "q8":
+    $if DATATYPE == "qu8":
       TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_twopass_fulltile_with_input_scale) {
         $if ISA_CHECK:
           ${ISA_CHECK};
@@ -1477,7 +1477,7 @@ $else:
     }
   }
 
-  $if DATATYPE == "q8":
+  $if DATATYPE == "qu8":
     TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_twopass_fulltile_with_input_scale) {
       $if ISA_CHECK:
         ${ISA_CHECK};
@@ -1652,7 +1652,7 @@ $else:
     }
   }
 
-  $if DATATYPE == "q8":
+  $if DATATYPE == "qu8":
     TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_with_input_scale) {
       $if ISA_CHECK:
         ${ISA_CHECK};
@@ -1787,7 +1787,7 @@ $else:
       }
     }
 
-    $if DATATYPE == "q8":
+    $if DATATYPE == "qu8":
       TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_multipass_with_input_scale) {
         $if ISA_CHECK:
           ${ISA_CHECK};
@@ -1933,7 +1933,7 @@ $else:
       }
     }
 
-    $if DATATYPE == "q8":
+    $if DATATYPE == "qu8":
       TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_multipass_with_input_scale) {
         $if ISA_CHECK:
           ${ISA_CHECK};
@@ -2079,7 +2079,7 @@ $else:
     }
   }
 
-  $if DATATYPE == "q8":
+  $if DATATYPE == "qu8":
     TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_with_input_scale) {
       $if ISA_CHECK:
         ${ISA_CHECK};
@@ -2234,7 +2234,7 @@ $else:
     }
   }
 
-  $if DATATYPE == "q8":
+  $if DATATYPE == "qu8":
     TEST(${TEST_NAME}, few_output_pixels_with_input_scale) {
       $if ISA_CHECK:
         ${ISA_CHECK};

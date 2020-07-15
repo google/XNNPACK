@@ -28,8 +28,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "ArgMax Pooling (NHWC, F32)";
     case xnn_operator_type_average_pooling_nhwc_f32:
       return "Average Pooling (NHWC, F32)";
-    case xnn_operator_type_average_pooling_nhwc_q8:
-      return "Average Pooling (NHWC, Q8)";
+    case xnn_operator_type_average_pooling_nhwc_qu8:
+      return "Average Pooling (NHWC, QU8)";
     case xnn_operator_type_bankers_rounding_nc_f32:
       return "Bankers Rounding (NC, F32)";
     case xnn_operator_type_ceiling_nc_f32:
@@ -48,38 +48,38 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Convolution (NHWC, F16)";
     case xnn_operator_type_convolution_nhwc_f32:
       return "Convolution (NHWC, F32)";
-    case xnn_operator_type_convolution_nhwc_q8:
-      return "Convolution (NHWC, Q8)";
+    case xnn_operator_type_convolution_nhwc_qu8:
+      return "Convolution (NHWC, QU8)";
     case xnn_operator_type_convolution_nchw_f32:
       return "Convolution (NCHW, F32)";
     case xnn_operator_type_copy_nc_x32:
       return "Copy (NC, X32)";
     case xnn_operator_type_deconvolution_nhwc_f32:
       return "Deconvolution (NHWC, F32)";
-    case xnn_operator_type_deconvolution_nhwc_q8:
-      return "Deconvolution (NHWC, Q8)";
+    case xnn_operator_type_deconvolution_nhwc_qu8:
+      return "Deconvolution (NHWC, QU8)";
     case xnn_operator_type_divide_nd_f32:
       return "Divide (ND, F32)";
     case xnn_operator_type_floor_nc_f32:
       return "Floor (NC, F32)";
     case xnn_operator_type_fully_connected_nc_f32:
       return "Fully Connected (NC, F32)";
-    case xnn_operator_type_fully_connected_nc_q8:
-      return "Fully Connected (NC, Q8)";
+    case xnn_operator_type_fully_connected_nc_qu8:
+      return "Fully Connected (NC, QU8)";
     case xnn_operator_type_global_average_pooling_nwc_f16:
       return "Global Average Pooling (NWC, F16)";
     case xnn_operator_type_global_average_pooling_nwc_f32:
       return "Global Average Pooling (NWC, F32)";
-    case xnn_operator_type_global_average_pooling_nwc_q8:
-      return "Global Average Pooling (NWC, Q8)";
+    case xnn_operator_type_global_average_pooling_nwc_qu8:
+      return "Global Average Pooling (NWC, QU8)";
     case xnn_operator_type_global_average_pooling_ncw_f32:
       return "Global Average Pooling (NCW, F32)";
     case xnn_operator_type_hardswish_nc_f32:
       return "HardSwish (NC, F32)";
     case xnn_operator_type_leaky_relu_nc_f32:
       return "Leaky ReLU (NC, F32)";
-    case xnn_operator_type_leaky_relu_nc_q8:
-      return "Leaky ReLU (NC, Q8)";
+    case xnn_operator_type_leaky_relu_nc_qu8:
+      return "Leaky ReLU (NC, QU8)";
     case xnn_operator_type_max_pooling_nhwc_f32:
       return "Max Pooling (NHWC, F32)";
     case xnn_operator_type_max_pooling_nhwc_u8:
@@ -98,12 +98,12 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Resize Bilinear (NHWC, F32)";
     case xnn_operator_type_sigmoid_nc_f32:
       return "Sigmoid (NC, F32)";
-    case xnn_operator_type_sigmoid_nc_q8:
-      return "Sigmoid (NC, Q8)";
+    case xnn_operator_type_sigmoid_nc_qu8:
+      return "Sigmoid (NC, QU8)";
     case xnn_operator_type_softmax_nc_f32:
       return "Softmax (NC, F32)";
-    case xnn_operator_type_softmax_nc_q8:
-      return "Softmax (NC, Q8)";
+    case xnn_operator_type_softmax_nc_qu8:
+      return "Softmax (NC, QU8)";
     case xnn_operator_type_square_nc_f32:
       return "Square (NC, F32)";
     case xnn_operator_type_square_root_nc_f32:
