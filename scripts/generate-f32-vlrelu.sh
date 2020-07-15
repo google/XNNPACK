@@ -14,6 +14,13 @@ tools/xngen src/f32-vlrelu/wasm.c.in -D BATCH_TILE=1 -D WASM=1 -o src/f32-vlrelu
 tools/xngen src/f32-vlrelu/wasm.c.in -D BATCH_TILE=2 -D WASM=1 -o src/f32-vlrelu/gen/wasm-x2.c
 tools/xngen src/f32-vlrelu/wasm.c.in -D BATCH_TILE=4 -D WASM=1 -o src/f32-vlrelu/gen/wasm-x4.c
 
+################################## WAsm SIMD ##################################
+tools/xngen src/f32-vlrelu/wasmsimd-bitselect.c.in -D BATCH_TILE=4 -o src/f32-vlrelu/gen/wasmsimd-bitselect-x4.c
+tools/xngen src/f32-vlrelu/wasmsimd-bitselect.c.in -D BATCH_TILE=8 -o src/f32-vlrelu/gen/wasmsimd-bitselect-x8.c
+
+tools/xngen src/f32-vlrelu/wasmsimd-minmax.c.in -D BATCH_TILE=4 -o src/f32-vlrelu/gen/wasmsimd-minmax-x4.c
+tools/xngen src/f32-vlrelu/wasmsimd-minmax.c.in -D BATCH_TILE=8 -o src/f32-vlrelu/gen/wasmsimd-minmax-x8.c
+
 ################################### ARM NEON ##################################
 tools/xngen src/f32-vlrelu/neon.c.in -D BATCH_TILE=4 -o src/f32-vlrelu/gen/neon-x4.c
 tools/xngen src/f32-vlrelu/neon.c.in -D BATCH_TILE=8 -o src/f32-vlrelu/gen/neon-x8.c
