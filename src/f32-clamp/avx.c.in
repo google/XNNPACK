@@ -24,6 +24,8 @@ void xnn_f32_clamp_ukernel__avx_x${BATCH_TILE}(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const __m256 vy_min = _mm256_broadcast_ps((const __m128*) params->sse.min);
   const __m256 vy_max = _mm256_broadcast_ps((const __m128*) params->sse.max);

@@ -22,6 +22,8 @@ void xnn_f16_clamp_ukernel__neonfp16arith_x${BATCH_TILE}(
 {
   assert(n != 0);
   assert(n % sizeof(__fp16) == 0);
+  assert(x_ptr != NULL);
+  assert(y_ptr != NULL);
 
   const __fp16* x = (const __fp16*) x_ptr;
   __fp16* y = (__fp16*) y_ptr;
