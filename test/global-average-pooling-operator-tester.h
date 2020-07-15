@@ -153,7 +153,7 @@ class GlobalAveragePoolingOperatorTester {
     return this->iterations_;
   }
 
-  void TestNWCxQ8() const {
+  void TestNWCxQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -184,7 +184,7 @@ class GlobalAveragePoolingOperatorTester {
       xnn_operator_t global_average_pooling_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_global_average_pooling_nwc_q8(
+        xnn_create_global_average_pooling_nwc_qu8(
           channels(), input_stride(), output_stride(),
           input_zero_point(), input_scale(),
           output_zero_point(), output_scale(),
@@ -196,7 +196,7 @@ class GlobalAveragePoolingOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_nwc_q8(
+        xnn_setup_global_average_pooling_nwc_qu8(
           global_average_pooling_op,
           batch_size(), width(),
           input.data(), output.data(),

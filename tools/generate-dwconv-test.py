@@ -221,7 +221,7 @@ $if ACTIVATION == "MINMAX":
     }
   }
 
-$if DATATYPE == "q8":
+$if DATATYPE == "qu8":
   TEST(${TEST_NAME}, input_zero_point_only) {
     $if ISA_CHECK:
       ${ISA_CHECK};

@@ -31,9 +31,9 @@ static std::pair<size_t, size_t> LargePoolSize(size_t min_elements) {
 
 /**************************** AVGPOOL path, unipass ****************************/
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first + 3)
@@ -41,20 +41,20 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second + 3)
       .input_width(pooling_size.first + 2)
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride_width = 1; stride_width <= 2; stride_width++) {
       for (size_t stride_height = 1; stride_height <= 2; stride_height++) {
@@ -70,7 +70,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_stride) {
           .stride_height(stride_height)
           .stride_width(stride_width)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
         AveragePoolingOperatorTester()
           .input_height(pooling_size.second + 3)
           .input_width(pooling_size.first + 2)
@@ -79,15 +79,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_stride) {
           .stride_height(stride_height)
           .stride_width(stride_width)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_width_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t padding_left = 0; padding_left <= 1; padding_left++) {
@@ -101,7 +101,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_width_padding) {
             .pooling_width(pooling_size.second)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
           AveragePoolingOperatorTester()
             .input_height(pooling_size.second + 3)
             .input_width(pooling_size.first + 2)
@@ -111,16 +111,16 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_width_padding) {
             .pooling_width(pooling_size.first)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
         }
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_height_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
@@ -134,7 +134,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_height_padding) {
             .pooling_width(pooling_size.second)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
           AveragePoolingOperatorTester()
             .input_height(pooling_size.second + 3)
             .input_width(pooling_size.first + 2)
@@ -144,16 +144,16 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_height_padding) {
             .pooling_width(pooling_size.first)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
         }
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_tf_same_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t input_height = pooling_size.first + 3; input_height <= pooling_size.first + 4; input_height++) {
@@ -165,7 +165,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.second)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_width = pooling_size.second + 2; input_width <= pooling_size.second + 3; input_width++) {
         AveragePoolingOperatorTester()
@@ -176,7 +176,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.second)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_height = pooling_size.second + 3; input_height <= pooling_size.second + 4; input_height++) {
         AveragePoolingOperatorTester()
@@ -187,7 +187,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.first)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_width = pooling_size.first + 2; input_width <= pooling_size.first + 3; input_width++) {
         AveragePoolingOperatorTester()
@@ -198,15 +198,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.first)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_input_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first + 3)
@@ -215,7 +215,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_input_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second + 3)
       .input_width(pooling_size.first + 2)
@@ -223,13 +223,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_input_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_output_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first + 3)
@@ -238,7 +238,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_output_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second + 3)
       .input_width(pooling_size.first + 2)
@@ -246,13 +246,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_output_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_input_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_input_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float input_scale = 0.01f; input_scale < 100.0f; input_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -262,7 +262,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_input_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second + 3)
         .input_width(pooling_size.first + 2)
@@ -270,14 +270,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_input_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_input_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_input_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t input_zero_point = 0; input_zero_point <= 255; input_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -287,7 +287,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_input_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second + 3)
         .input_width(pooling_size.first + 2)
@@ -295,14 +295,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_input_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_output_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_output_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float output_scale = 0.01f; output_scale < 100.0f; output_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -312,7 +312,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_output_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second + 3)
         .input_width(pooling_size.first + 2)
@@ -320,14 +320,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_output_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_output_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_output_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t output_zero_point = 0; output_zero_point <= 255; output_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -337,7 +337,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_output_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second + 3)
         .input_width(pooling_size.first + 2)
@@ -345,14 +345,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_output_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_qmin) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first + 3)
@@ -361,7 +361,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_qmin) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second + 3)
       .input_width(pooling_size.first + 2)
@@ -369,13 +369,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_qmin) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_qmax) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_pool_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first + 3)
@@ -384,7 +384,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_qmax) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second + 3)
       .input_width(pooling_size.first + 2)
@@ -392,15 +392,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_pool_with_qmax) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
 /**************************** AVGPOOL path, unipass, batched ****************************/
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -409,7 +409,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second + 3)
@@ -417,13 +417,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride_width = 1; stride_width <= 2; stride_width++) {
       for (size_t stride_height = 1; stride_height <= 2; stride_height++) {
@@ -440,7 +440,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_stride) {
           .stride_height(stride_height)
           .stride_width(stride_width)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
         AveragePoolingOperatorTester()
           .batch_size(2)
           .input_height(pooling_size.second + 3)
@@ -450,15 +450,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_stride) {
           .stride_height(stride_height)
           .stride_width(stride_width)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_width_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t padding_left = 0; padding_left <= 1; padding_left++) {
@@ -473,7 +473,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_width_padding) {
             .pooling_width(pooling_size.second)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
           AveragePoolingOperatorTester()
             .batch_size(2)
             .input_height(pooling_size.second + 3)
@@ -484,16 +484,16 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_width_padding) {
             .pooling_width(pooling_size.first)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
         }
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_height_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
@@ -508,7 +508,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_height_padding) {
             .pooling_width(pooling_size.second)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
           AveragePoolingOperatorTester()
             .batch_size(2)
             .input_height(pooling_size.second + 3)
@@ -519,16 +519,16 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_height_padding) {
             .pooling_width(pooling_size.first)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
         }
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_tf_same_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t input_height = pooling_size.first + 3; input_height <= pooling_size.first + 4; input_height++) {
@@ -541,7 +541,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.second)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_width = pooling_size.second + 2; input_width <= pooling_size.second + 3; input_width++) {
         AveragePoolingOperatorTester()
@@ -553,7 +553,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.second)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_height = pooling_size.second + 3; input_height <= pooling_size.second + 4; input_height++) {
         AveragePoolingOperatorTester()
@@ -565,7 +565,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.first)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_width = pooling_size.first + 2; input_width <= pooling_size.first + 3; input_width++) {
         AveragePoolingOperatorTester()
@@ -577,15 +577,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.first)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_input_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -595,7 +595,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_input_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second + 3)
@@ -604,13 +604,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_input_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_output_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -620,7 +620,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_output_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second + 3)
@@ -629,13 +629,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_output_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_input_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_input_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float input_scale = 0.01f; input_scale < 100.0f; input_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -646,7 +646,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_input_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second + 3)
@@ -655,14 +655,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_input_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_input_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_input_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t input_zero_point = 0; input_zero_point <= 255; input_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -673,7 +673,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_input_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second + 3)
@@ -682,14 +682,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_input_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_output_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_output_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float output_scale = 0.01f; output_scale < 100.0f; output_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -700,7 +700,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_output_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second + 3)
@@ -709,14 +709,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_output_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_output_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_output_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t output_zero_point = 0; output_zero_point <= 255; output_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -727,7 +727,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_output_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second + 3)
@@ -736,14 +736,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_output_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_qmin) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -753,7 +753,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_qmin) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second + 3)
@@ -762,13 +762,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_qmin) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_qmax) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_pool_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.avgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.avgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -778,7 +778,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_qmax) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second + 3)
@@ -787,15 +787,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_pool_with_qmax) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
 /**************************** AVGPOOL path, multipass ****************************/
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.avgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.avgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first + 3)
@@ -803,20 +803,20 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second + 3)
       .input_width(pooling_size.first + 2)
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride_width = 1; stride_width <= 2; stride_width++) {
       for (size_t stride_height = 1; stride_height <= 2; stride_height++) {
@@ -832,7 +832,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_stride) {
           .stride_height(stride_height)
           .stride_width(stride_width)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
         AveragePoolingOperatorTester()
           .input_height(pooling_size.second + 3)
           .input_width(pooling_size.first + 2)
@@ -841,15 +841,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_stride) {
           .stride_height(stride_height)
           .stride_width(stride_width)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_width_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t padding_left = 0; padding_left <= 1; padding_left++) {
@@ -863,7 +863,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_width_padding) {
             .pooling_width(pooling_size.second)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
           AveragePoolingOperatorTester()
             .input_height(pooling_size.second + 3)
             .input_width(pooling_size.first + 2)
@@ -873,16 +873,16 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_width_padding) {
             .pooling_width(pooling_size.first)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
         }
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_height_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
@@ -896,7 +896,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_height_padding) {
             .pooling_width(pooling_size.second)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
           AveragePoolingOperatorTester()
             .input_height(pooling_size.second + 3)
             .input_width(pooling_size.first + 2)
@@ -906,16 +906,16 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_height_padding) {
             .pooling_width(pooling_size.first)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
         }
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_tf_same_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t input_height = pooling_size.first + 3; input_height <= pooling_size.first + 4; input_height++) {
@@ -927,7 +927,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.second)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_width = pooling_size.second + 2; input_width <= pooling_size.second + 3; input_width++) {
         AveragePoolingOperatorTester()
@@ -938,7 +938,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.second)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_height = pooling_size.second + 3; input_height <= pooling_size.second + 4; input_height++) {
         AveragePoolingOperatorTester()
@@ -949,7 +949,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.first)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_width = pooling_size.first + 2; input_width <= pooling_size.first + 3; input_width++) {
         AveragePoolingOperatorTester()
@@ -960,15 +960,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.first)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_input_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first + 3)
@@ -977,7 +977,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_input_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second + 3)
       .input_width(pooling_size.first + 2)
@@ -985,13 +985,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_input_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_output_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first + 3)
@@ -1000,7 +1000,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_output_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second + 3)
       .input_width(pooling_size.first + 2)
@@ -1008,13 +1008,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_output_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_input_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_input_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float input_scale = 0.01f; input_scale < 100.0f; input_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -1024,7 +1024,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_input_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second + 3)
         .input_width(pooling_size.first + 2)
@@ -1032,14 +1032,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_input_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_input_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_input_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t input_zero_point = 0; input_zero_point <= 255; input_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -1049,7 +1049,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_input_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second + 3)
         .input_width(pooling_size.first + 2)
@@ -1057,14 +1057,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_input_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_output_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_output_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float output_scale = 0.01f; output_scale < 100.0f; output_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -1074,7 +1074,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_output_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second + 3)
         .input_width(pooling_size.first + 2)
@@ -1082,14 +1082,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_output_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_output_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_output_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t output_zero_point = 0; output_zero_point <= 255; output_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -1099,7 +1099,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_output_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second + 3)
         .input_width(pooling_size.first + 2)
@@ -1107,14 +1107,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_output_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_qmin) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first + 3)
@@ -1123,7 +1123,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_qmin) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second + 3)
       .input_width(pooling_size.first + 2)
@@ -1131,13 +1131,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_qmin) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_qmax) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_pool_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first + 3)
@@ -1146,7 +1146,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_qmax) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second + 3)
       .input_width(pooling_size.first + 2)
@@ -1154,15 +1154,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_pool_with_qmax) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
 /**************************** AVGPOOL path, multipass, batched ****************************/
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.avgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.avgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -1171,7 +1171,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second + 3)
@@ -1179,13 +1179,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride_width = 1; stride_width <= 2; stride_width++) {
       for (size_t stride_height = 1; stride_height <= 2; stride_height++) {
@@ -1202,7 +1202,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_stride) {
           .stride_height(stride_height)
           .stride_width(stride_width)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
         AveragePoolingOperatorTester()
           .batch_size(2)
           .input_height(pooling_size.second + 3)
@@ -1212,15 +1212,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_stride) {
           .stride_height(stride_height)
           .stride_width(stride_width)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_width_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t padding_left = 0; padding_left <= 1; padding_left++) {
@@ -1235,7 +1235,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_width_padding) {
             .pooling_width(pooling_size.second)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
           AveragePoolingOperatorTester()
             .batch_size(2)
             .input_height(pooling_size.second + 3)
@@ -1246,16 +1246,16 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_width_padding) {
             .pooling_width(pooling_size.first)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
         }
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_height_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
@@ -1270,7 +1270,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_height_padding) {
             .pooling_width(pooling_size.second)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
           AveragePoolingOperatorTester()
             .batch_size(2)
             .input_height(pooling_size.second + 3)
@@ -1281,16 +1281,16 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_height_padding) {
             .pooling_width(pooling_size.first)
             .stride(stride)
             .channels(channels)
-            .TestQ8();
+            .TestQU8();
         }
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_tf_same_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t stride = 1; stride <= 2; stride++) {
       for (size_t input_height = pooling_size.first + 3; input_height <= pooling_size.first + 4; input_height++) {
@@ -1303,7 +1303,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.second)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_width = pooling_size.second + 2; input_width <= pooling_size.second + 3; input_width++) {
         AveragePoolingOperatorTester()
@@ -1315,7 +1315,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.second)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_height = pooling_size.second + 3; input_height <= pooling_size.second + 4; input_height++) {
         AveragePoolingOperatorTester()
@@ -1327,7 +1327,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.first)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
       for (size_t input_width = pooling_size.first + 2; input_width <= pooling_size.first + 3; input_width++) {
         AveragePoolingOperatorTester()
@@ -1339,15 +1339,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_tf_same_padding) {
           .pooling_width(pooling_size.first)
           .stride(stride)
           .channels(channels)
-          .TestQ8();
+          .TestQU8();
       }
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_input_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -1357,7 +1357,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_input_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second + 3)
@@ -1366,13 +1366,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_input_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_output_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -1382,7 +1382,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_output_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second + 3)
@@ -1391,13 +1391,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_output_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_input_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_input_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float input_scale = 0.01f; input_scale < 100.0f; input_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -1408,7 +1408,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_input_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second + 3)
@@ -1417,14 +1417,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_input_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_input_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_input_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t input_zero_point = 0; input_zero_point <= 255; input_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -1435,7 +1435,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_input_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second + 3)
@@ -1444,14 +1444,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_input_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_output_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_output_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float output_scale = 0.01f; output_scale < 100.0f; output_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -1462,7 +1462,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_output_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second + 3)
@@ -1471,14 +1471,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_output_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_output_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_output_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t output_zero_point = 0; output_zero_point <= 255; output_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -1489,7 +1489,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_output_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second + 3)
@@ -1498,14 +1498,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_output_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_qmin) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -1515,7 +1515,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_qmin) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second + 3)
@@ -1524,13 +1524,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_qmin) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_qmax) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_pool_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -1540,7 +1540,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_qmax) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second + 3)
@@ -1549,15 +1549,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_pool_with_qmax) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
 /**************************** GAVGPOOL path, unipass ****************************/
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first)
@@ -1565,18 +1565,18 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first)
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_width_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image_with_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.f32.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
@@ -1588,7 +1588,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_width_padding) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first - 1)
@@ -1596,7 +1596,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_width_padding) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
 
     /* With right padding */
     AveragePoolingOperatorTester()
@@ -1606,7 +1606,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_width_padding) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first - 1)
@@ -1614,13 +1614,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_width_padding) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_height_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image_with_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     /* With top padding */
     AveragePoolingOperatorTester()
@@ -1630,7 +1630,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_height_padding) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second - 1)
       .input_width(pooling_size.first)
@@ -1638,7 +1638,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_height_padding) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
 
     /* With bottom padding */
     AveragePoolingOperatorTester()
@@ -1648,7 +1648,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_height_padding) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second - 1)
       .input_width(pooling_size.first)
@@ -1656,13 +1656,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_height_padding) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_input_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first)
@@ -1671,7 +1671,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_input_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first)
@@ -1679,13 +1679,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_input_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_output_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first)
@@ -1694,7 +1694,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_output_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first)
@@ -1702,13 +1702,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_output_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_input_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image_with_input_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float input_scale = 0.01f; input_scale < 100.0f; input_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -1718,7 +1718,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_input_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second)
         .input_width(pooling_size.first)
@@ -1726,14 +1726,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_input_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_input_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image_with_input_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t input_zero_point = 0; input_zero_point <= 255; input_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -1743,7 +1743,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_input_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second)
         .input_width(pooling_size.first)
@@ -1751,14 +1751,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_input_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_output_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image_with_output_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float output_scale = 0.01f; output_scale < 100.0f; output_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -1768,7 +1768,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_output_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second)
         .input_width(pooling_size.first)
@@ -1776,14 +1776,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_output_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_output_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image_with_output_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t output_zero_point = 0; output_zero_point <= 255; output_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -1793,7 +1793,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_output_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second)
         .input_width(pooling_size.first)
@@ -1801,14 +1801,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_output_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_qmin) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first)
@@ -1817,7 +1817,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_qmin) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first)
@@ -1825,13 +1825,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_qmin) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_qmax) {
+TEST(AVERAGE_POOLING_NHWC_QU8, small_image_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first)
@@ -1840,7 +1840,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_qmax) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first)
@@ -1848,15 +1848,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, small_image_with_qmax) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
 /**************************** GAVGPOOL path, unipass, batched ****************************/
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -1865,7 +1865,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -1873,11 +1873,11 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_width_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image_with_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.f32.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
@@ -1890,7 +1890,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_width_padding) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -1899,7 +1899,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_width_padding) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
 
     /* With right padding */
     AveragePoolingOperatorTester()
@@ -1910,7 +1910,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_width_padding) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -1919,13 +1919,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_width_padding) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_height_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image_with_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     /* With top padding */
     AveragePoolingOperatorTester()
@@ -1936,7 +1936,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_height_padding) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second - 1)
@@ -1945,7 +1945,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_height_padding) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
 
     /* With bottom padding */
     AveragePoolingOperatorTester()
@@ -1956,7 +1956,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_height_padding) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second - 1)
@@ -1965,13 +1965,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_height_padding) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_input_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -1981,7 +1981,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_input_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -1990,13 +1990,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_input_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_output_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -2006,7 +2006,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_output_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -2015,13 +2015,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_output_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_input_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image_with_input_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float input_scale = 0.01f; input_scale < 100.0f; input_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -2032,7 +2032,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_input_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second)
@@ -2041,14 +2041,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_input_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_input_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image_with_input_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t input_zero_point = 0; input_zero_point <= 255; input_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -2059,7 +2059,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_input_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second)
@@ -2068,14 +2068,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_input_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_output_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image_with_output_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float output_scale = 0.01f; output_scale < 100.0f; output_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -2086,7 +2086,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_output_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second)
@@ -2095,14 +2095,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_output_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_output_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image_with_output_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t output_zero_point = 0; output_zero_point <= 255; output_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -2113,7 +2113,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_output_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second)
@@ -2122,14 +2122,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_output_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_qmin) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -2139,7 +2139,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_qmin) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -2148,13 +2148,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_qmin) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_qmax) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_small_image_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.q8.gavgpool.mr);
+  const std::pair<size_t, size_t> pooling_size = SmallPoolSize(xnn_params.qu8.gavgpool.mr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -2164,7 +2164,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_qmax) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -2173,15 +2173,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_small_image_with_qmax) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
 /**************************** GAVGPOOL path, multipass ****************************/
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first)
@@ -2189,20 +2189,20 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first)
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_width_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image_with_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t padding_left = 1; padding_left <= 2; padding_left++) {
       AveragePoolingOperatorTester()
@@ -2212,7 +2212,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_width_padding) {
         .pooling_height(pooling_size.first)
         .pooling_width(pooling_size.second)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second)
         .input_width(pooling_size.first - padding_left)
@@ -2220,7 +2220,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_width_padding) {
         .pooling_height(pooling_size.second)
         .pooling_width(pooling_size.first)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
     }
     for (size_t padding_right = 1; padding_right <= 2; padding_right++) {
       AveragePoolingOperatorTester()
@@ -2230,7 +2230,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_width_padding) {
         .pooling_height(pooling_size.first)
         .pooling_width(pooling_size.second)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second)
         .input_width(pooling_size.first - padding_right)
@@ -2238,14 +2238,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_width_padding) {
         .pooling_height(pooling_size.second)
         .pooling_width(pooling_size.first)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_height_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image_with_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t padding_top = 1; padding_top <= 2; padding_top++) {
       AveragePoolingOperatorTester()
@@ -2255,7 +2255,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_height_padding) {
         .pooling_height(pooling_size.first)
         .pooling_width(pooling_size.second)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second - padding_top)
         .input_width(pooling_size.first)
@@ -2263,7 +2263,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_height_padding) {
         .pooling_height(pooling_size.second)
         .pooling_width(pooling_size.first)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
     }
     for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
       AveragePoolingOperatorTester()
@@ -2273,7 +2273,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_height_padding) {
         .pooling_height(pooling_size.first)
         .pooling_width(pooling_size.second)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second - padding_bottom)
         .input_width(pooling_size.first)
@@ -2281,14 +2281,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_height_padding) {
         .pooling_height(pooling_size.second)
         .pooling_width(pooling_size.first)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_input_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first)
@@ -2297,7 +2297,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_input_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first)
@@ -2305,13 +2305,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_input_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_output_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first)
@@ -2320,7 +2320,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_output_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first)
@@ -2328,13 +2328,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_output_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_input_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image_with_input_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float input_scale = 0.01f; input_scale < 100.0f; input_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -2344,7 +2344,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_input_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second)
         .input_width(pooling_size.first)
@@ -2352,14 +2352,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_input_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_input_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image_with_input_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t input_zero_point = 0; input_zero_point <= 255; input_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -2369,7 +2369,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_input_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second)
         .input_width(pooling_size.first)
@@ -2377,14 +2377,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_input_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_output_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image_with_output_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float output_scale = 0.01f; output_scale < 100.0f; output_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -2394,7 +2394,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_output_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second)
         .input_width(pooling_size.first)
@@ -2402,14 +2402,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_output_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_output_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image_with_output_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t output_zero_point = 0; output_zero_point <= 255; output_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -2419,7 +2419,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_output_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .input_height(pooling_size.second)
         .input_width(pooling_size.first)
@@ -2427,14 +2427,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_output_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_qmin) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first)
@@ -2443,7 +2443,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_qmin) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first)
@@ -2451,13 +2451,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_qmin) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_qmax) {
+TEST(AVERAGE_POOLING_NHWC_QU8, large_image_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .input_height(pooling_size.first)
@@ -2466,7 +2466,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_qmax) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .input_height(pooling_size.second)
       .input_width(pooling_size.first)
@@ -2474,15 +2474,15 @@ TEST(AVERAGE_POOLING_NHWC_Q8, large_image_with_qmax) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
 /**************************** GAVGPOOL path, multipass, batched ****************************/
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -2491,7 +2491,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image) {
       .pooling_height(pooling_size.first)
       .pooling_width(pooling_size.second)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -2499,13 +2499,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image) {
       .pooling_height(pooling_size.second)
       .pooling_width(pooling_size.first)
       .channels(channels)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_width_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t padding_left = 1; padding_left <= 2; padding_left++) {
       AveragePoolingOperatorTester()
@@ -2516,7 +2516,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_width_padding) {
         .pooling_height(pooling_size.first)
         .pooling_width(pooling_size.second)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second)
@@ -2525,7 +2525,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_width_padding) {
         .pooling_height(pooling_size.second)
         .pooling_width(pooling_size.first)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
     }
     for (size_t padding_right = 1; padding_right <= 2; padding_right++) {
       AveragePoolingOperatorTester()
@@ -2536,7 +2536,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_width_padding) {
         .pooling_height(pooling_size.first)
         .pooling_width(pooling_size.second)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second)
@@ -2545,14 +2545,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_width_padding) {
         .pooling_height(pooling_size.second)
         .pooling_width(pooling_size.first)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_height_padding) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t padding_top = 1; padding_top <= 2; padding_top++) {
       AveragePoolingOperatorTester()
@@ -2563,7 +2563,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_height_padding) {
         .pooling_height(pooling_size.first)
         .pooling_width(pooling_size.second)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second - padding_top)
@@ -2572,7 +2572,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_height_padding) {
         .pooling_height(pooling_size.second)
         .pooling_width(pooling_size.first)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
     }
     for (size_t padding_bottom = 1; padding_bottom <= 2; padding_bottom++) {
       AveragePoolingOperatorTester()
@@ -2583,7 +2583,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_height_padding) {
         .pooling_height(pooling_size.first)
         .pooling_width(pooling_size.second)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second - padding_bottom)
@@ -2592,14 +2592,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_height_padding) {
         .pooling_height(pooling_size.second)
         .pooling_width(pooling_size.first)
         .channels(channels)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_input_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -2609,7 +2609,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_input_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -2618,13 +2618,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_input_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .input_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_output_stride) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -2634,7 +2634,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_output_stride) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -2643,13 +2643,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_output_stride) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .output_pixel_stride(2 * channels + 3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_input_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_input_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float input_scale = 0.01f; input_scale < 100.0f; input_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -2660,7 +2660,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_input_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second)
@@ -2669,14 +2669,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_input_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_scale(input_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_input_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_input_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t input_zero_point = 0; input_zero_point <= 255; input_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -2687,7 +2687,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_input_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second)
@@ -2696,14 +2696,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_input_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .input_zero_point(uint8_t(input_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_output_scale) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_output_scale) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (float output_scale = 0.01f; output_scale < 100.0f; output_scale *= 3.14159265f) {
       AveragePoolingOperatorTester()
@@ -2714,7 +2714,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_output_scale) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second)
@@ -2723,14 +2723,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_output_scale) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_scale(output_scale)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_output_zero_point) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_output_zero_point) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (int32_t output_zero_point = 0; output_zero_point <= 255; output_zero_point += 51) {
       AveragePoolingOperatorTester()
@@ -2741,7 +2741,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_output_zero_point) {
         .pooling_width(pooling_size.second)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
       AveragePoolingOperatorTester()
         .batch_size(2)
         .input_height(pooling_size.second)
@@ -2750,14 +2750,14 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_output_zero_point) {
         .pooling_width(pooling_size.first)
         .channels(channels)
         .output_zero_point(uint8_t(output_zero_point))
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_qmin) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -2767,7 +2767,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_qmin) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -2776,13 +2776,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_qmin) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmin(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_qmax) {
+TEST(AVERAGE_POOLING_NHWC_QU8, batched_large_image_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.q8.gavgpool.mr * 2);
+  const std::pair<size_t, size_t> pooling_size = LargePoolSize(xnn_params.qu8.gavgpool.mr * 2);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     AveragePoolingOperatorTester()
       .batch_size(2)
@@ -2792,7 +2792,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_qmax) {
       .pooling_width(pooling_size.second)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
     AveragePoolingOperatorTester()
       .batch_size(2)
       .input_height(pooling_size.second)
@@ -2801,13 +2801,13 @@ TEST(AVERAGE_POOLING_NHWC_Q8, batched_large_image_with_qmax) {
       .pooling_width(pooling_size.first)
       .channels(channels)
       .qmax(128)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
 /**************************** AVGPOOL path, setup ****************************/
 
-TEST(AVERAGE_POOLING_NHWC_Q8, setup_increasing_batch) {
+TEST(AVERAGE_POOLING_NHWC_QU8, setup_increasing_batch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   AveragePoolingOperatorTester()
     .batch_size(2)
@@ -2817,10 +2817,10 @@ TEST(AVERAGE_POOLING_NHWC_Q8, setup_increasing_batch) {
     .pooling_height(5)
     .pooling_width(3)
     .channels(24)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, setup_decreasing_batch) {
+TEST(AVERAGE_POOLING_NHWC_QU8, setup_decreasing_batch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   AveragePoolingOperatorTester()
     .batch_size(5)
@@ -2830,10 +2830,10 @@ TEST(AVERAGE_POOLING_NHWC_Q8, setup_decreasing_batch) {
     .pooling_height(5)
     .pooling_width(3)
     .channels(24)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, setup_changing_height) {
+TEST(AVERAGE_POOLING_NHWC_QU8, setup_changing_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   AveragePoolingOperatorTester()
     .batch_size(2)
@@ -2843,7 +2843,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, setup_changing_height) {
     .pooling_height(5)
     .pooling_width(3)
     .channels(24)
-    .TestSetupQ8();
+    .TestSetupQU8();
   AveragePoolingOperatorTester()
     .batch_size(2)
     .input_height(8)
@@ -2852,10 +2852,10 @@ TEST(AVERAGE_POOLING_NHWC_Q8, setup_changing_height) {
     .pooling_height(5)
     .pooling_width(3)
     .channels(24)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, setup_changing_width) {
+TEST(AVERAGE_POOLING_NHWC_QU8, setup_changing_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   AveragePoolingOperatorTester()
     .batch_size(2)
@@ -2865,7 +2865,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, setup_changing_width) {
     .pooling_height(5)
     .pooling_width(3)
     .channels(24)
-    .TestSetupQ8();
+    .TestSetupQU8();
   AveragePoolingOperatorTester()
     .batch_size(2)
     .input_height(8)
@@ -2874,10 +2874,10 @@ TEST(AVERAGE_POOLING_NHWC_Q8, setup_changing_width) {
     .pooling_height(5)
     .pooling_width(3)
     .channels(24)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, setup_swap_height_and_width) {
+TEST(AVERAGE_POOLING_NHWC_QU8, setup_swap_height_and_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   AveragePoolingOperatorTester()
     .batch_size(2)
@@ -2888,10 +2888,10 @@ TEST(AVERAGE_POOLING_NHWC_Q8, setup_swap_height_and_width) {
     .pooling_height(5)
     .pooling_width(3)
     .channels(24)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, setup_local_to_global) {
+TEST(AVERAGE_POOLING_NHWC_QU8, setup_local_to_global) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   AveragePoolingOperatorTester()
     .batch_size(2)
@@ -2902,10 +2902,10 @@ TEST(AVERAGE_POOLING_NHWC_Q8, setup_local_to_global) {
     .pooling_height(5)
     .pooling_width(3)
     .channels(24)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(AVERAGE_POOLING_NHWC_Q8, setup_global_to_local) {
+TEST(AVERAGE_POOLING_NHWC_QU8, setup_global_to_local) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   AveragePoolingOperatorTester()
     .batch_size(2)
@@ -2916,7 +2916,7 @@ TEST(AVERAGE_POOLING_NHWC_Q8, setup_global_to_local) {
     .pooling_height(5)
     .pooling_width(3)
     .channels(24)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
 /**************************** AVGPOOL path, unipass ****************************/

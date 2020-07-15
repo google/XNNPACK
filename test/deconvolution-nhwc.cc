@@ -18,144 +18,144 @@ constexpr size_t kStridedInputWidth = 5;
 
 /**************************** Future GEMM path ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, 1x1) {
+TEST(DECONVOLUTION_NHWC_QU8, 1x1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 1x1_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, 1x1_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
       .input_size(input_height, kUnstridedInputWidth)
       .kernel_size(1, 1)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 1x1_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, 1x1_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, input_width)
       .kernel_size(1, 1)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 1x1_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, 1x1_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .kernel_size(1, 1)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 1x1_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, 1x1_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 1x1_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, 1x1_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(28)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 1x1_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, 1x1_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 1x1_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, 1x1_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 1x1_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, 1x1_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 1x1_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, 1x1_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** Future GEMM path, grouped ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_1x1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_1x1_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -163,13 +163,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_varying_input_width) {
       .kernel_size(1, 1)
       .groups(2)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_1x1_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -177,13 +177,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_varying_input_height) {
       .kernel_size(1, 1)
       .groups(2)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_1x1_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -191,15 +191,15 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_varying_input_channels) {
       .kernel_size(1, 1)
       .groups(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_1x1_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .kernel_size(1, 1)
@@ -207,63 +207,63 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_1x1_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(47)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_1x1_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_1x1_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_1x1_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_1x1_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -271,26 +271,26 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_1x1_without_bias) {
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** Future GEMM path, batched ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_1x1) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_1x1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_1x1_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -298,13 +298,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_varying_input_width) {
       .input_size(input_height, kUnstridedInputWidth)
       .kernel_size(1, 1)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_1x1_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -312,13 +312,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_varying_input_height) {
       .input_size(kUnstridedInputHeight, input_width)
       .kernel_size(1, 1)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_1x1_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -326,15 +326,15 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_varying_input_channels) {
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .kernel_size(1, 1)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_1x1_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -342,63 +342,63 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_1x1_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(28)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_1x1_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_1x1_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_1x1_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_1x1_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -406,14 +406,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_1x1_without_bias) {
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .kernel_size(1, 1)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** Future GEMM path, batched, grouped ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_1x1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -421,12 +421,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1) {
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_1x1_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -435,13 +435,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_varying_input_width) {
       .kernel_size(1, 1)
       .groups(2)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_1x1_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -450,13 +450,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_varying_input_height) {
       .kernel_size(1, 1)
       .groups(2)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_1x1_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -465,15 +465,15 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_varying_input_channels) {
       .kernel_size(1, 1)
       .groups(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_1x1_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -482,11 +482,11 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_1x1_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -494,13 +494,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_with_input_stride) {
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(47)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_1x1_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -508,13 +508,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_with_output_stride) {
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_1x1_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -522,13 +522,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_with_qmin) {
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_1x1_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -536,13 +536,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_with_qmax) {
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_1x1_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -551,26 +551,26 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_1x1_without_bias) {
     .kernel_size(1, 1)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** CONV path ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, Kx3) {
+TEST(DECONVOLUTION_NHWC_QU8, Kx3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 1; kernel_height <= 4; kernel_height *= 2) {
     DeconvolutionOperatorTester()
@@ -578,13 +578,13 @@ TEST(DECONVOLUTION_NHWC_Q8, Kx3) {
       .padding_width(1)
       .kernel_size(kernel_height, 3)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3xK) {
+TEST(DECONVOLUTION_NHWC_QU8, 3xK) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 1; kernel_width <= 4; kernel_width *= 2) {
     DeconvolutionOperatorTester()
@@ -592,13 +592,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3xK) {
       .padding_height(1)
       .kernel_size(3, kernel_width)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_height_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_varying_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -609,14 +609,14 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_height_padding) {
         .padding_bottom(padding_bottom)
         .kernel_size(3, 3)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_width_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_varying_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -627,14 +627,14 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_width_padding) {
         .padding_right(padding_right)
         .kernel_size(3, 3)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -644,13 +644,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_height_adjustment) {
       .adjustment_height(adjustment_height)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -660,13 +660,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_width_adjustment) {
       .adjustment_width(adjustment_width)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -674,13 +674,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_input_height) {
       .padding(1)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -688,13 +688,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_input_width) {
       .padding(1)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_input_height_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_varying_input_height_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -702,13 +702,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_input_height_with_tf_same_padding) {
       .padding_tf_same(true)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_input_width_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_varying_input_width_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -716,13 +716,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_input_width_with_tf_same_padding) {
       .padding_tf_same(true)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -730,15 +730,15 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_input_channels) {
       .padding(1)
       .kernel_size(3, 3)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
@@ -746,11 +746,11 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_height_dilation) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_with_height_dilation) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dilation_height = 2; dilation_height <= 3; dilation_height++) {
     DeconvolutionOperatorTester()
@@ -759,13 +759,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_height_dilation) {
       .kernel_size(3, 3)
       .dilation_height(dilation_height)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_width_dilation) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_with_width_dilation) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dilation_width = 2; dilation_width <= 3; dilation_width++) {
     DeconvolutionOperatorTester()
@@ -774,13 +774,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_width_dilation) {
       .kernel_size(3, 3)
       .dilation_width(dilation_width)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_height_dilation_and_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_with_height_dilation_and_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -789,12 +789,12 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_height_dilation_and_stride) {
     .dilation_height(3)
     .stride_height(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_width_dilation_and_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_with_width_dilation_and_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -803,64 +803,64 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_width_dilation_and_stride) {
     .dilation_width(3)
     .stride_width(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(28)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -868,14 +868,14 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_without_bias) {
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** CONV path, grouped ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -883,12 +883,12 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_Kx3) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_Kx3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 1; kernel_height <= 4; kernel_height *= 2) {
     DeconvolutionOperatorTester()
@@ -897,13 +897,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_Kx3) {
       .kernel_size(kernel_height, 3)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3xK) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3xK) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 1; kernel_width <= 4; kernel_width *= 2) {
     DeconvolutionOperatorTester()
@@ -912,13 +912,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3xK) {
       .kernel_size(3, kernel_width)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_height_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_varying_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -930,14 +930,14 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_height_padding) {
         .kernel_size(3, 3)
         .groups(2)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_width_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_varying_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -949,14 +949,14 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_width_padding) {
         .kernel_size(3, 3)
         .groups(2)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -967,13 +967,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_height_adjustment) {
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -984,13 +984,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_width_adjustment) {
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -999,13 +999,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_input_height) {
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -1014,13 +1014,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_input_width) {
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_input_height_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_varying_input_height_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -1029,13 +1029,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_input_height_with_tf_same_paddin
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_input_width_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_varying_input_width_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -1044,13 +1044,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_input_width_with_tf_same_padding
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -1059,15 +1059,15 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_input_channels) {
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
       .padding(1)
@@ -1076,11 +1076,11 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_height_dilation) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_with_height_dilation) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dilation_height = 2; dilation_height <= 3; dilation_height++) {
     DeconvolutionOperatorTester()
@@ -1090,13 +1090,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_height_dilation) {
       .dilation_height(dilation_height)
       .groups(2)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_width_dilation) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_with_width_dilation) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dilation_width = 2; dilation_width <= 3; dilation_width++) {
     DeconvolutionOperatorTester()
@@ -1106,13 +1106,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_width_dilation) {
       .dilation_width(dilation_width)
       .groups(2)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_height_dilation_and_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_with_height_dilation_and_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -1122,12 +1122,12 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_height_dilation_and_stride) {
     .stride_height(2)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_width_dilation_and_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_with_width_dilation_and_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -1137,12 +1137,12 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_width_dilation_and_stride) {
     .stride_width(2)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -1150,13 +1150,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_input_stride) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(47)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -1164,13 +1164,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_output_stride) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -1178,13 +1178,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_qmin) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -1192,13 +1192,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_with_qmax) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -1207,14 +1207,14 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3_without_bias) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** CONV path, batched ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1222,12 +1222,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3) {
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_Kx3) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_Kx3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 1; kernel_height <= 4; kernel_height *= 2) {
     DeconvolutionOperatorTester()
@@ -1236,13 +1236,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_Kx3) {
       .padding_width(1)
       .kernel_size(kernel_height, 3)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3xK) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3xK) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 1; kernel_width <= 4; kernel_width *= 2) {
     DeconvolutionOperatorTester()
@@ -1251,13 +1251,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3xK) {
       .padding_height(1)
       .kernel_size(3, kernel_width)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_height_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_varying_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -1269,14 +1269,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_height_padding) {
         .padding_bottom(padding_bottom)
         .kernel_size(3, 3)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_width_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_varying_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -1288,14 +1288,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_width_padding) {
         .padding_right(padding_right)
         .kernel_size(3, 3)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -1306,13 +1306,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_height_adjustment) {
       .adjustment_height(adjustment_height)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -1323,13 +1323,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_width_adjustment) {
       .adjustment_width(adjustment_width)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -1338,13 +1338,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_input_height) {
       .padding(1)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -1353,13 +1353,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_input_width) {
       .padding(1)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_input_height_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_varying_input_height_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -1368,13 +1368,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_input_height_with_tf_same_paddin
       .padding_tf_same(true)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_input_width_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_varying_input_width_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -1383,13 +1383,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_input_width_with_tf_same_padding
       .padding_tf_same(true)
       .kernel_size(3, 3)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -1398,15 +1398,15 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_input_channels) {
       .padding(1)
       .kernel_size(3, 3)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -1415,11 +1415,11 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_height_dilation) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_with_height_dilation) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dilation_height = 2; dilation_height <= 3; dilation_height++) {
     DeconvolutionOperatorTester()
@@ -1429,13 +1429,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_height_dilation) {
       .kernel_size(3, 3)
       .dilation_height(dilation_height)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_width_dilation) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_with_width_dilation) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dilation_width = 2; dilation_width <= 3; dilation_width++) {
     DeconvolutionOperatorTester()
@@ -1445,13 +1445,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_width_dilation) {
       .kernel_size(3, 3)
       .dilation_width(dilation_width)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_height_dilation_and_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_with_height_dilation_and_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1461,12 +1461,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_height_dilation_and_stride) {
     .dilation_height(3)
     .stride_height(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_width_dilation_and_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_with_width_dilation_and_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1476,12 +1476,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_width_dilation_and_stride) {
     .dilation_width(3)
     .stride_width(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1489,13 +1489,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_input_stride) {
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(28)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1503,13 +1503,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_output_stride) {
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1517,13 +1517,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_qmin) {
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1531,13 +1531,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_with_qmax) {
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -1546,14 +1546,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3_without_bias) {
     .padding(1)
     .kernel_size(3, 3)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** CONV path, grouped, batched ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1562,12 +1562,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_Kx3) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_Kx3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 1; kernel_height <= 4; kernel_height *= 2) {
     DeconvolutionOperatorTester()
@@ -1577,13 +1577,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_Kx3) {
       .kernel_size(kernel_height, 3)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3xK) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3xK) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 1; kernel_width <= 4; kernel_width *= 2) {
     DeconvolutionOperatorTester()
@@ -1593,13 +1593,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3xK) {
       .kernel_size(3, kernel_width)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_height_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_varying_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -1612,14 +1612,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_height_padding) {
         .kernel_size(3, 3)
         .groups(2)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_width_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_varying_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -1632,14 +1632,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_width_padding) {
         .kernel_size(3, 3)
         .groups(2)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -1651,13 +1651,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_height_adjustment) {
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -1669,13 +1669,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_width_adjustment) {
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -1685,13 +1685,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_input_height) {
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -1701,13 +1701,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_input_width) {
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_input_height_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_varying_input_height_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -1717,13 +1717,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_input_height_with_tf_sam
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_input_width_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_varying_input_width_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -1733,13 +1733,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_input_width_with_tf_same
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -1749,15 +1749,15 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_input_channels) {
       .kernel_size(3, 3)
       .groups(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -1767,11 +1767,11 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_height_dilation) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_with_height_dilation) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dilation_height = 2; dilation_height <= 3; dilation_height++) {
     DeconvolutionOperatorTester()
@@ -1782,13 +1782,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_height_dilation) {
       .dilation_height(dilation_height)
       .groups(2)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_width_dilation) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_with_width_dilation) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t dilation_width = 2; dilation_width <= 3; dilation_width++) {
     DeconvolutionOperatorTester()
@@ -1799,13 +1799,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_width_dilation) {
       .dilation_width(dilation_width)
       .groups(2)
       .group_input_channels(23)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_height_dilation_and_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_with_height_dilation_and_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1816,12 +1816,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_height_dilation_and_stride)
     .stride_width(2)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_width_dilation_and_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_with_width_dilation_and_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1832,12 +1832,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_width_dilation_and_stride) 
     .stride_width(2)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1846,13 +1846,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_input_stride) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(47)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1861,13 +1861,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_output_stride) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1876,13 +1876,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_qmin) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1891,13 +1891,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_with_qmax) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -1907,14 +1907,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3_without_bias) {
     .kernel_size(3, 3)
     .groups(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** CONV path, setup ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_setup_changing_batch) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_setup_changing_batch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1925,10 +1925,10 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_setup_changing_batch) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(17)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_setup_changing_height) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_setup_changing_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1939,10 +1939,10 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_setup_changing_height) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(17)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3_setup_changing_width) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3_setup_changing_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -1953,12 +1953,12 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3_setup_changing_width) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(17)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
 /**************************** SUBCONV2D/IGEMM path ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -1966,12 +1966,12 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, Kx3s2) {
+TEST(DECONVOLUTION_NHWC_QU8, Kx3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 2; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -1980,13 +1980,13 @@ TEST(DECONVOLUTION_NHWC_Q8, Kx3s2) {
       .kernel_size(kernel_height, 3)
       .stride(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3xKs2) {
+TEST(DECONVOLUTION_NHWC_QU8, 3xKs2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 2; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -1995,13 +1995,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3xKs2) {
       .kernel_size(3, kernel_width)
       .stride(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3sSx1) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3sSx1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t stride_height = 2; stride_height <= 3; stride_height++) {
     DeconvolutionOperatorTester()
@@ -2011,13 +2011,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3sSx1) {
       .kernel_size(3, 3)
       .stride_height(stride_height)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s1xS) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s1xS) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t stride_width = 2; stride_width <= 3; stride_width++) {
     DeconvolutionOperatorTester()
@@ -2027,13 +2027,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s1xS) {
       .kernel_size(3, 3)
       .stride_width(stride_width)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_height_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_varying_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -2045,14 +2045,14 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_height_padding) {
         .kernel_size(3, 3)
         .stride(2)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_width_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_varying_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -2064,14 +2064,14 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_width_padding) {
         .kernel_size(3, 3)
         .stride(2)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -2081,13 +2081,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_height_adjustment) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -2097,13 +2097,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_width_adjustment) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -2112,13 +2112,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_input_height) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -2127,13 +2127,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_input_width) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_input_height_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_varying_input_height_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -2142,13 +2142,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_input_height_with_tf_same_padding) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_input_width_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_varying_input_width_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -2157,13 +2157,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_input_width_with_tf_same_padding) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -2172,15 +2172,15 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_input_channels) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .padding(1)
@@ -2189,11 +2189,11 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2201,13 +2201,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_with_input_stride) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(28)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2215,13 +2215,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_with_output_stride) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2229,13 +2229,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_with_qmin) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2243,13 +2243,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_with_qmax) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -2258,14 +2258,14 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_without_bias) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2274,12 +2274,12 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_Kx3s2) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_Kx3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 2; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -2289,13 +2289,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_Kx3s2) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3xKs2) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3xKs2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 2; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -2305,13 +2305,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3xKs2) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3sSx1) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3sSx1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t stride_height = 2; stride_height <= 3; stride_height++) {
     DeconvolutionOperatorTester()
@@ -2322,13 +2322,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3sSx1) {
       .stride_height(stride_height)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s1xS) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s1xS) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t stride_width = 2; stride_width <= 3; stride_width++) {
     DeconvolutionOperatorTester()
@@ -2339,13 +2339,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s1xS) {
       .stride_width(stride_width)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_height_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_varying_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -2358,14 +2358,14 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_height_padding) {
         .stride(2)
         .groups(2)
         .group_input_channels(17)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_width_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_varying_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -2378,14 +2378,14 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_width_padding) {
         .stride(2)
         .groups(2)
         .group_input_channels(17)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -2396,13 +2396,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_height_adjustment) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -2413,13 +2413,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_width_adjustment) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -2429,13 +2429,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_input_height) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -2445,13 +2445,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_input_width) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_input_height_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_varying_input_height_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -2461,13 +2461,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_input_height_with_tf_same_padd
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_input_width_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_varying_input_width_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -2477,13 +2477,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_input_width_with_tf_same_paddi
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 14; input_channels <= 20; input_channels++) {
     DeconvolutionOperatorTester()
@@ -2493,15 +2493,15 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_input_channels) {
       .stride(2)
       .groups(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .padding(1)
@@ -2511,11 +2511,11 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_varying_output_channels) {
       .group_input_channels(17)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2524,13 +2524,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_with_input_stride) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(37)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2539,13 +2539,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_with_output_stride) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2554,13 +2554,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_with_qmin) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2569,13 +2569,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_with_qmax) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -2585,14 +2585,14 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_3x3s2_without_bias) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** SUBCONV2D/IGEMM path, batched ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -2601,12 +2601,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_Kx3s2) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_Kx3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 2; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -2616,13 +2616,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_Kx3s2) {
       .kernel_size(kernel_height, 3)
       .stride(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3xKs2) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3xKs2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 2; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -2632,13 +2632,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3xKs2) {
       .kernel_size(3, kernel_width)
       .stride(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3sSx1) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3sSx1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t stride_height = 2; stride_height <= 3; stride_height++) {
     DeconvolutionOperatorTester()
@@ -2649,13 +2649,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3sSx1) {
       .kernel_size(3, 3)
       .stride_height(stride_height)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s1xS) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s1xS) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t stride_width = 2; stride_width <= 3; stride_width++) {
     DeconvolutionOperatorTester()
@@ -2666,13 +2666,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s1xS) {
       .kernel_size(3, 3)
       .stride_width(stride_width)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_height_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_varying_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -2685,14 +2685,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_height_padding) {
         .kernel_size(3, 3)
         .stride(2)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_width_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_varying_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -2705,14 +2705,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_width_padding) {
         .kernel_size(3, 3)
         .stride(2)
         .group_input_channels(15)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -2723,13 +2723,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_height_adjustment) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -2740,13 +2740,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_width_adjustment) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -2756,13 +2756,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_input_height) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -2772,13 +2772,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_input_width) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_input_height_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_varying_input_height_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -2788,13 +2788,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_input_height_with_tf_same_padd
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_input_width_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_varying_input_width_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -2804,13 +2804,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_input_width_with_tf_same_paddi
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -2820,15 +2820,15 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_input_channels) {
       .kernel_size(3, 3)
       .stride(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -2838,11 +2838,11 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -2851,13 +2851,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_with_input_stride) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(28)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -2866,13 +2866,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_with_output_stride) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -2881,13 +2881,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_with_qmin) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -2896,13 +2896,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_with_qmax) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -2912,14 +2912,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_3x3s2_without_bias) {
     .kernel_size(3, 3)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** SUBCONV2D/IGEMM path, grouped, batched ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -2929,12 +2929,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_Kx3s2) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_Kx3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 2; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -2945,13 +2945,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_Kx3s2) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3xKs2) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3xKs2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 2; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -2962,13 +2962,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3xKs2) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3sSx1) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3sSx1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t stride_height = 2; stride_height <= 3; stride_height++) {
     DeconvolutionOperatorTester()
@@ -2980,13 +2980,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3sSx1) {
       .stride_height(stride_height)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s1xS) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s1xS) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t stride_width = 2; stride_width <= 3; stride_width++) {
     DeconvolutionOperatorTester()
@@ -2998,13 +2998,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s1xS) {
       .stride_width(stride_width)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_height_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_varying_height_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -3018,14 +3018,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_height_padding) {
         .stride(2)
         .groups(2)
         .group_input_channels(17)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_width_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_varying_width_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -3039,14 +3039,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_width_padding) {
         .stride(2)
         .groups(2)
         .group_input_channels(17)
-        .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+        .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
         .iterations(1)
-        .TestQ8();
+        .TestQU8();
     }
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_varying_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -3058,13 +3058,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_height_adjustment) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_varying_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -3076,13 +3076,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_width_adjustment) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -3093,13 +3093,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_input_height) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -3110,13 +3110,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_input_width) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_input_height_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_varying_input_height_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -3127,13 +3127,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_input_height_with_tf_s
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_input_width_with_tf_same_padding) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_varying_input_width_with_tf_same_padding) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -3144,13 +3144,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_input_width_with_tf_sa
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 14; input_channels <= 20; input_channels++) {
     DeconvolutionOperatorTester()
@@ -3161,15 +3161,15 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_input_channels) {
       .stride(2)
       .groups(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3180,11 +3180,11 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_varying_output_channels) {
       .group_input_channels(17)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3194,13 +3194,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_with_input_stride) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(37)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3210,13 +3210,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_with_output_stride) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3226,13 +3226,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_with_qmin) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3242,13 +3242,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_with_qmax) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -3259,14 +3259,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_3x3s2_without_bias) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** SUBCONV2D/IGEMM path, setup ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_setup_changing_batch) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_setup_changing_batch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3278,10 +3278,10 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_setup_changing_batch) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(17)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_setup_changing_height) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_setup_changing_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3293,10 +3293,10 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_setup_changing_height) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(17)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_setup_changing_width) {
+TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_setup_changing_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3308,24 +3308,24 @@ TEST(DECONVOLUTION_NHWC_Q8, 3x3s2_setup_changing_width) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(17)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
 /**************************** SUBCONV2D/GEMM path ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, Kx2sKx2) {
+TEST(DECONVOLUTION_NHWC_QU8, Kx2sKx2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 3; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -3333,13 +3333,13 @@ TEST(DECONVOLUTION_NHWC_Q8, Kx2sKx2) {
       .kernel_size(kernel_height, 2)
       .stride(kernel_height, 2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2xKs2xK) {
+TEST(DECONVOLUTION_NHWC_QU8, 2xKs2xK) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 3; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -3347,13 +3347,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 2xKs2xK) {
       .kernel_size(2, kernel_width)
       .stride(2, kernel_width)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3361,12 +3361,12 @@ TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_height_adjustment) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(1)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3374,12 +3374,12 @@ TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_width_adjustment) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(1)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -3387,13 +3387,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_varying_input_height) {
       .kernel_size(2, 2)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -3401,13 +3401,13 @@ TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_varying_input_width) {
       .kernel_size(2, 2)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -3415,15 +3415,15 @@ TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_varying_input_channels) {
       .kernel_size(2, 2)
       .stride(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .kernel_size(2, 2)
@@ -3431,63 +3431,63 @@ TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(28)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -3495,14 +3495,14 @@ TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_without_bias) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** SUBCONV2D/GEMM path, grouped ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3510,12 +3510,12 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_Kx2sKx2) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_Kx2sKx2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 3; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -3524,13 +3524,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_Kx2sKx2) {
       .stride(kernel_height, 2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2xKs2xK) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2xKs2xK) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 3; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -3539,13 +3539,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2xKs2xK) {
       .stride(2, kernel_width)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3554,12 +3554,12 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_height_adjustment) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(1)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3568,12 +3568,12 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_width_adjustment) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(1)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -3582,13 +3582,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_varying_input_height) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -3597,13 +3597,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_varying_input_width) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 14; input_channels <= 20; input_channels++) {
     DeconvolutionOperatorTester()
@@ -3612,15 +3612,15 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_varying_input_channels) {
       .stride(2)
       .groups(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .input_size(kStridedInputHeight, kStridedInputWidth)
       .kernel_size(2, 2)
@@ -3629,11 +3629,11 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_varying_output_channels) {
       .group_input_channels(17)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3641,13 +3641,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_with_input_stride) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(37)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3655,13 +3655,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_with_output_stride) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3669,13 +3669,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_with_qmin) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3683,13 +3683,13 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_with_qmax) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -3698,14 +3698,14 @@ TEST(DECONVOLUTION_NHWC_Q8, grouped_2x2s2_without_bias) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** SUBCONV2D/GEMM path, batched ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3713,12 +3713,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_Kx2sKx2) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_Kx2sKx2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 3; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -3727,13 +3727,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_Kx2sKx2) {
       .kernel_size(kernel_height, 2)
       .stride(kernel_height, 2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2xKs2xK) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2xKs2xK) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 3; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -3742,13 +3742,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2xKs2xK) {
       .kernel_size(2, kernel_width)
       .stride(2, kernel_width)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3757,12 +3757,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_height_adjustment) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(1)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3771,12 +3771,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_width_adjustment) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(15)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(1)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -3785,13 +3785,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_varying_input_height) {
       .kernel_size(2, 2)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -3800,13 +3800,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_varying_input_width) {
       .kernel_size(2, 2)
       .stride(2)
       .group_input_channels(15)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -3815,15 +3815,15 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_varying_input_channels) {
       .kernel_size(2, 2)
       .stride(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -3832,11 +3832,11 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_varying_output_channels) {
       .group_input_channels(23)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3844,13 +3844,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_with_input_stride) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(28)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3858,13 +3858,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_with_output_stride) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3872,13 +3872,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_with_qmin) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3886,13 +3886,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_with_qmax) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -3901,14 +3901,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_2x2s2_without_bias) {
     .kernel_size(2, 2)
     .stride(2)
     .group_input_channels(23)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** SUBCONV2D/GEMM path, grouped, batched ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3917,12 +3917,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_Kx2sKx2) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_Kx2sKx2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_height = 3; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -3932,13 +3932,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_Kx2sKx2) {
       .stride(kernel_height, 2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2xKs2xK) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2xKs2xK) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t kernel_width = 3; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -3948,13 +3948,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2xKs2xK) {
       .stride(2, kernel_width)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(3)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_height_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_height_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3964,12 +3964,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_height_adjustment) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(1)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_width_adjustment) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_width_adjustment) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -3979,12 +3979,12 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_width_adjustment) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(1)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_varying_input_height) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -3994,13 +3994,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_varying_input_height) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_varying_input_width) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -4010,13 +4010,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_varying_input_width) {
       .stride(2)
       .groups(2)
       .group_input_channels(17)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_varying_input_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 14; input_channels <= 20; input_channels++) {
     DeconvolutionOperatorTester()
@@ -4026,15 +4026,15 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_varying_input_channels) {
       .stride(2)
       .groups(2)
       .group_input_channels(input_channels)
-      .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+      .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_varying_output_channels) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t output_channels = 1; output_channels <= xnn_params.q8.gemm.nr * 2; output_channels *= 2) {
+  for (size_t output_channels = 1; output_channels <= xnn_params.qu8.gemm.nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
       .batch_size(2)
       .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -4044,11 +4044,11 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_varying_output_channels) {
       .group_input_channels(17)
       .group_output_channels(output_channels)
       .iterations(1)
-      .TestQ8();
+      .TestQU8();
   }
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_with_input_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_with_input_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -4057,13 +4057,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_with_input_stride) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .input_pixel_stride(37)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_with_output_stride) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_with_output_stride) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -4072,13 +4072,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_with_output_stride) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr + 3)
-    .output_pixel_stride(xnn_params.q8.gemm.nr * 2 + 13)
+    .group_output_channels(xnn_params.qu8.gemm.nr + 3)
+    .output_pixel_stride(xnn_params.qu8.gemm.nr * 2 + 13)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_with_qmin) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_with_qmin) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -4087,13 +4087,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_with_qmin) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmin(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_with_qmax) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_with_qmax) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -4102,13 +4102,13 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_with_qmax) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .qmax(128)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_without_bias) {
+TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -4118,14 +4118,14 @@ TEST(DECONVOLUTION_NHWC_Q8, batched_grouped_2x2s2_without_bias) {
     .stride(2)
     .groups(2)
     .group_input_channels(17)
-    .group_output_channels(xnn_params.q8.gemm.nr * 2 + 3)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
     .iterations(3)
-    .TestQ8();
+    .TestQU8();
 }
 
 /**************************** SUBCONV2D/GEMM path, setup ****************************/
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_setup_changing_batch) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_setup_changing_batch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -4136,10 +4136,10 @@ TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_setup_changing_batch) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(17)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_setup_changing_height) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_setup_changing_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -4150,10 +4150,10 @@ TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_setup_changing_height) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(17)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
-TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_setup_changing_width) {
+TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_setup_changing_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -4164,7 +4164,7 @@ TEST(DECONVOLUTION_NHWC_Q8, 2x2s2_setup_changing_width) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(17)
-    .TestSetupQ8();
+    .TestSetupQU8();
 }
 
 /**************************** Future GEMM path ****************************/

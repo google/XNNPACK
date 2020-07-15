@@ -703,7 +703,7 @@ TEST(${TEST_NAME}, strided_cm) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
-$if DATATYPE == "q8":
+$if DATATYPE == "qu8":
   TEST(${TEST_NAME}, no_a_zero_point) {
     $if ISA_CHECK:
       ${ISA_CHECK};

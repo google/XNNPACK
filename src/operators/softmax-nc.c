@@ -19,7 +19,7 @@
 #include <xnnpack/params-init.h>
 
 
-enum xnn_status xnn_create_softmax_nc_q8(
+enum xnn_status xnn_create_softmax_nc_qu8(
     size_t channels,
     size_t input_stride,
     size_t output_stride,
@@ -34,7 +34,7 @@ enum xnn_status xnn_create_softmax_nc_q8(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8));
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8));
     goto error;
   }
 
@@ -43,7 +43,7 @@ enum xnn_status xnn_create_softmax_nc_q8(
   if (channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8), channels);
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8), channels);
     goto error;
   }
 
@@ -51,7 +51,7 @@ enum xnn_status xnn_create_softmax_nc_q8(
     xnn_log_error(
       "failed to create %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8), input_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8), input_stride, channels);
     goto error;
   }
 
@@ -59,21 +59,21 @@ enum xnn_status xnn_create_softmax_nc_q8(
     xnn_log_error(
       "failed to create %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8), output_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8), output_stride, channels);
     goto error;
   }
 
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8), input_scale);
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8), input_scale);
     goto error;
   }
 
   if (output_scale <= 0.0f || !isnormal(output_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8), output_scale);
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8), output_scale);
     goto error;
   }
 
@@ -82,14 +82,14 @@ enum xnn_status xnn_create_softmax_nc_q8(
   if (output_scale != 0x1.0p-8f) {
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: only output scale of 1/256 is supported",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8), output_scale);
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8), output_scale);
     goto error;
   }
 
   if (output_zero_point != 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu8 " output zero point: only output zero point of 0 is supported",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8), output_zero_point);
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8), output_zero_point);
     goto error;
   }
 
@@ -99,7 +99,7 @@ enum xnn_status xnn_create_softmax_nc_q8(
   if (softmax_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8));
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8));
     goto error;
   }
 
@@ -107,7 +107,7 @@ enum xnn_status xnn_create_softmax_nc_q8(
   if (softmax_op->lookup_table == NULL) {
     xnn_log_error(
       "failed to allocate 256 bytes for %s operator lookup table",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8));
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8));
     goto error;
   }
 
@@ -122,7 +122,7 @@ enum xnn_status xnn_create_softmax_nc_q8(
   softmax_op->input_pixel_stride = input_stride;
   softmax_op->output_pixel_stride = output_stride;
 
-  softmax_op->type = xnn_operator_type_softmax_nc_q8;
+  softmax_op->type = xnn_operator_type_softmax_nc_qu8;
   softmax_op->ukernel.type = xnn_ukernel_type_softmax;
 
   softmax_op->state = xnn_run_state_invalid;
@@ -135,16 +135,16 @@ error:
   return status;
 }
 
-enum xnn_status xnn_setup_softmax_nc_q8(
+enum xnn_status xnn_setup_softmax_nc_qu8(
     xnn_operator_t softmax_op,
     size_t batch_size,
     const uint8_t* input,
     uint8_t* output,
     pthreadpool_t threadpool)
 {
-  if (softmax_op->type != xnn_operator_type_softmax_nc_q8) {
+  if (softmax_op->type != xnn_operator_type_softmax_nc_qu8) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_softmax_nc_q8),
+      xnn_operator_type_to_string(xnn_operator_type_softmax_nc_qu8),
       xnn_operator_type_to_string(softmax_op->type));
     return xnn_status_invalid_parameter;
   }
@@ -152,7 +152,7 @@ enum xnn_status xnn_setup_softmax_nc_q8(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_q8));
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qu8));
     return xnn_status_uninitialized;
   }
 

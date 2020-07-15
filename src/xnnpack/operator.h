@@ -49,7 +49,7 @@ enum xnn_operator_type {
   xnn_operator_type_add_nd_f32,
   xnn_operator_type_argmax_pooling_nhwc_f32,
   xnn_operator_type_average_pooling_nhwc_f32,
-  xnn_operator_type_average_pooling_nhwc_q8,
+  xnn_operator_type_average_pooling_nhwc_qu8,
   xnn_operator_type_bankers_rounding_nc_f32,
   xnn_operator_type_channel_shuffle_nc_x32,
   xnn_operator_type_channel_shuffle_nc_x8,
@@ -60,21 +60,21 @@ enum xnn_operator_type {
   xnn_operator_type_convolution_nchw_f32,
   xnn_operator_type_convolution_nhwc_f16,
   xnn_operator_type_convolution_nhwc_f32,
-  xnn_operator_type_convolution_nhwc_q8,
+  xnn_operator_type_convolution_nhwc_qu8,
   xnn_operator_type_copy_nc_x32,
   xnn_operator_type_deconvolution_nhwc_f32,
-  xnn_operator_type_deconvolution_nhwc_q8,
+  xnn_operator_type_deconvolution_nhwc_qu8,
   xnn_operator_type_divide_nd_f32,
   xnn_operator_type_fully_connected_nc_f32,
-  xnn_operator_type_fully_connected_nc_q8,
+  xnn_operator_type_fully_connected_nc_qu8,
   xnn_operator_type_floor_nc_f32,
   xnn_operator_type_global_average_pooling_nwc_f16,
   xnn_operator_type_global_average_pooling_nwc_f32,
-  xnn_operator_type_global_average_pooling_nwc_q8,
+  xnn_operator_type_global_average_pooling_nwc_qu8,
   xnn_operator_type_global_average_pooling_ncw_f32,
   xnn_operator_type_hardswish_nc_f32,
   xnn_operator_type_leaky_relu_nc_f32,
-  xnn_operator_type_leaky_relu_nc_q8,
+  xnn_operator_type_leaky_relu_nc_qu8,
   xnn_operator_type_max_pooling_nhwc_f32,
   xnn_operator_type_max_pooling_nhwc_u8,
   xnn_operator_type_maximum_nd_f32,
@@ -84,9 +84,9 @@ enum xnn_operator_type {
   xnn_operator_type_prelu_nc_f32,
   xnn_operator_type_resize_bilinear_nhwc_f32,
   xnn_operator_type_sigmoid_nc_f32,
-  xnn_operator_type_sigmoid_nc_q8,
+  xnn_operator_type_sigmoid_nc_qu8,
   xnn_operator_type_softmax_nc_f32,
-  xnn_operator_type_softmax_nc_q8,
+  xnn_operator_type_softmax_nc_qu8,
   xnn_operator_type_square_nc_f32,
   xnn_operator_type_square_root_nc_f32,
   xnn_operator_type_squared_difference_nd_f32,
@@ -273,13 +273,13 @@ struct xnn_operator {
       union xnn_f32_scaleminmax_params f32_scaleminmax;
     };
     union xnn_f32_chw_params f32_chw;
-    union xnn_q8_add_params q8_add;
-    union xnn_q8_gemm_params q8_gemm;
-    // Average Pooling normally use q8_avgpool_params, but also initialize q8_gavgpool_params in case it needs to switch
+    union xnn_qu8_add_params qu8_add;
+    union xnn_qu8_gemm_params qu8_gemm;
+    // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch
     // to Global Average Pooling operation.
     struct {
-      union xnn_q8_avgpool_params q8_avgpool;
-      union xnn_q8_avgpool_params q8_gavgpool;
+      union xnn_qu8_avgpool_params qu8_avgpool;
+      union xnn_qu8_avgpool_params qu8_gavgpool;
     };
     union xnn_u8_minmax_params u8_minmax;
   } params;

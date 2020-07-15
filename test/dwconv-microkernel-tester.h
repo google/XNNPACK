@@ -170,7 +170,7 @@ class DWConvMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_q8_dwconv_minmax_unipass_ukernel_function dwconv_minmax, Variant variant = Variant::Native) const {
+  void Test(xnn_qu8_dwconv_minmax_unipass_ukernel_function dwconv_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
@@ -198,11 +198,11 @@ class DWConvMicrokernelTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
-      const xnn_q8_packing_params packing_params = {
+      const xnn_qu8_packing_params packing_params = {
         .input_zero_point = input_zero_point(),
         .kernel_zero_point = kernel_zero_point(),
       };
-      xnn_pack_q8_dwconv_ghw_w(
+      xnn_pack_qu8_dwconv_ghw_w(
         kr(), 1, channels(), cr(),
         kernel.data(), bias.data(), packed_weights.data(), &packing_params);
       for (size_t i = 0; i < indirection.size(); i++) {
@@ -241,15 +241,15 @@ class DWConvMicrokernelTester {
 
       // Prepare parameters.
       const float requantization_scale = 1.0f / float(output_scale);
-      union xnn_q8_gemm_params quantization_params = { };
+      union xnn_qu8_gemm_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_q8_gemm_params(
+          quantization_params = xnn_init_qu8_gemm_params(
             input_zero_point(), kernel_zero_point(),
             requantization_scale, output_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_q8_gemm_params(
+          quantization_params = xnn_init_scalar_qu8_gemm_params(
             input_zero_point(), kernel_zero_point(),
             requantization_scale, output_zero_point, qmin(), qmax());
           break;

@@ -485,31 +485,31 @@ DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_gemm_minmax_ukernel_4x16__neonf
 DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_gemm_minmax_ukernel_6x16__neonfp16arith_ld64)
 DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_gemm_minmax_ukernel_8x16__neonfp16arith_ld64)
 
-#define DECLARE_Q8_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                             \
-      size_t mr,                                         \
-      size_t nr,                                         \
-      size_t k,                                          \
-      const uint8_t* a,                                  \
-      size_t a_stride,                                   \
-      const void* w,                                     \
-      uint8_t* c,                                        \
-      size_t cm_stride,                                  \
-      size_t cn_stride,                                  \
-      const union xnn_q8_gemm_params* params);
+#define DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                              \
+      size_t mr,                                          \
+      size_t nr,                                          \
+      size_t k,                                           \
+      const uint8_t* a,                                   \
+      size_t a_stride,                                    \
+      const void* w,                                      \
+      uint8_t* c,                                         \
+      size_t cm_stride,                                   \
+      size_t cn_stride,                                   \
+      const union xnn_qu8_gemm_params* params);
 
 
-DECLARE_Q8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_q8_gemm_minmax_ukernel_4x8__neon)
-DECLARE_Q8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_q8_gemm_minmax_ukernel_8x8__neon)
+DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_ukernel_4x8__neon)
+DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_ukernel_8x8__neon)
 
-DECLARE_Q8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_q8_gemm_minmax_ukernel_4x8__aarch32_neon)
+DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_ukernel_4x8__aarch32_neon)
 
-DECLARE_Q8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_q8_gemm_minmax_ukernel_8x8__aarch64_neon)
+DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_ukernel_8x8__aarch64_neon)
 
-DECLARE_Q8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_q8_gemm_minmax_ukernel_2x4c8__sse2)
-DECLARE_Q8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_q8_gemm_minmax_ukernel_4x4c2__sse2)
+DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_ukernel_2x4c8__sse2)
+DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_ukernel_4x4c2__sse2)
 
-DECLARE_Q8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_q8_gemm_minmax_ukernel_2x2__scalar)
+DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_ukernel_2x2__scalar)
 
 #ifdef __cplusplus
 }  // extern "C"

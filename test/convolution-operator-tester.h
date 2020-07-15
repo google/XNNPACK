@@ -506,7 +506,7 @@ class ConvolutionOperatorTester {
     return this->iterations_;
   }
 
-  void TestNHWCxQ8() const {
+  void TestNHWCxQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
@@ -620,7 +620,7 @@ class ConvolutionOperatorTester {
       xnn_operator_t convolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_convolution2d_nhwc_q8(
+        xnn_create_convolution2d_nhwc_qu8(
           padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
           padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
           kernel_height(), kernel_width(),
@@ -639,7 +639,7 @@ class ConvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_q8(
+        xnn_setup_convolution2d_nhwc_qu8(
           convolution_op,
           batch_size(), input_height(), input_width(),
           input.data(), output.data(),
@@ -1182,7 +1182,7 @@ class ConvolutionOperatorTester {
     }
   }
 
-  void TestSetupNHWCxQ8() const {
+  void TestSetupNHWCxQU8() const {
     ASSERT_FALSE(depthwise_layout());
 
     std::random_device random_device;
@@ -1275,7 +1275,7 @@ class ConvolutionOperatorTester {
       xnn_operator_t convolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_convolution2d_nhwc_q8(
+        xnn_create_convolution2d_nhwc_qu8(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           kernel_height(), kernel_width(),
           subsampling_height(), subsampling_width(),
@@ -1292,7 +1292,7 @@ class ConvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_q8(
+        xnn_setup_convolution2d_nhwc_qu8(
           convolution_op,
           batch_size(), input_height(), input_width(),
           input.data(), output.data(),
@@ -1375,7 +1375,7 @@ class ConvolutionOperatorTester {
 
       // Setup and run Convolution operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_q8(
+        xnn_setup_convolution2d_nhwc_qu8(
           convolution_op,
           next_batch_size(), next_input_height(), next_input_width(),
           input.data(), output.data(),

@@ -19,17 +19,17 @@ extern "C" {
 #endif
 
 
-#define DECLARE_Q8_VADD_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                             \
-      size_t n,                                          \
-      const uint8_t* a,                                  \
-      const uint8_t* b,                                  \
-      uint8_t* y,                                        \
-      const union xnn_q8_add_params* params);
+#define DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                              \
+      size_t n,                                           \
+      const uint8_t* a,                                   \
+      const uint8_t* b,                                   \
+      uint8_t* y,                                         \
+      const union xnn_qu8_add_params* params);
 
-DECLARE_Q8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_q8_vadd_minmax_ukernel__neon)
-DECLARE_Q8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_q8_vadd_minmax_ukernel__scalar)
-DECLARE_Q8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_q8_vadd_minmax_ukernel__sse2)
+DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qu8_vadd_minmax_ukernel__neon)
+DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qu8_vadd_minmax_ukernel__scalar)
+DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qu8_vadd_minmax_ukernel__sse2)
 
 
 #ifdef __cplusplus

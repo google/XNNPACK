@@ -112,7 +112,7 @@ class SoftMaxOperatorTester {
     return this->iterations_;
   }
 
-  void TestQ8() const {
+  void TestQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -149,7 +149,7 @@ class SoftMaxOperatorTester {
       xnn_operator_t softmax_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_softmax_nc_q8(
+        xnn_create_softmax_nc_qu8(
           channels(), input_stride(), output_stride(),
           input_scale(),
           output_zero_point(), output_scale(),
@@ -160,7 +160,7 @@ class SoftMaxOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_softmax_op(softmax_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_softmax_nc_q8(
+        xnn_setup_softmax_nc_qu8(
           softmax_op,
           batch_size(),
           input.data(), output.data(),

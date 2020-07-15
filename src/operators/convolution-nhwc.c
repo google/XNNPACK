@@ -414,7 +414,7 @@ error:
   return status;
 }
 
-enum xnn_status xnn_create_convolution2d_nhwc_q8(
+enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
     uint32_t input_padding_bottom,
@@ -446,28 +446,28 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_q8), input_scale);
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qu8), input_scale);
     return xnn_status_invalid_parameter;
   }
 
   if (kernel_scale <= 0.0f || !isnormal(kernel_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g kernel scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_q8), kernel_scale);
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qu8), kernel_scale);
     return xnn_status_invalid_parameter;
   }
 
   if (output_scale <= 0.0f || !isnormal(output_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_q8), output_scale);
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qu8), output_scale);
     return xnn_status_invalid_parameter;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
       "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_q8), output_min, output_max);
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -476,16 +476,16 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
     xnn_log_error(
       "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
       "requantization scale %.7g is greater or equal to 1.0",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_q8),
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qu8),
       input_scale, kernel_scale, output_scale, requantization_scale);
     return xnn_status_unsupported_parameter;
   }
 
-  const struct xnn_q8_packing_params packing_params = {
+  const struct xnn_qu8_packing_params packing_params = {
     .input_zero_point = input_zero_point,
     .kernel_zero_point = kernel_zero_point,
   };
-  const union xnn_q8_gemm_params params = xnn_init_q8_gemm_params(
+  const union xnn_qu8_gemm_params params = xnn_init_qu8_gemm_params(
     input_zero_point, kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
@@ -499,16 +499,16 @@ enum xnn_status xnn_create_convolution2d_nhwc_q8(
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
     (xnn_pack_vmulcaddc_w_function) NULL,
-    (xnn_pack_dwconv_hwg_w_function) xnn_pack_q8_dwconv_hwg_w,
-    (xnn_pack_dwconv_ghw_w_function) xnn_pack_q8_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_function) xnn_pack_q8_gemm_goi_w,
-    (xnn_pack_conv_kgo_w_function) xnn_pack_q8_conv_kgo_w,
-    (xnn_pack_conv_goki_w_function) xnn_pack_q8_conv_goki_w,
+    (xnn_pack_dwconv_hwg_w_function) xnn_pack_qu8_dwconv_hwg_w,
+    (xnn_pack_dwconv_ghw_w_function) xnn_pack_qu8_dwconv_ghw_w,
+    (xnn_pack_gemm_goi_w_function) xnn_pack_qu8_gemm_goi_w,
+    (xnn_pack_conv_kgo_w_function) xnn_pack_qu8_conv_kgo_w,
+    (xnn_pack_conv_goki_w_function) xnn_pack_qu8_conv_goki_w,
     &packing_params, input_zero_point /* input padding byte */, kernel_zero_point /* packed weights padding byte */,
     &params, sizeof(params),
-    &xnn_params.q8.gemm, xnn_params.q8.dwconv, XNN_MAX_Q8_DWCONV_UKERNELS, NULL /* vmulcaddc parameters */,
-    false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_Q8,
-    xnn_operator_type_convolution_nhwc_q8,
+    &xnn_params.qu8.gemm, xnn_params.qu8.dwconv, XNN_MAX_QU8_DWCONV_UKERNELS, NULL /* vmulcaddc parameters */,
+    false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QU8,
+    xnn_operator_type_convolution_nhwc_qu8,
     convolution_op_out);
 }
 
@@ -1049,7 +1049,7 @@ static enum xnn_status setup_convolution2d_nhwc(
   }
 }
 
-enum xnn_status xnn_setup_convolution2d_nhwc_q8(
+enum xnn_status xnn_setup_convolution2d_nhwc_qu8(
     xnn_operator_t convolution_op,
     size_t batch_size,
     size_t input_height,
@@ -1058,9 +1058,9 @@ enum xnn_status xnn_setup_convolution2d_nhwc_q8(
     uint8_t* output,
     pthreadpool_t threadpool)
 {
-  if (convolution_op->type != xnn_operator_type_convolution_nhwc_q8) {
+  if (convolution_op->type != xnn_operator_type_convolution_nhwc_qu8) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_q8),
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qu8),
       xnn_operator_type_to_string(convolution_op->type));
     return xnn_status_invalid_parameter;
   }
@@ -1069,13 +1069,13 @@ enum xnn_status xnn_setup_convolution2d_nhwc_q8(
     convolution_op,
     batch_size, input_height, input_width,
     input, output,
-    XNN_INIT_FLAG_Q8,
+    XNN_INIT_FLAG_QU8,
     0 /* log2(sizeof(input element)) = log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
-    &convolution_op->params.q8_gemm,
-    &convolution_op->params.q8_gemm,
+    &convolution_op->params.qu8_gemm,
+    &convolution_op->params.qu8_gemm,
     pthreadpool_get_threads_count(threadpool));
 }
 

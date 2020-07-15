@@ -221,7 +221,7 @@ union xnn_f32_hswish_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_q8_gemm_params {
+union xnn_qu8_gemm_params {
   struct {
     int32_t kernel_zero_point;
     int32_t input_zero_point;
@@ -260,7 +260,7 @@ union xnn_q8_gemm_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_q8_add_params {
+union xnn_qu8_add_params {
   struct {
     int32_t zero_point_product;
     uint32_t a_multiplier;
@@ -303,7 +303,7 @@ union xnn_q8_add_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_q8_avgpool_params {
+union xnn_qu8_avgpool_params {
   struct {
     int32_t bias;
     int32_t multiplier;
@@ -558,7 +558,7 @@ typedef void (*xnn_f16_igemm_minmax_ukernel_function)(
     const void* zero,
     const struct xnn_f16_scaleminmax_params* params);
 
-typedef void (*xnn_q8_gemm_ukernel_function)(
+typedef void (*xnn_qu8_gemm_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t k,
@@ -568,7 +568,7 @@ typedef void (*xnn_q8_gemm_ukernel_function)(
     uint8_t* c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_q8_gemm_params* params);
+    const union xnn_qu8_gemm_params* params);
 
 typedef void (*xnn_igemm_ukernel_function)(
     size_t mr,
@@ -626,7 +626,7 @@ typedef void (*xnn_f32_igemm_minmax_ukernel_function)(
     const float* zero,
     const union xnn_f32_minmax_params* params);
 
-typedef void (*xnn_q8_igemm_ukernel_function)(
+typedef void (*xnn_qu8_igemm_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t kc,
@@ -638,7 +638,7 @@ typedef void (*xnn_q8_igemm_ukernel_function)(
     size_t cn_stride,
     size_t a_offset,
     const uint8_t* zero,
-    const union xnn_q8_gemm_params* params);
+    const union xnn_qu8_gemm_params* params);
 
 typedef void (*xnn_conv_hwc_ukernel_function)(
     size_t input_height,
@@ -911,7 +911,7 @@ typedef void (*xnn_f16_dwconv_minmax_unipass_ukernel_function)(
     const void* zero,
     const struct xnn_f16_minmax_params* params);
 
-typedef void (*xnn_q8_dwconv_minmax_unipass_ukernel_function)(
+typedef void (*xnn_qu8_dwconv_minmax_unipass_ukernel_function)(
     size_t channels,
     size_t output_width,
     const uint8_t** input,
@@ -921,7 +921,7 @@ typedef void (*xnn_q8_dwconv_minmax_unipass_ukernel_function)(
     size_t output_increment,
     size_t input_offset,
     const uint8_t* zero,
-    const union xnn_q8_gemm_params* params);
+    const union xnn_qu8_gemm_params* params);
 
 typedef void (*xnn_dwconv_multipass_ukernel_function)(
     size_t channels,
@@ -981,14 +981,14 @@ typedef void (*xnn_f32_gavgpool_minmax_unipass_ukernel_function)(
     float* output,
     const union xnn_f32_scaleminmax_params* params);
 
-typedef void (*xnn_q8_gavgpool_minmax_unipass_ukernel_function)(
+typedef void (*xnn_qu8_gavgpool_minmax_unipass_ukernel_function)(
     size_t rows,
     size_t channels,
     const uint8_t* input,
     size_t input_stride,
     const uint8_t* zero,
     uint8_t* output,
-    const union xnn_q8_avgpool_params* params);
+    const union xnn_qu8_avgpool_params* params);
 
 typedef void (*xnn_gavgpool_multipass_ukernel_function)(
     size_t rows,
@@ -1020,7 +1020,7 @@ typedef void (*xnn_f32_gavgpool_minmax_multipass_ukernel_function)(
     float* output,
     const union xnn_f32_scaleminmax_params* params);
 
-typedef void (*xnn_q8_gavgpool_minmax_multipass_ukernel_function)(
+typedef void (*xnn_qu8_gavgpool_minmax_multipass_ukernel_function)(
     size_t rows,
     size_t channels,
     const uint8_t* input,
@@ -1028,7 +1028,7 @@ typedef void (*xnn_q8_gavgpool_minmax_multipass_ukernel_function)(
     const uint8_t* zero,
     int32_t* buffer,
     uint8_t* output,
-    const union xnn_q8_avgpool_params* params);
+    const union xnn_qu8_avgpool_params* params);
 
 typedef void (*xnn_gavgpool_cw_ukernel_function)(
     size_t elements,
@@ -1068,7 +1068,7 @@ typedef void (*xnn_f32_avgpool_minmax_unipass_ukernel_function)(
     size_t output_increment,
     const union xnn_f32_scaleminmax_params* params);
 
-typedef void (*xnn_q8_avgpool_minmax_unipass_ukernel_function)(
+typedef void (*xnn_qu8_avgpool_minmax_unipass_ukernel_function)(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
@@ -1078,7 +1078,7 @@ typedef void (*xnn_q8_avgpool_minmax_unipass_ukernel_function)(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_q8_avgpool_params* params);
+    const union xnn_qu8_avgpool_params* params);
 
 typedef void (*xnn_avgpool_multipass_ukernel_function)(
     size_t output_pixels,
@@ -1106,7 +1106,7 @@ typedef void (*xnn_f32_avgpool_minmax_multipass_ukernel_function)(
     size_t output_increment,
     const union xnn_f32_scaleminmax_params* params);
 
-typedef void (*xnn_q8_avgpool_minmax_multipass_ukernel_function)(
+typedef void (*xnn_qu8_avgpool_minmax_multipass_ukernel_function)(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
@@ -1117,7 +1117,7 @@ typedef void (*xnn_q8_avgpool_minmax_multipass_ukernel_function)(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_q8_avgpool_params* params);
+    const union xnn_qu8_avgpool_params* params);
 
 typedef void (*xnn_pavgpool_unipass_ukernel_function)(
     size_t output_pixels,
@@ -1322,12 +1322,12 @@ typedef void (*xnn_vadd_ukernel_function)(
     void* y,
     const void* params);
 
-typedef void (*xnn_q8_vadd_minmax_ukernel_function)(
+typedef void (*xnn_qu8_vadd_minmax_ukernel_function)(
     size_t n,
     const uint8_t* a,
     const uint8_t* b,
     uint8_t* y,
-    const union xnn_q8_add_params* params);
+    const union xnn_qu8_add_params* params);
 
 typedef void (*xnn_f32_vsqrt_ukernel_function)(
     size_t n,
@@ -1692,7 +1692,7 @@ struct vmulcaddc_parameters {
   uint8_t row_tile;
 };
 
-#define XNN_MAX_Q8_DWCONV_UKERNELS 1
+#define XNN_MAX_QU8_DWCONV_UKERNELS 1
 #define XNN_MAX_F16_DWCONV_UKERNELS 3
 #define XNN_MAX_F32_DWCONV_UKERNELS 3
 #define XNN_MAX_F32_ARGMAXPOOL_UKERNELS 3
@@ -1708,8 +1708,8 @@ struct vmulcaddc_parameters {
 #define XNN_INIT_FLAG_F16     0x00000008
 // Indicates that X16 XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_X16     0x00000010
-// Indicates that Q8 XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_Q8      0x00000020
+// Indicates that QU8 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_QU8     0x00000020
 // Indicates that U8 XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_U8      0x00000040
 // Indicates that X8 XNNPACK microkernels are available for use.
@@ -1721,11 +1721,11 @@ struct xnn_parameters {
   struct xnn_allocator allocator;
   struct {
     struct gemm_parameters gemm;
-    struct dwconv_parameters dwconv[XNN_MAX_Q8_DWCONV_UKERNELS];
+    struct dwconv_parameters dwconv[XNN_MAX_QU8_DWCONV_UKERNELS];
     struct avgpool_parameters avgpool;
     struct gavgpool_parameters gavgpool;
     xnn_vadd_ukernel_function vadd;
-  } q8;
+  } qu8;
   struct {
     struct maxpool_parameters maxpool;
     xnn_univector_ukernel_function clamp;

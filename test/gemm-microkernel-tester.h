@@ -212,7 +212,7 @@ class GemmMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_q8_gemm_ukernel_function gemm, Variant variant = Variant::Native) const {
+  void Test(xnn_qu8_gemm_ukernel_function gemm, Variant variant = Variant::Native) const {
     ASSERT_LE(m(), mr());
 
     std::random_device random_device;
@@ -239,11 +239,11 @@ class GemmMicrokernelTester {
       std::fill(c.begin(), c.end(), 0xA5);
 
       std::fill(packed_w.begin(), packed_w.end(), b_zero_point());
-      const xnn_q8_packing_params packing_params = {
+      const xnn_qu8_packing_params packing_params = {
         .input_zero_point = a_zero_point(),
         .kernel_zero_point = b_zero_point(),
       };
-      xnn_pack_q8_gemm_goi_w(1, n(), k(), nr(), kr(), sr(),
+      xnn_pack_qu8_gemm_goi_w(1, n(), k(), nr(), kr(), sr(),
         b.data(), bias.data(), packed_w.data(), &packing_params);
 
       // Compute 32-bit results and output quantization arguments.
@@ -267,15 +267,15 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<uint8_t>::max())), long(std::numeric_limits<uint8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_q8_gemm_params quantization_params = { };
+      union xnn_qu8_gemm_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_q8_gemm_params(
+          quantization_params = xnn_init_qu8_gemm_params(
             a_zero_point(), b_zero_point(),
             requantization_scale, c_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_q8_gemm_params(
+          quantization_params = xnn_init_scalar_qu8_gemm_params(
             a_zero_point(), b_zero_point(),
             requantization_scale, c_zero_point, qmin(), qmax());
           break;
@@ -312,7 +312,7 @@ class GemmMicrokernelTester {
     }
   }
 
-  void Test(xnn_q8_igemm_ukernel_function igemm, Variant variant = Variant::Native) const {
+  void Test(xnn_qu8_igemm_ukernel_function igemm, Variant variant = Variant::Native) const {
     ASSERT_LE(m(), mr());
 
     std::random_device random_device;
@@ -343,11 +343,11 @@ class GemmMicrokernelTester {
       std::fill(c.begin(), c.end(), 0xA5);
 
       std::fill(packed_w.begin(), packed_w.end(), b_zero_point());
-      const xnn_q8_packing_params packing_params = {
+      const xnn_qu8_packing_params packing_params = {
         .input_zero_point = a_zero_point(),
         .kernel_zero_point = b_zero_point(),
       };
-      xnn_pack_q8_conv_goki_w(
+      xnn_pack_qu8_conv_goki_w(
         1, n(), ks(), k(), nr(), kr(), sr(),
         b.data(), bias.data(), packed_w.data(), &packing_params);
 
@@ -398,15 +398,15 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<uint8_t>::max())), long(std::numeric_limits<uint8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_q8_gemm_params quantization_params = { };
+      union xnn_qu8_gemm_params quantization_params = { };
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_q8_gemm_params(
+          quantization_params = xnn_init_qu8_gemm_params(
             a_zero_point(), b_zero_point(),
             requantization_scale, c_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_q8_gemm_params(
+          quantization_params = xnn_init_scalar_qu8_gemm_params(
             a_zero_point(), b_zero_point(),
             requantization_scale, c_zero_point, qmin(), qmax());
           break;

@@ -209,7 +209,7 @@ class LeakyReLUOperatorTester {
     }
   }
 
-  void TestQ8() const {
+  void TestQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -237,7 +237,7 @@ class LeakyReLUOperatorTester {
       xnn_operator_t leaky_relu_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_leaky_relu_nc_q8(
+        xnn_create_leaky_relu_nc_qu8(
           channels(), input_stride(), output_stride(),
           negative_slope(),
           input_zero_point(), input_scale(),
@@ -250,7 +250,7 @@ class LeakyReLUOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_leaky_relu_op(leaky_relu_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_leaky_relu_nc_q8(
+        xnn_setup_leaky_relu_nc_qu8(
           leaky_relu_op,
           batch_size(),
           input.data(), output.data(),

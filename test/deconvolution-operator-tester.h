@@ -483,7 +483,7 @@ class DeconvolutionOperatorTester {
     return this->iterations_;
   }
 
-  void TestQ8() const {
+  void TestQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
@@ -571,7 +571,7 @@ class DeconvolutionOperatorTester {
       xnn_operator_t deconvolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_deconvolution2d_nhwc_q8(
+        xnn_create_deconvolution2d_nhwc_qu8(
           padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
           padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
           kernel_height(), kernel_width(),
@@ -590,7 +590,7 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_q8(
+        xnn_setup_deconvolution2d_nhwc_qu8(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
@@ -756,7 +756,7 @@ class DeconvolutionOperatorTester {
     }
   }
 
-  void TestSetupQ8() const {
+  void TestSetupQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
@@ -849,7 +849,7 @@ class DeconvolutionOperatorTester {
       xnn_operator_t deconvolution_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_deconvolution2d_nhwc_q8(
+        xnn_create_deconvolution2d_nhwc_qu8(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           kernel_height(), kernel_width(),
           stride_height(), stride_width(),
@@ -866,7 +866,7 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_q8(
+        xnn_setup_deconvolution2d_nhwc_qu8(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
@@ -952,7 +952,7 @@ class DeconvolutionOperatorTester {
 
       // Setup and run Deconvolution operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_q8(
+        xnn_setup_deconvolution2d_nhwc_qu8(
           deconvolution_op,
           next_batch_size(), next_input_height(), next_input_width(),
           adjustment_height(), adjustment_width(),

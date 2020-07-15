@@ -22,7 +22,7 @@
 #include <xnnpack/params.h>
 
 
-enum xnn_status xnn_create_global_average_pooling_nwc_q8(
+enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
     size_t channels,
     size_t input_stride,
     size_t output_stride,
@@ -40,7 +40,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_q8(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8));
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8));
     goto error;
   }
 
@@ -49,7 +49,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_q8(
   if (channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8), channels);
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8), channels);
     goto error;
   }
 
@@ -57,7 +57,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_q8(
     xnn_log_error(
       "failed to create %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8), input_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8), input_stride, channels);
     goto error;
   }
 
@@ -65,28 +65,28 @@ enum xnn_status xnn_create_global_average_pooling_nwc_q8(
     xnn_log_error(
       "failed to create %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8), output_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8), output_stride, channels);
     goto error;
   }
 
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8), input_scale);
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8), input_scale);
     goto error;
   }
 
   if (output_scale <= 0.0f || !isnormal(output_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8), output_scale);
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8), output_scale);
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
       "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8), output_min, output_max);
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8), output_min, output_max);
     goto error;
   }
 
@@ -96,7 +96,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_q8(
   if (input_output_scale < 0x1.0p-8f || input_output_scale >= 0x1.0p+8f) {
     xnn_log_error(
       "failed to create %s operator with %.7g input-to-output scale ratio: scale ratio must be in [2**-8, 2**8) range",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8), input_output_scale);
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8), input_output_scale);
     goto error;
   }
 
@@ -106,7 +106,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_q8(
   if (global_average_pooling_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8));
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8));
     goto error;
   }
 
@@ -115,7 +115,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_q8(
   if (zero_buffer == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator zero padding",
-      zero_size, xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8));
+      zero_size, xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8));
     goto error;
   }
   global_average_pooling_op->zero_buffer = zero_buffer;
@@ -130,7 +130,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_q8(
   global_average_pooling_op->output_min = output_min;
   global_average_pooling_op->output_max = output_max;
 
-  global_average_pooling_op->type = xnn_operator_type_global_average_pooling_nwc_q8;
+  global_average_pooling_op->type = xnn_operator_type_global_average_pooling_nwc_qu8;
   global_average_pooling_op->ukernel.type = xnn_ukernel_type_global_average_pooling;
 
   global_average_pooling_op->state = xnn_run_state_invalid;
@@ -360,7 +360,7 @@ error:
   return status;
 }
 
-enum xnn_status xnn_setup_global_average_pooling_nwc_q8(
+enum xnn_status xnn_setup_global_average_pooling_nwc_qu8(
     xnn_operator_t global_average_pooling_op,
     size_t batch_size,
     size_t width,
@@ -368,9 +368,9 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_q8(
     uint8_t* output,
     pthreadpool_t threadpool)
 {
-  if (global_average_pooling_op->type != xnn_operator_type_global_average_pooling_nwc_q8) {
+  if (global_average_pooling_op->type != xnn_operator_type_global_average_pooling_nwc_qu8) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8),
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8),
       xnn_operator_type_to_string(global_average_pooling_op->type));
     return xnn_status_invalid_parameter;
   }
@@ -378,15 +378,15 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_q8(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8));
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8));
     return xnn_status_uninitialized;
   }
 
-  assert(xnn_params.q8.gavgpool.mr != 0);
+  assert(xnn_params.qu8.gavgpool.mr != 0);
 
   if (width == 0) {
     xnn_log_error("failed to setup %s operator with width %zu: width must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_q8), width);
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qu8), width);
     return xnn_status_invalid_parameter;
   }
 
@@ -400,8 +400,8 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_q8(
   global_average_pooling_op->input = input;
   global_average_pooling_op->output = output;
 
-  global_average_pooling_op->params.q8_avgpool =
-    xnn_init_q8_avgpool_params(
+  global_average_pooling_op->params.qu8_avgpool =
+    xnn_init_qu8_avgpool_params(
       -(int32_t) width * (int32_t) (uint32_t) global_average_pooling_op->input_zero_point,
       global_average_pooling_op->input_scale / (global_average_pooling_op->output_scale * (float) width),
       global_average_pooling_op->output_zero_point,
@@ -419,17 +419,17 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_q8(
       .channels = channels,
       .output = output,
       .output_batch_stride = global_average_pooling_op->output_pixel_stride * sizeof(uint8_t),
-      .params.q8 = global_average_pooling_op->params.q8_avgpool,
+      .params.qu8 = global_average_pooling_op->params.qu8_avgpool,
   };
   global_average_pooling_op->compute.type = xnn_parallelization_type_1d;
   global_average_pooling_op->compute.range[0] = batch_size;
 
-  if (width <= xnn_params.q8.gavgpool.mr) {
+  if (width <= xnn_params.qu8.gavgpool.mr) {
     global_average_pooling_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_unipass;
-    global_average_pooling_op->context.global_average_pooling_nwc.unipass_ukernel = xnn_params.q8.gavgpool.up;
+    global_average_pooling_op->context.global_average_pooling_nwc.unipass_ukernel = xnn_params.qu8.gavgpool.up;
   } else {
     global_average_pooling_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_multipass;
-    global_average_pooling_op->context.global_average_pooling_nwc.multipass_ukernel = xnn_params.q8.gavgpool.mp;
+    global_average_pooling_op->context.global_average_pooling_nwc.multipass_ukernel = xnn_params.qu8.gavgpool.mp;
   }
   global_average_pooling_op->state = xnn_run_state_ready;
 
