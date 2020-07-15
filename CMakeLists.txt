@@ -335,6 +335,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/scalar-p5-x4-acc2.c
   src/f32-raddstoreexpminusmax/gen/scalar-p5-x4-acc4.c
   src/f32-rmax/scalar.c
+  src/f32-relu/gen/scalar-x1.c
+  src/f32-relu/gen/scalar-x2.c
+  src/f32-relu/gen/scalar-x4.c
   src/f32-sigmoid/gen/scalar-lut2048-p1-div-x1.c
   src/f32-sigmoid/gen/scalar-lut2048-p1-div-x2.c
   src/f32-sigmoid/gen/scalar-lut2048-p1-div-x4.c
@@ -780,6 +783,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x20-acc2.c
   src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x20-acc5.c
   src/f32-rmax/neon.c
+  src/f32-relu/gen/neon-x4.c
+  src/f32-relu/gen/neon-x8.c
   src/f32-sigmoid/gen/neon-frac-p9-p10-nr1recps-x16.c
   src/f32-sigmoid/gen/neon-rr2-p5-nr2recps-x4.c
   src/f32-sigmoid/gen/neon-rr2-p5-nr2recps-x8.c
@@ -1181,6 +1186,8 @@ SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-hswish/gen/neonfp16arith-x8.c
   src/f16-prelu/gen/neonfp16arith-2x16.c
   src/f16-prelu/gen/neonfp16arith-2x8.c
+  src/f16-relu/gen/neonfp16arith-x16.c
+  src/f16-relu/gen/neonfp16arith-x8.c
   src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x16.c
@@ -1301,6 +1308,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-prelu/gen/sse-2x4.c
   src/f32-prelu/gen/sse-2x8.c
   src/f32-rmax/sse.c
+  src/f32-relu/gen/sse-x4.c
+  src/f32-relu/gen/sse-x8.c
   src/f32-spmm/gen/4x1-minmax-sse.c
   src/f32-spmm/gen/8x1-minmax-sse.c
   src/f32-spmm/gen/16x1-minmax-sse.c
@@ -1661,6 +1670,8 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/avx2-p5-x96-acc2.c
   src/f32-raddstoreexpminusmax/gen/avx2-p5-x96-acc3.c
   src/f32-raddstoreexpminusmax/gen/avx2-p5-x96-acc6.c
+  src/f32-relu/gen/avx-x16.c
+  src/f32-relu/gen/avx-x8.c
   src/f32-sigmoid/gen/avx2-rr1-p5-div-x8.c
   src/f32-sigmoid/gen/avx2-rr1-p5-div-x16.c
   src/f32-sigmoid/gen/avx2-rr1-p5-div-x24.c
@@ -1803,6 +1814,8 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x192-acc3.c
   src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x192-acc6.c
   src/f32-rmax/avx512f.c
+  src/f32-relu/gen/avx512f-x16.c
+  src/f32-relu/gen/avx512f-x32.c
   src/f32-vbinary/gen/vadd-minmax-avx512f-x16.c
   src/f32-vbinary/gen/vadd-minmax-avx512f-x32.c
   src/f32-vbinary/gen/vaddc-minmax-avx512f-x16.c
@@ -2883,6 +2896,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-rmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-rmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-rmax-test f32-rmax-test)
+
+  ADD_EXECUTABLE(f32-relu-test test/f32-relu.cc)
+  SET_TARGET_PROPERTIES(f32-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-relu-test f32-relu-test)
 
   ADD_EXECUTABLE(f32-sigmoid-test test/f32-sigmoid.cc)
   SET_TARGET_PROPERTIES(f32-sigmoid-test PROPERTIES

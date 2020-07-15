@@ -26,6 +26,7 @@ class VUnOpMicrokernelTester {
     Abs,
     LeakyReLU,
     Negate,
+    ReLU,
     RoundToNearestEven,
     RoundTowardsZero,
     RoundUp,
@@ -132,6 +133,9 @@ class VUnOpMicrokernelTester {
           case OpType::Negate:
             y_ref[i] = -x_data[i];
             break;
+          case OpType::ReLU:
+            y_ref[i] = std::max(x_data[i], 0.0f);
+            break;
           case OpType::RoundToNearestEven:
             y_ref[i] = std::nearbyint(double(x_data[i]));
             break;
@@ -162,6 +166,7 @@ class VUnOpMicrokernelTester {
       // Prepare parameters.
       union {
         union xnn_f32_abs_params abs;
+        union xnn_f32_relu_params relu;
         union xnn_f32_lrelu_params lrelu;
         union xnn_f32_neg_params neg;
         union xnn_f32_rnd_params rnd;
@@ -211,6 +216,7 @@ class VUnOpMicrokernelTester {
               break;
           }
           break;
+        case OpType::ReLU:
         case OpType::Sigmoid:
         case OpType::Square:
           break;

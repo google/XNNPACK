@@ -20,6 +20,11 @@ struct xnn_f16_default_params {
   char _; // Dummy member variable to comply with the C standard
 };
 
+struct xnn_f16_relu_params {
+  // Empty; serves to differentiate pointer types for micro-kernels with different fused activations.
+  char _; // Dummy member variable to comply with the C standard
+};
+
 // scaleminmax is used for gemm/igemm ukernels.
 struct xnn_f16_scaleminmax_params {
   uint16_t scale;
@@ -1281,6 +1286,16 @@ typedef void (*xnn_u8_clamp_ukernel_function)(
     const uint8_t* x,
     uint8_t* y,
     const union xnn_u8_minmax_params* params);
+
+typedef void (*xnn_f16_relu_ukernel_function)(
+    size_t n,
+    const void* x,
+    void* y);
+
+typedef void (*xnn_f32_relu_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y);
 
 typedef void (*xnn_f16_hswish_ukernel_function)(
     size_t n,

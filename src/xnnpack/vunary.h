@@ -470,6 +470,39 @@ DECLARE_F32_VRND_UKERNEL_FUNCTION(xnn_f32_vrndd_ukernel__scalar_libm_x1)
 DECLARE_F32_VRND_UKERNEL_FUNCTION(xnn_f32_vrndd_ukernel__scalar_libm_x2)
 DECLARE_F32_VRND_UKERNEL_FUNCTION(xnn_f32_vrndd_ukernel__scalar_libm_x4)
 
+#define DECLARE_F16_RELU_UKERNEL_FUNCTION(fn_name)   \
+  XNN_INTERNAL void fn_name(                         \
+      size_t n,                                      \
+      const void* x,                                 \
+      void* y,                                       \
+      const struct xnn_f16_relu_params* params);
+
+DECLARE_F16_RELU_UKERNEL_FUNCTION(xnn_f16_relu_ukernel__neonfp16arith_x8)
+DECLARE_F16_RELU_UKERNEL_FUNCTION(xnn_f16_relu_ukernel__neonfp16arith_x16)
+
+#define DECLARE_F32_RELU_UKERNEL_FUNCTION(fn_name)   \
+  XNN_INTERNAL void fn_name(                         \
+      size_t n,                                      \
+      const float* x,                                \
+      float* y,                                      \
+      const union xnn_f32_relu_params* params);
+
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__neon_x4)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__neon_x8)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__sse_x4)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__sse_x8)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__avx_x8)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__avx_x16)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__avx512f_x16)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__avx512f_x32)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasmsimd_x4)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasmsimd_x8)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasm_x1)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasm_x2)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasm_x4)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__scalar_x1)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__scalar_x2)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__scalar_x4)
 
 #ifdef __cplusplus
 }  // extern "C"
