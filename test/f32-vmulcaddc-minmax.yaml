@@ -10,6 +10,10 @@
 - name: xnn_f32_vmulcaddc_ukernel_c8__sse_2x
 - name: xnn_f32_vmulcaddc_ukernel_c4__psimd_2x
 - name: xnn_f32_vmulcaddc_ukernel_c8__psimd_2x
+- name: xnn_f32_vmulcaddc_ukernel_c4__wasmsimd_arm_2x
+- name: xnn_f32_vmulcaddc_ukernel_c8__wasmsimd_arm_2x
+- name: xnn_f32_vmulcaddc_ukernel_c4__wasmsimd_x86_2x
+- name: xnn_f32_vmulcaddc_ukernel_c8__wasmsimd_x86_2x
 - name: xnn_f32_vmulcaddc_ukernel_c1__wasm_2x
 - name: xnn_f32_vmulcaddc_ukernel_c2__wasm_2x
 - name: xnn_f32_vmulcaddc_ukernel_c4__wasm_2x

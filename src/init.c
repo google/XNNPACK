@@ -1969,11 +1969,19 @@ static void init(void) {
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vsqrdiffc_ukernel__wasmsimd_x8,
       .element_tile = 8,
     };
-    xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
-      .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__psimd_2x,
-      .channel_tile = 4,
-      .row_tile = 2,
-    };
+    if (is_wasm_x86) {
+      xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
+        .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__wasmsimd_x86_2x,
+        .channel_tile = 4,
+        .row_tile = 2,
+      };
+    } else {
+      xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
+        .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_ukernel_c4__wasmsimd_arm_2x,
+        .channel_tile = 4,
+        .row_tile = 2,
+      };
+    }
     #ifndef XNN_NO_NCHW_OPERATORS
       xnn_params.f32.spmm = (struct spmm_parameters) {
         .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_16x1__psimd,
