@@ -328,6 +328,7 @@ static void init(void) {
         .channel_tile = 8,
       };
       xnn_params.f32.raddstoreexpminusmax = xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x8;
+      xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__neon_x8;
       xnn_params.f32.rmax = xnn_f32_rmax_ukernel__neon;
       xnn_params.f32.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vadd_minmax_ukernel__neon_x8,
@@ -539,6 +540,7 @@ static void init(void) {
       xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__scalar_x4;
       xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__scalar_x4;
       xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__scalar_x4;
+      xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__scalar_x4;
       xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__scalar_libm_x1;
       xnn_params.f32.rndz  = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__scalar_libm_x1;
       xnn_params.f32.rndu  = (xnn_univector_ukernel_function) xnn_f32_vrndu_ukernel__scalar_libm_x1;
@@ -1019,6 +1021,7 @@ static void init(void) {
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__neon_x16;
     xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__neon_x8;
     xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__neon_x8;
+    xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__neon_x8;
     xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__neonv8_x8;
     xnn_params.f32.rndz = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__neonv8_x8;
     xnn_params.f32.rndu = (xnn_univector_ukernel_function) xnn_f32_vrndu_ukernel__neonv8_x8;
@@ -1396,6 +1399,13 @@ static void init(void) {
       xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__avx_x16;
     } else {
       xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__sse_x8;
+    }
+    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+      xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__avx512f_x16;
+    } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx()) {
+      xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__avx_x16;
+    } else {
+      xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__sse_x8;
     }
     if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
       xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__avx512f_x16;
@@ -1841,6 +1851,7 @@ static void init(void) {
     xnn_params.f32.hswish = (xnn_univector_ukernel_function) xnn_f32_hswish_ukernel__wasmsimd_x16;
     xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__psimd_x8;
     xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__wasmsimd_x8;
+    xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__wasmsimd_x8;
     xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__wasmsimd_x8;
     xnn_params.f32.rndz  = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__wasmsimd_x8;
     xnn_params.f32.rndu  = (xnn_univector_ukernel_function) xnn_f32_vrndu_ukernel__wasmsimd_x8;
@@ -2208,6 +2219,7 @@ static void init(void) {
     }
     xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__scalar_x4;
     xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__scalar_x4;
+    xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__wasm_x4;
     xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__scalar_libm_x4;
     xnn_params.f32.rndz  = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__scalar_libm_x4;
     xnn_params.f32.rndu  = (xnn_univector_ukernel_function) xnn_f32_vrndu_ukernel__scalar_libm_x4;
