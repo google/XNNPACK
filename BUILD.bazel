@@ -4204,19 +4204,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f16_clamp_test",
-    srcs = [
-        "test/f16-clamp.cc",
-        "test/clamp-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "f32_clamp_test",
     srcs = [
         "test/f32-clamp.cc",
-        "test/clamp-microkernel-tester.h",
+        "test/vunary-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

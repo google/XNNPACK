@@ -24,16 +24,17 @@ class VUnOpMicrokernelTester {
  public:
   enum class OpType {
     Abs,
+    Clamp,
     LeakyReLU,
     Negate,
     ReLU,
+    RoundDown,
     RoundToNearestEven,
     RoundTowardsZero,
     RoundUp,
-    RoundDown,
+    Sigmoid,
     Square,
     SquareRoot,
-    Sigmoid,
   };
 
   enum class Variant {
@@ -127,6 +128,9 @@ class VUnOpMicrokernelTester {
           case OpType::Abs:
             y_ref[i] = std::abs(x_data[i]);
             break;
+          case OpType::Clamp:
+            y_ref[i] = std::max(std::min(x_data[i], float(qmax())), float(qmin()));
+            break;
           case OpType::LeakyReLU:
             y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * slope() : x_data[i];
             break;
@@ -166,9 +170,10 @@ class VUnOpMicrokernelTester {
       // Prepare parameters.
       union {
         union xnn_f32_abs_params abs;
-        union xnn_f32_relu_params relu;
+        union xnn_f32_minmax_params clamp;
         union xnn_f32_lrelu_params lrelu;
         union xnn_f32_neg_params neg;
+        union xnn_f32_relu_params relu;
         union xnn_f32_rnd_params rnd;
         union xnn_f32_sqrt_params sqrt;
       } params;
@@ -180,6 +185,16 @@ class VUnOpMicrokernelTester {
               break;
             case Variant::Scalar:
               params.abs = xnn_init_scalar_f32_abs_params();
+              break;
+          }
+          break;
+        case OpType::Clamp:
+          switch (variant) {
+            case Variant::Native:
+              params.clamp = xnn_init_f32_minmax_params(float(qmin()), float(qmax()));
+              break;
+            case Variant::Scalar:
+              params.clamp = xnn_init_scalar_f32_minmax_params(float(qmin()), float(qmax()));
               break;
           }
           break;
