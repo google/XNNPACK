@@ -778,8 +778,11 @@ WASMSIMD_UKERNELS = [
     "src/f32-vunary/gen/vsqr-wasmsimd-x8.c",
     "src/math/roundne-wasmsimd-addsub.c",
     "src/math/roundd-wasmsimd-addsub.c",
+    "src/math/roundd-wasmsimd-cvt.c",
     "src/math/roundu-wasmsimd-addsub.c",
+    "src/math/roundu-wasmsimd-cvt.c",
     "src/math/roundz-wasmsimd-addsub.c",
+    "src/math/roundz-wasmsimd-cvt.c",
     "src/requantization/fp32-wasmsimd.c",
 ]
 
