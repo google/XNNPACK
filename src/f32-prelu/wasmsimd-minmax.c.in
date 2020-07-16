@@ -65,7 +65,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_minmax_${ROW_TILE}x${CHANNEL_TILE}(
 
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
-          v128_t vacc${M}x${ABC[C:C+4]} = wasm_f32x4_max(vi${M}x${ABC[C:C+4]}, vzero);
+          v128_t vacc${M}x${ABC[C:C+4]} = wasm_i32x4_max(vi${M}x${ABC[C:C+4]}, vzero);
           vi${M}x${ABC[C:C+4]} = wasm_i32x4_min(vi${M}x${ABC[C:C+4]}, vzero);
 
       $for M in range(ROW_TILE):
@@ -88,7 +88,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_minmax_${ROW_TILE}x${CHANNEL_TILE}(
           i${M} += 4;
 
         $for M in range(ROW_TILE):
-          v128_t vacc${M}x0123 = wasm_f32x4_max(vi${M}x0123, vzero);
+          v128_t vacc${M}x0123 = wasm_i32x4_max(vi${M}x0123, vzero);
           vi${M}x0123 = wasm_i32x4_min(vi${M}x0123, vzero);
 
         $for M in range(ROW_TILE):
@@ -107,7 +107,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_minmax_${ROW_TILE}x${CHANNEL_TILE}(
         i${M} = (const float*) ((uintptr_t) i${M} + c);
 
       $for M in range(ROW_TILE):
-        v128_t vacc${M}x0123 = wasm_f32x4_max(vi${M}x0123, vzero);
+        v128_t vacc${M}x0123 = wasm_i32x4_max(vi${M}x0123, vzero);
         vi${M}x0123 = wasm_i32x4_min(vi${M}x0123, vzero);
 
       $for M in range(ROW_TILE):

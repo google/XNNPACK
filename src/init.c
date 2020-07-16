@@ -1850,13 +1850,13 @@ static void init(void) {
     xnn_params.f32.sqrt = (xnn_univector_ukernel_function) xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x8;
     if (is_wasm_x86) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__wasmsimd_bitselect_2x8,
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__wasmsimd_minmax_2x8,
         .row_tile = 2,
         .channel_tile = 8,
       };
     } else {
       xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__wasmsimd_minmax_2x8,
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__wasmsimd_bitselect_2x8,
         .row_tile = 2,
         .channel_tile = 8,
       };
