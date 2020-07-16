@@ -1,11 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-vrnd/vrndu-wasmsimd-addsub.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 4 == 0
-$assert BATCH_TILE >= 4
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <wasm_simd128.h>
@@ -15,7 +16,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vrndu_ukernel__wasmsimd_x${BATCH_TILE}(
+void xnn_f32_vrndu_ukernel__wasmsimd_addsub_x4(
     size_t n,
     const float* x,
     float* y,
@@ -24,42 +25,9 @@ void xnn_f32_vrndu_ukernel__wasmsimd_x${BATCH_TILE}(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const v128_t vsign_mask = wasm_i32x4_splat(INT32_C(0x80000000));
+  const v128_t vsign_mask = wasm_f32x4_splat(-0.0f);
   const v128_t vmagic_number = wasm_f32x4_splat(0x1.000000p+23f);
   const v128_t vone = wasm_f32x4_splat(1.0f);
-  $if BATCH_TILE > 4:
-    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
-      const v128_t vx${ABC[0:4]} = wasm_v128_load(x);
-      $for N in range(4, BATCH_TILE, 4):
-        const v128_t vx${ABC[N:N+4]} = wasm_v128_load(x + ${N});
-      x += ${BATCH_TILE};
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vabsx${ABC[N:N+4]} = wasm_v128_andnot(vx${ABC[N:N+4]}, vsign_mask);
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vrndmask${ABC[N:N+4]} = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx${ABC[N:N+4]}));
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vrndabsx${ABC[N:N+4]} = wasm_f32x4_sub(wasm_f32x4_add(vabsx${ABC[N:N+4]}, vmagic_number), vmagic_number);
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vrndx${ABC[N:N+4]} = wasm_v128_bitselect(vx${ABC[N:N+4]}, vrndabsx${ABC[N:N+4]}, vrndmask${ABC[N:N+4]});
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vadjmask${ABC[N:N+4]} = wasm_v128_or(vsign_mask, wasm_f32x4_le(vx${ABC[N:N+4]}, vrndx${ABC[N:N+4]}));
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vadjrndx${ABC[N:N+4]} = wasm_f32x4_add(vrndx${ABC[N:N+4]}, vone);
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vy${ABC[N:N+4]} = wasm_v128_bitselect(vrndx${ABC[N:N+4]}, vadjrndx${ABC[N:N+4]}, vadjmask${ABC[N:N+4]});
-
-      wasm_v128_store(y, vy${ABC[0:4]});
-      $for N in range(4, BATCH_TILE, 4):
-        wasm_v128_store(y + ${N}, vy${ABC[N:N+4]});
-      y += ${BATCH_TILE};
-    }
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(x);
     x += 4;

@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vrnd/vrndne-wasmsimd.c.in
+//   Template: src/f32-vrnd/vrndne-wasmsimd-addsub.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -16,7 +16,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vrndne_ukernel__wasmsimd_x8(
+void xnn_f32_vrndne_ukernel__wasmsimd_addsub_x8(
     size_t n,
     const float* x,
     float* y,
@@ -25,7 +25,7 @@ void xnn_f32_vrndne_ukernel__wasmsimd_x8(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const v128_t vsign_mask = wasm_i32x4_splat(INT32_C(0x80000000));
+  const v128_t vsign_mask = wasm_f32x4_splat(-0.0f);
   const v128_t vmagic_number = wasm_f32x4_splat(0x1.000000p+23f);
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const v128_t vx0123 = wasm_v128_load(x);

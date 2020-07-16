@@ -16,8 +16,10 @@
 - name: xnn_f32_vrndd_ukernel__avx512f_x32
 - name: xnn_f32_vrndd_ukernel__psimd_x4
 - name: xnn_f32_vrndd_ukernel__psimd_x8
-- name: xnn_f32_vrndd_ukernel__wasmsimd_x4
-- name: xnn_f32_vrndd_ukernel__wasmsimd_x8
+- name: xnn_f32_vrndd_ukernel__wasmsimd_addsub_x4
+- name: xnn_f32_vrndd_ukernel__wasmsimd_addsub_x8
+- name: xnn_f32_vrndd_ukernel__wasmsimd_cvt_x4
+- name: xnn_f32_vrndd_ukernel__wasmsimd_cvt_x8
 - name: xnn_f32_vrndd_ukernel__scalar_libm_x1
 - name: xnn_f32_vrndd_ukernel__scalar_libm_x2
 - name: xnn_f32_vrndd_ukernel__scalar_libm_x4

@@ -15,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vrndz_ukernel__wasmsimd_x${BATCH_TILE}(
+void xnn_f32_vrndd_ukernel__wasmsimd_cvt_x${BATCH_TILE}(
     size_t n,
     const float* x,
     float* y,
@@ -24,7 +24,7 @@ void xnn_f32_vrndz_ukernel__wasmsimd_x${BATCH_TILE}(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const v128_t vsign_mask = wasm_i32x4_splat(INT32_C(0x80000000));
+  const v128_t vsign_mask = wasm_f32x4_splat(-0.0f);
   const v128_t vmagic_number = wasm_f32x4_splat(0x1.000000p+23f);
   const v128_t vone = wasm_f32x4_splat(1.0f);
   $if BATCH_TILE > 4:
@@ -35,22 +35,21 @@ void xnn_f32_vrndz_ukernel__wasmsimd_x${BATCH_TILE}(
       x += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 4):
-        const v128_t vabsx${ABC[N:N+4]} = wasm_v128_andnot(vx${ABC[N:N+4]}, vsign_mask);
+        const v128_t vintx${ABC[N:N+4]} = wasm_i32x4_trunc_saturate_f32x4(vx${ABC[N:N+4]});
+        const v128_t vabsx${ABC[N:N+4]} = wasm_f32x4_abs(vx${ABC[N:N+4]});
 
       $for N in range(0, BATCH_TILE, 4):
-        const v128_t vrndmask${ABC[N:N+4]} = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx${ABC[N:N+4]}));
+        const v128_t vprerndx${ABC[N:N+4]} = wasm_f32x4_convert_i32x4(vintx${ABC[N:N+4]});
+        const v128_t vrndmask${ABC[N:N+4]} = wasm_v128_andnot(wasm_f32x4_lt(vabsx${ABC[N:N+4]}, vmagic_number), vsign_mask);
 
       $for N in range(0, BATCH_TILE, 4):
-        const v128_t vrndabsx${ABC[N:N+4]} = wasm_f32x4_sub(wasm_f32x4_add(vabsx${ABC[N:N+4]}, vmagic_number), vmagic_number);
+        const v128_t vrndx${ABC[N:N+4]} = wasm_v128_bitselect(vprerndx${ABC[N:N+4]}, vx${ABC[N:N+4]}, vrndmask${ABC[N:N+4]});
 
       $for N in range(0, BATCH_TILE, 4):
-        const v128_t vadjustment${ABC[N:N+4]} = wasm_v128_and(wasm_f32x4_lt(vabsx${ABC[N:N+4]}, vrndabsx${ABC[N:N+4]}), vone);
+        const v128_t vadj${ABC[N:N+4]} = wasm_v128_and(wasm_f32x4_lt(vx${ABC[N:N+4]}, vrndx${ABC[N:N+4]}), vone);
 
       $for N in range(0, BATCH_TILE, 4):
-        const v128_t vflrabsx${ABC[N:N+4]} = wasm_f32x4_sub(vrndabsx${ABC[N:N+4]}, vadjustment${ABC[N:N+4]});
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vy${ABC[N:N+4]} = wasm_v128_bitselect(vx${ABC[N:N+4]}, vflrabsx${ABC[N:N+4]}, vrndmask${ABC[N:N+4]});
+        const v128_t vy${ABC[N:N+4]} = wasm_f32x4_sub(vrndx${ABC[N:N+4]}, vadj${ABC[N:N+4]});
 
       wasm_v128_store(y, vy${ABC[0:4]});
       $for N in range(4, BATCH_TILE, 4):
@@ -61,12 +60,13 @@ void xnn_f32_vrndz_ukernel__wasmsimd_x${BATCH_TILE}(
     const v128_t vx = wasm_v128_load(x);
     x += 4;
 
-    const v128_t vabsx = wasm_v128_andnot(vx, vsign_mask);
-    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx));
-    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_number), vmagic_number);
-    const v128_t vadjustment = wasm_v128_and(wasm_f32x4_lt(vabsx, vrndabsx), vone);
-    const v128_t vflrabsx = wasm_f32x4_sub(vrndabsx, vadjustment);
-    const v128_t vy = wasm_v128_bitselect(vx, vflrabsx, vrndmask);
+    const v128_t vintx = wasm_i32x4_trunc_saturate_f32x4(vx);
+    const v128_t vabsx = wasm_f32x4_abs(vx);
+    const v128_t vprerndx = wasm_f32x4_convert_i32x4(vintx);
+    const v128_t vrndmask = wasm_v128_andnot(wasm_f32x4_lt(vabsx, vmagic_number), vsign_mask);
+    const v128_t vrndx = wasm_v128_bitselect(vprerndx, vx, vrndmask);
+    const v128_t vadj = wasm_v128_and(wasm_f32x4_lt(vx, vrndx), vone);
+    const v128_t vy = wasm_f32x4_sub(vrndx, vadj);
 
     wasm_v128_store(y, vy);
     y += 4;
@@ -74,12 +74,13 @@ void xnn_f32_vrndz_ukernel__wasmsimd_x${BATCH_TILE}(
   if XNN_UNLIKELY(n != 0) {
     const v128_t vx = wasm_v128_load(x);
 
-    const v128_t vabsx = wasm_v128_andnot(vx, vsign_mask);
-    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx));
-    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_number), vmagic_number);
-    const v128_t vadjustment = wasm_v128_and(wasm_f32x4_lt(vabsx, vrndabsx), vone);
-    const v128_t vflrabsx = wasm_f32x4_sub(vrndabsx, vadjustment);
-    v128_t vy = wasm_v128_bitselect(vx, vflrabsx, vrndmask);
+    const v128_t vintx = wasm_i32x4_trunc_saturate_f32x4(vx);
+    const v128_t vabsx = wasm_f32x4_abs(vx);
+    const v128_t vprerndx = wasm_f32x4_convert_i32x4(vintx);
+    const v128_t vrndmask = wasm_v128_andnot(wasm_f32x4_lt(vabsx, vmagic_number), vsign_mask);
+    const v128_t vrndx = wasm_v128_bitselect(vprerndx, vx, vrndmask);
+    const v128_t vadj = wasm_v128_and(wasm_f32x4_lt(vx, vrndx), vone);
+    v128_t vy = wasm_f32x4_sub(vrndx, vadj);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vy, 0);

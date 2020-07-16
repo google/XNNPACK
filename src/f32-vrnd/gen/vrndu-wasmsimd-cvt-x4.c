@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vrnd/vrndu-wasmsimd.c.in
+//   Template: src/f32-vrnd/vrndu-wasmsimd-cvt.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -16,7 +16,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vrndu_ukernel__wasmsimd_x4(
+void xnn_f32_vrndu_ukernel__wasmsimd_cvt_x4(
     size_t n,
     const float* x,
     float* y,
@@ -25,17 +25,18 @@ void xnn_f32_vrndu_ukernel__wasmsimd_x4(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const v128_t vsign_mask = wasm_i32x4_splat(INT32_C(0x80000000));
+  const v128_t vsign_mask = wasm_f32x4_splat(-0.0f);
   const v128_t vmagic_number = wasm_f32x4_splat(0x1.000000p+23f);
   const v128_t vone = wasm_f32x4_splat(1.0f);
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(x);
     x += 4;
 
-    const v128_t vabsx = wasm_v128_andnot(vx, vsign_mask);
-    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx));
-    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_number), vmagic_number);
-    const v128_t vrndx = wasm_v128_bitselect(vx, vrndabsx, vrndmask);
+    const v128_t vintx = wasm_i32x4_trunc_saturate_f32x4(vx);
+    const v128_t vabsx = wasm_f32x4_abs(vx);
+    const v128_t vprerndx = wasm_f32x4_convert_i32x4(vintx);
+    const v128_t vrndmask = wasm_v128_andnot(wasm_f32x4_lt(vabsx, vmagic_number), vsign_mask);
+    const v128_t vrndx = wasm_v128_bitselect(vprerndx, vx, vrndmask);
     const v128_t vadjmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vx, vrndx));
     const v128_t vadjrndx = wasm_f32x4_add(vrndx, vone);
     const v128_t vy = wasm_v128_bitselect(vrndx, vadjrndx, vadjmask);
@@ -46,10 +47,11 @@ void xnn_f32_vrndu_ukernel__wasmsimd_x4(
   if XNN_UNLIKELY(n != 0) {
     const v128_t vx = wasm_v128_load(x);
 
-    const v128_t vabsx = wasm_v128_andnot(vx, vsign_mask);
-    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx));
-    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_number), vmagic_number);
-    const v128_t vrndx = wasm_v128_bitselect(vx, vrndabsx, vrndmask);
+    const v128_t vintx = wasm_i32x4_trunc_saturate_f32x4(vx);
+    const v128_t vabsx = wasm_f32x4_abs(vx);
+    const v128_t vprerndx = wasm_f32x4_convert_i32x4(vintx);
+    const v128_t vrndmask = wasm_v128_andnot(wasm_f32x4_lt(vabsx, vmagic_number), vsign_mask);
+    const v128_t vrndx = wasm_v128_bitselect(vprerndx, vx, vrndmask);
     const v128_t vadjmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vx, vrndx));
     const v128_t vadjrndx = wasm_f32x4_add(vrndx, vone);
     v128_t vy = wasm_v128_bitselect(vrndx, vadjrndx, vadjmask);
