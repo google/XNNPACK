@@ -2035,7 +2035,7 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_X32;
 
     xnn_params.x32.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__psimd,
+      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__wasmsimd,
       .row_tile = 1,
     };
     xnn_params.x32.pad = (struct pad_parameters) {

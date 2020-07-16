@@ -788,6 +788,7 @@ WASMSIMD_UKERNELS = [
     "src/f32-vunary/gen/vneg-wasmsimd-x8.c",
     "src/f32-vunary/gen/vsqr-wasmsimd-x4.c",
     "src/f32-vunary/gen/vsqr-wasmsimd-x8.c",
+    "src/x32-fill/wasmsimd.c",
     "src/x32-packx/x4-wasmsimd.c",
     "src/math/roundne-wasmsimd-addsub.c",
     "src/math/roundd-wasmsimd-addsub.c",

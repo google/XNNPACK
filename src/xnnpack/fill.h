@@ -27,6 +27,7 @@ extern "C" {
 DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__sse)
 DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__neon)
 DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__psimd)
+DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__wasmsimd)
 DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__scalar_float)
 DECLARE_FILL_UKERNEL_FUNCTION(xnn_x32_fill_ukernel__scalar_int)
 
