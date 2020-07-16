@@ -30,6 +30,7 @@ extern "C" {
 
 DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__neon)
 DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__psimd)
+DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__wasmsimd)
 DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__sse)
 DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__scalar_float)
 DECLARE_X32_PAD_UKERNEL_FUNCTION(xnn_x32_pad_ukernel__scalar_int)

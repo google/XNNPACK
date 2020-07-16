@@ -519,6 +519,160 @@
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
+#if XNN_ARCH_WASMSIMD
+  TEST(X32_PAD__WASMSIMD, fulltile_copy_channels_eq_4) {
+    PadMicrokernelTester()
+      .rows(1)
+      .input_channels(4)
+      .Test(xnn_x32_pad_ukernel__wasmsimd);
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_copy_channels_div_4) {
+    for (size_t channels = 8; channels < 32; channels += 4) {
+      PadMicrokernelTester()
+        .rows(1)
+        .input_channels(channels)
+        .Test(xnn_x32_pad_ukernel__wasmsimd);
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_copy_channels_lt_4) {
+    for (size_t channels = 1; channels < 4; channels++) {
+      PadMicrokernelTester()
+        .rows(1)
+        .input_channels(channels)
+        .Test(xnn_x32_pad_ukernel__wasmsimd);
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_copy_channels_gt_4) {
+    for (size_t channels = 5; channels < 8; channels++) {
+      PadMicrokernelTester()
+        .rows(1)
+        .input_channels(4)
+        .Test(xnn_x32_pad_ukernel__wasmsimd);
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_pre_padding_eq_4) {
+    PadMicrokernelTester()
+      .rows(1)
+      .input_channels(1)
+      .pre_padding(4)
+      .Test(xnn_x32_pad_ukernel__wasmsimd);
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_pre_padding_div_4) {
+    for (size_t pre_padding = 8; pre_padding < 32; pre_padding += 4) {
+      PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .pre_padding(pre_padding)
+        .Test(xnn_x32_pad_ukernel__wasmsimd);
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_pre_padding_lt_4) {
+    for (size_t pre_padding = 1; pre_padding < 4; pre_padding++) {
+      PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .pre_padding(pre_padding)
+        .Test(xnn_x32_pad_ukernel__wasmsimd);
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_pre_padding_gt_4) {
+    for (size_t pre_padding = 5; pre_padding < 8; pre_padding++) {
+      PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .pre_padding(pre_padding)
+        .Test(xnn_x32_pad_ukernel__wasmsimd);
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_post_padding_eq_4) {
+    PadMicrokernelTester()
+      .rows(1)
+      .input_channels(1)
+      .post_padding(4)
+      .Test(xnn_x32_pad_ukernel__wasmsimd);
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_post_padding_div_4) {
+    for (size_t post_padding = 8; post_padding < 32; post_padding += 4) {
+      PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .post_padding(post_padding)
+        .Test(xnn_x32_pad_ukernel__wasmsimd);
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_post_padding_lt_4) {
+    for (size_t post_padding = 1; post_padding < 4; post_padding++) {
+      PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .post_padding(post_padding)
+        .Test(xnn_x32_pad_ukernel__wasmsimd);
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, fulltile_post_padding_gt_4) {
+    for (size_t post_padding = 5; post_padding < 8; post_padding++) {
+      PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .pre_padding(post_padding)
+        .Test(xnn_x32_pad_ukernel__wasmsimd);
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, multitile) {
+    for (size_t rows = 2; rows <= 5; rows++) {
+      for (size_t channels = 1; channels < 10; channels++) {
+        PadMicrokernelTester()
+          .rows(rows)
+          .input_channels(channels)
+          .pre_padding(channels)
+          .post_padding(channels)
+          .Test(xnn_x32_pad_ukernel__wasmsimd);
+      }
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, multitile_with_input_stride) {
+    for (size_t rows = 2; rows <= 5; rows++) {
+      for (size_t channels = 1; channels < 10; channels++) {
+        PadMicrokernelTester()
+          .rows(rows)
+          .input_channels(channels)
+          .pre_padding(channels)
+          .post_padding(channels)
+          .input_stride(2 * channels + 1)
+          .Test(xnn_x32_pad_ukernel__wasmsimd);
+      }
+    }
+  }
+
+  TEST(X32_PAD__WASMSIMD, multitile_with_output_stride) {
+    for (size_t rows = 2; rows <= 5; rows++) {
+      for (size_t channels = 1; channels < 10; channels++) {
+        PadMicrokernelTester()
+          .rows(rows)
+          .input_channels(2 * channels)
+          .pre_padding(channels)
+          .post_padding(channels)
+          .output_stride(5 * channels + 3)
+          .Test(xnn_x32_pad_ukernel__wasmsimd);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD
+
+
 TEST(X32_PAD__SCALAR_INT, fulltile_copy_channels_eq_1) {
   PadMicrokernelTester()
     .rows(1)

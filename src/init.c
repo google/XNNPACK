@@ -2039,7 +2039,7 @@ static void init(void) {
       .row_tile = 1,
     };
     xnn_params.x32.pad = (struct pad_parameters) {
-      .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__psimd,
+      .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__wasmsimd,
       .row_tile = 1,
     };
     xnn_params.x32.unpool = (xnn_unpool_ukernel_function) xnn_x32_unpool_ukernel__psimd;
