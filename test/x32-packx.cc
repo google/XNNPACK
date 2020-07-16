@@ -338,6 +338,104 @@
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 
+#if XNN_ARCH_WASMSIMD
+  TEST(X32_PACKX_4X__WASMSIMD, k_eq_4) {
+    PackMicrokernelTester()
+      .mr(4)
+      .m(4)
+      .k(4)
+      .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+  }
+
+  TEST(X32_PACKX_4X__WASMSIMD, k_eq_4_subtile) {
+    for (size_t m = 1; m <= 4; m++) {
+      PackMicrokernelTester()
+        .mr(4)
+        .m(m)
+        .k(4)
+        .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+    }
+  }
+
+  TEST(X32_PACKX_4X__WASMSIMD, k_lt_4) {
+    for (size_t k = 1; k < 4; k++) {
+      PackMicrokernelTester()
+        .mr(4)
+        .m(4)
+        .k(k)
+        .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+    }
+  }
+
+  TEST(X32_PACKX_4X__WASMSIMD, k_lt_4_subtile) {
+    for (size_t k = 1; k < 4; k++) {
+      for (size_t m = 1; m <= 4; m++) {
+        PackMicrokernelTester()
+          .mr(4)
+          .m(m)
+          .k(k)
+          .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+      }
+    }
+  }
+
+  TEST(X32_PACKX_4X__WASMSIMD, k_gt_4) {
+    for (size_t k = 5; k < 8; k++) {
+      PackMicrokernelTester()
+        .mr(4)
+        .m(4)
+        .k(k)
+        .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+    }
+  }
+
+  TEST(X32_PACKX_4X__WASMSIMD, k_gt_4_subtile) {
+    for (size_t k = 5; k < 8; k++) {
+      for (size_t m = 1; m <= 4; m++) {
+        PackMicrokernelTester()
+          .mr(4)
+          .m(m)
+          .k(k)
+          .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+      }
+    }
+  }
+
+  TEST(X32_PACKX_4X__WASMSIMD, k_div_4) {
+    for (size_t k = 8; k < 40; k += 4) {
+      PackMicrokernelTester()
+        .mr(4)
+        .m(4)
+        .k(k)
+        .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+    }
+  }
+
+  TEST(X32_PACKX_4X__WASMSIMD, k_div_4_subtile) {
+    for (size_t k = 8; k < 40; k += 4) {
+      for (size_t m = 1; m <= 4; m++) {
+        PackMicrokernelTester()
+          .mr(4)
+          .m(m)
+          .k(k)
+          .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+      }
+    }
+  }
+
+  TEST(X32_PACKX_4X__WASMSIMD, strided_x) {
+    for (size_t k = 1; k <= 20; k += 5) {
+      PackMicrokernelTester()
+        .mr(4)
+        .m(4)
+        .k(k)
+        .x_stride(23)
+        .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD
+
+
 TEST(X32_PACKX_2X__SCALAR, k_eq_1) {
   PackMicrokernelTester()
     .mr(2)
