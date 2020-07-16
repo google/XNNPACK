@@ -239,10 +239,7 @@ class GemmMicrokernelTester {
       std::fill(c.begin(), c.end(), 0xA5);
 
       std::fill(packed_w.begin(), packed_w.end(), b_zero_point());
-      const xnn_qu8_packing_params packing_params = {
-        .input_zero_point = a_zero_point(),
-        .kernel_zero_point = b_zero_point(),
-      };
+      const xnn_qu8_packing_params packing_params = { a_zero_point(), b_zero_point() };
       xnn_pack_qu8_gemm_goi_w(1, n(), k(), nr(), kr(), sr(),
         b.data(), bias.data(), packed_w.data(), &packing_params);
 
@@ -343,10 +340,7 @@ class GemmMicrokernelTester {
       std::fill(c.begin(), c.end(), 0xA5);
 
       std::fill(packed_w.begin(), packed_w.end(), b_zero_point());
-      const xnn_qu8_packing_params packing_params = {
-        .input_zero_point = a_zero_point(),
-        .kernel_zero_point = b_zero_point(),
-      };
+      const xnn_qu8_packing_params packing_params = { a_zero_point(), b_zero_point() };
       xnn_pack_qu8_conv_goki_w(
         1, n(), ks(), k(), nr(), kr(), sr(),
         b.data(), bias.data(), packed_w.data(), &packing_params);

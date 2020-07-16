@@ -57,34 +57,24 @@ TEST(MemoryPlanner, MemoryBlocksCoalescing) {
   struct xnn_value_allocation_tracker tracker;
   xnn_init_value_allocation_tracker(&tracker, &subgraph);
   // As this is an empty subgraph, we create the following xnn_value_usage stub.
-  tracker.usage[0] = (struct xnn_value_usage){
-      .first_node = 1,
-      .last_node = 1,
-  };
+  tracker.usage[0].first_node = 1,
+  tracker.usage[0].last_node = 1,
   xnn_add_value_allocation_tracker(&tracker, 0, 56);
 
-  tracker.usage[1] = (struct xnn_value_usage){
-      .first_node = 0,
-      .last_node = 1,
-  };
+  tracker.usage[1].first_node = 0,
+  tracker.usage[1].last_node = 1,
   xnn_add_value_allocation_tracker(&tracker, 1, 40);
 
-  tracker.usage[2] = (struct xnn_value_usage){
-      .first_node = 1,
-      .last_node = 1,
-  };
+  tracker.usage[2].first_node = 1,
+  tracker.usage[2].last_node = 1,
   xnn_add_value_allocation_tracker(&tracker, 2, 64);
 
-  tracker.usage[3] = (struct xnn_value_usage){
-      .first_node = 0,
-      .last_node = 0,
-  };
+  tracker.usage[3].first_node = 0,
+  tracker.usage[3].last_node = 0,
   xnn_add_value_allocation_tracker(&tracker, 3, 152);
 
-  tracker.usage[4] = (struct xnn_value_usage){
-      .first_node = 1,
-      .last_node = 1,
-  };
+  tracker.usage[4].first_node = 1,
+  tracker.usage[4].last_node = 1,
   xnn_add_value_allocation_tracker(&tracker, 4, 20);
 
   xnn_plan_value_allocation_tracker(&tracker);
@@ -116,52 +106,36 @@ TEST(MemoryPlanner, GeneralPlanning) {
   struct xnn_value_allocation_tracker tracker;
   xnn_init_value_allocation_tracker(&tracker, &subgraph);
   // As this is an empty subgraph, we create the following xnn_value_usage stub.
-  tracker.usage[0] = (struct xnn_value_usage){
-      .first_node = 0,
-      .last_node = 1,
-  };
+  tracker.usage[0].first_node = 0,
+  tracker.usage[0].last_node = 1,
   xnn_add_value_allocation_tracker(&tracker, 0, 32);
 
-  tracker.usage[1] = (struct xnn_value_usage){
-      .first_node = 1,
-      .last_node = 4,
-  };
+  tracker.usage[1].first_node = 1,
+  tracker.usage[1].last_node = 4,
   xnn_add_value_allocation_tracker(&tracker, 1, 28);
 
-  tracker.usage[2] = (struct xnn_value_usage){
-      .first_node = 2,
-      .last_node = 5,
-  };
+  tracker.usage[2].first_node = 2,
+  tracker.usage[2].last_node = 5,
   xnn_add_value_allocation_tracker(&tracker, 2, 36);
 
-  tracker.usage[3] = (struct xnn_value_usage){
-      .first_node = 3,
-      .last_node = 5,
-  };
+  tracker.usage[3].first_node = 3,
+  tracker.usage[3].last_node = 5,
   xnn_add_value_allocation_tracker(&tracker, 3, 16);
 
-  tracker.usage[4] = (struct xnn_value_usage){
-      .first_node = 4,
-      .last_node = 5,
-  };
+  tracker.usage[4].first_node = 4,
+  tracker.usage[4].last_node = 5,
   xnn_add_value_allocation_tracker(&tracker, 4, 8);
 
-  tracker.usage[5] = (struct xnn_value_usage){
-      .first_node = 5,
-      .last_node = 7,
-  };
+  tracker.usage[5].first_node = 5,
+  tracker.usage[5].last_node = 7,
   xnn_add_value_allocation_tracker(&tracker, 5, 64);
 
-  tracker.usage[6] = (struct xnn_value_usage){
-      .first_node = 6,
-      .last_node = 8,
-  };
+  tracker.usage[6].first_node = 6,
+  tracker.usage[6].last_node = 8,
   xnn_add_value_allocation_tracker(&tracker, 6, 10);
 
-  tracker.usage[7] = (struct xnn_value_usage){
-      .first_node = 7,
-      .last_node = 8,
-  };
+  tracker.usage[7].first_node = 7,
+  tracker.usage[7].last_node = 8,
   xnn_add_value_allocation_tracker(&tracker, 7, 40);
 
   xnn_plan_value_allocation_tracker(&tracker);
