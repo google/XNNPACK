@@ -22,6 +22,8 @@ void xnn_f32_clamp_ukernel__wasm_x1(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const float vy_min = params->scalar.min;
   const float vy_max = params->scalar.max;

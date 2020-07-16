@@ -520,8 +520,6 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-argmaxpool/9x-psimd-c4.c
   src/f32-avgpool/9p8x-minmax-psimd-c4.c
   src/f32-avgpool/9x-minmax-psimd-c4.c
-  src/f32-clamp/gen/psimd-x4.c
-  src/f32-clamp/gen/psimd-x8.c
   src/f32-conv-hwc2chw/3x3s2p1c3x4-psimd-2x2.c
   src/f32-dwconv-chw/3x3p1-psimd.c
   src/f32-dwconv-chw/3x3s2p1-psimd.c

@@ -24,6 +24,8 @@ void xnn_f32_clamp_ukernel__avx512f_x32(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const __m512 vy_min = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
   const __m512 vy_max = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));

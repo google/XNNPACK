@@ -23,6 +23,8 @@ void xnn_f32_clamp_ukernel__neon_x8(
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const float32x4_t vy_min = vld1q_dup_f32(&params->scalar.min);
   const float32x4_t vy_max = vld1q_dup_f32(&params->scalar.max);
