@@ -1865,7 +1865,7 @@ static void init(void) {
         .channel_tile = 8,
       };
     }
-    xnn_params.f32.raddstoreexpminusmax = xnn_f32_raddstoreexpminusmax_ukernel__psimd_p5_x16_acc2;
+    xnn_params.f32.raddstoreexpminusmax = xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x16_acc2;
     xnn_params.f32.rmax = xnn_f32_rmax_ukernel__wasmsimd_arm;
     if (is_wasm_x86) {
       xnn_params.f32.vadd = (struct vbinary_parameters) {
