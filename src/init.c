@@ -1835,15 +1835,15 @@ static void init(void) {
       };
     }
     xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_function) xnn_f32_argmaxpool_ukernel_4x__psimd_c4,
+      .up = (xnn_argmaxpool_unipass_ukernel_function) xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4,
       .mr = 4,
     };
     xnn_params.f32.argmaxpool[1] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_function) xnn_f32_argmaxpool_ukernel_9x__psimd_c4,
+      .up = (xnn_argmaxpool_unipass_ukernel_function) xnn_f32_argmaxpool_ukernel_9x__wasmsimd_c4,
       .mr = 9,
     };
     xnn_params.f32.argmaxpool[2] = (struct argmaxpool_parameters) {
-      .mp = (xnn_argmaxpool_multipass_ukernel_function) xnn_f32_argmaxpool_ukernel_9p8x__psimd_c4,
+      .mp = (xnn_argmaxpool_multipass_ukernel_function) xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4,
       .mr = 9,
       .qr = 8,
     };

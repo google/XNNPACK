@@ -29,12 +29,14 @@ extern "C" {
       size_t output_increment,                                   \
       const union xnn_f32_minmax_params* params);
 
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__psimd_c4)
 DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__sse2_c4)
+DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__psimd_c4)
+DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4)
 DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__scalar_c1)
 
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__psimd_c4)
 DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__sse2_c4)
+DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__psimd_c4)
+DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__wasmsimd_c4)
 DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__scalar_c1)
 
 
@@ -53,8 +55,9 @@ DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__s
       size_t output_increment,                                     \
       const union xnn_f32_minmax_params* params);
 
-DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__psimd_c4)
 DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4)
+DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__psimd_c4)
+DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4)
 DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1)
 
 
