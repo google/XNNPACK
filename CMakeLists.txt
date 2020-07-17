@@ -540,8 +540,6 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-spmm/gen/4x1-minmax-psimd.c
   src/f32-spmm/gen/8x1-minmax-psimd.c
   src/f32-spmm/gen/16x1-minmax-psimd.c
-  src/f32-vmulcaddc/gen/c4-minmax-psimd-2x.c
-  src/f32-vmulcaddc/gen/c8-minmax-psimd-2x.c
   src/x32-fill/psimd.c
   src/x32-packx/x4-psimd.c
   src/x32-pad/psimd.c

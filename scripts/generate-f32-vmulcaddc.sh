@@ -29,10 +29,6 @@ tools/xngen src/f32-vmulcaddc/neon.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D FMA=0
 tools/xngen src/f32-vmulcaddc/neon.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D FMA=1 -o src/f32-vmulcaddc/gen/c4-minmax-neonfma-2x.c
 tools/xngen src/f32-vmulcaddc/neon.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D FMA=1 -o src/f32-vmulcaddc/gen/c8-minmax-neonfma-2x.c
 
-#################################### PSIMD ####################################
-tools/xngen src/f32-vmulcaddc/psimd.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/c4-minmax-psimd-2x.c
-tools/xngen src/f32-vmulcaddc/psimd.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/c8-minmax-psimd-2x.c
-
 ################################### x86 SSE ###################################
 tools/xngen src/f32-vmulcaddc/sse.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/c4-minmax-sse-2x.c
 tools/xngen src/f32-vmulcaddc/sse.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/c8-minmax-sse-2x.c
