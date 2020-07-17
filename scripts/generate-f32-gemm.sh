@@ -110,11 +110,10 @@ tools/xngen src/f32-gemm/6x8-aarch64-neonfma-ld128.S.in       -D INC=0 -o src/f3
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-ld128.S.in       -D INC=1 -o src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-ld128.S
 
 ############################### AArch32 assembly ##############################
-tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a75.S.in  -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a75.S
-tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a75.S.in  -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S
-
-tools/xngen src/f32-gemm/4x8-minmax-aarch32-neon-ld64.S.in -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-ld64.S
-tools/xngen src/f32-gemm/4x8-minmax-aarch32-neon-ld64.S.in -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-pld-ld64.S
+tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a75.S.in       -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a75.S
+tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a75.S.in       -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S
+tools/xngen src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a7.S.in -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a7.S
+tools/xngen src/f32-gemm/4x8-minmax-aarch32-neon-ld64.S.in      -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/4x8-minmax-aarch32-neon-ld64.S
 
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels

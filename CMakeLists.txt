@@ -1907,16 +1907,16 @@ SET(XNNPACK_AARCH32_ASM_MICROKERNEL_SRCS
   src/f32-gemm/4x4-minmax-aarch32-vfp-ld64.S
   src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S
   src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a55.S
+  src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a7.S
   src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a75.S
-  src/f32-gemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S
   src/f32-gemm/gen/4x8-minmax-aarch32-neon-ld64.S
-  src/f32-gemm/gen/4x8-minmax-aarch32-neon-pld-ld64.S
-  src/f32-igemm/gen/4x8-minmax-aarch32-neon-ld64.S
-  src/f32-igemm/gen/4x8-minmax-aarch32-neon-pld-ld64.S
-  src/f32-igemm/gen/4x8-minmax-aarch32-neon-cortex-a75.S
-  src/f32-igemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S
+  src/f32-gemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S
   src/f32-igemm/4x8-minmax-aarch32-neon-cortex-a53.S
   src/f32-igemm/4x8-minmax-aarch32-neon-cortex-a55.S)
+  src/f32-igemm/gen/4x8-minmax-aarch32-neon-cortex-a7.S
+  src/f32-igemm/gen/4x8-minmax-aarch32-neon-cortex-a75.S
+  src/f32-igemm/gen/4x8-minmax-aarch32-neon-ld64.S
+  src/f32-igemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S
 
 SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen/1x16-minmax-aarch64-neonfp16arith-ld32.S
