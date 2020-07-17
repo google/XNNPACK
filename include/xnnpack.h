@@ -1083,8 +1083,6 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   size_t channels,
   size_t input_pixel_stride,
   size_t output_pixel_stride,
-  float output_min,
-  float output_max,
   uint32_t flags,
   xnn_operator_t* argmax_pooling_op_out);
 

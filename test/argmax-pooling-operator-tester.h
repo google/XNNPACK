@@ -319,24 +319,6 @@ class ArgmaxPoolingOperatorTester {
     }
   }
 
-  inline ArgmaxPoolingOperatorTester& qmin(uint8_t qmin) {
-    this->qmin_ = qmin;
-    return *this;
-  }
-
-  inline uint8_t qmin() const {
-    return this->qmin_;
-  }
-
-  inline ArgmaxPoolingOperatorTester& qmax(uint8_t qmax) {
-    this->qmax_ = qmax;
-    return *this;
-  }
-
-  inline uint8_t qmax() const {
-    return this->qmax_;
-  }
-
   inline ArgmaxPoolingOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -390,22 +372,6 @@ class ArgmaxPoolingOperatorTester {
         }
       }
 
-      // Compute clamping parameters.
-      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
-      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
-      const float accumulated_range = accumulated_max - accumulated_min;
-      const float output_min = accumulated_range == 0.0f ?
-        -std::numeric_limits<float>::infinity() :
-        accumulated_min + accumulated_range / 255.0f * float(qmin());
-      const float output_max = accumulated_range == 0.0f ?
-        +std::numeric_limits<float>::infinity() :
-        accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
-
-      // Clamp reference results.
-      for (float& value : output_ref) {
-        value = std::max(std::min(value, output_max), output_min);
-      }
-
       // Create, setup, run, and destroy Argmax Pooling operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t argmax_pooling_op = nullptr;
@@ -416,7 +382,6 @@ class ArgmaxPoolingOperatorTester {
           padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
           pooling_height(), pooling_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
-          output_min, output_max,
           padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0,
           &argmax_pooling_op));
       ASSERT_NE(nullptr, argmax_pooling_op);
@@ -439,10 +404,6 @@ class ArgmaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max) <<
-                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
-              ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min) <<
-                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
               ASSERT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                 output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
@@ -508,22 +469,6 @@ class ArgmaxPoolingOperatorTester {
         }
       }
 
-      // Compute clamping parameters.
-      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
-      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
-      const float accumulated_range = accumulated_max - accumulated_min;
-      const float output_min = accumulated_range == 0.0f ?
-        -std::numeric_limits<float>::infinity() :
-        accumulated_min + accumulated_range / 255.0f * float(qmin());
-      const float output_max = accumulated_range == 0.0f ?
-        +std::numeric_limits<float>::infinity() :
-        accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
-
-      // Clamp reference results.
-      for (float& value : output_ref) {
-        value = std::max(std::min(value, output_max), output_min);
-      }
-
       // Create, setup, and run Argmax Pooling operator once.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t argmax_pooling_op = nullptr;
@@ -533,7 +478,6 @@ class ArgmaxPoolingOperatorTester {
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
-          output_min, output_max,
           0, &argmax_pooling_op));
       ASSERT_NE(nullptr, argmax_pooling_op);
 
@@ -552,10 +496,6 @@ class ArgmaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max)
-                << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
-              ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min)
-                << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
               ASSERT_EQ(
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                   output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])
@@ -596,8 +536,6 @@ class ArgmaxPoolingOperatorTester {
                   }
                 }
               }
-              max_value = std::min(max_value, output_max);
-              max_value = std::max(max_value, output_min);
               next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c] = max_value;
               next_index_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c] = max_index;
             }
@@ -625,10 +563,6 @@ class ArgmaxPoolingOperatorTester {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_max)
-                << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;;
-              ASSERT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_min)
-                << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;;
               ASSERT_EQ(
                   next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
                   output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])

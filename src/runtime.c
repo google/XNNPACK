@@ -147,8 +147,6 @@ enum xnn_status xnn_create_runtime_v2(
           values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
           values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
           values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
-          -INFINITY,
-          INFINITY,
           node->flags,
           &runtime->opdata[i].operator_object);
         if (status != xnn_status_success) {

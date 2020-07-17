@@ -49,8 +49,6 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
     size_t channels,
     size_t input_pixel_stride,
     size_t output_pixel_stride,
-    float output_min,
-    float output_max,
     uint32_t flags,
     xnn_operator_t* argmax_pooling_op_out)
 {
@@ -104,28 +102,6 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
     goto error;
   }
 
-  if (isnan(output_min)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
-    goto error;
-  }
-
-  if (isnan(output_max)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
-    goto error;
-  }
-
-  if (output_min >= output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: "
-      "lower bound must be below upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), output_min, output_max);
-    goto error;
-  }
-
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     if (any_padding) {
@@ -163,7 +139,7 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->input_pixel_stride = input_pixel_stride;
   argmax_pooling_op->output_pixel_stride = output_pixel_stride;
 
-  argmax_pooling_op->params.f32_minmax = xnn_init_f32_minmax_params(output_min, output_max);
+  argmax_pooling_op->params.f32_minmax = xnn_init_f32_minmax_params(-INFINITY, INFINITY);
 
   argmax_pooling_op->type = xnn_operator_type_argmax_pooling_nhwc_f32;
   argmax_pooling_op->ukernel.type = xnn_ukernel_type_argmax_pooling;
