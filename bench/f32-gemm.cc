@@ -868,30 +868,6 @@ static void ruy_st(benchmark::State& state, const char* net)
 #endif  // XNN_ARCH_WASMSIMD
 
 #if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  static void f32_gemm_4x8__psimd_loadsplat(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_4x8__psimd_loadsplat, 4, 8, 1, 1);
-  }
-
-  static void f32_gemm_6x8__psimd_loadsplat(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_6x8__psimd_loadsplat, 6, 8, 1, 1);
-  }
-
-  static void f32_gemm_4x8__psimd_splat(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_4x8__psimd_splat, 4, 8, 1, 1);
-  }
-
-  static void f32_gemm_6x8__psimd_splat(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_6x8__psimd_splat, 6, 8, 1, 1);
-  }
-
-  static void f32_gemm_4x8s4__psimd(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_4x8s4__psimd, 4, 8, 1, 4);
-  }
-
-  static void f32_gemm_6x8s4__psimd(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_6x8s4__psimd, 6, 8, 1, 4);
-  }
-
   static void f32_ppmm_4x8_unipass__psimd(benchmark::State& state, const char* net) {
     PPMM1PBenchmark(state, xnn_f32_ppmm_minmax_ukernel_4x8__psimd, xnn_x32_packx_ukernel_4x__psimd, 4, 8);
   }
@@ -900,12 +876,6 @@ static void ruy_st(benchmark::State& state, const char* net)
     PPMM2PBenchmark(state, xnn_f32_ppmm_minmax_ukernel_4x8__psimd, xnn_x32_packx_ukernel_4x__psimd, 4, 8);
   }
 
-  BENCHMARK_GEMM(f32_gemm_4x8__psimd_loadsplat)
-  BENCHMARK_GEMM(f32_gemm_6x8__psimd_loadsplat)
-  BENCHMARK_GEMM(f32_gemm_4x8__psimd_splat)
-  BENCHMARK_GEMM(f32_gemm_6x8__psimd_splat)
-  BENCHMARK_GEMM(f32_gemm_4x8s4__psimd)
-  BENCHMARK_GEMM(f32_gemm_6x8s4__psimd)
   BENCHMARK_GEMM(f32_ppmm_4x8_unipass__psimd)
   BENCHMARK_GEMM(f32_ppmm_4x8_twopass__psimd)
 #endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC

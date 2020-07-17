@@ -633,56 +633,6 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_6x8s4__wasmsimd_x86)
 #endif  // XNN_ARCH_WASMSIMD
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  static void f32_igemm_1x8__psimd_loadsplat(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_1x8__psimd_loadsplat, 1, 8, 1, 1);
-  }
-
-  static void f32_igemm_4x8__psimd_loadsplat(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8__psimd_loadsplat, 4, 8, 1, 1);
-  }
-
-  static void f32_igemm_6x8__psimd_loadsplat(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8__psimd_loadsplat, 6, 8, 1, 1);
-  }
-
-  static void f32_igemm_1x8__psimd_splat(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_1x8__psimd_splat, 1, 8, 1, 1);
-  }
-
-  static void f32_igemm_4x8__psimd_splat(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8__psimd_splat, 4, 8, 1, 1);
-  }
-
-  static void f32_igemm_6x8__psimd_splat(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8__psimd_splat, 6, 8, 1, 1);
-  }
-
-  static void f32_igemm_1x8s4__psimd(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_1x8s4__psimd, 1, 8, 1, 4);
-  }
-
-  static void f32_igemm_4x8s4__psimd(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8s4__psimd, 4, 8, 1, 4);
-  }
-
-  static void f32_igemm_6x8s4__psimd(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8s4__psimd, 6, 8, 1, 4);
-  }
-
-  BENCHMARK_CONV(f32_igemm_1x8__psimd_loadsplat)
-  BENCHMARK_CONV(f32_igemm_4x8__psimd_loadsplat)
-  BENCHMARK_CONV(f32_igemm_6x8__psimd_loadsplat)
-
-  BENCHMARK_CONV(f32_igemm_1x8__psimd_splat)
-  BENCHMARK_CONV(f32_igemm_4x8__psimd_splat)
-  BENCHMARK_CONV(f32_igemm_6x8__psimd_splat)
-
-  BENCHMARK_CONV(f32_igemm_1x8s4__psimd)
-  BENCHMARK_CONV(f32_igemm_4x8s4__psimd)
-  BENCHMARK_CONV(f32_igemm_6x8s4__psimd)
-#endif /* !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC */
-
 static void f32_igemm_1x4__scalar(benchmark::State& state, const char* net) {
   IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_1x4__scalar, 1, 4, 1, 1);
 }

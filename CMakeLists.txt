@@ -540,37 +540,8 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-gavgpool-cw/psimd-x4.c
   src/f32-gavgpool/7p7x-minmax-psimd-c4.c
   src/f32-gavgpool/7x-minmax-psimd-c4.c
-  src/f32-gemm/gen/1x8-minmax-psimd-loadsplat.c
-  src/f32-gemm/gen/1x8-minmax-psimd-splat.c
-  src/f32-gemm/gen/1x8s4-minmax-psimd.c
-  src/f32-gemm/gen/4x2c4-minmax-psimd.c
-  src/f32-gemm/gen/4x8-minmax-psimd-loadsplat.c
-  src/f32-gemm/gen/4x8-minmax-psimd-splat.c
-  src/f32-gemm/gen/4x8s4-minmax-psimd.c
-  src/f32-gemm/gen/6x8-minmax-psimd-loadsplat.c
-  src/f32-gemm/gen/6x8-minmax-psimd-splat.c
-  src/f32-gemm/gen/6x8s4-minmax-psimd.c
-  src/f32-gemm/gen-inc/1x8inc-minmax-psimd-loadsplat.c
-  src/f32-gemm/gen-inc/1x8inc-minmax-psimd-splat.c
-  src/f32-gemm/gen-inc/1x8s4inc-minmax-psimd.c
-  src/f32-gemm/gen-inc/4x8inc-minmax-psimd-loadsplat.c
-  src/f32-gemm/gen-inc/4x8inc-minmax-psimd-splat.c
-  src/f32-gemm/gen-inc/4x8s4inc-minmax-psimd.c
-  src/f32-gemm/gen-inc/6x8inc-minmax-psimd-loadsplat.c
-  src/f32-gemm/gen-inc/6x8inc-minmax-psimd-splat.c
-  src/f32-gemm/gen-inc/6x8s4inc-minmax-psimd.c
   src/f32-ibilinear/gen/psimd-c4.c
   src/f32-ibilinear/gen/psimd-c8.c
-  src/f32-igemm/gen/1x8-minmax-psimd-loadsplat.c
-  src/f32-igemm/gen/1x8-minmax-psimd-splat.c
-  src/f32-igemm/gen/1x8s4-minmax-psimd.c
-  src/f32-igemm/gen/4x2c4-minmax-psimd.c
-  src/f32-igemm/gen/4x8-minmax-psimd-loadsplat.c
-  src/f32-igemm/gen/4x8-minmax-psimd-splat.c
-  src/f32-igemm/gen/4x8s4-minmax-psimd.c
-  src/f32-igemm/gen/6x8-minmax-psimd-loadsplat.c
-  src/f32-igemm/gen/6x8-minmax-psimd-splat.c
-  src/f32-igemm/gen/6x8s4-minmax-psimd.c
   src/f32-vlrelu/gen/vlrelu-psimd-x4.c
   src/f32-vlrelu/gen/vlrelu-psimd-x8.c
   src/f32-maxpool/9p8x-minmax-psimd-c4.c

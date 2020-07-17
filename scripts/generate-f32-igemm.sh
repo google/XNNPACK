@@ -148,22 +148,6 @@ tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=6 -D NR=8 -D FMA=1 -o src/f3
 tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=8 -D NR=8 -D FMA=0 -o src/f32-igemm/gen/8x8s4-minmax-neon.c
 tools/xngen src/f32-igemm/neon-shuffle.c.in   -D MR=8 -D NR=8 -D FMA=1 -o src/f32-igemm/gen/8x8s4-minmax-neonfma.c
 
-#################################### PSIMD ####################################
-### LOAD1+BROADCAST micro-kernels
-tools/xngen src/f32-igemm/psimd-loadsplat.c.in -D MR=1 -D NR=8 -o src/f32-igemm/gen/1x8-minmax-psimd-loadsplat.c
-tools/xngen src/f32-igemm/psimd-loadsplat.c.in -D MR=4 -D NR=8 -o src/f32-igemm/gen/4x8-minmax-psimd-loadsplat.c
-tools/xngen src/f32-igemm/psimd-loadsplat.c.in -D MR=6 -D NR=8 -o src/f32-igemm/gen/6x8-minmax-psimd-loadsplat.c
-### LOAD4+DUPLICATE micro-kernels
-tools/xngen src/f32-igemm/psimd-splat.c.in -D MR=1 -D NR=8 -o src/f32-igemm/gen/1x8-minmax-psimd-splat.c
-tools/xngen src/f32-igemm/psimd-splat.c.in -D MR=4 -D NR=8 -o src/f32-igemm/gen/4x8-minmax-psimd-splat.c
-tools/xngen src/f32-igemm/psimd-splat.c.in -D MR=6 -D NR=8 -o src/f32-igemm/gen/6x8-minmax-psimd-splat.c
-### LOAD4+PERMUTE micro-kernels
-tools/xngen src/f32-igemm/psimd-s4.c.in -D MR=1 -D NR=8 -o src/f32-igemm/gen/1x8s4-minmax-psimd.c
-tools/xngen src/f32-igemm/psimd-s4.c.in -D MR=4 -D NR=8 -o src/f32-igemm/gen/4x8s4-minmax-psimd.c
-tools/xngen src/f32-igemm/psimd-s4.c.in -D MR=6 -D NR=8 -o src/f32-igemm/gen/6x8s4-minmax-psimd.c
-### MRx2 micro-kernels
-tools/xngen src/f32-igemm/MRx2c4-psimd.c.in -D MR=4 -D NR=2 -o src/f32-igemm/gen/4x2c4-minmax-psimd.c
-
 ################################### x86 SSE ###################################
 ### LOAD1+BROADCAST micro-kernels
 tools/xngen src/f32-igemm/sse-load1.c.in -D MR=1 -D NR=8 -o src/f32-igemm/gen/1x8-minmax-sse-load1.c
