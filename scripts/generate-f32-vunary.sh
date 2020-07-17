@@ -32,14 +32,6 @@ tools/xngen src/f32-vunary/neon.c.in -D OP=NEG -D BATCH_TILE=8 -o src/f32-vunary
 tools/xngen src/f32-vunary/neon.c.in -D OP=SQR -D BATCH_TILE=4 -o src/f32-vunary/gen/vsqr-neon-x4.c
 tools/xngen src/f32-vunary/neon.c.in -D OP=SQR -D BATCH_TILE=8 -o src/f32-vunary/gen/vsqr-neon-x8.c
 
-#################################### PSIMD ####################################
-tools/xngen src/f32-vunary/psimd.c.in -D OP=ABS -D BATCH_TILE=4 -o src/f32-vunary/gen/vabs-psimd-x4.c
-tools/xngen src/f32-vunary/psimd.c.in -D OP=ABS -D BATCH_TILE=8 -o src/f32-vunary/gen/vabs-psimd-x8.c
-tools/xngen src/f32-vunary/psimd.c.in -D OP=NEG -D BATCH_TILE=4 -o src/f32-vunary/gen/vneg-psimd-x4.c
-tools/xngen src/f32-vunary/psimd.c.in -D OP=NEG -D BATCH_TILE=8 -o src/f32-vunary/gen/vneg-psimd-x8.c
-tools/xngen src/f32-vunary/psimd.c.in -D OP=SQR -D BATCH_TILE=4 -o src/f32-vunary/gen/vsqr-psimd-x4.c
-tools/xngen src/f32-vunary/psimd.c.in -D OP=SQR -D BATCH_TILE=8 -o src/f32-vunary/gen/vsqr-psimd-x8.c
-
 ################################# x86 128-bit #################################
 tools/xngen src/f32-vunary/sse.c.in -D OP=ABS -D BATCH_TILE=4 -o src/f32-vunary/gen/vabs-sse-x4.c
 tools/xngen src/f32-vunary/sse.c.in -D OP=ABS -D BATCH_TILE=8 -o src/f32-vunary/gen/vabs-sse-x8.c

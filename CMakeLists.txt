@@ -530,8 +530,6 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-gavgpool/7x-minmax-psimd-c4.c
   src/f32-ibilinear/gen/psimd-c4.c
   src/f32-ibilinear/gen/psimd-c8.c
-  src/f32-vlrelu/gen/vlrelu-psimd-x4.c
-  src/f32-vlrelu/gen/vlrelu-psimd-x8.c
   src/f32-maxpool/9p8x-minmax-psimd-c4.c
   src/f32-pavgpool/9p8x-minmax-psimd-c4.c
   src/f32-pavgpool/9x-minmax-psimd-c4.c
@@ -544,12 +542,6 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-spmm/gen/16x1-minmax-psimd.c
   src/f32-vmulcaddc/gen/c4-minmax-psimd-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-psimd-2x.c
-  src/f32-vunary/gen/vabs-psimd-x4.c
-  src/f32-vunary/gen/vabs-psimd-x8.c
-  src/f32-vunary/gen/vneg-psimd-x4.c
-  src/f32-vunary/gen/vneg-psimd-x8.c
-  src/f32-vunary/gen/vsqr-psimd-x4.c
-  src/f32-vunary/gen/vsqr-psimd-x8.c
   src/x32-fill/psimd.c
   src/x32-packx/x4-psimd.c
   src/x32-pad/psimd.c
@@ -574,20 +566,6 @@ SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/psimd-p5-x20.c
   src/f32-raddstoreexpminusmax/gen/psimd-p5-x20-acc2.c
   src/f32-raddstoreexpminusmax/gen/psimd-p5-x20-acc5.c
-  src/f32-sigmoid/gen/psimd-p5-div-x4.c
-  src/f32-sigmoid/gen/psimd-p5-div-x8.c
-  src/f32-sigmoid/gen/psimd-p5-div-x12.c
-  src/f32-sigmoid/gen/psimd-p5-div-x16.c
-  src/f32-sigmoid/gen/psimd-p5-div-x20.c
-  src/f32-sigmoid/gen/psimd-p5-div-x24.c
-  src/f32-vrnd/gen/vrndne-psimd-x4.c
-  src/f32-vrnd/gen/vrndne-psimd-x8.c
-  src/f32-vrnd/gen/vrndz-psimd-x4.c
-  src/f32-vrnd/gen/vrndz-psimd-x8.c
-  src/f32-vrnd/gen/vrndu-psimd-x4.c
-  src/f32-vrnd/gen/vrndu-psimd-x8.c
-  src/f32-vrnd/gen/vrndd-psimd-x4.c
-  src/f32-vrnd/gen/vrndd-psimd-x8.c
   src/math/roundne-psimd-addsub.c
   src/math/roundd-psimd-addsub.c
   src/math/roundu-psimd-addsub.c

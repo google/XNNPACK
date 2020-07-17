@@ -25,10 +25,6 @@ tools/xngen src/f32-vlrelu/wasmsimd-minmax.c.in -D BATCH_TILE=8 -o src/f32-vlrel
 tools/xngen src/f32-vlrelu/neon.c.in -D BATCH_TILE=4 -o src/f32-vlrelu/gen/vlrelu-neon-x4.c
 tools/xngen src/f32-vlrelu/neon.c.in -D BATCH_TILE=8 -o src/f32-vlrelu/gen/vlrelu-neon-x8.c
 
-#################################### PSIMD ####################################
-tools/xngen src/f32-vlrelu/psimd.c.in -D BATCH_TILE=4 -o src/f32-vlrelu/gen/vlrelu-psimd-x4.c
-tools/xngen src/f32-vlrelu/psimd.c.in -D BATCH_TILE=8 -o src/f32-vlrelu/gen/vlrelu-psimd-x8.c
-
 ################################# x86 128-bit #################################
 tools/xngen src/f32-vlrelu/sse.c.in -D BATCH_TILE=4 -D SSE=1 -o src/f32-vlrelu/gen/vlrelu-sse-x4.c
 tools/xngen src/f32-vlrelu/sse.c.in -D BATCH_TILE=8 -D SSE=1 -o src/f32-vlrelu/gen/vlrelu-sse-x8.c

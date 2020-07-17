@@ -55,16 +55,6 @@ tools/xngen src/f32-vrnd/neonv8.c.in -D OP=RNDU  -D BATCH_TILE=8 -o src/f32-vrnd
 tools/xngen src/f32-vrnd/neonv8.c.in -D OP=RNDD  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndd-neonv8-x4.c
 tools/xngen src/f32-vrnd/neonv8.c.in -D OP=RNDD  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndd-neonv8-x8.c
 
-#################################### PSIMD ####################################
-tools/xngen src/f32-vrnd/vrndne-psimd.c.in -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndne-psimd-x4.c
-tools/xngen src/f32-vrnd/vrndne-psimd.c.in -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndne-psimd-x8.c
-tools/xngen src/f32-vrnd/vrndz-psimd.c.in  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndz-psimd-x4.c
-tools/xngen src/f32-vrnd/vrndz-psimd.c.in  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndz-psimd-x8.c
-tools/xngen src/f32-vrnd/vrndu-psimd.c.in  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndu-psimd-x4.c
-tools/xngen src/f32-vrnd/vrndu-psimd.c.in  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndu-psimd-x8.c
-tools/xngen src/f32-vrnd/vrndd-psimd.c.in  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndd-psimd-x4.c
-tools/xngen src/f32-vrnd/vrndd-psimd.c.in  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndd-psimd-x8.c
-
 ################################# x86 128-bit #################################
 tools/xngen src/f32-vrnd/vrndne-sse2.c.in -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndne-sse2-x4.c
 tools/xngen src/f32-vrnd/vrndne-sse2.c.in -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndne-sse2-x8.c

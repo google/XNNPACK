@@ -14,8 +14,6 @@
 - name: xnn_f32_vlrelu_ukernel__avx_x16
 - name: xnn_f32_vlrelu_ukernel__avx512f_x16
 - name: xnn_f32_vlrelu_ukernel__avx512f_x32
-- name: xnn_f32_vlrelu_ukernel__psimd_x4
-- name: xnn_f32_vlrelu_ukernel__psimd_x8
 - name: xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x4
 - name: xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x8
 - name: xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x4
