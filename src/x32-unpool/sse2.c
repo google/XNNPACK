@@ -7,37 +7,37 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/pad.h>
+#include <xnnpack/unpool.h>
 
 
 void xnn_x32_unpool_ukernel__sse2(
-    size_t p,
-    size_t c,
-    uint32_t f,
+    size_t kernel_elements,
+    size_t channels,
+    uint32_t fill,
     const uint32_t* input,
     const uint32_t* index,
     uint32_t** output)
 {
   // Pre-initialize outputs with constant.
-  const __m128i vf = _mm_set1_epi32((int) f);
+  const __m128i vfill = _mm_set1_epi32((int) fill);
   uint32_t** os = output;
   do {
     uint32_t* o = *os++;
-    size_t k = c;
-    for (; k >= 4; k -= 4) {
-      _mm_storeu_si128((__m128i*) o, vf);
+    size_t c = channels;
+    for (; c >= 4; c -= 4) {
+      _mm_storeu_si128((__m128i*) o, vfill);
       o += 4;
     }
-    if (k != 0) {
-      if (k & 2) {
-        _mm_storel_epi64((__m128i*) o, vf);
+    if (c != 0) {
+      if (c & 2) {
+        _mm_storel_epi64((__m128i*) o, vfill);
         o += 2;
       }
-      if (k & 1) {
-        *((int*) o) = _mm_cvtsi128_si32(vf);
+      if (c & 1) {
+        *((int*) o) = _mm_cvtsi128_si32(vfill);
       }
     }
-  } while (--p != 0);
+  } while (--kernel_elements != 0);
 
   // Copy indexed elements to output.
   size_t offset = 0;
@@ -45,5 +45,5 @@ void xnn_x32_unpool_ukernel__sse2(
     const uint32_t i = *index++;
     *((uint32_t*) ((uintptr_t) output[i] + offset)) = *input++;
     offset += sizeof(uint32_t);
-  } while (--c != 0);
+  } while (--channels != 0);
 }

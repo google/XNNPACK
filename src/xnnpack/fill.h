@@ -18,7 +18,7 @@ extern "C" {
 
 #define DECLARE_FILL_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                   \
-    size_t rows,                               \
+    size_t kernel_elements,                    \
     size_t channels,                           \
     uint32_t* output,                          \
     size_t output_stride,                      \

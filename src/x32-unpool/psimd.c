@@ -7,37 +7,37 @@
 
 #include <psimd.h>
 
-#include <xnnpack/pad.h>
+#include <xnnpack/unpool.h>
 
 
 void xnn_x32_unpool_ukernel__psimd(
-    size_t p,
-    size_t c,
-    uint32_t f,
+    size_t kernel_elements,
+    size_t channels,
+    uint32_t fill,
     const uint32_t* input,
     const uint32_t* index,
     uint32_t** output)
 {
   // Pre-initialize outputs with constant.
-  const psimd_u32 vf = psimd_splat_u32(f);
+  const psimd_u32 vfill = psimd_splat_u32(fill);
   uint32_t** os = output;
   do {
     uint32_t* o = *os++;
-    size_t k = c;
-    for (; k >= 4; k -= 4) {
-      psimd_store_u32(o, vf);
+    size_t c = channels;
+    for (; c >= 4; c -= 4) {
+      psimd_store_u32(o, vfill);
       o += 4;
     }
-    if (k != 0) {
-      if (k & 2) {
-        psimd_store2_u32(o, vf);
+    if (c != 0) {
+      if (c & 2) {
+        psimd_store2_u32(o, vfill);
         o += 2;
       }
-      if (k & 1) {
-        psimd_store1_u32(o, vf);
+      if (c & 1) {
+        psimd_store1_u32(o, vfill);
       }
     }
-  } while (--p != 0);
+  } while (--kernel_elements != 0);
 
   // Copy indexed elements to output.
   size_t offset = 0;
@@ -45,5 +45,5 @@ void xnn_x32_unpool_ukernel__psimd(
     const uint32_t i = *index++;
     *((uint32_t*) ((uintptr_t) output[i] + offset)) = *input++;
     offset += sizeof(uint32_t);
-  } while (--c != 0);
+  } while (--channels != 0);
 }

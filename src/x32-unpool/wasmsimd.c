@@ -5,12 +5,12 @@
 
 #include <assert.h>
 
-#include <arm_neon.h>
+#include <wasm_simd128.h>
 
 #include <xnnpack/unpool.h>
 
 
-void xnn_x32_unpool_ukernel__neon(
+void xnn_x32_unpool_ukernel__wasmsimd(
     size_t kernel_elements,
     size_t channels,
     uint32_t fill,
@@ -19,20 +19,22 @@ void xnn_x32_unpool_ukernel__neon(
     uint32_t** output)
 {
   // Pre-initialize outputs with constant.
-  const uint32x4_t vfill = vdupq_n_u32(fill);
+  const v128_t vfill = wasm_i32x4_splat(fill);
   uint32_t** os = output;
   do {
-    uint32_t* o = *os++;
+    float* o = (float*) *os++;
     size_t c = channels;
     for (; c >= 4; c -= 4) {
-      vst1q_u32(o, vfill); o += 4;
+      wasm_v128_store(o, vfill);
+      o += 4;
     }
     if (c != 0) {
       if (c & 2) {
-        vst1_u32(o, vget_low_u32(vfill)); o += 2;
+        *((double*) o) = wasm_f64x2_extract_lane(vfill, 0);
+        o += 2;
       }
       if (c & 1) {
-        vst1q_lane_u32(o, vfill, 0);
+        *o = wasm_f32x4_extract_lane(vfill, 0);
       }
     }
   } while (--kernel_elements != 0);

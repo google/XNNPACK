@@ -2066,7 +2066,7 @@ static void init(void) {
       .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__wasmsimd,
       .row_tile = 1,
     };
-    xnn_params.x32.unpool = (xnn_unpool_ukernel_function) xnn_x32_unpool_ukernel__psimd;
+    xnn_params.x32.unpool = (xnn_unpool_ukernel_function) xnn_x32_unpool_ukernel__wasmsimd;
     xnn_params.x32.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x32_zip_x2_ukernel__psimd,
       .x3 = (xnn_zipc_ukernel_function) xnn_x32_zip_x3_ukernel__psimd,

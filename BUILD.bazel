@@ -815,6 +815,7 @@ WASMSIMD_UKERNELS = [
     "src/x32-fill/wasmsimd.c",
     "src/x32-packx/x4-wasmsimd.c",
     "src/x32-pad/wasmsimd.c",
+    "src/x32-unpool/wasmsimd.c",
     "src/math/roundne-wasmsimd-addsub.c",
     "src/math/roundd-wasmsimd-addsub.c",
     "src/math/roundd-wasmsimd-cvt.c",
