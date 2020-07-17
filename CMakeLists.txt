@@ -534,7 +534,6 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-pavgpool/9p8x-minmax-psimd-c4.c
   src/f32-pavgpool/9x-minmax-psimd-c4.c
   src/f32-ppmm/gen/4x8-minmax-psimd.c
-  src/f32-rmax/psimd.c
   src/f32-spmm/gen/4x1-minmax-psimd.c
   src/f32-spmm/gen/8x1-minmax-psimd.c
   src/f32-spmm/gen/16x1-minmax-psimd.c
