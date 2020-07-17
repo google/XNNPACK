@@ -542,38 +542,6 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-spmm/gen/4x1-minmax-psimd.c
   src/f32-spmm/gen/8x1-minmax-psimd.c
   src/f32-spmm/gen/16x1-minmax-psimd.c
-  src/f32-vbinary/gen/vadd-minmax-psimd-x4.c
-  src/f32-vbinary/gen/vadd-minmax-psimd-x8.c
-  src/f32-vbinary/gen/vaddc-minmax-psimd-x4.c
-  src/f32-vbinary/gen/vaddc-minmax-psimd-x8.c
-  src/f32-vbinary/gen/vdiv-minmax-psimd-x4.c
-  src/f32-vbinary/gen/vdiv-minmax-psimd-x8.c
-  src/f32-vbinary/gen/vdivc-minmax-psimd-x4.c
-  src/f32-vbinary/gen/vdivc-minmax-psimd-x8.c
-  src/f32-vbinary/gen/vmax-psimd-x4.c
-  src/f32-vbinary/gen/vmax-psimd-x8.c
-  src/f32-vbinary/gen/vmaxc-psimd-x4.c
-  src/f32-vbinary/gen/vmaxc-psimd-x8.c
-  src/f32-vbinary/gen/vmin-psimd-x4.c
-  src/f32-vbinary/gen/vmin-psimd-x8.c
-  src/f32-vbinary/gen/vminc-psimd-x4.c
-  src/f32-vbinary/gen/vminc-psimd-x8.c
-  src/f32-vbinary/gen/vmul-minmax-psimd-x4.c
-  src/f32-vbinary/gen/vmul-minmax-psimd-x8.c
-  src/f32-vbinary/gen/vmulc-minmax-psimd-x4.c
-  src/f32-vbinary/gen/vmulc-minmax-psimd-x8.c
-  src/f32-vbinary/gen/vrdivc-minmax-psimd-x4.c
-  src/f32-vbinary/gen/vrdivc-minmax-psimd-x8.c
-  src/f32-vbinary/gen/vrsubc-minmax-psimd-x4.c
-  src/f32-vbinary/gen/vrsubc-minmax-psimd-x8.c
-  src/f32-vbinary/gen/vsqrdiff-psimd-x4.c
-  src/f32-vbinary/gen/vsqrdiff-psimd-x8.c
-  src/f32-vbinary/gen/vsqrdiffc-psimd-x4.c
-  src/f32-vbinary/gen/vsqrdiffc-psimd-x8.c
-  src/f32-vbinary/gen/vsub-minmax-psimd-x4.c
-  src/f32-vbinary/gen/vsub-minmax-psimd-x8.c
-  src/f32-vbinary/gen/vsubc-minmax-psimd-x4.c
-  src/f32-vbinary/gen/vsubc-minmax-psimd-x8.c
   src/f32-vmulcaddc/gen/c4-minmax-psimd-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-psimd-2x.c
   src/f32-vunary/gen/vabs-psimd-x4.c
