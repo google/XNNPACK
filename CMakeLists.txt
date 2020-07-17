@@ -546,22 +546,10 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/x32-zip/x3-psimd.c
   src/x32-zip/x4-psimd.c
   src/x32-zip/xm-psimd.c
-  src/requantization/precise-psimd.c
-  src/requantization/fp32-psimd.c)
 
 SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x4.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x8.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x8-acc2.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x12.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x12-acc2.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x12-acc3.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x16.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x16-acc2.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x20.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x20-acc2.c
-  src/f32-raddstoreexpminusmax/gen/psimd-p5-x20-acc5.c)
+  src/requantization/precise-psimd.c
+  src/requantization/fp32-psimd.c)
 
 SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-minmax-neon-c4.c

@@ -99,20 +99,6 @@ tools/xngen src/f32-raddstoreexpminusmax/avx512f-p5-scalef.c.in -D ELEMENTS_TILE
 tools/xngen src/f32-raddstoreexpminusmax/avx512f-p5-scalef.c.in -D ELEMENTS_TILE=192 -D ACCUMULATORS=3 -o src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x192-acc3.c
 tools/xngen src/f32-raddstoreexpminusmax/avx512f-p5-scalef.c.in -D ELEMENTS_TILE=192 -D ACCUMULATORS=6 -o src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x192-acc6.c
 
-#################################### PSIMD ####################################
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=4  -D ACCUMULATORS=1 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x4.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=8  -D ACCUMULATORS=1 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x8.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=8  -D ACCUMULATORS=2 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x8-acc2.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=12 -D ACCUMULATORS=1 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x12.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=12 -D ACCUMULATORS=2 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x12-acc2.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=12 -D ACCUMULATORS=3 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x12-acc3.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=16 -D ACCUMULATORS=1 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x16.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=16 -D ACCUMULATORS=2 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x16-acc2.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=16 -D ACCUMULATORS=4 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x16-acc4.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=20 -D ACCUMULATORS=1 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x20.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=20 -D ACCUMULATORS=2 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x20-acc2.c
-tools/xngen src/f32-raddstoreexpminusmax/psimd-p5.c.in -D ELEMENTS_TILE=20 -D ACCUMULATORS=5 -o src/f32-raddstoreexpminusmax/gen/psimd-p5-x20-acc5.c
-
 ################################## WAsm SIMD ##################################
 tools/xngen src/f32-raddstoreexpminusmax/wasmsimd-p5.c.in -D ELEMENTS_TILE=4  -D ACCUMULATORS=1 -o src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x4.c
 tools/xngen src/f32-raddstoreexpminusmax/wasmsimd-p5.c.in -D ELEMENTS_TILE=8  -D ACCUMULATORS=1 -o src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x8.c
