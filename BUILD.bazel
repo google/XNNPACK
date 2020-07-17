@@ -885,11 +885,6 @@ PSIMD_ACCMATH_UKERNELS = [
     "src/f32-raddstoreexpminusmax/gen/psimd-p5-x20.c",
     "src/f32-raddstoreexpminusmax/gen/psimd-p5-x20-acc2.c",
     "src/f32-raddstoreexpminusmax/gen/psimd-p5-x20-acc5.c",
-    "src/math/roundne-psimd-addsub.c",
-    "src/math/roundd-psimd-addsub.c",
-    "src/math/roundu-psimd-addsub.c",
-    "src/math/roundz-psimd-addsub.c",
-    "src/math/sigmoid-psimd-p5-div.c",
 ]
 
 # ISA-specific micro-kernels

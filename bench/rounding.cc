@@ -160,36 +160,6 @@ BENCHMARK_F(RoundingTowardsZero, scalar_trunc)(benchmark::State& state) {
   }
 }
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  BENCHMARK_F(RoundingToNearestEven, psimd_addsub)(benchmark::State& state) {
-    for (auto _ : state) {
-      xnn_math_f32_roundne__psimd_addsub(
-          n() * sizeof(float), input(), output());
-    }
-  }
-
-  BENCHMARK_F(RoundingDown, psimd_addsub)(benchmark::State& state) {
-    for (auto _ : state) {
-      xnn_math_f32_roundd__psimd_addsub(
-          n() * sizeof(float), input(), output());
-    }
-  }
-
-  BENCHMARK_F(RoundingUp, psimd_addsub)(benchmark::State& state) {
-    for (auto _ : state) {
-      xnn_math_f32_roundu__psimd_addsub(
-          n() * sizeof(float), input(), output());
-    }
-  }
-
-  BENCHMARK_F(RoundingTowardsZero, psimd_addsub)(benchmark::State& state) {
-    for (auto _ : state) {
-      xnn_math_f32_roundz__psimd_addsub(
-          n() * sizeof(float), input(), output());
-    }
-  }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-
 #if XNN_ARCH_WASMSIMD
   BENCHMARK_F(RoundingToNearestEven, wasmsimd_addsub)(benchmark::State& state) {
     for (auto _ : state) {
