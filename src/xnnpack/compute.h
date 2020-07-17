@@ -458,9 +458,6 @@ struct argmax_pooling_context {
   size_t input_increment;
   size_t output_increment;
   union {
-    union xnn_f32_minmax_params f32;
-  } params;
-  union {
     xnn_argmaxpool_unipass_ukernel_function unipass_ukernel;
     xnn_argmaxpool_multipass_ukernel_function multipass_ukernel;
   };

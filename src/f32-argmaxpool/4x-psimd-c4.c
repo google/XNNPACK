@@ -19,16 +19,13 @@ void xnn_f32_argmaxpool_ukernel_4x__psimd_c4(
     float* output,
     uint32_t* index,
     size_t input_increment,
-    size_t output_increment,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    size_t output_increment) XNN_DISABLE_TSAN
 {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);
   assert(pooling_elements <= 4);
   assert(channels != 0);
 
-  const psimd_f32 voutput_max = psimd_load_splat_f32(&params->scalar.max);
-  const psimd_f32 voutput_min = psimd_load_splat_f32(&params->scalar.min);
   do {
     const float* i0 = input[0];
     const float* i1 = input[1];
@@ -74,9 +71,7 @@ void xnn_f32_argmaxpool_ukernel_4x__psimd_c4(
       vmax = psimd_blend_f32(vm3, vi3, vmax);
       vidx = psimd_blend_u32(vm3, psimd_splat_u32(3), vidx);
 
-      const psimd_f32 vout = psimd_max_f32(psimd_min_f32(vmax, voutput_max), voutput_min);
-
-      psimd_store_f32(output, vout);
+      psimd_store_f32(output, vmax);
       output += 4;
       psimd_store_u32(index, vidx);
       index += 4;
@@ -102,18 +97,16 @@ void xnn_f32_argmaxpool_ukernel_4x__psimd_c4(
       vmax = psimd_blend_f32(vm3, vi3, vmax);
       vidx = psimd_blend_u32(vm3, psimd_splat_u32(3), vidx);
 
-      psimd_f32 vout = psimd_max_f32(psimd_min_f32(vmax, voutput_max), voutput_min);
-
       if (c & 2) {
-        psimd_store2_f32(output, vout);
+        psimd_store2_f32(output, vmax);
         psimd_store2_u32(index, vidx);
-        vout = psimd_concat_hi_f32(vout, vout);
+        vmax = psimd_concat_hi_f32(vmax, vmax);
         vidx = psimd_concat_hi_u32(vidx, vidx);
         output += 2;
         index += 2;
       }
       if (c & 1) {
-        psimd_store1_f32(output, vout);
+        psimd_store1_f32(output, vmax);
         psimd_store1_u32(index, vidx);
         output += 1;
         index += 1;

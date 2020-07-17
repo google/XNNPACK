@@ -366,8 +366,7 @@ void xnn_compute_argmax_pooling_unipass(
   context->unipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
     indirect_input, input_offset, output, index,
-    context->input_increment, context->output_increment,
-    &context->params);
+    context->input_increment, context->output_increment);
 }
 
 void xnn_compute_argmax_pooling_multipass(
@@ -389,8 +388,7 @@ void xnn_compute_argmax_pooling_multipass(
   context->multipass_ukernel(
     context->output_width, context->pooling_size, context->channels,
     indirect_input, input_offset, multipass_accumulation_buffer, multipass_index_buffer, output, index,
-    context->input_increment, context->output_increment,
-    &context->params);
+    context->input_increment, context->output_increment);
 }
 
 void xnn_compute_max_pooling(

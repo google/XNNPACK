@@ -19,8 +19,7 @@ void xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4(
     float* output,
     uint32_t* index_ptr,
     size_t input_increment,
-    size_t output_increment,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    size_t output_increment) XNN_DISABLE_TSAN
 {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);
@@ -28,8 +27,6 @@ void xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4(
   assert(channels != 0);
 
   float* index = (float*) index_ptr;
-  const v128_t voutput_max = wasm_v32x4_load_splat(&params->scalar.max);
-  const v128_t voutput_min = wasm_v32x4_load_splat(&params->scalar.min);
   do {
     const float* i0 = input[0];
     const float* i1 = input[1];
@@ -75,9 +72,7 @@ void xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4(
       vmax = wasm_v128_bitselect(vi3, vmax, vm3);
       vidx = wasm_v128_bitselect(wasm_i32x4_splat(3), vidx, vm3);
 
-      const v128_t vout = wasm_f32x4_max(wasm_f32x4_min(vmax, voutput_max), voutput_min);
-
-      wasm_v128_store(output, vout);
+      wasm_v128_store(output, vmax);
       output += 4;
       wasm_v128_store(index, vidx);
       index += 4;
@@ -103,18 +98,16 @@ void xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4(
       vmax = wasm_v128_bitselect(vi3, vmax, vm3);
       vidx = wasm_v128_bitselect(wasm_i32x4_splat(3), vidx, vm3);
 
-      v128_t vout = wasm_f32x4_max(wasm_f32x4_min(vmax, voutput_max), voutput_min);
-
       if (c & 2) {
-        *((double*) output) = wasm_f64x2_extract_lane(vout, 0);
+        *((double*) output) = wasm_f64x2_extract_lane(vmax, 0);
         *((double*) index) = wasm_f64x2_extract_lane(vidx, 0);
-        vout = wasm_v32x4_shuffle(vout, vout, 2, 3, 2, 3);
+        vmax = wasm_v32x4_shuffle(vmax, vmax, 2, 3, 2, 3);
         vidx = wasm_v32x4_shuffle(vidx, vidx, 2, 3, 2, 3);
         output += 2;
         index += 2;
       }
       if (c & 1) {
-        *output++ = wasm_f32x4_extract_lane(vout, 0);
+        *output++ = wasm_f32x4_extract_lane(vmax, 0);
         *index++ = wasm_f32x4_extract_lane(vidx, 0);
       }
     }

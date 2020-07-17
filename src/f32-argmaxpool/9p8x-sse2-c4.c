@@ -21,16 +21,13 @@ void xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4(
     float* output,
     uint32_t* index,
     size_t input_increment,
-    size_t output_increment,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    size_t output_increment) XNN_DISABLE_TSAN
 {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);
   assert(pooling_elements > 9);
   assert(channels != 0);
 
-  const __m128 voutput_max = _mm_load_ps(params->sse.max);
-  const __m128 voutput_min = _mm_load_ps(params->sse.min);
   do {
     {
       float* ab = accumulation_buffer;
@@ -317,9 +314,7 @@ void xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4(
         vmax = _mm_max_ps(vi7, vmax);
         vidx = _mm_or_si128(_mm_andnot_si128(vm7, vidx), _mm_and_si128(vm7, vidx7));
 
-        __m128 vout = _mm_max_ps(_mm_min_ps(vmax, voutput_max), voutput_min);
-
-        _mm_storeu_ps(o, vout);
+        _mm_storeu_ps(o, vmax);
         o += 4;
         _mm_storeu_si128((__m128i*) i, vidx);
         i += 4;
@@ -376,18 +371,16 @@ void xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4(
         vmax = _mm_max_ps(vi7, vmax);
         vidx = _mm_or_si128(_mm_andnot_si128(vm7, vidx), _mm_and_si128(vm7, vidx7));
 
-        __m128 vout = _mm_max_ps(_mm_min_ps(vmax, voutput_max), voutput_min);
-
         if (c & 2) {
-          _mm_store_sd((double*) o, _mm_castps_pd(vout));
+          _mm_storel_pi((__m64*) o, vmax);
           _mm_storel_epi64((__m128i*) i, vidx);
-          vout = _mm_movehl_ps(vout, vout);
+          vmax = _mm_movehl_ps(vmax, vmax);
           vidx = _mm_unpackhi_epi64(vidx, vidx);
           o += 2;
           i += 2;
         }
         if (c & 1) {
-          _mm_store_ss(o, vout);
+          _mm_store_ss(o, vmax);
           *i = (uint32_t) _mm_cvtsi128_si32(vidx);
           o += 1;
           i += 1;
