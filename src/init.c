@@ -2068,10 +2068,10 @@ static void init(void) {
     };
     xnn_params.x32.unpool = (xnn_unpool_ukernel_function) xnn_x32_unpool_ukernel__wasmsimd;
     xnn_params.x32.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_function) xnn_x32_zip_x2_ukernel__psimd,
-      .x3 = (xnn_zipc_ukernel_function) xnn_x32_zip_x3_ukernel__psimd,
-      .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__psimd,
-      .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__psimd,
+      .x2 = (xnn_zipc_ukernel_function) xnn_x32_zip_x2_ukernel__wasmsimd,
+      .x3 = (xnn_zipc_ukernel_function) xnn_x32_zip_x3_ukernel__wasmsimd,
+      .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__wasmsimd,
+      .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__wasmsimd,
     };
   #endif  // XNN_NO_X32_OPERATORS
 
