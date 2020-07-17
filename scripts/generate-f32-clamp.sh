@@ -26,10 +26,6 @@ tools/xngen src/f32-clamp/wasmsimd.c.in -D BATCH_TILE=8 -D X86=1 -o src/f32-clam
 tools/xngen src/f32-clamp/neon.c.in -D BATCH_TILE=4 -o src/f32-clamp/gen/neon-x4.c
 tools/xngen src/f32-clamp/neon.c.in -D BATCH_TILE=8 -o src/f32-clamp/gen/neon-x8.c
 
-#################################### PSIMD ####################################
-tools/xngen src/f32-clamp/psimd.c.in -D BATCH_TILE=4 -o src/f32-clamp/gen/psimd-x4.c
-tools/xngen src/f32-clamp/psimd.c.in -D BATCH_TILE=8 -o src/f32-clamp/gen/psimd-x8.c
-
 ################################# x86 128-bit #################################
 tools/xngen src/f32-clamp/sse.c.in -D BATCH_TILE=4 -o src/f32-clamp/gen/sse-x4.c
 tools/xngen src/f32-clamp/sse.c.in -D BATCH_TILE=8 -o src/f32-clamp/gen/sse-x8.c
