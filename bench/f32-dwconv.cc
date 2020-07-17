@@ -333,25 +333,6 @@ static void DWConvBenchmark(benchmark::State& state,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  static void f32_dwconv_4x4__psimd(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state, xnn_f32_dwconv_minmax_ukernel_up4x4__psimd, 4, 4);
-  }
-
-  static void f32_dwconv_4x9__psimd(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state, xnn_f32_dwconv_minmax_ukernel_up4x9__psimd, 4, 9);
-  }
-
-  static void f32_dwconv_4x25__psimd(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state, xnn_f32_dwconv_minmax_ukernel_up4x25__psimd, 4, 25);
-  }
-
-  BENCHMARK_DWCONV(f32_dwconv_4x4__psimd)
-  BENCHMARK_DWCONV(f32_dwconv_4x9__psimd)
-  BENCHMARK_DWCONV(f32_dwconv_4x25__psimd)
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-
-
 static void f32_dwconv_1x4__scalar(benchmark::State& state, const char* net) {
   DWConvBenchmark(state, xnn_f32_dwconv_minmax_ukernel_up1x4__scalar, 1, 4);
 }

@@ -525,18 +525,6 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-dwconv-chw/3x3s2p1-psimd.c
   src/f32-dwconv-chw/5x5p2-psimd.c
   src/f32-dwconv-chw/5x5s2p2-psimd.c
-  src/f32-dwconv/gen/up4x25-minmax-psimd-acc2.c
-  src/f32-dwconv/gen/up4x25-minmax-psimd.c
-  src/f32-dwconv/gen/up4x4-minmax-psimd-acc2.c
-  src/f32-dwconv/gen/up4x4-minmax-psimd.c
-  src/f32-dwconv/gen/up4x9-minmax-psimd-acc2.c
-  src/f32-dwconv/gen/up4x9-minmax-psimd.c
-  src/f32-dwconv/gen/up8x25-minmax-psimd-acc2.c
-  src/f32-dwconv/gen/up8x25-minmax-psimd.c
-  src/f32-dwconv/gen/up8x4-minmax-psimd-acc2.c
-  src/f32-dwconv/gen/up8x4-minmax-psimd.c
-  src/f32-dwconv/gen/up8x9-minmax-psimd-acc2.c
-  src/f32-dwconv/gen/up8x9-minmax-psimd.c
   src/f32-gavgpool-cw/psimd-x4.c
   src/f32-gavgpool/7p7x-minmax-psimd-c4.c
   src/f32-gavgpool/7x-minmax-psimd-c4.c
