@@ -830,7 +830,8 @@ WASMSIMD_UKERNELS = [
     "src/math/roundu-wasmsimd-cvt.c",
     "src/math/roundz-wasmsimd-addsub.c",
     "src/math/roundz-wasmsimd-cvt.c",
-    "src/math/sigmoid-wasmsimd-p5-div.c",
+    "src/math/sigmoid-wasmsimd-rr2-lut64-p2-div.c",
+    "src/math/sigmoid-wasmsimd-rr2-p5-div.c",
     "src/requantization/fp32-wasmsimd.c",
 ]
 
