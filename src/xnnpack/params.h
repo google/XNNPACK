@@ -1291,7 +1291,8 @@ typedef void (*xnn_f16_relu_ukernel_function)(
 typedef void (*xnn_f32_relu_ukernel_function)(
     size_t n,
     const float* x,
-    float* y);
+    float* y,
+    const union xnn_f32_relu_params* params);
 
 typedef void (*xnn_f16_hswish_ukernel_function)(
     size_t n,
