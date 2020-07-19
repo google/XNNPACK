@@ -3547,6 +3547,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_relu_bench",
+    srcs = [
+        "bench/f16-relu.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_conv_hwc_bench",
     srcs = [
         "bench/f32-conv-hwc.cc",

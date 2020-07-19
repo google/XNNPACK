@@ -1286,7 +1286,8 @@ typedef void (*xnn_u8_clamp_ukernel_function)(
 typedef void (*xnn_f16_relu_ukernel_function)(
     size_t n,
     const void* x,
-    void* y);
+    void* y,
+    const struct xnn_f16_relu_params* params);
 
 typedef void (*xnn_f32_relu_ukernel_function)(
     size_t n,

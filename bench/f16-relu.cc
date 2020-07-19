@@ -1,0 +1,75 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <algorithm>
+#include <cmath>
+#include <functional>
+#include <random>
+#include <vector>
+
+#include <cpuinfo.h>
+
+#include <benchmark/benchmark.h>
+#include <fp16/fp16.h>
+#include "bench/utils.h"
+#include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/common.h>
+#include <xnnpack/params.h>
+#include <xnnpack/vunary.h>
+
+
+static void f16_relu(
+  benchmark::State& state,
+  xnn_f16_relu_ukernel_function f16_relu,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  if (!cpuinfo_initialize()) {
+    state.SkipWithError("cpuinfo initialization failed");
+    return;
+  }
+  if (isa_check && !isa_check(state)) {
+    return;
+  }
+
+  const size_t n = state.range(0);
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), rng);
+  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> x(n);
+  std::generate(x.begin(), x.end(), std::ref(f16rng));
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> y(n);
+  std::generate(x.begin(), x.end(), std::ref(f16rng));
+
+  for (auto _ : state) {
+    f16_relu(n * sizeof(uint16_t), x.data(), y.data(), NULL);
+  }
+
+  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+
+  state.counters["elements"] =
+    benchmark::Counter(uint64_t(state.iterations()) * n, benchmark::Counter::kIsRate);
+
+  state.counters["bytes"] =
+    benchmark::Counter(uint64_t(state.iterations()) * n * sizeof(uint16_t), benchmark::Counter::kIsRate);
+}
+
+#if XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(f16_relu, neonfp16arith_x8, xnn_f16_relu_ukernel__neonfp16arith_x8, benchmark::utils::CheckNEONFP16ARITH)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_relu, neonfp16arith_x16, xnn_f16_relu_ukernel__neonfp16arith_x16, benchmark::utils::CheckNEONFP16ARITH)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
+#endif  // XNN_ARCH_ARM64
+
+
+#ifndef XNNPACK_BENCHMARK_NO_MAIN
+BENCHMARK_MAIN();
+#endif
