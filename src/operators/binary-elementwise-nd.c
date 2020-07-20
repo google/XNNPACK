@@ -25,6 +25,7 @@ static enum xnn_status create_binary_elementwise_nd(
     size_t params_size,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
+    const struct vbinary_fused_ukernels* vbinary_fused_ukernels,
     xnn_operator_t* binary_elementwise_op_out)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -51,6 +52,10 @@ static enum xnn_status create_binary_elementwise_nd(
     memcpy(&binary_elementwise_op->params, params, params_size);
   }
 
+  binary_elementwise_op->ukernel.vbinary.op_function   = vbinary_fused_ukernels->op_ukernel;
+  binary_elementwise_op->ukernel.vbinary.opc_function  = vbinary_fused_ukernels->opc_ukernel;
+  binary_elementwise_op->ukernel.vbinary.ropc_function = vbinary_fused_ukernels->ropc_ukernel;
+
   binary_elementwise_op->type = operator_type;
   binary_elementwise_op->ukernel.type = xnn_ukernel_type_binary_elementwise;
 
@@ -65,6 +70,7 @@ static enum xnn_status create_binary_elementwise_nd_f16(
     float output_max,
     uint32_t flags,
     enum xnn_operator_type operator_type,
+    const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
     xnn_operator_t* binary_elementwise_op_out)
 {
   if (isnan(output_min)) {
@@ -94,7 +100,14 @@ static enum xnn_status create_binary_elementwise_nd_f16(
     fp16_ieee_from_fp32_value(output_min),
     fp16_ieee_from_fp32_value(output_max));
 
-  return create_binary_elementwise_nd(flags, &params, sizeof(params), XNN_INIT_FLAG_F16, operator_type, binary_elementwise_op_out);
+  return create_binary_elementwise_nd(
+    flags,
+    &params,
+    sizeof(params),
+    XNN_INIT_FLAG_F16,
+    operator_type,
+    &vbinary->minmax,
+    binary_elementwise_op_out);
 }
 
 static enum xnn_status create_binary_elementwise_nd_f32(
@@ -102,6 +115,7 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     float output_max,
     uint32_t flags,
     enum xnn_operator_type operator_type,
+    const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
     xnn_operator_t* binary_elementwise_op_out)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -131,8 +145,23 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     return xnn_status_invalid_parameter;
   }
 
+  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
+  const struct vbinary_fused_ukernels* vbinary_fused_ukernels = &vbinary->minmax;
+  if (linear_activation && vbinary->linear.op_ukernel != NULL) {
+    vbinary_fused_ukernels = &vbinary->linear;
+  }
+
   const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
-  return create_binary_elementwise_nd(flags, &params, sizeof(params), XNN_INIT_FLAG_F32, operator_type, binary_elementwise_op_out);
+
+
+  return create_binary_elementwise_nd(
+    flags,
+    &params,
+    sizeof(params),
+    XNN_INIT_FLAG_F32,
+    operator_type,
+    vbinary_fused_ukernels,
+    binary_elementwise_op_out);
 }
 
 enum xnn_status xnn_create_add_nd_f16(
@@ -142,7 +171,12 @@ enum xnn_status xnn_create_add_nd_f16(
     xnn_operator_t* add_op_out)
 {
   return create_binary_elementwise_nd_f16(
-    output_min, output_max, flags, xnn_operator_type_add_nd_f16, add_op_out);
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_add_nd_f16,
+    &xnn_params.f16.vadd,
+    add_op_out);
 }
 
 enum xnn_status xnn_create_add_nd_f32(
@@ -152,7 +186,12 @@ enum xnn_status xnn_create_add_nd_f32(
     xnn_operator_t* add_op_out)
 {
   return create_binary_elementwise_nd_f32(
-    output_min, output_max, flags, xnn_operator_type_add_nd_f32, add_op_out);
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_add_nd_f32,
+    &xnn_params.f32.vadd,
+    add_op_out);
 }
 
 enum xnn_status xnn_create_divide_nd_f32(
@@ -162,7 +201,12 @@ enum xnn_status xnn_create_divide_nd_f32(
     xnn_operator_t* divide_op_out)
 {
   return create_binary_elementwise_nd_f32(
-    output_min, output_max, flags, xnn_operator_type_divide_nd_f32, divide_op_out);
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_divide_nd_f32,
+    &xnn_params.f32.vdiv,
+    divide_op_out);
 }
 
 enum xnn_status xnn_create_maximum_nd_f32(
@@ -170,7 +214,13 @@ enum xnn_status xnn_create_maximum_nd_f32(
     xnn_operator_t* maximum_op_out)
 {
   return create_binary_elementwise_nd(
-    flags, NULL /* params */, 0 /* params size */, XNN_INIT_FLAG_F32, xnn_operator_type_maximum_nd_f32, maximum_op_out);
+    flags,
+    NULL /* params */,
+    0 /* params size */,
+    XNN_INIT_FLAG_F32,
+    xnn_operator_type_maximum_nd_f32,
+    &xnn_params.f32.vmax.minmax,
+    maximum_op_out);
 }
 
 enum xnn_status xnn_create_minimum_nd_f32(
@@ -178,7 +228,13 @@ enum xnn_status xnn_create_minimum_nd_f32(
     xnn_operator_t* minimum_op_out)
 {
   return create_binary_elementwise_nd(
-    flags, NULL /* params */, 0 /* params size */, XNN_INIT_FLAG_F32, xnn_operator_type_minimum_nd_f32, minimum_op_out);
+    flags,
+    NULL /* params */,
+    0 /* params size */,
+    XNN_INIT_FLAG_F32,
+    xnn_operator_type_minimum_nd_f32,
+    &xnn_params.f32.vmin.minmax,
+    minimum_op_out);
 }
 
 enum xnn_status xnn_create_multiply_nd_f32(
@@ -188,7 +244,12 @@ enum xnn_status xnn_create_multiply_nd_f32(
     xnn_operator_t* multiply_op_out)
 {
   return create_binary_elementwise_nd_f32(
-    output_min, output_max, flags, xnn_operator_type_multiply_nd_f32, multiply_op_out);
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_multiply_nd_f32,
+    &xnn_params.f32.vmul,
+    multiply_op_out);
 }
 
 enum xnn_status xnn_create_squared_difference_nd_f32(
@@ -196,8 +257,13 @@ enum xnn_status xnn_create_squared_difference_nd_f32(
     xnn_operator_t* squared_difference_op_out)
 {
   return create_binary_elementwise_nd(
-    flags, NULL /* params */, 0 /* params size */, XNN_INIT_FLAG_F32,
-    xnn_operator_type_squared_difference_nd_f32, squared_difference_op_out);
+    flags,
+    NULL /* params */,
+    0 /* params size */,
+    XNN_INIT_FLAG_F32,
+    xnn_operator_type_squared_difference_nd_f32,
+    &xnn_params.f32.vsqrdiff.minmax,
+    squared_difference_op_out);
 }
 
 enum xnn_status xnn_create_subtract_nd_f32(
@@ -207,7 +273,12 @@ enum xnn_status xnn_create_subtract_nd_f32(
     xnn_operator_t* subtract_op_out)
 {
   return create_binary_elementwise_nd_f32(
-    output_min, output_max, flags, xnn_operator_type_subtract_nd_f32, subtract_op_out);
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_subtract_nd_f32,
+    &xnn_params.f32.vsub,
+    subtract_op_out);
 }
 
 static enum xnn_status setup_binary_elementwise_nd(
@@ -364,15 +435,15 @@ static enum xnn_status setup_binary_elementwise_nd(
   const size_t* compressed_a_shape = compressed_input1_shape;
   const size_t* compressed_b_shape = compressed_input2_shape;
   if (compressed_input1_shape[0] == 1) {
-    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->minmax.ropc_ukernel;
+    binary_elementwise_op->context.elementwise_binary.ukernel = binary_elementwise_op->ukernel.vbinary.ropc_function;
     binary_elementwise_op->context.elementwise_binary.a = input2;
     binary_elementwise_op->context.elementwise_binary.b = input1;
     compressed_a_shape = compressed_input2_shape;
     compressed_b_shape = compressed_input1_shape;
   } else if (compressed_input2_shape[0] == 1) {
-    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->minmax.opc_ukernel;
+    binary_elementwise_op->context.elementwise_binary.ukernel = binary_elementwise_op->ukernel.vbinary.opc_function;
   } else if (compressed_input1_shape[0] == compressed_input2_shape[0]) {
-    binary_elementwise_op->context.elementwise_binary.ukernel = vbinary->minmax.op_ukernel;
+    binary_elementwise_op->context.elementwise_binary.ukernel = binary_elementwise_op->ukernel.vbinary.op_function;
   }
   size_t a_stride = compressed_a_shape[0], b_stride = compressed_b_shape[0], y_stride = compressed_output_shape[0];
   for (size_t i = 1; i < num_compressed_dims; i++) {

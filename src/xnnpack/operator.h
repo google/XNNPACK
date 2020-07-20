@@ -150,7 +150,9 @@ struct xnn_ukernel_vmulcaddc {
 };
 
 struct xnn_ukernel_vbinary {
-  xnn_vbinary_ukernel_function function;
+  xnn_vbinary_ukernel_function op_function;
+  xnn_vbinary_ukernel_function opc_function;
+  xnn_vbinary_ukernel_function ropc_function;
 };
 
 struct xnn_ukernel {
