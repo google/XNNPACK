@@ -82,6 +82,7 @@ enum xnn_operator_type {
   xnn_operator_type_multiply_nd_f32,
   xnn_operator_type_negate_nc_f32,
   xnn_operator_type_prelu_nc_f32,
+  xnn_operator_type_relu_nc_f32,
   xnn_operator_type_resize_bilinear_nhwc_f32,
   xnn_operator_type_sigmoid_nc_f32,
   xnn_operator_type_sigmoid_nc_qu8,
@@ -155,6 +156,10 @@ struct xnn_ukernel_vbinary {
   xnn_vbinary_ukernel_function ropc_function;
 };
 
+struct xnn_ukernel_vunary {
+  xnn_vunary_ukernel_function function;
+}
+
 struct xnn_ukernel {
   enum xnn_ukernel_type type;
   union {
@@ -166,6 +171,7 @@ struct xnn_ukernel {
     struct xnn_ukernel_spmm spmm;
     struct xnn_ukernel_vmulcaddc vmulcaddc;
     struct xnn_ukernel_vbinary vbinary;
+    struct xnn_ukernel_vunary vunary;
   };
 };
 

@@ -198,11 +198,14 @@ enum xnn_status xnn_create_clamp_nc_f32(
     return xnn_status_invalid_parameter;
   }
 
+  const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
+  xnn_operator_type clamp_op_type = relu_activation ? xnn_operator_type_relu_nc_f32 : xnn_operator_type_clamp_nc_f32;
   const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
+
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
-    xnn_operator_type_clamp_nc_f32,
+    clamp_op_type,
     clamp_op_out);
 }
 
@@ -491,7 +494,8 @@ enum xnn_status xnn_setup_clamp_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (clamp_op->type != xnn_operator_type_clamp_nc_f32) {
+  if (clamp_op->type != xnn_operator_type_clamp_nc_f32 &&
+      clamp_op->type != xnn_operator_type_relu_nc_f32) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32),
       xnn_operator_type_to_string(clamp_op->type));
@@ -499,10 +503,14 @@ enum xnn_status xnn_setup_clamp_nc_f32(
   }
   clamp_op->state = xnn_run_state_invalid;
 
+  xnn_univector_ukernel_function ukernel =
+    (clamp_op->type == xnn_operator_type_clamp_nc_f32) ? xnn_params.f32.clamp :
+    xnn_params.f32.relu;
+
   return setup_unary_elementwise_nc(
     clamp_op,
     batch_size, input, output,
-    xnn_params.f32.clamp,
+    ukernel,
     2 /* log2(sizeof(float)) */,
     &clamp_op->params.f32_minmax, sizeof(clamp_op->params.f32_minmax));
 }

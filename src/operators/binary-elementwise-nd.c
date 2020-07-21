@@ -153,7 +153,6 @@ static enum xnn_status create_binary_elementwise_nd_f32(
 
   const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
 
-
   return create_binary_elementwise_nd(
     flags,
     &params,
