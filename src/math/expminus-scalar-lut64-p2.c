@@ -13,24 +13,7 @@
 
 
 // Table of exp2(k / 64) values, k = 0..63
-static const uint32_t exp2_k_over_64_table[64] = {
-  0x3F800000, 0x3F8164D2, 0x3F82CD87, 0x3F843A29,
-  0x3F85AAC3, 0x3F871F62, 0x3F88980F, 0x3F8A14D5,
-  0x3F8B95C2, 0x3F8D1ADF, 0x3F8EA43A, 0x3F9031DC,
-  0x3F91C3D3, 0x3F935A2B, 0x3F94F4F0, 0x3F96942D,
-  0x3F9837F0, 0x3F99E046, 0x3F9B8D3A, 0x3F9D3EDA,
-  0x3F9EF532, 0x3FA0B051, 0x3FA27043, 0x3FA43516,
-  0x3FA5FED7, 0x3FA7CD94, 0x3FA9A15B, 0x3FAB7A3A,
-  0x3FAD583F, 0x3FAF3B79, 0x3FB123F6, 0x3FB311C4,
-  0x3FB504F3, 0x3FB6FD92, 0x3FB8FBAF, 0x3FBAFF5B,
-  0x3FBD08A4, 0x3FBF179A, 0x3FC12C4D, 0x3FC346CD,
-  0x3FC5672A, 0x3FC78D75, 0x3FC9B9BE, 0x3FCBEC15,
-  0x3FCE248C, 0x3FD06334, 0x3FD2A81E, 0x3FD4F35B,
-  0x3FD744FD, 0x3FD99D16, 0x3FDBFBB8, 0x3FDE60F5,
-  0x3FE0CCDF, 0x3FE33F89, 0x3FE5B907, 0x3FE8396A,
-  0x3FEAC0C7, 0x3FED4F30, 0x3FEFE4BA, 0x3FF28177,
-  0x3FF5257D, 0x3FF7D0DF, 0x3FFA83B3, 0x3FFD3E0C,
-};
+extern XNN_INTERNAL const uint32_t xnn_table_exp2_k_over_64[64];
 
 void xnn_math_f32_expminus__scalar_lut64_p2(
     size_t n,
@@ -66,7 +49,7 @@ void xnn_math_f32_expminus__scalar_lut64_p2(
     // Create a floating-point number s (scale) such that s := 2**(n / 64) for such inputs that expf(x) is normalized,
     // i.e. -87.33642 <= x <= 0.0. As n has 6 fractional bits, we split s == 2**(n / 64) = 2**e * 2**(n / 64 - e), where
     // e := int(n / 64). We create s in two steps:
-    // 1. Fetch 2**(n / 64 - e) = 2**(n % 64) from exp2_k_over_64_table using the 6 low bits of n, as integer. Note that the
+    // 1. Fetch 2**(n / 64 - e) = 2**(n % 64) from the table using the 6 low bits of n, as integer. Note that the
     //    fetched values are in the [1.0, 2.0) range, i.e. their floating-point exponent is 0.
     // 2. Adjust fecthed value by addition of e to its floating-point exponent. The result is always a normalized
     //    number, because for -87.33642 <= x <= 0.0 (inputs for which expf(x) is normalized) we have -126 <= e <= 0,
@@ -77,8 +60,8 @@ void xnn_math_f32_expminus__scalar_lut64_p2(
 
     // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
     const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
-    // Adjust exponent of the value l fetched from the exp2_k_over_64_table to get the final s value.
-    const float vs = fp32_from_bits(exp2_k_over_64_table[vidx] + ve);
+    // Adjust exponent of the value l fetched from the table to get the final s value.
+    const float vs = fp32_from_bits(xnn_table_exp2_k_over_64[vidx] + ve);
 
     // Subtract the large number back to get final n := round(x * 64 / log(2)) as a floating-point number.
     vn -= vmagic_bias;
