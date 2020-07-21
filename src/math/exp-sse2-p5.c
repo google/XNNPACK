@@ -17,7 +17,7 @@ void xnn_math_f32_exp__sse2_p5(
     const float* input,
     float* output)
 {
-  assert(n % (8 * sizeof(float)) == 0);
+  assert(n % (4 * sizeof(float)) == 0);
 
   const __m128 vmagic_bias = _mm_set1_ps(0x1.800000p+23f);
   // The smallest x for which expf(x) is non-zero.
