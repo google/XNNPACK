@@ -857,7 +857,6 @@ PSIMD_FASTMATH_UKERNELS = [
     "src/f32-spmm/gen/8x1-minmax-psimd.c",
     "src/f32-spmm/gen/16x1-minmax-psimd.c",
     "src/f32-ppmm/gen/4x8-minmax-psimd.c",
-    "src/x32-fill/psimd.c",
     "src/x32-packx/x4-psimd.c",
     "src/x32-pad/psimd.c",
     "src/x32-unpool/psimd.c",

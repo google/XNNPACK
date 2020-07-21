@@ -136,68 +136,6 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  TEST(X32_FILL__PSIMD, channels_eq_4) {
-    TEST_REQUIRES_PSIMD;
-    FillMicrokernelTester()
-      .channels(4)
-      .Test(xnn_x32_fill_ukernel__psimd);
-  }
-
-  TEST(X32_FILL__PSIMD, channels_div_4) {
-    TEST_REQUIRES_PSIMD;
-    for (size_t channels = 8; channels < 32; channels += 4) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_x32_fill_ukernel__psimd);
-    }
-  }
-
-  TEST(X32_FILL__PSIMD, channels_lt_4) {
-    TEST_REQUIRES_PSIMD;
-    for (size_t channels = 1; channels < 4; channels++) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_x32_fill_ukernel__psimd);
-    }
-  }
-
-  TEST(X32_FILL__PSIMD, channels_gt_4) {
-    TEST_REQUIRES_PSIMD;
-    for (size_t channels = 5; channels < 8; channels++) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_x32_fill_ukernel__psimd);
-    }
-  }
-
-  TEST(X32_FILL__PSIMD, multiple_rows) {
-    TEST_REQUIRES_PSIMD;
-    for (size_t rows = 2; rows < 5; rows++) {
-      for (size_t channels = 1; channels < 16; channels += 3) {
-        FillMicrokernelTester()
-          .channels(channels)
-          .rows(rows)
-          .Test(xnn_x32_fill_ukernel__psimd);
-      }
-    }
-  }
-
-  TEST(X32_FILL__PSIMD, multiple_rows_with_output_stride) {
-    TEST_REQUIRES_PSIMD;
-    for (size_t rows = 2; rows < 5; rows++) {
-      for (size_t channels = 1; channels < 16; channels += 3) {
-        FillMicrokernelTester()
-          .channels(channels)
-          .rows(rows)
-          .output_stride(17)
-          .Test(xnn_x32_fill_ukernel__psimd);
-      }
-    }
-  }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-
-
 #if XNN_ARCH_WASMSIMD
   TEST(X32_FILL__WASMSIMD, channels_eq_4) {
     FillMicrokernelTester()
