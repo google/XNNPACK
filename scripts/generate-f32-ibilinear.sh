@@ -20,10 +20,6 @@ tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -D FMA
 tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -D FMA=1 -o src/f32-ibilinear/gen/neonfma-c4.c
 tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -D FMA=1 -o src/f32-ibilinear/gen/neonfma-c8.c
 
-#################################### PSIMD ####################################
-tools/xngen src/f32-ibilinear/psimd.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/psimd-c4.c
-tools/xngen src/f32-ibilinear/psimd.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/psimd-c8.c
-
 ################################### x86 SSE ###################################
 tools/xngen src/f32-ibilinear/sse.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/sse-c4.c
 tools/xngen src/f32-ibilinear/sse.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/sse-c8.c
