@@ -155,6 +155,10 @@ struct xnn_ukernel_vbinary {
   xnn_vbinary_ukernel_function ropc_function;
 };
 
+struct xnn_ukernel_vunary {
+  xnn_vunary_ukernel_function function;
+};
+
 struct xnn_ukernel {
   enum xnn_ukernel_type type;
   union {
@@ -166,6 +170,7 @@ struct xnn_ukernel {
     struct xnn_ukernel_spmm spmm;
     struct xnn_ukernel_vmulcaddc vmulcaddc;
     struct xnn_ukernel_vbinary vbinary;
+    struct xnn_ukernel_vunary vunary;
   };
 };
 

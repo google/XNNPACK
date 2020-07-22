@@ -1773,6 +1773,7 @@ struct xnn_parameters {
     xnn_univector_ukernel_function hswish;
     xnn_univector_ukernel_function lrelu;
     xnn_univector_ukernel_function neg;
+    xnn_univector_ukernel_function relu;
     xnn_univector_ukernel_function rndne;
     xnn_univector_ukernel_function rndz;
     xnn_univector_ukernel_function rndu;

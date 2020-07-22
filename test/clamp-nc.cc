@@ -131,6 +131,16 @@ TEST(CLAMP_NC_F32, unit_batch_with_qmax) {
   }
 }
 
+TEST(CLAMP_NC_F32, unit_batch_with_relu) {
+  for (size_t channels = 1; channels < 100; channels++) {
+    ClampOperatorTester()
+      .batch_size(1)
+      .channels(channels)
+      .relu_activation(true)
+      .iterations(3)
+      .TestF32();
+  }
+}
 TEST(CLAMP_NC_F32, small_batch) {
   for (size_t channels = 1; channels < 100; channels++) {
     ClampOperatorTester()

@@ -92,6 +92,15 @@ class ClampOperatorTester {
     return this->qmax_;
   }
 
+  inline ClampOperatorTester& relu_activation(bool relu_activation) {
+    this->relu_activation_ = relu_activation;
+    return *this;
+  }
+
+  inline bool relu_activation() const {
+    return this->relu_activation_;
+  }
+
   inline ClampOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -179,7 +188,8 @@ class ClampOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           const float x = input[i * input_stride() + c];
-          const float y = std::min(std::max(x, float(qmin())), float(qmax()));
+          const float y = relu_activation() ? std::max(x, 0.f) :
+            std::min(std::max(x, float(qmin())), float(qmax()));
           output_ref[i * channels() + c] = y;
         }
       }
@@ -188,10 +198,12 @@ class ClampOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t clamp_op = nullptr;
 
+      const float output_min = relu_activation() ? 0.0f : float(qmin());
+      const float output_max = relu_activation() ? std::numeric_limits<float>::infinity() : float(qmax());
       ASSERT_EQ(xnn_status_success,
         xnn_create_clamp_nc_f32(
           channels(), input_stride(), output_stride(),
-          float(qmin()), float(qmax()),
+          output_min, output_max,
           0, &clamp_op));
       ASSERT_NE(nullptr, clamp_op);
 
@@ -211,13 +223,13 @@ class ClampOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(output[i * output_stride() + c], float(qmax()))
+          ASSERT_LE(output[i * output_stride() + c], output_max)
             << "at position " << i << ", batch size = " << batch_size() << ", channels = " << channels();
-          ASSERT_GE(output[i * output_stride() + c], float(qmin()))
+          ASSERT_GE(output[i * output_stride() + c], output_min)
             << "at position " << i << ", batch size = " << batch_size() << ", channels = " << channels();
           ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at position " << i << ", batch size = " << batch_size() << ", channels = " << channels()
-            << ", qmin = " << uint32_t(qmin()) << ", qmax = " << uint32_t(qmax());
+            << ", min = " << output_min << ", max = " << output_max;
         }
       }
     }
@@ -230,5 +242,6 @@ class ClampOperatorTester {
   size_t output_stride_{0};
   uint8_t qmin_{5};
   uint8_t qmax_{250};
+  bool relu_activation_{false};
   size_t iterations_{15};
 };

@@ -25,6 +25,7 @@ static enum xnn_status create_unary_elementwise_nc(
     const void* params,
     size_t params_size,
     enum xnn_operator_type operator_type,
+    xnn_univector_ukernel_function ukernel,
     xnn_operator_t* unary_elementwise_op_out)
 {
   xnn_operator_t unary_elementwise_op = NULL;
@@ -73,6 +74,7 @@ static enum xnn_status create_unary_elementwise_nc(
     memcpy(&unary_elementwise_op->params, params, params_size);
   }
 
+  unary_elementwise_op->ukernel.vunary.function = ukernel;
   unary_elementwise_op->type = operator_type;
   unary_elementwise_op->ukernel.type = xnn_ukernel_type_unary_elementwise;
 
@@ -87,7 +89,6 @@ static enum xnn_status setup_unary_elementwise_nc(
     size_t batch_size,
     const void* input,
     void* output,
-    xnn_univector_ukernel_function ukernel,
     uint32_t log2_element_size,
     const void* params,
     size_t params_size)
@@ -106,6 +107,9 @@ static enum xnn_status setup_unary_elementwise_nc(
   const size_t channels = unary_elementwise_op->channels;
   const size_t input_stride = unary_elementwise_op->input_pixel_stride;
   const size_t output_stride = unary_elementwise_op->output_pixel_stride;
+
+  xnn_univector_ukernel_function ukernel = unary_elementwise_op->ukernel.vunary.function;
+
   if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) || batch_size == 1) {
     const size_t block_size = 4096;
     unary_elementwise_op->context.univector_contiguous = (struct univector_contiguous_context) {
@@ -165,6 +169,7 @@ enum xnn_status xnn_create_clamp_nc_u8(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_clamp_nc_u8,
+    xnn_params.u8.clamp,
     clamp_op_out);
 }
 
@@ -198,11 +203,16 @@ enum xnn_status xnn_create_clamp_nc_f32(
     return xnn_status_invalid_parameter;
   }
 
+  const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
+  xnn_univector_ukernel_function clamp_ukernel = (relu_activation && (xnn_params.f32.relu != NULL)) ?
+    xnn_params.f32.relu : xnn_params.f32.clamp;
+
   const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_clamp_nc_f32,
+    clamp_ukernel,
     clamp_op_out);
 }
 
@@ -218,6 +228,7 @@ enum xnn_status xnn_create_abs_nc_f32(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_abs_nc_f32,
+    xnn_params.f32.abs,
     abs_op_out);
 }
 
@@ -233,6 +244,7 @@ enum xnn_status xnn_create_bankers_rounding_nc_f32(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_bankers_rounding_nc_f32,
+    xnn_params.f32.rndne,
     rounding_op_out);
 }
 
@@ -248,7 +260,12 @@ enum xnn_status xnn_create_ceiling_nc_f32(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_ceiling_nc_f32,
+    xnn_params.f32.rndu,
     ceiling_op_out);
+}
+
+static void memcpy_ukernel(size_t size, const void* input, void* output, const void* params) {
+  memcpy(output, input, size);
 }
 
 enum xnn_status xnn_create_copy_nc_x32(
@@ -262,6 +279,7 @@ enum xnn_status xnn_create_copy_nc_x32(
     channels, input_stride, output_stride, flags,
     NULL, 0,
     xnn_operator_type_copy_nc_x32,
+    memcpy_ukernel,
     copy_op_out);
 }
 
@@ -277,6 +295,7 @@ enum xnn_status xnn_create_floor_nc_f32(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_floor_nc_f32,
+    xnn_params.f32.rndd,
     floor_op_out);
 }
 
@@ -292,6 +311,7 @@ enum xnn_status xnn_create_hardswish_nc_f32(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_hardswish_nc_f32,
+    xnn_params.f32.hswish,
     hardswish_op_out);
 }
 
@@ -316,6 +336,7 @@ enum xnn_status xnn_create_leaky_relu_nc_f32(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_leaky_relu_nc_f32,
+    xnn_params.f32.lrelu,
     leaky_relu_op_out);
 }
 
@@ -331,6 +352,7 @@ enum xnn_status xnn_create_negate_nc_f32(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_negate_nc_f32,
+    xnn_params.f32.neg,
     negate_op_out);
 }
 
@@ -345,6 +367,7 @@ enum xnn_status xnn_create_sigmoid_nc_f32(
     channels, input_stride, output_stride, flags,
     NULL, 0,
     xnn_operator_type_sigmoid_nc_f32,
+    xnn_params.f32.sigmoid,
     sigmoid_op_out);
 }
 
@@ -359,6 +382,7 @@ enum xnn_status xnn_create_square_nc_f32(
     channels, input_stride, output_stride, flags,
     NULL, 0,
     xnn_operator_type_square_nc_f32,
+    xnn_params.f32.sqr,
     square_op_out);
 }
 
@@ -374,6 +398,7 @@ enum xnn_status xnn_create_square_root_nc_f32(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_square_root_nc_f32,
+    xnn_params.f32.sqrt,
     sqrt_op_out);
 }
 
@@ -389,6 +414,7 @@ enum xnn_status xnn_create_truncation_nc_f32(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_truncation_nc_f32,
+    xnn_params.f32.rndz,
     truncation_op_out);
 }
 
@@ -410,7 +436,6 @@ enum xnn_status xnn_setup_abs_nc_f32(
   return setup_unary_elementwise_nc(
     abs_op,
     batch_size, input, output,
-    xnn_params.f32.abs,
     2 /* log2(sizeof(float)) */,
     &abs_op->params.f32_abs, sizeof(abs_op->params.f32_abs));
 }
@@ -433,7 +458,6 @@ enum xnn_status xnn_setup_bankers_rounding_nc_f32(
   return setup_unary_elementwise_nc(
     rounding_op,
     batch_size, input, output,
-    xnn_params.f32.rndne,
     2 /* log2(sizeof(float)) */,
     &rounding_op->params.f32_rnd, sizeof(rounding_op->params.f32_rnd));
 }
@@ -456,7 +480,6 @@ enum xnn_status xnn_setup_ceiling_nc_f32(
   return setup_unary_elementwise_nc(
     ceiling_op,
     batch_size, input, output,
-    xnn_params.f32.rndu,
     2 /* log2(sizeof(float)) */,
     &ceiling_op->params.f32_rnd, sizeof(ceiling_op->params.f32_rnd));
 }
@@ -479,7 +502,6 @@ enum xnn_status xnn_setup_clamp_nc_u8(
   return setup_unary_elementwise_nc(
     clamp_op,
     batch_size, input, output,
-    xnn_params.u8.clamp,
     0 /* log2(sizeof(uint8_t)) */,
     &clamp_op->params.u8_minmax, sizeof(clamp_op->params.u8_minmax));
 }
@@ -502,13 +524,8 @@ enum xnn_status xnn_setup_clamp_nc_f32(
   return setup_unary_elementwise_nc(
     clamp_op,
     batch_size, input, output,
-    xnn_params.f32.clamp,
     2 /* log2(sizeof(float)) */,
     &clamp_op->params.f32_minmax, sizeof(clamp_op->params.f32_minmax));
-}
-
-static void memcpy_ukernel(size_t size, const void* input, void* output, const void* params) {
-  memcpy(output, input, size);
 }
 
 enum xnn_status xnn_setup_copy_nc_x32(
@@ -529,7 +546,6 @@ enum xnn_status xnn_setup_copy_nc_x32(
   return setup_unary_elementwise_nc(
     copy_op,
     batch_size, input, output,
-    memcpy_ukernel,
     2 /* log2(sizeof(uint32_t)) */,
     NULL, 0);
 }
@@ -552,7 +568,6 @@ enum xnn_status xnn_setup_floor_nc_f32(
   return setup_unary_elementwise_nc(
     floor_op,
     batch_size, input, output,
-    xnn_params.f32.rndd,
     2 /* log2(sizeof(float)) */,
     &floor_op->params.f32_rnd, sizeof(floor_op->params.f32_rnd));
 }
@@ -575,7 +590,6 @@ enum xnn_status xnn_setup_hardswish_nc_f32(
   return setup_unary_elementwise_nc(
     hardswish_op,
     batch_size, input, output,
-    xnn_params.f32.hswish,
     2 /* log2(sizeof(float)) */,
     &hardswish_op->params.f32_hswish, sizeof(hardswish_op->params.f32_hswish));
 }
@@ -598,7 +612,6 @@ enum xnn_status xnn_setup_leaky_relu_nc_f32(
   return setup_unary_elementwise_nc(
     leaky_relu_op,
     batch_size, input, output,
-    xnn_params.f32.lrelu,
     2 /* log2(sizeof(float)) */,
     &leaky_relu_op->params.f32_lrelu, sizeof(leaky_relu_op->params.f32_lrelu));
 }
@@ -621,7 +634,6 @@ enum xnn_status xnn_setup_negate_nc_f32(
   return setup_unary_elementwise_nc(
     negate_op,
     batch_size, input, output,
-    xnn_params.f32.neg,
     2 /* log2(sizeof(float)) */,
     &negate_op->params.f32_neg, sizeof(negate_op->params.f32_neg));
 }
@@ -644,7 +656,6 @@ enum xnn_status xnn_setup_sigmoid_nc_f32(
   return setup_unary_elementwise_nc(
     sigmoid_op,
     batch_size, input, output,
-    xnn_params.f32.sigmoid,
     2 /* log2(sizeof(float)) */,
     NULL, 0);
 }
@@ -667,7 +678,6 @@ enum xnn_status xnn_setup_square_nc_f32(
   return setup_unary_elementwise_nc(
     square_op,
     batch_size, input, output,
-    xnn_params.f32.sqr,
     2 /* log2(sizeof(float)) */,
     NULL, 0);
 }
@@ -690,7 +700,6 @@ enum xnn_status xnn_setup_square_root_nc_f32(
   return setup_unary_elementwise_nc(
     sqrt_op,
     batch_size, input, output,
-    xnn_params.f32.sqrt,
     2 /* log2(sizeof(float)) */,
     NULL, 0);
 }
@@ -713,7 +722,6 @@ enum xnn_status xnn_setup_truncation_nc_f32(
   return setup_unary_elementwise_nc(
     truncation_op,
     batch_size, input, output,
-    xnn_params.f32.rndz,
     2 /* log2(sizeof(float)) */,
     &truncation_op->params.f32_rnd, sizeof(truncation_op->params.f32_rnd));
 }
