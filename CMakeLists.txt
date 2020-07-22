@@ -529,11 +529,7 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-spmm/gen/8x1-minmax-psimd.c
   src/f32-spmm/gen/16x1-minmax-psimd.c
   src/x32-packx/x4-psimd.c
-  src/x32-unpool/psimd.c
-  src/x32-zip/x2-psimd.c
-  src/x32-zip/x3-psimd.c
-  src/x32-zip/x4-psimd.c
-  src/x32-zip/xm-psimd.c)
+  src/x32-unpool/psimd.c)
 
 SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/requantization/precise-psimd.c
