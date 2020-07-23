@@ -37,7 +37,7 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 #include "bench/utils.h"
 
-
+#ifndef XNN_NO_QU8_OPERATORS
 void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
   const size_t input_height = state.range(1);
@@ -151,7 +151,9 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
       kernel_height * kernel_width,
     benchmark::Counter::kIsRate);
 }
+#endif  // XNN_NO_QU8_OPERATORS
 
+#ifndef XNN_NO_F16_OPERATORS
 void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   if (!benchmark::utils::CheckNEONFP16ARITH(state)) {
     return;
@@ -265,6 +267,7 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
       kernel_height * kernel_width,
     benchmark::Counter::kIsRate);
 }
+#endif  // XNN_NO_F16_OPERATORS
 
 void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
@@ -1831,6 +1834,7 @@ static void SRCNN955(benchmark::internal::Benchmark* b) {
   b->Args({1, 372, 372,  5,  5,  0,  0, 1, 1, 1,   32,    1});
 }
 
+#ifndef XNN_NO_F16_OPERATORS
 BENCHMARK_CAPTURE(xnnpack_convolution_f16, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_f16, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_f16, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3Small)->UseRealTime();
@@ -1853,6 +1857,7 @@ BENCHMARK_CAPTURE(xnnpack_convolution_f16, vgg, "VGG")->Apply(VGG)->UseRealTime(
 BENCHMARK_CAPTURE(xnnpack_convolution_f16, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_f16, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_f16, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
+#endif  // XNN_NO_F16_OPERATORS
 
 BENCHMARK_CAPTURE(xnnpack_convolution_f32, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_f32, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2)->UseRealTime();
@@ -1877,6 +1882,7 @@ BENCHMARK_CAPTURE(xnnpack_convolution_f32, srcnn915, "SRCNN (9-1-5)")->Apply(SRC
 BENCHMARK_CAPTURE(xnnpack_convolution_f32, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_f32, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
 
+#ifndef XNN_NO_QU8_OPERATORS
 BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3Small)->UseRealTime();
@@ -1899,6 +1905,7 @@ BENCHMARK_CAPTURE(xnnpack_convolution_qu8, vgg, "VGG")->Apply(VGG)->UseRealTime(
 BENCHMARK_CAPTURE(xnnpack_convolution_qu8, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_qu8, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_convolution_qu8, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
+#endif  // XNN_NO_QU8_OPERATORS
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
   BENCHMARK_CAPTURE(tflite_convolution_f32, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();

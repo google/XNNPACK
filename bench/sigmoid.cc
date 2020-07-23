@@ -24,7 +24,7 @@
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-
+#ifndef XNN_NO_QU8_OPERATORS
 static void xnnpack_sigmoid_qu8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
   const size_t channels = state.range(1);
@@ -90,6 +90,7 @@ static void xnnpack_sigmoid_qu8(benchmark::State& state) {
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
+#endif  // XNN_NO_QU8_OPERATORS
 
 static void xnnpack_sigmoid_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
@@ -277,7 +278,9 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b)
   }
 }
 
+#ifndef XNN_NO_QU8_OPERATORS
 BENCHMARK(xnnpack_sigmoid_qu8)->Apply(CharacteristicArguments)->UseRealTime();
+#endif  // XNN_NO_QU8_OPERATORS
 BENCHMARK(xnnpack_sigmoid_f32)->Apply(CharacteristicArguments)->UseRealTime();
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
