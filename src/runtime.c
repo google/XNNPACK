@@ -213,20 +213,6 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].inputs[0] = node->inputs[0];
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
-      case xnn_node_type_constant_pad:
-        status = xnn_create_constant_pad_nd_x32(
-          &node->params.static_pad.padding_value,
-          node->flags,
-          &runtime->opdata[i].operator_object);
-        if (status != xnn_status_success) {
-          goto error;
-        }
-        runtime->opdata[i].shape1 = values[node->inputs[0]].shape;
-        memcpy(runtime->opdata[i].pre_paddings, node->params.static_pad.pre_paddings, sizeof(size_t) * XNN_MAX_TENSOR_DIMS);
-        memcpy(runtime->opdata[i].post_paddings, node->params.static_pad.post_paddings, sizeof(size_t) * XNN_MAX_TENSOR_DIMS);
-        runtime->opdata[i].inputs[0] = node->inputs[0];
-        runtime->opdata[i].outputs[0] = node->outputs[0];
-        break;
       case xnn_node_type_convolution_2d:
         assert(values[node->inputs[1]].data != NULL);
         assert(values[node->inputs[2]].data != NULL);
@@ -665,6 +651,20 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].inputs[0] = node->inputs[0];
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
+      case xnn_node_type_static_constant_pad:
+        status = xnn_create_constant_pad_nd_x32(
+          &node->params.static_pad.padding_value,
+          node->flags,
+          &runtime->opdata[i].operator_object);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->opdata[i].shape1 = values[node->inputs[0]].shape;
+        memcpy(runtime->opdata[i].pre_paddings, node->params.static_pad.pre_paddings, sizeof(size_t) * XNN_MAX_TENSOR_DIMS);
+        memcpy(runtime->opdata[i].post_paddings, node->params.static_pad.post_paddings, sizeof(size_t) * XNN_MAX_TENSOR_DIMS);
+        runtime->opdata[i].inputs[0] = node->inputs[0];
+        runtime->opdata[i].outputs[0] = node->outputs[0];
+        break;
       case xnn_node_type_static_reshape:
         status = xnn_create_copy_nc_x32(
           1 /* channels */,
@@ -676,6 +676,24 @@ enum xnn_status xnn_create_runtime_v2(
           goto error;
         }
         runtime->opdata[i].batch_size = product_all_dims(&values[node->inputs[0]].shape);
+        runtime->opdata[i].inputs[0] = node->inputs[0];
+        runtime->opdata[i].outputs[0] = node->outputs[0];
+        break;
+      case xnn_node_type_static_resize_bilinear_2d:
+        status = xnn_create_resize_bilinear2d_nhwc_f32(
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+          node->flags,
+          &runtime->opdata[i].operator_object);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->opdata[i].batch_size = values[node->inputs[0]].shape.dim[0];
+        runtime->opdata[i].input_height = values[node->inputs[0]].shape.dim[1];
+        runtime->opdata[i].input_width = values[node->inputs[0]].shape.dim[2];
+        runtime->opdata[i].output_height = values[node->outputs[0]].shape.dim[1];
+        runtime->opdata[i].output_width = values[node->outputs[0]].shape.dim[2];
         runtime->opdata[i].inputs[0] = node->inputs[0];
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
@@ -1155,6 +1173,20 @@ enum xnn_status xnn_setup_runtime(
         status = xnn_setup_prelu_nc_f32(
           opdata->operator_object,
           opdata->batch_size,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+      case xnn_operator_type_resize_bilinear_nhwc_f32:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_resize_bilinear2d_nhwc_f32(
+          opdata->operator_object,
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          opdata->output_height,
+          opdata->output_width,
           runtime->blobs[opdata->inputs[0]].data,
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);

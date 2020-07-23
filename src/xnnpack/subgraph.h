@@ -82,7 +82,6 @@ enum xnn_node_type {
   xnn_node_type_bankers_rounding,
   xnn_node_type_ceiling,
   xnn_node_type_clamp,
-  xnn_node_type_constant_pad,
   xnn_node_type_convolution_2d,
   xnn_node_type_deconvolution_2d,
   xnn_node_type_depthwise_convolution_2d,
@@ -100,7 +99,9 @@ enum xnn_node_type {
   xnn_node_type_prelu,
   xnn_node_type_sigmoid,
   xnn_node_type_softmax,
+  xnn_node_type_static_constant_pad,
   xnn_node_type_static_reshape,
+  xnn_node_type_static_resize_bilinear_2d,
   xnn_node_type_square,
   xnn_node_type_square_root,
   xnn_node_type_squared_difference,
@@ -182,6 +183,10 @@ struct xnn_node {
     struct {
       struct xnn_shape new_shape;
     } static_reshape;
+    struct {
+      size_t new_height;
+      size_t new_width;
+    } static_resize;
   } params;
   struct {
     float output_min;
@@ -203,6 +208,8 @@ struct xnn_operator_data {
   size_t batch_size;
   size_t input_height;
   size_t input_width;
+  size_t output_height;
+  size_t output_width;
   struct xnn_shape shape1;
   struct xnn_shape shape2;
   size_t pre_paddings[XNN_MAX_TENSOR_DIMS];

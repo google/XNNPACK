@@ -799,6 +799,25 @@ enum xnn_status xnn_define_static_reshape(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a 2D Resize Bilinear Node with static output height & width specification and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param new_height - height dimension of the output tensor.
+/// @param new_width - width dimension of the output tensor.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, H, W, C] dimensions
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, new_height, new_width, C] dimensions.
+/// @param flags - binary features of the 2D Resize Bilinear Node. The only currently supported values are
+///                XNN_FLAG_TENSORFLOW_LEGACY_MODE and XNN_FLAG_ALIGN_CORNERS, which are mutually exclusive.
+enum xnn_status xnn_define_static_resize_bilinear_2d(
+  xnn_subgraph_t subgraph,
+  size_t new_height,
+  size_t new_width,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a PReLU (Parametric ReLU) Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

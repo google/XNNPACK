@@ -32,8 +32,6 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Ceiling";
     case xnn_node_type_clamp:
       return "Clamp";
-    case xnn_node_type_constant_pad:
-      return "Constant Pad";
     case xnn_node_type_convolution_2d:
       return "Convolution 2D";
     case xnn_node_type_deconvolution_2d:
@@ -68,8 +66,12 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Sigmoid";
     case xnn_node_type_softmax:
       return "Softmax";
+    case xnn_node_type_static_constant_pad:
+      return "Static Constant Pad";
     case xnn_node_type_static_reshape:
       return "Static Reshape";
+    case xnn_node_type_static_resize_bilinear_2d:
+      return "Static Resize Bilinear 2D";
     case xnn_node_type_square:
       return "Square";
     case xnn_node_type_square_root:

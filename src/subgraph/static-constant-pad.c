@@ -27,21 +27,21 @@ enum xnn_status xnn_define_static_constant_pad(
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to define %s operator: XNNPACK is not initialized",
-      xnn_node_type_to_string(xnn_node_type_constant_pad));
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad));
     return xnn_status_uninitialized;
   }
 
   if (input_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_constant_pad), input_id);
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad), input_id);
     return xnn_status_invalid_parameter;
   }
 
   if (output_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_constant_pad), output_id);
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad), output_id);
     return xnn_status_invalid_parameter;
   }
 
@@ -55,7 +55,7 @@ enum xnn_status xnn_define_static_constant_pad(
   memcpy(&node->params.static_pad.post_paddings, post_paddings, num_dims * sizeof(size_t));
   node->params.static_pad.padding_value = fp32_to_bits(padding_value);
 
-  node->type = xnn_node_type_constant_pad;
+  node->type = xnn_node_type_static_constant_pad;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;

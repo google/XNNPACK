@@ -542,7 +542,7 @@ enum xnn_status xnn_subgraph_optimize(
         }
       }
       // Try to fuse Constant Pad node downstream into [Depthwise] Convolution 2D Node
-      if (producer->type == xnn_node_type_constant_pad) {
+      if (producer->type == xnn_node_type_static_constant_pad) {
         assert(producer->num_inputs == 1);
         assert(producer->num_outputs == 1);
         const bool is_spatial_2d_zero_padding = value->shape.num_dims == 4 &&
