@@ -12,12 +12,37 @@ tools/xngen src/f32-prelu/scalar.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32
 tools/xngen src/f32-prelu/wasm.c.in -D CHANNEL_TILE=1 -D ROW_TILE=2 -o src/f32-prelu/gen/wasm-2x1.c
 tools/xngen src/f32-prelu/wasm.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32-prelu/gen/wasm-2x4.c
 
-################################## WAsm SIMD ##################################
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32-prelu/gen/wasmsimd-bitselect-2x4.c
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -o src/f32-prelu/gen/wasmsimd-bitselect-2x8.c
+################################### ARM NEON ##################################
+tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=4  -D ROW_TILE=1 -o src/f32-prelu/gen/neon-1x4.c
+tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=8  -D ROW_TILE=1 -o src/f32-prelu/gen/neon-1x8.c
+tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=16 -D ROW_TILE=1 -o src/f32-prelu/gen/neon-1x16.c
+tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=4  -D ROW_TILE=2 -o src/f32-prelu/gen/neon-2x4.c
+tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=8  -D ROW_TILE=2 -o src/f32-prelu/gen/neon-2x8.c
+tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=16 -D ROW_TILE=2 -o src/f32-prelu/gen/neon-2x16.c
+tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=4  -D ROW_TILE=4 -o src/f32-prelu/gen/neon-4x4.c
+tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=8  -D ROW_TILE=4 -o src/f32-prelu/gen/neon-4x8.c
+tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=16 -D ROW_TILE=4 -o src/f32-prelu/gen/neon-4x16.c
 
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32-prelu/gen/wasmsimd-minmax-2x4.c
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -o src/f32-prelu/gen/wasmsimd-minmax-2x8.c
+################################## WAsm SIMD ##################################
+tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=1 -o src/f32-prelu/gen/wasmsimd-bitselect-1x4.c
+tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=1 -o src/f32-prelu/gen/wasmsimd-bitselect-1x8.c
+tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=1 -o src/f32-prelu/gen/wasmsimd-bitselect-1x16.c
+tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=2 -o src/f32-prelu/gen/wasmsimd-bitselect-2x4.c
+tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=2 -o src/f32-prelu/gen/wasmsimd-bitselect-2x8.c
+tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=2 -o src/f32-prelu/gen/wasmsimd-bitselect-2x16.c
+tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=4 -o src/f32-prelu/gen/wasmsimd-bitselect-4x4.c
+tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=4 -o src/f32-prelu/gen/wasmsimd-bitselect-4x8.c
+tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=4 -o src/f32-prelu/gen/wasmsimd-bitselect-4x16.c
+
+tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=1 -o src/f32-prelu/gen/wasmsimd-minmax-1x4.c
+tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=1 -o src/f32-prelu/gen/wasmsimd-minmax-1x8.c
+tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=1 -o src/f32-prelu/gen/wasmsimd-minmax-1x16.c
+tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=2 -o src/f32-prelu/gen/wasmsimd-minmax-2x4.c
+tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=2 -o src/f32-prelu/gen/wasmsimd-minmax-2x8.c
+tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=2 -o src/f32-prelu/gen/wasmsimd-minmax-2x16.c
+tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=4 -o src/f32-prelu/gen/wasmsimd-minmax-4x4.c
+tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=4 -o src/f32-prelu/gen/wasmsimd-minmax-4x8.c
+tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=4 -o src/f32-prelu/gen/wasmsimd-minmax-4x16.c
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32-prelu/gen/neon-2x4.c

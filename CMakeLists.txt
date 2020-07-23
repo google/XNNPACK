@@ -622,8 +622,15 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-pavgpool/9x-minmax-neon-c4.c
   src/f32-ppmm/gen/4x8-minmax-neon.c
   src/f32-ppmm/gen/8x8-minmax-neon.c
+  src/f32-prelu/gen/neon-1x4.c
+  src/f32-prelu/gen/neon-1x8.c
+  src/f32-prelu/gen/neon-1x16.c
   src/f32-prelu/gen/neon-2x4.c
   src/f32-prelu/gen/neon-2x8.c
+  src/f32-prelu/gen/neon-2x16.c
+  src/f32-prelu/gen/neon-4x4.c
+  src/f32-prelu/gen/neon-4x8.c
+  src/f32-prelu/gen/neon-4x16.c
   src/f32-raddstoreexpminusmax/gen/neon-p5-x4.c
   src/f32-raddstoreexpminusmax/gen/neon-p5-x8.c
   src/f32-raddstoreexpminusmax/gen/neon-p5-x8-acc2.c
