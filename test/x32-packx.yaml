@@ -6,8 +6,6 @@
   k-block: 4
 - name: xnn_x32_packx_ukernel_4x__sse
   k-block: 4
-- name: xnn_x32_packx_ukernel_4x__psimd
-  k-block: 4
 - name: xnn_x32_packx_ukernel_4x__wasmsimd
   k-block: 4
 - name: xnn_x32_packx_ukernel_2x__scalar

@@ -20,9 +20,6 @@ tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=1 -o src/f32-ppmm/gen/
 tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=0 -o src/f32-ppmm/gen/8x8-minmax-neon.c
 tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=1 -o src/f32-ppmm/gen/8x8-minmax-neonfma.c
 
-#################################### PSIMD ####################################
-tools/xngen src/f32-ppmm/psimd.c.in -D MR=4 -D NR=8 -o src/f32-ppmm/gen/4x8-minmax-psimd.c
-
 ################################### x86 SSE ###################################
 tools/xngen src/f32-ppmm/sse.c.in -D MR=4 -D NR=8 -o src/f32-ppmm/gen/4x8-minmax-sse.c
 
