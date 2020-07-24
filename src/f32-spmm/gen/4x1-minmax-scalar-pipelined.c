@@ -14,31 +14,31 @@
 
 
 void xnn_f32_spmm_minmax_ukernel_4x1__scalar_pipelined(
-    uint32_t m,
-    uint32_t n,
-    const float*restrict a,
+    uint32_t batch_size,
+    uint32_t output_channels,
+    const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
-    float*restrict c,
+    float*restrict output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(m != 0);
+  assert(batch_size != 0);
 
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
-  size_t i = m;
-  while XNN_LIKELY(i >= 4) {
+  size_t n = batch_size;
+  while XNN_LIKELY(n >= 4) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
     float vw = *w++;
     intptr_t diff = *dmap++;
-    float va0 = a[0];
-    float va1 = a[1];
-    float va2 = a[2];
-    float va3 = a[3];
-    size_t j = n;
+    float vi0 = input[0];
+    float vi1 = input[1];
+    float vi2 = input[2];
+    float vi3 = input[3];
+    size_t c = output_channels;
     do {
       uint32_t nnz = *nnzmap++;
       float vacc0 = vw;
@@ -48,18 +48,18 @@ void xnn_f32_spmm_minmax_ukernel_4x1__scalar_pipelined(
       vw = *w++;
       if XNN_LIKELY(nnz != 0) {
         do {
-          vacc0 += va0 * vw;
-          vacc1 += va1 * vw;
-          vacc2 += va2 * vw;
-          vacc3 += va3 * vw;
-          a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+          vacc0 += vi0 * vw;
+          vacc1 += vi1 * vw;
+          vacc2 += vi2 * vw;
+          vacc3 += vi3 * vw;
+          input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
 
           diff = *dmap++;
           vw = *w++;
-          va0 = a[0];
-          va1 = a[1];
-          va2 = a[2];
-          va3 = a[3];
+          vi0 = input[0];
+          vi1 = input[1];
+          vi2 = input[2];
+          vi3 = input[3];
         } while (--nnz != 0);
       }
       float vout0 = math_min_f32(vacc0, vmax);
@@ -70,27 +70,27 @@ void xnn_f32_spmm_minmax_ukernel_4x1__scalar_pipelined(
       vout1 = math_max_f32(vout1, vmin);
       vout2 = math_max_f32(vout2, vmin);
       vout3 = math_max_f32(vout3, vmin);
-      c[0] = vout0;
-      c[1] = vout1;
-      c[2] = vout2;
-      c[3] = vout3;
-      c += m;
-    } while (--j != 0);
-    c -= m * n;
-    c += 4;
-    a += 4;
-    i -= 4;
+      output[0] = vout0;
+      output[1] = vout1;
+      output[2] = vout2;
+      output[3] = vout3;
+      output += batch_size;
+    } while (--c != 0);
+    output -= batch_size * output_channels;
+    output += 4;
+    input += 4;
+    n -= 4;
   }
-  if XNN_UNLIKELY(i != 0) {
-    if (i & 2) {
+  if XNN_UNLIKELY(n != 0) {
+    if (n & 2) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       float vw = *w++;
       intptr_t diff = *dmap++;
-      float va0 = a[0];
-      float va1 = a[1];
-      size_t j = n;
+      float vi0 = input[0];
+      float vi1 = input[1];
+      size_t c = output_channels;
       do {
         uint32_t nnz = *nnzmap++;
         float vacc0 = vw;
@@ -98,58 +98,58 @@ void xnn_f32_spmm_minmax_ukernel_4x1__scalar_pipelined(
         vw = *w++;
         if XNN_LIKELY(nnz != 0) {
           do {
-            vacc0 += va0 * vw;
-            vacc1 += va1 * vw;
-            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+            vacc0 += vi0 * vw;
+            vacc1 += vi1 * vw;
+            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
 
             diff = *dmap++;
             vw = *w++;
-            va0 = a[0];
-            va1 = a[1];
+            vi0 = input[0];
+            vi1 = input[1];
           } while (--nnz != 0);
         }
         float vout0 = math_min_f32(vacc0, vmax);
         float vout1 = math_min_f32(vacc1, vmax);
         vout0 = math_max_f32(vout0, vmin);
         vout1 = math_max_f32(vout1, vmin);
-        c[0] = vout0;
-        c[1] = vout1;
-        c += m;
-      } while (--j != 0);
-      c -= m * n;
-      c += 2;
-      a += 2;
+        output[0] = vout0;
+        output[1] = vout1;
+        output += batch_size;
+      } while (--c != 0);
+      output -= batch_size * output_channels;
+      output += 2;
+      input += 2;
     }
-    if (i & 1) {
+    if (n & 1) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       float vw = *w++;
       intptr_t diff = *dmap++;
-      float va0 = a[0];
-      size_t j = n;
+      float vi0 = input[0];
+      size_t c = output_channels;
       do {
         uint32_t nnz = *nnzmap++;
         float vacc0 = vw;
         vw = *w++;
         if XNN_LIKELY(nnz != 0) {
           do {
-            vacc0 += va0 * vw;
-            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+            vacc0 += vi0 * vw;
+            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
 
             diff = *dmap++;
             vw = *w++;
-            va0 = a[0];
+            vi0 = input[0];
           } while (--nnz != 0);
         }
         float vout0 = math_min_f32(vacc0, vmax);
         vout0 = math_max_f32(vout0, vmin);
-        c[0] = vout0;
-        c += m;
-      } while (--j != 0);
-      c -= m * n;
-      c += 1;
-      a += 1;
+        output[0] = vout0;
+        output += batch_size;
+      } while (--c != 0);
+      output -= batch_size * output_channels;
+      output += 1;
+      input += 1;
     }
   }
 }

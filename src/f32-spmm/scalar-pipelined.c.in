@@ -11,29 +11,29 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
-    uint32_t m,
-    uint32_t n,
-    const float*restrict a,
+    uint32_t batch_size,
+    uint32_t output_channels,
+    const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
-    float*restrict c,
+    float*restrict output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(m != 0);
+  assert(batch_size != 0);
 
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
-  size_t i = m;
-  while XNN_LIKELY(i >= ${MR}) {
+  size_t n = batch_size;
+  while XNN_LIKELY(n >= ${MR}) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
     float vw = *w++;
     intptr_t diff = *dmap++;
     $for M in range(MR):
-      float va${ABC[M]} = a[${M}];
-    size_t j = n;
+      float vi${ABC[M]} = input[${M}];
+    size_t c = output_channels;
     do {
       uint32_t nnz = *nnzmap++;
       $for M in range(MR):
@@ -42,13 +42,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
       if XNN_LIKELY(nnz != 0) {
         do {
           $for M in range(MR):
-            vacc${ABC[M]} += va${ABC[M]} * vw;
-          a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+            vacc${ABC[M]} += vi${ABC[M]} * vw;
+          input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
 
           diff = *dmap++;
           vw = *w++;
           $for M in range(MR):
-            va${ABC[M]} = a[${M}];
+            vi${ABC[M]} = input[${M}];
         } while (--nnz != 0);
       }
       $for M in range(MR):
@@ -56,26 +56,26 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
       $for M in range(MR):
         vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
       $for M in range(MR):
-        c[${M}] = vout${ABC[M]};
-      c += m;
-    } while (--j != 0);
-    c -= m * n;
-    c += ${MR};
-    a += ${MR};
-    i -= ${MR};
+        output[${M}] = vout${ABC[M]};
+      output += batch_size;
+    } while (--c != 0);
+    output -= batch_size * output_channels;
+    output += ${MR};
+    input += ${MR};
+    n -= ${MR};
   }
-  if XNN_UNLIKELY(i != 0) {
+  if XNN_UNLIKELY(n != 0) {
     $for LOG2M in reversed(range((MR - 1).bit_length())):
       $SUBMR = 1 << LOG2M
-      if (i & ${SUBMR}) {
+      if (n & ${SUBMR}) {
         const float*restrict w = weights;
         const int32_t* dmap = widx_dmap;
         const uint32_t* nnzmap = nidx_nnzmap;
         float vw = *w++;
         intptr_t diff = *dmap++;
         $for M in range(SUBMR):
-          float va${ABC[M]} = a[${M}];
-        size_t j = n;
+          float vi${ABC[M]} = input[${M}];
+        size_t c = output_channels;
         do {
           uint32_t nnz = *nnzmap++;
           $for M in range(SUBMR):
@@ -84,13 +84,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
           if XNN_LIKELY(nnz != 0) {
             do {
               $for M in range(SUBMR):
-                vacc${ABC[M]} += va${ABC[M]} * vw;
-              a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+                vacc${ABC[M]} += vi${ABC[M]} * vw;
+              input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
 
               diff = *dmap++;
               vw = *w++;
               $for M in range(SUBMR):
-                va${ABC[M]} = a[${M}];
+                vi${ABC[M]} = input[${M}];
             } while (--nnz != 0);
           }
           $for M in range(SUBMR):
@@ -98,12 +98,12 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
           $for M in range(SUBMR):
             vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
           $for M in range(SUBMR):
-            c[${M}] = vout${ABC[M]};
-          c += m;
-        } while (--j != 0);
-        c -= m * n;
-        c += ${SUBMR};
-        a += ${SUBMR};
+            output[${M}] = vout${ABC[M]};
+          output += batch_size;
+        } while (--c != 0);
+        output -= batch_size * output_channels;
+        output += ${SUBMR};
+        input += ${SUBMR};
       }
   }
 }

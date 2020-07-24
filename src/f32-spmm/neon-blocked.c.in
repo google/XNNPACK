@@ -14,26 +14,26 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
-    uint32_t m,
-    uint32_t n,
-    const float*restrict a,
+    uint32_t batch_size,
+    uint32_t output_channels,
+    const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
-    float*restrict c,
+    float*restrict output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(m != 0);
+  assert(batch_size != 0);
 
   const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
   const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
-  size_t i = m;
-  while XNN_LIKELY(i >= ${MR}) {
+  size_t n = batch_size;
+  while XNN_LIKELY(n >= ${MR}) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
-    size_t j = n;
-    while (j >= ${NR}) {
+    size_t c = output_channels;
+    while (c >= ${NR}) {
       uint32_t nnz = *nnzmap++;
       $for N in range(0, NR, 1):
         float32x4_t vacc${ABC[0:4]}c${N} = vld1q_dup_f32(w); w += 1;
@@ -42,26 +42,26 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;
-          const float32x4_t va${ABC[0:4]} = vld1q_f32(a);
+          const float32x4_t vi${ABC[0:4]} = vld1q_f32(input);
           $for M in range(4, MR, 4):
-            const float32x4_t va${ABC[M:M+4]} = vld1q_f32(a + ${M});
+            const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
           $if MR == 16:
-            __builtin_prefetch(a + 16);
-          a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+            __builtin_prefetch(input + 16);
+          input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
           $if NR == 1:
-            const float32x4_t vb = vld1q_dup_f32(w); w += 1;
+            const float32x4_t vw = vld1q_dup_f32(w); w += 1;
           $elif NR == 2:
-            const float32x2_t vb = vld1_f32(w); w += 2;
+            const float32x2_t vw = vld1_f32(w); w += 2;
           $elif NR == 4:
-            const float32x4_t vb = vld1q_f32(w); w += 4;
+            const float32x4_t vw = vld1q_f32(w); w += 4;
 
           $if NR == 1:
             $for M in range(0, MR, 4):
-              vacc${ABC[M:M+4]}c0 = vfmaq_f32(vacc${ABC[M:M+4]}c0, va${ABC[M:M+4]}, vb);
+              vacc${ABC[M:M+4]}c0 = vfmaq_f32(vacc${ABC[M:M+4]}c0, vi${ABC[M:M+4]}, vw);
           $else:
             $for N in range(NR):
               $for M in range(0, MR, 4):
-                vacc${ABC[M:M+4]}c${N} = vfmaq_lane${"q" if NR == 4 else ""}_f32(vacc${ABC[M:M+4]}c${N}, va${ABC[M:M+4]}, vb, ${N});
+                vacc${ABC[M:M+4]}c${N} = vfmaq_lane${"q" if NR == 4 else ""}_f32(vacc${ABC[M:M+4]}c${N}, vi${ABC[M:M+4]}, vw, ${N});
         } while (--nnz != 0);
       }
       $for N in range(0, NR, 1):
@@ -74,13 +74,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
 
       $for N in range(0, NR, 1):
         $for M in range(0, MR, 4):
-          vst1q_f32(c + ${N} * m + ${M}, vout${ABC[M:M+4]}c${N});
-      c += ${NR} * m;
-      j -= ${NR};
+          vst1q_f32(output + ${N} * batch_size + ${M}, vout${ABC[M:M+4]}c${N});
+      output += ${NR} * batch_size;
+      c -= ${NR};
     }
 
     // clean up loop, fall back to nr=1
-    if XNN_UNLIKELY(j != 0) {
+    if XNN_UNLIKELY(c != 0) {
       do {
         uint32_t nnz = *nnzmap++;
         float32x4_t vacc${ABC[0:4]} = vld1q_dup_f32(w); w += 1;
@@ -89,13 +89,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
-            const float32x4_t va${ABC[0:4]} = vld1q_f32(a);
+            const float32x4_t vi${ABC[0:4]} = vld1q_f32(input);
             $for M in range(4, MR, 4):
-              const float32x4_t va${ABC[M:M+4]} = vld1q_f32(a + ${M});
-            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-            const float32x4_t vb = vld1q_dup_f32(w); w += 1;
+              const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
+            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            const float32x4_t vw = vld1q_dup_f32(w); w += 1;
             $for M in range(0, MR, 4):
-              vacc${ABC[M:M+4]} = vfmaq_f32(vacc${ABC[M:M+4]}, va${ABC[M:M+4]}, vb);
+              vacc${ABC[M:M+4]} = vfmaq_f32(vacc${ABC[M:M+4]}, vi${ABC[M:M+4]}, vw);
           } while (--nnz != 0);
         }
         $for M in range(0, MR, 4):
@@ -105,25 +105,25 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
           vout${ABC[M:M+4]} = vmaxq_f32(vout${ABC[M:M+4]}, vmin);
 
         $for M in range(0, MR, 4):
-          vst1q_f32(c + ${M}, vout${ABC[M:M+4]});
-        c += m;
-        j -= 1;
-      } while (j != 0);
+          vst1q_f32(output + ${M}, vout${ABC[M:M+4]});
+        output += batch_size;
+        c -= 1;
+      } while (c != 0);
     }
-    c -= m * n;
-    c += ${MR};
-    a += ${MR};
-    i -= ${MR};
+    output -= batch_size * output_channels;
+    output += ${MR};
+    input += ${MR};
+    n -= ${MR};
   }
-  if XNN_UNLIKELY(i != 0) {
+  if XNN_UNLIKELY(n != 0) {
     $for LOG2M in reversed(range((MR - 1).bit_length())):
       $SUBMR = 1 << LOG2M
-      if (i & ${SUBMR}) {
+      if (n & ${SUBMR}) {
         const float*restrict w = weights;
         const int32_t* dmap = widx_dmap;
         const uint32_t* nnzmap = nidx_nnzmap;
-        size_t j = n;
-        while (j >= ${NR}) {
+        size_t c = output_channels;
+        while (c >= ${NR}) {
           uint32_t nnz = *nnzmap++;
           $for N in range(0, NR, 1):
             $if SUBMR < 4:
@@ -136,37 +136,37 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
             do {
               const intptr_t diff = *dmap++;
               $if SUBMR == 1:
-                const float32x2_t va${ABC[0]} = vld1_dup_f32(a);
+                const float32x2_t vi${ABC[0]} = vld1_dup_f32(input);
               $elif SUBMR == 2:
-                const float32x2_t va${ABC[0:2]} = vld1_f32(a);
+                const float32x2_t vi${ABC[0:2]} = vld1_f32(input);
               $else:
-                const float32x4_t va${ABC[0:4]} = vld1q_f32(a);
+                const float32x4_t vi${ABC[0:4]} = vld1q_f32(input);
               $for M in range(4, SUBMR, 4):
-                const float32x4_t va${ABC[M:M+4]} = vld1q_f32(a + ${M});
-              a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+                const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
+              input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
               $if NR == 1:
                 $if SUBMR < 4:
-                  const float32x2_t vb = vld1_dup_f32(w); w += 1;
+                  const float32x2_t vw = vld1_dup_f32(w); w += 1;
                 $else:
-                  const float32x4_t vb = vld1q_dup_f32(w); w += 1;
+                  const float32x4_t vw = vld1q_dup_f32(w); w += 1;
               $elif NR == 2:
-                const float32x2_t vb = vld1_f32(w); w += 2;
+                const float32x2_t vw = vld1_f32(w); w += 2;
               $elif NR == 4:
-                const float32x4_t vb = vld1q_f32(w); w += 4;
+                const float32x4_t vw = vld1q_f32(w); w += 4;
 
               $if NR == 1:
                 $if SUBMR < 4:
-                    vacc${ABC[0:SUBMR]}c0 = vfmaq_f32(vacc${ABC[0:SUBMR]}c0, va${ABC[0:SUBMR]}, vb);
+                    vacc${ABC[0:SUBMR]}c0 = vfmaq_f32(vacc${ABC[0:SUBMR]}c0, vi${ABC[0:SUBMR]}, vw);
                 $else:
                   $for M in range(0, SUBMR, 4):
-                    vacc${ABC[M:M+4]}c0 = vfmaq_f32(vacc${ABC[M:M+4]}c0, va${ABC[M:M+4]}, vb);
+                    vacc${ABC[M:M+4]}c0 = vfmaq_f32(vacc${ABC[M:M+4]}c0, vi${ABC[M:M+4]}, vw);
               $else:
                 $for N in range(NR):
                   $if SUBMR < 4:
-                    vacc${ABC[0:SUBMR]}c${N} = vfma_lane${"q" if NR == 4 else ""}_f32(vacc${ABC[0:SUBMR]}c${N}, va${ABC[0:SUBMR]}, vb, ${N});
+                    vacc${ABC[0:SUBMR]}c${N} = vfma_lane${"q" if NR == 4 else ""}_f32(vacc${ABC[0:SUBMR]}c${N}, vi${ABC[0:SUBMR]}, vw, ${N});
                   $else:
                     $for M in range(0, SUBMR, 4):
-                      vacc${ABC[M:M+4]}c${N} = vfmaq_lane${"q" if NR == 4 else ""}_f32(vacc${ABC[M:M+4]}c${N}, va${ABC[M:M+4]}, vb, ${N});
+                      vacc${ABC[M:M+4]}c${N} = vfmaq_lane${"q" if NR == 4 else ""}_f32(vacc${ABC[M:M+4]}c${N}, vi${ABC[M:M+4]}, vw, ${N});
             } while (--nnz != 0);
           }
           $for N in range(0, NR, 1):
@@ -185,18 +185,18 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
 
           $for N in range(0, NR, 1):
             $if SUBMR == 1:
-              vst1_lane_f32(c + ${N} * m + ${M}, vout${ABC[0:SUBMR]}c${N}, 0);
+              vst1_lane_f32(output + ${N} * batch_size + ${M}, vout${ABC[0:SUBMR]}c${N}, 0);
             $elif SUBMR == 2:
-              vst1_f32(c + ${N} * m + ${M}, vout${ABC[0:SUBMR]}c${N});
+              vst1_f32(output + ${N} * batch_size + ${M}, vout${ABC[0:SUBMR]}c${N});
             $else:
               $for M in range(0, SUBMR, 4):
-                vst1q_f32(c + ${N} * m + ${M}, vout${ABC[M:M+4]}c${N});
-          c += ${NR} * m;
-          j -= ${NR};
+                vst1q_f32(output + ${N} * batch_size + ${M}, vout${ABC[M:M+4]}c${N});
+          output += ${NR} * batch_size;
+          c -= ${NR};
         }
 
         // clean up loop, fall back to nr=1
-        if XNN_UNLIKELY(j != 0) {
+        if XNN_UNLIKELY(c != 0) {
           do {
             uint32_t nnz = *nnzmap++;
             $if SUBMR < 4:
@@ -209,21 +209,21 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
               do {
                 const intptr_t diff = *dmap++;
                 $if SUBMR == 1:
-                  const float32x2_t va${ABC[0:1]} = vld1_dup_f32(a);
+                  const float32x2_t vi${ABC[0:1]} = vld1_dup_f32(input);
                 $elif SUBMR == 2:
-                  const float32x2_t va${ABC[0:2]} = vld1_f32(a);
+                  const float32x2_t vi${ABC[0:2]} = vld1_f32(input);
                 $else:
-                  const float32x4_t va${ABC[0:4]} = vld1q_f32(a);
+                  const float32x4_t vi${ABC[0:4]} = vld1q_f32(input);
                 $for M in range(4, SUBMR, 4):
-                  const float32x4_t va${ABC[M:M+4]} = vld1q_f32(a + ${M});
-                a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+                  const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
+                input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
                 $if SUBMR < 4:
-                  const float32x2_t vb = vld1_dup_f32(w); w += 1;
-                  vacc${ABC[0:SUBMR]} = vfma_f32(vacc${ABC[0:SUBMR]}, va${ABC[0:SUBMR]}, vb);
+                  const float32x2_t vw = vld1_dup_f32(w); w += 1;
+                  vacc${ABC[0:SUBMR]} = vfma_f32(vacc${ABC[0:SUBMR]}, vi${ABC[0:SUBMR]}, vw);
                 $else:
-                  const float32x4_t vb = vld1q_dup_f32(w); w += 1;
+                  const float32x4_t vw = vld1q_dup_f32(w); w += 1;
                   $for M in range(0, SUBMR, 4):
-                    vacc${ABC[M:M+4]} = vfmaq_f32(vacc${ABC[M:M+4]}, va${ABC[M:M+4]}, vb);
+                    vacc${ABC[M:M+4]} = vfmaq_f32(vacc${ABC[M:M+4]}, vi${ABC[M:M+4]}, vw);
               } while (--nnz != 0);
             }
             $if SUBMR < 4:
@@ -237,19 +237,19 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
                 vout${ABC[M:M+4]} = vmaxq_f32(vout${ABC[M:M+4]}, vmin);
 
             $if SUBMR == 1:
-              vst1_lane_f32(c, vout${ABC[0:1]}, 1);
+              vst1_lane_f32(output, vout${ABC[0:1]}, 1);
             $elif SUBMR == 2:
-              vst1_f32(c, vout${ABC[0:2]});
+              vst1_f32(output, vout${ABC[0:2]});
             $else:
               $for M in range(0, SUBMR, 4):
-                vst1q_f32(c + ${M}, vout${ABC[M:M+4]});
-            c += m;
-            j -= 1;
-          } while (j != 0);
+                vst1q_f32(output + ${M}, vout${ABC[M:M+4]});
+            output += batch_size;
+            c -= 1;
+          } while (c != 0);
         }
-        c -= m * n;
-        c += ${SUBMR};
-        a += ${SUBMR};
+        output -= batch_size * output_channels;
+        output += ${SUBMR};
+        input += ${SUBMR};
       }
     }
 }

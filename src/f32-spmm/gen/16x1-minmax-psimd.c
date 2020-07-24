@@ -15,25 +15,25 @@
 
 
 void xnn_f32_spmm_minmax_ukernel_16x1__psimd(
-    uint32_t m,
-    uint32_t n,
-    const float*restrict a,
+    uint32_t batch_size,
+    uint32_t output_channels,
+    const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
-    float*restrict c,
+    float*restrict output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(m != 0);
+  assert(batch_size != 0);
 
   const psimd_f32 vmin = psimd_load_splat_f32(&params->scalar.min);
   const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
-  size_t i = m;
-  while XNN_LIKELY(i >= 16) {
+  size_t n = batch_size;
+  while XNN_LIKELY(n >= 16) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
-    size_t j = n;
+    size_t c = output_channels;
     do {
       uint32_t nnz = *nnzmap++;
       psimd_f32 vacc0123 = psimd_load_splat_f32(w); w += 1;
@@ -43,16 +43,16 @@ void xnn_f32_spmm_minmax_ukernel_16x1__psimd(
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;
-          const psimd_f32 va0123 = psimd_load_f32(a);
-          const psimd_f32 va4567 = psimd_load_f32(a + 4);
-          const psimd_f32 va89AB = psimd_load_f32(a + 8);
-          const psimd_f32 vaCDEF = psimd_load_f32(a + 12);
-          a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-          const psimd_f32 vb = psimd_load_splat_f32(w); w += 1;
-          vacc0123 = psimd_qfma_f32(vacc0123, va0123, vb);
-          vacc4567 = psimd_qfma_f32(vacc4567, va4567, vb);
-          vacc89AB = psimd_qfma_f32(vacc89AB, va89AB, vb);
-          vaccCDEF = psimd_qfma_f32(vaccCDEF, vaCDEF, vb);
+          const psimd_f32 vi0123 = psimd_load_f32(input);
+          const psimd_f32 vi4567 = psimd_load_f32(input + 4);
+          const psimd_f32 vi89AB = psimd_load_f32(input + 8);
+          const psimd_f32 viCDEF = psimd_load_f32(input + 12);
+          input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          const psimd_f32 vw = psimd_load_splat_f32(w); w += 1;
+          vacc0123 = psimd_qfma_f32(vacc0123, vi0123, vw);
+          vacc4567 = psimd_qfma_f32(vacc4567, vi4567, vw);
+          vacc89AB = psimd_qfma_f32(vacc89AB, vi89AB, vw);
+          vaccCDEF = psimd_qfma_f32(vaccCDEF, viCDEF, vw);
         } while (--nnz != 0);
       }
       psimd_f32 vout0123 = psimd_min_f32(vacc0123, vmax);
@@ -63,23 +63,23 @@ void xnn_f32_spmm_minmax_ukernel_16x1__psimd(
       vout4567 = psimd_max_f32(vout4567, vmin);
       vout89AB = psimd_max_f32(vout89AB, vmin);
       voutCDEF = psimd_max_f32(voutCDEF, vmin);
-      psimd_store_f32(c, vout0123);
-      psimd_store_f32(c + 4, vout4567);
-      psimd_store_f32(c + 8, vout89AB);
-      psimd_store_f32(c + 12, voutCDEF);
-      c += 1 * m;
-    } while (--j != 0);
-    c -= m * n;
-    c += 16;
-    a += 16;
-    i -= 16;
+      psimd_store_f32(output, vout0123);
+      psimd_store_f32(output + 4, vout4567);
+      psimd_store_f32(output + 8, vout89AB);
+      psimd_store_f32(output + 12, voutCDEF);
+      output += 1 * batch_size;
+    } while (--c != 0);
+    output -= batch_size * output_channels;
+    output += 16;
+    input += 16;
+    n -= 16;
   }
-  if XNN_UNLIKELY(i != 0) {
-    if (i & 8) {
+  if XNN_UNLIKELY(n != 0) {
+    if (n & 8) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
-      size_t j = n;
+      size_t c = output_channels;
       do {
         uint32_t nnz = *nnzmap++;
         psimd_f32 vacc0123 = psimd_load_splat_f32(w); w += 1;
@@ -87,103 +87,103 @@ void xnn_f32_spmm_minmax_ukernel_16x1__psimd(
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
-            const psimd_f32 va0123 = psimd_load_f32(a);
-            const psimd_f32 va4567 = psimd_load_f32(a + 4);
-            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-            const psimd_f32 vb = psimd_load_splat_f32(w); w += 1;
-            vacc0123 = psimd_qfma_f32(vacc0123, va0123, vb);
-            vacc4567 = psimd_qfma_f32(vacc4567, va4567, vb);
+            const psimd_f32 vi0123 = psimd_load_f32(input);
+            const psimd_f32 vi4567 = psimd_load_f32(input + 4);
+            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            const psimd_f32 vw = psimd_load_splat_f32(w); w += 1;
+            vacc0123 = psimd_qfma_f32(vacc0123, vi0123, vw);
+            vacc4567 = psimd_qfma_f32(vacc4567, vi4567, vw);
           } while (--nnz != 0);
         }
         psimd_f32 vout0123 = psimd_min_f32(vacc0123, vmax);
         psimd_f32 vout4567 = psimd_min_f32(vacc4567, vmax);
         vout0123 = psimd_max_f32(vout0123, vmin);
         vout4567 = psimd_max_f32(vout4567, vmin);
-        psimd_store_f32(c, vout0123);
-        psimd_store_f32(c + 4, vout4567);
-        c += 1 * m;
-      } while (--j != 0);
-      c -= m * n;
-      c += 8;
-      a += 8;
+        psimd_store_f32(output, vout0123);
+        psimd_store_f32(output + 4, vout4567);
+        output += 1 * batch_size;
+      } while (--c != 0);
+      output -= batch_size * output_channels;
+      output += 8;
+      input += 8;
     }
-    if (i & 4) {
+    if (n & 4) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
-      size_t j = n;
+      size_t c = output_channels;
       do {
         uint32_t nnz = *nnzmap++;
         psimd_f32 vacc0123 = psimd_load_splat_f32(w); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
-            const psimd_f32 va0123 = psimd_load_f32(a);
-            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-            const psimd_f32 vb = psimd_load_splat_f32(w); w += 1;
-            vacc0123 = psimd_qfma_f32(vacc0123, va0123, vb);
+            const psimd_f32 vi0123 = psimd_load_f32(input);
+            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            const psimd_f32 vw = psimd_load_splat_f32(w); w += 1;
+            vacc0123 = psimd_qfma_f32(vacc0123, vi0123, vw);
           } while (--nnz != 0);
         }
         psimd_f32 vout0123 = psimd_min_f32(vacc0123, vmax);
         vout0123 = psimd_max_f32(vout0123, vmin);
-        psimd_store_f32(c, vout0123);
-        c += 1 * m;
-      } while (--j != 0);
-      c -= m * n;
-      c += 4;
-      a += 4;
+        psimd_store_f32(output, vout0123);
+        output += 1 * batch_size;
+      } while (--c != 0);
+      output -= batch_size * output_channels;
+      output += 4;
+      input += 4;
     }
-    if (i & 2) {
+    if (n & 2) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
-      size_t j = n;
+      size_t c = output_channels;
       do {
         uint32_t nnz = *nnzmap++;
         psimd_f32 vacc01 = psimd_load_splat_f32(w); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
-            const psimd_f32 va01 = psimd_load2_f32(a);
-            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-            const psimd_f32 vb = psimd_load_splat_f32(w); w += 1;
-            vacc01 = psimd_qfma_f32(vacc01, va01, vb);
+            const psimd_f32 vi01 = psimd_load2_f32(input);
+            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            const psimd_f32 vw = psimd_load_splat_f32(w); w += 1;
+            vacc01 = psimd_qfma_f32(vacc01, vi01, vw);
           } while (--nnz != 0);
         }
         psimd_f32 vout01 = psimd_min_f32(vacc01, vmax);
         vout01 = psimd_max_f32(vout01, vmin);
-        psimd_store2_f32(c, vout01);
-        c += 1 * m;
-      } while (--j != 0);
-      c -= m * n;
-      c += 2;
-      a += 2;
+        psimd_store2_f32(output, vout01);
+        output += 1 * batch_size;
+      } while (--c != 0);
+      output -= batch_size * output_channels;
+      output += 2;
+      input += 2;
     }
-    if (i & 1) {
+    if (n & 1) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
-      size_t j = n;
+      size_t c = output_channels;
       do {
         uint32_t nnz = *nnzmap++;
         psimd_f32 vacc0 = psimd_load_splat_f32(w); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
-            const psimd_f32 va0 = psimd_load_splat_f32(a);
-            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-            const psimd_f32 vb = psimd_load_splat_f32(w); w += 1;
-            vacc0 = psimd_qfma_f32(vacc0, va0, vb);
+            const psimd_f32 vi0 = psimd_load_splat_f32(input);
+            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            const psimd_f32 vw = psimd_load_splat_f32(w); w += 1;
+            vacc0 = psimd_qfma_f32(vacc0, vi0, vw);
           } while (--nnz != 0);
         }
         psimd_f32 vout0 = psimd_min_f32(vacc0, vmax);
         vout0 = psimd_max_f32(vout0, vmin);
-        psimd_store1_f32(c, vout0);
-        c += 1 * m;
-      } while (--j != 0);
-      c -= m * n;
-      c += 1;
-      a += 1;
+        psimd_store1_f32(output, vout0);
+        output += 1 * batch_size;
+      } while (--c != 0);
+      output -= batch_size * output_channels;
+      output += 1;
+      input += 1;
     }
   }
 }

@@ -13,25 +13,25 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__sse${"_unroll" + str(UNROLL) if UNROLL > 1 else ""}(
-    uint32_t m,
-    uint32_t n,
-    const float*restrict a,
+    uint32_t batch_size,
+    uint32_t output_channels,
+    const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
-    float*restrict c,
+    float*restrict output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(m != 0);
+  assert(batch_size != 0);
 
   const __m128 vmin = _mm_load_ps(params->sse.min);
   const __m128 vmax = _mm_load_ps(params->sse.max);
-  size_t i = m;
-  while XNN_LIKELY(i >= ${MR}) {
+  size_t n = batch_size;
+  while XNN_LIKELY(n >= ${MR}) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
-    size_t j = n;
+    size_t c = output_channels;
     do {
       uint32_t nnz = *nnzmap++;
       $if UNROLL > 1:
@@ -48,14 +48,14 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__sse${"_unroll" + str(UNROLL) if UN
             const intptr_t diff${K} = dmap[${K}];
           dmap += ${UNROLL};
           $for K in range(UNROLL):
-            const __m128 va0123x${K} = _mm_loadu_ps(a);
+            const __m128 vi0123x${K} = _mm_loadu_ps(input);
             $for M in range(4, MR, 4):
-              const __m128 va${ABC[M:M+4]}x${K} = _mm_loadu_ps(a + ${M});
-            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff${K});
-            const __m128 vb${K} = _mm_load1_ps(w);
+              const __m128 vi${ABC[M:M+4]}x${K} = _mm_loadu_ps(input + ${M});
+            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff${K});
+            const __m128 vw${K} = _mm_load1_ps(w);
             w += 1;
             $for M in range(0, MR, 4):
-              vacc${ABC[M:M+4]}x${K} = _mm_add_ps(vacc${ABC[M:M+4]}x${K}, _mm_mul_ps(va${ABC[M:M+4]}x${K}, vb${K}));
+              vacc${ABC[M:M+4]}x${K} = _mm_add_ps(vacc${ABC[M:M+4]}x${K}, _mm_mul_ps(vi${ABC[M:M+4]}x${K}, vw${K}));
         }
         $for M in range(0, MR, 4):
           __m128 vacc${ABC[M:M+4]} = vacc${ABC[M:M+4]}x0;
@@ -69,37 +69,37 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__sse${"_unroll" + str(UNROLL) if UN
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;
-          const __m128 va0123 = _mm_loadu_ps(a);
+          const __m128 vi0123 = _mm_loadu_ps(input);
           $for M in range(4, MR, 4):
-            const __m128 va${ABC[M:M+4]} = _mm_loadu_ps(a + ${M});
-          a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-          const __m128 vb = _mm_load1_ps(w); w += 1;
+            const __m128 vi${ABC[M:M+4]} = _mm_loadu_ps(input + ${M});
+          input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          const __m128 vw = _mm_load1_ps(w); w += 1;
           $for M in range(0, MR, 4):
-            vacc${ABC[M:M+4]} = _mm_add_ps(vacc${ABC[M:M+4]}, _mm_mul_ps(va${ABC[M:M+4]}, vb));
+            vacc${ABC[M:M+4]} = _mm_add_ps(vacc${ABC[M:M+4]}, _mm_mul_ps(vi${ABC[M:M+4]}, vw));
         } while (--nnz != 0);
       }
       $for M in range(0, MR, 4):
         __m128 vout${ABC[M:M+4]} = _mm_min_ps(vacc${ABC[M:M+4]}, vmax);
       $for M in range(0, MR, 4):
         vout${ABC[M:M+4]} = _mm_max_ps(vout${ABC[M:M+4]}, vmin);
-      _mm_storeu_ps(c, vout0123);
+      _mm_storeu_ps(output, vout0123);
       $for M in range(4, MR, 4):
-        _mm_storeu_ps(c + ${M}, vout${ABC[M:M+4]});
-      c += ${NR} * m;
-    } while (--j != 0);
-    c -= m * n;
-    c += ${MR};
-    a += ${MR};
-    i -= ${MR};
+        _mm_storeu_ps(output + ${M}, vout${ABC[M:M+4]});
+      output += ${NR} * batch_size;
+    } while (--c != 0);
+    output -= batch_size * output_channels;
+    output += ${MR};
+    input += ${MR};
+    n -= ${MR};
   }
-  if XNN_UNLIKELY(i != 0) {
+  if XNN_UNLIKELY(n != 0) {
     $for LOG2M in reversed(range((MR - 1).bit_length())):
       $SUBMR = 1 << LOG2M
-      if (i & ${SUBMR}) {
+      if (n & ${SUBMR}) {
         const float*restrict w = weights;
         const int32_t* dmap = widx_dmap;
         const uint32_t* nnzmap = nidx_nnzmap;
-        size_t j = n;
+        size_t c = output_channels;
         do {
           uint32_t nnz = *nnzmap++;
           $if SUBMR == 1:
@@ -115,26 +115,26 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__sse${"_unroll" + str(UNROLL) if UN
             do {
               const intptr_t diff = *dmap++;
               $if SUBMR >= 4:
-                const __m128 va0123 = _mm_loadu_ps(a);
+                const __m128 vi0123 = _mm_loadu_ps(input);
               $elif SUBMR == 2:
-                const __m128 va01 = _mm_loadl_pi(_mm_undefined_ps(), (const __m64*) a);
+                const __m128 vi01 = _mm_loadl_pi(_mm_undefined_ps(), (const __m64*) input);
               $elif SUBMR == 1:
-                const __m128 va0 = _mm_load_ss(a);
+                const __m128 vi0 = _mm_load_ss(input);
               $for M in range(4, SUBMR, 4):
-                const __m128 va${ABC[M:M+4]} = _mm_loadu_ps(a + ${M});
-              a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+                const __m128 vi${ABC[M:M+4]} = _mm_loadu_ps(input + ${M});
+              input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
               $if SUBMR >= 4:
-                const __m128 vb = _mm_load1_ps(w); w += 1;
+                const __m128 vw = _mm_load1_ps(w); w += 1;
               $elif SUBMR == 2:
-                __m128 vb = _mm_load_ss(w); w += 1;
-                vb = _mm_unpacklo_ps(vb, vb);
+                __m128 vw = _mm_load_ss(w); w += 1;
+                vw = _mm_unpacklo_ps(vw, vw);
               $else:
-                const __m128 vb = _mm_load_ss(w); w += 1;
+                const __m128 vw = _mm_load_ss(w); w += 1;
               $if SUBMR == 1:
-                vacc${ABC[0]} = _mm_add_ss(vacc${ABC[0]}, _mm_mul_ss(va${ABC[0]}, vb));
+                vacc${ABC[0]} = _mm_add_ss(vacc${ABC[0]}, _mm_mul_ss(vi${ABC[0]}, vw));
               $else:
                 $for M in range(0, SUBMR, 4):
-                  vacc${ABC[M:min(M+4,SUBMR)]} = _mm_add_ps(vacc${ABC[M:min(M+4,SUBMR)]}, _mm_mul_ps(va${ABC[M:min(M+4,SUBMR)]}, vb));
+                  vacc${ABC[M:min(M+4,SUBMR)]} = _mm_add_ps(vacc${ABC[M:min(M+4,SUBMR)]}, _mm_mul_ps(vi${ABC[M:min(M+4,SUBMR)]}, vw));
             } while (--nnz != 0);
           }
           $if SUBMR == 1:
@@ -146,18 +146,18 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__sse${"_unroll" + str(UNROLL) if UN
             $for M in range(0, SUBMR, 4):
               vout${ABC[M:min(M+4,SUBMR)]} = _mm_max_ps(vout${ABC[M:min(M+4,SUBMR)]}, vmin);
           $if SUBMR >= 4:
-            _mm_storeu_ps(c, vout0123);
+            _mm_storeu_ps(output, vout0123);
           $elif SUBMR == 2:
-            _mm_storel_pi((__m64*) c, vout01);
+            _mm_storel_pi((__m64*) output, vout01);
           $elif SUBMR == 1:
-            _mm_store_ss(c, vout0);
+            _mm_store_ss(output, vout0);
           $for M in range(4, SUBMR, 4):
-            _mm_storeu_ps(c + ${M}, vout${ABC[M:M+4]});
-          c += ${NR} * m;
-        } while (--j != 0);
-        c -= m * n;
-        c += ${SUBMR};
-        a += ${SUBMR};
+            _mm_storeu_ps(output + ${M}, vout${ABC[M:M+4]});
+          output += ${NR} * batch_size;
+        } while (--c != 0);
+        output -= batch_size * output_channels;
+        output += ${SUBMR};
+        input += ${SUBMR};
       }
   }
 }

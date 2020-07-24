@@ -11,26 +11,26 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if UNROLL > 1 else ""}(
-    uint32_t m,
-    uint32_t n,
-    const float*restrict a,
+    uint32_t batch_size,
+    uint32_t output_channels,
+    const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
-    float*restrict c,
+    float*restrict output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(m != 0);
+  assert(batch_size != 0);
 
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
-  size_t i = m;
-  while (i >= ${MR}) {
+  size_t n = batch_size;
+  while (n >= ${MR}) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
-    size_t j = n;
-    while (j >= ${NR}) {
+    size_t c = output_channels;
+    while (c >= ${NR}) {
       uint32_t nnz = *nnzmap++;
       $for N in range(0, NR, 1):
         float vacc0x${N} = *w++;
@@ -40,13 +40,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if
         do {
           const intptr_t diff = *dmap++;
           $for M in range(MR):
-            const float va${ABC[M]} = a[${M}];
-          a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+            const float vi${ABC[M]} = input[${M}];
+          input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
           $for N in range(0, NR, 1):
-            const float vb${N} = *w++;
+            const float vw${N} = *w++;
           $for N in range(0, NR, 1):
             $for M in range(MR):
-              vacc${ABC[M]}x${N} += va${ABC[M]} * vb${N};
+              vacc${ABC[M]}x${N} += vi${ABC[M]} * vw${N};
         } while (--nnz != 0);
       }
       $for N in range(NR):
@@ -57,11 +57,11 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if
           vout${ABC[M]}x${N} = math_max_f32(vout${ABC[M]}x${N}, vmin);
       $for N in range(NR):
         $for M in range(MR):
-          c[${N} * m + ${M}] = vout${ABC[M]}x${N};
-      c += ${NR} * m;
-      j -= ${NR};
+          output[${N} * batch_size + ${M}] = vout${ABC[M]}x${N};
+      output += ${NR} * batch_size;
+      c -= ${NR};
     }
-    if XNN_UNLIKELY(j != 0) {
+    if XNN_UNLIKELY(c != 0) {
       do {
         uint32_t nnz = *nnzmap++;
         float vacc0 = *w++;
@@ -71,11 +71,11 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if
           do {
             const intptr_t diff = *dmap++;
             $for M in range(MR):
-              const float va${ABC[M]} = a[${M}];
-            a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-            const float vb = *w++;
+              const float vi${ABC[M]} = input[${M}];
+            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            const float vw = *w++;
             $for M in range(MR):
-              vacc${ABC[M]} += va${ABC[M]} * vb;
+              vacc${ABC[M]} += vi${ABC[M]} * vw;
           } while (--nnz != 0);
         }
         $for M in range(MR):
@@ -83,25 +83,25 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if
         $for M in range(MR):
           vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
         $for M in range(MR):
-          c[${M}] = vout${ABC[M]};
-        c += m;
-        j -= 1;
-      } while (j != 0);
+          output[${M}] = vout${ABC[M]};
+        output += batch_size;
+        c -= 1;
+      } while (c != 0);
     }
-    c -= m * n;
-    c += ${MR};
-    a += ${MR};
-    i -= ${MR};
+    output -= batch_size * output_channels;
+    output += ${MR};
+    input += ${MR};
+    n -= ${MR};
   }
-  if XNN_UNLIKELY(i != 0) {
+  if XNN_UNLIKELY(n != 0) {
     $for LOG2M in reversed(range((MR - 1).bit_length())):
       $SUBMR = 1 << LOG2M
-      if (i & ${SUBMR}) {
+      if (n & ${SUBMR}) {
         const float*restrict w = weights;
         const int32_t* dmap = widx_dmap;
         const uint32_t* nnzmap = nidx_nnzmap;
-        size_t j = n;
-        while (j >= ${NR}) {
+        size_t c = output_channels;
+        while (c >= ${NR}) {
           uint32_t nnz = *nnzmap++;
           $for N in range(0, NR, 1):
             float vacc0x${N} = *w++;
@@ -111,13 +111,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if
             do {
               const intptr_t diff = *dmap++;
               $for M in range(SUBMR):
-                const float va${ABC[M]} = a[${M}];
-              a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
+                const float vi${ABC[M]} = input[${M}];
+              input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
               $for N in range(0, NR, 1):
-                const float vb${N} = *w++;
+                const float vw${N} = *w++;
               $for N in range(0, NR, 1):
                 $for M in range(SUBMR):
-                  vacc${ABC[M]}x${N} += va${ABC[M]} * vb${N};
+                  vacc${ABC[M]}x${N} += vi${ABC[M]} * vw${N};
             } while (--nnz != 0);
           }
           $for N in range(0, NR, 1):
@@ -128,11 +128,11 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if
               vout${ABC[M]}x${N} = math_max_f32(vout${ABC[M]}x${N}, vmin);
           $for N in range(0, NR, 1):
             $for M in range(SUBMR):
-              c[${N} * m + ${M}] = vout${ABC[M]}x${N};
-          c += ${NR} * m;
-          j -= ${NR};
+              output[${N} * batch_size + ${M}] = vout${ABC[M]}x${N};
+          output += ${NR} * batch_size;
+          c -= ${NR};
         }
-        if XNN_UNLIKELY(j != 0) {
+        if XNN_UNLIKELY(c != 0) {
           do {
             uint32_t nnz = *nnzmap++;
             float vacc0 = *w++;
@@ -142,11 +142,11 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if
               do {
                 const intptr_t diff = *dmap++;
                 $for M in range(SUBMR):
-                  const float va${ABC[M]} = a[${M}];
-                a = (const float*restrict) ((uintptr_t) a + (uintptr_t) diff);
-                const float vb = *w++;
+                  const float vi${ABC[M]} = input[${M}];
+                input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+                const float vw = *w++;
                 $for M in range(SUBMR):
-                  vacc${ABC[M]} += va${ABC[M]} * vb;
+                  vacc${ABC[M]} += vi${ABC[M]} * vw;
               } while (--nnz != 0);
             }
             $for M in range(SUBMR):
@@ -154,14 +154,14 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_unroll" + str(UNROLL) if
             $for M in range(SUBMR):
               vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
             $for M in range(SUBMR):
-              c[${M}] = vout${ABC[M]};
-            c += m;
-            j -= 1;
-          } while (j != 0);
+              output[${M}] = vout${ABC[M]};
+            output += batch_size;
+            c -= 1;
+          } while (c != 0);
         }
-        c -= m * n;
-        c += ${SUBMR};
-        a += ${SUBMR};
+        output -= batch_size * output_channels;
+        output += ${SUBMR};
+        input += ${SUBMR};
       }
   }
 }
