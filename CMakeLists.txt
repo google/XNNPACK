@@ -516,9 +516,6 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/requantization/gemmlowp-scalar.c)
 
 SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
-  src/f32-argmaxpool/4x-psimd-c4.c
-  src/f32-argmaxpool/9p8x-psimd-c4.c
-  src/f32-argmaxpool/9x-psimd-c4.c
   src/f32-conv-hwc2chw/3x3s2p1c3x4-psimd-2x2.c
   src/f32-dwconv-chw/3x3p1-psimd.c
   src/f32-dwconv-chw/3x3s2p1-psimd.c
