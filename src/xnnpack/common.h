@@ -45,12 +45,6 @@
   #define XNN_ARCH_PPC64 0
 #endif
 
-#if defined(__asmjs__)
-  #define XNN_ARCH_ASMJS 1
-#else
-  #define XNN_ARCH_ASMJS 0
-#endif
-
 #if defined(__wasm__)
   #if defined(__wasm_simd128__)
     #define XNN_ARCH_WASMSIMD 1

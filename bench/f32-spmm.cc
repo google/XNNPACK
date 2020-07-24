@@ -319,23 +319,23 @@ BENCHMARK_GEMM(spmm80_2x1__scalar_pipelined)
 BENCHMARK_GEMM(spmm80_4x1__scalar_pipelined)
 BENCHMARK_GEMM(spmm80_8x1__scalar_pipelined)
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   static void spmm80_4x1__psimd(benchmark::State& state, const char* net) {
     SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_4x1__psimd, 4, 1, 0.8f);
   }
-  
+
   static void spmm80_8x1__psimd(benchmark::State& state, const char* net) {
     SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_8x1__psimd, 8, 1, 0.8f);
   }
-  
+
   static void spmm80_16x1__psimd(benchmark::State& state, const char* net) {
     SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_16x1__psimd, 16, 1, 0.8f);
   }
-  
+
   BENCHMARK_GEMM(spmm80_4x1__psimd)
   BENCHMARK_GEMM(spmm80_8x1__psimd)
   BENCHMARK_GEMM(spmm80_16x1__psimd)
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

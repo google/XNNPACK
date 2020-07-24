@@ -201,7 +201,7 @@
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_CHW_3X3P1__PSIMD, input_width_eq_4) {
     TEST_REQUIRES_PSIMD;
     DWConvCHWMicrokernelTester()
@@ -389,9 +389,9 @@
         .Test(xnn_f32_dwconv_chw_ukernel_3x3p1__psimd, DWConvCHWMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_CHW_3X3S2P1__PSIMD, input_width_eq_4_pad0) {
     TEST_REQUIRES_PSIMD;
     DWConvCHWMicrokernelTester()
@@ -787,9 +787,9 @@
         .Test(xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd, DWConvCHWMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_CHW_5X5P2__PSIMD, input_width_eq_4_pad2) {
     TEST_REQUIRES_PSIMD;
     DWConvCHWMicrokernelTester()
@@ -998,9 +998,9 @@
     }
   }
 
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
-#if !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   TEST(F32_DWCONV_CHW_5X5S2P2__PSIMD, input_width_eq_8_pad2) {
     TEST_REQUIRES_PSIMD;
     DWConvCHWMicrokernelTester()
@@ -1396,7 +1396,7 @@
         .Test(xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd, DWConvCHWMicrokernelTester::Variant::Scalar);
     }
   }
-#endif  // !XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_DWCONV_CHW_3X3S2P1__SSE, input_width_eq_4_pad0) {

@@ -32,7 +32,7 @@ void xnn_deallocate(void* context, void* pointer) {
 }
 
 void* xnn_aligned_allocate(void* context, size_t alignment, size_t size) {
-#if XNN_ARCH_ASMJS || XNN_ARCH_WASM
+#if XNN_ARCH_WASM
   assert(alignment <= 2 * sizeof(void*));
   return malloc(size);
 #elif defined(__ANDROID__)

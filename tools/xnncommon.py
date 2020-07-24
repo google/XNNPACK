@@ -94,7 +94,7 @@ def postprocess_test_case(test_case, arch, isa, assembly=False):
       _indent(test_case) + "\n" + \
       "#endif  // %s\n" % guard
   elif isa == "psimd":
-    guard = "!XNN_ARCH_ASMJS && !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC"
+    guard = "!XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC"
     return "#if %s\n" % guard + \
       _indent(test_case) + "\n" + \
       "#endif  // %s\n" % guard

@@ -5674,14 +5674,6 @@ config_setting(
 )
 
 config_setting(
-    name = "emscripten_asmjs",
-    values = {
-        "crosstool_top": "//toolchain:emscripten",
-        "cpu": "asmjs",
-    },
-)
-
-config_setting(
     name = "ios_armv7",
     values = {
         "apple_platform_type": "ios",
