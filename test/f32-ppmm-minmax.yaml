@@ -14,6 +14,10 @@
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__psimd
   k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_4x8__wasmsimd_splat_arm
+  k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_4x8__wasmsimd_splat_x86
+  k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x2__scalar
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_2x4__scalar
