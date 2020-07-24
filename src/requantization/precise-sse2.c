@@ -8,7 +8,6 @@
 
 #include <assert.h>
 #include <stdint.h>
-#include <stddef.h>
 
 #include <emmintrin.h>
 
@@ -17,7 +16,7 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qu8_requantize_precise__sse2(
+void xnn_requantize_precise__sse2(
     size_t n,
     const int32_t* input,
     float scale,

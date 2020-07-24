@@ -8,16 +8,15 @@
 
 #include <assert.h>
 #include <stdint.h>
-#include <stddef.h>
 
-#include <tmmintrin.h>
+#include <emmintrin.h>
 
 #include <fp16/bitcasts.h>
 
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qu8_requantize_q31__ssse3(
+void xnn_requantize_q31__sse2(
     size_t n,
     const int32_t* input,
     float scale,
@@ -59,15 +58,15 @@ void xnn_qu8_requantize_q31__ssse3(
     const __m128i w = _mm_loadu_si128((const __m128i*) (input + 12));
     input += 16;
 
-    const __m128i x_abs = _mm_abs_epi32(x);
-    const __m128i y_abs = _mm_abs_epi32(y);
-    const __m128i z_abs = _mm_abs_epi32(z);
-    const __m128i w_abs = _mm_abs_epi32(w);
-
     const __m128i x_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), x);
     const __m128i y_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), y);
     const __m128i z_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), z);
     const __m128i w_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), w);
+
+    const __m128i x_abs = _mm_sub_epi32(_mm_xor_si128(x, x_neg_mask), x_neg_mask);
+    const __m128i y_abs = _mm_sub_epi32(_mm_xor_si128(y, y_neg_mask), y_neg_mask);
+    const __m128i z_abs = _mm_sub_epi32(_mm_xor_si128(z, z_neg_mask), z_neg_mask);
+    const __m128i w_abs = _mm_sub_epi32(_mm_xor_si128(w, w_neg_mask), w_neg_mask);
 
     const __m128i x_abs_rev = _mm_shuffle_epi32(x_abs, _MM_SHUFFLE(2, 3, 0, 1));
     const __m128i y_abs_rev = _mm_shuffle_epi32(y_abs, _MM_SHUFFLE(2, 3, 0, 1));
@@ -164,23 +163,22 @@ void xnn_qu8_requantize_q31__ssse3(
     // 4x SHUFPS
     // 8x PMULUDQ
     // 8x PXOR (setzero)
-    // 8x PXOR
+    // 12x PXOR
     // 4x PAND
     // 8x PADDQ
     // 4x PADDD
     // 2x PADDW
     // 8x PSUBQ
-    // 4x PSUBD
+    // 8x PSUBD
     // 8x PSRLQ (immediate)
     // 4x PSRAD (register)
     // 12x PCMPGTD
-    // 4x PABSD
     // 2x PACKSSDW
     // 1x PACKUSWB
     // 1x PMAXUB
     // 1x PMINUB
     // ---------------------
-    // 107 instructions total
+    // 111 instructions total
 
     _mm_storeu_si128((__m128i*) output, xyzw_clamped);
     output += 16;

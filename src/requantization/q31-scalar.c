@@ -8,7 +8,6 @@
 
 #include <assert.h>
 #include <stdint.h>
-#include <stddef.h>
 
 #include <fp16/bitcasts.h>
 
@@ -16,7 +15,7 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qu8_requantize_q31__scalar(
+void xnn_requantize_q31__scalar(
     size_t n,
     const int32_t* input,
     float scale,

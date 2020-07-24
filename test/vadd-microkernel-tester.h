@@ -197,7 +197,7 @@ class VAddMicrokernelTester {
           float(int32_t(b_data[i]) - int32_t(b_zero_point())) * (b_scale() / y_scale());
         y_fp[i] = std::min<float>(y_fp[i], float(qmax()));
         y_fp[i] = std::max<float>(y_fp[i], float(qmin()));
-        y_ref[i] = xnn_qu8_quantize_add(a_data[i], b_data[i], scalar_quantization_params);
+        y_ref[i] = xnn_add_quantize(a_data[i], b_data[i], scalar_quantization_params);
       }
 
       // Call optimized micro-kernel.

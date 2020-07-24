@@ -488,12 +488,6 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/qu8-gavgpool/7x-minmax-scalar-c1.c
   src/qu8-gemm/2x2-minmax-scalar.c
   src/qu8-igemm/2x2-minmax-scalar.c
-  src/qu8-requantization/fp32-scalar-lrintf.c
-  src/qu8-requantization/fp32-scalar-magic.c
-  src/qu8-requantization/precise-scalar-signed64.c
-  src/qu8-requantization/precise-scalar-unsigned32.c
-  src/qu8-requantization/precise-scalar-unsigned64.c
-  src/qu8-requantization/q31-scalar.c
   src/qu8-vadd/minmax-scalar.c
   src/u8-clamp/scalar-x4.c
   src/u8-lut32norm/scalar.c
@@ -515,7 +509,11 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x8-zip/x2-scalar.c
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
-  src/x8-zip/xm-scalar.c)
+  src/x8-zip/xm-scalar.c
+  src/requantization/precise-scalar.c
+  src/requantization/fp32-scalar.c
+  src/requantization/q31-scalar.c
+  src/requantization/gemmlowp-scalar.c)
 
 SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-conv-hwc2chw/3x3s2p1c3x4-psimd-2x2.c
@@ -529,8 +527,8 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-spmm/gen/16x1-minmax-psimd.c)
 
 SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
-  src/qu8-requantization/fp32-psimd.c
-  src/qu8-requantization/precise-psimd.c)
+  src/requantization/precise-psimd.c
+  src/requantization/fp32-psimd.c)
 
 SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-neon-c4.c
@@ -728,9 +726,6 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qu8-gemm/8x8-minmax-neon.c
   src/qu8-igemm/4x8-minmax-neon.c
   src/qu8-igemm/8x8-minmax-neon.c
-  src/qu8-requantization/precise-neon.c
-  src/qu8-requantization/fp32-neon.c
-  src/qu8-requantization/q31-neon.c
   src/qu8-vadd/minmax-neon.c
   src/u8-clamp/neon-x64.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
@@ -763,7 +758,11 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/math/sigmoid-neon-rr2-p5-nr2recps.c
   src/math/sqrt-neon-nr1rsqrts.c
   src/math/sqrt-neon-nr2rsqrts.c
-  src/math/sqrt-neon-nr3rsqrts.c)
+  src/math/sqrt-neon-nr3rsqrts.c
+  src/requantization/precise-neon.c
+  src/requantization/fp32-neon.c
+  src/requantization/q31-neon.c
+  src/requantization/gemmlowp-neon.c)
 
 SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-ibilinear/gen/neonfma-c4.c
@@ -1280,9 +1279,6 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/qu8-gavgpool/7x-minmax-sse2-c8.c
   src/qu8-gemm/2x4c8-minmax-sse2.c
   src/qu8-gemm/4x4c2-minmax-sse2.c
-  src/qu8-requantization/fp32-sse2.c
-  src/qu8-requantization/precise-sse2.c
-  src/qu8-requantization/q31-sse2.c
   src/qu8-vadd/minmax-sse2.c
   src/u8-clamp/sse2-x64.c
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
@@ -1302,11 +1298,16 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/math/roundd-sse2-cvt.c
   src/math/roundu-sse2-cvt.c
   src/math/roundz-sse2-cvt.c
-  src/math/sigmoid-sse2-p5-div.c)
+  src/math/sigmoid-sse2-p5-div.c
+  src/requantization/precise-sse2.c
+  src/requantization/fp32-sse2.c
+  src/requantization/q31-sse2.c
+  src/requantization/gemmlowp-sse2.c)
 
 SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
-  src/qu8-requantization/precise-ssse3.c
-  src/qu8-requantization/q31-ssse3.c)
+  src/requantization/precise-ssse3.c
+  src/requantization/q31-ssse3.c
+  src/requantization/gemmlowp-ssse3.c)
 
 SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/gen/sse41-2x4.c
@@ -1327,12 +1328,13 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-sse41-x8.c
   src/f32-vrnd/gen/vrndd-sse41-x4.c
   src/f32-vrnd/gen/vrndd-sse41-x8.c
-  src/qu8-requantization/precise-sse4.c
-  src/qu8-requantization/q31-sse4.c
   src/math/roundne-sse41.c
   src/math/roundd-sse41.c
   src/math/roundu-sse41.c
-  src/math/roundz-sse41.c)
+  src/math/roundz-sse41.c
+  src/requantization/precise-sse4.c
+  src/requantization/q31-sse4.c
+  src/requantization/gemmlowp-sse4.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-clamp/gen/avx-x8.c
@@ -3315,15 +3317,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qu8-igemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qu8-igemm-minmax-test qu8-igemm-minmax-test)
 
-  ADD_EXECUTABLE(qu8-requantization-test test/qu8-requantization.cc)
-  SET_TARGET_PROPERTIES(qu8-requantization-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-requantization-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(qu8-requantization-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(qu8-requantization-test qu8-requantization-test)
-
   ADD_EXECUTABLE(qu8-vadd-minmax-test test/qu8-vadd-minmax.cc)
   SET_TARGET_PROPERTIES(qu8-vadd-minmax-test PROPERTIES
     CXX_STANDARD 11
@@ -3431,6 +3424,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(x8-zip-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(x8-zip-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(x8-zip-test x8-zip-test)
+
+  ADD_EXECUTABLE(requantization-test test/requantization.cc)
+  SET_TARGET_PROPERTIES(requantization-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(requantization-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(requantization-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(requantization-test requantization-test)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
@@ -3850,14 +3852,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(qu8-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(qu8-requantization-bench bench/qu8-requantization.cc)
-  SET_TARGET_PROPERTIES(qu8-requantization-bench PROPERTIES
+  ADD_EXECUTABLE(requantization-bench bench/requantization.cc)
+  SET_TARGET_PROPERTIES(requantization-bench PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(qu8-requantization-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  TARGET_INCLUDE_DIRECTORIES(requantization-bench PRIVATE src)
+  TARGET_INCLUDE_DIRECTORIES(requantization-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(requantization-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(rounding-bench bench/rounding.cc)
   SET_TARGET_PROPERTIES(rounding-bench PROPERTIES

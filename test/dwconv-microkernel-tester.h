@@ -258,7 +258,7 @@ class DWConvMicrokernelTester {
       // Renormalize reference results.
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[x * channels() + c] = xnn_qu8_requantize_q31(accumulators[x * channels() + c], scalar_requantization_params);
+          output_ref[x * channels() + c] = xnn_q31_requantize(accumulators[x * channels() + c], scalar_requantization_params);
         }
       }
 

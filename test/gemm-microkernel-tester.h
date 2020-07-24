@@ -290,7 +290,7 @@ class GemmMicrokernelTester {
 
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
-          c_ref[m_index * n() + n_index] = xnn_qu8_requantize_q31(acc[m_index * n() + n_index], scalar_requantization_params);
+          c_ref[m_index * n() + n_index] = xnn_q31_requantize(acc[m_index * n() + n_index], scalar_requantization_params);
         }
       }
 
@@ -420,7 +420,7 @@ class GemmMicrokernelTester {
 
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
-          c_ref[m_index * n() + n_index] = xnn_qu8_requantize_q31(acc[m_index * n() + n_index], scalar_requantization_params);
+          c_ref[m_index * n() + n_index] = xnn_q31_requantize(acc[m_index * n() + n_index], scalar_requantization_params);
         }
       }
 
