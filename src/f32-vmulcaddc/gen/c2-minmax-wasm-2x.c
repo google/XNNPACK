@@ -13,7 +13,7 @@
 #include <xnnpack/vmulcaddc.h>
 
 
-void xnn_f32_vmulcaddc_ukernel_c2__wasm_2x(
+void xnn_f32_vmulcaddc_minmax_ukernel_c2__wasm_2x(
     size_t rows,
     size_t channels,
     const float*restrict input,

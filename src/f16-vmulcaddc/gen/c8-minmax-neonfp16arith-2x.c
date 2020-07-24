@@ -15,7 +15,7 @@
 #include <xnnpack/vmulcaddc.h>
 
 
-void xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x(
+void xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x(
     size_t rows,
     size_t channels,
     const void*restrict input,

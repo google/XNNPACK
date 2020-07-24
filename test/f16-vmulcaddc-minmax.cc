@@ -18,49 +18,49 @@
 
 
 #if XNN_ARCH_ARM64
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, channels_eq_8) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, channels_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VMulCAddCMicrokernelTester()
       .channel_tile(8)
       .channels(8)
       .rows(2)
-      .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+      .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, channels_div_8) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, channels_div_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t channels = 16; channels < 80; channels += 8) {
       VMulCAddCMicrokernelTester()
         .channel_tile(8)
         .channels(channels)
         .rows(2)
-        .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+        .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
     }
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, channels_lt_8) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, channels_lt_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t channels = 1; channels < 8; channels++) {
       VMulCAddCMicrokernelTester()
         .channel_tile(8)
         .channels(channels)
         .rows(2)
-        .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+        .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
     }
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, channels_gt_8) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, channels_gt_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t channels = 9; channels < 16; channels++) {
       VMulCAddCMicrokernelTester()
         .channel_tile(8)
         .channels(channels)
         .rows(2)
-        .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+        .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
     }
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, rows_lt_2) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, rows_lt_2) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows < 2; rows++) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -68,12 +68,12 @@
           .channel_tile(8)
           .channels(channels)
           .rows(rows)
-          .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, rows_div_2) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, rows_div_2) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 4; rows <= 8; rows += 2) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -81,12 +81,12 @@
           .channel_tile(8)
           .channels(channels)
           .rows(rows)
-          .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, rows_gt_2) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, rows_gt_2) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 3; rows < 4; rows++) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -94,12 +94,12 @@
           .channel_tile(8)
           .channels(channels)
           .rows(rows)
-          .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, input_stride) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, input_stride) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows <= 6; rows += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -108,12 +108,12 @@
           .channels(channels)
           .rows(rows)
           .input_stride(43)
-          .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, output_stride) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, output_stride) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows <= 6; rows += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -122,12 +122,12 @@
           .channels(channels)
           .rows(rows)
           .output_stride(43)
-          .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, inplace) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, inplace) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows <= 6; rows += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -136,12 +136,12 @@
           .channels(channels)
           .rows(rows)
           .inplace(true)
-          .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, qmin) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, qmin) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows <= 6; rows += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -150,12 +150,12 @@
           .channels(channels)
           .rows(rows)
           .qmin(128)
-          .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C8__NEONFP16ARITH_2X, qmax) {
+  TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, qmax) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows <= 6; rows += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -164,7 +164,7 @@
           .channels(channels)
           .rows(rows)
           .qmax(128)
-          .Test(xnn_f16_vmulcaddc_ukernel_c8__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x);
       }
     }
   }
@@ -172,49 +172,49 @@
 
 
 #if XNN_ARCH_ARM64
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, channels_eq_16) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, channels_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VMulCAddCMicrokernelTester()
       .channel_tile(16)
       .channels(16)
       .rows(2)
-      .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+      .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, channels_div_16) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, channels_div_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t channels = 32; channels < 160; channels += 16) {
       VMulCAddCMicrokernelTester()
         .channel_tile(16)
         .channels(channels)
         .rows(2)
-        .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+        .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
     }
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, channels_lt_16) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, channels_lt_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t channels = 1; channels < 16; channels++) {
       VMulCAddCMicrokernelTester()
         .channel_tile(16)
         .channels(channels)
         .rows(2)
-        .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+        .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
     }
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, channels_gt_16) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, channels_gt_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t channels = 17; channels < 32; channels++) {
       VMulCAddCMicrokernelTester()
         .channel_tile(16)
         .channels(channels)
         .rows(2)
-        .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+        .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
     }
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, rows_lt_2) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, rows_lt_2) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows < 2; rows++) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -222,12 +222,12 @@
           .channel_tile(16)
           .channels(channels)
           .rows(rows)
-          .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, rows_div_2) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, rows_div_2) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 4; rows <= 8; rows += 2) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -235,12 +235,12 @@
           .channel_tile(16)
           .channels(channels)
           .rows(rows)
-          .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, rows_gt_2) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, rows_gt_2) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 3; rows < 4; rows++) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -248,12 +248,12 @@
           .channel_tile(16)
           .channels(channels)
           .rows(rows)
-          .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, input_stride) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, input_stride) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows <= 6; rows += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -262,12 +262,12 @@
           .channels(channels)
           .rows(rows)
           .input_stride(83)
-          .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, output_stride) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, output_stride) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows <= 6; rows += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -276,12 +276,12 @@
           .channels(channels)
           .rows(rows)
           .output_stride(83)
-          .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, inplace) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, inplace) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows <= 6; rows += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -290,12 +290,12 @@
           .channels(channels)
           .rows(rows)
           .inplace(true)
-          .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, qmin) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, qmin) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows <= 6; rows += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -304,12 +304,12 @@
           .channels(channels)
           .rows(rows)
           .qmin(128)
-          .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
       }
     }
   }
 
-  TEST(F16_VMULCADDC_C16__NEONFP16ARITH_2X, qmax) {
+  TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, qmax) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t rows = 1; rows <= 6; rows += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -318,7 +318,7 @@
           .channels(channels)
           .rows(rows)
           .qmax(128)
-          .Test(xnn_f16_vmulcaddc_ukernel_c16__neonfp16arith_2x);
+          .Test(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x);
       }
     }
   }

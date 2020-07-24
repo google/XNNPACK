@@ -28,12 +28,12 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_vmulcaddc_ukernel_c(\d+)__(.+)_(\d+)x$", name)
+  match = re.match(r"^xnn_(f16|f32)_vmulcaddc(_(minmax))?_ukernel_c(\d+)__(.+)_(\d+)x$", name)
   assert match is not None
-  channel_tile = int(match.group(2))
-  row_tile = int(match.group(4))
+  channel_tile = int(match.group(4))
+  row_tile = int(match.group(6))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(3))
+  arch, isa = xnncommon.parse_target_name(target_name=match.group(5))
   return channel_tile, row_tile, arch, isa
 
 
