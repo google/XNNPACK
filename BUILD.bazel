@@ -671,6 +671,8 @@ WASMSIMD_UKERNELS = [
     "src/f32-gavgpool/7p7x-minmax-wasmsimd-x86-c4.c",
     "src/f32-gavgpool/7x-minmax-wasmsimd-arm-c4.c",
     "src/f32-gavgpool/7x-minmax-wasmsimd-x86-c4.c",
+    "src/f32-gavgpool-cw/wasmsimd-arm-x4.c",
+    "src/f32-gavgpool-cw/wasmsimd-x86-x4.c",
     "src/f32-hswish/gen/hswish-wasmsimd-x4.c",
     "src/f32-hswish/gen/hswish-wasmsimd-x8.c",
     "src/f32-hswish/gen/hswish-wasmsimd-x16.c",
