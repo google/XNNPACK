@@ -8,6 +8,7 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #include <arm_neon.h>
 
@@ -16,7 +17,7 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_requantize_precise__neon(
+void xnn_qu8_requantize_precise__neon(
     size_t n,
     const int32_t* input,
     float scale,

@@ -9,13 +9,14 @@
 #include <assert.h>
 #include <math.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #include <fp16/bitcasts.h>
 
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_requantize_fp32__scalar_lrintf(
+void xnn_qu8_requantize_fp32__scalar_lrintf(
     size_t n,
     const int32_t* input,
     float scale,
@@ -65,7 +66,7 @@ void xnn_requantize_fp32__scalar_lrintf(
   }
 }
 
-void xnn_requantize_fp32__scalar_magic(
+void xnn_qu8_requantize_fp32__scalar_magic(
     size_t n,
     const int32_t* input,
     float scale,

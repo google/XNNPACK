@@ -88,42 +88,35 @@ class Requantization : public benchmark::Fixture {
 
 BENCHMARK_F(Requantization, precise__scalar_unsigned32)(benchmark::State& state) {
   for (auto _ : state) {
-    xnn_requantize_precise__scalar_unsigned32(
+    xnn_qu8_requantize_precise__scalar_unsigned32(
         n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
   }
 }
 
 BENCHMARK_F(Requantization, precise__scalar_unsigned64)(benchmark::State& state) {
   for (auto _ : state) {
-    xnn_requantize_precise__scalar_unsigned64(
+    xnn_qu8_requantize_precise__scalar_unsigned64(
         n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
   }
 }
 
 BENCHMARK_F(Requantization, precise__scalar_signed64)(benchmark::State& state) {
   for (auto _ : state) {
-    xnn_requantize_precise__scalar_signed64(
+    xnn_qu8_requantize_precise__scalar_signed64(
         n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
   }
 }
 
 BENCHMARK_F(Requantization, fp32__scalar_lrintf)(benchmark::State& state) {
   for (auto _ : state) {
-    xnn_requantize_fp32__scalar_lrintf(
+    xnn_qu8_requantize_fp32__scalar_lrintf(
         n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
   }
 }
 
 BENCHMARK_F(Requantization, fp32__scalar_magic)(benchmark::State& state) {
   for (auto _ : state) {
-    xnn_requantize_fp32__scalar_magic(
-        n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
-  }
-}
-
-BENCHMARK_F(Requantization, gemmlowp__scalar)(benchmark::State& state) {
-  for (auto _ : state) {
-    xnn_requantize_gemmlowp__scalar(
+    xnn_qu8_requantize_fp32__scalar_magic(
         n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
   }
 }
@@ -131,14 +124,14 @@ BENCHMARK_F(Requantization, gemmlowp__scalar)(benchmark::State& state) {
 #if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   BENCHMARK_F(Requantization, precise__psimd)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_precise__psimd(
+      xnn_qu8_requantize_precise__psimd(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
 
   BENCHMARK_F(Requantization, fp32__psimd)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_fp32__psimd(
+      xnn_qu8_requantize_fp32__psimd(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
@@ -148,7 +141,7 @@ BENCHMARK_F(Requantization, gemmlowp__scalar)(benchmark::State& state) {
 #if XNN_ARCH_WASMSIMD
   BENCHMARK_F(Requantization, fp32__wasmsimd)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_fp32__wasmsimd(
+      xnn_qu8_requantize_fp32__wasmsimd(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
@@ -158,28 +151,21 @@ BENCHMARK_F(Requantization, gemmlowp__scalar)(benchmark::State& state) {
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_F(Requantization, precise__neon)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_precise__neon(
+      xnn_qu8_requantize_precise__neon(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
 
   BENCHMARK_F(Requantization, fp32__neon)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_fp32__neon(
+      xnn_qu8_requantize_fp32__neon(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
 
   BENCHMARK_F(Requantization, q31__neon)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_q31__neon(
-          n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
-    }
-  }
-
-  BENCHMARK_F(Requantization, gemmlowp__neon)(benchmark::State& state) {
-    for (auto _ : state) {
-      xnn_requantize_gemmlowp__neon(
+      xnn_qu8_requantize_q31__neon(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
@@ -188,70 +174,49 @@ BENCHMARK_F(Requantization, gemmlowp__scalar)(benchmark::State& state) {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_F(Requantization, precise__sse2)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_precise__sse2(
+      xnn_qu8_requantize_precise__sse2(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
 
   BENCHMARK_F(Requantization, precise__ssse3)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_precise__ssse3(
+      xnn_qu8_requantize_precise__ssse3(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
 
   BENCHMARK_F(Requantization, precise__sse4)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_precise__sse4(
+      xnn_qu8_requantize_precise__sse4(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
 
   BENCHMARK_F(Requantization, fp32__sse2)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_fp32__sse2(
+      xnn_qu8_requantize_fp32__sse2(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
 
   BENCHMARK_F(Requantization, q31__sse2)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_q31__sse2(
+      xnn_qu8_requantize_q31__sse2(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
 
   BENCHMARK_F(Requantization, q31__ssse3)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_q31__ssse3(
+      xnn_qu8_requantize_q31__ssse3(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
 
   BENCHMARK_F(Requantization, q31__sse4)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_requantize_q31__sse4(
-          n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
-    }
-  }
-
-  BENCHMARK_F(Requantization, gemmlowp__sse2)(benchmark::State& state) {
-    for (auto _ : state) {
-      xnn_requantize_gemmlowp__sse2(
-          n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
-    }
-  }
-
-  BENCHMARK_F(Requantization, gemmlowp__ssse3)(benchmark::State& state) {
-    for (auto _ : state) {
-      xnn_requantize_gemmlowp__ssse3(
-          n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
-    }
-  }
-
-  BENCHMARK_F(Requantization, gemmlowp__sse4)(benchmark::State& state) {
-    for (auto _ : state) {
-      xnn_requantize_gemmlowp__sse4(
+      xnn_qu8_requantize_q31__sse4(
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }

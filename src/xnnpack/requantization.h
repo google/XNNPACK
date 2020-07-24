@@ -27,7 +27,7 @@
 #include <xnnpack/scalar-utils.h>
 
 
-static inline uint8_t xnn_q31_requantize(
+static inline uint8_t xnn_qu8_requantize_q31(
   int32_t n,
   union xnn_q31_requantization_params params)
 {
@@ -45,7 +45,7 @@ static inline uint8_t xnn_q31_requantize(
   return (uint8_t) (n + params.scalar.zero_point);
 }
 
-static inline uint8_t xnn_avgpool_quantize(
+static inline uint8_t xnn_qu8_quantize_avgpool(
   int32_t n,
   union xnn_qu8_avgpool_params params)
 {
@@ -63,7 +63,7 @@ static inline uint8_t xnn_avgpool_quantize(
   return (uint8_t) (n + params.scalar.output_zero_point);
 }
 
-static inline uint8_t xnn_add_quantize(
+static inline uint8_t xnn_qu8_quantize_add(
   uint8_t a, uint8_t b,
   union xnn_qu8_add_params params)
 {

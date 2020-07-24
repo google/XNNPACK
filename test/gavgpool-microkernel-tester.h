@@ -193,7 +193,7 @@ class GAvgPoolMicrokernelTester {
           acc += input[n * input_stride() + c];
         }
         accumulators[c] = acc;
-        output_ref[c] = xnn_avgpool_quantize(acc, scalar_quantization_params);
+        output_ref[c] = xnn_qu8_quantize_avgpool(acc, scalar_quantization_params);
         output_fp[c] = float(acc) * (input_scale() / (output_scale() * float(rows()))) + float(output_zero_point());
         output_fp[c] = std::min<float>(output_fp[c], float(qmax()));
         output_fp[c] = std::max<float>(output_fp[c], float(qmin()));
@@ -269,7 +269,7 @@ class GAvgPoolMicrokernelTester {
         }
 
         accumulators[c] = acc;
-        output_ref[c] = xnn_avgpool_quantize(acc, scalar_quantization_params);
+        output_ref[c] = xnn_qu8_quantize_avgpool(acc, scalar_quantization_params);
         output_fp[c] = float(acc) * (input_scale() / (output_scale() * float(rows()))) + float(output_zero_point());
         output_fp[c] = std::min<float>(output_fp[c], float(qmax()));
         output_fp[c] = std::max<float>(output_fp[c], float(qmin()));

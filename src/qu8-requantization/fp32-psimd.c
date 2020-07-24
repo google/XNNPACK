@@ -8,13 +8,14 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #include <psimd.h>
 
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_requantize_fp32__psimd(
+void xnn_qu8_requantize_fp32__psimd(
     size_t n,
     const int32_t* input,
     float scale,

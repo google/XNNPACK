@@ -273,7 +273,7 @@ class AvgPoolMicrokernelTester {
             }
           }
           accumulator[x * channels() + c] = acc;
-          output_ref[x * channels() + c] = xnn_avgpool_quantize(acc, scalar_quantization_params);
+          output_ref[x * channels() + c] = xnn_qu8_quantize_avgpool(acc, scalar_quantization_params);
           const float scaled_acc =
             float(acc) * input_scale() / (output_scale() * float(pooling_elements())) + float(output_zero_point());
           output_real[x * channels() + c] = std::min(std::max(scaled_acc, float(qmin())), float(qmax()));
@@ -376,7 +376,7 @@ class AvgPoolMicrokernelTester {
             }
           }
           accumulator[x * channels() + c] = acc;
-          output_ref[x * channels() + c] = xnn_avgpool_quantize(acc, scalar_quantization_params);
+          output_ref[x * channels() + c] = xnn_qu8_quantize_avgpool(acc, scalar_quantization_params);
           const float scaled_acc =
             float(acc) * input_scale() / (output_scale() * float(pooling_elements())) + float(output_zero_point());
           output_real[x * channels() + c] = std::min(std::max(scaled_acc, float(qmin())), float(qmax()));
