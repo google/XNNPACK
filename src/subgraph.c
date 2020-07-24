@@ -515,10 +515,13 @@ enum xnn_status xnn_subgraph_optimize(
           case xnn_node_type_average_pooling_2d:
           case xnn_node_type_clamp:
           case xnn_node_type_convolution_2d:
+          case xnn_node_type_divide:
+          case xnn_node_type_deconvolution_2d:
           case xnn_node_type_depthwise_convolution_2d:
           case xnn_node_type_fully_connected:
           case xnn_node_type_multiply2:
           case xnn_node_type_max_pooling_2d:
+          case xnn_node_type_subtract:
             xnn_log_info("fuse Clamp Node #%"PRIu32" into upstream Node #%"PRIu32, consumer_id, producer_id);
             assert(producer->num_outputs == 1);
             assert(consumer->num_inputs == 1);
