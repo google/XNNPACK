@@ -536,6 +536,9 @@ SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/requantization/fp32-psimd.c)
 
 SET(XNNPACK_NEON_MICROKERNEL_SRCS
+  src/f32-argmaxpool/4x-neon-c4.c
+  src/f32-argmaxpool/9p8x-neon-c4.c
+  src/f32-argmaxpool/9x-neon-c4.c
   src/f32-avgpool/9p8x-minmax-neon-c4.c
   src/f32-avgpool/9x-minmax-neon-c4.c
   src/f32-clamp/gen/neon-x4.c
