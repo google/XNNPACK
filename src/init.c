@@ -2048,10 +2048,17 @@ static void init(void) {
         .output_width_tile = 4,
         .output_height_tile = 1,
       };
-      xnn_params.f32.gavgpool_cw = (struct gavgpool_cw_parameters) {
-        .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f32_gavgpool_cw_ukernel__psimd_x4,
-        .channel_tile = 4,
-      };
+      if (is_wasm_x86) {
+        xnn_params.f32.gavgpool_cw = (struct gavgpool_cw_parameters) {
+          .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4,
+          .channel_tile = 4,
+        };
+      } else {
+        xnn_params.f32.gavgpool_cw = (struct gavgpool_cw_parameters) {
+          .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_x4,
+          .channel_tile = 4,
+        };
+      }
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
