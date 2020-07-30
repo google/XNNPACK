@@ -250,7 +250,6 @@ union xnn_qu8_gemm_params {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) int16_t kernel_zero_point[8];
-    XNN_ALIGN(16) int16_t input_zero_point[8];
     XNN_ALIGN(16) uint32_t multiplier[4];
     XNN_ALIGN(16) uint64_t rounding[2];
     XNN_ALIGN(16) int32_t remainder_mask[4];
