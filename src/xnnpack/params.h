@@ -339,7 +339,7 @@ union xnn_qu8_avgpool_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_q31_requantization_params {
+union xnn_qu8_requantization_params {
   struct {
     int32_t multiplier;
     int32_t remainder_mask;
@@ -348,11 +348,7 @@ union xnn_q31_requantization_params {
     int32_t min_less_zero_point;
     int32_t max_less_zero_point;
     int32_t zero_point;
-  } scalar;
-};
-
-union xnn_requantization_params {
-  union xnn_q31_requantization_params q31;
+  } q31;
 };
 
 typedef void (*xnn_ppmm_ukernel_function)(

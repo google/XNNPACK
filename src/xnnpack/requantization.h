@@ -29,20 +29,20 @@
 
 static inline uint8_t xnn_qu8_requantize_q31(
   int32_t n,
-  union xnn_q31_requantization_params params)
+  union xnn_qu8_requantization_params params)
 {
-  const int64_t product = (int64_t) n * (int64_t) params.scalar.multiplier;
+  const int64_t product = (int64_t) n * (int64_t) params.q31.multiplier;
   const int32_t q31product = (int32_t) (uint32_t) ((uint64_t) (product + INT64_C(0x40000000)) >> 31);
-  const int32_t remainder = (q31product & params.scalar.remainder_mask) - (int32_t) (n < 0);
-  n = asr_s32(q31product, params.scalar.shift) + (int32_t) (remainder > params.scalar.remainder_threshold);
-  if (n < params.scalar.min_less_zero_point) {
-    n = params.scalar.min_less_zero_point;
+  const int32_t remainder = (q31product & params.q31.remainder_mask) - (int32_t) (n < 0);
+  n = asr_s32(q31product, params.q31.shift) + (int32_t) (remainder > params.q31.remainder_threshold);
+  if (n < params.q31.min_less_zero_point) {
+    n = params.q31.min_less_zero_point;
   }
-  if (n > params.scalar.max_less_zero_point) {
-    n = params.scalar.max_less_zero_point;
+  if (n > params.q31.max_less_zero_point) {
+    n = params.q31.max_less_zero_point;
   }
 
-  return (uint8_t) (n + params.scalar.zero_point);
+  return (uint8_t) (n + params.q31.zero_point);
 }
 
 inline static uint8_t xnn_qu8_requantize_precise(

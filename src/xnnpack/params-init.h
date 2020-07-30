@@ -891,7 +891,7 @@ static inline union xnn_qu8_add_params xnn_init_scalar_qu8_add_params(
   return params;
 }
 
-static inline union xnn_q31_requantization_params xnn_init_scalar_requantization_params(
+static inline union xnn_qu8_requantization_params xnn_init_scalar_qu8_requantization_params(
   float scale,
   uint8_t zero_point,
   uint8_t min,
@@ -912,16 +912,16 @@ static inline union xnn_q31_requantization_params xnn_init_scalar_requantization
   assert(shift >= 0);
   assert(shift < 32);
 
-  union xnn_q31_requantization_params params;
+  union xnn_qu8_requantization_params params;
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
-  params.scalar.multiplier = multiplier;
-  params.scalar.remainder_mask = (int32_t) remainder_mask;
-  params.scalar.remainder_threshold = (int32_t) remainder_threshold;
-  params.scalar.shift = (uint32_t) shift;
-  params.scalar.min_less_zero_point = (int32_t) (uint32_t) min - (int32_t) (uint32_t) zero_point;
-  params.scalar.max_less_zero_point = (int32_t) (uint32_t) max - (int32_t) (uint32_t) zero_point;
-  params.scalar.zero_point = (int32_t) (uint32_t) zero_point;
+  params.q31.multiplier = multiplier;
+  params.q31.remainder_mask = (int32_t) remainder_mask;
+  params.q31.remainder_threshold = (int32_t) remainder_threshold;
+  params.q31.shift = (uint32_t) shift;
+  params.q31.min_less_zero_point = (int32_t) (uint32_t) min - (int32_t) (uint32_t) zero_point;
+  params.q31.max_less_zero_point = (int32_t) (uint32_t) max - (int32_t) (uint32_t) zero_point;
+  params.q31.zero_point = (int32_t) (uint32_t) zero_point;
   return params;
 }
 

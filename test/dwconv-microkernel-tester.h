@@ -249,9 +249,8 @@ class DWConvMicrokernelTester {
             kernel_zero_point(), requantization_scale, output_zero_point, qmin(), qmax());
           break;
       }
-      const union xnn_q31_requantization_params scalar_requantization_params =
-        xnn_init_scalar_requantization_params(
-          requantization_scale, output_zero_point, qmin(), qmax());
+      const union xnn_qu8_requantization_params scalar_requantization_params =
+        xnn_init_scalar_qu8_requantization_params(requantization_scale, output_zero_point, qmin(), qmax());
 
       // Renormalize reference results.
       for (size_t x = 0; x < width(); x++) {
