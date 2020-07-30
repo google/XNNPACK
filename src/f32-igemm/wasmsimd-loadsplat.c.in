@@ -41,6 +41,8 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__wasmsimd_loadsplat${
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
+  $if ACTIVATION == "RELU":
+    const v128_t vzero = wasm_f32x4_splat(0.0f);
 
   float* c0 = c;
   $for M in range(1, MR):
@@ -120,7 +122,6 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__wasmsimd_loadsplat${
           $for M in range(MR):
             vacc${M}x${ABC[N:N+4]} = wasm_f32x4_min(vacc${M}x${ABC[N:N+4]}, vmax);
     $elif ACTIVATION == "RELU":
-      const v128_t vzero = wasm_f32x4_splat(0.0f);
       $for N in range(0, NR, 4):
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = wasm_i32x4_max(vacc${M}x${ABC[N:N+4]}, vzero);

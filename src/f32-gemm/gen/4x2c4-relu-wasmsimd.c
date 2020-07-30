@@ -55,6 +55,7 @@ void xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd(
     a3 = a2;
     c3 = c2;
   }
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
 
   do {
     v128_t vacc0x0c4 = wasm_f32x4_replace_lane(wasm_f32x4_splat(0.0f), 0, w[0]);
@@ -105,7 +106,6 @@ void xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd(
       const v128_t vb1 = wasm_v128_load(w + 4);
       w += 8;
 
-      const v128_t vzero = wasm_f32x4_splat(0.0f);
       const v128_t vmask0 = wasm_f32x4_eq(vb0, vzero);
       const v128_t vmask1 = wasm_f32x4_eq(vb1, vzero);
 
@@ -139,7 +139,6 @@ void xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd(
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 0, 1, 4, 5),
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 2, 3, 6, 7));
 
-    const v128_t vzero = wasm_f32x4_splat(0.0f);
     vacc01x01 = wasm_i32x4_max(vacc01x01, vzero);
     vacc23x01 = wasm_i32x4_max(vacc23x01, vzero);
 

@@ -34,6 +34,7 @@ void xnn_f32_gemm_minmax_ukernel_4x2c4__wasmsimd_arm(
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
 
   const float* a0 = a;
   float* c0 = c;
@@ -107,7 +108,6 @@ void xnn_f32_gemm_minmax_ukernel_4x2c4__wasmsimd_arm(
       const v128_t vb1 = wasm_v128_load(w + 4);
       w += 8;
 
-      const v128_t vzero = wasm_f32x4_splat(0.0f);
       const v128_t vmask0 = wasm_f32x4_eq(vb0, vzero);
       const v128_t vmask1 = wasm_f32x4_eq(vb1, vzero);
 

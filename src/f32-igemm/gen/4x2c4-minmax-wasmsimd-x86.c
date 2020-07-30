@@ -53,6 +53,7 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__wasmsimd_x86(
   if XNN_UNPREDICTABLE(mr != 4) {
     c3 = c2;
   }
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
 
   do {
     v128_t vacc0x0c4 = wasm_f32x4_replace_lane(wasm_f32x4_splat(0.0f), 0, w[0]);
@@ -123,7 +124,6 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__wasmsimd_x86(
         const v128_t vb1 = wasm_v128_load(w + 4);
         w += 8;
 
-        const v128_t vzero = wasm_f32x4_splat(0.0f);
         const v128_t vmask0 = wasm_f32x4_eq(vb0, vzero);
         const v128_t vmask1 = wasm_f32x4_eq(vb1, vzero);
 
