@@ -77,7 +77,7 @@ static void GEMMBenchmark(benchmark::State& state,
   std::fill(c.begin(), c.end(), 0xA5);
 
   union xnn_qu8_gemm_params quantization_params =
-    xnn_init_qu8_gemm_params(127, 127, 0.75f, 127, 1, 254);
+    xnn_init_qu8_gemm_params(127, 0.75f, 127, 1, 254);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

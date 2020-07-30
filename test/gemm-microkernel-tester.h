@@ -268,13 +268,11 @@ class GemmMicrokernelTester {
       switch (variant) {
         case Variant::Native:
           quantization_params = xnn_init_qu8_gemm_params(
-            a_zero_point(), b_zero_point(),
-            requantization_scale, c_zero_point, qmin(), qmax());
+            b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
           quantization_params = xnn_init_scalar_qu8_gemm_params(
-            a_zero_point(), b_zero_point(),
-            requantization_scale, c_zero_point, qmin(), qmax());
+            b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
           break;
       }
       const union xnn_q31_requantization_params scalar_requantization_params =
@@ -396,13 +394,11 @@ class GemmMicrokernelTester {
       switch (variant) {
         case Variant::Native:
           quantization_params = xnn_init_qu8_gemm_params(
-            a_zero_point(), b_zero_point(),
-            requantization_scale, c_zero_point, qmin(), qmax());
+            b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
           quantization_params = xnn_init_scalar_qu8_gemm_params(
-            a_zero_point(), b_zero_point(),
-            requantization_scale, c_zero_point, qmin(), qmax());
+            b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
           break;
       }
       const union xnn_q31_requantization_params scalar_requantization_params =

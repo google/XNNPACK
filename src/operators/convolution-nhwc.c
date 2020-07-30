@@ -486,7 +486,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     .kernel_zero_point = kernel_zero_point,
   };
   const union xnn_qu8_gemm_params params = xnn_init_qu8_gemm_params(
-    input_zero_point, kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
+    kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,

@@ -28,7 +28,6 @@
 
 
 static inline union xnn_qu8_gemm_params xnn_init_scalar_qu8_gemm_params(
-  uint8_t input_zero_point,
   uint8_t kernel_zero_point,
   float scale,
   uint8_t output_zero_point,
@@ -52,7 +51,6 @@ static inline union xnn_qu8_gemm_params xnn_init_scalar_qu8_gemm_params(
   const uint32_t remainder_threshold = remainder_mask >> 1;
 
   union xnn_qu8_gemm_params params;
-  params.scalar.input_zero_point = (int32_t) (uint32_t) input_zero_point;
   params.scalar.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
   params.scalar.multiplier = multiplier;
   params.scalar.remainder_mask = (int32_t) remainder_mask;
@@ -67,7 +65,6 @@ static inline union xnn_qu8_gemm_params xnn_init_scalar_qu8_gemm_params(
 }
 
 static inline union xnn_qu8_gemm_params xnn_init_qu8_gemm_params(
-  uint8_t input_zero_point,
   uint8_t kernel_zero_point,
   float scale,
   uint8_t output_zero_point,
@@ -92,7 +89,6 @@ static inline union xnn_qu8_gemm_params xnn_init_qu8_gemm_params(
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
     for (uint32_t i = 0; i < 8; i++) {
-      params.sse2.input_zero_point[i] = (int16_t) (uint16_t) input_zero_point;
       params.sse2.kernel_zero_point[i] = (int16_t) (uint16_t) kernel_zero_point;
     }
     params.sse2.multiplier[0] = multiplier;
@@ -119,8 +115,7 @@ static inline union xnn_qu8_gemm_params xnn_init_qu8_gemm_params(
       params.sse2.output_max[i] = output_max;
     }
   #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-    params.neon.input_zero_point = (int16_t) (uint16_t) input_zero_point;
-    params.neon.kernel_zero_point = (int16_t) (uint16_t) kernel_zero_point;
+    params.neon.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
     params.neon.multiplier = multiplier;
     params.neon.right_shift = -shift;
     params.neon.output_zero_point = (int16_t) (uint16_t) output_zero_point;
@@ -129,7 +124,6 @@ static inline union xnn_qu8_gemm_params xnn_init_qu8_gemm_params(
   #else
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
-    params.scalar.input_zero_point = (int32_t) (uint32_t) input_zero_point;
     params.scalar.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
     params.scalar.multiplier = multiplier;
     params.scalar.remainder_mask = (int32_t) remainder_mask;

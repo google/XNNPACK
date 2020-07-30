@@ -229,7 +229,6 @@ union xnn_f32_hswish_params {
 union xnn_qu8_gemm_params {
   struct {
     int32_t kernel_zero_point;
-    int32_t input_zero_point;
     int32_t multiplier;
     int32_t remainder_mask;
     int32_t remainder_threshold;
@@ -240,8 +239,7 @@ union xnn_qu8_gemm_params {
   } scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    int16_t kernel_zero_point;
-    int16_t input_zero_point;
+    int32_t kernel_zero_point;
     int32_t multiplier;
     int32_t right_shift;
     int16_t output_zero_point;

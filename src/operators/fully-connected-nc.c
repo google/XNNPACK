@@ -293,7 +293,7 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
   }
 
   const union xnn_qu8_gemm_params params = xnn_init_qu8_gemm_params(
-    input_zero_point, kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
+    kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   const struct xnn_qu8_packing_params packing_params = {
     .input_zero_point = input_zero_point,
     .kernel_zero_point = kernel_zero_point,
