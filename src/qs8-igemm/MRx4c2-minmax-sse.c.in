@@ -1,0 +1,266 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
+#include <assert.h>
+
+#include <${SSE_HEADER}>
+
+#include <xnnpack/igemm.h>
+
+
+$ISA = {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
+void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const int8_t** restrict a,
+    const void* restrict w,
+    int8_t* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const int8_t* zero,
+    const union xnn_qs8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(ks != 0);
+  assert(ks % (${MR} * sizeof(void*)) == 0);
+  assert(a_offset % sizeof(int8_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  int8_t* c0 = c;
+  $for M in range(1, MR):
+    int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  do {
+    __m128i vacc0x0123 = _mm_loadu_si128((const __m128i*) w);
+    $for M in range(1, MR):
+      __m128i vacc${M}x0123 = vacc0x0123;
+    w = (const void*) ((uintptr_t) w + 16);
+
+    size_t p = ks;
+    do {
+      $for M in range(MR):
+        const int8_t* restrict a${M} = a[${M}];
+        if XNN_UNPREDICTABLE(a${M} != zero) {
+          a${M} = (const int8_t*) ((uintptr_t) a${M} + a_offset);
+        }
+      a += ${MR};
+
+      size_t k = kc;
+      while (k >= 8 * sizeof(int8_t)) {
+        $for M in range(MR):
+          const __m128i va${M} = _mm_loadl_epi64((const __m128i*) a${M});
+          $if SSE == 4:
+            const __m128i vxa${M} = _mm_cvtepi8_epi16(va${M});
+          $else:
+            const __m128i vxa${M} = _mm_unpacklo_epi8(va${M}, _mm_cmpgt_epi8(_mm_setzero_si128(), va${M}));
+          a${M} += 8;
+
+        $for K in range(4):
+          $if K == 0:
+            const __m128i vb${K} = _mm_loadl_epi64((const __m128i*) w);
+          $else:
+            const __m128i vb${K} = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + ${K * 8}));
+          $if SSE == 4:
+            const __m128i vxb${K} = _mm_cvtepi8_epi16(vb${K});
+          $else:
+            const __m128i vxb${K} = _mm_unpacklo_epi8(vb${K}, _mm_cmpgt_epi8(_mm_setzero_si128(), vb${K}));
+
+          $for M in range(MR):
+            vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+              _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}));
+
+        w = (const void*) ((uintptr_t) w + 32);
+        k -= 8 * sizeof(int8_t);
+      }
+      if (k != 0) {
+        $for M in range(MR):
+          const __m128i va${M} = _mm_loadl_epi64((const __m128i*) a${M});
+          $if SSE == 4:
+            const __m128i vxa${M} = _mm_cvtepi8_epi16(va${M});
+          $else:
+            const __m128i vxa${M} = _mm_unpacklo_epi8(va${M}, _mm_cmpgt_epi8(_mm_setzero_si128(), va${M}));
+          a${M} = (const int8_t*) ((uintptr_t) a${M} + k);
+
+        const __m128i vb0 = _mm_loadl_epi64((const __m128i*) w);
+        w = (const void*) ((uintptr_t) w + 8);
+        const __m128i vxb0 = _mm_unpacklo_epi8(vb0, _mm_cmpgt_epi8(_mm_setzero_si128(), vb0));
+
+        $for M in range(MR):
+          vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+            _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(0, 0, 0, 0)), vxb0));
+
+        if (k > 2 * sizeof(int8_t)) {
+          const __m128i vb1 = _mm_loadl_epi64((const __m128i*) w);
+          w = (const void*) ((uintptr_t) w + 8);
+          const __m128i vxb1 = _mm_unpacklo_epi8(vb1, _mm_cmpgt_epi8(_mm_setzero_si128(), vb1));
+
+          $for M in range(MR):
+            vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+              _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(1, 1, 1, 1)), vxb1));
+
+          if (k > 4 * sizeof(int8_t)) {
+            const __m128i vb2 = _mm_loadl_epi64((const __m128i*) w);
+            w = (const void*) ((uintptr_t) w + 8);
+            const __m128i vxb2 = _mm_unpacklo_epi8(vb2, _mm_cmpgt_epi8(_mm_setzero_si128(), vb2));
+
+            $for M in range(MR):
+              vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+                _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
+
+            if (k > 6 * sizeof(int8_t)) {
+              const __m128i vb3 = _mm_loadl_epi64((const __m128i*) w);
+              w = (const void*) ((uintptr_t) w + 8);
+              const __m128i vxb3 = _mm_unpacklo_epi8(vb3, _mm_cmpgt_epi8(_mm_setzero_si128(), vb3));
+
+              $for M in range(MR):
+                vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+                  _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
+            }
+          }
+        }
+      }
+      p -= ${MR} * sizeof(void*);
+    } while (p != 0);
+
+    const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
+    const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
+
+    $if SSE == 4:
+      $for M in range(MR):
+        const __m128i vacc${M}x2301 = _mm_shuffle_epi32(vacc${M}x0123, _MM_SHUFFLE(2, 3, 0, 1));
+
+      $for M in range(MR):
+        const __m128i vprod${M}x02 = _mm_add_epi64(_mm_mul_epi32(vacc${M}x0123, vmultiplier), vrounding);
+
+      $for M in range(MR):
+        const __m128i vprod${M}x13 = _mm_add_epi64(_mm_mul_epi32(vacc${M}x2301, vmultiplier), vrounding);
+
+      $for M in range(MR):
+        const __m128i vq31prod${M}x02 = _mm_srli_epi64(vprod${M}x02, 31);
+        const __m128i vq31prod${M}x13 = _mm_add_epi64(vprod${M}x13, vprod${M}x13);
+
+      $for M in range(MR):
+        const __m128i vq31prod${M}x0123 = _mm_blend_epi16(vq31prod${M}x02, vq31prod${M}x13, 0xCC);
+    $else:
+      $for M in range(MR):
+        const __m128i vnmask${M}x0123 = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc${M}x0123);
+
+      $for M in range(MR):
+        $if SSE >= 3:
+          const __m128i vabsacc${M}x0123 = _mm_abs_epi32(vacc${M}x0123);
+        $else:
+          const __m128i vabsacc${M}x0123 = _mm_sub_epi32(_mm_xor_si128(vacc${M}x0123, vnmask${M}x0123), vnmask${M}x0123);
+
+      $for M in range(MR):
+        const __m128i vabsacc${M}x1032 = _mm_shuffle_epi32(vabsacc${M}x0123, _MM_SHUFFLE(2, 3, 0, 1));
+
+      $for M in range(MR):
+        const __m128i vabsprod${M}x02 = _mm_mul_epu32(vabsacc${M}x0123, vmultiplier);
+
+      $for M in range(MR):
+        const __m128i vnmask${M}x02 = _mm_shuffle_epi32(vnmask${M}x0123, _MM_SHUFFLE(2, 2, 0, 0));
+
+      $for M in range(MR):
+        const __m128i vprod${M}x02 = _mm_sub_epi64(_mm_xor_si128(vabsprod${M}x02, vnmask${M}x02), vnmask${M}x02);
+
+      $for M in range(MR):
+        const __m128i vq31prod${M}x02 = _mm_srli_epi64(_mm_add_epi64(vprod${M}x02, vrounding), 31);
+
+      $for M in range(MR):
+        const __m128i vabsprod${M}x13 = _mm_mul_epu32(vabsacc${M}x1032, vmultiplier);
+
+      $for M in range(MR):
+        const __m128i vnmask${M}x13 = _mm_shuffle_epi32(vnmask${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));
+
+      $for M in range(MR):
+        const __m128i vprod${M}x13 = _mm_sub_epi64(_mm_xor_si128(vabsprod${M}x13, vnmask${M}x13), vnmask${M}x13);
+
+      $for M in range(MR):
+        const __m128i vq31prod${M}x13 = _mm_srli_epi64(_mm_add_epi64(vprod${M}x13, vrounding), 31);
+
+      $for M in range(MR):
+        const __m128i vq31prod${M}x0213 = _mm_castps_si128(_mm_shuffle_ps(
+            _mm_castsi128_ps(vq31prod${M}x02), _mm_castsi128_ps(vq31prod${M}x13), _MM_SHUFFLE(2, 0, 2, 0)));
+
+      $for M in range(MR):
+        const __m128i vq31prod${M}x0123 = _mm_shuffle_epi32(vq31prod${M}x0213, _MM_SHUFFLE(3, 1, 2, 0));
+
+    const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->sse2.remainder_mask);
+    $for M in range(MR):
+      const __m128i vrem${M}x0123 =
+        _mm_add_epi32(_mm_and_si128(vq31prod${M}x0123, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vq31prod${M}x0123));
+
+    const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->sse2.remainder_threshold);
+    const __m128i vshift = _mm_load_si128((const __m128i*) params->sse2.shift);
+    $for M in range(MR):
+      vacc${M}x0123 =
+        _mm_sub_epi32(_mm_sra_epi32(vq31prod${M}x0123, vshift), _mm_cmpgt_epi32(vrem${M}x0123, vremainder_threshold));
+
+    const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
+    $for M in range(0, MR, 2):
+      __m128i vacc${M}${min(M+1, MR-1)}x0123 = _mm_adds_epi16(_mm_packs_epi32(vacc${M}x0123, vacc${min(M+1, MR-1)}x0123), voutput_zero_point);
+
+    const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
+    const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
+    $for M in range(0, MR, 2):
+      vacc${M}${min(M+1, MR-1)}x0123 = _mm_min_epi16(_mm_max_epi16(vacc${M}${min(M+1, MR-1)}x0123, voutput_min), voutput_max);
+
+    __m128i vout = _mm_packs_epi16(vacc0${min(1, MR-1)}x0123, vacc${min(2, MR-1)}${min(3, MR-1)}x0123);
+
+    if (nc >= 4) {
+      $for M in reversed(range(1, MR)):
+        $if SSE == 4:
+          *((uint32_t*) c${M}) = (uint32_t) _mm_extract_epi32(vout, ${M});
+        $else:
+          *((uint32_t*) c${M}) = (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(${M}, ${M}, ${M}, ${M})));
+        c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
+      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+
+      a = (const int8_t**restrict) ((uintptr_t) a - ks);
+
+      nc -= 4;
+    } else {
+      if (nc & 2) {
+        $for M in reversed(range(MR)):
+          *((uint16_t*) c${M}) = (uint16_t) _mm_extract_epi16(vout, ${M * 2});
+          c${M} += 2;
+        vout = _mm_srli_epi32(vout, 16);
+      }
+      if (nc & 1) {
+        $if SSE == 4:
+          $for M in reversed(range(MR)):
+            *((int8_t*) c${M}) = (int8_t) _mm_extract_epi8(vout, ${M * 4});
+        $else:
+          $for M in reversed(range(1, MR)):
+            *((int8_t*) c${M}) = (int8_t) _mm_extract_epi16(vout, ${M * 2});
+          *((int8_t*) c0) = (int8_t) _mm_cvtsi128_si32(vout);
+      }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

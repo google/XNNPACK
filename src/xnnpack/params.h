@@ -609,6 +609,20 @@ typedef void (*xnn_qu8_igemm_ukernel_function)(
     const uint8_t* zero,
     const union xnn_qu8_gemm_params* params);
 
+typedef void (*xnn_qs8_igemm_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t kc,
+    size_t ks,
+    const int8_t** a,
+    const void* w,
+    int8_t* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const int8_t* zero,
+    const union xnn_qs8_gemm_params* params);
+
 typedef void (*xnn_conv_hwc_ukernel_function)(
     size_t input_height,
     size_t input_width,

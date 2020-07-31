@@ -188,6 +188,19 @@ XNN_INTERNAL void xnn_pack_qu8_conv_goki_w(
   void* packed_w,
   const struct xnn_qu8_packing_params* params);
 
+XNN_INTERNAL void xnn_pack_qs8_conv_goki_w(
+  size_t g,
+  size_t nc,
+  size_t ks,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const int8_t* k,
+  const int32_t* b,
+  void* packed_w,
+  const struct xnn_qs8_packing_params* params);
+
 
 typedef void (*xnn_pack_conv_kgo_w_function)(
   size_t g,

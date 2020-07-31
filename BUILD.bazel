@@ -1642,6 +1642,8 @@ SSE2_UKERNELS = [
     "src/qs8-requantization/q31-sse2.c",
     "src/qs8-gemm/gen/1x4c2-minmax-sse2.c",
     "src/qs8-gemm/gen/4x4c2-minmax-sse2.c",
+    "src/qs8-igemm/gen/1x4c2-minmax-sse2.c",
+    "src/qs8-igemm/gen/4x4c2-minmax-sse2.c",
     "src/qu8-avgpool/9p8x-minmax-sse2-c8.c",
     "src/qu8-avgpool/9x-minmax-sse2-c8.c",
     "src/qu8-igemm/4x4c2-minmax-sse2.c",
@@ -1678,6 +1680,8 @@ SSE2_UKERNELS = [
 SSSE3_UKERNELS = [
     "src/qs8-gemm/gen/1x4c2-minmax-ssse3.c",
     "src/qs8-gemm/gen/4x4c2-minmax-ssse3.c",
+    "src/qs8-igemm/gen/1x4c2-minmax-ssse3.c",
+    "src/qs8-igemm/gen/4x4c2-minmax-ssse3.c",
     "src/qs8-requantization/precise-ssse3.c",
     "src/qs8-requantization/q31-ssse3.c",
     "src/qu8-requantization/precise-ssse3.c",
@@ -1705,6 +1709,8 @@ SSE41_UKERNELS = [
     "src/f32-vrnd/gen/vrndd-sse41-x8.c",
     "src/qs8-gemm/gen/1x4c2-minmax-sse41.c",
     "src/qs8-gemm/gen/4x4c2-minmax-sse41.c",
+    "src/qs8-igemm/gen/1x4c2-minmax-sse41.c",
+    "src/qs8-igemm/gen/4x4c2-minmax-sse41.c",
     "src/qs8-requantization/fp32-sse4.c",
     "src/qs8-requantization/precise-sse4.c",
     "src/qs8-requantization/q31-sse4.c",
@@ -5007,16 +5013,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_requantization_test",
-    srcs = [
-        "src/xnnpack/requantization-stubs.h",
-        "test/qs8-requantization.cc",
-        "test/requantization-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "qs8_gemm_minmax_test",
     srcs = [
         "test/qs8-gemm-minmax.cc",
@@ -5024,6 +5020,26 @@ xnnpack_unit_test(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qs8_igemm_minmax_test",
+    srcs = [
+        "test/qs8-igemm-minmax.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qs8_requantization_test",
+    srcs = [
+        "src/xnnpack/requantization-stubs.h",
+        "test/qs8-requantization.cc",
+        "test/requantization-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(

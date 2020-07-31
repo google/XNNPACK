@@ -1284,6 +1284,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndd-sse2-x8.c
   src/qs8-gemm/1x4c2-minmax-sse2.c
   src/qs8-gemm/4x4c2-minmax-sse2.c
+  src/qs8-igemm/1x4c2-minmax-sse2.c
+  src/qs8-igemm/4x4c2-minmax-sse2.c
   src/qs8-requantization/fp32-sse2.c
   src/qs8-requantization/precise-sse2.c
   src/qs8-requantization/q31-sse2.c
@@ -1322,6 +1324,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
 SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
   src/qs8-gemm/1x4c2-minmax-ssse3.c
   src/qs8-gemm/4x4c2-minmax-ssse3.c
+  src/qs8-igemm/1x4c2-minmax-ssse3.c
+  src/qs8-igemm/4x4c2-minmax-ssse3.c
   src/qs8-requantization/precise-ssse3.c
   src/qs8-requantization/q31-ssse3.c
   src/qu8-requantization/precise-ssse3.c
@@ -1348,6 +1352,8 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndd-sse41-x8.c
   src/qs8-gemm/1x4c2-minmax-sse41.c
   src/qs8-gemm/4x4c2-minmax-sse41.c
+  src/qs8-igemm/1x4c2-minmax-sse41.c
+  src/qs8-igemm/4x4c2-minmax-sse41.c
   src/qs8-requantization/fp32-sse4.c
   src/qs8-requantization/precise-sse4.c
   src/qs8-requantization/q31-sse4.c
@@ -3302,6 +3308,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(qs8-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qs8-gemm-minmax-test qs8-gemm-minmax-test)
+
+  ADD_EXECUTABLE(qs8-igemm-minmax-test test/qs8-igemm-minmax.cc)
+  SET_TARGET_PROPERTIES(qs8-igemm-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-igemm-minmax-test qs8-igemm-minmax-test)
 
   ADD_EXECUTABLE(qu8-avgpool-minmax-test test/qu8-avgpool-minmax.cc)
   SET_TARGET_PROPERTIES(qu8-avgpool-minmax-test PROPERTIES
