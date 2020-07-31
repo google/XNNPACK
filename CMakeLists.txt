@@ -1284,6 +1284,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndd-sse2-x8.c
   src/qs8-gemm/1x4c2-minmax-sse2.c
   src/qs8-gemm/4x4c2-minmax-sse2.c
+  src/qs8-gemm/1x4c8-minmax-sse2.c
+  src/qs8-gemm/2x4c8-minmax-sse2.c
   src/qs8-igemm/1x4c2-minmax-sse2.c
   src/qs8-igemm/4x4c2-minmax-sse2.c
   src/qs8-requantization/fp32-sse2.c
@@ -1324,6 +1326,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
 SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
   src/qs8-gemm/1x4c2-minmax-ssse3.c
   src/qs8-gemm/4x4c2-minmax-ssse3.c
+  src/qs8-gemm/1x4c8-minmax-ssse3.c
+  src/qs8-gemm/2x4c8-minmax-ssse3.c
   src/qs8-igemm/1x4c2-minmax-ssse3.c
   src/qs8-igemm/4x4c2-minmax-ssse3.c
   src/qs8-requantization/precise-ssse3.c
@@ -1352,6 +1356,8 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndd-sse41-x8.c
   src/qs8-gemm/1x4c2-minmax-sse41.c
   src/qs8-gemm/4x4c2-minmax-sse41.c
+  src/qs8-gemm/1x4c8-minmax-sse41.c
+  src/qs8-gemm/2x4c8-minmax-sse41.c
   src/qs8-igemm/1x4c2-minmax-sse41.c
   src/qs8-igemm/4x4c2-minmax-sse41.c
   src/qs8-requantization/fp32-sse4.c

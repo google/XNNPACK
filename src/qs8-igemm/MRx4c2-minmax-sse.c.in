@@ -57,7 +57,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}(
     __m128i vacc0x0123 = _mm_loadu_si128((const __m128i*) w);
     $for M in range(1, MR):
       __m128i vacc${M}x0123 = vacc0x0123;
-    w = (const void*) ((uintptr_t) w + 16);
+    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
 
     size_t p = ks;
     do {

@@ -15,5 +15,15 @@ tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=3 -o src/qs8-gemm
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=4 -o src/qs8-gemm/gen/1x4c2-minmax-sse41.c
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=4 -o src/qs8-gemm/gen/4x4c2-minmax-sse41.c
 
+### C8 micro-kernels
+tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=2 -o src/qs8-gemm/gen/1x4c8-minmax-sse2.c
+tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=2 -o src/qs8-gemm/gen/2x4c8-minmax-sse2.c
+
+tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=3 -o src/qs8-gemm/gen/1x4c8-minmax-ssse3.c
+tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=3 -o src/qs8-gemm/gen/2x4c8-minmax-ssse3.c
+
+tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=4 -o src/qs8-gemm/gen/1x4c8-minmax-sse41.c
+tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=4 -o src/qs8-gemm/gen/2x4c8-minmax-sse41.c
+
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax.yaml --output test/qs8-gemm-minmax.cc

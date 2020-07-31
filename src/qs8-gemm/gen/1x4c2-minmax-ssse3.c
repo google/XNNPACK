@@ -40,7 +40,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3(
 
   do {
     __m128i vacc0x0123 = _mm_loadu_si128((const __m128i*) w);
-    w = (const void*) ((uintptr_t) w + 16);
+    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
 
     size_t k = kc;
     while (k >= 8 * sizeof(int8_t)) {
