@@ -316,14 +316,14 @@ DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_ukernel_2x2__scal
       const int8_t* zero,                                  \
       const union xnn_qs8_gemm_params* params);
 
-DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse2)
-DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse2)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse2_ld64)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse2_ld64)
 
-DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_1x4c2__ssse3)
-DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_4x4c2__ssse3)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_1x4c2__ssse3_ld64)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_4x4c2__ssse3_ld64)
 
-DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41)
-DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64)
 
 
 #ifdef __cplusplus

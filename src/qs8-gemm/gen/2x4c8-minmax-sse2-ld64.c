@@ -9,12 +9,12 @@
 
 #include <assert.h>
 
-#include <tmmintrin.h>
+#include <emmintrin.h>
 
 #include <xnnpack/gemm.h>
 
 
-void xnn_qs8_gemm_minmax_ukernel_2x4c8__ssse3(
+void xnn_qs8_gemm_minmax_ukernel_2x4c8__sse2_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -89,13 +89,13 @@ void xnn_qs8_gemm_minmax_ukernel_2x4c8__ssse3(
       k += 8 * sizeof(int8_t);
     }
 
-    const __m128i vacc0x01 = _mm_hadd_epi32(vacc0x0, vacc0x1);
-    const __m128i vacc0x23 = _mm_hadd_epi32(vacc0x2, vacc0x3);
-    const __m128i vacc1x01 = _mm_hadd_epi32(vacc1x0, vacc1x1);
-    const __m128i vacc1x23 = _mm_hadd_epi32(vacc1x2, vacc1x3);
+    const __m128i vacc0x02 = _mm_add_epi32(_mm_unpacklo_epi32(vacc0x0, vacc0x2), _mm_unpackhi_epi32(vacc0x0, vacc0x2));
+    const __m128i vacc0x13 = _mm_add_epi32(_mm_unpacklo_epi32(vacc0x1, vacc0x3), _mm_unpackhi_epi32(vacc0x1, vacc0x3));
+    const __m128i vacc1x02 = _mm_add_epi32(_mm_unpacklo_epi32(vacc1x0, vacc1x2), _mm_unpackhi_epi32(vacc1x0, vacc1x2));
+    const __m128i vacc1x13 = _mm_add_epi32(_mm_unpacklo_epi32(vacc1x1, vacc1x3), _mm_unpackhi_epi32(vacc1x1, vacc1x3));
 
-    __m128i vacc0x0123 = _mm_hadd_epi32(vacc0x01, vacc0x23);
-    __m128i vacc1x0123 = _mm_hadd_epi32(vacc1x01, vacc1x23);
+    __m128i vacc0x0123 = _mm_add_epi32(_mm_unpacklo_epi32(vacc0x02, vacc0x13), _mm_unpackhi_epi32(vacc0x02, vacc0x13));
+    __m128i vacc1x0123 = _mm_add_epi32(_mm_unpacklo_epi32(vacc1x02, vacc1x13), _mm_unpackhi_epi32(vacc1x02, vacc1x13));
 
     const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
     const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
@@ -103,8 +103,8 @@ void xnn_qs8_gemm_minmax_ukernel_2x4c8__ssse3(
     const __m128i vnmask0x0123 = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc0x0123);
     const __m128i vnmask1x0123 = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc1x0123);
 
-    const __m128i vabsacc0x0123 = _mm_abs_epi32(vacc0x0123);
-    const __m128i vabsacc1x0123 = _mm_abs_epi32(vacc1x0123);
+    const __m128i vabsacc0x0123 = _mm_sub_epi32(_mm_xor_si128(vacc0x0123, vnmask0x0123), vnmask0x0123);
+    const __m128i vabsacc1x0123 = _mm_sub_epi32(_mm_xor_si128(vacc1x0123, vnmask1x0123), vnmask1x0123);
 
     const __m128i vabsacc0x1032 = _mm_shuffle_epi32(vabsacc0x0123, _MM_SHUFFLE(2, 3, 0, 1));
     const __m128i vabsacc1x1032 = _mm_shuffle_epi32(vabsacc1x0123, _MM_SHUFFLE(2, 3, 0, 1));

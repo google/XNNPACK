@@ -14,7 +14,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41(
+void xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -58,7 +58,7 @@ void xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41(
     __m128i vacc1x0123 = vacc0x0123;
     __m128i vacc2x0123 = vacc0x0123;
     __m128i vacc3x0123 = vacc0x0123;
-    w = (const void*) ((uintptr_t) w + 16);
+    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
 
     size_t p = ks;
     do {

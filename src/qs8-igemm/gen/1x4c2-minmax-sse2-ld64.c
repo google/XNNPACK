@@ -9,12 +9,12 @@
 
 #include <assert.h>
 
-#include <tmmintrin.h>
+#include <emmintrin.h>
 
 #include <xnnpack/igemm.h>
 
 
-void xnn_qs8_igemm_minmax_ukernel_1x4c2__ssse3(
+void xnn_qs8_igemm_minmax_ukernel_1x4c2__sse2_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -43,7 +43,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c2__ssse3(
 
   do {
     __m128i vacc0x0123 = _mm_loadu_si128((const __m128i*) w);
-    w = (const void*) ((uintptr_t) w + 16);
+    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
 
     size_t p = ks;
     do {
@@ -130,7 +130,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c2__ssse3(
 
     const __m128i vnmask0x0123 = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc0x0123);
 
-    const __m128i vabsacc0x0123 = _mm_abs_epi32(vacc0x0123);
+    const __m128i vabsacc0x0123 = _mm_sub_epi32(_mm_xor_si128(vacc0x0123, vnmask0x0123), vnmask0x0123);
 
     const __m128i vabsacc0x1032 = _mm_shuffle_epi32(vabsacc0x0123, _MM_SHUFFLE(2, 3, 0, 1));
 

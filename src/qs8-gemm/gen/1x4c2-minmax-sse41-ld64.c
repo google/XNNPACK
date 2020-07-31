@@ -9,12 +9,12 @@
 
 #include <assert.h>
 
-#include <tmmintrin.h>
+#include <smmintrin.h>
 
 #include <xnnpack/gemm.h>
 
 
-void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3(
+void xnn_qs8_gemm_minmax_ukernel_1x4c2__sse41_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -45,26 +45,26 @@ void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3(
     size_t k = kc;
     while (k >= 8 * sizeof(int8_t)) {
       const __m128i va0 = _mm_loadl_epi64((const __m128i*) a0);
-      const __m128i vxa0 = _mm_unpacklo_epi8(va0, _mm_cmpgt_epi8(_mm_setzero_si128(), va0));
+      const __m128i vxa0 = _mm_cvtepi8_epi16(va0);
       a0 += 8;
 
       const __m128i vb0 = _mm_loadl_epi64((const __m128i*) w);
-      const __m128i vxb0 = _mm_unpacklo_epi8(vb0, _mm_cmpgt_epi8(_mm_setzero_si128(), vb0));
+      const __m128i vxb0 = _mm_cvtepi8_epi16(vb0);
 
       vacc0x0123 = _mm_add_epi32(vacc0x0123,
         _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(0, 0, 0, 0)), vxb0));
       const __m128i vb1 = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + 8));
-      const __m128i vxb1 = _mm_unpacklo_epi8(vb1, _mm_cmpgt_epi8(_mm_setzero_si128(), vb1));
+      const __m128i vxb1 = _mm_cvtepi8_epi16(vb1);
 
       vacc0x0123 = _mm_add_epi32(vacc0x0123,
         _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(1, 1, 1, 1)), vxb1));
       const __m128i vb2 = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + 16));
-      const __m128i vxb2 = _mm_unpacklo_epi8(vb2, _mm_cmpgt_epi8(_mm_setzero_si128(), vb2));
+      const __m128i vxb2 = _mm_cvtepi8_epi16(vb2);
 
       vacc0x0123 = _mm_add_epi32(vacc0x0123,
         _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
       const __m128i vb3 = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + 24));
-      const __m128i vxb3 = _mm_unpacklo_epi8(vb3, _mm_cmpgt_epi8(_mm_setzero_si128(), vb3));
+      const __m128i vxb3 = _mm_cvtepi8_epi16(vb3);
 
       vacc0x0123 = _mm_add_epi32(vacc0x0123,
         _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
@@ -74,7 +74,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3(
     }
     if (k != 0) {
       const __m128i va0 = _mm_loadl_epi64((const __m128i*) a0);
-      const __m128i vxa0 = _mm_unpacklo_epi8(va0, _mm_cmpgt_epi8(_mm_setzero_si128(), va0));
+      const __m128i vxa0 = _mm_cvtepi8_epi16(va0);
       a0 = (const int8_t*) ((uintptr_t) a0 + k);
 
       const __m128i vb0 = _mm_loadl_epi64((const __m128i*) w);
@@ -115,32 +115,16 @@ void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3(
     const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
     const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
 
-    const __m128i vnmask0x0123 = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc0x0123);
+    const __m128i vacc0x2301 = _mm_shuffle_epi32(vacc0x0123, _MM_SHUFFLE(2, 3, 0, 1));
 
-    const __m128i vabsacc0x0123 = _mm_abs_epi32(vacc0x0123);
+    const __m128i vprod0x02 = _mm_add_epi64(_mm_mul_epi32(vacc0x0123, vmultiplier), vrounding);
 
-    const __m128i vabsacc0x1032 = _mm_shuffle_epi32(vabsacc0x0123, _MM_SHUFFLE(2, 3, 0, 1));
+    const __m128i vprod0x13 = _mm_add_epi64(_mm_mul_epi32(vacc0x2301, vmultiplier), vrounding);
 
-    const __m128i vabsprod0x02 = _mm_mul_epu32(vabsacc0x0123, vmultiplier);
+    const __m128i vq31prod0x02 = _mm_srli_epi64(vprod0x02, 31);
+    const __m128i vq31prod0x13 = _mm_add_epi64(vprod0x13, vprod0x13);
 
-    const __m128i vnmask0x02 = _mm_shuffle_epi32(vnmask0x0123, _MM_SHUFFLE(2, 2, 0, 0));
-
-    const __m128i vprod0x02 = _mm_sub_epi64(_mm_xor_si128(vabsprod0x02, vnmask0x02), vnmask0x02);
-
-    const __m128i vq31prod0x02 = _mm_srli_epi64(_mm_add_epi64(vprod0x02, vrounding), 31);
-
-    const __m128i vabsprod0x13 = _mm_mul_epu32(vabsacc0x1032, vmultiplier);
-
-    const __m128i vnmask0x13 = _mm_shuffle_epi32(vnmask0x0123, _MM_SHUFFLE(3, 3, 1, 1));
-
-    const __m128i vprod0x13 = _mm_sub_epi64(_mm_xor_si128(vabsprod0x13, vnmask0x13), vnmask0x13);
-
-    const __m128i vq31prod0x13 = _mm_srli_epi64(_mm_add_epi64(vprod0x13, vrounding), 31);
-
-    const __m128i vq31prod0x0213 = _mm_castps_si128(_mm_shuffle_ps(
-        _mm_castsi128_ps(vq31prod0x02), _mm_castsi128_ps(vq31prod0x13), _MM_SHUFFLE(2, 0, 2, 0)));
-
-    const __m128i vq31prod0x0123 = _mm_shuffle_epi32(vq31prod0x0213, _MM_SHUFFLE(3, 1, 2, 0));
+    const __m128i vq31prod0x0123 = _mm_blend_epi16(vq31prod0x02, vq31prod0x13, 0xCC);
 
     const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->sse2.remainder_mask);
     const __m128i vrem0x0123 =
@@ -175,7 +159,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3(
         vout = _mm_srli_epi32(vout, 16);
       }
       if (nc & 1) {
-        *((int8_t*) c0) = (int8_t) _mm_cvtsi128_si32(vout);
+        *((int8_t*) c0) = (int8_t) _mm_extract_epi8(vout, 0);
       }
 
       nc = 0;
