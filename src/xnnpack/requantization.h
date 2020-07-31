@@ -45,6 +45,24 @@ static inline uint8_t xnn_qu8_requantize_q31(
   return (uint8_t) (n + params.q31.zero_point);
 }
 
+static inline uint8_t xnn_qs8_requantize_q31(
+  int32_t n,
+  union xnn_qs8_requantization_params params)
+{
+  const int64_t product = (int64_t) n * (int64_t) params.q31.multiplier;
+  const int32_t q31product = (int32_t) (uint32_t) ((uint64_t) (product + INT64_C(0x40000000)) >> 31);
+  const int32_t remainder = (q31product & params.q31.remainder_mask) - (int32_t) (n < 0);
+  n = asr_s32(q31product, params.q31.shift) + (int32_t) (remainder > params.q31.remainder_threshold);
+  if (n < params.q31.min_less_zero_point) {
+    n = params.q31.min_less_zero_point;
+  }
+  if (n > params.q31.max_less_zero_point) {
+    n = params.q31.max_less_zero_point;
+  }
+
+  return (int8_t) (n + params.q31.zero_point);
+}
+
 inline static uint8_t xnn_qu8_requantize_precise(
   int32_t value,
   float scale,

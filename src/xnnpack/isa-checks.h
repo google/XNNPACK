@@ -38,6 +38,13 @@
     } \
   } while (0)
 
+#define TEST_REQUIRES_X86_SSSE3 \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_x86_ssse3()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
+
 #define TEST_REQUIRES_X86_SSE41 \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_x86_sse4_1()) { \

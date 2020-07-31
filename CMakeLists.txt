@@ -1282,6 +1282,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-sse2-x8.c
   src/f32-vrnd/gen/vrndd-sse2-x4.c
   src/f32-vrnd/gen/vrndd-sse2-x8.c
+  src/qs8-gemm/1x4c2-minmax-sse2.c
+  src/qs8-gemm/4x4c2-minmax-sse2.c
   src/qs8-requantization/fp32-sse2.c
   src/qs8-requantization/precise-sse2.c
   src/qs8-requantization/q31-sse2.c
@@ -1318,6 +1320,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/math/sigmoid-sse2-p5-div.c)
 
 SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
+  src/qs8-gemm/1x4c2-minmax-ssse3.c
+  src/qs8-gemm/4x4c2-minmax-ssse3.c
   src/qs8-requantization/precise-ssse3.c
   src/qs8-requantization/q31-ssse3.c
   src/qu8-requantization/precise-ssse3.c
@@ -1342,6 +1346,8 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-sse41-x8.c
   src/f32-vrnd/gen/vrndd-sse41-x4.c
   src/f32-vrnd/gen/vrndd-sse41-x8.c
+  src/qs8-gemm/1x4c2-minmax-sse41.c
+  src/qs8-gemm/4x4c2-minmax-sse41.c
   src/qs8-requantization/fp32-sse4.c
   src/qs8-requantization/precise-sse4.c
   src/qs8-requantization/q31-sse4.c
@@ -3288,6 +3294,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vrsubc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vrsubc-minmax-test f32-vrsubc-minmax-test)
 
+  ADD_EXECUTABLE(qs8-gemm-minmax-test test/qs8-gemm-minmax.cc)
+  SET_TARGET_PROPERTIES(qs8-gemm-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-gemm-minmax-test qs8-gemm-minmax-test)
+
   ADD_EXECUTABLE(qu8-avgpool-minmax-test test/qu8-avgpool-minmax.cc)
   SET_TARGET_PROPERTIES(qu8-avgpool-minmax-test PROPERTIES
     CXX_STANDARD 11
@@ -3858,6 +3873,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE src)
   TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
+
+  ADD_EXECUTABLE(qs8-gemm-bench bench/qs8-gemm.cc)
+  SET_TARGET_PROPERTIES(qs8-gemm-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE src)
+  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(qu8-gemm-bench bench/qu8-gemm.cc)
   SET_TARGET_PROPERTIES(qu8-gemm-bench PROPERTIES
