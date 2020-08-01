@@ -112,6 +112,16 @@ static void GEMMBenchmark(benchmark::State& state,
     GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_4x4c2__sse41_ld64, 4, 4, 2, 1);
   }
 
+  static void qs8_gemm_4x4c2__sse2_ld128(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_4x4c2__sse2_ld128, 4, 4, 2, 1);
+  }
+  static void qs8_gemm_4x4c2__ssse3_ld128(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_4x4c2__ssse3_ld128, 4, 4, 2, 1);
+  }
+  static void qs8_gemm_4x4c2__sse41_ld128(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_4x4c2__sse41_ld128, 4, 4, 2, 1);
+  }
+
   static void qs8_gemm_2x4c8__sse2_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_2x4c8__sse2_ld64, 2, 4, 8, 1);
   }
@@ -122,13 +132,31 @@ static void GEMMBenchmark(benchmark::State& state,
     GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_2x4c8__sse41_ld64, 2, 4, 8, 1);
   }
 
+  static void qs8_gemm_2x4c8__sse2_ld128(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_2x4c8__sse2_ld128, 2, 4, 8, 1);
+  }
+  static void qs8_gemm_2x4c8__ssse3_ld128(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_2x4c8__ssse3_ld128, 2, 4, 8, 1);
+  }
+  static void qs8_gemm_2x4c8__sse41_ld128(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_2x4c8__sse41_ld128, 2, 4, 8, 1);
+  }
+
   BENCHMARK_GEMM(qs8_gemm_4x4c2__sse2_ld64)
   BENCHMARK_GEMM(qs8_gemm_4x4c2__ssse3_ld64)
   BENCHMARK_GEMM(qs8_gemm_4x4c2__sse41_ld64)
 
+  BENCHMARK_GEMM(qs8_gemm_4x4c2__sse2_ld128)
+  BENCHMARK_GEMM(qs8_gemm_4x4c2__ssse3_ld128)
+  BENCHMARK_GEMM(qs8_gemm_4x4c2__sse41_ld128)
+
   BENCHMARK_GEMM(qs8_gemm_2x4c8__sse2_ld64)
   BENCHMARK_GEMM(qs8_gemm_2x4c8__ssse3_ld64)
   BENCHMARK_GEMM(qs8_gemm_2x4c8__sse41_ld64)
+
+  BENCHMARK_GEMM(qs8_gemm_2x4c8__sse2_ld128)
+  BENCHMARK_GEMM(qs8_gemm_2x4c8__ssse3_ld128)
+  BENCHMARK_GEMM(qs8_gemm_2x4c8__sse41_ld128)
 #endif
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

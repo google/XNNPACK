@@ -1282,12 +1282,18 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-sse2-x8.c
   src/f32-vrnd/gen/vrndd-sse2-x4.c
   src/f32-vrnd/gen/vrndd-sse2-x8.c
-  src/qs8-gemm/1x4c2-minmax-sse2.c
-  src/qs8-gemm/4x4c2-minmax-sse2.c
-  src/qs8-gemm/1x4c8-minmax-sse2.c
-  src/qs8-gemm/2x4c8-minmax-sse2.c
-  src/qs8-igemm/1x4c2-minmax-sse2.c
-  src/qs8-igemm/4x4c2-minmax-sse2.c
+  src/qs8-gemm/1x4c2-minmax-sse2-ld64.c
+  src/qs8-gemm/4x4c2-minmax-sse2-ld64.c
+  src/qs8-gemm/1x4c2-minmax-sse2-ld128.c
+  src/qs8-gemm/4x4c2-minmax-sse2-ld128.c
+  src/qs8-gemm/1x4c8-minmax-sse2-ld64.c
+  src/qs8-gemm/2x4c8-minmax-sse2-ld64.c
+  src/qs8-gemm/1x4c8-minmax-sse2-ld128.c
+  src/qs8-gemm/2x4c8-minmax-sse2-ld128.c
+  src/qs8-igemm/1x4c2-minmax-sse2-ld64.c
+  src/qs8-igemm/4x4c2-minmax-sse2-ld64.c
+  src/qs8-igemm/1x4c2-minmax-sse2-ld128.c
+  src/qs8-igemm/4x4c2-minmax-sse2-ld128.c
   src/qs8-requantization/fp32-sse2.c
   src/qs8-requantization/precise-sse2.c
   src/qs8-requantization/q31-sse2.c
@@ -1324,12 +1330,18 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/math/sigmoid-sse2-p5-div.c)
 
 SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
-  src/qs8-gemm/1x4c2-minmax-ssse3.c
-  src/qs8-gemm/4x4c2-minmax-ssse3.c
-  src/qs8-gemm/1x4c8-minmax-ssse3.c
-  src/qs8-gemm/2x4c8-minmax-ssse3.c
-  src/qs8-igemm/1x4c2-minmax-ssse3.c
-  src/qs8-igemm/4x4c2-minmax-ssse3.c
+  src/qs8-gemm/1x4c2-minmax-ssse3-ld64.c
+  src/qs8-gemm/4x4c2-minmax-ssse3-ld64.c
+  src/qs8-gemm/1x4c2-minmax-ssse3-ld128.c
+  src/qs8-gemm/4x4c2-minmax-ssse3-ld128.c
+  src/qs8-gemm/1x4c8-minmax-ssse3-ld64.c
+  src/qs8-gemm/2x4c8-minmax-ssse3-ld64.c
+  src/qs8-gemm/1x4c8-minmax-ssse3-ld128.c
+  src/qs8-gemm/2x4c8-minmax-ssse3-ld128.c
+  src/qs8-igemm/1x4c2-minmax-ssse3-ld64.c
+  src/qs8-igemm/4x4c2-minmax-ssse3-ld64.c
+  src/qs8-igemm/1x4c2-minmax-ssse3-ld128.c
+  src/qs8-igemm/4x4c2-minmax-ssse3-ld128.c
   src/qs8-requantization/precise-ssse3.c
   src/qs8-requantization/q31-ssse3.c
   src/qu8-requantization/precise-ssse3.c
@@ -1354,12 +1366,18 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-sse41-x8.c
   src/f32-vrnd/gen/vrndd-sse41-x4.c
   src/f32-vrnd/gen/vrndd-sse41-x8.c
-  src/qs8-gemm/1x4c2-minmax-sse41.c
-  src/qs8-gemm/4x4c2-minmax-sse41.c
-  src/qs8-gemm/1x4c8-minmax-sse41.c
-  src/qs8-gemm/2x4c8-minmax-sse41.c
-  src/qs8-igemm/1x4c2-minmax-sse41.c
-  src/qs8-igemm/4x4c2-minmax-sse41.c
+  src/qs8-gemm/1x4c2-minmax-sse41-ld64.c
+  src/qs8-gemm/4x4c2-minmax-sse41-ld64.c
+  src/qs8-gemm/1x4c2-minmax-sse41-ld128.c
+  src/qs8-gemm/4x4c2-minmax-sse41-ld128.c
+  src/qs8-gemm/1x4c8-minmax-sse41-ld64.c
+  src/qs8-gemm/2x4c8-minmax-sse41-ld64.c
+  src/qs8-gemm/1x4c8-minmax-sse41-ld128.c
+  src/qs8-gemm/2x4c8-minmax-sse41-ld128.c
+  src/qs8-igemm/1x4c2-minmax-sse41-ld64.c
+  src/qs8-igemm/4x4c2-minmax-sse41-ld64.c
+  src/qs8-igemm/1x4c2-minmax-sse41-ld128.c
+  src/qs8-igemm/4x4c2-minmax-sse41-ld128.c
   src/qs8-requantization/fp32-sse4.c
   src/qs8-requantization/precise-sse4.c
   src/qs8-requantization/q31-sse4.c
