@@ -22,7 +22,7 @@ static void xnnpack_truncation_f32(benchmark::State& state) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
 
   std::vector<float> input(batch_size * channels);
   std::vector<float> output(batch_size * channels);

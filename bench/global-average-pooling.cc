@@ -30,7 +30,7 @@ static void global_average_pooling_qu8(benchmark::State& state) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   std::vector<uint8_t> input(batch_size * input_height * input_width * channels);
   std::generate(input.begin(), input.end(), std::ref(u8rng));
@@ -93,7 +93,7 @@ static void global_average_pooling_f16(benchmark::State& state) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
   auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
   std::vector<uint16_t> input(batch_size * input_height * input_width * channels);
@@ -150,7 +150,7 @@ static void global_average_pooling_f32(benchmark::State& state) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
   std::vector<float> input(batch_size * input_height * input_width * channels);
   std::generate(input.begin(), input.end(), std::ref(f32rng));

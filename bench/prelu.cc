@@ -32,8 +32,8 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
-  auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), rng);
+  auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
+  auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), std::ref(rng));
 
   std::vector<float> input(batch_size * height * width * channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32irng));
@@ -102,8 +102,8 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
-  auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), rng);
+  auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
+  auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), std::ref(rng));
 
   std::vector<float> slope(channels);
   std::generate(slope.begin(), slope.end(), std::ref(f32wrng));

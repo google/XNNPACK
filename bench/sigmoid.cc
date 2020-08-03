@@ -31,7 +31,7 @@ static void xnnpack_sigmoid_qu8(benchmark::State& state) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   std::vector<uint8_t> input(batch_size * channels);
   std::vector<uint8_t> output(batch_size * channels);
@@ -98,7 +98,7 @@ static void xnnpack_sigmoid_f32(benchmark::State& state) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
 
   std::vector<float> input(batch_size * channels);
   std::vector<float> output(batch_size * channels);
@@ -162,7 +162,7 @@ static void tflite_sigmoid_f32(benchmark::State& state) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
 
   flatbuffers::FlatBufferBuilder builder;
   flatbuffers::Offset<tflite::OperatorCode> operator_code =

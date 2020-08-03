@@ -55,7 +55,7 @@ static void GEMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
   std::vector<float> a(mc * kc);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
@@ -128,7 +128,7 @@ static void PPMM1PBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
   std::vector<float> a(mc * kc);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
@@ -205,7 +205,7 @@ static void PPMM2PBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
   std::vector<float> a(mc * kc);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
@@ -267,7 +267,7 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
 {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);

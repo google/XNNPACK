@@ -49,7 +49,7 @@ class Requantization : public benchmark::Fixture {
   {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(), rng);
+    auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
     input_.resize(n());
     std::generate(input_.begin(), input_.end(), std::ref(s32rng));
