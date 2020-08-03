@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-igemm/MRx4c8-minmax-sse.c.in
+//   Template: src/qs8-gemm/MRx4c8-minmax-sse.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -9,23 +9,26 @@
 
 #include <assert.h>
 
-#include <smmintrin.h>
+#ifdef __GNUC__
+  #include <x86intrin.h>
+#else
+  #include <immintrin.h>
+  #include <ammintrin.h>
+#endif
 
-#include <xnnpack/igemm.h>
+#include <xnnpack/gemm.h>
 
 
-void xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64(
+void xnn_qs8_gemm_minmax_ukernel_1x4c8__xop_ld128(
     size_t mr,
     size_t nc,
     size_t kc,
-    size_t ks,
-    const int8_t** restrict a,
+    const int8_t* restrict a,
+    size_t a_stride,
     const void* restrict w,
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    size_t a_offset,
-    const int8_t* zero,
     const union xnn_qs8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(mr != 0);
@@ -37,6 +40,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
+  const int8_t* a0 = a;
   int8_t* c0 = c;
 
   do {
@@ -46,42 +50,30 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64(
     __m128i vacc0x3 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[3]);
     w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
 
-    size_t p = ks;
-    do {
-      const int8_t* restrict a0 = a[0];
-      if XNN_UNPREDICTABLE(a0 != zero) {
-        a0 = (const int8_t*) ((uintptr_t) a0 + a_offset);
-      }
-      a += 1;
+    size_t k = 0;
+    while (k < kc) {
+      const __m128i va0 = _mm_loadl_epi64((const __m128i*) a0);
+      const __m128i vxa0 = _mm_cvtepi8_epi16(va0);
+      a0 += 8;
 
-      size_t k = 0;
-      while (k < kc) {
-        const __m128i va0 = _mm_loadl_epi64((const __m128i*) a0);
-        const __m128i vxa0 = _mm_cvtepi8_epi16(va0);
-        a0 += 8;
+      const __m128i vb01 = _mm_load_si128((const __m128i*) w);
+      const __m128i vsb01 = _mm_cmpgt_epi8(_mm_setzero_si128(), vb01);
+      const __m128i vxb0 = _mm_unpacklo_epi8(vb01, vsb01);
+      const __m128i vxb1 = _mm_unpackhi_epi8(vb01, vsb01);
 
-        const __m128i vb0 = _mm_loadl_epi64((const __m128i*) w);
-        const __m128i vxb0 = _mm_cvtepi8_epi16(vb0);
+      vacc0x0 = _mm_maddd_epi16(vxa0, vxb0, vacc0x0);
+      vacc0x1 = _mm_maddd_epi16(vxa0, vxb1, vacc0x1);
+      const __m128i vb23 = _mm_load_si128((const __m128i*) ((uintptr_t) w + 16));
+      const __m128i vsb23 = _mm_cmpgt_epi8(_mm_setzero_si128(), vb23);
+      const __m128i vxb2 = _mm_unpacklo_epi8(vb23, vsb23);
+      const __m128i vxb3 = _mm_unpackhi_epi8(vb23, vsb23);
 
-        vacc0x0 = _mm_add_epi32(vacc0x0, _mm_madd_epi16(vxa0, vxb0));
-        const __m128i vb1 = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + 8));
-        const __m128i vxb1 = _mm_cvtepi8_epi16(vb1);
+      vacc0x2 = _mm_maddd_epi16(vxa0, vxb2, vacc0x2);
+      vacc0x3 = _mm_maddd_epi16(vxa0, vxb3, vacc0x3);
 
-        vacc0x1 = _mm_add_epi32(vacc0x1, _mm_madd_epi16(vxa0, vxb1));
-        const __m128i vb2 = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + 16));
-        const __m128i vxb2 = _mm_cvtepi8_epi16(vb2);
-
-        vacc0x2 = _mm_add_epi32(vacc0x2, _mm_madd_epi16(vxa0, vxb2));
-        const __m128i vb3 = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + 24));
-        const __m128i vxb3 = _mm_cvtepi8_epi16(vb3);
-
-        vacc0x3 = _mm_add_epi32(vacc0x3, _mm_madd_epi16(vxa0, vxb3));
-
-        w = (const void*) ((uintptr_t) w + 32);
-        k += 8 * sizeof(int8_t);
-      }
-      p -= 1 * sizeof(void*);
-    } while (p != 0);
+      w = (const void*) ((uintptr_t) w + 32);
+      k += 8 * sizeof(int8_t);
+    }
 
     const __m128i vacc0x01 = _mm_hadd_epi32(vacc0x0, vacc0x1);
     const __m128i vacc0x23 = _mm_hadd_epi32(vacc0x2, vacc0x3);
@@ -122,9 +114,10 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64(
 
     if (nc >= 4) {
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
-      a = (const int8_t**restrict) ((uintptr_t) a - ks);
+      a0 = (const int8_t*) ((uintptr_t) a0 - k);
+
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
       nc -= 4;
     } else {

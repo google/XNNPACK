@@ -11,7 +11,7 @@
 
 #include <smmintrin.h>
 
-#include <xnnpack/gemm.h>
+#include <xnnpack/igemm.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128(

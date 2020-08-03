@@ -1860,6 +1860,25 @@ AVX_UKERNELS = [
     "src/f32-vunary/gen/vsqr-avx-x16.c",
 ]
 
+XOP_UKERNELS = [
+    "src/qs8-gemm/gen/1x4c2-minmax-xop-ld64.c",
+    "src/qs8-gemm/gen/4x4c2-minmax-xop-ld64.c",
+    "src/qs8-gemm/gen/1x4c2-minmax-xop-ld128.c",
+    "src/qs8-gemm/gen/4x4c2-minmax-xop-ld128.c",
+    "src/qs8-gemm/gen/1x4c8-minmax-xop-ld64.c",
+    "src/qs8-gemm/gen/2x4c8-minmax-xop-ld64.c",
+    "src/qs8-gemm/gen/1x4c8-minmax-xop-ld128.c",
+    "src/qs8-gemm/gen/2x4c8-minmax-xop-ld128.c",
+    "src/qs8-igemm/gen/1x4c2-minmax-xop-ld64.c",
+    "src/qs8-igemm/gen/4x4c2-minmax-xop-ld64.c",
+    "src/qs8-igemm/gen/1x4c2-minmax-xop-ld128.c",
+    "src/qs8-igemm/gen/4x4c2-minmax-xop-ld128.c",
+    "src/qs8-igemm/gen/1x4c8-minmax-xop-ld64.c",
+    "src/qs8-igemm/gen/2x4c8-minmax-xop-ld64.c",
+    "src/qs8-igemm/gen/1x4c8-minmax-xop-ld128.c",
+    "src/qs8-igemm/gen/2x4c8-minmax-xop-ld128.c",
+]
+
 FMA3_UKERNELS = [
     "src/f32-dwconv/gen/up16x4-minmax-fma3-acc2.c",
     "src/f32-dwconv/gen/up16x4-minmax-fma3.c",
@@ -2888,6 +2907,42 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "xop_ukernels",
+    hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mxop"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs = XOP_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "xop_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mxop"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs = XOP_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "fma3_ukernels",
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -3067,6 +3122,7 @@ xnnpack_aggregate_library(
         ":ssse3_ukernels",
         ":sse41_ukernels",
         ":avx_ukernels",
+        ":xop_ukernels",
         ":fma3_ukernels",
         ":avx2_ukernels",
         ":avx512f_ukernels",
@@ -3106,6 +3162,7 @@ xnnpack_aggregate_library(
         ":ssse3_ukernels_test_mode",
         ":sse41_ukernels_test_mode",
         ":avx_ukernels_test_mode",
+        ":xop_ukernels_test_mode",
         ":fma3_ukernels_test_mode",
         ":avx2_ukernels_test_mode",
         ":avx512f_ukernels_test_mode",
@@ -3147,6 +3204,7 @@ xnnpack_aggregate_library(
         ":ssse3_ukernels",
         ":sse41_ukernels",
         ":avx_ukernels",
+        ":xop_ukernels",
         ":fma3_ukernels",
         ":avx2_ukernels",
         ":avx512f_ukernels",

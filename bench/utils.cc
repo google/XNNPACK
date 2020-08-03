@@ -197,6 +197,14 @@ bool CheckNEONFMA(benchmark::State& state) {
   return true;
 }
 
+bool CheckSSSE3(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_x86_ssse3()) {
+    state.SkipWithError("no SSSE3 extension");
+    return false;
+  }
+  return true;
+}
+
 bool CheckSSE41(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_x86_sse4_1()) {
     state.SkipWithError("no SSE4.1 extension");
@@ -208,6 +216,14 @@ bool CheckSSE41(benchmark::State& state) {
 bool CheckAVX(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx()) {
     state.SkipWithError("no AVX extension");
+    return false;
+  }
+  return true;
+}
+
+bool CheckXOP(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_x86_xop()) {
+    state.SkipWithError("no XOP extension");
     return false;
   }
   return true;

@@ -59,6 +59,13 @@
     } \
   } while (0)
 
+#define TEST_REQUIRES_X86_XOP \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_x86_xop()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
+
 #define TEST_REQUIRES_X86_FMA3 \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_x86_fma3()) { \
