@@ -33,27 +33,35 @@ tools/xngen src/qs8-igemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=5 -D LD128=1 -o 
 ### C8 micro-kernels
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=2 -D LD128=0 -o src/qs8-igemm/gen/1x4c8-minmax-sse2-ld64.c
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=2 -D LD128=0 -o src/qs8-igemm/gen/2x4c8-minmax-sse2-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=2 -D LD128=0 -o src/qs8-igemm/gen/3x4c8-minmax-sse2-ld64.c
 
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=3 -D LD128=0 -o src/qs8-igemm/gen/1x4c8-minmax-ssse3-ld64.c
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=3 -D LD128=0 -o src/qs8-igemm/gen/2x4c8-minmax-ssse3-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=3 -D LD128=0 -o src/qs8-igemm/gen/3x4c8-minmax-ssse3-ld64.c
 
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=4 -D LD128=0 -o src/qs8-igemm/gen/1x4c8-minmax-sse41-ld64.c
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=4 -D LD128=0 -o src/qs8-igemm/gen/2x4c8-minmax-sse41-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=4 -D LD128=0 -o src/qs8-igemm/gen/3x4c8-minmax-sse41-ld64.c
 
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=5 -D LD128=0 -o src/qs8-igemm/gen/1x4c8-minmax-xop-ld64.c
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=5 -D LD128=0 -o src/qs8-igemm/gen/2x4c8-minmax-xop-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=5 -D LD128=0 -o src/qs8-igemm/gen/3x4c8-minmax-xop-ld64.c
 
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=2 -D LD128=1 -o src/qs8-igemm/gen/1x4c8-minmax-sse2-ld128.c
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=2 -D LD128=1 -o src/qs8-igemm/gen/2x4c8-minmax-sse2-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=2 -D LD128=1 -o src/qs8-igemm/gen/3x4c8-minmax-sse2-ld128.c
 
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=3 -D LD128=1 -o src/qs8-igemm/gen/1x4c8-minmax-ssse3-ld128.c
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=3 -D LD128=1 -o src/qs8-igemm/gen/2x4c8-minmax-ssse3-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=3 -D LD128=1 -o src/qs8-igemm/gen/3x4c8-minmax-ssse3-ld128.c
 
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=4 -D LD128=1 -o src/qs8-igemm/gen/1x4c8-minmax-sse41-ld128.c
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=4 -D LD128=1 -o src/qs8-igemm/gen/2x4c8-minmax-sse41-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=4 -D LD128=1 -o src/qs8-igemm/gen/3x4c8-minmax-sse41-ld128.c
 
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=5 -D LD128=1 -o src/qs8-igemm/gen/1x4c8-minmax-xop-ld128.c
 tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=5 -D LD128=1 -o src/qs8-igemm/gen/2x4c8-minmax-xop-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=5 -D LD128=1 -o src/qs8-igemm/gen/3x4c8-minmax-xop-ld128.c
 
 ################################### x86 AVX2 ##################################
 ### C8 micro-kernels

@@ -38,33 +38,49 @@
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_2x4c8__sse2_ld64
   k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_3x4c8__sse2_ld64
+  k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x4c8__ssse3_ld64
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_2x4c8__ssse3_ld64
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_3x4c8__ssse3_ld64
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64
   k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64
+  k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x4c8__sse2_ld128
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_2x4c8__sse2_ld128
   k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_3x4c8__sse2_ld128
+  k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x4c8__ssse3_ld128
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_2x4c8__ssse3_ld128
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_3x4c8__ssse3_ld128
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128
   k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128
+  k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2
   k-block: 8
