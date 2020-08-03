@@ -55,5 +55,11 @@ tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=4 -D LD128=1 -o s
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=5 -D LD128=1 -o src/qs8-gemm/gen/1x4c8-minmax-xop-ld128.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=5 -D LD128=1 -o src/qs8-gemm/gen/2x4c8-minmax-xop-ld128.c
 
+################################### x86 AVX2 ##################################
+### C8 micro-kernels
+tools/xngen src/qs8-gemm/MRx8c8-minmax-avx2.c.in -D MR=1 -o src/qs8-gemm/gen/1x8c8-minmax-avx2.c
+tools/xngen src/qs8-gemm/MRx8c8-minmax-avx2.c.in -D MR=2 -o src/qs8-gemm/gen/2x8c8-minmax-avx2.c
+tools/xngen src/qs8-gemm/MRx8c8-minmax-avx2.c.in -D MR=3 -o src/qs8-gemm/gen/3x8c8-minmax-avx2.c
+
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax.yaml --output test/qs8-gemm-minmax.cc

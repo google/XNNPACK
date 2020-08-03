@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h", 5: "ammintrin.h"}[SSE]
+$assert MR <= 4
 #include <assert.h>
 
 $if SSE == 5:
