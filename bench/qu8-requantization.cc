@@ -140,6 +140,13 @@ BENCHMARK_F(Requantization, q31__scalar)(benchmark::State& state) {
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
+
+  BENCHMARK_F(Requantization, q31__wasmsimd)(benchmark::State& state) {
+    for (auto _ : state) {
+      xnn_qu8_requantize_q31__wasmsimd(
+          n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
+    }
+  }
 #endif
 
 

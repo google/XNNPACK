@@ -851,6 +851,7 @@ WASMSIMD_UKERNELS = [
     "src/qs8-requantization/fp32-wasmsimd.c",
     "src/qs8-requantization/q31-wasmsimd.c",
     "src/qu8-requantization/fp32-wasmsimd.c",
+    "src/qu8-requantization/q31-wasmsimd.c",
     "src/x32-fill/wasmsimd.c",
     "src/x32-packx/x4-wasmsimd.c",
     "src/x32-pad/wasmsimd.c",

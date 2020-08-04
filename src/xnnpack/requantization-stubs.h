@@ -59,6 +59,7 @@ DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_q31__ssse3)
 DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_q31__sse4)
 DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_q31__neon)
 DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_q31__psimd)
+DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_q31__wasmsimd)
 
 
 typedef void (*xnn_qs8_requantization_function)(

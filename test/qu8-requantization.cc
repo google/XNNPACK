@@ -1058,4 +1058,63 @@ TEST(QU8_Q31__SCALAR, random_cases) {
       .iterations(1000)
       .TestRandomCasesApproximate(xnn_qu8_requantize_fp32__wasmsimd);
   }
+
+
+  /*
+   * Q31-based WAsmd SIMD implementation.
+   */
+
+  TEST(QU8_Q31__WASMSIMD, exact_divide_by_po2) {
+    for (uint32_t s = 1; s < 32; s++) {
+      RequantizationTester()
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .s(s)
+        .TestExactDivideByPO2(xnn_qu8_requantize_q31__wasmsimd);
+    }
+  }
+
+  TEST(QU8_Q31__WASMSIMD, exact_divide_by_po2_with_zero_point) {
+    for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .s(s)
+          .TestExactDivideByPO2(xnn_qu8_requantize_q31__wasmsimd);
+      }
+    }
+  }
+
+  TEST(QU8_Q31__WASMSIMD, divide_by_po2_with_rounding_up) {
+    for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_q31__wasmsimd);
+      }
+    }
+  }
+
+  /* No rounding down test - it fails because of upward bias in multiplication */
+  /* No rounding away test - it fails because of upward bias in multiplication */
+
+  TEST(QU8_Q31__WASMSIMD, special_cases) {
+    RequantizationTester()
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .TestSpecialCases(xnn_qu8_requantize_q31__wasmsimd);
+  }
+
+  TEST(QU8_Q31__WASMSIMD, random_cases) {
+    RequantizationTester()
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .iterations(100)
+      .TestRandomCasesApproximate(xnn_qu8_requantize_q31__wasmsimd);
+  }
 #endif  // XNN_ARCH_WASMSIMD
