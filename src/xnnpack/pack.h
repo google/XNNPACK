@@ -368,6 +368,16 @@ XNN_INTERNAL void xnn_pack_qu8_dwconv_ghw_w(
   void* packed_w,
   const struct xnn_qu8_packing_params* params);
 
+XNN_INTERNAL void xnn_pack_qs8_dwconv_ghw_w(
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t cr,
+  const int8_t* k,
+  const int32_t* b,
+  void* packed_w,
+  const struct xnn_qs8_packing_params* params);
+
 
 typedef void (*xnn_pack_dwconv_hwg_w_function)(
   size_t h,

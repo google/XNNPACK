@@ -1647,9 +1647,9 @@ SSE2_UKERNELS = [
     "src/f32-vrnd/gen/vrndu-sse2-x8.c",
     "src/f32-vrnd/gen/vrndd-sse2-x4.c",
     "src/f32-vrnd/gen/vrndd-sse2-x8.c",
-    "src/qs8-requantization/precise-sse2.c",
-    "src/qs8-requantization/fp32-sse2.c",
-    "src/qs8-requantization/q31-sse2.c",
+    "src/qs8-dwconv/gen/up8x9-minmax-sse2-mul16.c",
+    "src/qs8-dwconv/gen/up16x9-minmax-sse2-mul16.c",
+    "src/qs8-dwconv/gen/up24x9-minmax-sse2-mul16.c",
     "src/qs8-gemm/gen/1x4c2-minmax-sse2-ld64.c",
     "src/qs8-gemm/gen/4x4c2-minmax-sse2-ld64.c",
     "src/qs8-gemm/gen/1x4c2-minmax-sse2-ld128.c",
@@ -1675,6 +1675,9 @@ SSE2_UKERNELS = [
     "src/qs8-igemm/gen/1x4c8-minmax-sse2-ld128.c",
     "src/qs8-igemm/gen/2x4c8-minmax-sse2-ld128.c",
     "src/qs8-igemm/gen/3x4c8-minmax-sse2-ld128.c",
+    "src/qs8-requantization/precise-sse2.c",
+    "src/qs8-requantization/fp32-sse2.c",
+    "src/qs8-requantization/q31-sse2.c",
     "src/qu8-avgpool/9p8x-minmax-sse2-c8.c",
     "src/qu8-avgpool/9x-minmax-sse2-c8.c",
     "src/qu8-igemm/4x4c2-minmax-sse2.c",
@@ -1709,6 +1712,9 @@ SSE2_UKERNELS = [
 ]
 
 SSSE3_UKERNELS = [
+    "src/qs8-dwconv/gen/up8x9-minmax-ssse3-mul16.c",
+    "src/qs8-dwconv/gen/up16x9-minmax-ssse3-mul16.c",
+    "src/qs8-dwconv/gen/up24x9-minmax-ssse3-mul16.c",
     "src/qs8-gemm/gen/1x4c2-minmax-ssse3-ld64.c",
     "src/qs8-gemm/gen/4x4c2-minmax-ssse3-ld64.c",
     "src/qs8-gemm/gen/1x4c2-minmax-ssse3-ld128.c",
@@ -1759,6 +1765,9 @@ SSE41_UKERNELS = [
     "src/f32-vrnd/gen/vrndu-sse41-x8.c",
     "src/f32-vrnd/gen/vrndd-sse41-x4.c",
     "src/f32-vrnd/gen/vrndd-sse41-x8.c",
+    "src/qs8-dwconv/gen/up8x9-minmax-sse41-mul16.c",
+    "src/qs8-dwconv/gen/up16x9-minmax-sse41-mul16.c",
+    "src/qs8-dwconv/gen/up24x9-minmax-sse41-mul16.c",
     "src/qs8-gemm/gen/1x4c2-minmax-sse41-ld64.c",
     "src/qs8-gemm/gen/4x4c2-minmax-sse41-ld64.c",
     "src/qs8-gemm/gen/1x4c2-minmax-sse41-ld128.c",
@@ -1898,6 +1907,9 @@ AVX_UKERNELS = [
 ]
 
 XOP_UKERNELS = [
+    "src/qs8-dwconv/gen/up8x9-minmax-xop-mul16.c",
+    "src/qs8-dwconv/gen/up16x9-minmax-xop-mul16.c",
+    "src/qs8-dwconv/gen/up24x9-minmax-xop-mul16.c",
     "src/qs8-gemm/gen/1x4c2-minmax-xop-ld64.c",
     "src/qs8-gemm/gen/4x4c2-minmax-xop-ld64.c",
     "src/qs8-gemm/gen/1x4c2-minmax-xop-ld128.c",
@@ -5172,6 +5184,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_dwconv_minmax_test",
+    srcs = [
+        "test/qs8-dwconv-minmax.cc",
+        "test/dwconv-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
     name = "qs8_gemm_minmax_test",
     srcs = [
         "test/qs8-gemm-minmax.cc",
@@ -5212,20 +5234,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qu8_igemm_minmax_test",
+    name = "qu8_dwconv_minmax_test",
     srcs = [
-        "test/qu8-igemm-minmax.cc",
-        "test/gemm-microkernel-tester.h",
+        "test/qu8-dwconv-minmax.cc",
+        "test/dwconv-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
 xnnpack_unit_test(
-    name = "qu8_dwconv_minmax_test",
+    name = "qu8_igemm_minmax_test",
     srcs = [
-        "test/qu8-dwconv-minmax.cc",
-        "test/dwconv-microkernel-tester.h",
+        "test/qu8-igemm-minmax.cc",
+        "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],

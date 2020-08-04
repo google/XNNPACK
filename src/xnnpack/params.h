@@ -951,6 +951,18 @@ typedef void (*xnn_qu8_dwconv_minmax_unipass_ukernel_function)(
     const uint8_t* zero,
     const union xnn_qu8_gemm_params* params);
 
+typedef void (*xnn_qs8_dwconv_minmax_unipass_ukernel_function)(
+    size_t channels,
+    size_t output_width,
+    const int8_t** input,
+    const void* weights,
+    int8_t* output,
+    size_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const int8_t* zero,
+    const union xnn_qs8_gemm_params* params);
+
 typedef void (*xnn_dwconv_multipass_ukernel_function)(
     size_t channels,
     size_t output_width,

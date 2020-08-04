@@ -282,6 +282,119 @@ class DWConvMicrokernelTester {
     }
   }
 
+  void Test(xnn_qs8_dwconv_minmax_unipass_ukernel_function dwconv_minmax, Variant variant = Variant::Native) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<uint32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+
+    std::vector<const int8_t*> indirection((width() - 1) * step() + kr());
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
+    std::vector<int8_t> kernel(channels() * kr());
+    std::vector<int32_t> bias(channels());
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights((kr() + sizeof(int32_t) / sizeof(int8_t)) * packed_channels());
+    std::vector<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> output((width() - 1) * output_stride() + channels());
+    std::vector<int32_t> accumulators(width() * channels());
+    std::vector<int8_t> output_ref(width() * channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      do {
+        std::generate(input.begin(), input.end(), std::ref(i8rng));
+      } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
+      do {
+        std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
+      } while (kernel.size() > 1 && *std::max_element(kernel.cbegin(), kernel.cend()) == *std::min_element(kernel.cbegin(), kernel.cend()));
+      std::generate(bias.begin(), bias.end(), std::ref(i32rng));
+      std::fill(zero.begin(), zero.end(), int8_t(input_zero_point() - 0x80));
+      std::fill(output.begin(), output.end(), 0xA5);
+
+      std::fill(packed_weights.begin(), packed_weights.end(), 0);
+      const xnn_qs8_packing_params packing_params = { int8_t(input_zero_point() - 0x80) };
+      xnn_pack_qs8_dwconv_ghw_w(
+        kr(), 1, channels(), cr(),
+        kernel.data(), bias.data(), packed_weights.data(), &packing_params);
+      for (size_t i = 0; i < indirection.size(); i++) {
+        indirection[i] = input.data() + i * channels() - input_offset();
+      }
+      std::shuffle(indirection.begin(), indirection.end(), rng);
+      if (zero_index() != SIZE_MAX) {
+        for (size_t i = 0; i < indirection.size(); i += kr()) {
+          indirection[i + zero_index()] = zero.data();
+        }
+      }
+
+      // Compute reference results, without renormalization.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          float acc = bias[c];
+          for (size_t k = 0; k < kr(); k++) {
+            if (indirection[x * step() + k] != zero.data()) {
+              acc +=
+                (int32_t(indirection[x * step() + k][c + input_offset()]) - int32_t(input_zero_point() - 0x80)) *
+                int32_t(kernel[c * kr() + k]);
+            }
+          }
+          accumulators[x * channels() + c] = acc;
+        }
+      }
+
+      // Compute renormalization parameters.
+      const int32_t accumulated_min = *std::min_element(accumulators.cbegin(), accumulators.cend());
+      const int32_t accumulated_max = *std::max_element(accumulators.cbegin(), accumulators.cend());
+      const uint32_t accumulated_range = uint32_t(accumulated_max) - uint32_t(accumulated_min);
+      const double output_scale = accumulated_range >= 256 ? double(accumulated_range) / 255.0 : 1.00001;
+      const int8_t output_zero_point = int8_t(std::max(std::min(
+        lrint(-0.5 - 0.5 * double(accumulated_min + accumulated_max) / output_scale),
+        long(std::numeric_limits<int8_t>::max())), long(std::numeric_limits<int8_t>::min())));
+
+      // Prepare parameters.
+      const float requantization_scale = 1.0f / float(output_scale);
+      union xnn_qs8_gemm_params quantization_params = { };
+      switch (variant) {
+        case Variant::Native:
+          quantization_params = xnn_init_qs8_gemm_params(
+            requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          break;
+        case Variant::Scalar:
+          quantization_params = xnn_init_scalar_qs8_gemm_params(
+            requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          break;
+      }
+      const union xnn_qs8_requantization_params scalar_requantization_params =
+        xnn_init_scalar_qs8_requantization_params(requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+
+      // Renormalize reference results.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          output_ref[x * channels() + c] = xnn_qs8_requantize_q31(accumulators[x * channels() + c], scalar_requantization_params);
+        }
+      }
+
+      // Call optimized micro-kernel.
+      dwconv_minmax(
+        channels(), width(),
+        indirection.data(), packed_weights.data(), output.data(),
+        step() * sizeof(void*),
+        (output_stride() - channels()) * sizeof(int8_t),
+        input_offset() * sizeof(int8_t), zero.data(),
+        &quantization_params);
+
+      // Verify results.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_GE(int32_t(output[x * output_stride() + c]), int32_t(qmin()) - 0x80)
+            << "x = " << x << ", channel = " << c;
+          ASSERT_LE(int32_t(output[x * output_stride() + c]), int32_t(qmax()) - 0x80)
+            << "x = " << x << ", channel = " << c;
+          ASSERT_EQ(int32_t(output[x * output_stride() + c]), int32_t(output_ref[x * channels() + c]))
+            << "x = " << x << ", channel = " << c << ", accumulator = " << accumulators[x * channels() + c];
+        }
+      }
+    }
+  }
+
   void Test(xnn_f16_dwconv_minmax_unipass_ukernel_function dwconv_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
