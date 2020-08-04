@@ -3610,6 +3610,7 @@ xnnpack_cc_library(
         "//conditions:default": [],
     }),
     defines = [
+        "XNN_NO_QS8_OPERATORS",
         "XNN_NO_QU8_OPERATORS",
         "XNN_NO_U8_OPERATORS",
         "XNN_NO_X8_OPERATORS",
@@ -3654,6 +3655,7 @@ xnnpack_cc_library(
         "//conditions:default": [],
     }),
     defines = [
+        "XNN_NO_QS8_OPERATORS",
         "XNN_NO_QU8_OPERATORS",
         "XNN_NO_U8_OPERATORS",
         "XNN_NO_X8_OPERATORS",

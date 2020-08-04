@@ -1740,6 +1740,7 @@ struct vmulcaddc_parameters {
   uint8_t row_tile;
 };
 
+#define XNN_MAX_QS8_DWCONV_UKERNELS 1
 #define XNN_MAX_QU8_DWCONV_UKERNELS 1
 #define XNN_MAX_F16_DWCONV_UKERNELS 3
 #define XNN_MAX_F32_DWCONV_UKERNELS 3
@@ -1756,17 +1757,23 @@ struct vmulcaddc_parameters {
 #define XNN_INIT_FLAG_F16     0x00000008
 // Indicates that X16 XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_X16     0x00000010
+// Indicates that QS8 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_QS8     0x00000020
 // Indicates that QU8 XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_QU8     0x00000020
+#define XNN_INIT_FLAG_QU8     0x00000040
 // Indicates that U8 XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_U8      0x00000040
+#define XNN_INIT_FLAG_U8      0x00000080
 // Indicates that X8 XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_X8      0x00000080
+#define XNN_INIT_FLAG_X8      0x00000100
 
 struct xnn_parameters {
   // Bitwise combination of XNN_INIT_FLAG_* flags
   uint32_t init_flags;
   struct xnn_allocator allocator;
+  struct {
+    struct gemm_parameters gemm;
+    struct dwconv_parameters dwconv[XNN_MAX_QS8_DWCONV_UKERNELS];
+  } qs8;
   struct {
     struct gemm_parameters gemm;
     struct dwconv_parameters dwconv[XNN_MAX_QU8_DWCONV_UKERNELS];

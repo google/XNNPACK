@@ -512,6 +512,99 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     convolution_op_out);
 }
 
+enum xnn_status xnn_create_convolution2d_nhwc_qs8(
+    uint32_t input_padding_top,
+    uint32_t input_padding_right,
+    uint32_t input_padding_bottom,
+    uint32_t input_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t subsampling_height,
+    uint32_t subsampling_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    size_t input_channel_stride,
+    size_t output_channel_stride,
+    int8_t input_zero_point,
+    float input_scale,
+    float kernel_scale,
+    const int8_t* kernel,
+    const int32_t* bias,
+    int8_t output_zero_point,
+    float output_scale,
+    int8_t output_min,
+    int8_t output_max,
+    uint32_t flags,
+    xnn_operator_t* convolution_op_out)
+{
+  if (input_scale <= 0.0f || !isnormal(input_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qs8), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (kernel_scale <= 0.0f || !isnormal(kernel_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g kernel scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qs8), kernel_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qs8), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qs8), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float requantization_scale = input_scale * kernel_scale / output_scale;
+  if (requantization_scale >= 1.0f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
+      "requantization scale %.7g is greater or equal to 1.0",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qs8),
+      input_scale, kernel_scale, output_scale, requantization_scale);
+    return xnn_status_unsupported_parameter;
+  }
+
+  const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point, };
+  const union xnn_qs8_gemm_params params = xnn_init_qs8_gemm_params(
+    requantization_scale, output_zero_point, output_min, output_max);
+  return create_convolution2d_nhwc(
+    input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+    kernel_height, kernel_width,
+    subsampling_height, subsampling_width,
+    dilation_height, dilation_width,
+    groups, group_input_channels, group_output_channels,
+    input_channel_stride, output_channel_stride,
+    kernel, bias, flags,
+    0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
+    0 /* log2(sizeof(filter element)) = log2(sizeof(int8_t)) */,
+    sizeof(int32_t) /* sizeof(bias element) */,
+    (xnn_pack_vmulcaddc_w_function) NULL,
+    (xnn_pack_dwconv_hwg_w_function) xnn_pack_qs8_dwconv_hwg_w,
+    (xnn_pack_dwconv_ghw_w_function) xnn_pack_qs8_dwconv_ghw_w,
+    (xnn_pack_gemm_goi_w_function) xnn_pack_qs8_gemm_goi_w,
+    (xnn_pack_conv_kgo_w_function) xnn_pack_qs8_conv_kgo_w,
+    (xnn_pack_conv_goki_w_function) xnn_pack_qs8_conv_goki_w,
+    &packing_params, input_zero_point /* input padding byte */, 0 /* packed weights padding byte */,
+    &params, sizeof(params),
+    &xnn_params.qs8.gemm, xnn_params.qs8.dwconv, XNN_MAX_QS8_DWCONV_UKERNELS, NULL /* vmulcaddc parameters */,
+    false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QS8,
+    xnn_operator_type_convolution_nhwc_qs8,
+    convolution_op_out);
+}
 
 enum xnn_status xnn_create_convolution2d_nhwc_f16(
     uint32_t input_padding_top,
@@ -1076,6 +1169,36 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qu8(
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
     &convolution_op->params.qu8_gemm,
     &convolution_op->params.qu8_gemm,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_convolution2d_nhwc_qs8(
+    xnn_operator_t convolution_op,
+    size_t batch_size,
+    size_t input_height,
+    size_t input_width,
+    const int8_t* input,
+    int8_t* output,
+    pthreadpool_t threadpool)
+{
+  if (convolution_op->type != xnn_operator_type_convolution_nhwc_qs8) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qs8),
+      xnn_operator_type_to_string(convolution_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  return setup_convolution2d_nhwc(
+    convolution_op,
+    batch_size, input_height, input_width,
+    input, output,
+    XNN_INIT_FLAG_QS8,
+    0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
+    0 /* log2(sizeof(filter element)) = log2(sizeof(int8_t)) */,
+    sizeof(int32_t) /* sizeof(bias element) */,
+    0 /* log2(sizeof(output element)) = log2(sizeof(int8_t)) */,
+    &convolution_op->params.qs8_gemm,
+    &convolution_op->params.qs8_gemm,
     pthreadpool_get_threads_count(threadpool));
 }
 
