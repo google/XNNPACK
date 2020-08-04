@@ -41,7 +41,7 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
   auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   const size_t output_pixel_stride = groups * group_output_channels;
@@ -60,7 +60,7 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   std::vector<uint8_t> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
   std::vector<int32_t> bias(groups * group_output_channels);
-  std::generate(bias.begin(), bias.end(), std::ref(s32rng));
+  std::generate(bias.begin(), bias.end(), std::ref(i32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);

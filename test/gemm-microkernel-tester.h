@@ -217,7 +217,7 @@ class GemmMicrokernelTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
     std::vector<uint8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
@@ -235,7 +235,7 @@ class GemmMicrokernelTester {
       do {
         std::generate(b.begin(), b.end(), std::ref(u8rng));
       } while (b.size() > 1 && *std::max_element(b.cbegin(), b.cend()) == *std::min_element(b.cbegin(), b.cend()));
-      std::generate(bias.begin(), bias.end(), std::ref(s32rng));
+      std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(c.begin(), c.end(), 0xA5);
 
       std::fill(packed_w.begin(), packed_w.end(), b_zero_point());
@@ -311,7 +311,7 @@ class GemmMicrokernelTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
     std::vector<uint8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
@@ -333,7 +333,7 @@ class GemmMicrokernelTester {
       do {
         std::generate(b.begin(), b.end(), std::ref(u8rng));
       } while (b.size() > 1 && *std::max_element(b.cbegin(), b.cend()) == *std::min_element(b.cbegin(), b.cend()));
-      std::generate(bias.begin(), bias.end(), std::ref(s32rng));
+      std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(c.begin(), c.end(), 0xA5);
 
       std::fill(packed_w.begin(), packed_w.end(), b_zero_point());
@@ -438,8 +438,8 @@ class GemmMicrokernelTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-    auto s8rng = std::bind(
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i8rng = std::bind(
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
 
     std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
@@ -452,12 +452,12 @@ class GemmMicrokernelTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
-        std::generate(a.begin(), a.end(), std::ref(s8rng));
+        std::generate(a.begin(), a.end(), std::ref(i8rng));
       } while (a.size() > 1 && *std::max_element(a.cbegin(), a.cend()) == *std::min_element(a.cbegin(), a.cend()));
       do {
-        std::generate(b.begin(), b.end(), std::ref(s8rng));
+        std::generate(b.begin(), b.end(), std::ref(i8rng));
       } while (b.size() > 1 && *std::max_element(b.cbegin(), b.cend()) == *std::min_element(b.cbegin(), b.cend()));
-      std::generate(bias.begin(), bias.end(), std::ref(s32rng));
+      std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(c.begin(), c.end(), 0xA5);
 
       std::fill(packed_w.begin(), packed_w.end(), 0);
@@ -531,8 +531,8 @@ class GemmMicrokernelTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-    auto s8rng = std::bind(
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i8rng = std::bind(
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
 
     std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
@@ -545,12 +545,12 @@ class GemmMicrokernelTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
-        std::generate(a.begin(), a.end(), std::ref(s8rng));
+        std::generate(a.begin(), a.end(), std::ref(i8rng));
       } while (a.size() > 1 && *std::max_element(a.cbegin(), a.cend()) == *std::min_element(a.cbegin(), a.cend()));
       do {
-        std::generate(b.begin(), b.end(), std::ref(s8rng));
+        std::generate(b.begin(), b.end(), std::ref(i8rng));
       } while (b.size() > 1 && *std::max_element(b.cbegin(), b.cend()) == *std::min_element(b.cbegin(), b.cend()));
-      std::generate(bias.begin(), bias.end(), std::ref(s32rng));
+      std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(c.begin(), c.end(), 0xA5);
 
       std::fill(packed_w.begin(), packed_w.end(), 0);
@@ -624,8 +624,8 @@ class GemmMicrokernelTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-    auto s8rng = std::bind(
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i8rng = std::bind(
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
 
     std::vector<int8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
@@ -642,12 +642,12 @@ class GemmMicrokernelTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
-        std::generate(a.begin(), a.end(), std::ref(s8rng));
+        std::generate(a.begin(), a.end(), std::ref(i8rng));
       } while (a.size() > 1 && *std::max_element(a.cbegin(), a.cend()) == *std::min_element(a.cbegin(), a.cend()));
       do {
-        std::generate(b.begin(), b.end(), std::ref(s8rng));
+        std::generate(b.begin(), b.end(), std::ref(i8rng));
       } while (b.size() > 1 && *std::max_element(b.cbegin(), b.cend()) == *std::min_element(b.cbegin(), b.cend()));
-      std::generate(bias.begin(), bias.end(), std::ref(s32rng));
+      std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(c.begin(), c.end(), 0xA5);
 
       std::fill(packed_w.begin(), packed_w.end(), 0);

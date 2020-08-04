@@ -48,16 +48,16 @@ static void GEMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto s8rng = std::bind(
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+  auto i8rng = std::bind(
     std::uniform_int_distribution<uint32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
 
   std::vector<int8_t> a(mc * kc);
-  std::generate(a.begin(), a.end(), std::ref(s8rng));
+  std::generate(a.begin(), a.end(), std::ref(i8rng));
   std::vector<int8_t> k(nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(s8rng));
+  std::generate(k.begin(), k.end(), std::ref(i8rng));
   std::vector<int32_t> b(nc);
-  std::generate(b.begin(), b.end(), std::ref(s32rng));
+  std::generate(b.begin(), b.end(), std::ref(i32rng));
 
   const size_t w_size = kc_stride * nc_stride * sizeof(int8_t) + nc_stride * sizeof(int32_t);
   const size_t c_elements = mc * nc;
@@ -125,16 +125,16 @@ static void GEMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-  auto s8rng = std::bind(
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+  auto i8rng = std::bind(
     std::uniform_int_distribution<uint32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
 
   std::vector<int8_t> a(mc * kc);
-  std::generate(a.begin(), a.end(), std::ref(s8rng));
+  std::generate(a.begin(), a.end(), std::ref(i8rng));
   std::vector<int8_t> k(nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(s8rng));
+  std::generate(k.begin(), k.end(), std::ref(i8rng));
   std::vector<int32_t> b(nc);
-  std::generate(b.begin(), b.end(), std::ref(s32rng));
+  std::generate(b.begin(), b.end(), std::ref(i32rng));
 
   const size_t w_size = kc_stride * nc_stride * sizeof(int16_t) + nc_stride * sizeof(int32_t);
   const size_t c_elements = mc * nc;

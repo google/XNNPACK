@@ -53,7 +53,7 @@ static void GEMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
   auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   std::vector<uint8_t> a(mc * kc);
@@ -61,7 +61,7 @@ static void GEMMBenchmark(benchmark::State& state,
   std::vector<uint8_t> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
   std::vector<int32_t> b(nc);
-  std::generate(b.begin(), b.end(), std::ref(s32rng));
+  std::generate(b.begin(), b.end(), std::ref(i32rng));
 
   const size_t w_elements = kc_stride * nc_stride + nc_stride * sizeof(int32_t) / sizeof(uint8_t);
   const size_t c_elements = mc * nc;
@@ -156,7 +156,7 @@ static void GemmlowpBenchmark(benchmark::State& state, uint32_t threads)
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
   auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   std::vector<uint8_t> a(mc * kc);
@@ -172,7 +172,7 @@ static void GemmlowpBenchmark(benchmark::State& state, uint32_t threads)
   std::vector<uint8_t> k(kElements * num_buffers);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
   std::vector<int32_t> b(bElements * num_buffers);
-  std::generate(b.begin(), b.end(), std::ref(s32rng));
+  std::generate(b.begin(), b.end(), std::ref(i32rng));
   std::vector<uint8_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), 0xA5);
 
@@ -215,7 +215,7 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
   auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   const size_t num_buffers = 1 +
@@ -227,7 +227,7 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
   std::vector<uint8_t> k(num_buffers * nc * kc);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
   std::vector<int32_t> b(num_buffers * nc);
-  std::generate(b.begin(), b.end(), std::ref(s32rng));
+  std::generate(b.begin(), b.end(), std::ref(i32rng));
   std::vector<uint8_t> c(num_buffers * nc * mc);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
