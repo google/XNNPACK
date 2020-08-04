@@ -3679,6 +3679,16 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_requantization_bench",
+    srcs = [
+        "bench/qs8-requantization.cc",
+        "src/xnnpack/requantization-stubs.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "qu8_gemm_bench",
     srcs = [
         "bench/gemm.h",
