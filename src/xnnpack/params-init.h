@@ -491,9 +491,9 @@ static inline void xnn_update_f32_gavgpool_params(
 
     const uint32_t w = (width - 1) & 3;
     params->scalar.mask[0] = UINT32_C(0xFFFFFFFF);
-    params->scalar.mask[1] = (int32_t) (w >= 1);
-    params->scalar.mask[2] = (int32_t) (w >= 2);
-    params->scalar.mask[3] = (int32_t) (w >= 3);
+    params->scalar.mask[1] = -(int32_t) (w >= 1);
+    params->scalar.mask[2] = -(int32_t) (w >= 2);
+    params->scalar.mask[3] = -(int32_t) (w >= 3);
   #endif
 }
 
