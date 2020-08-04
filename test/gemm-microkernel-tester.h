@@ -526,6 +526,99 @@ class GemmMicrokernelTester {
     }
   }
 
+  void Test(xnn_qs8_gemm_xw_ukernel_function gemm, Variant variant = Variant::Native) const {
+    ASSERT_LE(m(), mr());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto s32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto s8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+
+    std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> b(n() * k());
+    std::vector<int32_t> bias(n());
+    std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_w(packed_n() * packed_k() + bias_n() * sizeof(int32_t) / sizeof(int16_t));
+    std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+    std::vector<int32_t> acc(m() * n());
+    std::vector<int8_t> c_ref(m() * n());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      do {
+        std::generate(a.begin(), a.end(), std::ref(s8rng));
+      } while (a.size() > 1 && *std::max_element(a.cbegin(), a.cend()) == *std::min_element(a.cbegin(), a.cend()));
+      do {
+        std::generate(b.begin(), b.end(), std::ref(s8rng));
+      } while (b.size() > 1 && *std::max_element(b.cbegin(), b.cend()) == *std::min_element(b.cbegin(), b.cend()));
+      std::generate(bias.begin(), bias.end(), std::ref(s32rng));
+      std::fill(c.begin(), c.end(), 0xA5);
+
+      std::fill(packed_w.begin(), packed_w.end(), 0);
+      const xnn_qs8_packing_params packing_params = { int8_t(a_zero_point() - 0x80) };
+      xnn_pack_qs8_gemm_xw_goi_w(1, n(), k(), nr(), kr(), sr(),
+        b.data(), bias.data(), packed_w.data(), &packing_params);
+
+      // Compute 32-bit results and output quantization arguments.
+      std::fill(acc.begin(), acc.end(), 0);
+      for (size_t m_index = 0; m_index < m(); m_index++) {
+        for (size_t n_index = 0; n_index < n(); n_index++) {
+          for (size_t k_index = 0; k_index < k(); k_index++) {
+            acc[m_index * n() + n_index] +=
+                (int32_t(a[m_index * a_stride() + k_index]) - int32_t(a_zero_point() - 0x80)) *
+                int32_t(b[n_index * k() + k_index]);
+          }
+          acc[m_index * n() + n_index] += bias[n_index];
+        }
+      }
+
+      const int32_t accumulated_min = *std::min_element(acc.cbegin(), acc.cend());
+      const int32_t accumulated_max = *std::max_element(acc.cbegin(), acc.cend());
+      const double c_scale = uint32_t(accumulated_max - accumulated_min) >= 256 ? double(uint32_t(accumulated_max - accumulated_min)) / 255.0 : 1.00001;
+      const int8_t c_zero_point = int8_t(std::max(std::min(
+        lrint(-0.5 - 0.5 * double(accumulated_min + accumulated_max) / c_scale),
+        long(std::numeric_limits<int8_t>::max())), long(std::numeric_limits<int8_t>::min())));
+
+      const float requantization_scale = 1.0f / float(c_scale);
+      union xnn_qs8_gemm_xw_params quantization_params = { };
+      switch (variant) {
+        case Variant::Native:
+          quantization_params = xnn_init_qs8_gemm_xw_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          break;
+        case Variant::Scalar:
+          quantization_params = xnn_init_scalar_qs8_gemm_xw_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          break;
+      }
+      const union xnn_qs8_requantization_params scalar_requantization_params =
+        xnn_init_scalar_qs8_requantization_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+
+      gemm(
+        m(), n(), k(),
+        a.data(), a_stride() * sizeof(int8_t),
+        packed_w.data(),
+        c.data(), cm_stride() * sizeof(int8_t), cn_stride() * sizeof(int8_t),
+        &quantization_params);
+
+      for (size_t m_index = 0; m_index < m(); m_index++) {
+        for (size_t n_index = 0; n_index < n(); n_index++) {
+          c_ref[m_index * n() + n_index] = xnn_qs8_requantize_q31(acc[m_index * n() + n_index], scalar_requantization_params);
+        }
+      }
+
+      for (size_t i = 0; i < m(); i++) {
+        for (size_t j = 0; j < n(); j++) {
+          ASSERT_LE(int32_t(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), int32_t(qmax()) - 0x80);
+          ASSERT_GE(int32_t(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), int32_t(qmin()) - 0x80);
+          ASSERT_EQ(int32_t(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), int32_t(c_ref[i * n() + j]))
+              << "at " << i << ", " << j << ": reference = " << int32_t(c_ref[i * n() + j])
+              << " (accumulator = " << acc[i * n() + j]
+              << "), optimized = " << int32_t(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x "
+              << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k()
+              << ", requantization scale = " << requantization_scale << ", output zero point = " << int32_t(c_zero_point);
+        }
+      }
+    }
+  }
+
   void Test(xnn_qs8_igemm_ukernel_function igemm, Variant variant = Variant::Native) const {
     ASSERT_LE(m(), mr());
 

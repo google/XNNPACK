@@ -235,6 +235,34 @@ static inline union xnn_qs8_gemm_params xnn_init_qs8_gemm_params(
   return params;
 }
 
+static inline union xnn_qs8_gemm_xw_params xnn_init_scalar_qs8_gemm_xw_params(
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  union {
+    union xnn_qs8_gemm_xw_params gemm_xw;
+    union xnn_qs8_gemm_params gemm;
+  } params;
+  params.gemm = xnn_init_scalar_qs8_gemm_params(scale, output_zero_point, output_min, output_max);
+  return params.gemm_xw;
+}
+
+static inline union xnn_qs8_gemm_xw_params xnn_init_qs8_gemm_xw_params(
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  union {
+    union xnn_qs8_gemm_xw_params gemm_xw;
+    union xnn_qs8_gemm_params gemm;
+  } params;
+  params.gemm = xnn_init_qs8_gemm_params(scale, output_zero_point, output_min, output_max);
+  return params.gemm_xw;
+}
+
 static inline union xnn_qu8_avgpool_params xnn_init_qu8_avgpool_params(
   int32_t bias,
   float scale,

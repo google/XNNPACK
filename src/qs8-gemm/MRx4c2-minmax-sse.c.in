@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h", 5: "ammintrin.h"}[SSE]
+$assert VARIANT in ["LD64", "LD128", "EXTENDED"]
 $assert MR <= 4
 #include <assert.h>
 
@@ -20,8 +21,10 @@ $else:
 #include <xnnpack/gemm.h>
 
 
+$LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
+$GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
 $ISA = {2: "sse2", 3: "ssse3", 4: "sse41", 5: "xop"}[SSE]
-void xnn_qs8_gemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64"}(
+void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c2__${ISA}${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -31,7 +34,7 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_gemm${GEMM_SUFFIX}_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -79,7 +82,7 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64
           const __m128i vxa${M} = _mm_unpacklo_epi8(va${M}, _mm_cmpgt_epi8(_mm_setzero_si128(), va${M}));
         a${M} += 8;
 
-      $if LD128:
+      $if VARIANT == "LD128":
         $for K in range(0, 4, 2):
           $if K == 0:
             const __m128i vb${K}${K+1} = _mm_loadu_si128((const __m128i*) w);
@@ -106,14 +109,20 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64
                 _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K+1}, ${K+1}, ${K+1}, ${K+1})), vxb${K+1}));
       $else:
         $for K in range(4):
-          $if K == 0:
-            const __m128i vb${K} = _mm_loadl_epi64((const __m128i*) w);
-          $else:
-            const __m128i vb${K} = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + ${K * 8} * sizeof(int8_t)));
-          $if SSE >= 4:
-            const __m128i vxb${K} = _mm_cvtepi8_epi16(vb${K});
-          $else:
-            const __m128i vxb${K} = _mm_unpacklo_epi8(vb${K}, _mm_cmpgt_epi8(_mm_setzero_si128(), vb${K}));
+          $if VARIANT == "LD64":
+            $if K == 0:
+              const __m128i vb${K} = _mm_loadl_epi64((const __m128i*) w);
+            $else:
+              const __m128i vb${K} = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + ${K * 8} * sizeof(int8_t)));
+            $if SSE >= 4:
+              const __m128i vxb${K} = _mm_cvtepi8_epi16(vb${K});
+            $else:
+              const __m128i vxb${K} = _mm_unpacklo_epi8(vb${K}, _mm_cmpgt_epi8(_mm_setzero_si128(), vb${K}));
+          $elif VARIANT == "EXTENDED":
+            $if K == 0:
+              const __m128i vxb${K} = _mm_load_si128((const __m128i*) w);
+            $else:
+              const __m128i vxb${K} = _mm_load_si128((const __m128i*) ((uintptr_t) w + ${K * 8} * sizeof(int16_t)));
 
           $for M in range(MR):
             $if SSE == 5:
@@ -123,7 +132,10 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64
               vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
                 _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}));
 
-      w = (const void*) ((uintptr_t) w + 32 * sizeof(int8_t));
+      $if VARIANT == "EXTENDED":
+        w = (const void*) ((uintptr_t) w + 32 * sizeof(int16_t));
+      $else:
+        w = (const void*) ((uintptr_t) w + 32 * sizeof(int8_t));
       k -= 8 * sizeof(int8_t);
     }
     if (k != 0) {
@@ -135,9 +147,16 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64
           const __m128i vxa${M} = _mm_unpacklo_epi8(va${M}, _mm_cmpgt_epi8(_mm_setzero_si128(), va${M}));
         a${M} = (const int8_t*) ((uintptr_t) a${M} + k);
 
-      const __m128i vb0 = _mm_loadl_epi64((const __m128i*) w);
-      w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-      const __m128i vxb0 = _mm_unpacklo_epi8(vb0, _mm_cmpgt_epi8(_mm_setzero_si128(), vb0));
+      $if VARIANT == "EXTENDED":
+        const __m128i vxb0 = _mm_load_si128((const __m128i*) w);
+        w = (const void*) ((uintptr_t) w + 8 * sizeof(int16_t));
+      $else:
+        const __m128i vb0 = _mm_loadl_epi64((const __m128i*) w);
+        $if SSE >= 4:
+          const __m128i vxb0 = _mm_cvtepi8_epi16(vb0);
+        $else:
+          const __m128i vxb0 = _mm_unpacklo_epi8(vb0, _mm_cmpgt_epi8(_mm_setzero_si128(), vb0));
+        w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
       $for M in range(MR):
         $if SSE == 5:
@@ -148,9 +167,16 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64
             _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(0, 0, 0, 0)), vxb0));
 
       if (k > 2 * sizeof(int8_t)) {
-        const __m128i vb1 = _mm_loadl_epi64((const __m128i*) w);
-        w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-        const __m128i vxb1 = _mm_unpacklo_epi8(vb1, _mm_cmpgt_epi8(_mm_setzero_si128(), vb1));
+        $if VARIANT == "EXTENDED":
+          const __m128i vxb1 = _mm_load_si128((const __m128i*) w);
+          w = (const void*) ((uintptr_t) w + 8 * sizeof(int16_t));
+        $else:
+          const __m128i vb1 = _mm_loadl_epi64((const __m128i*) w);
+          $if SSE >= 4:
+            const __m128i vxb1 = _mm_cvtepi8_epi16(vb1);
+          $else:
+            const __m128i vxb1 = _mm_unpacklo_epi8(vb1, _mm_cmpgt_epi8(_mm_setzero_si128(), vb1));
+          w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
         $for M in range(MR):
           $if SSE == 5:
@@ -161,9 +187,16 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64
               _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(1, 1, 1, 1)), vxb1));
 
         if (k > 4 * sizeof(int8_t)) {
-          const __m128i vb2 = _mm_loadl_epi64((const __m128i*) w);
-          w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-          const __m128i vxb2 = _mm_unpacklo_epi8(vb2, _mm_cmpgt_epi8(_mm_setzero_si128(), vb2));
+          $if VARIANT == "EXTENDED":
+            const __m128i vxb2 = _mm_load_si128((const __m128i*) w);
+            w = (const void*) ((uintptr_t) w + 8 * sizeof(int16_t));
+          $else:
+            const __m128i vb2 = _mm_loadl_epi64((const __m128i*) w);
+            $if SSE >= 4:
+              const __m128i vxb2 = _mm_cvtepi8_epi16(vb2);
+            $else:
+              const __m128i vxb2 = _mm_unpacklo_epi8(vb2, _mm_cmpgt_epi8(_mm_setzero_si128(), vb2));
+            w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
           $for M in range(MR):
             $if SSE == 5:
@@ -174,9 +207,16 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64
                 _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
 
           if (k > 6 * sizeof(int8_t)) {
-            const __m128i vb3 = _mm_loadl_epi64((const __m128i*) w);
-            w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-            const __m128i vxb3 = _mm_unpacklo_epi8(vb3, _mm_cmpgt_epi8(_mm_setzero_si128(), vb3));
+            $if VARIANT == "EXTENDED":
+              const __m128i vxb3 = _mm_load_si128((const __m128i*) w);
+              w = (const void*) ((uintptr_t) w + 8 * sizeof(int16_t));
+            $else:
+              const __m128i vb3 = _mm_loadl_epi64((const __m128i*) w);
+              $if SSE >= 4:
+                const __m128i vxb3 = _mm_cvtepi8_epi16(vb3);
+              $else:
+                const __m128i vxb3 = _mm_unpacklo_epi8(vb3, _mm_cmpgt_epi8(_mm_setzero_si128(), vb3));
+              w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
             $for M in range(MR):
               $if SSE == 5:
