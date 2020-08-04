@@ -726,6 +726,14 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-vunary/gen/vneg-neon-x8.c
   src/f32-vunary/gen/vsqr-neon-x4.c
   src/f32-vunary/gen/vsqr-neon-x8.c
+  src/qs8-gemm/gen/1x8-minmax-neon-mlal-lane.c
+  src/qs8-gemm/gen/4x8-minmax-neon-mlal-lane.c
+  src/qs8-gemm/gen/1x16-minmax-neon-mlal-lane.c
+  src/qs8-gemm/gen/2x16-minmax-neon-mlal-lane.c
+  src/qs8-igemm/gen/1x8-minmax-neon-mlal-lane.c
+  src/qs8-igemm/gen/4x8-minmax-neon-mlal-lane.c
+  src/qs8-igemm/gen/1x16-minmax-neon-mlal-lane.c
+  src/qs8-igemm/gen/2x16-minmax-neon-mlal-lane.c
   src/qs8-requantization/precise-neon.c
   src/qs8-requantization/fp32-neon.c
   src/qs8-requantization/q31-neon.c

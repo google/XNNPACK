@@ -4,6 +4,13 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################### ARM NEON ##################################
+tools/xngen src/qs8-igemm/minmax-neon-mlal-lane.c.in -D MR=1 -D NR=8 -o src/qs8-igemm/gen/1x8-minmax-neon-mlal-lane.c
+tools/xngen src/qs8-igemm/minmax-neon-mlal-lane.c.in -D MR=4 -D NR=8 -o src/qs8-igemm/gen/4x8-minmax-neon-mlal-lane.c
+
+tools/xngen src/qs8-igemm/minmax-neon-mlal-lane.c.in -D MR=1 -D NR=16 -o src/qs8-igemm/gen/1x16-minmax-neon-mlal-lane.c
+tools/xngen src/qs8-igemm/minmax-neon-mlal-lane.c.in -D MR=2 -D NR=16 -o src/qs8-igemm/gen/2x16-minmax-neon-mlal-lane.c
+
 ################################### x86 SSE ###################################
 ### C2 micro-kernels
 tools/xngen src/qs8-igemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=2 -D LD128=0 -o src/qs8-igemm/gen/1x4c2-minmax-sse2-ld64.c

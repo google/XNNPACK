@@ -316,6 +316,12 @@ DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_ukernel_2x2__scal
       const int8_t* zero,                                  \
       const union xnn_qs8_gemm_params* params);
 
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_1x8__neon_mlal_lane)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_4x8__neon_mlal_lane)
+
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_1x16__neon_mlal_lane)
+DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_2x16__neon_mlal_lane)
+
 DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse2_ld64)
 DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse2_ld64)
 
