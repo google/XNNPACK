@@ -109,6 +109,13 @@ BENCHMARK_F(Requantization, fp32__scalar_magic)(benchmark::State& state) {
   }
 }
 
+BENCHMARK_F(Requantization, q31__scalar)(benchmark::State& state) {
+  for (auto _ : state) {
+    xnn_qu8_requantize_q31__scalar(
+        n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
+  }
+}
+
 #if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
   BENCHMARK_F(Requantization, precise__psimd)(benchmark::State& state) {
     for (auto _ : state) {
