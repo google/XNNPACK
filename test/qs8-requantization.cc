@@ -1179,7 +1179,7 @@ TEST(QS8_Q31__SCALAR, random_cases) {
 
 #if XNN_ARCH_WASMSIMD
   /*
-   * FP32-based ARM NEON implementation.
+   * FP32-based WAsm SIMD implementation.
    */
 
   TEST(QS8_FP32__WASMSIMD, random_cases) {
@@ -1188,5 +1188,69 @@ TEST(QS8_Q31__SCALAR, random_cases) {
       .qmax(std::numeric_limits<int8_t>::max())
       .iterations(1000)
       .TestRandomCasesApproximate(xnn_qs8_requantize_fp32__wasmsimd);
+  }
+
+  /*
+   * Q31-based WAsm SIMD implementation.
+   */
+
+  TEST(QS8_Q31__WASMSIMD, exact_divide_by_po2) {
+    for (uint32_t s = 1; s < 32; s++) {
+      RequantizationTester()
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+        .s(s)
+        .TestExactDivideByPO2(xnn_qs8_requantize_q31__wasmsimd);
+    }
+  }
+
+  TEST(QS8_Q31__WASMSIMD, exact_divide_by_po2_with_zero_point) {
+    for (int32_t zero_point = std::numeric_limits<int8_t>::min();
+         zero_point <= std::numeric_limits<int8_t>::max();
+         zero_point++)
+    {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .s(s)
+          .TestExactDivideByPO2(xnn_qs8_requantize_q31__wasmsimd);
+      }
+    }
+  }
+
+  TEST(QS8_Q31__WASMSIMD, divide_by_po2_with_rounding_up) {
+    for (int32_t zero_point = std::numeric_limits<int8_t>::min();
+         zero_point <= std::numeric_limits<int8_t>::max();
+         zero_point++)
+    {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingUp(xnn_qs8_requantize_q31__wasmsimd);
+      }
+    }
+  }
+
+  /* No rounding down test - it fails because of upward bias in multiplication */
+  /* No rounding away test - it fails because of upward bias in multiplication */
+
+  TEST(QS8_Q31__WASMSIMD, special_cases) {
+    RequantizationTester()
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
+      .TestSpecialCases(xnn_qs8_requantize_q31__wasmsimd);
+  }
+
+  TEST(QS8_Q31__WASMSIMD, random_cases) {
+    RequantizationTester()
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
+      .iterations(100)
+      .TestRandomCasesApproximate(xnn_qs8_requantize_q31__wasmsimd);
   }
 #endif  // XNN_ARCH_WASMSIMD

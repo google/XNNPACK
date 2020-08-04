@@ -110,7 +110,7 @@ class RequantizationTester {
     for (int32_t i = 0; i <= std::numeric_limits<uint8_t>::max(); i++) {
       const int32_t clamped_i = std::max(min_i, std::min(max_i, i));
       ASSERT_EQ(uint32_t(clamped_i), uint32_t(outputs[i]))
-        << "i = " << i << ", clamped i = " << clamped_i
+        << "i = " << i << ", clamped i = " << clamped_i << ", input = " << inputs[i]
         << ", min i = " << min_i << ", max i = " << max_i
         << ", s = " << s() << ", zero point = " << zero_point();
     }
@@ -151,6 +151,7 @@ class RequantizationTester {
       const int32_t clamped_i = std::max(min_i, std::min(max_i, i));
       ASSERT_EQ(clamped_i, int32_t(outputs[i - std::numeric_limits<int8_t>::min()]))
         << "i = " << i << ", clamped i = " << clamped_i
+        << ", input = " << inputs[i - std::numeric_limits<int8_t>::min()]
         << ", min i = " << min_i << ", max i = " << max_i
         << ", s = " << s() << ", zero point = " << zero_point();
     }

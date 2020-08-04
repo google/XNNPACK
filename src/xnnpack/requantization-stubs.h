@@ -103,6 +103,7 @@ DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_q31__ssse3)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_q31__sse4)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_q31__neon)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_q31__psimd)
+DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_q31__wasmsimd)
 
 
 #ifdef __cplusplus
