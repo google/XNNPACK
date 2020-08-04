@@ -116,9 +116,8 @@ void xnn_qs8_requantize_q31__wasmsimd(
 
     // 12x v128.shuffle
     // 8x i32x4.lt
-    // 12x i64x2.add
+    // 8x i64x2.add
     // 8x i64x2.mul
-    // 4x i64x2.shr_u
     // 4x v128.and
     // 4x i32x4.add
     // 4x i32x4.sub
@@ -130,7 +129,7 @@ void xnn_qs8_requantize_q31__wasmsimd(
     // 1x i8x16.max_s
     // 1x i8x16.min_s
     // ---------------------
-    // 71 instructions total
+    // 63 instructions total
 
     wasm_v128_store(output, xyzw_clamped);
     output += 16;
