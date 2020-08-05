@@ -100,10 +100,10 @@ Benchmarked on May 22, 2020 with `end2end-bench --benchmark_min_time=5` on a Ras
 
 ### Machine Learning Frameworks
 
+- [TensorFlow Lite](https://blog.tensorflow.org/2020/07/accelerating-tensorflow-lite-xnnpack-integration.html).
 - [TensorFlow.js WebAssembly backend](https://blog.tensorflow.org/2020/03/introducing-webassembly-backend-for-tensorflow-js.html).
-- [MediaPipe for Web](https://developers.googleblog.com/2020/01/mediapipe-on-web.html).
-- TensorFlow Lite through the [XNNPACK delegate](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/delegates/xnnpack).
-- [PyTorch](https://github.com/pytorch/pytorch/tree/master/aten/src/ATen/native/xnnpack).
+- [PyTorch Mobile](https://pytorch.org/mobile).
+- [MediaPipe for the Web](https://developers.googleblog.com/2020/01/mediapipe-on-web.html).
 
 ## Acknowledgements
 
