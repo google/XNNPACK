@@ -283,6 +283,8 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b)
   b->Args({1, 1001});
   // ImageNet-22K
   b->Args({1, 21841});
+  // ADE20K
+  b->Args({257 * 257, 151});
 }
 
 #ifndef XNN_NO_QU8_OPERATORS
