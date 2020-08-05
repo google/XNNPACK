@@ -1199,14 +1199,19 @@ static void init(void) {
       xnn_params.qs8.gemm.log2_kr = 3;
     }
 
-    if (cpuinfo_has_x86_sse4_1()) {
+    if (cpuinfo_has_x86_avx2()) {
+      xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up16x9__avx2_mul32;
+      xnn_params.qs8.dwconv[0].channel_tile = 16;
+    } else if (cpuinfo_has_x86_sse4_1()) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up8x9__sse41_mul16;
+      xnn_params.qs8.dwconv[0].channel_tile = 8;
     } else if (cpuinfo_has_x86_ssse3()) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up8x9__ssse3_mul16;
+      xnn_params.qs8.dwconv[0].channel_tile = 8;
     } else if (cpuinfo_has_x86_sse2()) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up8x9__sse2_mul16;
+      xnn_params.qs8.dwconv[0].channel_tile = 8;
     }
-    xnn_params.qs8.dwconv[0].channel_tile = 8;
     xnn_params.qs8.dwconv[0].primary_tile = 9;
   #endif  // XNN_NO_QU8_OPERATORS
 

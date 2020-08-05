@@ -1740,6 +1740,10 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/f32-vscaleextexp/gen/avx2-p5-x80.c
   src/f32-vscaleextexp/gen/avx2-p5-x88.c
   src/f32-vscaleextexp/gen/avx2-p5-x96.c
+  src/qs8-dwconv/gen/up8x9-minmax-avx2-mul32.c
+  src/qs8-dwconv/gen/up16x9-minmax-avx2-mul32.c
+  src/qs8-dwconv/gen/up24x9-minmax-avx2-mul32.c
+  src/qs8-dwconv/gen/up32x9-minmax-avx2-mul32.c
   src/qs8-gemm/gen/1x8c8-minmax-avx2.c
   src/qs8-gemm/gen/2x8c8-minmax-avx2.c
   src/qs8-gemm/gen/3x8c8-minmax-avx2.c

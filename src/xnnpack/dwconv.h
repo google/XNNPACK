@@ -306,6 +306,11 @@ DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel
 DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up16x9__xop_mul16)
 DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up24x9__xop_mul16)
 
+DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up8x9__avx2_mul32)
+DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up16x9__avx2_mul32)
+DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up24x9__avx2_mul32)
+DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up32x9__avx2_mul32)
+
 
 #define DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                             \
