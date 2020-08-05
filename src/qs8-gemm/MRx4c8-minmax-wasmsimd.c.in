@@ -1,0 +1,194 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert VARIANT in ["LD64", "LD128", "EXTENDED"]
+$assert MR <= 4
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include <xnnpack/gemm.h>
+
+
+$LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
+$GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
+void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX}(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const int8_t* restrict a,
+    size_t a_stride,
+    const void* restrict w,
+    int8_t* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_qs8_gemm${GEMM_SUFFIX}_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(int8_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  const int8_t* a0 = a;
+  int8_t* c0 = c;
+  $for M in range(1, MR):
+    const int8_t* a${M} = (const int8_t*) ((uintptr_t) a${M-1} + a_stride);
+    int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+
+  const v128_t vzero = wasm_f64x2_splat(0.0);
+  do {
+    $for N in range(4):
+      v128_t vacc0x${N} = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[${N}]);
+    $for M in range(1, MR):
+      $for N in range(4):
+        v128_t vacc${M}x${N} = vacc0x${N};
+    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+
+    size_t k = 0;
+    while (k < kc) {
+      $for M in range(MR):
+        const v128_t vxa${M} = wasm_i16x8_load_8x8(a${M});
+        a${M} += 8;
+
+      $if VARIANT == "LD128":
+        $for N in range(0, 4, 2):
+          $if N == 0:
+            const v128_t vb${N}${N+1} = wasm_v128_load(w);
+          $else:
+            const v128_t vb${N}${N+1} = wasm_v128_load((const void*) ((uintptr_t) w + ${N * 8} * sizeof(int8_t)));
+          const v128_t vxb${N} = wasm_i16x8_widen_low_i8x16(vb${N}${N+1});
+          const v128_t vxb${N+1} = wasm_i16x8_widen_high_i8x16(vb${N}${N+1});
+
+          $for M in range(MR):
+            const v128_t vprod${M}x${N} = wasm_i16x8_mul(vxb${N}, vxa${M});
+            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_widen_low_i16x8(vprod${M}x${N}));
+
+          $for M in range(MR):
+            const v128_t vprod${M}x${N+1} = wasm_i16x8_mul(vxb${N+1}, vxa${M});
+            vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_widen_low_i16x8(vprod${M}x${N+1}));
+            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_widen_high_i16x8(vprod${M}x${N}));
+
+          $for M in range(MR):
+            vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_widen_high_i16x8(vprod${M}x${N+1}));
+      $else:
+        $for N in range(4):
+          $if VARIANT == "LD64":
+            $if N == 0:
+              const v128_t vxb${N} = wasm_i16x8_load_8x8(w);
+            $else:
+              const v128_t vxb${N} = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + ${N * 8} * sizeof(int8_t)));
+          $elif VARIANT == "EXTENDED":
+            $if N == 0:
+              const v128_t vxb${N} = wasm_v128_load(w);
+            $else:
+              const v128_t vxb${N} = wasm_v128_load((const void*) ((uintptr_t) w + ${N * 8} * sizeof(int16_t)));
+
+          $for M in range(MR):
+            const v128_t vprod${M}x${N} = wasm_i16x8_mul(vxa${M}, vxb${N});
+            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_widen_low_i16x8(vprod${M}x${N}));
+            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_widen_high_i16x8(vprod${M}x${N}));
+
+      $if VARIANT == "EXTENDED":
+        w = (const void*) ((uintptr_t) w + 32 * sizeof(int16_t));
+      $else:
+        w = (const void*) ((uintptr_t) w + 32 * sizeof(int8_t));
+      k += 8 * sizeof(int8_t);
+    }
+
+    $for M in range(MR):
+      const v128_t vacc${M}x02 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc${M}x0, vacc${M}x2, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc${M}x0, vacc${M}x2, 2, 6, 3, 7));
+      const v128_t vacc${M}x13 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc${M}x1, vacc${M}x3, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc${M}x1, vacc${M}x3, 2, 6, 3, 7));
+
+    $for M in range(MR):
+      v128_t vacc${M}x0123 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc${M}x02, vacc${M}x13, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc${M}x02, vacc${M}x13, 2, 6, 3, 7));
+
+    $for M in range(MR):
+      const v128_t vsign${M}x0123 = wasm_i32x4_lt(vacc${M}x0123, vzero);
+
+    $for M in range(MR):
+      const v128_t vacc${M}x01 = wasm_v32x4_shuffle(vacc${M}x0123, vsign${M}x0123, 0, 4, 1, 5);
+
+    const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
+    const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
+    $for M in range(MR):
+      const v128_t vprod${M}x01 = wasm_i64x2_add(wasm_i64x2_mul(vacc${M}x01, vmultiplier), vrounding);
+      const v128_t vacc${M}x23 = wasm_v32x4_shuffle(vacc${M}x0123, vsign${M}x0123, 2, 6, 3, 7);
+
+    $for M in range(MR):
+      const v128_t vprod${M}x23 = wasm_i64x2_add(wasm_i64x2_mul(vacc${M}x23, vmultiplier), vrounding);
+
+    $for M in range(MR):
+      const v128_t vq31prod${M}x0123 = wasm_v32x4_shuffle(vprod${M}x01, vprod${M}x23, 1, 3, 5, 7);
+
+    const v128_t vremainder_mask = wasm_v128_load(params->wasmsimd.remainder_mask);
+    $for M in range(MR):
+      const v128_t vrem${M}x0123 = wasm_i32x4_add(wasm_v128_and(vq31prod${M}x0123, vremainder_mask), wasm_i32x4_lt(vq31prod${M}x0123, vzero));
+
+    const v128_t vthreshold = wasm_v128_load(params->wasmsimd.remainder_threshold);
+    const int32_t vshift = params->wasmsimd.shift;
+    $for M in range(MR):
+      vacc${M}x0123 = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod${M}x0123, vshift), wasm_i32x4_gt(vrem${M}x0123, vthreshold));
+
+    const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
+    $for M in range(0, MR, 2):
+      v128_t vacc${M}${min(M+1, MR-1)}x0123 = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc${M}x0123, vacc${min(M+1, MR-1)}x0123), voutput_zero_point);
+
+    $if MR > 2:
+      v128_t vout = wasm_i8x16_narrow_i16x8(vacc0${min(1, MR-1)}x0123, vacc${min(2, MR-1)}${min(3, MR-1)}x0123);
+    $else:
+      v128_t vout = wasm_i8x16_narrow_i16x8(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
+
+    const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
+    vout = wasm_i8x16_max(vout, voutput_min);
+
+    const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
+    vout = wasm_i8x16_min(vout, voutput_max);
+
+    if (nc >= 4) {
+      $for M in range(MR):
+        *((float*) c${M}) = (float) wasm_f32x4_extract_lane(vout, ${M});
+
+      $for M in range(MR):
+        a${M} = (const int8_t*) ((uintptr_t) a${M} - k);
+
+      $for M in range(MR):
+        c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
+
+      nc -= 4;
+    } else {
+      if (nc & 2) {
+        $for M in range(MR):
+          *((uint16_t*) c${M}) = (uint16_t) wasm_i16x8_extract_lane(vout, ${M * 2});
+          c${M} += 2;
+        vout = wasm_u32x4_shr(vout, 16);
+      }
+      if (nc & 1) {
+        $for M in range(MR):
+          *c${M} = (int8_t) wasm_i8x16_extract_lane(vout, ${M * 4});
+      }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

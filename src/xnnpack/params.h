@@ -293,6 +293,18 @@ union xnn_qs8_gemm_params {
     XNN_ALIGN(16) int16_t output_max[8];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    XNN_ALIGN(16) int64_t multiplier[2];
+    XNN_ALIGN(16) int64_t rounding[2];
+    XNN_ALIGN(16) int32_t remainder_mask[4];
+    XNN_ALIGN(16) int32_t remainder_threshold[4];
+    int32_t shift;
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int8_t output_min[16];
+    XNN_ALIGN(16) int8_t output_max[16];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD
 };
 
 union xnn_qs8_gemm_xw_params {
@@ -326,6 +338,18 @@ union xnn_qs8_gemm_xw_params {
     XNN_ALIGN(16) int16_t output_max[8];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    XNN_ALIGN(16) int64_t multiplier[2];
+    XNN_ALIGN(16) int64_t rounding[2];
+    XNN_ALIGN(16) int32_t remainder_mask[4];
+    XNN_ALIGN(16) int32_t remainder_threshold[4];
+    int32_t shift;
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int8_t output_min[16];
+    XNN_ALIGN(16) int8_t output_max[16];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD
 };
 
 union xnn_qu8_add_params {

@@ -142,3 +142,21 @@
   k-block: 8
 - name: xnn_qs8_gemm_xw_minmax_ukernel_3x8c8__avx2
   k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_1x4c8__wasmsimd_ld64
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_2x4c8__wasmsimd_ld64
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_3x4c8__wasmsimd_ld64
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_1x4c8__wasmsimd_ld128
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_2x4c8__wasmsimd_ld128
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_3x4c8__wasmsimd_ld128
+  k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_ukernel_1x4c8__wasmsimd
+  k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_ukernel_2x4c8__wasmsimd
+  k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_ukernel_3x4c8__wasmsimd
+  k-block: 8

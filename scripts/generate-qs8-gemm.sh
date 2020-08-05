@@ -4,6 +4,20 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################## WAsm SIMD ##################################
+### C8 micro-kernels   
+tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=1 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c8-minmax-wasmsimd-ld64.c
+tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=2 -D VARIANT=LD64     -o src/qs8-gemm/gen/2x4c8-minmax-wasmsimd-ld64.c
+tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=3 -D VARIANT=LD64     -o src/qs8-gemm/gen/3x4c8-minmax-wasmsimd-ld64.c
+
+tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=1 -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c8-minmax-wasmsimd-ld128.c
+tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=2 -D VARIANT=LD128    -o src/qs8-gemm/gen/2x4c8-minmax-wasmsimd-ld128.c
+tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=3 -D VARIANT=LD128    -o src/qs8-gemm/gen/3x4c8-minmax-wasmsimd-ld128.c
+
+tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=1 -D VARIANT=EXTENDED -o src/qs8-gemm/gen/1x4c8-xw-minmax-wasmsimd.c
+tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=2 -D VARIANT=EXTENDED -o src/qs8-gemm/gen/2x4c8-xw-minmax-wasmsimd.c
+tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=3 -D VARIANT=EXTENDED -o src/qs8-gemm/gen/3x4c8-xw-minmax-wasmsimd.c
+
 ################################### ARM NEON ##################################
 tools/xngen src/qs8-gemm/minmax-neon-mlal-lane.c.in -D MR=1 -D NR=8 -o src/qs8-gemm/gen/1x8-minmax-neon-mlal-lane.c
 tools/xngen src/qs8-gemm/minmax-neon-mlal-lane.c.in -D MR=4 -D NR=8 -o src/qs8-gemm/gen/4x8-minmax-neon-mlal-lane.c

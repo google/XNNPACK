@@ -221,6 +221,30 @@ static inline union xnn_qs8_gemm_params xnn_init_qs8_gemm_params(
     params.neon.output_zero_point = (int16_t) output_zero_point;
     params.neon.output_min = output_min;
     params.neon.output_max = output_max;
+  #elif XNN_ARCH_WASMSIMD
+    const int64_t twice_multiplier = INT64_C(2) * (int64_t) multiplier;
+    const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
+    const uint32_t remainder_threshold = remainder_mask >> 1;
+    params.wasmsimd.multiplier[0] = twice_multiplier;
+    params.wasmsimd.multiplier[1] = twice_multiplier;
+    params.wasmsimd.rounding[0] = INT64_C(0x80000000);
+    params.wasmsimd.rounding[1] = INT64_C(0x80000000);
+    params.wasmsimd.remainder_mask[0] = (int32_t) remainder_mask;
+    params.wasmsimd.remainder_mask[1] = (int32_t) remainder_mask;
+    params.wasmsimd.remainder_mask[2] = (int32_t) remainder_mask;
+    params.wasmsimd.remainder_mask[3] = (int32_t) remainder_mask;
+    params.wasmsimd.remainder_threshold[0] = (int32_t) remainder_threshold;
+    params.wasmsimd.remainder_threshold[1] = (int32_t) remainder_threshold;
+    params.wasmsimd.remainder_threshold[2] = (int32_t) remainder_threshold;
+    params.wasmsimd.remainder_threshold[3] = (int32_t) remainder_threshold;
+    params.wasmsimd.shift = shift;
+    for (uint32_t i = 0; i < 8; i++) {
+      params.wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
+    }
+    for (uint32_t i = 0; i < 16; i++) {
+      params.wasmsimd.output_min[i] = output_min;
+      params.wasmsimd.output_max[i] = output_max;
+    }
   #else
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
