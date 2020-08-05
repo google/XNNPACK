@@ -98,17 +98,17 @@ void xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2(
 
     const __m256i vacc0x02461357 = _mm256_hadd_epi32(vacc0x0213, vacc0x4657);
 
-    const __m256i vpermuate_mask = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
-    __m256i vacc0x01234567 = _mm256_permutevar8x32_epi32(vacc0x02461357, vpermuate_mask);
+    const __m256i vpermute_mask = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
+    __m256i vacc0x01234567 = _mm256_permutevar8x32_epi32(vacc0x02461357, vpermute_mask);
 
     const __m256i vmultiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.multiplier));
     const __m256i vrounding = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.rounding));
 
-    const __m256i vacc0x23016745 = _mm256_shuffle_epi32(vacc0x01234567, _MM_SHUFFLE(2, 3, 0, 1));
+    const __m256i vacc0x11335577 = _mm256_shuffle_epi32(vacc0x01234567, _MM_SHUFFLE(3, 3, 1, 1));
 
     const __m256i vprod0x0246 = _mm256_add_epi64(_mm256_mul_epi32(vacc0x01234567, vmultiplier), vrounding);
 
-    const __m256i vprod0x1357 = _mm256_add_epi64(_mm256_mul_epi32(vacc0x23016745, vmultiplier), vrounding);
+    const __m256i vprod0x1357 = _mm256_add_epi64(_mm256_mul_epi32(vacc0x11335577, vmultiplier), vrounding);
 
     const __m256i vq31prod0x0246 = _mm256_srli_epi64(vprod0x0246, 31);
     const __m256i vq31prod0x1357 = _mm256_add_epi64(vprod0x1357, vprod0x1357);

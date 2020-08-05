@@ -93,11 +93,11 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64(
     const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
     const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
 
-    const __m128i vacc0x2301 = _mm_shuffle_epi32(vacc0x0123, _MM_SHUFFLE(2, 3, 0, 1));
+    const __m128i vacc0x1133 = _mm_shuffle_epi32(vacc0x0123, _MM_SHUFFLE(3, 3, 1, 1));
 
     const __m128i vprod0x02 = _mm_add_epi64(_mm_mul_epi32(vacc0x0123, vmultiplier), vrounding);
 
-    const __m128i vprod0x13 = _mm_add_epi64(_mm_mul_epi32(vacc0x2301, vmultiplier), vrounding);
+    const __m128i vprod0x13 = _mm_add_epi64(_mm_mul_epi32(vacc0x1133, vmultiplier), vrounding);
 
     const __m128i vq31prod0x02 = _mm_srli_epi64(vprod0x02, 31);
     const __m128i vq31prod0x13 = _mm_add_epi64(vprod0x13, vprod0x13);

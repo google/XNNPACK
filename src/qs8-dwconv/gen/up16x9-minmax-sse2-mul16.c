@@ -290,17 +290,16 @@ void xnn_qs8_dwconv_minmax_ukernel_up16x9__sse2_mul16(
       const __m128i vabsacc89AB = _mm_sub_epi32(_mm_xor_si128(vacc89AB, vnmask89AB), vnmask89AB);
       const __m128i vabsaccCDEF = _mm_sub_epi32(_mm_xor_si128(vaccCDEF, vnmaskCDEF), vnmaskCDEF);
 
-      const __m128i vabsacc13 = _mm_srli_epi64(vabsacc0123, 32);
-      const __m128i vabsacc57 = _mm_srli_epi64(vabsacc4567, 32);
-      const __m128i vabsacc9B = _mm_srli_epi64(vabsacc89AB, 32);
-      const __m128i vabsaccDF = _mm_srli_epi64(vabsaccCDEF, 32);
-
+      const __m128i vabsacc13 = _mm_shuffle_epi32(vabsacc0123, _MM_SHUFFLE(3, 3, 1, 1));
       const __m128i vabsprod02 = _mm_mul_epu32(vabsacc0123, vmultiplier);
       const __m128i vabsprod13 = _mm_mul_epu32(vabsacc13, vmultiplier);
+      const __m128i vabsacc57 = _mm_shuffle_epi32(vabsacc4567, _MM_SHUFFLE(3, 3, 1, 1));
       const __m128i vabsprod46 = _mm_mul_epu32(vabsacc4567, vmultiplier);
       const __m128i vabsprod57 = _mm_mul_epu32(vabsacc57, vmultiplier);
+      const __m128i vabsacc9B = _mm_shuffle_epi32(vabsacc89AB, _MM_SHUFFLE(3, 3, 1, 1));
       const __m128i vabsprod8A = _mm_mul_epu32(vabsacc89AB, vmultiplier);
       const __m128i vabsprod9B = _mm_mul_epu32(vabsacc9B, vmultiplier);
+      const __m128i vabsaccDF = _mm_shuffle_epi32(vabsaccCDEF, _MM_SHUFFLE(3, 3, 1, 1));
       const __m128i vabsprodCE = _mm_mul_epu32(vabsaccCDEF, vmultiplier);
       const __m128i vabsprodDF = _mm_mul_epu32(vabsaccDF, vmultiplier);
 
@@ -516,8 +515,8 @@ void xnn_qs8_dwconv_minmax_ukernel_up16x9__sse2_mul16(
         const __m128i vabsacc0123 = _mm_sub_epi32(_mm_xor_si128(vacc0123, vnmask0123), vnmask0123);
         const __m128i vabsacc4567 = _mm_sub_epi32(_mm_xor_si128(vacc4567, vnmask4567), vnmask4567);
 
-        const __m128i vabsacc13 = _mm_srli_epi64(vabsacc0123, 32);
-        const __m128i vabsacc57 = _mm_srli_epi64(vabsacc4567, 32);
+        const __m128i vabsacc13 = _mm_shuffle_epi32(vabsacc0123, _MM_SHUFFLE(3, 3, 1, 1));
+        const __m128i vabsacc57 = _mm_shuffle_epi32(vabsacc4567, _MM_SHUFFLE(3, 3, 1, 1));
 
         const __m128i vabsprod02 = _mm_mul_epu32(vabsacc0123, vmultiplier);
         const __m128i vabsprod13 = _mm_mul_epu32(vabsacc13, vmultiplier);

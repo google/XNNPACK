@@ -170,13 +170,12 @@ void xnn_qs8_dwconv_minmax_ukernel_up16x9__avx2_mul32(
       const __m256i vmultiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.multiplier));
       const __m256i vrounding = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.rounding));
 
-      const __m256i vacc1357 = _mm256_srli_epi64(vacc01234567, 32);
-      const __m256i vacc9BDF = _mm256_srli_epi64(vacc89ABCDEF, 32);
+      const __m256i vacc1357 = _mm256_shuffle_epi32(vacc01234567, _MM_SHUFFLE(3, 3, 1, 1));
+      const __m256i vacc9BDF = _mm256_shuffle_epi32(vacc89ABCDEF, _MM_SHUFFLE(3, 3, 1, 1));
 
       const __m256i vprod0246 = _mm256_add_epi64(_mm256_mul_epi32(vacc01234567, vmultiplier), vrounding);
-      const __m256i vprod8ACE = _mm256_add_epi64(_mm256_mul_epi32(vacc89ABCDEF, vmultiplier), vrounding);
-
       const __m256i vprod1357 = _mm256_add_epi64(_mm256_mul_epi32(vacc1357, vmultiplier), vrounding);
+      const __m256i vprod8ACE = _mm256_add_epi64(_mm256_mul_epi32(vacc89ABCDEF, vmultiplier), vrounding);
       const __m256i vprod9BDF = _mm256_add_epi64(_mm256_mul_epi32(vacc9BDF, vmultiplier), vrounding);
 
       const __m256i vq31prod0246 = _mm256_srli_epi64(vprod0246, 31);
@@ -278,7 +277,7 @@ void xnn_qs8_dwconv_minmax_ukernel_up16x9__avx2_mul32(
         const __m256i vmultiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.multiplier));
         const __m256i vrounding = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.rounding));
 
-        const __m256i vacc1357 = _mm256_srli_epi64(vacc01234567, 32);
+        const __m256i vacc1357 = _mm256_shuffle_epi32(vacc01234567, _MM_SHUFFLE(3, 3, 1, 1));
 
         const __m256i vprod0246 = _mm256_add_epi64(_mm256_mul_epi32(vacc01234567, vmultiplier), vrounding);
         const __m256i vprod1357 = _mm256_add_epi64(_mm256_mul_epi32(vacc1357, vmultiplier), vrounding);

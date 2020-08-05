@@ -132,7 +132,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c2__sse2_ld128(
 
     const __m128i vabsacc0x0123 = _mm_sub_epi32(_mm_xor_si128(vacc0x0123, vnmask0x0123), vnmask0x0123);
 
-    const __m128i vabsacc0x1032 = _mm_shuffle_epi32(vabsacc0x0123, _MM_SHUFFLE(2, 3, 0, 1));
+    const __m128i vabsacc0x1133 = _mm_shuffle_epi32(vabsacc0x0123, _MM_SHUFFLE(3, 3, 1, 1));
 
     const __m128i vabsprod0x02 = _mm_mul_epu32(vabsacc0x0123, vmultiplier);
 
@@ -142,7 +142,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c2__sse2_ld128(
 
     const __m128i vq31prod0x02 = _mm_srli_epi64(_mm_add_epi64(vprod0x02, vrounding), 31);
 
-    const __m128i vabsprod0x13 = _mm_mul_epu32(vabsacc0x1032, vmultiplier);
+    const __m128i vabsprod0x13 = _mm_mul_epu32(vabsacc0x1133, vmultiplier);
 
     const __m128i vnmask0x13 = _mm_shuffle_epi32(vnmask0x0123, _MM_SHUFFLE(3, 3, 1, 1));
 

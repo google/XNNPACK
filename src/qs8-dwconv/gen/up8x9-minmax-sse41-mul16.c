@@ -206,13 +206,11 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__sse41_mul16(
       const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
       const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
 
-      const __m128i vacc13 = _mm_srli_epi64(vacc0123, 32);
-      const __m128i vacc57 = _mm_srli_epi64(vacc4567, 32);
-
+      const __m128i vacc13 = _mm_shuffle_epi32(vacc0123, _MM_SHUFFLE(3, 3, 1, 1));
       const __m128i vprod02 = _mm_add_epi64(_mm_mul_epi32(vacc0123, vmultiplier), vrounding);
-      const __m128i vprod46 = _mm_add_epi64(_mm_mul_epi32(vacc4567, vmultiplier), vrounding);
-
       const __m128i vprod13 = _mm_add_epi64(_mm_mul_epi32(vacc13, vmultiplier), vrounding);
+      const __m128i vacc57 = _mm_shuffle_epi32(vacc4567, _MM_SHUFFLE(3, 3, 1, 1));
+      const __m128i vprod46 = _mm_add_epi64(_mm_mul_epi32(vacc4567, vmultiplier), vrounding);
       const __m128i vprod57 = _mm_add_epi64(_mm_mul_epi32(vacc57, vmultiplier), vrounding);
 
       const __m128i vq31prod02 = _mm_srli_epi64(vprod02, 31);
@@ -376,8 +374,8 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__sse41_mul16(
         const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
         const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
 
-        const __m128i vacc13 = _mm_srli_epi64(vacc0123, 32);
-        const __m128i vacc57 = _mm_srli_epi64(vacc4567, 32);
+        const __m128i vacc13 = _mm_shuffle_epi32(vacc0123, _MM_SHUFFLE(3, 3, 1, 1));
+        const __m128i vacc57 = _mm_shuffle_epi32(vacc4567, _MM_SHUFFLE(3, 3, 1, 1));
 
         const __m128i vprod02 = _mm_add_epi64(_mm_mul_epi32(vacc0123, vmultiplier), vrounding);
         const __m128i vprod46 = _mm_add_epi64(_mm_mul_epi32(vacc4567, vmultiplier), vrounding);

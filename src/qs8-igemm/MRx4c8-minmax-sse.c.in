@@ -149,13 +149,13 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c8__${ISA}_${"ld128" if LD128 else "ld6
 
     $if SSE >= 4:
       $for M in range(MR):
-        const __m128i vacc${M}x2301 = _mm_shuffle_epi32(vacc${M}x0123, _MM_SHUFFLE(2, 3, 0, 1));
+        const __m128i vacc${M}x1133 = _mm_shuffle_epi32(vacc${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));
 
       $for M in range(MR):
         const __m128i vprod${M}x02 = _mm_add_epi64(_mm_mul_epi32(vacc${M}x0123, vmultiplier), vrounding);
 
       $for M in range(MR):
-        const __m128i vprod${M}x13 = _mm_add_epi64(_mm_mul_epi32(vacc${M}x2301, vmultiplier), vrounding);
+        const __m128i vprod${M}x13 = _mm_add_epi64(_mm_mul_epi32(vacc${M}x1133, vmultiplier), vrounding);
 
       $for M in range(MR):
         const __m128i vq31prod${M}x02 = _mm_srli_epi64(vprod${M}x02, 31);
@@ -174,7 +174,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c8__${ISA}_${"ld128" if LD128 else "ld6
           const __m128i vabsacc${M}x0123 = _mm_sub_epi32(_mm_xor_si128(vacc${M}x0123, vnmask${M}x0123), vnmask${M}x0123);
 
       $for M in range(MR):
-        const __m128i vabsacc${M}x1032 = _mm_shuffle_epi32(vabsacc${M}x0123, _MM_SHUFFLE(2, 3, 0, 1));
+        const __m128i vabsacc${M}x1133 = _mm_shuffle_epi32(vabsacc${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));
 
       $for M in range(MR):
         const __m128i vabsprod${M}x02 = _mm_mul_epu32(vabsacc${M}x0123, vmultiplier);
@@ -189,7 +189,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c8__${ISA}_${"ld128" if LD128 else "ld6
         const __m128i vq31prod${M}x02 = _mm_srli_epi64(_mm_add_epi64(vprod${M}x02, vrounding), 31);
 
       $for M in range(MR):
-        const __m128i vabsprod${M}x13 = _mm_mul_epu32(vabsacc${M}x1032, vmultiplier);
+        const __m128i vabsprod${M}x13 = _mm_mul_epu32(vabsacc${M}x1133, vmultiplier);
 
       $for M in range(MR):
         const __m128i vnmask${M}x13 = _mm_shuffle_epi32(vnmask${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));

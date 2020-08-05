@@ -212,10 +212,10 @@ void xnn_qs8_gemm_minmax_ukernel_4x4c2__ssse3_ld64(
     const __m128i vabsacc2x0123 = _mm_abs_epi32(vacc2x0123);
     const __m128i vabsacc3x0123 = _mm_abs_epi32(vacc3x0123);
 
-    const __m128i vabsacc0x1032 = _mm_shuffle_epi32(vabsacc0x0123, _MM_SHUFFLE(2, 3, 0, 1));
-    const __m128i vabsacc1x1032 = _mm_shuffle_epi32(vabsacc1x0123, _MM_SHUFFLE(2, 3, 0, 1));
-    const __m128i vabsacc2x1032 = _mm_shuffle_epi32(vabsacc2x0123, _MM_SHUFFLE(2, 3, 0, 1));
-    const __m128i vabsacc3x1032 = _mm_shuffle_epi32(vabsacc3x0123, _MM_SHUFFLE(2, 3, 0, 1));
+    const __m128i vabsacc0x1133 = _mm_shuffle_epi32(vabsacc0x0123, _MM_SHUFFLE(3, 3, 1, 1));
+    const __m128i vabsacc1x1133 = _mm_shuffle_epi32(vabsacc1x0123, _MM_SHUFFLE(3, 3, 1, 1));
+    const __m128i vabsacc2x1133 = _mm_shuffle_epi32(vabsacc2x0123, _MM_SHUFFLE(3, 3, 1, 1));
+    const __m128i vabsacc3x1133 = _mm_shuffle_epi32(vabsacc3x0123, _MM_SHUFFLE(3, 3, 1, 1));
 
     const __m128i vabsprod0x02 = _mm_mul_epu32(vabsacc0x0123, vmultiplier);
     const __m128i vabsprod1x02 = _mm_mul_epu32(vabsacc1x0123, vmultiplier);
@@ -237,10 +237,10 @@ void xnn_qs8_gemm_minmax_ukernel_4x4c2__ssse3_ld64(
     const __m128i vq31prod2x02 = _mm_srli_epi64(_mm_add_epi64(vprod2x02, vrounding), 31);
     const __m128i vq31prod3x02 = _mm_srli_epi64(_mm_add_epi64(vprod3x02, vrounding), 31);
 
-    const __m128i vabsprod0x13 = _mm_mul_epu32(vabsacc0x1032, vmultiplier);
-    const __m128i vabsprod1x13 = _mm_mul_epu32(vabsacc1x1032, vmultiplier);
-    const __m128i vabsprod2x13 = _mm_mul_epu32(vabsacc2x1032, vmultiplier);
-    const __m128i vabsprod3x13 = _mm_mul_epu32(vabsacc3x1032, vmultiplier);
+    const __m128i vabsprod0x13 = _mm_mul_epu32(vabsacc0x1133, vmultiplier);
+    const __m128i vabsprod1x13 = _mm_mul_epu32(vabsacc1x1133, vmultiplier);
+    const __m128i vabsprod2x13 = _mm_mul_epu32(vabsacc2x1133, vmultiplier);
+    const __m128i vabsprod3x13 = _mm_mul_epu32(vabsacc3x1133, vmultiplier);
 
     const __m128i vnmask0x13 = _mm_shuffle_epi32(vnmask0x0123, _MM_SHUFFLE(3, 3, 1, 1));
     const __m128i vnmask1x13 = _mm_shuffle_epi32(vnmask1x0123, _MM_SHUFFLE(3, 3, 1, 1));
