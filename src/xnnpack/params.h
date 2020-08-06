@@ -1136,6 +1136,16 @@ typedef void (*xnn_qu8_gavgpool_minmax_multipass_ukernel_function)(
     uint8_t* output,
     const union xnn_qu8_avgpool_params* params);
 
+typedef void (*xnn_qs8_gavgpool_minmax_multipass_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    const int8_t* input,
+    size_t input_stride,
+    const int8_t* zero,
+    int32_t* buffer,
+    int8_t* output,
+    const union xnn_qs8_avgpool_params* params);
+
 typedef void (*xnn_gavgpool_cw_ukernel_function)(
     size_t elements,
     size_t channels,

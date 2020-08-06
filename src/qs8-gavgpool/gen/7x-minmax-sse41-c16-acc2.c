@@ -29,27 +29,27 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__sse41_c16_acc2(
 
   const int8_t* i0 = input;
   const int8_t* i1 = (const int8_t*) ((uintptr_t) i0 + input_stride);
-  if (rows < 2) {
+  if XNN_UNPREDICTABLE(rows < 2) {
     i1 = zero;
   }
   const int8_t* i2 = (const int8_t*) ((uintptr_t) i1 + input_stride);
-  if (rows <= 2) {
+  if XNN_UNPREDICTABLE(rows <= 2) {
     i2 = zero;
   }
   const int8_t* i3 = (const int8_t*) ((uintptr_t) i2 + input_stride);
-  if (rows < 4) {
+  if XNN_UNPREDICTABLE(rows < 4) {
     i3 = zero;
   }
   const int8_t* i4 = (const int8_t*) ((uintptr_t) i3 + input_stride);
-  if (rows <= 4) {
+  if XNN_UNPREDICTABLE(rows <= 4) {
     i4 = zero;
   }
   const int8_t* i5 = (const int8_t*) ((uintptr_t) i4 + input_stride);
-  if (rows < 6) {
+  if XNN_UNPREDICTABLE(rows < 6) {
     i5 = zero;
   }
   const int8_t* i6 = (const int8_t*) ((uintptr_t) i5 + input_stride);
-  if (rows <= 6) {
+  if XNN_UNPREDICTABLE(rows <= 6) {
     i6 = zero;
   }
 
@@ -97,10 +97,10 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__sse41_c16_acc2(
     vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vacc1x01234567);
     vacc0x89ABCDEF = _mm_add_epi16(vacc0x89ABCDEF, vacc1x89ABCDEF);
 
-    __m128i vacc0123 = _mm_add_epi32(vbias, _mm_cvtepi16_epi32(vacc0x01234567));
-    __m128i vacc4567 = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vacc0x01234567, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567)));
-    __m128i vacc89AB = _mm_add_epi32(vbias, _mm_cvtepi16_epi32(vacc0x89ABCDEF));
-    __m128i vaccCDEF = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vacc0x89ABCDEF, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x89ABCDEF)));
+    const __m128i vacc0123 = _mm_add_epi32(vbias, _mm_cvtepi16_epi32(vacc0x01234567));
+    const __m128i vacc4567 = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vacc0x01234567, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567)));
+    const __m128i vacc89AB = _mm_add_epi32(vbias, _mm_cvtepi16_epi32(vacc0x89ABCDEF));
+    const __m128i vaccCDEF = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vacc0x89ABCDEF, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x89ABCDEF)));
 
     const __m128i vabsacc0123 = _mm_abs_epi32(vacc0123);
     const __m128i vabsacc4567 = _mm_abs_epi32(vacc4567);
@@ -181,11 +181,11 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__sse41_c16_acc2(
       vacc1x01234567 = _mm_add_epi16(vacc1x01234567, vxi5x01234567);
       vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi6x01234567);
 
-      // Add up all accumulators to vacc0x0123456789ABCDEF
+      // Add up all accumulators to vacc0x01234567
       vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vacc1x01234567);
 
-      __m128i vacc0123 = _mm_add_epi32(vbias, _mm_cvtepi16_epi32(vacc0x01234567));
-      __m128i vacc4567 = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vacc0x01234567, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567)));
+      const __m128i vacc0123 = _mm_add_epi32(vbias, _mm_cvtepi16_epi32(vacc0x01234567));
+      const __m128i vacc4567 = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vacc0x01234567, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567)));
 
       const __m128i vabsacc0123 = _mm_abs_epi32(vacc0123);
       const __m128i vabsacc4567 = _mm_abs_epi32(vacc4567);
