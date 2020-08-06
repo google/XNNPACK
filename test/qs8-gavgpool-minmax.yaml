@@ -1,0 +1,13 @@
+# Copyright 2020 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_qs8_gavgpool_minmax_ukernel_7x__sse2_c8_acc2
+- name: xnn_qs8_gavgpool_minmax_ukernel_7x__sse2_c16_acc2
+- name: xnn_qs8_gavgpool_minmax_ukernel_7x__sse2_c24_acc2
+- name: xnn_qs8_gavgpool_minmax_ukernel_7x__ssse3_c8_acc2
+- name: xnn_qs8_gavgpool_minmax_ukernel_7x__ssse3_c16_acc2
+- name: xnn_qs8_gavgpool_minmax_ukernel_7x__ssse3_c24_acc2
+- name: xnn_qs8_gavgpool_minmax_ukernel_7x__sse41_c8_acc2
+- name: xnn_qs8_gavgpool_minmax_ukernel_7x__sse41_c16_acc2
+- name: xnn_qs8_gavgpool_minmax_ukernel_7x__sse41_c24_acc2

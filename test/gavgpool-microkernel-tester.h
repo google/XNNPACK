@@ -222,6 +222,81 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
+  void Test(xnn_qs8_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax, Variant variant = Variant::Native) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
+      (rows() - 1) * input_stride() + channels());
+    std::vector<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> output(channels());
+    std::vector<int8_t> output_ref(channels());
+    std::vector<float> output_fp(channels());
+    std::vector<int32_t> accumulators(channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::fill(output.begin(), output.end(), 0xA5);
+
+      // Prepare parameters.
+      union xnn_qs8_avgpool_params quantization_params = { };
+      switch (variant) {
+        case Variant::Native:
+          quantization_params = xnn_init_qs8_avgpool_params(
+            -int32_t(input_zero_point() - 0x80) * int32_t(rows()),
+            input_scale() / (output_scale() * float(rows())),
+            int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          break;
+        case Variant::Scalar:
+          quantization_params = xnn_init_scalar_qs8_avgpool_params(
+            -int32_t(input_zero_point() - 0x80) * int32_t(rows()),
+            input_scale() / (output_scale() * float(rows())),
+            int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          break;
+      }
+      const union xnn_qs8_avgpool_params scalar_quantization_params =
+        xnn_init_scalar_qs8_avgpool_params(
+          -int32_t(input_zero_point() - 0x80) * int32_t(rows()),
+          input_scale() / (output_scale() * float(rows())),
+          int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+
+      // Compute reference results.
+      for (size_t c = 0; c < channels(); c++) {
+        int32_t acc = scalar_quantization_params.scalar.bias;
+        for (size_t n = 0; n < rows(); n++) {
+          acc += input[n * input_stride() + c];
+        }
+        accumulators[c] = acc;
+        output_ref[c] = xnn_qs8_quantize_avgpool(acc, scalar_quantization_params);
+        output_fp[c] = float(acc) * (input_scale() / (output_scale() * float(rows()))) + float(output_zero_point() - 0x80);
+        output_fp[c] = std::min<float>(output_fp[c], float(qmax() - 0x80));
+        output_fp[c] = std::max<float>(output_fp[c], float(qmin() - 0x80));
+      }
+
+      // Call optimized micro-kernel.
+      gavgpool_minmax(rows(), channels(),
+        input.data(), input_stride() * sizeof(int8_t),
+        zero.data(),
+        output.data(),
+        &quantization_params);
+
+      // Verify results.
+      for (size_t c = 0; c < channels(); c++) {
+        ASSERT_LE(int32_t(output[c]), int32_t(qmax() - 0x80))
+          << "at channel " << c << " / " << channels() << ", rows = " << rows();
+        ASSERT_GE(int32_t(output[c]), int32_t(qmin() - 0x80))
+          << "at channel " << c << " / " << channels() << ", rows = " << rows();
+        ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.5f)
+          << "at channel " << c << " / " << channels() << ", rows = " << rows()
+          << ", accumulator = " << accumulators[c];
+        ASSERT_EQ(int32_t(output_ref[c]), int32_t(output[c]))
+          << "at channel " << c << " / " << channels() << ", rows = " << rows()
+          << ", accumulator = " << accumulators[c];
+      }
+    }
+  }
+
   void Test(xnn_qu8_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());

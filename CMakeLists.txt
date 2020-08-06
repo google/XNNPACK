@@ -1293,6 +1293,9 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-sse2-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-sse2-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-sse2-mul16.c
+  src/qs8-gavgpool/gen/7x-minmax-sse2-c8-acc2.c
+  src/qs8-gavgpool/gen/7x-minmax-sse2-c16-acc2.c
+  src/qs8-gavgpool/gen/7x-minmax-sse2-c24-acc2.c
   src/qs8-gemm/gen/1x4c2-minmax-sse2-ld64.c
   src/qs8-gemm/gen/4x4c2-minmax-sse2-ld64.c
   src/qs8-gemm/gen/1x4c2-minmax-sse2-ld128.c
@@ -1362,6 +1365,9 @@ SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-ssse3-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-ssse3-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-ssse3-mul16.c
+  src/qs8-gavgpool/gen/7x-minmax-ssse3-c8-acc2.c
+  src/qs8-gavgpool/gen/7x-minmax-ssse3-c16-acc2.c
+  src/qs8-gavgpool/gen/7x-minmax-ssse3-c24-acc2.c
   src/qs8-gemm/gen/1x4c2-minmax-ssse3-ld64.c
   src/qs8-gemm/gen/4x4c2-minmax-ssse3-ld64.c
   src/qs8-gemm/gen/1x4c2-minmax-ssse3-ld128.c
@@ -1414,6 +1420,9 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-sse41-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-sse41-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-sse41-mul16.c
+  src/qs8-gavgpool/gen/7x-minmax-sse41-c8-acc2.c
+  src/qs8-gavgpool/gen/7x-minmax-sse41-c16-acc2.c
+  src/qs8-gavgpool/gen/7x-minmax-sse41-c24-acc2.c
   src/qs8-gemm/gen/1x4c2-minmax-sse41-ld64.c
   src/qs8-gemm/gen/4x4c2-minmax-sse41-ld64.c
   src/qs8-gemm/gen/1x4c2-minmax-sse41-ld128.c
@@ -3439,6 +3448,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qs8-dwconv-minmax-test qs8-dwconv-minmax-test)
+
+  ADD_EXECUTABLE(qs8-gavgpool-minmax-test test/qs8-gavgpool-minmax.cc)
+  SET_TARGET_PROPERTIES(qs8-gavgpool-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-gavgpool-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-gavgpool-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-gavgpool-test qs8-gavgpool-minmax-test)
 
   ADD_EXECUTABLE(qs8-gemm-minmax-test test/qs8-gemm-minmax.cc)
   SET_TARGET_PROPERTIES(qs8-gemm-minmax-test PROPERTIES

@@ -428,6 +428,39 @@ union xnn_qu8_avgpool_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+union xnn_qs8_avgpool_params {
+  struct {
+    int32_t bias;
+    int32_t multiplier;
+    int64_t rounding;
+    uint32_t right_shift;
+    int32_t output_min_less_zero_point;
+    int32_t output_max_less_zero_point;
+    int32_t output_zero_point;
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int32_t bias;
+    int32_t multiplier;
+    int64_t left_shift;
+    int16_t output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int32_t bias[4];
+    XNN_ALIGN(16) uint32_t multiplier[4];
+    XNN_ALIGN(16) uint64_t rounding[2];
+    XNN_ALIGN(16) uint64_t right_shift[2];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int16_t output_min[8];
+    XNN_ALIGN(16) int16_t output_max[8];
+  } sse2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_qu8_requantization_params {
   struct {
     int32_t multiplier;
@@ -1053,6 +1086,15 @@ typedef void (*xnn_qu8_gavgpool_minmax_unipass_ukernel_function)(
     const uint8_t* zero,
     uint8_t* output,
     const union xnn_qu8_avgpool_params* params);
+
+typedef void (*xnn_qs8_gavgpool_minmax_unipass_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    const int8_t* input,
+    size_t input_stride,
+    const int8_t* zero,
+    int8_t* output,
+    const union xnn_qs8_avgpool_params* params);
 
 typedef void (*xnn_gavgpool_multipass_ukernel_function)(
     size_t rows,

@@ -1668,6 +1668,9 @@ SSE2_UKERNELS = [
     "src/qs8-dwconv/gen/up8x9-minmax-sse2-mul16.c",
     "src/qs8-dwconv/gen/up16x9-minmax-sse2-mul16.c",
     "src/qs8-dwconv/gen/up24x9-minmax-sse2-mul16.c",
+    "src/qs8-gavgpool/gen/7x-minmax-sse2-c8-acc2.c",
+    "src/qs8-gavgpool/gen/7x-minmax-sse2-c16-acc2.c",
+    "src/qs8-gavgpool/gen/7x-minmax-sse2-c24-acc2.c",
     "src/qs8-gemm/gen/1x4c2-minmax-sse2-ld64.c",
     "src/qs8-gemm/gen/4x4c2-minmax-sse2-ld64.c",
     "src/qs8-gemm/gen/1x4c2-minmax-sse2-ld128.c",
@@ -1733,6 +1736,9 @@ SSSE3_UKERNELS = [
     "src/qs8-dwconv/gen/up8x9-minmax-ssse3-mul16.c",
     "src/qs8-dwconv/gen/up16x9-minmax-ssse3-mul16.c",
     "src/qs8-dwconv/gen/up24x9-minmax-ssse3-mul16.c",
+    "src/qs8-gavgpool/gen/7x-minmax-ssse3-c8-acc2.c",
+    "src/qs8-gavgpool/gen/7x-minmax-ssse3-c16-acc2.c",
+    "src/qs8-gavgpool/gen/7x-minmax-ssse3-c24-acc2.c",
     "src/qs8-gemm/gen/1x4c2-minmax-ssse3-ld64.c",
     "src/qs8-gemm/gen/4x4c2-minmax-ssse3-ld64.c",
     "src/qs8-gemm/gen/1x4c2-minmax-ssse3-ld128.c",
@@ -1786,6 +1792,9 @@ SSE41_UKERNELS = [
     "src/qs8-dwconv/gen/up8x9-minmax-sse41-mul16.c",
     "src/qs8-dwconv/gen/up16x9-minmax-sse41-mul16.c",
     "src/qs8-dwconv/gen/up24x9-minmax-sse41-mul16.c",
+    "src/qs8-gavgpool/gen/7x-minmax-sse41-c8-acc2.c",
+    "src/qs8-gavgpool/gen/7x-minmax-sse41-c16-acc2.c",
+    "src/qs8-gavgpool/gen/7x-minmax-sse41-c24-acc2.c",
     "src/qs8-gemm/gen/1x4c2-minmax-sse41-ld64.c",
     "src/qs8-gemm/gen/4x4c2-minmax-sse41-ld64.c",
     "src/qs8-gemm/gen/1x4c2-minmax-sse41-ld128.c",
@@ -5228,6 +5237,16 @@ xnnpack_unit_test(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qs8_gavgpool_minmax_test",
+    srcs = [
+        "test/qs8-gavgpool-minmax.cc",
+        "test/gavgpool-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
