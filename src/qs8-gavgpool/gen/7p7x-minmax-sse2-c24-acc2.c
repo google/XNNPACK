@@ -37,7 +37,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_7p7x__sse2_c24_acc2(
   const int8_t* i6 = (const int8_t*) ((uintptr_t) i5 + input_stride);
   const size_t input_increment = 7 * input_stride - round_up_po2(channels, 8);
 
-  const __m128i vbias = _mm_load_si128((const __m128i*) &params->sse2.bias);
+  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
   int32_t* b = buffer;
   size_t c = channels;
   for (; c >= 24; c -= 24) {
@@ -358,7 +358,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_7p7x__sse2_c24_acc2(
 
   const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
   const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
-  const __m128i vright_shift = _mm_loadl_epi64((const __m128i*) params->sse2.right_shift);
+  const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->sse2.shift);
   while (channels >= 24) {
     const __m128i vi0x01234567 = _mm_loadl_epi64((const __m128i*) i0);
     const __m128i vi0x89ABCDEF = _mm_loadl_epi64((const __m128i*) (i0 + 8));
@@ -478,18 +478,18 @@ void xnn_qs8_gavgpool_minmax_ukernel_7p7x__sse2_c24_acc2(
     const __m128i vabsprodKM = _mm_mul_epu32(vabsaccKLMN, vmultiplier);
     const __m128i vabsprodLN = _mm_mul_epu32(vabsaccLN, vmultiplier);
 
-    const __m128i vabsout02 = _mm_srl_epi64(_mm_add_epi64(vabsprod02, vrounding), vright_shift);
-    const __m128i vabsout13 = _mm_srl_epi64(_mm_add_epi64(vabsprod13, vrounding), vright_shift);
-    const __m128i vabsout46 = _mm_srl_epi64(_mm_add_epi64(vabsprod46, vrounding), vright_shift);
-    const __m128i vabsout57 = _mm_srl_epi64(_mm_add_epi64(vabsprod57, vrounding), vright_shift);
-    const __m128i vabsout8A = _mm_srl_epi64(_mm_add_epi64(vabsprod8A, vrounding), vright_shift);
-    const __m128i vabsout9B = _mm_srl_epi64(_mm_add_epi64(vabsprod9B, vrounding), vright_shift);
-    const __m128i vabsoutCE = _mm_srl_epi64(_mm_add_epi64(vabsprodCE, vrounding), vright_shift);
-    const __m128i vabsoutDF = _mm_srl_epi64(_mm_add_epi64(vabsprodDF, vrounding), vright_shift);
-    const __m128i vabsoutGI = _mm_srl_epi64(_mm_add_epi64(vabsprodGI, vrounding), vright_shift);
-    const __m128i vabsoutHJ = _mm_srl_epi64(_mm_add_epi64(vabsprodHJ, vrounding), vright_shift);
-    const __m128i vabsoutKM = _mm_srl_epi64(_mm_add_epi64(vabsprodKM, vrounding), vright_shift);
-    const __m128i vabsoutLN = _mm_srl_epi64(_mm_add_epi64(vabsprodLN, vrounding), vright_shift);
+    const __m128i vabsout02 = _mm_srl_epi64(_mm_add_epi64(vabsprod02, vrounding), vshift);
+    const __m128i vabsout13 = _mm_srl_epi64(_mm_add_epi64(vabsprod13, vrounding), vshift);
+    const __m128i vabsout46 = _mm_srl_epi64(_mm_add_epi64(vabsprod46, vrounding), vshift);
+    const __m128i vabsout57 = _mm_srl_epi64(_mm_add_epi64(vabsprod57, vrounding), vshift);
+    const __m128i vabsout8A = _mm_srl_epi64(_mm_add_epi64(vabsprod8A, vrounding), vshift);
+    const __m128i vabsout9B = _mm_srl_epi64(_mm_add_epi64(vabsprod9B, vrounding), vshift);
+    const __m128i vabsoutCE = _mm_srl_epi64(_mm_add_epi64(vabsprodCE, vrounding), vshift);
+    const __m128i vabsoutDF = _mm_srl_epi64(_mm_add_epi64(vabsprodDF, vrounding), vshift);
+    const __m128i vabsoutGI = _mm_srl_epi64(_mm_add_epi64(vabsprodGI, vrounding), vshift);
+    const __m128i vabsoutHJ = _mm_srl_epi64(_mm_add_epi64(vabsprodHJ, vrounding), vshift);
+    const __m128i vabsoutKM = _mm_srl_epi64(_mm_add_epi64(vabsprodKM, vrounding), vshift);
+    const __m128i vabsoutLN = _mm_srl_epi64(_mm_add_epi64(vabsprodLN, vrounding), vshift);
 
     const __m128i vabsout0213 = _mm_castps_si128(
         _mm_shuffle_ps(_mm_castsi128_ps(vabsout02), _mm_castsi128_ps(vabsout13), _MM_SHUFFLE(2, 0, 2, 0)));
@@ -592,10 +592,10 @@ void xnn_qs8_gavgpool_minmax_ukernel_7p7x__sse2_c24_acc2(
       const __m128i vabsprod46 = _mm_mul_epu32(vabsacc4567, vmultiplier);
       const __m128i vabsprod57 = _mm_mul_epu32(vabsacc57, vmultiplier);
 
-      const __m128i vabsout02 = _mm_srl_epi64(_mm_add_epi64(vabsprod02, vrounding), vright_shift);
-      const __m128i vabsout13 = _mm_srl_epi64(_mm_add_epi64(vabsprod13, vrounding), vright_shift);
-      const __m128i vabsout46 = _mm_srl_epi64(_mm_add_epi64(vabsprod46, vrounding), vright_shift);
-      const __m128i vabsout57 = _mm_srl_epi64(_mm_add_epi64(vabsprod57, vrounding), vright_shift);
+      const __m128i vabsout02 = _mm_srl_epi64(_mm_add_epi64(vabsprod02, vrounding), vshift);
+      const __m128i vabsout13 = _mm_srl_epi64(_mm_add_epi64(vabsprod13, vrounding), vshift);
+      const __m128i vabsout46 = _mm_srl_epi64(_mm_add_epi64(vabsprod46, vrounding), vshift);
+      const __m128i vabsout57 = _mm_srl_epi64(_mm_add_epi64(vabsprod57, vrounding), vshift);
 
       const __m128i vabsout0213 = _mm_castps_si128(
           _mm_shuffle_ps(_mm_castsi128_ps(vabsout02), _mm_castsi128_ps(vabsout13), _MM_SHUFFLE(2, 0, 2, 0)));

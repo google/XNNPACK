@@ -184,7 +184,7 @@ static inline int8_t xnn_qs8_quantize_avgpool(
   const int64_t product = (int64_t) n * (int64_t) params.scalar.multiplier;
   const int64_t adjusted_product = product - (int64_t) (n < 0);
 
-  n = (int32_t) asr_s64(adjusted_product + params.scalar.rounding, params.scalar.right_shift);
+  n = (int32_t) asr_s64(adjusted_product + params.scalar.rounding, params.scalar.shift);
   if (n < params.scalar.output_min_less_zero_point) {
     n = params.scalar.output_min_less_zero_point;
   }

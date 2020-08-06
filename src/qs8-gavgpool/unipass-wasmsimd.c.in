@@ -1,0 +1,223 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE % 8 == 0
+$assert CHANNEL_TILE >= 8
+$assert ROW_TILE >= 2
+$assert ACCUMULATORS >= 1
+$assert ROW_TILE >= ACCUMULATORS * 2
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include <xnnpack/gavgpool.h>
+
+
+void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t rows,
+    size_t channels,
+    const int8_t* input,
+    size_t input_stride,
+    const int8_t* zero,
+    int8_t* output,
+    const union xnn_qs8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(rows != 0);
+  assert(rows <= ${ROW_TILE});
+  assert(channels != 0);
+
+  const int8_t* i0 = input;
+  $for M in range(1, ROW_TILE):
+    const int8_t* i${M} = (const int8_t*) ((uintptr_t) i${M-1} + input_stride);
+    $if M % 2 == 1:
+      if XNN_UNPREDICTABLE(rows < ${M+1}) {
+        i${M} = zero;
+      }
+    $else:
+      if XNN_UNPREDICTABLE(rows <= ${M}) {
+        i${M} = zero;
+      }
+
+  const v128_t vbias = wasm_v128_load(params->wasmsimd.bias);
+  const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
+  const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
+  const int32_t vshift = params->wasmsimd.shift;
+  const v128_t vzero = wasm_f64x2_splat(0.0);
+  while (channels >= ${CHANNEL_TILE}) {
+    $for M in range(ROW_TILE):
+      const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load_8x8(i${M});
+      $for C in range(8, CHANNEL_TILE, 8):
+        const v128_t vxi${M}x${ABC[C:C+8]} = wasm_i16x8_load_8x8(i${M} + ${C});
+      i${M} += ${CHANNEL_TILE};
+
+    $for A in range(ACCUMULATORS):
+      $for C in range(0, CHANNEL_TILE, 8):
+        v128_t vacc${A}x${ABC[C:C+8]} = wasm_i16x8_add(vxi${A*2}x${ABC[C:C+8]}, vxi${A*2+1}x${ABC[C:C+8]});
+
+    $for M in range(ACCUMULATORS * 2, ROW_TILE):
+      $for C in range(0, CHANNEL_TILE, 8):
+        vacc${M % ACCUMULATORS}x${ABC[C:C+8]} = wasm_i16x8_add(vacc${M % ACCUMULATORS}x${ABC[C:C+8]}, vxi${M}x${ABC[C:C+8]});
+
+    $if ACCUMULATORS > 1:
+      // Add up all accumulators to vacc0x${ABC[0:CHANNEL_TILE]}
+      $ACC_SLICE = 1
+      $while ACC_SLICE < ACCUMULATORS:
+        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+          $if A + ACC_SLICE < ACCUMULATORS:
+            $for C in range(0, CHANNEL_TILE, 8):
+              vacc${A}x${ABC[C:C+8]} = wasm_i16x8_add(vacc${A}x${ABC[C:C+8]}, vacc${A + ACC_SLICE}x${ABC[C:C+8]});
+        $ACC_SLICE *= 2
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      const v128_t vacc${ABC[C:C+4]} = wasm_i32x4_add(vbias, wasm_i32x4_widen_low_i16x8(vacc0x${ABC[C:C+8]}));
+      const v128_t vacc${ABC[C+4:C+8]} = wasm_i32x4_add(vbias, wasm_i32x4_widen_high_i16x8(vacc0x${ABC[C:C+8]}));
+
+    $for C in range(0, CHANNEL_TILE, 4):
+      const v128_t vabsacc${ABC[C:C+4]} = wasm_i32x4_abs(vacc${ABC[C:C+4]});
+
+    $for C in range(0, CHANNEL_TILE, 4):
+      const v128_t vsgnacc${ABC[C:C+4]} = wasm_i32x4_gt(vabsacc${ABC[C:C+4]}, vacc${ABC[C:C+4]});
+
+    $for C in range(0, CHANNEL_TILE, 4):
+      const v128_t vabsacc${ABC[C:C+2]} = wasm_v32x4_shuffle(vabsacc${ABC[C:C+4]}, vzero, 0, 4, 1, 5);
+      const v128_t vabsacc${ABC[C+2:C+4]} = wasm_v32x4_shuffle(vabsacc${ABC[C:C+4]}, vzero, 2, 6, 3, 7);
+
+    $for C in range(0, CHANNEL_TILE, 4):
+      const v128_t vabsprod${ABC[C:C+2]} = wasm_i64x2_mul(vabsacc${ABC[C:C+2]}, vmultiplier);
+      const v128_t vabsprod${ABC[C+2:C+4]} = wasm_i64x2_mul(vabsacc${ABC[C+2:C+4]}, vmultiplier);
+
+    $for C in range(0, CHANNEL_TILE, 2):
+      const v128_t vabsout${ABC[C:C+2]} = wasm_u64x2_shr(wasm_i64x2_add(vabsprod${ABC[C:C+2]}, vrounding), vshift);
+
+    $for C in range(0, CHANNEL_TILE, 4):
+      const v128_t vabsout${ABC[C:C+4]} = wasm_v32x4_shuffle(vabsout${ABC[C:C+2]}, vabsout${ABC[C+2:C+4]}, 0, 2, 4, 6);
+
+    $for C in range(0, CHANNEL_TILE, 4):
+      const v128_t vout${ABC[C:C+4]} = wasm_i32x4_sub(wasm_v128_xor(vabsout${ABC[C:C+4]}, vsgnacc${ABC[C:C+4]}), vsgnacc${ABC[C:C+4]});
+
+    const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
+    $for C in range(0, CHANNEL_TILE, 8):
+      const v128_t vout${ABC[C:C+8]} = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vout${ABC[C:C+4]}, vout${ABC[C+4:C+8]}), voutput_zero_point);
+
+    const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
+    const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
+    $for C in range(0, CHANNEL_TILE, 16):
+      $if C + 8 < CHANNEL_TILE:
+        const v128_t vout${ABC[C:C+16]} = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout${ABC[C:C+8]}, vout${ABC[C+8:C+16]}), voutput_min), voutput_max);
+      $else:
+        const v128_t vout${ABC[C:C+8]}${ABC[C:C+8]} = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout${ABC[C:C+8]}, vout${ABC[C:C+8]}), voutput_min), voutput_max);
+
+    $if CHANNEL_TILE > 8:
+      wasm_v128_store(output, vout${ABC[0:16]});
+    $else:
+      *((double*) output) = wasm_f64x2_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+    $for C in range(16, CHANNEL_TILE, 16):
+      $if C + 8 < CHANNEL_TILE:
+        wasm_v128_store(output + ${C}, vout${ABC[C:C+16]});
+      $else:
+        *((double*) (output + ${C})) = wasm_f64x2_extract_lane(vout${ABC[C:C+8]}${ABC[C:C+8]}, 0);
+    output += ${CHANNEL_TILE};
+
+    channels -= ${CHANNEL_TILE};
+  }
+  if XNN_UNLIKELY(channels != 0) {
+    ${"do " if CHANNEL_TILE > 8 else ""}{
+      $for M in range(ROW_TILE):
+        const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load_8x8(i${M});
+        i${M} += 8;
+
+      $for A in range(ACCUMULATORS):
+        v128_t vacc${A}x${ABC[0:8]} = wasm_i16x8_add(vxi${A*2}x${ABC[0:8]}, vxi${A*2+1}x${ABC[0:8]});
+
+      $for M in range(ACCUMULATORS * 2, ROW_TILE):
+        vacc${M % ACCUMULATORS}x${ABC[0:8]} = wasm_i16x8_add(vacc${M % ACCUMULATORS}x${ABC[0:8]}, vxi${M}x${ABC[0:8]});
+
+      $if ACCUMULATORS > 1:
+        // Add up all accumulators to vacc0x${ABC[0:8]}
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              vacc${A}x${ABC[0:8]} = wasm_i16x8_add(vacc${A}x${ABC[0:8]}, vacc${A + ACC_SLICE}x${ABC[0:8]});
+          $ACC_SLICE *= 2
+
+      const v128_t vacc${ABC[0:4]} = wasm_i32x4_add(vbias, wasm_i32x4_widen_low_i16x8(vacc0x${ABC[0:8]}));
+      const v128_t vacc${ABC[4:8]} = wasm_i32x4_add(vbias, wasm_i32x4_widen_high_i16x8(vacc0x${ABC[0:8]}));
+
+      const v128_t vabsacc${ABC[0:4]} = wasm_i32x4_abs(vacc${ABC[0:4]});
+      const v128_t vabsacc${ABC[4:8]} = wasm_i32x4_abs(vacc${ABC[4:8]});
+
+      const v128_t vsgnacc${ABC[0:4]} = wasm_i32x4_gt(vabsacc${ABC[0:4]}, vacc${ABC[0:4]});
+      const v128_t vsgnacc${ABC[4:8]} = wasm_i32x4_gt(vabsacc${ABC[4:8]}, vacc${ABC[4:8]});
+
+      const v128_t vabsacc${ABC[0:2]} = wasm_v32x4_shuffle(vabsacc${ABC[0:4]}, vzero, 0, 4, 1, 5);
+      const v128_t vabsacc${ABC[2:4]} = wasm_v32x4_shuffle(vabsacc${ABC[0:4]}, vzero, 2, 6, 3, 7);
+      const v128_t vabsacc${ABC[4:6]} = wasm_v32x4_shuffle(vabsacc${ABC[4:8]}, vzero, 0, 4, 1, 5);
+      const v128_t vabsacc${ABC[6:8]} = wasm_v32x4_shuffle(vabsacc${ABC[4:8]}, vzero, 2, 6, 3, 7);
+
+      const v128_t vabsprod${ABC[0:2]} = wasm_i64x2_mul(vabsacc${ABC[0:2]}, vmultiplier);
+      const v128_t vabsprod${ABC[2:4]} = wasm_i64x2_mul(vabsacc${ABC[2:4]}, vmultiplier);
+      const v128_t vabsprod${ABC[4:6]} = wasm_i64x2_mul(vabsacc${ABC[4:6]}, vmultiplier);
+      const v128_t vabsprod${ABC[6:8]} = wasm_i64x2_mul(vabsacc${ABC[6:8]}, vmultiplier);
+
+      const v128_t vabsout${ABC[0:2]} = wasm_u64x2_shr(wasm_i64x2_add(vabsprod${ABC[0:2]}, vrounding), vshift);
+      const v128_t vabsout${ABC[2:4]} = wasm_u64x2_shr(wasm_i64x2_add(vabsprod${ABC[2:4]}, vrounding), vshift);
+      const v128_t vabsout${ABC[4:6]} = wasm_u64x2_shr(wasm_i64x2_add(vabsprod${ABC[4:6]}, vrounding), vshift);
+      const v128_t vabsout${ABC[6:8]} = wasm_u64x2_shr(wasm_i64x2_add(vabsprod${ABC[6:8]}, vrounding), vshift);
+
+      const v128_t vabsout${ABC[0:4]} = wasm_v32x4_shuffle(vabsout${ABC[0:2]}, vabsout${ABC[2:4]}, 0, 2, 4, 6);
+      const v128_t vabsout${ABC[4:8]} = wasm_v32x4_shuffle(vabsout${ABC[4:6]}, vabsout${ABC[6:8]}, 0, 2, 4, 6);
+
+      const v128_t vout${ABC[0:4]} = wasm_i32x4_sub(wasm_v128_xor(vabsout${ABC[0:4]}, vsgnacc${ABC[0:4]}), vsgnacc${ABC[0:4]});
+      const v128_t vout${ABC[4:8]} = wasm_i32x4_sub(wasm_v128_xor(vabsout${ABC[4:8]}, vsgnacc${ABC[4:8]}), vsgnacc${ABC[4:8]});
+
+      const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
+      const v128_t vout${ABC[0:8]} = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vout${ABC[0:4]}, vout${ABC[4:8]}), voutput_zero_point);
+
+      const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
+      const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
+      v128_t vout${ABC[0:8]}${ABC[0:8]} = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout${ABC[0:8]}, vout${ABC[0:8]}), voutput_min), voutput_max);
+
+      $if CHANNEL_TILE > 8:
+        if XNN_LIKELY(channels >= 8) {
+          *((double*) output) = wasm_f64x2_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          output += 8;
+          channels -= 8;
+        } else {
+          if (channels & 4) {
+            *((float*) output) = wasm_f32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+            vout${ABC[0:8]}${ABC[0:8]} = wasm_u64x2_shr(vout${ABC[0:8]}${ABC[0:8]}, 32);
+            output += 4;
+          }
+          if (channels & 2) {
+            *((uint16_t*) output) = (uint16_t) wasm_i16x8_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+            vout${ABC[0:8]}${ABC[0:8]} = wasm_u32x4_shr(vout${ABC[0:8]}${ABC[0:8]}, 16);
+            output += 2;
+          }
+          if (channels & 1) {
+            *output = (int8_t) wasm_i8x16_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+            output += 1;
+          }
+          channels = 0;
+        }
+      $else:
+        if (channels & 4) {
+          *((float*) output) = wasm_f32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          vout${ABC[0:8]}${ABC[0:8]} = wasm_u64x2_shr(vout${ABC[0:8]}${ABC[0:8]}, 32);
+          output += 4;
+        }
+        if (channels & 2) {
+          *((uint16_t*) output) = (uint16_t) wasm_i16x8_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          vout${ABC[0:8]}${ABC[0:8]} = wasm_u32x4_shr(vout${ABC[0:8]}${ABC[0:8]}, 16);
+          output += 2;
+        }
+        if (channels & 1) {
+          *output = (int8_t) wasm_i8x16_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          output += 1;
+        }
+    }${" while (channels != 0);" if CHANNEL_TILE > 8 else ""}
+  }
+}

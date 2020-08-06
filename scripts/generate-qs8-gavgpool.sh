@@ -4,6 +4,11 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################## WAsm SIMD ##################################
+tools/xngen src/qs8-gavgpool/unipass-wasmsimd.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D ACCUMULATORS=2 -o src/qs8-gavgpool/gen/7x-minmax-wasmsimd-c8-acc2.c
+tools/xngen src/qs8-gavgpool/unipass-wasmsimd.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D ACCUMULATORS=2 -o src/qs8-gavgpool/gen/7x-minmax-wasmsimd-c16-acc2.c
+tools/xngen src/qs8-gavgpool/unipass-wasmsimd.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D ACCUMULATORS=2 -o src/qs8-gavgpool/gen/7x-minmax-wasmsimd-c24-acc2.c
+
 ################################### x86 SSE ###################################
 tools/xngen src/qs8-gavgpool/unipass-sse.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D ACCUMULATORS=2 -D SSE=2 -o src/qs8-gavgpool/gen/7x-minmax-sse2-c8-acc2.c
 tools/xngen src/qs8-gavgpool/unipass-sse.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D ACCUMULATORS=2 -D SSE=2 -o src/qs8-gavgpool/gen/7x-minmax-sse2-c16-acc2.c

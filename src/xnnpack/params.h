@@ -433,7 +433,7 @@ union xnn_qs8_avgpool_params {
     int32_t bias;
     int32_t multiplier;
     int64_t rounding;
-    uint32_t right_shift;
+    uint32_t shift;
     int32_t output_min_less_zero_point;
     int32_t output_max_less_zero_point;
     int32_t output_zero_point;
@@ -453,12 +453,23 @@ union xnn_qs8_avgpool_params {
     XNN_ALIGN(16) int32_t bias[4];
     XNN_ALIGN(16) uint32_t multiplier[4];
     XNN_ALIGN(16) uint64_t rounding[2];
-    XNN_ALIGN(16) uint64_t right_shift[2];
+    XNN_ALIGN(16) uint64_t shift[2];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int16_t output_min[8];
     XNN_ALIGN(16) int16_t output_max[8];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    XNN_ALIGN(16) int32_t bias[4];
+    XNN_ALIGN(16) int64_t multiplier[2];
+    XNN_ALIGN(16) int64_t rounding[2];
+    int32_t shift;
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int8_t output_min[16];
+    XNN_ALIGN(16) int8_t output_max[16];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD
 };
 
 union xnn_qu8_requantization_params {
