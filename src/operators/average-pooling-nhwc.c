@@ -208,7 +208,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
   average_pooling_op->input_pixel_stride = input_pixel_stride;
   average_pooling_op->output_pixel_stride = output_pixel_stride;
 
-  average_pooling_op->input_zero_point = input_zero_point;
+  average_pooling_op->input_zero_point = (int32_t) (uint32_t) input_zero_point;
   average_pooling_op->output_zero_point = output_zero_point;
   average_pooling_op->input_scale = input_scale;
   average_pooling_op->output_scale = output_scale;
@@ -664,7 +664,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
   const size_t gavgpool_nrows = round_up(input_size, xnn_params.qu8.gavgpool.mr);
   average_pooling_op->params.qu8_gavgpool =
     xnn_init_qu8_avgpool_params(
-      (int32_t) -((uint32_t) average_pooling_op->input_zero_point * (uint32_t) gavgpool_nrows),
+      -(average_pooling_op->input_zero_point * (int32_t) gavgpool_nrows),
       average_pooling_op->input_scale / (average_pooling_op->output_scale * (float) pooling_size),
       average_pooling_op->output_zero_point,
       average_pooling_op->output_min,
