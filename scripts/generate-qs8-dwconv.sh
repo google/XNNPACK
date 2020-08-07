@@ -27,6 +27,9 @@ tools/xngen src/qs8-dwconv/up-sse-mul16.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9
 tools/xngen src/qs8-dwconv/up-sse-mul16.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -D SSE=5 -o src/qs8-dwconv/gen/up24x9-minmax-xop-mul16.c
 
 ################################### x86 AVX2 ##################################
+tools/xngen src/qs8-dwconv/up-avx2-mul16.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up16x9-minmax-avx2-mul16.c
+tools/xngen src/qs8-dwconv/up-avx2-mul16.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up32x9-minmax-avx2-mul16.c
+
 tools/xngen src/qs8-dwconv/up-avx2-mul32.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up8x9-minmax-avx2-mul32.c
 tools/xngen src/qs8-dwconv/up-avx2-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up16x9-minmax-avx2-mul32.c
 tools/xngen src/qs8-dwconv/up-avx2-mul32.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up24x9-minmax-avx2-mul32.c

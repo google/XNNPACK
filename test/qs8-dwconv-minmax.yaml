@@ -14,6 +14,8 @@
 - name: xnn_qs8_dwconv_minmax_ukernel_up8x9__xop_mul16
 - name: xnn_qs8_dwconv_minmax_ukernel_up16x9__xop_mul16
 - name: xnn_qs8_dwconv_minmax_ukernel_up24x9__xop_mul16
+- name: xnn_qs8_dwconv_minmax_ukernel_up16x9__avx2_mul16
+- name: xnn_qs8_dwconv_minmax_ukernel_up32x9__avx2_mul16
 - name: xnn_qs8_dwconv_minmax_ukernel_up8x9__avx2_mul32
 - name: xnn_qs8_dwconv_minmax_ukernel_up16x9__avx2_mul32
 - name: xnn_qs8_dwconv_minmax_ukernel_up24x9__avx2_mul32

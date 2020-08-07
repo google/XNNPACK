@@ -128,15 +128,16 @@ void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wasmsimd_mu
               const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8((const v128_t*) (k + ${K * CHANNEL_TILE}));
           $else:
             const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8((const v128_t*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE} * sizeof(int8_t)));
-          i${K} += 8;
+          $if CHANNEL_TILE > 8:
+            i${K} += 8;
 
           const v128_t vprod${K}x${ABC[0:8]} = wasm_i16x8_mul(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
 
           vacc${ABC[0:4]} = wasm_i32x4_add(vacc${ABC[0:4]}, wasm_i32x4_widen_low_i16x8(vprod${K}x${ABC[0:8]}));
           vacc${ABC[4:8]} = wasm_i32x4_add(vacc${ABC[4:8]}, wasm_i32x4_widen_high_i16x8(vprod${K}x${ABC[0:8]}));
 
-        w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
         $if CHANNEL_TILE > 8:
+          w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
           k += 8;
 
       const v128_t vsign${ABC[0:4]} = wasm_i32x4_shr(vacc${ABC[0:4]}, 31);

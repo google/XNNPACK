@@ -69,7 +69,6 @@ class DWConvMicrokernelTester {
 
   inline DWConvMicrokernelTester& cr(uint32_t cr) {
     assert(cr != 0);
-    assert((cr & (cr - 1)) == 0);
     this->cr_ = cr;
     return *this;
   }
