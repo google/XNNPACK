@@ -71,6 +71,7 @@ enum xnn_operator_type {
   xnn_operator_type_floor_nc_f32,
   xnn_operator_type_global_average_pooling_nwc_f16,
   xnn_operator_type_global_average_pooling_nwc_f32,
+  xnn_operator_type_global_average_pooling_nwc_qs8,
   xnn_operator_type_global_average_pooling_nwc_qu8,
   xnn_operator_type_global_average_pooling_ncw_f32,
   xnn_operator_type_hardswish_nc_f32,
@@ -281,6 +282,12 @@ struct xnn_operator {
     };
     union xnn_f32_chw_params f32_chw;
     union xnn_qs8_gemm_params qs8_gemm;
+    // Average Pooling normally use qs8_avgpool_params, but also initialize qs8_gavgpool_params in case it needs to switch
+    // to Global Average Pooling operation.
+    struct {
+      union xnn_qs8_avgpool_params qs8_avgpool;
+      union xnn_qs8_avgpool_params qs8_gavgpool;
+    };
     union xnn_qu8_add_params qu8_add;
     union xnn_qu8_gemm_params qu8_gemm;
     // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch

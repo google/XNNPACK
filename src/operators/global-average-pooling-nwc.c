@@ -261,6 +261,69 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
   return status;
 }
 
+enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    int8_t input_zero_point,
+    float input_scale,
+    int8_t output_zero_point,
+    float output_scale,
+    int8_t output_min,
+    int8_t output_max,
+    uint32_t flags,
+    xnn_operator_t* global_average_pooling_op_out)
+{
+  if (input_scale <= 0.0f || !isnormal(input_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qs8), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qs8), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qs8), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float input_output_scale = input_scale / output_scale;
+  if (input_output_scale < 0x1.0p-8f || input_output_scale >= 0x1.0p+8f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input-to-output scale ratio: scale ratio must be in [2**-8, 2**8) range",
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_qs8), input_output_scale);
+    return xnn_status_unsupported_parameter;
+  }
+
+  const union xnn_qs8_avgpool_params params =
+    xnn_init_qs8_avgpool_params(
+      0 /* bias */, 1.0f /* scale */,
+      output_zero_point, output_min, output_max);
+  const enum xnn_status status = create_global_average_pooling_nwc(
+    channels, input_stride, output_stride, flags,
+    0 /* log2(sizeof(int8_t)) */,
+    offsetof(struct xnn_operator, params.qs8_gavgpool),
+    &params, sizeof(params),
+    XNN_INIT_FLAG_QS8,
+    xnn_operator_type_global_average_pooling_nwc_qs8,
+    global_average_pooling_op_out);
+  if (status == xnn_status_success) {
+    xnn_operator_t global_average_pooling_op = *global_average_pooling_op_out;
+    global_average_pooling_op->input_zero_point = (int32_t) input_zero_point;
+    global_average_pooling_op->input_scale = input_scale;
+    global_average_pooling_op->output_scale = output_scale;
+  }
+  return status;
+}
+
 enum xnn_status xnn_create_global_average_pooling_nwc_f16(
     size_t channels,
     size_t input_stride,
@@ -379,6 +442,37 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_qu8(
     &global_average_pooling_op->params.qu8_gavgpool,
     sizeof(global_average_pooling_op->params.qu8_gavgpool),
     update_params_qu8,
+    threadpool);
+}
+
+static void update_params_qs8(
+  xnn_operator_t global_average_pooling_op,
+  size_t width)
+{
+  const int32_t bias = -((int32_t) width * global_average_pooling_op->input_zero_point);
+  const float scale = global_average_pooling_op->input_scale / (global_average_pooling_op->output_scale * (float) width);
+  xnn_update_qs8_avgpool_params(&global_average_pooling_op->params.qs8_gavgpool, bias, scale);
+}
+
+enum xnn_status xnn_setup_global_average_pooling_nwc_qs8(
+    xnn_operator_t global_average_pooling_op,
+    size_t batch_size,
+    size_t width,
+    const int8_t* input,
+    int8_t* output,
+    pthreadpool_t threadpool)
+{
+  return setup_global_average_pooling_nwc(
+    global_average_pooling_op,
+    batch_size, width,
+    input, output,
+    0 /* log2(sizeof(int8_t)) */,
+    &xnn_params.qs8.gavgpool,
+    XNN_INIT_FLAG_QS8,
+    xnn_operator_type_global_average_pooling_nwc_qs8,
+    &global_average_pooling_op->params.qs8_gavgpool,
+    sizeof(global_average_pooling_op->params.qs8_gavgpool),
+    update_params_qs8,
     threadpool);
 }
 

@@ -819,11 +819,11 @@ ExecutionPlan QS8MobileNetV1(pthreadpool_t threadpool) {
   operators.emplace_back(op26, xnn_delete_operator);
 
   xnn_operator_t op27 = nullptr;
-  status = xnn_create_global_average_pooling_nwc_qu8(
+  status = xnn_create_global_average_pooling_nwc_qs8(
     1024 /* channels */, 1024 /* input stride */, 1024 /* output stride */,
-    127 /* input zero point */, 0.5f /* input scale */,
-    127 /* output zero point */, 0.5f /* output scale */,
-    0 /* output min */, 255 /* output max */,
+    -1 /* input zero point */, 0.5f /* input scale */,
+    -1 /* output zero point */, 0.5f /* output scale */,
+    -126 /* output min */, 126 /* output max */,
     0 /* flags */,
     &op27);
   if (status != xnn_status_success) {
@@ -1127,10 +1127,10 @@ ExecutionPlan QS8MobileNetV1(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_global_average_pooling_nwc_qu8(
+  status = xnn_setup_global_average_pooling_nwc_qs8(
     op27,
     1 /* batch size */, 49 /* width */,
-    reinterpret_cast<uint8_t*>(v27) /* input */, reinterpret_cast<uint8_t*>(v28) /* output */,
+    v27 /* input */, v28 /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #27" << std::endl;

@@ -183,13 +183,16 @@ class GlobalAveragePoolingOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t global_average_pooling_op = nullptr;
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_create_global_average_pooling_nwc_qu8(
+      xnn_status status = xnn_create_global_average_pooling_nwc_qu8(
           channels(), input_stride(), output_stride(),
           input_zero_point(), input_scale(),
           output_zero_point(), output_scale(),
           qmin(), qmax(),
-          0, &global_average_pooling_op));
+          0, &global_average_pooling_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, global_average_pooling_op);
 
       // Smart pointer to automatically delete global_average_pooling_op.
@@ -210,8 +213,78 @@ class GlobalAveragePoolingOperatorTester {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_LE(uint32_t(output[i * output_stride() + c]), uint32_t(qmax()));
           ASSERT_GE(uint32_t(output[i * output_stride() + c]), uint32_t(qmin()));
-          ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.80f) <<
-            "in batch index " << i << ", channel " << c;
+          ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.80f)
+            << "at batch index " << i << " / " << batch_size()
+            << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
+  void TestNWCxQS8() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+
+    std::vector<int8_t> input((batch_size() * width() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> output(batch_size() * output_stride());
+    std::vector<float> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::fill(output.begin(), output.end(), 0xA5);
+
+      // Compute reference results.
+      const double scale = double(input_scale()) / (double(width()) * double(output_scale()));
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t j = 0; j < channels(); j++) {
+          double acc = 0.0f;
+          for (size_t k = 0; k < width(); k++) {
+            acc += double(int32_t(input[(i * width() + k) * input_stride() + j]) - int32_t(input_zero_point() - 0x80));
+          }
+          output_ref[i * channels() + j] = float(acc * scale + double(output_zero_point() - 0x80));
+          output_ref[i * channels() + j] = std::min<float>(output_ref[i * channels() + j], float(qmax() - 0x80));
+          output_ref[i * channels() + j] = std::max<float>(output_ref[i * channels() + j], float(qmin() - 0x80));
+        }
+      }
+
+      // Create, setup, run, and destroy Global Average Pooling operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t global_average_pooling_op = nullptr;
+
+      xnn_status status = xnn_create_global_average_pooling_nwc_qs8(
+          channels(), input_stride(), output_stride(),
+          int8_t(input_zero_point() - 0x80), input_scale(),
+          int8_t(output_zero_point() - 0x80), output_scale(),
+          int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+          0, &global_average_pooling_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, global_average_pooling_op);
+
+      // Smart pointer to automatically delete global_average_pooling_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_global_average_pooling_nwc_qs8(
+          global_average_pooling_op,
+          batch_size(), width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_LE(int32_t(output[i * output_stride() + c]), int32_t(qmax() - 0x80));
+          ASSERT_GE(int32_t(output[i * output_stride() + c]), int32_t(qmin() - 0x80));
+          ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.80f)
+            << "at batch index " << i << " / " << batch_size()
+            << ", channel " << c << " / " << channels();
         }
       }
     }
@@ -287,8 +360,9 @@ class GlobalAveragePoolingOperatorTester {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_LE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_max);
           ASSERT_GE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_min);
-          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-2f) <<
-            "in batch index " << i << ", channel " << c;
+          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-2f)
+            << "at batch index " << i << " / " << batch_size()
+            << ", channel " << c << " / " << channels();
         }
       }
     }
@@ -337,11 +411,14 @@ class GlobalAveragePoolingOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t global_average_pooling_op = nullptr;
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_create_global_average_pooling_nwc_f32(
+      xnn_status status = xnn_create_global_average_pooling_nwc_f32(
           channels(), input_stride(), output_stride(),
           output_min, output_max,
-          0, &global_average_pooling_op));
+          0, &global_average_pooling_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, global_average_pooling_op);
 
       // Smart pointer to automatically delete global_average_pooling_op.
@@ -362,8 +439,9 @@ class GlobalAveragePoolingOperatorTester {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_LE(output[i * output_stride() + c], output_max);
           ASSERT_GE(output[i * output_stride() + c], output_min);
-          ASSERT_NEAR(output[i * output_stride() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-6f) <<
-            "in batch index " << i << ", channel " << c;
+          ASSERT_NEAR(output[i * output_stride() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-6f)
+            << "at batch index " << i << " / " << batch_size()
+            << ", channel " << c << " / " << channels();
         }
       }
     }
@@ -438,8 +516,9 @@ class GlobalAveragePoolingOperatorTester {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_LE(output[i * channels() + c], output_max);
           ASSERT_GE(output[i * channels() + c], output_min);
-          ASSERT_NEAR(output[i * channels() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-5f) <<
-            "in batch index " << i << ", channel " << c;
+          ASSERT_NEAR(output[i * channels() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-5f)
+            << "at batch index " << i << " / " << batch_size()
+            << ", channel " << c << " / " << channels();
         }
       }
     }
