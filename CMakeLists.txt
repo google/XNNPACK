@@ -1297,6 +1297,9 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-sse2-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-sse2-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-sse2-mul16.c
+  src/qs8-gavgpool/gen/7p7x-minmax-sse2-c8-acc2.c
+  src/qs8-gavgpool/gen/7p7x-minmax-sse2-c16-acc2.c
+  src/qs8-gavgpool/gen/7p7x-minmax-sse2-c24-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-sse2-c8-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-sse2-c16-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-sse2-c24-acc2.c
@@ -1319,17 +1322,12 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/qs8-igemm/gen/4x4c2-minmax-sse2-ld64.c
   src/qs8-igemm/gen/1x4c2-minmax-sse2-ld128.c
   src/qs8-igemm/gen/4x4c2-minmax-sse2-ld128.c
-  src/qs8-igemm/gen/1x4c2-xw-minmax-sse2.c
-  src/qs8-igemm/gen/4x4c2-xw-minmax-sse2.c
   src/qs8-igemm/gen/1x4c8-minmax-sse2-ld64.c
   src/qs8-igemm/gen/2x4c8-minmax-sse2-ld64.c
   src/qs8-igemm/gen/3x4c8-minmax-sse2-ld64.c
   src/qs8-igemm/gen/1x4c8-minmax-sse2-ld128.c
   src/qs8-igemm/gen/2x4c8-minmax-sse2-ld128.c
   src/qs8-igemm/gen/3x4c8-minmax-sse2-ld128.c
-  src/qs8-igemm/gen/1x4c8-xw-minmax-sse2.c
-  src/qs8-igemm/gen/2x4c8-xw-minmax-sse2.c
-  src/qs8-igemm/gen/3x4c8-xw-minmax-sse2.c
   src/qs8-requantization/fp32-sse2.c
   src/qs8-requantization/precise-sse2.c
   src/qs8-requantization/q31-sse2.c
@@ -1369,6 +1367,9 @@ SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-ssse3-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-ssse3-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-ssse3-mul16.c
+  src/qs8-gavgpool/gen/7p7x-minmax-ssse3-c8-acc2.c
+  src/qs8-gavgpool/gen/7p7x-minmax-ssse3-c16-acc2.c
+  src/qs8-gavgpool/gen/7p7x-minmax-ssse3-c24-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-ssse3-c8-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-ssse3-c16-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-ssse3-c24-acc2.c
@@ -1424,6 +1425,9 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-sse41-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-sse41-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-sse41-mul16.c
+  src/qs8-gavgpool/gen/7p7x-minmax-sse41-c8-acc2.c
+  src/qs8-gavgpool/gen/7p7x-minmax-sse41-c16-acc2.c
+  src/qs8-gavgpool/gen/7p7x-minmax-sse41-c24-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-sse41-c8-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-sse41-c16-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-sse41-c24-acc2.c
@@ -1588,7 +1592,7 @@ SET(XNNPACK_XOP_MICROKERNEL_SRCS
   src/qs8-igemm/gen/2x4c8-minmax-xop-ld64.c
   src/qs8-igemm/gen/3x4c8-minmax-xop-ld64.c
   src/qs8-igemm/gen/1x4c8-minmax-xop-ld128.c
-  src/qs8-igemm/gen/2x4c8-minmax-xop-ld128.c)
+  src/qs8-igemm/gen/2x4c8-minmax-xop-ld128.c
   src/qs8-igemm/gen/3x4c8-minmax-xop-ld128.c)
 
 SET(XNNPACK_FMA3_MICROKERNEL_SRCS
