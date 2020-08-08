@@ -1566,9 +1566,6 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vunary/gen/vsqr-avx-x16.c)
 
 SET(XNNPACK_XOP_MICROKERNEL_SRCS
-  src/qs8-dwconv/gen/up8x9-minmax-xop-mul16.c
-  src/qs8-dwconv/gen/up16x9-minmax-xop-mul16.c
-  src/qs8-dwconv/gen/up24x9-minmax-xop-mul16.c
   src/qs8-gemm/gen/1x4c2-minmax-xop-ld64.c
   src/qs8-gemm/gen/4x4c2-minmax-xop-ld64.c
   src/qs8-gemm/gen/1x4c2-minmax-xop-ld128.c
