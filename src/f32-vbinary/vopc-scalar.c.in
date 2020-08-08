@@ -6,7 +6,7 @@
 $assert BATCH_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
-$assert ACTIVATION in ["LINEAR", "MINMAX"]
+$assert ACTIVATION in ["LINEAR", "MINMAX", "RELU"]
 #include <assert.h>
 
 #include <xnnpack/common.h>
@@ -27,8 +27,8 @@ $  "SUB": lambda x: "%s - vb" % x,
 $  "RSUB": lambda x: "vb - %s" % x,
 $  "SQRDIFF": lambda x: "%s - vb" % x,
 $}[OP]
-$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+$SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_x${BATCH_TILE}(
     size_t n,
     const float* a,
@@ -66,6 +66,9 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_x
 
         $for N in range(BATCH_TILE):
           vy${ABC[N]} = ${MIN_F32}(vy${ABC[N]}, vy_max);
+      $elif ACTIVATION == "RELU":
+        $for N in range(BATCH_TILE):
+          vy${ABC[N]} = ${MAX_F32}(vy${ABC[N]}, 0.0f);
 
       $for N in range(BATCH_TILE):
         y[${N}] = vy${ABC[N]};
@@ -81,6 +84,8 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_x
           $if ACTIVATION == "MINMAX":
             vy = ${MAX_F32}(vy, vy_min);
             vy = ${MIN_F32}(vy, vy_max);
+          $elif ACTIVATION == "RELU":
+            vy = ${MAX_F32}(vy, 0.0f);
           *y++ = vy;
           n -= sizeof(float);
         } while (n != 0);
@@ -92,6 +97,8 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_x
         $if ACTIVATION == "MINMAX":
           vy = ${MAX_F32}(vy, vy_min);
           vy = ${MIN_F32}(vy, vy_max);
+        $elif ACTIVATION == "RELU":
+          vy = ${MAX_F32}(vy, 0.0f);
         *y = vy;
     }
   $else:
@@ -103,6 +110,8 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_x
       $if ACTIVATION == "MINMAX":
         vy = ${MAX_F32}(vy, vy_min);
         vy = ${MIN_F32}(vy, vy_max);
+      $elif ACTIVATION == "RELU":
+        vy = ${MAX_F32}(vy, 0.0f);
       *y++ = vy;
     }
 }

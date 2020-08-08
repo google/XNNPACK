@@ -1505,6 +1505,13 @@ typedef void (*xnn_f32_vbinary_minmax_ukernel_function)(
     float* y,
     const union xnn_f32_minmax_params* params);
 
+typedef void (*xnn_f32_vbinary_relu_ukernel_function)(
+    size_t n,
+    const float* a,
+    const float* b,
+    float* y,
+    const union xnn_f32_relu_params* params);
+
 typedef void (*xnn_vunary_ukernel_function)(
     size_t n,
     const void* x,

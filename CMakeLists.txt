@@ -361,24 +361,36 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vadd-minmax-scalar-x1.c
   src/f32-vbinary/gen/vadd-minmax-scalar-x2.c
   src/f32-vbinary/gen/vadd-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vadd-relu-scalar-x1.c
+  src/f32-vbinary/gen/vadd-relu-scalar-x2.c
+  src/f32-vbinary/gen/vadd-relu-scalar-x4.c
   src/f32-vbinary/gen/vadd-scalar-x1.c
   src/f32-vbinary/gen/vadd-scalar-x2.c
   src/f32-vbinary/gen/vadd-scalar-x4.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vaddc-relu-scalar-x1.c
+  src/f32-vbinary/gen/vaddc-relu-scalar-x2.c
+  src/f32-vbinary/gen/vaddc-relu-scalar-x4.c
   src/f32-vbinary/gen/vaddc-scalar-x1.c
   src/f32-vbinary/gen/vaddc-scalar-x2.c
   src/f32-vbinary/gen/vaddc-scalar-x4.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x1.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x2.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vdiv-relu-scalar-x1.c
+  src/f32-vbinary/gen/vdiv-relu-scalar-x2.c
+  src/f32-vbinary/gen/vdiv-relu-scalar-x4.c
   src/f32-vbinary/gen/vdiv-scalar-x1.c
   src/f32-vbinary/gen/vdiv-scalar-x2.c
   src/f32-vbinary/gen/vdiv-scalar-x4.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vdivc-relu-scalar-x1.c
+  src/f32-vbinary/gen/vdivc-relu-scalar-x2.c
+  src/f32-vbinary/gen/vdivc-relu-scalar-x4.c
   src/f32-vbinary/gen/vdivc-scalar-x1.c
   src/f32-vbinary/gen/vdivc-scalar-x2.c
   src/f32-vbinary/gen/vdivc-scalar-x4.c
@@ -397,24 +409,36 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vmul-minmax-scalar-x1.c
   src/f32-vbinary/gen/vmul-minmax-scalar-x2.c
   src/f32-vbinary/gen/vmul-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vmul-relu-scalar-x1.c
+  src/f32-vbinary/gen/vmul-relu-scalar-x2.c
+  src/f32-vbinary/gen/vmul-relu-scalar-x4.c
   src/f32-vbinary/gen/vmul-scalar-x1.c
   src/f32-vbinary/gen/vmul-scalar-x2.c
   src/f32-vbinary/gen/vmul-scalar-x4.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vmulc-relu-scalar-x1.c
+  src/f32-vbinary/gen/vmulc-relu-scalar-x2.c
+  src/f32-vbinary/gen/vmulc-relu-scalar-x4.c
   src/f32-vbinary/gen/vmulc-scalar-x1.c
   src/f32-vbinary/gen/vmulc-scalar-x2.c
   src/f32-vbinary/gen/vmulc-scalar-x4.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vrdivc-relu-scalar-x1.c
+  src/f32-vbinary/gen/vrdivc-relu-scalar-x2.c
+  src/f32-vbinary/gen/vrdivc-relu-scalar-x4.c
   src/f32-vbinary/gen/vrdivc-scalar-x1.c
   src/f32-vbinary/gen/vrdivc-scalar-x2.c
   src/f32-vbinary/gen/vrdivc-scalar-x4.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vrsubc-relu-scalar-x1.c
+  src/f32-vbinary/gen/vrsubc-relu-scalar-x2.c
+  src/f32-vbinary/gen/vrsubc-relu-scalar-x4.c
   src/f32-vbinary/gen/vrsubc-scalar-x1.c
   src/f32-vbinary/gen/vrsubc-scalar-x2.c
   src/f32-vbinary/gen/vrsubc-scalar-x4.c
@@ -427,12 +451,18 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsub-minmax-scalar-x1.c
   src/f32-vbinary/gen/vsub-minmax-scalar-x2.c
   src/f32-vbinary/gen/vsub-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vsub-relu-scalar-x1.c
+  src/f32-vbinary/gen/vsub-relu-scalar-x2.c
+  src/f32-vbinary/gen/vsub-relu-scalar-x4.c
   src/f32-vbinary/gen/vsub-scalar-x1.c
   src/f32-vbinary/gen/vsub-scalar-x2.c
   src/f32-vbinary/gen/vsub-scalar-x4.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vsubc-relu-scalar-x1.c
+  src/f32-vbinary/gen/vsubc-relu-scalar-x2.c
+  src/f32-vbinary/gen/vsubc-relu-scalar-x4.c
   src/f32-vbinary/gen/vsubc-scalar-x1.c
   src/f32-vbinary/gen/vsubc-scalar-x2.c
   src/f32-vbinary/gen/vsubc-scalar-x4.c
@@ -3123,6 +3153,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vadd-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vadd-minmax-test f32-vadd-minmax-test)
 
+  ADD_EXECUTABLE(f32-vadd-relu-test test/f32-vadd-relu.cc)
+  SET_TARGET_PROPERTIES(f32-vadd-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vadd-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vadd-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vadd-relu-test f32-vadd-relu-test)
+
   ADD_EXECUTABLE(f32-vaddc-test test/f32-vaddc.cc)
   SET_TARGET_PROPERTIES(f32-vaddc-test PROPERTIES
     CXX_STANDARD 11
@@ -3140,6 +3179,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vaddc-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vaddc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vaddc-minmax-test f32-vaddc-minmax-test)
+
+  ADD_EXECUTABLE(f32-vaddc-relu-test test/f32-vaddc-relu.cc)
+  SET_TARGET_PROPERTIES(f32-vaddc-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vaddc-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vaddc-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vaddc-relu-test f32-vaddc-relu-test)
 
   ADD_EXECUTABLE(f32-vdiv-test test/f32-vdiv.cc)
   SET_TARGET_PROPERTIES(f32-vdiv-test PROPERTIES
@@ -3159,6 +3207,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vdiv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vdiv-minmax-test f32-vdiv-minmax-test)
 
+  ADD_EXECUTABLE(f32-vdiv-relu-test test/f32-vdiv-relu.cc)
+  SET_TARGET_PROPERTIES(f32-vdiv-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vdiv-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vdiv-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vdiv-relu-test f32-vdiv-relu-test)
+
   ADD_EXECUTABLE(f32-vdivc-test test/f32-vdivc.cc)
   SET_TARGET_PROPERTIES(f32-vdivc-test PROPERTIES
     CXX_STANDARD 11
@@ -3177,6 +3234,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vdivc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vdivc-minmax-test f32-vdivc-minmax-test)
 
+  ADD_EXECUTABLE(f32-vdivc-relu-test test/f32-vdivc-relu.cc)
+  SET_TARGET_PROPERTIES(f32-vdivc-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vdivc-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vdivc-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vdivc-relu-test f32-vdivc-relu-test)
+
   ADD_EXECUTABLE(f32-vrdivc-test test/f32-vrdivc.cc)
   SET_TARGET_PROPERTIES(f32-vrdivc-test PROPERTIES
     CXX_STANDARD 11
@@ -3194,6 +3260,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vrdivc-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vrdivc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vrdivc-minmax-test f32-vrdivc-minmax-test)
+
+  ADD_EXECUTABLE(f32-vrdivc-relu-test test/f32-vrdivc-relu.cc)
+  SET_TARGET_PROPERTIES(f32-vrdivc-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrdivc-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vrdivc-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vrdivc-relu-test f32-vrdivc-relu-test)
 
   ADD_EXECUTABLE(f32-vlrelu-test test/f32-vlrelu.cc)
   SET_TARGET_PROPERTIES(f32-vlrelu-test PROPERTIES
@@ -3258,6 +3333,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vmul-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vmul-minmax-test f32-vmul-minmax-test)
 
+  ADD_EXECUTABLE(f32-vmul-relu-test test/f32-vmul-relu.cc)
+  SET_TARGET_PROPERTIES(f32-vmul-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vmul-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vmul-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vmul-relu-test f32-vmul-relu-test)
+
   ADD_EXECUTABLE(f32-vmulc-test test/f32-vmulc.cc)
   SET_TARGET_PROPERTIES(f32-vmulc-test PROPERTIES
     CXX_STANDARD 11
@@ -3275,6 +3359,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vmulc-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vmulc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vmulc-minmax-test f32-vmulc-minmax-test)
+
+  ADD_EXECUTABLE(f32-vmulc-relu-test test/f32-vmulc-relu.cc)
+  SET_TARGET_PROPERTIES(f32-vmulc-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vmulc-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vmulc-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vmulc-relu-test f32-vmulc-relu-test)
 
   ADD_EXECUTABLE(f16-vmulcaddc-minmax-test test/f16-vmulcaddc-minmax.cc)
   SET_TARGET_PROPERTIES(f16-vmulcaddc-minmax-test PROPERTIES
@@ -3411,6 +3504,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vsub-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vsub-minmax-test f32-vsub-minmax-test)
 
+  ADD_EXECUTABLE(f32-vsub-relu-test test/f32-vsub-relu.cc)
+  SET_TARGET_PROPERTIES(f32-vsub-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vsub-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vsub-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vsub-relu-test f32-vsub-relu-test)
+
   ADD_EXECUTABLE(f32-vsubc-test test/f32-vsubc.cc)
   SET_TARGET_PROPERTIES(f32-vsubc-test PROPERTIES
     CXX_STANDARD 11
@@ -3429,6 +3531,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vsubc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vsubc-minmax-test f32-vsubc-minmax-test)
 
+  ADD_EXECUTABLE(f32-vsubc-relu-test test/f32-vsubc-relu.cc)
+  SET_TARGET_PROPERTIES(f32-vsubc-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vsubc-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vsubc-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vsubc-relu-test f32-vsubc-relu-test)
+
   ADD_EXECUTABLE(f32-vrsubc-test test/f32-vrsubc.cc)
   SET_TARGET_PROPERTIES(f32-vrsubc-test PROPERTIES
     CXX_STANDARD 11
@@ -3446,6 +3557,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vrsubc-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vrsubc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vrsubc-minmax-test f32-vrsubc-minmax-test)
+
+  ADD_EXECUTABLE(f32-vrsubc-relu-test test/f32-vrsubc-relu.cc)
+  SET_TARGET_PROPERTIES(f32-vrsubc-relu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrsubc-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vrsubc-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vrsubc-relu-test f32-vrsubc-relu-test)
 
   ADD_EXECUTABLE(qs8-dwconv-minmax-test test/qs8-dwconv-minmax.cc)
   SET_TARGET_PROPERTIES(qs8-dwconv-minmax-test PROPERTIES

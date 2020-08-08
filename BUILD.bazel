@@ -238,24 +238,36 @@ SCALAR_UKERNELS = [
     "src/f32-vbinary/gen/vadd-minmax-scalar-x1.c",
     "src/f32-vbinary/gen/vadd-minmax-scalar-x2.c",
     "src/f32-vbinary/gen/vadd-minmax-scalar-x4.c",
+    "src/f32-vbinary/gen/vadd-relu-scalar-x1.c",
+    "src/f32-vbinary/gen/vadd-relu-scalar-x2.c",
+    "src/f32-vbinary/gen/vadd-relu-scalar-x4.c",
     "src/f32-vbinary/gen/vadd-scalar-x1.c",
     "src/f32-vbinary/gen/vadd-scalar-x2.c",
     "src/f32-vbinary/gen/vadd-scalar-x4.c",
     "src/f32-vbinary/gen/vaddc-minmax-scalar-x1.c",
     "src/f32-vbinary/gen/vaddc-minmax-scalar-x2.c",
     "src/f32-vbinary/gen/vaddc-minmax-scalar-x4.c",
+    "src/f32-vbinary/gen/vaddc-relu-scalar-x1.c",
+    "src/f32-vbinary/gen/vaddc-relu-scalar-x2.c",
+    "src/f32-vbinary/gen/vaddc-relu-scalar-x4.c",
     "src/f32-vbinary/gen/vaddc-scalar-x1.c",
     "src/f32-vbinary/gen/vaddc-scalar-x2.c",
     "src/f32-vbinary/gen/vaddc-scalar-x4.c",
     "src/f32-vbinary/gen/vdiv-minmax-scalar-x1.c",
     "src/f32-vbinary/gen/vdiv-minmax-scalar-x2.c",
     "src/f32-vbinary/gen/vdiv-minmax-scalar-x4.c",
+    "src/f32-vbinary/gen/vdiv-relu-scalar-x1.c",
+    "src/f32-vbinary/gen/vdiv-relu-scalar-x2.c",
+    "src/f32-vbinary/gen/vdiv-relu-scalar-x4.c",
     "src/f32-vbinary/gen/vdiv-scalar-x1.c",
     "src/f32-vbinary/gen/vdiv-scalar-x2.c",
     "src/f32-vbinary/gen/vdiv-scalar-x4.c",
     "src/f32-vbinary/gen/vdivc-minmax-scalar-x1.c",
     "src/f32-vbinary/gen/vdivc-minmax-scalar-x2.c",
     "src/f32-vbinary/gen/vdivc-minmax-scalar-x4.c",
+    "src/f32-vbinary/gen/vdivc-relu-scalar-x1.c",
+    "src/f32-vbinary/gen/vdivc-relu-scalar-x2.c",
+    "src/f32-vbinary/gen/vdivc-relu-scalar-x4.c",
     "src/f32-vbinary/gen/vdivc-scalar-x1.c",
     "src/f32-vbinary/gen/vdivc-scalar-x2.c",
     "src/f32-vbinary/gen/vdivc-scalar-x4.c",
@@ -274,24 +286,36 @@ SCALAR_UKERNELS = [
     "src/f32-vbinary/gen/vmul-minmax-scalar-x1.c",
     "src/f32-vbinary/gen/vmul-minmax-scalar-x2.c",
     "src/f32-vbinary/gen/vmul-minmax-scalar-x4.c",
+    "src/f32-vbinary/gen/vmul-relu-scalar-x1.c",
+    "src/f32-vbinary/gen/vmul-relu-scalar-x2.c",
+    "src/f32-vbinary/gen/vmul-relu-scalar-x4.c",
     "src/f32-vbinary/gen/vmul-scalar-x1.c",
     "src/f32-vbinary/gen/vmul-scalar-x2.c",
     "src/f32-vbinary/gen/vmul-scalar-x4.c",
     "src/f32-vbinary/gen/vmulc-minmax-scalar-x1.c",
     "src/f32-vbinary/gen/vmulc-minmax-scalar-x2.c",
     "src/f32-vbinary/gen/vmulc-minmax-scalar-x4.c",
+    "src/f32-vbinary/gen/vmulc-relu-scalar-x1.c",
+    "src/f32-vbinary/gen/vmulc-relu-scalar-x2.c",
+    "src/f32-vbinary/gen/vmulc-relu-scalar-x4.c",
     "src/f32-vbinary/gen/vmulc-scalar-x1.c",
     "src/f32-vbinary/gen/vmulc-scalar-x2.c",
     "src/f32-vbinary/gen/vmulc-scalar-x4.c",
     "src/f32-vbinary/gen/vrdivc-minmax-scalar-x1.c",
     "src/f32-vbinary/gen/vrdivc-minmax-scalar-x2.c",
     "src/f32-vbinary/gen/vrdivc-minmax-scalar-x4.c",
+    "src/f32-vbinary/gen/vrdivc-relu-scalar-x1.c",
+    "src/f32-vbinary/gen/vrdivc-relu-scalar-x2.c",
+    "src/f32-vbinary/gen/vrdivc-relu-scalar-x4.c",
     "src/f32-vbinary/gen/vrdivc-scalar-x1.c",
     "src/f32-vbinary/gen/vrdivc-scalar-x2.c",
     "src/f32-vbinary/gen/vrdivc-scalar-x4.c",
     "src/f32-vbinary/gen/vrsubc-minmax-scalar-x1.c",
     "src/f32-vbinary/gen/vrsubc-minmax-scalar-x2.c",
     "src/f32-vbinary/gen/vrsubc-minmax-scalar-x4.c",
+    "src/f32-vbinary/gen/vrsubc-relu-scalar-x1.c",
+    "src/f32-vbinary/gen/vrsubc-relu-scalar-x2.c",
+    "src/f32-vbinary/gen/vrsubc-relu-scalar-x4.c",
     "src/f32-vbinary/gen/vrsubc-scalar-x1.c",
     "src/f32-vbinary/gen/vrsubc-scalar-x2.c",
     "src/f32-vbinary/gen/vrsubc-scalar-x4.c",
@@ -304,12 +328,18 @@ SCALAR_UKERNELS = [
     "src/f32-vbinary/gen/vsub-minmax-scalar-x1.c",
     "src/f32-vbinary/gen/vsub-minmax-scalar-x2.c",
     "src/f32-vbinary/gen/vsub-minmax-scalar-x4.c",
+    "src/f32-vbinary/gen/vsub-relu-scalar-x1.c",
+    "src/f32-vbinary/gen/vsub-relu-scalar-x2.c",
+    "src/f32-vbinary/gen/vsub-relu-scalar-x4.c",
     "src/f32-vbinary/gen/vsub-scalar-x1.c",
     "src/f32-vbinary/gen/vsub-scalar-x2.c",
     "src/f32-vbinary/gen/vsub-scalar-x4.c",
     "src/f32-vbinary/gen/vsubc-minmax-scalar-x1.c",
     "src/f32-vbinary/gen/vsubc-minmax-scalar-x2.c",
     "src/f32-vbinary/gen/vsubc-minmax-scalar-x4.c",
+    "src/f32-vbinary/gen/vsubc-relu-scalar-x1.c",
+    "src/f32-vbinary/gen/vsubc-relu-scalar-x2.c",
+    "src/f32-vbinary/gen/vsubc-relu-scalar-x4.c",
     "src/f32-vbinary/gen/vsubc-scalar-x1.c",
     "src/f32-vbinary/gen/vsubc-scalar-x2.c",
     "src/f32-vbinary/gen/vsubc-scalar-x4.c",
@@ -487,6 +517,18 @@ WASM_UKERNELS = [
     "src/f32-vbinary/gen/vdivc-minmax-wasm-x1.c",
     "src/f32-vbinary/gen/vdivc-minmax-wasm-x2.c",
     "src/f32-vbinary/gen/vdivc-minmax-wasm-x4.c",
+    "src/f32-vbinary/gen/vadd-relu-wasm-x1.c",
+    "src/f32-vbinary/gen/vadd-relu-wasm-x2.c",
+    "src/f32-vbinary/gen/vadd-relu-wasm-x4.c",
+    "src/f32-vbinary/gen/vaddc-relu-wasm-x1.c",
+    "src/f32-vbinary/gen/vaddc-relu-wasm-x2.c",
+    "src/f32-vbinary/gen/vaddc-relu-wasm-x4.c",
+    "src/f32-vbinary/gen/vdiv-relu-wasm-x1.c",
+    "src/f32-vbinary/gen/vdiv-relu-wasm-x2.c",
+    "src/f32-vbinary/gen/vdiv-relu-wasm-x4.c",
+    "src/f32-vbinary/gen/vdivc-relu-wasm-x1.c",
+    "src/f32-vbinary/gen/vdivc-relu-wasm-x2.c",
+    "src/f32-vbinary/gen/vdivc-relu-wasm-x4.c",
     "src/f32-vbinary/gen/vmax-wasm-x1.c",
     "src/f32-vbinary/gen/vmax-wasm-x2.c",
     "src/f32-vbinary/gen/vmax-wasm-x4.c",
@@ -517,6 +559,24 @@ WASM_UKERNELS = [
     "src/f32-vbinary/gen/vsubc-minmax-wasm-x1.c",
     "src/f32-vbinary/gen/vsubc-minmax-wasm-x2.c",
     "src/f32-vbinary/gen/vsubc-minmax-wasm-x4.c",
+    "src/f32-vbinary/gen/vmul-relu-wasm-x1.c",
+    "src/f32-vbinary/gen/vmul-relu-wasm-x2.c",
+    "src/f32-vbinary/gen/vmul-relu-wasm-x4.c",
+    "src/f32-vbinary/gen/vmulc-relu-wasm-x1.c",
+    "src/f32-vbinary/gen/vmulc-relu-wasm-x2.c",
+    "src/f32-vbinary/gen/vmulc-relu-wasm-x4.c",
+    "src/f32-vbinary/gen/vrdivc-relu-wasm-x1.c",
+    "src/f32-vbinary/gen/vrdivc-relu-wasm-x2.c",
+    "src/f32-vbinary/gen/vrdivc-relu-wasm-x4.c",
+    "src/f32-vbinary/gen/vrsubc-relu-wasm-x1.c",
+    "src/f32-vbinary/gen/vrsubc-relu-wasm-x2.c",
+    "src/f32-vbinary/gen/vrsubc-relu-wasm-x4.c",
+    "src/f32-vbinary/gen/vsub-relu-wasm-x1.c",
+    "src/f32-vbinary/gen/vsub-relu-wasm-x2.c",
+    "src/f32-vbinary/gen/vsub-relu-wasm-x4.c",
+    "src/f32-vbinary/gen/vsubc-relu-wasm-x1.c",
+    "src/f32-vbinary/gen/vsubc-relu-wasm-x2.c",
+    "src/f32-vbinary/gen/vsubc-relu-wasm-x4.c",
     "src/f32-vlrelu/gen/vlrelu-wasm-x1.c",
     "src/f32-vlrelu/gen/vlrelu-wasm-x2.c",
     "src/f32-vlrelu/gen/vlrelu-wasm-x4.c",
@@ -746,24 +806,32 @@ WASMSIMD_UKERNELS = [
     "src/f32-vbinary/gen/vadd-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vadd-relu-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vadd-relu-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vadd-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vadd-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vaddc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vaddc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vaddc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vaddc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vaddc-relu-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vaddc-relu-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vaddc-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vaddc-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vdiv-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vdiv-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vdiv-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vdiv-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vdiv-relu-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vdiv-relu-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vdiv-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vdiv-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vdivc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vdivc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vdivc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vdivc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vdivc-relu-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vdivc-relu-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vdivc-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vdivc-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vmax-wasmsimd-arm-x4.c",
@@ -786,24 +854,32 @@ WASMSIMD_UKERNELS = [
     "src/f32-vbinary/gen/vmul-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vmul-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vmul-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vmul-relu-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vmul-relu-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vmul-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vmul-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vmulc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vmulc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vmulc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vmulc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vmulc-relu-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vmulc-relu-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vmulc-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vmulc-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vrdivc-relu-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vrdivc-relu-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vrdivc-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vrdivc-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vrsubc-relu-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vrsubc-relu-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vrsubc-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vrsubc-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vsqrdiff-wasmsimd-x4.c",
@@ -814,12 +890,16 @@ WASMSIMD_UKERNELS = [
     "src/f32-vbinary/gen/vsub-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vsub-relu-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vsub-relu-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vsub-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vsub-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vsubc-minmax-wasmsimd-arm-x4.c",
     "src/f32-vbinary/gen/vsubc-minmax-wasmsimd-arm-x8.c",
     "src/f32-vbinary/gen/vsubc-minmax-wasmsimd-x86-x4.c",
     "src/f32-vbinary/gen/vsubc-minmax-wasmsimd-x86-x8.c",
+    "src/f32-vbinary/gen/vsubc-relu-wasmsimd-x4.c",
+    "src/f32-vbinary/gen/vsubc-relu-wasmsimd-x8.c",
     "src/f32-vbinary/gen/vsubc-wasmsimd-x4.c",
     "src/f32-vbinary/gen/vsubc-wasmsimd-x8.c",
     "src/f32-vlrelu/gen/vlrelu-wasmsimd-bitselect-x4.c",
@@ -4913,6 +4993,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vadd_relu_test",
+    srcs = [
+        "test/f32-vadd-relu.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vaddc_test",
     srcs = [
         "test/f32-vaddc.cc",
@@ -4925,6 +5014,15 @@ xnnpack_unit_test(
     name = "f32_vaddc_minmax_test",
     srcs = [
         "test/f32-vaddc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vaddc_relu_test",
+    srcs = [
+        "test/f32-vaddc-relu.cc",
         "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
@@ -4949,6 +5047,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vdiv_relu_test",
+    srcs = [
+        "test/f32-vdiv-relu.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vdivc_test",
     srcs = [
         "test/f32-vdivc.cc",
@@ -4967,6 +5074,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vdivc_relu_test",
+    srcs = [
+        "test/f32-vdivc-relu.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vrdivc_test",
     srcs = [
         "test/f32-vrdivc.cc",
@@ -4979,6 +5095,15 @@ xnnpack_unit_test(
     name = "f32_vrdivc_minmax_test",
     srcs = [
         "test/f32-vrdivc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vrdivc_relu_test",
+    srcs = [
+        "test/f32-vrdivc-relu.cc",
         "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
@@ -5039,6 +5164,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vmul_relu_test",
+    srcs = [
+        "test/f32-vmul-relu.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vmulc_test",
     srcs = [
         "test/f32-vmulc.cc",
@@ -5051,6 +5185,15 @@ xnnpack_unit_test(
     name = "f32_vmulc_minmax_test",
     srcs = [
         "test/f32-vmulc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vmulc_relu_test",
+    srcs = [
+        "test/f32-vmulc-relu.cc",
         "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
@@ -5212,6 +5355,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vsub_relu_test",
+    srcs = [
+        "test/f32-vsub-relu.cc",
+        "test/vbinary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vsubc_test",
     srcs = [
         "test/f32-vsubc.cc",
@@ -5230,6 +5382,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_vsubc_relu_test",
+    srcs = [
+        "test/f32-vsubc-relu.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_vrsubc_test",
     srcs = [
         "test/f32-vrsubc.cc",
@@ -5242,6 +5403,15 @@ xnnpack_unit_test(
     name = "f32_vrsubc_minmax_test",
     srcs = [
         "test/f32-vrsubc-minmax.cc",
+        "test/vbinaryc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vrsubc_relu_test",
+    srcs = [
+        "test/f32-vrsubc-relu.cc",
         "test/vbinaryc-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,

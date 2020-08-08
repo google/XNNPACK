@@ -19,6 +19,19 @@ tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB     -D BATCH_TILE=1 -D WAS
 tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB     -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsub-minmax-scalar-x2.c
 tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB     -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsub-minmax-scalar-x4.c
 
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD     -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vadd-relu-scalar-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD     -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vadd-relu-scalar-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD     -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vadd-relu-scalar-x4.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=DIV     -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdiv-relu-scalar-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=DIV     -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdiv-relu-scalar-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=DIV     -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdiv-relu-scalar-x4.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL     -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmul-relu-scalar-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL     -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmul-relu-scalar-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL     -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmul-relu-scalar-x4.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB     -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsub-relu-scalar-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB     -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsub-relu-scalar-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB     -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsub-relu-scalar-x4.c
+
 tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD     -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vadd-scalar-x1.c
 tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD     -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vadd-scalar-x2.c
 tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD     -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vadd-scalar-x4.c
@@ -59,6 +72,25 @@ tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB     -D BATCH_TILE=4 -D W
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB      -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-scalar-x1.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB      -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-scalar-x2.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB      -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-scalar-x4.c
+
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD      -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vaddc-relu-scalar-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD      -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vaddc-relu-scalar-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD      -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vaddc-relu-scalar-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=DIV      -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdivc-relu-scalar-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=DIV      -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdivc-relu-scalar-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=DIV      -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdivc-relu-scalar-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL      -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmulc-relu-scalar-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL      -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmulc-relu-scalar-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL      -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmulc-relu-scalar-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RDIV     -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrdivc-relu-scalar-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RDIV     -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrdivc-relu-scalar-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RDIV     -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrdivc-relu-scalar-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB     -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrsubc-relu-scalar-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB     -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrsubc-relu-scalar-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB     -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrsubc-relu-scalar-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB      -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsubc-relu-scalar-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB      -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsubc-relu-scalar-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB      -D BATCH_TILE=4 -D WASM=0 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsubc-relu-scalar-x4.c
 
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD      -D BATCH_TILE=1 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vaddc-scalar-x1.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD      -D BATCH_TILE=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/vaddc-scalar-x2.c
@@ -108,6 +140,19 @@ tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=1 -D WASM=1 
 tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsub-minmax-wasm-x2.c
 tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsub-minmax-wasm-x4.c
 
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vadd-relu-wasm-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vadd-relu-wasm-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=ADD -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vadd-relu-wasm-x4.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=DIV -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdiv-relu-wasm-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=DIV -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdiv-relu-wasm-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=DIV -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdiv-relu-wasm-x4.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmul-relu-wasm-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmul-relu-wasm-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=MUL -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmul-relu-wasm-x4.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsub-relu-wasm-x1.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsub-relu-wasm-x2.c
+tools/xngen src/f32-vbinary/vop-scalar.c.in -D OP=SUB -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsub-relu-wasm-x4.c
+
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vaddc-minmax-wasm-x1.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vaddc-minmax-wasm-x2.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vaddc-minmax-wasm-x4.c
@@ -133,6 +178,25 @@ tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=1 -D WASM=
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-wasm-x2.c
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/vsubc-minmax-wasm-x4.c
 
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vaddc-relu-wasm-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vaddc-relu-wasm-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=ADD  -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vaddc-relu-wasm-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=DIV  -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdivc-relu-wasm-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=DIV  -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdivc-relu-wasm-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=DIV  -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vdivc-relu-wasm-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL  -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmulc-relu-wasm-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL  -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmulc-relu-wasm-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=MUL  -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vmulc-relu-wasm-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RDIV -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrdivc-relu-wasm-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RDIV -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrdivc-relu-wasm-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RDIV -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrdivc-relu-wasm-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrsubc-relu-wasm-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrsubc-relu-wasm-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=RSUB -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vrsubc-relu-wasm-x4.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=1 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsubc-relu-wasm-x1.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=2 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsubc-relu-wasm-x2.c
+tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB  -D BATCH_TILE=4 -D WASM=1 -D ACTIVATION=RELU -o src/f32-vbinary/gen/vsubc-relu-wasm-x4.c
+
 ################################## WAsm SIMD ##################################
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vadd-minmax-wasmsimd-arm-x4.c
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x4.c
@@ -150,6 +214,15 @@ tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SUB -D BATCH_TILE=4 -D ACTIV
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SUB -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x4.c
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SUB -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vsub-minmax-wasmsimd-arm-x8.c
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SUB -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x8.c
+
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD -D BATCH_TILE=4 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vadd-relu-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD -D BATCH_TILE=8 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vadd-relu-wasmsimd-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=DIV -D BATCH_TILE=4 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vdiv-relu-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=DIV -D BATCH_TILE=8 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vdiv-relu-wasmsimd-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MUL -D BATCH_TILE=4 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vmul-relu-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=MUL -D BATCH_TILE=8 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vmul-relu-wasmsimd-x8.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SUB -D BATCH_TILE=4 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vsub-relu-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=SUB -D BATCH_TILE=8 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vsub-relu-wasmsimd-x8.c
 
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vadd-wasmsimd-x4.c
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD     -D BATCH_TILE=8 -D ACTIVATION=LINEAR -D X86=0 -o src/f32-vbinary/gen/vadd-wasmsimd-x8.c
@@ -194,6 +267,19 @@ tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=SUB  -D BATCH_TILE=4 -D ACT
 tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=SUB  -D BATCH_TILE=4 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vsubc-minmax-wasmsimd-x86-x4.c
 tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=SUB  -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=0 -o src/f32-vbinary/gen/vsubc-minmax-wasmsimd-arm-x8.c
 tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=SUB  -D BATCH_TILE=8 -D ACTIVATION=MINMAX -D X86=1 -o src/f32-vbinary/gen/vsubc-minmax-wasmsimd-x86-x8.c
+
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=ADD  -D BATCH_TILE=4 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vaddc-relu-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=ADD  -D BATCH_TILE=8 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vaddc-relu-wasmsimd-x8.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=DIV  -D BATCH_TILE=4 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vdivc-relu-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=DIV  -D BATCH_TILE=8 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vdivc-relu-wasmsimd-x8.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=MUL  -D BATCH_TILE=4 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vmulc-relu-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=MUL  -D BATCH_TILE=8 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vmulc-relu-wasmsimd-x8.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=RDIV -D BATCH_TILE=4 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vrdivc-relu-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=RDIV -D BATCH_TILE=8 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vrdivc-relu-wasmsimd-x8.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=RSUB -D BATCH_TILE=4 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vrsubc-relu-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=RSUB -D BATCH_TILE=8 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vrsubc-relu-wasmsimd-x8.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=SUB  -D BATCH_TILE=4 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vsubc-relu-wasmsimd-x4.c
+tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=SUB  -D BATCH_TILE=8 -D ACTIVATION=RELU -D X86=1 -o src/f32-vbinary/gen/vsubc-relu-wasmsimd-x8.c
 
 tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=ADD     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -D X86=1 -o src/f32-vbinary/gen/vaddc-wasmsimd-x4.c
 tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=ADD     -D BATCH_TILE=8 -D ACTIVATION=LINEAR -D X86=1 -o src/f32-vbinary/gen/vaddc-wasmsimd-x8.c
@@ -361,29 +447,40 @@ tools/xngen src/f32-vbinary/vopc-avx512f.c.in -D OP=SUB      -D BATCH_TILE=32 -D
 
 ################################## Unit tests #################################
 tools/generate-vbinary-test.py --spec test/f32-vadd-minmax.yaml --output test/f32-vadd-minmax.cc
+tools/generate-vbinary-test.py --spec test/f32-vadd-relu.yaml   --output test/f32-vadd-relu.cc
 tools/generate-vbinary-test.py --spec test/f32-vadd.yaml        --output test/f32-vadd.cc
 tools/generate-vbinary-test.py --spec test/f32-vdiv-minmax.yaml --output test/f32-vdiv-minmax.cc
+tools/generate-vbinary-test.py --spec test/f32-vdiv-relu.yaml   --output test/f32-vdiv-relu.cc
 tools/generate-vbinary-test.py --spec test/f32-vdiv.yaml        --output test/f32-vdiv.cc
 tools/generate-vbinary-test.py --spec test/f32-vmax.yaml        --output test/f32-vmax.cc
 tools/generate-vbinary-test.py --spec test/f32-vmin.yaml        --output test/f32-vmin.cc
 tools/generate-vbinary-test.py --spec test/f32-vmul-minmax.yaml --output test/f32-vmul-minmax.cc
+tools/generate-vbinary-test.py --spec test/f32-vmul-relu.yaml   --output test/f32-vmul-relu.cc
 tools/generate-vbinary-test.py --spec test/f32-vmul.yaml        --output test/f32-vmul.cc
 tools/generate-vbinary-test.py --spec test/f32-vsqrdiff.yaml    --output test/f32-vsqrdiff.cc
 tools/generate-vbinary-test.py --spec test/f32-vsub-minmax.yaml --output test/f32-vsub-minmax.cc
+tools/generate-vbinary-test.py --spec test/f32-vsub-relu.yaml   --output test/f32-vsub-relu.cc
 tools/generate-vbinary-test.py --spec test/f32-vsub.yaml        --output test/f32-vsub.cc
 
 tools/generate-vbinary-test.py --spec test/f32-vaddc-minmax.yaml  --output test/f32-vaddc-minmax.cc
+tools/generate-vbinary-test.py --spec test/f32-vaddc-relu.yaml    --output test/f32-vaddc-relu.cc
 tools/generate-vbinary-test.py --spec test/f32-vaddc.yaml         --output test/f32-vaddc.cc
 tools/generate-vbinary-test.py --spec test/f32-vdivc-minmax.yaml  --output test/f32-vdivc-minmax.cc
+tools/generate-vbinary-test.py --spec test/f32-vdivc-relu.yaml    --output test/f32-vdivc-relu.cc
 tools/generate-vbinary-test.py --spec test/f32-vdivc.yaml         --output test/f32-vdivc.cc
 tools/generate-vbinary-test.py --spec test/f32-vmaxc.yaml         --output test/f32-vmaxc.cc
 tools/generate-vbinary-test.py --spec test/f32-vminc.yaml         --output test/f32-vminc.cc
 tools/generate-vbinary-test.py --spec test/f32-vmulc-minmax.yaml  --output test/f32-vmulc-minmax.cc
+tools/generate-vbinary-test.py --spec test/f32-vmulc-relu.yaml    --output test/f32-vmulc-relu.cc
 tools/generate-vbinary-test.py --spec test/f32-vmulc.yaml         --output test/f32-vmulc.cc
 tools/generate-vbinary-test.py --spec test/f32-vrdivc-minmax.yaml --output test/f32-vrdivc-minmax.cc
+tools/generate-vbinary-test.py --spec test/f32-vrdivc-relu.yaml   --output test/f32-vrdivc-relu.cc
 tools/generate-vbinary-test.py --spec test/f32-vrdivc.yaml        --output test/f32-vrdivc.cc
 tools/generate-vbinary-test.py --spec test/f32-vrsubc-minmax.yaml --output test/f32-vrsubc-minmax.cc
+tools/generate-vbinary-test.py --spec test/f32-vrsubc-relu.yaml   --output test/f32-vrsubc-relu.cc
 tools/generate-vbinary-test.py --spec test/f32-vrsubc.yaml        --output test/f32-vrsubc.cc
 tools/generate-vbinary-test.py --spec test/f32-vsqrdiffc.yaml     --output test/f32-vsqrdiffc.cc
+tools/generate-vbinary-test.py --spec test/f32-vsqrdiffc.yaml     --output test/f32-vsqrdiffc.cc
 tools/generate-vbinary-test.py --spec test/f32-vsubc-minmax.yaml  --output test/f32-vsubc-minmax.cc
+tools/generate-vbinary-test.py --spec test/f32-vsubc-relu.yaml    --output test/f32-vsubc-relu.cc
 tools/generate-vbinary-test.py --spec test/f32-vsubc.yaml         --output test/f32-vsubc.cc
