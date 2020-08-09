@@ -591,6 +591,17 @@ static inline void xnn_update_qs8_avgpool_params(
     params->neon.bias = bias;
     params->neon.multiplier = multiplier;
     params->neon.left_shift = (int64_t) -shift;
+  #elif XNN_ARCH_WASMSIMD
+    const int64_t rounding = INT64_C(1) << ((uint32_t) shift - 1);
+    params->wasmsimd.bias[0] = bias;
+    params->wasmsimd.bias[1] = bias;
+    params->wasmsimd.bias[2] = bias;
+    params->wasmsimd.bias[3] = bias;
+    params->wasmsimd.multiplier[0] = (int64_t) multiplier;
+    params->wasmsimd.multiplier[1] = (int64_t) multiplier;
+    params->wasmsimd.rounding[0] = rounding;
+    params->wasmsimd.rounding[1] = rounding;
+    params->wasmsimd.shift = shift;
   #else
     const int64_t rounding = INT64_C(1) << ((uint32_t) shift - 1);
     params->scalar.bias = bias;
