@@ -229,7 +229,6 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__sse2_c8_acc2(
       }
       if (channels & 1) {
         *output = (int32_t) _mm_cvtsi128_si32(vout0123456701234567);
-        output += 1;
       }
     }
   }
