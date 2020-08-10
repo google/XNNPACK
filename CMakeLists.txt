@@ -768,10 +768,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-gavgpool/gen/7p7x-minmax-neon-c16-acc2.c
   src/qs8-gavgpool/gen/7p7x-minmax-neon-c24-acc2.c
   src/qs8-gavgpool/gen/7p7x-minmax-neon-c32-acc2.c
-  src/qs8-dwconv/gen/up8x9-minmax-wasmsimd-mul16.c
-  src/qs8-dwconv/gen/up16x9-minmax-wasmsimd-mul16.c
-  src/qs8-dwconv/gen/up24x9-minmax-wasmsimd-mul16.c
-  src/qs8-dwconv/gen/up32x9-minmax-wasmsimd-mul16.c
+  src/qs8-dwconv/gen/up8x9-minmax-neon-mul16.c
+  src/qs8-dwconv/gen/up16x9-minmax-neon-mul16.c
+  src/qs8-dwconv/gen/up24x9-minmax-neon-mul16.c
+  src/qs8-dwconv/gen/up32x9-minmax-neon-mul16.c
   src/qs8-gemm/gen/1x8-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/4x8-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/1x16-minmax-neon-mlal-lane.c
