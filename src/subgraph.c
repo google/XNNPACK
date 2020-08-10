@@ -561,9 +561,9 @@ enum xnn_status xnn_subgraph_optimize(
               assert(consumer->inputs[0] == producer->outputs[0]);
 
               consumer->params.convolution_2d.input_padding_top    += producer->params.static_pad.pre_paddings[1];
-              consumer->params.convolution_2d.input_padding_right  += producer->params.static_pad.pre_paddings[2];
+              consumer->params.convolution_2d.input_padding_right  += producer->params.static_pad.post_paddings[2];
               consumer->params.convolution_2d.input_padding_bottom += producer->params.static_pad.post_paddings[1];
-              consumer->params.convolution_2d.input_padding_left   += producer->params.static_pad.post_paddings[2];
+              consumer->params.convolution_2d.input_padding_left   += producer->params.static_pad.pre_paddings[2];
 
               consumer->inputs[0] = producer->inputs[0];
 
@@ -587,11 +587,11 @@ enum xnn_status xnn_subgraph_optimize(
               consumer->params.depthwise_convolution_2d.input_padding_top +=
                 producer->params.static_pad.pre_paddings[1];
               consumer->params.depthwise_convolution_2d.input_padding_right +=
-                producer->params.static_pad.pre_paddings[2];
+                producer->params.static_pad.post_paddings[2];
               consumer->params.depthwise_convolution_2d.input_padding_bottom +=
                 producer->params.static_pad.post_paddings[1];
               consumer->params.depthwise_convolution_2d.input_padding_left +=
-                producer->params.static_pad.post_paddings[2];
+                producer->params.static_pad.pre_paddings[2];
 
               consumer->inputs[0] = producer->inputs[0];
 
