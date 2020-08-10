@@ -10,6 +10,7 @@ $assert MR <= 4
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""

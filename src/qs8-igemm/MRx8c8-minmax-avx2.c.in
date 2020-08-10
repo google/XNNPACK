@@ -9,6 +9,7 @@ $assert MR <= 4
 #include <immintrin.h>
 
 #include <xnnpack/igemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_${MR}x8c8__avx2(

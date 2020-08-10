@@ -8,6 +8,28 @@
 #include <xnnpack/common.h>
 
 
+#if defined(__SSE2__)
+#include <emmintrin.h>
+
+// GCC any, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-16
+#if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)) || \
+    (defined(__clang__) && !defined(__apple_build_version__) && (__clang_major__ < 8)) || \
+    (defined(__clang__) && defined(__ANDROID__) && (__clang_major__ == 8) && (__clang_minor__ == 0) && (__clang_patchlevel__ < 7)) || \
+    (defined(__clang__) && defined(__apple_build_version__) && (__apple_build_version__ < 11000000)) || \
+    (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
+
+static XNN_INTRINSIC
+__m128i _mm_loadu_si32(const void* address) {
+  return _mm_cvtsi32_si128(*((const int*) address));
+}
+
+static XNN_INTRINSIC
+void _mm_storeu_si32(const void* address, __m128i v) {
+  *((int*) address) = _mm_cvtsi128_si32(v);
+}
+#endif  // GCC any, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-16
+#endif  // SSE2
+
 #ifdef __AVX512F__
 #include <immintrin.h>
 
@@ -23,7 +45,7 @@ __mmask16 _cvtu32_mask16(unsigned int mask) {
   return (__mmask16) mask;
 }
 
-#endif  // GCC pre-7, Clang pre-8, Apple Clang pre-10, and ICC pre-18
+#endif  // GCC pre-7, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-18
 
 // GCC pre-7, Clang pre-4, and ICC pre-18
 #if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 7)) || \

@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/igemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2(
