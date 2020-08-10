@@ -75,6 +75,10 @@ bool CheckAVX2(benchmark::State& state);
 // If AVX512F is unsupported, report error in benchmark state, and return false.
 bool CheckAVX512F(benchmark::State& state);
 
+// Check if x86 SKX-level AVX512 extensions (AVX512F, AVX512CD, AVX512BW, AVX512DQ, and AVX512VL) are supported.
+// If SKX-level AVX512 extensions are unsupported, report error in benchmark state, and return false.
+bool CheckAVX512SKX(benchmark::State& state);
+
 template <class T>
 inline T DivideRoundUp(T x, T q) {
   return x / q + T(x % q != 0);

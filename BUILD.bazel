@@ -2416,6 +2416,17 @@ AVX512F_UKERNELS = [
     "src/math/sqrt-avx512f-nr1fma1adj.c",
 ]
 
+AVX512SKX_UKERNELS = [
+    "src/qs8-gemm/gen/1x16c8-minmax-avx512skx.c",
+    "src/qs8-gemm/gen/2x16c8-minmax-avx512skx.c",
+    "src/qs8-gemm/gen/3x16c8-minmax-avx512skx.c",
+    "src/qs8-gemm/gen/4x16c8-minmax-avx512skx.c",
+    "src/qs8-igemm/gen/1x16c8-minmax-avx512skx.c",
+    "src/qs8-igemm/gen/2x16c8-minmax-avx512skx.c",
+    "src/qs8-igemm/gen/3x16c8-minmax-avx512skx.c",
+    "src/qs8-igemm/gen/4x16c8-minmax-avx512skx.c",
+]
+
 AARCH32_ASM_UKERNELS = [
     "src/f32-gemm/4x4-aarch32-vfp-ld64.S",
     "src/f32-gemm/4x4-minmax-aarch32-vfp-ld64.S",
@@ -3257,6 +3268,58 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "avx512skx_ukernels",
+    hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = [
+        "-mavx512f",
+        "-mavx512cd",
+        "-mavx512bw",
+        "-mavx512dq",
+        "-mavx512vl",
+    ],
+    mingw_copts = ["-fno-asynchronous-unwind-tables"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX512"],
+    msvc_x86_64_copts = ["/arch:AVX512"],
+    msys_copts = ["-fno-asynchronous-unwind-tables"],
+    x86_srcs = AVX512SKX_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "avx512skx_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = [
+        "-mavx512f",
+        "-mavx512cd",
+        "-mavx512bw",
+        "-mavx512dq",
+        "-mavx512vl",
+    ],
+    mingw_copts = ["-fno-asynchronous-unwind-tables"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX512"],
+    msvc_x86_64_copts = ["/arch:AVX512"],
+    msys_copts = ["-fno-asynchronous-unwind-tables"],
+    x86_srcs = AVX512SKX_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "asm_ukernels",
     hdrs = ["src/xnnpack/assembly.h"],
     aarch32_srcs = AARCH32_ASM_UKERNELS,
@@ -3322,6 +3385,7 @@ xnnpack_aggregate_library(
         ":fma3_ukernels",
         ":avx2_ukernels",
         ":avx512f_ukernels",
+        ":avx512skx_ukernels",
     ],
 )
 
@@ -3362,6 +3426,7 @@ xnnpack_aggregate_library(
         ":fma3_ukernels_test_mode",
         ":avx2_ukernels_test_mode",
         ":avx512f_ukernels_test_mode",
+        ":avx512skx_ukernels_test_mode",
     ],
 )
 
@@ -3404,6 +3469,7 @@ xnnpack_aggregate_library(
         ":fma3_ukernels",
         ":avx2_ukernels",
         ":avx512f_ukernels",
+        ":avx512skx_ukernels",
     ],
 )
 

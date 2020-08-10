@@ -45,6 +45,11 @@ __mmask16 _cvtu32_mask16(unsigned int mask) {
   return (__mmask16) mask;
 }
 
+static XNN_INTRINSIC
+__mmask64 _cvtu64_mask64(unsigned long long mask) {
+  return (__mmask64) mask;
+}
+
 #endif  // GCC pre-7, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-18
 
 // GCC pre-7, Clang pre-4, and ICC pre-18

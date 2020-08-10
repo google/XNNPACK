@@ -253,5 +253,16 @@ bool CheckAVX512F(benchmark::State& state) {
   return true;
 }
 
+bool CheckAVX512SKX(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx512f() ||
+      !cpuinfo_has_x86_avx512cd() || !cpuinfo_has_x86_avx512bw() ||
+      !cpuinfo_has_x86_avx512dq() || !cpuinfo_has_x86_avx512vl())
+  {
+    state.SkipWithError("no AVX512 SKX extensions");
+    return false;
+  }
+  return true;
+}
+
 }  // namespace utils
 }  // namespace benchmark

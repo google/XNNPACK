@@ -87,6 +87,13 @@
     } \
   } while (0)
 
+#define TEST_REQUIRES_X86_AVX512SKX \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx512f() || !cpuinfo_has_x86_avx512cd() || !cpuinfo_has_x86_avx512dq() || !cpuinfo_has_x86_avx512bw() || !cpuinfo_has_x86_avx512vl()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
+
 #define TEST_REQUIRES_ARM_NEON \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon()) { \
