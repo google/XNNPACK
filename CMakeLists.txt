@@ -1361,6 +1361,10 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/qs8-requantization/fp32-sse2.c
   src/qs8-requantization/precise-sse2.c
   src/qs8-requantization/q31-sse2.c
+  src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x8.c
+  src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x16.c
+  src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x24.c
+  src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x32.c
   src/qu8-avgpool/9p8x-minmax-sse2-c8.c
   src/qu8-avgpool/9x-minmax-sse2-c8.c
   src/qu8-igemm/4x4c2-minmax-sse2.c
@@ -1489,6 +1493,10 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/qs8-requantization/fp32-sse4.c
   src/qs8-requantization/precise-sse4.c
   src/qs8-requantization/q31-sse4.c
+  src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x8.c
+  src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x16.c
+  src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x24.c
+  src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x32.c
   src/qu8-requantization/precise-sse4.c
   src/qu8-requantization/q31-sse4.c
   src/math/roundne-sse41.c

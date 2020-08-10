@@ -19,6 +19,10 @@ import xnncommon
 
 parser = argparse.ArgumentParser(
   description='Vector binary operation microkernel test generator')
+parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
+                    choices=["VAddMicrokernelTester",
+                    "VBinOpMicrokernelTester", "VBinOpCMicrokernelTester"],
+                    help="Tester class to be used in the generated test")
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Specification (YAML) file")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
@@ -27,7 +31,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_v(add|div|max|min|mul|sqrdiff|sub|addc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu))?_ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(qs8|f16|f32)_v(add|div|max|min|mul|sqrdiff|sub|addc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu))?_ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
@@ -171,13 +175,14 @@ $if ACTIVATION_TYPE == "MINMAX":
 """
 
 
-def generate_test_cases(ukernel, op_type, activation_type, batch_tile, isa):
+def generate_test_cases(ukernel, op_type, activation_type, tester, batch_tile, isa):
   """Generates all tests cases for a Vector Binary Operation micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     op_type: Operation type (ADD/MUL/SUB/etc).
     activation_type: Activation type (LINEAR/MINMAX/RELU).
+    tester: C++ name of the tester class.
     batch_tile: Number of batch elements processed per one iteration of the
                 inner loop of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
@@ -188,11 +193,9 @@ def generate_test_cases(ukernel, op_type, activation_type, batch_tile, isa):
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
-  tester = "VBinOp%sMicrokernelTester" % ("C" if op_type.endswith("C") else "")
-  test_args = [
-    ukernel,
-    "%s::OpType::%s" % (tester, op_type),
-  ]
+  test_args = [ukernel]
+  if tester in ["VBinOpMicrokernelTester", "VBinOpCMicrokernelTester"]:
+    test_args.append("%s::OpType::%s" % (tester, op_type))
   if not isa or isa == "psimd":
     test_args.append("%s::Variant::Scalar" % tester)
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
@@ -216,11 +219,16 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     spec_name = os.path.splitext(os.path.split(options.spec)[1])[0]
-    opname = spec_name.split("-")[1]
-    if opname.endswith("c"):
-      header = "vbinaryc-microkernel-tester.h"
-    else:
-      header = "vbinary-microkernel-tester.h"
+    microkernel_header = {
+      "VAddMicrokernelTester": "xnnpack/vadd.h",
+      "VBinOpMicrokernelTester": "xnnpack/vbinary.h",
+      "VBinOpCMicrokernelTester": "xnnpack/vbinary.h",
+    }[options.tester]
+    tester_header = {
+      "VAddMicrokernelTester": "vadd-microkernel-tester.h",
+      "VBinOpMicrokernelTester": "vbinary-microkernel-tester.h",
+      "VBinOpCMicrokernelTester": "vbinaryc-microkernel-tester.h",
+    }[options.tester]
     tests = """\
 // Copyright 2019 Google LLC
 //
@@ -237,9 +245,10 @@ def main(args):
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
-#include <xnnpack/vbinary.h>
-#include "{header}"
-""".format(specification=options.spec, generator=sys.argv[0], header=header)
+#include <{microkernel_header}>
+#include "{tester_header}"
+""".format(specification=options.spec, generator=sys.argv[0],
+           microkernel_header=microkernel_header, tester_header=tester_header)
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
@@ -249,7 +258,7 @@ def main(args):
       arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(name, op_type, activation_type,
-                                      batch_tile, isa)
+                                      options.tester, batch_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     with codecs.open(options.output, "w", encoding="utf-8") as output_file:

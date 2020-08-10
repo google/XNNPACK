@@ -1137,7 +1137,7 @@ static inline union xnn_qu8_add_params xnn_init_qu8_add_params(
   assert(b_output_scale < 0x1.0p+8f);
 
   // Compute requantization parameters.
-  const float max_output_scale = a_output_scale > b_output_scale ? a_output_scale : b_output_scale;
+  const float max_output_scale = math_max_f32(a_output_scale, b_output_scale);
   assert(max_output_scale >= 0x1.0p-14f);
   assert(max_output_scale < 0x1.0p+8f);
   const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
@@ -1226,7 +1226,7 @@ static inline union xnn_qu8_add_params xnn_init_scalar_qu8_add_params(
   assert(b_output_scale < 0x1.0p+8f);
 
   // Compute requantization parameters.
-  const float max_output_scale = a_output_scale > b_output_scale ? a_output_scale : b_output_scale;
+  const float max_output_scale = math_max_f32(a_output_scale, b_output_scale);
   assert(max_output_scale >= 0x1.0p-10f);
   assert(max_output_scale < 0x1.0p+8f);
   const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
@@ -1256,6 +1256,143 @@ static inline union xnn_qu8_add_params xnn_init_scalar_qu8_add_params(
   params.scalar.y_zero_point = (int32_t) (uint32_t) output_zero_point;
   params.scalar.y_min = (int32_t) (uint32_t) output_min;
   params.scalar.y_max = (int32_t) (uint32_t) output_max;
+  return params;
+}
+
+static inline union xnn_qs8_add_params xnn_init_qs8_add_params(
+  int8_t x_zero_point,
+  int8_t y_zero_point,
+  int8_t output_zero_point,
+  float x_output_scale,
+  float y_output_scale,
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(x_output_scale >= 0x1.0p-14f);
+  assert(y_output_scale >= 0x1.0p-14f);
+  assert(x_output_scale < 0x1.0p+8f);
+  assert(y_output_scale < 0x1.0p+8f);
+
+  // Compute requantization parameters.
+  const float max_output_scale = math_max_f32(x_output_scale, y_output_scale);
+  assert(max_output_scale >= 0x1.0p-14f);
+  assert(max_output_scale < 0x1.0p+8f);
+  const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
+  const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
+  // Shift is in [13, 31] range.
+  const uint32_t shift = (uint32_t) (21 - max_scale_exponent);
+  assert(shift < 32);
+  assert(shift >= 13);
+
+  const float scale_multiplier = fp32_from_bits((uint32_t) (21 - max_scale_exponent + 127) << 23);
+
+  // Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range.
+  const int32_t x_multiplier = (int32_t) lrintf(x_output_scale * scale_multiplier);
+  const int32_t y_multiplier = (int32_t) lrintf(y_output_scale * scale_multiplier);
+  assert((x_multiplier > y_multiplier ? x_multiplier : y_multiplier) >= INT32_C(0x00200000));
+  assert(x_multiplier < INT32_C(0x00400000));
+  assert(y_multiplier < INT32_C(0x00400000));
+
+  union xnn_qs8_add_params params;
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
+    const int32_t remainder_threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
+    const int32_t zero_point_product =
+      (int32_t) -(x_multiplier * (int32_t) x_zero_point + y_multiplier * (int32_t) y_zero_point);
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse2.zero_point_product[i] = zero_point_product;
+    }
+    const uint16_t x_multiplier_lo = (uint16_t) x_multiplier;
+    const uint16_t x_multiplier_hi = (uint16_t) ((uint32_t) x_multiplier >> 16);
+    const uint16_t y_multiplier_lo = (uint16_t) y_multiplier;
+    const uint16_t y_multiplier_hi = (uint16_t) ((uint32_t) y_multiplier >> 16);
+    for (uint32_t i = 0; i < 8; i++) {
+      params.sse2.x_multiplier_lo[i] = x_multiplier_lo;
+      params.sse2.x_multiplier_hi[i] = x_multiplier_hi;
+      params.sse2.y_multiplier_lo[i] = y_multiplier_lo;
+      params.sse2.y_multiplier_hi[i] = y_multiplier_hi;
+    }
+    params.sse2.shift = shift;
+    for (uint32_t i = 0; i < 4; i++) {
+      params.sse2.remainder_mask[i] = remainder_mask;
+      params.sse2.remainder_threshold[i] = remainder_threshold;
+    }
+    for (uint32_t i = 0; i < 8; i++) {
+      params.sse2.output_zero_point[i] = (int16_t) output_zero_point;
+      params.sse2.output_min[i] = (int16_t) output_min;
+      params.sse2.output_max[i] = (int16_t) output_max;
+    }
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
+    params.neon.x_zero_point = x_zero_point;
+    params.neon.y_zero_point = y_zero_point;
+    params.neon.output_zero_point = (int16_t) output_zero_point;
+    params.neon.x_multiplier = (int32_t) x_multiplier;
+    params.neon.y_multiplier = (int32_t) y_multiplier;
+    params.neon.right_shift = (int32_t) -shift;
+    params.neon.output_min = output_min;
+    params.neon.output_max = output_max;
+  #else
+    const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
+    const int32_t remainder_threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
+    params.scalar.zero_point_product =
+      (int32_t) -(x_multiplier * (int32_t) x_zero_point + y_multiplier * (int32_t) y_zero_point);
+    params.scalar.x_multiplier = x_multiplier;
+    params.scalar.y_multiplier = y_multiplier;
+    params.scalar.remainder_mask = (int32_t) remainder_mask;
+    params.scalar.remainder_threshold = (int32_t) remainder_threshold;
+    params.scalar.shift = shift;
+    params.scalar.output_zero_point = (int32_t) output_zero_point;
+    params.scalar.output_min = (int32_t) output_min;
+    params.scalar.output_max = (int32_t) output_max;
+  #endif
+  return params;
+}
+
+static inline union xnn_qs8_add_params xnn_init_scalar_qs8_add_params(
+  int8_t x_zero_point,
+  int8_t y_zero_point,
+  int8_t output_zero_point,
+  float x_output_scale,
+  float y_output_scale,
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(x_output_scale >= 0x1.0p-10f);
+  assert(y_output_scale >= 0x1.0p-10f);
+  assert(x_output_scale < 0x1.0p+8f);
+  assert(y_output_scale < 0x1.0p+8f);
+
+  // Compute requantization parameters.
+  const float max_output_scale = math_max_f32(x_output_scale, y_output_scale);
+  assert(max_output_scale >= 0x1.0p-10f);
+  assert(max_output_scale < 0x1.0p+8f);
+  const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
+  const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
+  // Shift is in [13, 31] range.
+  const uint32_t shift = (uint32_t) (21 - max_scale_exponent);
+  assert(shift < 32);
+  assert(shift >= 13);
+
+  // Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range.
+  const int32_t x_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(x_output_scale) + (shift << 23)));
+  const int32_t y_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(y_output_scale) + (shift << 23)));
+  assert((x_multiplier > y_multiplier ? x_multiplier : y_multiplier) >= INT32_C(0x00200000));
+  assert(x_multiplier < INT32_C(0x00400000));
+  assert(y_multiplier < INT32_C(0x00400000));
+
+  union xnn_qs8_add_params params;
+  const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
+  const int32_t remainder_threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
+  params.scalar.zero_point_product =
+    (int32_t) -(x_multiplier * (int32_t) x_zero_point + y_multiplier * (int32_t) y_zero_point);
+  params.scalar.x_multiplier = x_multiplier;
+  params.scalar.y_multiplier = y_multiplier;
+  params.scalar.remainder_mask = (int32_t) remainder_mask;
+  params.scalar.remainder_threshold = (int32_t) remainder_threshold;
+  params.scalar.shift = shift;
+  params.scalar.output_zero_point = (int32_t) output_zero_point;
+  params.scalar.output_min = (int32_t) output_min;
+  params.scalar.output_max = (int32_t) output_max;
   return params;
 }
 

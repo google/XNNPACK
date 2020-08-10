@@ -30,7 +30,6 @@ void xnn_f32_vmulc_minmax_ukernel__wasmsimd_x86_x8(
 
   const v128_t vy_min = wasm_v32x4_load_splat(&params->scalar.min);
   const v128_t vy_max = wasm_v32x4_load_splat(&params->scalar.max);
-
   const v128_t vb = wasm_v32x4_load_splat(b);
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const v128_t va0123 = wasm_v128_load(a);

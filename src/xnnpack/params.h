@@ -395,6 +395,47 @@ union xnn_qu8_add_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+union xnn_qs8_add_params {
+  struct {
+    int32_t zero_point_product;
+    int32_t x_multiplier;
+    int32_t y_multiplier;
+    uint32_t shift;
+    int32_t remainder_mask;
+    int32_t remainder_threshold;
+    int32_t output_zero_point;
+    int32_t output_min;
+    int32_t output_max;
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    uint8_t x_zero_point;
+    uint8_t y_zero_point;
+    int16_t output_zero_point;
+    int32_t x_multiplier;
+    int32_t y_multiplier;
+    int32_t right_shift;
+    uint8_t output_min;
+    uint8_t output_max;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int32_t zero_point_product[4];
+    XNN_ALIGN(16) uint16_t x_multiplier_lo[8];
+    XNN_ALIGN(16) uint16_t x_multiplier_hi[8];
+    XNN_ALIGN(16) uint16_t y_multiplier_lo[8];
+    XNN_ALIGN(16) uint16_t y_multiplier_hi[8];
+    XNN_ALIGN(16) int32_t remainder_mask[4];
+    XNN_ALIGN(16) int32_t remainder_threshold[4];
+    uint32_t shift;
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int16_t output_min[8];
+    XNN_ALIGN(16) int16_t output_max[8];
+  } sse2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_qu8_avgpool_params {
   struct {
     int32_t bias;
@@ -1459,10 +1500,17 @@ typedef void (*xnn_vadd_ukernel_function)(
 
 typedef void (*xnn_qu8_vadd_minmax_ukernel_function)(
     size_t n,
-    const uint8_t* a,
-    const uint8_t* b,
-    uint8_t* y,
+    const uint8_t* input_x,
+    const uint8_t* input_y,
+    uint8_t* output,
     const union xnn_qu8_add_params* params);
+
+typedef void (*xnn_qs8_vadd_minmax_ukernel_function)(
+    size_t n,
+    const int8_t* input_x,
+    const int8_t* input_y,
+    int8_t* output,
+    const union xnn_qs8_add_params* params);
 
 typedef void (*xnn_f32_vsqrt_ukernel_function)(
     size_t n,

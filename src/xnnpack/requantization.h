@@ -218,3 +218,27 @@ static inline uint8_t xnn_qu8_quantize_add(
   }
   return (uint8_t) y;
 }
+
+static inline int8_t xnn_qs8_quantize_add(
+  int8_t x, int8_t y,
+  union xnn_qs8_add_params params)
+{
+  // Multiply by factors and accumulate products.
+  int32_t acc = params.scalar.zero_point_product +
+    (int32_t) ((int32_t) x * params.scalar.x_multiplier) +
+    (int32_t) ((int32_t) y * params.scalar.y_multiplier);
+
+  // Shift right and round.
+  const int32_t rem = (acc & params.scalar.remainder_mask) - (int32_t) (acc < 0);
+  acc = asr_s32(acc, params.scalar.shift) + (int32_t) (rem > params.scalar.remainder_threshold);
+
+  // Clamp and add output zero point.
+  int32_t out = acc + params.scalar.output_zero_point;
+  if (out >= params.scalar.output_max) {
+    out = params.scalar.output_max;
+  }
+  if (out <= params.scalar.output_min) {
+    out = params.scalar.output_min;
+  }
+  return (int8_t) out;
+}
