@@ -290,6 +290,11 @@ DECLARE_QU8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_dwconv_minmax_ukernel
     const int8_t* zero,                                             \
     const union xnn_qs8_gemm_params* params);
 
+DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up8x9__neon_mul16)
+DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up16x9__neon_mul16)
+DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up24x9__neon_mul16)
+DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up32x9__neon_mul16)
+
 DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up8x9__sse2_mul16)
 DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up16x9__sse2_mul16)
 DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up24x9__sse2_mul16)

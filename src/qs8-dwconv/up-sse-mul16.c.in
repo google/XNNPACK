@@ -41,7 +41,7 @@ void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul1
     input = (const int8_t**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;
-    const int8_t* w = weights;
+    const void* w = weights;
     for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
       __m128i vacc${ABC[0:4]} = _mm_loadu_si128((const __m128i*) w);
       $for C in range(4, CHANNEL_TILE, 4):

@@ -2,6 +2,10 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+- name: xnn_qs8_dwconv_minmax_ukernel_up8x9__neon_mul16
+- name: xnn_qs8_dwconv_minmax_ukernel_up16x9__neon_mul16
+- name: xnn_qs8_dwconv_minmax_ukernel_up24x9__neon_mul16
+- name: xnn_qs8_dwconv_minmax_ukernel_up32x9__neon_mul16
 - name: xnn_qs8_dwconv_minmax_ukernel_up8x9__sse2_mul16
 - name: xnn_qs8_dwconv_minmax_ukernel_up16x9__sse2_mul16
 - name: xnn_qs8_dwconv_minmax_ukernel_up24x9__sse2_mul16

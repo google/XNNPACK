@@ -41,7 +41,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__wasmsimd_c${CH
   $else:
     const size_t input_increment = ${ROW_TILE} * input_stride - round_up_po2(channels, 8);
 
-  const v128_t vbias = wasm_v128_load((const v128_t*) params->wasmsimd.bias);
+  const v128_t vbias = wasm_v128_load(params->wasmsimd.bias);
   int32_t* b = buffer;
   size_t c = channels;
   for (; ${"c >= %d" % CHANNEL_TILE if CHANNEL_TILE > 16 else "c != 0"}; ${("c -= %d" if CHANNEL_TILE > 16 else "c = doz(c, %d)") % CHANNEL_TILE}) {
@@ -82,7 +82,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__wasmsimd_c${CH
     if XNN_UNLIKELY(c != 0) {
       do {
         $for M in range(ROW_TILE):
-          const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load_8x8((const v128_t*) i${M});
+          const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load_8x8(i${M});
           i${M} += 8;
 
         $for A in range(ACCUMULATORS):
@@ -330,11 +330,11 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__wasmsimd_c${CH
       const v128_t vout${ABC[0:4]} = wasm_i32x4_sub(wasm_v128_xor(vabsout${ABC[0:4]}, vsgnacc${ABC[0:4]}), vsgnacc${ABC[0:4]});
       const v128_t vout${ABC[4:8]} = wasm_i32x4_sub(wasm_v128_xor(vabsout${ABC[4:8]}, vsgnacc${ABC[4:8]}), vsgnacc${ABC[4:8]});
 
-      const v128_t voutput_zero_point = wasm_v128_load((const v128_t*) params->wasmsimd.output_zero_point);
+      const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
       const v128_t vout${ABC[0:8]} = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vout${ABC[0:4]}, vout${ABC[4:8]}), voutput_zero_point);
 
-      const v128_t voutput_min = wasm_v128_load((const v128_t*) params->wasmsimd.output_min);
-      const v128_t voutput_max = wasm_v128_load((const v128_t*) params->wasmsimd.output_max);
+      const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
+      const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
       v128_t vout${ABC[0:8]}${ABC[0:8]} = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout${ABC[0:8]}, vout${ABC[0:8]}), voutput_min), voutput_max);
 
       $if CHANNEL_TILE > 8:

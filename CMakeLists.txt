@@ -760,6 +760,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-vunary/gen/vneg-neon-x8.c
   src/f32-vunary/gen/vsqr-neon-x4.c
   src/f32-vunary/gen/vsqr-neon-x8.c
+  src/qs8-dwconv/gen/up8x9-minmax-wasmsimd-mul16.c
+  src/qs8-dwconv/gen/up16x9-minmax-wasmsimd-mul16.c
+  src/qs8-dwconv/gen/up24x9-minmax-wasmsimd-mul16.c
+  src/qs8-dwconv/gen/up32x9-minmax-wasmsimd-mul16.c
   src/qs8-gemm/gen/1x8-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/4x8-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/1x16-minmax-neon-mlal-lane.c

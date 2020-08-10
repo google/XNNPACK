@@ -78,7 +78,7 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__avx2_mul32(
     input = (const int8_t**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;
-    const int8_t* w = weights;
+    const void* w = weights;
     for (; c >= 8; c -= 8) {
       __m256i vacc01234567 = _mm256_loadu_si256((const __m256i*) w);
 

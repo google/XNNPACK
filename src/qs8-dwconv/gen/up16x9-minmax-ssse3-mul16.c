@@ -78,7 +78,7 @@ void xnn_qs8_dwconv_minmax_ukernel_up16x9__ssse3_mul16(
     input = (const int8_t**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;
-    const int8_t* w = weights;
+    const void* w = weights;
     for (; c >= 16; c -= 16) {
       __m128i vacc0123 = _mm_loadu_si128((const __m128i*) w);
       __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 4 * sizeof(int32_t)));

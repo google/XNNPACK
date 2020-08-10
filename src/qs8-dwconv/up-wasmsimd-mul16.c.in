@@ -39,7 +39,7 @@ void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wasmsimd_mu
     input = (const int8_t**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;
-    const int8_t* w = weights;
+    const void* w = weights;
     for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
       v128_t vacc${ABC[0:4]} = wasm_v128_load(w);
       $for C in range(4, CHANNEL_TILE, 4):
@@ -120,14 +120,14 @@ void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wasmsimd_mu
 
         $for K in range(KERNEL_TILE):
 
-          const v128_t vi${K}x${ABC[0:8]} = wasm_i16x8_load_8x8((const v128_t*) i${K});
+          const v128_t vi${K}x${ABC[0:8]} = wasm_i16x8_load_8x8(i${K});
           $if CHANNEL_TILE > 8:
             $if K == 0:
-              const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8((const v128_t*) k);
+              const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8(k);
             $else:
-              const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8((const v128_t*) (k + ${K * CHANNEL_TILE}));
+              const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8((const void*) (k + ${K * CHANNEL_TILE}));
           $else:
-            const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8((const v128_t*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE} * sizeof(int8_t)));
+            const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE} * sizeof(int8_t)));
           $if CHANNEL_TILE > 8:
             i${K} += 8;
 
