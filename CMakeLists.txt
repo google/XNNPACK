@@ -1377,6 +1377,10 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x16.c
   src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x24.c
   src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x32.c
+  src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x8.c
+  src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x16.c
+  src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x24.c
+  src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x32.c
   src/qu8-avgpool/9p8x-minmax-sse2-c8.c
   src/qu8-avgpool/9x-minmax-sse2-c8.c
   src/qu8-igemm/4x4c2-minmax-sse2.c
@@ -1509,6 +1513,10 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x16.c
   src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x24.c
   src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x32.c
+  src/qs8-vaddc/gen/minmax-sse41-mul16-ld64-x8.c
+  src/qs8-vaddc/gen/minmax-sse41-mul16-ld64-x16.c
+  src/qs8-vaddc/gen/minmax-sse41-mul16-ld64-x24.c
+  src/qs8-vaddc/gen/minmax-sse41-mul16-ld64-x32.c
   src/qu8-requantization/precise-sse4.c
   src/qu8-requantization/q31-sse4.c
   src/math/roundne-sse41.c
@@ -3636,6 +3644,24 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(qs8-igemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qs8-igemm-minmax-test qs8-igemm-minmax-test)
+
+  ADD_EXECUTABLE(qs8-vadd-minmax-test test/qs8-vadd-minmax.cc)
+  SET_TARGET_PROPERTIES(qs8-vadd-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-vadd-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-vadd-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-vadd-minmax-test qs8-vadd-minmax-test)
+
+  ADD_EXECUTABLE(qs8-vaddc-minmax-test test/qs8-vaddc-minmax.cc)
+  SET_TARGET_PROPERTIES(qs8-vaddc-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-vaddc-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-vaddc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-vaddc-minmax-test qs8-vaddc-minmax-test)
 
   ADD_EXECUTABLE(qu8-avgpool-minmax-test test/qu8-avgpool-minmax.cc)
   SET_TARGET_PROPERTIES(qu8-avgpool-minmax-test PROPERTIES

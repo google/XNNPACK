@@ -1313,6 +1313,7 @@ static inline union xnn_qs8_add_params xnn_init_qs8_add_params(
       params.sse2.y_multiplier_hi[i] = y_multiplier_hi;
     }
     params.sse2.shift = shift;
+    params.sse2.y_multiplier = y_multiplier;
     for (uint32_t i = 0; i < 4; i++) {
       params.sse2.remainder_mask[i] = remainder_mask;
       params.sse2.remainder_threshold[i] = remainder_threshold;

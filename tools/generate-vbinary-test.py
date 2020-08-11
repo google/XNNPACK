@@ -20,7 +20,7 @@ import xnncommon
 parser = argparse.ArgumentParser(
   description='Vector binary operation microkernel test generator')
 parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
-                    choices=["VAddMicrokernelTester",
+                    choices=["VAddMicrokernelTester", "VAddCMicrokernelTester",
                     "VBinOpMicrokernelTester", "VBinOpCMicrokernelTester"],
                     help="Tester class to be used in the generated test")
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
@@ -104,7 +104,7 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   }
 }
 
-$if TESTER == "VBinOpCMicrokernelTester":
+$if TESTER in ["VAddCMicrokernelTester", "VBinOpCMicrokernelTester"]:
   TEST(${TEST_NAME}, inplace) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -221,11 +221,13 @@ def main(args):
     spec_name = os.path.splitext(os.path.split(options.spec)[1])[0]
     microkernel_header = {
       "VAddMicrokernelTester": "xnnpack/vadd.h",
+      "VAddCMicrokernelTester": "xnnpack/vadd.h",
       "VBinOpMicrokernelTester": "xnnpack/vbinary.h",
       "VBinOpCMicrokernelTester": "xnnpack/vbinary.h",
     }[options.tester]
     tester_header = {
       "VAddMicrokernelTester": "vadd-microkernel-tester.h",
+      "VAddCMicrokernelTester": "vaddc-microkernel-tester.h",
       "VBinOpMicrokernelTester": "vbinary-microkernel-tester.h",
       "VBinOpCMicrokernelTester": "vbinaryc-microkernel-tester.h",
     }[options.tester]
