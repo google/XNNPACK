@@ -689,3 +689,29 @@ TEST(F32_RELU__SCALAR_X4, inplace) {
     }
   }
 #endif  // XNN_ARCH_WASMSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+  TEST(F32_RELU__WASM32_SHR_X1, batch_eq_1) {
+    VUnOpMicrokernelTester()
+      .batch_size(1)
+      .Test(xnn_f32_vunary_ukernel_function(xnn_f32_relu_ukernel__wasm32_shr_x1), VUnOpMicrokernelTester::OpType::ReLU);
+  }
+
+  TEST(F32_RELU__WASM32_SHR_X1, batch_gt_1) {
+    for (size_t batch_size = 2; batch_size < 10; batch_size++) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_relu_ukernel__wasm32_shr_x1), VUnOpMicrokernelTester::OpType::ReLU);
+    }
+  }
+
+  TEST(F32_RELU__WASM32_SHR_X1, inplace) {
+    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+      VUnOpMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_relu_ukernel__wasm32_shr_x1), VUnOpMicrokernelTester::OpType::ReLU);
+    }
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
