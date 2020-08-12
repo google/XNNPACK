@@ -85,4 +85,37 @@ float _mm512_reduce_max_ps(__m512 v) {
 
 #endif  // GCC pre-7, Clang pre-4, and ICC pre-18
 
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 9)
+static XNN_INTRINSIC
+__m512i _mm512_set_epi8(
+  char e63, char e62, char e61, char e60,
+  char e59, char e58, char e57, char e56,
+  char e55, char e54, char e53, char e52,
+  char e51, char e50, char e49, char e48,
+  char e47, char e46, char e45, char e44,
+  char e43, char e42, char e41, char e40,
+  char e39, char e38, char e37, char e36,
+  char e35, char e34, char e33, char e32,
+  char e31, char e30, char e29, char e28,
+  char e27, char e26, char e25, char e24,
+  char e23, char e22, char e21, char e20,
+  char e19, char e18, char e17, char e16,
+  char e15, char e14, char e13, char e12,
+  char e11, char e10, char e09, char e08,
+  char e07, char e06, char e05, char e04,
+  char e03, char e02, char e01, char e00)
+{
+  return (__m512i) (__v64qi) {
+    e00, e01, e02, e03, e04, e05, e06, e07,
+    e08, e09, e10, e11, e12, e13, e14, e15,
+    e16, e17, e18, e19, e20, e21, e22, e23,
+    e24, e25, e26, e27, e28, e29, e30, e31,
+    e32, e33, e34, e35, e36, e37, e38, e39,
+    e40, e41, e42, e43, e44, e45, e46, e47,
+    e48, e49, e50, e51, e52, e53, e54, e55,
+    e56, e57, e58, e59, e60, e61, e62, e63
+  };
+}
+#endif  // GCC pre-9
+
 #endif  // __AVX512F__
