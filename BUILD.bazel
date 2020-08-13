@@ -1618,6 +1618,12 @@ AARCH64_NEONFP16ARITH_UKERNELS = [
     "src/f16-spmm/gen/32x1-minmax-neonfp16arith-unroll2.c",
 ]
 
+NEONDOT_UKERNELS = [
+    "src/qs8-gemm/gen/8x8c4-minmax-neondot.c",
+    "src/qs8-gemm/gen/12x8c4-minmax-neondot.c",
+    "src/qs8-gemm/gen/4x16c4-minmax-neondot.c",
+]
+
 SSE_UKERNELS = [
     "src/f32-avgpool/9p8x-minmax-sse-c4.c",
     "src/f32-avgpool/9x-minmax-sse-c4.c",
@@ -3005,6 +3011,42 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "neondot_ukernels",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = ["-march=armv8.2-a+dotprod"],
+    aarch32_srcs = NEONDOT_UKERNELS,
+    aarch64_copts = ["-march=armv8.2-a+dotprod"],
+    aarch64_srcs = NEONDOT_UKERNELS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neondot_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = ["-march=armv8.2-a+dotprod"],
+    aarch32_srcs = NEONDOT_UKERNELS,
+    aarch64_copts = ["-march=armv8.2-a+dotprod"],
+    aarch64_srcs = NEONDOT_UKERNELS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "sse2_ukernels",
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -3383,6 +3425,7 @@ xnnpack_aggregate_library(
         ":neon_ukernels",
         ":neonfma_ukernels",
         ":neonv8_ukernels",
+        ":neondot_ukernels",
         ":asm_ukernels",
     ],
     aarch64_deps = [
@@ -3390,6 +3433,7 @@ xnnpack_aggregate_library(
         ":neonfma_ukernels",
         ":neonv8_ukernels",
         ":neonfp16arith_ukernels",
+        ":neondot_ukernels",
         ":asm_ukernels",
     ],
     generic_deps = [
@@ -3424,6 +3468,7 @@ xnnpack_aggregate_library(
         ":neon_ukernels_test_mode",
         ":neonfma_ukernels_test_mode",
         ":neonv8_ukernels_test_mode",
+        ":neondot_ukernels_test_mode",
         ":asm_ukernels",
     ],
     aarch64_deps = [
@@ -3431,6 +3476,7 @@ xnnpack_aggregate_library(
         ":neonfma_ukernels_test_mode",
         ":neonv8_ukernels_test_mode",
         ":neonfp16arith_ukernels_test_mode",
+        ":neondot_ukernels_test_mode",
         ":asm_ukernels",
     ],
     generic_deps = [

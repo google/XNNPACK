@@ -47,6 +47,10 @@ bool CheckNEON(benchmark::State& state);
 // If NEON-FMA is unsupported, report error in benchmark state, and return false.
 bool CheckNEONFMA(benchmark::State& state);
 
+// Check if ARM DOT extension is supported.
+// If DOT is unsupported, report error in benchmark state, and return false.
+bool CheckNEONDOT(benchmark::State& state);
+
 // Check if x86 SSSE3 extension is supported.
 // If SSSE3 is unsupported, report error in benchmark state, and return false.
 bool CheckSSSE3(benchmark::State& state);

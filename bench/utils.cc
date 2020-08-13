@@ -197,6 +197,14 @@ bool CheckNEONFMA(benchmark::State& state) {
   return true;
 }
 
+bool CheckNEONDOT(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_dot()) {
+    state.SkipWithError("no NEON-DOT extension");
+    return false;
+  }
+  return true;
+}
+
 bool CheckSSSE3(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_x86_ssse3()) {
     state.SkipWithError("no SSSE3 extension");

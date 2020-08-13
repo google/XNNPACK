@@ -172,4 +172,9 @@
   k-block: 4
 - name: xnn_qs8_gemm_minmax_ukernel_12x4c4__scalar
   k-block: 4
-
+- name: xnn_qs8_gemm_minmax_ukernel_8x8c4__neondot
+  k-block: 4
+- name: xnn_qs8_gemm_minmax_ukernel_12x8c4__neondot
+  k-block: 4
+- name: xnn_qs8_gemm_minmax_ukernel_4x16c4__neondot
+  k-block: 4

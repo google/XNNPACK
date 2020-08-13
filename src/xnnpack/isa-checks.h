@@ -121,3 +121,10 @@
       GTEST_SKIP(); \
     } \
   } while (0)
+
+#define TEST_REQUIRES_ARM_NEON_DOT \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_dot()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
