@@ -3013,7 +3013,11 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "neondot_ukernels",
     hdrs = INTERNAL_HDRS,
-    aarch32_copts = ["-march=armv8.2-a+dotprod"],
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+dotprod",
+        "-mfpu=neon-fp-armv8",
+    ],
     aarch32_srcs = NEONDOT_UKERNELS,
     aarch64_copts = ["-march=armv8.2-a+dotprod"],
     aarch64_srcs = NEONDOT_UKERNELS,
@@ -3029,7 +3033,11 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "neondot_ukernels_test_mode",
     hdrs = INTERNAL_HDRS,
-    aarch32_copts = ["-march=armv8.2-a+dotprod"],
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+dotprod",
+        "-mfpu=neon-fp-armv8",
+    ],
     aarch32_srcs = NEONDOT_UKERNELS,
     aarch64_copts = ["-march=armv8.2-a+dotprod"],
     aarch64_srcs = NEONDOT_UKERNELS,
