@@ -4036,7 +4036,7 @@
 #endif  // XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM32 || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_PRELU__WASM_2X1, channels_eq_1) {
     PReLUMicrokernelTester()
       .rows(2)
@@ -4124,10 +4124,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM32 || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM32 || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
   TEST(F32_PRELU__WASM_2X4, channels_eq_4) {
     PReLUMicrokernelTester()
       .rows(2)
@@ -4233,7 +4233,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM32 || XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 
 TEST(F32_PRELU__SCALAR_2X1, channels_eq_1) {
