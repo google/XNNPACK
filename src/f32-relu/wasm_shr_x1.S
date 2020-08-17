@@ -65,7 +65,7 @@ xnn_f32_relu_ukernel__wasm32_shr_x1:
 
       local.get    0
       i32.const    0       # count > 0
-      i32.gt_u
+      i32.gt_s
       br_if        0       # loop
 
     end_loop

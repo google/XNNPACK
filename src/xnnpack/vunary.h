@@ -503,6 +503,8 @@ DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__scalar_x1)
 DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__scalar_x2)
 DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__scalar_x4)
 DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasm32_shr_x1)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasm32_shr_x2)
+DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasm32_shr_x4)
 
 #ifdef __cplusplus
 }  // extern "C"
