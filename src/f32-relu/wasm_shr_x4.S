@@ -3,12 +3,13 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+#include <xnnpack/assembly.h>
+
 # void xnn_f32_relu_ukernel__wasm32_shr_x4(
 #     size_t n,             0
 #     const float* x,       1
 #     float* y,             2
 #     const union params)   3 unused
-
 
 # locals
 #     float value0          4
@@ -20,13 +21,7 @@
 #     float mask2           10
 #     float mask3           11
 
-    .text
-    .section    .text.xnn_f32_relu_ukernel__wasm32_shr_x4,"",@
-    .hidden     xnn_f32_relu_ukernel__wasm32_shr_x4
-    .globl      xnn_f32_relu_ukernel__wasm32_shr_x4
-    .type       xnn_f32_relu_ukernel__wasm32_shr_x4,@function
-
-xnn_f32_relu_ukernel__wasm32_shr_x4:
+BEGIN_FUNCTION  xnn_f32_relu_ukernel__wasm32_shr_x4
     .functype   xnn_f32_relu_ukernel__wasm32_shr_x4 (i32, i32, i32, i32) -> ()
     .local      i32, i32, i32, i32, i32, i32, i32, i32
 
@@ -183,6 +178,4 @@ xnn_f32_relu_ukernel__wasm32_shr_x4:
         br_if        0       # loop
       end_loop
     end_if
-
-    end_function
-
+END_FUNCTION xnn_f32_relu_ukernel__wasm32_shr_x4
