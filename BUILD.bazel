@@ -505,9 +505,6 @@ WASM_UKERNELS = [
     "src/f32-relu/gen/wasm-x1.c",
     "src/f32-relu/gen/wasm-x2.c",
     "src/f32-relu/gen/wasm-x4.c",
-    "src/f32-relu/wasm_shr_x1.S",
-    "src/f32-relu/wasm_shr_x2.S",
-    "src/f32-relu/wasm_shr_x4.S",
     "src/f32-vbinary/gen/vadd-minmax-wasm-x1.c",
     "src/f32-vbinary/gen/vadd-minmax-wasm-x2.c",
     "src/f32-vbinary/gen/vadd-minmax-wasm-x4.c",
@@ -2467,6 +2464,12 @@ AVX512SKX_UKERNELS = [
     "src/qs8-igemm/gen/4x16c8-minmax-avx512skx.c",
 ]
 
+WASM32_ASM_UKERNELS = [
+    "src/f32-relu/wasm_shr_x1.S",
+    "src/f32-relu/wasm_shr_x2.S",
+    "src/f32-relu/wasm_shr_x4.S",
+]
+
 AARCH32_ASM_UKERNELS = [
     "src/f32-gemm/4x4-aarch32-vfp-ld64.S",
     "src/f32-gemm/4x4-minmax-aarch32-vfp-ld64.S",
@@ -3409,6 +3412,8 @@ xnnpack_cc_library(
     aarch32_srcs = AARCH32_ASM_UKERNELS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = AARCH64_ASM_UKERNELS,
+    wasm_srcs = WASM32_ASM_UKERNELS,
+    wasmsimd_srcs = WASM32_ASM_UKERNELS,
 )
 
 xnnpack_cc_library(
@@ -3458,9 +3463,11 @@ xnnpack_aggregate_library(
     ],
     wasm_deps = [
         ":wasm_ukernels",
+        ":asm_ukernels",
     ],
     wasmsimd_deps = [
         ":wasm_ukernels",
+        ":asm_ukernels",
     ],
     x86_deps = [
         ":sse2_ukernels",
@@ -3501,9 +3508,11 @@ xnnpack_aggregate_library(
     ],
     wasm_deps = [
         ":wasm_ukernels_test_mode",
+        ":asm_ukernels",
     ],
     wasmsimd_deps = [
         ":wasm_ukernels_test_mode",
+        ":asm_ukernels",
     ],
     x86_deps = [
         ":sse2_ukernels_test_mode",
