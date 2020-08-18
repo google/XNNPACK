@@ -119,6 +119,16 @@ static void f32_relu(
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_relu, wasm32_shr_x8, xnn_f32_relu_ukernel__wasm32_shr_x8)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_relu, wasm32_shr_pipelined_x8, xnn_f32_relu_ukernel__wasm32_shr_pipelined_x8)
+    ->RangeMultiplier(10)
+    ->Range(1000, 100000000)
+    ->UseRealTime();
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
 #if XNN_ARCH_WASMSIMD

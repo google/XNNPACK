@@ -2468,6 +2468,8 @@ WASM32_ASM_UKERNELS = [
     "src/f32-relu/wasm_shr_x1.S",
     "src/f32-relu/wasm_shr_x2.S",
     "src/f32-relu/wasm_shr_x4.S",
+    "src/f32-relu/wasm_shr_x8.S",
+    "src/f32-relu/wasm_shr_pipelined_x8.S",
 ]
 
 AARCH32_ASM_UKERNELS = [

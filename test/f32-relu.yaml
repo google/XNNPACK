@@ -21,3 +21,5 @@
 - name: xnn_f32_relu_ukernel__wasm32_shr_x1
 - name: xnn_f32_relu_ukernel__wasm32_shr_x2
 - name: xnn_f32_relu_ukernel__wasm32_shr_x4
+- name: xnn_f32_relu_ukernel__wasm32_shr_x8
+- name: xnn_f32_relu_ukernel__wasm32_shr_pipelined_x8
