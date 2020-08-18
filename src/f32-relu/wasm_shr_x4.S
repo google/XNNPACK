@@ -29,12 +29,11 @@
 xnn_f32_relu_ukernel__wasm32_shr_x4:
     .functype   xnn_f32_relu_ukernel__wasm32_shr_x4 (i32, i32, i32, i32) -> ()
     .local      i32, i32, i32, i32, i32, i32, i32, i32
-    block
-      local.get    0
-      i32.const    16      # count < 8
-      i32.lt_s
-      br_if        0
 
+    local.get    0
+    i32.const    16      # count >= 16
+    i32.ge_s
+    if
       loop
         local.get    1
         i32.load     0        # load 4 floats from src
@@ -132,20 +131,22 @@ xnn_f32_relu_ukernel__wasm32_shr_x4:
         i32.const    16      # count >= 16
         i32.ge_s
         br_if        0       # loop
-
       end_loop
-    end_block
+    end_if
 
-    block
-      local.get    0
-      i32.const    4       # count < 4
-      i32.lt_s
-      br_if        0
-
+    local.get    0
+    i32.const    4       # if count >= 4
+    i32.ge_s
+    if
       loop
         local.get    1        # src
         i32.load     0        # load float from src
         local.set    4
+
+        local.get    1        # src += 4
+        i32.const    4
+        i32.add
+        local.set    1
 
         local.get    4        # (v >> 31) - 1) & v
         i32.const    31
@@ -171,11 +172,6 @@ xnn_f32_relu_ukernel__wasm32_shr_x4:
         i32.add
         local.set    2
 
-        local.get    1        # src += 4
-        i32.const    4
-        i32.add
-        local.set    1
-
         local.get    0
         i32.const    -4
         i32.add              # count -= 4
@@ -186,7 +182,7 @@ xnn_f32_relu_ukernel__wasm32_shr_x4:
         i32.ge_s
         br_if        0       # loop
       end_loop
-    end_block
+    end_if
 
     end_function
 
