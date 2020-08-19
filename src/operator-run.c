@@ -86,7 +86,7 @@ void xnn_compute_spmm(
       &context->params);
 }
 
-void xnn_compute_grouped_igemm(
+void xnn_compute_grouped_batch_igemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
     size_t group_index,
@@ -113,7 +113,33 @@ void xnn_compute_grouped_igemm(
       &context->params);
 }
 
-void xnn_compute_igemm(
+void xnn_compute_grouped_igemm(
+    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t group_index,
+    size_t mr_block_start,
+    size_t nr_block_start,
+    size_t mr_block_size,
+    size_t nr_block_size)
+{
+  const size_t ks        = context->ks;
+  const size_t cm_stride = context->cm_stride;
+
+  context->ukernel.function[XNN_UARCH_DEFAULT](
+      mr_block_size,
+      nr_block_size,
+      context->kc,
+      context->ks_scaled,
+      (const void**) ((uintptr_t) context->indirect_a + mr_block_start * ks * sizeof(void*)),
+      (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->gw_stride),
+      (void*) ((uintptr_t) context->c + group_index * context->gc_stride + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+      cm_stride,
+      context->cn_stride,
+      context->a_offset + group_index * context->ga_stride,
+      context->zero,
+      &context->params);
+}
+
+void xnn_compute_batch_igemm(
     const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
     size_t mr_block_start,
@@ -135,6 +161,31 @@ void xnn_compute_igemm(
       cm_stride,
       context->cn_stride,
       context->a_offset + batch_index * context->ba_stride,
+      context->zero,
+      &context->params);
+}
+
+void xnn_compute_igemm(
+    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t mr_block_start,
+    size_t nr_block_start,
+    size_t mr_block_size,
+    size_t nr_block_size)
+{
+  const size_t ks        = context->ks;
+  const size_t cm_stride = context->cm_stride;
+
+  context->ukernel.function[XNN_UARCH_DEFAULT](
+      mr_block_size,
+      nr_block_size,
+      context->kc,
+      context->ks_scaled,
+      (const void**) ((uintptr_t) context->indirect_a + mr_block_start * ks * sizeof(void*)),
+      (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
+      (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+      cm_stride,
+      context->cn_stride,
+      context->a_offset,
       context->zero,
       &context->params);
 }
@@ -828,7 +879,7 @@ void xnn_compute_vmulcaddc(
         &context->params);
   }
 
-  void xnn_compute_hmp_grouped_igemm(
+  void xnn_compute_hmp_grouped_batch_igemm(
       const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       uint32_t uarch_index,
       size_t batch_index,
@@ -856,7 +907,34 @@ void xnn_compute_vmulcaddc(
         &context->params);
   }
 
-  void xnn_compute_hmp_igemm(
+  void xnn_compute_hmp_grouped_igemm(
+      const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      uint32_t uarch_index,
+      size_t group_index,
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size)
+  {
+    const size_t ks        = context->ks;
+    const size_t cm_stride = context->cm_stride;
+
+    context->ukernel.function[uarch_index](
+        mr_block_size,
+        nr_block_size,
+        context->kc,
+        context->ks_scaled,
+        (const void**) ((uintptr_t) context->indirect_a + mr_block_start * ks * sizeof(void*)),
+        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->gw_stride),
+        (void*) ((uintptr_t) context->c + group_index * context->gc_stride + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+        cm_stride,
+        context->cn_stride,
+        context->a_offset + group_index * context->ga_stride,
+        context->zero,
+        &context->params);
+  }
+
+  void xnn_compute_batch_hmp_igemm(
       const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       uint32_t uarch_index,
       size_t batch_index,
@@ -879,6 +957,32 @@ void xnn_compute_vmulcaddc(
         cm_stride,
         context->cn_stride,
         context->a_offset + batch_index * context->ba_stride,
+        context->zero,
+        &context->params);
+  }
+
+  void xnn_compute_hmp_igemm(
+      const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      uint32_t uarch_index,
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size)
+  {
+    const size_t ks        = context->ks;
+    const size_t cm_stride = context->cm_stride;
+
+    context->ukernel.function[uarch_index](
+        mr_block_size,
+        nr_block_size,
+        context->kc,
+        context->ks_scaled,
+        (const void**) ((uintptr_t) context->indirect_a + mr_block_start * ks * sizeof(void*)),
+        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
+        (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+        cm_stride,
+        context->cn_stride,
+        context->a_offset,
         context->zero,
         &context->params);
   }

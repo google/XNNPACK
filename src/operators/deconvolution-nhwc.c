@@ -556,20 +556,35 @@ static enum xnn_status setup_conv_path(
     }
   }
   if (groups == 1) {
-    deconvolution_op->compute.type = xnn_parallelization_type_3d_tile_2d;
-    deconvolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_igemm;
-    deconvolution_op->compute.range[0] = batch_size;
-    deconvolution_op->compute.range[1] = output_size;
-    deconvolution_op->compute.range[2] = group_output_channels;
+    if (batch_size > 1) {
+      deconvolution_op->compute.type = xnn_parallelization_type_3d_tile_2d;
+      deconvolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_batch_igemm;
+      deconvolution_op->compute.range[0] = batch_size;
+      deconvolution_op->compute.range[1] = output_size;
+      deconvolution_op->compute.range[2] = group_output_channels;
+    } else {
+      deconvolution_op->compute.type = xnn_parallelization_type_2d_tile_2d;
+      deconvolution_op->compute.task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_igemm;
+      deconvolution_op->compute.range[0] = output_size;
+      deconvolution_op->compute.range[1] = group_output_channels;
+    }
     deconvolution_op->compute.tile[0] = mr;
     deconvolution_op->compute.tile[1] = nc;
   } else {
-    deconvolution_op->compute.type = xnn_parallelization_type_4d_tile_2d;
-    deconvolution_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_igemm;
-    deconvolution_op->compute.range[0] = batch_size;
-    deconvolution_op->compute.range[1] = groups;
-    deconvolution_op->compute.range[2] = output_size;
-    deconvolution_op->compute.range[3] = group_output_channels;
+    if (batch_size > 1) {
+      deconvolution_op->compute.type = xnn_parallelization_type_4d_tile_2d;
+      deconvolution_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_batch_igemm;
+      deconvolution_op->compute.range[0] = batch_size;
+      deconvolution_op->compute.range[1] = groups;
+      deconvolution_op->compute.range[2] = output_size;
+      deconvolution_op->compute.range[3] = group_output_channels;
+    } else {
+      deconvolution_op->compute.type = xnn_parallelization_type_3d_tile_2d;
+      deconvolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_grouped_igemm;
+      deconvolution_op->compute.range[0] = groups;
+      deconvolution_op->compute.range[1] = output_size;
+      deconvolution_op->compute.range[2] = group_output_channels;
+    }
     deconvolution_op->compute.tile[0] = mr;
     deconvolution_op->compute.tile[1] = nc;
   }

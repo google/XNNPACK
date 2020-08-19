@@ -179,6 +179,14 @@ struct igemm_context {
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_grouped_igemm(
       const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t group_index,
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size);
+
+  XNN_PRIVATE void xnn_compute_grouped_batch_igemm(
+      const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t group_index,
       size_t mr_block_start,
@@ -187,6 +195,13 @@ struct igemm_context {
       size_t nr_block_size);
 
   XNN_PRIVATE void xnn_compute_igemm(
+      const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t mr_block_start,
+      size_t nr_block_start,
+      size_t mr_block_size,
+      size_t nr_block_size);
+
+  XNN_PRIVATE void xnn_compute_batch_igemm(
       const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t mr_block_start,
@@ -198,6 +213,15 @@ struct igemm_context {
     XNN_PRIVATE void xnn_compute_hmp_grouped_igemm(
         const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
         uint32_t uarch_index,
+        size_t group_index,
+        size_t mr_block_start,
+        size_t nr_block_start,
+        size_t mr_block_size,
+        size_t nr_block_size);
+
+    XNN_PRIVATE void xnn_compute_hmp_grouped_batch_igemm(
+        const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+        uint32_t uarch_index,
         size_t batch_index,
         size_t group_index,
         size_t mr_block_start,
@@ -206,6 +230,14 @@ struct igemm_context {
         size_t nr_block_size);
 
     XNN_PRIVATE void xnn_compute_hmp_igemm(
+        const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+        uint32_t uarch_index,
+        size_t mr_block_start,
+        size_t nr_block_start,
+        size_t mr_block_size,
+        size_t nr_block_size);
+
+    XNN_PRIVATE void xnn_compute_batch_hmp_igemm(
         const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
         uint32_t uarch_index,
         size_t batch_index,

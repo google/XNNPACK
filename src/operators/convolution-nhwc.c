@@ -1002,38 +1002,79 @@ static enum xnn_status setup_convolution2d_nhwc(
       if (groups == 1) {
         #if XNN_MAX_UARCH_TYPES > 1
           if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
-            convolution_op->compute.type = xnn_parallelization_type_3d_tile_2d_with_uarch;
-            convolution_op->compute.task_3d_tile_2d_with_id = (pthreadpool_task_3d_tile_2d_with_id_t) xnn_compute_hmp_igemm;
+            if (batch_size > 1) {
+              convolution_op->compute.type = xnn_parallelization_type_3d_tile_2d_with_uarch;
+              convolution_op->compute.task_3d_tile_2d_with_id = (pthreadpool_task_3d_tile_2d_with_id_t) xnn_compute_batch_hmp_igemm;
+            } else {
+              convolution_op->compute.type = xnn_parallelization_type_2d_tile_2d_with_uarch;
+              convolution_op->compute.task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_igemm;
+            }
           } else {
-            convolution_op->compute.type = xnn_parallelization_type_3d_tile_2d;
-            convolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_igemm;
+            if (batch_size > 1) {
+              convolution_op->compute.type = xnn_parallelization_type_3d_tile_2d;
+              convolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_batch_igemm;
+            } else {
+              convolution_op->compute.type = xnn_parallelization_type_2d_tile_2d;
+              convolution_op->compute.task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_igemm;
+            }
           }
         #else
-          convolution_op->compute.type = xnn_parallelization_type_3d_tile_2d;
-          convolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_igemm;
+          if (batch_size > 1) {
+            convolution_op->compute.type = xnn_parallelization_type_3d_tile_2d;
+            convolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_batch_igemm;
+          } else {
+            convolution_op->compute.type = xnn_parallelization_type_2d_tile_2d;
+            convolution_op->compute.task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_igemm;
+          }
         #endif
-        convolution_op->compute.range[0] = batch_size;
-        convolution_op->compute.range[1] = output_size;
-        convolution_op->compute.range[2] = group_output_channels;
+        if (batch_size > 1) {
+          convolution_op->compute.range[0] = batch_size;
+          convolution_op->compute.range[1] = output_size;
+          convolution_op->compute.range[2] = group_output_channels;
+        } else {
+          convolution_op->compute.range[0] = output_size;
+          convolution_op->compute.range[1] = group_output_channels;
+        }
         convolution_op->compute.tile[0] = mr;
         convolution_op->compute.tile[1] = nc;
       } else {
         #if XNN_MAX_UARCH_TYPES > 1
           if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
-            convolution_op->compute.type = xnn_parallelization_type_4d_tile_2d_with_uarch;
-            convolution_op->compute.task_4d_tile_2d_with_id = (pthreadpool_task_4d_tile_2d_with_id_t) xnn_compute_hmp_grouped_igemm;
+            if (batch_size > 1) {
+              convolution_op->compute.type = xnn_parallelization_type_4d_tile_2d_with_uarch;
+              convolution_op->compute.task_4d_tile_2d_with_id = (pthreadpool_task_4d_tile_2d_with_id_t) xnn_compute_hmp_grouped_batch_igemm;
+            } else {
+              convolution_op->compute.type = xnn_parallelization_type_3d_tile_2d_with_uarch;
+              convolution_op->compute.task_3d_tile_2d_with_id = (pthreadpool_task_3d_tile_2d_with_id_t) xnn_compute_hmp_grouped_igemm;
+            }
           } else {
-            convolution_op->compute.type = xnn_parallelization_type_4d_tile_2d;
-            convolution_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_igemm;
+            if (batch_size > 1) {
+              convolution_op->compute.type = xnn_parallelization_type_4d_tile_2d;
+              convolution_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_batch_igemm;
+            } else {
+              convolution_op->compute.type = xnn_parallelization_type_3d_tile_2d;
+              convolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_grouped_igemm;
+            }
           }
         #else
-          convolution_op->compute.type = xnn_parallelization_type_4d_tile_2d;
-          convolution_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_igemm;
+          if (batch_size > 1) {
+            convolution_op->compute.type = xnn_parallelization_type_4d_tile_2d;
+            convolution_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_batch_igemm;
+          } else {
+            convolution_op->compute.type = xnn_parallelization_type_3d_tile_2d;
+            convolution_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_grouped_igemm;
+          }
         #endif
-        convolution_op->compute.range[0] = batch_size;
-        convolution_op->compute.range[1] = groups;
-        convolution_op->compute.range[2] = output_size;
-        convolution_op->compute.range[3] = group_output_channels;
+        if (batch_size > 1) {
+          convolution_op->compute.range[0] = batch_size;
+          convolution_op->compute.range[1] = groups;
+          convolution_op->compute.range[2] = output_size;
+          convolution_op->compute.range[3] = group_output_channels;
+        } else {
+          convolution_op->compute.range[0] = groups;
+          convolution_op->compute.range[1] = output_size;
+          convolution_op->compute.range[2] = group_output_channels;
+        }
         convolution_op->compute.tile[0] = mr;
         convolution_op->compute.tile[1] = nc;
       }
