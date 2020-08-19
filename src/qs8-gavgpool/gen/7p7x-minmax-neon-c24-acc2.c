@@ -434,7 +434,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_7p7x__neon_c24_acc2(
     const int16x8_t vacc89ABCDEF = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc89AB), vqmovn_s32(vaccCDEF)), voutput_zero_point);
     const int16x8_t vaccGHIJKLMN = vqaddq_s16(vcombine_s16(vqmovn_s32(vaccGHIJ), vqmovn_s32(vaccKLMN)), voutput_zero_point);
 
-    int8x16_t vout0123456789ABCDEF = vcombine_s16(vqmovn_s16(vacc01234567), vqmovn_s16(vacc89ABCDEF));
+    int8x16_t vout0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc01234567), vqmovn_s16(vacc89ABCDEF));
     int8x8_t voutGHIJKLMN = vqmovn_s16(vaccGHIJKLMN);
 #endif
 

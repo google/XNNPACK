@@ -37,7 +37,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_7p7x__wasmsimd_c24_acc2(
   const int8_t* i6 = (const int8_t*) ((uintptr_t) i5 + input_stride);
   const size_t input_increment = 7 * input_stride - round_up_po2(channels, 8);
 
-  const v128_t vbias = wasm_v128_load((const v128_t*) params->wasmsimd.bias);
+  const v128_t vbias = wasm_v128_load(params->wasmsimd.bias);
   int32_t* b = buffer;
   size_t c = channels;
   for (; c >= 24; c -= 24) {
@@ -109,19 +109,19 @@ void xnn_qs8_gavgpool_minmax_ukernel_7p7x__wasmsimd_c24_acc2(
   }
   if XNN_UNLIKELY(c != 0) {
     do {
-      const v128_t vxi0x01234567 = wasm_i16x8_load_8x8((const v128_t*) i0);
+      const v128_t vxi0x01234567 = wasm_i16x8_load_8x8(i0);
       i0 += 8;
-      const v128_t vxi1x01234567 = wasm_i16x8_load_8x8((const v128_t*) i1);
+      const v128_t vxi1x01234567 = wasm_i16x8_load_8x8(i1);
       i1 += 8;
-      const v128_t vxi2x01234567 = wasm_i16x8_load_8x8((const v128_t*) i2);
+      const v128_t vxi2x01234567 = wasm_i16x8_load_8x8(i2);
       i2 += 8;
-      const v128_t vxi3x01234567 = wasm_i16x8_load_8x8((const v128_t*) i3);
+      const v128_t vxi3x01234567 = wasm_i16x8_load_8x8(i3);
       i3 += 8;
-      const v128_t vxi4x01234567 = wasm_i16x8_load_8x8((const v128_t*) i4);
+      const v128_t vxi4x01234567 = wasm_i16x8_load_8x8(i4);
       i4 += 8;
-      const v128_t vxi5x01234567 = wasm_i16x8_load_8x8((const v128_t*) i5);
+      const v128_t vxi5x01234567 = wasm_i16x8_load_8x8(i5);
       i5 += 8;
-      const v128_t vxi6x01234567 = wasm_i16x8_load_8x8((const v128_t*) i6);
+      const v128_t vxi6x01234567 = wasm_i16x8_load_8x8(i6);
       i6 += 8;
 
       v128_t vacc0x01234567 = wasm_i16x8_add(vxi0x01234567, vxi1x01234567);
@@ -493,11 +493,11 @@ void xnn_qs8_gavgpool_minmax_ukernel_7p7x__wasmsimd_c24_acc2(
       const v128_t vout0123 = wasm_i32x4_sub(wasm_v128_xor(vabsout0123, vsgnacc0123), vsgnacc0123);
       const v128_t vout4567 = wasm_i32x4_sub(wasm_v128_xor(vabsout4567, vsgnacc4567), vsgnacc4567);
 
-      const v128_t voutput_zero_point = wasm_v128_load((const v128_t*) params->wasmsimd.output_zero_point);
+      const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
       const v128_t vout01234567 = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vout0123, vout4567), voutput_zero_point);
 
-      const v128_t voutput_min = wasm_v128_load((const v128_t*) params->wasmsimd.output_min);
-      const v128_t voutput_max = wasm_v128_load((const v128_t*) params->wasmsimd.output_max);
+      const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
+      const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
       v128_t vout0123456701234567 = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout01234567, vout01234567), voutput_min), voutput_max);
 
       if XNN_LIKELY(channels >= 8) {

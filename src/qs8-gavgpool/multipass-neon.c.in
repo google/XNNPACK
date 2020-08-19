@@ -280,7 +280,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__neon_c${CHANNE
 
     $for C in range(0, CHANNEL_TILE, 16):
       $if C + 8 < CHANNEL_TILE:
-        int8x16_t vout${ABC[C:C+16]} = vcombine_s16(vqmovn_s16(vacc${ABC[C:C+8]}), vqmovn_s16(vacc${ABC[C+8:C+16]}));
+        int8x16_t vout${ABC[C:C+16]} = vcombine_s8(vqmovn_s16(vacc${ABC[C:C+8]}), vqmovn_s16(vacc${ABC[C+8:C+16]}));
       $else:
         int8x8_t vout${ABC[C:C+8]} = vqmovn_s16(vacc${ABC[C:C+8]});
 #endif
