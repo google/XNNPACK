@@ -105,23 +105,23 @@ void xnn_qs8_requantize_precise__psimd(
         w_abs_hi * vmultiplier_hi + (w_product_lh >> psimd_splat_u32(16)) + (w_product_hl >> psimd_splat_u32(16));
 
     const psimd_u32 x_adjusted_product =
-        (x_product_hi + vrounding_hi) - ((psimd_s32) (x_product_lo & vrounding_lo) >> psimd_splat_s32(31));
+        (x_product_hi + vrounding_hi) - (psimd_u32) ((psimd_s32) (x_product_lo & vrounding_lo) >> psimd_splat_s32(31));
     const psimd_u32 y_adjusted_product =
-        (y_product_hi + vrounding_hi) - ((psimd_s32) (y_product_lo & vrounding_lo) >> psimd_splat_s32(31));
+        (y_product_hi + vrounding_hi) - (psimd_u32) ((psimd_s32) (y_product_lo & vrounding_lo) >> psimd_splat_s32(31));
     const psimd_u32 z_adjusted_product =
-        (z_product_hi + vrounding_hi) - ((psimd_s32) (z_product_lo & vrounding_lo) >> psimd_splat_s32(31));
+        (z_product_hi + vrounding_hi) - (psimd_u32) ((psimd_s32) (z_product_lo & vrounding_lo) >> psimd_splat_s32(31));
     const psimd_u32 w_adjusted_product =
-        (w_product_hi + vrounding_hi) - ((psimd_s32) (w_product_lo & vrounding_lo) >> psimd_splat_s32(31));
+        (w_product_hi + vrounding_hi) - (psimd_u32) ((psimd_s32) (w_product_lo & vrounding_lo) >> psimd_splat_s32(31));
 
     const psimd_u32 x_abs_scaled = x_adjusted_product >> vshift;
     const psimd_u32 y_abs_scaled = y_adjusted_product >> vshift;
     const psimd_u32 z_abs_scaled = z_adjusted_product >> vshift;
     const psimd_u32 w_abs_scaled = w_adjusted_product >> vshift;
 
-    const psimd_s32 x_scaled = (psimd_s32) (x_abs_scaled ^ x_neg_mask) - x_neg_mask;
-    const psimd_s32 y_scaled = (psimd_s32) (y_abs_scaled ^ y_neg_mask) - y_neg_mask;
-    const psimd_s32 z_scaled = (psimd_s32) (z_abs_scaled ^ z_neg_mask) - z_neg_mask;
-    const psimd_s32 w_scaled = (psimd_s32) (w_abs_scaled ^ w_neg_mask) - w_neg_mask;
+    const psimd_s32 x_scaled = ((psimd_s32) x_abs_scaled ^ x_neg_mask) - x_neg_mask;
+    const psimd_s32 y_scaled = ((psimd_s32) y_abs_scaled ^ y_neg_mask) - y_neg_mask;
+    const psimd_s32 z_scaled = ((psimd_s32) z_abs_scaled ^ z_neg_mask) - z_neg_mask;
+    const psimd_s32 w_scaled = ((psimd_s32) w_abs_scaled ^ w_neg_mask) - w_neg_mask;
 
     const psimd_s32 x_clamped = psimd_max_s32(psimd_min_s32(x_scaled, vsmax), vsmin) + vzero_point;
     const psimd_s32 y_clamped = psimd_max_s32(psimd_min_s32(y_scaled, vsmax), vsmin) + vzero_point;

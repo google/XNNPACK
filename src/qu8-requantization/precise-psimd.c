@@ -57,10 +57,10 @@ void xnn_qu8_requantize_precise__psimd(
     const psimd_s32 z_neg_mask = z >> psimd_splat_s32(31);
     const psimd_s32 w_neg_mask = w >> psimd_splat_s32(31);
 
-    const psimd_u32 x_abs = (psimd_u32)((x ^ x_neg_mask) - x_neg_mask);
-    const psimd_u32 y_abs = (psimd_u32)((y ^ y_neg_mask) - y_neg_mask);
-    const psimd_u32 z_abs = (psimd_u32)((z ^ z_neg_mask) - z_neg_mask);
-    const psimd_u32 w_abs = (psimd_u32)((w ^ w_neg_mask) - w_neg_mask);
+    const psimd_u32 x_abs = (psimd_u32) ((x ^ x_neg_mask) - x_neg_mask);
+    const psimd_u32 y_abs = (psimd_u32) ((y ^ y_neg_mask) - y_neg_mask);
+    const psimd_u32 z_abs = (psimd_u32) ((z ^ z_neg_mask) - z_neg_mask);
+    const psimd_u32 w_abs = (psimd_u32) ((w ^ w_neg_mask) - w_neg_mask);
 
     const psimd_u32 x_abs_lo = x_abs & psimd_splat_u32(UINT32_C(0x0000FFFF));
     const psimd_u32 x_abs_hi = x_abs >> psimd_splat_u32(16);
@@ -105,28 +105,28 @@ void xnn_qu8_requantize_precise__psimd(
         w_abs_hi * vmultiplier_hi + (w_product_lh >> psimd_splat_u32(16)) + (w_product_hl >> psimd_splat_u32(16));
 
     const psimd_u32 x_adjusted_product =
-        (x_product_hi + vrounding_hi) - ((psimd_s32)(x_product_lo & vrounding_lo) >> psimd_splat_s32(31));
+        (x_product_hi + vrounding_hi) - (psimd_u32) ((psimd_s32) (x_product_lo & vrounding_lo) >> psimd_splat_s32(31));
     const psimd_u32 y_adjusted_product =
-        (y_product_hi + vrounding_hi) - ((psimd_s32)(y_product_lo & vrounding_lo) >> psimd_splat_s32(31));
+        (y_product_hi + vrounding_hi) - (psimd_u32) ((psimd_s32) (y_product_lo & vrounding_lo) >> psimd_splat_s32(31));
     const psimd_u32 z_adjusted_product =
-        (z_product_hi + vrounding_hi) - ((psimd_s32)(z_product_lo & vrounding_lo) >> psimd_splat_s32(31));
+        (z_product_hi + vrounding_hi) - (psimd_u32) ((psimd_s32) (z_product_lo & vrounding_lo) >> psimd_splat_s32(31));
     const psimd_u32 w_adjusted_product =
-        (w_product_hi + vrounding_hi) - ((psimd_s32)(w_product_lo & vrounding_lo) >> psimd_splat_s32(31));
+        (w_product_hi + vrounding_hi) - (psimd_u32) ((psimd_s32) (w_product_lo & vrounding_lo) >> psimd_splat_s32(31));
 
     const psimd_u32 x_abs_scaled = x_adjusted_product >> vshift;
     const psimd_u32 y_abs_scaled = y_adjusted_product >> vshift;
     const psimd_u32 z_abs_scaled = z_adjusted_product >> vshift;
     const psimd_u32 w_abs_scaled = w_adjusted_product >> vshift;
 
-    const psimd_s32 x_scaled = (psimd_s32)(x_abs_scaled ^ x_neg_mask) - x_neg_mask;
-    const psimd_s32 y_scaled = (psimd_s32)(y_abs_scaled ^ y_neg_mask) - y_neg_mask;
-    const psimd_s32 z_scaled = (psimd_s32)(z_abs_scaled ^ z_neg_mask) - z_neg_mask;
-    const psimd_s32 w_scaled = (psimd_s32)(w_abs_scaled ^ w_neg_mask) - w_neg_mask;
+    const psimd_s32 x_scaled = ((psimd_s32) x_abs_scaled ^ x_neg_mask) - x_neg_mask;
+    const psimd_s32 y_scaled = ((psimd_s32) y_abs_scaled ^ y_neg_mask) - y_neg_mask;
+    const psimd_s32 z_scaled = ((psimd_s32) z_abs_scaled ^ z_neg_mask) - z_neg_mask;
+    const psimd_s32 w_scaled = ((psimd_s32) w_abs_scaled ^ w_neg_mask) - w_neg_mask;
 
-    const psimd_u32 x_clamped = (psimd_u32) psimd_max_s32(psimd_min_s32(x_scaled, vsmax), vsmin) + vzero_point;
-    const psimd_u32 y_clamped = (psimd_u32) psimd_max_s32(psimd_min_s32(y_scaled, vsmax), vsmin) + vzero_point;
-    const psimd_u32 z_clamped = (psimd_u32) psimd_max_s32(psimd_min_s32(z_scaled, vsmax), vsmin) + vzero_point;
-    const psimd_u32 w_clamped = (psimd_u32) psimd_max_s32(psimd_min_s32(w_scaled, vsmax), vsmin) + vzero_point;
+    const psimd_u32 x_clamped = (psimd_u32) (psimd_max_s32(psimd_min_s32(x_scaled, vsmax), vsmin) + vzero_point);
+    const psimd_u32 y_clamped = (psimd_u32) (psimd_max_s32(psimd_min_s32(y_scaled, vsmax), vsmin) + vzero_point);
+    const psimd_u32 z_clamped = (psimd_u32) (psimd_max_s32(psimd_min_s32(z_scaled, vsmax), vsmin) + vzero_point);
+    const psimd_u32 w_clamped = (psimd_u32) (psimd_max_s32(psimd_min_s32(w_scaled, vsmax), vsmin) + vzero_point);
 
     const psimd_u16 xy_clamped = psimd_concat_even_u16((psimd_u16) x_clamped, (psimd_u16) y_clamped);
     const psimd_u16 zw_clamped = psimd_concat_even_u16((psimd_u16) z_clamped, (psimd_u16) w_clamped);
