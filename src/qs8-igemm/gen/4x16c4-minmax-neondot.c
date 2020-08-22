@@ -93,39 +93,118 @@ void xnn_qs8_igemm_minmax_ukernel_4x16c4__neondot(
       a += 4;
 
       // Inner accumulation loop along the 16 columns.
-      size_t k = 0;
-      while (k < kc) {
+      size_t k = kc;
+      // 2x partial unrolled loop to load 8 bytes at a time.
+      while (k >= 8 * sizeof(int8_t)) {
+        // Load a 4x8 block of activations.
+        const int8x8_t va0x01234567 = vld1_s8(a0); a0 += 8;
+        const int8x8_t va1x01234567 = vld1_s8(a1); a1 += 8;
+        const int8x8_t va2x01234567 = vld1_s8(a2); a2 += 8;
+        const int8x8_t va3x01234567 = vld1_s8(a3); a3 += 8;
+
+        // Load a 8x16 block of weights.
+        const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb0123x89AB = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb0123xCDEF = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb4567x89AB = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb4567xCDEF = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+
+        // Multiply-accumulate: 4x8 * 8x16 --> 4x16.
+        vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);
+        vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb0123x4567, va0x01234567, 0);
+        vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb0123x89AB, va0x01234567, 0);
+        vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb0123xCDEF, va0x01234567, 0);
+        vacc1x0123 = vdotq_lane_s32(vacc1x0123, vb0123x0123, va1x01234567, 0);
+        vacc1x4567 = vdotq_lane_s32(vacc1x4567, vb0123x4567, va1x01234567, 0);
+        vacc1x89AB = vdotq_lane_s32(vacc1x89AB, vb0123x89AB, va1x01234567, 0);
+        vacc1xCDEF = vdotq_lane_s32(vacc1xCDEF, vb0123xCDEF, va1x01234567, 0);
+        vacc2x0123 = vdotq_lane_s32(vacc2x0123, vb0123x0123, va2x01234567, 0);
+        vacc2x4567 = vdotq_lane_s32(vacc2x4567, vb0123x4567, va2x01234567, 0);
+        vacc2x89AB = vdotq_lane_s32(vacc2x89AB, vb0123x89AB, va2x01234567, 0);
+        vacc2xCDEF = vdotq_lane_s32(vacc2xCDEF, vb0123xCDEF, va2x01234567, 0);
+        vacc3x0123 = vdotq_lane_s32(vacc3x0123, vb0123x0123, va3x01234567, 0);
+        vacc3x4567 = vdotq_lane_s32(vacc3x4567, vb0123x4567, va3x01234567, 0);
+        vacc3x89AB = vdotq_lane_s32(vacc3x89AB, vb0123x89AB, va3x01234567, 0);
+        vacc3xCDEF = vdotq_lane_s32(vacc3xCDEF, vb0123xCDEF, va3x01234567, 0);
+        vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb4567x0123, va0x01234567, 1);
+        vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb4567x4567, va0x01234567, 1);
+        vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb4567x89AB, va0x01234567, 1);
+        vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb4567xCDEF, va0x01234567, 1);
+        vacc1x0123 = vdotq_lane_s32(vacc1x0123, vb4567x0123, va1x01234567, 1);
+        vacc1x4567 = vdotq_lane_s32(vacc1x4567, vb4567x4567, va1x01234567, 1);
+        vacc1x89AB = vdotq_lane_s32(vacc1x89AB, vb4567x89AB, va1x01234567, 1);
+        vacc1xCDEF = vdotq_lane_s32(vacc1xCDEF, vb4567xCDEF, va1x01234567, 1);
+        vacc2x0123 = vdotq_lane_s32(vacc2x0123, vb4567x0123, va2x01234567, 1);
+        vacc2x4567 = vdotq_lane_s32(vacc2x4567, vb4567x4567, va2x01234567, 1);
+        vacc2x89AB = vdotq_lane_s32(vacc2x89AB, vb4567x89AB, va2x01234567, 1);
+        vacc2xCDEF = vdotq_lane_s32(vacc2xCDEF, vb4567xCDEF, va2x01234567, 1);
+        vacc3x0123 = vdotq_lane_s32(vacc3x0123, vb4567x0123, va3x01234567, 1);
+        vacc3x4567 = vdotq_lane_s32(vacc3x4567, vb4567x4567, va3x01234567, 1);
+        vacc3x89AB = vdotq_lane_s32(vacc3x89AB, vb4567x89AB, va3x01234567, 1);
+        vacc3xCDEF = vdotq_lane_s32(vacc3xCDEF, vb4567xCDEF, va3x01234567, 1);
+
+        k -= 8 * sizeof(int8_t);
+      }
+      // Handle up to 7 final positions of `k`
+      if XNN_UNLIKELY(k != 0) {
         // Load a 4x4 block of activations.
-        int8x8_t va0x0123 = vld1_s8(a0); a0 += 4;
-        int8x8_t va1x0123 = vld1_s8(a1); a1 += 4;
-        int8x8_t va2x0123 = vld1_s8(a2); a2 += 4;
-        int8x8_t va3x0123 = vld1_s8(a3); a3 += 4;
+        const int8x8_t va0x01234567 = vld1_s8(a0);
+        const int8x8_t va1x01234567 = vld1_s8(a1);
+        const int8x8_t va2x01234567 = vld1_s8(a2);
+        const int8x8_t va3x01234567 = vld1_s8(a3);
 
         // Load a 4x16 block of weights.
-        int8x16_t vb0123x0123 = vld1q_s8((const int8_t*)w); w = (const void*)((const int8_t*)w + 16);
-        int8x16_t vb0123x4567 = vld1q_s8((const int8_t*)w); w = (const void*)((const int8_t*)w + 16);
-        int8x16_t vb0123x89AB = vld1q_s8((const int8_t*)w); w = (const void*)((const int8_t*)w + 16);
-        int8x16_t vb0123xCDEF = vld1q_s8((const int8_t*)w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb0123x89AB = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb0123xCDEF = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
 
         // Multiply-accumulate: 4x4 * 4x16 --> 4x16.
-        vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x0123, 0);
-        vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb0123x4567, va0x0123, 0);
-        vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb0123x89AB, va0x0123, 0);
-        vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb0123xCDEF, va0x0123, 0);
-        vacc1x0123 = vdotq_lane_s32(vacc1x0123, vb0123x0123, va1x0123, 0);
-        vacc1x4567 = vdotq_lane_s32(vacc1x4567, vb0123x4567, va1x0123, 0);
-        vacc1x89AB = vdotq_lane_s32(vacc1x89AB, vb0123x89AB, va1x0123, 0);
-        vacc1xCDEF = vdotq_lane_s32(vacc1xCDEF, vb0123xCDEF, va1x0123, 0);
-        vacc2x0123 = vdotq_lane_s32(vacc2x0123, vb0123x0123, va2x0123, 0);
-        vacc2x4567 = vdotq_lane_s32(vacc2x4567, vb0123x4567, va2x0123, 0);
-        vacc2x89AB = vdotq_lane_s32(vacc2x89AB, vb0123x89AB, va2x0123, 0);
-        vacc2xCDEF = vdotq_lane_s32(vacc2xCDEF, vb0123xCDEF, va2x0123, 0);
-        vacc3x0123 = vdotq_lane_s32(vacc3x0123, vb0123x0123, va3x0123, 0);
-        vacc3x4567 = vdotq_lane_s32(vacc3x4567, vb0123x4567, va3x0123, 0);
-        vacc3x89AB = vdotq_lane_s32(vacc3x89AB, vb0123x89AB, va3x0123, 0);
-        vacc3xCDEF = vdotq_lane_s32(vacc3xCDEF, vb0123xCDEF, va3x0123, 0);
+        vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);
+        vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb0123x4567, va0x01234567, 0);
+        vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb0123x89AB, va0x01234567, 0);
+        vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb0123xCDEF, va0x01234567, 0);
+        vacc1x0123 = vdotq_lane_s32(vacc1x0123, vb0123x0123, va1x01234567, 0);
+        vacc1x4567 = vdotq_lane_s32(vacc1x4567, vb0123x4567, va1x01234567, 0);
+        vacc1x89AB = vdotq_lane_s32(vacc1x89AB, vb0123x89AB, va1x01234567, 0);
+        vacc1xCDEF = vdotq_lane_s32(vacc1xCDEF, vb0123xCDEF, va1x01234567, 0);
+        vacc2x0123 = vdotq_lane_s32(vacc2x0123, vb0123x0123, va2x01234567, 0);
+        vacc2x4567 = vdotq_lane_s32(vacc2x4567, vb0123x4567, va2x01234567, 0);
+        vacc2x89AB = vdotq_lane_s32(vacc2x89AB, vb0123x89AB, va2x01234567, 0);
+        vacc2xCDEF = vdotq_lane_s32(vacc2xCDEF, vb0123xCDEF, va2x01234567, 0);
+        vacc3x0123 = vdotq_lane_s32(vacc3x0123, vb0123x0123, va3x01234567, 0);
+        vacc3x4567 = vdotq_lane_s32(vacc3x4567, vb0123x4567, va3x01234567, 0);
+        vacc3x89AB = vdotq_lane_s32(vacc3x89AB, vb0123x89AB, va3x01234567, 0);
+        vacc3xCDEF = vdotq_lane_s32(vacc3xCDEF, vb0123xCDEF, va3x01234567, 0);
 
-        k += 4 * sizeof(int8_t);
+        if (k > 4) {
+          // Load a 4x16 block of weights.
+          const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+          const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+          const int8x16_t vb4567x89AB = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+          const int8x16_t vb4567xCDEF = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+
+          // Multiply-accumulate: 4x4 * 4x16 --> 4x16.
+          vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb4567x0123, va0x01234567, 1);
+          vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb4567x4567, va0x01234567, 1);
+          vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb4567x89AB, va0x01234567, 1);
+          vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb4567xCDEF, va0x01234567, 1);
+          vacc1x0123 = vdotq_lane_s32(vacc1x0123, vb4567x0123, va1x01234567, 1);
+          vacc1x4567 = vdotq_lane_s32(vacc1x4567, vb4567x4567, va1x01234567, 1);
+          vacc1x89AB = vdotq_lane_s32(vacc1x89AB, vb4567x89AB, va1x01234567, 1);
+          vacc1xCDEF = vdotq_lane_s32(vacc1xCDEF, vb4567xCDEF, va1x01234567, 1);
+          vacc2x0123 = vdotq_lane_s32(vacc2x0123, vb4567x0123, va2x01234567, 1);
+          vacc2x4567 = vdotq_lane_s32(vacc2x4567, vb4567x4567, va2x01234567, 1);
+          vacc2x89AB = vdotq_lane_s32(vacc2x89AB, vb4567x89AB, va2x01234567, 1);
+          vacc2xCDEF = vdotq_lane_s32(vacc2xCDEF, vb4567xCDEF, va2x01234567, 1);
+          vacc3x0123 = vdotq_lane_s32(vacc3x0123, vb4567x0123, va3x01234567, 1);
+          vacc3x4567 = vdotq_lane_s32(vacc3x4567, vb4567x4567, va3x01234567, 1);
+          vacc3x89AB = vdotq_lane_s32(vacc3x89AB, vb4567x89AB, va3x01234567, 1);
+          vacc3xCDEF = vdotq_lane_s32(vacc3xCDEF, vb4567xCDEF, va3x01234567, 1);
+        }
       }
       p -= 4 * sizeof(void*);
     } while (p != 0);
