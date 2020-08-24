@@ -174,7 +174,8 @@ bool CheckVFP(benchmark::State& state) {
 }
 
 bool CheckNEONFP16ARITH(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fp16_arith()) {
+  // Workaround for FP16 detect on BLU Vivo XL5
+  if (!cpuinfo_initialize() || (!cpuinfo_has_arm_neon_fp16_arith() && cpuinfo_get_current_core()->uarch != cpuinfo_uarch_cortex_a55)) {
     state.SkipWithError("no NEON-FP16-ARITH extension");
     return false;
   }

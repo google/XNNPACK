@@ -778,7 +778,7 @@ static void init(void) {
 
   /**************************** F16 micro-kernels ****************************/
   #ifndef XNN_NO_F16_OPERATORS
-    if (cpuinfo_has_arm_neon_fp16_arith()) {
+    if (cpuinfo_has_arm_neon_fp16_arith() || cpuinfo_get_current_core()->uarch == cpuinfo_uarch_cortex_a55) {
       init_flags |= XNN_INIT_FLAG_F16;
 
       #if XNN_ENABLE_ASSEMBLY
