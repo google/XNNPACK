@@ -28,7 +28,7 @@ void xnn_f16_hswish_ukernel__neonfp16arith_x${BATCH_TILE}(
 
   const float16x8_t vsixth = vld1q_dup_f16(&params->sixth);
   const float16x8_t vthree = vld1q_dup_f16(&params->three);
-  const int16x8_t vsix = vreinterpretq_s16_f32(vld1q_dup_f16(&params->six));
+  const int16x8_t vsix = vreinterpretq_s16_f16(vld1q_dup_f16(&params->six));
   const int16x8_t vzero = vdupq_n_s16(0);
 
   $if BATCH_TILE > 8:
