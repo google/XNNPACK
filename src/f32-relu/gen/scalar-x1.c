@@ -13,6 +13,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 
+
 void xnn_f32_relu_ukernel__scalar_x1(
     size_t n,
     const float* x_ptr,
@@ -33,3 +34,4 @@ void xnn_f32_relu_ukernel__scalar_x1(
     *y++ = vacc;
   }
 }
+

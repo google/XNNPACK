@@ -11,6 +11,34 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 
+$if BATCH_TILE > 1:
+  __attribute__((noinline)) void xnn_f32_relu_ukernel__scalar_x${BATCH_TILE}_batch(
+      size_t n,
+      const float* x_ptr,
+      float* y_ptr)
+  {
+    assert(n != 0);
+    assert(n % sizeof(float) == 0);
+    assert(x_ptr != NULL);
+    assert(y_ptr != NULL);
+
+    const uint32_t* x = (const uint32_t*)x_ptr;
+    uint32_t* y = (uint32_t*)y_ptr;
+
+      for (; n >= ${BATCH_TILE} * sizeof(uint32_t); n -= ${BATCH_TILE} * sizeof(uint32_t)) {
+        $for N in range(BATCH_TILE):
+          uint32_t vacc${ABC[N]} = x[${N}];
+        x += ${BATCH_TILE};
+
+        $for N in range(BATCH_TILE):
+          vacc${ABC[N]} = ((vacc${ABC[N]} >> 31) - 1) & vacc${ABC[N]};
+
+        $for N in range(BATCH_TILE):
+          y[${N}] = vacc${ABC[N]};
+        y += ${BATCH_TILE};
+      }
+  }
+
 void xnn_f32_relu_ukernel__scalar_x${BATCH_TILE}(
     size_t n,
     const float* x_ptr,
@@ -26,18 +54,12 @@ void xnn_f32_relu_ukernel__scalar_x${BATCH_TILE}(
   uint32_t* y = (uint32_t*)y_ptr;
 
   $if BATCH_TILE > 1:
-    for (; n >= ${BATCH_TILE} * sizeof(uint32_t); n -= ${BATCH_TILE} * sizeof(uint32_t)) {
-      $for N in range(BATCH_TILE):
-        uint32_t vacc${ABC[N]} = x[${N}];
-      x += ${BATCH_TILE};
+    xnn_f32_relu_ukernel__scalar_x${BATCH_TILE}_batch(n, x_ptr, y_ptr);
+    size_t n_batch = n & ~(${BATCH_TILE} - 1);
+    x += n_batch * sizeof(float);
+    y += n_batch * sizeof(float);
+    n -= n_batch;
 
-      $for N in range(BATCH_TILE):
-        vacc${ABC[N]} = ((vacc${ABC[N]} >> 31) - 1) & vacc${ABC[N]};
-
-      $for N in range(BATCH_TILE):
-        y[${N}] = vacc${ABC[N]};
-      y += ${BATCH_TILE};
-    }
     if XNN_UNLIKELY(n != 0) {
       $if BATCH_TILE > 2:
         do {
@@ -58,3 +80,4 @@ void xnn_f32_relu_ukernel__scalar_x${BATCH_TILE}(
       *y++ = vacc;
     }
 }
+

@@ -13,6 +13,39 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 
+__attribute__((noinline)) void xnn_f32_relu_ukernel__scalar_x4_batch(
+    size_t n,
+    const float* x_ptr,
+    float* y_ptr)
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+  assert(x_ptr != NULL);
+  assert(y_ptr != NULL);
+
+  const uint32_t* x = (const uint32_t*)x_ptr;
+  uint32_t* y = (uint32_t*)y_ptr;
+
+    for (; n >= 4 * sizeof(uint32_t); n -= 4 * sizeof(uint32_t)) {
+      uint32_t vacc0 = x[0];
+      uint32_t vacc1 = x[1];
+      uint32_t vacc2 = x[2];
+      uint32_t vacc3 = x[3];
+      x += 4;
+
+      vacc0 = ((vacc0 >> 31) - 1) & vacc0;
+      vacc1 = ((vacc1 >> 31) - 1) & vacc1;
+      vacc2 = ((vacc2 >> 31) - 1) & vacc2;
+      vacc3 = ((vacc3 >> 31) - 1) & vacc3;
+
+      y[0] = vacc0;
+      y[1] = vacc1;
+      y[2] = vacc2;
+      y[3] = vacc3;
+      y += 4;
+    }
+}
+
 void xnn_f32_relu_ukernel__scalar_x4(
     size_t n,
     const float* x_ptr,
@@ -27,24 +60,12 @@ void xnn_f32_relu_ukernel__scalar_x4(
   const uint32_t* x = (const uint32_t*)x_ptr;
   uint32_t* y = (uint32_t*)y_ptr;
 
-  for (; n >= 4 * sizeof(uint32_t); n -= 4 * sizeof(uint32_t)) {
-    uint32_t vacc0 = x[0];
-    uint32_t vacc1 = x[1];
-    uint32_t vacc2 = x[2];
-    uint32_t vacc3 = x[3];
-    x += 4;
+  xnn_f32_relu_ukernel__scalar_x4_batch(n, x_ptr, y_ptr);
+  size_t n_batch = n & ~(4 - 1);
+  x += n_batch * sizeof(float);
+  y += n_batch * sizeof(float);
+  n -= n_batch;
 
-    vacc0 = ((vacc0 >> 31) - 1) & vacc0;
-    vacc1 = ((vacc1 >> 31) - 1) & vacc1;
-    vacc2 = ((vacc2 >> 31) - 1) & vacc2;
-    vacc3 = ((vacc3 >> 31) - 1) & vacc3;
-
-    y[0] = vacc0;
-    y[1] = vacc1;
-    y[2] = vacc2;
-    y[3] = vacc3;
-    y += 4;
-  }
   if XNN_UNLIKELY(n != 0) {
     do {
       uint32_t vacc = *x++;
@@ -54,3 +75,4 @@ void xnn_f32_relu_ukernel__scalar_x4(
     } while (n != 0);
   }
 }
+
