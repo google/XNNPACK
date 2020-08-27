@@ -339,6 +339,7 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-relu/gen/scalar-x1.c
   src/f32-relu/gen/scalar-x2.c
   src/f32-relu/gen/scalar-x4.c
+  src/f32-relu/gen/scalar-x8.c
   src/f32-sigmoid/gen/scalar-lut2048-p1-div-x1.c
   src/f32-sigmoid/gen/scalar-lut2048-p1-div-x2.c
   src/f32-sigmoid/gen/scalar-lut2048-p1-div-x4.c

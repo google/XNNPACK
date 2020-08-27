@@ -9,15 +9,18 @@
 tools/xngen src/f32-relu/scalar.c.in -D BATCH_TILE=1 -o src/f32-relu/gen/scalar-x1.c
 tools/xngen src/f32-relu/scalar.c.in -D BATCH_TILE=2 -o src/f32-relu/gen/scalar-x2.c
 tools/xngen src/f32-relu/scalar.c.in -D BATCH_TILE=4 -o src/f32-relu/gen/scalar-x4.c
+tools/xngen src/f32-relu/scalar.c.in -D BATCH_TILE=8 -o src/f32-relu/gen/scalar-x8.c
 
 ### WAsm-specific micro-kernels
 tools/xngen src/f32-relu/wasm.c.in -D BATCH_TILE=1 -o src/f32-relu/gen/wasm-x1.c
 tools/xngen src/f32-relu/wasm.c.in -D BATCH_TILE=2 -o src/f32-relu/gen/wasm-x2.c
 tools/xngen src/f32-relu/wasm.c.in -D BATCH_TILE=4 -o src/f32-relu/gen/wasm-x4.c
+tools/xngen src/f32-relu/wasm.c.in -D BATCH_TILE=8 -o src/f32-relu/gen/wasm-x8.c
 
 ################################## WAsm SIMD ##################################
-tools/xngen src/f32-relu/wasmsimd.c.in -D BATCH_TILE=4 -o src/f32-relu/gen/wasmsimd-x4.c
-tools/xngen src/f32-relu/wasmsimd.c.in -D BATCH_TILE=8 -o src/f32-relu/gen/wasmsimd-x8.c
+tools/xngen src/f32-relu/wasmsimd.c.in -D BATCH_TILE=4  -o src/f32-relu/gen/wasmsimd-x4.c
+tools/xngen src/f32-relu/wasmsimd.c.in -D BATCH_TILE=8  -o src/f32-relu/gen/wasmsimd-x8.c
+tools/xngen src/f32-relu/wasmsimd.c.in -D BATCH_TILE=16 -o src/f32-relu/gen/wasmsimd-x16.c
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-relu/neon.c.in -D BATCH_TILE=4 -o src/f32-relu/gen/neon-x4.c

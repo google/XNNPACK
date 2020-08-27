@@ -2023,7 +2023,7 @@ static void init(void) {
       xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x8;
     }
     xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__wasmsimd_x8;
-    xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__wasmsimd_x8;
+    xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__wasmsimd_x16;
     xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__wasmsimd_addsub_x8;
     if (is_wasm_x86) {
       xnn_params.f32.rndz = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__wasmsimd_addsub_x8;
@@ -2403,9 +2403,9 @@ static void init(void) {
     xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__scalar_x4;
     xnn_params.f32.neg = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__scalar_x4;
     if (is_wasm_x86) {
-      xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__scalar_x4;
+      xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__scalar_x8;
     } else {
-      xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__wasm_x4;
+      xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_relu_ukernel__wasm_x8;
     }
     xnn_params.f32.rndne = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__scalar_libm_x4;
     xnn_params.f32.rndz  = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__scalar_libm_x4;
