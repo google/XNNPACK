@@ -14,20 +14,14 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/common.h>
 
 
-void xnn_f32_relu_ukernel__wasmsimd_x${BATCH_TILE}(
+$if BATCH_TILE > 4:
+  __attribute__((noinline)) static void relu_batch(
     size_t n,
     const float* x,
-    float* y,
-    const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
-{
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+    float* y) XNN_DISABLE_TSAN
+  {
+    const v128_t vzero = wasm_f32x4_splat(0.0f);
 
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
-
-  $if BATCH_TILE > 4:
     for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
       v128_t vacc${ABC[0:4]} = wasm_v128_load(x);
       $for N in range(4, BATCH_TILE, 4):
@@ -42,6 +36,29 @@ void xnn_f32_relu_ukernel__wasmsimd_x${BATCH_TILE}(
         wasm_v128_store(y + ${N}, vacc${ABC[N:N+4]});
       y += ${BATCH_TILE};
     }
+  }
+
+void xnn_f32_relu_ukernel__wasmsimd_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
+
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
+
+  $if BATCH_TILE > 4:
+    relu_batch(n, x, y);
+
+    size_t n_batch = n & ~(${BATCH_TILE} - 1);
+    x += n_batch * sizeof(float);
+    y += n_batch * sizeof(float);
+    n -= n_batch;
+
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     v128_t vacc = wasm_v128_load(x);
     x += 4;

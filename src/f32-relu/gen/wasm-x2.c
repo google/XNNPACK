@@ -14,6 +14,27 @@
 #include <xnnpack/math.h>
 
 
+__attribute__((noinline)) static void relu_batch(
+    size_t n,
+    const float* x,
+    float* y)
+{
+  const float vzero = 0.0f;
+
+  for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
+    float vacc0 = x[0];
+    float vacc1 = x[1];
+    x += 2;
+
+    vacc0 = __builtin_wasm_max_f32(vacc0, vzero);
+    vacc1 = __builtin_wasm_max_f32(vacc1, vzero);
+
+    y[0] = vacc0;
+    y[1] = vacc1;
+    y += 2;
+  }
+}
+
 void xnn_f32_relu_ukernel__wasm_x2(
     size_t n,
     const float* x,
@@ -26,6 +47,15 @@ void xnn_f32_relu_ukernel__wasm_x2(
   assert(y != NULL);
 
   const float vzero = 0.0f;
+
+  if (n >= 2 * sizeof(uint32_t)) {
+    relu_batch(n, x, y);
+
+    size_t n_batch = n & ~(2 - 1);
+    x += n_batch * sizeof(float);
+    y += n_batch * sizeof(float);
+    n -= n_batch;
+  }
 
   for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
     float vacc0 = x[0];

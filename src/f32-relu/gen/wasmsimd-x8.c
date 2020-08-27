@@ -15,17 +15,11 @@
 #include <xnnpack/common.h>
 
 
-void xnn_f32_relu_ukernel__wasmsimd_x8(
-    size_t n,
-    const float* x,
-    float* y,
-    const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+__attribute__((noinline)) static void relu_batch(
+  size_t n,
+  const float* x,
+  float* y) XNN_DISABLE_TSAN
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
-
   const v128_t vzero = wasm_f32x4_splat(0.0f);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
@@ -40,6 +34,28 @@ void xnn_f32_relu_ukernel__wasmsimd_x8(
     wasm_v128_store(y + 4, vacc4567);
     y += 8;
   }
+}
+
+void xnn_f32_relu_ukernel__wasmsimd_x8(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
+
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
+
+  relu_batch(n, x, y);
+
+  size_t n_batch = n & ~(8 - 1);
+  x += n_batch * sizeof(float);
+  y += n_batch * sizeof(float);
+  n -= n_batch;
+
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     v128_t vacc = wasm_v128_load(x);
     x += 4;
