@@ -12,11 +12,15 @@
 - name: xnn_f32_vmaxc_ukernel__avx512f_x32
 - name: xnn_f32_vmaxc_ukernel__wasmsimd_arm_x4
 - name: xnn_f32_vmaxc_ukernel__wasmsimd_arm_x8
+- name: xnn_f32_vmaxc_ukernel__wasmsimd_arm_x16
 - name: xnn_f32_vmaxc_ukernel__wasmsimd_x86_x4
 - name: xnn_f32_vmaxc_ukernel__wasmsimd_x86_x8
+- name: xnn_f32_vmaxc_ukernel__wasmsimd_x86_x16
 - name: xnn_f32_vmaxc_ukernel__wasm_x1
 - name: xnn_f32_vmaxc_ukernel__wasm_x2
 - name: xnn_f32_vmaxc_ukernel__wasm_x4
+- name: xnn_f32_vmaxc_ukernel__wasm_x8
 - name: xnn_f32_vmaxc_ukernel__scalar_x1
 - name: xnn_f32_vmaxc_ukernel__scalar_x2
 - name: xnn_f32_vmaxc_ukernel__scalar_x4
+- name: xnn_f32_vmaxc_ukernel__scalar_x8

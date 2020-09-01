@@ -12,6 +12,8 @@
 - name: xnn_f32_vsqrdiff_ukernel__avx512f_x32
 - name: xnn_f32_vsqrdiff_ukernel__wasmsimd_x4
 - name: xnn_f32_vsqrdiff_ukernel__wasmsimd_x8
+- name: xnn_f32_vsqrdiff_ukernel__wasmsimd_x16
 - name: xnn_f32_vsqrdiff_ukernel__scalar_x1
 - name: xnn_f32_vsqrdiff_ukernel__scalar_x2
 - name: xnn_f32_vsqrdiff_ukernel__scalar_x4
+- name: xnn_f32_vsqrdiff_ukernel__scalar_x8

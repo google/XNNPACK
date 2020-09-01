@@ -4,6 +4,8 @@
 # LICENSE file in the root directory of this source tree.
 - name: xnn_f32_vmulc_ukernel__wasmsimd_x4
 - name: xnn_f32_vmulc_ukernel__wasmsimd_x8
+- name: xnn_f32_vmulc_ukernel__wasmsimd_x16
 - name: xnn_f32_vmulc_ukernel__scalar_x1
 - name: xnn_f32_vmulc_ukernel__scalar_x2
 - name: xnn_f32_vmulc_ukernel__scalar_x4
+- name: xnn_f32_vmulc_ukernel__scalar_x8

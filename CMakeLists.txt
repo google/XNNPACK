@@ -362,111 +362,147 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vadd-minmax-scalar-x1.c
   src/f32-vbinary/gen/vadd-minmax-scalar-x2.c
   src/f32-vbinary/gen/vadd-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vadd-minmax-scalar-x8.c
   src/f32-vbinary/gen/vadd-relu-scalar-x1.c
   src/f32-vbinary/gen/vadd-relu-scalar-x2.c
   src/f32-vbinary/gen/vadd-relu-scalar-x4.c
+  src/f32-vbinary/gen/vadd-relu-scalar-x8.c
   src/f32-vbinary/gen/vadd-scalar-x1.c
   src/f32-vbinary/gen/vadd-scalar-x2.c
   src/f32-vbinary/gen/vadd-scalar-x4.c
+  src/f32-vbinary/gen/vadd-scalar-x8.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vaddc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vaddc-minmax-scalar-x8.c
   src/f32-vbinary/gen/vaddc-relu-scalar-x1.c
   src/f32-vbinary/gen/vaddc-relu-scalar-x2.c
   src/f32-vbinary/gen/vaddc-relu-scalar-x4.c
+  src/f32-vbinary/gen/vaddc-relu-scalar-x8.c
   src/f32-vbinary/gen/vaddc-scalar-x1.c
   src/f32-vbinary/gen/vaddc-scalar-x2.c
   src/f32-vbinary/gen/vaddc-scalar-x4.c
+  src/f32-vbinary/gen/vaddc-scalar-x8.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x1.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x2.c
   src/f32-vbinary/gen/vdiv-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vdiv-minmax-scalar-x8.c
   src/f32-vbinary/gen/vdiv-relu-scalar-x1.c
   src/f32-vbinary/gen/vdiv-relu-scalar-x2.c
   src/f32-vbinary/gen/vdiv-relu-scalar-x4.c
+  src/f32-vbinary/gen/vdiv-relu-scalar-x8.c
   src/f32-vbinary/gen/vdiv-scalar-x1.c
   src/f32-vbinary/gen/vdiv-scalar-x2.c
   src/f32-vbinary/gen/vdiv-scalar-x4.c
+  src/f32-vbinary/gen/vdiv-scalar-x8.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vdivc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vdivc-minmax-scalar-x8.c
   src/f32-vbinary/gen/vdivc-relu-scalar-x1.c
   src/f32-vbinary/gen/vdivc-relu-scalar-x2.c
   src/f32-vbinary/gen/vdivc-relu-scalar-x4.c
+  src/f32-vbinary/gen/vdivc-relu-scalar-x8.c
   src/f32-vbinary/gen/vdivc-scalar-x1.c
   src/f32-vbinary/gen/vdivc-scalar-x2.c
   src/f32-vbinary/gen/vdivc-scalar-x4.c
+  src/f32-vbinary/gen/vdivc-scalar-x8.c
   src/f32-vbinary/gen/vmax-scalar-x1.c
   src/f32-vbinary/gen/vmax-scalar-x2.c
   src/f32-vbinary/gen/vmax-scalar-x4.c
+  src/f32-vbinary/gen/vmax-scalar-x8.c
   src/f32-vbinary/gen/vmaxc-scalar-x1.c
   src/f32-vbinary/gen/vmaxc-scalar-x2.c
   src/f32-vbinary/gen/vmaxc-scalar-x4.c
+  src/f32-vbinary/gen/vmaxc-scalar-x8.c
   src/f32-vbinary/gen/vmin-scalar-x1.c
   src/f32-vbinary/gen/vmin-scalar-x2.c
   src/f32-vbinary/gen/vmin-scalar-x4.c
+  src/f32-vbinary/gen/vmin-scalar-x8.c
   src/f32-vbinary/gen/vminc-scalar-x1.c
   src/f32-vbinary/gen/vminc-scalar-x2.c
   src/f32-vbinary/gen/vminc-scalar-x4.c
+  src/f32-vbinary/gen/vminc-scalar-x8.c
   src/f32-vbinary/gen/vmul-minmax-scalar-x1.c
   src/f32-vbinary/gen/vmul-minmax-scalar-x2.c
   src/f32-vbinary/gen/vmul-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vmul-minmax-scalar-x8.c
   src/f32-vbinary/gen/vmul-relu-scalar-x1.c
   src/f32-vbinary/gen/vmul-relu-scalar-x2.c
   src/f32-vbinary/gen/vmul-relu-scalar-x4.c
+  src/f32-vbinary/gen/vmul-relu-scalar-x8.c
   src/f32-vbinary/gen/vmul-scalar-x1.c
   src/f32-vbinary/gen/vmul-scalar-x2.c
   src/f32-vbinary/gen/vmul-scalar-x4.c
+  src/f32-vbinary/gen/vmul-scalar-x8.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vmulc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vmulc-minmax-scalar-x8.c
   src/f32-vbinary/gen/vmulc-relu-scalar-x1.c
   src/f32-vbinary/gen/vmulc-relu-scalar-x2.c
   src/f32-vbinary/gen/vmulc-relu-scalar-x4.c
+  src/f32-vbinary/gen/vmulc-relu-scalar-x8.c
   src/f32-vbinary/gen/vmulc-scalar-x1.c
   src/f32-vbinary/gen/vmulc-scalar-x2.c
   src/f32-vbinary/gen/vmulc-scalar-x4.c
+  src/f32-vbinary/gen/vmulc-scalar-x8.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vrdivc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vrdivc-minmax-scalar-x8.c
   src/f32-vbinary/gen/vrdivc-relu-scalar-x1.c
   src/f32-vbinary/gen/vrdivc-relu-scalar-x2.c
   src/f32-vbinary/gen/vrdivc-relu-scalar-x4.c
+  src/f32-vbinary/gen/vrdivc-relu-scalar-x8.c
   src/f32-vbinary/gen/vrdivc-scalar-x1.c
   src/f32-vbinary/gen/vrdivc-scalar-x2.c
   src/f32-vbinary/gen/vrdivc-scalar-x4.c
+  src/f32-vbinary/gen/vrdivc-scalar-x8.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vrsubc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vrsubc-minmax-scalar-x8.c
   src/f32-vbinary/gen/vrsubc-relu-scalar-x1.c
   src/f32-vbinary/gen/vrsubc-relu-scalar-x2.c
   src/f32-vbinary/gen/vrsubc-relu-scalar-x4.c
+  src/f32-vbinary/gen/vrsubc-relu-scalar-x8.c
   src/f32-vbinary/gen/vrsubc-scalar-x1.c
   src/f32-vbinary/gen/vrsubc-scalar-x2.c
   src/f32-vbinary/gen/vrsubc-scalar-x4.c
+  src/f32-vbinary/gen/vrsubc-scalar-x8.c
   src/f32-vbinary/gen/vsqrdiff-scalar-x1.c
   src/f32-vbinary/gen/vsqrdiff-scalar-x2.c
   src/f32-vbinary/gen/vsqrdiff-scalar-x4.c
+  src/f32-vbinary/gen/vsqrdiff-scalar-x8.c
   src/f32-vbinary/gen/vsqrdiffc-scalar-x1.c
   src/f32-vbinary/gen/vsqrdiffc-scalar-x2.c
   src/f32-vbinary/gen/vsqrdiffc-scalar-x4.c
+  src/f32-vbinary/gen/vsqrdiffc-scalar-x8.c
   src/f32-vbinary/gen/vsub-minmax-scalar-x1.c
   src/f32-vbinary/gen/vsub-minmax-scalar-x2.c
   src/f32-vbinary/gen/vsub-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vsub-minmax-scalar-x8.c
   src/f32-vbinary/gen/vsub-relu-scalar-x1.c
   src/f32-vbinary/gen/vsub-relu-scalar-x2.c
   src/f32-vbinary/gen/vsub-relu-scalar-x4.c
+  src/f32-vbinary/gen/vsub-relu-scalar-x8.c
   src/f32-vbinary/gen/vsub-scalar-x1.c
   src/f32-vbinary/gen/vsub-scalar-x2.c
   src/f32-vbinary/gen/vsub-scalar-x4.c
+  src/f32-vbinary/gen/vsub-scalar-x8.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x1.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x2.c
   src/f32-vbinary/gen/vsubc-minmax-scalar-x4.c
+  src/f32-vbinary/gen/vsubc-minmax-scalar-x8.c
   src/f32-vbinary/gen/vsubc-relu-scalar-x1.c
   src/f32-vbinary/gen/vsubc-relu-scalar-x2.c
   src/f32-vbinary/gen/vsubc-relu-scalar-x4.c
+  src/f32-vbinary/gen/vsubc-relu-scalar-x8.c
   src/f32-vbinary/gen/vsubc-scalar-x1.c
   src/f32-vbinary/gen/vsubc-scalar-x2.c
   src/f32-vbinary/gen/vsubc-scalar-x4.c
+  src/f32-vbinary/gen/vsubc-scalar-x8.c
   src/f32-vmulcaddc/gen/c1-minmax-scalar-2x.c
   src/f32-vmulcaddc/gen/c2-minmax-scalar-2x.c
   src/f32-vmulcaddc/gen/c4-minmax-scalar-2x.c

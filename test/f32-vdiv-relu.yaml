@@ -4,9 +4,12 @@
 # LICENSE file in the root directory of this source tree.
 - name: xnn_f32_vdiv_relu_ukernel__wasmsimd_x4
 - name: xnn_f32_vdiv_relu_ukernel__wasmsimd_x8
+- name: xnn_f32_vdiv_relu_ukernel__wasmsimd_x16
 - name: xnn_f32_vdiv_relu_ukernel__wasm_x1
 - name: xnn_f32_vdiv_relu_ukernel__wasm_x2
 - name: xnn_f32_vdiv_relu_ukernel__wasm_x4
+- name: xnn_f32_vdiv_relu_ukernel__wasm_x8
 - name: xnn_f32_vdiv_relu_ukernel__scalar_x1
 - name: xnn_f32_vdiv_relu_ukernel__scalar_x2
 - name: xnn_f32_vdiv_relu_ukernel__scalar_x4
+- name: xnn_f32_vdiv_relu_ukernel__scalar_x8
