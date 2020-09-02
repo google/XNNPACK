@@ -113,7 +113,7 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x16(
       if XNN_LIKELY(n >= (8 * sizeof(int8_t))) {
         _mm_storel_epi64((__m128i*) output, vout0123456701234567);
         output += 8;
-        n -= 8;
+        n -= 8 * sizeof(int8_t);
       } else {
         if (n & (4 * sizeof(int8_t))) {
           *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);

@@ -158,7 +158,7 @@ void xnn_qs8_vadd_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TILE}(
         if XNN_LIKELY(n >= (8 * sizeof(int8_t))) {
           _mm_storel_epi64((__m128i*) output, vout${ABC[0:8]}${ABC[0:8]});
           output += 8;
-          n -= 8;
+          n -= 8 * sizeof(int8_t);
         } else {
           if (n & (4 * sizeof(int8_t))) {
             *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});

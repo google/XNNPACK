@@ -409,14 +409,14 @@ union xnn_qs8_add_params {
   } scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    uint8_t x_zero_point;
-    uint8_t y_zero_point;
+    int8_t x_zero_point;
+    int8_t y_zero_point;
     int16_t output_zero_point;
     int32_t x_multiplier;
     int32_t y_multiplier;
     int32_t right_shift;
-    uint8_t output_min;
-    uint8_t output_max;
+    int8_t output_min;
+    int8_t output_max;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

@@ -820,6 +820,14 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-requantization/precise-neon.c
   src/qs8-requantization/fp32-neon.c
   src/qs8-requantization/q31-neon.c
+  src/qs8-vadd/gen/minmax-neon-ld64-x8.c
+  src/qs8-vadd/gen/minmax-neon-ld64-x16.c
+  src/qs8-vadd/gen/minmax-neon-ld64-x24.c
+  src/qs8-vadd/gen/minmax-neon-ld64-x32.c
+  src/qs8-vaddc/gen/minmax-neon-ld64-x8.c
+  src/qs8-vaddc/gen/minmax-neon-ld64-x16.c
+  src/qs8-vaddc/gen/minmax-neon-ld64-x24.c
+  src/qs8-vaddc/gen/minmax-neon-ld64-x32.c
   src/qu8-avgpool/9p8x-minmax-neon-c8.c
   src/qu8-avgpool/9x-minmax-neon-c8.c
   src/qu8-dwconv/up8x9-minmax-neon.c

@@ -1,0 +1,138 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/vadd.h>
+
+#include <stdio.h>
+#include <inttypes.h>
+
+
+void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x${BATCH_TILE}(
+    size_t n,
+    const int8_t* input_x,
+    const int8_t* input_y,
+    int8_t* output,
+    const union xnn_qs8_add_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  const int8x8_t vx_zero_point = vld1_dup_s8(&params->neon.x_zero_point);
+  const int32x4_t vx_multiplier = vld1q_dup_s32(&params->neon.x_multiplier);
+  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
+  const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+
+  const int32_t vey = (int32_t) *input_y - (int32_t) params->neon.y_zero_point;
+  const int32_t vy_multiplier = params->neon.y_multiplier;
+  const int32x4_t vy_bias = vdupq_n_s32(vey * vy_multiplier);
+
+  for (; n >= ${BATCH_TILE} * sizeof(int8_t); n -= ${BATCH_TILE} * sizeof(int8_t)) {
+    $for N in range(0, BATCH_TILE, 8):
+      const int8x8_t vx${ABC[N:N+8]} = vld1_s8(input_x); input_x += 8;
+
+    $for N in range(0, BATCH_TILE, 8):
+      const int16x8_t vex${ABC[N:N+8]} = vsubl_s8(vx${ABC[N:N+8]}, vx_zero_point);
+
+    $for N in range(0, BATCH_TILE, 8):
+      int32x4_t vacc${ABC[N:N+4]} = vmlaq_s32(vy_bias, vmovl_s16(vget_low_s16(vex${ABC[N:N+8]})), vx_multiplier);
+      int32x4_t vacc${ABC[N+4:N+8]} = vmlaq_s32(vy_bias, vmovl_s16(vget_high_s16(vex${ABC[N:N+8]})), vx_multiplier);
+
+    $for N in range(0, BATCH_TILE, 4):
+      vacc${ABC[N:N+4]} = vsraq_n_s32(vacc${ABC[N:N+4]}, vbicq_s32(vacc${ABC[N:N+4]}, vzero_shift_mask), 31);
+
+    $for N in range(0, BATCH_TILE, 4):
+      vacc${ABC[N:N+4]} = vrshlq_s32(vacc${ABC[N:N+4]}, vright_shift);
+
+    $for N in range(0, BATCH_TILE, 8):
+      const int16x8_t vacc${ABC[N:N+8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${ABC[N:N+4]}), vqmovn_s32(vacc${ABC[N+4:N+8]})), voutput_zero_point);
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        int8x16_t vout${ABC[N:N+16]} = vcombine_s8(vqmovn_s16(vacc${ABC[N:N+8]}), vqmovn_s16(vacc${ABC[N+8:N+16]}));
+      $else:
+        int8x8_t vout${ABC[N:N+8]} = vqmovn_s16(vacc${ABC[N:N+8]});
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        vout${ABC[N:N+16]} = vmaxq_s8(vout${ABC[N:N+16]}, voutput_min);
+      $else:
+        vout${ABC[N:N+8]} = vmax_s8(vout${ABC[N:N+8]}, vget_low_s8(voutput_min));
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        vout${ABC[N:N+16]} = vminq_s8(vout${ABC[N:N+16]}, voutput_max);
+      $else:
+        vout${ABC[N:N+8]} = vmin_s8(vout${ABC[N:N+8]}, vget_low_s8(voutput_max));
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        vst1q_s8(output, vout${ABC[N:N+16]}); output += 16;
+      $else:
+        vst1_s8(output, vout${ABC[N:N+8]}); output += 8;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    ${"do " if BATCH_TILE > 8 else ""}{
+      $if BATCH_TILE > 8:
+        const int8x8_t vx${ABC[0:8]} = vld1_s8(input_x); input_x += 8;
+      $else:
+        const int8x8_t vx${ABC[0:8]} = vld1_s8(input_x);
+
+      const int16x8_t vex${ABC[0:8]} = vsubl_s8(vx${ABC[0:8]}, vx_zero_point);
+
+      int32x4_t vacc${ABC[0:4]} = vmlaq_s32(vy_bias, vmovl_s16(vget_low_s16(vex${ABC[0:8]})), vx_multiplier);
+      int32x4_t vacc${ABC[4:8]} = vmlaq_s32(vy_bias, vmovl_s16(vget_high_s16(vex${ABC[0:8]})), vx_multiplier);
+
+      vacc${ABC[0:4]} = vsraq_n_s32(vacc${ABC[0:4]}, vbicq_s32(vacc${ABC[0:4]}, vzero_shift_mask), 31);
+      vacc${ABC[4:8]} = vsraq_n_s32(vacc${ABC[4:8]}, vbicq_s32(vacc${ABC[4:8]}, vzero_shift_mask), 31);
+
+      vacc${ABC[0:4]} = vrshlq_s32(vacc${ABC[0:4]}, vright_shift);
+      vacc${ABC[4:8]} = vrshlq_s32(vacc${ABC[4:8]}, vright_shift);
+
+      const int16x8_t vacc${ABC[0:8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${ABC[0:4]}), vqmovn_s32(vacc${ABC[4:8]})), voutput_zero_point);
+
+      int8x8_t vout${ABC[0:8]} = vqmovn_s16(vacc${ABC[0:8]});
+      vout${ABC[0:8]} = vmax_s8(vout${ABC[0:8]}, vget_low_s8(voutput_min));
+      vout${ABC[0:8]} = vmin_s8(vout${ABC[0:8]}, vget_low_s8(voutput_max));
+
+      $if BATCH_TILE > 8:
+        if XNN_LIKELY(n >= (8 * sizeof(int8_t))) {
+          vst1_s8(output, vout${ABC[0:8]}); output += 8;
+          n -= 8 * sizeof(int8_t);
+        } else {
+          if (n & (4 * sizeof(int8_t))) {
+            vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_s8(vout${ABC[0:8]}), 0); output += 4;
+            vout${ABC[0:8]} = vext_s8(vout${ABC[0:8]}, vout${ABC[0:8]}, 4);
+          }
+          if (n & (2 * sizeof(int8_t))) {
+            vst1_lane_u16(__builtin_assume_aligned(output, 1), vreinterpret_u16_s8(vout${ABC[0:8]}), 0); output += 2;
+            vout${ABC[0:8]} = vext_s8(vout${ABC[0:8]}, vout${ABC[0:8]}, 2);
+          }
+          if (n & (1 * sizeof(int8_t))) {
+            vst1_lane_s8(output, vout${ABC[0:8]}, 0); output += 1;
+          }
+          n = 0;
+        }
+      $else:
+        if (n & (4 * sizeof(int8_t))) {
+          vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_s8(vout${ABC[0:8]}), 0); output += 4;
+          vout${ABC[0:8]} = vext_s8(vout${ABC[0:8]}, vout${ABC[0:8]}, 4);
+        }
+        if (n & (2 * sizeof(int8_t))) {
+          vst1_lane_u16(__builtin_assume_aligned(output, 1), vreinterpret_u16_s8(vout${ABC[0:8]}), 0); output += 2;
+          vout${ABC[0:8]} = vext_s8(vout${ABC[0:8]}, vout${ABC[0:8]}, 2);
+        }
+        if (n & (1 * sizeof(int8_t))) {
+          vst1_lane_s8(output, vout${ABC[0:8]}, 0); output += 1;
+        }
+    }${" while (n != 0);" if BATCH_TILE > 8 else ""}
+  }
+}

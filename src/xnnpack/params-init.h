@@ -1326,10 +1326,10 @@ static inline union xnn_qs8_add_params xnn_init_qs8_add_params(
   #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
     params.neon.x_zero_point = x_zero_point;
     params.neon.y_zero_point = y_zero_point;
-    params.neon.output_zero_point = (int16_t) output_zero_point;
     params.neon.x_multiplier = (int32_t) x_multiplier;
     params.neon.y_multiplier = (int32_t) y_multiplier;
     params.neon.right_shift = (int32_t) -shift;
+    params.neon.output_zero_point = (int16_t) output_zero_point;
     params.neon.output_min = output_min;
     params.neon.output_max = output_max;
   #else
