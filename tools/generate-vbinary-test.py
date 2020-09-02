@@ -150,6 +150,85 @@ $else:
     }
   }
 
+$if DATATYPE == "QS8":
+  TEST(${TEST_NAME}, a_zero_point) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      for (int32_t a_zero_point = -128; a_zero_point <= 127; a_zero_point += 51) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .a_zero_point(a_zero_point)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, b_zero_point) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      for (int32_t b_zero_point = -128; b_zero_point <= 127; b_zero_point += 51) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .b_zero_point(b_zero_point)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, y_zero_point) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      for (int32_t y_zero_point = -128; y_zero_point <= 127; y_zero_point += 51) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .y_zero_point(y_zero_point)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, a_scale) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      for (float a_scale = 0.1f; a_scale <= 10.0f; a_scale *= 3.14f) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .a_scale(a_scale)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, b_scale) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      for (float b_scale = 0.1f; b_scale <= 10.0f; b_scale *= 3.14f) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .b_scale(b_scale)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, y_scale) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      for (float y_scale = 0.1f; y_scale <= 10.0f; y_scale *= 3.14f) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .y_scale(y_scale)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
 $if ACTIVATION_TYPE == "MINMAX":
   TEST(${TEST_NAME}, qmin) {
     $if ISA_CHECK:
@@ -202,7 +281,7 @@ def generate_test_cases(ukernel, op_type, activation_type, tester, batch_tile, i
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
       "TESTER": tester,
-      "DATATYPE": datatype,
+      "DATATYPE": datatype.upper(),
       "BATCH_TILE": batch_tile,
       "OP_TYPE": op_type,
       "ACTIVATION_TYPE": activation_type,
