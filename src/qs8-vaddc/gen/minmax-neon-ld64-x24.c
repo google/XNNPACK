@@ -116,7 +116,7 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x24(
           vout01234567 = vext_s8(vout01234567, vout01234567, 2);
         }
         if (n & (1 * sizeof(int8_t))) {
-          vst1_lane_s8(output, vout01234567, 0); output += 1;
+          vst1_lane_s8(output, vout01234567, 0);
         }
         n = 0;
       }

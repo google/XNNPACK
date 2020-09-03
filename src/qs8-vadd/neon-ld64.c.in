@@ -124,7 +124,7 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x${BATCH_TILE}(
             vout${ABC[0:8]} = vext_s8(vout${ABC[0:8]}, vout${ABC[0:8]}, 2);
           }
           if (n & (1 * sizeof(int8_t))) {
-            vst1_lane_s8(output, vout${ABC[0:8]}, 0); output += 1;
+            vst1_lane_s8(output, vout${ABC[0:8]}, 0);
           }
           n = 0;
         }
@@ -138,7 +138,7 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x${BATCH_TILE}(
           vout${ABC[0:8]} = vext_s8(vout${ABC[0:8]}, vout${ABC[0:8]}, 2);
         }
         if (n & (1 * sizeof(int8_t))) {
-          vst1_lane_s8(output, vout${ABC[0:8]}, 0); output += 1;
+          vst1_lane_s8(output, vout${ABC[0:8]}, 0);
         }
     }${" while (n != 0);" if BATCH_TILE > 8 else ""}
   }

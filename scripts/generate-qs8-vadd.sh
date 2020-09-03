@@ -4,6 +4,17 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################## WAsm SIMD ##################################
+tools/xngen src/qs8-vadd/wasmsimd.c.in -D BATCH_TILE=8  -o src/qs8-vadd/gen/minmax-wasmsimd-x8.c
+tools/xngen src/qs8-vadd/wasmsimd.c.in -D BATCH_TILE=16 -o src/qs8-vadd/gen/minmax-wasmsimd-x16.c
+tools/xngen src/qs8-vadd/wasmsimd.c.in -D BATCH_TILE=24 -o src/qs8-vadd/gen/minmax-wasmsimd-x24.c
+tools/xngen src/qs8-vadd/wasmsimd.c.in -D BATCH_TILE=32 -o src/qs8-vadd/gen/minmax-wasmsimd-x32.c
+
+tools/xngen src/qs8-vaddc/wasmsimd.c.in -D BATCH_TILE=8  -o src/qs8-vaddc/gen/minmax-wasmsimd-x8.c
+tools/xngen src/qs8-vaddc/wasmsimd.c.in -D BATCH_TILE=16 -o src/qs8-vaddc/gen/minmax-wasmsimd-x16.c
+tools/xngen src/qs8-vaddc/wasmsimd.c.in -D BATCH_TILE=24 -o src/qs8-vaddc/gen/minmax-wasmsimd-x24.c
+tools/xngen src/qs8-vaddc/wasmsimd.c.in -D BATCH_TILE=32 -o src/qs8-vaddc/gen/minmax-wasmsimd-x32.c
+
 ################################### ARM NEON ##################################
 tools/xngen src/qs8-vadd/neon-ld64.c.in -D BATCH_TILE=8  -o src/qs8-vadd/gen/minmax-neon-ld64-x8.c
 tools/xngen src/qs8-vadd/neon-ld64.c.in -D BATCH_TILE=16 -o src/qs8-vadd/gen/minmax-neon-ld64-x16.c

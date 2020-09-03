@@ -21,11 +21,11 @@ void xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_x32(
     int8_t* output,
     const union xnn_qs8_add_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const __m128i vzero_point_product = _mm_load_si128((const __m128i*) &params->sse2.zero_point_product);
-  const __m128i vx_multiplier_lo = _mm_load_si128((const __m128i*) &params->sse2.x_multiplier_lo);
-  const __m128i vx_multiplier_hi = _mm_load_si128((const __m128i*) &params->sse2.x_multiplier_hi);
-  const __m128i vy_multiplier_lo = _mm_load_si128((const __m128i*) &params->sse2.y_multiplier_lo);
-  const __m128i vy_multiplier_hi = _mm_load_si128((const __m128i*) &params->sse2.y_multiplier_hi);
+  const __m128i vzero_point_product = _mm_load_si128((const __m128i*) params->sse2.zero_point_product);
+  const __m128i vx_multiplier_lo = _mm_load_si128((const __m128i*) params->sse2.x_multiplier_lo);
+  const __m128i vx_multiplier_hi = _mm_load_si128((const __m128i*) params->sse2.x_multiplier_hi);
+  const __m128i vy_multiplier_lo = _mm_load_si128((const __m128i*) params->sse2.y_multiplier_lo);
+  const __m128i vy_multiplier_hi = _mm_load_si128((const __m128i*) params->sse2.y_multiplier_hi);
   const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->sse2.remainder_mask);
   const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->sse2.remainder_threshold);
   const __m128i vshift = _mm_cvtsi32_si128((int) params->sse2.shift);
@@ -193,7 +193,6 @@ void xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_x32(
         }
         if (n & (1 * sizeof(int8_t))) {
           *output = (int8_t) _mm_extract_epi8(vout0123456701234567, 0);
-          output += 1;
         }
         n = 0;
       }
