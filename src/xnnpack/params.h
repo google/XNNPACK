@@ -1930,6 +1930,7 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct dwconv_parameters dwconv[XNN_MAX_QS8_DWCONV_UKERNELS];
     struct gavgpool_parameters gavgpool;
+    struct vbinary_parameters vadd;
   } qs8;
   struct {
     struct gemm_parameters gemm;

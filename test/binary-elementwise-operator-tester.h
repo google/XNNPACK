@@ -60,6 +60,25 @@ class BinaryElementwiseOperatorTester {
       this->input1_shape_.begin(), this->input1_shape_.end(), size_t(1), std::multiplies<size_t>());
   }
 
+  inline BinaryElementwiseOperatorTester& input1_zero_point(int16_t input1_zero_point) {
+    this->input1_zero_point_ = input1_zero_point;
+    return *this;
+  }
+
+  inline int16_t input1_zero_point() const {
+    return this->input1_zero_point_;
+  }
+
+  inline BinaryElementwiseOperatorTester& input1_scale(float input1_scale) {
+    assert(isfinite(input1_scale));
+    this->input1_scale_ = input1_scale;
+    return *this;
+  }
+
+  inline float input1_scale() const {
+    return this->input1_scale_;
+  }
+
   inline BinaryElementwiseOperatorTester& input2_shape(std::initializer_list<size_t> input2_shape) {
     assert(input2_shape.size() <= XNN_MAX_TENSOR_DIMS);
     this->input2_shape_ = std::vector<size_t>(input2_shape);
@@ -81,6 +100,44 @@ class BinaryElementwiseOperatorTester {
   inline size_t num_input2_elements() const {
     return std::accumulate(
       this->input2_shape_.begin(), this->input2_shape_.end(), size_t(1), std::multiplies<size_t>());
+  }
+
+  inline BinaryElementwiseOperatorTester& input2_zero_point(int16_t input2_zero_point) {
+    this->input2_zero_point_ = input2_zero_point;
+    return *this;
+  }
+
+  inline int16_t input2_zero_point() const {
+    return this->input2_zero_point_;
+  }
+
+  inline BinaryElementwiseOperatorTester& input2_scale(float input2_scale) {
+    assert(isfinite(input2_scale));
+    this->input2_scale_ = input2_scale;
+    return *this;
+  }
+
+  inline float input2_scale() const {
+    return this->input2_scale_;
+  }
+
+  inline BinaryElementwiseOperatorTester& output_zero_point(int16_t output_zero_point) {
+    this->output_zero_point_ = output_zero_point;
+    return *this;
+  }
+
+  inline int16_t output_zero_point() const {
+    return this->output_zero_point_;
+  }
+
+  inline BinaryElementwiseOperatorTester& output_scale(float output_scale) {
+    assert(isfinite(output_scale));
+    this->output_scale_ = output_scale;
+    return *this;
+  }
+
+  inline float output_scale() const {
+    return this->output_scale_;
   }
 
   inline BinaryElementwiseOperatorTester& qmin(uint8_t qmin) {
@@ -140,6 +197,149 @@ class BinaryElementwiseOperatorTester {
     }
   }
 
+  void TestQS8() const {
+    ASSERT_NE(operation_type(), OperationType::Unknown);
+    ASSERT_GE(input1_zero_point(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(input1_zero_point(), std::numeric_limits<int8_t>::max());
+    ASSERT_GE(input2_zero_point(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(input2_zero_point(), std::numeric_limits<int8_t>::max());
+    ASSERT_GE(output_zero_point(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(output_zero_point(), std::numeric_limits<int8_t>::max());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
+
+    // Compute generalized shapes.
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_dims;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> output_dims;
+    std::fill(input1_dims.begin(), input1_dims.end(), 1);
+    std::fill(input2_dims.begin(), input2_dims.end(), 1);
+    std::fill(output_dims.begin(), output_dims.end(), 1);
+    std::copy(input1_shape().cbegin(), input1_shape().cend(), input1_dims.end() - num_input1_dims());
+    std::copy(input2_shape().cbegin(), input2_shape().cend(), input2_dims.end() - num_input2_dims());
+    for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
+      if (input1_dims[i] != 1 && input2_dims[i] != 1) {
+        ASSERT_EQ(input1_dims[i], input2_dims[i]);
+      }
+      output_dims[i] = std::max(input1_dims[i], input2_dims[i]);
+    }
+    const size_t num_output_elements =
+      std::accumulate(output_dims.begin(), output_dims.end(), size_t(1), std::multiplies<size_t>());
+
+    // Compute generalized strides.
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_strides;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_strides;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> output_strides;
+    size_t input1_stride = 1, input2_stride = 1, output_stride = 1;
+    for (size_t i = XNN_MAX_TENSOR_DIMS; i != 0; i--) {
+      input1_strides[i - 1] = input1_dims[i - 1] == 1 ? 0 : input1_stride;
+      input2_strides[i - 1] = input2_dims[i - 1] == 1 ? 0 : input2_stride;
+      output_strides[i - 1] = output_stride;
+      input1_stride *= input1_dims[i - 1];
+      input2_stride *= input2_dims[i - 1];
+      output_stride *= output_dims[i - 1];
+    }
+
+    std::vector<int8_t> input1(XNN_EXTRA_BYTES / sizeof(uint16_t) + num_input1_elements());
+    std::vector<int8_t> input2(XNN_EXTRA_BYTES / sizeof(uint16_t) + num_input2_elements());
+    std::vector<int8_t> output(num_output_elements);
+    std::vector<float> output_ref(num_output_elements);
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input1.begin(), input1.end(), std::ref(i8rng));
+      std::generate(input2.begin(), input2.end(), std::ref(i8rng));
+      std::fill(output.begin(), output.end(), 0xAA);
+
+      // Compute reference results.
+      for (size_t i = 0; i < output_dims[0]; i++) {
+        for (size_t j = 0; j < output_dims[1]; j++) {
+          for (size_t k = 0; k < output_dims[2]; k++) {
+            for (size_t l = 0; l < output_dims[3]; l++) {
+              for (size_t m = 0; m < output_dims[4]; m++) {
+                for (size_t n = 0; n < output_dims[5]; n++) {
+                  output_ref[i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5]] = Compute(
+                    input1_scale() * (int32_t(input1[i * input1_strides[0] + j * input1_strides[1] + k * input1_strides[2] + l * input1_strides[3] + m * input1_strides[4] + n * input1_strides[5]]) - input1_zero_point()),
+                    input2_scale() * (int32_t(input2[i * input2_strides[0] + j * input2_strides[1] + k * input2_strides[2] + l * input2_strides[3] + m * input2_strides[4] + n * input2_strides[5]]) - input2_zero_point())) /
+                      output_scale() + float(output_zero_point());
+                }
+              }
+            }
+          }
+        }
+      }
+
+      for (float& output_value : output_ref) {
+        output_value = std::min(std::max(output_value, float(int8_t(qmin() - 0x80))), float(int8_t(qmax() - 0x80)));
+      }
+
+      // Create, setup, run, and destroy a binary elementwise operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t binary_elementwise_op = nullptr;
+      xnn_status status = xnn_status_unsupported_parameter;
+      switch (operation_type()) {
+        case OperationType::Add:
+          status = xnn_create_add_nd_qs8(
+            input1_zero_point(), input1_scale(),
+            input2_zero_point(), input2_scale(),
+            output_zero_point(), output_scale(),
+            int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+            0, &binary_elementwise_op);
+          break;
+        default:
+          FAIL() << "Unsupported operation type";
+      }
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, binary_elementwise_op);
+
+      // Smart pointer to automatically delete binary_elementwise_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_binary_elementwise_op(binary_elementwise_op, xnn_delete_operator);
+
+      switch (operation_type()) {
+        case OperationType::Add:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_add_nd_qs8(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        default:
+          FAIL() << "Unsupported operation type";
+      }
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(binary_elementwise_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < output_dims[0]; i++) {
+        for (size_t j = 0; j < output_dims[1]; j++) {
+          for (size_t k = 0; k < output_dims[2]; k++) {
+            for (size_t l = 0; l < output_dims[3]; l++) {
+              for (size_t m = 0; m < output_dims[4]; m++) {
+                for (size_t n = 0; n < output_dims[5]; n++) {
+                  const size_t index =
+                    i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
+                  ASSERT_NEAR(float(output[index]), output_ref[index], 0.6f)
+                    << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
+                    << ", input1 zero point = " << input1_zero_point() << ", input1 scale = " << input1_scale()
+                    << ", input2 zero point = " << input2_zero_point() << ", input2 scale = " << input2_scale()
+                    << ", output zero point = " << output_zero_point() << ", output scale = " << output_scale();
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
   void TestF16() const {
     ASSERT_NE(operation_type(), OperationType::Unknown);
@@ -278,6 +478,7 @@ class BinaryElementwiseOperatorTester {
       }
     }
   }
+
   void TestF32() const {
     ASSERT_NE(operation_type(), OperationType::Unknown);
 
@@ -513,6 +714,12 @@ class BinaryElementwiseOperatorTester {
  private:
   std::vector<size_t> input1_shape_;
   std::vector<size_t> input2_shape_;
+  int16_t input1_zero_point_{0};
+  float input1_scale_{1.0f};
+  int16_t input2_zero_point_{0};
+  float input2_scale_{1.0f};
+  int16_t output_zero_point_{0};
+  float output_scale_{1.0f};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   OperationType operation_type_{OperationType::Unknown};

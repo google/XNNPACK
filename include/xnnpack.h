@@ -1767,6 +1767,29 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f16(
 
 #ifndef XNN_NO_QS8_OPERATORS
 
+enum xnn_status xnn_create_add_nd_qs8(
+  int8_t input1_zero_point,
+  float input1_scale,
+  int8_t input2_zero_point,
+  float input2_scale,
+  int8_t output_zero_point,
+  float output_scale,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* add_op_out);
+
+enum xnn_status xnn_setup_add_nd_qs8(
+  xnn_operator_t add_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const int8_t* input1,
+  const int8_t* input2,
+  int8_t* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_convolution2d_nhwc_qs8(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
