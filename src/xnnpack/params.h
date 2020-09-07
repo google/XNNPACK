@@ -426,10 +426,11 @@ union xnn_qs8_add_params {
     XNN_ALIGN(16) uint16_t x_multiplier_hi[8];
     XNN_ALIGN(16) uint16_t y_multiplier_lo[8];
     XNN_ALIGN(16) uint16_t y_multiplier_hi[8];
+    XNN_ALIGN(16) int32_t x_multiplier[4];
+    XNN_ALIGN(16) int32_t y_multiplier[4];
     XNN_ALIGN(16) int32_t remainder_mask[4];
     XNN_ALIGN(16) int32_t remainder_threshold[4];
     uint32_t shift;
-    int32_t y_multiplier;
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int16_t output_min[8];
     XNN_ALIGN(16) int16_t output_max[8];

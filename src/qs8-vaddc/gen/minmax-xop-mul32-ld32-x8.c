@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-vaddc/sse-mul16-ld64.c.in
+//   Template: src/qs8-vaddc/sse-mul32-ld32.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -9,20 +9,25 @@
 
 #include <assert.h>
 
-#include <smmintrin.h>
+#ifdef __GNUC__
+  #include <x86intrin.h>
+#else
+  #include <immintrin.h>
+  #include <ammintrin.h>
+#endif
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vadd.h>
 
 
-void xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8(
+void xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_x8(
     size_t n,
     const int8_t* input_x,
     const int8_t* input_y,
     int8_t* output,
     const union xnn_qs8_add_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const __m128i vx_multiplier_lo = _mm_load_si128((const __m128i*) params->sse2.x_multiplier_lo);
-  const __m128i vx_multiplier_hi = _mm_load_si128((const __m128i*) params->sse2.x_multiplier_hi);
+  const __m128i vx_multiplier = _mm_load_si128((const __m128i*) params->sse2.x_multiplier);
   const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->sse2.remainder_mask);
   const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->sse2.remainder_threshold);
   const __m128i vshift = _mm_cvtsi32_si128((int) params->sse2.shift);
@@ -34,19 +39,13 @@ void xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8(
   vzero_point_product = _mm_shuffle_epi32(vzero_point_product, _MM_SHUFFLE(0, 0, 0, 0));
   vzero_point_product = _mm_add_epi32(vzero_point_product, _mm_load_si128((const __m128i*) params->sse2.zero_point_product));
   for (; n >= 8 * sizeof(int8_t); n -= 8 * sizeof(int8_t)) {
-    const __m128i vx01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input_x));
+    const __m128i vx0123 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_x));
+    const __m128i vx4567 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_x + 4));
     input_x += 8;
+    input_y += 8;
 
-
-    __m128i vxprod01234567hi = _mm_mulhi_epu16(vx01234567, vx_multiplier_lo);
-    const __m128i vxprod01234567lo = _mm_mullo_epi16(vx01234567, vx_multiplier_lo);
-
-    vxprod01234567hi = _mm_add_epi16(vxprod01234567hi, _mm_mullo_epi16(vx01234567, vx_multiplier_hi));
-
-    vxprod01234567hi = _mm_sub_epi16(vxprod01234567hi, _mm_and_si128(_mm_srai_epi16(vx01234567, 15), vx_multiplier_lo));
-
-    __m128i vacc0123 = _mm_add_epi32(vzero_point_product, _mm_unpacklo_epi16(vxprod01234567lo, vxprod01234567hi));
-    __m128i vacc4567 = _mm_add_epi32(vzero_point_product, _mm_unpackhi_epi16(vxprod01234567lo, vxprod01234567hi));
+    __m128i vacc0123 = _mm_macc_epi32(vx0123, vx_multiplier, vzero_point_product);
+    __m128i vacc4567 = _mm_macc_epi32(vx4567, vx_multiplier, vzero_point_product);
 
     const __m128i vrem0123 = _mm_add_epi32(_mm_and_si128(vacc0123, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vacc0123));
     const __m128i vrem4567 = _mm_add_epi32(_mm_and_si128(vacc4567, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vacc4567));
@@ -67,18 +66,11 @@ void xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8(
   }
   if XNN_UNLIKELY(n != 0) {
     {
-      const __m128i vx01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input_x));
+      const __m128i vx0123 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_x));
+      const __m128i vx4567 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_x + 4));
 
-
-      __m128i vxprod01234567hi = _mm_mulhi_epu16(vx01234567, vx_multiplier_lo);
-      const __m128i vxprod01234567lo = _mm_mullo_epi16(vx01234567, vx_multiplier_lo);
-
-      vxprod01234567hi = _mm_add_epi16(vxprod01234567hi, _mm_mullo_epi16(vx01234567, vx_multiplier_hi));
-
-      vxprod01234567hi = _mm_sub_epi16(vxprod01234567hi, _mm_and_si128(_mm_srai_epi16(vx01234567, 15), vx_multiplier_lo));
-
-      __m128i vacc0123 = _mm_add_epi32(vzero_point_product, _mm_unpacklo_epi16(vxprod01234567lo, vxprod01234567hi));
-      __m128i vacc4567 = _mm_add_epi32(vzero_point_product, _mm_unpackhi_epi16(vxprod01234567lo, vxprod01234567hi));
+      __m128i vacc0123 = _mm_macc_epi32(vx0123, vx_multiplier, vzero_point_product);
+      __m128i vacc4567 = _mm_macc_epi32(vx4567, vx_multiplier, vzero_point_product);
 
       const __m128i vrem0123 = _mm_add_epi32(_mm_and_si128(vacc0123, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vacc0123));
       const __m128i vrem4567 = _mm_add_epi32(_mm_and_si128(vacc4567, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vacc4567));
