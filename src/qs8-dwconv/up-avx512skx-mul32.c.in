@@ -1,0 +1,217 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert CHANNEL_TILE % 16 == 0
+$assert CHANNEL_TILE >= 16
+$assert KERNEL_TILE >= 2
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/dwconv.h>
+#include <xnnpack/intrinsics-polyfill.h>
+
+
+void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx512skx_mul32(
+    size_t channels,
+    size_t output_width,
+    const int8_t** input,
+    const void* weights,
+    int8_t* output,
+    size_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const int8_t* zero,
+    const union xnn_qs8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  const __mmask16 vblend_mask = _cvtu32_mask16(0xAAAA);
+  const __m512i vmultiplier = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.multiplier));
+  const __m512i vrounding = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.rounding));
+  const __m512i vremainder_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.remainder_mask));
+  const __m512i vremainder_threshold = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.remainder_threshold));
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->sse2.shift);
+  $if CHANNEL_TILE > 16:
+    const __m512i voutput_zero_point = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.output_zero_point));
+    const __m512i voutput_min = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.output_min));
+    const __m512i voutput_max = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.output_max));
+    const __m256i vpermute_mask = _mm256_set_epi32(7, 3, 5, 1, 6, 2, 4, 0);
+  $else:
+    const __m256i voutput_zero_point = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.output_zero_point));
+    const __m256i voutput_min = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.output_min));
+    const __m256i voutput_max = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.output_max));
+
+  do {
+    $for K in range(KERNEL_TILE):
+      const int8_t* i${K} = input[${K}];
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != zero) {
+        i${K} = (const int8_t*) ((uintptr_t) i${K} + input_offset);
+      }
+    input = (const int8_t**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const void* w = weights;
+    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+      __m512i vacc${ABC[0:16]} = _mm512_loadu_si512(w);
+      $for C in range(16, CHANNEL_TILE, 16):
+        __m512i vacc${ABC[C:C+16]} = _mm512_loadu_si512((const void*) ((uintptr_t) w + ${C} * sizeof(int32_t)));
+
+      $for K in range(KERNEL_TILE):
+
+        $for C in range(0, CHANNEL_TILE, 16):
+          $if C == 0:
+            const __m512i vi${K}x${ABC[0:16]} = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) i${K}));
+          $else:
+            const __m512i vi${K}x${ABC[C:C+16]} = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) (i${K} + ${C})));
+          const __m512i vk${K}x${ABC[C:C+16]} = _mm512_cvtepi8_epi32(_mm_load_si128((const __m128i*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE + C} * sizeof(int8_t))));
+        i${K} += ${CHANNEL_TILE};
+
+        $for C in range(0, CHANNEL_TILE, 16):
+          vacc${ABC[C:C+16]} = _mm512_add_epi32(vacc${ABC[C:C+16]}, _mm512_mullo_epi32(vi${K}x${ABC[C:C+16]}, vk${K}x${ABC[C:C+16]}));
+
+      w = (const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${KERNEL_TILE * CHANNEL_TILE} * sizeof(int8_t));
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        const __m512i vacc${ABC[C+1:C+16:2]} = _mm512_shuffle_epi32(vacc${ABC[C:C+16]}, _MM_SHUFFLE(3, 3, 1, 1));
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        const __m512i vprod${ABC[C:C+16:2]} = _mm512_add_epi64(_mm512_mul_epi32(vacc${ABC[C:C+16]}, vmultiplier), vrounding);
+        const __m512i vprod${ABC[C+1:C+16:2]} = _mm512_add_epi64(_mm512_mul_epi32(vacc${ABC[C+1:C+16:2]}, vmultiplier), vrounding);
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        const __m512i vq31prod${ABC[C:C+16:2]} = _mm512_srli_epi64(vprod${ABC[C:C+16:2]}, 31);
+        const __m512i vq31prod${ABC[C+1:C+16:2]} = _mm512_add_epi64(vprod${ABC[C+1:C+16:2]}, vprod${ABC[C+1:C+16:2]});
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        const __m512i vq31prod${ABC[C:C+16]} = _mm512_mask_blend_epi32(vblend_mask, vq31prod${ABC[C:C+16:2]}, vq31prod${ABC[C+1:C+16:2]});
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        const __m512i vrem${ABC[C:C+16]} =
+          _mm512_add_epi32(_mm512_and_epi32(vq31prod${ABC[C:C+16]}, vremainder_mask), _mm512_srai_epi32(vq31prod${ABC[C:C+16]}, 31));
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        vacc${ABC[C:C+16]} = _mm512_sra_epi32(vq31prod${ABC[C:C+16]}, vshift);
+
+      const __m512i vminus_one = _mm512_set1_epi32(-1);
+      $for C in range(0, CHANNEL_TILE, 16):
+        vacc${ABC[C:C+16]} = _mm512_mask_sub_epi32(vacc${ABC[C:C+16]}, _mm512_cmpgt_epi32_mask(vrem${ABC[C:C+16]}, vremainder_threshold), vacc${ABC[C:C+16]}, vminus_one);
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 16 < CHANNEL_TILE:
+          __m512i vout${ABC[C:C+4]}${ABC[C+16:C+20]}${ABC[C+4:C+8]}${ABC[C+20:C+24]}${ABC[C+8:C+12]}${ABC[C+24:C+28]}${ABC[C+12:C+16]}${ABC[C+28:C+32]} = _mm512_adds_epi16(_mm512_packs_epi32(vacc${ABC[C:C+16]}, vacc${ABC[C+16:C+32]}), voutput_zero_point);
+        $elif CHANNEL_TILE > 16:
+          __m256i vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]} = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc${ABC[C:C+16]}), _mm512_extracti32x8_epi32(vacc${ABC[C:C+16]}, 1)), _mm512_castsi512_si256(voutput_zero_point));
+        $else:
+          __m256i vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]} = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc${ABC[C:C+16]}), _mm512_extracti32x8_epi32(vacc${ABC[C:C+16]}, 1)), voutput_zero_point);
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 16 < CHANNEL_TILE:
+          vout${ABC[C:C+4]}${ABC[C+16:C+20]}${ABC[C+4:C+8]}${ABC[C+20:C+24]}${ABC[C+8:C+12]}${ABC[C+24:C+28]}${ABC[C+12:C+16]}${ABC[C+28:C+32]} = _mm512_min_epi16(_mm512_max_epi16(vout${ABC[C:C+4]}${ABC[C+16:C+20]}${ABC[C+4:C+8]}${ABC[C+20:C+24]}${ABC[C+8:C+12]}${ABC[C+24:C+28]}${ABC[C+12:C+16]}${ABC[C+28:C+32]}, voutput_min), voutput_max);
+        $elif CHANNEL_TILE > 16:
+          vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]} = _mm256_min_epi16(_mm256_max_epi16(vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]}, _mm512_castsi512_si256(voutput_min)), _mm512_castsi512_si256(voutput_max));
+        $else:
+          vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]} = _mm256_min_epi16(_mm256_max_epi16(vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]}, voutput_min), voutput_max);
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 16 < CHANNEL_TILE:
+          const __m256i vout${ABC[C:C+4]}${ABC[C+16:C+20]}${ABC[C+4:C+8]}${ABC[C+20:C+24]} = _mm512_castsi512_si256(vout${ABC[C:C+4]}${ABC[C+16:C+20]}${ABC[C+4:C+8]}${ABC[C+20:C+24]}${ABC[C+8:C+12]}${ABC[C+24:C+28]}${ABC[C+12:C+16]}${ABC[C+28:C+32]});
+          const __m256i vout${ABC[C+8:C+12]}${ABC[C+24:C+28]}${ABC[C+12:C+16]}${ABC[C+28:C+32]} = _mm512_extracti32x8_epi32(vout${ABC[C:C+4]}${ABC[C+16:C+20]}${ABC[C+4:C+8]}${ABC[C+20:C+24]}${ABC[C+8:C+12]}${ABC[C+24:C+28]}${ABC[C+12:C+16]}${ABC[C+28:C+32]}, 1);
+          const __m256i vout${ABC[C:C+4]}${ABC[C+16:C+20]}${ABC[C+8:C+12]}${ABC[C+24:C+28]}${ABC[C+4:C+8]}${ABC[C+20:C+24]}${ABC[C+12:C+16]}${ABC[C+28:C+32]} = _mm256_packs_epi16(vout${ABC[C:C+4]}${ABC[C+16:C+20]}${ABC[C+4:C+8]}${ABC[C+20:C+24]}, vout${ABC[C+8:C+12]}${ABC[C+24:C+28]}${ABC[C+12:C+16]}${ABC[C+28:C+32]});
+          __m256i vout${ABC[C:C+32]} = _mm256_permutevar8x32_epi32(vout${ABC[C:C+4]}${ABC[C+16:C+20]}${ABC[C+8:C+12]}${ABC[C+24:C+28]}${ABC[C+4:C+8]}${ABC[C+20:C+24]}${ABC[C+12:C+16]}${ABC[C+28:C+32]}, vpermute_mask);
+        $else:
+          const __m128i vout${ABC[C:C+4]}${ABC[C+8:C+12]} = _mm256_castsi256_si128(vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]});
+          const __m128i vout${ABC[C+4:C+8]}${ABC[C+12:C+16]} = _mm256_extracti128_si256(vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]}, 1);
+          __m128i vout${ABC[C:C+16]} = _mm_shuffle_epi32(_mm_packs_epi16(vout${ABC[C:C+4]}${ABC[C+8:C+12]}, vout${ABC[C+4:C+8]}${ABC[C+12:C+16]}), _MM_SHUFFLE(3, 1, 2, 0));
+
+      $if CHANNEL_TILE > 16:
+        _mm256_storeu_si256((__m256i*) output, vout${ABC[0:32]});
+      $else:
+        _mm_storeu_si128((__m128i*) output, vout${ABC[0:16]});
+      $for C in range(16, CHANNEL_TILE, 16):
+        $if C + 16 < CHANNEL_TILE:
+          _mm256_storeu_si256((__m256i*) (output + ${C}), vout${ABC[C:C+32]});
+        $else:
+          _mm_storeu_si128((__m128i*) (output + ${C}), vout${ABC[C:C+16]});
+      output += ${CHANNEL_TILE};
+    }
+    if XNN_UNLIKELY(c != 0) {
+      // Prepare mask for valid 8-bit elements (depends on nc).
+      const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << (c & 15)) - UINT32_C(1)));
+      $if CHANNEL_TILE > 16:
+        const int8_t* k = (const int8_t*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t));
+      ${"do " if CHANNEL_TILE > 16 else ""}{
+        __m512i vacc${ABC[0:16]} = _mm512_loadu_si512(w);
+
+        $for K in range(KERNEL_TILE):
+
+          const __m512i vi${K}x${ABC[0:16]} = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) i${K}));
+          $if CHANNEL_TILE > 16:
+            $if K == 0:
+              const __m512i vk${K}x${ABC[0:16]} = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) k));
+            $else:
+              const __m512i vk${K}x${ABC[0:16]} = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) (k + ${K * CHANNEL_TILE})));
+          $else:
+            const __m512i vk${K}x${ABC[0:16]} = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE} * sizeof(int8_t))));
+          $if CHANNEL_TILE > 16:
+            i${K} += 16;
+
+          vacc${ABC[0:16]} = _mm512_add_epi32(vacc${ABC[0:16]}, _mm512_mullo_epi32(vi${K}x${ABC[0:16]}, vk${K}x${ABC[0:16]}));
+
+        $if CHANNEL_TILE > 16:
+          w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t));
+          k += 16;
+
+        const __m512i vacc${ABC[1:16:2]} = _mm512_shuffle_epi32(vacc${ABC[0:16]}, _MM_SHUFFLE(3, 3, 1, 1));
+
+        const __m512i vprod${ABC[0:16:2]} = _mm512_add_epi64(_mm512_mul_epi32(vacc${ABC[0:16]}, vmultiplier), vrounding);
+        const __m512i vprod${ABC[1:16:2]} = _mm512_add_epi64(_mm512_mul_epi32(vacc${ABC[1:16:2]}, vmultiplier), vrounding);
+
+        const __m512i vq31prod${ABC[0:16:2]} = _mm512_srli_epi64(vprod${ABC[0:16:2]}, 31);
+        const __m512i vq31prod${ABC[1:16:2]} = _mm512_add_epi64(vprod${ABC[1:16:2]}, vprod${ABC[1:16:2]});
+
+        const __m512i vq31prod${ABC[0:16]} = _mm512_mask_blend_epi32(vblend_mask, vq31prod${ABC[0:16:2]}, vq31prod${ABC[1:16:2]});
+
+        const __m512i vrem${ABC[0:16]} = _mm512_add_epi32(_mm512_and_epi32(vq31prod${ABC[0:16]}, vremainder_mask), _mm512_srai_epi32(vq31prod${ABC[0:16]}, 31));
+
+        vacc${ABC[0:16]} = _mm512_sra_epi32(vq31prod${ABC[0:16]}, vshift);
+        vacc${ABC[0:16]} = _mm512_mask_sub_epi32(vacc${ABC[0:16]}, _mm512_cmpgt_epi32_mask(vrem${ABC[0:16]}, vremainder_threshold), vacc${ABC[0:16]}, _mm512_set1_epi32(-1));
+
+        $if CHANNEL_TILE > 16:
+          __m256i vout${ABC[0:4]}${ABC[8:12]}${ABC[4:8]}${ABC[12:16]} = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc${ABC[0:16]}), _mm512_extracti32x8_epi32(vacc${ABC[0:16]}, 1)), _mm512_castsi512_si256(voutput_zero_point));
+        $else:
+          __m256i vout${ABC[0:4]}${ABC[8:12]}${ABC[4:8]}${ABC[12:16]} = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc${ABC[0:16]}), _mm512_extracti32x8_epi32(vacc${ABC[0:16]}, 1)), voutput_zero_point);
+
+        $if CHANNEL_TILE > 16:
+          vout${ABC[0:4]}${ABC[8:12]}${ABC[4:8]}${ABC[12:16]} = _mm256_min_epi16(_mm256_max_epi16(vout${ABC[0:4]}${ABC[8:12]}${ABC[4:8]}${ABC[12:16]}, _mm512_castsi512_si256(voutput_min)), _mm512_castsi512_si256(voutput_max));
+        $else:
+          vout${ABC[0:4]}${ABC[8:12]}${ABC[4:8]}${ABC[12:16]} = _mm256_min_epi16(_mm256_max_epi16(vout${ABC[0:4]}${ABC[8:12]}${ABC[4:8]}${ABC[12:16]}, voutput_min), voutput_max);
+
+        const __m128i vout${ABC[0:4]}${ABC[8:12]} = _mm256_castsi256_si128(vout${ABC[0:4]}${ABC[8:12]}${ABC[4:8]}${ABC[12:16]});
+        const __m128i vout${ABC[4:8]}${ABC[12:16]} = _mm256_extracti128_si256(vout${ABC[0:4]}${ABC[8:12]}${ABC[4:8]}${ABC[12:16]}, 1);
+        __m128i vout${ABC[0:16]} = _mm_shuffle_epi32(_mm_packs_epi16(vout${ABC[0:4]}${ABC[8:12]}, vout${ABC[4:8]}${ABC[12:16]}), _MM_SHUFFLE(3, 1, 2, 0));
+
+        $if CHANNEL_TILE > 16:
+          if XNN_LIKELY(c >= 16) {
+            _mm_storeu_si128((__m128i*) output, vout${ABC[0:16]});
+            output += 16;
+            c -= 16;
+          } else {
+            _mm_mask_storeu_epi8(output, vmask, vout${ABC[0:16]});
+            output = (int8_t*) ((uintptr_t) output + c);
+            c = 0;
+          }
+        $else:
+          _mm_mask_storeu_epi8(output, vmask, vout${ABC[0:16]});
+          output = (int8_t*) ((uintptr_t) output + c);
+      }${" while (c != 0);" if CHANNEL_TILE > 16 else ""}
+    }
+
+    output = (int8_t*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}

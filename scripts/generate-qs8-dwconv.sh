@@ -37,5 +37,9 @@ tools/xngen src/qs8-dwconv/up-avx2-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=
 tools/xngen src/qs8-dwconv/up-avx2-mul32.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up24x9-minmax-avx2-mul32.c
 tools/xngen src/qs8-dwconv/up-avx2-mul32.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up32x9-minmax-avx2-mul32.c
 
+################################## x86 AVX512 #################################
+tools/xngen src/qs8-dwconv/up-avx512skx-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up16x9-minmax-avx512skx-mul32.c
+tools/xngen src/qs8-dwconv/up-avx512skx-mul32.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up32x9-minmax-avx512skx-mul32.c
+
 ################################## Unit tests #################################
 tools/generate-dwconv-test.py --spec test/qs8-dwconv-minmax.yaml --output test/qs8-dwconv-minmax.cc

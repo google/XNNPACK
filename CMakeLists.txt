@@ -2060,6 +2060,8 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/math/sqrt-avx512f-nr1fma1adj.c)
 
 SET(XNNPACK_AVX512SKX_MICROKERNEL_SRCS
+  src/qs8-dwconv/gen/up16x9-minmax-avx512skx-mul32.c
+  src/qs8-dwconv/gen/up32x9-minmax-avx512skx-mul32.c
   src/qs8-gemm/gen/1x16c8-minmax-avx512skx.c
   src/qs8-gemm/gen/2x16c8-minmax-avx512skx.c
   src/qs8-gemm/gen/3x16c8-minmax-avx512skx.c
