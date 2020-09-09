@@ -311,6 +311,21 @@ enum xnn_status xnn_create_minimum_nd_f32(
     minimum_op_out);
 }
 
+enum xnn_status xnn_create_multiply_nd_f16(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* multiply_op_out)
+{
+  return create_binary_elementwise_nd_f16(
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_multiply_nd_f16,
+    &xnn_params.f16.vmul,
+    multiply_op_out);
+}
+
 enum xnn_status xnn_create_multiply_nd_f32(
     float output_min,
     float output_max,
@@ -576,7 +591,7 @@ static enum xnn_status setup_binary_elementwise_nd_f16(
     input2,
     output,
     XNN_INIT_FLAG_F16,
-    1 /* log2(sizeof(float)) */,
+    1 /* log2(sizeof(half)) */,
     &binary_elementwise_op->params.f16_minmax, sizeof(binary_elementwise_op->params.f16_minmax),
     &binary_elementwise_op->params.f16_minmax, sizeof(binary_elementwise_op->params.f16_minmax),
     vbinary,
@@ -730,6 +745,26 @@ enum xnn_status xnn_setup_minimum_nd_f32(
     num_input2_dims, input2_shape,
     input1, input2, output,
     &xnn_params.f32.vmin,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_multiply_nd_f16(
+    xnn_operator_t multiply_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const void* input1,
+    const void* input2,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f16(
+    multiply_op, xnn_operator_type_multiply_nd_f16,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f16.vmul,
     pthreadpool_get_threads_count(threadpool));
 }
 

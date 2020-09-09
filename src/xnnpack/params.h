@@ -1956,6 +1956,7 @@ struct xnn_parameters {
     struct gemm_parameters gemm2;
     struct dwconv_parameters dwconv[XNN_MAX_F16_DWCONV_UKERNELS];
     struct vbinary_parameters vadd;
+    struct vbinary_parameters vmul;
     struct vmulcaddc_parameters vmulcaddc;
   } f16;
   struct {

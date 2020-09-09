@@ -94,6 +94,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Maximum (ND, F32)";
     case xnn_operator_type_minimum_nd_f32:
       return "Minimum (ND, F32)";
+    case xnn_operator_type_multiply_nd_f16:
+      return "Multiply (ND, F16)";
     case xnn_operator_type_multiply_nd_f32:
       return "Multiply (ND, F32)";
     case xnn_operator_type_negate_nc_f32:

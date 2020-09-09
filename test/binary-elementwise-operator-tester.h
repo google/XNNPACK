@@ -428,6 +428,9 @@ class BinaryElementwiseOperatorTester {
         case OperationType::Add:
           status = xnn_create_add_nd_f16(output_min, output_max, 0, &binary_elementwise_op);
           break;
+        case OperationType::Multiply:
+          status = xnn_create_multiply_nd_f16(output_min, output_max, 0, &binary_elementwise_op);
+          break;
         default:
           FAIL() << "Unsupported operation type";
       }
@@ -444,6 +447,17 @@ class BinaryElementwiseOperatorTester {
         case OperationType::Add:
           ASSERT_EQ(xnn_status_success,
             xnn_setup_add_nd_f16(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Multiply:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_multiply_nd_f16(
               binary_elementwise_op,
               num_input1_dims(),
               input1_shape().data(),
