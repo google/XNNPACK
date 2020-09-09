@@ -67,6 +67,17 @@ tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=5 -o src/q
 tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=5 -o src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x24.c
 tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=5 -o src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x32.c
 
+################################### x86 AVX ###################################
+tools/xngen src/qs8-vadd/avx2-mul32-ld64.c.in -D BATCH_TILE=8  -o src/qs8-vadd/gen/minmax-avx2-mul32-ld64-x8.c
+tools/xngen src/qs8-vadd/avx2-mul32-ld64.c.in -D BATCH_TILE=16 -o src/qs8-vadd/gen/minmax-avx2-mul32-ld64-x16.c
+tools/xngen src/qs8-vadd/avx2-mul32-ld64.c.in -D BATCH_TILE=24 -o src/qs8-vadd/gen/minmax-avx2-mul32-ld64-x24.c
+tools/xngen src/qs8-vadd/avx2-mul32-ld64.c.in -D BATCH_TILE=32 -o src/qs8-vadd/gen/minmax-avx2-mul32-ld64-x32.c
+
+tools/xngen src/qs8-vaddc/avx2-mul32-ld64.c.in -D BATCH_TILE=8  -o src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x8.c
+tools/xngen src/qs8-vaddc/avx2-mul32-ld64.c.in -D BATCH_TILE=16 -o src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c
+tools/xngen src/qs8-vaddc/avx2-mul32-ld64.c.in -D BATCH_TILE=24 -o src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x24.c
+tools/xngen src/qs8-vaddc/avx2-mul32-ld64.c.in -D BATCH_TILE=32 -o src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x32.c
+
 ################################## Unit tests #################################
 tools/generate-vbinary-test.py --tester VAddMicrokernelTester  --spec test/qs8-vadd-minmax.yaml  --output test/qs8-vadd-minmax.cc
 tools/generate-vbinary-test.py --tester VAddCMicrokernelTester --spec test/qs8-vaddc-minmax.yaml --output test/qs8-vaddc-minmax.cc

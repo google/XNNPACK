@@ -1897,6 +1897,14 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/qs8-igemm/gen/1x8c8-minmax-avx2.c
   src/qs8-igemm/gen/2x8c8-minmax-avx2.c
   src/qs8-igemm/gen/3x8c8-minmax-avx2.c
+  src/qs8-vadd/gen/minmax-avx2-mul32-ld64-x8.c
+  src/qs8-vadd/gen/minmax-avx2-mul32-ld64-x16.c
+  src/qs8-vadd/gen/minmax-avx2-mul32-ld64-x24.c
+  src/qs8-vadd/gen/minmax-avx2-mul32-ld64-x32.c
+  src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x8.c
+  src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c
+  src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x24.c
+  src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x32.c
   src/math/exp-avx2-p5.c
   src/math/exp-avx2-perm-p3.c
   src/math/exp-avx2-perm-p4.c

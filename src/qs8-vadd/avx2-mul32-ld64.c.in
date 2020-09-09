@@ -1,0 +1,154 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/vadd.h>
+
+
+void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x${BATCH_TILE}(
+    size_t n,
+    const int8_t* input_x,
+    const int8_t* input_y,
+    int8_t* output,
+    const union xnn_qs8_add_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  const __m256i vzero_point_product = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.zero_point_product));
+  const __m256i vx_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.x_multiplier));
+  const __m256i vy_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.y_multiplier));
+  const __m256i vremainder_mask = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_mask));
+  const __m256i vremainder_threshold = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_threshold));
+  const __m128i vshift = _mm_cvtsi32_si128((int) params->sse2.shift);
+  $if BATCH_TILE > 8:
+    const __m256i voutput_zero_point = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.output_zero_point));
+    const __m256i voutput_min = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.output_min));
+    const __m256i voutput_max = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.output_max));
+  $else:
+    const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
+    const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
+    const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
+
+  for (; n >= ${BATCH_TILE} * sizeof(int8_t); n -= ${BATCH_TILE} * sizeof(int8_t)) {
+    const __m256i vx${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_x));
+    const __m256i vy${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_y));
+    $for N in range(8, BATCH_TILE, 8):
+      const __m256i vx${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) (input_x + ${N})));
+      const __m256i vy${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) (input_y + ${N})));
+    input_x += ${BATCH_TILE};
+    input_y += ${BATCH_TILE};
+
+    $for N in range(0, BATCH_TILE, 8):
+      __m256i vacc${ABC[N:N+8]} = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(vx${ABC[N:N+8]}, vx_multiplier));
+
+    $for N in range(0, BATCH_TILE, 8):
+      vacc${ABC[N:N+8]} = _mm256_add_epi32(vacc${ABC[N:N+8]}, _mm256_mullo_epi32(vy${ABC[N:N+8]}, vy_multiplier));
+
+    $for N in range(0, BATCH_TILE, 8):
+      const __m256i vrem${ABC[N:N+8]} = _mm256_add_epi32(_mm256_and_si256(vacc${ABC[N:N+8]}, vremainder_mask), _mm256_srai_epi32(vacc${ABC[N:N+8]}, 31));
+
+    $for N in range(0, BATCH_TILE, 8):
+      vacc${ABC[N:N+8]} = _mm256_sub_epi32(_mm256_sra_epi32(vacc${ABC[N:N+8]}, vshift), _mm256_cmpgt_epi32(vrem${ABC[N:N+8]}, vremainder_threshold));
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        __m256i vout${ABC[N:N+4]}${ABC[N+8:N+12]}${ABC[N+4:N+8]}${ABC[N+12:N+16]} = _mm256_adds_epi16(_mm256_packs_epi32(vacc${ABC[N:N+8]}, vacc${ABC[N+8:N+16]}), voutput_zero_point);
+      $elif BATCH_TILE > 8:
+        __m128i vout${ABC[N:N+8]} = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc${ABC[N:N+8]}), _mm256_extracti128_si256(vacc${ABC[N:N+8]}, 1)), _mm256_castsi256_si128(voutput_zero_point));
+      $else:
+        __m128i vout${ABC[N:N+8]} = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc${ABC[N:N+8]}), _mm256_extracti128_si256(vacc${ABC[N:N+8]}, 1)), voutput_zero_point);
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        vout${ABC[N:N+4]}${ABC[N+8:N+12]}${ABC[N+4:N+8]}${ABC[N+12:N+16]} = _mm256_min_epi16(_mm256_max_epi16(vout${ABC[N:N+4]}${ABC[N+8:N+12]}${ABC[N+4:N+8]}${ABC[N+12:N+16]}, voutput_min), voutput_max);
+      $elif BATCH_TILE > 8:
+        vout${ABC[N:N+8]} = _mm_min_epi16(_mm_max_epi16(vout${ABC[N:N+8]}, _mm256_castsi256_si128(voutput_min)), _mm256_castsi256_si128(voutput_max));
+      $else:
+        vout${ABC[N:N+8]} = _mm_min_epi16(_mm_max_epi16(vout${ABC[N:N+8]}, voutput_min), voutput_max);
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        __m128i vout${ABC[N:N+16]} = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(vout${ABC[N:N+4]}${ABC[N+8:N+12]}${ABC[N+4:N+8]}${ABC[N+12:N+16]}), _mm256_extracti128_si256(vout${ABC[N:N+4]}${ABC[N+8:N+12]}${ABC[N+4:N+8]}${ABC[N+12:N+16]}, 1)), _MM_SHUFFLE(3, 1, 2, 0));
+      $else:
+        __m128i vout${ABC[N:N+8]}${ABC[N:N+8]} = _mm_packs_epi16(vout${ABC[N:N+8]}, vout${ABC[N:N+8]});
+
+    $if BATCH_TILE >= 16:
+      _mm_storeu_si128((__m128i*) output, vout${ABC[0:16]});
+    $else:
+      _mm_storel_epi64((__m128i*) output, vout${ABC[0:8]}${ABC[0:8]});
+    $for N in range(16, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        _mm_storeu_si128((__m128i*) (output + ${N}), vout${ABC[N:N+16]});
+      $else:
+        _mm_storel_epi64((__m128i*) (output + ${N}), vout${ABC[N:N+8]}${ABC[N:N+8]});
+    output += ${BATCH_TILE};
+  }
+  if XNN_UNLIKELY(n != 0) {
+    ${"do " if BATCH_TILE > 8 else ""}{
+      const __m256i vx${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_x));
+      const __m256i vy${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_y));
+      $if BATCH_TILE > 8:
+        input_x += 8;
+        input_y += 8;
+
+      __m256i vacc${ABC[0:8]} = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(vx${ABC[0:8]}, vx_multiplier));
+
+      vacc${ABC[0:8]} = _mm256_add_epi32(vacc${ABC[0:8]}, _mm256_mullo_epi32(vy${ABC[0:8]}, vy_multiplier));
+
+      const __m256i vrem${ABC[0:8]} = _mm256_add_epi32(_mm256_and_si256(vacc${ABC[0:8]}, vremainder_mask), _mm256_srai_epi32(vacc${ABC[0:8]}, 31));
+
+      vacc${ABC[0:8]} = _mm256_sub_epi32(_mm256_sra_epi32(vacc${ABC[0:8]}, vshift), _mm256_cmpgt_epi32(vrem${ABC[0:8]}, vremainder_threshold));
+
+      $if BATCH_TILE > 8:
+        __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc${ABC[0:8]}), _mm256_extracti128_si256(vacc${ABC[0:8]}, 1)), _mm256_castsi256_si128(voutput_zero_point));
+        vout${ABC[0:8]} = _mm_min_epi16(_mm_max_epi16(vout${ABC[0:8]}, _mm256_castsi256_si128(voutput_min)), _mm256_castsi256_si128(voutput_max));
+      $else:
+        __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc${ABC[0:8]}), _mm256_extracti128_si256(vacc${ABC[0:8]}, 1)), voutput_zero_point);
+        vout${ABC[0:8]} = _mm_min_epi16(_mm_max_epi16(vout${ABC[0:8]}, voutput_min), voutput_max);
+      __m128i vout${ABC[0:8]}${ABC[0:8]} = _mm_packs_epi16(vout${ABC[0:8]}, vout${ABC[0:8]});
+
+      $if BATCH_TILE > 8:
+        if XNN_LIKELY(n >= (8 * sizeof(int8_t))) {
+          _mm_storel_epi64((__m128i*) output, vout${ABC[0:8]}${ABC[0:8]});
+          output += 8;
+          n -= 8 * sizeof(int8_t);
+        } else {
+          if (n & (4 * sizeof(int8_t))) {
+            *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+            vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
+            output += 4;
+          }
+          if (n & (2 * sizeof(int8_t))) {
+            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0);
+            vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi32(vout${ABC[0:8]}${ABC[0:8]}, 16);
+            output += 2;
+          }
+          if (n & (1 * sizeof(int8_t))) {
+            *output = (int8_t) _mm_extract_epi8(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          }
+          n = 0;
+        }
+      $else:
+        if (n & (4 * sizeof(int8_t))) {
+          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+          vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
+          output += 4;
+        }
+        if (n & (2 * sizeof(int8_t))) {
+          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi32(vout${ABC[0:8]}${ABC[0:8]}, 16);
+          output += 2;
+        }
+        if (n & (1 * sizeof(int8_t))) {
+          *output = (int8_t) _mm_extract_epi8(vout${ABC[0:8]}${ABC[0:8]}, 0);
+        }
+    }${" while (n != 0);" if BATCH_TILE > 8 else ""}
+  }
+}
