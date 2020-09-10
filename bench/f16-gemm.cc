@@ -73,7 +73,7 @@ static void GEMMBenchmark(benchmark::State& state,
   // Prepare minmax parameters.
   xnn_f16_scaleminmax_params params;
   params = xnn_init_f16_scaleminmax_params(
-    UINT16_C(0x3C00)  /* 1.0 */, UINT16_C(0x7C00)  /* inf */, UINT16_C(0xFC00)  /* -inf */); 
+    UINT16_C(0x3C00)  /* 1.0 */, UINT16_C(0x7C00)  /* inf */, UINT16_C(0xFC00)  /* -inf */);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

@@ -147,8 +147,8 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x72_acc3(
     // Accumulate "extended" floating-point numbers in ("mantissa", "exponent") representation where
     //  - vnX is "exponent"
     //  - vpX is "mantissa"
-    //   
-    // exp2(ae) * av + exp2(be) * bv = 
+    //
+    // exp2(ae) * av + exp2(be) * bv =
     //   = exp2(max(ae, be)) * exp2(ae - max(ae, be)) * av + exp2(max(ae, be)) * exp2(be - max(ae, be)) * bv
     //   = exp2(max_e) * (exp2(ae - max_e) * av + exp2(be - max_e) * bv)
     //   = exp2(max_e) * (exp2(delta_ae) * av + exp2(delta_be) * bv)
@@ -266,7 +266,7 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x72_acc3(
     // Convert exponents into scale factors.
     const __m256 vaccs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce, vmagic_bias)), 23));
     const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_e, vmagic_bias)), 23));
-    
+
     // Update accumulated "mantissa" and "exponent" values.
     vaccv = _mm256_mul_ps(vaccv, vaccs);
     vaccv = _mm256_fmadd_ps(vp, vs, vaccv);
@@ -324,7 +324,7 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x72_acc3(
   vmax_acce = _mm256_max_ps(vmax_acce, _mm256_shuffle_ps(vmax_acce, vmax_acce, _MM_SHUFFLE(2, 3, 0, 1)));
   const __m256 vdelta_acce = _mm256_max_ps(_mm256_sub_ps(vacce, vmax_acce), vmin_exponent);
   const __m256 vaccs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(vdelta_acce, vmagic_bias)), 23));
-  
+
   vaccv = _mm256_mul_ps(vaccv, vaccs);
   __m128 vaccv_sum = _mm_add_ps(_mm256_castps256_ps128(vaccv), _mm256_extractf128_ps(vaccv, 1));
   vaccv_sum = _mm_add_ps(vaccv_sum, _mm_movehl_ps(vaccv_sum, vaccv_sum));

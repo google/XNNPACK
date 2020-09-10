@@ -166,8 +166,8 @@ void xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x192(
     // Accumulate "extended" floating-point numbers in ("mantissa", "exponent") representation where
     //  - vnX is "exponent"
     //  - vpX is "mantissa"
-    //   
-    // exp2(ae) * av + exp2(be) * bv = 
+    //
+    // exp2(ae) * av + exp2(be) * bv =
     //   = exp2(max(ae, be)) * exp2(ae - max(ae, be)) * av + exp2(max(ae, be)) * exp2(be - max(ae, be)) * bv
     //   = exp2(max_e) * (exp2(ae - max_e) * av + exp2(be - max_e) * bv)
     //   = exp2(max_e) * (exp2(delta_ae) * av + exp2(delta_be) * bv)

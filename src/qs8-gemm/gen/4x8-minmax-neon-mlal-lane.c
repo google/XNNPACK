@@ -340,10 +340,10 @@ void xnn_qs8_gemm_minmax_ukernel_4x8__neon_mlal_lane(
       vst1_s8(c2 + 0, vget_low_s8(vout2x01234567_3x01234567));
       vst1_s8(c3 + 0, vget_high_s8(vout2x01234567_3x01234567));
 
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);      
-      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);      
-      c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);      
-      c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);      
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
+      c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
+      c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);

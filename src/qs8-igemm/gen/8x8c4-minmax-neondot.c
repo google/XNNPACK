@@ -348,14 +348,14 @@ void xnn_qs8_igemm_minmax_ukernel_8x8c4__neondot(
       vst1_s8(c1 + 0, vget_high_s8(vout0x01234567_1x01234567));
       vst1_s8(c0 + 0, vget_low_s8(vout0x01234567_1x01234567));
 
-      c7 = (int8_t*) ((uintptr_t) c7 + cn_stride);      
-      c6 = (int8_t*) ((uintptr_t) c6 + cn_stride);      
-      c5 = (int8_t*) ((uintptr_t) c5 + cn_stride);      
-      c4 = (int8_t*) ((uintptr_t) c4 + cn_stride);      
-      c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);      
-      c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);      
-      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);      
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);      
+      c7 = (int8_t*) ((uintptr_t) c7 + cn_stride);
+      c6 = (int8_t*) ((uintptr_t) c6 + cn_stride);
+      c5 = (int8_t*) ((uintptr_t) c5 + cn_stride);
+      c4 = (int8_t*) ((uintptr_t) c4 + cn_stride);
+      c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
+      c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
+      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
 

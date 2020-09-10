@@ -432,7 +432,7 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_u8(
 
   return setup_max_pooling2d_nhwc(
     max_pooling_op,
-    batch_size, input_height, input_width, 
+    batch_size, input_height, input_width,
     input, output,
     0 /* log2(sizeof(input element)) = log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
@@ -459,7 +459,7 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f32(
 
   return setup_max_pooling2d_nhwc(
     max_pooling_op,
-    batch_size, input_height, input_width, 
+    batch_size, input_height, input_width,
     input, output,
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,

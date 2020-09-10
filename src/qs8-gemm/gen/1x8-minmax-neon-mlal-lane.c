@@ -183,7 +183,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x8__neon_mlal_lane(
     if (nc >= 8) {
       vst1_s8(c0 + 0, vout0x01234567);
 
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);      
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 

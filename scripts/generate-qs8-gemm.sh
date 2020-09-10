@@ -10,7 +10,7 @@ tools/xngen src/qs8-gemm/MRxNRc4-minmax-scalar.c.in -D MR=8  -D NR=8 -o src/qs8-
 tools/xngen src/qs8-gemm/MRxNRc4-minmax-scalar.c.in -D MR=12 -D NR=4 -o src/qs8-gemm/gen/12x4c4-minmax-scalar.c
 
 ################################## WAsm SIMD ##################################
-### C8 micro-kernels   
+### C8 micro-kernels
 tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=1 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c8-minmax-wasmsimd-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=2 -D VARIANT=LD64     -o src/qs8-gemm/gen/2x4c8-minmax-wasmsimd-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-wasmsimd.c.in -D MR=3 -D VARIANT=LD64     -o src/qs8-gemm/gen/3x4c8-minmax-wasmsimd-ld64.c
@@ -41,25 +41,25 @@ tools/xngen src/qs8-gemm/MRxNRc4-minmax-neondot.c.in -D MR=4  -D NR=16 -o src/qs
 ### C2 micro-kernels
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=2 -D VARIANT=LD64  -o src/qs8-gemm/gen/1x4c2-minmax-sse2-ld64.c
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=2 -D VARIANT=LD64     -o src/qs8-gemm/gen/4x4c2-minmax-sse2-ld64.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=3 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c2-minmax-ssse3-ld64.c
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=3 -D VARIANT=LD64     -o src/qs8-gemm/gen/4x4c2-minmax-ssse3-ld64.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=4 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c2-minmax-sse41-ld64.c
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=4 -D VARIANT=LD64     -o src/qs8-gemm/gen/4x4c2-minmax-sse41-ld64.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=5 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c2-minmax-xop-ld64.c
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=5 -D VARIANT=LD64     -o src/qs8-gemm/gen/4x4c2-minmax-xop-ld64.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=2 -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c2-minmax-sse2-ld128.c
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=2 -D VARIANT=LD128    -o src/qs8-gemm/gen/4x4c2-minmax-sse2-ld128.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=3 -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c2-minmax-ssse3-ld128.c
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=3 -D VARIANT=LD128    -o src/qs8-gemm/gen/4x4c2-minmax-ssse3-ld128.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=4 -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c2-minmax-sse41-ld128.c
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=4 -D VARIANT=LD128    -o src/qs8-gemm/gen/4x4c2-minmax-sse41-ld128.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=5 -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c2-minmax-xop-ld128.c
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=5 -D VARIANT=LD128    -o src/qs8-gemm/gen/4x4c2-minmax-xop-ld128.c
 
@@ -75,19 +75,19 @@ tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=4 -D VARIANT=EXTE
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=1 -D SSE=5 -D VARIANT=EXTENDED -o src/qs8-gemm/gen/1x4c2-xw-minmax-xop.c
 tools/xngen src/qs8-gemm/MRx4c2-minmax-sse.c.in -D MR=4 -D SSE=5 -D VARIANT=EXTENDED -o src/qs8-gemm/gen/4x4c2-xw-minmax-xop.c
 
-### C8 micro-kernels   
+### C8 micro-kernels
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=2 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c8-minmax-sse2-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=2 -D VARIANT=LD64     -o src/qs8-gemm/gen/2x4c8-minmax-sse2-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=2 -D VARIANT=LD64     -o src/qs8-gemm/gen/3x4c8-minmax-sse2-ld64.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=3 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c8-minmax-ssse3-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=3 -D VARIANT=LD64     -o src/qs8-gemm/gen/2x4c8-minmax-ssse3-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=3 -D VARIANT=LD64     -o src/qs8-gemm/gen/3x4c8-minmax-ssse3-ld64.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=4 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c8-minmax-sse41-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=4 -D VARIANT=LD64     -o src/qs8-gemm/gen/2x4c8-minmax-sse41-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=4 -D VARIANT=LD64     -o src/qs8-gemm/gen/3x4c8-minmax-sse41-ld64.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=5 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c8-minmax-xop-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=5 -D VARIANT=LD64     -o src/qs8-gemm/gen/2x4c8-minmax-xop-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=5 -D VARIANT=LD64     -o src/qs8-gemm/gen/3x4c8-minmax-xop-ld64.c
@@ -95,15 +95,15 @@ tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=5 -D VARIANT=LD64
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=2 -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c8-minmax-sse2-ld128.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=2 -D VARIANT=LD128    -o src/qs8-gemm/gen/2x4c8-minmax-sse2-ld128.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=2 -D VARIANT=LD128    -o src/qs8-gemm/gen/3x4c8-minmax-sse2-ld128.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=3 -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c8-minmax-ssse3-ld128.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=3 -D VARIANT=LD128    -o src/qs8-gemm/gen/2x4c8-minmax-ssse3-ld128.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=3 -D VARIANT=LD128    -o src/qs8-gemm/gen/3x4c8-minmax-ssse3-ld128.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=4 -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c8-minmax-sse41-ld128.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=4 -D VARIANT=LD128    -o src/qs8-gemm/gen/2x4c8-minmax-sse41-ld128.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=4 -D VARIANT=LD128    -o src/qs8-gemm/gen/3x4c8-minmax-sse41-ld128.c
-   
+
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=1 -D SSE=5 -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c8-minmax-xop-ld128.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=2 -D SSE=5 -D VARIANT=LD128    -o src/qs8-gemm/gen/2x4c8-minmax-xop-ld128.c
 tools/xngen src/qs8-gemm/MRx4c8-minmax-sse.c.in -D MR=3 -D SSE=5 -D VARIANT=LD128    -o src/qs8-gemm/gen/3x4c8-minmax-xop-ld128.c

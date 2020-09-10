@@ -46,7 +46,7 @@ void xnn_f32_sigmoid_ukernel__sse41_p5_div_x8(
 
     // General structure of the algorithm:
     //           / exp(x) / (1 + exp(x)) if x <= 0
-    //   f[x] := 
+    //   f[x] :=
     //           \ 1 - f[-x] if x >= 0
     //
     // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),
@@ -131,7 +131,7 @@ void xnn_f32_sigmoid_ukernel__sse41_p5_div_x8(
 
     // General structure of the algorithm:
     //           / exp(x) / (1 + exp(x)) if x <= 0
-    //   f[x] := 
+    //   f[x] :=
     //           \ 1 - f[-x] if x >= 0
     //
     // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),
@@ -194,7 +194,7 @@ void xnn_f32_sigmoid_ukernel__sse41_p5_div_x8(
 
     // General structure of the algorithm:
     //           / exp(x) / (1 + exp(x)) if x <= 0
-    //   f[x] := 
+    //   f[x] :=
     //           \ 1 - f[-x] if x >= 0
     //
     // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),

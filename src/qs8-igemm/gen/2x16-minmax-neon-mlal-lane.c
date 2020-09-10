@@ -371,8 +371,8 @@ void xnn_qs8_igemm_minmax_ukernel_2x16__neon_mlal_lane(
       vst1q_s8(c1 + 0, vout1x0123456789ABCDEF);
       vst1q_s8(c0 + 0, vout0x0123456789ABCDEF);
 
-      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);      
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);      
+      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
 

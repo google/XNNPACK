@@ -39,7 +39,7 @@ void xnn_math_f32_sigmoid__avx2_rr2_p5_nr1fma(
 
     // General structure of the algorithm:
     //           / exp(x) / (1 + exp(x)) if x <= 0
-    //   f[x] := 
+    //   f[x] :=
     //           \ 1 - f[-x] if x >= 0
     //
     // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),

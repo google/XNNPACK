@@ -77,8 +77,8 @@ void xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_x${ELEMENTS_TILE}(
     // Multiply "extended" floating-point numbers in ("mantissa", "exponent") representation where
     //  - vnX is "exponent"
     //  - vpX is "mantissa"
-    //   
-    // exp2(ae) * av * exp2(be) * bv = 
+    //
+    // exp2(ae) * av * exp2(be) * bv =
     //   = exp2(ae + be) * (av * bv)
     $for N in range(SIMD_TILE):
       __m512 vf${N} = _mm512_mul_ps(vp${N}, vscalev);

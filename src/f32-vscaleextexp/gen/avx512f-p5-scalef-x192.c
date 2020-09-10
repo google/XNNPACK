@@ -166,8 +166,8 @@ void xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_x192(
     // Multiply "extended" floating-point numbers in ("mantissa", "exponent") representation where
     //  - vnX is "exponent"
     //  - vpX is "mantissa"
-    //   
-    // exp2(ae) * av * exp2(be) * bv = 
+    //
+    // exp2(ae) * av * exp2(be) * bv =
     //   = exp2(ae + be) * (av * bv)
     __m512 vf0 = _mm512_mul_ps(vp0, vscalev);
     __m512 vf1 = _mm512_mul_ps(vp1, vscalev);

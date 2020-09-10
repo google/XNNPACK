@@ -159,7 +159,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x16c4__neondot(
     if (nc >= 16) {
       vst1q_s8(c0 + 0, vout0x0123456789ABCDEF);
 
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);      
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
 
