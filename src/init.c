@@ -851,6 +851,7 @@ static void init(void) {
         .channel_tile = 8,
         .row_tile = 2,
       };
+      xnn_params.f16.hswish = (xnn_univector_ukernel_function) xnn_f16_hswish_ukernel__neonfp16arith_x16;
     }
   #endif  // XNN_NO_F16_OPERATORS
 

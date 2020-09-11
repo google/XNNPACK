@@ -80,6 +80,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Global Average Pooling (NWC, QU8)";
     case xnn_operator_type_global_average_pooling_ncw_f32:
       return "Global Average Pooling (NCW, F32)";
+    case xnn_operator_type_hardswish_nc_f16:
+      return "HardSwish (NC, F16)";
     case xnn_operator_type_hardswish_nc_f32:
       return "HardSwish (NC, F32)";
     case xnn_operator_type_leaky_relu_nc_f32:

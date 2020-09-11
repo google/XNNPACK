@@ -299,6 +299,34 @@ enum xnn_status xnn_create_floor_nc_f32(
     floor_op_out);
 }
 
+enum xnn_status xnn_create_hardswish_nc_f16(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* hardswish_op_out)
+{
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f16));
+    return xnn_status_uninitialized;
+  }
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
+  const struct xnn_f16_hswish_params params = xnn_init_f16_hswish_params();
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_hardswish_nc_f16,
+    xnn_params.f16.hswish,
+    hardswish_op_out);
+}
+
 enum xnn_status xnn_create_hardswish_nc_f32(
     size_t channels,
     size_t input_stride,
@@ -570,6 +598,28 @@ enum xnn_status xnn_setup_floor_nc_f32(
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     &floor_op->params.f32_rnd, sizeof(floor_op->params.f32_rnd));
+}
+
+enum xnn_status xnn_setup_hardswish_nc_f16(
+    xnn_operator_t hardswish_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  if (hardswish_op->type != xnn_operator_type_hardswish_nc_f16) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f16),
+      xnn_operator_type_to_string(hardswish_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  hardswish_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    hardswish_op,
+    batch_size, input, output,
+    1 /* log2(sizeof(half)) */,
+    &hardswish_op->params.f16_hswish, sizeof(hardswish_op->params.f16_hswish));
 }
 
 enum xnn_status xnn_setup_hardswish_nc_f32(

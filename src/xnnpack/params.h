@@ -1955,6 +1955,7 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct dwconv_parameters dwconv[XNN_MAX_F16_DWCONV_UKERNELS];
+    xnn_univector_ukernel_function hswish;
     struct vbinary_parameters vadd;
     struct vbinary_parameters vmul;
     struct vmulcaddc_parameters vmulcaddc;
