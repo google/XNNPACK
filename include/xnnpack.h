@@ -1714,23 +1714,6 @@ enum xnn_status xnn_setup_add_nd_f16(
   void* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_multiply_nd_f16(
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  xnn_operator_t* multiply_op_out);
-
-enum xnn_status xnn_setup_multiply_nd_f16(
-  xnn_operator_t multiply_op,
-  size_t num_input1_dims,
-  const size_t* input1_shape,
-  size_t num_input2_dims,
-  const size_t* input2_shape,
-  const void* input1,
-  const void* input2,
-  void* output,
-  pthreadpool_t threadpool);
-
 enum xnn_status xnn_create_convolution2d_nhwc_f16(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
@@ -1791,6 +1774,23 @@ enum xnn_status xnn_setup_hardswish_nc_f16(
   xnn_operator_t hardswish_op,
   size_t batch_size,
   const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_multiply_nd_f16(
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* multiply_op_out);
+
+enum xnn_status xnn_setup_multiply_nd_f16(
+  xnn_operator_t multiply_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const void* input1,
+  const void* input2,
   void* output,
   pthreadpool_t threadpool);
 
