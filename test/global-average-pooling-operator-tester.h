@@ -293,7 +293,7 @@ class GlobalAveragePoolingOperatorTester {
   void TestNWCxF16() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<uint16_t> input((batch_size() * width() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
@@ -360,7 +360,7 @@ class GlobalAveragePoolingOperatorTester {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_LE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_max);
           ASSERT_GE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_min);
-          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-2f)
+          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::max(1.0e-3f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
             << "at batch index " << i << " / " << batch_size()
             << ", channel " << c << " / " << channels();
         }

@@ -397,7 +397,7 @@ class DWConvMicrokernelTester {
   void Test(xnn_f16_dwconv_minmax_unipass_ukernel_function dwconv_minmax, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<const uint16_t*> indirection((width() - 1) * step() + kr());
@@ -477,10 +477,7 @@ class DWConvMicrokernelTester {
             << "x = " << x << ", channel = " << c;
           ASSERT_LE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_max)
             << "x = " << x << ", channel = " << c;
-          ASSERT_NEAR(
-              output_ref[x * channels() + c],
-              fp16_ieee_to_fp32_value(output[x * output_stride() + c]),
-              std::abs(output_ref[x * channels() + c]) * 1.0e-2)
+          ASSERT_NEAR(output_ref[x * channels() + c], fp16_ieee_to_fp32_value(output[x * output_stride() + c]), std::max(1.0e-3f, std::abs(output_ref[x * channels() + c]) * 1.0e-2f))
             << "x = " << x << ", channel = " << c;
         }
       }

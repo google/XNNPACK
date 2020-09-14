@@ -443,10 +443,7 @@ class SpMMMicrokernelTester {
       // Validate micro-kernel outputs.
       for (size_t pxb = 0; pxb < n(); pxb++) {
         for (size_t oc = 0; oc < m(); oc++) {
-          ASSERT_NEAR(
-            fp16_ieee_to_fp32_value(c[pxb * m() + oc]),
-            c_ref[pxb * m() + oc],
-            std::abs(c_ref[pxb * m() + oc]) * 1.0e-2f)
+          ASSERT_NEAR(fp16_ieee_to_fp32_value(c[pxb * m() + oc]), c_ref[pxb * m() + oc], std::max(1.0e-3f, std::abs(c_ref[pxb * m() + oc]) * 1.0e-2f))
             << "at " << pxb << ", " << oc
             << ": Mr x Nr x Kr = " << mr() << " x " << nr()
             << ", M x N x K = " << m() << " x " << n() << " x " << k();

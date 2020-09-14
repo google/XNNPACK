@@ -131,9 +131,7 @@ class HardSwishOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]),
-                      output_ref[i * channels() + c],
-                      std::abs(output_ref[i * channels() + c]) * 1.0e-2f + 1.0e-3f)
+          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::max(1.0e-3f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
             << "at position " << i << ", batch size = " << batch_size() << ", channels = " << channels();
         }
       }
