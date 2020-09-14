@@ -4651,6 +4651,19 @@ cc_library(
 )
 
 cc_library(
+    name = "fp16_mobilenet_v3_large",
+    srcs = ["models/fp16-mobilenet-v3-large.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
     name = "fp32_mobilenet_v3_small",
     srcs = ["models/fp32-mobilenet-v3-small.cc"],
     hdrs = ["models/models.h"],
@@ -4658,6 +4671,19 @@ cc_library(
     linkstatic = True,
     deps = [
         ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
+    name = "fp16_mobilenet_v3_small",
+    srcs = ["models/fp16-mobilenet-v3-small.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@FP16",
         "@pthreadpool",
     ],
 )
@@ -4700,6 +4726,8 @@ xnnpack_benchmark(
         ":bench_utils",
         ":fp16_mobilenet_v1",
         ":fp16_mobilenet_v2",
+        ":fp16_mobilenet_v3_large",
+        ":fp16_mobilenet_v3_small",
         ":fp32_mobilenet_v1",
         ":fp32_mobilenet_v2",
         ":fp32_mobilenet_v3_large",

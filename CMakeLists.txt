@@ -4012,7 +4012,9 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     models/qs8-mobilenet-v2.cc
     models/fp16-mobilenet-v2.cc
     models/fp32-mobilenet-v2.cc
+    models/fp16-mobilenet-v3-large.cc
     models/fp32-mobilenet-v3-large.cc
+    models/fp16-mobilenet-v3-small.cc
     models/fp32-mobilenet-v3-small.cc)
   SET_TARGET_PROPERTIES(bench-models PROPERTIES
     CXX_STANDARD 11

@@ -11,6 +11,8 @@
 #include <limits>
 #include <random>
 
+#include <fp16/fp16.h>
+
 #include "models/models.h"
 
 namespace models {
