@@ -813,19 +813,23 @@ enum xnn_status xnn_create_runtime_v2(
   }
   xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
 
-  runtime->workspace = xnn_allocate_simd_memory(mem_alloc_tracker.mem_arena_size);
-  if (runtime->workspace == NULL) {
-    xnn_log_error("failed to allocate %zu bytes to runtime workspace", mem_alloc_tracker.mem_arena_size);
-    xnn_release_value_allocation_tracker(&mem_alloc_tracker);
-    goto error;
-  }
-  for (size_t i = 0; i < subgraph->num_values; i++) {
-    const struct xnn_value* value = &subgraph->values[i];
-    struct xnn_blob* blob = &runtime->blobs[i];
-    if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
-      if (value->data == NULL && !blob->external) {
-        // Value is purely internal to the runtime, allocate it in the workspace.
-        blob->data = (void*) ((uintptr_t) runtime->workspace + mem_alloc_tracker.usage[i].alloc_offset);
+  if (mem_alloc_tracker.mem_arena_size != 0) {
+    // XNN_EXTRA_BYTES ensures that out-of-bound reads of intermediate values don't segfault.
+    const size_t mem_arena_size = mem_alloc_tracker.mem_arena_size + XNN_EXTRA_BYTES;
+    runtime->workspace = xnn_allocate_simd_memory(mem_arena_size);
+    if (runtime->workspace == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for runtime workspace", mem_arena_size);
+      xnn_release_value_allocation_tracker(&mem_alloc_tracker);
+      goto error;
+    }
+    for (size_t i = 0; i < subgraph->num_values; i++) {
+      const struct xnn_value* value = &subgraph->values[i];
+      struct xnn_blob* blob = &runtime->blobs[i];
+      if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
+        if (value->data == NULL && !blob->external) {
+          // Value is purely internal to the runtime, allocate it in the workspace.
+          blob->data = (void*) ((uintptr_t) runtime->workspace + mem_alloc_tracker.usage[i].alloc_offset);
+        }
       }
     }
   }
