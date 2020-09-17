@@ -545,9 +545,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/math/roundz-scalar-addsub.c
   src/math/roundz-scalar-cvt.c
   src/math/roundz-scalar-trunc.c
-  src/math/sigmoid-scalar-lut2048-p1-div.c
-  src/math/sigmoid-scalar-lut64-p2-div.c
-  src/math/sigmoid-scalar-p5-div.c
+  src/math/sigmoid-scalar-rr2-lut2048-p1-div.c
+  src/math/sigmoid-scalar-rr2-lut64-p2-div.c
+  src/math/sigmoid-scalar-rr2-p5-div.c
   src/qs8-gemm/gen/8x8c4-minmax-scalar.c
   src/qs8-gemm/gen/12x4c4-minmax-scalar.c
   src/qs8-requantization/fp32-scalar-lrintf.c
@@ -1468,7 +1468,8 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/math/roundd-sse2-cvt.c
   src/math/roundu-sse2-cvt.c
   src/math/roundz-sse2-cvt.c
-  src/math/sigmoid-sse2-p5-div.c)
+  src/math/sigmoid-sse2-rr2-p5-div.c
+  src/math/sigmoid-sse2-rr2-lut64-p2-div.c)
 
 SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-ssse3-mul16.c

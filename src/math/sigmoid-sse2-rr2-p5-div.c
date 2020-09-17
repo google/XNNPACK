@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_sigmoid__sse2_p5_div(
+void xnn_math_f32_sigmoid__sse2_rr2_p5_div(
     size_t n,
     const float* input,
     float* output)

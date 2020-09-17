@@ -14,7 +14,7 @@
 #include <fp16/bitcasts.h>
 
 
-void xnn_math_f32_sigmoid__scalar_p5_div(
+void xnn_math_f32_sigmoid__scalar_rr2_p5_div(
     size_t n,
     const float* input,
     float* output)
