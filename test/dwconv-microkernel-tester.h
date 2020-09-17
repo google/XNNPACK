@@ -477,7 +477,7 @@ class DWConvMicrokernelTester {
             << "x = " << x << ", channel = " << c;
           ASSERT_LE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_max)
             << "x = " << x << ", channel = " << c;
-          ASSERT_NEAR(output_ref[x * channels() + c], fp16_ieee_to_fp32_value(output[x * output_stride() + c]), std::max(1.0e-3f, std::abs(output_ref[x * channels() + c]) * 1.0e-2f))
+          ASSERT_NEAR(output_ref[x * channels() + c], fp16_ieee_to_fp32_value(output[x * output_stride() + c]), std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) * 1.0e-2f))
             << "x = " << x << ", channel = " << c;
         }
       }

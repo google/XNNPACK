@@ -482,7 +482,7 @@ class BinaryElementwiseOperatorTester {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(fp16_ieee_to_fp32_value(output[index]), output_ref[index], std::max(1.0e-3f, std::abs(output_ref[index]) * 1.0e-2f))
+                  ASSERT_NEAR(fp16_ieee_to_fp32_value(output[index]), output_ref[index], std::max(1.0e-4f, std::abs(output_ref[index]) * 1.0e-2f))
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")";
                 }
               }

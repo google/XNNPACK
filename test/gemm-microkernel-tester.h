@@ -811,7 +811,7 @@ class GemmMicrokernelTester {
       // Validate micro-kernel outputs.
       for (size_t i = 0; i < m(); i++) {
         for (size_t j = 0; j < n(); j++) {
-          ASSERT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], std::max(1.0e-3f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
+          ASSERT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
               << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
               << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
               << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -930,7 +930,7 @@ class GemmMicrokernelTester {
               << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
               << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
               << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
-          ASSERT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], std::max(1.0e-3f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
+          ASSERT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
               << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
               << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
               << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();

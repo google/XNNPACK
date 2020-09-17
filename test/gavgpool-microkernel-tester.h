@@ -507,7 +507,7 @@ class GAvgPoolMicrokernelTester {
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
         ASSERT_GE(fp16_ieee_to_fp32_value(output[c]), output_min)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
-        ASSERT_NEAR(fp16_ieee_to_fp32_value(output[c]), output_ref[c], std::max(1.0e-3f, std::abs(output_ref[c]) * 1.0e-2f))
+        ASSERT_NEAR(fp16_ieee_to_fp32_value(output[c]), output_ref[c], std::max(1.0e-4f, std::abs(output_ref[c]) * 1.0e-2f))
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
       }
     }

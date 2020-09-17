@@ -360,7 +360,7 @@ class GlobalAveragePoolingOperatorTester {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_LE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_max);
           ASSERT_GE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_min);
-          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::max(1.0e-3f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
+          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
             << "at batch index " << i << " / " << batch_size()
             << ", channel " << c << " / " << channels();
         }
