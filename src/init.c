@@ -1612,8 +1612,10 @@ static void init(void) {
     }
     if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx2()) {
       xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__avx2_rr1_p5_div_x40;
+    } else if (cpuinfo_has_x86_sse4_1()) {
+      xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__sse41_lut64_p2_div_x8;
     } else {
-      xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__sse2_p5_div_x16;
+      xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__sse2_lut64_p2_div_x8;
     }
     if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
       xnn_params.f32.sqr = (xnn_univector_ukernel_function) xnn_f32_vsqr_ukernel__avx512f_x16;
