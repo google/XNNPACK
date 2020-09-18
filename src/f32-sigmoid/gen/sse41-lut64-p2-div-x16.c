@@ -97,28 +97,28 @@ void xnn_f32_sigmoid_ukernel__sse41_lut64_p2_div_x16(
 
     #if XNN_ARCH_X86_64
       const uint64_t vidx01 = (uint64_t) _mm_cvtsi128_si64(vidx0123);
-      const uint64_t vidx23 = (uint64_t) _mm_cvtsi128_si64(_mm_unpackhi_epi64(vidx0123, vidx0123));
+      const uint64_t vidx23 = (uint64_t) _mm_extract_epi64(vidx0123, 1);
       const __m128i vl0   = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx01)));
       const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx23)));
       const __m128i vl01 = _mm_insert_epi32(vl0, *((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx01 >> 32))), 1);
       const __m128i vl23 = _mm_insert_epi32(vl2, *((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx23 >> 32))), 1);
       const __m128i vl0123 = _mm_unpacklo_epi64(vl01, vl23);
       const uint64_t vidx45 = (uint64_t) _mm_cvtsi128_si64(vidx4567);
-      const uint64_t vidx67 = (uint64_t) _mm_cvtsi128_si64(_mm_unpackhi_epi64(vidx4567, vidx4567));
+      const uint64_t vidx67 = (uint64_t) _mm_extract_epi64(vidx4567, 1);
       const __m128i vl4   = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx45)));
       const __m128i vl6 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx67)));
       const __m128i vl45 = _mm_insert_epi32(vl4, *((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx45 >> 32))), 1);
       const __m128i vl67 = _mm_insert_epi32(vl6, *((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx67 >> 32))), 1);
       const __m128i vl4567 = _mm_unpacklo_epi64(vl45, vl67);
       const uint64_t vidx89 = (uint64_t) _mm_cvtsi128_si64(vidx89AB);
-      const uint64_t vidxAB = (uint64_t) _mm_cvtsi128_si64(_mm_unpackhi_epi64(vidx89AB, vidx89AB));
+      const uint64_t vidxAB = (uint64_t) _mm_extract_epi64(vidx89AB, 1);
       const __m128i vl8   = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx89)));
       const __m128i vlA = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidxAB)));
       const __m128i vl89 = _mm_insert_epi32(vl8, *((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx89 >> 32))), 1);
       const __m128i vlAB = _mm_insert_epi32(vlA, *((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidxAB >> 32))), 1);
       const __m128i vl89AB = _mm_unpacklo_epi64(vl89, vlAB);
       const uint64_t vidxCD = (uint64_t) _mm_cvtsi128_si64(vidxCDEF);
-      const uint64_t vidxEF = (uint64_t) _mm_cvtsi128_si64(_mm_unpackhi_epi64(vidxCDEF, vidxCDEF));
+      const uint64_t vidxEF = (uint64_t) _mm_extract_epi64(vidxCDEF, 1);
       const __m128i vlC   = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidxCD)));
       const __m128i vlE = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidxEF)));
       const __m128i vlCD = _mm_insert_epi32(vlC, *((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidxCD >> 32))), 1);
@@ -270,7 +270,7 @@ void xnn_f32_sigmoid_ukernel__sse41_lut64_p2_div_x16(
     const __m128i vidx = _mm_slli_epi32(_mm_andnot_si128(vinv_index_mask, _mm_castps_si128(vn)), 2);
     #if XNN_ARCH_X86_64
       const uint64_t vidx_lo = (uint64_t) _mm_cvtsi128_si64(vidx);
-      const uint64_t vidx_hi = (uint64_t) _mm_cvtsi128_si64(_mm_unpackhi_epi64(vidx, vidx));
+      const uint64_t vidx_hi = (uint64_t) _mm_extract_epi64(vidx, 1);
       const __m128i vl0 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx_lo)));
       const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx_hi)));
       const __m128i vl01 = _mm_insert_epi32(vl0, *((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx_lo >> 32))), 1);
@@ -360,7 +360,7 @@ void xnn_f32_sigmoid_ukernel__sse41_lut64_p2_div_x16(
     const __m128i vidx = _mm_slli_epi32(_mm_andnot_si128(vinv_index_mask, _mm_castps_si128(vn)), 2);
     #if XNN_ARCH_X86_64
       const uint64_t vidx_lo = (uint64_t) _mm_cvtsi128_si64(vidx);
-      const uint64_t vidx_hi = (uint64_t) _mm_cvtsi128_si64(_mm_unpackhi_epi64(vidx, vidx));
+      const uint64_t vidx_hi = (uint64_t) _mm_extract_epi64(vidx, 1);
       const __m128i vl0 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx_lo)));
       const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx_hi)));
       const __m128i vl01 = _mm_insert_epi32(vl0, *((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx_lo >> 32))), 1);
