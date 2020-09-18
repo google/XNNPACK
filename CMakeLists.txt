@@ -1377,6 +1377,12 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/sse2-p5-x20.c
   src/f32-raddstoreexpminusmax/gen/sse2-p5-x20-acc2.c
   src/f32-raddstoreexpminusmax/gen/sse2-p5-x20-acc5.c
+  src/f32-sigmoid/gen/sse2-lut64-p2-div-x4.c
+  src/f32-sigmoid/gen/sse2-lut64-p2-div-x8.c
+  src/f32-sigmoid/gen/sse2-lut64-p2-div-x12.c
+  src/f32-sigmoid/gen/sse2-lut64-p2-div-x16.c
+  src/f32-sigmoid/gen/sse2-lut64-p2-div-x20.c
+  src/f32-sigmoid/gen/sse2-lut64-p2-div-x24.c
   src/f32-sigmoid/gen/sse2-p5-div-x4.c
   src/f32-sigmoid/gen/sse2-p5-div-x8.c
   src/f32-sigmoid/gen/sse2-p5-div-x12.c
@@ -1514,6 +1520,12 @@ SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
 SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/gen/sse41-2x4.c
   src/f32-prelu/gen/sse41-2x8.c
+  src/f32-sigmoid/gen/sse41-lut64-p2-div-x4.c
+  src/f32-sigmoid/gen/sse41-lut64-p2-div-x8.c
+  src/f32-sigmoid/gen/sse41-lut64-p2-div-x12.c
+  src/f32-sigmoid/gen/sse41-lut64-p2-div-x16.c
+  src/f32-sigmoid/gen/sse41-lut64-p2-div-x20.c
+  src/f32-sigmoid/gen/sse41-lut64-p2-div-x24.c
   src/f32-sigmoid/gen/sse41-p5-div-x4.c
   src/f32-sigmoid/gen/sse41-p5-div-x8.c
   src/f32-sigmoid/gen/sse41-p5-div-x12.c

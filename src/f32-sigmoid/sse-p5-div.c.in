@@ -6,18 +6,17 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 #include <assert.h>
 
-$if BLEND:
-  #include <smmintrin.h>
-$else:
-  #include <emmintrin.h>
+#include <${SSE_HEADER}>
 
 #include <xnnpack/common.h>
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_sigmoid_ukernel__${"sse41" if BLEND else "sse2"}_p5_div_x${BATCH_TILE}(
+$ISA = {2: "sse2", 4: "sse41"}[SSE]
+void xnn_f32_sigmoid_ukernel__${ISA}_p5_div_x${BATCH_TILE}(
     size_t n,
     const float* x,
     float* y,
@@ -121,7 +120,7 @@ void xnn_f32_sigmoid_ukernel__${"sse41" if BLEND else "sse2"}_p5_div_x${BATCH_TI
         vf${ABC[N:N+4]} = _mm_andnot_ps(_mm_cmplt_ps(vz${ABC[N:N+4]}, vdenorm_cutoff), vf${ABC[N:N+4]});
 
       // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-      $if BLEND:
+      $if SSE >= 4:
         $for N in range(0, BATCH_TILE, 4):
           vf${ABC[N:N+4]} = _mm_blendv_ps(_mm_sub_ps(vone, vf${ABC[N:N+4]}), vf${ABC[N:N+4]}, vx${ABC[N:N+4]});
       $else:
@@ -194,7 +193,7 @@ void xnn_f32_sigmoid_ukernel__${"sse41" if BLEND else "sse2"}_p5_div_x${BATCH_TI
     vf = _mm_andnot_ps(_mm_cmplt_ps(vz, vdenorm_cutoff), vf);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    $if BLEND:
+    $if SSE >= 4:
       vf = _mm_blendv_ps(_mm_sub_ps(vone, vf), vf, vx);
     $else:
       __m128 vm = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx)));
@@ -261,7 +260,7 @@ void xnn_f32_sigmoid_ukernel__${"sse41" if BLEND else "sse2"}_p5_div_x${BATCH_TI
     vf = _mm_andnot_ps(_mm_cmplt_ps(vz, vdenorm_cutoff), vf);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
-    $if BLEND:
+    $if SSE >= 4:
       vf = _mm_blendv_ps(_mm_sub_ps(vone, vf), vf, vx);
     $else:
       __m128 vm = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx)));

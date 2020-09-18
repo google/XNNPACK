@@ -113,19 +113,33 @@ tools/xngen src/f32-sigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=24 -D RR_STEPS=2 
 tools/xngen src/f32-sigmoid/neon-frac-p9-p10-nr1recps.c.in -D BATCH_TILE=16 -o src/f32-sigmoid/gen/neon-frac-p9-p10-nr1recps-x16.c
 
 ################################### x86 SSE ###################################
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=4  -D BLEND=0 -o src/f32-sigmoid/gen/sse2-p5-div-x4.c
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=8  -D BLEND=0 -o src/f32-sigmoid/gen/sse2-p5-div-x8.c
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=12 -D BLEND=0 -o src/f32-sigmoid/gen/sse2-p5-div-x12.c
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=16 -D BLEND=0 -o src/f32-sigmoid/gen/sse2-p5-div-x16.c
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=20 -D BLEND=0 -o src/f32-sigmoid/gen/sse2-p5-div-x20.c
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=24 -D BLEND=0 -o src/f32-sigmoid/gen/sse2-p5-div-x24.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=4  -D SSE=2 -o src/f32-sigmoid/gen/sse2-p5-div-x4.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=8  -D SSE=2 -o src/f32-sigmoid/gen/sse2-p5-div-x8.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=12 -D SSE=2 -o src/f32-sigmoid/gen/sse2-p5-div-x12.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=16 -D SSE=2 -o src/f32-sigmoid/gen/sse2-p5-div-x16.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=20 -D SSE=2 -o src/f32-sigmoid/gen/sse2-p5-div-x20.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=24 -D SSE=2 -o src/f32-sigmoid/gen/sse2-p5-div-x24.c
 
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=4  -D BLEND=1 -o src/f32-sigmoid/gen/sse41-p5-div-x4.c
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=8  -D BLEND=1 -o src/f32-sigmoid/gen/sse41-p5-div-x8.c
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=12 -D BLEND=1 -o src/f32-sigmoid/gen/sse41-p5-div-x12.c
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=16 -D BLEND=1 -o src/f32-sigmoid/gen/sse41-p5-div-x16.c
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=20 -D BLEND=1 -o src/f32-sigmoid/gen/sse41-p5-div-x20.c
-tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=24 -D BLEND=1 -o src/f32-sigmoid/gen/sse41-p5-div-x24.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=4  -D SSE=4 -o src/f32-sigmoid/gen/sse41-p5-div-x4.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=8  -D SSE=4 -o src/f32-sigmoid/gen/sse41-p5-div-x8.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=12 -D SSE=4 -o src/f32-sigmoid/gen/sse41-p5-div-x12.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=16 -D SSE=4 -o src/f32-sigmoid/gen/sse41-p5-div-x16.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=20 -D SSE=4 -o src/f32-sigmoid/gen/sse41-p5-div-x20.c
+tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=24 -D SSE=4 -o src/f32-sigmoid/gen/sse41-p5-div-x24.c
+
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=4  -D SSE=2 -o src/f32-sigmoid/gen/sse2-lut64-p2-div-x4.c
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=8  -D SSE=2 -o src/f32-sigmoid/gen/sse2-lut64-p2-div-x8.c
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=12 -D SSE=2 -o src/f32-sigmoid/gen/sse2-lut64-p2-div-x12.c
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=16 -D SSE=2 -o src/f32-sigmoid/gen/sse2-lut64-p2-div-x16.c
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=20 -D SSE=2 -o src/f32-sigmoid/gen/sse2-lut64-p2-div-x20.c
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=24 -D SSE=2 -o src/f32-sigmoid/gen/sse2-lut64-p2-div-x24.c
+
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=4  -D SSE=4 -o src/f32-sigmoid/gen/sse41-lut64-p2-div-x4.c
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=8  -D SSE=4 -o src/f32-sigmoid/gen/sse41-lut64-p2-div-x8.c
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=12 -D SSE=4 -o src/f32-sigmoid/gen/sse41-lut64-p2-div-x12.c
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=16 -D SSE=4 -o src/f32-sigmoid/gen/sse41-lut64-p2-div-x16.c
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=20 -D SSE=4 -o src/f32-sigmoid/gen/sse41-lut64-p2-div-x20.c
+tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=24 -D SSE=4 -o src/f32-sigmoid/gen/sse41-lut64-p2-div-x24.c
 
 ################################### x86 AVX ###################################
 tools/xngen src/f32-sigmoid/avx2-p5.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx2-rr1-p5-div-x8.c
