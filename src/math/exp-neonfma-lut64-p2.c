@@ -66,13 +66,13 @@ void xnn_math_f32_exp__neonfma_lut64_p2(
     const float32x4_t vsn = vreinterpretq_f32_s32(vaddq_s32(ven, vdefault_exponent));
 
     // Use the low 6 bits of n (as integer) for table lookup.
-    const uint64x2_t vidx = vreinterpretq_u64_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask));
+    const uint64x2_t vidx = vreinterpretq_u64_s32(vshlq_n_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask), 2));
     const uint64_t vidx01 = vgetq_lane_u64(vidx, 0);
     const uint64_t vidx23 = vgetq_lane_u64(vidx, 1);
-    float32x2_t vl01 = vld1_dup_f32(&xnn_table_exp2_k_over_64[(uint32_t) vidx01]);
-    float32x2_t vl23 = vld1_dup_f32(&xnn_table_exp2_k_over_64[(uint32_t) vidx23]);
-    vl01 = vld1_lane_f32(&xnn_table_exp2_k_over_64[(uint32_t) (vidx01 >> 32)], vl01, 1);
-    vl23 = vld1_lane_f32(&xnn_table_exp2_k_over_64[(uint32_t) (vidx23 >> 32)], vl23, 1);
+    float32x2_t vl01 = vld1_dup_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx01));
+    float32x2_t vl23 = vld1_dup_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx23));
+    vl01 = vld1_lane_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_64 + (vidx01 >> 32)), vl01, 1);
+    vl23 = vld1_lane_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_64 + (vidx23 >> 32)), vl23, 1);
     float32x4_t vl = vcombine_f32(vl01, vl23);
     // Fuse so into the value l fetched from a table by adjusting its exponential.
     vl = vreinterpretq_f32_s32(vaddq_s32(vreinterpretq_s32_f32(vl), veo));
