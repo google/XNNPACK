@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_exp__avx2_perm_p3(
+void xnn_math_f32_exp__avx2_lut8_p3_perm(
     size_t n,
     const float* input,
     float* output)

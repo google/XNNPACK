@@ -12,7 +12,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_exp__avx2_perm_p4(
+void xnn_math_f32_exp__avx2_lut8_p4_perm(
     size_t n,
     const float* input,
     float* output)
