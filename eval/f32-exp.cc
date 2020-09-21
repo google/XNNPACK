@@ -77,6 +77,9 @@ static void ExpError(benchmark::State& state,
   static void f32_exp__sse2_lut64_p2(benchmark::State& state) {
     ExpError(state, xnn_math_f32_exp__sse2_lut64_p2, 4);
   }
+  static void f32_exp__avx_p5(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_exp__avx_p5, 8);
+  }
   static void f32_exp__avx2_lut8_p3_perm(benchmark::State& state) {
     ExpError(state, xnn_math_f32_exp__avx2_lut8_p3_perm, 8);
   }
@@ -101,6 +104,7 @@ static void ExpError(benchmark::State& state,
 
   BENCHMARK(f32_exp__sse2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__sse2_lut64_p2)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_exp__avx_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx2_lut8_p4_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx2_lut8_p3_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);

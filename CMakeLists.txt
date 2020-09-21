@@ -1700,7 +1700,8 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vunary/gen/vneg-avx-x8.c
   src/f32-vunary/gen/vneg-avx-x16.c
   src/f32-vunary/gen/vsqr-avx-x8.c
-  src/f32-vunary/gen/vsqr-avx-x16.c)
+  src/f32-vunary/gen/vsqr-avx-x16.c
+  src/math/exp-avx-p5.c)
 
 SET(XNNPACK_XOP_MICROKERNEL_SRCS
   src/qs8-gemm/gen/1x4c2-minmax-xop-ld64.c

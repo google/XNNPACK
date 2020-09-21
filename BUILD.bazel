@@ -2222,6 +2222,7 @@ AVX_UKERNELS = [
     "src/f32-vunary/gen/vneg-avx-x16.c",
     "src/f32-vunary/gen/vsqr-avx-x8.c",
     "src/f32-vunary/gen/vsqr-avx-x16.c",
+    "src/math/exp-avx-p5.c",
 ]
 
 XOP_UKERNELS = [
