@@ -81,16 +81,8 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX}
           const v128_t vxb${N+1} = wasm_i16x8_widen_high_i8x16(vb${N}${N+1});
 
           $for M in range(MR):
-            const v128_t vprod${M}x${N} = wasm_i16x8_mul(vxb${N}, vxa${M});
-            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_widen_low_i16x8(vprod${M}x${N}));
-
-          $for M in range(MR):
-            const v128_t vprod${M}x${N+1} = wasm_i16x8_mul(vxb${N+1}, vxa${M});
-            vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_widen_low_i16x8(vprod${M}x${N+1}));
-            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_widen_high_i16x8(vprod${M}x${N}));
-
-          $for M in range(MR):
-            vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_widen_high_i16x8(vprod${M}x${N+1}));
+            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, __builtin_wasm_dot_s_i32x4_i16x8(vxa${M}, vxb${N}));
+            vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, __builtin_wasm_dot_s_i32x4_i16x8(vxa${M}, vxb${N+1}));
       $else:
         $for N in range(4):
           $if VARIANT == "LD64":
@@ -105,9 +97,7 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX}
               const v128_t vxb${N} = wasm_v128_load((const void*) ((uintptr_t) w + ${N * 8} * sizeof(int16_t)));
 
           $for M in range(MR):
-            const v128_t vprod${M}x${N} = wasm_i16x8_mul(vxa${M}, vxb${N});
-            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_widen_low_i16x8(vprod${M}x${N}));
-            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_widen_high_i16x8(vprod${M}x${N}));
+            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, __builtin_wasm_dot_s_i32x4_i16x8(vxa${M}, vxb${N}));
 
       $if VARIANT == "EXTENDED":
         w = (const void*) ((uintptr_t) w + 32 * sizeof(int16_t));

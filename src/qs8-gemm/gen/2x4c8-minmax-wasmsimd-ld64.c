@@ -65,36 +65,20 @@ void xnn_qs8_gemm_minmax_ukernel_2x4c8__wasmsimd_ld64(
 
       const v128_t vxb0 = wasm_i16x8_load_8x8(w);
 
-      const v128_t vprod0x0 = wasm_i16x8_mul(vxa0, vxb0);
-      vacc0x0 = wasm_i32x4_add(vacc0x0, wasm_i32x4_widen_low_i16x8(vprod0x0));
-      vacc0x0 = wasm_i32x4_add(vacc0x0, wasm_i32x4_widen_high_i16x8(vprod0x0));
-      const v128_t vprod1x0 = wasm_i16x8_mul(vxa1, vxb0);
-      vacc1x0 = wasm_i32x4_add(vacc1x0, wasm_i32x4_widen_low_i16x8(vprod1x0));
-      vacc1x0 = wasm_i32x4_add(vacc1x0, wasm_i32x4_widen_high_i16x8(vprod1x0));
+      vacc0x0 = wasm_i32x4_add(vacc0x0, __builtin_wasm_dot_s_i32x4_i16x8(vxa0, vxb0));
+      vacc1x0 = wasm_i32x4_add(vacc1x0, __builtin_wasm_dot_s_i32x4_i16x8(vxa1, vxb0));
       const v128_t vxb1 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 8 * sizeof(int8_t)));
 
-      const v128_t vprod0x1 = wasm_i16x8_mul(vxa0, vxb1);
-      vacc0x1 = wasm_i32x4_add(vacc0x1, wasm_i32x4_widen_low_i16x8(vprod0x1));
-      vacc0x1 = wasm_i32x4_add(vacc0x1, wasm_i32x4_widen_high_i16x8(vprod0x1));
-      const v128_t vprod1x1 = wasm_i16x8_mul(vxa1, vxb1);
-      vacc1x1 = wasm_i32x4_add(vacc1x1, wasm_i32x4_widen_low_i16x8(vprod1x1));
-      vacc1x1 = wasm_i32x4_add(vacc1x1, wasm_i32x4_widen_high_i16x8(vprod1x1));
+      vacc0x1 = wasm_i32x4_add(vacc0x1, __builtin_wasm_dot_s_i32x4_i16x8(vxa0, vxb1));
+      vacc1x1 = wasm_i32x4_add(vacc1x1, __builtin_wasm_dot_s_i32x4_i16x8(vxa1, vxb1));
       const v128_t vxb2 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 16 * sizeof(int8_t)));
 
-      const v128_t vprod0x2 = wasm_i16x8_mul(vxa0, vxb2);
-      vacc0x2 = wasm_i32x4_add(vacc0x2, wasm_i32x4_widen_low_i16x8(vprod0x2));
-      vacc0x2 = wasm_i32x4_add(vacc0x2, wasm_i32x4_widen_high_i16x8(vprod0x2));
-      const v128_t vprod1x2 = wasm_i16x8_mul(vxa1, vxb2);
-      vacc1x2 = wasm_i32x4_add(vacc1x2, wasm_i32x4_widen_low_i16x8(vprod1x2));
-      vacc1x2 = wasm_i32x4_add(vacc1x2, wasm_i32x4_widen_high_i16x8(vprod1x2));
+      vacc0x2 = wasm_i32x4_add(vacc0x2, __builtin_wasm_dot_s_i32x4_i16x8(vxa0, vxb2));
+      vacc1x2 = wasm_i32x4_add(vacc1x2, __builtin_wasm_dot_s_i32x4_i16x8(vxa1, vxb2));
       const v128_t vxb3 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int8_t)));
 
-      const v128_t vprod0x3 = wasm_i16x8_mul(vxa0, vxb3);
-      vacc0x3 = wasm_i32x4_add(vacc0x3, wasm_i32x4_widen_low_i16x8(vprod0x3));
-      vacc0x3 = wasm_i32x4_add(vacc0x3, wasm_i32x4_widen_high_i16x8(vprod0x3));
-      const v128_t vprod1x3 = wasm_i16x8_mul(vxa1, vxb3);
-      vacc1x3 = wasm_i32x4_add(vacc1x3, wasm_i32x4_widen_low_i16x8(vprod1x3));
-      vacc1x3 = wasm_i32x4_add(vacc1x3, wasm_i32x4_widen_high_i16x8(vprod1x3));
+      vacc0x3 = wasm_i32x4_add(vacc0x3, __builtin_wasm_dot_s_i32x4_i16x8(vxa0, vxb3));
+      vacc1x3 = wasm_i32x4_add(vacc1x3, __builtin_wasm_dot_s_i32x4_i16x8(vxa1, vxb3));
 
       w = (const void*) ((uintptr_t) w + 32 * sizeof(int8_t));
       k += 8 * sizeof(int8_t);
