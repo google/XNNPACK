@@ -2095,6 +2095,18 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/math/exp-avx512f-perm-p3.c
   src/math/exp-avx512f-perm2-p2.c
   src/math/extexp-avx512f-p5.c
+  src/math/sigmoid-avx512f-rr1-p5-div.c
+  src/math/sigmoid-avx512f-rr1-p5-nr1fma.c
+  src/math/sigmoid-avx512f-rr1-p5-nr2fma.c
+  src/math/sigmoid-avx512f-rr2-p5-div.c
+  src/math/sigmoid-avx512f-rr2-p5-nr1fma.c
+  src/math/sigmoid-avx512f-rr2-p5-nr2fma.c
+  src/math/sigmoid-avx512f-rr1-p5-scalef-div.c
+  src/math/sigmoid-avx512f-rr1-p5-scalef-nr1fma.c
+  src/math/sigmoid-avx512f-rr1-p5-scalef-nr2fma.c
+  src/math/sigmoid-avx512f-rr2-p5-scalef-div.c
+  src/math/sigmoid-avx512f-rr2-p5-scalef-nr1fma.c
+  src/math/sigmoid-avx512f-rr2-p5-scalef-nr2fma.c
   src/math/sqrt-avx512f-nr1fma.c
   src/math/sqrt-avx512f-nr2fma.c
   src/math/sqrt-avx512f-nr1fma1adj.c)

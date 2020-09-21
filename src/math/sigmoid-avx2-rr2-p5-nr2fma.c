@@ -89,7 +89,7 @@ void xnn_math_f32_sigmoid__avx2_rr2_p5_nr2fma(
     vr = _mm256_fmadd_ps(_mm256_fnmadd_ps(vr, vd, vone), vr, vr);
     vr = _mm256_fmadd_ps(_mm256_fnmadd_ps(vr, vd, vone), vr, vr);
 
-    // Reconstruct sigmoid(-z) = exp(-z) / (1.0 + exp(-z))
+    // Reconstruct sigmoid(-z) = exp(z) / (1.0 + exp(z))
     __m256 vf = _mm256_mul_ps(ve, vr);
 
     // For inputs below denormal cutoff, replace output with +0.0f.
