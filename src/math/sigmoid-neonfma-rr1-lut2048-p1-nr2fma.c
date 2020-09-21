@@ -68,14 +68,14 @@ void xnn_math_f32_sigmoid__neonfma_rr1_lut2048_p1_nr2fma(
     const int32x4_t ve = vshlq_n_s32(vbicq_s32(vreinterpretq_s32_f32(vn), vmovq_n_s32(INT32_C(0x7FF))), 12);
 
     // Use bits 0:11 bits of n, as integer, as an index for table lookup of l := 2**(n % 2048).
-    const uint64x2_t vidx = vreinterpretq_u64_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask));
-    const uint64_t vidx01 = vgetq_lane_u64(vidx, 0);
-    const uint64_t vidx23 = vgetq_lane_u64(vidx, 1);
-    float32x2_t vl01 = vld1_dup_f32(&xnn_table_exp2_k_over_2048[(uint32_t) vidx01]);
-    float32x2_t vl23 = vld1_dup_f32(&xnn_table_exp2_k_over_2048[(uint32_t) vidx23]);
-    vl01 = vld1_lane_f32(&xnn_table_exp2_k_over_2048[(uint32_t) (vidx01 >> 32)], vl01, 1);
-    vl23 = vld1_lane_f32(&xnn_table_exp2_k_over_2048[(uint32_t) (vidx23 >> 32)], vl23, 1);
-    const float32x4_t vl = vcombine_f32(vl01, vl23);
+    const uint64x2_t vidx = vreinterpretq_u64_s32(vshlq_n_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask), 2));
+    const uint64_t vidx_lo = vgetq_lane_u64(vidx, 0);
+    const uint64_t vidx_hi = vgetq_lane_u64(vidx, 1);
+    float32x2_t vl_lo = vld1_dup_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_2048 + (uint32_t) vidx_lo));
+    float32x2_t vl_hi = vld1_dup_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_2048 + (uint32_t) vidx_hi));
+    vl_lo = vld1_lane_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_2048 + (uint32_t) (vidx_lo >> 32)), vl_lo, 1);
+    vl_hi = vld1_lane_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_2048 + (uint32_t) (vidx_hi >> 32)), vl_hi, 1);
+    const float32x4_t vl = vcombine_f32(vl_lo, vl_hi);
     // Adjust exponent of the value l fetched from the table to get the final s value.
     const float32x4_t vs = vreinterpretq_f32_s32(vaddq_s32(vreinterpretq_s32_f32(vl), ve));
 
