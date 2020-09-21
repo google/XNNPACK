@@ -66,23 +66,23 @@ void xnn_math_f32_exp__sse2_lut64_p2(
     const __m128 vsn = _mm_castsi128_ps(_mm_add_epi32(ven, vdefault_exponent));
 
     // Use the low 6 bits of n (as integer) for table lookup.
-    const __m128i vidx = _mm_and_si128(_mm_castps_si128(vn), vindex_mask);
+    const __m128i vidx = _mm_slli_epi32(_mm_and_si128(_mm_castps_si128(vn), vindex_mask), 2);
 #if XNN_ARCH_X86_64
     const uint64_t vidx01 = (uint64_t) _mm_cvtsi128_si64(vidx);
     const uint64_t vidx23 = (uint64_t) _mm_cvtsi128_si64(_mm_unpackhi_epi64(vidx, vidx));
-    const __m128i vl0 = _mm_cvtsi32_si128(*((const int*) &xnn_table_exp2_k_over_64[(uint32_t) vidx01]));
-    const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) &xnn_table_exp2_k_over_64[(uint32_t) vidx23]));
-    const __m128i vl1 = _mm_cvtsi32_si128(*((const int*) &xnn_table_exp2_k_over_64[(uint32_t) (vidx01 >> 32)]));
-    const __m128i vl3 = _mm_cvtsi32_si128(*((const int*) &xnn_table_exp2_k_over_64[(uint32_t) (vidx23 >> 32)]));
+    const __m128i vl0 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) &xnn_table_exp2_k_over_64 + (uint32_t) vidx01)));
+    const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx23)));
+    const __m128i vl1 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx01 >> 32))));
+    const __m128i vl3 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx23 >> 32))));
 #else
     const uint32_t vidx0 = (uint32_t) _mm_cvtsi128_si32(vidx);
     const uint32_t vidx1 = (uint32_t) _mm_extract_epi16(vidx, 2);
     const uint32_t vidx2 = (uint32_t) _mm_extract_epi16(vidx, 4);
     const uint32_t vidx3 = (uint32_t) _mm_extract_epi16(vidx, 6);
-    const __m128i vl0 = _mm_cvtsi32_si128(*((const int*) &xnn_table_exp2_k_over_64[vidx0]));
-    const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) &xnn_table_exp2_k_over_64[vidx2]));
-    const __m128i vl1 = _mm_cvtsi32_si128(*((const int*) &xnn_table_exp2_k_over_64[vidx1]));
-    const __m128i vl3 = _mm_cvtsi32_si128(*((const int*) &xnn_table_exp2_k_over_64[vidx3]));
+    const __m128i vl0 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + vidx0)));
+    const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + vidx2)));
+    const __m128i vl1 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + vidx1)));
+    const __m128i vl3 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + vidx3)));
 #endif
     // Fuse so into the value l fetched from a table by adjusting its exponential.
     const __m128 vl = _mm_castsi128_ps(_mm_add_epi32(_mm_unpacklo_epi64(_mm_unpacklo_epi32(vl0, vl1), _mm_unpacklo_epi32(vl2, vl3)), veo));
