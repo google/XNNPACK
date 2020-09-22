@@ -92,8 +92,14 @@ static void ExpError(benchmark::State& state,
   static void f32_exp__avx512f_lut16_p3_perm(benchmark::State& state) {
     ExpError(state, xnn_math_f32_exp__avx512f_lut16_p3_perm, 16);
   }
+  static void f32_exp__avx512f_lut16_p3_perm_scalef(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_exp__avx512f_lut16_p3_perm_scalef, 16);
+  }
   static void f32_exp__avx512f_lut32_p2_perm2(benchmark::State& state) {
     ExpError(state, xnn_math_f32_exp__avx512f_lut32_p2_perm2, 16);
+  }
+  static void f32_exp__avx512f_lut32_p2_perm2_scalef(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_exp__avx512f_lut32_p2_perm2_scalef, 16);
   }
   static void f32_exp__avx512f_p5(benchmark::State& state) {
     ExpError(state, xnn_math_f32_exp__avx512f_p5, 16);
@@ -109,7 +115,9 @@ static void ExpError(benchmark::State& state,
   BENCHMARK(f32_exp__avx2_lut8_p3_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx512f_lut16_p3_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_exp__avx512f_lut16_p3_perm_scalef)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx512f_lut32_p2_perm2)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_exp__avx512f_lut32_p2_perm2_scalef)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx512f_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_exp__avx512f_p5_scalef)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

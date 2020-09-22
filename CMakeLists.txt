@@ -2092,10 +2092,12 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-vunary/gen/vneg-avx512f-x32.c
   src/f32-vunary/gen/vsqr-avx512f-x16.c
   src/f32-vunary/gen/vsqr-avx512f-x32.c
-  src/math/exp-avx512f-p5-scalef.c
   src/math/exp-avx512f-p5.c
+  src/math/exp-avx512f-p5-scalef.c
   src/math/exp-avx512f-lut16-p3-perm.c
+  src/math/exp-avx512f-lut16-p3-perm-scalef.c
   src/math/exp-avx512f-lut32-p2-perm2.c
+  src/math/exp-avx512f-lut32-p2-perm2-scalef.c
   src/math/extexp-avx512f-p5.c
   src/math/sigmoid-avx512f-rr1-p5-div.c
   src/math/sigmoid-avx512f-rr1-p5-nr1fma.c
