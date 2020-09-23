@@ -18,9 +18,6 @@ void xnn_math_f32_sigmoid__avx512f_rr2_p5_scalef_div(
 {
   assert(n % (16 * sizeof(float)) == 0);
 
-  // The smallest x for which sigmoidf(x) is normalized.
-  // This number is also the smallest x for which expf(x) is normalized.
-  const __m512 vdenorm_cutoff = _mm512_set1_ps(-0x1.5D589Ep+6f);
   const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
   const __m512 vminus_ln2_hi = _mm512_set1_ps(-0x1.62E43p-1f);
   const __m512 vminus_ln2_lo = _mm512_set1_ps(0x1.05C61p-29f);
@@ -66,10 +63,8 @@ void xnn_math_f32_sigmoid__avx512f_rr2_p5_scalef_div(
     // Denominator of the sigmoid fraction: 1.0 + exp(z)
     const __m512 vd = _mm512_add_ps(ve, vone);
 
-    // Reconstruct sigmoid(-z) = exp(z) / (1.0 + exp(z))
-    // For inputs below denormal cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is true, and outputs are left unchanged.
-    __m512 vf = _mm512_maskz_div_ps(_mm512_cmp_ps_mask(vz, vdenorm_cutoff, _CMP_NLT_US), ve, vd);
+    // Reconstruct sigmoid(z) = exp(z) / (1.0 + exp(z))
+    __m512 vf = _mm512_div_ps(ve, vd);
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
     vf = _mm512_mask_sub_ps(vf, _mm512_testn_epi32_mask(_mm512_castps_si512(vx), vsign_mask), vone, vf);

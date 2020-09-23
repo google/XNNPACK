@@ -216,41 +216,59 @@ static void SigmoidError(benchmark::State& state,
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void f32_sigmoid__avx512f_rr1_p5_div(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_p5_div, 16);
+  static void f32_sigmoid__avx512f_rr2_p5_scalef_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_p5_scalef_div, 16);
   }
-  static void f32_sigmoid__avx512f_rr1_p5_nr2fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_p5_nr2fma, 16);
+  static void f32_sigmoid__avx512f_rr2_p5_scalef_nr1fma1adj(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_p5_scalef_nr1fma1adj, 16);
   }
-  static void f32_sigmoid__avx512f_rr1_p5_nr1fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_p5_nr1fma, 16);
-  }
-  static void f32_sigmoid__avx512f_rr2_p5_div(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_p5_div, 16);
-  }
-  static void f32_sigmoid__avx512f_rr2_p5_nr2fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_p5_nr2fma, 16);
-  }
-  static void f32_sigmoid__avx512f_rr2_p5_nr1fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_p5_nr1fma, 16);
+  static void f32_sigmoid__avx512f_rr2_p5_scalef_nr1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_p5_scalef_nr1fma, 16);
   }
   static void f32_sigmoid__avx512f_rr1_p5_scalef_div(benchmark::State& state) {
     SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_p5_scalef_div, 16);
   }
-  static void f32_sigmoid__avx512f_rr1_p5_scalef_nr2fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_p5_scalef_nr2fma, 16);
+  static void f32_sigmoid__avx512f_rr1_p5_scalef_nr1fma1adj(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_p5_scalef_nr1fma1adj, 16);
   }
   static void f32_sigmoid__avx512f_rr1_p5_scalef_nr1fma(benchmark::State& state) {
     SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_p5_scalef_nr1fma, 16);
   }
-  static void f32_sigmoid__avx512f_rr2_p5_scalef_div(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_p5_scalef_div, 16);
+  static void f32_sigmoid__avx512f_rr2_lut16_p3_perm_scalef_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_lut16_p3_perm_scalef_div, 16);
   }
-  static void f32_sigmoid__avx512f_rr2_p5_scalef_nr2fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_p5_scalef_nr2fma, 16);
+  static void f32_sigmoid__avx512f_rr2_lut16_p3_perm_scalef_nr1fma1adj(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_lut16_p3_perm_scalef_nr1fma1adj, 16);
   }
-  static void f32_sigmoid__avx512f_rr2_p5_scalef_nr1fma(benchmark::State& state) {
-    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_p5_scalef_nr1fma, 16);
+  static void f32_sigmoid__avx512f_rr2_lut16_p3_perm_scalef_nr1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_lut16_p3_perm_scalef_nr1fma, 16);
+  }
+  static void f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_div, 16);
+  }
+  static void f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_nr1fma1adj(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_nr1fma1adj, 16);
+  }
+  static void f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_nr1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_nr1fma, 16);
+  }
+  static void f32_sigmoid__avx512f_rr2_lut32_p2_perm2_scalef_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_lut32_p2_perm2_scalef_div, 16);
+  }
+  static void f32_sigmoid__avx512f_rr2_lut32_p2_perm2_scalef_nr1fma1adj(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_lut32_p2_perm2_scalef_nr1fma1adj, 16);
+  }
+  static void f32_sigmoid__avx512f_rr2_lut32_p2_perm2_scalef_nr1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr2_lut32_p2_perm2_scalef_nr1fma, 16);
+  }
+  static void f32_sigmoid__avx512f_rr1_lut32_p2_perm2_scalef_div(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_lut32_p2_perm2_scalef_div, 16);
+  }
+  static void f32_sigmoid__avx512f_rr1_lut32_p2_perm2_scalef_nr1fma1adj(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_lut32_p2_perm2_scalef_nr1fma1adj, 16);
+  }
+  static void f32_sigmoid__avx512f_rr1_lut32_p2_perm2_scalef_nr1fma(benchmark::State& state) {
+    SigmoidError(state, xnn_math_f32_sigmoid__avx512f_rr1_lut32_p2_perm2_scalef_nr1fma, 16);
   }
 
   static void f32_sigmoid__avx2_rr2_p5_div(benchmark::State& state) {
@@ -279,18 +297,24 @@ static void SigmoidError(benchmark::State& state,
     SigmoidError(state, xnn_math_f32_sigmoid__sse2_rr2_p5_div, 4);
   }
 
-  BENCHMARK(f32_sigmoid__avx512f_rr1_p5_div)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__avx512f_rr1_p5_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__avx512f_rr1_p5_nr1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__avx512f_rr2_p5_div)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__avx512f_rr2_p5_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__avx512f_rr2_p5_nr1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__avx512f_rr1_p5_scalef_div)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__avx512f_rr1_p5_scalef_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__avx512f_rr1_p5_scalef_nr1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_sigmoid__avx512f_rr2_p5_scalef_div)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_sigmoid__avx512f_rr2_p5_scalef_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr2_p5_scalef_nr1fma1adj)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_sigmoid__avx512f_rr2_p5_scalef_nr1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr1_p5_scalef_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr1_p5_scalef_nr1fma1adj)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr1_p5_scalef_nr1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr2_lut16_p3_perm_scalef_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr2_lut16_p3_perm_scalef_nr1fma1adj)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr2_lut16_p3_perm_scalef_nr1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_nr1fma1adj)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_nr1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr2_lut32_p2_perm2_scalef_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr2_lut32_p2_perm2_scalef_nr1fma1adj)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr2_lut32_p2_perm2_scalef_nr1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr1_lut32_p2_perm2_scalef_div)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr1_lut32_p2_perm2_scalef_nr1fma1adj)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_sigmoid__avx512f_rr1_lut32_p2_perm2_scalef_nr1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_sigmoid__avx2_rr2_p5_div)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_sigmoid__avx2_rr2_p5_nr2fma)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_sigmoid__avx2_rr2_p5_nr1fma)->Unit(benchmark::kMillisecond)->Iterations(1);
