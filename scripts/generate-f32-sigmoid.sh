@@ -175,6 +175,61 @@ tools/xngen src/f32-sigmoid/avx2-p5.c.in -D BATCH_TILE=64 -D RR_STEPS=1 -D DIV_A
 tools/xngen src/f32-sigmoid/avx2-p5.c.in -D BATCH_TILE=72 -D RR_STEPS=1 -D DIV_ALGO=nr2fma -o src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x72.c
 tools/xngen src/f32-sigmoid/avx2-p5.c.in -D BATCH_TILE=80 -D RR_STEPS=1 -D DIV_ALGO=nr2fma -o src/f32-sigmoid/gen/avx2-rr1-p5-nr2fma-x80.c
 
+################################# x86 AVX-512 #################################
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=16  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-div-x16.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=32  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-div-x32.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=48  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-div-x48.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=64  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-div-x64.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=80  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-div-x80.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=96  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-div-x96.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=112 -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-div-x112.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=128 -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-div-x128.c
+
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=16  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x16.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=32  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x32.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=48  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x48.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=64  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x64.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=80  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x80.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=96  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x96.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=112 -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x112.c
+tools/xngen src/f32-sigmoid/avx512f-p5-scalef.c.in -D BATCH_TILE=128 -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x128.c
+
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=16  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x16.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=32  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x32.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=48  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x48.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=64  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x64.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=80  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x80.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=96  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x96.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=112 -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x112.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=128 -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x128.c
+
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=16  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x16.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=32  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x32.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=48  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x48.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=64  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x64.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=80  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x80.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=96  -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x96.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=112 -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x112.c
+tools/xngen src/f32-sigmoid/avx512f-lut16-p3-perm-scalef.c.in -D BATCH_TILE=128 -D RR_STEPS=1 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x128.c
+
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=16  -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x16.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=32  -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x32.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=48  -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x48.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=64  -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x64.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=80  -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x80.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=96  -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x96.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=112 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x112.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=128 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x128.c
+
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=16  -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x16.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=32  -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x32.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=48  -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x48.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=64  -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x64.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=80  -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x80.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=96  -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x96.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=112 -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x112.c
+tools/xngen src/f32-sigmoid/avx512f-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=128 -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-sigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x128.c
+
 ################################## WAsm SIMD ##################################
 tools/xngen src/f32-sigmoid/wasmsimd-p5-div.c.in -D BATCH_TILE=4  -D BLEND=0 -o src/f32-sigmoid/gen/wasmsimd-p5-div-x4.c
 tools/xngen src/f32-sigmoid/wasmsimd-p5-div.c.in -D BATCH_TILE=8  -D BLEND=0 -o src/f32-sigmoid/gen/wasmsimd-p5-div-x8.c
