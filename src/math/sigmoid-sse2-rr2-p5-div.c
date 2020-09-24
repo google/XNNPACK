@@ -18,6 +18,7 @@ void xnn_math_f32_sigmoid__sse2_rr2_p5_div(
 {
   assert(n % (4 * sizeof(float)) == 0);
 
+  const __m128 vsign_mask = _mm_set1_ps(-0.0f);
   const __m128 vmagic_bias = _mm_set1_ps(0x1.8000FEp23f);
   // The smallest x for which sigmoidf(x) is normalized.
   // This number is also the smallest x for which expf(x) is normalized.
@@ -27,7 +28,6 @@ void xnn_math_f32_sigmoid__sse2_rr2_p5_div(
   const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
   const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
   const __m128 vone = _mm_set1_ps(1.0f);
-  const __m128 vsign_mask = _mm_set1_ps(-0.0f);
 
   const __m128 vc1 = _mm_set1_ps(0x1.FFFFF6p-1f);
   const __m128 vc2 = _mm_set1_ps(0x1.FFFDC6p-2f);

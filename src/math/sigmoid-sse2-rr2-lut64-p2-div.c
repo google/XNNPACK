@@ -9,7 +9,6 @@
 #include <emmintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
 
 
@@ -23,20 +22,18 @@ void xnn_math_f32_sigmoid__sse2_rr2_lut64_p2_div(
 {
   assert(n % (4 * sizeof(float)) == 0);
 
-  // Mask for all bits of a floating-point number except the sign bit.
-  const __m128 vnonsign_mask = _mm_set1_ps(math_nonsign_mask_f32());
-
+  const __m128 vsign_mask = _mm_set1_ps(-0.0f);
   const __m128 vmagic_bias = _mm_set1_ps(0x1.800000p23f);
   // The largest z for which sigmoidf(-z) is normalized.
   // This number is also the largest z for which expf(-z) is normalized.
   const __m128 vdenorm_cutoff = _mm_set1_ps(0x1.5D589Ep+6f);
-  const __m128 vminus_log2e_x64 = _mm_set1_ps(-0x1.715476p6f);
+  const __m128 vlog2e_x64 = _mm_set1_ps(0x1.715476p6f);
   // Last 13 bits are zeroes
-  const __m128 vln2_o64_hi = _mm_set1_ps(0x1.630000p-7f);
-  const __m128 vln2_o64_lo = _mm_set1_ps(-0x1.BD0106p-19f);
-  const __m128 vone = _mm_set1_ps(1.0f);
+  const __m128 vminus_ln2_o64_hi = _mm_set1_ps(-0x1.630000p-7f);
+  const __m128 vminus_ln2_o64_lo = _mm_set1_ps(0x1.BD0106p-19f);
 
   const __m128 vc2 = _mm_set1_ps(0x1.FFFF0Ap-2f);
+  const __m128 vone = _mm_set1_ps(1.0f);
 
   const __m128i vinv_index_mask = _mm_set1_epi32(~INT32_C(0x3F));
 
@@ -49,18 +46,18 @@ void xnn_math_f32_sigmoid__sse2_rr2_lut64_p2_div(
     //   f[x] :=
     //           \ 1 - f[-x] if x >= 0
     //
-    // First we compute f[-z] := exp(-z) / (1 + exp(-z)) where z = abs(x),
-    // then replace result with 1 - f[-z] if x >= 0.
-    const __m128 vz = _mm_and_ps(vx, vnonsign_mask);
+    // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),
+    // then replace result with 1 - f[z] if x >= 0.
+    const __m128 vz = _mm_or_ps(vx, vsign_mask);
 
-    // Compute reduced argument n := round(-z * 64 / log(2)).
+    // Compute reduced argument n := round(z * 64 / log(2)).
     // We do it by adding a large number (magic bias), which cause rounding of the result to an integer, then subtracing
     // the large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
     // The trick with adding large number is valid only within certain bounds (|z * 64 / log(2)| <= 2**22, i.e.
     // |z| <= 0x1.62E43p+15 = 45426.09375), but that is acceptable, because inputs x outside of [-87.336544, 17.328678]
     // (i.e. z outsize [0, 87.336544]) underflow or saturate sigmoidf(x). We fixup the result  for such inputs at the
     // very end of the algorithm.
-    __m128 vn = _mm_add_ps(vmagic_bias, _mm_mul_ps(vz, vminus_log2e_x64));
+    __m128 vn = _mm_add_ps(_mm_mul_ps(vz, vlog2e_x64), vmagic_bias);
 
     // Create a floating-point number s (scale) such that s := 2**(n / 64) for such inputs that sigmoidf(-z) is
     // normalized, i.e. 0 <= z <= 87.33642. As n has 6 fractional bits, we split s == 2**(n / 64) =
@@ -97,27 +94,27 @@ void xnn_math_f32_sigmoid__sse2_rr2_lut64_p2_div(
     // Adjust exponent of the value l fetched from the table to get the final s value.
     const __m128 vs = _mm_castsi128_ps(_mm_add_epi32(vl, ve));
 
-    // Subtract the large number back to get the final n := round(-z * 64 / log(2)) as a floating-point number.
+    // Subtract the large number back to get final n := round(z * 64 / log(2)).
     vn = _mm_sub_ps(vn, vmagic_bias);
 
-    // Compute reduced argument t := (z + n * log(2) / 64). Note that -t = -z - n * log(2) / 64.
-    // Use Cody-Waite range reduction method (note two constants to represent log(2) / 64) to improve accuracy.
-    __m128 vt = _mm_add_ps(vz, _mm_mul_ps(vn, vln2_o64_hi));
-    vt = _mm_add_ps(vt, _mm_mul_ps(vn, vln2_o64_lo));
+    // Compute reduced argument t := z - n * log(2) / 64.
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m128 vt = _mm_add_ps(vz, _mm_mul_ps(vn, vminus_ln2_o64_hi));
+    vt = _mm_add_ps(vt, _mm_mul_ps(vn, vminus_ln2_o64_lo));
 
-    // Compute degree-2 polynomial approxiatmion for exp(-t) on [-log(2)/128, log(2)/128].
-    //   P1(t) = 1 + t * (-1 + t * c2)
+    // Compute degree-2 polynomial approxiatmion for exp(t) on [-log(2)/128, log(2)/128].
+    //   P1(t) = 1 + t * (1 + t * c2)
     __m128 vp = _mm_mul_ps(vt, vc2);
-    vp = _mm_sub_ps(vt, _mm_mul_ps(vp, vt));
+    vp = _mm_add_ps(vt, _mm_mul_ps(vp, vt));
 
-    // Reconstruct the exp(-z) value:
-    //   f = s * (1 + t * (-1 + t * c2))
-    //     = s * (1 - t + t * (t * c2))
-    //     = s - s * (t - t * (t * c2))
-    //     = s - s * p
-    const __m128 vy = _mm_sub_ps(vs, _mm_mul_ps(vs, vp));
+    // Reconstruct the exp(t) value:
+    //   e = s * (1 + t * (1 + t * c2))
+    //     = s * (1 + t + t * (t * c2))
+    //     = s + s * (t + t * (t * c2))
+    //     = s + s * p
+    const __m128 vy = _mm_add_ps(vs, _mm_mul_ps(vs, vp));
 
-    // Reconstruct sigmoid(-z) = exp(-z) / (1.0 + exp(-z))
+    // Reconstruct sigmoid(z) = exp(z) / (1.0 + exp(z))
     __m128 vf = _mm_div_ps(vy, _mm_add_ps(vy, vone));
 
     // For inputs below denormal cutoff, replace output with +0.0f.
