@@ -110,6 +110,8 @@ SUBGRAPH_SRCS = [
 TABLE_SRCS = [
     "src/tables/exp2-k-over-64.c",
     "src/tables/exp2-k-over-2048.c",
+    "src/tables/exp2minus-k-over-64.c",
+    "src/tables/exp2minus-k-over-2048.c",
 ]
 
 SCALAR_UKERNELS = [

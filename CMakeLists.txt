@@ -233,7 +233,9 @@ SET(XNNPACK_HOT_SRCS
 
 SET(XNNPACK_TABLE_SRCS
   src/tables/exp2-k-over-64.c
-  src/tables/exp2-k-over-2048.c)
+  src/tables/exp2-k-over-2048.c
+  src/tables/exp2minus-k-over-64.c
+  src/tables/exp2minus-k-over-2048.c)
 
 SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-scalar-c1.c

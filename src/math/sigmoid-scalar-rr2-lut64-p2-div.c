@@ -14,8 +14,8 @@
 #include <fp16/bitcasts.h>
 
 
-// Table of exp2(k / 64) values, k = 0..63
-extern XNN_INTERNAL const uint32_t xnn_table_exp2_k_over_64[64];
+// Table of exp2(k / 64) values decremented (as integer) by (k << 17), k = 0..63
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_64[64];
 
 void xnn_math_f32_sigmoid__scalar_rr2_lut64_p2_div(
     size_t n,
@@ -68,13 +68,13 @@ void xnn_math_f32_sigmoid__scalar_rr2_lut64_p2_div(
     //    number, because for 0 <= z <= 87.33642 (inputs for which sigmoidf(-z) is normalized) we have -126 <= e <= 0,
     //    and thus the adjusted exponent is not lower than -126.
     //
-    // Extract e from bits 6:14 of n and shift it into bits 23:31 (position of floating-point exponent).
-    const uint32_t ve = (fp32_to_bits(vn) & ~vindex_mask) << 17;
+    // Shift bits 6:14 into 23:31 (position of floating-point exponent).
+    const uint32_t ve = fp32_to_bits(vn) << 17;
 
     // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
     const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    const float vs = fp32_from_bits(xnn_table_exp2_k_over_64[vidx] + ve);
+    const float vs = fp32_from_bits(xnn_table_exp2minus_k_over_64[vidx] + ve);
 
     // Subtract the large number back to get the final n := round(-z * 64 / log(2)) as a floating-point number.
     vn -= vmagic_bias;

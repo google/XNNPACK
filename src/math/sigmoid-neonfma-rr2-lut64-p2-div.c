@@ -12,8 +12,8 @@
 #include <xnnpack/math-stubs.h>
 
 
-// Table of exp2(k / 64) values, k = 0..63
-extern XNN_INTERNAL const float xnn_table_exp2_k_over_64[64];
+// Table of exp2(k / 64) values decremented (as integer) by (k << 17), k = 0..63
+extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
 void xnn_math_f32_sigmoid__neonfma_rr2_lut64_p2_div(
     size_t n,
@@ -65,17 +65,17 @@ void xnn_math_f32_sigmoid__neonfma_rr2_lut64_p2_div(
     //    number, because for 0 <= z <= 87.33642 (inputs for which sigmoidf(-z) is normalized) we have -126 <= e <= 0,
     //    and thus the adjusted exponent is not lower than -126.
     //
-    // Extract e from bits 6:14 of n and shift it into bits 23:31 (position of floating-point exponent).
-    const int32x4_t ve = vshlq_n_s32(vbicq_s32(vreinterpretq_s32_f32(vn), vmovq_n_s32(INT32_C(0x3F))), 17);
+    // Shift bits 6:14 into 23:31 (position of floating-point exponent).
+    const int32x4_t ve = vshlq_n_s32(vreinterpretq_s32_f32(vn), 17);
 
     // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
     const uint64x2_t vidx = vreinterpretq_u64_s32(vshlq_n_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask), 2));
     const uint64_t vidx_lo = vgetq_lane_u64(vidx, 0);
     const uint64_t vidx_hi = vgetq_lane_u64(vidx, 1);
-    float32x2_t vl_lo = vld1_dup_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx_lo));
-    float32x2_t vl_hi = vld1_dup_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx_hi));
-    vl_lo = vld1_lane_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx_lo >> 32)), vl_lo, 1);
-    vl_hi = vld1_lane_f32((const float*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx_hi >> 32)), vl_hi, 1);
+    float32x2_t vl_lo = vld1_dup_f32((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_lo));
+    float32x2_t vl_hi = vld1_dup_f32((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_hi));
+    vl_lo = vld1_lane_f32((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_lo >> 32)), vl_lo, 1);
+    vl_hi = vld1_lane_f32((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_hi >> 32)), vl_hi, 1);
     const float32x4_t vl = vcombine_f32(vl_lo, vl_hi);
     // Adjust exponent of the value l fetched from the table to get the final s value.
     const float32x4_t vs = vreinterpretq_f32_s32(vaddq_s32(vreinterpretq_s32_f32(vl), ve));

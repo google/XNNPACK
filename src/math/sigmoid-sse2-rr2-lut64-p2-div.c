@@ -12,8 +12,8 @@
 #include <xnnpack/math-stubs.h>
 
 
-// Table of exp2(k / 64) values, k = 0..63
-extern XNN_INTERNAL const float xnn_table_exp2_k_over_64[64];
+// Table of exp2(k / 64) values decremented (as integer) by (k << 17), k = 0..63
+extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
 void xnn_math_f32_sigmoid__sse2_rr2_lut64_p2_div(
     size_t n,
@@ -35,7 +35,7 @@ void xnn_math_f32_sigmoid__sse2_rr2_lut64_p2_div(
   const __m128 vc2 = _mm_set1_ps(0x1.FFFF0Ap-2f);
   const __m128 vone = _mm_set1_ps(1.0f);
 
-  const __m128i vinv_index_mask = _mm_set1_epi32(~INT32_C(0x3F));
+  const __m128i vindex_mask = _mm_set1_epi32(INT32_C(0x3F));
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     const __m128 vx = _mm_load_ps(input);
@@ -68,27 +68,27 @@ void xnn_math_f32_sigmoid__sse2_rr2_lut64_p2_div(
     //    number, because for 0 <= z <= 87.33642 (inputs for which sigmoidf(-z) is normalized) we have -126 <= e <= 0,
     //    and thus the adjusted exponent is not lower than -126.
     //
-    // Extract e from bits 6:14 of n and shift it into bits 23:31 (position of floating-point exponent).
-    const __m128i ve = _mm_slli_epi32(_mm_and_si128(_mm_castps_si128(vn), vinv_index_mask), 17);
+    // Shift bits 6:14 into 23:31 (position of floating-point exponent).
+    const __m128i ve = _mm_slli_epi32(_mm_castps_si128(vn), 17);
 
     // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
-    const __m128i vidx = _mm_slli_epi32(_mm_andnot_si128(vinv_index_mask, _mm_castps_si128(vn)), 2);
+    const __m128i vidx = _mm_slli_epi32(_mm_and_si128(_mm_castps_si128(vn), vindex_mask), 2);
 #if XNN_ARCH_X86_64
     const uint64_t vidx_lo = (uint64_t) _mm_cvtsi128_si64(vidx);
     const uint64_t vidx_hi = (uint64_t) _mm_cvtsi128_si64(_mm_unpackhi_epi64(vidx, vidx));
-    const __m128i vl0 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx_lo)));
-    const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) vidx_hi)));
-    const __m128i vl1 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx_lo >> 32))));
-    const __m128i vl3 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + (uint32_t) (vidx_hi >> 32))));
+    const __m128i vl0 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_lo)));
+    const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_hi)));
+    const __m128i vl1 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_lo >> 32))));
+    const __m128i vl3 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_hi >> 32))));
 #else
     const uint32_t vidx0 = (uint32_t) _mm_cvtsi128_si32(vidx);
     const uint32_t vidx1 = (uint32_t) _mm_extract_epi16(vidx, 2);
     const uint32_t vidx2 = (uint32_t) _mm_extract_epi16(vidx, 4);
     const uint32_t vidx3 = (uint32_t) _mm_extract_epi16(vidx, 6);
-    const __m128i vl0 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + vidx0)));
-    const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + vidx2)));
-    const __m128i vl1 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + vidx1)));
-    const __m128i vl3 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2_k_over_64 + vidx3)));
+    const __m128i vl0 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + vidx0)));
+    const __m128i vl2 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + vidx2)));
+    const __m128i vl1 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + vidx1)));
+    const __m128i vl3 = _mm_cvtsi32_si128(*((const int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + vidx3)));
 #endif
     const __m128i vl = _mm_unpacklo_epi64(_mm_unpacklo_epi32(vl0, vl1), _mm_unpacklo_epi32(vl2, vl3));
     // Adjust exponent of the value l fetched from the table to get the final s value.
