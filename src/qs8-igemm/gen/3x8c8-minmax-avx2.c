@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-igemm/MRx8c8-minmax-avx2.c.in
+//   Template: src/qs8-igemm/MRx8c8-avx2.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC

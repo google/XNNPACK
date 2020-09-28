@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-igemm/minmax-neon-mlal-lane.c.in
+//   Template: src/qs8-igemm/neon-mlal-lane.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC

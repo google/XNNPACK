@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-dwconv/up-neon-mul16.c.in
+//   Template: src/qs8-dwconv/unipass-neon-mul16.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC

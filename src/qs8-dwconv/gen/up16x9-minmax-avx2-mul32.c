@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-dwconv/up-avx2-mul32.c.in
+//   Template: src/qs8-dwconv/unipass-avx2-mul32.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC

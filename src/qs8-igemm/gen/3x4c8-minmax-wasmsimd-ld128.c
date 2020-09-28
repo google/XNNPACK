@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-igemm/MRx4c8-minmax-wasmsimd.c.in
+//   Template: src/qs8-igemm/MRx4c8-wasmsimd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
