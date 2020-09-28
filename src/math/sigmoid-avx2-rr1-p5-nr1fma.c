@@ -18,39 +18,43 @@ void xnn_math_f32_sigmoid__avx2_rr1_p5_nr1fma(
 {
   assert(n % (8 * sizeof(float)) == 0);
 
+  // Floating-point mask with only the sign bit set
+  const __m256 vsign_mask = _mm256_set1_ps(-0.0f);
+  // Large number such that ulp(magic bias) == 1 and magic bias === 127 mod 2**22.
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p0f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E43p-1f);
+  // Coefficient of polynomial approximation of
+  // exp(t) ~ 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) on [-log(2)/2, log(2)/2]
+  const __m256 vc5 = _mm256_set1_ps(0x1.0F9F9Cp-7f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.573A1Ap-5f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.555A80p-3f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FFFDC6p-2f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.FFFFF6p-1f);
+  const __m256 vone = _mm256_set1_ps(1.0f);
   // The smallest x for which sigmoidf(x) is normalized.
   // This number is also the smallest x for which expf(x) is normalized.
   const __m256 vdenorm_cutoff = _mm256_set1_ps(-0x1.5D589Ep+6f);
-  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
-  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E43p-1f);
-  const __m256 vone = _mm256_set1_ps(1.0f);
-  const __m256 vsign_mask = _mm256_set1_ps(-0.0f);
-
-  const __m256 vc1 = _mm256_set1_ps(0x1.FFFFF6p-1f);
-  const __m256 vc2 = _mm256_set1_ps(0x1.FFFDC6p-2f);
-  const __m256 vc3 = _mm256_set1_ps(0x1.555A80p-3f);
-  const __m256 vc4 = _mm256_set1_ps(0x1.573A1Ap-5f);
-  const __m256 vc5 = _mm256_set1_ps(0x1.0F9F9Cp-7f);
 
   for (; n != 0; n -= 8 * sizeof(float)) {
     const __m256 vx = _mm256_loadu_ps(input);
 
     // General structure of the algorithm:
+    //
     //           / exp(x) / (1 + exp(x)) if x <= 0
     //   f[x] :=
     //           \ 1 - f[-x] if x >= 0
     //
-    // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),
-    // then replace result with 1 - f[z] if x >= 0.
+    // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x), then replace result with 1 - f[z] if x >= 0.
     const __m256 vz = _mm256_or_ps(vx, vsign_mask);
 
     // Compute reduced argument n := round(z / log(2)).
-    // We do it by adding a large number (magic bias) to the product z * (1/log(2)), which cause rounding of the result
-    // to an integer, then subtracing the large number back. The trick with adding large number is valid only within
-    // certain bounds (|x| <= 2**22), but thats ok, because inputs x outside of [-87.336544, 17.328678] (i.e. z outsize
-    // [0, 87.336544]) underflow or saturate sigmoidf(x) anyway. We fixup the result for such inputs at the very end of
-    // the algorithm.
+    // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
+    // the large number back. The addition is combined with multiplication by log2e into a single FMA instruction. The
+    // trick with adding large number is valid only within certain bounds (|z / log(2)| <= 2**22, i.e.
+    // |z| <= 0x1.62E43p+22 = 5814540.0), but that is acceptable, because inputs x outside of [-87.336544, 17.328678]
+    // (i.e. z outsize [87.336544, 0]) underflow or saturate sigmoidf(x). We fixup the result for such inputs at the
+    // very end of the algorithm.
     __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
@@ -63,7 +67,8 @@ void xnn_math_f32_sigmoid__avx2_rr1_p5_nr1fma(
     // Compute reduced argument t := z - n * log(2).
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
+    //   P(t) = 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) = 1 + t * p
     __m256 vp = _mm256_fmadd_ps(vc5, vt, vc4);
     vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
@@ -85,7 +90,7 @@ void xnn_math_f32_sigmoid__avx2_rr1_p5_nr1fma(
     __m256 vr = _mm256_rcp_ps(vd);
     vr = _mm256_fmadd_ps(_mm256_fnmadd_ps(vr, vd, vone), vr, vr);
 
-    // Reconstruct sigmoid(-z) = exp(z) / (1.0 + exp(z))
+    // Reconstruct sigmoid(z) = exp(z) / (1.0 + exp(z))
     __m256 vf = _mm256_mul_ps(ve, vr);
 
     // For inputs below denormal cutoff, replace output with +0.0f.

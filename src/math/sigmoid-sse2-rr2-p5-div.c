@@ -18,41 +18,44 @@ void xnn_math_f32_sigmoid__sse2_rr2_p5_div(
 {
   assert(n % (4 * sizeof(float)) == 0);
 
+  // Floating-point mask with only the sign bit set
   const __m128 vsign_mask = _mm_set1_ps(-0.0f);
+  // Large number such that ulp(magic bias) == 1 and magic bias === 127 mod 2**22.
   const __m128 vmagic_bias = _mm_set1_ps(0x1.8000FEp23f);
+  const __m128 vlog2e = _mm_set1_ps(0x1.715476p0f);
+  // Last 8 bits are zeroes
+  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
+  const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
+  // Coefficient of polynomial approximation of
+  // exp(t) ~ 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) on [-log(2)/2, log(2)/2]
+  const __m128 vc5 = _mm_set1_ps(0x1.0F9F9Cp-7f);
+  const __m128 vc4 = _mm_set1_ps(0x1.573A1Ap-5f);
+  const __m128 vc3 = _mm_set1_ps(0x1.555A80p-3f);
+  const __m128 vc2 = _mm_set1_ps(0x1.FFFDC6p-2f);
+  const __m128 vc1 = _mm_set1_ps(0x1.FFFFF6p-1f);
+  const __m128 vone = _mm_set1_ps(1.0f);
   // The smallest x for which sigmoidf(x) is normalized.
   // This number is also the smallest x for which expf(x) is normalized.
   const __m128 vdenorm_cutoff = _mm_set1_ps(-0x1.5D589Ep+6f);
-  const __m128 vlog2e = _mm_set1_ps(0x1.715476p+0f);
-  // Last 7 bits are zeroes
-  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
-  const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
-  const __m128 vone = _mm_set1_ps(1.0f);
-
-  const __m128 vc1 = _mm_set1_ps(0x1.FFFFF6p-1f);
-  const __m128 vc2 = _mm_set1_ps(0x1.FFFDC6p-2f);
-  const __m128 vc3 = _mm_set1_ps(0x1.555A80p-3f);
-  const __m128 vc4 = _mm_set1_ps(0x1.573A1Ap-5f);
-  const __m128 vc5 = _mm_set1_ps(0x1.0F9F9Cp-7f);
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     const __m128 vx = _mm_loadu_ps(input);
 
     // General structure of the algorithm:
+    //
     //           / exp(x) / (1 + exp(x)) if x <= 0
     //   f[x] :=
     //           \ 1 - f[-x] if x >= 0
     //
-    // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),
-    // then replace result with 1 - f[z] if x >= 0.
+    // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x), then replace result with 1 - f[z] if x >= 0.
     const __m128 vz = _mm_or_ps(vx, vsign_mask);
 
     // Compute reduced argument n := round(z / log(2)).
-    // We do it by adding a large number (magic bias) to the product z * (1/log(2)), which cause rounding of the result
-    // to an integer, then subtracing the large number back. The trick with adding large number is valid only within
-    // certain bounds (|x| <= 2**22), but thats ok, because inputs x outside of [-87.336544, 17.328678] (i.e. z outsize
-    // [0, 87.336544]) underflow or saturate sigmoidf(x) anyway. We fixup the result for such inputs at the very end of
-    // the algorithm.
+    // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
+    // the large number back. The trick with adding large number is valid only within certain bounds
+    // (|z / log(2)| <= 2**22, i.e. |z| <= 0x1.62E43p+22 = 5814540.0), but that is acceptable, because inputs x outside
+    // of [-87.336544, 17.328678] (i.e. z outsize [87.336544, 0]) underflow or saturate sigmoidf(x). We fixup the
+    // result for such inputs at the very end of the algorithm.
     __m128 vn = _mm_add_ps(_mm_mul_ps(vz, vlog2e), vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
@@ -67,7 +70,8 @@ void xnn_math_f32_sigmoid__sse2_rr2_p5_div(
     __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_hi), vz);
     vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_lo), vt);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
+    //   P(t) = 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) = 1 + t * p
     __m128 vp = _mm_add_ps(_mm_mul_ps(vc5, vt), vc4);
     vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc3);
     vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc2);
@@ -83,7 +87,7 @@ void xnn_math_f32_sigmoid__sse2_rr2_p5_div(
     // Denominator of the sigmoid fraction: 1.0 + exp(z)
     __m128 vd = _mm_add_ps(ve, vone);
 
-    // Reconstruct sigmoid(-z) = exp(z) / (1.0 + exp(z))
+    // Reconstruct sigmoid(z) = exp(z) / (1.0 + exp(z))
     __m128 vf = _mm_div_ps(ve, vd);
 
     // For inputs below denormal cutoff, replace output with +0.0f.

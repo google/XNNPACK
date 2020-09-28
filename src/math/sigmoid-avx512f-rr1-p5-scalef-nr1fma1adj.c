@@ -18,27 +18,29 @@ void xnn_math_f32_sigmoid__avx512f_rr1_p5_scalef_nr1fma1adj(
 {
   assert(n % (16 * sizeof(float)) == 0);
 
-  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
-  const __m512 vminus_ln2 = _mm512_set1_ps(-0x1.62E43p-1f);
-  const __m512 vone = _mm512_set1_ps(1.0f);
+  // Floating-point mask with only the sign bit set
   const __m512i vsign_mask = _mm512_set1_epi32(0x80000000);
-
-  const __m512 vc1 = _mm512_set1_ps(0x1.FFFFF6p-1f);
-  const __m512 vc2 = _mm512_set1_ps(0x1.FFFDC6p-2f);
-  const __m512 vc3 = _mm512_set1_ps(0x1.555A80p-3f);
-  const __m512 vc4 = _mm512_set1_ps(0x1.573A1Ap-5f);
+  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p0f);
+  const __m512 vminus_ln2 = _mm512_set1_ps(-0x1.62E43p-1f);
+  // Coefficient of polynomial approximation of
+  // exp(t) ~ 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) on [-log(2)/2, log(2)/2]
   const __m512 vc5 = _mm512_set1_ps(0x1.0F9F9Cp-7f);
+  const __m512 vc4 = _mm512_set1_ps(0x1.573A1Ap-5f);
+  const __m512 vc3 = _mm512_set1_ps(0x1.555A80p-3f);
+  const __m512 vc2 = _mm512_set1_ps(0x1.FFFDC6p-2f);
+  const __m512 vc1 = _mm512_set1_ps(0x1.FFFFF6p-1f);
+  const __m512 vone = _mm512_set1_ps(1.0f);
 
   for (; n != 0; n -= 16 * sizeof(float)) {
     const __m512 vx = _mm512_loadu_ps(input);
 
     // General structure of the algorithm:
+    //
     //           / exp(x) / (1 + exp(x)) if x <= 0
     //   f[x] :=
     //           \ 1 - f[-x] if x >= 0
     //
-    // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),
-    // then replace result with 1 - f[z] if x >= 0.
+    // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x), then replace result with 1 - f[z] if x >= 0.
     const __m512 vz = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx), vsign_mask));
 
     // Compute reduced argument n := round(z / log(2)).
@@ -47,7 +49,8 @@ void xnn_math_f32_sigmoid__avx512f_rr1_p5_scalef_nr1fma1adj(
     // Compute reduced argument t := z - n * log(2).
     __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2, vz);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
+    //   P(t) = 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) = p
     __m512 vp = _mm512_fmadd_ps(vc5, vt, vc4);
     vp = _mm512_fmadd_ps(vp, vt, vc3);
     vp = _mm512_fmadd_ps(vp, vt, vc2);
