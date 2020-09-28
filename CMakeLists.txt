@@ -2283,7 +2283,25 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-igemm/6x8-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-igemm/6x8-minmax-aarch64-neonfma-cortex-a73.S
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a57.S
-  src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S)
+  src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S
+  src/qs8-gemm/12x8c4-minmax-neondot.S
+  src/qs8-gemm/1x16c4-minmax-neondot.S
+  src/qs8-gemm/1x8c4-minmax-neondot.S
+  src/qs8-gemm/4x16c4-minmax-neondot.S
+  src/qs8-gemm/4x8c4-minmax-neondot.S
+  src/qs8-gemm/6x16c4-minmax-neondot.S
+  src/qs8-gemm/6x8c4-minmax-neondot.S
+  src/qs8-gemm/8x16c4-minmax-neondot.S
+  src/qs8-gemm/8x8c4-minmax-neondot.S
+  src/qs8-igemm/i12x8c4-minmax-neondot.S
+  src/qs8-igemm/i1x16c4-minmax-neondot.S
+  src/qs8-igemm/i1x8c4-minmax-neondot.S
+  src/qs8-igemm/i4x16c4-minmax-neondot.S
+  src/qs8-igemm/i4x8c4-minmax-neondot.S
+  src/qs8-igemm/i6x16c4-minmax-neondot.S
+  src/qs8-igemm/i6x8c4-minmax-neondot.S
+  src/qs8-igemm/i8x16c4-minmax-neondot.S
+  src/qs8-igemm/i8x8c4-minmax-neondot.S)
 
 SET(XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SCALAR_MICROKERNEL_SRCS})
 IF(NOT EMSCRIPTEN AND NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
@@ -2345,7 +2363,7 @@ ENDIF()
 IF(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64" OR IOS_ARCH MATCHES "^arm64.*")
   SET_PROPERTY(SOURCE ${XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 ")
   SET_PROPERTY(SOURCE ${XNNPACK_NEONDOT_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod ")
-  SET_PROPERTY(SOURCE ${XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 ")
+  SET_PROPERTY(SOURCE ${XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16+dotprod ")
   IF(IOS)
     SET_PROPERTY(SOURCE ${XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -arch ${IOS_ARCH} ")
   ENDIF()
