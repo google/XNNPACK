@@ -18,19 +18,21 @@ void xnn_math_f32_sigmoid__neon_rr1_p5_nr2recps(
 {
   assert(n % (4 * sizeof(float)) == 0);
 
+  // Large number such that ulp(magic bias) == 1 and magic bias === 127 mod 2**22.
   const float32x4_t vmagic_bias = vmovq_n_f32(0x1.8000FEp23f);
+  const float32x4_t vminus_log2e = vmovq_n_f32(-0x1.715476p+0f);
+  const float32x4_t vln2 = vmovq_n_f32(0x1.62E43p-1f);
+  // Coefficient of polynomial approximation of
+  // exp(-t) ~ 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) on [-log(2)/2, log(2)/2]
+  const float32x4_t vc5 = vmovq_n_f32(-0x1.0F9F9Cp-7f);
+  const float32x4_t vc4 = vmovq_n_f32(0x1.573A1Ap-5f);
+  const float32x4_t vc3 = vmovq_n_f32(-0x1.555A80p-3f);
+  const float32x4_t vc2 = vmovq_n_f32(0x1.FFFDC6p-2f);
+  const float32x4_t vc1 = vmovq_n_f32(-0x1.FFFFF6p-1f);
+  const float32x4_t vone = vmovq_n_f32(1.0f);
   // The largest z for which sigmoidf(-z) is normalized.
   // This number is also the largest z for which expf(-z) is normalized.
   const float32x4_t vdenorm_cutoff = vmovq_n_f32(-0x1.5D589Ep+6f);
-  const float32x4_t vminus_log2e = vmovq_n_f32(-0x1.715476p+0f);
-  const float32x4_t vln2 = vmovq_n_f32(0x1.62E43p-1f);
-  const float32x4_t vone = vmovq_n_f32(1.0f);
-
-  const float32x4_t vc1 = vmovq_n_f32(-0x1.FFFFF6p-1f);
-  const float32x4_t vc2 = vmovq_n_f32(0x1.FFFDC6p-2f);
-  const float32x4_t vc3 = vmovq_n_f32(-0x1.555A80p-3f);
-  const float32x4_t vc4 = vmovq_n_f32(0x1.573A1Ap-5f);
-  const float32x4_t vc5 = vmovq_n_f32(-0x1.0F9F9Cp-7f);
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     const float32x4_t vx = vld1q_f32(input); input += 4;
@@ -45,11 +47,11 @@ void xnn_math_f32_sigmoid__neon_rr1_p5_nr2recps(
     const float32x4_t vz = vabsq_f32(vx);
 
     // Compute reduced argument n := round(-z / log(2)).
-    // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
-    // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
-    // inputs x outside of [-87.336544, 17.328678] (i.e. z outsize [0, 87.336544]) underflow or saturate sigmoidf(x)
-    // anyway. We fixup the result for such inputs at the very end of the algorithm.
+    // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
+    // the large number back. The trick with adding large number is valid only within certain bounds
+    // (|-z / log(2)| <= 2**22, i.e. |z| <= 0x1.62E43p+22 = 5814540.0), but that is acceptable, because inputs x
+    // outside of [-87.336544, 17.328678] (i.e. z outsize [0, 87.336544]) underflow or saturate sigmoidf(x). We fixup
+    // the result for such inputs at the very end of the algorithm.
     float32x4_t vn = vmlaq_f32(vmagic_bias, vz, vminus_log2e);
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.

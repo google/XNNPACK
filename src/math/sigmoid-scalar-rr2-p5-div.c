@@ -21,26 +21,29 @@ void xnn_math_f32_sigmoid__scalar_rr2_p5_div(
 {
   assert(n % sizeof(float) == 0);
 
+  // Large number such that ulp(magic bias) == 1 and magic bias === 127 mod 2**22.
   const float vmagic_bias = 0x1.8000FEp23f;
-  // The largest z for which sigmoidf(-z) is normalized.
-  // This number is also the largest z for which expf(-z) is normalized.
-  const float vdenorm_cutoff = 0x1.5D589Ep+6f;
   const float vminus_log2e = -0x1.715476p+0f;
   // Last 7 bits are zeroes
   const float vln2_hi = 0x1.62E400p-1f;
   const float vln2_lo = 0x1.7F7D1Cp-20f;
-  const float vone = 1.0f;
-
-  const float vc1 = -0x1.FFFFF6p-1f;
-  const float vc2 =  0x1.FFFDC6p-2f;
-  const float vc3 = -0x1.555A80p-3f;
-  const float vc4 =  0x1.573A1Ap-5f;
+  // Coefficient of polynomial approximation of
+  // exp(-t) ~ 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) on [-log(2)/2, log(2)/2]
   const float vc5 = -0x1.0F9F9Cp-7f;
+  const float vc4 =  0x1.573A1Ap-5f;
+  const float vc3 = -0x1.555A80p-3f;
+  const float vc2 =  0x1.FFFDC6p-2f;
+  const float vc1 = -0x1.FFFFF6p-1f;
+  const float vone = 1.0f;
+  // The largest z for which sigmoidf(-z) is normalized.
+  // This number is also the largest z for which expf(-z) is normalized.
+  const float vdenorm_cutoff = 0x1.5D589Ep+6f;
 
   for (; n != 0; n -= sizeof(float)) {
     const float vx = *input++;
 
     // General structure of the algorithm:
+    //
     //           / exp(x) / (1 + exp(x)) if x <= 0
     //   f[x] :=
     //           \ 1 - f[-x] if x >= 0
@@ -50,11 +53,11 @@ void xnn_math_f32_sigmoid__scalar_rr2_p5_div(
     const float vz = fabsf(vx);
 
     // Compute reduced argument n := round(-z / log(2)).
-    // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
-    // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
-    // inputs x outside of [-87.336544, 17.328678] (i.e. z outsize [0, 87.336544]) underflow or saturate sigmoidf(x)
-    // anyway. We fixup the result for such inputs at the very end of the algorithm.
+    // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
+    // the large number back. The trick with adding large number is valid only within certain bounds
+    // (|-z / log(2)| <= 2**22, i.e. |z| <= 0x1.62E43p+21 = 2907270.0), but that is acceptable, because inputs x
+    // outside of [-87.336544, 17.328678] (i.e. z outsize [0, 87.336544]) underflow or saturate sigmoidf(x). We fixup
+    // the result for such inputs at the very end of the algorithm.
     float vn = vz * vminus_log2e + vmagic_bias;
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
@@ -70,7 +73,7 @@ void xnn_math_f32_sigmoid__scalar_rr2_p5_div(
     vt = vn * vln2_lo + vt;
 
     // Compute degree-5 polynomial approximation for exp(-t) on [-log(2)/2, log(2)/2]:
-    //   P5(t) = 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
+    //   P(t) = 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) = 1 + t * p
     float vp = vt * vc5 + vc4;
     vp = vt * vp + vc3;
     vp = vt * vp + vc2;
@@ -78,7 +81,7 @@ void xnn_math_f32_sigmoid__scalar_rr2_p5_div(
 
     // Reconstruct the exp(-z) value:
     //   e = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
+    //     = s * (1 + t * p)
     //     = s + (t * s) * p
     vt *= vs;
     const float ve = vt * vp + vs;

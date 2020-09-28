@@ -52,7 +52,7 @@ void xnn_math_f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_nr1fma1adj(
     // We do it by adding a large number (magic bias), which cause rounding of the result to 4 fractional bits, then
     // subtracing the large number back. The addition is combined with multiplication by log2e into a single FMA
     // instruction. The trick with adding large number is valid only within certain bounds (|z / log(2)| <= 2**18,
-    // i.e. |z| <= 0x1.62E43p+18 = 363408.75), but that is acceptable, because inputs x outside of
+    // i.e. |z| <= 0x1.62E43p+17 = 181704.375), but that is acceptable, because inputs x outside of
     // [-87.336544, 17.328678] (i.e. z outsize [87.336544, 0]) underflow or saturate sigmoidf(x). We fixup the result
     // for such inputs at the very end of the algorithm.
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
@@ -60,7 +60,7 @@ void xnn_math_f32_sigmoid__avx512f_rr1_lut16_p3_perm_scalef_nr1fma1adj(
     // Use the low 4 bits of n (as integer) for table lookup.
     const __m512 vl = _mm512_permutexvar_ps(_mm512_castps_si512(vn), vtable);
 
-    // Subtract the large number back to get final n := round(z / log(2), 4).
+    // Subtract the large number back to get the final n := round(z / log(2), 4) as a floating-point number.
     vn = _mm512_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).

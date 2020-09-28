@@ -53,7 +53,7 @@ void xnn_math_f32_sigmoid__avx2_rr2_p5_nr1fma(
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
     // the large number back. The addition is combined with multiplication by log2e into a single FMA instruction. The
     // trick with adding large number is valid only within certain bounds (|z / log(2)| <= 2**22, i.e.
-    // |z| <= 0x1.62E43p+22 = 5814540.0), but that is acceptable, because inputs x outside of [-87.336544, 17.328678]
+    // |z| <= 0x1.62E43p+21 = 2907270.0), but that is acceptable, because inputs x outside of [-87.336544, 17.328678]
     // (i.e. z outsize [87.336544, 0]) underflow or saturate sigmoidf(x). We fixup the result for such inputs at the
     // very end of the algorithm.
     __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
@@ -62,7 +62,7 @@ void xnn_math_f32_sigmoid__avx2_rr2_p5_nr1fma(
     // -87.33642 <= z <= 0.0, and -126 <= n <= 0 accordingly.
     const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn), 23));
 
-    // Subtract the large number back to get final n := round(z / log(2)).
+    // Subtract the large number back to get the final n := round(z / log(2)) as a floating-point number.
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).

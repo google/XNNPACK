@@ -54,7 +54,7 @@ void xnn_math_f32_sigmoid__avx_rr2_lut64_p2_div(
     // Compute reduced argument n := round(z / log(2), 6).
     // We do it by adding a large number (magic bias), which cause rounding of the result to 6 fractional bits, then
     // subtracing the large number back. The trick with adding large number is valid only within certain bounds
-    // (|z / log(2)| <= 2**16, i.e. |z| <= 0x1.62E43p+16 = 45426.09375), but that is acceptable, because inputs x
+    // (|z / log(2)| <= 2**16, i.e. |z| <= 0x1.62E43p+15 = 45426.09375), but that is acceptable, because inputs x
     // outside of [-87.336544, 17.328678] (i.e. z outsize [87.336544, 0]) underflow or saturate sigmoidf(x). We fixup
     // the result  for such inputs at the very end of the algorithm.
     __m256 vn = _mm256_add_ps(_mm256_mul_ps(vz, vlog2e), vmagic_bias);
@@ -106,7 +106,7 @@ void xnn_math_f32_sigmoid__avx_rr2_lut64_p2_div(
     const __m128 vs_hi = _mm_castsi128_ps(_mm_add_epi32(vl_hi, ve_hi));
     const __m256 vs = _mm256_insertf128_ps(_mm256_castps128_ps256(vs_lo), vs_hi, 1);
 
-    // Subtract the large number back to get final n := round(z / log(2), 6).
+    // Subtract the large number back to get the final n := round(z / log(2), 6) as a floating-point number.
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).

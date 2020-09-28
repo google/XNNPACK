@@ -23,7 +23,7 @@ void xnn_math_f32_sigmoid__avx_rr2_p5_div(
   // Large number such that ulp(magic bias) == 1 and magic bias === 127 mod 2**22.
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
   const __m256 vlog2e = _mm256_set1_ps(0x1.715476p0f);
-  // Last 8 bits are zeroes
+  // Last 7 bits are zeroes
   const __m256 vminus_ln2_hi = _mm256_set1_ps(-0x1.62E400p-1f);
   const __m256 vminus_ln2_lo = _mm256_set1_ps(-0x1.7F7D1Cp-20f);
   // Coefficient of polynomial approximation of
@@ -53,7 +53,7 @@ void xnn_math_f32_sigmoid__avx_rr2_p5_div(
     // Compute reduced argument n := round(z / log(2)).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
     // the large number back. The trick with adding large number is valid only within certain bounds
-    // (|z / log(2)| <= 2**22, i.e. |z| <= 0x1.62E43p+22 = 5814540.0), but that is acceptable, because inputs x outside
+    // (|z / log(2)| <= 2**22, i.e. |z| <= 0x1.62E43p+21 = 2907270.0), but that is acceptable, because inputs x outside
     // of [-87.336544, 17.328678] (i.e. z outsize [87.336544, 0]) underflow or saturate sigmoidf(x). We fixup the
     // result for such inputs at the very end of the algorithm.
     __m256 vn = _mm256_add_ps(_mm256_mul_ps(vz, vlog2e), vmagic_bias);
@@ -64,7 +64,7 @@ void xnn_math_f32_sigmoid__avx_rr2_p5_div(
     const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_extractf128_ps(vn, 1)), 23));
     const __m256 vs = _mm256_insertf128_ps(_mm256_castps128_ps256(vs_lo), vs_hi, 1);
 
-    // Subtract the large number back to get final n := round(z / log(2)).
+    // Subtract the large number back to get the final n := round(z / log(2)) as a floating-point number.
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).

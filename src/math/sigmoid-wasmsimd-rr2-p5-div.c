@@ -19,27 +19,30 @@ void xnn_math_f32_sigmoid__wasmsimd_rr2_p5_div(
 {
   assert(n % (4 * sizeof(float)) == 0);
 
+  // Large number such that ulp(magic bias) == 1 and magic bias === 127 mod 2**22.
   const v128_t vmagic_bias = wasm_f32x4_splat(0x1.8000FEp23f);
-  // The largest z for which sigmoidf(-z) is normalized.
-  // This number is also the largest z for which expf(-z) is normalized.
-  const v128_t vdenorm_cutoff = wasm_f32x4_splat(0x1.5D589Ep+6f);
   const v128_t vminus_log2e = wasm_f32x4_splat(-0x1.715476p+0f);
   // Last 7 bits are zeroes
   const v128_t vln2_hi = wasm_f32x4_splat(0x1.62E400p-1f);
   const v128_t vln2_lo = wasm_f32x4_splat(0x1.7F7D1Cp-20f);
-  const v128_t vone = wasm_f32x4_splat(1.0f);
-
-  const v128_t vc1 = wasm_f32x4_splat(-0x1.FFFFF6p-1f);
-  const v128_t vc2 = wasm_f32x4_splat( 0x1.FFFDC6p-2f);
-  const v128_t vc3 = wasm_f32x4_splat(-0x1.555A80p-3f);
-  const v128_t vc4 = wasm_f32x4_splat( 0x1.573A1Ap-5f);
+  // Coefficient of polynomial approximation of
+  // exp(-t) ~ 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) on [-log(2)/2, log(2)/2]
   const v128_t vc5 = wasm_f32x4_splat(-0x1.0F9F9Cp-7f);
+  const v128_t vc4 = wasm_f32x4_splat( 0x1.573A1Ap-5f);
+  const v128_t vc3 = wasm_f32x4_splat(-0x1.555A80p-3f);
+  const v128_t vc2 = wasm_f32x4_splat( 0x1.FFFDC6p-2f);
+  const v128_t vc1 = wasm_f32x4_splat(-0x1.FFFFF6p-1f);
+  const v128_t vone = wasm_f32x4_splat(1.0f);
+  // The largest z for which sigmoidf(-z) is normalized.
+  // This number is also the largest z for which expf(-z) is normalized.
+  const v128_t vdenorm_cutoff = wasm_f32x4_splat(0x1.5D589Ep+6f);
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(input);
     input += 4;
 
     // General structure of the algorithm:
+    //
     //           / exp(x) / (1 + exp(x)) if x <= 0
     //   f[x] :=
     //           \ 1 - f[-x] if x >= 0
@@ -49,11 +52,11 @@ void xnn_math_f32_sigmoid__wasmsimd_rr2_p5_div(
     const v128_t vz = wasm_f32x4_abs(vx);
 
     // Compute reduced argument n := round(-z / log(2)).
-    // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
-    // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
-    // inputs x outside of [-87.336544, 17.328678] (i.e. z outsize [0, 87.336544]) underflow or saturate sigmoidf(x)
-    // anyway. We fixup the result for such inputs at the very end of the algorithm.
+    // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
+    // the large number back. The trick with adding large number is valid only within certain bounds
+    // (|-z / log(2)| <= 2**22, i.e. |z| <= 0x1.62E43p+21 = 2907270.0), but that is acceptable, because inputs x
+    // outside of [-87.336544, 17.328678] (i.e. z outsize [0, 87.336544]) underflow or saturate sigmoidf(x). We fixup
+    // the result for such inputs at the very end of the algorithm.
     v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vminus_log2e));
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
@@ -69,7 +72,7 @@ void xnn_math_f32_sigmoid__wasmsimd_rr2_p5_div(
     vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vln2_lo));
 
     // Compute degree-5 polynomial approximation for exp(-t) on [-log(2)/2, log(2)/2]:
-    //   P5(t) = 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
+    //   P(t) = 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) = 1 + t * p
     v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vt, vc5));
     vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vt, vp));
     vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vt, vp));
@@ -77,7 +80,7 @@ void xnn_math_f32_sigmoid__wasmsimd_rr2_p5_div(
 
     // Reconstruct the exp(-z) value:
     //   e = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
+    //     = s * (1 + t * p)
     //     = s + (t * s) * p
     vt = wasm_f32x4_mul(vt, vs);
     const v128_t ve = wasm_f32x4_add(vs, wasm_f32x4_mul(vt, vp));
