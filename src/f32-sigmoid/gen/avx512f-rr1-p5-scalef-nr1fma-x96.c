@@ -26,7 +26,6 @@ void xnn_f32_sigmoid_ukernel__avx512f_rr1_p5_scalef_nr1fma_x96(
   const __m512i vsign_mask = _mm512_set1_epi32(0x80000000);
   const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
   const __m512 vminus_ln2 = _mm512_set1_ps(-0x1.62E43p-1f);
-
   const __m512 vc5 = _mm512_set1_ps(0x1.0F9F9Cp-7f);
   const __m512 vc4 = _mm512_set1_ps(0x1.573A1Ap-5f);
   const __m512 vc3 = _mm512_set1_ps(0x1.555A80p-3f);

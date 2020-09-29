@@ -25,10 +25,7 @@ void xnn_f32_sigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x48(
 
   const __m512i vsign_mask = _mm512_set1_epi32(0x80000000);
   const __m512 vmagic_bias = _mm512_set1_ps(0x1.800000p18f);
-  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
-  const __m512 vminus_ln2_hi = _mm512_set1_ps(-0x1.62E43p-1f);
-  const __m512 vminus_ln2_lo = _mm512_set1_ps(0x1.05C61p-29f);
-
+  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p0f);
   const __m512 vtable_hi = _mm512_set_ps(
     0x1.F50766p+0f, 0x1.EA4AFAp+0f, 0x1.DFC974p+0f, 0x1.D5818Ep+0f,
     0x1.CB720Ep+0f, 0x1.C199BEp+0f, 0x1.B7F770p+0f, 0x1.AE89FAp+0f,
@@ -39,7 +36,8 @@ void xnn_f32_sigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x48(
     0x1.44E086p+0f, 0x1.3DEA64p+0f, 0x1.371A74p+0f, 0x1.306FE0p+0f,
     0x1.29E9E0p+0f, 0x1.2387A6p+0f, 0x1.1D4874p+0f, 0x1.172B84p+0f,
     0x1.11301Ep+0f, 0x1.0B5586p+0f, 0x1.059B0Ep+0f, 0x1.000000p+0f);
-
+  const __m512 vminus_ln2_hi = _mm512_set1_ps(-0x1.62E43p-1f);
+  const __m512 vminus_ln2_lo = _mm512_set1_ps(0x1.05C61p-29f);
   const __m512 vc2 = _mm512_set1_ps(0x1.000000p-1f);
   const __m512 vc1 = _mm512_set1_ps(0x1.0000F6p-0f);
   const __m512 vone = _mm512_set1_ps(1.0f);

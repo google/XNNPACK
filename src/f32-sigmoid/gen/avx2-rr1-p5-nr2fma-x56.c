@@ -25,20 +25,17 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
 {
   assert(n % sizeof(float) == 0);
 
-  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
-  // The smallest x for which sigmoidf(x) is normalized.
-  // This number is also the smallest x for which expf(x) is normalized.
-  const __m256 vdenorm_cutoff = _mm256_set1_ps(-0x1.5D589Ep+6f);
-  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
-  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E43p-1f);
-  const __m256 vone = _mm256_set1_ps(1.0f);
   const __m256 vsign_mask = _mm256_set1_ps(-0.0f);
-
-  const __m256 vc1 = _mm256_set1_ps(0x1.FFFFF6p-1f);
-  const __m256 vc2 = _mm256_set1_ps(0x1.FFFDC6p-2f);
-  const __m256 vc3 = _mm256_set1_ps(0x1.555A80p-3f);
-  const __m256 vc4 = _mm256_set1_ps(0x1.573A1Ap-5f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p0f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E43p-1f);
   const __m256 vc5 = _mm256_set1_ps(0x1.0F9F9Cp-7f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.573A1Ap-5f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.555A80p-3f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FFFDC6p-2f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.FFFFF6p-1f);
+  const __m256 vone = _mm256_set1_ps(1.0f);
+  const __m256 vdenorm_cutoff = _mm256_set1_ps(-0x1.5D589Ep+6f);
 
   for (; n >= 56 * sizeof(float); n -= 56 * sizeof(float)) {
     const __m256 vx0 = _mm256_loadu_ps(x);
@@ -50,13 +47,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     const __m256 vx6 = _mm256_loadu_ps(x + 48);
     x += 56;
 
-    // General structure of the algorithm:
-    //           / exp(x) / (1 + exp(x)) if x <= 0
-    //   f[x] :=
-    //           \ 1 - f[-x] if x >= 0
-    //
-    // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),
-    // then replace result with 1 - f[z] if x >= 0.
     const __m256 vz0 = _mm256_or_ps(vx0, vsign_mask);
     const __m256 vz1 = _mm256_or_ps(vx1, vsign_mask);
     const __m256 vz2 = _mm256_or_ps(vx2, vsign_mask);
@@ -65,12 +55,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     const __m256 vz5 = _mm256_or_ps(vx5, vsign_mask);
     const __m256 vz6 = _mm256_or_ps(vx6, vsign_mask);
 
-    // Compute reduced argument n := round(z / log(2)).
-    // We do it by adding a large number (magic bias) to the product z * (1/log(2)), which cause rounding of the result
-    // to an integer, then subtracing the large number back. The trick with adding large number is valid only within
-    // certain bounds (|x| <= 2**22), but thats ok, because inputs x outside of [-87.336544, 17.328678] (i.e. z outsize
-    // [0, 87.336544]) underflow or saturate sigmoidf(x) anyway. We fixup the result for such inputs at the very end of
-    // the algorithm.
     __m256 vn0 = _mm256_fmadd_ps(vz0, vlog2e, vmagic_bias);
     __m256 vn1 = _mm256_fmadd_ps(vz1, vlog2e, vmagic_bias);
     __m256 vn2 = _mm256_fmadd_ps(vz2, vlog2e, vmagic_bias);
@@ -79,8 +63,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     __m256 vn5 = _mm256_fmadd_ps(vz5, vlog2e, vmagic_bias);
     __m256 vn6 = _mm256_fmadd_ps(vz6, vlog2e, vmagic_bias);
 
-    // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
-    // -87.33642 <= z <= 0.0, and -126 <= n <= 0 accordingly.
     const __m256 vs0 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn0), 23));
     const __m256 vs1 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn1), 23));
     const __m256 vs2 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn2), 23));
@@ -89,7 +71,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     const __m256 vs5 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn5), 23));
     const __m256 vs6 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn6), 23));
 
-    // Subtract the large number back to get final n := round(z / log(2)).
     vn0 = _mm256_sub_ps(vn0, vmagic_bias);
     vn1 = _mm256_sub_ps(vn1, vmagic_bias);
     vn2 = _mm256_sub_ps(vn2, vmagic_bias);
@@ -98,7 +79,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     vn5 = _mm256_sub_ps(vn5, vmagic_bias);
     vn6 = _mm256_sub_ps(vn6, vmagic_bias);
 
-    // Compute reduced argument t := z - n * log(2).
     __m256 vt0 = _mm256_fmadd_ps(vn0, vminus_ln2, vz0);
     __m256 vt1 = _mm256_fmadd_ps(vn1, vminus_ln2, vz1);
     __m256 vt2 = _mm256_fmadd_ps(vn2, vminus_ln2, vz2);
@@ -107,7 +87,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     __m256 vt5 = _mm256_fmadd_ps(vn5, vminus_ln2, vz5);
     __m256 vt6 = _mm256_fmadd_ps(vn6, vminus_ln2, vz6);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
     __m256 vp0 = _mm256_fmadd_ps(vc5, vt0, vc4);
     __m256 vp1 = _mm256_fmadd_ps(vc5, vt1, vc4);
     __m256 vp2 = _mm256_fmadd_ps(vc5, vt2, vc4);
@@ -140,10 +119,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     vp5 = _mm256_fmadd_ps(vp5, vt5, vc1);
     vp6 = _mm256_fmadd_ps(vp6, vt6, vc1);
 
-    // Reconstruct the exp(z) value:
-    //   e = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
-    //     = s + (t * s) * p
     vt0 = _mm256_mul_ps(vt0, vs0);
     vt1 = _mm256_mul_ps(vt1, vs1);
     vt2 = _mm256_mul_ps(vt2, vs2);
@@ -160,7 +135,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     const __m256 ve5 = _mm256_fmadd_ps(vt5, vp5, vs5);
     const __m256 ve6 = _mm256_fmadd_ps(vt6, vp6, vs6);
 
-    // Denominator of the sigmoid fraction: 1.0 + exp(z)
     const __m256 vd0 = _mm256_add_ps(ve0, vone);
     const __m256 vd1 = _mm256_add_ps(ve1, vone);
     const __m256 vd2 = _mm256_add_ps(ve2, vone);
@@ -169,9 +143,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     const __m256 vd5 = _mm256_add_ps(ve5, vone);
     const __m256 vd6 = _mm256_add_ps(ve6, vone);
 
-    // Use Newton-Raphson method to compute reciprocal of denominator.
-    // Note: 1 < d <= 2, because z >= 0.0 and 0 < exp(-z) <= 1.0.
-    // Thus the reciprocal of the denominator never overflows.
     __m256 vr0 = _mm256_rcp_ps(vd0);
     __m256 vr1 = _mm256_rcp_ps(vd1);
     __m256 vr2 = _mm256_rcp_ps(vd2);
@@ -196,7 +167,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     vr5 = _mm256_fmadd_ps(_mm256_fnmadd_ps(vr5, vd5, vone), vr5, vr5);
     vr6 = _mm256_fmadd_ps(_mm256_fnmadd_ps(vr6, vd6, vone), vr6, vr6);
 
-    // Reconstruct sigmoid(z) = exp(z) * recip(1.0 + exp(z))
     __m256 vf0 = _mm256_mul_ps(ve0, vr0);
     __m256 vf1 = _mm256_mul_ps(ve1, vr1);
     __m256 vf2 = _mm256_mul_ps(ve2, vr2);
@@ -205,8 +175,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     __m256 vf5 = _mm256_mul_ps(ve5, vr5);
     __m256 vf6 = _mm256_mul_ps(ve6, vr6);
 
-    // For inputs below denormal cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf0 = _mm256_andnot_ps(_mm256_cmp_ps(vz0, vdenorm_cutoff, _CMP_LT_OS), vf0);
     vf1 = _mm256_andnot_ps(_mm256_cmp_ps(vz1, vdenorm_cutoff, _CMP_LT_OS), vf1);
     vf2 = _mm256_andnot_ps(_mm256_cmp_ps(vz2, vdenorm_cutoff, _CMP_LT_OS), vf2);
@@ -215,7 +183,6 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     vf5 = _mm256_andnot_ps(_mm256_cmp_ps(vz5, vdenorm_cutoff, _CMP_LT_OS), vf5);
     vf6 = _mm256_andnot_ps(_mm256_cmp_ps(vz6, vdenorm_cutoff, _CMP_LT_OS), vf6);
 
-    // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
     vf0 = _mm256_blendv_ps(_mm256_sub_ps(vone, vf0), vf0, vx0);
     vf1 = _mm256_blendv_ps(_mm256_sub_ps(vone, vf1), vf1, vx1);
     vf2 = _mm256_blendv_ps(_mm256_sub_ps(vone, vf2), vf2, vx2);
@@ -237,64 +204,29 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
     const __m256 vx = _mm256_loadu_ps(x);
     x += 8;
 
-    // General structure of the algorithm:
-    //           / exp(x) / (1 + exp(x)) if x <= 0
-    //   f[x] :=
-    //           \ 1 - f[-x] if x >= 0
-    //
-    // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),
-    // then replace result with 1 - f[z] if x >= 0.
     const __m256 vz = _mm256_or_ps(vx, vsign_mask);
 
-    // Compute reduced argument n := round(z / log(2)).
-    // We do it by adding a large number (magic bias) to the product z * (1/log(2)), which cause rounding of the result
-    // to an integer, then subtracing the large number back. The trick with adding large number is valid only within
-    // certain bounds (|x| <= 2**22), but thats ok, because inputs x outside of [-87.336544, 17.328678] (i.e. z outsize
-    // [0, 87.336544]) underflow or saturate sigmoidf(x) anyway. We fixup the result for such inputs at the very end of
-    // the algorithm.
     __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
-
-    // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
-    // -87.33642 <= z <= 0.0, and -126 <= n <= 0 accordingly.
     const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn), 23));
-
-    // Subtract the large number back to get final n := round(z / log(2)).
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
-    // Compute reduced argument t := z - n * log(2).
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
     __m256 vp = _mm256_fmadd_ps(vc5, vt, vc4);
     vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
     vp = _mm256_fmadd_ps(vp, vt, vc1);
 
-    // Reconstruct the exp(z) value:
-    //   e = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
-    //     = s + (t * s) * p
     vt = _mm256_mul_ps(vt, vs);
     const __m256 ve = _mm256_fmadd_ps(vt, vp, vs);
 
-    // Denominator of the sigmoid fraction: 1.0 + exp(z)
     const __m256 vd = _mm256_add_ps(ve, vone);
-
-    // Use Newton-Raphson method to compute reciprocal of denominator.
-    // Note: 1 < d <= 2, because z >= 0.0 and 0 < exp(-z) <= 1.0.
-    // Thus the reciprocal of the denominator never overflows.
     __m256 vr = _mm256_rcp_ps(vd);
     vr = _mm256_fmadd_ps(_mm256_fnmadd_ps(vr, vd, vone), vr, vr);
     vr = _mm256_fmadd_ps(_mm256_fnmadd_ps(vr, vd, vone), vr, vr);
-
-    // Reconstruct sigmoid(z) = exp(z) * recip(1.0 + exp(z))
     __m256 vf = _mm256_mul_ps(ve, vr);
 
-    // For inputs below denormal cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vz, vdenorm_cutoff, _CMP_LT_OS), vf);
-
-    // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
     vf = _mm256_blendv_ps(_mm256_sub_ps(vone, vf), vf, vx);
 
     _mm256_storeu_ps(y, vf);
@@ -307,64 +239,29 @@ void xnn_f32_sigmoid_ukernel__avx2_rr1_p5_nr2fma_x56(
 
     const __m256 vx = _mm256_maskload_ps(x, vmask);
 
-    // General structure of the algorithm:
-    //           / exp(x) / (1 + exp(x)) if x <= 0
-    //   f[x] :=
-    //           \ 1 - f[-x] if x >= 0
-    //
-    // First we compute f[z] := exp(z) / (1 + exp(z)) where z = -abs(x),
-    // then replace result with 1 - f[z] if x >= 0.
     const __m256 vz = _mm256_or_ps(vx, vsign_mask);
 
-    // Compute reduced argument n := round(z / log(2)).
-    // We do it by adding a large number (magic bias) to the product z * (1/log(2)), which cause rounding of the result
-    // to an integer, then subtracing the large number back. The trick with adding large number is valid only within
-    // certain bounds (|x| <= 2**22), but thats ok, because inputs x outside of [-87.336544, 17.328678] (i.e. z outsize
-    // [0, 87.336544]) underflow or saturate sigmoidf(x) anyway. We fixup the result for such inputs at the very end of
-    // the algorithm.
     __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
-
-    // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
-    // -87.33642 <= z <= 0.0, and -126 <= n <= 0 accordingly.
     const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn), 23));
-
-    // Subtract the large number back to get final n := round(z / log(2)).
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
-    // Compute reduced argument t := z - n * log(2).
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
     __m256 vp = _mm256_fmadd_ps(vc5, vt, vc4);
     vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
     vp = _mm256_fmadd_ps(vp, vt, vc1);
 
-    // Reconstruct the exp(z) value:
-    //   e = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
-    //     = s + (t * s) * p
     vt = _mm256_mul_ps(vt, vs);
     const __m256 ve = _mm256_fmadd_ps(vt, vp, vs);
 
-    // Denominator of the sigmoid fraction: 1.0 + exp(z)
     const __m256 vd = _mm256_add_ps(ve, vone);
-
-    // Use Newton-Raphson method to compute reciprocal of denominator.
-    // Note: 1 < d <= 2, because z >= 0.0 and 0 < exp(-z) <= 1.0.
-    // Thus the reciprocal of the denominator never overflows.
     __m256 vr = _mm256_rcp_ps(vd);
     vr = _mm256_fmadd_ps(_mm256_fnmadd_ps(vr, vd, vone), vr, vr);
     vr = _mm256_fmadd_ps(_mm256_fnmadd_ps(vr, vd, vone), vr, vr);
-
-    // Reconstruct sigmoid(z) = exp(z) * recip(1.0 + exp(z))
     __m256 vf = _mm256_mul_ps(ve, vr);
 
-    // For inputs below denormal cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vz, vdenorm_cutoff, _CMP_LT_OS), vf);
-
-    // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
     vf = _mm256_blendv_ps(_mm256_sub_ps(vone, vf), vf, vx);
 
     // _mm256_maskstore_ps(y, vmask, vf) could be used here, but triggers msan failures (probably an msan bug).

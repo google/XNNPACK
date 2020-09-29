@@ -32,7 +32,6 @@ void xnn_f32_sigmoid_ukernel__avx512f_rr${RR_STEPS}_p5_scalef_${DIV_ALGO}_x${BAT
   $else:
     const __m512 vminus_ln2_hi = _mm512_set1_ps(-0x1.62E43p-1f);
     const __m512 vminus_ln2_lo = _mm512_set1_ps(0x1.05C61p-29f);
-
   const __m512 vc5 = _mm512_set1_ps(0x1.0F9F9Cp-7f);
   const __m512 vc4 = _mm512_set1_ps(0x1.573A1Ap-5f);
   const __m512 vc3 = _mm512_set1_ps(0x1.555A80p-3f);
