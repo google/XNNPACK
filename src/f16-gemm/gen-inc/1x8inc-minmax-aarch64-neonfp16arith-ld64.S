@@ -55,7 +55,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         # Is there at least 4 halffloats (8 bytes)
         SUBS x0, x2, 8  // k = kc - 8
 
-        B.LO 6f
+        B.LO 3f
 
         # Main loop - 4 halffloats of A (8 bytes)
 1:
@@ -72,11 +72,11 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         B.HS 1b
 
         # Is there a remainder?- 2 halffloats of A (4 bytes)
-        TBNZ x0, 2, 7f
+        TBNZ x0, 2, 4f
         # Is there a remainder?- 1 halffloats of A (2 bytes)
-        TBNZ x0, 1, 8f
+        TBNZ x0, 1, 5f
 
-4:
+2:
         FADD v16.8h, v16.8h, v18.8h
         SUBS x1, x1, 8
 
@@ -86,7 +86,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         FMIN v16.8h, v16.8h, v6.8h
 
         # Store full 1 x 8
-        B.LO 10f
+        B.LO 6f
 
         ST1 {v16.16b},  [x6], x14
         SUB  x3,  x3, x2 // a0 -= kc
@@ -94,39 +94,39 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         B.HI 0b
         RET
 
-6:
-        TBZ x0, 2, 8f
-7:
+3:
+        TBZ x0, 2, 5f
+4:
         # Remainder- 2 halffloats of A (4 bytes)
         LDR  s0, [x3], 4
         LDR q20, [x5], 16
         LDR q21, [x5], 16
         FMLA v16.8h, v20.8h, v0.h[0]
         FMLA v18.8h, v21.8h, v0.h[1]
-        TBZ x0, 1, 4b
+        TBZ x0, 1, 2b
 
-8:
+5:
         # Remainder- 1 halffloat of A (2 bytes)
         LDR h0,  [x3], 2
         LDR q20, [x5], 16
         FMLA v16.8h, v20.8h, v0.h[0]
-        B 4b
+        B 2b
 
         # Store odd channels
-10:
-        TBZ x1, 2, 11f
+6:
+        TBZ x1, 2, 7f
         STR d16, [x6], 8
         DUP d16, v16.d[1]
 
-11:
-        TBZ x1, 1, 12f
+7:
+        TBZ x1, 1, 8f
         STR s16, [x6], 4
         DUP s16, v16.s[1]
 
-12:
-        TBZ x1, 0, 13f
+8:
+        TBZ x1, 0, 9f
         STR h16, [x6]
-13:
+9:
         RET
 
 END_FUNCTION xnn_f16_gemminc_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64

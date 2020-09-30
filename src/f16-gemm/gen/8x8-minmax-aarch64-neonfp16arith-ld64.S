@@ -134,7 +134,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
 
          # Is there at least 4 halffloats (8 bytes)?
         SUBS x0, x2, 8  // k = kc - 8
-        B.LO 5f
+        B.LO 3f
 
         # Main loop - 4 halffloats of A (8 bytes)
         # 32 FMA + 8 ld64 A + 4 LDR B
@@ -190,10 +190,10 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         B.HS 1b
 
         # Is there a remainder?- 2 halffloats of A (4 bytes)
-        TBNZ x0, 2, 6f
+        TBNZ x0, 2, 4f
         # Is there a remainder?- 1 halffloats of A (2 bytes)
-        TBNZ x0, 1, 7f
-4:
+        TBNZ x0, 1, 5f
+2:
         # Scale and Clamp
         FMUL v24.8h, v24.8h, v20.8h
         FMUL v25.8h, v25.8h, v20.8h
@@ -224,7 +224,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         FMIN v31.8h, v31.8h, v22.8h
 
         # Store full 8 x 8
-        B.LO 8f
+        B.LO 6f
 
         ST1 {v24.16b},  [x6], x0
         SUB  x3,  x3, x2 // a0 -= kc
@@ -250,9 +250,9 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         LDP x19, x20, [sp], 32
         RET
 
-5:
-        TBZ x0, 2, 7f
-6:
+3:
+        TBZ x0, 2, 5f
+4:
         # Remainder- 2 halffloats of A (4 bytes)
         LDR   s0,  [x3], 4
         LDR  q16,  [x5], 16
@@ -283,9 +283,9 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         FMLA v30.8h, v17.8h,  v6.h[1]
         FMLA v31.8h, v17.8h,  v7.h[1]
 
-        TBZ x0, 1, 4b
+        TBZ x0, 1, 2b
 
-7:
+5:
         # Remainder- 1 halffloat of A (2 bytes)
         LDR   h0,  [x3], 2
         LDR  q16,  [x5], 16
@@ -305,11 +305,11 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         FMLA v29.8h, v16.8h,  v5.h[0]
         FMLA v30.8h, v16.8h,  v6.h[0]
         FMLA v31.8h, v16.8h,  v7.h[0]
-        B 4b
+        B 2b
 
         # Store odd width
-8:
-        TBZ x1, 2, 9f
+6:
+        TBZ x1, 2, 7f
         STR d24,  [x6], 8
         DUP d24, v24.d[1]
         STR d25, [x16], 8
@@ -326,8 +326,8 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         DUP d30, v30.d[1]
         STR d31,  [x7], 8
         DUP d31, v31.d[1]
-9:
-        TBZ x1, 1, 10f
+7:
+        TBZ x1, 1, 8f
         STR s24,  [x6], 4
         DUP s24, v24.s[1]
         STR s25, [x16], 4
@@ -345,8 +345,8 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         STR s31,  [x7], 4
         DUP s31, v31.s[1]
 
-10:
-        TBZ x1, 0, 11f
+8:
+        TBZ x1, 0, 9f
         STR h24,  [x6]
         STR h25, [x16]
         STR h26, [x17]
@@ -355,7 +355,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         STR h29, [x21]
         STR h30, [x22]
         STR h31,  [x7]
-11:
+9:
         # Restore x19,x20,x21,x22 from stack
         LDP x21, x22, [sp, 16]
         LDP x19, x20, [sp], 32

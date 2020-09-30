@@ -169,7 +169,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53
 
         # Store full 1 x 8
         SUBS x1, x1, 8
-        B.LO 10f
+        B.LO 8f
 
         ST1 {v16.16b, v17.16b}, [x6], x10
         SUB x4, x4, x3  // a -= ks
@@ -224,21 +224,21 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53
         FMLA v17.4s, v21.4s, v0.s[0]
         B 4b
 
-10:
+8:
         # Store odd channels
-        TBZ x1, 2, 11f
+        TBZ x1, 2, 9f
         STR q16, [x6], 16
         MOV v16.16b, v17.16b
 
-11:
-        TBZ x1, 1, 12f
+9:
+        TBZ x1, 1, 10f
         STR d16, [x6], 8
         DUP d16, v16.d[1]
 
-12:
-        TBZ x1, 0, 13f
+10:
+        TBZ x1, 0, 11f
         STR s16, [x6], 4
-13:
+11:
         RET
 
 END_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53

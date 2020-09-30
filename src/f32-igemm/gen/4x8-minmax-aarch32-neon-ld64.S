@@ -113,7 +113,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
 
 
         SUBS        r5, r5, 8        // kc - 8
-        BLO         5f               // less than 2 channels?
+        BLO         4f               // less than 2 channels?
 
         // Main loop - 2 floats of A (8 bytes)
 2:
@@ -145,9 +145,9 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
 
         // Is there a remainder?- 1 floats of A (4 bytes)
         TST         r5, 4
-        BNE         5f
+        BNE         4f
 
-4:
+3:
         # ks loop
         SUBS        r14, r14, 16  // ks -= MR * sizeof(void*)
         BHI         1b
@@ -175,7 +175,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VMIN.F32    q15, q15, q3
 
         // Store full 4 x 8
-        BLO         10f
+        BLO         5f
         VST1.32     {d28-d31},  [r6], r7
         VST1.32     {d24-d27},  [r8], r7
         VST1.32     {d20-d23},  [r4], r7
@@ -187,7 +187,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         ADD         sp, sp, 12  // skip pad, r2, r3
         POP         {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-5:
+4:
         // Remainder- 1 floats of A (4 bytes)
         VLDM        r3!, {s0}       // A0
         VLDM        r9!, {d8-d11}   // B0
@@ -202,12 +202,12 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VMLA.F32    q13, q5, d2[0]
         VMLA.F32    q14, q4, d3[0]
         VMLA.F32    q15, q5, d3[0]
-        B           4b
+        B           3b
 
         // Store odd width
-10:
+5:
         TST         r1, 4
-        BEQ         11f
+        BEQ         6f
         VST1.32    {d28-d29},  [r6]!
         VMOV        q14, q15
         VST1.32    {d24-d25},  [r8]!
@@ -217,9 +217,9 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VST1.32    {d16-d17}, [r11]!
         VMOV         q8,  q9
 
-11:
+6:
         TST        r1, 2
-        BEQ        12f
+        BEQ        7f
         VST1.32    {d28},  [r6]!
         VMOV        d28, d29
         VST1.32    {d24},  [r8]!
@@ -229,15 +229,15 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VST1.32    {d16}, [r11]!
         VMOV        d16, d17
 
-12:
+7:
         TST         r1, 1
-        BEQ         13f
+        BEQ         8f
         VST1.32    {d28[0]},  [r6]!
         VST1.32    {d24[0]},  [r8]!
         VST1.32    {d20[0]},  [r4]!
         VST1.32    {d16[0]}, [r11]!
 
-13:
+8:
         VPOP        {d8-d15}
         ADD         sp, sp, 12  // skip pad, r2, r3
         POP         {r4, r5, r6, r7, r8, r9, r10, r11, pc}
@@ -247,6 +247,3 @@ END_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
 #endif
-
-
-

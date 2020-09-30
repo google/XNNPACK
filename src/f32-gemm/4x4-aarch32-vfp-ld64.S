@@ -70,7 +70,7 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x4__aarch32_vfp_ld64
         MOVLO  r0, r10               // a3
         MOVLO  r7, r8                // c3
 
-1:
+0:
         # Load initial bias from w into accumulators
         VLDM        r9!, {d8-d9}   // Bias
         SUBS        r5, r2, 8
@@ -80,10 +80,10 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x4__aarch32_vfp_ld64
         VMOV.F64    d11, d9
         VMOV.F64    d13, d9
         VMOV.F64    d15, d9
-        BLO         5f               // less than 2 channels?
+        BLO         3f               // less than 2 channels?
 
         // Main loop - 2 floats of A (8 bytes)
-2:
+1:
         VLDM        r3!, {d0}        // A0
         VLDM        r9!, {d4-d5}     // B0
         VLDM       r12!, {d1}        // A1
@@ -130,16 +130,16 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x4__aarch32_vfp_ld64
         VMLA.F32    s30, s14, s7
         VMLA.F32    s31, s15, s7
 
-        BHS         2b
+        BHS         1b
 
         // Is there a remainder?- 1 floats of A (4 bytes)
         TST         r5, 4
-        BNE         5f
+        BNE         3f
 
-4:
+2:
 
         SUBS        r1, r1, 4
-        BLO         10f
+        BLO         4f
 
         // Store full 4 x 4
         VSTM        r6, {d8-d9}
@@ -154,13 +154,13 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x4__aarch32_vfp_ld64
         VSTM        r7, {d14-d15}
         SUB         r3, r3, r2
         ADD         r7, r11
-        BHI         1b
+        BHI         0b
 
         VPOP        {d8-d15}
         POP         {r4, r5, r6, r7, r8, r9, r10, r11}
         BX          lr
 
-5:
+3:
         // Remainder- 1 floats of A (4 bytes)
         VLDM         r3!, {s0}       // A0
         VLDM         r9!, {d6-d7}    // B
@@ -188,12 +188,12 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x4__aarch32_vfp_ld64
         VMLA.F32    s30, s14, s3
         VMLA.F32    s31, s15, s3
 
-        B           4b
+        B           2b
 
         // Store odd width
-10:
+4:
         TST        r1, 2
-        BEQ        11f
+        BEQ        5f
         VSTM       r6!, {d8}
         VMOV.F32   s16, s18
         VSTM       r4!, {d10}
@@ -203,15 +203,15 @@ BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x4__aarch32_vfp_ld64
         VSTM       r7!, {d14}
         VMOV.F32   s28, s30
 
-11:
+5:
         TST         r1, 1
-        BEQ         12f
+        BEQ         6f
         VSTR        s16, [r6]
         VSTR        s20, [r4]
         VSTR        s24, [r8]
         VSTR        s28, [r7]
 
-12:
+6:
         VPOP        {d8-d15}
         POP         {r4, r5, r6, r7, r8, r9, r10, r11}
         BX          lr

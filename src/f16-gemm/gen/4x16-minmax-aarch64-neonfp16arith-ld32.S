@@ -76,7 +76,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
 
         # Is there at least 2 halffloats (4 bytes)?
         SUBS x0, x2, 4  // k = kc - 4
-        B.LO 5f
+        B.LO 3f
 
         # Main loop - 2 halffloats of A (4 bytes)
 1:
@@ -108,9 +108,9 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         B.HS 1b
 
         # Is there a remainder?- 1 halffloat of A (2 bytes)
-        TBNZ x0, 1, 5f
+        TBNZ x0, 1, 3f
 
-4:
+2:
         # Scale and Clamp
         FMUL v16.8h, v16.8h, v4.8h
         SUBS x1, x1, 16
@@ -139,7 +139,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         FMIN v31.8h, v31.8h, v6.8h
 
         # Store full 4 x 16
-        B.LO 7f
+        B.LO 4f
 
         ST1 {v16.16b, v17.16b},  [x6], x14
         SUB  x3,  x3, x2 // a0 -= kc
@@ -155,7 +155,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         RET
 
         # Remainder- 1 halffloat of A (2 bytes)
-5:
+3:
         LDR  h0,  [x3], 2
         LDR q20,  [x5], 16
         LDR q21,  [x5], 16
@@ -170,11 +170,11 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         FMLA v29.8h, v21.8h, v2.h[0]
         FMLA v30.8h, v20.8h, v3.h[0]
         FMLA v31.8h, v21.8h, v3.h[0]
-        B 4b
+        B 2b
 
         # Store odd width
-7:
-        TBZ x1, 3, 8f
+4:
+        TBZ x1, 3, 5f
         STR q16, [x6], 16
         MOV v16.16b, v17.16b
         STR q18, [x9], 16
@@ -184,8 +184,8 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         STR q30, [x7], 16
         MOV v30.16b, v31.16b
 
-8:
-        TBZ x1, 2, 9f
+5:
+        TBZ x1, 2, 6f
         STR d16, [x6], 8
         DUP d16, v16.d[1]
         STR d18, [x9], 8
@@ -195,8 +195,8 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         STR d30, [x7], 8
         DUP d30, v30.d[1]
 
-9:
-        TBZ x1, 1, 10f
+6:
+        TBZ x1, 1, 7f
         STR s16,  [x6], 4
         DUP s16, v16.s[1]
         STR s18,  [x9], 4
@@ -206,13 +206,13 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         STR s30,  [x7], 4
         DUP s30, v30.s[1]
 
-10:
-        TBZ x1, 0, 11f
+7:
+        TBZ x1, 0, 8f
         STR h16,  [x6]
         STR h18,  [x9]
         STR h28, [x10]
         STR h30,  [x7]
-11:
+8:
         RET
 
 END_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32

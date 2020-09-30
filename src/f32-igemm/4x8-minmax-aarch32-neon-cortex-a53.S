@@ -402,7 +402,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMIN.F32    q15, q15, q3
 
         // Store full 4 x 8
-        BLO         10f
+        BLO         7f
         VST1.32     {d28-d31},  [r6], r0
         VST1.32     {d24-d27},  [r8], r0
         VST1.32     {d20-d23},  [r4], r0
@@ -469,9 +469,9 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         B           4b
 
         // Store odd width
-10:
+7:
         TST         r1, 4
-        BEQ         11f
+        BEQ         8f
         VST1.32    {d28-d29},  [r6]!
         VMOV        q14, q15
         VST1.32    {d24-d25},  [r8]!
@@ -481,9 +481,9 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VST1.32    {d16-d17}, [r11]!
         VMOV         q8,  q9
 
-11:
+8:
         TST        r1, 2
-        BEQ        12f
+        BEQ        9f
         VST1.32    {d28},  [r6]!
         VMOV        d28, d29
         VST1.32    {d24},  [r8]!
@@ -493,15 +493,15 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VST1.32    {d16}, [r11]!
         VMOV        d16, d17
 
-12:
+9:
         TST         r1, 1
-        BEQ         13f
+        BEQ         10f
         VST1.32    {d28[0]},  [r6]!
         VST1.32    {d24[0]},  [r8]!
         VST1.32    {d20[0]},  [r4]!
         VST1.32    {d16[0]}, [r11]!
 
-13:
+10:
         VPOP        {d8-d15}
         ADD         sp, sp, 12  // skip pad, r2, r3
         POP         {r4, r5, r6, r7, r8, r9, r10, r11, pc}

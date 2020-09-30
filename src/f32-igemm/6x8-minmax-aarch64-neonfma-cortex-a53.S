@@ -453,7 +453,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMIN v31.4s, v31.4s, v7.4s
 
         # Store full 6 x 8
-        B.LO 8f
+        B.LO 7f
 
         STP q30, q31,  [x7]
         ADD x7, x7, x0
@@ -550,8 +550,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         B 4b
 
         # Store odd width
-8:
-        TBZ x1, 2, 9f
+7:
+        TBZ x1, 2, 8f
         STR q30,  [x7], 16
         MOV v30.16b, v31.16b
         STR q28, [x13], 16
@@ -564,8 +564,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         MOV v22.16b, v23.16b
         STR q20,  [x6], 16
         MOV v20.16b, v21.16b
-9:
-        TBZ x1, 1, 10f
+8:
+        TBZ x1, 1, 9f
         STR d30,  [x7], 8
         DUP d30, v30.d[1]
         STR d28, [x13], 8
@@ -579,15 +579,15 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         STR d20,  [x6], 8
         DUP d20, v20.d[1]
 
-10:
-        TBZ x1, 0, 11f
+9:
+        TBZ x1, 0, 10f
         STR s30,  [x7]
         STR s28, [x13]
         STR s26, [x10]
         STR s24, [x17]
         STR s22, [x16]
         STR s20,  [x6]
-11:
+10:
         // Restore x19-x23, d12-d15 from stack
         LDR x23,      [sp, 64]
         LDP x21, x22, [sp, 48]

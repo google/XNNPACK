@@ -113,7 +113,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
-        B.LO 5f
+        B.LO 4f
 
         # Prologue - First group loads, no FMA
         LDR   d0, [x3], 8              // a0
@@ -329,9 +329,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA v27.4s, v15.4s,  v4.s[3]
 
         # Is there a remainder?- 2 floats of A (8 bytes) or less
-        B.NE 5f
+        B.NE 4f
 
-4:
+3:
         # Clamp
         FMAX v20.4s, v20.4s, v6.4s
         # Load cn_stride
@@ -354,7 +354,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMIN v27.4s, v27.4s, v7.4s
 
         # Store full 4 x 8
-        B.LO 8f
+        B.LO 6f
 
         ST1 {v26.16b, v27.16b}, [x14], x0
         SUB  x3,  x3, x2 // a0 -= kc
@@ -372,9 +372,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDP d12, d13, [sp], 32
         RET
 
-5:
+4:
         # Is there a remainder?- 2 floats of A (8 bytes)
-        TBZ x0, 3, 6f
+        TBZ x0, 3, 5f
 
         # Remainder- 2 floats of A (8 bytes)
         LDR   d0,  [x3], 8
@@ -404,9 +404,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA v27.4s, v19.4s,  v1.s[3]
 
         # Is there a remainder?- 1 floats of A (4 bytes)
-        TBZ x0, 2, 4b
+        TBZ x0, 2, 3b
 
-6:
+5:
         # Remainder- 1 floats of A (4 bytes)
         LDR   s0,  [x3], 4
         LDR  q16, [x5], 16
@@ -423,11 +423,11 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA v23.4s, v17.4s,  v0.s[2]
         FMLA v25.4s, v17.4s,  v1.s[0]
         FMLA v27.4s, v17.4s,  v1.s[2]
-        B 4b
+        B 3b
 
         # Store odd width
-8:
-        TBZ x1, 2, 9f
+6:
+        TBZ x1, 2, 7f
         STR q26, [x14], 16
         MOV v26.16b, v27.16b
         STR q24, [x17], 16
@@ -437,8 +437,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         STR q20,  [x6], 16
         MOV v20.16b, v21.16b
 
-9:
-        TBZ x1, 1, 10f
+7:
+        TBZ x1, 1, 8f
         STR d26, [x14], 8
         DUP d26, v26.d[1]
         STR d24, [x17], 8
@@ -448,13 +448,13 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         STR d20,  [x6], 8
         DUP d20, v20.d[1]
 
-10:
-        TBZ x1, 0, 11f
+8:
+        TBZ x1, 0, 9f
         STR s26, [x14]
         STR s24, [x17]
         STR s22, [x16]
         STR s20,  [x6]
-11:
+9:
         // Restore d12-d15 from stack
         LDP d14, d15, [sp, 16]
         LDP d12, d13, [sp], 32

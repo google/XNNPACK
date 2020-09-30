@@ -74,7 +74,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
 
         # Is there at least 2 floats (8 bytes)?
         SUBS x0, x2, 8  // k = kc - 8
-        B.LO 5f
+        B.LO 3f
 
         # Main loop - 2 floats of A (8 bytes)
 1:
@@ -104,9 +104,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
         B.HS 1b
 
         # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ x0, 2, 5f
+        TBNZ x0, 2, 3f
 
-4:
+2:
         # Clamp
         FMAX v16.4s, v16.4s, v4.4s
         SUBS x1, x1, 8
@@ -127,7 +127,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
         FMIN v31.4s, v31.4s, v5.4s
 
         # Store full 4 x 8
-        B.LO 7f
+        B.LO 4f
 
         ST1 {v30.16b, v31.16b},  [x7], x14
         SUB  x3,  x3, x2 // a0 -= kc
@@ -143,7 +143,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
         RET
 
         # Remainder- 1 float of A (4 bytes)
-5:
+3:
         LDR s0,  [x3], 4
         LDP q20, q21, [x5], 32
         LDR s1, [x11], 4
@@ -157,11 +157,11 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
         FMLA v29.4s, v21.4s, v2.s[0]
         FMLA v30.4s, v20.4s, v3.s[0]
         FMLA v31.4s, v21.4s, v3.s[0]
-        B 4b
+        B 2b
 
         # Store odd width
-7:
-        TBZ x1, 2, 8f
+4:
+        TBZ x1, 2, 5f
         STR q30, [x7], 16
         MOV v30.16b, v31.16b
         STR q28, [x10], 16
@@ -171,8 +171,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
         STR q16, [x6], 16
         MOV v16.16b, v17.16b
 
-8:
-        TBZ x1, 1, 9f
+5:
+        TBZ x1, 1, 6f
         STR d30, [x7], 8
         DUP d30, v30.d[1]
         STR d28, [x10], 8
@@ -182,13 +182,13 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
         STR d16, [x6], 8
         DUP d16, v16.d[1]
 
-9:
-        TBZ x1, 0, 10f
+6:
+        TBZ x1, 0, 7f
         STR s30,  [x7]
         STR s28, [x10]
         STR s18,  [x9]
         STR s16,  [x6]
-10:
+7:
         RET
 
 END_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64

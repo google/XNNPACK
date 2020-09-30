@@ -453,7 +453,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMIN v31.4s, v31.4s, v5.4s
 
         # Store full 4 x 12
-        B.LO 8f
+        B.LO 7f
 
         ST1 {v29.16b, v30.16b, v31.16b},  [x7], x0
         ST1 {v26.16b, v27.16b, v28.16b}, [x10], x0
@@ -534,10 +534,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA v31.4s, v8.4s, v3.s[0]
         B 4b
 
-8:
+7:
         ADD x1, x1, 12
         # Store odd channels
-        TBZ x1, 3, 9f
+        TBZ x1, 3, 8f
         STP q29, q30,  [x7], 32
         MOV v29.16b, v31.16b
         STP q26, q27, [x10], 32
@@ -547,8 +547,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         STP q20, q21,  [x6], 32
         MOV v20.16b, v22.16b
 
-9:
-        TBZ x1, 2, 10f
+8:
+        TBZ x1, 2, 9f
         STR q29,  [x7], 16
         MOV v29.16b, v30.16b
         STR q26, [x10], 16
@@ -558,8 +558,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         STR q20,  [x6], 16
         MOV v20.16b, v21.16b
 
-10:
-        TBZ x1, 1, 11f
+9:
+        TBZ x1, 1, 10f
         STR d29,  [x7], 8
         DUP d29, v29.d[1]
         STR d26, [x10], 8
@@ -569,13 +569,13 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         STR d20,  [x6], 8
         DUP d20, v20.d[1]
 
-11:
-        TBZ x1, 0, 12f
+10:
+        TBZ x1, 0, 11f
         STR s29,  [x7]
         STR s26, [x10]
         STR s23, [x17]
         STR s20,  [x6]
-12:
+11:
         # Restore d8-d11,d14,d15 from stack
         LDP d14, d15, [sp, 32]
         LDP d10, d11, [sp, 16]
