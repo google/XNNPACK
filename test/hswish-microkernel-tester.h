@@ -60,7 +60,7 @@ class HSwishMicrokernelTester {
   void Test(xnn_f16_hswish_ukernel_function hswish) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-4.0f, 4.0f), std::ref(rng));
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
@@ -97,7 +97,7 @@ class HSwishMicrokernelTester {
   void Test(xnn_f32_hswish_ukernel_function hswish, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-4.0f, 4.0f), rng);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
@@ -132,7 +132,7 @@ class HSwishMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y_ref[i], y[i], std::abs(y_ref[i]) * 1.0e-6f)
+        ASSERT_NEAR(y_ref[i], y[i], std::max(1.0e-7f, std::abs(y_ref[i]) * 1.0e-6f))
           << "at position " << i << ", batch_size = " << batch_size();
       }
     }
