@@ -281,7 +281,9 @@ static void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
       node->layout_flags & XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC ? "yes" : "no");
   }
 
-  // Run Shiloach-Vishkin connected components algorithm
+  // Run Shiloach-Vishkin connected components algorithm i.e. find all
+  // XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC nodes and set them as cluster leaders
+  // to all the producer nodes
   bool update = false;
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
@@ -317,6 +319,13 @@ static void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
       }
     }
   }
+  // No NCHW2NHWC compatible nodes have been found thus the graph rewriting
+  // pratically cannot happen.
+  if (!update) {
+    return;
+  }
+  // Propagate the cluster leader to other nodes in the graph untill all the
+  // nodes in the cluster is not updated
   while (update) {
     update = false;
     for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
