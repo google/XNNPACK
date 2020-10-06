@@ -2284,7 +2284,7 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-igemm/6x8-minmax-aarch64-neonfma-cortex-a73.S
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S
-  src/qs8-gemm/4x16c4-minmax-neondot.S)
+  src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S)
 
 SET(XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SCALAR_MICROKERNEL_SRCS})
 IF(NOT EMSCRIPTEN AND NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")

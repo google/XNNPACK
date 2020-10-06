@@ -17,7 +17,7 @@
 #     size_t cn_stride,          [sp] -> x12
 #     const union xnn_qs8_gemm_params params)  [sp + 8] -> x11
 
-# d8-d15, x15-x30 need to be preserved if used. x18 is reserved by the OS.
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
 # A0  x3 v0
@@ -76,7 +76,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
 
         # Is there at least 8 bytes?
         SUBS    x0, x2, 8  // k = kc - 8
-        B.LO    4f
+        B.LO    3f
 
         # Main loop - 8 bytes of A
         .p2align 3
@@ -127,10 +127,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
 
         # Is there a remainder?- 1 to 7 bytes of A
         AND     x0, x2, 7
-        CBNZ    x0, 4f
+        CBNZ    x0, 3f
 
         .p2align 3
-3:
+2:
          # Apply params - scale, shift, bias and clamp
         LD2R    {v0.4s, v1.4s}, [x11]
         ADD     x0, x11, 8
@@ -216,7 +216,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         SQXTN   v17.4h, v17.4s
         SQXTN   v18.4h, v18.4s
         SQXTN   v19.4h, v19.4s
-        LD1R    {v1.8h}, [x0], 2   // add bias
+        LD1R    {v2.8h}, [x0], 2   // add bias
 
         SQXTN2  v4.8h,  v8.4s
         SQXTN2  v5.8h,  v9.4s
@@ -227,14 +227,14 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         SQXTN2  v18.8h, v22.4s
         SQXTN2  v19.8h, v23.4s
 
-        SQADD    v4.8h,  v4.8h, v1.8h
-        SQADD    v5.8h,  v5.8h, v1.8h
-        SQADD    v6.8h,  v6.8h, v1.8h
-        SQADD    v7.8h,  v7.8h, v1.8h
-        SQADD   v16.8h, v16.8h, v1.8h
-        SQADD   v17.8h, v17.8h, v1.8h
-        SQADD   v18.8h, v18.8h, v1.8h
-        SQADD   v19.8h, v19.8h, v1.8h
+        SQADD    v4.8h,  v4.8h, v2.8h
+        SQADD    v5.8h,  v5.8h, v2.8h
+        SQADD    v6.8h,  v6.8h, v2.8h
+        SQADD    v7.8h,  v7.8h, v2.8h
+        SQADD   v16.8h, v16.8h, v2.8h
+        SQADD   v17.8h, v17.8h, v2.8h
+        SQADD   v18.8h, v18.8h, v2.8h
+        SQADD   v19.8h, v19.8h, v2.8h
         LD2R    {v0.16b, v1.16b}, [x0]   // clamp to min/max
 
         SQXTN    v4.8b, v4.8h
@@ -256,7 +256,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         SMIN    v7.16b, v7.16b, v1.16b
 
         SUBS    x1, x1, 16
-        B.LO    5f
+        B.LO    4f
 
         # Store full 4 x 16
         ST1     {v4.16b}, [x6], x12
@@ -273,9 +273,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         LDP      d8,  d9, [sp], 32
         RET
 
-        .p2align 3
         # Remainder- 1 to 7 bytes of A
-4:
+        .p2align 3
+3:
         AND     x0, x2, 7  // remainder is 1 to 7 bytes.
         LD1     {v0.8b},  [x3], x0
         LDP     q8, q9, [x5], 32
@@ -300,7 +300,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         SDOT    v29.4s, v11.16b, v1.4b[0]
         SDOT    v30.4s, v11.16b, v2.4b[0]
         SDOT    v31.4s, v11.16b, v3.4b[0]
-        B.LS    3b
+        B.LS    2b
         LDP      q4,  q5, [x5], 32
         SDOT    v16.4s, v4.16b,  v0.4b[1]
         SDOT    v17.4s, v4.16b,  v1.4b[1]
@@ -319,11 +319,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         SDOT    v29.4s, v7.16b,  v1.4b[1]
         SDOT    v30.4s, v7.16b,  v2.4b[1]
         SDOT    v31.4s, v7.16b,  v3.4b[1]
-        B       3b
+        B       2b
 
         # Store odd width
-5:
-        TBZ     x1, 3, 6f
+        .p2align 3
+4:
+        TBZ     x1, 3, 5f
         STR     d4, [x6], 8
         DUP     d4, v4.d[1]
         STR     d5, [x8], 8
@@ -332,8 +333,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         DUP     d6, v6.d[1]
         STR     d7, [x7], 8
         DUP     d7, v7.d[1]
-6:
-        TBZ     x1, 2, 7f
+5:
+        TBZ     x1, 2, 6f
         STR     s4, [x6], 4
         DUP     s4, v4.s[1]
         STR     s5, [x8], 4
@@ -342,8 +343,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         DUP     s6, v6.s[1]
         STR     s7, [x7], 4
         DUP     s7, v7.s[1]
-7:
-        TBZ     x1, 1, 8f
+6:
+        TBZ     x1, 1, 7f
         ST1     {v4.h}[0], [x6], 2
         DUP     h4, v4.h[1]
         ST1     {v5.h}[0], [x8], 2
@@ -352,13 +353,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         DUP     h6, v6.h[1]
         ST1     {v7.h}[0], [x7], 2
         DUP     h7, v7.h[1]
-8:
-        TBZ     x1, 0, 9f
+7:
+        TBZ     x1, 0, 8f
         ST1     {v4.b}[0], [x6]
         ST1     {v5.b}[0], [x8]
         ST1     {v6.b}[0], [x9]
         ST1     {v7.b}[0], [x7]
-9:
+8:
         LDP     d10, d11, [sp, 16]
         LDP      d8,  d9, [sp], 32
         RET
