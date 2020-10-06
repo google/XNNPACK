@@ -293,7 +293,7 @@ class GlobalAveragePoolingOperatorTester {
   void TestNWCxF16() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(1.0e-3f, 1.0f), rng);
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<uint16_t> input((batch_size() * width() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
