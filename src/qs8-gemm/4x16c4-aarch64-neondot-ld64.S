@@ -8,7 +8,7 @@
 # void xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
-#     size_t kc,                 x2 / x0
+#     size_t kc,                 x2 / x0 / x10
 #     const int8_t* restrict a,  x3
 #     size_t a_stride,           x4
 #     const void* restrict w,    x5
@@ -32,10 +32,6 @@
 # unused v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
-        STP      d8,  d9, [sp, -32]!
-        STP     d10, d11, [sp, 16]
-
-        LDP     x12, x11, [sp, 32]   // cn_stride, params
 
         # Clamp A and C pointers
         CMP      x0, 2            // if mr < 2
@@ -44,11 +40,15 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         CSEL    x15, x3, x15, LO  //   a1 = a0
         CSEL     x8, x6,  x8, LO  //   c1 = c0
 
+        STP      d8,  d9, [sp, -32]!
+
         ADD     x13, x15, x4      // a2 = a1 + a_stride
         ADD      x9,  x8, x7      // c2 = c1 + cm_stride
                                   // if mr <= 2
         CSEL    x13, x15, x13, LS //   a2 = a1
         CSEL     x9,  x8,  x9, LS //   c2 = c1
+
+        STP     d10, d11, [sp, 16]
 
         CMP      x0, 4             // if mr < 4
         ADD      x4, x13, x4       // a3 = a2 + a_stride
@@ -56,26 +56,28 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         CSEL     x4, x13, x4, LO   //   a3 = a2
         CSEL     x7,  x9, x7, LO   //   c3 = c2
 
+
         .p2align 3
 0:
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
-        LDP     q24, q28, [x5], 32
+        SUBS    x0, x2, 8          // k = kc - 8
         MOV     v17.16b, v16.16b
         MOV     v18.16b, v16.16b
+        LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
+        LDR     x11, [sp, 40]      // params
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
+        AND     x10, x2, 7         // kc remainder 0 to 7
         MOV     v27.16b, v24.16b
         MOV     v29.16b, v28.16b
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
-
         # Is there at least 8 bytes?
-        SUBS    x0, x2, 8  // k = kc - 8
         B.LO    3f
 
         # Main loop - 8 bytes of A
@@ -126,22 +128,20 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         B.HS    1b
 
         # Is there a remainder?- 1 to 7 bytes of A
-        AND     x0, x2, 7
-        CBNZ    x0, 3f
+        CBNZ    x10, 3f
 
         .p2align 3
 2:
-         # Apply params - scale, shift, bias and clamp
-        LD2R    {v0.4s, v1.4s}, [x11]
-        ADD     x0, x11, 8
-        CMEQ    v2.4s, v1.4s, 0
-
+        # Apply params - scale, shift, bias and clamp
+        LD1R    {v0.4s}, [x11], 4
         SQRDMULH     v4.4s, v16.4s, v0.4s
         SQRDMULH     v5.4s, v17.4s, v0.4s
+        LD1R    {v1.4s}, [x11], 4
         SQRDMULH     v6.4s, v18.4s, v0.4s
         SQRDMULH     v7.4s, v19.4s, v0.4s
         SQRDMULH     v8.4s, v20.4s, v0.4s
         SQRDMULH     v9.4s, v21.4s, v0.4s
+        CMEQ    v2.4s, v1.4s, 0
         SQRDMULH    v10.4s, v22.4s, v0.4s
         SQRDMULH    v11.4s, v23.4s, v0.4s
 
@@ -181,7 +181,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         BIC     v30.16b, v30.16b, v2.16b
         BIC     v31.16b, v31.16b, v2.16b
 
-        SSRA    v16.4s, v24.4s, 31  // signed shift right accumulate
+        SSRA    v16.4s, v24.4s, 31
         SSRA    v17.4s, v25.4s, 31
         SSRA    v18.4s, v26.4s, 31
         SSRA    v19.4s, v27.4s, 31
@@ -216,7 +216,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         SQXTN   v17.4h, v17.4s
         SQXTN   v18.4h, v18.4s
         SQXTN   v19.4h, v19.4s
-        LD1R    {v2.8h}, [x0], 2   // add bias
+        LD1R    {v2.8h}, [x11], 2   // add bias
 
         SQXTN2  v4.8h,  v8.4s
         SQXTN2  v5.8h,  v9.4s
@@ -235,7 +235,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         SQADD   v17.8h, v17.8h, v2.8h
         SQADD   v18.8h, v18.8h, v2.8h
         SQADD   v19.8h, v19.8h, v2.8h
-        LD2R    {v0.16b, v1.16b}, [x0]   // clamp to min/max
+        LD2R    {v0.16b, v1.16b}, [x11]   // clamp to min/max
 
         SQXTN    v4.8b, v4.8h
         SQXTN    v5.8b, v5.8h
@@ -245,6 +245,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         SQXTN2   v5.16b, v17.8h
         SQXTN2   v6.16b, v18.8h
         SQXTN2   v7.16b, v19.8h
+        LDR     x12, [sp, 32]   // cn_stride
 
         SMAX    v4.16b, v4.16b, v0.16b
         SMAX    v5.16b, v5.16b, v0.16b
@@ -276,13 +277,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         # Remainder- 1 to 7 bytes of A
         .p2align 3
 3:
-        AND     x0, x2, 7  // remainder is 1 to 7 bytes.
-        LD1     {v0.8b},  [x3], x0
+        LD1     {v0.8b},  [x3], x10
         LDP     q8, q9, [x5], 32
-        LD1     {v1.8b}, [x15], x0
-        LD1     {v2.8b}, [x13], x0
-        LD1     {v3.8b},  [x4], x0
-        CMP     x0, 4
+        LD1     {v1.8b}, [x15], x10
+        LD1     {v2.8b}, [x13], x10
+        LD1     {v3.8b},  [x4], x10
+        CMP     x10, 4
         SDOT    v16.4s, v8.16b,  v0.4b[0]
         SDOT    v17.4s, v8.16b,  v1.4b[0]
         SDOT    v18.4s, v8.16b,  v2.4b[0]
