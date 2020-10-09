@@ -24,12 +24,12 @@
 # A1 x15 v1
 # A2 x13 v2
 # A3  x4 v3
-# B   x5 v4  v5  v6  v7  v8  v9 v10 v11
+# B   x5 v4  v5  v6  v7
 # C0  x6 v16 v20 v24 v28
 # C1  x8 v17 v21 v25 v29
 # C2  x9 v18 v22 v26 v30
 # C3  x7 v19 v23 v27 v31
-# unused v12 v13 v14 v15
+# unused v8 v9 v10 v11 v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
 
@@ -40,15 +40,11 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         CSEL    x15, x3, x15, LO  //   a1 = a0
         CSEL     x8, x6,  x8, LO  //   c1 = c0
 
-        STP      d8,  d9, [sp, -32]!
-
         ADD     x13, x15, x4      // a2 = a1 + a_stride
         ADD      x9,  x8, x7      // c2 = c1 + cm_stride
                                   // if mr <= 2
         CSEL    x13, x15, x13, LS //   a2 = a1
         CSEL     x9,  x8,  x9, LS //   c2 = c1
-
-        STP     d10, d11, [sp, 16]
 
         CMP      x0, 4             // if mr < 4
         ADD      x4, x13, x4       // a3 = a2 + a_stride
@@ -69,7 +65,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         MOV     v21.16b, v20.16b
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
-        LDR     x11, [sp, 40]      // params
+        LDR     x11, [sp, 8]      // params
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
         AND     x10, x2, 7         // kc remainder 0 to 7
@@ -84,31 +80,31 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         .p2align 3
 1:
         LDR     d0,  [x3], 8
-        LDR     q8, [x5], 16
+        LDR     q4, [x5], 16
         LDR     d1, [x15], 8
         LDR     d2, [x13], 8
         LDR     d3,  [x4], 8
-        LDR     q9, [x5], 16
-        SDOT    v16.4s, v8.16b,  v0.4b[0]
-        SDOT    v17.4s, v8.16b,  v1.4b[0]
-        SDOT    v18.4s, v8.16b,  v2.4b[0]
-        SDOT    v19.4s, v8.16b,  v3.4b[0]
-        LDP     q10, q11, [x5], 32
-        SDOT    v20.4s, v9.16b,  v0.4b[0]
-        SDOT    v21.4s, v9.16b,  v1.4b[0]
-        SDOT    v22.4s, v9.16b,  v2.4b[0]
-        SDOT    v23.4s, v9.16b,  v3.4b[0]
+        SDOT    v16.4s, v4.16b,  v0.4b[0]
+        LDR     q5, [x5], 16
+        SDOT    v17.4s, v4.16b,  v1.4b[0]
+        SDOT    v18.4s, v4.16b,  v2.4b[0]
+        SDOT    v19.4s, v4.16b,  v3.4b[0]
+        SDOT    v20.4s, v5.16b,  v0.4b[0]
+        LDP     q6, q7, [x5], 32
+        SDOT    v21.4s, v5.16b,  v1.4b[0]
+        SDOT    v22.4s, v5.16b,  v2.4b[0]
+        SDOT    v23.4s, v5.16b,  v3.4b[0]
+        SDOT    v24.4s, v6.16b, v0.4b[0]
         LDP      q4,  q5, [x5], 32
-        SDOT    v24.4s, v10.16b, v0.4b[0]
-        SDOT    v25.4s, v10.16b, v1.4b[0]
-        SDOT    v26.4s, v10.16b, v2.4b[0]
-        SDOT    v27.4s, v10.16b, v3.4b[0]
-        LDP      q6,  q7, [x5], 32
-        SDOT    v28.4s, v11.16b, v0.4b[0]
-        SDOT    v29.4s, v11.16b, v1.4b[0]
-        SDOT    v30.4s, v11.16b, v2.4b[0]
-        SDOT    v31.4s, v11.16b, v3.4b[0]
+        SDOT    v25.4s, v6.16b, v1.4b[0]
+        SDOT    v26.4s, v6.16b, v2.4b[0]
+        SDOT    v27.4s, v6.16b, v3.4b[0]
+        SDOT    v28.4s, v7.16b, v0.4b[0]
+        SDOT    v29.4s, v7.16b, v1.4b[0]
+        SDOT    v30.4s, v7.16b, v2.4b[0]
+        SDOT    v31.4s, v7.16b, v3.4b[0]
         SDOT    v16.4s, v4.16b,  v0.4b[1]
+        LDP      q6,  q7, [x5], 32
         SDOT    v17.4s, v4.16b,  v1.4b[1]
         SDOT    v18.4s, v4.16b,  v2.4b[1]
         SDOT    v19.4s, v4.16b,  v3.4b[1]
@@ -134,72 +130,70 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
 2:
         # Apply params - scale, shift, bias and clamp
         LD1R    {v0.4s}, [x11], 4
-        SQRDMULH     v4.4s, v16.4s, v0.4s
-        SQRDMULH     v5.4s, v17.4s, v0.4s
         LD1R    {v1.4s}, [x11], 4
-        SQRDMULH     v6.4s, v18.4s, v0.4s
-        SQRDMULH     v7.4s, v19.4s, v0.4s
-        SQRDMULH     v8.4s, v20.4s, v0.4s
-        SQRDMULH     v9.4s, v21.4s, v0.4s
         CMEQ    v2.4s, v1.4s, 0
-        SQRDMULH    v10.4s, v22.4s, v0.4s
-        SQRDMULH    v11.4s, v23.4s, v0.4s
 
-        BIC     v16.16b, v16.16b, v2.16b
-        BIC     v17.16b, v17.16b, v2.16b
-        BIC     v18.16b, v18.16b, v2.16b
-        BIC     v19.16b, v19.16b, v2.16b
-        BIC     v20.16b, v20.16b, v2.16b
-        BIC     v21.16b, v21.16b, v2.16b
-        BIC     v22.16b, v22.16b, v2.16b
-        BIC     v23.16b, v23.16b, v2.16b
+        BIC     v4.16b, v16.16b, v2.16b
+        BIC     v5.16b, v17.16b, v2.16b
+        BIC     v6.16b, v18.16b, v2.16b
+        BIC     v7.16b, v19.16b, v2.16b
 
-        SSRA     v4.4s, v16.4s, 31  // signed shift right accumulate
-        SSRA     v5.4s, v17.4s, 31
-        SSRA     v6.4s, v18.4s, 31
-        SSRA     v7.4s, v19.4s, 31
-        SSRA     v8.4s, v20.4s, 31
-        SSRA     v9.4s, v21.4s, 31
-        SSRA    v10.4s, v22.4s, 31
-        SSRA    v11.4s, v23.4s, 31
+        SQRDMULH  v16.4s, v16.4s, v0.4s
+        SQRDMULH  v17.4s, v17.4s, v0.4s
+        SQRDMULH  v18.4s, v18.4s, v0.4s
+        SQRDMULH  v19.4s, v19.4s, v0.4s
 
-        SQRDMULH  v16.4s, v24.4s, v0.4s
-        SQRDMULH  v17.4s, v25.4s, v0.4s
-        SQRDMULH  v18.4s, v26.4s, v0.4s
-        SQRDMULH  v19.4s, v27.4s, v0.4s
-        SQRDMULH  v20.4s, v28.4s, v0.4s
-        SQRDMULH  v21.4s, v29.4s, v0.4s
-        SQRDMULH  v22.4s, v30.4s, v0.4s
-        SQRDMULH  v23.4s, v31.4s, v0.4s
+        SSRA    v16.4s, v4.4s, 31  // signed shift right accumulate
+        SSRA    v17.4s, v5.4s, 31
+        SSRA    v18.4s, v6.4s, 31
+        SSRA    v19.4s, v7.4s, 31
 
-        BIC     v24.16b, v24.16b, v2.16b
-        BIC     v25.16b, v25.16b, v2.16b
-        BIC     v26.16b, v26.16b, v2.16b
-        BIC     v27.16b, v27.16b, v2.16b
-        BIC     v28.16b, v28.16b, v2.16b
-        BIC     v29.16b, v29.16b, v2.16b
-        BIC     v30.16b, v30.16b, v2.16b
-        BIC     v31.16b, v31.16b, v2.16b
+        BIC     v4.16b, v20.16b, v2.16b
+        BIC     v5.16b, v21.16b, v2.16b
+        BIC     v6.16b, v22.16b, v2.16b
+        BIC     v7.16b, v23.16b, v2.16b
 
-        SSRA    v16.4s, v24.4s, 31
-        SSRA    v17.4s, v25.4s, 31
-        SSRA    v18.4s, v26.4s, 31
-        SSRA    v19.4s, v27.4s, 31
-        SSRA    v20.4s, v28.4s, 31
-        SSRA    v21.4s, v29.4s, 31
-        SSRA    v22.4s, v30.4s, 31
-        SSRA    v23.4s, v31.4s, 31
+        SQRDMULH  v20.4s, v20.4s, v0.4s
+        SQRDMULH  v21.4s, v21.4s, v0.4s
+        SQRDMULH  v22.4s, v22.4s, v0.4s
+        SQRDMULH  v23.4s, v23.4s, v0.4s
 
-        SRSHL    v4.4s,  v4.4s, v1.4s  // signed rounding shift left
-        SRSHL    v5.4s,  v5.4s, v1.4s
-        SRSHL    v6.4s,  v6.4s, v1.4s
-        SRSHL    v7.4s,  v7.4s, v1.4s
-        SRSHL    v8.4s,  v8.4s, v1.4s
-        SRSHL    v9.4s,  v9.4s, v1.4s
-        SRSHL   v10.4s, v10.4s, v1.4s
-        SRSHL   v11.4s, v11.4s, v1.4s
+        SSRA    v20.4s, v4.4s, 31
+        SSRA    v21.4s, v5.4s, 31
+        SSRA    v22.4s, v6.4s, 31
+        SSRA    v23.4s, v7.4s, 31
 
-        SRSHL   v16.4s, v16.4s, v1.4s
+        BIC     v4.16b, v24.16b, v2.16b
+        BIC     v5.16b, v25.16b, v2.16b
+        BIC     v6.16b, v26.16b, v2.16b
+        BIC     v7.16b, v27.16b, v2.16b
+
+        SQRDMULH  v24.4s, v24.4s, v0.4s
+        SQRDMULH  v25.4s, v25.4s, v0.4s
+        SQRDMULH  v26.4s, v26.4s, v0.4s
+        SQRDMULH  v27.4s, v27.4s, v0.4s
+
+        SSRA    v24.4s, v4.4s, 31
+        SSRA    v25.4s, v5.4s, 31
+        SSRA    v26.4s, v6.4s, 31
+        SSRA    v27.4s, v7.4s, 31
+
+        BIC     v4.16b, v28.16b, v2.16b
+        BIC     v5.16b, v29.16b, v2.16b
+        BIC     v6.16b, v30.16b, v2.16b
+        BIC     v7.16b, v31.16b, v2.16b
+
+        SQRDMULH  v28.4s, v28.4s, v0.4s
+        SQRDMULH  v29.4s, v29.4s, v0.4s
+        SQRDMULH  v30.4s, v30.4s, v0.4s
+        SQRDMULH  v31.4s, v31.4s, v0.4s
+
+        SSRA    v28.4s, v4.4s, 31
+        SSRA    v29.4s, v5.4s, 31
+        SSRA    v30.4s, v6.4s, 31
+        SSRA    v31.4s, v7.4s, 31
+
+        SRSHL   v16.4s, v16.4s, v1.4s  // signed rounding shift left
         SRSHL   v17.4s, v17.4s, v1.4s
         SRSHL   v18.4s, v18.4s, v1.4s
         SRSHL   v19.4s, v19.4s, v1.4s
@@ -207,45 +201,55 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         SRSHL   v21.4s, v21.4s, v1.4s
         SRSHL   v22.4s, v22.4s, v1.4s
         SRSHL   v23.4s, v23.4s, v1.4s
+        SRSHL   v24.4s, v24.4s, v1.4s
+        SRSHL   v25.4s, v25.4s, v1.4s
+        SRSHL   v26.4s, v26.4s, v1.4s
+        SRSHL   v27.4s, v27.4s, v1.4s
+        SRSHL   v28.4s, v28.4s, v1.4s
+        SRSHL   v29.4s, v29.4s, v1.4s
+        SRSHL   v30.4s, v30.4s, v1.4s
+        SRSHL   v31.4s, v31.4s, v1.4s
 
-        SQXTN    v4.4h,  v4.4s
-        SQXTN    v5.4h,  v5.4s
-        SQXTN    v6.4h,  v6.4s
-        SQXTN    v7.4h,  v7.4s
         SQXTN   v16.4h, v16.4s
         SQXTN   v17.4h, v17.4s
         SQXTN   v18.4h, v18.4s
         SQXTN   v19.4h, v19.4s
+        SQXTN   v24.4h, v24.4s
+        SQXTN   v25.4h, v25.4s
+        SQXTN   v26.4h, v26.4s
+        SQXTN   v27.4h, v27.4s
+
         LD1R    {v2.8h}, [x11], 2   // add bias
 
-        SQXTN2  v4.8h,  v8.4s
-        SQXTN2  v5.8h,  v9.4s
-        SQXTN2  v6.8h, v10.4s
-        SQXTN2  v7.8h, v11.4s
         SQXTN2  v16.8h, v20.4s
         SQXTN2  v17.8h, v21.4s
         SQXTN2  v18.8h, v22.4s
         SQXTN2  v19.8h, v23.4s
+        SQXTN2  v24.8h, v28.4s
+        SQXTN2  v25.8h, v29.4s
+        SQXTN2  v26.8h, v30.4s
+        SQXTN2  v27.8h, v31.4s
 
-        SQADD    v4.8h,  v4.8h, v2.8h
-        SQADD    v5.8h,  v5.8h, v2.8h
-        SQADD    v6.8h,  v6.8h, v2.8h
-        SQADD    v7.8h,  v7.8h, v2.8h
         SQADD   v16.8h, v16.8h, v2.8h
         SQADD   v17.8h, v17.8h, v2.8h
         SQADD   v18.8h, v18.8h, v2.8h
         SQADD   v19.8h, v19.8h, v2.8h
+        SQADD   v24.8h, v24.8h, v2.8h
+        SQADD   v25.8h, v25.8h, v2.8h
+        SQADD   v26.8h, v26.8h, v2.8h
+        SQADD   v27.8h, v27.8h, v2.8h
+
         LD2R    {v0.16b, v1.16b}, [x11]   // clamp to min/max
 
-        SQXTN    v4.8b, v4.8h
-        SQXTN    v5.8b, v5.8h
-        SQXTN    v6.8b, v6.8h
-        SQXTN    v7.8b, v7.8h
-        SQXTN2   v4.16b, v16.8h
-        SQXTN2   v5.16b, v17.8h
-        SQXTN2   v6.16b, v18.8h
-        SQXTN2   v7.16b, v19.8h
-        LDR     x12, [sp, 32]   // cn_stride
+        SQXTN    v4.8b, v16.8h
+        SQXTN    v5.8b, v17.8h
+        SQXTN    v6.8b, v18.8h
+        SQXTN    v7.8b, v19.8h
+        SQXTN2   v4.16b, v24.8h
+        SQXTN2   v5.16b, v25.8h
+        SQXTN2   v6.16b, v26.8h
+        SQXTN2   v7.16b, v27.8h
+        LDR     x12, [sp]   // cn_stride
 
         SMAX    v4.16b, v4.16b, v0.16b
         SMAX    v5.16b, v5.16b, v0.16b
@@ -270,36 +274,34 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         SUB      x4,  x4, x2         // a3 -= kc
         B.NE    0b
 
-        LDP     d10, d11, [sp, 16]
-        LDP      d8,  d9, [sp], 32
         RET
 
         # Remainder- 1 to 7 bytes of A
         .p2align 3
 3:
         LD1     {v0.8b},  [x3], x10
-        LDP     q8, q9, [x5], 32
+        LDP     q4, q5, [x5], 32
         LD1     {v1.8b}, [x15], x10
         LD1     {v2.8b}, [x13], x10
         LD1     {v3.8b},  [x4], x10
         CMP     x10, 4
-        SDOT    v16.4s, v8.16b,  v0.4b[0]
-        SDOT    v17.4s, v8.16b,  v1.4b[0]
-        SDOT    v18.4s, v8.16b,  v2.4b[0]
-        SDOT    v19.4s, v8.16b,  v3.4b[0]
-        LDP     q10, q11, [x5], 32
-        SDOT    v20.4s, v9.16b,  v0.4b[0]
-        SDOT    v21.4s, v9.16b,  v1.4b[0]
-        SDOT    v22.4s, v9.16b,  v2.4b[0]
-        SDOT    v23.4s, v9.16b,  v3.4b[0]
-        SDOT    v24.4s, v10.16b, v0.4b[0]
-        SDOT    v25.4s, v10.16b, v1.4b[0]
-        SDOT    v26.4s, v10.16b, v2.4b[0]
-        SDOT    v27.4s, v10.16b, v3.4b[0]
-        SDOT    v28.4s, v11.16b, v0.4b[0]
-        SDOT    v29.4s, v11.16b, v1.4b[0]
-        SDOT    v30.4s, v11.16b, v2.4b[0]
-        SDOT    v31.4s, v11.16b, v3.4b[0]
+        SDOT    v16.4s, v4.16b,  v0.4b[0]
+        SDOT    v17.4s, v4.16b,  v1.4b[0]
+        SDOT    v18.4s, v4.16b,  v2.4b[0]
+        SDOT    v19.4s, v4.16b,  v3.4b[0]
+        LDP     q6, q7, [x5], 32
+        SDOT    v20.4s, v5.16b,  v0.4b[0]
+        SDOT    v21.4s, v5.16b,  v1.4b[0]
+        SDOT    v22.4s, v5.16b,  v2.4b[0]
+        SDOT    v23.4s, v5.16b,  v3.4b[0]
+        SDOT    v24.4s, v6.16b, v0.4b[0]
+        SDOT    v25.4s, v6.16b, v1.4b[0]
+        SDOT    v26.4s, v6.16b, v2.4b[0]
+        SDOT    v27.4s, v6.16b, v3.4b[0]
+        SDOT    v28.4s, v7.16b, v0.4b[0]
+        SDOT    v29.4s, v7.16b, v1.4b[0]
+        SDOT    v30.4s, v7.16b, v2.4b[0]
+        SDOT    v31.4s, v7.16b, v3.4b[0]
         B.LS    2b
         LDP      q4,  q5, [x5], 32
         SDOT    v16.4s, v4.16b,  v0.4b[1]
@@ -360,8 +362,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
         ST1     {v6.b}[0], [x9]
         ST1     {v7.b}[0], [x7]
 8:
-        LDP     d10, d11, [sp, 16]
-        LDP      d8,  d9, [sp], 32
         RET
 
 END_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot
