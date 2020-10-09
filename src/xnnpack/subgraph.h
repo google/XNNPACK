@@ -18,6 +18,10 @@
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct xnn_shape {
   size_t num_dims;
   size_t dim[XNN_MAX_TENSOR_DIMS];
@@ -261,5 +265,12 @@ size_t xnn_tensor_get_size(
 
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 
+void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph);
+
 void xnn_node_clear(struct xnn_node* node);
 void xnn_value_clear(struct xnn_value* value);
+
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif

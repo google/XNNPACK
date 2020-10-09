@@ -2879,6 +2879,24 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(unpooling-nhwc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(unpooling-nhwc-test unpooling-nhwc-test)
 
+  ADD_EXECUTABLE(memory-planner-test test/memory-planner-test.cc)
+  SET_TARGET_PROPERTIES(memory-planner-test PROPERTIES
+    C_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    C_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(memory-planner-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(memory-planner-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(memory-planner-test memory-planner-test)
+
+  ADD_EXECUTABLE(subgraph-nchw-test test/subgraph-nchw.cc)
+  SET_TARGET_PROPERTIES(subgraph-nchw-test PROPERTIES
+    C_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    C_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(subgraph-nchw-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(subgraph-nchw-test subgraph-nchw-test)
+
   # ---[ Build microkernel-level unit tests
   ADD_EXECUTABLE(f16-gemm-minmax-test test/f16-gemm-minmax.cc)
   SET_TARGET_PROPERTIES(f16-gemm-minmax-test PROPERTIES

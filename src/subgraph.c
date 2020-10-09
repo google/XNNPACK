@@ -127,7 +127,6 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
 #define XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC 4
 #define XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER 8
 
-#if XNN_ENABLE_SPARSE
 uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* node) {
   switch (node->type) {
     case xnn_node_type_convolution_2d:
@@ -264,7 +263,7 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
   }
 }
 
-static void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
+void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
 {
   // Convert parts of the subgraph to NCHW for sparse inference
   // Step 1: detect NCHW-compatible Nodes
@@ -443,7 +442,6 @@ static void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
     }
   }
 }
-#endif  // XNN_ENABLE_SPARSE
 
 enum xnn_status xnn_subgraph_optimize(
   xnn_subgraph_t subgraph,

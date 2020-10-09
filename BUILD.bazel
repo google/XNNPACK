@@ -6458,6 +6458,18 @@ xnnpack_unit_test(
     ],
 )
 
+xnnpack_unit_test(
+    name = "subgraph_nchw_test",
+    srcs = [
+        "src/xnnpack/subgraph.h",
+        "test/subgraph-nchw.cc",
+        "test/subgraph-tester.h",
+    ],
+    deps = [
+        ":XNNPACK",
+    ],
+)
+
 ############################# Build configurations #############################
 
 # Enables usage of assembly kernels.
