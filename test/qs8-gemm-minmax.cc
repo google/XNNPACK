@@ -5961,7 +5961,7 @@
       .m(1)
       .n(16)
       .k(8)
-      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
   }
 
   TEST(QS8_GEMM_MINMAX_1X16C4__AARCH64_NEONDOT, strided_cn) {
@@ -5975,7 +5975,7 @@
       .n(16)
       .k(8)
       .cn_stride(19)
-      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
   }
 
   TEST(QS8_GEMM_MINMAX_1X16C4__AARCH64_NEONDOT, k_eq_8_strided_a) {
@@ -5989,7 +5989,7 @@
       .n(16)
       .k(8)
       .a_stride(11)
-      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
   }
 
   TEST(QS8_GEMM_MINMAX_1X16C4__AARCH64_NEONDOT, k_eq_8_subtile) {
@@ -6005,7 +6005,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6022,7 +6022,7 @@
         .n(16)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6038,7 +6038,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6053,7 +6053,7 @@
         .m(1)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6069,7 +6069,7 @@
         .n(16)
         .k(k)
         .a_stride(11)
-        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6087,7 +6087,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6104,7 +6104,7 @@
         .m(1)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6120,7 +6120,7 @@
         .n(16)
         .k(k)
         .a_stride(19)
-        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6138,7 +6138,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6155,7 +6155,7 @@
         .m(1)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6171,7 +6171,7 @@
         .n(16)
         .k(k)
         .a_stride(83)
-        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6189,7 +6189,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6207,7 +6207,7 @@
           .m(1)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6225,7 +6225,7 @@
           .n(16)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6243,7 +6243,7 @@
           .n(n)
           .k(k)
           .a_stride(43)
-          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6262,7 +6262,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6280,7 +6280,7 @@
           .m(1)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6298,7 +6298,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6316,7 +6316,7 @@
           .n(n)
           .k(k)
           .a_stride(43)
-          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6335,7 +6335,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6356,7 +6356,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6373,7 +6373,7 @@
       .n(16)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
   }
 
   TEST(QS8_GEMM_MINMAX_1X16C4__AARCH64_NEONDOT, qmax) {
@@ -6387,7 +6387,7 @@
       .n(16)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
   }
 
   TEST(QS8_GEMM_MINMAX_1X16C4__AARCH64_NEONDOT, strided_cm) {
@@ -6401,7 +6401,7 @@
       .n(16)
       .k(8)
       .cm_stride(19)
-      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
   }
 #endif  // XNN_ARCH_ARM64
 
@@ -6417,7 +6417,7 @@
       .m(4)
       .n(16)
       .k(8)
-      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
   }
 
   TEST(QS8_GEMM_MINMAX_4X16C4__AARCH64_NEONDOT, strided_cn) {
@@ -6431,7 +6431,7 @@
       .n(16)
       .k(8)
       .cn_stride(19)
-      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
   }
 
   TEST(QS8_GEMM_MINMAX_4X16C4__AARCH64_NEONDOT, k_eq_8_strided_a) {
@@ -6445,7 +6445,7 @@
       .n(16)
       .k(8)
       .a_stride(11)
-      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
   }
 
   TEST(QS8_GEMM_MINMAX_4X16C4__AARCH64_NEONDOT, k_eq_8_subtile) {
@@ -6461,7 +6461,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6478,7 +6478,7 @@
         .n(16)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6494,7 +6494,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6509,7 +6509,7 @@
         .m(4)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6525,7 +6525,7 @@
         .n(16)
         .k(k)
         .a_stride(11)
-        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6543,7 +6543,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6560,7 +6560,7 @@
         .m(4)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6576,7 +6576,7 @@
         .n(16)
         .k(k)
         .a_stride(19)
-        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6594,7 +6594,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6611,7 +6611,7 @@
         .m(4)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6627,7 +6627,7 @@
         .n(16)
         .k(k)
         .a_stride(83)
-        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+        .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
     }
   }
 
@@ -6645,7 +6645,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6663,7 +6663,7 @@
           .m(4)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6681,7 +6681,7 @@
           .n(16)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6699,7 +6699,7 @@
           .n(n)
           .k(k)
           .a_stride(43)
-          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6718,7 +6718,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6736,7 +6736,7 @@
           .m(4)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6754,7 +6754,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6772,7 +6772,7 @@
           .n(n)
           .k(k)
           .a_stride(43)
-          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+          .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
       }
     }
   }
@@ -6791,7 +6791,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6812,7 +6812,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+            .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
         }
       }
     }
@@ -6829,7 +6829,7 @@
       .n(16)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
   }
 
   TEST(QS8_GEMM_MINMAX_4X16C4__AARCH64_NEONDOT, qmax) {
@@ -6843,7 +6843,7 @@
       .n(16)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
   }
 
   TEST(QS8_GEMM_MINMAX_4X16C4__AARCH64_NEONDOT, strided_cm) {
@@ -6857,7 +6857,7 @@
       .n(16)
       .k(8)
       .cm_stride(19)
-      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
+      .Test(xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
   }
 #endif  // XNN_ARCH_ARM64
 

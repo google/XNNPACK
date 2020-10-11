@@ -713,8 +713,8 @@ static void init(void) {
 
     if (cpuinfo_has_arm_neon_dot()) {
       #if XNN_ENABLE_ASSEMBLY
-        xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot);
-        xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot);
+        xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
+        xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64);
       #else
         xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_ukernel_4x16c4__neondot);
         xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_ukernel_1x16c4__neondot);
