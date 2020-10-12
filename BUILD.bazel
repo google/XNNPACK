@@ -4246,7 +4246,8 @@ xnnpack_benchmark(
         "bench/qs8-gemm.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
-    deps = MICROKERNEL_BENCHMARK_DEPS + [":packing"],
+    copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":packing"] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
 )
 
 xnnpack_benchmark(
