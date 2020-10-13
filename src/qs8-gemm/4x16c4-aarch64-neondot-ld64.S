@@ -34,24 +34,23 @@
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
 
         # Clamp A and C pointers
-        CMP      x0, 2            // if mr < 2
-        ADD     x15, x3, x4       // a1 = a0 + a_stride
-        ADD      x8, x6, x7       // c1 = c0 + cm_stride
-        CSEL    x15, x3, x15, LO  //   a1 = a0
-        CSEL     x8, x6,  x8, LO  //   c1 = c0
+        CMP      x0, 2             // if mr < 2
+        ADD     x15, x3, x4        // a1 = a0 + a_stride
+        ADD      x8, x6, x7        // c1 = c0 + cm_stride
+        CSEL    x15, x3, x15, LO   //   a1 = a0
+        CSEL     x8, x6,  x8, LO   //   c1 = c0
 
-        ADD     x13, x15, x4      // a2 = a1 + a_stride
-        ADD      x9,  x8, x7      // c2 = c1 + cm_stride
-                                  // if mr <= 2
-        CSEL    x13, x15, x13, LS //   a2 = a1
-        CSEL     x9,  x8,  x9, LS //   c2 = c1
+        ADD     x13, x15, x4       // a2 = a1 + a_stride
+        ADD      x9,  x8, x7       // c2 = c1 + cm_stride
+                                   // if mr <= 2
+        CSEL    x13, x15, x13, LS  //   a2 = a1
+        CSEL     x9,  x8,  x9, LS  //   c2 = c1
 
         CMP      x0, 4             // if mr < 4
         ADD      x4, x13, x4       // a3 = a2 + a_stride
         ADD      x7,  x9, x7       // c3 = c2 + cm_stride
         CSEL     x4, x13, x4, LO   //   a3 = a2
         CSEL     x7,  x9, x7, LO   //   c3 = c2
-
 
         .p2align 3
 0:
@@ -218,7 +217,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SQXTN   v25.4h, v25.4s
         SQXTN   v26.4h, v26.4s
         SQXTN   v27.4h, v27.4s
-
         LD1R    {v2.8h}, [x11], 2   // add bias
 
         SQXTN2  v16.8h, v20.4s
@@ -238,13 +236,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SQADD   v25.8h, v25.8h, v2.8h
         SQADD   v26.8h, v26.8h, v2.8h
         SQADD   v27.8h, v27.8h, v2.8h
-
-        LD2R    {v0.16b, v1.16b}, [x11]   // clamp to min/max
+        LD1R    {v0.16b}, [x11], 1  // clamp min value
 
         SQXTN    v4.8b, v16.8h
         SQXTN    v5.8b, v17.8h
         SQXTN    v6.8b, v18.8h
         SQXTN    v7.8b, v19.8h
+        LD1R    {v1.16b}, [x11]     // clamp max value
         SQXTN2   v4.16b, v24.8h
         SQXTN2   v5.16b, v25.8h
         SQXTN2   v6.16b, v26.8h
@@ -255,12 +253,11 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SMAX    v5.16b, v5.16b, v0.16b
         SMAX    v6.16b, v6.16b, v0.16b
         SMAX    v7.16b, v7.16b, v0.16b
+        SUBS    x1, x1, 16
         SMIN    v4.16b, v4.16b, v1.16b
         SMIN    v5.16b, v5.16b, v1.16b
         SMIN    v6.16b, v6.16b, v1.16b
         SMIN    v7.16b, v7.16b, v1.16b
-
-        SUBS    x1, x1, 16
         B.LO    4f
 
         # Store full 4 x 16
@@ -273,7 +270,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         ST1     {v7.16b}, [x7], x12
         SUB      x4,  x4, x2         // a3 -= kc
         B.NE    0b
-
         RET
 
         # Remainder- 1 to 7 bytes of A
