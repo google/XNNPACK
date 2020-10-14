@@ -142,6 +142,28 @@ tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=20 -D SSE=4 -o s
 tools/xngen src/f32-sigmoid/sse-lut64-p2-div.c.in -D BATCH_TILE=24 -D SSE=4 -o src/f32-sigmoid/gen/sse41-lut64-p2-div-x24.c
 
 ################################### x86 AVX ###################################
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=8  -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx-rr2-p5-div-x8.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=16 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx-rr2-p5-div-x16.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=24 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx-rr2-p5-div-x24.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=32 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx-rr2-p5-div-x32.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=40 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx-rr2-p5-div-x40.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=48 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx-rr2-p5-div-x48.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=56 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx-rr2-p5-div-x56.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=64 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx-rr2-p5-div-x64.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=72 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx-rr2-p5-div-x72.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=80 -D RR_STEPS=2 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx-rr2-p5-div-x80.c
+
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=8  -D RR_STEPS=2 -D DIV_ALGO=nr2 -o src/f32-sigmoid/gen/avx-rr2-p5-nr2-x8.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=16 -D RR_STEPS=2 -D DIV_ALGO=nr2 -o src/f32-sigmoid/gen/avx-rr2-p5-nr2-x16.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=24 -D RR_STEPS=2 -D DIV_ALGO=nr2 -o src/f32-sigmoid/gen/avx-rr2-p5-nr2-x24.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=32 -D RR_STEPS=2 -D DIV_ALGO=nr2 -o src/f32-sigmoid/gen/avx-rr2-p5-nr2-x32.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=40 -D RR_STEPS=2 -D DIV_ALGO=nr2 -o src/f32-sigmoid/gen/avx-rr2-p5-nr2-x40.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=48 -D RR_STEPS=2 -D DIV_ALGO=nr2 -o src/f32-sigmoid/gen/avx-rr2-p5-nr2-x48.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=56 -D RR_STEPS=2 -D DIV_ALGO=nr2 -o src/f32-sigmoid/gen/avx-rr2-p5-nr2-x56.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=64 -D RR_STEPS=2 -D DIV_ALGO=nr2 -o src/f32-sigmoid/gen/avx-rr2-p5-nr2-x64.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=72 -D RR_STEPS=2 -D DIV_ALGO=nr2 -o src/f32-sigmoid/gen/avx-rr2-p5-nr2-x72.c
+tools/xngen src/f32-sigmoid/avx-p5.c.in -D BATCH_TILE=80 -D RR_STEPS=2 -D DIV_ALGO=nr2 -o src/f32-sigmoid/gen/avx-rr2-p5-nr2-x80.c
+
 tools/xngen src/f32-sigmoid/avx2-p5.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx2-rr1-p5-div-x8.c
 tools/xngen src/f32-sigmoid/avx2-p5.c.in -D BATCH_TILE=16 -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx2-rr1-p5-div-x16.c
 tools/xngen src/f32-sigmoid/avx2-p5.c.in -D BATCH_TILE=24 -D RR_STEPS=1 -D DIV_ALGO=div -o src/f32-sigmoid/gen/avx2-rr1-p5-div-x24.c

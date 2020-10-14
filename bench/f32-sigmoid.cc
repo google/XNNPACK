@@ -630,6 +630,87 @@ static void f32_sigmoid(
     ->Range(1000, 1000000)
     ->UseRealTime();
 
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_div_x8, xnn_f32_sigmoid_ukernel__avx_rr2_p5_div_x8)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_div_x16, xnn_f32_sigmoid_ukernel__avx_rr2_p5_div_x16)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_div_x24, xnn_f32_sigmoid_ukernel__avx_rr2_p5_div_x24)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_div_x32, xnn_f32_sigmoid_ukernel__avx_rr2_p5_div_x32)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_div_x40, xnn_f32_sigmoid_ukernel__avx_rr2_p5_div_x40)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_div_x48, xnn_f32_sigmoid_ukernel__avx_rr2_p5_div_x48)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_div_x56, xnn_f32_sigmoid_ukernel__avx_rr2_p5_div_x56)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_div_x64, xnn_f32_sigmoid_ukernel__avx_rr2_p5_div_x64)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_div_x72, xnn_f32_sigmoid_ukernel__avx_rr2_p5_div_x72)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_div_x80, xnn_f32_sigmoid_ukernel__avx_rr2_p5_div_x80)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_nr2_x8, xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x8)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_nr2_x16, xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x16)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_nr2_x24, xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x24)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_nr2_x32, xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x32)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_nr2_x40, xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x40)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_nr2_x48, xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x48)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_nr2_x56, xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x56)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_nr2_x64, xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x64)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_nr2_x72, xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x72)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_sigmoid, avx_p5_nr2_x80, xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x80)
+      ->RangeMultiplier(10)
+      ->Range(1000, 1000000)
+      ->UseRealTime();
+
   BENCHMARK_CAPTURE(f32_sigmoid, avx2_p5_div_x8, xnn_f32_sigmoid_ukernel__avx2_rr1_p5_div_x8)
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)

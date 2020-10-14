@@ -1706,6 +1706,8 @@ static void init(void) {
       xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64;
     } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx2()) {
       xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__avx2_rr1_p5_div_x40;
+    } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx()) {
+      xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__avx_rr2_p5_nr2_x40;
     } else if (cpuinfo_has_x86_sse4_1()) {
       xnn_params.f32.sigmoid = (xnn_univector_ukernel_function) xnn_f32_sigmoid_ukernel__sse41_lut64_p2_div_x8;
     } else {
