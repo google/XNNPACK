@@ -371,17 +371,19 @@ struct conv2d_context {
 #endif
 
 struct dwconv_context {
-  size_t groups;
-  const void** indirection_buffer;
-  size_t indirection_buffer_row_stride;
-  size_t indirection_buffer_col_stride;
+  const void** indirect_input;
+  size_t indirect_input_width_stride;
+  size_t indirect_input_height_stride;
+  size_t input_offset;
+  size_t input_batch_stride;
   const void* packed_weights;
   void* output;
+  size_t output_batch_stride;
+  size_t output_height_stride;
   size_t output_width;
-  size_t output_row_stride;
-  size_t output_col_increment;
-  size_t input_offset;
+  size_t groups;
   const void* zero;
+  size_t output_increment;
   union {
     union xnn_qs8_gemm_params qs8;
     union xnn_qu8_gemm_params qu8;
@@ -396,6 +398,7 @@ struct dwconv_context {
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_dwconv_unipass(
       const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
       size_t output_y);
 #endif
 

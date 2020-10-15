@@ -366,18 +366,20 @@ void xnn_compute_conv2d_hwc2chw(
 
 void xnn_compute_dwconv_unipass(
     const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
     size_t output_y)
 {
+  const void** indirect_input =
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+
   context->unipass_ukernel(
-    context->groups,
-    context->output_width,
-    context->indirection_buffer + output_y * context->indirection_buffer_row_stride,
-    context->packed_weights,
-    (void*) ((uintptr_t) context->output + output_y * context->output_row_stride),
-    context->indirection_buffer_col_stride,
-    context->output_col_increment,
-    context->input_offset,
-    context->zero,
+    context->groups, context->output_width,
+    indirect_input, context->packed_weights, output,
+    context->indirect_input_width_stride, context->output_increment,
+    input_offset, context->zero,
     &context->params);
 }
 

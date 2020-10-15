@@ -26,7 +26,6 @@ XNN_INTERNAL void xnn_indirection_init_conv2d(
 
 XNN_INTERNAL void xnn_indirection_init_dwconv2d(
   xnn_operator_t op,
-  size_t batch_start,
   size_t step_height,
   size_t step_width,
   uint32_t log2_element_size);

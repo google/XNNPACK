@@ -518,7 +518,7 @@ static enum xnn_status setup_average_pooling2d(
     const size_t last_input_width = average_pooling_op->last_input_width;
     if (input_height != last_input_height || input_width != last_input_width) {
       // Micro-kernel may read up to (mr - 1) elements after the end of indirection buffer.
-      const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + batch_size * output_height * step_height);
+      const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + output_height * step_height);
 
       const void** indirection_buffer =
         (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
@@ -529,10 +529,7 @@ static enum xnn_status setup_average_pooling2d(
       }
       average_pooling_op->indirection_buffer = indirection_buffer;
 
-      // Indirection buffer always setup for batch size 1, larger batch size supported through input_offset argument
-      average_pooling_op->batch_size = 1;
-      xnn_indirection_init_dwconv2d(
-        average_pooling_op, 0, step_height, step_width, log2_input_element_size);
+      xnn_indirection_init_dwconv2d(average_pooling_op, step_height, step_width, log2_input_element_size);
 
       average_pooling_op->last_input = input;
       average_pooling_op->last_input_height = input_height;

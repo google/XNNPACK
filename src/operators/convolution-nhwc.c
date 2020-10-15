@@ -1084,20 +1084,6 @@ static enum xnn_status setup_convolution2d_nhwc(
     }
     case xnn_ukernel_type_dwconv:
     {
-      size_t valid_batch_size = 0;
-      if (input == convolution_op->last_input &&
-          input_height == convolution_op->last_input_height &&
-          input_width == convolution_op->last_input_width)
-      {
-        valid_batch_size = convolution_op->valid_batch_size;
-        if (batch_size <= valid_batch_size) {
-          convolution_op->compute.range[0] = batch_size * convolution_op->output_height;
-          convolution_op->context.dwconv.output = output;
-          convolution_op->state = xnn_run_state_ready;
-          return xnn_status_success;
-        }
-      }
-
       const size_t kernel_height = convolution_op->kernel_height;
       const size_t kernel_width = convolution_op->kernel_width;
       const size_t kernel_size = kernel_height * kernel_width;
@@ -1105,44 +1091,53 @@ static enum xnn_status setup_convolution2d_nhwc(
       const size_t output_width = convolution_op->output_width;
       const size_t step_width = convolution_op->dilation_width == 1 ? convolution_op->stride_width : kernel_width;
       const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
-      const size_t indirection_buffer_size = sizeof(void*) * batch_size * output_height * step_height;
+      if (input_height != convolution_op->last_input_height || input_width != convolution_op->last_input_width) {
+        const size_t indirection_buffer_size = sizeof(void*) * output_height * step_height;
 
-      const void** indirection_buffer =
-        (const void**) xnn_reallocate_memory((void*) convolution_op->indirection_buffer, indirection_buffer_size);
-      if (indirection_buffer == NULL) {
-        xnn_log_error(
-          "failed to allocate %zu bytes for %s operator indirection buffer",
-          indirection_buffer_size, xnn_operator_type_to_string(convolution_op->type));
-        return xnn_status_out_of_memory;
+        const void** indirection_buffer =
+          (const void**) xnn_reallocate_memory(convolution_op->indirection_buffer, indirection_buffer_size);
+        if (indirection_buffer == NULL) {
+          xnn_log_error("failed to allocate %zu bytes for %s operator indirection buffer",
+            indirection_buffer_size, xnn_operator_type_to_string(convolution_op->type));
+          return xnn_status_out_of_memory;
+        }
+        convolution_op->indirection_buffer = indirection_buffer;
+
+        xnn_indirection_init_dwconv2d(convolution_op, step_height, step_width, log2_input_element_size);
+
+        convolution_op->last_input = input;
+        convolution_op->last_input_height = input_height;
+        convolution_op->last_input_width = input_width;
       }
-      convolution_op->indirection_buffer = indirection_buffer;
-
-      xnn_indirection_init_dwconv2d(convolution_op, valid_batch_size, step_height, step_width, log2_input_element_size);
 
       const size_t groups = convolution_op->groups;
       convolution_op->context.dwconv = (struct dwconv_context) {
-          .groups = groups,
-          .indirection_buffer = convolution_op->indirection_buffer,
-          .indirection_buffer_row_stride = step_height,
-          .indirection_buffer_col_stride = kernel_height * step_width * sizeof(void*),
+          .indirect_input = convolution_op->indirection_buffer,
+          .indirect_input_width_stride = kernel_height * step_width * sizeof(void*),
+          .indirect_input_height_stride = step_height * sizeof(void*),
+          .input_offset = (size_t) ((uintptr_t) input - (uintptr_t) convolution_op->last_input),
+          .input_batch_stride = (input_height * input_width * convolution_op->input_pixel_stride) << log2_input_element_size,
           .packed_weights = convolution_op->packed_weights,
           .output = convolution_op->output,
+          .output_batch_stride = (output_height * output_width * convolution_op->output_pixel_stride) << log2_output_element_size,
+          .output_height_stride = (output_width * convolution_op->output_pixel_stride) << log2_output_element_size,
           .output_width = output_width,
-          .output_row_stride = output_width * convolution_op->output_pixel_stride << log2_output_element_size,
-          .output_col_increment = (convolution_op->output_pixel_stride - groups) << log2_output_element_size,
+          .groups = groups,
+          .zero = convolution_op->zero_buffer,
+          .output_increment = (convolution_op->output_pixel_stride - groups) << log2_output_element_size,
           .unipass_ukernel = convolution_op->ukernel.dwconv.unipass_function,
       };
       memcpy(&convolution_op->context.dwconv.params, dwconv_params, sizeof(convolution_op->context.dwconv.params));
 
-      convolution_op->compute.type = xnn_parallelization_type_1d;
-      convolution_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_dwconv_unipass;
-      convolution_op->compute.range[0] = batch_size * output_height;
+      convolution_op->compute.type = xnn_parallelization_type_2d;
+      convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_unipass;
+      convolution_op->compute.range[0] = batch_size;
+      convolution_op->compute.range[1] = output_height;
       convolution_op->state = xnn_run_state_ready;
 
       convolution_op->last_input = input;
       convolution_op->last_input_height = input_height;
       convolution_op->last_input_width = input_width;
-      convolution_op->valid_batch_size = max(valid_batch_size, batch_size);
 
       return xnn_status_success;
     }
