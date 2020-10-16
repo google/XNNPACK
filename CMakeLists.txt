@@ -1486,7 +1486,11 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/math/roundu-sse2-cvt.c
   src/math/roundz-sse2-cvt.c
   src/math/sigmoid-sse2-rr2-p5-div.c
-  src/math/sigmoid-sse2-rr2-lut64-p2-div.c)
+  src/math/sigmoid-sse2-rr2-p5-nr1.c
+  src/math/sigmoid-sse2-rr2-p5-nr2.c
+  src/math/sigmoid-sse2-rr2-lut64-p2-div.c
+  src/math/sigmoid-sse2-rr2-lut64-p2-nr1.c
+  src/math/sigmoid-sse2-rr2-lut64-p2-nr2.c)
 
 SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-ssse3-mul16.c

@@ -2002,7 +2002,11 @@ SSE2_UKERNELS = [
     "src/math/roundu-sse2-cvt.c",
     "src/math/roundz-sse2-cvt.c",
     "src/math/sigmoid-sse2-rr2-p5-div.c",
+    "src/math/sigmoid-sse2-rr2-p5-nr1.c",
+    "src/math/sigmoid-sse2-rr2-p5-nr2.c",
     "src/math/sigmoid-sse2-rr2-lut64-p2-div.c",
+    "src/math/sigmoid-sse2-rr2-lut64-p2-nr1.c",
+    "src/math/sigmoid-sse2-rr2-lut64-p2-nr2.c",
 ]
 
 SSSE3_UKERNELS = [
