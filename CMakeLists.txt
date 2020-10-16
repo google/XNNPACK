@@ -1966,7 +1966,15 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/sigmoid-avx2-rr2-p5-nr2fma.c
   src/math/sigmoid-avx2-rr1-p5-nr2fma.c
   src/math/sigmoid-avx2-rr2-p5-nr1fma.c
-  src/math/sigmoid-avx2-rr1-p5-nr1fma.c)
+  src/math/sigmoid-avx2-rr1-p5-nr1fma.c
+  src/math/sigmoid-avx2-rr1-lut64-p2-gather-div.c
+  src/math/sigmoid-avx2-rr2-lut64-p2-gather-div.c
+  src/math/sigmoid-avx2-rr1-lut64-p2-gather-nr2fma1adj.c
+  src/math/sigmoid-avx2-rr2-lut64-p2-gather-nr2fma1adj.c
+  src/math/sigmoid-avx2-rr1-lut64-p2-gather-nr2fma.c
+  src/math/sigmoid-avx2-rr2-lut64-p2-gather-nr2fma.c
+  src/math/sigmoid-avx2-rr1-lut64-p2-gather-nr1fma.c
+  src/math/sigmoid-avx2-rr2-lut64-p2-gather-nr1fma.c)
 
 SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-clamp/gen/avx512f-x16.c
@@ -2198,6 +2206,12 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/math/sigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div.c
   src/math/sigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma1adj.c
   src/math/sigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma.c
+  src/math/sigmoid-avx512f-rr1-lut64-p2-gather-scalef-div.c
+  src/math/sigmoid-avx512f-rr1-lut64-p2-gather-scalef-nr1fma1adj.c
+  src/math/sigmoid-avx512f-rr1-lut64-p2-gather-scalef-nr1fma.c
+  src/math/sigmoid-avx512f-rr2-lut64-p2-gather-scalef-div.c
+  src/math/sigmoid-avx512f-rr2-lut64-p2-gather-scalef-nr1fma1adj.c
+  src/math/sigmoid-avx512f-rr2-lut64-p2-gather-scalef-nr1fma.c
   src/math/sqrt-avx512f-nr1fma.c
   src/math/sqrt-avx512f-nr2fma.c
   src/math/sqrt-avx512f-nr1fma1adj.c)

@@ -54,7 +54,7 @@ void xnn_math_f32_sigmoid__avx512f_rr1_lut32_p2_perm2_scalef_nr1fma(
     const __m512 vz = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx), vsign_mask));
 
     // Compute reduced argument n := round(z / log(2), 5).
-    // We do it by adding a large number (magic bias), which cause rounding of the result to 4 fractional bits, then
+    // We do it by adding a large number (magic bias), which cause rounding of the result to 5 fractional bits, then
     // subtracing the large number back. The addition is combined with multiplication by log2e into a single FMA
     // instruction. The trick with adding large number is valid only within certain bounds (|z / log(2)| <= 2**17,
     // i.e. |z| <= 0x1.62E43p+16 = 90852.1875), but that is acceptable, because inputs x outside of
