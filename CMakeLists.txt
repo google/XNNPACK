@@ -1736,8 +1736,9 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vunary/gen/vsqr-avx-x8.c
   src/f32-vunary/gen/vsqr-avx-x16.c
   src/math/exp-avx-p5.c
-  src/math/sigmoid-avx-rr2-p5-nr2.c
   src/math/sigmoid-avx-rr2-p5-div.c
+  src/math/sigmoid-avx-rr2-p5-nr1.c
+  src/math/sigmoid-avx-rr2-p5-nr2.c
   src/math/sigmoid-avx-rr2-lut64-p2-div.c)
 
 SET(XNNPACK_XOP_MICROKERNEL_SRCS
