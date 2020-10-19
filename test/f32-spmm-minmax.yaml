@@ -80,11 +80,17 @@
   k-block: 1
 - name: xnn_f32_spmm_minmax_ukernel_16x1__sse
   k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_4x1__psimd
+- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm
   k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_8x1__psimd
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm
   k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_16x1__psimd
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86
   k-block: 1
 - name: xnn_f32_spmm_minmax_ukernel_1x1__scalar
   k-block: 1

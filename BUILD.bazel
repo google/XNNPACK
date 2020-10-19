@@ -818,6 +818,12 @@ WASMSIMD_UKERNELS = [
     "src/f32-pavgpool/9p8x-minmax-wasmsimd-x86-c4.c",
     "src/f32-pavgpool/9x-minmax-wasmsimd-arm-c4.c",
     "src/f32-pavgpool/9x-minmax-wasmsimd-x86-c4.c",
+    "src/f32-spmm/gen/4x1-minmax-wasmsimd-arm.c",
+    "src/f32-spmm/gen/8x1-minmax-wasmsimd-arm.c",
+    "src/f32-spmm/gen/16x1-minmax-wasmsimd-arm.c",
+    "src/f32-spmm/gen/4x1-minmax-wasmsimd-x86.c",
+    "src/f32-spmm/gen/8x1-minmax-wasmsimd-x86.c",
+    "src/f32-spmm/gen/16x1-minmax-wasmsimd-x86.c",
     "src/f32-ppmm/gen/4x8-minmax-wasmsimd-splat-arm.c",
     "src/f32-ppmm/gen/4x8-minmax-wasmsimd-splat-x86.c",
     "src/f32-prelu/gen/wasmsimd-bitselect-1x4.c",
@@ -1108,9 +1114,6 @@ PSIMD_FASTMATH_UKERNELS = [
     "src/f32-dwconv-chw/3x3s2p1-psimd.c",
     "src/f32-dwconv-chw/5x5p2-psimd.c",
     "src/f32-dwconv-chw/5x5s2p2-psimd.c",
-    "src/f32-spmm/gen/4x1-minmax-psimd.c",
-    "src/f32-spmm/gen/8x1-minmax-psimd.c",
-    "src/f32-spmm/gen/16x1-minmax-psimd.c",
 ]
 
 PSIMD_ACCMATH_UKERNELS = [

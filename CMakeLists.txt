@@ -601,10 +601,7 @@ SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-dwconv-chw/3x3p1-psimd.c
   src/f32-dwconv-chw/3x3s2p1-psimd.c
   src/f32-dwconv-chw/5x5p2-psimd.c
-  src/f32-dwconv-chw/5x5s2p2-psimd.c
-  src/f32-spmm/gen/4x1-minmax-psimd.c
-  src/f32-spmm/gen/8x1-minmax-psimd.c
-  src/f32-spmm/gen/16x1-minmax-psimd.c)
+  src/f32-dwconv-chw/5x5s2p2-psimd.c)
 
 SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/qs8-requantization/fp32-psimd.c

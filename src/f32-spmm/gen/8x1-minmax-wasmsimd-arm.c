@@ -1,20 +1,20 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-spmm/psimd.c.in
+//   Template: src/f32-spmm/wasmsimd.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
-#include <psimd.h>
+#include <wasm_simd128.h>
 
 #include <xnnpack/spmm.h>
 
 
-void xnn_f32_spmm_minmax_ukernel_8x1__psimd(
+void xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm(
     uint32_t batch_size,
     uint32_t output_channels,
     const float*restrict input,
@@ -26,8 +26,8 @@ void xnn_f32_spmm_minmax_ukernel_8x1__psimd(
 {
   assert(batch_size != 0);
 
-  const psimd_f32 vmin = psimd_load_splat_f32(&params->scalar.min);
-  const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
+  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   size_t n = batch_size;
   while XNN_LIKELY(n >= 8) {
     const float*restrict w = weights;
@@ -36,25 +36,25 @@ void xnn_f32_spmm_minmax_ukernel_8x1__psimd(
     size_t c = output_channels;
     do {
       uint32_t nnz = *nnzmap++;
-      psimd_f32 vacc0123 = psimd_load_splat_f32(w); w += 1;
-      psimd_f32 vacc4567 = vacc0123;
+      v128_t vacc0123 = wasm_v32x4_load_splat(w); w += 1;
+      v128_t vacc4567 = vacc0123;
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;
-          const psimd_f32 vi0123 = psimd_load_f32(input);
-          const psimd_f32 vi4567 = psimd_load_f32(input + 4);
+          const v128_t vi0123 = wasm_v128_load(input);
+          const v128_t vi4567 = wasm_v128_load(input + 4);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-          const psimd_f32 vw = psimd_load_splat_f32(w); w += 1;
-          vacc0123 = psimd_qfma_f32(vacc0123, vi0123, vw);
-          vacc4567 = psimd_qfma_f32(vacc4567, vi4567, vw);
+          const v128_t vw = wasm_v32x4_load_splat(w); w += 1;
+          vacc0123 = wasm_f32x4_add(vacc0123, wasm_f32x4_mul(vi0123, vw));
+          vacc4567 = wasm_f32x4_add(vacc4567, wasm_f32x4_mul(vi4567, vw));
         } while (--nnz != 0);
       }
-      psimd_f32 vout0123 = psimd_min_f32(vacc0123, vmax);
-      psimd_f32 vout4567 = psimd_min_f32(vacc4567, vmax);
-      vout0123 = psimd_max_f32(vout0123, vmin);
-      vout4567 = psimd_max_f32(vout4567, vmin);
-      psimd_store_f32(output, vout0123);
-      psimd_store_f32(output + 4, vout4567);
+      v128_t vout0123 = wasm_f32x4_min(vacc0123, vmax);
+      v128_t vout4567 = wasm_f32x4_min(vacc4567, vmax);
+      vout0123 = wasm_f32x4_max(vout0123, vmin);
+      vout4567 = wasm_f32x4_max(vout4567, vmin);
+      wasm_v128_store(output, vout0123);
+      wasm_v128_store(output + 4, vout4567);
       output += 1 * batch_size;
     } while (--c != 0);
     output -= batch_size * output_channels;
@@ -70,19 +70,20 @@ void xnn_f32_spmm_minmax_ukernel_8x1__psimd(
       size_t c = output_channels;
       do {
         uint32_t nnz = *nnzmap++;
-        psimd_f32 vacc0123 = psimd_load_splat_f32(w); w += 1;
+        v128_t vacc0123 = wasm_v32x4_load_splat(w); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
-            const psimd_f32 vi0123 = psimd_load_f32(input);
+            const v128_t vi0123 = wasm_v128_load(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            const psimd_f32 vw = psimd_load_splat_f32(w); w += 1;
-            vacc0123 = psimd_qfma_f32(vacc0123, vi0123, vw);
+            const v128_t vw = wasm_v32x4_load_splat(w); w += 1;
+            vacc0123 = wasm_f32x4_add(vacc0123, wasm_f32x4_mul(vi0123, vw));
           } while (--nnz != 0);
         }
-        psimd_f32 vout0123 = psimd_min_f32(vacc0123, vmax);
-        vout0123 = psimd_max_f32(vout0123, vmin);
-        psimd_store_f32(output, vout0123);
+        v128_t vout0123 = wasm_f32x4_min(vacc0123, vmax);
+        vout0123 = wasm_f32x4_max(vout0123, vmin);
+        wasm_v128_store(output, vout0123);
+
         output += 1 * batch_size;
       } while (--c != 0);
       output -= batch_size * output_channels;
@@ -96,19 +97,20 @@ void xnn_f32_spmm_minmax_ukernel_8x1__psimd(
       size_t c = output_channels;
       do {
         uint32_t nnz = *nnzmap++;
-        psimd_f32 vacc01 = psimd_load_splat_f32(w); w += 1;
+        v128_t vacc01 = wasm_v32x4_load_splat(w); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
-            const psimd_f32 vi01 = psimd_load2_f32(input);
+            const v128_t vi01 = wasm_v64x2_load_splat(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            const psimd_f32 vw = psimd_load_splat_f32(w); w += 1;
-            vacc01 = psimd_qfma_f32(vacc01, vi01, vw);
+            const v128_t vw = wasm_v32x4_load_splat(w); w += 1;
+            vacc01 = wasm_f32x4_add(vacc01, wasm_f32x4_mul(vi01, vw));
           } while (--nnz != 0);
         }
-        psimd_f32 vout01 = psimd_min_f32(vacc01, vmax);
-        vout01 = psimd_max_f32(vout01, vmin);
-        psimd_store2_f32(output, vout01);
+        v128_t vout01 = wasm_f32x4_min(vacc01, vmax);
+        vout01 = wasm_f32x4_max(vout01, vmin);
+        *((double*) output) = wasm_f64x2_extract_lane(vout01, 0);
+
         output += 1 * batch_size;
       } while (--c != 0);
       output -= batch_size * output_channels;
@@ -122,19 +124,20 @@ void xnn_f32_spmm_minmax_ukernel_8x1__psimd(
       size_t c = output_channels;
       do {
         uint32_t nnz = *nnzmap++;
-        psimd_f32 vacc0 = psimd_load_splat_f32(w); w += 1;
+        v128_t vacc0 = wasm_v32x4_load_splat(w); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
-            const psimd_f32 vi0 = psimd_load_splat_f32(input);
+            const v128_t vi0 = wasm_v32x4_load_splat(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            const psimd_f32 vw = psimd_load_splat_f32(w); w += 1;
-            vacc0 = psimd_qfma_f32(vacc0, vi0, vw);
+            const v128_t vw = wasm_v32x4_load_splat(w); w += 1;
+            vacc0 = wasm_f32x4_add(vacc0, wasm_f32x4_mul(vi0, vw));
           } while (--nnz != 0);
         }
-        psimd_f32 vout0 = psimd_min_f32(vacc0, vmax);
-        vout0 = psimd_max_f32(vout0, vmin);
-        psimd_store1_f32(output, vout0);
+        v128_t vout0 = wasm_f32x4_min(vacc0, vmax);
+        vout0 = wasm_f32x4_max(vout0, vmin);
+        *output = wasm_f32x4_extract_lane(vout0, 0);
+
         output += 1 * batch_size;
       } while (--c != 0);
       output -= batch_size * output_channels;

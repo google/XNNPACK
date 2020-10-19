@@ -3926,9 +3926,8 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  TEST(F32_SPMM_MINMAX_4X1__PSIMD, k_eq_1) {
-    TEST_REQUIRES_PSIMD;
+#if XNN_ARCH_WASMSIMD
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, k_eq_1) {
     SpMMMicrokernelTester()
       .mr(4)
       .nr(1)
@@ -3936,11 +3935,10 @@
       .n(1)
       .k(1)
       .sparsity(0.0f)
-      .Test(xnn_f32_spmm_minmax_ukernel_4x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm);
   }
 
-  TEST(F32_SPMM_MINMAX_4X1__PSIMD, k_gt_1) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, k_gt_1) {
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -3949,12 +3947,11 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f32_spmm_minmax_ukernel_4x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm);
     }
   }
 
-  TEST(F32_SPMM_MINMAX_4X1__PSIMD, n_gt_1) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, n_gt_1) {
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3964,13 +3961,12 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f32_spmm_minmax_ukernel_4x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_4X1__PSIMD, m_lt_4) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, m_lt_4) {
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -3981,14 +3977,13 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f32_spmm_minmax_ukernel_4x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm);
         }
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_4X1__PSIMD, m_div_4) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, m_div_4) {
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -3999,14 +3994,13 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f32_spmm_minmax_ukernel_4x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm);
         }
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_4X1__PSIMD, m_gt_4) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, m_gt_4) {
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -4017,14 +4011,13 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f32_spmm_minmax_ukernel_4x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm);
         }
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_4X1__PSIMD, qmin) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, qmin) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4035,13 +4028,12 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f32_spmm_minmax_ukernel_4x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_4X1__PSIMD, qmax) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, qmax) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4052,13 +4044,12 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f32_spmm_minmax_ukernel_4x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_4X1__PSIMD, half_sparse) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, half_sparse) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4068,13 +4059,12 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f32_spmm_minmax_ukernel_4x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_4X1__PSIMD, zero_weights) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, zero_weights) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4084,16 +4074,15 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f32_spmm_minmax_ukernel_4x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm);
       }
     }
   }
-#endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#endif  // XNN_ARCH_WASMSIMD
 
 
-#if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  TEST(F32_SPMM_MINMAX_8X1__PSIMD, k_eq_1) {
-    TEST_REQUIRES_PSIMD;
+#if XNN_ARCH_WASMSIMD
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM, k_eq_1) {
     SpMMMicrokernelTester()
       .mr(8)
       .nr(1)
@@ -4101,11 +4090,10 @@
       .n(1)
       .k(1)
       .sparsity(0.0f)
-      .Test(xnn_f32_spmm_minmax_ukernel_8x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm);
   }
 
-  TEST(F32_SPMM_MINMAX_8X1__PSIMD, k_gt_1) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM, k_gt_1) {
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -4114,12 +4102,11 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f32_spmm_minmax_ukernel_8x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm);
     }
   }
 
-  TEST(F32_SPMM_MINMAX_8X1__PSIMD, n_gt_1) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM, n_gt_1) {
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4129,13 +4116,12 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f32_spmm_minmax_ukernel_8x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_8X1__PSIMD, m_lt_8) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM, m_lt_8) {
     for (uint32_t m = 1; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -4146,14 +4132,13 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f32_spmm_minmax_ukernel_8x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm);
         }
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_8X1__PSIMD, m_div_8) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM, m_div_8) {
     for (uint32_t m = 16; m <= 24; m += 8) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -4164,14 +4149,13 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f32_spmm_minmax_ukernel_8x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm);
         }
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_8X1__PSIMD, m_gt_8) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM, m_gt_8) {
     for (uint32_t m = 9; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -4182,14 +4166,13 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f32_spmm_minmax_ukernel_8x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm);
         }
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_8X1__PSIMD, qmin) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM, qmin) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4200,13 +4183,12 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f32_spmm_minmax_ukernel_8x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_8X1__PSIMD, qmax) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM, qmax) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4217,13 +4199,12 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f32_spmm_minmax_ukernel_8x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_8X1__PSIMD, half_sparse) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM, half_sparse) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4233,13 +4214,12 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f32_spmm_minmax_ukernel_8x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_8X1__PSIMD, zero_weights) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM, zero_weights) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4249,16 +4229,15 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f32_spmm_minmax_ukernel_8x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm);
       }
     }
   }
-#endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#endif  // XNN_ARCH_WASMSIMD
 
 
-#if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  TEST(F32_SPMM_MINMAX_16X1__PSIMD, k_eq_1) {
-    TEST_REQUIRES_PSIMD;
+#if XNN_ARCH_WASMSIMD
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM, k_eq_1) {
     SpMMMicrokernelTester()
       .mr(16)
       .nr(1)
@@ -4266,11 +4245,10 @@
       .n(1)
       .k(1)
       .sparsity(0.0f)
-      .Test(xnn_f32_spmm_minmax_ukernel_16x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm);
   }
 
-  TEST(F32_SPMM_MINMAX_16X1__PSIMD, k_gt_1) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM, k_gt_1) {
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -4279,12 +4257,11 @@
         .n(1)
         .k(k)
         .sparsity(0.0f)
-        .Test(xnn_f32_spmm_minmax_ukernel_16x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm);
     }
   }
 
-  TEST(F32_SPMM_MINMAX_16X1__PSIMD, n_gt_1) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM, n_gt_1) {
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4294,13 +4271,12 @@
           .n(n)
           .k(k)
           .sparsity(0.0f)
-          .Test(xnn_f32_spmm_minmax_ukernel_16x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_16X1__PSIMD, m_lt_16) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM, m_lt_16) {
     for (uint32_t m = 1; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -4311,14 +4287,13 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f32_spmm_minmax_ukernel_16x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm);
         }
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_16X1__PSIMD, m_div_16) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM, m_div_16) {
     for (uint32_t m = 32; m <= 48; m += 16) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -4329,14 +4304,13 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f32_spmm_minmax_ukernel_16x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm);
         }
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_16X1__PSIMD, m_gt_16) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM, m_gt_16) {
     for (uint32_t m = 17; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -4347,14 +4321,13 @@
             .n(n)
             .k(k)
             .sparsity(0.0f)
-            .Test(xnn_f32_spmm_minmax_ukernel_16x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm);
         }
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_16X1__PSIMD, qmin) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM, qmin) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4365,13 +4338,12 @@
           .k(k)
           .sparsity(0.0f)
           .qmin(128)
-          .Test(xnn_f32_spmm_minmax_ukernel_16x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_16X1__PSIMD, qmax) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM, qmax) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4382,13 +4354,12 @@
           .k(k)
           .sparsity(0.0f)
           .qmax(128)
-          .Test(xnn_f32_spmm_minmax_ukernel_16x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_16X1__PSIMD, half_sparse) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM, half_sparse) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4398,13 +4369,12 @@
           .n(n)
           .k(k)
           .sparsity(0.5f)
-          .Test(xnn_f32_spmm_minmax_ukernel_16x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm);
       }
     }
   }
 
-  TEST(F32_SPMM_MINMAX_16X1__PSIMD, zero_weights) {
-    TEST_REQUIRES_PSIMD;
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM, zero_weights) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4414,11 +4384,476 @@
           .n(n)
           .k(k)
           .sparsity(1.0f)
-          .Test(xnn_f32_spmm_minmax_ukernel_16x1__psimd, SpMMMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm);
       }
     }
   }
-#endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+#endif  // XNN_ARCH_WASMSIMD
+
+
+#if XNN_ARCH_WASMSIMD
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, k_eq_1) {
+    SpMMMicrokernelTester()
+      .mr(4)
+      .nr(1)
+      .m(4)
+      .n(1)
+      .k(1)
+      .sparsity(0.0f)
+      .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86);
+  }
+
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, k_gt_1) {
+    for (size_t k = 2; k < 10; k++) {
+      SpMMMicrokernelTester()
+        .mr(4)
+        .nr(1)
+        .m(4)
+        .n(1)
+        .k(k)
+        .sparsity(0.0f)
+        .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86);
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, n_gt_1) {
+    for (uint32_t n = 2; n < 10; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4)
+          .nr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, m_lt_4) {
+    for (uint32_t m = 1; m < 4; m++) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(4)
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, m_div_4) {
+    for (uint32_t m = 8; m <= 12; m += 4) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(4)
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, m_gt_4) {
+    for (uint32_t m = 5; m < 8; m++) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(4)
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, qmin) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4)
+          .nr(1)
+          .m(8)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmin(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, qmax) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4)
+          .nr(1)
+          .m(8)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmax(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, half_sparse) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4)
+          .nr(1)
+          .m(8)
+          .n(n)
+          .k(k)
+          .sparsity(0.5f)
+          .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, zero_weights) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4)
+          .nr(1)
+          .m(8)
+          .n(n)
+          .k(k)
+          .sparsity(1.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD
+
+
+#if XNN_ARCH_WASMSIMD
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_X86, k_eq_1) {
+    SpMMMicrokernelTester()
+      .mr(8)
+      .nr(1)
+      .m(8)
+      .n(1)
+      .k(1)
+      .sparsity(0.0f)
+      .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86);
+  }
+
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_X86, k_gt_1) {
+    for (size_t k = 2; k < 10; k++) {
+      SpMMMicrokernelTester()
+        .mr(8)
+        .nr(1)
+        .m(8)
+        .n(1)
+        .k(k)
+        .sparsity(0.0f)
+        .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86);
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_X86, n_gt_1) {
+    for (uint32_t n = 2; n < 10; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8)
+          .nr(1)
+          .m(8)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_X86, m_lt_8) {
+    for (uint32_t m = 1; m < 8; m++) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(8)
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_X86, m_div_8) {
+    for (uint32_t m = 16; m <= 24; m += 8) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(8)
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_X86, m_gt_8) {
+    for (uint32_t m = 9; m < 16; m++) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(8)
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_X86, qmin) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8)
+          .nr(1)
+          .m(16)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmin(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_X86, qmax) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8)
+          .nr(1)
+          .m(16)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmax(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_X86, half_sparse) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8)
+          .nr(1)
+          .m(16)
+          .n(n)
+          .k(k)
+          .sparsity(0.5f)
+          .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_X86, zero_weights) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8)
+          .nr(1)
+          .m(16)
+          .n(n)
+          .k(k)
+          .sparsity(1.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD
+
+
+#if XNN_ARCH_WASMSIMD
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_X86, k_eq_1) {
+    SpMMMicrokernelTester()
+      .mr(16)
+      .nr(1)
+      .m(16)
+      .n(1)
+      .k(1)
+      .sparsity(0.0f)
+      .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86);
+  }
+
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_X86, k_gt_1) {
+    for (size_t k = 2; k < 10; k++) {
+      SpMMMicrokernelTester()
+        .mr(16)
+        .nr(1)
+        .m(16)
+        .n(1)
+        .k(k)
+        .sparsity(0.0f)
+        .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86);
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_X86, n_gt_1) {
+    for (uint32_t n = 2; n < 10; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(16)
+          .nr(1)
+          .m(16)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_X86, m_lt_16) {
+    for (uint32_t m = 1; m < 16; m++) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(16)
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_X86, m_div_16) {
+    for (uint32_t m = 32; m <= 48; m += 16) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(16)
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_X86, m_gt_16) {
+    for (uint32_t m = 17; m < 32; m++) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(16)
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_X86, qmin) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(16)
+          .nr(1)
+          .m(32)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmin(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_X86, qmax) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(16)
+          .nr(1)
+          .m(32)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmax(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_X86, half_sparse) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(16)
+          .nr(1)
+          .m(32)
+          .n(n)
+          .k(k)
+          .sparsity(0.5f)
+          .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_X86, zero_weights) {
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(16)
+          .nr(1)
+          .m(32)
+          .n(n)
+          .k(k)
+          .sparsity(1.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD
 
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR, k_eq_1) {
