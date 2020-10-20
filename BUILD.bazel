@@ -178,6 +178,9 @@ SCALAR_UKERNELS = [
     "src/f32-ibilinear/gen/scalar-c1.c",
     "src/f32-ibilinear/gen/scalar-c2.c",
     "src/f32-ibilinear/gen/scalar-c4.c",
+    "src/f32-ibilinear-chw/gen/scalar-p1.c",
+    "src/f32-ibilinear-chw/gen/scalar-p2.c",
+    "src/f32-ibilinear-chw/gen/scalar-p4.c",
     "src/f32-igemm/gen/1x4-scalar.c",
     "src/f32-igemm/gen/2x4-scalar.c",
     "src/f32-igemm/gen/4x2-scalar.c",
@@ -5020,6 +5023,16 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-ibilinear.cc",
         "test/ibilinear-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_ibilinear_chw_test",
+    srcs = [
+        "test/f32-ibilinear-chw.cc",
+        "test/ibilinear-chw-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,

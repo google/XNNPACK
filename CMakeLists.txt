@@ -3134,6 +3134,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-ibilinear-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-ibilinear-test f32-ibilinear-test)
 
+  ADD_EXECUTABLE(f32-ibilinear-chw-test test/f32-ibilinear-chw.cc)
+  SET_TARGET_PROPERTIES(f32-ibilinear-chw-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-ibilinear-chw-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-ibilinear-chw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-ibilinear-chw-test f32-ibilinear-chw-test)
+
   ADD_EXECUTABLE(f32-igemm-test test/f32-igemm.cc)
   SET_TARGET_PROPERTIES(f32-igemm-test PROPERTIES
     CXX_STANDARD 11
