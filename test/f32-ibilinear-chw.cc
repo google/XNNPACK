@@ -200,14 +200,3 @@ TEST(F32_IBILINEAR__SCALAR_P4, output_stride) {
     }
   }
 }
-
-#if XNN_ARCH_WASMSIMD
-TEST(F32_IBILINEAR__WASMSIMD_C4, channels_eq_4) {
-    IBilinearCHWMicrokernelTester()
-      .pixels(1)
-      .channels(4)
-      // TODO(kartynnik, artsiom): Replace with correct microkernel
-      .Test(xnn_f32_ibilinear_ukernel__wasmsimd_c4);
-}
-
-#endif  // XNN_ARCH_WASMSIMD
