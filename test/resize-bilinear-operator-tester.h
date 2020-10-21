@@ -220,7 +220,7 @@ class ResizeBilinearOperatorTester {
     return this->iterations_;
   }
 
-  void TestF32() const {
+  void TestNHWCxF32() const {
     if (align_corners()) {
       ASSERT_FALSE(tf_legacy_mode());
     }

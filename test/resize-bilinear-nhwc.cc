@@ -16,7 +16,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_upscale_y) {
         .output_size(output_height, 1)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -29,7 +29,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_upscale_x) {
         .output_size(1, output_width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -42,7 +42,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_upscale) {
         .output_size(output_height, output_width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -55,7 +55,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_downscale_y) {
         .output_size(output_height, 1)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -68,7 +68,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_downscale_x) {
         .output_size(1, output_width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -81,7 +81,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -94,7 +94,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_identical_size) {
         .output_size(height, width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -104,11 +104,11 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_varying_channels) {
     for (size_t output_size = 2; output_size <= 6; output_size += 2) {
       for (size_t channels = 15; channels <= 19; channels++) {
         ResizeBilinearOperatorTester()
-            .input_size(output_size, output_size)
+          .input_size(output_size, output_size)
           .output_size(output_size, output_size)
           .channels(channels)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -119,12 +119,12 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_with_input_stride) {
     for (size_t output_size = 2; output_size <= 6; output_size += 2) {
       for (size_t channels = 15; channels <= 19; channels++) {
         ResizeBilinearOperatorTester()
-            .input_size(output_size, output_size)
+          .input_size(output_size, output_size)
           .output_size(output_size, output_size)
           .channels(channels)
           .input_pixel_stride(23)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -135,12 +135,12 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_with_output_stride) {
     for (size_t output_size = 2; output_size <= 6; output_size += 2) {
       for (size_t channels = 15; channels <= 19; channels++) {
         ResizeBilinearOperatorTester()
-            .input_size(output_size, output_size)
+          .input_size(output_size, output_size)
           .output_size(output_size, output_size)
           .channels(channels)
           .output_pixel_stride(29)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -151,11 +151,11 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_varying_batch_size) {
     for (size_t output_size = 2; output_size <= 6; output_size += 2) {
       for (size_t batch_size = 2; batch_size <= 3; batch_size++) {
         ResizeBilinearOperatorTester()
-            .batch_size(batch_size)
+          .batch_size(batch_size)
           .input_size(output_size, output_size)
           .output_size(output_size, output_size)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -170,7 +170,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_upscale_y) {
         .output_size(output_height, 1)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -184,7 +184,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_upscale_x) {
         .output_size(1, output_width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -198,7 +198,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_upscale) {
         .output_size(output_height, output_width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -211,7 +211,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_downscale_y) {
         .output_size(output_height, 1)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -224,7 +224,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_downscale_x) {
         .output_size(1, output_width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -237,7 +237,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -251,7 +251,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_identical_size) {
         .output_size(height, width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -261,12 +261,12 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_varying_channels) {
     for (size_t output_size = 2; output_size <= 6; output_size += 2) {
       for (size_t channels = 15; channels <= 19; channels++) {
         ResizeBilinearOperatorTester()
-            .align_corners(true)
+          .align_corners(true)
           .input_size(output_size, output_size)
           .output_size(output_size, output_size)
           .channels(channels)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -277,13 +277,13 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_with_input_stride) {
     for (size_t output_size = 2; output_size <= 6; output_size += 2) {
       for (size_t channels = 15; channels <= 19; channels++) {
         ResizeBilinearOperatorTester()
-            .align_corners(true)
+          .align_corners(true)
           .input_size(output_size, output_size)
           .output_size(output_size, output_size)
           .channels(channels)
           .input_pixel_stride(23)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -294,13 +294,13 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_with_output_stride) {
     for (size_t output_size = 2; output_size <= 6; output_size += 2) {
       for (size_t channels = 15; channels <= 19; channels++) {
         ResizeBilinearOperatorTester()
-            .align_corners(true)
+          .align_corners(true)
           .input_size(output_size, output_size)
           .output_size(output_size, output_size)
           .channels(channels)
           .output_pixel_stride(29)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -311,12 +311,12 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_varying_batch_size) {
     for (size_t output_size = 2; output_size <= 6; output_size += 2) {
       for (size_t batch_size = 2; batch_size <= 3; batch_size++) {
         ResizeBilinearOperatorTester()
-            .align_corners(true)
+          .align_corners(true)
           .batch_size(batch_size)
           .input_size(output_size, output_size)
           .output_size(output_size, output_size)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -331,7 +331,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_upscale_y) {
         .output_size(output_height, 1)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -345,7 +345,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_upscale_x) {
         .output_size(1, output_width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -359,7 +359,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_upscale) {
         .output_size(output_height, output_width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -373,7 +373,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_downscale_y) {
         .output_size(output_height, 1)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -387,7 +387,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_downscale_x) {
         .output_size(1, output_width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -401,7 +401,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -415,7 +415,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_identical_size) {
         .output_size(height, width)
         .channels(17)
         .iterations(3)
-        .TestF32();
+        .TestNHWCxF32();
     }
   }
 }
@@ -430,7 +430,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_varying_channels) {
           .output_size(output_size, output_size)
           .channels(channels)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -447,7 +447,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_with_input_stride) {
           .channels(channels)
           .input_pixel_stride(23)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -464,7 +464,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_with_output_stride) {
           .channels(channels)
           .output_pixel_stride(29)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
@@ -480,7 +480,7 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_varying_batch_size) {
           .input_size(output_size, output_size)
           .output_size(output_size, output_size)
           .iterations(3)
-          .TestF32();
+          .TestNHWCxF32();
       }
     }
   }
