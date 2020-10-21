@@ -78,8 +78,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
     __m128 vi2x4567 = _mm_loadu_ps(i2);
     i2 += 4;
 
-    size_t k = input_width;
-    for (; k > 4; k -= 4) {
+    size_t w = input_width;
+    for (; w > 4; w -= 4) {
       __m128 vo4567p0 = vbias;
 
       // vi0x89AB = ( vi0B, vi0A, vi09, vi08 )
@@ -150,8 +150,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
       output += 4;
     }
     // Always process the last block of 1..4 pixels.
-    assert(k >= 1);
-    assert(k <= 4);
+    assert(w >= 1);
+    assert(w <= 4);
     {
       __m128 vo4567p0 = vbias;
 
@@ -206,16 +206,16 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
       vo = _mm_max_ps(vo, vmin);
       vo = _mm_min_ps(vo, vmax);
 
-      if XNN_LIKELY(k == 4) {
+      if XNN_LIKELY(w == 4) {
         _mm_storeu_ps(output, vo);
       } else {
         float* output_lo = output;
-        if (k & 2) {
+        if (w & 2) {
           _mm_storel_pi((__m64*) output_lo, vo);
           output_lo += 2;
           vo = _mm_movehl_ps(vo, vo);
         }
-        if (k & 1) {
+        if (w & 1) {
           _mm_store_ss(output_lo, vo);
         }
       }

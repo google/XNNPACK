@@ -101,8 +101,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
     psimd_f32 vi2x4567 = psimd_load_f32(i2);
     i2 += 4;
 
-    size_t k = input_width;
-    for (; k > 4; k -= 4) {
+    size_t w = input_width;
+    for (; w > 4; w -= 4) {
       psimd_f32 vo4567p0 = vbias;
 
       // vi0x89AB = ( vi0B, vi0A, vi09, vi08 )
@@ -173,8 +173,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
       output += 4;
     }
     // Always process the last block of 1..4 pixels.
-    assert(k >= 1);
-    assert(k <= 4);
+    assert(w >= 1);
+    assert(w <= 4);
     {
       psimd_f32 vo4567p0 = vbias;
 
@@ -229,16 +229,16 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
       vo = psimd_max_f32(vo, vmin);
       vo = psimd_min_f32(vo, vmax);
 
-      if XNN_LIKELY(k == 4) {
+      if XNN_LIKELY(w == 4) {
         psimd_store_f32(output, vo);
       } else {
         float* output_lo = output;
-        if (k & 2) {
+        if (w & 2) {
           psimd_store2_f32(output_lo, vo);
           output_lo += 2;
           vo = psimd_concat_hi_f32(vo, vo);
         }
-        if (k & 1) {
+        if (w & 1) {
           psimd_store1_f32(output_lo, vo);
         }
       }

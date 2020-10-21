@@ -23,7 +23,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
 {
   assert(input_height!= 0);
   assert(input_width != 0);
-  assert(padding_top >= 0 && padding_top <= 1);
+  assert(padding_top >= 0);
+  assert(padding_top <= 1);
 
   const size_t input_tuple_stride = 4 * sizeof(float);
   const size_t output_tuple_stride = 4 * sizeof(float);
@@ -75,8 +76,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
     float32x4_t vi1x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi2x0123 = vmovq_n_f32(0.0f);
 
-    size_t k = input_width;
-    for (; k >= 8; k -= 8) {
+    size_t w = input_width;
+    for (; w >= 8; w -= 8) {
       float32x4_t vo468Ap0 = vdupq_laneq_f32(vw0123, 0);
 
       const float32x4_t vi0x4567 = vld1q_f32(i0); i0 += 4;
@@ -128,8 +129,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
       vst1q_f32(output, vo); output += 4;
     }
     // Last block has 0-7 pixels to process.
-    assert(k < 8);
-    if XNN_LIKELY(k != 0) {
+    assert(w < 8);
+    if XNN_LIKELY(w != 0) {
       float32x4_t vo468Ap0 = vdupq_laneq_f32(vw0123, 0);
 
       const float32x4_t vi0x4567 = vld1q_f32(i0);
@@ -174,17 +175,17 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
       vo = vmaxq_f32(vo, vmin);
       vo = vminq_f32(vo, vmax);
 
-      k += 1;
-      if (k & 8) {
+      w += 1;
+      if (w & 8) {
         vst1q_f32(output, vo);
       } else {
         float* output_lo = output;
         float32x2_t vo_lo = vget_low_f32(vo);
-        if (k & 4) {
+        if (w & 4) {
           vst1_f32(output_lo, vo_lo); output_lo += 2;
           vo_lo = vget_high_f32(vo);
         }
-        if (k & 2) {
+        if (w & 2) {
           vst1_lane_f32(output_lo, vo_lo, 0);
         }
       }

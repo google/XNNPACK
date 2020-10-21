@@ -39,7 +39,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
 {
   assert(input_height!= 0);
   assert(input_width != 0);
-  assert(padding_top >= 0 && padding_top <= 1);
+  assert(padding_top >= 0);
+  assert(padding_top <= 1);
 
   const size_t input_tuple_stride = 4 * sizeof(float);
   const size_t output_tuple_stride = 4 * sizeof(float);
@@ -98,8 +99,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
     psimd_f32 vi1x7531 = psimd_zero_f32();
     psimd_f32 vi2x7531 = psimd_zero_f32();
 
-    size_t k = input_width;
-    for (; k >= 8; k -= 8) {
+    size_t w = input_width;
+    for (; w >= 8; w -= 8) {
       psimd_f32 vo8ACEp0 = vbias;
 
       const psimd_f32 vi0x89AB = psimd_load_f32(i0);
@@ -154,8 +155,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
       output += 4;
     }
     // Last block has 0-7 pixels to process.
-    assert(k < 8);
-    if XNN_LIKELY(k != 0) {
+    assert(w < 8);
+    if XNN_LIKELY(w != 0) {
       psimd_f32 vo8ACEp0 = vbias;
 
       const psimd_f32 vi0x89AB = psimd_load_f32(i0);
@@ -199,17 +200,17 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
       vo = psimd_max_f32(vo, vmin);
       vo = psimd_min_f32(vo, vmax);
 
-      if (k == 7) {
+      if (w == 7) {
         psimd_store_f32(output, vo);
       } else {
         float* output_lo = output;
-        k += 1;
-        if (k & 4) {
+        w += 1;
+        if (w & 4) {
           psimd_store2_f32(output_lo, vo);
           output_lo += 2;
           vo = psimd_concat_hi_f32(vo, vo);
         }
-        if (k & 2) {
+        if (w & 2) {
           psimd_store1_f32(output_lo, vo);
         }
       }

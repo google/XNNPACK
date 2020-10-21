@@ -23,7 +23,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
 {
   assert(input_height!= 0);
   assert(input_width != 0);
-  assert(padding_top >= 0 && padding_top <= 1);
+  assert(padding_top >= 0);
+  assert(padding_top <= 1);
 
   const size_t input_tuple_stride = sizeof(float);
   const size_t output_tuple_stride = sizeof(float);
@@ -64,8 +65,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
     }
   }
 
-  float* output0 = output;
-
   const float vw0 = weights[0];
   const float vw1 = weights[1];
   const float vw2 = weights[2];
@@ -82,8 +81,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
     float vi1x0 = 0.0f;
     float vi2x0 = 0.0f;
 
-    size_t k = input_width;
-    for (; k >= 2; k -= 2) {
+    size_t w = input_width;
+    for (; w >= 2; w -= 2) {
       const float vi0x1 = i0[0];
       const float vi1x1 = i1[0];
       const float vi2x1 = i2[0];
@@ -106,10 +105,10 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0++ = voutput;
+      *output++ = voutput;
     }
     // Possibly process the last pixel separately to account for right edge.
-    if (k == 1)
+    if (w == 1)
     {
       const float vi0x1 = i0[0];
       const float vi1x1 = i1[0];
@@ -123,13 +122,13 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput;
+      *output = voutput;
     }
 
     i0 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
-    output0 = (float*) ((uintptr_t) output0 + output_width_increment);
+    output = (float*) ((uintptr_t) output + output_width_increment);
     output_height -= 1;
     if (output_height == 1 && padding_top == input_height % 2) {
       // to mimic the following code with only one if, we do some small

@@ -21,7 +21,8 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
 {
   assert(input_width != 0);
   assert(input_height != 0);
-  assert(padding_top >= 1 && padding_top <= 2);
+  assert(padding_top >= 1);
+  assert(padding_top <= 2);
 
   const size_t input_tuple_stride = sizeof(float);
   const size_t output_tuple_stride = sizeof(float);
@@ -75,8 +76,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
     }
   }
 
-  float* output0 = output;
-
   // this almost certainly will use too many scalar registers
   // hope the compiler is good at spilling...
   const float vw0 = weights[0];
@@ -123,9 +122,8 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
     float vi3x2 = *i3++;
     float vi4x2 = *i4++;
 
-
-    size_t k = input_width;
-    for (; k > 2; k -= 2) {
+    size_t w = input_width;
+    for (; w > 2; w -= 2) {
       const float vi0x3 = i0[0];
       const float vi1x3 = i1[0];
       const float vi2x3 = i2[0];
@@ -169,9 +167,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput; output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
+      *output++ = voutput;
     }
-    if XNN_UNPREDICTABLE(k == 2) {
+    if XNN_UNPREDICTABLE(w == 2) {
       const float vi0x3 = *i0;
       const float vi1x3 = *i1;
       const float vi2x3 = *i2;
@@ -189,9 +187,8 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput;
-    }
-    else {
+      *output = voutput;
+    } else {
       const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2;
       const float vrow1_accum = vw6  * vi1x0 + vw7  * vi1x1 + vw8  * vi1x2;
       const float vrow2_accum = vw11 * vi2x0 + vw12 * vi2x1 + vw13 * vi2x2;
@@ -203,7 +200,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput;
+      *output = voutput;
     }
 
     i0 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
@@ -211,7 +208,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
     i3 = (const float*) ((uintptr_t) i3 + input_width_increment);
     i4 = (const float*) ((uintptr_t) i4 + input_width_increment);
-    output0 = (float*) ((uintptr_t) output0 + output_width_increment);
+    output = (float*) ((uintptr_t) output + output_width_increment);
     output_height -= 1;
     if (output_height == 1) {
       i4 = zero;

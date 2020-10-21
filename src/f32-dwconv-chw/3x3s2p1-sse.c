@@ -23,7 +23,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
 {
   assert(input_height!= 0);
   assert(input_width != 0);
-  assert(padding_top >= 0 && padding_top <= 1);
+  assert(padding_top >= 0);
+  assert(padding_top <= 1);
 
   const size_t input_tuple_stride = 4 * sizeof(float);
   const size_t output_tuple_stride = 4 * sizeof(float);
@@ -82,8 +83,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
     __m128 vi1x7531 = _mm_setzero_ps();
     __m128 vi2x7531 = _mm_setzero_ps();
 
-    size_t k = input_width;
-    for (; k >= 8; k -= 8) {
+    size_t w = input_width;
+    for (; w >= 8; w -= 8) {
       __m128 vo8ACEp0 = vbias;
 
       const __m128 vi0x89AB = _mm_loadu_ps(i0);
@@ -138,8 +139,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
       output += 4;
     }
     // Last block has 0-7 pixels to process.
-    assert(k < 8);
-    if XNN_LIKELY(k != 0) {
+    assert(w < 8);
+    if XNN_LIKELY(w != 0) {
       __m128 vo8ACEp0 = vbias;
 
       const __m128 vi0x89AB = _mm_loadu_ps(i0);
@@ -183,17 +184,17 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
       vo = _mm_max_ps(vo, vmin);
       vo = _mm_min_ps(vo, vmax);
 
-      if (k == 7) {
+      if (w == 7) {
         _mm_storeu_ps(output, vo);
       } else {
         float* output_lo = output;
-        k += 1;
-        if (k & 4) {
+        w += 1;
+        if (w & 4) {
           _mm_storel_pi((__m64*) output_lo, vo);
           output_lo += 2;
           vo = _mm_movehl_ps(vo, vo);
         }
-        if (k & 2) {
+        if (w & 2) {
           _mm_store_ss(output_lo, vo);
         }
       }

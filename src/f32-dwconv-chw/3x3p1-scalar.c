@@ -47,8 +47,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
     i2 = zero;
   }
 
-  float* output0 = output;
-
   const float vw0 = weights[0];
   const float vw1 = weights[1];
   const float vw2 = weights[2];
@@ -68,8 +66,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
     float vi1x1 = *i1++;
     float vi2x1 = *i2++;
 
-    size_t k = input_width;
-    for (; k > 1; k--) {
+    size_t w = input_width;
+    for (; w > 1; w--) {
       const float vi0x2 = *i0++;
       const float vi1x2 = *i1++;
       const float vi2x2 = *i2++;
@@ -89,10 +87,10 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0++ = voutput;
+      *output++ = voutput;
     }
     // Always process the last pixel separately to account for right edge.
-    assert(k == 1);
+    assert(w == 1);
     {
       const float vrow0_accum = vw1 * vi0x0 + vw2 * vi0x1;
       const float vrow1_accum = vw4 * vi1x0 + vw5 * vi1x1;
@@ -103,13 +101,13 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput;
+      *output = voutput;
     }
 
     i0 = (const float*) ((uintptr_t) i1 - input_width_decrement);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
-    output0 = (float*) ((uintptr_t) output0 + output_width_increment);
+    output = (float*) ((uintptr_t) output + output_width_increment);
     output_height--;
     if (output_height == 1) {
       i2 = zero;

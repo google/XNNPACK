@@ -51,8 +51,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
     i3 = zero;
   }
 
-  float* output0 = output;
-
   // this almost certainly will use too many scalar registers
   // hope the compiler is good at spilling...
   const float vw0 = weights[0];
@@ -112,8 +110,8 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       vi4x3 = *i4++;
     }
 
-    size_t k = input_width;
-    for (; k > 2; k -= 1) {
+    size_t w = input_width;
+    for (; w > 2; w -= 1) {
       const float vi0x4 = *i0++;
       const float vi1x4 = *i1++;
       const float vi2x4 = *i2++;
@@ -151,9 +149,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0++ = voutput;
+      *output++ = voutput;
     }
-    if XNN_LIKELY(k > 1) {
+    if XNN_LIKELY(w > 1) {
       const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2 + vw4  * vi0x3;
       vi0x0 = vi0x1;
       vi0x1 = vi0x2;
@@ -180,10 +178,10 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0++ = voutput;
-      k -= 1;
+      *output++ = voutput;
+      w -= 1;
     }
-    assert(k == 1);
+    assert(w == 1);
     {
       const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2;
       const float vrow1_accum = vw6  * vi1x0 + vw7  * vi1x1 + vw8  * vi1x2;
@@ -196,7 +194,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput;;
+      *output = voutput;;
     }
 
     i0 = (const float*) ((uintptr_t) i1 - input_width_decrement_single);
@@ -204,7 +202,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment_single);
     i3 = (const float*) ((uintptr_t) i3 + input_width_increment_single);
     i4 = (const float*) ((uintptr_t) i4 + input_width_increment_single);
-    output0 = (float*) ((uintptr_t) output0 + output_width_increment_single);
+    output = (float*) ((uintptr_t) output + output_width_increment_single);
     output_height -= 1;
     if (output_height <= 2) {
       i4 = zero;

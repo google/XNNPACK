@@ -67,7 +67,8 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
 {
   assert(input_width != 0);
   assert(input_height != 0);
-  assert(padding_top >= 1 && padding_top <= 2);
+  assert(padding_top >= 1);
+  assert(padding_top <= 2);
 
   const size_t input_tuple_stride = 4 * sizeof(float);
   const size_t output_tuple_stride = 4 * sizeof(float);
@@ -123,8 +124,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
     }
   }
 
-  float* output0 = output;
-
   const psimd_f32 vw0123 = psimd_load_f32(weights);
   const psimd_f32 vw4567 = psimd_load_f32(weights + 4);
   const psimd_f32 vw89AB = psimd_load_f32(weights + 8);
@@ -150,8 +149,8 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
     psimd_f32 vi4x4567 = psimd_load_f32(i4);
     i4 += 4;
 
-    size_t k = input_width;
-    for (; k > 8; k -= 8) {
+    size_t w = input_width;
+    for (; w > 8; w -= 8) {
       psimd_f32 vo468Ap00 = psimd_splat0_f32(vw0123);
 
       psimd_f32 vi0x89AB;
@@ -264,18 +263,18 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
       vo0 = psimd_max_f32(vo0, vmin);
       vo0 = psimd_min_f32(vo0, vmax);
 
-      size_t k_tmp = (k + 1) / 2;
-      if XNN_LIKELY(k_tmp >= 4) {
-        psimd_store_f32(output0, vo0);
-        output0 += 4;
+      size_t w_tmp = (w + 1) / 2;
+      if XNN_LIKELY(w_tmp >= 4) {
+        psimd_store_f32(output, vo0);
+        output += 4;
       } else {
-        float* output0_lo = output0;
-        if (k_tmp & 2) {
-          psimd_store2_f32(output0_lo, vo0); output0_lo += 2;
+        float* output_tmp = output;
+        if (w_tmp & 2) {
+          psimd_store2_f32(output_tmp, vo0); output_tmp += 2;
           vo0 = psimd_splat2_f32(vo0);
         }
-        if (k_tmp & 1) {
-          psimd_store1_f32(output0_lo, vo0);
+        if (w_tmp & 1) {
+          psimd_store1_f32(output_tmp, vo0);
         }
       }
     }
@@ -289,7 +288,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
       psimd_f32 vi3x89AB;
       psimd_f32 vi4x89AB;
 
-      if XNN_LIKELY(k > 4) {
+      if XNN_LIKELY(w > 4) {
         vi0x89AB = psimd_load_f32(i0);
         i0 += 4;
         vi1x89AB = psimd_load_f32(i1);
@@ -314,7 +313,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
       psimd_f32 vi3xCDEF;
       psimd_f32 vi4xCDEF;
 
-      if XNN_LIKELY(k > 8) {
+      if XNN_LIKELY(w > 8) {
         vi0xCDEF = psimd_load_f32(i0);
         i0 += 4;
         vi1xCDEF = psimd_load_f32(i1);
@@ -425,18 +424,18 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
       vo0 = psimd_max_f32(vo0, vmin);
       vo0 = psimd_min_f32(vo0, vmax);
 
-      size_t k_tmp = (k + 1) / 2;
-      if XNN_LIKELY(k_tmp >= 4) {
-        psimd_store_f32(output0, vo0);
-        output0 += 4;
+      size_t w_tmp = (w + 1) / 2;
+      if XNN_LIKELY(w_tmp >= 4) {
+        psimd_store_f32(output, vo0);
+        output += 4;
       } else {
-        float* output0_lo = output0;
-        if (k_tmp & 2) {
-          psimd_store2_f32(output0_lo, vo0); output0_lo += 2;
+        float* output_tmp = output;
+        if (w_tmp & 2) {
+          psimd_store2_f32(output_tmp, vo0); output_tmp += 2;
           vo0 = psimd_splat2_f32(vo0);
         }
-        if (k_tmp & 1) {
-          psimd_store1_f32(output0_lo, vo0);
+        if (w_tmp & 1) {
+          psimd_store1_f32(output_tmp, vo0);
         }
       }
     }
@@ -446,7 +445,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment_double);
     i3 = (const float*) ((uintptr_t) i3 + input_width_increment_double);
     i4 = (const float*) ((uintptr_t) i4 + input_width_increment_double);
-    output0 = (float*) ((uintptr_t) output0 + output_width_increment_single);
+    output = (float*) ((uintptr_t) output + output_width_increment_single);
     output_height -= 1;
     if (output_height == 1) {
       i4 = zero;
