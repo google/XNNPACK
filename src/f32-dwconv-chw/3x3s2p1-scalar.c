@@ -27,17 +27,13 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
   assert(padding_top <= 1);
 
   const size_t input_tuple_stride = sizeof(float);
-  const size_t output_tuple_stride = sizeof(float);
   const size_t input_width_stride = input_width * sizeof(float);
-  const size_t output_width = (input_width + 1) / 2;
-  const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
   size_t output_height = (padded_input_height - 3) / 2 + 1;
 
   const size_t input_width_decrement_single = (input_width/2) * 2 * input_tuple_stride;;
   const size_t input_width_increment = 2 * input_width_stride - input_width_decrement_single;
-  const size_t output_width_increment = output_width_stride - (input_width/2) * output_tuple_stride;
 
   const float params_min = params->scalar.min;
   const float params_max = params->scalar.max;
@@ -108,8 +104,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
       *output++ = voutput;
     }
     // Possibly process the last pixel separately to account for right edge.
-    if (w == 1)
-    {
+    if (w == 1) {
       const float vi0x1 = i0[0];
       const float vi1x1 = i1[0];
       const float vi2x1 = i2[0];
@@ -122,13 +117,12 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output = voutput;
+      *output++ = voutput;
     }
 
     i0 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
-    output = (float*) ((uintptr_t) output + output_width_increment);
     output_height -= 1;
     if (output_height == 1 && padding_top == input_height % 2) {
       // to mimic the following code with only one if, we do some small

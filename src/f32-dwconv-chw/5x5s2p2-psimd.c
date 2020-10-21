@@ -71,10 +71,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
   assert(padding_top <= 2);
 
   const size_t input_tuple_stride = 4 * sizeof(float);
-  const size_t output_tuple_stride = 4 * sizeof(float);
   const size_t input_width_stride = input_width * sizeof(float);
-  const size_t output_width = (input_width + 1) / 2;
-  const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 2 /* padding_bottom */;
   size_t output_height = (padded_input_height - 5) / 2 + 1;
@@ -87,7 +84,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
   const size_t input_width_decrement_single = input_tuple_stride * ((input_width - 1) / 4 + 1);
   const size_t input_width_increment_single = input_width_stride - input_width_decrement_single;
   const size_t input_width_increment_double= input_width_stride * 2 - input_width_decrement_single;
-  const size_t output_width_increment_single = output_width_stride - (input_width + 1) / 8 * output_tuple_stride;
 
   const float* i0;
   const float* i1;
@@ -268,13 +264,14 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
         psimd_store_f32(output, vo0);
         output += 4;
       } else {
-        float* output_tmp = output;
         if (w_tmp & 2) {
-          psimd_store2_f32(output_tmp, vo0); output_tmp += 2;
+          psimd_store2_f32(output, vo0);
+          output += 2;
           vo0 = psimd_splat2_f32(vo0);
         }
         if (w_tmp & 1) {
-          psimd_store1_f32(output_tmp, vo0);
+          psimd_store1_f32(output, vo0);
+          output += 1;
         }
       }
     }
@@ -429,13 +426,14 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
         psimd_store_f32(output, vo0);
         output += 4;
       } else {
-        float* output_tmp = output;
         if (w_tmp & 2) {
-          psimd_store2_f32(output_tmp, vo0); output_tmp += 2;
+          psimd_store2_f32(output, vo0);
+          output += 2;
           vo0 = psimd_splat2_f32(vo0);
         }
         if (w_tmp & 1) {
-          psimd_store1_f32(output_tmp, vo0);
+          psimd_store1_f32(output, vo0);
+          output += 1;
         }
       }
     }
@@ -445,7 +443,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment_double);
     i3 = (const float*) ((uintptr_t) i3 + input_width_increment_double);
     i4 = (const float*) ((uintptr_t) i4 + input_width_increment_double);
-    output = (float*) ((uintptr_t) output + output_width_increment_single);
     output_height -= 1;
     if (output_height == 1) {
       i4 = zero;

@@ -26,7 +26,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma(
   assert(padding_top == 2);
 
   const size_t input_tuple_stride = 4 * sizeof(float);
-  const size_t output_tuple_stride = 4 * sizeof(float);
   const size_t input_width_stride = input_width * sizeof(float);
   const size_t output_width = input_width;
   const size_t output_width_stride = output_width * sizeof(float);
@@ -40,7 +39,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma(
 
   const size_t input_width_increment_single = input_width_stride - round_up_po2(input_width, 4) / 4 * input_tuple_stride;
   const size_t input_width_increment_triple = 3  * input_width_stride - round_up_po2(input_width, 4) / 4 * input_tuple_stride;
-  const size_t output_width_increment_single = output_width_stride - (input_width - 1) / 4 * output_tuple_stride;
 
   const float* i0 = zero;
   const float* i1 = zero;;
@@ -258,10 +256,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma(
       float32x4_t vo2 = vo4567p20;
 
       vo0 = vmaxq_f32(vo0, vmin);
-      vo0 = vminq_f32(vo0, vmax);
       vo1 = vmaxq_f32(vo1, vmin);
-      vo1 = vminq_f32(vo1, vmax);
       vo2 = vmaxq_f32(vo2, vmin);
+
+      vo0 = vminq_f32(vo0, vmax);
+      vo1 = vminq_f32(vo1, vmax);
       vo2 = vminq_f32(vo2, vmax);
 
       vst1q_f32(o0, vo0); o0 += 4;
@@ -622,28 +621,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma(
       vo2 = vminq_f32(vo2, vmax);
 
       if XNN_LIKELY(w & 4) {
-        vst1q_f32(o0, vo0);
-        vst1q_f32(o1, vo1);
-        vst1q_f32(o2, vo2);
+        vst1q_f32(o0, vo0); o0 += 4;
+        vst1q_f32(o1, vo1); o1 += 4;
+        vst1q_f32(o2, vo2); o2 += 4;
       } else {
-        float* o0_tmp = o0;
-        float* o1_tmp = o1;
-        float* o2_tmp = o2;
         float32x2_t vo0_lo = vget_low_f32(vo0);
         float32x2_t vo1_lo = vget_low_f32(vo1);
         float32x2_t vo2_lo = vget_low_f32(vo2);
         if (w & 2) {
-          vst1_f32(o0_tmp, vo0_lo); o0_tmp += 2;
-          vst1_f32(o1_tmp, vo1_lo); o1_tmp += 2;
-          vst1_f32(o2_tmp, vo2_lo); o2_tmp += 2;
+          vst1_f32(o0, vo0_lo); o0 += 2;
+          vst1_f32(o1, vo1_lo); o1 += 2;
+          vst1_f32(o2, vo2_lo); o2 += 2;
           vo0_lo = vget_high_f32(vo0);
           vo1_lo = vget_high_f32(vo1);
           vo2_lo = vget_high_f32(vo2);
         }
         if (w & 1) {
-          vst1_lane_f32(o0_tmp, vo0_lo, 0);
-          vst1_lane_f32(o1_tmp, vo1_lo, 0);
-          vst1_lane_f32(o2_tmp, vo2_lo, 0);
+          vst1_lane_f32(o0, vo0_lo, 0); o0 += 1;
+          vst1_lane_f32(o1, vo1_lo, 0); o1 += 1;
+          vst1_lane_f32(o2, vo2_lo, 0); o2 += 1;
         }
       }
     }
@@ -655,7 +651,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma(
     i4 = (const float*) ((uintptr_t) i4 + input_width_increment_triple);
     i5 = (const float*) ((uintptr_t) i5 + input_width_increment_triple);
     i6 = (const float*) ((uintptr_t) i6 + input_width_increment_triple);
-    o0 = (float*) ((uintptr_t) o2 + output_width_increment_single);
+    o0 = o2;
     o1 = (float*) ((uintptr_t) o0 + output_width_stride);
     o2 = (float*) ((uintptr_t) o1 + output_width_stride);
     output_height -= 3;
@@ -1129,8 +1125,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma(
         }
       }
     }
-  }
-  else if (output_height == 1) {
+  } else if (output_height == 1) {
     i3 = i4 = zero;
     float32x4_t vi0x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi1x0123 = vmovq_n_f32(0.0f);

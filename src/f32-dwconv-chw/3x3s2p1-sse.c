@@ -27,10 +27,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
   assert(padding_top <= 1);
 
   const size_t input_tuple_stride = 4 * sizeof(float);
-  const size_t output_tuple_stride = 4 * sizeof(float);
   const size_t input_width_stride = input_width * sizeof(float);
-  const size_t output_width = (input_width + 1) / 2;
-  const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
   size_t output_height = (padded_input_height - 3) / 2 + 1;
@@ -42,7 +39,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
 
   const size_t input_width_decrement_single = input_width / 8  * input_tuple_stride * 2;
   const size_t input_width_increment = input_width_stride * 2 - input_width_decrement_single;
-  const size_t output_width_increment = output_width_stride - input_width / 8 * output_tuple_stride;
 
   const float* i0;
   const float* i1;
@@ -186,16 +182,17 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
 
       if (w == 7) {
         _mm_storeu_ps(output, vo);
+        output += 4;
       } else {
-        float* output_lo = output;
         w += 1;
         if (w & 4) {
-          _mm_storel_pi((__m64*) output_lo, vo);
-          output_lo += 2;
+          _mm_storel_pi((__m64*) output, vo);
+          output += 2;
           vo = _mm_movehl_ps(vo, vo);
         }
         if (w & 2) {
-          _mm_store_ss(output_lo, vo);
+          _mm_store_ss(output, vo);
+          output += 1;
         }
       }
     }
@@ -203,7 +200,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
     i0 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
-    output = (float*) ((uintptr_t) output + output_width_increment);
     output_height -= 1;
     if (output_height == 1 && padding_top == input_height % 2) {
       // to mimic the following code with only one if, we do some small

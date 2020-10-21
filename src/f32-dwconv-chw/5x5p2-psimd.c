@@ -67,7 +67,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
   assert(padding_top == 2);
 
   const size_t input_tuple_stride = 4 * sizeof(float);
-  const size_t output_tuple_stride = 4 * sizeof(float);
   const size_t input_width_stride = input_width * sizeof(float);
   const size_t output_width = input_width;
   const size_t output_width_stride = output_width * sizeof(float);
@@ -81,7 +80,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
 
   const size_t input_width_increment_single = input_width_stride - round_up_po2(input_width, 4) / 4 * input_tuple_stride;
   const size_t input_width_increment_triple = 3  * input_width_stride - round_up_po2(input_width, 4) / 4 * input_tuple_stride;
-  const size_t output_width_increment_single = output_width_stride - (input_width - 1) / 4 * output_tuple_stride;
 
   const float* i0 = zero;
   const float* i1 = zero;;
@@ -664,24 +662,30 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
 
       if XNN_LIKELY(w & 4) {
         psimd_store_f32(o0, vo0);
+        o0 += 4;
         psimd_store_f32(o1, vo1);
+        o1 += 4;
         psimd_store_f32(o2, vo2);
+        o2 += 4;
       } else {
-        float* o0_tmp = o0;
-        float* o1_tmp = o1;
-        float* o2_tmp = o2;
         if (w & 2) {
-          psimd_store2_f32(o0_tmp, vo0); o0_tmp += 2;
-          psimd_store2_f32(o1_tmp, vo1); o1_tmp += 2;
-          psimd_store2_f32(o2_tmp, vo2); o2_tmp += 2;
+          psimd_store2_f32(o0, vo0);
+          o0 += 2;
+          psimd_store2_f32(o1, vo1);
+          o1 += 2;
+          psimd_store2_f32(o2, vo2);
+          o2 += 2;
           vo0 = psimd_splat2_f32(vo0);
           vo1 = psimd_splat2_f32(vo1);
           vo2 = psimd_splat2_f32(vo2);
         }
         if (w & 1) {
-          psimd_store1_f32(o0_tmp, vo0);
-          psimd_store1_f32(o1_tmp, vo1);
-          psimd_store1_f32(o2_tmp, vo2);
+          psimd_store1_f32(o0, vo0);
+          o0 += 1;
+          psimd_store1_f32(o1, vo1);
+          o1 += 1;
+          psimd_store1_f32(o2, vo2);
+          o2 += 1;
         }
       }
     }
@@ -693,7 +697,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
     i4 = (const float*) ((uintptr_t) i4 + input_width_increment_triple);
     i5 = (const float*) ((uintptr_t) i5 + input_width_increment_triple);
     i6 = (const float*) ((uintptr_t) i6 + input_width_increment_triple);
-    o0 = (float*) ((uintptr_t) o2 + output_width_increment_single);
+    o0 = o2;
     o1 = (float*) ((uintptr_t) o0 + output_width_stride);
     o2 = (float*) ((uintptr_t) o1 + output_width_stride);
     output_height -= 3;
@@ -1151,22 +1155,19 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
         psimd_store_f32(o0, vo0);
         psimd_store_f32(o1, vo1);
       } else {
-        float* o0_tmp = o0;
-        float* o1_tmp = o1;
         if (w & 2) {
-          psimd_store2_f32(o0_tmp, vo0); o0_tmp += 2;
-          psimd_store2_f32(o1_tmp, vo1); o1_tmp += 2;
+          psimd_store2_f32(o0, vo0); o0 += 2;
+          psimd_store2_f32(o1, vo1); o1 += 2;
           vo0 = psimd_splat2_f32(vo0);
           vo1 = psimd_splat2_f32(vo1);
         }
         if (w & 1) {
-          psimd_store1_f32(o0_tmp, vo0);
-          psimd_store1_f32(o1_tmp, vo1);
+          psimd_store1_f32(o0, vo0);
+          psimd_store1_f32(o1, vo1);
         }
       }
     }
-  }
-  else if (output_height == 1) {
+  } else if (output_height == 1) {
     i3 = i4 = zero;
     psimd_f32 vi0x0123 = psimd_zero_f32();
     psimd_f32 vi1x0123 = psimd_zero_f32();
@@ -1431,13 +1432,12 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
       if XNN_LIKELY(w & 4) {
         psimd_store_f32(o0, vo0);
       } else {
-        float* o0_tmp = o0;
         if (w & 2) {
-          psimd_store2_f32(o0_tmp, vo0); o0_tmp += 2;
+          psimd_store2_f32(o0, vo0); o0 += 2;
           vo0 = psimd_splat2_f32(vo0);
         }
         if (w & 1) {
-          psimd_store1_f32(o0_tmp, vo0);
+          psimd_store1_f32(o0, vo0);
         }
       }
     }

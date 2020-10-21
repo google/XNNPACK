@@ -24,10 +24,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
   assert(padding_top == 2);
 
   const size_t input_tuple_stride = sizeof(float);
-  const size_t output_tuple_stride = sizeof(float);
   const size_t input_width_stride = input_width * sizeof(float);
-  const size_t output_width = input_width;
-  const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 2 /* padding_bottom */;
   size_t output_height = padded_input_height - 5 + 1;
@@ -37,7 +34,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
 
   const size_t input_width_decrement_single = input_width * input_tuple_stride;
   const size_t input_width_increment_single = input_width_stride - input_width_decrement_single;;
-  const size_t output_width_increment_single = output_width_stride - (input_width - 1) * output_tuple_stride;
 
   const float* i0 = zero;
   const float* i1 = zero;;
@@ -194,7 +190,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output = voutput;;
+      *output++ = voutput;
     }
 
     i0 = (const float*) ((uintptr_t) i1 - input_width_decrement_single);
@@ -202,7 +198,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment_single);
     i3 = (const float*) ((uintptr_t) i3 + input_width_increment_single);
     i4 = (const float*) ((uintptr_t) i4 + input_width_increment_single);
-    output = (float*) ((uintptr_t) output + output_width_increment_single);
     output_height -= 1;
     if (output_height <= 2) {
       i4 = zero;

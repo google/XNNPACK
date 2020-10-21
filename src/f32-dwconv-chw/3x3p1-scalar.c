@@ -24,17 +24,13 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
   assert(padding_top == 1);
 
   const size_t input_tuple_stride = sizeof(float);
-  const size_t output_tuple_stride = sizeof(float);
   const size_t input_width_stride = input_width * sizeof(float);
-  const size_t output_width = input_width;
-  const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
   size_t output_height = padded_input_height - 3 + 1;
 
   const size_t input_width_decrement = input_width * input_tuple_stride;
   const size_t input_width_increment = input_width_stride - input_width_decrement;
-  const size_t output_width_increment = output_width_stride - (input_width - 1) * output_tuple_stride;
 
   const float params_min = params->scalar.min;
   const float params_max = params->scalar.max;
@@ -101,13 +97,12 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output = voutput;
+      *output++ = voutput;
     }
 
     i0 = (const float*) ((uintptr_t) i1 - input_width_decrement);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
-    output = (float*) ((uintptr_t) output + output_width_increment);
     output_height--;
     if (output_height == 1) {
       i2 = zero;
