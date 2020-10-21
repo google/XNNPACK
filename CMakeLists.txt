@@ -301,6 +301,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-ibilinear/gen/scalar-c1.c
   src/f32-ibilinear/gen/scalar-c2.c
   src/f32-ibilinear/gen/scalar-c4.c
+  src/f32-ibilinear-chw/gen/scalar-p1.c
+  src/f32-ibilinear-chw/gen/scalar-p2.c
+  src/f32-ibilinear-chw/gen/scalar-p4.c
   src/f32-igemm/gen/1x4-scalar.c
   src/f32-igemm/gen/2x4-scalar.c
   src/f32-igemm/gen/4x2-scalar.c
