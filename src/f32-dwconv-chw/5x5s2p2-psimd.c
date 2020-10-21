@@ -70,55 +70,10 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
   assert(padding_top >= 1);
   assert(padding_top <= 2);
 
-  const size_t input_tuple_stride = 4 * sizeof(float);
-  const size_t input_width_stride = input_width * sizeof(float);
-
-  const size_t padded_input_height = input_height + padding_top + 2 /* padding_bottom */;
-  size_t output_height = (padded_input_height - 5) / 2 + 1;
-
   const psimd_s32 vmask_even = psimd_load_s32(params->scalar.mask_even);
   const psimd_s32 vmask_odd = psimd_load_s32(params->scalar.mask_odd);
   const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
   const psimd_f32 vmin = psimd_load_splat_f32(&params->scalar.min);
-
-  const size_t input_width_decrement_single = input_tuple_stride * ((input_width - 1) / 4 + 1);
-  const size_t input_width_increment_single = input_width_stride - input_width_decrement_single;
-  const size_t input_width_increment_double= input_width_stride * 2 - input_width_decrement_single;
-
-  const float* i0;
-  const float* i1;
-  const float* i2;
-  const float* i3;
-  const float* i4;
-
-  if (padding_top == 1) {
-    i0 = zero;
-    i1 = input;
-    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
-    i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
-    i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
-    if (input_height <= 3) {
-      i4 = zero;
-    }
-    if (input_height <= 2) {
-      i3 = zero;
-    }
-    if (input_height == 1) {
-      i2 = zero;
-    }
-  } else {
-    i0 = zero;
-    i1 = zero;
-    i2 = input;
-    i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
-    i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
-    if (input_height <= 2) {
-      i4 = zero;
-    }
-    if (input_height == 1) {
-      i3 = zero;
-    }
-  }
 
   const psimd_f32 vw0123 = psimd_load_f32(weights);
   const psimd_f32 vw4567 = psimd_load_f32(weights + 4);
@@ -128,7 +83,29 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
   const psimd_f32 vwKLMN = psimd_load_f32(weights + 20);
   const psimd_f32 vwOP   = psimd_load2_f32( weights + 24);
 
+  const uint32_t padding_top_less_1 = padding_top - 1;
+  const size_t input_width_stride = input_width * sizeof(float);
+  const size_t input_decrement = (round_down_po2(input_width - 1, 4) + 4) * sizeof(float);
+
+  const float* i0 = zero;
+  const float* i1 = (const float*) ((uintptr_t) input - ((-padding_top_less_1) & input_width_stride));
+  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  if XNN_UNPREDICTABLE(padding_top_less_1 != 0) {
+    i1 = zero;
+  }
+  const float* i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
+  const float* i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
+
+  size_t padded_input_height = input_height + (padding_top_less_1 + 1) + 2 /* padding bottom */;
+  size_t output_height = (padded_input_height - 5 /* kernel size */ + 2 /* subsampling */) / 2;
   do {
+    if XNN_UNPREDICTABLE(padded_input_height <= 6) {
+      i4 = zero;
+    }
+    if XNN_UNPREDICTABLE(padded_input_height < 6) {
+      i3 = zero;
+    }
+
     psimd_f32 vi0x0123 = psimd_zero_f32();
     psimd_f32 vi1x0123 = psimd_zero_f32();
     psimd_f32 vi2x0123 = psimd_zero_f32();
@@ -438,24 +415,13 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
       }
     }
 
-    i0 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
-    i1 = (const float*) ((uintptr_t) i2 + input_width_increment_single);
-    i2 = (const float*) ((uintptr_t) i2 + input_width_increment_double);
-    i3 = (const float*) ((uintptr_t) i3 + input_width_increment_double);
-    i4 = (const float*) ((uintptr_t) i4 + input_width_increment_double);
+    i0 = (const float*) ((uintptr_t) i2 - input_decrement);
+    i1 = (const float*) ((uintptr_t) i3 - input_decrement);
+    i2 = (const float*) ((uintptr_t) i4 - input_decrement);
+    i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
+    i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
+
     output_height -= 1;
-    if (output_height == 1) {
-      i4 = zero;
-      // we mimic the following logic:
-      // if (padding_top == 2 && input_height % 2 == 1) {
-      //   i3 = zero;
-      // } else if (padding_top == 1 && input_height % 2 == 0) {
-      //   i3 = zero;
-      // }
-      // with: padding_top - 1 == input_height % 2
-      if (padding_top - 1 == input_height % 2) {
-        i3 = zero;
-      }
-    }
-  } while (output_height > 0);
+    padded_input_height -= 2;
+  } while (output_height != 0);
 }

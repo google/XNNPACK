@@ -25,26 +25,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
   assert(input_height != 0);
   assert(padding_top == 1);
 
-  const size_t input_tuple_stride = 4 * sizeof(float);
-  const size_t input_width_stride = input_width * sizeof(float);
-
-  const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
-  size_t output_height = padded_input_height - 3 + 1;
-
   const __m128 vmask = _mm_load_ps((const float*) params->sse.mask);
   const __m128 vmax = _mm_load_ps(params->sse.max);
   const __m128 vmin = _mm_load_ps(params->sse.min);
-
-  const size_t input_width_decrement = round_up_po2(input_width, 4) / 4 * input_tuple_stride;
-  const size_t input_width_increment = input_width_stride - input_width_decrement;
-
-  const float* i0 = zero;
-  const float* i1 = input;
-  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
-
-  if (input_height == 1) {
-    i2 = zero;
-  }
 
   const __m128 vbias = _mm_load1_ps(weights);
   const __m128 vk00 = _mm_load1_ps(weights + 1);
@@ -57,7 +40,19 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
   const __m128 vk21 = _mm_load1_ps(weights + 8);
   const __m128 vk22 = _mm_load1_ps(weights + 9);
 
+  const size_t input_width_stride = input_width * sizeof(float);
+  const size_t input_decrement = round_up_po2(input_width * sizeof(float), 4 * sizeof(float));
+
+  const float* i0 = zero;
+  const float* i1 = input;
+  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+
+  size_t output_height = input_height;
   do {
+    if XNN_UNPREDICTABLE(output_height == 1) {
+      i2 = zero;
+    }
+
     // vi0x3012 = ( vi02, vi01, vi00, vi03 )
     __m128 vi0x3012 = _mm_setzero_ps();
     // vi1x3012 = ( vi12, vi11, vi10, vi13 )
@@ -218,12 +213,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
       }
     }
 
-    i0 = (const float*) ((uintptr_t) i1 - input_width_decrement);
-    i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
-    i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
-    output_height -= 1;
-    if (output_height == 1) {
-      i2 = zero;
-    }
-  } while (output_height != 0);
+    i0 = (const float*) ((uintptr_t) i1 - input_decrement);
+    i1 = (const float*) ((uintptr_t) i2 - input_decrement);
+    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  } while (--output_height != 0);
 }

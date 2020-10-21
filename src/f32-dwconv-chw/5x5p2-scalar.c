@@ -23,60 +23,53 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
   assert(input_height != 0);
   assert(padding_top == 2);
 
-  const size_t input_tuple_stride = sizeof(float);
-  const size_t input_width_stride = input_width * sizeof(float);
-
-  const size_t padded_input_height = input_height + padding_top + 2 /* padding_bottom */;
-  size_t output_height = padded_input_height - 5 + 1;
-
   const float params_max = params->scalar.max;
   const float params_min = params->scalar.min;
 
-  const size_t input_width_decrement_single = input_width * input_tuple_stride;
-  const size_t input_width_increment_single = input_width_stride - input_width_decrement_single;;
+  const float vbias = weights[0];
+  const float vk00 = weights[1];
+  const float vk01 = weights[2];
+  const float vk02 = weights[3];
+  const float vk03 = weights[4];
+  const float vk04 = weights[5];
+  const float vk10 = weights[6];
+  const float vk11 = weights[7];
+  const float vk12 = weights[8];
+  const float vk13 = weights[9];
+  const float vk14 = weights[10];
+  const float vk20 = weights[11];
+  const float vk21 = weights[12];
+  const float vk22 = weights[13];
+  const float vk23 = weights[14];
+  const float vk24 = weights[15];
+  const float vk30 = weights[16];
+  const float vk31 = weights[17];
+  const float vk32 = weights[18];
+  const float vk33 = weights[19];
+  const float vk34 = weights[20];
+  const float vk40 = weights[21];
+  const float vk41 = weights[22];
+  const float vk42 = weights[23];
+  const float vk43 = weights[24];
+  const float vk44 = weights[25];
+
+  const size_t input_width_stride = input_width * sizeof(float);
 
   const float* i0 = zero;
-  const float* i1 = zero;;
+  const float* i1 = zero;
   const float* i2 = input;
   const float* i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
   const float* i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
-  if (input_height <= 2) {
-    i4 = zero;
-  }
-  if (input_height == 1) {
-    i3 = zero;
-  }
 
-  // this almost certainly will use too many scalar registers
-  // hope the compiler is good at spilling...
-  const float vw0 = weights[0];
-  const float vw1 = weights[1];
-  const float vw2 = weights[2];
-  const float vw3 = weights[3];
-  const float vw4 = weights[4];
-  const float vw5 = weights[5];
-  const float vw6 = weights[6];
-  const float vw7 = weights[7];
-  const float vw8 = weights[8];
-  const float vw9 = weights[9];
-  const float vw10 = weights[10];
-  const float vw11 = weights[11];
-  const float vw12 = weights[12];
-  const float vw13 = weights[13];
-  const float vw14 = weights[14];
-  const float vw15 = weights[15];
-  const float vw16 = weights[16];
-  const float vw17 = weights[17];
-  const float vw18 = weights[18];
-  const float vw19 = weights[19];
-  const float vw20 = weights[20];
-  const float vw21 = weights[21];
-  const float vw22 = weights[22];
-  const float vw23 = weights[23];
-  const float vw24 = weights[24];
-  const float vw25 = weights[25];
-
+  size_t output_height = input_height;
   do {
+    if XNN_UNPREDICTABLE(output_height <= 2) {
+      i4 = zero;
+    }
+    if XNN_UNPREDICTABLE(output_height < 2) {
+      i3 = zero;
+    }
+
     float vi0x0 = 0.0f;
     float vi1x0 = 0.0f;
     float vi2x0 = 0.0f;
@@ -114,33 +107,61 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       const float vi3x4 = *i3++;
       const float vi4x4 = *i4++;
 
-      const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2 + vw4  * vi0x3 + vw5  * vi0x4;
+      float vacc0 = vk00 * vi0x0;
+      float vacc1 = vk10 * vi1x0;
+      float vacc2 = vk20 * vi2x0;
+      float vacc3 = vk30 * vi3x0;
+      float vacc4 = vk40 * vi4x0;
+
       vi0x0 = vi0x1;
-      vi0x1 = vi0x2;
-      vi0x2 = vi0x3;
-      vi0x3 = vi0x4;
-      const float vrow1_accum = vw6  * vi1x0 + vw7  * vi1x1 + vw8  * vi1x2 + vw9  * vi1x3 + vw10 * vi1x4;
       vi1x0 = vi1x1;
-      vi1x1 = vi1x2;
-      vi1x2 = vi1x3;
-      vi1x3 = vi1x4;
-      const float vrow2_accum = vw11 * vi2x0 + vw12 * vi2x1 + vw13 * vi2x2 + vw14 * vi2x3 + vw15 * vi2x4;
       vi2x0 = vi2x1;
-      vi2x1 = vi2x2;
-      vi2x2 = vi2x3;
-      vi2x3 = vi2x4;
-      const float vrow3_accum = vw16 * vi3x0 + vw17 * vi3x1 + vw18 * vi3x2 + vw19 * vi3x3 + vw20 * vi3x4;
       vi3x0 = vi3x1;
-      vi3x1 = vi3x2;
-      vi3x2 = vi3x3;
-      vi3x3 = vi3x4;
-      const float vrow4_accum = vw21 * vi4x0 + vw22 * vi4x1 + vw23 * vi4x2 + vw24 * vi4x3 + vw25 * vi4x4;
       vi4x0 = vi4x1;
+
+      vacc0 += vk01 * vi0x1;
+      vacc1 += vk11 * vi1x1;
+      vacc2 += vk21 * vi2x1;
+      vacc3 += vk31 * vi3x1;
+      vacc4 += vk41 * vi4x1;
+
+      vi0x1 = vi0x2;
+      vi1x1 = vi1x2;
+      vi2x1 = vi2x2;
+      vi3x1 = vi3x2;
       vi4x1 = vi4x2;
+
+      vacc0 += vk02 * vi0x2;
+      vacc1 += vk12 * vi1x2;
+      vacc2 += vk22 * vi2x2;
+      vacc3 += vk32 * vi3x2;
+      vacc4 += vk42 * vi4x2;
+
+      vi0x2 = vi0x3;
+      vi1x2 = vi1x3;
+      vi2x2 = vi2x3;
+      vi3x2 = vi3x3;
       vi4x2 = vi4x3;
+
+      vacc0 += vk03 * vi0x3;
+      vacc1 += vk13 * vi1x3;
+      vacc2 += vk23 * vi2x3;
+      vacc3 += vk33 * vi3x3;
+      vacc4 += vk43 * vi4x3;
+
+      vi0x3 = vi0x4;
+      vi1x3 = vi1x4;
+      vi2x3 = vi2x4;
+      vi3x3 = vi3x4;
       vi4x3 = vi4x4;
 
-      float voutput = (vw0 + vrow0_accum) + (vrow1_accum + vrow2_accum) + (vrow3_accum + vrow4_accum);
+      vacc0 += vk04 * vi0x4;
+      vacc1 += vk14 * vi1x4;
+      vacc2 += vk24 * vi2x4;
+      vacc3 += vk34 * vi3x4;
+      vacc4 += vk44 * vi4x4;
+
+      float voutput = (vbias + vacc0) + (vacc1 + vacc2) + (vacc3 + vacc4);
 
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
@@ -148,28 +169,49 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       *output++ = voutput;
     }
     if XNN_LIKELY(w > 1) {
-      const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2 + vw4  * vi0x3;
+      float vacc0 = vk00 * vi0x0;
+      float vacc1 = vk10 * vi1x0;
+      float vacc2 = vk20 * vi2x0;
+      float vacc3 = vk30 * vi3x0;
+      float vacc4 = vk40 * vi4x0;
+
       vi0x0 = vi0x1;
-      vi0x1 = vi0x2;
-      vi0x2 = vi0x3;
-      const float vrow1_accum = vw6  * vi1x0 + vw7  * vi1x1 + vw8  * vi1x2 + vw9  * vi1x3;
       vi1x0 = vi1x1;
-      vi1x1 = vi1x2;
-      vi1x2 = vi1x3;
-      const float vrow2_accum = vw11 * vi2x0 + vw12 * vi2x1 + vw13 * vi2x2 + vw14 * vi2x3;
       vi2x0 = vi2x1;
-      vi2x1 = vi2x2;
-      vi2x2 = vi2x3;
-      const float vrow3_accum = vw16 * vi3x0 + vw17 * vi3x1 + vw18 * vi3x2 + vw19 * vi3x3;
       vi3x0 = vi3x1;
-      vi3x1 = vi3x2;
-      vi3x2 = vi3x3;
-      const float vrow4_accum = vw21 * vi4x0 + vw22 * vi4x1 + vw23 * vi4x2 + vw24 * vi4x3;
       vi4x0 = vi4x1;
+
+      vacc0 += vk01 * vi0x1;
+      vacc1 += vk11 * vi1x1;
+      vacc2 += vk21 * vi2x1;
+      vacc3 += vk31 * vi3x1;
+      vacc4 += vk41 * vi4x1;
+
+      vi0x1 = vi0x2;
+      vi1x1 = vi1x2;
+      vi2x1 = vi2x2;
+      vi3x1 = vi3x2;
       vi4x1 = vi4x2;
+
+      vacc0 += vk02 * vi0x2;
+      vacc1 += vk12 * vi1x2;
+      vacc2 += vk22 * vi2x2;
+      vacc3 += vk32 * vi3x2;
+      vacc4 += vk42 * vi4x2;
+
+      vi0x2 = vi0x3;
+      vi1x2 = vi1x3;
+      vi2x2 = vi2x3;
+      vi3x2 = vi3x3;
       vi4x2 = vi4x3;
 
-      float voutput = (vw0 + vrow0_accum) + (vrow1_accum + vrow2_accum) + (vrow3_accum + vrow4_accum);
+      vacc0 += vk03 * vi0x3;
+      vacc1 += vk13 * vi1x3;
+      vacc2 += vk23 * vi2x3;
+      vacc3 += vk33 * vi3x3;
+      vacc4 += vk43 * vi4x3;
+
+      float voutput = (vbias + vacc0) + (vacc1 + vacc2) + (vacc3 + vacc4);
 
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
@@ -179,13 +221,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
     }
     assert(w == 1);
     {
-      const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2;
-      const float vrow1_accum = vw6  * vi1x0 + vw7  * vi1x1 + vw8  * vi1x2;
-      const float vrow2_accum = vw11 * vi2x0 + vw12 * vi2x1 + vw13 * vi2x2;
-      const float vrow3_accum = vw16 * vi3x0 + vw17 * vi3x1 + vw18 * vi3x2;
-      const float vrow4_accum = vw21 * vi4x0 + vw22 * vi4x1 + vw23 * vi4x2;
+      float vacc0 = vk00 * vi0x0;
+      float vacc1 = vk10 * vi1x0;
+      float vacc2 = vk20 * vi2x0;
+      float vacc3 = vk30 * vi3x0;
+      float vacc4 = vk40 * vi4x0;
 
-      float voutput = (vw0 + vrow0_accum) + (vrow1_accum + vrow2_accum) + (vrow3_accum + vrow4_accum);
+      vacc0 += vk01 * vi0x1;
+      vacc1 += vk11 * vi1x1;
+      vacc2 += vk21 * vi2x1;
+      vacc3 += vk31 * vi3x1;
+      vacc4 += vk41 * vi4x1;
+
+      vacc0 += vk02 * vi0x2;
+      vacc1 += vk12 * vi1x2;
+      vacc2 += vk22 * vi2x2;
+      vacc3 += vk32 * vi3x2;
+      vacc4 += vk42 * vi4x2;
+
+      float voutput = (vbias + vacc0) + (vacc1 + vacc2) + (vacc3 + vacc4);
 
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
@@ -193,17 +247,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       *output++ = voutput;
     }
 
-    i0 = (const float*) ((uintptr_t) i1 - input_width_decrement_single);
-    i1 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
-    i2 = (const float*) ((uintptr_t) i2 + input_width_increment_single);
-    i3 = (const float*) ((uintptr_t) i3 + input_width_increment_single);
-    i4 = (const float*) ((uintptr_t) i4 + input_width_increment_single);
-    output_height -= 1;
-    if (output_height <= 2) {
-      i4 = zero;
-    }
-    if (output_height == 1) {
-      i3 = zero;
-    }
-  } while (output_height > 0);
+    i0 = (const float*) ((uintptr_t) i1 - input_width_stride);
+    i1 = (const float*) ((uintptr_t) i2 - input_width_stride);
+  } while (--output_height != 0);
 }

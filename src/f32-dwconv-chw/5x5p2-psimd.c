@@ -66,44 +66,13 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
   assert(input_height != 0);
   assert(padding_top == 2);
 
-  const size_t input_tuple_stride = 4 * sizeof(float);
   const size_t input_width_stride = input_width * sizeof(float);
   const size_t output_width = input_width;
   const size_t output_width_stride = output_width * sizeof(float);
 
-  const size_t padded_input_height = input_height + padding_top + 2 /* padding_bottom */;
-  size_t output_height = padded_input_height - 5 + 1;
-
   const psimd_s32 vmask = psimd_load_s32(params->scalar.mask);
   const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
   const psimd_f32 vmin = psimd_load_splat_f32(&params->scalar.min);
-
-  const size_t input_width_increment_single = input_width_stride - round_up_po2(input_width, 4) / 4 * input_tuple_stride;
-  const size_t input_width_increment_triple = 3  * input_width_stride - round_up_po2(input_width, 4) / 4 * input_tuple_stride;
-
-  const float* i0 = zero;
-  const float* i1 = zero;;
-  const float* i2 = input;
-  const float* i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
-  const float* i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
-  const float* i5 = (const float*) ((uintptr_t) i4 + input_width_stride);
-  const float* i6 = (const float*) ((uintptr_t) i5 + input_width_stride);
-  if (input_height <= 4) {
-    i6 = zero;
-  }
-  if (input_height <= 3) {
-    i5 = zero;
-  }
-  if (input_height <= 2) {
-    i4 = zero;
-  }
-  if (input_height <= 1) {
-    i3 = zero;
-  }
-
-  float* o0 = output;
-  float* o1 = (float *) ((uintptr_t) o0 + output_width_stride);
-  float* o2 = (float *) ((uintptr_t) o1 + output_width_stride);
 
   const psimd_f32 vw0123 = psimd_load_f32(weights);
   const psimd_f32 vw4567 = psimd_load_f32(weights + 4);
@@ -113,7 +82,37 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
   const psimd_f32 vwKLMN = psimd_load_f32(weights + 20);
   const psimd_f32 vwOP   = psimd_load2_f32(weights + 24);
 
-  while (output_height >= 3) {
+  const size_t input_decrement = round_up_po2(input_width * sizeof(float), 4 * sizeof(float));
+
+  const float* i0 = zero;
+  const float* i1 = zero;
+  const float* i2 = input;
+  const float* i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
+  const float* i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
+  const float* i5 = (const float*) ((uintptr_t) i4 + input_width_stride);
+  const float* i6 = (const float*) ((uintptr_t) i5 + input_width_stride);
+
+  float* o0 = output;
+  float* o1 = (float*) ((uintptr_t) o0 + output_width_stride);
+  float* o2 = (float*) ((uintptr_t) o1 + output_width_stride);
+
+  size_t output_height = input_height;
+  do {
+    if XNN_UNPREDICTABLE(output_height < 2) {
+      i3 = zero;
+      o1 = o0;
+    }
+    if XNN_UNPREDICTABLE(output_height <= 2) {
+      i4 = zero;
+      o2 = o1;
+    }
+    if XNN_UNPREDICTABLE(output_height < 4) {
+      i5 = zero;
+    }
+    if XNN_UNPREDICTABLE(output_height <= 4) {
+      i6 = zero;
+    }
+
     psimd_f32 vi0x0123 = psimd_zero_f32();
     psimd_f32 vi1x0123 = psimd_zero_f32();
     psimd_f32 vi2x0123 = psimd_zero_f32();
@@ -303,9 +302,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
       vo2 = psimd_max_f32(vo2, vmin);
       vo2 = psimd_min_f32(vo2, vmax);
 
-      psimd_store_f32(o0, vo0); o0 += 4;
-      psimd_store_f32(o1, vo1); o1 += 4;
       psimd_store_f32(o2, vo2); o2 += 4;
+      psimd_store_f32(o1, vo1); o1 += 4;
+      psimd_store_f32(o0, vo0); o0 += 4;
     }
     // Always process the last block of 5..8 pixels.
     if XNN_LIKELY(w > 4)
@@ -492,9 +491,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
       vo2 = psimd_max_f32(vo2, vmin);
       vo2 = psimd_min_f32(vo2, vmax);
 
-      psimd_store_f32(o0, vo0); o0 += 4;
-      psimd_store_f32(o1, vo1); o1 += 4;
       psimd_store_f32(o2, vo2); o2 += 4;
+      psimd_store_f32(o1, vo1); o1 += 4;
+      psimd_store_f32(o0, vo0); o0 += 4;
       w -= 4;
     }
     assert(w >= 1);
@@ -504,8 +503,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
       psimd_f32 vo4567p10 = psimd_splat0_f32(vw0123);
       psimd_f32 vo4567p20 = psimd_splat0_f32(vw0123);
 
-      // This might have already happened if there are more than 4 pixels, but
-      // we can't count on it.
+      // This might have already happened if there are more than 4 pixels, but we can't count on it.
       vi0x4567 = psimd_andmask_f32(vmask, vi0x4567);
       vi1x4567 = psimd_andmask_f32(vmask, vi1x4567);
       vi2x4567 = psimd_andmask_f32(vmask, vi2x4567);
@@ -591,7 +589,6 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
       vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi5x2345, vwKLMN);
       vo4567p20 = vfmaq_lane1_f32(vo4567p20, vi6x2345, vwKLMN);
 
-
       const psimd_f32 vzero = psimd_zero_f32();
       const psimd_f32 vi0x5678 = extq1_f32(vi0x4567, vzero);
       const psimd_f32 vi1x5678 = extq1_f32(vi1x4567, vzero);
@@ -654,792 +651,56 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
       psimd_f32 vo2 = vo4567p20;
 
       vo0 = psimd_max_f32(vo0, vmin);
-      vo0 = psimd_min_f32(vo0, vmax);
       vo1 = psimd_max_f32(vo1, vmin);
-      vo1 = psimd_min_f32(vo1, vmax);
       vo2 = psimd_max_f32(vo2, vmin);
+
+      vo0 = psimd_min_f32(vo0, vmax);
+      vo1 = psimd_min_f32(vo1, vmax);
       vo2 = psimd_min_f32(vo2, vmax);
 
       if XNN_LIKELY(w & 4) {
-        psimd_store_f32(o0, vo0);
-        o0 += 4;
-        psimd_store_f32(o1, vo1);
-        o1 += 4;
         psimd_store_f32(o2, vo2);
         o2 += 4;
+        psimd_store_f32(o1, vo1);
+        o1 += 4;
+        psimd_store_f32(o0, vo0);
+        o0 += 4;
       } else {
         if (w & 2) {
-          psimd_store2_f32(o0, vo0);
-          o0 += 2;
-          psimd_store2_f32(o1, vo1);
-          o1 += 2;
           psimd_store2_f32(o2, vo2);
           o2 += 2;
+          psimd_store2_f32(o1, vo1);
+          o1 += 2;
+          psimd_store2_f32(o0, vo0);
+          o0 += 2;
+
           vo0 = psimd_splat2_f32(vo0);
           vo1 = psimd_splat2_f32(vo1);
           vo2 = psimd_splat2_f32(vo2);
         }
         if (w & 1) {
-          psimd_store1_f32(o0, vo0);
-          o0 += 1;
-          psimd_store1_f32(o1, vo1);
-          o1 += 1;
           psimd_store1_f32(o2, vo2);
           o2 += 1;
+          psimd_store1_f32(o1, vo1);
+          o1 += 1;
+          psimd_store1_f32(o0, vo0);
+          o0 += 1;
         }
       }
     }
 
-    i0 = (const float*) ((uintptr_t) i2 + input_width_increment_single);
-    i1 = (const float*) ((uintptr_t) i3 + input_width_increment_single);
-    i2 = (const float*) ((uintptr_t) i2 + input_width_increment_triple);
-    i3 = (const float*) ((uintptr_t) i3 + input_width_increment_triple);
-    i4 = (const float*) ((uintptr_t) i4 + input_width_increment_triple);
-    i5 = (const float*) ((uintptr_t) i5 + input_width_increment_triple);
-    i6 = (const float*) ((uintptr_t) i6 + input_width_increment_triple);
+    i0 = (const float*) ((uintptr_t) i3 - input_decrement);
+    i1 = (const float*) ((uintptr_t) i4 - input_decrement);
+    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+    i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
+    i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
+    i5 = (const float*) ((uintptr_t) i4 + input_width_stride);
+    i6 = (const float*) ((uintptr_t) i5 + input_width_stride);
+
     o0 = o2;
     o1 = (float*) ((uintptr_t) o0 + output_width_stride);
     o2 = (float*) ((uintptr_t) o1 + output_width_stride);
-    output_height -= 3;
-    if (output_height <= 4) {
-      i6 = zero;
-    }
-    if (output_height <= 3) {
-      i5 = zero;
-    }
-    if (output_height <= 2) {
-      i4 = zero;
-    }
-    if (output_height <= 1) {
-      i3 = zero;
-    }
-  }
 
-  if (output_height == 2) {
-    i4 = i5 = zero;
-    psimd_f32 vi0x0123 = psimd_zero_f32();
-    psimd_f32 vi1x0123 = psimd_zero_f32();
-    psimd_f32 vi2x0123 = psimd_zero_f32();
-    psimd_f32 vi3x0123 = psimd_zero_f32();
-    psimd_f32 vi4x0123 = psimd_zero_f32();
-    psimd_f32 vi5x0123 = psimd_zero_f32();
-    psimd_f32 vi0x4567 = psimd_load_f32(i0); i0 += 4;
-    psimd_f32 vi1x4567 = psimd_load_f32(i1); i1 += 4;
-    psimd_f32 vi2x4567 = psimd_load_f32(i2); i2 += 4;
-    psimd_f32 vi3x4567 = psimd_load_f32(i3); i3 += 4;
-    psimd_f32 vi4x4567 = psimd_load_f32(i4); i4 += 4;
-    psimd_f32 vi5x4567 = psimd_load_f32(i5); i5 += 4;
-
-    size_t w = input_width;
-    for (; w > 8; w -= 4) {
-      psimd_f32 vo4567p00 = psimd_splat0_f32(vw0123);
-      psimd_f32 vo4567p10 = psimd_splat0_f32(vw0123);
-
-      const psimd_f32 vi0x89AB = psimd_load_f32(i0); i0 += 4;
-      const psimd_f32 vi1x89AB = psimd_load_f32(i1); i1 += 4;
-      const psimd_f32 vi2x89AB = psimd_load_f32(i2); i2 += 4;
-      const psimd_f32 vi3x89AB = psimd_load_f32(i3); i3 += 4;
-      const psimd_f32 vi4x89AB = psimd_load_f32(i4); i4 += 4;
-      const psimd_f32 vi5x89AB = psimd_load_f32(i5); i5 += 4;
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi0x4567, vw0123);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi1x4567, vw0123);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi1x4567, vw89AB);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi2x4567, vw89AB);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi2x4567, vwCDEF);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi3x4567, vwCDEF);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi3x4567, vwGHIJ);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi4x4567, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi4x4567, vwKLMN);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi5x4567, vwKLMN);
-
-
-      const psimd_f32 vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x3456 = extq3_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x3456 = extq3_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x3456 = extq3_f32(vi4x0123, vi4x4567);
-      const psimd_f32 vi5x3456 = extq3_f32(vi5x0123, vi5x4567);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi0x3456, vw0123);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi1x3456, vw0123);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi1x3456, vw4567);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi2x3456, vw4567);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi2x3456, vwCDEF);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi3x3456, vwCDEF);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi3x3456, vwGHIJ);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi4x3456, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi4x3456, vwKLMN);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi5x3456, vwKLMN);
-
-      const psimd_f32 vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x2345 = extq2_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x2345 = extq2_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x2345 = extq2_f32(vi4x0123, vi4x4567);
-      const psimd_f32 vi5x2345 = extq2_f32(vi5x0123, vi5x4567);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x2345, vw0123);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi1x2345, vw0123);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x2345, vw4567);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi2x2345, vw4567);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x2345, vw89AB);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi3x2345, vw89AB);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x2345, vwGHIJ);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi4x2345, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi4x2345, vwKLMN);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi5x2345, vwKLMN);
-
-      vi0x0123 = vi0x4567;
-      vi1x0123 = vi1x4567;
-      vi2x0123 = vi2x4567;
-      vi3x0123 = vi3x4567;
-      vi4x0123 = vi4x4567;
-      vi5x0123 = vi5x4567;
-
-      const psimd_f32 vi0x5678 = extq1_f32(vi0x4567, vi0x89AB);
-      const psimd_f32 vi1x5678 = extq1_f32(vi1x4567, vi1x89AB);
-      const psimd_f32 vi2x5678 = extq1_f32(vi2x4567, vi2x89AB);
-      const psimd_f32 vi3x5678 = extq1_f32(vi3x4567, vi3x89AB);
-      const psimd_f32 vi4x5678 = extq1_f32(vi4x4567, vi4x89AB);
-      const psimd_f32 vi5x5678 = extq1_f32(vi5x4567, vi5x89AB);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi0x5678, vw4567);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi1x5678, vw4567);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi1x5678, vw89AB);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi2x5678, vw89AB);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi2x5678, vwCDEF);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi3x5678, vwCDEF);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi3x5678, vwGHIJ);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi4x5678, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane0_f32( vo4567p00, vi4x5678, vwOP);
-      vo4567p10 = vfmaq_lane0_f32( vo4567p10, vi5x5678, vwOP);
-
-      const psimd_f32 vi0x6789 = extq2_f32(vi0x4567, vi0x89AB);
-      const psimd_f32 vi1x6789 = extq2_f32(vi1x4567, vi1x89AB);
-      const psimd_f32 vi2x6789 = extq2_f32(vi2x4567, vi2x89AB);
-      const psimd_f32 vi3x6789 = extq2_f32(vi3x4567, vi3x89AB);
-      const psimd_f32 vi4x6789 = extq2_f32(vi4x4567, vi4x89AB);
-      const psimd_f32 vi5x6789 = extq2_f32(vi5x4567, vi5x89AB);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x6789, vw4567);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi1x6789, vw4567);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x6789, vw89AB);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi2x6789, vw89AB);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x6789, vwCDEF);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi3x6789, vwCDEF);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x6789, vwKLMN);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi4x6789, vwKLMN);
-
-      vo4567p00 = vfmaq_lane1_f32( vo4567p00, vi4x6789, vwOP);
-      vo4567p10 = vfmaq_lane1_f32( vo4567p10, vi5x6789, vwOP);
-
-      vi0x4567 = vi0x89AB;
-      vi1x4567 = vi1x89AB;
-      vi2x4567 = vi2x89AB;
-      vi3x4567 = vi3x89AB;
-      vi4x4567 = vi4x89AB;
-      vi5x4567 = vi5x89AB;
-
-      psimd_f32 vo0 = vo4567p00;
-      psimd_f32 vo1 = vo4567p10;
-
-      vo0 = psimd_max_f32(vo0, vmin);
-      vo0 = psimd_min_f32(vo0, vmax);
-      vo1 = psimd_max_f32(vo1, vmin);
-      vo1 = psimd_min_f32(vo1, vmax);
-
-      psimd_store_f32(o0, vo0); o0 += 4;
-      psimd_store_f32(o1, vo1); o1 += 4;
-    }
-    // Always process the last block of 5..8 pixels.
-    if XNN_LIKELY(w > 4)
-    {
-      psimd_f32 vo4567p00 = psimd_splat0_f32(vw0123);
-      psimd_f32 vo4567p10 = psimd_splat0_f32(vw0123);
-
-      psimd_f32 vi0x89AB = psimd_load_f32(i0); i0 += 4;
-      psimd_f32 vi1x89AB = psimd_load_f32(i1); i1 += 4;
-      psimd_f32 vi2x89AB = psimd_load_f32(i2); i2 += 4;
-      psimd_f32 vi3x89AB = psimd_load_f32(i3); i3 += 4;
-      psimd_f32 vi4x89AB = psimd_load_f32(i4); i4 += 4;
-      psimd_f32 vi5x89AB = psimd_load_f32(i5); i5 += 4;
-
-      vi0x89AB = psimd_andmask_f32(vmask, vi0x89AB);
-      vi1x89AB = psimd_andmask_f32(vmask, vi1x89AB);
-      vi2x89AB = psimd_andmask_f32(vmask, vi2x89AB);
-      vi3x89AB = psimd_andmask_f32(vmask, vi3x89AB);
-      vi4x89AB = psimd_andmask_f32(vmask, vi4x89AB);
-      vi5x89AB = psimd_andmask_f32(vmask, vi5x89AB);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi0x4567, vw0123);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi1x4567, vw0123);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi1x4567, vw89AB);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi2x4567, vw89AB);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi2x4567, vwCDEF);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi3x4567, vwCDEF);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi3x4567, vwGHIJ);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi4x4567, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi4x4567, vwKLMN);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi5x4567, vwKLMN);
-
-
-      const psimd_f32 vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x3456 = extq3_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x3456 = extq3_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x3456 = extq3_f32(vi4x0123, vi4x4567);
-      const psimd_f32 vi5x3456 = extq3_f32(vi5x0123, vi5x4567);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi0x3456, vw0123);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi1x3456, vw0123);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi1x3456, vw4567);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi2x3456, vw4567);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi2x3456, vwCDEF);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi3x3456, vwCDEF);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi3x3456, vwGHIJ);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi4x3456, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi4x3456, vwKLMN);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi5x3456, vwKLMN);
-
-
-      const psimd_f32 vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x2345 = extq2_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x2345 = extq2_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x2345 = extq2_f32(vi4x0123, vi4x4567);
-      const psimd_f32 vi5x2345 = extq2_f32(vi5x0123, vi5x4567);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x2345, vw0123);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi1x2345, vw0123);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x2345, vw4567);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi2x2345, vw4567);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x2345, vw89AB);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi3x2345, vw89AB);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x2345, vwGHIJ);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi4x2345, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi4x2345, vwKLMN);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi5x2345, vwKLMN);
-
-
-      vi0x0123 = vi0x4567;
-      vi1x0123 = vi1x4567;
-      vi2x0123 = vi2x4567;
-      vi3x0123 = vi3x4567;
-      vi4x0123 = vi4x4567;
-      vi5x0123 = vi5x4567;
-
-      const psimd_f32 vi0x5678 = extq1_f32(vi0x4567, vi0x89AB);
-      const psimd_f32 vi1x5678 = extq1_f32(vi1x4567, vi1x89AB);
-      const psimd_f32 vi2x5678 = extq1_f32(vi2x4567, vi2x89AB);
-      const psimd_f32 vi3x5678 = extq1_f32(vi3x4567, vi3x89AB);
-      const psimd_f32 vi4x5678 = extq1_f32(vi4x4567, vi4x89AB);
-      const psimd_f32 vi5x5678 = extq1_f32(vi5x4567, vi5x89AB);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi0x5678, vw4567);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi1x5678, vw4567);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi1x5678, vw89AB);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi2x5678, vw89AB);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi2x5678, vwCDEF);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi3x5678, vwCDEF);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi3x5678, vwGHIJ);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi4x5678, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane0_f32( vo4567p00, vi4x5678, vwOP);
-      vo4567p10 = vfmaq_lane0_f32( vo4567p10, vi5x5678, vwOP);
-
-      const psimd_f32 vi0x6789 = extq2_f32(vi0x4567, vi0x89AB);
-      const psimd_f32 vi1x6789 = extq2_f32(vi1x4567, vi1x89AB);
-      const psimd_f32 vi2x6789 = extq2_f32(vi2x4567, vi2x89AB);
-      const psimd_f32 vi3x6789 = extq2_f32(vi3x4567, vi3x89AB);
-      const psimd_f32 vi4x6789 = extq2_f32(vi4x4567, vi4x89AB);
-      const psimd_f32 vi5x6789 = extq2_f32(vi5x4567, vi5x89AB);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x6789, vw4567);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi1x6789, vw4567);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x6789, vw89AB);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi2x6789, vw89AB);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x6789, vwCDEF);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi3x6789, vwCDEF);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x6789, vwKLMN);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi4x6789, vwKLMN);
-
-      vo4567p00 = vfmaq_lane1_f32( vo4567p00, vi4x6789, vwOP);
-      vo4567p10 = vfmaq_lane1_f32( vo4567p10, vi5x6789, vwOP);
-
-      vi0x4567 = vi0x89AB;
-      vi1x4567 = vi1x89AB;
-      vi2x4567 = vi2x89AB;
-      vi3x4567 = vi3x89AB;
-      vi4x4567 = vi4x89AB;
-      vi5x4567 = vi5x89AB;
-
-      psimd_f32 vo0 = vo4567p00;
-      psimd_f32 vo1 = vo4567p10;
-
-      vo0 = psimd_max_f32(vo0, vmin);
-      vo0 = psimd_min_f32(vo0, vmax);
-      vo1 = psimd_max_f32(vo1, vmin);
-      vo1 = psimd_min_f32(vo1, vmax);
-
-      psimd_store_f32(o0, vo0); o0 += 4;
-      psimd_store_f32(o1, vo1); o1 += 4;
-      w -= 4;
-    }
-    assert(w >= 1);
-    assert(w <= 4);
-    {
-      psimd_f32 vo4567p00 = psimd_splat0_f32(vw0123);
-      psimd_f32 vo4567p10 = psimd_splat0_f32(vw0123);
-
-      // This might have already happened if there are more than 4 pixels, but
-      // we can't count on it.
-      vi0x4567 = psimd_andmask_f32(vmask, vi0x4567);
-      vi1x4567 = psimd_andmask_f32(vmask, vi1x4567);
-      vi2x4567 = psimd_andmask_f32(vmask, vi2x4567);
-      vi3x4567 = psimd_andmask_f32(vmask, vi3x4567);
-      vi4x4567 = psimd_andmask_f32(vmask, vi4x4567);
-      vi5x4567 = psimd_andmask_f32(vmask, vi5x4567);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi0x4567, vw0123);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi1x4567, vw0123);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi1x4567, vw89AB);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi2x4567, vw89AB);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi2x4567, vwCDEF);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi3x4567, vwCDEF);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi3x4567, vwGHIJ);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi4x4567, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi4x4567, vwKLMN);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi5x4567, vwKLMN);
-
-
-      const psimd_f32 vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x3456 = extq3_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x3456 = extq3_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x3456 = extq3_f32(vi4x0123, vi4x4567);
-      const psimd_f32 vi5x3456 = extq3_f32(vi5x0123, vi5x4567);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi0x3456, vw0123);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi1x3456, vw0123);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi1x3456, vw4567);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi2x3456, vw4567);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi2x3456, vwCDEF);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi3x3456, vwCDEF);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi3x3456, vwGHIJ);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi4x3456, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi4x3456, vwKLMN);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi5x3456, vwKLMN);
-
-      const psimd_f32 vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x2345 = extq2_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x2345 = extq2_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x2345 = extq2_f32(vi4x0123, vi4x4567);
-      const psimd_f32 vi5x2345 = extq2_f32(vi5x0123, vi5x4567);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x2345, vw0123);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi1x2345, vw0123);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x2345, vw4567);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi2x2345, vw4567);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x2345, vw89AB);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi3x2345, vw89AB);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x2345, vwGHIJ);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi4x2345, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi4x2345, vwKLMN);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi5x2345, vwKLMN);
-
-      const psimd_f32 vzero = psimd_zero_f32();
-      const psimd_f32 vi0x5678 = extq1_f32(vi0x4567, vzero);
-      const psimd_f32 vi1x5678 = extq1_f32(vi1x4567, vzero);
-      const psimd_f32 vi2x5678 = extq1_f32(vi2x4567, vzero);
-      const psimd_f32 vi3x5678 = extq1_f32(vi3x4567, vzero);
-      const psimd_f32 vi4x5678 = extq1_f32(vi4x4567, vzero);
-      const psimd_f32 vi5x5678 = extq1_f32(vi5x4567, vzero);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi0x5678, vw4567);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi1x5678, vw4567);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi1x5678, vw89AB);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi2x5678, vw89AB);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi2x5678, vwCDEF);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi3x5678, vwCDEF);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi3x5678, vwGHIJ);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi4x5678, vwGHIJ);
-
-      vo4567p00 = vfmaq_lane0_f32( vo4567p00, vi4x5678, vwOP);
-      vo4567p10 = vfmaq_lane0_f32( vo4567p10, vi5x5678, vwOP);
-
-      const psimd_f32 vi0x6789 = extq2_f32(vi0x4567, vzero);
-      const psimd_f32 vi1x6789 = extq2_f32(vi1x4567, vzero);
-      const psimd_f32 vi2x6789 = extq2_f32(vi2x4567, vzero);
-      const psimd_f32 vi3x6789 = extq2_f32(vi3x4567, vzero);
-      const psimd_f32 vi4x6789 = extq2_f32(vi4x4567, vzero);
-      const psimd_f32 vi5x6789 = extq2_f32(vi5x4567, vzero);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x6789, vw4567);
-      vo4567p10 = vfmaq_lane1_f32(vo4567p10, vi1x6789, vw4567);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x6789, vw89AB);
-      vo4567p10 = vfmaq_lane2_f32(vo4567p10, vi2x6789, vw89AB);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x6789, vwCDEF);
-      vo4567p10 = vfmaq_lane3_f32(vo4567p10, vi3x6789, vwCDEF);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x6789, vwKLMN);
-      vo4567p10 = vfmaq_lane0_f32(vo4567p10, vi4x6789, vwKLMN);
-
-      vo4567p00 = vfmaq_lane1_f32( vo4567p00, vi4x6789, vwOP);
-      vo4567p10 = vfmaq_lane1_f32( vo4567p10, vi5x6789, vwOP);
-
-      psimd_f32 vo0 = vo4567p00;
-      psimd_f32 vo1 = vo4567p10;
-
-      vo0 = psimd_max_f32(vo0, vmin);
-      vo0 = psimd_min_f32(vo0, vmax);
-      vo1 = psimd_max_f32(vo1, vmin);
-      vo1 = psimd_min_f32(vo1, vmax);
-
-      if XNN_LIKELY(w & 4) {
-        psimd_store_f32(o0, vo0);
-        psimd_store_f32(o1, vo1);
-      } else {
-        if (w & 2) {
-          psimd_store2_f32(o0, vo0); o0 += 2;
-          psimd_store2_f32(o1, vo1); o1 += 2;
-          vo0 = psimd_splat2_f32(vo0);
-          vo1 = psimd_splat2_f32(vo1);
-        }
-        if (w & 1) {
-          psimd_store1_f32(o0, vo0);
-          psimd_store1_f32(o1, vo1);
-        }
-      }
-    }
-  } else if (output_height == 1) {
-    i3 = i4 = zero;
-    psimd_f32 vi0x0123 = psimd_zero_f32();
-    psimd_f32 vi1x0123 = psimd_zero_f32();
-    psimd_f32 vi2x0123 = psimd_zero_f32();
-    psimd_f32 vi3x0123 = psimd_zero_f32();
-    psimd_f32 vi4x0123 = psimd_zero_f32();
-    psimd_f32 vi0x4567 = psimd_load_f32(i0); i0 += 4;
-    psimd_f32 vi1x4567 = psimd_load_f32(i1); i1 += 4;
-    psimd_f32 vi2x4567 = psimd_load_f32(i2); i2 += 4;
-    psimd_f32 vi3x4567 = psimd_load_f32(i3); i3 += 4;
-    psimd_f32 vi4x4567 = psimd_load_f32(i4); i4 += 4;
-
-    size_t w = input_width;
-    for (; w > 8; w -= 4) {
-      psimd_f32 vo4567p00 = psimd_splat0_f32(vw0123);
-
-      const psimd_f32 vi0x89AB = psimd_load_f32(i0); i0 += 4;
-      const psimd_f32 vi1x89AB = psimd_load_f32(i1); i1 += 4;
-      const psimd_f32 vi2x89AB = psimd_load_f32(i2); i2 += 4;
-      const psimd_f32 vi3x89AB = psimd_load_f32(i3); i3 += 4;
-      const psimd_f32 vi4x89AB = psimd_load_f32(i4); i4 += 4;
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi0x4567, vw0123);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi1x4567, vw89AB);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi2x4567, vwCDEF);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi3x4567, vwGHIJ);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi4x4567, vwKLMN);
-
-      const psimd_f32 vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x3456 = extq3_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x3456 = extq3_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x3456 = extq3_f32(vi4x0123, vi4x4567);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi0x3456, vw0123);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi1x3456, vw4567);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi2x3456, vwCDEF);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi3x3456, vwGHIJ);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi4x3456, vwKLMN);
-
-      const psimd_f32 vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x2345 = extq2_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x2345 = extq2_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x2345 = extq2_f32(vi4x0123, vi4x4567);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x2345, vw0123);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x2345, vw4567);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x2345, vw89AB);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x2345, vwGHIJ);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi4x2345, vwKLMN);
-
-      vi0x0123 = vi0x4567;
-      vi1x0123 = vi1x4567;
-      vi2x0123 = vi2x4567;
-      vi3x0123 = vi3x4567;
-      vi4x0123 = vi4x4567;
-
-      const psimd_f32 vi0x5678 = extq1_f32(vi0x4567, vi0x89AB);
-      const psimd_f32 vi1x5678 = extq1_f32(vi1x4567, vi1x89AB);
-      const psimd_f32 vi2x5678 = extq1_f32(vi2x4567, vi2x89AB);
-      const psimd_f32 vi3x5678 = extq1_f32(vi3x4567, vi3x89AB);
-      const psimd_f32 vi4x5678 = extq1_f32(vi4x4567, vi4x89AB);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi0x5678, vw4567);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi1x5678, vw89AB);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi2x5678, vwCDEF);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi3x5678, vwGHIJ);
-      vo4567p00 = vfmaq_lane0_f32( vo4567p00, vi4x5678, vwOP);
-
-      const psimd_f32 vi0x6789 = extq2_f32(vi0x4567, vi0x89AB);
-      const psimd_f32 vi1x6789 = extq2_f32(vi1x4567, vi1x89AB);
-      const psimd_f32 vi2x6789 = extq2_f32(vi2x4567, vi2x89AB);
-      const psimd_f32 vi3x6789 = extq2_f32(vi3x4567, vi3x89AB);
-      const psimd_f32 vi4x6789 = extq2_f32(vi4x4567, vi4x89AB);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x6789, vw4567);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x6789, vw89AB);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x6789, vwCDEF);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x6789, vwKLMN);
-      vo4567p00 = vfmaq_lane1_f32( vo4567p00, vi4x6789, vwOP);
-
-
-      vi0x4567 = vi0x89AB;
-      vi1x4567 = vi1x89AB;
-      vi2x4567 = vi2x89AB;
-      vi3x4567 = vi3x89AB;
-      vi4x4567 = vi4x89AB;
-
-      psimd_f32 vo0 = vo4567p00;
-
-      vo0 = psimd_max_f32(vo0, vmin);
-      vo0 = psimd_min_f32(vo0, vmax);
-
-      psimd_store_f32(o0, vo0); o0 += 4;
-    }
-    // Always process the last block of 5..8 pixels.
-    if XNN_LIKELY(w > 4)
-    {
-      psimd_f32 vo4567p00 = psimd_splat0_f32(vw0123);
-
-      psimd_f32 vi0x89AB = psimd_load_f32(i0); i0 += 4;
-      psimd_f32 vi1x89AB = psimd_load_f32(i1); i1 += 4;
-      psimd_f32 vi2x89AB = psimd_load_f32(i2); i2 += 4;
-      psimd_f32 vi3x89AB = psimd_load_f32(i3); i3 += 4;
-      psimd_f32 vi4x89AB = psimd_load_f32(i4); i4 += 4;
-
-      vi0x89AB = psimd_andmask_f32(vmask, vi0x89AB);
-      vi1x89AB = psimd_andmask_f32(vmask, vi1x89AB);
-      vi2x89AB = psimd_andmask_f32(vmask, vi2x89AB);
-      vi3x89AB = psimd_andmask_f32(vmask, vi3x89AB);
-      vi4x89AB = psimd_andmask_f32(vmask, vi4x89AB);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi0x4567, vw0123);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi1x4567, vw89AB);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi2x4567, vwCDEF);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi3x4567, vwGHIJ);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi4x4567, vwKLMN);
-
-      const psimd_f32 vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x3456 = extq3_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x3456 = extq3_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x3456 = extq3_f32(vi4x0123, vi4x4567);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi0x3456, vw0123);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi1x3456, vw4567);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi2x3456, vwCDEF);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi3x3456, vwGHIJ);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi4x3456, vwKLMN);
-
-      const psimd_f32 vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x2345 = extq2_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x2345 = extq2_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x2345 = extq2_f32(vi4x0123, vi4x4567);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x2345, vw0123);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x2345, vw4567);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x2345, vw89AB);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x2345, vwGHIJ);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi4x2345, vwKLMN);
-
-      vi0x0123 = vi0x4567;
-      vi1x0123 = vi1x4567;
-      vi2x0123 = vi2x4567;
-      vi3x0123 = vi3x4567;
-      vi4x0123 = vi4x4567;
-
-      const psimd_f32 vi0x5678 = extq1_f32(vi0x4567, vi0x89AB);
-      const psimd_f32 vi1x5678 = extq1_f32(vi1x4567, vi1x89AB);
-      const psimd_f32 vi2x5678 = extq1_f32(vi2x4567, vi2x89AB);
-      const psimd_f32 vi3x5678 = extq1_f32(vi3x4567, vi3x89AB);
-      const psimd_f32 vi4x5678 = extq1_f32(vi4x4567, vi4x89AB);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi0x5678, vw4567);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi1x5678, vw89AB);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi2x5678, vwCDEF);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi3x5678, vwGHIJ);
-      vo4567p00 = vfmaq_lane0_f32( vo4567p00, vi4x5678, vwOP);
-
-      const psimd_f32 vi0x6789 = extq2_f32(vi0x4567, vi0x89AB);
-      const psimd_f32 vi1x6789 = extq2_f32(vi1x4567, vi1x89AB);
-      const psimd_f32 vi2x6789 = extq2_f32(vi2x4567, vi2x89AB);
-      const psimd_f32 vi3x6789 = extq2_f32(vi3x4567, vi3x89AB);
-      const psimd_f32 vi4x6789 = extq2_f32(vi4x4567, vi4x89AB);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x6789, vw4567);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x6789, vw89AB);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x6789, vwCDEF);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x6789, vwKLMN);
-      vo4567p00 = vfmaq_lane1_f32( vo4567p00, vi4x6789, vwOP);
-
-      vi0x4567 = vi0x89AB;
-      vi1x4567 = vi1x89AB;
-      vi2x4567 = vi2x89AB;
-      vi3x4567 = vi3x89AB;
-      vi4x4567 = vi4x89AB;
-
-      psimd_f32 vo0 = vo4567p00;
-
-      vo0 = psimd_max_f32(vo0, vmin);
-      vo0 = psimd_min_f32(vo0, vmax);
-
-      psimd_store_f32(o0, vo0); o0 += 4;
-      w -= 4;
-    }
-    assert(w >= 1);
-    assert(w <= 4);
-    {
-      psimd_f32 vo4567p00 = psimd_splat0_f32(vw0123);
-
-      // This might have already happened if there are more than 4 pixels, but
-      // we can't count on it.
-      vi0x4567 = psimd_andmask_f32(vmask, vi0x4567);
-      vi1x4567 = psimd_andmask_f32(vmask, vi1x4567);
-      vi2x4567 = psimd_andmask_f32(vmask, vi2x4567);
-      vi3x4567 = psimd_andmask_f32(vmask, vi3x4567);
-      vi4x4567 = psimd_andmask_f32(vmask, vi4x4567);
-
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi0x4567, vw0123);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi1x4567, vw89AB);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi2x4567, vwCDEF);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi3x4567, vwGHIJ);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi4x4567, vwKLMN);
-
-
-      const psimd_f32 vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x3456 = extq3_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x3456 = extq3_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x3456 = extq3_f32(vi4x0123, vi4x4567);
-
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi0x3456, vw0123);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi1x3456, vw4567);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi2x3456, vwCDEF);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi3x3456, vwGHIJ);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi4x3456, vwKLMN);
-
-      const psimd_f32 vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
-      const psimd_f32 vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
-      const psimd_f32 vi2x2345 = extq2_f32(vi2x0123, vi2x4567);
-      const psimd_f32 vi3x2345 = extq2_f32(vi3x0123, vi3x4567);
-      const psimd_f32 vi4x2345 = extq2_f32(vi4x0123, vi4x4567);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x2345, vw0123);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x2345, vw4567);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x2345, vw89AB);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x2345, vwGHIJ);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi4x2345, vwKLMN);
-
-      const psimd_f32 vzero = psimd_zero_f32();
-      const psimd_f32 vi0x5678 = extq1_f32(vi0x4567, vzero);
-      const psimd_f32 vi1x5678 = extq1_f32(vi1x4567, vzero);
-      const psimd_f32 vi2x5678 = extq1_f32(vi2x4567, vzero);
-      const psimd_f32 vi3x5678 = extq1_f32(vi3x4567, vzero);
-      const psimd_f32 vi4x5678 = extq1_f32(vi4x4567, vzero);
-
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi0x5678, vw4567);
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi1x5678, vw89AB);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi2x5678, vwCDEF);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi3x5678, vwGHIJ);
-      vo4567p00 = vfmaq_lane0_f32( vo4567p00, vi4x5678, vwOP);
-
-      const psimd_f32 vi0x6789 = extq2_f32(vi0x4567, vzero);
-      const psimd_f32 vi1x6789 = extq2_f32(vi1x4567, vzero);
-      const psimd_f32 vi2x6789 = extq2_f32(vi2x4567, vzero);
-      const psimd_f32 vi3x6789 = extq2_f32(vi3x4567, vzero);
-      const psimd_f32 vi4x6789 = extq2_f32(vi4x4567, vzero);
-
-      vo4567p00 = vfmaq_lane1_f32(vo4567p00, vi0x6789, vw4567);
-      vo4567p00 = vfmaq_lane2_f32(vo4567p00, vi1x6789, vw89AB);
-      vo4567p00 = vfmaq_lane3_f32(vo4567p00, vi2x6789, vwCDEF);
-      vo4567p00 = vfmaq_lane0_f32(vo4567p00, vi3x6789, vwKLMN);
-      vo4567p00 = vfmaq_lane1_f32( vo4567p00, vi4x6789, vwOP);
-
-      psimd_f32 vo0 = vo4567p00;
-
-      vo0 = psimd_max_f32(vo0, vmin);
-      vo0 = psimd_min_f32(vo0, vmax);
-
-      if XNN_LIKELY(w & 4) {
-        psimd_store_f32(o0, vo0);
-      } else {
-        if (w & 2) {
-          psimd_store2_f32(o0, vo0); o0 += 2;
-          vo0 = psimd_splat2_f32(vo0);
-        }
-        if (w & 1) {
-          psimd_store1_f32(o0, vo0);
-        }
-      }
-    }
-  }
+    output_height = doz(output_height, 3);
+  } while (output_height != 0);
 }

@@ -26,48 +26,32 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
   assert(padding_top >= 0);
   assert(padding_top <= 1);
 
-  const size_t input_tuple_stride = 4 * sizeof(float);
-  const size_t input_width_stride = input_width * sizeof(float);
-
-  const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
-  size_t output_height = (padded_input_height - 3) / 2 + 1;
-
   const uint32x4_t vmask_even = vld1q_u32(params->neon.mask_even);
   const uint32x4_t vmask_odd  = vld1q_u32(params->neon.mask_odd);
   const float32x4_t vmax = vld1q_dup_f32(&params->neon.max);
   const float32x4_t vmin = vld1q_dup_f32(&params->neon.min);
 
-  const size_t input_width_decrement_single = input_width / 8  * input_tuple_stride * 2;
-  const size_t input_width_increment = input_width_stride * 2 - input_width_decrement_single;
-
-  const float* i0;
-  const float* i1;
-  const float* i2;
-
-  if (padding_top == 0) {
-    i0 = input;
-    i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
-    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
-    if (input_height <= 2) {
-      i2 = zero;
-    }
-    if (input_height == 1) {
-      i1 = zero;
-    }
-  } else {
-    i0 = zero;
-    i1 = input;
-    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
-    if (input_height == 1) {
-      i2 = zero;
-    }
-  }
-
   const float32x4_t vw0123 = vld1q_f32(weights);
   const float32x4_t vw4567 = vld1q_f32(weights + 4);
   const float32x2_t vw89 = vld1_f32(weights + 8);
 
+  const size_t input_width_stride = input_width * sizeof(float);
+  const size_t input_decrement = round_down_po2(input_width * sizeof(float), 4 /* SIMD output width */ * 2 /* subsampling */ * sizeof(float));
+
+  const float* i0 = (const float*) ((uintptr_t) input - ((-padding_top) & input_width_stride));
+  const float* i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
+  if XNN_UNPREDICTABLE(padding_top != 0) {
+    i0 = zero;
+  }
+  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+
+  size_t padded_input_height = input_height + padding_top + 1 /* padding bottom */;
+  size_t output_height = (padded_input_height - 3 /* kernel size */ + 2 /* subsampling */) / 2;
   do {
+    if XNN_UNPREDICTABLE(padded_input_height <= 3) {
+      i2 = zero;
+    }
+
     float32x4_t vi0x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi1x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi2x0123 = vmovq_n_f32(0.0f);
@@ -186,19 +170,11 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
       }
     }
 
-    i0 = (const float*) ((uintptr_t) i2 - input_width_decrement_single);
-    i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
-    i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
+    i0 = (const float*) ((uintptr_t) i2 - input_decrement);
+    i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
+    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+
     output_height -= 1;
-    if (output_height == 1 && padding_top == input_height % 2) {
-      // to mimic the following code with only one if, we do some small
-      // shenanigans...
-      // if (padding_top == 0 && input_height % 2 == 0) {
-      //   i2 = zero;
-      // } else if (padding_top == 1 && input_height % 2 == 1) {
-      //   i2 = zero;
-      // }
-      i2 = zero;
-    }
+    padded_input_height -= 2;
   } while (output_height != 0);
 }

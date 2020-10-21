@@ -23,38 +23,32 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
   assert(input_height != 0);
   assert(padding_top == 1);
 
-  const size_t input_tuple_stride = sizeof(float);
-  const size_t input_width_stride = input_width * sizeof(float);
-
-  const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
-  size_t output_height = padded_input_height - 3 + 1;
-
-  const size_t input_width_decrement = input_width * input_tuple_stride;
-  const size_t input_width_increment = input_width_stride - input_width_decrement;
-
   const float params_min = params->scalar.min;
   const float params_max = params->scalar.max;
+
+  const float vbias = weights[0];
+  const float vk00 = weights[1];
+  const float vk01 = weights[2];
+  const float vk02 = weights[3];
+  const float vk10 = weights[4];
+  const float vk11 = weights[5];
+  const float vk12 = weights[6];
+  const float vk20 = weights[7];
+  const float vk21 = weights[8];
+  const float vk22 = weights[9];
+
+  const size_t input_width_stride = input_width * sizeof(float);
 
   const float* i0 = zero;
   const float* i1 = input;
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
 
-  if (input_height == 1) {
-    i2 = zero;
-  }
+  size_t output_height = input_height;
+  do {
+    if XNN_UNPREDICTABLE(output_height == 1) {
+      i2 = zero;
+    }
 
-  const float vw0 = weights[0];
-  const float vw1 = weights[1];
-  const float vw2 = weights[2];
-  const float vw3 = weights[3];
-  const float vw4 = weights[4];
-  const float vw5 = weights[5];
-  const float vw6 = weights[6];
-  const float vw7 = weights[7];
-  const float vw8 = weights[8];
-  const float vw9 = weights[9];
-
-  while (output_height != 0) {
     float vi0x0 = 0.0f;
     float vi1x0 = 0.0f;
     float vi2x0 = 0.0f;
@@ -68,17 +62,25 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
       const float vi1x2 = *i1++;
       const float vi2x2 = *i2++;
 
-      const float vrow0_accum = vw1 * vi0x0 + vw2 * vi0x1 + vw3 * vi0x2;
+      float vacc0 = vk00 * vi0x0;
       vi0x0 = vi0x1;
-      vi0x1 = vi0x2;
-      const float vrow1_accum = vw4 * vi1x0 + vw5 * vi1x1 + vw6 * vi1x2;
+      float vacc1 = vk10 * vi1x0;
       vi1x0 = vi1x1;
-      vi1x1 = vi1x2;
-      const float vrow2_accum = vw7 * vi2x0 + vw8 * vi2x1 + vw9 * vi2x2;
+      float vacc2 = vk20 * vi2x0;
       vi2x0 = vi2x1;
+
+      vacc0 += vk01 * vi0x1;
+      vi0x1 = vi0x2;
+      vacc1 += vk11 * vi1x1;
+      vi1x1 = vi1x2;
+      vacc2 += vk21 * vi2x1;
       vi2x1 = vi2x2;
 
-      float voutput = (vw0 + vrow0_accum) + (vrow1_accum + vrow2_accum);
+      vacc0 += vk02 * vi0x2;
+      vacc1 += vk12 * vi1x2;
+      vacc2 += vk22 * vi2x2;
+
+      float voutput = (vbias + vacc0) + (vacc1 + vacc2);
 
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
@@ -88,11 +90,15 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
     // Always process the last pixel separately to account for right edge.
     assert(w == 1);
     {
-      const float vrow0_accum = vw1 * vi0x0 + vw2 * vi0x1;
-      const float vrow1_accum = vw4 * vi1x0 + vw5 * vi1x1;
-      const float vrow2_accum = vw7 * vi2x0 + vw8 * vi2x1;
+      float vacc0 = vk00 * vi0x0;
+      float vacc1 = vk10 * vi1x0;
+      float vacc2 = vk20 * vi2x0;
 
-      float voutput = (vw0 + vrow0_accum) + (vrow1_accum + vrow2_accum);
+      vacc0 += vk01 * vi0x1;
+      vacc1 += vk11 * vi1x1;
+      vacc2 += vk21 * vi2x1;
+
+      float voutput = (vbias + vacc0) + (vacc1 + vacc2);
 
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
@@ -100,12 +106,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
       *output++ = voutput;
     }
 
-    i0 = (const float*) ((uintptr_t) i1 - input_width_decrement);
-    i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
-    i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
-    output_height--;
-    if (output_height == 1) {
-      i2 = zero;
-    }
-  }
+    i0 = (const float*) ((uintptr_t) i1 - input_width_stride);
+  } while (--output_height != 0);
 }
