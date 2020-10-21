@@ -34,24 +34,6 @@ class DWConvCHWMicrokernelTester {
     Scalar,
   };
 
-  inline DWConvCHWMicrokernelTester& input_tuple_size(uint32_t input_tuple_size) {
-    this->input_tuple_size_ = input_tuple_size;
-    return *this;
-  }
-
-  inline uint32_t input_tuple_size() const {
-    return this->input_tuple_size_;
-  }
-
-  inline DWConvCHWMicrokernelTester& output_tuple_size(uint32_t output_tuple_size) {
-    this->output_tuple_size_ = output_tuple_size;
-    return *this;
-  }
-
-  inline uint32_t output_tuple_size() const {
-    return this->output_tuple_size_;
-  }
-
   inline DWConvCHWMicrokernelTester& padding_left(uint32_t padding_left) {
     this->padding_left_ = padding_left;
     return *this;
@@ -155,62 +137,6 @@ class DWConvCHWMicrokernelTester {
     }
   }
 
-  inline DWConvCHWMicrokernelTester& input_tuple_stride(uint32_t input_tuple_stride) {
-    assert(input_tuple_stride != 0);
-    this->input_tuple_stride_ = input_tuple_stride;
-    return *this;
-  }
-
-  inline uint32_t input_tuple_stride() const {
-    if (this->input_tuple_stride_ == 0) {
-      return this->input_tuple_size();
-    } else {
-      return this->input_tuple_stride_;
-    }
-  }
-
-  inline DWConvCHWMicrokernelTester& output_tuple_stride(uint32_t output_tuple_stride) {
-    assert(output_tuple_stride != 0);
-    this->output_tuple_stride_ = output_tuple_stride;
-    return *this;
-  }
-
-  inline uint32_t output_tuple_stride() const {
-    if (this->output_tuple_stride_ == 0) {
-      return this->output_tuple_size();
-    } else {
-      return this->output_tuple_stride_;
-    }
-  }
-
-  inline DWConvCHWMicrokernelTester& input_width_stride(uint32_t input_width_stride) {
-    assert(input_width_stride != 0);
-    this->input_width_stride_ = input_width_stride;
-    return *this;
-  }
-
-  inline uint32_t input_width_stride() const {
-    if (this->input_width_stride_ == 0) {
-      return (this->input_width() + input_tuple_size() - 1) / input_tuple_size() * input_tuple_size();
-    } else {
-      return this->input_width_stride_;
-    }
-  }
-
-  inline DWConvCHWMicrokernelTester& output_width_stride(uint32_t output_width_stride) {
-    assert(output_width_stride != 0);
-    this->output_width_stride_ = output_width_stride;
-    return *this;
-  }
-
-  inline uint32_t output_width_stride() const {
-    if (this->output_width_stride_ == 0) {
-      return (this->output_width() + output_tuple_size() - 1) / output_tuple_size() * output_tuple_size();
-    } else {
-      return this->output_width_stride_;
-    }
-  }
-
   inline DWConvCHWMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
@@ -239,19 +165,14 @@ class DWConvCHWMicrokernelTester {
   }
 
   void Test(xnn_f32_dwconv_chw_ukernel_function dwconv, Variant variant = Variant::Native) const {
-    ASSERT_EQ(0, input_tuple_stride() % input_tuple_size());
-    ASSERT_EQ(0, output_tuple_stride() % output_tuple_size());
-
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
 
-    std::vector<float, AlignedAllocator<float, 64>> input((input_height() - 1) * input_width_stride() +
-      (input_width() - 1) / input_tuple_size() * input_tuple_stride() + input_tuple_stride() + input_tuple_size());
-    std::vector<float> zero((input_width() - 1) / input_tuple_size() * input_tuple_stride() + input_tuple_stride() + input_tuple_size());
+    std::vector<float, AlignedAllocator<float, 64>> input(input_height() * input_width() + 2 * XNN_EXTRA_BYTES);
+    std::vector<float> zero(input_width() + 2 * XNN_EXTRA_BYTES);
     std::vector<float> packed_weights(kernel_size() + 1);
-    std::vector<float, AlignedAllocator<float, 64>> output((output_height() - 1) * output_width_stride() +
-      (output_width() - 1) / output_tuple_size() * output_tuple_stride() + output_tuple_size());
+    std::vector<float, AlignedAllocator<float, 64>> output(output_height() * output_width());
     std::vector<float> output_ref(output_height() * output_width());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -266,9 +187,9 @@ class DWConvCHWMicrokernelTester {
             const size_t iy = oy * subsampling() + ky - padding_top();
             for (size_t kx = 0; kx < kernel_width(); kx++) {
               const size_t ix = ox * subsampling() + kx - padding_left();
-              if (ix < input_width() && iy <= input_height() - 1) {
-                float input_val = input[ iy * input_width_stride() + ix / input_tuple_size() * input_tuple_stride() + ix % input_tuple_size()];
-                float kernel_val = packed_weights[1 + ky * kernel_width() + kx];
+              if (ix < input_width() && iy < input_height()) {
+                const float input_val = input[iy * input_width() + ix];
+                const float kernel_val = packed_weights[1 + ky * kernel_width() + kx];
                 acc += input_val * kernel_val;
               }
             }
@@ -305,8 +226,6 @@ class DWConvCHWMicrokernelTester {
         input_height(), input_width(),
         input.data(), packed_weights.data(), zero.data(), output.data(),
         padding_top(),
-        input_tuple_stride() * sizeof(float), output_tuple_stride() * sizeof(float),
-        input_width_stride() * sizeof(float), output_width_stride() * sizeof(float),
         &chw_params);
 
       // Verify results.
@@ -314,25 +233,15 @@ class DWConvCHWMicrokernelTester {
         for (size_t x = 0; x < output_width(); x++) {
           ASSERT_NEAR(
               output_ref[y * output_width() + x],
-              output[y * output_width_stride() + x / output_tuple_size() * output_tuple_stride() + x % output_tuple_size()],
+              output[y * output_width() + x],
               std::abs(output_ref[y * output_width() + x]) * 1.0e-5)
             << "x = " << x << ", y = " << y;
-        }
-      }
-
-      // Verify that remainder of the last tile left unchanged.
-      if (output_width() % output_tuple_size() != 0) {
-        for (size_t i = output.size() - output_tuple_size() + output_width() % output_tuple_size(); i < output.size(); i++) {
-          ASSERT_TRUE(std::isnan(output[i]))
-            << "i = " << i << ", output = " << output[i];
         }
       }
     }
   }
 
  private:
-  uint32_t input_tuple_size_{1};
-  uint32_t output_tuple_size_{1};
   uint32_t padding_left_{0};
   uint32_t padding_right_{0};
   uint32_t padding_top_{0};
@@ -342,10 +251,6 @@ class DWConvCHWMicrokernelTester {
   uint32_t subsampling_{1};
   uint32_t kernel_height_{1};
   uint32_t kernel_width_{1};
-  uint32_t input_tuple_stride_{0};
-  uint32_t output_tuple_stride_{0};
-  uint32_t input_width_stride_{0};
-  uint32_t output_width_stride_{0};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   size_t iterations_{1};

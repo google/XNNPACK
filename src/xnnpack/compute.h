@@ -415,10 +415,6 @@ struct dwconv2d_context {
   void* output;
   size_t output_channel_stride;
   size_t output_batch_stride;
-  size_t input_tuple_stride;
-  size_t output_tuple_stride;
-  size_t input_pixel_stride;
-  size_t output_pixel_stride;
   union {
     union xnn_f32_chw_params f32;
   } params;

@@ -995,10 +995,6 @@ typedef void (*xnn_dwconv_chw_ukernel_function)(
     const void* zero,
     void* output,
     uint32_t padding_top,
-    size_t input_tuple_stride,
-    size_t output_tuple_stride,
-    size_t input_width_stride,
-    size_t output_width_stride,
     const void* params);
 
 typedef void (*xnn_f32_dwconv_chw_ukernel_function)(
@@ -1009,10 +1005,6 @@ typedef void (*xnn_f32_dwconv_chw_ukernel_function)(
     const float* zero,
     float* output,
     uint32_t padding_top,
-    size_t input_tuple_stride,
-    size_t output_tuple_stride,
-    size_t input_width_stride,
-    size_t output_width_stride,
     const union xnn_f32_chw_params* params);
 
 typedef void (*xnn_dwconv_unipass_ukernel_function)(

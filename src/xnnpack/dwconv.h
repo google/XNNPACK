@@ -332,10 +332,6 @@ DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel
     const float* zero,                                   \
     float* output,                                       \
     uint32_t padding_top,                                \
-    size_t input_tuple_stride,                           \
-    size_t output_tuple_stride,                          \
-    size_t input_height_stride,                          \
-    size_t output_height_stride,                         \
     const union xnn_f32_chw_params* params);
 
 DECLARE_F32_DWCONV_CHW_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3p1__scalar)

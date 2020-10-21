@@ -396,10 +396,6 @@ void xnn_compute_dwconv2d_chw(
     context->zero,
     (void*) ((uintptr_t) context->output + channel * context->output_channel_stride + batch_index * context->output_batch_stride),
     context->input_padding_top,
-    context->input_tuple_stride,
-    context->output_tuple_stride,
-    context->input_pixel_stride,
-    context->output_pixel_stride,
     &context->params);
 }
 

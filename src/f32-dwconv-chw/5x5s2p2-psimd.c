@@ -63,15 +63,17 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
     const float* zero,
     float* output,
     uint32_t padding_top,
-    size_t input_tuple_stride,
-    size_t output_tuple_stride,
-    size_t input_width_stride,
-    size_t output_width_stride,
     const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(input_width != 0);
   assert(input_height != 0);
   assert(padding_top >= 1 && padding_top <= 2);
+
+  const size_t input_tuple_stride = 4 * sizeof(float);
+  const size_t output_tuple_stride = 4 * sizeof(float);
+  const size_t input_width_stride = input_width * sizeof(float);
+  const size_t output_width = (input_width + 1) / 2;
+  const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 2 /* padding_bottom */;
   const size_t output_height = (padded_input_height - 5) / 2 + 1;
