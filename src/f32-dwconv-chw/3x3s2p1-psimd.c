@@ -48,7 +48,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
   const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
-  const size_t output_height = (padded_input_height - 3) / 2 + 1;
+  size_t output_height = (padded_input_height - 3) / 2 + 1;
 
   const psimd_s32 vmask_even = psimd_load_s32(params->scalar.mask_even);
   const psimd_s32 vmask_odd  = psimd_load_s32(params->scalar.mask_odd);
@@ -93,7 +93,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
   const psimd_f32 vk21 = psimd_load_splat_f32(weights + 8);
   const psimd_f32 vk22 = psimd_load_splat_f32(weights + 9);
 
-  size_t m = output_height;
   do {
     psimd_f32 vi0x7531 = psimd_zero_f32();
     psimd_f32 vi1x7531 = psimd_zero_f32();
@@ -220,8 +219,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
     output = (float*) ((uintptr_t) output + output_width_increment);
-    m -= 1;
-    if (m == 1 && padding_top == input_height % 2) {
+    output_height -= 1;
+    if (output_height == 1 && padding_top == input_height % 2) {
       // to mimic the following code with only one if, we do some small
       // shenanigans...
       // if (padding_top == 0 && input_height % 2 == 0) {
@@ -231,5 +230,5 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
       // }
       i2 = zero;
     }
-  } while (m != 0);
+  } while (output_height != 0);
 }

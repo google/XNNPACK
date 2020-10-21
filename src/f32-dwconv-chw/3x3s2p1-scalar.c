@@ -32,7 +32,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
   const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
-  const size_t output_height = (padded_input_height - 3) / 2 + 1;
+  size_t output_height = (padded_input_height - 3) / 2 + 1;
 
   const size_t input_width_decrement_single = (input_width/2) * 2 * input_tuple_stride;;
   const size_t input_width_increment = 2 * input_width_stride - input_width_decrement_single;
@@ -77,8 +77,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
   const float vw8 = weights[8];
   const float vw9 = weights[9];
 
-  size_t m = output_height;
-  while (m > 0) {
+  while (output_height != 0) {
     float vi0x0 = 0.0f;
     float vi1x0 = 0.0f;
     float vi2x0 = 0.0f;
@@ -131,8 +130,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
     output0 = (float*) ((uintptr_t) output0 + output_width_increment);
-    m -= 1;
-    if (m == 1 && padding_top == input_height % 2) {
+    output_height -= 1;
+    if (output_height == 1 && padding_top == input_height % 2) {
       // to mimic the following code with only one if, we do some small
       // shenanigans...
       // if (padding_top == 0 && input_height % 2 == 0) {

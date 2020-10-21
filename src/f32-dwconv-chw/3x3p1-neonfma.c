@@ -32,7 +32,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma(
   const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
-  const size_t output_height = padded_input_height - 3 + 1;
+  size_t output_height = padded_input_height - 3 + 1;
 
   const uint32x4_t vmask = vld1q_u32(params->neon.mask);
   const float32x4_t vmax = vld1q_dup_f32(&params->neon.max);
@@ -67,8 +67,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma(
   const float32x4_t vw4567 = vld1q_f32(weights + 4);
   const float32x2_t vw89 = vld1_f32(weights + 8);
 
-  size_t m = output_height;
-  while (m >= 3) {
+  while (output_height >= 3) {
     float32x4_t vi0x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi1x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi2x0123 = vmovq_n_f32(0.0f);
@@ -268,7 +267,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma(
       }
     }
 
-    m -= 3;
+    output_height -= 3;
     i0 = (const float*) ((uintptr_t) i2 + input_width_increment_single);
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
@@ -277,16 +276,16 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma(
     output0 = (float*) ((uintptr_t) output0 + output_width_increment);
     output1 = (float*) ((uintptr_t) output1 + output_width_increment);
     output2 = (float*) ((uintptr_t) output2 + output_width_increment);
-    if (m == 3) {
+    if (output_height == 3) {
       i4 = zero;
     }
   }
 
-  if (m == 1) {
+  if (output_height == 1) {
     i2 = zero;
   }
 
-  while (m != 0) {
+  while (output_height != 0) {
     float32x4_t vi0x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi1x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi2x0123 = vmovq_n_f32(0.0f);
@@ -394,6 +393,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma(
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment_single);
     i2 = zero;
     output0 = (float*) ((uintptr_t) output0 + output_width_increment_single);
-    m -= 1;
+    output_height -= 1;
   }
 }

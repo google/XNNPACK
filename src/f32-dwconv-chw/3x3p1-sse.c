@@ -32,7 +32,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
   const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
-  const size_t output_height = padded_input_height - 3 + 1;
+  size_t output_height = padded_input_height - 3 + 1;
 
   const __m128 vmask = _mm_load_ps((const float*) params->sse.mask);
   const __m128 vmax = _mm_load_ps(params->sse.max);
@@ -61,7 +61,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
   const __m128 vk21 = _mm_load1_ps(weights + 8);
   const __m128 vk22 = _mm_load1_ps(weights + 9);
 
-  size_t m = output_height;
   do {
     // vi0x3012 = ( vi02, vi01, vi00, vi03 )
     __m128 vi0x3012 = _mm_setzero_ps();
@@ -226,9 +225,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
     output = (float*) ((uintptr_t) output + output_width_increment);
-    m -= 1;
-    if (m == 1) {
+    output_height -= 1;
+    if (output_height == 1) {
       i2 = zero;
     }
-  } while (m != 0);
+  } while (output_height != 0);
 }

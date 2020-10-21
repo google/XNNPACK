@@ -73,7 +73,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
   const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 2 /* padding_bottom */;
-  const size_t output_height = padded_input_height - 5 + 1;
+  size_t output_height = padded_input_height - 5 + 1;
 
   const psimd_s32 vmask = psimd_load_s32(params->scalar.mask);
   const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
@@ -115,8 +115,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
   const psimd_f32 vwKLMN = psimd_load_f32(weights + 20);
   const psimd_f32 vwOP   = psimd_load2_f32(weights + 24);
 
-  size_t m = output_height;
-  while (m >= 3) {
+  while (output_height >= 3) {
     psimd_f32 vi0x0123 = psimd_zero_f32();
     psimd_f32 vi1x0123 = psimd_zero_f32();
     psimd_f32 vi2x0123 = psimd_zero_f32();
@@ -697,22 +696,22 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
     output0 = (float*) ((uintptr_t) output2 + output_width_increment_single);
     output1 = (float*) ((uintptr_t) output0 + output_width_stride);
     output2 = (float*) ((uintptr_t) output1 + output_width_stride);
-    m -= 3;
-    if (m <= 4) {
+    output_height -= 3;
+    if (output_height <= 4) {
       i6 = zero;
     }
-    if (m <= 3) {
+    if (output_height <= 3) {
       i5 = zero;
     }
-    if (m <= 2) {
+    if (output_height <= 2) {
       i4 = zero;
     }
-    if (m <= 1) {
+    if (output_height <= 1) {
       i3 = zero;
     }
   }
 
-  if (m == 2) {
+  if (output_height == 2) {
     i4 = i5 = zero;
     psimd_f32 vi0x0123 = psimd_zero_f32();
     psimd_f32 vi1x0123 = psimd_zero_f32();
@@ -1167,7 +1166,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd(
       }
     }
   }
-  else if (m == 1) {
+  else if (output_height == 1) {
     i3 = i4 = zero;
     psimd_f32 vi0x0123 = psimd_zero_f32();
     psimd_f32 vi1x0123 = psimd_zero_f32();

@@ -55,7 +55,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
   const size_t output_width_stride = output_width * sizeof(float);
 
   const size_t padded_input_height = input_height + padding_top + 1 /* padding_bottom */;
-  const size_t output_height = padded_input_height - 3 + 1;
+  size_t output_height = padded_input_height - 3 + 1;
 
   const psimd_s32 vmask = psimd_load_s32(params->scalar.mask);
   const psimd_f32 vmax = psimd_load_splat_f32(&params->scalar.max);
@@ -84,7 +84,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
   const psimd_f32 vk21 = psimd_load_splat_f32(weights + 8);
   const psimd_f32 vk22 = psimd_load_splat_f32(weights + 9);
 
-  size_t m = output_height;
   do {
     // vi0x3012 = ( vi02, vi01, vi00, vi03 )
     psimd_f32 vi0x3012 = psimd_zero_f32();
@@ -249,9 +248,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
     i1 = (const float*) ((uintptr_t) i1 + input_width_increment);
     i2 = (const float*) ((uintptr_t) i2 + input_width_increment);
     output = (float*) ((uintptr_t) output + output_width_increment);
-    m -= 1;
-    if (m == 1) {
+    output_height -= 1;
+    if (output_height == 1) {
       i2 = zero;
     }
-  } while (m != 0);
+  } while (output_height != 0);
 }
