@@ -9,7 +9,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
+void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar_1x1(
     size_t input_height,
     size_t input_width,
     const float* input,

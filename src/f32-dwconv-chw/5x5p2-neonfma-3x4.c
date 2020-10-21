@@ -11,7 +11,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma(
+void xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma_3x4(
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -36,7 +36,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma(
   const float32x4_t vwCDEF = vld1q_f32(weights + 12);
   const float32x4_t vwGHIJ = vld1q_f32(weights + 16);
   const float32x4_t vwKLMN = vld1q_f32(weights + 20);
-  const float32x2_t vwOP   = vld1_f32( weights + 24);
+  const float32x2_t vwOP = vld1_f32(weights + 24);
 
   const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(float));
 

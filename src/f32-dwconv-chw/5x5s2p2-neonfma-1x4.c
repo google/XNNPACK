@@ -11,7 +11,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma(
+void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
     size_t input_height,
     size_t input_width,
     const float* input,

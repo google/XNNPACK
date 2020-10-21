@@ -34,7 +34,7 @@ PSIMD_INTRINSIC psimd_f32 extq3_f32(psimd_f32 a, psimd_f32 b) {
   #endif  // defined(__clang__)
 }
 
-void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd(
+void xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd_1x4(
     size_t input_height,
     size_t input_width,
     const float* input,
