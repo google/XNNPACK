@@ -88,18 +88,15 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
       __m128 vo8ACEp0 = vbias;
 
       const __m128 vi0x89AB = _mm_loadu_ps(i0);
-      i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
       const __m128 vi1x89AB = _mm_loadu_ps(i1);
-      i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
       const __m128 vi2x89AB = _mm_loadu_ps(i2);
-      i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
 
-      const __m128 vi0xCDEF = _mm_loadu_ps(i0);
-      i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      const __m128 vi1xCDEF = _mm_loadu_ps(i1);
-      i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      const __m128 vi2xCDEF = _mm_loadu_ps(i2);
-      i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
+      const __m128 vi0xCDEF = _mm_loadu_ps(i0 + 4);
+      i0 += 8;
+      const __m128 vi1xCDEF = _mm_loadu_ps(i1 + 4);
+      i1 += 8;
+      const __m128 vi2xCDEF = _mm_loadu_ps(i2 + 4);
+      i2 += 8;
 
       const __m128 vi0x8ACE = _mm_shuffle_ps(vi0x89AB, vi0xCDEF, _MM_SHUFFLE(2, 0, 2, 0));
       const __m128 vi0x9BDF = _mm_shuffle_ps(vi0x89AB, vi0xCDEF, _MM_SHUFFLE(3, 1, 3, 1));
@@ -139,7 +136,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
       vo = _mm_min_ps(vo, vmax);
 
       _mm_storeu_ps(output, vo);
-      output = (float*) ((uintptr_t) output + output_tuple_stride);
+      output += 4;
     }
     // Last block has 0-7 pixels to process.
     assert(k < 8);
@@ -150,9 +147,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse(
       const __m128 vi1x89AB = _mm_loadu_ps(i1);
       const __m128 vi2x89AB = _mm_loadu_ps(i2);
 
-      const __m128 vi0xCDEF = _mm_loadu_ps((const float*) ((uintptr_t) i0 + input_tuple_stride));
-      const __m128 vi1xCDEF = _mm_loadu_ps((const float*) ((uintptr_t) i1 + input_tuple_stride));
-      const __m128 vi2xCDEF = _mm_loadu_ps((const float*) ((uintptr_t) i2 + input_tuple_stride));
+      const __m128 vi0xCDEF = _mm_loadu_ps(i0 + 4);
+      const __m128 vi1xCDEF = _mm_loadu_ps(i1 + 4);
+      const __m128 vi2xCDEF = _mm_loadu_ps(i2 + 4);
 
       const __m128 vi0x8ACE = _mm_and_ps(vmask_even, _mm_shuffle_ps(vi0x89AB, vi0xCDEF, _MM_SHUFFLE(2, 0, 2, 0)));
       const __m128 vi0x9BDF = _mm_and_ps(vmask_odd,  _mm_shuffle_ps(vi0x89AB, vi0xCDEF, _MM_SHUFFLE(3, 1, 3, 1)));

@@ -104,18 +104,15 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
       psimd_f32 vo8ACEp0 = vbias;
 
       const psimd_f32 vi0x89AB = psimd_load_f32(i0);
-      i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
       const psimd_f32 vi1x89AB = psimd_load_f32(i1);
-      i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
       const psimd_f32 vi2x89AB = psimd_load_f32(i2);
-      i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
 
-      const psimd_f32 vi0xCDEF = psimd_load_f32(i0);
-      i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      const psimd_f32 vi1xCDEF = psimd_load_f32(i1);
-      i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      const psimd_f32 vi2xCDEF = psimd_load_f32(i2);
-      i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
+      const psimd_f32 vi0xCDEF = psimd_load_f32(i0 + 4);
+      i0 += 8;
+      const psimd_f32 vi1xCDEF = psimd_load_f32(i1 + 4);
+      i1 += 8;
+      const psimd_f32 vi2xCDEF = psimd_load_f32(i2 + 4);
+      i2 += 8;
 
       const psimd_f32 vi0x8ACE = psimd_concat_even_f32(vi0x89AB, vi0xCDEF);
       const psimd_f32 vi0x9BDF = psimd_concat_odd_f32(vi0x89AB, vi0xCDEF);
@@ -155,7 +152,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
       vo = psimd_min_f32(vo, vmax);
 
       psimd_store_f32(output, vo);
-      output = (float*) ((uintptr_t) output + output_tuple_stride);
+      output += 4;
     }
     // Last block has 0-7 pixels to process.
     assert(k < 8);
@@ -166,9 +163,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd(
       const psimd_f32 vi1x89AB = psimd_load_f32(i1);
       const psimd_f32 vi2x89AB = psimd_load_f32(i2);
 
-      const psimd_f32 vi0xCDEF = psimd_load_f32((const float*) ((uintptr_t) i0 + input_tuple_stride));
-      const psimd_f32 vi1xCDEF = psimd_load_f32((const float*) ((uintptr_t) i1 + input_tuple_stride));
-      const psimd_f32 vi2xCDEF = psimd_load_f32((const float*) ((uintptr_t) i2 + input_tuple_stride));
+      const psimd_f32 vi0xCDEF = psimd_load_f32(i0 + 4);
+      const psimd_f32 vi1xCDEF = psimd_load_f32(i1 + 4);
+      const psimd_f32 vi2xCDEF = psimd_load_f32(i2 + 4);
 
       const psimd_f32 vi0x8ACE = psimd_andmask_f32(vmask_even, psimd_concat_even_f32(vi0x89AB, vi0xCDEF));
       const psimd_f32 vi0x9BDF = psimd_andmask_f32(vmask_odd,  psimd_concat_odd_f32(vi0x89AB, vi0xCDEF));

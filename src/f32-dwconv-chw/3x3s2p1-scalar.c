@@ -85,12 +85,15 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
 
     size_t k = input_width;
     for (; k >= 2; k -= 2) {
-      const float vi0x1 = *i0; i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      const float vi1x1 = *i1; i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      const float vi2x1 = *i2; i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-      const float vi0x2 = *i0; i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      const float vi1x2 = *i1; i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      const float vi2x2 = *i2; i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
+      const float vi0x1 = i0[0];
+      const float vi1x1 = i1[0];
+      const float vi2x1 = i2[0];
+      const float vi0x2 = i0[1];
+      const float vi1x2 = i1[1];
+      const float vi2x2 = i2[1];
+      i0 += 2;
+      i1 += 2;
+      i2 += 2;
 
       const float vrow0_accum = vw1 * vi0x0 + vw2 * vi0x1 + vw3 * vi0x2;
       vi0x0 = vi0x2;
@@ -104,7 +107,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput; output0 = (float *) ((uintptr_t) output0 + output_tuple_stride);
+      *output0++ = voutput;
     }
     // Possibly process the last pixel separately to account for right edge.
     if (k == 1)

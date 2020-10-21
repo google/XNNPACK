@@ -80,13 +80,13 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
     for (; k >= 8; k -= 8) {
       float32x4_t vo468Ap0 = vdupq_laneq_f32(vw0123, 0);
 
-      const float32x4_t vi0x4567 = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      const float32x4_t vi1x4567 = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      const float32x4_t vi2x4567 = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
+      const float32x4_t vi0x4567 = vld1q_f32(i0); i0 += 4;
+      const float32x4_t vi1x4567 = vld1q_f32(i1); i1 += 4;
+      const float32x4_t vi2x4567 = vld1q_f32(i2); i2 += 4;
 
-      const float32x4_t vi0x89AB = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      const float32x4_t vi1x89AB = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      const float32x4_t vi2x89AB = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
+      const float32x4_t vi0x89AB = vld1q_f32(i0); i0 += 4;
+      const float32x4_t vi1x89AB = vld1q_f32(i1); i1 += 4;
+      const float32x4_t vi2x89AB = vld1q_f32(i2); i2 += 4;
 
       const float32x4_t vi0x468A = vuzp1q_f32(vi0x4567, vi0x89AB);
       const float32x4_t vi0x579B = vuzp2q_f32(vi0x4567, vi0x89AB);
@@ -126,7 +126,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
       vo = vmaxq_f32(vo, vmin);
       vo = vminq_f32(vo, vmax);
 
-      vst1q_f32(output, vo); output = (float*) ((uintptr_t) output + output_tuple_stride);
+      vst1q_f32(output, vo); output += 4;
     }
     // Last block has 0-7 pixels to process.
     assert(k < 8);
@@ -137,9 +137,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
       const float32x4_t vi1x4567 = vld1q_f32(i1);
       const float32x4_t vi2x4567 = vld1q_f32(i2);
 
-      const float32x4_t vi0x89AB = vld1q_f32((const float*) ((uintptr_t) i0 + input_tuple_stride));
-      const float32x4_t vi1x89AB = vld1q_f32((const float*) ((uintptr_t) i1 + input_tuple_stride));
-      const float32x4_t vi2x89AB = vld1q_f32((const float*) ((uintptr_t) i2 + input_tuple_stride));
+      const float32x4_t vi0x89AB = vld1q_f32(i0 + 4);
+      const float32x4_t vi1x89AB = vld1q_f32(i1 + 4);
+      const float32x4_t vi2x89AB = vld1q_f32(i2 + 4);
 
       const float32x4_t vi0x468A = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vuzp1q_f32(vi0x4567, vi0x89AB))));
       const float32x4_t vi0x579B = vreinterpretq_f32_u32(vandq_u32(vmask_odd,  vreinterpretq_u32_f32(vuzp2q_f32(vi0x4567, vi0x89AB))));

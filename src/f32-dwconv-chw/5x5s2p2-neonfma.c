@@ -96,11 +96,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma(
     float32x4_t vi2x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi3x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi4x0123 = vmovq_n_f32(0.0f);
-    float32x4_t vi0x4567 = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-    float32x4_t vi1x4567 = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-    float32x4_t vi2x4567 = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-    float32x4_t vi3x4567 = vld1q_f32(i3); i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-    float32x4_t vi4x4567 = vld1q_f32(i4); i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+    float32x4_t vi0x4567 = vld1q_f32(i0); i0 += 4;
+    float32x4_t vi1x4567 = vld1q_f32(i1); i1 += 4;
+    float32x4_t vi2x4567 = vld1q_f32(i2); i2 += 4;
+    float32x4_t vi3x4567 = vld1q_f32(i3); i3 += 4;
+    float32x4_t vi4x4567 = vld1q_f32(i4); i4 += 4;
 
     size_t k = input_width;
     for (; k > 8; k -= 8) {
@@ -112,11 +112,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma(
       float32x4_t vi3x89AB;
       float32x4_t vi4x89AB;
 
-      vi0x89AB = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      vi1x89AB = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      vi2x89AB = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-      vi3x89AB = vld1q_f32(i3); i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-      vi4x89AB = vld1q_f32(i4); i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+      vi0x89AB = vld1q_f32(i0); i0 += 4;
+      vi1x89AB = vld1q_f32(i1); i1 += 4;
+      vi2x89AB = vld1q_f32(i2); i2 += 4;
+      vi3x89AB = vld1q_f32(i3); i3 += 4;
+      vi4x89AB = vld1q_f32(i4); i4 += 4;
 
       float32x4_t vi0xCDEF;
       float32x4_t vi1xCDEF;
@@ -124,11 +124,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma(
       float32x4_t vi3xCDEF;
       float32x4_t vi4xCDEF;
 
-      vi0xCDEF = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      vi1xCDEF = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      vi2xCDEF = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-      vi3xCDEF = vld1q_f32(i3); i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-      vi4xCDEF = vld1q_f32(i4); i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+      vi0xCDEF = vld1q_f32(i0); i0 += 4;
+      vi1xCDEF = vld1q_f32(i1); i1 += 4;
+      vi2xCDEF = vld1q_f32(i2); i2 += 4;
+      vi3xCDEF = vld1q_f32(i3); i3 += 4;
+      vi4xCDEF = vld1q_f32(i4); i4 += 4;
 
       float32x4_t vi0x468A = vuzp1q_f32(vi0x4567, vi0x89AB);
       float32x4_t vi0x579B = vuzp2q_f32(vi0x4567, vi0x89AB);
@@ -225,8 +225,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma(
 
       size_t k_tmp = (k + 1) / 2;
       if XNN_LIKELY(k_tmp >= 4) {
-        vst1q_f32(output0, vo0);
-        output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
+        vst1q_f32(output0, vo0); output0 += 4;
       } else {
         float* output0_lo = output0;
         float32x2_t vo0_lo = vget_low_f32(vo0);
@@ -250,11 +249,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma(
       float32x4_t vi4x89AB;
 
       if XNN_LIKELY(k > 4) {
-        vi0x89AB = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-        vi1x89AB = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-        vi2x89AB = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-        vi3x89AB = vld1q_f32(i3); i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-        vi4x89AB = vld1q_f32(i4); i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+        vi0x89AB = vld1q_f32(i0); i0 += 4;
+        vi1x89AB = vld1q_f32(i1); i1 += 4;
+        vi2x89AB = vld1q_f32(i2); i2 += 4;
+        vi3x89AB = vld1q_f32(i3); i3 += 4;
+        vi4x89AB = vld1q_f32(i4); i4 += 4;
       } else {
         vi0x89AB = vmovq_n_f32(0.f);
         vi1x89AB = vmovq_n_f32(0.f);
@@ -270,11 +269,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma(
       float32x4_t vi4xCDEF;
 
       if XNN_LIKELY(k > 8) {
-        vi0xCDEF = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-        vi1xCDEF = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-        vi2xCDEF = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-        vi3xCDEF = vld1q_f32(i3); i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-        vi4xCDEF = vld1q_f32(i4); i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+        vi0xCDEF = vld1q_f32(i0); i0 += 4;
+        vi1xCDEF = vld1q_f32(i1); i1 += 4;
+        vi2xCDEF = vld1q_f32(i2); i2 += 4;
+        vi3xCDEF = vld1q_f32(i3); i3 += 4;
+        vi4xCDEF = vld1q_f32(i4); i4 += 4;
       } else {
         vi0xCDEF = vmovq_n_f32(0.f);
         vi1xCDEF = vmovq_n_f32(0.f);
@@ -389,8 +388,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma(
 
       size_t k_tmp = (k + 1) / 2;
       if XNN_LIKELY(k_tmp >= 4) {
-        vst1q_f32(output0, vo0);
-        output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
+        vst1q_f32(output0, vo0); output0 += 4;
       } else {
         float* output0_lo = output0;
         float32x2_t vo0_lo = vget_low_f32(vo0);

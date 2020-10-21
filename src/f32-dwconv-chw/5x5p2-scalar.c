@@ -94,11 +94,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
     float vi2x1 = 0.0f;
     float vi3x1 = 0.0f;
     float vi4x1 = 0.0f;
-    float vi0x2 = *i0; i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-    float vi1x2 = *i1; i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-    float vi2x2 = *i2; i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-    float vi3x2 = *i3; i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-    float vi4x2 = *i4; i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+    float vi0x2 = *i0++;
+    float vi1x2 = *i1++;
+    float vi2x2 = *i2++;
+    float vi3x2 = *i3++;
+    float vi4x2 = *i4++;
 
     float vi0x3;
     float vi1x3;
@@ -106,20 +106,20 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
     float vi3x3;
     float vi4x3;
     if XNN_LIKELY(input_width > 1) {
-      vi0x3 = *i0; i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      vi1x3 = *i1; i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      vi2x3 = *i2; i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-      vi3x3 = *i3; i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-      vi4x3 = *i4; i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+      vi0x3 = *i0++;
+      vi1x3 = *i1++;
+      vi2x3 = *i2++;
+      vi3x3 = *i3++;
+      vi4x3 = *i4++;
     }
 
     size_t k = input_width;
     for (; k > 2; k -= 1) {
-      const float vi0x4 = *i0; i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      const float vi1x4 = *i1; i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      const float vi2x4 = *i2; i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-      const float vi3x4 = *i3; i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-      const float vi4x4 = *i4; i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+      const float vi0x4 = *i0++;
+      const float vi1x4 = *i1++;
+      const float vi2x4 = *i2++;
+      const float vi3x4 = *i3++;
+      const float vi4x4 = *i4++;
 
       const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2 + vw4  * vi0x3 + vw5  * vi0x4;
       vi0x0 = vi0x1;
@@ -152,7 +152,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput; output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
+      *output0++ = voutput;
     }
     if XNN_LIKELY(k > 1) {
       const float vrow0_accum = vw1  * vi0x0 + vw2  * vi0x1 + vw3  * vi0x2 + vw4  * vi0x3;
@@ -181,7 +181,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       voutput = math_max_f32(voutput, params_min);
       voutput = math_min_f32(voutput, params_max);
 
-      *output0 = voutput; output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
+      *output0++ = voutput;
       k -= 1;
     }
     assert(k == 1);

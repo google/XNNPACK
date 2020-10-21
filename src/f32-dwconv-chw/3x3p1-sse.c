@@ -71,13 +71,13 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
     __m128 vi2x3012 = _mm_setzero_ps();
     // vi0x4567 = ( vi07, vi06, vi05, vi04 )
     __m128 vi0x4567 = _mm_loadu_ps(i0);
-    i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
+    i0 += 4;
     // vi1x4567 = ( vi17, vi16, vi15, vi14 )
     __m128 vi1x4567 = _mm_loadu_ps(i1);
-    i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
+    i1 += 4;
     // vi2x4567 = ( vi27, vi26, vi25, vi24 )
     __m128 vi2x4567 = _mm_loadu_ps(i2);
-    i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
+    i2 += 4;
 
     size_t k = input_width;
     for (; k > 4; k -= 4) {
@@ -85,13 +85,13 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
 
       // vi0x89AB = ( vi0B, vi0A, vi09, vi08 )
       const __m128 vi0x89AB = _mm_loadu_ps(i0);
-      i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
+      i0 += 4;
       // vi1x89AB = ( vi1B, vi0A, vi09, vi08 )
       const __m128 vi1x89AB = _mm_loadu_ps(i1);
-      i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
+      i1 += 4;
       // vi2x89AB = ( vi2B, vi0A, vi09, vi08 )
       const __m128 vi2x89AB = _mm_loadu_ps(i2);
-      i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
+      i2 += 4;
 
       // vi0x7456 = ( vi06, vi05, vi04, vi07 )
       const __m128 vi0x7456 = _mm_shuffle_ps(vi0x4567, vi0x4567, _MM_SHUFFLE(2, 1, 0, 3));
@@ -148,7 +148,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
       vo = _mm_min_ps(vo, vmax);
 
       _mm_storeu_ps(output, vo);
-      output = (float*) ((uintptr_t) output + output_tuple_stride);
+      output += 4;
     }
     // Always process the last block of 1..4 pixels.
     assert(k >= 1);

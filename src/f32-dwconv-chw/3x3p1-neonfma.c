@@ -74,11 +74,11 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma(
     float32x4_t vi2x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi3x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi4x0123 = vmovq_n_f32(0.0f);
-    float32x4_t vi0x4567 = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-    float32x4_t vi1x4567 = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-    float32x4_t vi2x4567 = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-    float32x4_t vi3x4567 = vld1q_f32(i3); i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-    float32x4_t vi4x4567 = vld1q_f32(i4); i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+    float32x4_t vi0x4567 = vld1q_f32(i0); i0 += 4;
+    float32x4_t vi1x4567 = vld1q_f32(i1); i1 += 4;
+    float32x4_t vi2x4567 = vld1q_f32(i2); i2 += 4;
+    float32x4_t vi3x4567 = vld1q_f32(i3); i3 += 4;
+    float32x4_t vi4x4567 = vld1q_f32(i4); i4 += 4;
 
     size_t k = input_width;
     for (; k > 4; k -= 4) {
@@ -86,11 +86,11 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma(
       float32x4_t vo4567p01 = vdupq_laneq_f32(vw0123, 0);
       float32x4_t vo4567p02 = vdupq_laneq_f32(vw0123, 0);
 
-      const float32x4_t vi0x89AB = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      const float32x4_t vi1x89AB = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      const float32x4_t vi2x89AB = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
-      const float32x4_t vi3x89AB = vld1q_f32(i3); i3 = (const float*) ((uintptr_t) i3 + input_tuple_stride);
-      const float32x4_t vi4x89AB = vld1q_f32(i4); i4 = (const float*) ((uintptr_t) i4 + input_tuple_stride);
+      const float32x4_t vi0x89AB = vld1q_f32(i0); i0 += 4;
+      const float32x4_t vi1x89AB = vld1q_f32(i1); i1 += 4;
+      const float32x4_t vi2x89AB = vld1q_f32(i2); i2 += 4;
+      const float32x4_t vi3x89AB = vld1q_f32(i3); i3 += 4;
+      const float32x4_t vi4x89AB = vld1q_f32(i4); i4 += 4;
 
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi0x4567, vw0123, 2);
       vo4567p00 = vfmaq_laneq_f32(vo4567p00, vi1x4567, vw4567, 1);
@@ -163,9 +163,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma(
       vo2 = vmaxq_f32(vo2, vmin);
       vo2 = vminq_f32(vo2, vmax);
 
-      vst1q_f32(output0, vo0); output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
-      vst1q_f32(output1, vo1); output1 = (float*) ((uintptr_t) output1 + output_tuple_stride);
-      vst1q_f32(output2, vo2); output2 = (float*) ((uintptr_t) output2 + output_tuple_stride);
+      vst1q_f32(output0, vo0); output0 += 4;
+      vst1q_f32(output1, vo1); output1 += 4;
+      vst1q_f32(output2, vo2); output2 += 4;
     }
     // Always process the last block of 1..4 pixels.
     assert(k >= 1);
@@ -290,17 +290,17 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma(
     float32x4_t vi0x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi1x0123 = vmovq_n_f32(0.0f);
     float32x4_t vi2x0123 = vmovq_n_f32(0.0f);
-    float32x4_t vi0x4567 = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-    float32x4_t vi1x4567 = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-    float32x4_t vi2x4567 = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
+    float32x4_t vi0x4567 = vld1q_f32(i0); i0 += 4;
+    float32x4_t vi1x4567 = vld1q_f32(i1); i1 += 4;
+    float32x4_t vi2x4567 = vld1q_f32(i2); i2 += 4;
 
     size_t k = input_width;
     for (; k > 4; k -= 4) {
       float32x4_t vo4567p0 = vdupq_laneq_f32(vw0123, 0);
 
-      const float32x4_t vi0x89AB = vld1q_f32(i0); i0 = (const float*) ((uintptr_t) i0 + input_tuple_stride);
-      const float32x4_t vi1x89AB = vld1q_f32(i1); i1 = (const float*) ((uintptr_t) i1 + input_tuple_stride);
-      const float32x4_t vi2x89AB = vld1q_f32(i2); i2 = (const float*) ((uintptr_t) i2 + input_tuple_stride);
+      const float32x4_t vi0x89AB = vld1q_f32(i0); i0 += 4;
+      const float32x4_t vi1x89AB = vld1q_f32(i1); i1 += 4;
+      const float32x4_t vi2x89AB = vld1q_f32(i2); i2 += 4;
 
       vo4567p0 = vfmaq_laneq_f32(vo4567p0, vi0x4567, vw0123, 2);
       float32x4_t vo4567p1 = vmulq_laneq_f32(vi1x4567, vw4567, 1);
@@ -336,7 +336,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma(
       vo = vmaxq_f32(vo, vmin);
       vo = vminq_f32(vo, vmax);
 
-      vst1q_f32(output0, vo); output0 = (float*) ((uintptr_t) output0 + output_tuple_stride);
+      vst1q_f32(output0, vo); output0 += 4;
     }
     // Always process the last block of 1..4 pixels.
     assert(k >= 1);
