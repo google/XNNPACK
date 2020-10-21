@@ -178,7 +178,7 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
       output_width != resize_op->last_output_width)
   {
     const uint32_t flags = resize_op->flags;
-    xnn_indirection_init_resize_bilinear2d_hwc_f32(
+    xnn_indirection_init_resize_bilinear2d_f32(
       input_pixel_stride_in_bytes,
       input_height, input_width,
       output_height, output_width,

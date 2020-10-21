@@ -324,7 +324,7 @@ void xnn_indirection_init_maxpool2d(
   }
 }
 
-void xnn_indirection_init_resize_bilinear2d_hwc_f32(
+void xnn_indirection_init_resize_bilinear2d_f32(
   size_t input_pixel_stride,
   size_t input_height,
   size_t input_width,
