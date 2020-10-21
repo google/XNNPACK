@@ -19,8 +19,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
     uint32_t padding_top,
     const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(input_width != 0);
   assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
   assert(padding_top == 2);
 
   const float params_max = params->scalar.max;
@@ -53,13 +54,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
   const float vk43 = weights[24];
   const float vk44 = weights[25];
 
-  const size_t input_width_stride = input_width * sizeof(float);
-
   const float* i0 = zero;
   const float* i1 = zero;
   const float* i2 = input;
-  const float* i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
-  const float* i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
+  const float* i3 = (const float*) ((uintptr_t) i2 + input_width);
+  const float* i4 = (const float*) ((uintptr_t) i3 + input_width);
 
   size_t output_height = input_height;
   do {
@@ -91,7 +90,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
     float vi2x3;
     float vi3x3;
     float vi4x3;
-    if XNN_LIKELY(input_width > 1) {
+    if XNN_LIKELY(input_width > 1 * sizeof(float)) {
       vi0x3 = *i0++;
       vi1x3 = *i1++;
       vi2x3 = *i2++;
@@ -100,7 +99,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
     }
 
     size_t w = input_width;
-    for (; w > 2; w -= 1) {
+    for (; w > 2 * sizeof(float); w -= 1 * sizeof(float)) {
       const float vi0x4 = *i0++;
       const float vi1x4 = *i1++;
       const float vi2x4 = *i2++;
@@ -168,7 +167,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
 
       *output++ = voutput;
     }
-    if XNN_LIKELY(w > 1) {
+    if XNN_LIKELY(w > 1 * sizeof(float)) {
       float vacc0 = vk00 * vi0x0;
       float vacc1 = vk10 * vi1x0;
       float vacc2 = vk20 * vi2x0;
@@ -217,9 +216,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       voutput = math_min_f32(voutput, params_max);
 
       *output++ = voutput;
-      w -= 1;
+      w -= 1 * sizeof(float);
     }
-    assert(w == 1);
+    assert(w == 1 * sizeof(float));
     {
       float vacc0 = vk00 * vi0x0;
       float vacc1 = vk10 * vi1x0;
@@ -247,7 +246,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar(
       *output++ = voutput;
     }
 
-    i0 = (const float*) ((uintptr_t) i1 - input_width_stride);
-    i1 = (const float*) ((uintptr_t) i2 - input_width_stride);
+    i0 = (const float*) ((uintptr_t) i1 - input_width);
+    i1 = (const float*) ((uintptr_t) i2 - input_width);
   } while (--output_height != 0);
 }

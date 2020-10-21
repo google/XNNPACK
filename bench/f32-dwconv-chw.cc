@@ -123,7 +123,7 @@ static void DWConvCHWBenchmark(benchmark::State& state,
 
     for (uint32_t channel = 0; channel < channels; channel++) {
       dwconv(
-        input_height, input_width,
+        input_height, input_width * sizeof(float),
         input.data() + channel * inputSize,
         packed_weights.data() + channel * (kernel_size + 1) + buffer_index * w_elements,
         zero.data(),

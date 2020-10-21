@@ -19,8 +19,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
     uint32_t padding_top,
     const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(input_width != 0);
   assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
   assert(padding_top >= 1);
   assert(padding_top <= 2);
 
@@ -55,17 +56,16 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
   const float vk44 = weights[25];
 
   const uint32_t padding_top_less_1 = padding_top - 1;
-  const size_t input_width_stride = input_width * sizeof(float);
-  const size_t input_decrement = (round_down_po2(input_width - 1, 2) + 1) * sizeof(float);
+  const size_t input_decrement = round_down_po2(input_width - 1 * sizeof(float), 2 * sizeof(float)) + 1 * sizeof(float);
 
   const float* i0 = zero;
-  const float* i1 = (const float*) ((uintptr_t) input - ((-padding_top_less_1) & input_width_stride));
-  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  const float* i1 = (const float*) ((uintptr_t) input - ((-padding_top_less_1) & input_width));
+  const float* i2 = (const float*) ((uintptr_t) i1 + input_width);
   if XNN_UNPREDICTABLE(padding_top_less_1 != 0) {
     i1 = zero;
   }
-  const float* i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
-  const float* i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
+  const float* i3 = (const float*) ((uintptr_t) i2 + input_width);
+  const float* i4 = (const float*) ((uintptr_t) i3 + input_width);
 
   size_t padded_input_height = input_height + (padding_top_less_1 + 1) + 2 /* padding bottom */;
   size_t output_height = (padded_input_height - 5 /* kernel size */ + 2 /* subsampling */) / 2;
@@ -94,7 +94,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
     float vi4x2 = *i4++;
 
     size_t w = input_width;
-    for (; w > 2; w -= 2) {
+    for (; w > 2 * sizeof(float); w -= 2 * sizeof(float)) {
       const float vi0x3 = i0[0];
       const float vi1x3 = i1[0];
       const float vi2x3 = i2[0];
@@ -167,7 +167,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
 
       *output++ = voutput;
     }
-    if XNN_UNPREDICTABLE(w == 2) {
+    if XNN_UNPREDICTABLE(w == 2 * sizeof(float)) {
       const float vi0x3 = *i0;
       const float vi1x3 = *i1;
       const float vi2x3 = *i2;
@@ -234,8 +234,8 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar(
     i0 = (const float*) ((uintptr_t) i2 - input_decrement);
     i1 = (const float*) ((uintptr_t) i3 - input_decrement);
     i2 = (const float*) ((uintptr_t) i4 - input_decrement);
-    i3 = (const float*) ((uintptr_t) i2 + input_width_stride);
-    i4 = (const float*) ((uintptr_t) i3 + input_width_stride);
+    i3 = (const float*) ((uintptr_t) i2 + input_width);
+    i4 = (const float*) ((uintptr_t) i3 + input_width);
 
     output_height -= 1;
     padded_input_height -= 2;

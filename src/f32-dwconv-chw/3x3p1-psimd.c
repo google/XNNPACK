@@ -44,8 +44,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
     uint32_t padding_top,
     const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(input_width != 0);
   assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
   assert(padding_top == 1);
 
   const psimd_s32 vmask = psimd_load_s32(params->scalar.mask);
@@ -63,12 +64,11 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
   const psimd_f32 vk21 = psimd_load_splat_f32(weights + 8);
   const psimd_f32 vk22 = psimd_load_splat_f32(weights + 9);
 
-  const size_t input_width_stride = input_width * sizeof(float);
-  const size_t input_decrement = round_up_po2(input_width * sizeof(float), 4 * sizeof(float));
+  const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(float));
 
   const float* i0 = zero;
   const float* i1 = input;
-  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  const float* i2 = (const float*) ((uintptr_t) i1 + input_width);
 
   size_t output_height = input_height;
   do {
@@ -93,7 +93,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
     i2 += 4;
 
     size_t w = input_width;
-    for (; w > 4; w -= 4) {
+    for (; w > 4 * sizeof(float); w -= 4 * sizeof(float)) {
       psimd_f32 vo4567p0 = vbias;
 
       // vi0x89AB = ( vi0B, vi0A, vi09, vi08 )
@@ -164,8 +164,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
       output += 4;
     }
     // Always process the last block of 1..4 pixels.
-    assert(w >= 1);
-    assert(w <= 4);
+    assert(w >= 1 * sizeof(float));
+    assert(w <= 4 * sizeof(float));
     {
       psimd_f32 vo4567p0 = vbias;
 
@@ -220,16 +220,16 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
       vo = psimd_max_f32(vo, vmin);
       vo = psimd_min_f32(vo, vmax);
 
-      if XNN_LIKELY(w == 4) {
+      if XNN_LIKELY(w == 4 * sizeof(float)) {
         psimd_store_f32(output, vo);
         output += 4;
       } else {
-        if (w & 2) {
+        if (w & (2 * sizeof(float))) {
           psimd_store2_f32(output, vo);
           output += 2;
           vo = psimd_concat_hi_f32(vo, vo);
         }
-        if (w & 1) {
+        if (w & (1 * sizeof(float))) {
           psimd_store1_f32(output, vo);
           output += 1;
         }
@@ -238,6 +238,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__psimd(
 
     i0 = (const float*) ((uintptr_t) i1 - input_decrement);
     i1 = (const float*) ((uintptr_t) i2 - input_decrement);
-    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+    i2 = (const float*) ((uintptr_t) i1 + input_width);
   } while (--output_height != 0);
 }

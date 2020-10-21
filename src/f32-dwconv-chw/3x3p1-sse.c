@@ -21,8 +21,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
     uint32_t padding_top,
     const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(input_width != 0);
   assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
   assert(padding_top == 1);
 
   const __m128 vmask = _mm_load_ps((const float*) params->sse.mask);
@@ -40,12 +41,11 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
   const __m128 vk21 = _mm_load1_ps(weights + 8);
   const __m128 vk22 = _mm_load1_ps(weights + 9);
 
-  const size_t input_width_stride = input_width * sizeof(float);
-  const size_t input_decrement = round_up_po2(input_width * sizeof(float), 4 * sizeof(float));
+  const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(float));
 
   const float* i0 = zero;
   const float* i1 = input;
-  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  const float* i2 = (const float*) ((uintptr_t) i1 + input_width);
 
   size_t output_height = input_height;
   do {
@@ -70,7 +70,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
     i2 += 4;
 
     size_t w = input_width;
-    for (; w > 4; w -= 4) {
+    for (; w > 4 * sizeof(float); w -= 4 * sizeof(float)) {
       __m128 vo4567p0 = vbias;
 
       // vi0x89AB = ( vi0B, vi0A, vi09, vi08 )
@@ -141,8 +141,8 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
       output += 4;
     }
     // Always process the last block of 1..4 pixels.
-    assert(w >= 1);
-    assert(w <= 4);
+    assert(w >= 1 * sizeof(float));
+    assert(w <= 4 * sizeof(float));
     {
       __m128 vo4567p0 = vbias;
 
@@ -197,16 +197,16 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
       vo = _mm_max_ps(vo, vmin);
       vo = _mm_min_ps(vo, vmax);
 
-      if XNN_LIKELY(w == 4) {
+      if XNN_LIKELY(w == 4 * sizeof(float)) {
         _mm_storeu_ps(output, vo);
         output += 4;
       } else {
-        if (w & 2) {
+        if (w & (2 * sizeof(float))) {
           _mm_storel_pi((__m64*) output, vo);
           output += 2;
           vo = _mm_movehl_ps(vo, vo);
         }
-        if (w & 1) {
+        if (w & (1 * sizeof(float))) {
           _mm_store_ss(output, vo);
           output += 1;
         }
@@ -215,6 +215,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__sse(
 
     i0 = (const float*) ((uintptr_t) i1 - input_decrement);
     i1 = (const float*) ((uintptr_t) i2 - input_decrement);
-    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+    i2 = (const float*) ((uintptr_t) i1 + input_width);
   } while (--output_height != 0);
 }

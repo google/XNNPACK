@@ -19,8 +19,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
     uint32_t padding_top,
     const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(input_width != 0);
   assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
   assert(padding_top == 1);
 
   const float params_min = params->scalar.min;
@@ -37,11 +38,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
   const float vk21 = weights[8];
   const float vk22 = weights[9];
 
-  const size_t input_width_stride = input_width * sizeof(float);
-
   const float* i0 = zero;
   const float* i1 = input;
-  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  const float* i2 = (const float*) ((uintptr_t) i1 + input_width);
 
   size_t output_height = input_height;
   do {
@@ -57,7 +56,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
     float vi2x1 = *i2++;
 
     size_t w = input_width;
-    for (; w > 1; w--) {
+    for (; w > 1 * sizeof(float); w -= 1 * sizeof(float)) {
       const float vi0x2 = *i0++;
       const float vi1x2 = *i1++;
       const float vi2x2 = *i2++;
@@ -88,7 +87,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
       *output++ = voutput;
     }
     // Always process the last pixel separately to account for right edge.
-    assert(w == 1);
+    assert(w == 1 * sizeof(float));
     {
       float vacc0 = vk00 * vi0x0;
       float vacc1 = vk10 * vi1x0;
@@ -106,6 +105,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3p1__scalar(
       *output++ = voutput;
     }
 
-    i0 = (const float*) ((uintptr_t) i1 - input_width_stride);
+    i0 = (const float*) ((uintptr_t) i1 - input_width);
   } while (--output_height != 0);
 }

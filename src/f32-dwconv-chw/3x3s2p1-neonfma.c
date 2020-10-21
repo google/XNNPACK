@@ -21,8 +21,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
     uint32_t padding_top,
     const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(input_height!= 0);
+  assert(input_height != 0);
   assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
   assert(padding_top >= 0);
   assert(padding_top <= 1);
 
@@ -35,15 +36,14 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
   const float32x4_t vw4567 = vld1q_f32(weights + 4);
   const float32x2_t vw89 = vld1_f32(weights + 8);
 
-  const size_t input_width_stride = input_width * sizeof(float);
-  const size_t input_decrement = round_down_po2(input_width * sizeof(float), 4 /* SIMD output width */ * 2 /* subsampling */ * sizeof(float));
+  const size_t input_decrement = round_down_po2(input_width, 4 /* SIMD output width */ * 2 /* subsampling */ * sizeof(float));
 
-  const float* i0 = (const float*) ((uintptr_t) input - ((-padding_top) & input_width_stride));
-  const float* i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
+  const float* i0 = (const float*) ((uintptr_t) input - ((-padding_top) & input_width));
+  const float* i1 = (const float*) ((uintptr_t) i0 + input_width);
   if XNN_UNPREDICTABLE(padding_top != 0) {
     i0 = zero;
   }
-  const float* i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+  const float* i2 = (const float*) ((uintptr_t) i1 + input_width);
 
   size_t padded_input_height = input_height + padding_top + 1 /* padding bottom */;
   size_t output_height = (padded_input_height - 3 /* kernel size */ + 2 /* subsampling */) / 2;
@@ -57,7 +57,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
     float32x4_t vi2x0123 = vmovq_n_f32(0.0f);
 
     size_t w = input_width;
-    for (; w >= 8; w -= 8) {
+    for (; w >= 8 * sizeof(float); w -= 8 * sizeof(float)) {
       float32x4_t vo468Ap0 = vdupq_laneq_f32(vw0123, 0);
 
       const float32x4_t vi0x4567 = vld1q_f32(i0); i0 += 4;
@@ -109,7 +109,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
       vst1q_f32(output, vo); output += 4;
     }
     // Last block has 0-7 pixels to process.
-    assert(w < 8);
+    assert(w < 8 * sizeof(float));
     if XNN_LIKELY(w != 0) {
       float32x4_t vo468Ap0 = vdupq_laneq_f32(vw0123, 0);
 
@@ -155,24 +155,24 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma(
       vo = vmaxq_f32(vo, vmin);
       vo = vminq_f32(vo, vmax);
 
-      w += 1;
-      if (w & 8) {
+      w += 1 * sizeof(float);
+      if (w & (8 * sizeof(float))) {
         vst1q_f32(output, vo); output += 4;
       } else {
         float32x2_t vo_lo = vget_low_f32(vo);
-        if (w & 4) {
+        if (w & (4 * sizeof(float))) {
           vst1_f32(output, vo_lo); output += 2;
           vo_lo = vget_high_f32(vo);
         }
-        if (w & 2) {
+        if (w & (2 * sizeof(float))) {
           vst1_lane_f32(output, vo_lo, 0); output += 1;
         }
       }
     }
 
     i0 = (const float*) ((uintptr_t) i2 - input_decrement);
-    i1 = (const float*) ((uintptr_t) i0 + input_width_stride);
-    i2 = (const float*) ((uintptr_t) i1 + input_width_stride);
+    i1 = (const float*) ((uintptr_t) i0 + input_width);
+    i2 = (const float*) ((uintptr_t) i1 + input_width);
 
     output_height -= 1;
     padded_input_height -= 2;

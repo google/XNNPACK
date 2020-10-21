@@ -223,7 +223,7 @@ class DWConvCHWMicrokernelTester {
 
       // Call optimized micro-kernel.
       dwconv(
-        input_height(), input_width(),
+        input_height(), input_width() * sizeof(float),
         input.data(), packed_weights.data(), zero.data(), output.data(),
         padding_top(),
         &chw_params);
