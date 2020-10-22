@@ -11,10 +11,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <xnnpack/spmm.h>
 
-$assert UNROLL == 1
 $ARCH_SUFFIX = "_x86" if X86 else "_arm"
 
-void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}(
+void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_unroll" + str(UNROLL) if UNROLL > 1 else ""}(
     uint32_t batch_size,
     uint32_t output_channels,
     const float*restrict input,
