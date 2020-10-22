@@ -130,9 +130,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
 
     size_t w = input_width;
     for (; w > 8 * sizeof(float); w -= 4 * sizeof(float)) {
-      psimd_f32 vo4567p00 = vbias;
-      psimd_f32 vo4567p10 = vbias;
-      psimd_f32 vo4567p20 = vbias;
+      psimd_f32 vo4567p0 = vbias;
+      psimd_f32 vo4567p1 = vbias;
+      psimd_f32 vo4567p2 = vbias;
 
       const psimd_f32 vi0x89AB = psimd_load_f32(i0); i0 += 4;
       const psimd_f32 vi1x89AB = psimd_load_f32(i1); i1 += 4;
@@ -142,25 +142,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x89AB = psimd_load_f32(i5); i5 += 4;
       const psimd_f32 vi6x89AB = psimd_load_f32(i6); i6 += 4;
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x4567, vk02);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x4567, vk02);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x4567, vk02);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x4567, vk02);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x4567, vk02);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x4567, vk02);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x4567, vk12);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x4567, vk12);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x4567, vk12);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x4567, vk12);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x4567, vk12);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x4567, vk12);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x4567, vk22);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x4567, vk22);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x4567, vk22);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x4567, vk22);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x4567, vk22);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x4567, vk22);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x4567, vk32);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x4567, vk32);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x4567, vk32);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x4567, vk32);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x4567, vk32);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x4567, vk32);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x4567, vk42);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x4567, vk42);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x4567, vk42);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x4567, vk42);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x4567, vk42);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x4567, vk42);
 
       const psimd_f32 vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
       const psimd_f32 vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
@@ -170,25 +170,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x3456 = extq3_f32(vi5x0123, vi5x4567);
       const psimd_f32 vi6x3456 = extq3_f32(vi6x0123, vi6x4567);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x3456, vk01);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x3456, vk01);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x3456, vk01);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x3456, vk01);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x3456, vk01);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x3456, vk01);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x3456, vk11);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x3456, vk11);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x3456, vk11);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x3456, vk11);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x3456, vk11);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x3456, vk11);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x3456, vk21);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x3456, vk21);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x3456, vk21);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x3456, vk21);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x3456, vk21);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x3456, vk21);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x3456, vk31);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x3456, vk31);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x3456, vk31);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x3456, vk31);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x3456, vk31);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x3456, vk31);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x3456, vk41);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x3456, vk41);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x3456, vk41);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x3456, vk41);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x3456, vk41);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x3456, vk41);
 
       const psimd_f32 vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
       const psimd_f32 vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
@@ -198,25 +198,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x2345 = extq2_f32(vi5x0123, vi5x4567);
       const psimd_f32 vi6x2345 = extq2_f32(vi6x0123, vi6x4567);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x2345, vk00);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x2345, vk00);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x2345, vk00);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x2345, vk00);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x2345, vk00);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x2345, vk00);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x2345, vk10);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x2345, vk10);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x2345, vk10);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x2345, vk10);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x2345, vk10);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x2345, vk10);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x2345, vk20);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x2345, vk20);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x2345, vk20);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x2345, vk20);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x2345, vk20);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x2345, vk20);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x2345, vk30);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x2345, vk30);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x2345, vk30);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x2345, vk30);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x2345, vk30);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x2345, vk30);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x2345, vk40);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x2345, vk40);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x2345, vk40);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x2345, vk40);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x2345, vk40);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x2345, vk40);
 
       vi0x0123 = vi0x4567;
       vi1x0123 = vi1x4567;
@@ -234,25 +234,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x5678 = extq1_f32(vi5x4567, vi5x89AB);
       const psimd_f32 vi6x5678 = extq1_f32(vi6x4567, vi6x89AB);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x5678, vk03);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x5678, vk03);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x5678, vk03);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x5678, vk03);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x5678, vk03);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x5678, vk03);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x5678, vk13);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x5678, vk13);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x5678, vk13);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x5678, vk13);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x5678, vk13);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x5678, vk13);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x5678, vk23);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x5678, vk23);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x5678, vk23);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x5678, vk23);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x5678, vk23);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x5678, vk23);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x5678, vk33);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x5678, vk33);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x5678, vk33);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x5678, vk33);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x5678, vk33);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x5678, vk33);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x5678, vk43);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x5678, vk43);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x5678, vk43);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x5678, vk43);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x5678, vk43);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x5678, vk43);
 
       const psimd_f32 vi0x6789 = extq2_f32(vi0x4567, vi0x89AB);
       const psimd_f32 vi1x6789 = extq2_f32(vi1x4567, vi1x89AB);
@@ -262,25 +262,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x6789 = extq2_f32(vi5x4567, vi5x89AB);
       const psimd_f32 vi6x6789 = extq2_f32(vi6x4567, vi6x89AB);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x6789, vk04);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x6789, vk04);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x6789, vk04);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x6789, vk04);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x6789, vk04);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x6789, vk04);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x6789, vk14);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x6789, vk14);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x6789, vk14);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x6789, vk14);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x6789, vk14);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x6789, vk14);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x6789, vk24);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x6789, vk24);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x6789, vk24);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x6789, vk24);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x6789, vk24);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x6789, vk24);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x6789, vk34);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x6789, vk34);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x6789, vk34);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x6789, vk34);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x6789, vk34);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x6789, vk34);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x6789, vk44);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x6789, vk44);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x6789, vk44);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x6789, vk44);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x6789, vk44);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x6789, vk44);
 
       vi0x4567 = vi0x89AB;
       vi1x4567 = vi1x89AB;
@@ -290,9 +290,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       vi5x4567 = vi5x89AB;
       vi6x4567 = vi6x89AB;
 
-      psimd_f32 vo0 = vo4567p00;
-      psimd_f32 vo1 = vo4567p10;
-      psimd_f32 vo2 = vo4567p20;
+      psimd_f32 vo0 = vo4567p0;
+      psimd_f32 vo1 = vo4567p1;
+      psimd_f32 vo2 = vo4567p2;
 
       vo0 = psimd_max_f32(vo0, vmin);
       vo1 = psimd_max_f32(vo1, vmin);
@@ -308,9 +308,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
     }
     // Always process the last block of 5..8 pixels.
     if XNN_LIKELY(w > 4 * sizeof(float)) {
-      psimd_f32 vo4567p00 = vbias;
-      psimd_f32 vo4567p10 = vbias;
-      psimd_f32 vo4567p20 = vbias;
+      psimd_f32 vo4567p0 = vbias;
+      psimd_f32 vo4567p1 = vbias;
+      psimd_f32 vo4567p2 = vbias;
 
       psimd_f32 vi0x89AB = psimd_load_f32(i0); i0 += 4;
       psimd_f32 vi1x89AB = psimd_load_f32(i1); i1 += 4;
@@ -328,25 +328,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       vi5x89AB = psimd_andmask_f32(vmask, vi5x89AB);
       vi6x89AB = psimd_andmask_f32(vmask, vi6x89AB);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x4567, vk02);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x4567, vk02);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x4567, vk02);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x4567, vk02);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x4567, vk02);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x4567, vk02);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x4567, vk12);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x4567, vk12);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x4567, vk12);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x4567, vk12);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x4567, vk12);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x4567, vk12);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x4567, vk22);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x4567, vk22);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x4567, vk22);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x4567, vk22);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x4567, vk22);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x4567, vk22);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x4567, vk32);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x4567, vk32);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x4567, vk32);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x4567, vk32);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x4567, vk32);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x4567, vk32);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x4567, vk42);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x4567, vk42);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x4567, vk42);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x4567, vk42);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x4567, vk42);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x4567, vk42);
 
       const psimd_f32 vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
       const psimd_f32 vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
@@ -356,25 +356,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x3456 = extq3_f32(vi5x0123, vi5x4567);
       const psimd_f32 vi6x3456 = extq3_f32(vi6x0123, vi6x4567);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x3456, vk01);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x3456, vk01);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x3456, vk01);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x3456, vk01);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x3456, vk01);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x3456, vk01);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x3456, vk11);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x3456, vk11);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x3456, vk11);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x3456, vk11);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x3456, vk11);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x3456, vk11);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x3456, vk21);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x3456, vk21);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x3456, vk21);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x3456, vk21);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x3456, vk21);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x3456, vk21);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x3456, vk31);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x3456, vk31);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x3456, vk31);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x3456, vk31);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x3456, vk31);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x3456, vk31);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x3456, vk41);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x3456, vk41);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x3456, vk41);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x3456, vk41);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x3456, vk41);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x3456, vk41);
 
       const psimd_f32 vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
       const psimd_f32 vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
@@ -384,25 +384,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x2345 = extq2_f32(vi5x0123, vi5x4567);
       const psimd_f32 vi6x2345 = extq2_f32(vi6x0123, vi6x4567);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x2345, vk00);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x2345, vk00);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x2345, vk00);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x2345, vk00);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x2345, vk00);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x2345, vk00);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x2345, vk10);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x2345, vk10);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x2345, vk10);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x2345, vk10);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x2345, vk10);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x2345, vk10);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x2345, vk20);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x2345, vk20);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x2345, vk20);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x2345, vk20);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x2345, vk20);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x2345, vk20);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x2345, vk30);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x2345, vk30);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x2345, vk30);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x2345, vk30);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x2345, vk30);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x2345, vk30);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x2345, vk40);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x2345, vk40);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x2345, vk40);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x2345, vk40);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x2345, vk40);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x2345, vk40);
 
       vi0x0123 = vi0x4567;
       vi1x0123 = vi1x4567;
@@ -420,25 +420,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x5678 = extq1_f32(vi5x4567, vi5x89AB);
       const psimd_f32 vi6x5678 = extq1_f32(vi6x4567, vi6x89AB);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x5678, vk03);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x5678, vk03);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x5678, vk03);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x5678, vk03);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x5678, vk03);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x5678, vk03);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x5678, vk13);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x5678, vk13);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x5678, vk13);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x5678, vk13);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x5678, vk13);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x5678, vk13);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x5678, vk23);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x5678, vk23);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x5678, vk23);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x5678, vk23);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x5678, vk23);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x5678, vk23);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x5678, vk33);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x5678, vk33);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x5678, vk33);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x5678, vk33);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x5678, vk33);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x5678, vk33);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x5678, vk43);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x5678, vk43);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x5678, vk43);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x5678, vk43);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x5678, vk43);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x5678, vk43);
 
       const psimd_f32 vi0x6789 = extq2_f32(vi0x4567, vi0x89AB);
       const psimd_f32 vi1x6789 = extq2_f32(vi1x4567, vi1x89AB);
@@ -448,25 +448,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x6789 = extq2_f32(vi5x4567, vi5x89AB);
       const psimd_f32 vi6x6789 = extq2_f32(vi6x4567, vi6x89AB);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x6789, vk04);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x6789, vk04);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x6789, vk04);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x6789, vk04);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x6789, vk04);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x6789, vk04);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x6789, vk14);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x6789, vk14);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x6789, vk14);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x6789, vk14);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x6789, vk14);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x6789, vk14);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x6789, vk24);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x6789, vk24);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x6789, vk24);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x6789, vk24);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x6789, vk24);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x6789, vk24);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x6789, vk34);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x6789, vk34);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x6789, vk34);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x6789, vk34);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x6789, vk34);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x6789, vk34);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x6789, vk44);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x6789, vk44);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x6789, vk44);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x6789, vk44);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x6789, vk44);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x6789, vk44);
 
       vi0x4567 = vi0x89AB;
       vi1x4567 = vi1x89AB;
@@ -476,9 +476,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       vi5x4567 = vi5x89AB;
       vi6x4567 = vi6x89AB;
 
-      psimd_f32 vo0 = vo4567p00;
-      psimd_f32 vo1 = vo4567p10;
-      psimd_f32 vo2 = vo4567p20;
+      psimd_f32 vo0 = vo4567p0;
+      psimd_f32 vo1 = vo4567p1;
+      psimd_f32 vo2 = vo4567p2;
 
       vo0 = psimd_max_f32(vo0, vmin);
       vo1 = psimd_max_f32(vo1, vmin);
@@ -496,9 +496,9 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
     assert(w >= 1 * sizeof(float));
     assert(w <= 4 * sizeof(float));
     {
-      psimd_f32 vo4567p00 = vbias;
-      psimd_f32 vo4567p10 = vbias;
-      psimd_f32 vo4567p20 = vbias;
+      psimd_f32 vo4567p0 = vbias;
+      psimd_f32 vo4567p1 = vbias;
+      psimd_f32 vo4567p2 = vbias;
 
       // This might have already happened if there are more than 4 pixels, but we can't count on it.
       vi0x4567 = psimd_andmask_f32(vmask, vi0x4567);
@@ -509,25 +509,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       vi5x4567 = psimd_andmask_f32(vmask, vi5x4567);
       vi6x4567 = psimd_andmask_f32(vmask, vi6x4567);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x4567, vk02);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x4567, vk02);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x4567, vk02);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x4567, vk02);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x4567, vk02);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x4567, vk02);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x4567, vk12);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x4567, vk12);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x4567, vk12);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x4567, vk12);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x4567, vk12);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x4567, vk12);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x4567, vk22);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x4567, vk22);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x4567, vk22);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x4567, vk22);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x4567, vk22);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x4567, vk22);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x4567, vk32);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x4567, vk32);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x4567, vk32);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x4567, vk32);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x4567, vk32);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x4567, vk32);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x4567, vk42);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x4567, vk42);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x4567, vk42);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x4567, vk42);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x4567, vk42);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x4567, vk42);
 
       const psimd_f32 vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
       const psimd_f32 vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
@@ -537,25 +537,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x3456 = extq3_f32(vi5x0123, vi5x4567);
       const psimd_f32 vi6x3456 = extq3_f32(vi6x0123, vi6x4567);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x3456, vk01);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x3456, vk01);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x3456, vk01);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x3456, vk01);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x3456, vk01);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x3456, vk01);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x3456, vk11);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x3456, vk11);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x3456, vk11);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x3456, vk11);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x3456, vk11);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x3456, vk11);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x3456, vk21);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x3456, vk21);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x3456, vk21);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x3456, vk21);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x3456, vk21);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x3456, vk21);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x3456, vk31);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x3456, vk31);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x3456, vk31);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x3456, vk31);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x3456, vk31);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x3456, vk31);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x3456, vk41);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x3456, vk41);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x3456, vk41);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x3456, vk41);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x3456, vk41);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x3456, vk41);
 
       const psimd_f32 vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
       const psimd_f32 vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
@@ -565,25 +565,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x2345 = extq2_f32(vi5x0123, vi5x4567);
       const psimd_f32 vi6x2345 = extq2_f32(vi6x0123, vi6x4567);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x2345, vk00);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x2345, vk00);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x2345, vk00);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x2345, vk00);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x2345, vk00);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x2345, vk00);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x2345, vk10);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x2345, vk10);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x2345, vk10);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x2345, vk10);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x2345, vk10);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x2345, vk10);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x2345, vk20);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x2345, vk20);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x2345, vk20);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x2345, vk20);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x2345, vk20);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x2345, vk20);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x2345, vk30);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x2345, vk30);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x2345, vk30);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x2345, vk30);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x2345, vk30);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x2345, vk30);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x2345, vk40);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x2345, vk40);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x2345, vk40);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x2345, vk40);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x2345, vk40);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x2345, vk40);
 
       const psimd_f32 vzero = psimd_zero_f32();
       const psimd_f32 vi0x5678 = extq1_f32(vi0x4567, vzero);
@@ -594,25 +594,25 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x5678 = extq1_f32(vi5x4567, vzero);
       const psimd_f32 vi6x5678 = extq1_f32(vi6x4567, vzero);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x5678, vk03);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x5678, vk03);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x5678, vk03);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x5678, vk03);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x5678, vk03);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x5678, vk03);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x5678, vk13);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x5678, vk13);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x5678, vk13);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x5678, vk13);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x5678, vk13);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x5678, vk13);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x5678, vk23);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x5678, vk23);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x5678, vk23);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x5678, vk23);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x5678, vk23);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x5678, vk23);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x5678, vk33);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x5678, vk33);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x5678, vk33);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x5678, vk33);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x5678, vk33);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x5678, vk33);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x5678, vk43);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x5678, vk43);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x5678, vk43);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x5678, vk43);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x5678, vk43);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x5678, vk43);
 
       const psimd_f32 vi0x6789 = extq2_f32(vi0x4567, vzero);
       const psimd_f32 vi1x6789 = extq2_f32(vi1x4567, vzero);
@@ -622,29 +622,29 @@ void xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4(
       const psimd_f32 vi5x6789 = extq2_f32(vi5x4567, vzero);
       const psimd_f32 vi6x6789 = extq2_f32(vi6x4567, vzero);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi0x6789, vk04);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi1x6789, vk04);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi2x6789, vk04);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi0x6789, vk04);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi1x6789, vk04);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi2x6789, vk04);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi1x6789, vk14);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi2x6789, vk14);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi3x6789, vk14);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi1x6789, vk14);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi2x6789, vk14);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi3x6789, vk14);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi2x6789, vk24);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi3x6789, vk24);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi4x6789, vk24);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi2x6789, vk24);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi3x6789, vk24);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi4x6789, vk24);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi3x6789, vk34);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi4x6789, vk34);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi5x6789, vk34);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi3x6789, vk34);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi4x6789, vk34);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi5x6789, vk34);
 
-      vo4567p00 = psimd_qfma_f32(vo4567p00, vi4x6789, vk44);
-      vo4567p10 = psimd_qfma_f32(vo4567p10, vi5x6789, vk44);
-      vo4567p20 = psimd_qfma_f32(vo4567p20, vi6x6789, vk44);
+      vo4567p0 = psimd_qfma_f32(vo4567p0, vi4x6789, vk44);
+      vo4567p1 = psimd_qfma_f32(vo4567p1, vi5x6789, vk44);
+      vo4567p2 = psimd_qfma_f32(vo4567p2, vi6x6789, vk44);
 
-      psimd_f32 vo0 = vo4567p00;
-      psimd_f32 vo1 = vo4567p10;
-      psimd_f32 vo2 = vo4567p20;
+      psimd_f32 vo0 = vo4567p0;
+      psimd_f32 vo1 = vo4567p1;
+      psimd_f32 vo2 = vo4567p2;
 
       vo0 = psimd_max_f32(vo0, vmin);
       vo1 = psimd_max_f32(vo1, vmin);

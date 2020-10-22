@@ -11,7 +11,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_chw_ukernel_3x3p1__sse_1x4(
+void xnn_f32_dwconv_chw_ukernel_3x3p1__sse_1x4_acc3(
     size_t input_height,
     size_t input_width,
     const float* input,

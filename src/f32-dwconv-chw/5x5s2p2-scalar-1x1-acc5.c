@@ -9,7 +9,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar_1x1(
+void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar_1x1_acc5(
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -113,39 +113,36 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar_1x1(
       i4 += 2;
 
       float vacc0 = vk00 * vi0x0;
-      float vacc1 = vk10 * vi1x0;
-      float vacc2 = vk20 * vi2x0;
-      float vacc3 = vk30 * vi3x0;
-      float vacc4 = vk40 * vi4x0;
-
       vi0x0 = vi0x2;
+      float vacc1 = vk10 * vi1x0;
       vi1x0 = vi1x2;
+      float vacc2 = vk20 * vi2x0;
       vi2x0 = vi2x2;
+      float vacc3 = vk30 * vi3x0;
       vi3x0 = vi3x2;
+      float vacc4 = vk40 * vi4x0;
       vi4x0 = vi4x2;
 
       vacc0 += vk01 * vi0x1;
-      vacc1 += vk11 * vi1x1;
-      vacc2 += vk21 * vi2x1;
-      vacc3 += vk31 * vi3x1;
-      vacc4 += vk41 * vi4x1;
-
       vi0x1 = vi0x3;
+      vacc1 += vk11 * vi1x1;
       vi1x1 = vi1x3;
+      vacc2 += vk21 * vi2x1;
       vi2x1 = vi2x3;
+      vacc3 += vk31 * vi3x1;
       vi3x1 = vi3x3;
+      vacc4 += vk41 * vi4x1;
       vi4x1 = vi4x3;
 
       vacc0 += vk02 * vi0x2;
-      vacc1 += vk12 * vi1x2;
-      vacc2 += vk22 * vi2x2;
-      vacc3 += vk32 * vi3x2;
-      vacc4 += vk42 * vi4x2;
-
       vi0x2 = vi0x4;
+      vacc1 += vk12 * vi1x2;
       vi1x2 = vi1x4;
+      vacc2 += vk22 * vi2x2;
       vi2x2 = vi2x4;
+      vacc3 += vk32 * vi3x2;
       vi3x2 = vi3x4;
+      vacc4 += vk42 * vi4x2;
       vi4x2 = vi4x4;
 
       vacc0 += vk03 * vi0x3;

@@ -249,10 +249,10 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-conv-hwc/3x3s2p1c3x4-scalar-1x1.c
   src/f32-conv-hwc/3x3s2p0p1c3x4-scalar-1x1.c
   src/f32-conv-hwc2chw/3x3s2p1c3x4-scalar-1x1.c
-  src/f32-dwconv-chw/3x3p1-scalar-1x1.c
-  src/f32-dwconv-chw/3x3s2p1-scalar-1x1.c
-  src/f32-dwconv-chw/5x5p2-scalar-1x1.c
-  src/f32-dwconv-chw/5x5s2p2-scalar-1x1.c
+  src/f32-dwconv-chw/3x3p1-scalar-1x1-acc3.c
+  src/f32-dwconv-chw/3x3s2p1-scalar-1x1-acc3.c
+  src/f32-dwconv-chw/5x5p2-scalar-1x1-acc5.c
+  src/f32-dwconv-chw/5x5s2p2-scalar-1x1-acc5.c
   src/f32-dwconv/gen/up1x4-scalar.c
   src/f32-dwconv/gen/up1x4-scalar-acc2.c
   src/f32-dwconv/gen/up1x9-scalar.c
@@ -601,10 +601,10 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
 
 SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
   src/f32-conv-hwc2chw/3x3s2p1c3x4-psimd-2x2.c
-  src/f32-dwconv-chw/3x3p1-psimd-1x4.c
-  src/f32-dwconv-chw/3x3s2p1-psimd-1x4.c
+  src/f32-dwconv-chw/3x3p1-psimd-1x4-acc3.c
+  src/f32-dwconv-chw/3x3s2p1-psimd-1x4-acc3.c
   src/f32-dwconv-chw/5x5p2-psimd-3x4.c
-  src/f32-dwconv-chw/5x5s2p2-psimd-1x4.c)
+  src/f32-dwconv-chw/5x5s2p2-psimd-1x4-acc2.c)
 
 SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/qs8-requantization/fp32-psimd.c
@@ -1100,9 +1100,9 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-conv-hwc/gen/3x3s2p1c3x8-neonfma-2x2.c
   src/f32-conv-hwc2chw/3x3s2p1c3x4-neonfma-2x2.c
   src/f32-dwconv-chw/3x3p1-neonfma-3x4.c
+  src/f32-dwconv-chw/3x3s2p1-neonfma-1x4-acc3.c
   src/f32-dwconv-chw/5x5p2-neonfma-3x4.c
-  src/f32-dwconv-chw/3x3s2p1-neonfma-1x4.c
-  src/f32-dwconv-chw/5x5s2p2-neonfma-1x4.c
+  src/f32-dwconv-chw/5x5s2p2-neonfma-1x4-acc2.c
   src/f32-sigmoid/gen/neonfma-rr1-p5-div-x4.c
   src/f32-sigmoid/gen/neonfma-rr1-p5-div-x8.c
   src/f32-sigmoid/gen/neonfma-rr1-p5-div-x12.c
@@ -1261,8 +1261,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-clamp/gen/sse-x8.c
   src/f32-conv-hwc2chw/3x3s2p1c3x4-sse-1x1.c
   src/f32-conv-hwc2chw/3x3s2p1c3x4-sse-2x2.c
-  src/f32-dwconv-chw/3x3p1-sse-1x4.c
-  src/f32-dwconv-chw/3x3s2p1-sse-1x4.c
+  src/f32-dwconv-chw/3x3p1-sse-1x4-acc3.c
+  src/f32-dwconv-chw/3x3s2p1-sse-1x4-acc3.c
   src/f32-dwconv/gen/up4x25-minmax-sse-acc2.c
   src/f32-dwconv/gen/up4x25-minmax-sse.c
   src/f32-dwconv/gen/up4x4-minmax-sse-acc2.c

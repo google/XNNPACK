@@ -11,7 +11,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
+void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4_acc2(
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -75,7 +75,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
 
     size_t w = input_width;
     for (; w > 8 * sizeof(float); w -= 8 * sizeof(float)) {
-      float32x4_t vo468Ap00 = vdupq_laneq_f32(vw0123, 0);
+      float32x4_t vo468Ap0 = vdupq_laneq_f32(vw0123, 0);
 
       float32x4_t vi0x89AB;
       float32x4_t vi1x89AB;
@@ -113,11 +113,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       float32x4_t vi4x579B = vuzp2q_f32(vi4x4567, vi4x89AB);
 
       // middle tap
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x468A, vw0123, 3);
-      float32x4_t vo468Ap01 = vmulq_laneq_f32(vi1x468A, vw89AB, 0);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi2x468A, vwCDEF, 1);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi3x468A, vwGHIJ, 2);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi4x468A, vwKLMN, 3);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x468A, vw0123, 3);
+      float32x4_t vo468Ap1 = vmulq_laneq_f32(vi1x468A, vw89AB, 0);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi2x468A, vwCDEF, 1);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi3x468A, vwGHIJ, 2);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi4x468A, vwKLMN, 3);
 
       // one left
       const float32x4_t vi0x3579 = vextq_f32(vi0x0123, vi0x579B, 3);
@@ -126,11 +126,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       const float32x4_t vi3x3579 = vextq_f32(vi3x0123, vi3x579B, 3);
       const float32x4_t vi4x3579 = vextq_f32(vi4x0123, vi4x579B, 3);
 
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x3579, vw0123, 2);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi1x3579, vw4567, 3);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi2x3579, vwCDEF, 0);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi3x3579, vwGHIJ, 1);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi4x3579, vwKLMN, 2);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x3579, vw0123, 2);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi1x3579, vw4567, 3);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi2x3579, vwCDEF, 0);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi3x3579, vwGHIJ, 1);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi4x3579, vwKLMN, 2);
 
       // two left
       // getting the vector to use for the far left tap is annoying
@@ -151,11 +151,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       const float32x4_t vi3x2468 = vextq_f32(vi3x0012, vi3x468A, 3);
       const float32x4_t vi4x2468 = vextq_f32(vi4x0012, vi4x468A, 3);
 
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x2468, vw0123, 1);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi1x2468, vw4567, 2);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi2x2468, vw89AB, 3);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi3x2468, vwGHIJ, 0);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi4x2468, vwKLMN, 1);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x2468, vw0123, 1);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi1x2468, vw4567, 2);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi2x2468, vw89AB, 3);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi3x2468, vwGHIJ, 0);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi4x2468, vwKLMN, 1);
 
       vi0x0123 = vi0x89AB;
       vi1x0123 = vi1x89AB;
@@ -164,11 +164,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       vi4x0123 = vi4x89AB;
 
       // one right
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x579B, vw4567, 0);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi1x579B, vw89AB, 1);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi2x579B, vwCDEF, 2);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi3x579B, vwGHIJ, 3);
-      vo468Ap00 = vfmaq_lane_f32( vo468Ap00, vi4x579B, vwOP, 0);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x579B, vw4567, 0);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi1x579B, vw89AB, 1);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi2x579B, vwCDEF, 2);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi3x579B, vwGHIJ, 3);
+      vo468Ap0 = vfmaq_lane_f32( vo468Ap0, vi4x579B, vwOP, 0);
 
       // two right
       const float32x4_t vi0x68AC = vextq_f32(vi0x468A, vi0xCDEF, 1);
@@ -177,11 +177,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       const float32x4_t vi3x68AC = vextq_f32(vi3x468A, vi3xCDEF, 1);
       const float32x4_t vi4x68AC = vextq_f32(vi4x468A, vi4xCDEF, 1);
 
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x68AC, vw4567, 1);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi1x68AC, vw89AB, 2);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi2x68AC, vwCDEF, 3);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi3x68AC, vwKLMN, 0);
-      vo468Ap00 = vfmaq_lane_f32( vo468Ap00, vi4x68AC, vwOP, 1);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x68AC, vw4567, 1);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi1x68AC, vw89AB, 2);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi2x68AC, vwCDEF, 3);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi3x68AC, vwKLMN, 0);
+      vo468Ap0 = vfmaq_lane_f32( vo468Ap0, vi4x68AC, vwOP, 1);
 
       vi0x4567 = vi0xCDEF;
       vi1x4567 = vi1xCDEF;
@@ -189,7 +189,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       vi3x4567 = vi3xCDEF;
       vi4x4567 = vi4xCDEF;
 
-      float32x4_t vo0 = vaddq_f32(vo468Ap00, vo468Ap01);
+      float32x4_t vo0 = vaddq_f32(vo468Ap0, vo468Ap1);
 
       vo0 = vmaxq_f32(vo0, vmin);
       vo0 = vminq_f32(vo0, vmax);
@@ -211,7 +211,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
     }
 
     {
-      float32x4_t vo468Ap00 = vdupq_laneq_f32(vw0123, 0);
+      float32x4_t vo468Ap0 = vdupq_laneq_f32(vw0123, 0);
 
       float32x4_t vi0x89AB;
       float32x4_t vi1x89AB;
@@ -276,11 +276,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       vi4x579B = vreinterpretq_f32_u32(vandq_u32(vmask_odd, vreinterpretq_u32_f32(vi4x579B)));
 
       // middle tap
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x468A, vw0123, 3);
-      float32x4_t vo468Ap01 = vmulq_laneq_f32(vi1x468A, vw89AB, 0);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi2x468A, vwCDEF, 1);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi3x468A, vwGHIJ, 2);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi4x468A, vwKLMN, 3);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x468A, vw0123, 3);
+      float32x4_t vo468Ap1 = vmulq_laneq_f32(vi1x468A, vw89AB, 0);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi2x468A, vwCDEF, 1);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi3x468A, vwGHIJ, 2);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi4x468A, vwKLMN, 3);
 
       // one left
       const float32x4_t vi0x3579 = vextq_f32(vi0x0123, vi0x579B, 3);
@@ -289,11 +289,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       const float32x4_t vi3x3579 = vextq_f32(vi3x0123, vi3x579B, 3);
       const float32x4_t vi4x3579 = vextq_f32(vi4x0123, vi4x579B, 3);
 
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x3579, vw0123, 2);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi1x3579, vw4567, 3);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi2x3579, vwCDEF, 0);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi3x3579, vwGHIJ, 1);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi4x3579, vwKLMN, 2);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x3579, vw0123, 2);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi1x3579, vw4567, 3);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi2x3579, vwCDEF, 0);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi3x3579, vwGHIJ, 1);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi4x3579, vwKLMN, 2);
 
       // two left
       // getting the vector to use for the far left tap is annoying
@@ -314,11 +314,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       const float32x4_t vi3x2468 = vextq_f32(vi3x0012, vi3x468A, 3);
       const float32x4_t vi4x2468 = vextq_f32(vi4x0012, vi4x468A, 3);
 
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x2468, vw0123, 1);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi1x2468, vw4567, 2);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi2x2468, vw89AB, 3);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi3x2468, vwGHIJ, 0);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi4x2468, vwKLMN, 1);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x2468, vw0123, 1);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi1x2468, vw4567, 2);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi2x2468, vw89AB, 3);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi3x2468, vwGHIJ, 0);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi4x2468, vwKLMN, 1);
 
       vi0x0123 = vi0x89AB;
       vi1x0123 = vi1x89AB;
@@ -327,11 +327,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       vi4x0123 = vi4x89AB;
 
       // one right
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x579B, vw4567, 0);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi1x579B, vw89AB, 1);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi2x579B, vwCDEF, 2);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi3x579B, vwGHIJ, 3);
-      vo468Ap00 = vfmaq_lane_f32( vo468Ap00, vi4x579B, vwOP, 0);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x579B, vw4567, 0);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi1x579B, vw89AB, 1);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi2x579B, vwCDEF, 2);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi3x579B, vwGHIJ, 3);
+      vo468Ap0 = vfmaq_lane_f32( vo468Ap0, vi4x579B, vwOP, 0);
 
       // two right
       const float32x4_t vi0x68AC = vextq_f32(vi0x468A, vi0xCDEF, 1);
@@ -340,11 +340,11 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       const float32x4_t vi3x68AC = vextq_f32(vi3x468A, vi3xCDEF, 1);
       const float32x4_t vi4x68AC = vextq_f32(vi4x468A, vi4xCDEF, 1);
 
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi0x68AC, vw4567, 1);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi1x68AC, vw89AB, 2);
-      vo468Ap00 = vfmaq_laneq_f32(vo468Ap00, vi2x68AC, vwCDEF, 3);
-      vo468Ap01 = vfmaq_laneq_f32(vo468Ap01, vi3x68AC, vwKLMN, 0);
-      vo468Ap00 = vfmaq_lane_f32( vo468Ap00, vi4x68AC, vwOP, 1);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi0x68AC, vw4567, 1);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi1x68AC, vw89AB, 2);
+      vo468Ap0 = vfmaq_laneq_f32(vo468Ap0, vi2x68AC, vwCDEF, 3);
+      vo468Ap1 = vfmaq_laneq_f32(vo468Ap1, vi3x68AC, vwKLMN, 0);
+      vo468Ap0 = vfmaq_lane_f32( vo468Ap0, vi4x68AC, vwOP, 1);
 
       vi0x4567 = vi0xCDEF;
       vi1x4567 = vi1xCDEF;
@@ -352,7 +352,7 @@ void xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4(
       vi3x4567 = vi3xCDEF;
       vi4x4567 = vi4xCDEF;
 
-      float32x4_t vo0 = vaddq_f32(vo468Ap00, vo468Ap01);
+      float32x4_t vo0 = vaddq_f32(vo468Ap0, vo468Ap1);
 
       vo0 = vmaxq_f32(vo0, vmin);
       vo0 = vminq_f32(vo0, vmax);
