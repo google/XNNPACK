@@ -28,6 +28,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_unroll2(
 
   const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
   const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
   size_t n = batch_size;
   while XNN_LIKELY(n >= 4) {
     const float*restrict w = weights;
@@ -38,7 +39,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_unroll2(
       uint32_t nnz = *nnzmap++;
       v128_t vacc0123x0 = wasm_v32x4_load_splat(w);
       w += 1;
-      v128_t vacc0123x1 = wasm_f32x4_splat(0.0f);
+      v128_t vacc0123x1 = vzero;
       for (; nnz >= 2; nnz -= 2) {
         const intptr_t diff0 = dmap[0];
         const intptr_t diff1 = dmap[1];

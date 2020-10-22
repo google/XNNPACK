@@ -27,6 +27,8 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_unroll" 
 
   const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
   const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+  $if UNROLL > 1:
+    const v128_t vzero = wasm_f32x4_splat(0.0f);
   size_t n = batch_size;
   while XNN_LIKELY(n >= ${MR}) {
     const float*restrict w = weights;
@@ -39,11 +41,11 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_unroll" 
         v128_t vacc0123x0 = wasm_v32x4_load_splat(w);
         w += 1;
         $for K in range(1, UNROLL):
-          v128_t vacc0123x${K} = wasm_f32x4_splat(0.0f);
+          v128_t vacc0123x${K} = vzero;
         $for M in range(4, MR, 4):
           v128_t vacc${ABC[M:M+4]}x0 = vacc0123x0;
           $for K in range(1, UNROLL):
-            v128_t vacc${ABC[M:M+4]}x${K} = wasm_f32x4_splat(0.0f);
+            v128_t vacc${ABC[M:M+4]}x${K} = vzero;
         for (; nnz >= ${UNROLL}; nnz -= ${UNROLL}) {
           $for K in range(UNROLL):
             const intptr_t diff${K} = dmap[${K}];
