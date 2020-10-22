@@ -14,55 +14,44 @@
 
 void xnn_f32_ibilinear_chw_ukernel__scalar_p1(
     size_t output_pixels,
-    size_t channels,
     const float**restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output)
+    const float*restrict horizontal_weights,
+    const float*restrict vertical_weights,
+    float* output)
 {
   assert(output_pixels != 0);
-  assert(channels != 0);
-  assert(channels % sizeof(float) == 0);
 
-  const size_t input_offset_increment = output_pixels * 4 * sizeof(float);
-  size_t c = channels;
+  const float** i = input;
+  const float* wh = horizontal_weights;
+  const float* wv = vertical_weights;
+
+  size_t p = output_pixels;
   do {
-    const float** i = input;
-    const float* w = weights;
+    const float* i0 = (const float*) ((uintptr_t) i[0] + input_offset);
+    const float* i1 = (const float*) ((uintptr_t) i[1] + input_offset);
+    const float* i2 = (const float*) ((uintptr_t) i[2] + input_offset);
+    const float* i3 = (const float*) ((uintptr_t) i[3] + input_offset);
+    i += 4;
 
-    size_t p = output_pixels;
-    do {
-      const float* i0 = (const float*) ((uintptr_t) i[0] + input_offset);
-      const float* i1 = (const float*) ((uintptr_t) i[1] + input_offset);
-      const float* i2 = (const float*) ((uintptr_t) i[2] + input_offset);
-      const float* i3 = (const float*) ((uintptr_t) i[3] + input_offset);
-      i += 4;
+    const float valphah = *wh++;
+    const float valphav = *wv++;
 
-      const float valphah = w[0];
-      const float valphav = w[1];
-      w += 2;
+    const float vtl = *i0;
+    const float vtr = *i1;
+    const float vbl = *i2;
+    const float vbr = *i3;
 
-      const float vtl = *i0;
-      const float vtr = *i1;
-      const float vbl = *i2;
-      const float vbr = *i3;
+    const float vtd = vtr - vtl;
+    const float vbd = vbr - vbl;
 
-      const float vtd = vtr - vtl;
-      const float vbd = vbr - vbl;
+    const float vt = vtl + vtd * valphah;
+    const float vb = vbl + vbd * valphah;
 
-      const float vt = vtl + vtd * valphah;
-      const float vb = vbl + vbd * valphah;
+    const float vd = vb - vt;
 
-      const float vd = vb - vt;
+    const float vo = vt + vd * valphav;
 
-      const float vo = vt + vd * valphav;
-
-      *output++ = vo;
-
-    } while (--p != 0);
-
-    input_offset += input_offset_increment;
-
-    c -= sizeof(float);
-  } while (c != 0);
+    *output++ = vo;
+  } while (--p != 0);
 }
