@@ -55,6 +55,11 @@ __mmask64 _kshiftli_mask64(__mmask64 a, unsigned int count) {
   return (__mmask64) ((unsigned long long) a << count);
 }
 
+static XNN_INTRINSIC
+__mmask64 _kshiftri_mask64(__mmask64 a, unsigned int count) {
+  return (__mmask64) ((unsigned long long) a >> count);
+}
+
 #endif  // GCC pre-7, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-18
 
 // GCC pre-7, Clang pre-4, and ICC pre-18
