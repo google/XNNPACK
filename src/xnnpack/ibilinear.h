@@ -27,13 +27,14 @@ extern "C" {
       size_t output_increment);
 
 #define DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(fn_name) \
-XNN_INTERNAL void fn_name(                            \
-    size_t output_pixels,                             \
-    size_t channels,                                  \
-    const float** input,                              \
-    size_t input_offset,                              \
-    const float* weights,                             \
-    float* output,                                    \
+XNN_INTERNAL void fn_name(                                  \
+    size_t output_pixels,                                   \
+    size_t channels,                                        \
+    const float** input,                                    \
+    size_t input_offset,                                    \
+    const float* horizontal_weights,                        \
+    const float* vertical_weights,                          \
+    float* output,                                          \
     size_t input_increment);
 
 DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__scalar_c1)

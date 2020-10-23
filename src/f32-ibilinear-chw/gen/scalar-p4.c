@@ -17,7 +17,8 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
     size_t channels,
     const float**restrict input,
     size_t input_offset,
-    const float*restrict weights,
+    const float*restrict horizontal_weights,
+    const float*restrict vertical_weights,
     float*restrict output,
     size_t input_increment)
 {
@@ -28,7 +29,8 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
   size_t c = channels;
   do {
     const float** i = input;
-    const float* w = weights;
+    const float* wh = horizontal_weights;
+    const float* wv = vertical_weights;
 
     size_t p = output_pixels;
     for (; p >= 4; p -= 4) {
@@ -50,15 +52,16 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
       const float* i15 = (const float*) ((uintptr_t) i[15] + input_offset);
       i += 4 * 4;
 
-      const float valphah0 = w[0];
-      const float valphav0 = w[1];
-      const float valphah1 = w[2];
-      const float valphav1 = w[3];
-      const float valphah2 = w[4];
-      const float valphav2 = w[5];
-      const float valphah3 = w[6];
-      const float valphav3 = w[7];
-      w += 4 * 2;
+      const float valphah0 = wh[0];
+      const float valphav0 = wv[0];
+      const float valphah1 = wh[1];
+      const float valphav1 = wv[1];
+      const float valphah2 = wh[2];
+      const float valphav2 = wv[2];
+      const float valphah3 = wh[3];
+      const float valphav3 = wv[3];
+      wh += 4;
+      wv += 4;
 
       const float vtl0 = *i0;
       const float vtr0 = *i1;
@@ -119,9 +122,8 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
       const float* i3 = (const float*) ((uintptr_t) i[3] + input_offset);
       i += 4;
 
-      const float valphah = w[0];
-      const float valphav = w[1];
-      w += 2;
+      const float valphah = *wh++;
+      const float valphav = *wv++;
 
       const float vtl = *i0;
       const float vtr = *i1;

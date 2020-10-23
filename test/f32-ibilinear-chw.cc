@@ -21,7 +21,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P1, pixels_eq_1) {
   IBilinearMicrokernelTester()
     .pixels(1)
     .channels(1)
-    .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p1);
+    .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p1);
 }
 
 TEST(F32_IBILINEAR_CHW__SCALAR_P1, pixels_gt_1) {
@@ -29,7 +29,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P1, pixels_gt_1) {
     IBilinearMicrokernelTester()
       .pixels(pixels)
       .channels(1)
-      .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p1);
+      .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p1);
   }
 }
 
@@ -39,7 +39,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P1, channels_gt_1) {
       IBilinearMicrokernelTester()
         .pixels(pixels)
         .channels(channels)
-        .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p1);
+        .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p1);
     }
   }
 }
@@ -51,7 +51,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P1, input_offset) {
         .pixels(pixels)
         .channels(channels)
         .input_offset(7)
-        .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p1);
+        .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p1);
     }
   }
 }
@@ -63,7 +63,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P1, input_stride) {
         .pixels(pixels)
         .channels(channels)
         .input_stride(23)
-        .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p1);
+        .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p1);
     }
   }
 }
@@ -73,7 +73,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P2, pixels_eq_2) {
   IBilinearMicrokernelTester()
     .pixels(2)
     .channels(1)
-    .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
+    .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
 }
 
 TEST(F32_IBILINEAR_CHW__SCALAR_P2, pixels_div_2) {
@@ -81,7 +81,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P2, pixels_div_2) {
     IBilinearMicrokernelTester()
       .pixels(pixels)
       .channels(1)
-      .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
+      .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
   }
 }
 
@@ -90,7 +90,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P2, pixels_lt_2) {
     IBilinearMicrokernelTester()
       .pixels(pixels)
       .channels(1)
-      .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
+      .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
   }
 }
 
@@ -99,7 +99,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P2, pixels_gt_2) {
     IBilinearMicrokernelTester()
       .pixels(pixels)
       .channels(1)
-      .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
+      .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
   }
 }
 
@@ -109,7 +109,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P2, channels_gt_2) {
       IBilinearMicrokernelTester()
         .pixels(pixels)
         .channels(channels)
-        .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
+        .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
     }
   }
 }
@@ -121,7 +121,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P2, input_offset) {
         .pixels(pixels)
         .channels(channels)
         .input_offset(7)
-        .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
+        .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
     }
   }
 }
@@ -133,7 +133,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P2, input_stride) {
         .pixels(pixels)
         .channels(channels)
         .input_stride(43)
-        .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
+        .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p2);
     }
   }
 }
@@ -143,7 +143,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, pixels_eq_4) {
   IBilinearMicrokernelTester()
     .pixels(4)
     .channels(1)
-    .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
+    .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
 }
 
 TEST(F32_IBILINEAR_CHW__SCALAR_P4, pixels_div_4) {
@@ -151,7 +151,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, pixels_div_4) {
     IBilinearMicrokernelTester()
       .pixels(pixels)
       .channels(1)
-      .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
+      .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
   }
 }
 
@@ -160,7 +160,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, pixels_lt_4) {
     IBilinearMicrokernelTester()
       .pixels(pixels)
       .channels(1)
-      .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
+      .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
   }
 }
 
@@ -169,7 +169,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, pixels_gt_4) {
     IBilinearMicrokernelTester()
       .pixels(pixels)
       .channels(1)
-      .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
+      .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
   }
 }
 
@@ -179,7 +179,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, channels_gt_4) {
       IBilinearMicrokernelTester()
         .pixels(pixels)
         .channels(channels)
-        .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
+        .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
     }
   }
 }
@@ -191,7 +191,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, input_offset) {
         .pixels(pixels)
         .channels(channels)
         .input_offset(7)
-        .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
+        .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
     }
   }
 }
@@ -203,7 +203,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, input_stride) {
         .pixels(pixels)
         .channels(channels)
         .input_stride(83)
-        .TestCHW(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
+        .Test(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
     }
   }
 }

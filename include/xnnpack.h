@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 /// The number of bytes XNNPACK may read beyond array bounds.
-/// The caller must allocate at this this many extra bytes after the tensor data passed to XNNPACK.
+/// The caller must allocate at least this many extra bytes after the tensor data passed to XNNPACK.
 ///
 /// Note: XNNPACK reads, but never writes beyond array bounds.
 #define XNN_EXTRA_BYTES 16
