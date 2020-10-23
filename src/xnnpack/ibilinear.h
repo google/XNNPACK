@@ -33,7 +33,8 @@ XNN_INTERNAL void fn_name(                            \
     const float** input,                              \
     size_t input_offset,                              \
     const float* weights,                             \
-    float* output);
+    float* output,                                    \
+    size_t input_increment);
 
 DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__scalar_c1)
 DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__scalar_c2)

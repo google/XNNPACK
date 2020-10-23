@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright 2019 Google LLC
+# Copyright 2020 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -18,7 +18,7 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(
-  description='IBILINEAR microkernel test generator')
+    description='IBILINEAR microkernel test generator')
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Specification (YAML) file")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
@@ -27,57 +27,23 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_ibilinear_ukernel__(.+)_c(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_ibilinear_chw_ukernel__(.+)_p(\d+)$", name)
   assert match is not None
-  channel_tile = int(match.group(3))
-  pixel_tile = 1
+  pixel_tile = int(match.group(3))
+  channel_tile = 1
 
   arch, isa = xnncommon.parse_target_name(target_name=match.group(2))
   return channel_tile, pixel_tile, arch, isa
 
 
 IBILINEAR_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}) {
+TEST(${TEST_NAME}, pixels_eq_${PIXEL_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   IBilinearMicrokernelTester()
     .pixels(${PIXEL_TILE})
     .channels(${CHANNEL_TILE})
-    .Test(${TEST_FUNC});
-}
-
-$if CHANNEL_TILE > 1:
-  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*10}; channels += ${CHANNEL_TILE}) {
-      IBilinearMicrokernelTester()
-        .pixels(${PIXEL_TILE})
-        .channels(channels)
-        .Test(${TEST_FUNC});
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
-      IBilinearMicrokernelTester()
-        .pixels(${PIXEL_TILE})
-        .channels(channels)
-        .Test(${TEST_FUNC});
-    }
-  }
-
-TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-    IBilinearMicrokernelTester()
-      .pixels(${PIXEL_TILE})
-      .channels(channels)
-      .Test(${TEST_FUNC});
-  }
+    .TestCHW(${TEST_FUNC});
 }
 
 $if PIXEL_TILE > 1:
@@ -85,12 +51,10 @@ $if PIXEL_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t pixels = ${PIXEL_TILE*2}; pixels < ${PIXEL_TILE*10}; pixels += ${PIXEL_TILE}) {
-      for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
-        IBilinearMicrokernelTester()
-          .pixels(pixels)
-          .channels(channels)
-          .Test(${TEST_FUNC});
-      }
+      IBilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(${CHANNEL_TILE})
+        .TestCHW(${TEST_FUNC});
     }
   }
 
@@ -98,24 +62,60 @@ $if PIXEL_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t pixels = 1; pixels < ${PIXEL_TILE}; pixels++) {
-      for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
-        IBilinearMicrokernelTester()
-          .pixels(pixels)
-          .channels(channels)
-          .Test(${TEST_FUNC});
-      }
+      IBilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(${CHANNEL_TILE})
+        .TestCHW(${TEST_FUNC});
     }
   }
 
 TEST(${TEST_NAME}, pixels_gt_${PIXEL_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pixels = ${PIXEL_TILE+1}; pixels < ${max(PIXEL_TILE*2, 3)}; pixels++) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
+  for (size_t pixels = ${PIXEL_TILE+1}; pixels < ${10 if PIXEL_TILE == 1 else PIXEL_TILE*2}; pixels++) {
+    IBilinearMicrokernelTester()
+      .pixels(pixels)
+      .channels(${CHANNEL_TILE})
+      .TestCHW(${TEST_FUNC});
+  }
+}
+
+$if CHANNEL_TILE > 1:
+  TEST(${TEST_NAME}, channels_div_${PIXEL_TILE}) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*10}; channels += ${CHANNEL_TILE}) {
+      for (size_t pixels = 1; pixels <= ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .TestCHW(${TEST_FUNC});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, channels_lt_${PIXEL_TILE}) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+      for (size_t pixels = 1; pixels <= ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .TestCHW(${TEST_FUNC});
+      }
+    }
+  }
+
+TEST(${TEST_NAME}, channels_gt_${PIXEL_TILE}) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${max(CHANNEL_TILE*2, 3)}; channels++) {
+    for (size_t pixels = 1; pixels <= ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
       IBilinearMicrokernelTester()
         .pixels(pixels)
         .channels(channels)
-        .Test(${TEST_FUNC});
+        .TestCHW(${TEST_FUNC});
     }
   }
 }
@@ -129,12 +129,12 @@ TEST(${TEST_NAME}, input_offset) {
         .pixels(pixels)
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE * 5 + 1)})
-        .Test(${TEST_FUNC});
+        .TestCHW(${TEST_FUNC});
     }
   }
 }
 
-TEST(${TEST_NAME}, output_stride) {
+TEST(${TEST_NAME}, input_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t pixels = 1; pixels < ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
@@ -142,11 +142,12 @@ TEST(${TEST_NAME}, output_stride) {
       IBilinearMicrokernelTester()
         .pixels(pixels)
         .channels(channels)
-        .output_stride(${next_prime(CHANNEL_TILE * 5 + 1)})
-        .Test(${TEST_FUNC});
+        .input_stride(${next_prime(4 * (PIXEL_TILE * 5) + 1)})
+        .TestCHW(${TEST_FUNC});
     }
   }
 }
+
 """
 
 
@@ -177,7 +178,7 @@ def generate_test_cases(ukernel, channel_tile, pixel_tile, isa):
       "PIXEL_TILE": pixel_tile,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
-    })
+  })
 
 
 def main(args):
@@ -189,7 +190,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.

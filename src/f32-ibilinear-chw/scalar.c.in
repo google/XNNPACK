@@ -17,13 +17,13 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p${PIXEL_TILE}${"" if CHANNEL_TILE ==
     const float**restrict input,
     size_t input_offset,
     const float*restrict weights,
-    float*restrict output)
+    float*restrict output,
+    size_t input_increment)
 {
   assert(output_pixels != 0);
   assert(channels != 0);
-  assert(channels % sizeof(float) == 0);
+  assert(input_increment % sizeof(float) == 0);
 
-  const size_t input_offset_increment = output_pixels * 4 * sizeof(float);
   size_t c = channels;
   do {
     const float** i = input;
@@ -125,8 +125,8 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p${PIXEL_TILE}${"" if CHANNEL_TILE ==
 
       } while (--p != 0);
 
-    input_offset += input_offset_increment;
+    input_offset += input_increment;
 
-    c -= sizeof(float);
+    c--;
   } while (c != 0);
 }

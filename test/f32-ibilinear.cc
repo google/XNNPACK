@@ -55,6 +55,7 @@ TEST(F32_IBILINEAR__SCALAR_C1, input_offset) {
     }
   }
 }
+
 TEST(F32_IBILINEAR__SCALAR_C1, output_stride) {
   for (size_t pixels = 1; pixels < 5; pixels += 1) {
     for (size_t channels = 1; channels <= 5; channels += 1) {
@@ -123,6 +124,7 @@ TEST(F32_IBILINEAR__SCALAR_C2, input_offset) {
     }
   }
 }
+
 TEST(F32_IBILINEAR__SCALAR_C2, output_stride) {
   for (size_t pixels = 1; pixels < 5; pixels += 1) {
     for (size_t channels = 1; channels <= 10; channels += 1) {
@@ -191,6 +193,7 @@ TEST(F32_IBILINEAR__SCALAR_C4, input_offset) {
     }
   }
 }
+
 TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
   for (size_t pixels = 1; pixels < 5; pixels += 1) {
     for (size_t channels = 1; channels <= 20; channels += 3) {
@@ -266,6 +269,7 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
+
   TEST(F32_IBILINEAR__NEON_C4, output_stride) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
@@ -344,6 +348,7 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
+
   TEST(F32_IBILINEAR__NEON_C8, output_stride) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
@@ -422,6 +427,7 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
+
   TEST(F32_IBILINEAR__NEONFMA_C4, output_stride) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
@@ -500,6 +506,7 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
+
   TEST(F32_IBILINEAR__NEONFMA_C8, output_stride) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
@@ -578,6 +585,7 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
+
   TEST(F32_IBILINEAR__SSE_C4, output_stride) {
     TEST_REQUIRES_X86_SSE;
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
@@ -656,6 +664,7 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
+
   TEST(F32_IBILINEAR__SSE_C8, output_stride) {
     TEST_REQUIRES_X86_SSE;
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
@@ -728,6 +737,7 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
+
   TEST(F32_IBILINEAR__WASMSIMD_C4, output_stride) {
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 20; channels += 3) {
@@ -799,6 +809,7 @@ TEST(F32_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
+
   TEST(F32_IBILINEAR__WASMSIMD_C8, output_stride) {
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
