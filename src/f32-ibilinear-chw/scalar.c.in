@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert CHANNEL_TILE == 1
 $assert PIXEL_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
@@ -11,7 +10,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/ibilinear.h>
 
 
-void xnn_f32_ibilinear_chw_ukernel__scalar_p${PIXEL_TILE}${"" if CHANNEL_TILE == 1 else "x%d" % CHANNEL_TILE}(
+void xnn_f32_ibilinear_chw_ukernel__scalar_p${PIXEL_TILE}(
     size_t output_pixels,
     size_t channels,
     const float**restrict input,

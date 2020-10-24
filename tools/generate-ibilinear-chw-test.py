@@ -94,20 +94,18 @@ $if CHANNEL_TILE > 1:
     }
   }
 
-  TEST(${TEST_NAME}, channels_lt_${PIXEL_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
-      for (size_t pixels = 1; pixels <= ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
-        IBilinearMicrokernelTester()
-          .pixels(pixels)
-          .channels(channels)
-          .TestCHW(${TEST_FUNC});
-      }
-    }
+TEST(${TEST_NAME}, channels_eq_1) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t pixels = 1; pixels <= ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
+    IBilinearMicrokernelTester()
+      .pixels(pixels)
+      .channels(1)
+      .TestCHW(${TEST_FUNC});
   }
+}
 
-TEST(${TEST_NAME}, channels_gt_${PIXEL_TILE}) {
+TEST(${TEST_NAME}, channels_gt_1) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t channels = ${CHANNEL_TILE+1}; channels < ${max(CHANNEL_TILE*2, 3)}; channels++) {
