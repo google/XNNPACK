@@ -145,22 +145,20 @@ class IBilinearMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_ibilinear_chw_ukernel_function ibilinear) const {
+  void TestCHW(xnn_f32_ibilinear_chw_ukernel_function ibilinear) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
 
     std::vector<const float*> indirection(pixels() * 4);
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + (channels() - 1) * input_stride() + 4 * pixels());
-    std::vector<float, AlignedAllocator<float, 64>> horizontal_weights(pixels());
-    std::vector<float, AlignedAllocator<float, 64>> vertical_weights(pixels());
+    std::vector<float, AlignedAllocator<float, 64>> packed_weights(pixels() * 2);
     std::vector<float> output(pixels() * channels());
     std::vector<float> output_ref(pixels() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f32rng));
-      std::generate(horizontal_weights.begin(), horizontal_weights.end(), std::ref(f32rng));
-      std::generate(vertical_weights.begin(), vertical_weights.end(), std::ref(f32rng));
+      std::generate(packed_weights.begin(), packed_weights.end(), std::ref(f32rng));
       std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < indirection.size(); i++) {
@@ -171,8 +169,8 @@ class IBilinearMicrokernelTester {
       // Compute reference results.
       for (size_t i = 0; i < pixels(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          const float alpha_h = horizontal_weights[i];
-          const float alpha_v = vertical_weights[i];
+          const float alpha_h = packed_weights[i * 2 + 0];
+          const float alpha_v = packed_weights[i * 2 + 1];
           // `c * pixels() + i` because the output is NCHW.
           output_ref[c * pixels() + i] =
             // `c * indirection.size()` because the input is NCHW.
@@ -187,8 +185,7 @@ class IBilinearMicrokernelTester {
       ibilinear(
         pixels(), channels(),
         indirection.data(), input_offset() * sizeof(float),
-        horizontal_weights.data(), vertical_weights.data(),
-        output.data(), input_stride() * sizeof(float));
+        packed_weights.data(), output.data(), input_stride() * sizeof(float));
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {

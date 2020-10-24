@@ -17,8 +17,7 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p1(
     size_t channels,
     const float**restrict input,
     size_t input_offset,
-    const float*restrict horizontal_weights,
-    const float*restrict vertical_weights,
+    const float*restrict weights,
     float*restrict output,
     size_t input_increment)
 {
@@ -29,8 +28,7 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p1(
   size_t c = channels;
   do {
     const float** i = input;
-    const float* wh = horizontal_weights;
-    const float* wv = vertical_weights;
+    const float* w = weights;
 
     size_t p = output_pixels;
     do {
@@ -40,8 +38,9 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p1(
       const float* i3 = (const float*) ((uintptr_t) i[3] + input_offset);
       i += 4;
 
-      const float valphah = *wh++;
-      const float valphav = *wv++;
+      const float valphah = w[0];
+      const float valphav = w[1];
+      w += 2;
 
       const float vtl = *i0;
       const float vtr = *i1;

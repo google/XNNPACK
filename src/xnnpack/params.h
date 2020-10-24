@@ -1106,8 +1106,7 @@ typedef void (*xnn_f32_ibilinear_chw_ukernel_function)(
     size_t channels,
     const float** input,
     size_t input_offset,
-    const float* horizontal_weights,
-    const float* vertical_weights,
+    const float* weights,
     float* output,
     size_t input_increment);
 
@@ -1125,8 +1124,7 @@ typedef void (*xnn_ibilinear_chw_ukernel_function)(
     size_t channels,
     const void** input,
     size_t input_offset,
-    const float* horizontal_weights,
-    const float* vertical_weights,
+    const void* weights,
     void* output,
     size_t input_increment);
 

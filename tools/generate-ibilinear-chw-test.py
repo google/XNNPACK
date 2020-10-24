@@ -43,7 +43,7 @@ TEST(${TEST_NAME}, pixels_eq_${PIXEL_TILE}) {
   IBilinearMicrokernelTester()
     .pixels(${PIXEL_TILE})
     .channels(${CHANNEL_TILE})
-    .Test(${TEST_FUNC});
+    .TestCHW(${TEST_FUNC});
 }
 
 $if PIXEL_TILE > 1:
@@ -54,7 +54,7 @@ $if PIXEL_TILE > 1:
       IBilinearMicrokernelTester()
         .pixels(pixels)
         .channels(${CHANNEL_TILE})
-        .Test(${TEST_FUNC});
+        .TestCHW(${TEST_FUNC});
     }
   }
 
@@ -65,7 +65,7 @@ $if PIXEL_TILE > 1:
       IBilinearMicrokernelTester()
         .pixels(pixels)
         .channels(${CHANNEL_TILE})
-        .Test(${TEST_FUNC});
+        .TestCHW(${TEST_FUNC});
     }
   }
 
@@ -76,7 +76,7 @@ TEST(${TEST_NAME}, pixels_gt_${PIXEL_TILE}) {
     IBilinearMicrokernelTester()
       .pixels(pixels)
       .channels(${CHANNEL_TILE})
-      .Test(${TEST_FUNC});
+      .TestCHW(${TEST_FUNC});
   }
 }
 
@@ -89,7 +89,7 @@ $if CHANNEL_TILE > 1:
         IBilinearMicrokernelTester()
           .pixels(pixels)
           .channels(channels)
-          .Test(${TEST_FUNC});
+          .TestCHW(${TEST_FUNC});
       }
     }
   }
@@ -102,7 +102,7 @@ $if CHANNEL_TILE > 1:
         IBilinearMicrokernelTester()
           .pixels(pixels)
           .channels(channels)
-          .Test(${TEST_FUNC});
+          .TestCHW(${TEST_FUNC});
       }
     }
   }
@@ -115,7 +115,7 @@ TEST(${TEST_NAME}, channels_gt_${PIXEL_TILE}) {
       IBilinearMicrokernelTester()
         .pixels(pixels)
         .channels(channels)
-        .Test(${TEST_FUNC});
+        .TestCHW(${TEST_FUNC});
     }
   }
 }
@@ -129,7 +129,7 @@ TEST(${TEST_NAME}, input_offset) {
         .pixels(pixels)
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE * 5 + 1)})
-        .Test(${TEST_FUNC});
+        .TestCHW(${TEST_FUNC});
     }
   }
 }
@@ -143,7 +143,7 @@ TEST(${TEST_NAME}, input_stride) {
         .pixels(pixels)
         .channels(channels)
         .input_stride(${next_prime(4 * (PIXEL_TILE * 5) + 1)})
-        .Test(${TEST_FUNC});
+        .TestCHW(${TEST_FUNC});
     }
   }
 }
