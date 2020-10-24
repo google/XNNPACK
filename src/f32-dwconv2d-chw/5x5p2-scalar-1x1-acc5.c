@@ -9,7 +9,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_chw_ukernel_5x5p2__scalar_1x1_acc5(
+void xnn_f32_dwconv2d_chw_ukernel_5x5p2__scalar_1x1_acc5(
     size_t input_height,
     size_t input_width,
     const float* input,

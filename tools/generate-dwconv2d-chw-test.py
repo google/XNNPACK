@@ -18,7 +18,7 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(
-  description='Test generator for DWCONV CHW micro-kernels')
+  description='Test generator for DWCONV2D CHW micro-kernels')
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Spec (YAML) file")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
@@ -31,7 +31,7 @@ $if SUBSAMPLING == 1:
   TEST(${TEST_NAME}, output_width_eq_${WIDTH_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    DWConvCHWMicrokernelTester()
+    DWConv2DMicrokernelTester()
       .input_width(${(WIDTH_TILE - 1) * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING})
       .input_height(${HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING - 1})
       .kernel_height(${KERNEL_HEIGHT})
@@ -48,7 +48,7 @@ $else:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t input_width = ${(WIDTH_TILE - 1) * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING}; input_width < ${WIDTH_TILE * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING}; input_width++) {
-      DWConvCHWMicrokernelTester()
+      DWConv2DMicrokernelTester()
         .input_width(input_width)
         .input_height(${HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING - 1})
         .kernel_height(${KERNEL_HEIGHT})
@@ -67,7 +67,7 @@ $if WIDTH_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t input_width = ${2 * WIDTH_TILE * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING - 1}; input_width < ${8 * WIDTH_TILE * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING - 1}; input_width += ${WIDTH_TILE * SUBSAMPLING}) {
-      DWConvCHWMicrokernelTester()
+      DWConv2DMicrokernelTester()
         .input_width(input_width)
         .input_height(${HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING - 1})
         .kernel_height(${KERNEL_HEIGHT})
@@ -85,7 +85,7 @@ $if WIDTH_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t input_width = ${max(1, KERNEL_WIDTH - 2 * PADDING)}; input_width < ${(WIDTH_TILE - 1) * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING}; input_width++) {
-      DWConvCHWMicrokernelTester()
+      DWConv2DMicrokernelTester()
         .input_width(${WIDTH_TILE * SUBSAMPLING})
         .input_height(${HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING - 1})
         .kernel_height(${KERNEL_HEIGHT})
@@ -103,7 +103,7 @@ TEST(${TEST_NAME}, output_width_gt_${WIDTH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t input_width = ${WIDTH_TILE * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING}; input_width < ${(5 if WIDTH_TILE == 1 else 2) * WIDTH_TILE * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING}; input_width++) {
-    DWConvCHWMicrokernelTester()
+    DWConv2DMicrokernelTester()
       .input_width(input_width)
       .input_height(${HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING - 1})
       .kernel_height(${KERNEL_HEIGHT})
@@ -123,7 +123,7 @@ $if SUBSAMPLING > 1:
       ${ISA_CHECK};
     for (size_t input_height = ${(HEIGHT_TILE - 1) * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING}; input_height < ${HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING}; input_height++) {
       for (size_t input_width = 1; input_width < ${5 * WIDTH_TILE * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING}; input_width += ${max(1, WIDTH_TILE * SUBSAMPLING - 1)}) {
-        DWConvCHWMicrokernelTester()
+        DWConv2DMicrokernelTester()
           .input_width(input_width)
           .input_height(input_height)
           .kernel_height(${KERNEL_HEIGHT})
@@ -144,7 +144,7 @@ $if HEIGHT_TILE > 1:
       ${ISA_CHECK};
     for (size_t input_height = ${2 * HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING - 1}; input_height < ${8 * HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING - 1}; input_height += ${HEIGHT_TILE * SUBSAMPLING}) {
       for (size_t input_width = 1; input_width < ${5 * WIDTH_TILE * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING}; input_width += ${max(1, WIDTH_TILE * SUBSAMPLING - 1)}) {
-        DWConvCHWMicrokernelTester()
+        DWConv2DMicrokernelTester()
           .input_width(input_width)
           .input_height(input_height)
           .kernel_height(${KERNEL_HEIGHT})
@@ -164,7 +164,7 @@ $if HEIGHT_TILE > 1:
       ${ISA_CHECK};
     for (size_t input_height = ${max(1, KERNEL_HEIGHT - 2 * PADDING)}; input_height < ${(HEIGHT_TILE - 1) * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING}; input_height++) {
       for (size_t input_width = 1; input_width < ${5 * WIDTH_TILE * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING}; input_width += ${max(1, WIDTH_TILE * SUBSAMPLING - 1)}) {
-        DWConvCHWMicrokernelTester()
+        DWConv2DMicrokernelTester()
           .input_width(input_width)
           .input_height(input_height)
           .kernel_height(${KERNEL_HEIGHT})
@@ -184,7 +184,7 @@ TEST(${TEST_NAME}, output_height_gt_${HEIGHT_TILE}) {
     ${ISA_CHECK};
   for (size_t input_height = ${HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING}; input_height < ${(5 if WIDTH_TILE == 1 else 2) * HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING}; input_height++) {
     for (size_t input_width = 1; input_width < ${5 * WIDTH_TILE * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING}; input_width += ${max(1, WIDTH_TILE * SUBSAMPLING - 1)}) {
-      DWConvCHWMicrokernelTester()
+      DWConv2DMicrokernelTester()
         .input_width(input_width)
         .input_height(input_height)
         .kernel_height(${KERNEL_HEIGHT})
@@ -205,7 +205,7 @@ $if SUBSAMPLING > 1:
       ${ISA_CHECK};
     for (size_t input_height = ${max(1, KERNEL_HEIGHT - 2 * PADDING + 1)}; input_height < ${3 * HEIGHT_TILE * SUBSAMPLING + KERNEL_HEIGHT - 2 * PADDING + 1}; input_height++) {
       for (size_t input_width = 1; input_width < ${5 * WIDTH_TILE * SUBSAMPLING + KERNEL_WIDTH - 2 * PADDING}; input_width += ${max(1, WIDTH_TILE * SUBSAMPLING - 1)}) {
-        DWConvCHWMicrokernelTester()
+        DWConv2DMicrokernelTester()
           .input_width(input_width)
           .input_height(input_height)
           .kernel_height(${KERNEL_HEIGHT})
@@ -222,7 +222,7 @@ $if SUBSAMPLING > 1:
 """
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_dwconv_chw_ukernel_(\d+)x(\d+)(s2)?p(\d+)__(.+)_(\d+)x(\d+)(_acc\d+)?$", name)
+  match = re.match(r"^xnn_(f16|f32)_dwconv2d_chw_ukernel_(\d+)x(\d+)(s2)?p(\d+)__(.+)_(\d+)x(\d+)(_acc\d+)?$", name)
   assert match is not None
   kernel_height, kernel_width = int(match.group(2)), int(match.group(3))
   if match.group(4):
@@ -242,7 +242,7 @@ def split_ukernel_name(name):
 
 def generate_test_cases(ukernel, kernel_height, kernel_width, subsampling, \
   padding, isa, height_tile, width_tile):
-  """Generates all tests cases for a DWCONV CHW micro-kernel.
+  """Generates all tests cases for a DWCONV2D CHW micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
@@ -270,7 +270,7 @@ def generate_test_cases(ukernel, kernel_height, kernel_width, subsampling, \
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
   if not isa or isa == "psimd":
-    test_args.append("DWConvCHWMicrokernelTester::Variant::Scalar")
+    test_args.append("DWConv2DMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -312,7 +312,7 @@ def main(args):
 #include <xnnpack/isa-checks.h>
 
 #include <xnnpack/dwconv.h>
-#include "dwconv-chw-microkernel-tester.h"
+#include "dwconv2d-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

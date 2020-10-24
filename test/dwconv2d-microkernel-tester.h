@@ -27,14 +27,14 @@
 #include <xnnpack/params.h>
 
 
-class DWConvCHWMicrokernelTester {
+class DWConv2DMicrokernelTester {
  public:
   enum class Variant {
     Native,
     Scalar,
   };
 
-  inline DWConvCHWMicrokernelTester& padding_left(uint32_t padding_left) {
+  inline DWConv2DMicrokernelTester& padding_left(uint32_t padding_left) {
     this->padding_left_ = padding_left;
     return *this;
   }
@@ -43,7 +43,7 @@ class DWConvCHWMicrokernelTester {
     return this->padding_left_;
   }
 
-  inline DWConvCHWMicrokernelTester& padding_right(uint32_t padding_right) {
+  inline DWConv2DMicrokernelTester& padding_right(uint32_t padding_right) {
     this->padding_right_ = padding_right;
     return *this;
   }
@@ -52,7 +52,7 @@ class DWConvCHWMicrokernelTester {
     return this->padding_right_;
   }
 
-  inline DWConvCHWMicrokernelTester& padding_top(uint32_t padding_top) {
+  inline DWConv2DMicrokernelTester& padding_top(uint32_t padding_top) {
     this->padding_top_ = padding_top;
     return *this;
   }
@@ -62,7 +62,7 @@ class DWConvCHWMicrokernelTester {
   }
 
 
-  inline DWConvCHWMicrokernelTester& padding_bottom(uint32_t padding_bottom) {
+  inline DWConv2DMicrokernelTester& padding_bottom(uint32_t padding_bottom) {
     this->padding_bottom_ = padding_bottom;
     return *this;
   }
@@ -70,7 +70,7 @@ class DWConvCHWMicrokernelTester {
     return this->padding_bottom_;
   }
 
-  inline DWConvCHWMicrokernelTester& input_height(uint32_t input_height) {
+  inline DWConv2DMicrokernelTester& input_height(uint32_t input_height) {
     assert(input_height >= 1);
     this->input_height_ = input_height;
     return *this;
@@ -80,7 +80,7 @@ class DWConvCHWMicrokernelTester {
     return this->input_height_;
   }
 
-  inline DWConvCHWMicrokernelTester& input_width(uint32_t input_width) {
+  inline DWConv2DMicrokernelTester& input_width(uint32_t input_width) {
     assert(input_width >= 1);
     this->input_width_ = input_width;
     return *this;
@@ -90,7 +90,7 @@ class DWConvCHWMicrokernelTester {
     return this->input_width_;
   }
 
-  inline DWConvCHWMicrokernelTester& subsampling(uint32_t subsampling) {
+  inline DWConv2DMicrokernelTester& subsampling(uint32_t subsampling) {
     assert(subsampling >= 1);
     this->subsampling_ = subsampling;
     return *this;
@@ -100,7 +100,7 @@ class DWConvCHWMicrokernelTester {
     return this->subsampling_;
   }
 
-  inline DWConvCHWMicrokernelTester& kernel_height(uint32_t kernel_height) {
+  inline DWConv2DMicrokernelTester& kernel_height(uint32_t kernel_height) {
     assert(kernel_height != 0);
     this->kernel_height_ = kernel_height;
     return *this;
@@ -110,7 +110,7 @@ class DWConvCHWMicrokernelTester {
     return this->kernel_height_;
   }
 
-  inline DWConvCHWMicrokernelTester& kernel_width(uint32_t kernel_width) {
+  inline DWConv2DMicrokernelTester& kernel_width(uint32_t kernel_width) {
     assert(kernel_width != 0);
     this->kernel_width_ = kernel_width;
     return *this;
@@ -142,7 +142,7 @@ class DWConvCHWMicrokernelTester {
     }
   }
 
-  inline DWConvCHWMicrokernelTester& qmin(uint8_t qmin) {
+  inline DWConv2DMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
@@ -151,7 +151,7 @@ class DWConvCHWMicrokernelTester {
     return this->qmin_;
   }
 
-  inline DWConvCHWMicrokernelTester& qmax(uint8_t qmax) {
+  inline DWConv2DMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
@@ -160,7 +160,7 @@ class DWConvCHWMicrokernelTester {
     return this->qmax_;
   }
 
-  inline DWConvCHWMicrokernelTester& iterations(size_t iterations) {
+  inline DWConv2DMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -169,7 +169,7 @@ class DWConvCHWMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_dwconv_chw_ukernel_function dwconv, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_dwconv2d_chw_ukernel_function dwconv, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);

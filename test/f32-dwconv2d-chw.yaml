@@ -1,0 +1,26 @@
+# Copyright 2020 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_3x4
+  arch:
+    - aarch64
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_1x4_acc3
+  arch:
+    - aarch64
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_3x4
+  arch:
+    - aarch64
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_1x4_acc2
+  arch:
+    - aarch64
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_1x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__psimd_1x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__psimd_1x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__psimd_3x4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__psimd_1x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_1x1_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__scalar_1x1_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__scalar_1x1_acc5
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_1x1_acc5

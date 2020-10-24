@@ -126,10 +126,6 @@ SCALAR_UKERNELS = [
     "src/f32-conv-hwc/3x3s2p0p1c3x4-scalar-1x1.c",
     "src/f32-conv-hwc/3x3s2p1c3x4-scalar-1x1.c",
     "src/f32-conv-hwc2chw/3x3s2p1c3x4-scalar-1x1.c",
-    "src/f32-dwconv-chw/3x3p1-scalar-1x1-acc3.c",
-    "src/f32-dwconv-chw/3x3s2p1-scalar-1x1-acc3.c",
-    "src/f32-dwconv-chw/5x5p2-scalar-1x1-acc5.c",
-    "src/f32-dwconv-chw/5x5s2p2-scalar-1x1-acc5.c",
     "src/f32-dwconv/gen/up1x4-minmax-scalar-acc2.c",
     "src/f32-dwconv/gen/up1x4-minmax-scalar.c",
     "src/f32-dwconv/gen/up1x4-scalar-acc2.c",
@@ -154,6 +150,10 @@ SCALAR_UKERNELS = [
     "src/f32-dwconv/gen/up2x25-minmax-scalar.c",
     "src/f32-dwconv/gen/up2x25-scalar-acc2.c",
     "src/f32-dwconv/gen/up2x25-scalar.c",
+    "src/f32-dwconv2d-chw/3x3p1-scalar-1x1-acc3.c",
+    "src/f32-dwconv2d-chw/3x3s2p1-scalar-1x1-acc3.c",
+    "src/f32-dwconv2d-chw/5x5p2-scalar-1x1-acc5.c",
+    "src/f32-dwconv2d-chw/5x5s2p2-scalar-1x1-acc5.c",
     "src/f32-gavgpool-cw/scalar-x1.c",
     "src/f32-gavgpool/7p7x-minmax-scalar-c1.c",
     "src/f32-gavgpool/7x-minmax-scalar-c1.c",
@@ -1125,10 +1125,10 @@ WASMSIMD_UKERNELS = [
 
 PSIMD_FASTMATH_UKERNELS = [
     "src/f32-conv-hwc2chw/3x3s2p1c3x4-psimd-2x2.c",
-    "src/f32-dwconv-chw/3x3p1-psimd-1x4-acc3.c",
-    "src/f32-dwconv-chw/3x3s2p1-psimd-1x4-acc3.c",
-    "src/f32-dwconv-chw/5x5p2-psimd-3x4.c",
-    "src/f32-dwconv-chw/5x5s2p2-psimd-1x4-acc2.c",
+    "src/f32-dwconv2d-chw/3x3p1-psimd-1x4-acc3.c",
+    "src/f32-dwconv2d-chw/3x3s2p1-psimd-1x4-acc3.c",
+    "src/f32-dwconv2d-chw/5x5p2-psimd-3x4.c",
+    "src/f32-dwconv2d-chw/5x5s2p2-psimd-1x4-acc2.c",
 ]
 
 PSIMD_ACCMATH_UKERNELS = [
@@ -1588,10 +1588,10 @@ AARCH64_NEONFMA_UKERNELS = [
     "src/f32-conv-hwc/gen/3x3s2p1c3x8-neonfma-2x1.c",
     "src/f32-conv-hwc/gen/3x3s2p1c3x8-neonfma-2x2.c",
     "src/f32-conv-hwc2chw/3x3s2p1c3x4-neonfma-2x2.c",
-    "src/f32-dwconv-chw/3x3p1-neonfma-3x4.c",
-    "src/f32-dwconv-chw/3x3s2p1-neonfma-1x4-acc3.c",
-    "src/f32-dwconv-chw/5x5p2-neonfma-3x4.c",
-    "src/f32-dwconv-chw/5x5s2p2-neonfma-1x4-acc2.c",
+    "src/f32-dwconv2d-chw/3x3p1-neonfma-3x4.c",
+    "src/f32-dwconv2d-chw/3x3s2p1-neonfma-1x4-acc3.c",
+    "src/f32-dwconv2d-chw/5x5p2-neonfma-3x4.c",
+    "src/f32-dwconv2d-chw/5x5s2p2-neonfma-1x4-acc2.c",
     "src/f32-gemm/gen-inc/1x8inc-minmax-neonfma-lane-ld64.c",
     "src/f32-gemm/gen-inc/4x8inc-minmax-neonfma-lane-ld64.c",
     "src/f32-gemm/gen-inc/4x8inc-minmax-neonfma-lane-ld128.c",
@@ -1794,8 +1794,6 @@ SSE_UKERNELS = [
     "src/f32-clamp/gen/sse-x8.c",
     "src/f32-conv-hwc2chw/3x3s2p1c3x4-sse-1x1.c",
     "src/f32-conv-hwc2chw/3x3s2p1c3x4-sse-2x2.c",
-    "src/f32-dwconv-chw/3x3p1-sse-1x4-acc3.c",
-    "src/f32-dwconv-chw/3x3s2p1-sse-1x4-acc3.c",
     "src/f32-dwconv/gen/up4x4-minmax-sse-acc2.c",
     "src/f32-dwconv/gen/up4x4-minmax-sse.c",
     "src/f32-dwconv/gen/up4x9-minmax-sse-acc2.c",
@@ -1808,6 +1806,8 @@ SSE_UKERNELS = [
     "src/f32-dwconv/gen/up8x9-minmax-sse.c",
     "src/f32-dwconv/gen/up8x25-minmax-sse-acc2.c",
     "src/f32-dwconv/gen/up8x25-minmax-sse.c",
+    "src/f32-dwconv2d-chw/3x3p1-sse-1x4-acc3.c",
+    "src/f32-dwconv2d-chw/3x3s2p1-sse-1x4-acc3.c",
     "src/f32-gavgpool-cw/sse-x4.c",
     "src/f32-gavgpool/7p7x-minmax-sse-c4.c",
     "src/f32-gavgpool/7x-minmax-sse-c4.c",
@@ -4450,9 +4450,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_dwconv_chw_bench",
+    name = "f32_dwconv2d_chw_bench",
     srcs = [
-        "bench/f32-dwconv-chw.cc",
+        "bench/f32-dwconv2d-chw.cc",
         "bench/dwconv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
@@ -5159,10 +5159,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f32_dwconv_chw_test",
+    name = "f32_dwconv2d_chw_test",
     srcs = [
-        "test/f32-dwconv-chw.cc",
-        "test/dwconv-chw-microkernel-tester.h",
+        "test/f32-dwconv2d-chw.cc",
+        "test/dwconv2d-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],

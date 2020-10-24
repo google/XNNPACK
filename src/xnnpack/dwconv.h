@@ -323,31 +323,31 @@ DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel
 DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_ukernel_up24x9__wasmsimd_mul16)
 
 
-#define DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                    \
-    size_t input_height,                                        \
-    size_t input_width,                                         \
-    const float* input,                                         \
-    const float* weights,                                       \
-    const float* zero,                                          \
-    float* output,                                              \
-    uint32_t padding_top,                                       \
+#define DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                      \
+    size_t input_height,                                          \
+    size_t input_width,                                           \
+    const float* input,                                           \
+    const float* weights,                                         \
+    const float* zero,                                            \
+    float* output,                                                \
+    uint32_t padding_top,                                         \
     const union xnn_f32_chw_params* params);
 
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3p1__scalar_1x1_acc3)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar_1x1_acc3)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_5x5p2__scalar_1x1_acc5)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_5x5s2p2__scalar_1x1_acc5)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3p1__psimd_1x4_acc3)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3s2p1__psimd_1x4_acc3)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_5x5p2__psimd_3x4)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_5x5s2p2__psimd_1x4_acc2)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3p1__neonfma_3x4)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3s2p1__neonfma_1x4_acc3)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_5x5p2__neonfma_3x4)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_5x5s2p2__neonfma_1x4_acc2)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3p1__sse_1x4_acc3)
-DECLARE_F32_DWCONV_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_chw_ukernel_3x3s2p1__sse_1x4_acc3)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_1x1_acc3)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__scalar_1x1_acc3)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_5x5p2__scalar_1x1_acc5)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_1x1_acc5)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_3x3p1__psimd_1x4_acc3)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__psimd_1x4_acc3)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_5x5p2__psimd_3x4)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__psimd_1x4_acc2)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_3x4)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_1x4_acc3)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_3x4)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_1x4_acc2)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3)
+DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_1x4_acc3)
 
 
 #ifdef __cplusplus

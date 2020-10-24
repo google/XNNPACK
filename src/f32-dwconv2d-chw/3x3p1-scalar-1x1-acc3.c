@@ -5,13 +5,11 @@
 
 #include <assert.h>
 
-#include <stdio.h>
-
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
+void xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_1x1_acc3(
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -24,8 +22,7 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
   assert(input_height != 0);
   assert(input_width != 0);
   assert(input_width % sizeof(float) == 0);
-  assert(padding_top >= 0);
-  assert(padding_top <= 1);
+  assert(padding_top == 1);
 
   const float params_min = params->scalar.min;
   const float params_max = params->scalar.max;
@@ -41,47 +38,42 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
   const float vk21 = weights[8];
   const float vk22 = weights[9];
 
-  const float* i0 = (const float*) ((uintptr_t) input - ((-padding_top) & input_width));
-  const float* i1 = (const float*) ((uintptr_t) i0 + input_width);
-  if XNN_UNPREDICTABLE(padding_top != 0) {
-    i0 = zero;
-  }
+  const float* i0 = zero;
+  const float* i1 = input;
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width);
 
-  size_t padded_input_height = input_height + padding_top + 1 /* padding bottom */;
-  size_t output_height = (padded_input_height - 3 /* kernel size */ + 2 /* subsampling */) / 2;
+  size_t output_height = input_height;
   do {
-    if XNN_UNPREDICTABLE(padded_input_height <= 3) {
+    if XNN_UNPREDICTABLE(output_height == 1) {
       i2 = zero;
     }
 
     float vi0x0 = 0.0f;
     float vi1x0 = 0.0f;
     float vi2x0 = 0.0f;
+    float vi0x1 = *i0++;
+    float vi1x1 = *i1++;
+    float vi2x1 = *i2++;
 
     size_t w = input_width;
-    for (; w >= 2 * sizeof(float); w -= 2 * sizeof(float)) {
-      const float vi0x1 = i0[0];
-      const float vi1x1 = i1[0];
-      const float vi2x1 = i2[0];
+    for (; w > 1 * sizeof(float); w -= 1 * sizeof(float)) {
+      const float vi0x2 = *i0++;
+      const float vi1x2 = *i1++;
+      const float vi2x2 = *i2++;
 
       float vacc0 = vk00 * vi0x0;
+      vi0x0 = vi0x1;
       float vacc1 = vk10 * vi1x0;
+      vi1x0 = vi1x1;
       float vacc2 = vk20 * vi2x0;
-
-      const float vi0x2 = i0[1];
-      i0 += 2;
-      const float vi1x2 = i1[1];
-      i1 += 2;
-      const float vi2x2 = i2[1];
-      i2 += 2;
+      vi2x0 = vi2x1;
 
       vacc0 += vk01 * vi0x1;
-      vi0x0 = vi0x2;
+      vi0x1 = vi0x2;
       vacc1 += vk11 * vi1x1;
-      vi1x0 = vi1x2;
+      vi1x1 = vi1x2;
       vacc2 += vk21 * vi2x1;
-      vi2x0 = vi2x2;
+      vi2x1 = vi2x2;
 
       vacc0 += vk02 * vi0x2;
       vacc1 += vk12 * vi1x2;
@@ -94,13 +86,9 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
 
       *output++ = voutput;
     }
-    // Potentially process the last pixel.
-    assert(w <= 1 * sizeof(float));
-    if (w == 1 * sizeof(float)) {
-      const float vi0x1 = *i0++;
-      const float vi1x1 = *i1++;
-      const float vi2x1 = *i2++;
-
+    // Always process the last pixel separately to account for right edge.
+    assert(w == 1 * sizeof(float));
+    {
       float vacc0 = vk00 * vi0x0;
       float vacc1 = vk10 * vi1x0;
       float vacc2 = vk20 * vi2x0;
@@ -117,11 +105,6 @@ void xnn_f32_dwconv_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
       *output++ = voutput;
     }
 
-    i0 = i1;
-    i1 = i2;
-    i2 = (const float*) ((uintptr_t) i1 + input_width);
-
-    output_height -= 1;
-    padded_input_height -= 2;
-  } while (output_height != 0);
+    i0 = (const float*) ((uintptr_t) i1 - input_width);
+  } while (--output_height != 0);
 }

@@ -987,7 +987,7 @@ typedef void (*xnn_x8_lut_ukernel_function)(
     const uint8_t* t,
     uint8_t* y);
 
-typedef void (*xnn_dwconv_chw_ukernel_function)(
+typedef void (*xnn_dwconv2d_chw_ukernel_function)(
     size_t input_height,
     size_t input_width,
     const void* input,
@@ -997,7 +997,7 @@ typedef void (*xnn_dwconv_chw_ukernel_function)(
     uint32_t padding_top,
     const void* params);
 
-typedef void (*xnn_f32_dwconv_chw_ukernel_function)(
+typedef void (*xnn_f32_dwconv2d_chw_ukernel_function)(
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -1798,8 +1798,8 @@ struct conv_hwc2chw_parameters {
   uint8_t output_width_tile;
 };
 
-struct dwconv_chw_parameters {
-  xnn_dwconv_chw_ukernel_function ukernel;
+struct dwconv2d_chw_parameters {
+  xnn_dwconv2d_chw_ukernel_function ukernel;
   // Number of input width pixels in a tile.
   uint8_t input_width_tile;
   // Number of output width pixels in a tile.
@@ -2014,13 +2014,13 @@ struct xnn_parameters {
     // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->CHW layout conversion.
     struct conv_hwc2chw_parameters conv_hwc2chw_3x3c3s2;
     // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW layout.
-    struct dwconv_chw_parameters dwconv_chw_3x3;
+    struct dwconv2d_chw_parameters dwconv2d_chw_3x3;
     // Direct 3x3 stride-2 Convolution with padding 1 on left and right in CHW layout.
-    struct dwconv_chw_parameters dwconv_chw_3x3s2;
+    struct dwconv2d_chw_parameters dwconv2d_chw_3x3s2;
     // Direct 5x5 stride-1 Convolution with padding 2 on left and right in CHW layout.
-    struct dwconv_chw_parameters dwconv_chw_5x5;
+    struct dwconv2d_chw_parameters dwconv2d_chw_5x5;
     // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW layout.
-    struct dwconv_chw_parameters dwconv_chw_5x5s2;
+    struct dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
     // Global Average Pooling in CW layout.
     struct gavgpool_cw_parameters gavgpool_cw;
   } f32;

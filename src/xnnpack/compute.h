@@ -419,7 +419,7 @@ struct dwconv2d_context {
     union xnn_f32_chw_params f32;
   } params;
   union {
-    xnn_dwconv_chw_ukernel_function chw_ukernel;
+    xnn_dwconv2d_chw_ukernel_function chw_ukernel;
   };
 };
 
