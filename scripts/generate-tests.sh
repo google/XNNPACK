@@ -32,6 +32,3 @@ tools/generate-avgpool-test.py --spec test/f32-pavgpool-minmax.yaml --output tes
 
 ### Tests for ArgMaxPool micro-kernels
 tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/f32-argmaxpool.cc
-
-### Tests for DWConv2D CHW micro-kernels
-tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output test/f32-dwconv2d-chw.cc

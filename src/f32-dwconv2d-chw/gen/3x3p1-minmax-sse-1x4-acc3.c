@@ -1,4 +1,8 @@
-// Copyright 2019 Google LLC
+// Auto-generated file. Do not edit!
+//   Template: src/f32-dwconv2d-chw/3x3p1-sse.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -47,39 +51,37 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3(
   const float* i1 = input;
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width);
 
+  float* o0 = output;
+
   size_t output_height = input_height;
   do {
-    if XNN_UNPREDICTABLE(output_height == 1) {
+    if XNN_UNPREDICTABLE(output_height < 2) {
       i2 = zero;
     }
 
-    // vi0x3012 = ( vi02, vi01, vi00, vi03 )
+    // vi0x3012 = ( vi02, vi01, vi{M}0, vi{M}3 )
     __m128 vi0x3012 = _mm_setzero_ps();
-    // vi1x3012 = ( vi12, vi11, vi10, vi13 )
+    // vi1x3012 = ( vi12, vi11, vi{M}0, vi{M}3 )
     __m128 vi1x3012 = _mm_setzero_ps();
-    // vi2x3012 = ( vi22, vi21, vi20, vi13 )
+    // vi2x3012 = ( vi22, vi21, vi{M}0, vi{M}3 )
     __m128 vi2x3012 = _mm_setzero_ps();
-    // vi0x4567 = ( vi07, vi06, vi05, vi04 )
+
     __m128 vi0x4567 = _mm_loadu_ps(i0);
     i0 += 4;
-    // vi1x4567 = ( vi17, vi16, vi15, vi14 )
     __m128 vi1x4567 = _mm_loadu_ps(i1);
     i1 += 4;
-    // vi2x4567 = ( vi27, vi26, vi25, vi24 )
     __m128 vi2x4567 = _mm_loadu_ps(i2);
     i2 += 4;
 
     size_t w = input_width;
     for (; w > 4 * sizeof(float); w -= 4 * sizeof(float)) {
-      __m128 vo4567p0 = vbias;
-
       // vi0x89AB = ( vi0B, vi0A, vi09, vi08 )
       const __m128 vi0x89AB = _mm_loadu_ps(i0);
       i0 += 4;
-      // vi1x89AB = ( vi1B, vi0A, vi09, vi08 )
+      // vi1x89AB = ( vi1B, vi1A, vi19, vi18 )
       const __m128 vi1x89AB = _mm_loadu_ps(i1);
       i1 += 4;
-      // vi2x89AB = ( vi2B, vi0A, vi09, vi08 )
+      // vi2x89AB = ( vi2B, vi2A, vi29, vi28 )
       const __m128 vi2x89AB = _mm_loadu_ps(i2);
       i2 += 4;
 
@@ -90,9 +92,9 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3(
       // vi2x7456 = ( vi26, vi25, vi24, vi27 )
       const __m128 vi2x7456 = _mm_shuffle_ps(vi2x4567, vi2x4567, _MM_SHUFFLE(2, 1, 0, 3));
 
-      vo4567p0 = _mm_add_ps(vo4567p0, _mm_mul_ps(vi0x4567, vk01));
-      __m128 vo4567p1 = _mm_mul_ps(vi1x4567, vk11);
-      __m128 vo4567p2 = _mm_mul_ps(vi2x4567, vk21);
+      __m128 vo0p0 = _mm_add_ps(vbias, _mm_mul_ps(vi0x4567, vk01));
+      __m128 vo0p1 = _mm_mul_ps(vi1x4567, vk11);
+      __m128 vo0p2 = _mm_mul_ps(vi2x4567, vk21);
 
       // vi0x3456 = ( vi06, vi05, vi04, vi03 )
       const __m128 vi0x3456 = _mm_move_ss(vi0x7456, vi0x3012);
@@ -101,9 +103,9 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3(
       // vi2x3456 = ( vi26, vi25, vi24, vi23 )
       const __m128 vi2x3456 = _mm_move_ss(vi2x7456, vi2x3012);
 
-      vo4567p0 = _mm_add_ps(vo4567p0, _mm_mul_ps(vi0x3456, vk00));
-      vo4567p1 = _mm_add_ps(vo4567p1, _mm_mul_ps(vi1x3456, vk10));
-      vo4567p2 = _mm_add_ps(vo4567p2, _mm_mul_ps(vi2x3456, vk20));
+      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi0x3456, vk00));
+      vo0p1 = _mm_add_ps(vo0p1, _mm_mul_ps(vi1x3456, vk10));
+      vo0p2 = _mm_add_ps(vo0p2, _mm_mul_ps(vi2x3456, vk20));
 
       vi0x3012 = vi0x7456;
       vi1x3012 = vi1x7456;
@@ -123,29 +125,28 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3(
       // vi2x5678 = ( vi28, vi27, vi26, vi25 )
       const __m128 vi2x5678 = _mm_shuffle_ps(vi2x8567, vi2x8567, _MM_SHUFFLE(0, 3, 2, 1));
 
-      vo4567p0 = _mm_add_ps(vo4567p0, _mm_mul_ps(vi0x5678, vk02));
-      vo4567p1 = _mm_add_ps(vo4567p1, _mm_mul_ps(vi1x5678, vk12));
-      vo4567p2 = _mm_add_ps(vo4567p2, _mm_mul_ps(vi2x5678, vk22));
+      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi0x5678, vk02));
+      vo0p1 = _mm_add_ps(vo0p1, _mm_mul_ps(vi1x5678, vk12));
+      vo0p2 = _mm_add_ps(vo0p2, _mm_mul_ps(vi2x5678, vk22));
 
       vi0x4567 = vi0x89AB;
       vi1x4567 = vi1x89AB;
       vi2x4567 = vi2x89AB;
 
-      __m128 vo = _mm_add_ps(vo4567p0, vo4567p1);
-      vo = _mm_add_ps(vo, vo4567p2);
+      vo0p0 = _mm_add_ps(vo0p0, vo0p1);
+      vo0p0 = _mm_add_ps(vo0p0, vo0p2);
 
-      vo = _mm_max_ps(vo, vmin);
-      vo = _mm_min_ps(vo, vmax);
+      __m128 vo0 = _mm_max_ps(vo0p0, vmin);
 
-      _mm_storeu_ps(output, vo);
-      output += 4;
+      vo0 = _mm_min_ps(vo0, vmax);
+
+      _mm_storeu_ps(o0, vo0);
+      o0 += 4;
     }
     // Always process the last block of 1..4 pixels.
     assert(w >= 1 * sizeof(float));
     assert(w <= 4 * sizeof(float));
     {
-      __m128 vo4567p0 = vbias;
-
       vi0x4567 = _mm_and_ps(vmask, vi0x4567);
       vi1x4567 = _mm_and_ps(vmask, vi1x4567);
       vi2x4567 = _mm_and_ps(vmask, vi2x4567);
@@ -157,9 +158,9 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3(
       // vi2x7456 = ( vi26, vi25, vi24, vi27 )
       const __m128 vi2x7456 = _mm_shuffle_ps(vi2x4567, vi2x4567, _MM_SHUFFLE(2, 1, 0, 3));
 
-      vo4567p0 = _mm_add_ps(vo4567p0, _mm_mul_ps(vi0x4567, vk01));
-      __m128 vo4567p1 = _mm_mul_ps(vi1x4567, vk11);
-      __m128 vo4567p2 = _mm_mul_ps(vi2x4567, vk21);
+      __m128 vo0p0 = _mm_add_ps(vbias, _mm_mul_ps(vi0x4567, vk01));
+      __m128 vo0p1 = _mm_mul_ps(vi1x4567, vk11);
+      __m128 vo0p2 = _mm_mul_ps(vi2x4567, vk21);
 
       // vi0x3456 = ( vi06, vi05, vi04, vi03 )
       const __m128 vi0x3456 = _mm_move_ss(vi0x7456, vi0x3012);
@@ -168,9 +169,9 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3(
       // vi2x3456 = ( vi26, vi25, vi24, vi23 )
       const __m128 vi2x3456 = _mm_move_ss(vi2x7456, vi2x3012);
 
-      vo4567p0 = _mm_add_ps(vo4567p0, _mm_mul_ps(vi0x3456, vk00));
-      vo4567p1 = _mm_add_ps(vo4567p1, _mm_mul_ps(vi1x3456, vk10));
-      vo4567p2 = _mm_add_ps(vo4567p2, _mm_mul_ps(vi2x3456, vk20));
+      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi0x3456, vk00));
+      vo0p1 = _mm_add_ps(vo0p1, _mm_mul_ps(vi1x3456, vk10));
+      vo0p2 = _mm_add_ps(vo0p2, _mm_mul_ps(vi2x3456, vk20));
 
       const __m128 vzero = _mm_setzero_ps();
       // vi0x8567 = ( vi07, vi06, vi05, 0.0 )
@@ -187,28 +188,30 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3(
       // vi2x5678 = ( vi28, vi27, vi26, vi25 )
       const __m128 vi2x5678 = _mm_shuffle_ps(vi2x8567, vi2x8567, _MM_SHUFFLE(0, 3, 2, 1));
 
-      vo4567p0 = _mm_add_ps(vo4567p0, _mm_mul_ps(vi0x5678, vk02));
-      vo4567p1 = _mm_add_ps(vo4567p1, _mm_mul_ps(vi1x5678, vk12));
-      vo4567p2 = _mm_add_ps(vo4567p2, _mm_mul_ps(vi2x5678, vk22));
+      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi0x5678, vk02));
+      vo0p1 = _mm_add_ps(vo0p1, _mm_mul_ps(vi1x5678, vk12));
+      vo0p2 = _mm_add_ps(vo0p2, _mm_mul_ps(vi2x5678, vk22));
 
-      __m128 vo = _mm_add_ps(vo4567p0, vo4567p1);
-      vo = _mm_add_ps(vo, vo4567p2);
+      vo0p0 = _mm_add_ps(vo0p0, vo0p1);
+      vo0p0 = _mm_add_ps(vo0p0, vo0p2);
 
-      vo = _mm_max_ps(vo, vmin);
-      vo = _mm_min_ps(vo, vmax);
+      __m128 vo0 = _mm_max_ps(vo0p0, vmin);
+
+      vo0 = _mm_min_ps(vo0, vmax);
 
       if XNN_LIKELY(w == 4 * sizeof(float)) {
-        _mm_storeu_ps(output, vo);
-        output += 4;
+        _mm_storeu_ps(o0, vo0);
+        o0 += 4;
       } else {
         if (w & (2 * sizeof(float))) {
-          _mm_storel_pi((__m64*) output, vo);
-          output += 2;
-          vo = _mm_movehl_ps(vo, vo);
+          _mm_storel_pi((__m64*) o0, vo0);
+          o0 += 2;
+
+          vo0 = _mm_movehl_ps(vo0, vo0);
         }
         if (w & (1 * sizeof(float))) {
-          _mm_store_ss(output, vo);
-          output += 1;
+          _mm_store_ss(o0, vo0);
+          o0 += 1;
         }
       }
     }
@@ -216,5 +219,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3(
     i0 = (const float*) ((uintptr_t) i1 - input_decrement);
     i1 = (const float*) ((uintptr_t) i2 - input_decrement);
     i2 = (const float*) ((uintptr_t) i1 + input_width);
+
+
   } while (--output_height != 0);
 }
