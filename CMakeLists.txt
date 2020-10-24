@@ -1503,6 +1503,16 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/x32-zip/xm-sse2.c)
 
 SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-1x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-2x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-3x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-4x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-5x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-6x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-2x4-acc2.c
   src/qs8-dwconv/gen/up8x9-minmax-ssse3-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-ssse3-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-ssse3-mul16.c

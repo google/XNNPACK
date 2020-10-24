@@ -24,6 +24,16 @@
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc3
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_1x4_acc4
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__sse_2x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_1x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_2x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_3x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_4x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_5x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_6x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_1x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_1x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_1x4_acc4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_2x4_acc2
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_1x4_acc3
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__psimd_1x4_acc3
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__psimd_1x4_acc3
