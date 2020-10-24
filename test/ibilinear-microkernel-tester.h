@@ -150,7 +150,7 @@ class IBilinearMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
 
-    std::vector<const float*> indirection(pixels() * 4);
+    std::vector<const float*> indirection(pixels() * 2);
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + (channels() - 1) * input_stride() + 4 * pixels());
     std::vector<float, AlignedAllocator<float, 64>> packed_weights(pixels() * 2);
     std::vector<float> output(pixels() * channels());
@@ -161,8 +161,11 @@ class IBilinearMicrokernelTester {
       std::generate(packed_weights.begin(), packed_weights.end(), std::ref(f32rng));
       std::fill(output.begin(), output.end(), nanf(""));
 
+      // Indirection will point to the even ("left") pixels of the input.
+      // The kernels will expect "right" pixels to be placed right next to them.
       for (size_t i = 0; i < indirection.size(); i++) {
-        indirection[i] = input.data() + i - input_offset();
+        const float* left_corner = input.data() + 2 * i - input_offset();
+        indirection[i] = left_corner;
       }
       std::shuffle(indirection.begin(), indirection.end(), rng);
 
@@ -174,10 +177,10 @@ class IBilinearMicrokernelTester {
           // `c * pixels() + i` because the output is NCHW.
           output_ref[c * pixels() + i] =
             // `c * indirection.size()` because the input is NCHW.
-            indirection[i * 4 + 0][c * input_stride() + input_offset()] * (1.0f - alpha_h) * (1.0f - alpha_v) +
-            indirection[i * 4 + 1][c * input_stride() + input_offset()] * alpha_h * (1.0f - alpha_v) +
-            indirection[i * 4 + 2][c * input_stride() + input_offset()] * (1.0f - alpha_h) * alpha_v +
-            indirection[i * 4 + 3][c * input_stride() + input_offset()] * alpha_h * alpha_v;
+            (indirection[i * 2 + 0] + 0)[c * input_stride() + input_offset()] * (1.0f - alpha_h) * (1.0f - alpha_v) +
+            (indirection[i * 2 + 0] + 1)[c * input_stride() + input_offset()] * alpha_h * (1.0f - alpha_v) +
+            (indirection[i * 2 + 1] + 0)[c * input_stride() + input_offset()] * (1.0f - alpha_h) * alpha_v +
+            (indirection[i * 2 + 1] + 1)[c * input_stride() + input_offset()] * alpha_h * alpha_v;
         }
       }
 

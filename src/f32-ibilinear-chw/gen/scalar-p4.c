@@ -33,22 +33,22 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
     size_t p = output_pixels;
     for (; p >= 4; p -= 4) {
       const float* i0 = (const float*) ((uintptr_t) i[0] + input_offset);
-      const float* i1 = (const float*) ((uintptr_t) i[1] + input_offset);
-      const float* i2 = (const float*) ((uintptr_t) i[2] + input_offset);
-      const float* i3 = (const float*) ((uintptr_t) i[3] + input_offset);
-      const float* i4 = (const float*) ((uintptr_t) i[4] + input_offset);
-      const float* i5 = (const float*) ((uintptr_t) i[5] + input_offset);
-      const float* i6 = (const float*) ((uintptr_t) i[6] + input_offset);
-      const float* i7 = (const float*) ((uintptr_t) i[7] + input_offset);
-      const float* i8 = (const float*) ((uintptr_t) i[8] + input_offset);
-      const float* i9 = (const float*) ((uintptr_t) i[9] + input_offset);
-      const float* i10 = (const float*) ((uintptr_t) i[10] + input_offset);
-      const float* i11 = (const float*) ((uintptr_t) i[11] + input_offset);
-      const float* i12 = (const float*) ((uintptr_t) i[12] + input_offset);
-      const float* i13 = (const float*) ((uintptr_t) i[13] + input_offset);
-      const float* i14 = (const float*) ((uintptr_t) i[14] + input_offset);
-      const float* i15 = (const float*) ((uintptr_t) i[15] + input_offset);
-      i += 4 * 4;
+      const float* i1 = i0 + 1;
+      const float* i2 = (const float*) ((uintptr_t) i[1] + input_offset);
+      const float* i3 = i2 + 1;
+      const float* i4 = (const float*) ((uintptr_t) i[2] + input_offset);
+      const float* i5 = i4 + 1;
+      const float* i6 = (const float*) ((uintptr_t) i[3] + input_offset);
+      const float* i7 = i6 + 1;
+      const float* i8 = (const float*) ((uintptr_t) i[4] + input_offset);
+      const float* i9 = i8 + 1;
+      const float* i10 = (const float*) ((uintptr_t) i[5] + input_offset);
+      const float* i11 = i10 + 1;
+      const float* i12 = (const float*) ((uintptr_t) i[6] + input_offset);
+      const float* i13 = i12 + 1;
+      const float* i14 = (const float*) ((uintptr_t) i[7] + input_offset);
+      const float* i15 = i14 + 1;
+      i += 4 * 2;
 
       const float valphah0 = w[0];
       const float valphav0 = w[1];
@@ -114,10 +114,10 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
 
     for (; p >= 1; p -= 1) {
       const float* i0 = (const float*) ((uintptr_t) i[0] + input_offset);
-      const float* i1 = (const float*) ((uintptr_t) i[1] + input_offset);
-      const float* i2 = (const float*) ((uintptr_t) i[2] + input_offset);
-      const float* i3 = (const float*) ((uintptr_t) i[3] + input_offset);
-      i += 4;
+      const float* i1 = i0 + 1;
+      const float* i2 = (const float*) ((uintptr_t) i[1] + input_offset);
+      const float* i3 = i2 + 1;
+      i += 2;
 
       const float valphah = w[0];
       const float valphav = w[1];
