@@ -70,8 +70,14 @@ class DWConvCHWMicrokernelTester {
     return this->padding_bottom_;
   }
 
+  inline DWConvCHWMicrokernelTester& input_height(uint32_t input_height) {
+    assert(input_height >= 1);
+    this->input_height_ = input_height;
+    return *this;
+  }
+
   inline uint32_t input_height() const {
-    return (output_height() - 1) * subsampling() + kernel_height() - padding_top() - padding_bottom();
+    return this->input_height_;
   }
 
   inline DWConvCHWMicrokernelTester& input_width(uint32_t input_width) {
@@ -118,14 +124,13 @@ class DWConvCHWMicrokernelTester {
     return kernel_height() * kernel_width();
   }
 
-  inline DWConvCHWMicrokernelTester& output_height(uint32_t output_height) {
-    assert(output_height >= 1);
-    this->output_height_ = output_height;
-    return *this;
-  }
-
   inline uint32_t output_height() const {
-    return this->output_height_;
+    const uint32_t padded_input_height = padding_top() + input_height() + padding_bottom();
+    if (padded_input_height <= kernel_height()) {
+      return 1;
+    } else {
+      return (padded_input_height - kernel_height()) / subsampling() + 1;
+    }
   }
 
   inline uint32_t output_width() const {
@@ -246,7 +251,7 @@ class DWConvCHWMicrokernelTester {
   uint32_t padding_right_{0};
   uint32_t padding_top_{0};
   uint32_t padding_bottom_{0};
-  uint32_t output_height_{1};
+  uint32_t input_height_{1};
   uint32_t input_width_{1};
   uint32_t subsampling_{1};
   uint32_t kernel_height_{1};
