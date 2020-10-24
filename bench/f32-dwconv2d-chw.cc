@@ -365,8 +365,35 @@ static void DWConv2DBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__psimd_1x4_acc2)
 #endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
 
+static void dwconv2d_chw_3x3p1__scalar_1x1(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_1x1, 3, 3, 1, 1);
+}
+static void dwconv2d_chw_3x3p1__scalar_2x1(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_2x1, 3, 3, 1, 1);
+}
+static void dwconv2d_chw_3x3p1__scalar_3x1(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_3x1, 3, 3, 1, 1);
+}
+static void dwconv2d_chw_3x3p1__scalar_4x1(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_4x1, 3, 3, 1, 1);
+}
+static void dwconv2d_chw_3x3p1__scalar_5x1(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_5x1, 3, 3, 1, 1);
+}
+static void dwconv2d_chw_3x3p1__scalar_6x1(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_6x1, 3, 3, 1, 1);
+}
+static void dwconv2d_chw_3x3p1__scalar_1x1_acc2(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_1x1_acc2, 3, 3, 1, 1);
+}
 static void dwconv2d_chw_3x3p1__scalar_1x1_acc3(benchmark::State& state, const char* net) {
   DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_1x1_acc3, 3, 3, 1, 1);
+}
+static void dwconv2d_chw_3x3p1__scalar_1x1_acc4(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_1x1_acc4, 3, 3, 1, 1);
+}
+static void dwconv2d_chw_3x3p1__scalar_2x1_acc2(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_2x1_acc2, 3, 3, 1, 1);
 }
 
 static void dwconv2d_chw_3x3s2p1__scalar_1x1_acc3(benchmark::State& state, const char* net) {
@@ -381,7 +408,16 @@ static void dwconv2d_chw_5x5s2p2__scalar_1x1_acc5(benchmark::State& state, const
   DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_1x1_acc5, 5, 5, 2, 2);
 }
 
+BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_1x1)
+BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_2x1)
+BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_3x1)
+BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_4x1)
+BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_5x1)
+BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_6x1)
+BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_1x1_acc2)
 BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_1x1_acc3)
+BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_1x1_acc4)
+BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_2x1_acc2)
 BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__scalar_1x1_acc3)
 BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__scalar_1x1_acc5)
 BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_1x1_acc5)

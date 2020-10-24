@@ -1,0 +1,168 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ROW_TILE >= 1
+$assert ACCUMULATORS >= 1
+#include <assert.h>
+
+#include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
+
+
+void xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_${ROW_TILE}x1${"_acc%d" % ACCUMULATORS if ACCUMULATORS > 1 else ""}(
+    size_t input_height,
+    size_t input_width,
+    const float* input,
+    const float* weights,
+    const float* zero,
+    float* output,
+    uint32_t padding_top,
+    const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
+  assert(padding_top == 1);
+
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
+
+  const float vbias = weights[0];
+  const float vk00 = weights[1];
+  const float vk01 = weights[2];
+  const float vk02 = weights[3];
+  const float vk10 = weights[4];
+  const float vk11 = weights[5];
+  const float vk12 = weights[6];
+  const float vk20 = weights[7];
+  const float vk21 = weights[8];
+  const float vk22 = weights[9];
+
+  const float* i0 = zero;
+  const float* i1 = input;
+  $for M in range(2, 2 + ROW_TILE):
+    const float* i${M} = (const float*) ((uintptr_t) i${M-1} + input_width);
+
+  float* o0 = output;
+  $for M in range(1, ROW_TILE):
+    float* o${M} = (float*) ((uintptr_t) o${M-1} + input_width);
+
+  size_t output_height = input_height;
+  do {
+    $for M in range(2, 2 + ROW_TILE):
+      if XNN_UNPREDICTABLE(output_height < ${M}) {
+        i${M} = zero;
+        $if M <= ROW_TILE:
+          o${M-1} = o${M-2};
+      }
+
+    $for M in range(2 + ROW_TILE):
+      float vi${M}x0 = 0.0f;
+
+    $for M in range(2 + ROW_TILE):
+      float vi${M}x1 = *i${M}++;
+
+    size_t w = input_width;
+    for (; w > 1 * sizeof(float); w -= 1 * sizeof(float)) {
+      $for M in range(2 + ROW_TILE):
+        const float vi${M}x2 = *i${M}++;
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          $if K == 0:
+            float vo${M}p0 = vbias + vi${M+K}x0 * vk${K}0;
+          $elif K < ACCUMULATORS:
+            float vo${M}p${K} = vi${M+K}x0 * vk${K}0;
+          $else:
+            vo${M}p${K % ACCUMULATORS} += vi${M+K}x0 * vk${K}0;
+
+      $for M in range(2 + ROW_TILE):
+          vi${M}x0 = vi${M}x1;
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          $if K+3 < ACCUMULATORS:
+            float vo${M}p${K+3} = vi${M+K}x1 * vk${K}1;
+          $else:
+            vo${M}p${(K+3) % ACCUMULATORS} += vi${M+K}x1 * vk${K}1;
+
+      $for M in range(2 + ROW_TILE):
+        vi${M}x1 = vi${M}x2;
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          vo${M}p${(K+6) % ACCUMULATORS} += vi${M+K}x2 * vk${K}2;
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} += vo${M}p${A + ACC_SLICE};
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        float vo${M} = math_max_f32(vo${M}p0, vmin);
+
+      $for M in range(ROW_TILE):
+        vo${M} = math_min_f32(vo${M}, vmax);
+
+      $for M in reversed(range(ROW_TILE)):
+        *o${M}++ = vo${M};
+    }
+    // Always process the last pixel separately to account for right edge.
+    assert(w == 1 * sizeof(float));
+    {
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          $if K == 0:
+            float vo${M}p0 = vbias + vi${M+K}x0 * vk${K}0;
+          $elif K < ACCUMULATORS:
+            float vo${M}p${K} = vi${M+K}x0 * vk${K}0;
+          $else:
+            vo${M}p${K % ACCUMULATORS} += vi${M+K}x0 * vk${K}0;
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          $if K+3 < ACCUMULATORS:
+            float vo${M}p${K+3} = vi${M+K}x1 * vk${K}1;
+          $else:
+            vo${M}p${(K+3) % ACCUMULATORS} += vi${M+K}x1 * vk${K}1;
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} += vo${M}p${A + ACC_SLICE};
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        float vo${M} = math_max_f32(vo${M}p0, vmin);
+
+      $for M in range(ROW_TILE):
+        vo${M} = math_min_f32(vo${M}, vmax);
+
+      $for M in reversed(range(ROW_TILE)):
+        *o${M}++ = vo${M};
+    }
+
+    i0 = (const float*) ((uintptr_t) i${ROW_TILE} - input_width);
+    $if ROW_TILE > 1:
+      i1 = (const float*) ((uintptr_t) i${ROW_TILE+1} - input_width);
+      $for M in range(2, 2 + ROW_TILE):
+        i${M} = (const float*) ((uintptr_t) i${M-1} + input_width);
+
+    $if ROW_TILE > 1:
+      o0 = o${ROW_TILE - 1};
+      $for M in range(1, ROW_TILE):
+        o${M} = (float*) ((uintptr_t) o${M-1} + input_width);
+
+    $if ROW_TILE > 1:
+      output_height = doz(output_height, ${ROW_TILE});
+  } while (${"--" if ROW_TILE == 1 else ""}output_height != 0);
+}
