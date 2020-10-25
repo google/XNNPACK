@@ -1311,7 +1311,6 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-sse-1x4-acc3.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-sse-1x4-acc4.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-sse-2x4-acc2.c
-  src/f32-dwconv2d-chw/3x3p1-sse-1x4-acc3.c
   src/f32-dwconv2d-chw/3x3s2p1-sse-1x4-acc3.c
   src/f32-gavgpool-cw/sse-x4.c
   src/f32-gavgpool/7p7x-minmax-sse-c4.c
