@@ -683,6 +683,19 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-neon-1x4-acc3.c
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-neon-1x4-acc4.c
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-neon-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-4x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-5x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-4x4-acc2.c
   src/f32-gavgpool-cw/neon-x4.c
   src/f32-gavgpool/7p7x-minmax-neon-c4.c
   src/f32-gavgpool/7x-minmax-neon-c4.c
@@ -1134,7 +1147,19 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-neonfma-1x4-acc3.c
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-neonfma-1x4-acc4.c
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-neonfma-2x4-acc2.c
-  src/f32-dwconv2d-chw/5x5p2-neonfma-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-4x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-5x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-4x4-acc2.c
   src/f32-dwconv2d-chw/5x5s2p2-neonfma-1x4-acc2.c
   src/f32-gemm/gen-inc/1x8inc-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen-inc/4x8inc-minmax-neonfma-lane-ld64.c
