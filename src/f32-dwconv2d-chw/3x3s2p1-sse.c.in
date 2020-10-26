@@ -1,0 +1,229 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ROW_TILE >= 1
+$assert ACCUMULATORS >= 1
+#include <assert.h>
+
+#include <xmmintrin.h>
+
+#include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
+
+
+void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_${ROW_TILE}x4${"_acc%d" % ACCUMULATORS if ACCUMULATORS > 1 else ""}(
+    size_t input_height,
+    size_t input_width,
+    const float* input,
+    const float* weights,
+    const float* zero,
+    float* output,
+    uint32_t padding_top,
+    const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
+  assert(padding_top >= 0);
+  assert(padding_top <= 1);
+
+  const __m128 vmask_even = _mm_load_ps((const float*) params->sse.mask_even);
+  const __m128 vmask_odd  = _mm_load_ps((const float*) params->sse.mask_odd);
+  const __m128 vmax = _mm_load_ps(params->sse.max);
+  const __m128 vmin = _mm_load_ps(params->sse.min);
+
+  const __m128 vbias = _mm_load1_ps(weights);
+  const __m128 vk00 = _mm_load1_ps(weights + 1);
+  const __m128 vk01 = _mm_load1_ps(weights + 2);
+  const __m128 vk02 = _mm_load1_ps(weights + 3);
+  const __m128 vk10 = _mm_load1_ps(weights + 4);
+  const __m128 vk11 = _mm_load1_ps(weights + 5);
+  const __m128 vk12 = _mm_load1_ps(weights + 6);
+  const __m128 vk20 = _mm_load1_ps(weights + 7);
+  const __m128 vk21 = _mm_load1_ps(weights + 8);
+  const __m128 vk22 = _mm_load1_ps(weights + 9);
+
+  const size_t input_decrement = round_down_po2(input_width, 4 /* SIMD output width */ * 2 /* subsampling */ * sizeof(float));
+  $if ROW_TILE > 1:
+    const size_t output_width = round_down_po2((input_width + (2 /* padding */ - 3 /* kernel size */ + 2 /* subsampling */) * sizeof(float)) / 2, sizeof(float));
+
+  const float* i0 = (const float*) ((uintptr_t) input - ((-padding_top) & input_width));
+  const float* i1 = (const float*) ((uintptr_t) i0 + input_width);
+  if XNN_UNPREDICTABLE(padding_top != 0) {
+    i0 = zero;
+  }
+  $for M in range(2, 1 + 2 * ROW_TILE):
+    const float* i${M} = (const float*) ((uintptr_t) i${M-1} + input_width);
+
+  float* o0 = output;
+  $for M in range(1, ROW_TILE):
+    float* o${M} = (float*) ((uintptr_t) o${M-1} + output_width);
+
+  size_t padded_input_height = input_height + padding_top + 1 /* padding bottom */;
+  size_t output_height = (padded_input_height - 3 /* kernel size */ + 2 /* subsampling */) / 2;
+  do {
+    $for M in range(2, 1 + 2 * ROW_TILE):
+      if XNN_UNPREDICTABLE(padded_input_height < ${2 + M}) {
+        i${M} = zero;
+        $if M % 2 == 1:
+          o${(M - 1) / 2} = o${(M - 1) / 2 - 1};
+      }
+
+    $for M in range(1 + 2 * ROW_TILE):
+      __m128 vi${M}x7531 = _mm_setzero_ps();
+
+    size_t w = input_width;
+    for (; w >= 8 * sizeof(float); w -= 8 * sizeof(float)) {
+      $for M in range(1 + 2 * ROW_TILE):
+        const __m128 vi${M}x89AB = _mm_loadu_ps(i${M});
+        const __m128 vi${M}xCDEF = _mm_loadu_ps(i${M} + 4);
+        i${M} += 8;
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const __m128 vi${M}x8ACE = _mm_shuffle_ps(vi${M}x89AB, vi${M}xCDEF, _MM_SHUFFLE(2, 0, 2, 0));
+        const __m128 vi${M}x9BDF = _mm_shuffle_ps(vi${M}x89AB, vi${M}xCDEF, _MM_SHUFFLE(3, 1, 3, 1));
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          $if K == 0:
+            __m128 vo${M}p0 = _mm_add_ps(vbias, _mm_mul_ps(vi${2*M+K}x8ACE, vk${K}1));
+          $elif K < ACCUMULATORS:
+            __m128 vo${M}p${K} = _mm_mul_ps(vi${2*M+K}x8ACE, vk${K}1);
+          $else:
+            vo${M}p${K % ACCUMULATORS} = _mm_add_ps(vo${M}p${K % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x8ACE, vk${K}1));
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const __m128 vi${M}xF9BD = _mm_shuffle_ps(vi${M}x9BDF, vi${M}x9BDF, _MM_SHUFFLE(2, 1, 0, 3));
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          $if K+3 < ACCUMULATORS:
+            __m128 vo${M}p${K+3} = _mm_mul_ps(vi${2*M+K}x9BDF, vk${K}2);
+          $else:
+            vo${M}p${(K+3) % ACCUMULATORS} = _mm_add_ps(vo${M}p${(K+3) % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x9BDF, vk${K}2));
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const __m128 vi${M}x7BDF = _mm_move_ss(vi${M}xF9BD, vi${M}x7531);
+
+      $for M in range(1 + 2 * ROW_TILE):
+        vi${M}x7531 = vi${M}xF9BD;
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          vo${M}p${(K+6) % ACCUMULATORS} = _mm_add_ps(vo${M}p${(K+6) % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x7BDF, vk${K}0));
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = _mm_add_ps(vo${M}p${A}, vo${M}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        __m128 vo${M} = _mm_max_ps(vo${M}p0, vmin);
+
+      $for M in range(ROW_TILE):
+        vo${M} = _mm_min_ps(vo${M}, vmax);
+
+      $for M in reversed(range(ROW_TILE)):
+        _mm_storeu_ps(o${M}, vo${M});
+        o${M} += 4;
+    }
+    // Potentially process the last block of 0..7 pixels.
+    assert(w < 8 * sizeof(float));
+    if XNN_LIKELY(w != 0) {
+      $for M in range(1 + 2 * ROW_TILE):
+        const __m128 vi${M}x89AB = _mm_loadu_ps(i${M});
+        const __m128 vi${M}xCDEF = _mm_loadu_ps(i${M} + 4);
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const __m128 vi${M}x8ACE = _mm_and_ps(vmask_even, _mm_shuffle_ps(vi${M}x89AB, vi${M}xCDEF, _MM_SHUFFLE(2, 0, 2, 0)));
+        const __m128 vi${M}x9BDF = _mm_and_ps(vmask_odd,  _mm_shuffle_ps(vi${M}x89AB, vi${M}xCDEF, _MM_SHUFFLE(3, 1, 3, 1)));
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          $if K == 0:
+            __m128 vo${M}p0 = _mm_add_ps(vbias, _mm_mul_ps(vi${2*M+K}x8ACE, vk${K}1));
+          $elif K < ACCUMULATORS:
+            __m128 vo${M}p${K} = _mm_mul_ps(vi${2*M+K}x8ACE, vk${K}1);
+          $else:
+            vo${M}p${K % ACCUMULATORS} = _mm_add_ps(vo${M}p${K % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x8ACE, vk${K}1));
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const __m128 vi${M}xF9BD = _mm_shuffle_ps(vi${M}x9BDF, vi${M}x9BDF, _MM_SHUFFLE(2, 1, 0, 3));
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          $if K+3 < ACCUMULATORS:
+            __m128 vo${M}p${K+3} = _mm_mul_ps(vi${2*M+K}x9BDF, vk${K}2);
+          $else:
+            vo${M}p${(K+3) % ACCUMULATORS} = _mm_add_ps(vo${M}p${(K+3) % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x9BDF, vk${K}2));
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const __m128 vi${M}x7BDF = _mm_move_ss(vi${M}xF9BD, vi${M}x7531);
+
+      $for M in range(1 + 2 * ROW_TILE):
+        vi${M}x7531 = vi${M}xF9BD;
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          vo${M}p${(K+6) % ACCUMULATORS} = _mm_add_ps(vo${M}p${(K+6) % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x7BDF, vk${K}0));
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = _mm_add_ps(vo${M}p${A}, vo${M}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        __m128 vo${M} = _mm_max_ps(vo${M}p0, vmin);
+
+      $for M in range(ROW_TILE):
+        vo${M} = _mm_min_ps(vo${M}, vmax);
+
+      if (w == 7 * sizeof(float)) {
+        $for M in reversed(range(ROW_TILE)):
+          _mm_storeu_ps(o${M}, vo${M});
+          o${M} += 4;
+      } else {
+        w += 1 * sizeof(float);
+        if (w & (4 * sizeof(float))) {
+          $for M in reversed(range(ROW_TILE)):
+            _mm_storel_pi((__m64*) o${M}, vo${M});
+            o${M} += 2;
+
+          $for M in range(ROW_TILE):
+            vo${M} = _mm_movehl_ps(vo${M}, vo${M});
+        }
+        if (w & (2 * sizeof(float))) {
+          $for M in reversed(range(ROW_TILE)):
+            _mm_store_ss(o${M}, vo${M});
+            o${M} += 1;
+        }
+      }
+    }
+
+    i0 = (const float*) ((uintptr_t) i${2 * ROW_TILE} - input_decrement);
+    $for M in range(1, 1 + 2 * ROW_TILE):
+      i${M} = (const float*) ((uintptr_t) i${M-1} + input_width);
+
+    $if ROW_TILE > 1:
+      o0 = o${ROW_TILE - 1};
+      $for M in range(1, ROW_TILE):
+        o${M} = (float*) ((uintptr_t) o${M-1} + output_width);
+
+    $if ROW_TILE > 1:
+      output_height = doz(output_height, ${ROW_TILE});
+      padded_input_height = doz(padded_input_height, ${ROW_TILE * 2});
+    $else:
+      output_height -= 1;
+      padded_input_height -= 2;
+  } while (output_height != 0);
+}

@@ -316,8 +316,29 @@ static void DWConv2DBenchmark(benchmark::State& state,
     DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_2x4_acc2, 3, 3, 1, 1, benchmark::utils::CheckSSSE3);
   }
 
+  static void dwconv2d_chw_3x3s2p1__sse_1x4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_1x4, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__sse_2x4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_2x4, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__sse_3x4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_3x4, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__sse_4x4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_4x4, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__sse_1x4_acc2(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_1x4_acc2, 3, 3, 1, 2);
+  }
   static void dwconv2d_chw_3x3s2p1__sse_1x4_acc3(benchmark::State& state, const char* net) {
     DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_1x4_acc3, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__sse_1x4_acc4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_1x4_acc4, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__sse_2x4_acc2(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_2x4_acc2, 3, 3, 1, 2);
   }
 
   BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__sse_1x4)
@@ -342,7 +363,14 @@ static void DWConv2DBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__ssse3_1x4_acc4)
   BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__ssse3_2x4_acc2)
 
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__sse_1x4)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__sse_2x4)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__sse_3x4)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__sse_4x4)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__sse_1x4_acc2)
   BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__sse_1x4_acc3)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__sse_1x4_acc4)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__sse_2x4_acc2)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
