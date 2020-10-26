@@ -1217,6 +1217,11 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-spmm/gen/16x1-minmax-neonfma.c
   src/f32-spmm/gen/16x2-minmax-neonfma.c
   src/f32-spmm/gen/16x4-minmax-neonfma.c
+  src/f32-spmm/gen/32x1-minmax-neonfma-pipelined.c
+  src/f32-spmm/gen/32x1-minmax-neonfma-unroll2.c
+  src/f32-spmm/gen/32x1-minmax-neonfma.c
+  src/f32-spmm/gen/32x2-minmax-neonfma.c
+  src/f32-spmm/gen/32x4-minmax-neonfma.c
   src/f32-vbinary/gen/vdiv-minmax-neon-x4.c
   src/f32-vbinary/gen/vdiv-minmax-neon-x8.c
   src/f32-vbinary/gen/vdivc-minmax-neon-x4.c
@@ -1414,6 +1419,7 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-spmm/gen/4x1-minmax-sse.c
   src/f32-spmm/gen/8x1-minmax-sse.c
   src/f32-spmm/gen/16x1-minmax-sse.c
+  src/f32-spmm/gen/32x1-minmax-sse.c
   src/f32-vbinary/gen/vadd-minmax-sse-x4.c
   src/f32-vbinary/gen/vadd-minmax-sse-x8.c
   src/f32-vbinary/gen/vaddc-minmax-sse-x4.c
