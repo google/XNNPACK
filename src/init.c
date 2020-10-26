@@ -665,7 +665,7 @@ static void init(void) {
           .output_height_tile = 1,
         };
         xnn_params.f32.dwconv2d_chw_5x5 = (struct dwconv2d_chw_parameters) {
-          .ukernel = (xnn_dwconv2d_chw_ukernel_function) xnn_f32_dwconv2d_chw_ukernel_5x5p2__scalar_1x1_acc5,
+          .ukernel = (xnn_dwconv2d_chw_ukernel_function) xnn_f32_dwconv2d_chw_ukernel_5x5p2__scalar_1x1_acc4,
           .input_width_tile = 1,
           .output_width_tile = 1,
           .output_height_tile = 1,

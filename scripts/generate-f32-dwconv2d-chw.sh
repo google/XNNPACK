@@ -107,5 +107,17 @@ tools/xngen src/f32-dwconv2d-chw/3x3s2p1-scalar.c.in -D ROW_TILE=1 -D ACCUMULATO
 tools/xngen src/f32-dwconv2d-chw/3x3s2p1-scalar.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-scalar-1x1-acc4.c
 tools/xngen src/f32-dwconv2d-chw/3x3s2p1-scalar.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-scalar-2x1-acc2.c
 
+tools/xngen src/f32-dwconv2d-chw/5x5p2-scalar.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-1x1.c
+tools/xngen src/f32-dwconv2d-chw/5x5p2-scalar.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-2x1.c
+tools/xngen src/f32-dwconv2d-chw/5x5p2-scalar.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-3x1.c
+
+tools/xngen src/f32-dwconv2d-chw/5x5p2-scalar.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-1x1-acc2.c
+tools/xngen src/f32-dwconv2d-chw/5x5p2-scalar.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-1x1-acc3.c
+tools/xngen src/f32-dwconv2d-chw/5x5p2-scalar.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-1x1-acc4.c
+tools/xngen src/f32-dwconv2d-chw/5x5p2-scalar.c.in -D ROW_TILE=1 -D ACCUMULATORS=5 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-1x1-acc5.c
+tools/xngen src/f32-dwconv2d-chw/5x5p2-scalar.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-2x1-acc2.c
+tools/xngen src/f32-dwconv2d-chw/5x5p2-scalar.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-2x1-acc3.c
+tools/xngen src/f32-dwconv2d-chw/5x5p2-scalar.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-3x1-acc2.c
+
 ################################## Unit tests #################################
 tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output test/f32-dwconv2d-chw.cc
