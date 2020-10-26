@@ -1,17 +1,19 @@
-// Copyright 2019 Google LLC
+// Auto-generated file. Do not edit!
+//   Template: src/f32-dwconv2d-chw/3x3s2p1-scalar.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
-#include <stdio.h>
-
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
+void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__scalar_1x1_acc2(
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -27,8 +29,8 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
   assert(padding_top >= 0);
   assert(padding_top <= 1);
 
-  const float params_min = params->scalar.min;
-  const float params_max = params->scalar.max;
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
 
   const float vbias = weights[0];
   const float vk00 = weights[1];
@@ -41,6 +43,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
   const float vk21 = weights[8];
   const float vk22 = weights[9];
 
+
   const float* i0 = (const float*) ((uintptr_t) input - ((-padding_top) & input_width));
   const float* i1 = (const float*) ((uintptr_t) i0 + input_width);
   if XNN_UNPREDICTABLE(padding_top != 0) {
@@ -48,10 +51,12 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
   }
   const float* i2 = (const float*) ((uintptr_t) i1 + input_width);
 
+  float* o0 = output;
+
   size_t padded_input_height = input_height + padding_top + 1 /* padding bottom */;
   size_t output_height = (padded_input_height - 3 /* kernel size */ + 2 /* subsampling */) / 2;
   do {
-    if XNN_UNPREDICTABLE(padded_input_height <= 3) {
+    if XNN_UNPREDICTABLE(padded_input_height < 4) {
       i2 = zero;
     }
 
@@ -65,9 +70,9 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
       const float vi1x1 = i1[0];
       const float vi2x1 = i2[0];
 
-      float vacc0 = vk00 * vi0x0;
-      float vacc1 = vk10 * vi1x0;
-      float vacc2 = vk20 * vi2x0;
+      float vo0p0 = vbias + vi0x0 * vk00;
+      float vo0p1 = vi1x0 * vk10;
+      vo0p0 += vi2x0 * vk20;
 
       const float vi0x2 = i0[1];
       i0 += 2;
@@ -76,50 +81,54 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__scalar_1x1_acc3(
       const float vi2x2 = i2[1];
       i2 += 2;
 
-      vacc0 += vk01 * vi0x1;
+      vo0p1 += vi0x1 * vk01;
+      vo0p0 += vi1x1 * vk11;
+      vo0p1 += vi2x1 * vk21;
+
       vi0x0 = vi0x2;
-      vacc1 += vk11 * vi1x1;
       vi1x0 = vi1x2;
-      vacc2 += vk21 * vi2x1;
       vi2x0 = vi2x2;
 
-      vacc0 += vk02 * vi0x2;
-      vacc1 += vk12 * vi1x2;
-      vacc2 += vk22 * vi2x2;
+      vo0p0 += vi0x2 * vk02;
+      vo0p1 += vi1x2 * vk12;
+      vo0p0 += vi2x2 * vk22;
 
-      float voutput = (vbias + vacc0) + (vacc1 + vacc2);
+      vo0p0 += vo0p1;
 
-      voutput = math_max_f32(voutput, params_min);
-      voutput = math_min_f32(voutput, params_max);
+      float vo0 = math_max_f32(vo0p0, vmin);
 
-      *output++ = voutput;
+      vo0 = math_min_f32(vo0, vmax);
+
+      *o0++ = vo0;
     }
     // Potentially process the last pixel.
     assert(w <= 1 * sizeof(float));
-    if (w == 1 * sizeof(float)) {
+    if (w != 0) {
       const float vi0x1 = *i0++;
       const float vi1x1 = *i1++;
       const float vi2x1 = *i2++;
 
-      float vacc0 = vk00 * vi0x0;
-      float vacc1 = vk10 * vi1x0;
-      float vacc2 = vk20 * vi2x0;
+      float vo0p0 = vbias + vi0x0 * vk00;
+      float vo0p1 = vi1x0 * vk10;
+      vo0p0 += vi2x0 * vk20;
 
-      vacc0 += vk01 * vi0x1;
-      vacc1 += vk11 * vi1x1;
-      vacc2 += vk21 * vi2x1;
+      vo0p1 += vi0x1 * vk01;
+      vo0p0 += vi1x1 * vk11;
+      vo0p1 += vi2x1 * vk21;
 
-      float voutput = (vbias + vacc0) + (vacc1 + vacc2);
+      vo0p0 += vo0p1;
 
-      voutput = math_max_f32(voutput, params_min);
-      voutput = math_min_f32(voutput, params_max);
+      float vo0 = math_max_f32(vo0p0, vmin);
 
-      *output++ = voutput;
+      vo0 = math_min_f32(vo0, vmax);
+
+      *o0++ = vo0;
     }
 
-    i0 = i1;
-    i1 = i2;
+    i0 = (const float*) ((uintptr_t) i1);
+    i1 = (const float*) ((uintptr_t) i2);
     i2 = (const float*) ((uintptr_t) i1 + input_width);
+
 
     output_height -= 1;
     padded_input_height -= 2;
