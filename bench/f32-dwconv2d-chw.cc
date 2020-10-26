@@ -223,8 +223,29 @@ static void DWConv2DBenchmark(benchmark::State& state,
     DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_2x4_acc2, 3, 3, 1, 1);
   }
 
+  static void dwconv2d_chw_3x3s2p1__neonfma_1x4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_1x4, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__neonfma_2x4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_2x4, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__neonfma_3x4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_3x4, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__neonfma_4x4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_4x4, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__neonfma_1x4_acc2(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_1x4_acc2, 3, 3, 1, 2);
+  }
   static void dwconv2d_chw_3x3s2p1__neonfma_1x4_acc3(benchmark::State& state, const char* net) {
     DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_1x4_acc3, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__neonfma_1x4_acc4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_1x4_acc4, 3, 3, 1, 2);
+  }
+  static void dwconv2d_chw_3x3s2p1__neonfma_2x4_acc2(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_2x4_acc2, 3, 3, 1, 2);
   }
 
   static void dwconv2d_chw_5x5p2__neonfma_3x4(benchmark::State& state, const char* net) {
@@ -246,7 +267,14 @@ static void DWConv2DBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__neonfma_1x4_acc4)
   BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__neonfma_2x4_acc2)
 
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfma_1x4)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfma_2x4)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfma_3x4)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfma_4x4)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfma_1x4_acc2)
   BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfma_1x4_acc3)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfma_1x4_acc4)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfma_2x4_acc2)
 
   BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__neonfma_3x4)
 

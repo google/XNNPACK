@@ -1,0 +1,259 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ROW_TILE >= 1
+$assert ACCUMULATORS >= 1
+$VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
+
+
+void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__${"neonfma" if FMA else "neon"}_${ROW_TILE}x4${"_acc%d" % ACCUMULATORS if ACCUMULATORS > 1 else ""}(
+    size_t input_height,
+    size_t input_width,
+    const float* input,
+    const float* weights,
+    const float* zero,
+    float* output,
+    uint32_t padding_top,
+    const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
+  assert(padding_top >= 0);
+  assert(padding_top <= 1);
+
+  const uint32x4_t vmask_even = vld1q_u32(params->neon.mask_even);
+  const uint32x4_t vmask_odd  = vld1q_u32(params->neon.mask_odd);
+  const float32x4_t vmax = vld1q_dup_f32(&params->neon.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->neon.min);
+
+  const float32x4_t vw0123 = vld1q_f32(weights);
+  const float32x4_t vw4567 = vld1q_f32(weights + 4);
+  const float32x2_t vw89 = vld1_f32(weights + 8);
+
+  const size_t input_decrement = round_down_po2(input_width, 4 /* SIMD output width */ * 2 /* subsampling */ * sizeof(float));
+  $if ROW_TILE > 1:
+    const size_t output_width = round_down_po2((input_width + (2 /* padding */ - 3 /* kernel size */ + 2 /* subsampling */) * sizeof(float)) / 2, sizeof(float));
+
+  const float* i0 = (const float*) ((uintptr_t) input - ((-padding_top) & input_width));
+  const float* i1 = (const float*) ((uintptr_t) i0 + input_width);
+  if XNN_UNPREDICTABLE(padding_top != 0) {
+    i0 = zero;
+  }
+  $for M in range(2, 1 + 2 * ROW_TILE):
+    const float* i${M} = (const float*) ((uintptr_t) i${M-1} + input_width);
+
+  float* o0 = output;
+  $for M in range(1, ROW_TILE):
+    float* o${M} = (float*) ((uintptr_t) o${M-1} + output_width);
+
+  size_t padded_input_height = input_height + padding_top + 1 /* padding bottom */;
+  size_t output_height = (padded_input_height - 3 /* kernel size */ + 2 /* subsampling */) / 2;
+  do {
+    $for M in range(2, 1 + 2 * ROW_TILE):
+      if XNN_UNPREDICTABLE(padded_input_height < ${2 + M}) {
+        i${M} = zero;
+        $if M % 2 == 1:
+          o${(M - 1) / 2} = o${(M - 1) / 2 - 1};
+      }
+
+    $for M in range(1 + 2 * ROW_TILE):
+      float32x4_t vi${M}x1357 = vmovq_n_f32(0.0f);
+
+    size_t w = input_width;
+    for (; w >= 8 * sizeof(float); w -= 8 * sizeof(float)) {
+      $for M in range(ROW_TILE):
+        float32x4_t vo${M}p0 = vdupq_lane_f32(vget_low_f32(vw0123), 0);
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const float32x4x2_t vi${M}x8ACE9BDF = vld2q_f32(i${M}); i${M} += 8;
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 1:
+          float32x4_t vo${M}p1 = vmulq_lane_f32(vi${2*M}x8ACE9BDF.val[0], vget_high_f32(vw0123), 0);
+        $else:
+          vo${M}p0 = ${VMULADDQ_LANE_F32}(vo${M}p0, vi${2*M}x8ACE9BDF.val[0], vget_high_f32(vw0123), 0);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 2:
+          float32x4_t vo${M}p2 = vmulq_lane_f32(vi${2*M+1}x8ACE9BDF.val[0], vget_low_f32(vw4567), 1);
+        $else:
+          vo${M}p0 = ${VMULADDQ_LANE_F32}(vo${M}p0, vi${2*M+1}x8ACE9BDF.val[0], vget_low_f32(vw4567), 1);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 3:
+          float32x4_t vo${M}p3 = vmulq_lane_f32(vi${2*M+2}x8ACE9BDF.val[0], vw89, 0);
+        $else:
+          vo${M}p${4 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${4 % ACCUMULATORS}, vi${2*M+2}x8ACE9BDF.val[0], vw89, 0);
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const float32x4_t vi${M}x7BDF = vextq_f32(vi${M}x1357, vi${M}x8ACE9BDF.val[1], 3);
+        vi${M}x1357 = vi${M}x8ACE9BDF.val[1];
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 4:
+          float32x4_t vo${M}p4 = vmulq_lane_f32(vi${2*M}x7BDF, vget_low_f32(vw0123), 1);
+        $else:
+          vo${M}p${5 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${5 % ACCUMULATORS}, vi${2*M}x7BDF, vget_low_f32(vw0123), 1);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 5:
+          float32x4_t vo${M}p5 = vmulq_lane_f32(vi${2*M+1}x7BDF, vget_low_f32(vw4567), 0);
+        $else:
+          vo${M}p${6 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${6 % ACCUMULATORS}, vi${2*M+1}x7BDF, vget_low_f32(vw4567), 0);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 6:
+          float32x4_t vo${M}p6 = vmulq_lane_f32(vi${2*M+2}x7BDF, vget_low_f32(vw4567), 1);
+        $else:
+          vo${M}p${7 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${7 % ACCUMULATORS}, vi${2*M+2}x7BDF, vget_high_f32(vw4567), 1);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${8 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${8 % ACCUMULATORS}, vi${2*M}x8ACE9BDF.val[1], vget_high_f32(vw0123), 1);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${9 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${9 % ACCUMULATORS}, vi${2*M+1}x8ACE9BDF.val[1], vget_high_f32(vw4567), 0);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${10 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${10 % ACCUMULATORS}, vi${2*M+2}x8ACE9BDF.val[1], vw89, 1);
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = vaddq_f32(vo${M}p${A}, vo${M}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        float32x4_t vo${M} = vmaxq_f32(vo${M}p0, vmin);
+
+      $for M in range(ROW_TILE):
+        vo${M} = vminq_f32(vo${M}, vmax);
+
+      $for M in reversed(range(ROW_TILE)):
+        vst1q_f32(o${M}, vo${M}); o${M} += 4;
+    }
+    // Last block has 0-7 pixels to process.
+    assert(w < 8 * sizeof(float));
+    if XNN_LIKELY(w != 0) {
+      $for M in range(ROW_TILE):
+        float32x4_t vo${M}p0 = vdupq_lane_f32(vget_low_f32(vw0123), 0);
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const float32x4x2_t vi${M}x8ACE9BDF = vld2q_f32(i${M});
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const float32x4_t vi${M}x8ACE = vreinterpretq_f32_u32(vandq_u32(vmask_even, vreinterpretq_u32_f32(vi${M}x8ACE9BDF.val[0])));
+        const float32x4_t vi${M}x9BDF = vreinterpretq_f32_u32(vandq_u32(vmask_odd,  vreinterpretq_u32_f32(vi${M}x8ACE9BDF.val[1])));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 1:
+          float32x4_t vo${M}p1 = vmulq_lane_f32(vi${2*M}x8ACE, vget_high_f32(vw0123), 0);
+        $else:
+          vo${M}p0 = ${VMULADDQ_LANE_F32}(vo${M}p0, vi${2*M}x8ACE, vget_high_f32(vw0123), 0);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 2:
+          float32x4_t vo${M}p2 = vmulq_lane_f32(vi${2*M+1}x8ACE, vget_low_f32(vw4567), 1);
+        $else:
+          vo${M}p0 = ${VMULADDQ_LANE_F32}(vo${M}p0, vi${2*M+1}x8ACE, vget_low_f32(vw4567), 1);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 3:
+          float32x4_t vo${M}p3 = vmulq_lane_f32(vi${2*M+2}x8ACE, vw89, 0);
+        $else:
+          vo${M}p${4 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${4 % ACCUMULATORS}, vi${2*M+2}x8ACE, vw89, 0);
+
+      $for M in range(1 + 2 * ROW_TILE):
+        const float32x4_t vi${M}x7BDF = vextq_f32(vi${M}x1357, vi${M}x9BDF, 3);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 4:
+          float32x4_t vo${M}p4 = vmulq_lane_f32(vi${2*M}x7BDF, vget_low_f32(vw0123), 1);
+        $else:
+          vo${M}p${5 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${5 % ACCUMULATORS}, vi${2*M}x7BDF, vget_low_f32(vw0123), 1);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 5:
+          float32x4_t vo${M}p5 = vmulq_lane_f32(vi${2*M+1}x7BDF, vget_low_f32(vw4567), 0);
+        $else:
+          vo${M}p${6 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${6 % ACCUMULATORS}, vi${2*M+1}x7BDF, vget_low_f32(vw4567), 0);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 6:
+          float32x4_t vo${M}p6 = vmulq_lane_f32(vi${2*M+2}x7BDF, vget_low_f32(vw4567), 1);
+        $else:
+          vo${M}p${7 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${7 % ACCUMULATORS}, vi${2*M+2}x7BDF, vget_high_f32(vw4567), 1);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${8 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${8 % ACCUMULATORS}, vi${2*M}x9BDF, vget_high_f32(vw0123), 1);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${9 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${9 % ACCUMULATORS}, vi${2*M+1}x9BDF, vget_high_f32(vw4567), 0);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${10 % ACCUMULATORS} = ${VMULADDQ_LANE_F32}(vo${M}p${10 % ACCUMULATORS}, vi${2*M+2}x9BDF, vw89, 1);
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = vaddq_f32(vo${M}p${A}, vo${M}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        float32x4_t vo${M} = vmaxq_f32(vo${M}p0, vmin);
+
+      $for M in range(ROW_TILE):
+        vo${M} = vminq_f32(vo${M}, vmax);
+
+      w += 1 * sizeof(float);
+      if (w & (8 * sizeof(float))) {
+        $for M in reversed(range(ROW_TILE)):
+          vst1q_f32(o${M}, vo${M}); o${M} += 4;
+      } else {
+        $for M in range(ROW_TILE):
+          float32x2_t vo${M}_lo = vget_low_f32(vo${M});
+        if (w & (4 * sizeof(float))) {
+          $for M in reversed(range(ROW_TILE)):
+            vst1_f32(o${M}, vo${M}_lo); o${M} += 2;
+
+          $for M in range(ROW_TILE):
+            vo${M}_lo = vget_high_f32(vo${M});
+        }
+        if (w & (2 * sizeof(float))) {
+          $for M in reversed(range(ROW_TILE)):
+            vst1_lane_f32(o${M}, vo${M}_lo, 0); o${M} += 1;
+        }
+      }
+    }
+
+    i0 = (const float*) ((uintptr_t) i${2 * ROW_TILE} - input_decrement);
+    $for M in range(1, 1 + 2 * ROW_TILE):
+      i${M} = (const float*) ((uintptr_t) i${M-1} + input_width);
+
+    $if ROW_TILE > 1:
+      o0 = o${ROW_TILE - 1};
+      $for M in range(1, ROW_TILE):
+        o${M} = (float*) ((uintptr_t) o${M-1} + output_width);
+
+    $if ROW_TILE > 1:
+      output_height = doz(output_height, ${ROW_TILE});
+      padded_input_height = doz(padded_input_height, ${ROW_TILE * 2});
+    $else:
+      output_height -= 1;
+      padded_input_height -= 2;
+  } while (output_height != 0);
+}
