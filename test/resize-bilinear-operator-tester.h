@@ -301,6 +301,91 @@ class ResizeBilinearOperatorTester {
     }
   }
 
+  void TestNCHWxF32() const {
+    if (align_corners()) {
+      ASSERT_FALSE(tf_legacy_mode());
+    }
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+
+    std::vector<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results.
+      const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
+      const int64_t input_num_pixels = input_height() * input_width();
+      const int64_t input_num_elements = input_num_pixels * input_pixel_stride();
+      const int64_t output_num_pixels = output_height() * output_width();
+      const int64_t output_num_elements = output_num_pixels * channels();
+      for (size_t batch_index = 0; batch_index < batch_size(); batch_index++) {
+        for (size_t output_y = 0; output_y < output_height(); output_y++) {
+          const float input_y = (float(output_y) + offset) * height_scale() - offset;
+          const int64_t input_y_top = std::max<int64_t>(int64_t(std::floor(input_y)), 0);
+          const int64_t input_y_bottom = std::min<int64_t>(int64_t(std::ceil(input_y)), input_height() - 1);
+          const float y_alpha = input_y - std::floor(input_y);
+          for (size_t output_x = 0; output_x < output_width(); output_x++) {
+            const float input_x = (float(output_x) + offset) * width_scale() - offset;
+            const int64_t input_x_left = std::max<int64_t>(int64_t(std::floor(input_x)), 0);
+            const int64_t input_x_right = std::min<int64_t>(int64_t(std::ceil(input_x)), input_width() - 1);
+            const float x_alpha = input_x - std::floor(input_x);
+            for (size_t c = 0; c < channels(); c++) {
+              output_ref[batch_index * output_num_elements + c * output_num_pixels + output_y * output_width() + output_x] =
+                input[batch_index * input_num_elements + c * input_num_pixels + input_y_top * input_width() + input_x_left] * (1.0f - y_alpha) * (1.0f - x_alpha) +
+                input[batch_index * input_num_elements + c * input_num_pixels + input_y_top * input_width() + input_x_right] * (1.0f - y_alpha) * x_alpha +
+                input[batch_index * input_num_elements + c * input_num_pixels + input_y_bottom * input_width() + input_x_left] * y_alpha * (1.0f - x_alpha) +
+                input[batch_index * input_num_elements + c * input_num_pixels + input_y_bottom * input_width() + input_x_right] * y_alpha * x_alpha;
+            }
+          }
+        }
+      }
+
+      // Create, setup, run, and destroy Resize Bilinear operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t resize_bilinear_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_resize_bilinear2d_nchw_f32(
+          channels(), input_pixel_stride(), output_pixel_stride(),
+          (align_corners() ? XNN_FLAG_ALIGN_CORNERS : 0) | (tf_legacy_mode() ? XNN_FLAG_TENSORFLOW_LEGACY_MODE : 0),
+          &resize_bilinear_op));
+      ASSERT_NE(nullptr, resize_bilinear_op);
+
+      // Smart pointer to automatically delete resize_bilinear_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_resize_bilinear2d_nchw_f32(
+          resize_bilinear_op,
+          batch_size(), input_height(), input_width(),
+          output_height(), output_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t y = 0; y < output_height(); y++) {
+          for (size_t x = 0; x < output_width(); x++) {
+            for (size_t c = 0; c < channels(); c++) {
+              ASSERT_NEAR(output[i * output_num_elements +  c * output_num_pixels + y * output_width() + x],
+                  output_ref[i * output_num_elements +  c * output_num_pixels + y * output_width() + x],
+                  1.0e-6f) <<
+                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
+            }
+          }
+        }
+      }
+    }
+  }
+
   // void TestSetupF32() const {
   //   std::random_device random_device;
   //   auto rng = std::mt19937(random_device());

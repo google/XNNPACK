@@ -639,6 +639,26 @@ void xnn_compute_resize_bilinear(
     context->output_pixel_stride - context->scaled_channels);
 }
 
+void xnn_compute_resize_bilinear_chw(
+    const struct resize_bilinear_chw_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
+    size_t channel_start,
+    size_t channel_range)
+{
+  void* output =
+    (void*) ((uintptr_t) context->output + channel_start * context->output_channel_stride + batch_index * context->output_batch_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride + channel_start * context->input_channel_stride;
+
+  context->ukernel(
+    context->output_pixels,
+    channel_range,
+    context->indirect_input,
+    input_offset,
+    context->packed_weights,
+    output,
+    context->input_channel_stride);
+}
+
 void xnn_compute_prelu(
     const struct prelu_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_start,

@@ -65,6 +65,7 @@ OPERATOR_SRCS = [
     "src/operators/leaky-relu-nc.c",
     "src/operators/max-pooling-nhwc.c",
     "src/operators/prelu-nc.c",
+    "src/operators/resize-bilinear-nchw.c",
     "src/operators/resize-bilinear-nhwc.c",
     "src/operators/sigmoid-nc.c",
     "src/operators/softmax-nc.c",
@@ -6562,6 +6563,15 @@ xnnpack_unit_test(
     name = "resize_bilinear_nhwc_test",
     srcs = [
         "test/resize-bilinear-nhwc.cc",
+        "test/resize-bilinear-operator-tester.h",
+    ] + OPERATOR_TEST_PARAMS_HDRS,
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "resize_bilinear_nchw_test",
+    srcs = [
+        "test/resize-bilinear-nchw.cc",
         "test/resize-bilinear-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,

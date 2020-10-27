@@ -173,6 +173,7 @@ SET(XNNPACK_OPERATOR_SRCS
   src/operators/max-pooling-nhwc.c
   src/operators/prelu-nc.c
   src/operators/resize-bilinear-nhwc.c
+  src/operators/resize-bilinear-nchw.c
   src/operators/sigmoid-nc.c
   src/operators/softmax-nc.c
   src/operators/unary-elementwise-nc.c
@@ -2994,6 +2995,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nhwc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(resize-bilinear-nhwc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(resize-bilinear-nhwc-test resize-bilinear-nhwc-test)
+
+  ADD_EXECUTABLE(resize-bilinear-nchw-test test/resize-bilinear-nchw.cc)
+  SET_TARGET_PROPERTIES(resize-bilinear-nchw-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nchw-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(resize-bilinear-nchw-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(resize-bilinear-nchw-test resize-bilinear-nchw-test)
 
   ADD_EXECUTABLE(sigmoid-nc-test test/sigmoid-nc.cc)
   SET_TARGET_PROPERTIES(sigmoid-nc-test PROPERTIES

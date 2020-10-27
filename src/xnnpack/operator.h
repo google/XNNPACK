@@ -87,6 +87,7 @@ enum xnn_operator_type {
   xnn_operator_type_multiply_nd_f32,
   xnn_operator_type_negate_nc_f32,
   xnn_operator_type_prelu_nc_f32,
+  xnn_operator_type_resize_bilinear_nchw_f32,
   xnn_operator_type_resize_bilinear_nhwc_f32,
   xnn_operator_type_sigmoid_nc_f32,
   xnn_operator_type_sigmoid_nc_qu8,
@@ -331,6 +332,7 @@ struct xnn_operator {
     struct pixelwise_average_pooling_context pixelwise_average_pooling;
     struct prelu_context prelu;
     struct resize_bilinear_context resize_bilinear;
+    struct resize_bilinear_chw_context resize_bilinear_chw;
     struct spmm_context spmm;
     struct subconv_context subconv;
     struct subgemm_context subgemm;

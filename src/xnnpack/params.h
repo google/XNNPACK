@@ -1874,6 +1874,16 @@ struct ibilinear_parameters {
   uint8_t channel_tile;
 };
 
+struct ibilinear_chw_parameters {
+  xnn_ibilinear_chw_ukernel_function ukernel;
+  // Number of output pixels in a tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
+  uint8_t pixel_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint8_t channel_tile;
+};
+
 struct zip_parameters {
   xnn_zipc_ukernel_function x2;
   xnn_zipc_ukernel_function x3;
@@ -2023,6 +2033,8 @@ struct xnn_parameters {
     struct dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
     // Global Average Pooling in CW layout.
     struct gavgpool_cw_parameters gavgpool_cw;
+    // Bilinear interpolation (2D) in CHW layout.
+    struct ibilinear_chw_parameters ibilinear_chw;
   } f32;
   struct {
     struct pad_parameters pad;

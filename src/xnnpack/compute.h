@@ -664,12 +664,42 @@ struct resize_bilinear_context {
   xnn_ibilinear_ukernel_function ukernel;
 };
 
+struct resize_bilinear_chw_context {
+  // Number of pixels per output image plane.
+  size_t output_pixels;
+  // Number of channels multiplied by sizeof(input element).
+  size_t channels;
+  // Stride, in bytes, between adjacent channels in the input.
+  size_t input_channel_stride;
+  // Indirection buffer with pointers related to rows of input pixels.
+  const void** indirect_input;
+  // Offset, in bytes, to be added to pointers in indirection buffer.
+  size_t input_offset;
+  // Stride, in bytes, between images of consecutive batches in the input.
+  size_t input_batch_stride;
+  // Packed pairs of (x, y) linear interpolation coefficients.
+  const void* packed_weights;
+  // Pointer to the output tensor.
+  void* output;
+  // Stride, in bytes, between images of consecutive batches in the output.
+  size_t output_batch_stride;
+  // Stride, in bytes, between consecutive channels of an output image.
+  size_t output_channel_stride;
+  // Pointer to BILINEAR micro-kernel function.
+  xnn_ibilinear_chw_ukernel_function ukernel;
+};
+
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_resize_bilinear(
       const struct resize_bilinear_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t pixel_start,
       size_t pixel_range);
+  XNN_PRIVATE void xnn_compute_resize_bilinear_chw(
+    const struct resize_bilinear_chw_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
+    size_t pixel_start,
+    size_t pixel_range);
 #endif
 
 struct elementwise_binary_context {

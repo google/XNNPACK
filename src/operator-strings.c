@@ -106,6 +106,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "PReLU (NC, F32)";
     case xnn_operator_type_resize_bilinear_nhwc_f32:
       return "Resize Bilinear (NHWC, F32)";
+    case xnn_operator_type_resize_bilinear_nchw_f32:
+      return "Resize Bilinear (NCHW, F32)";
     case xnn_operator_type_sigmoid_nc_f32:
       return "Sigmoid (NC, F32)";
     case xnn_operator_type_sigmoid_nc_qu8:
