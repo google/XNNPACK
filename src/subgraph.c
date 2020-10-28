@@ -245,6 +245,9 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
       }
 
       return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
+    case xnn_node_type_static_resize_bilinear_2d:
+      return subgraph->values[node->inputs[0]].shape.dim[1] > 1 &&
+             subgraph->values[node->inputs[0]].shape.dim[2] > 1 ? XNN_LAYOUT_FLAG_COMPATIBLE_NCHW : 0;
     case xnn_node_type_abs:
     case xnn_node_type_bankers_rounding:
     case xnn_node_type_ceiling:
