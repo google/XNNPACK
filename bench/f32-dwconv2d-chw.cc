@@ -556,8 +556,35 @@ static void dwconv2d_chw_5x5p2__scalar_3x1_acc2(benchmark::State& state, const c
   DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__scalar_3x1_acc2, 5, 5, 2, 1);
 }
 
+static void dwconv2d_chw_5x5s2p2__scalar_1x1(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_1x1, 5, 5, 2, 2);
+}
+static void dwconv2d_chw_5x5s2p2__scalar_2x1(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_2x1, 5, 5, 2, 2);
+}
+static void dwconv2d_chw_5x5s2p2__scalar_3x1(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_3x1, 5, 5, 2, 2);
+}
+static void dwconv2d_chw_5x5s2p2__scalar_1x1_acc2(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_1x1_acc2, 5, 5, 2, 2);
+}
+static void dwconv2d_chw_5x5s2p2__scalar_1x1_acc3(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_1x1_acc3, 5, 5, 2, 2);
+}
+static void dwconv2d_chw_5x5s2p2__scalar_1x1_acc4(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_1x1_acc4, 5, 5, 2, 2);
+}
 static void dwconv2d_chw_5x5s2p2__scalar_1x1_acc5(benchmark::State& state, const char* net) {
   DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_1x1_acc5, 5, 5, 2, 2);
+}
+static void dwconv2d_chw_5x5s2p2__scalar_2x1_acc2(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_2x1_acc2, 5, 5, 2, 2);
+}
+static void dwconv2d_chw_5x5s2p2__scalar_2x1_acc3(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_2x1_acc3, 5, 5, 2, 2);
+}
+static void dwconv2d_chw_5x5s2p2__scalar_3x1_acc2(benchmark::State& state, const char* net) {
+  DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_3x1_acc2, 5, 5, 2, 2);
 }
 
 BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__scalar_1x1)
@@ -591,7 +618,16 @@ BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__scalar_2x1_acc2)
 BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__scalar_2x1_acc3)
 BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__scalar_3x1_acc2)
 
+BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_1x1)
+BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_2x1)
+BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_3x1)
+BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_1x1_acc2)
+BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_1x1_acc3)
+BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_1x1_acc4)
 BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_1x1_acc5)
+BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_2x1_acc2)
+BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_2x1_acc3)
+BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_3x1_acc2)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

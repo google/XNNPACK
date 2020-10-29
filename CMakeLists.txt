@@ -274,7 +274,6 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up2x25-minmax-scalar.c
   src/f32-dwconv/gen/up2x25-scalar-acc2.c
   src/f32-dwconv/gen/up2x25-scalar.c
-  src/f32-dwconv2d-chw/5x5s2p2-scalar-1x1-acc5.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-scalar-1x1-acc2.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-scalar-1x1-acc3.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-scalar-1x1-acc4.c
@@ -303,6 +302,16 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-2x1.c
   src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-3x1-acc2.c
   src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-3x1.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-1x1-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-1x1-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-1x1-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-1x1-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-1x1.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-2x1-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-2x1-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-2x1.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-3x1-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-3x1.c
   src/f32-gavgpool-cw/scalar-x1.c
   src/f32-gavgpool/7p7x-minmax-scalar-c1.c
   src/f32-gavgpool/7x-minmax-scalar-c1.c
