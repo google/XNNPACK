@@ -1409,6 +1409,19 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-sse-2x4.c
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-sse-3x4.c
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-sse-4x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-4x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-4x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-5x4.c
   src/f32-gavgpool-cw/sse-x4.c
   src/f32-gavgpool/7p7x-minmax-sse-c4.c
   src/f32-gavgpool/7x-minmax-sse-c4.c
