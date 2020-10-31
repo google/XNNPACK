@@ -1935,6 +1935,12 @@ static void init(void) {
         .output_width_tile = 4,
         .output_height_tile = 4,
       };
+      xnn_params.f32.dwconv2d_chw_5x5s2 = (struct dwconv2d_chw_parameters) {
+        .ukernel = (xnn_dwconv2d_chw_ukernel_function) xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__sse_2x4,
+        .input_width_tile = 4,
+        .output_width_tile = 4,
+        .output_height_tile = 2,
+      };
       xnn_params.f32.gavgpool_cw = (struct gavgpool_cw_parameters) {
         .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f32_gavgpool_cw_ukernel__sse_x4,
         .channel_tile = 4,

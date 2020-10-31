@@ -153,6 +153,18 @@ tools/xngen src/f32-dwconv2d-chw/5x5p2-sse.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 
 tools/xngen src/f32-dwconv2d-chw/5x5p2-sse.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-3x4-acc2.c
 tools/xngen src/f32-dwconv2d-chw/5x5p2-sse.c.in -D ROW_TILE=4 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/5x5p2-minmax-sse-4x4-acc2.c
 
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-sse.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-1x4.c
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-sse.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-2x4.c
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-sse.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-3x4.c
+
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-sse.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-1x4-acc2.c
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-sse.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-1x4-acc3.c
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-sse.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-1x4-acc4.c
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-sse.c.in -D ROW_TILE=1 -D ACCUMULATORS=5 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-1x4-acc5.c
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-sse.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-2x4-acc2.c
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-sse.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-2x4-acc3.c
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-sse.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-3x4-acc2.c
+
 ################################### Scalar ####################################
 tools/xngen src/f32-dwconv2d-chw/3x3p1-scalar.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/3x3p1-minmax-scalar-1x1.c
 tools/xngen src/f32-dwconv2d-chw/3x3p1-scalar.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/3x3p1-minmax-scalar-2x1.c
