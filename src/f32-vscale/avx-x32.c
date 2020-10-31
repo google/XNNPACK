@@ -11,7 +11,7 @@
 #include <xnnpack/vscale.h>
 
 
-void xnn_f32_vscale_ukernel__avx_unroll32(
+void xnn_f32_vscale_ukernel__avx_x32(
     size_t n,
     const float* x,
     float* y,

@@ -12,7 +12,7 @@
 #include <xnnpack/vscale.h>
 
 
-void xnn_f32_vscale_ukernel__avx512f_unroll64(
+void xnn_f32_vscale_ukernel__avx512f_x64(
     size_t n,
     const float* x,
     float* y,

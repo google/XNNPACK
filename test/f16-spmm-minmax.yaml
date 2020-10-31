@@ -6,7 +6,7 @@
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_unroll2
+- name: xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2
   k-block: 2
   arch:
   - aarch64
@@ -14,7 +14,7 @@
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_unroll2
+- name: xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2
   k-block: 2
   arch:
   - aarch64
@@ -22,7 +22,7 @@
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_unroll2
+- name: xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2
   k-block: 2
   arch:
   - aarch64
@@ -30,7 +30,7 @@
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_unroll2
+- name: xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2
   k-block: 2
   arch:
   - aarch64

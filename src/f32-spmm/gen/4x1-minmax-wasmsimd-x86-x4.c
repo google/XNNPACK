@@ -14,7 +14,7 @@
 #include <xnnpack/spmm.h>
 
 
-void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_unroll2(
+void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_x4(
     uint32_t batch_size,
     uint32_t output_channels,
     const float*restrict input,
@@ -40,10 +40,14 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_unroll2(
       v128_t vacc0123x0 = wasm_v32x4_load_splat(w);
       w += 1;
       v128_t vacc0123x1 = vzero;
-      for (; nnz >= 2; nnz -= 2) {
+      v128_t vacc0123x2 = vzero;
+      v128_t vacc0123x3 = vzero;
+      for (; nnz >= 4; nnz -= 4) {
         const intptr_t diff0 = dmap[0];
         const intptr_t diff1 = dmap[1];
-        dmap += 2;
+        const intptr_t diff2 = dmap[2];
+        const intptr_t diff3 = dmap[3];
+        dmap += 4;
         const v128_t vi0123x0 = wasm_v128_load(input);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff0);
         const v128_t vw0 = wasm_v32x4_load_splat(w);
@@ -54,9 +58,21 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_unroll2(
         const v128_t vw1 = wasm_v32x4_load_splat(w);
         w += 1;
         vacc0123x1 = wasm_f32x4_add(vacc0123x1, wasm_f32x4_mul(vi0123x1, vw1));
+        const v128_t vi0123x2 = wasm_v128_load(input);
+        input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff2);
+        const v128_t vw2 = wasm_v32x4_load_splat(w);
+        w += 1;
+        vacc0123x2 = wasm_f32x4_add(vacc0123x2, wasm_f32x4_mul(vi0123x2, vw2));
+        const v128_t vi0123x3 = wasm_v128_load(input);
+        input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff3);
+        const v128_t vw3 = wasm_v32x4_load_splat(w);
+        w += 1;
+        vacc0123x3 = wasm_f32x4_add(vacc0123x3, wasm_f32x4_mul(vi0123x3, vw3));
       }
       v128_t vacc0123 = vacc0123x0;
       vacc0123 = wasm_f32x4_add(vacc0123, vacc0123x1);
+      vacc0123 = wasm_f32x4_add(vacc0123, vacc0123x2);
+      vacc0123 = wasm_f32x4_add(vacc0123, vacc0123x3);
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;

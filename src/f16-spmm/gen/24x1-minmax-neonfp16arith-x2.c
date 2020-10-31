@@ -14,7 +14,7 @@
 #include <xnnpack/spmm.h>
 
 
-void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_unroll2(
+void xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2(
     uint32_t m,
     uint32_t n,
     const void*restrict input,
@@ -34,7 +34,7 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_unroll2(
   const float16x8_t vmin = vld1q_dup_f16((const __fp16*) &params->min);
 
   size_t i = m;
-  while XNN_LIKELY(i >= 32) {
+  while XNN_LIKELY(i >= 24) {
     const __fp16*restrict w = (const __fp16*) weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
@@ -47,8 +47,6 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_unroll2(
       float16x8_t vacc89ABCDEFx1 = vmovq_n_f16(0.0f);
       float16x8_t vaccGHIJKLMNx0 = vacc01234567x0;
       float16x8_t vaccGHIJKLMNx1 = vmovq_n_f16(0.0f);
-      float16x8_t vaccOPQRSTUVx0 = vacc01234567x0;
-      float16x8_t vaccOPQRSTUVx1 = vmovq_n_f16(0.0f);
       for (; nnz >= 2; nnz -= 2) {
         const intptr_t diff0 = dmap[0];
         const intptr_t diff1 = dmap[1];
@@ -56,69 +54,57 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_unroll2(
         const float16x8_t va01234567x0 = vld1q_f16(a);
         const float16x8_t va89ABCDEFx0 = vld1q_f16(a + 8);
         const float16x8_t vaGHIJKLMNx0 = vld1q_f16(a + 16);
-        const float16x8_t vaOPQRSTUVx0 = vld1q_f16(a + 24);
         a = (const __fp16*restrict) ((uintptr_t) a + (uintptr_t) diff0);
         const float16x8_t vb0 = vld1q_dup_f16(w); w += 1;
         vacc01234567x0 = vfmaq_f16(vacc01234567x0, va01234567x0, vb0);
         vacc89ABCDEFx0 = vfmaq_f16(vacc89ABCDEFx0, va89ABCDEFx0, vb0);
         vaccGHIJKLMNx0 = vfmaq_f16(vaccGHIJKLMNx0, vaGHIJKLMNx0, vb0);
-        vaccOPQRSTUVx0 = vfmaq_f16(vaccOPQRSTUVx0, vaOPQRSTUVx0, vb0);
         const float16x8_t va01234567x1 = vld1q_f16(a);
         const float16x8_t va89ABCDEFx1 = vld1q_f16(a + 8);
         const float16x8_t vaGHIJKLMNx1 = vld1q_f16(a + 16);
-        const float16x8_t vaOPQRSTUVx1 = vld1q_f16(a + 24);
         a = (const __fp16*restrict) ((uintptr_t) a + (uintptr_t) diff1);
         const float16x8_t vb1 = vld1q_dup_f16(w); w += 1;
         vacc01234567x1 = vfmaq_f16(vacc01234567x1, va01234567x1, vb1);
         vacc89ABCDEFx1 = vfmaq_f16(vacc89ABCDEFx1, va89ABCDEFx1, vb1);
         vaccGHIJKLMNx1 = vfmaq_f16(vaccGHIJKLMNx1, vaGHIJKLMNx1, vb1);
-        vaccOPQRSTUVx1 = vfmaq_f16(vaccOPQRSTUVx1, vaOPQRSTUVx1, vb1);
       }
       float16x8_t vacc01234567 = vacc01234567x0;
       float16x8_t vacc89ABCDEF = vacc89ABCDEFx0;
       float16x8_t vaccGHIJKLMN = vaccGHIJKLMNx0;
-      float16x8_t vaccOPQRSTUV = vaccOPQRSTUVx0;
       vacc01234567 = vaddq_f16(vacc01234567, vacc01234567x1);
       vacc89ABCDEF = vaddq_f16(vacc89ABCDEF, vacc89ABCDEFx1);
       vaccGHIJKLMN = vaddq_f16(vaccGHIJKLMN, vaccGHIJKLMNx1);
-      vaccOPQRSTUV = vaddq_f16(vaccOPQRSTUV, vaccOPQRSTUVx1);
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;
           const float16x8_t va01234567 = vld1q_f16(a);
           const float16x8_t va89ABCDEF = vld1q_f16(a + 8);
           const float16x8_t vaGHIJKLMN = vld1q_f16(a + 16);
-          const float16x8_t vaOPQRSTUV = vld1q_f16(a + 24);
           a = (const __fp16*restrict) ((uintptr_t) a + (uintptr_t) diff);
           const float16x8_t vb = vld1q_dup_f16(w); w += 1;
           vacc01234567 = vfmaq_f16(vacc01234567, va01234567, vb);
           vacc89ABCDEF = vfmaq_f16(vacc89ABCDEF, va89ABCDEF, vb);
           vaccGHIJKLMN = vfmaq_f16(vaccGHIJKLMN, vaGHIJKLMN, vb);
-          vaccOPQRSTUV = vfmaq_f16(vaccOPQRSTUV, vaOPQRSTUV, vb);
         } while (--nnz != 0);
       }
       float16x8_t vout01234567 = vmulq_f16(vacc01234567, vscale);
       float16x8_t vout89ABCDEF = vmulq_f16(vacc89ABCDEF, vscale);
       float16x8_t voutGHIJKLMN = vmulq_f16(vaccGHIJKLMN, vscale);
-      float16x8_t voutOPQRSTUV = vmulq_f16(vaccOPQRSTUV, vscale);
       vout01234567 = vminq_f16(vout01234567, vmax);
       vout89ABCDEF = vminq_f16(vout89ABCDEF, vmax);
       voutGHIJKLMN = vminq_f16(voutGHIJKLMN, vmax);
-      voutOPQRSTUV = vminq_f16(voutOPQRSTUV, vmax);
       vout01234567 = vmaxq_f16(vout01234567, vmin);
       vout89ABCDEF = vmaxq_f16(vout89ABCDEF, vmin);
       voutGHIJKLMN = vmaxq_f16(voutGHIJKLMN, vmin);
-      voutOPQRSTUV = vmaxq_f16(voutOPQRSTUV, vmin);
       vst1q_f16(c, vout01234567);
       vst1q_f16(c + 8, vout89ABCDEF);
       vst1q_f16(c + 16, voutGHIJKLMN);
-      vst1q_f16(c + 24, voutOPQRSTUV);
       c += m;
     } while (--j != 0);
     c -= m * n;
-    c += 32;
-    a += 32;
-    i -= 32;
+    c += 24;
+    a += 24;
+    i -= 24;
   }
   if XNN_UNLIKELY(i != 0) {
     if (i & 16) {

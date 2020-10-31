@@ -17,8 +17,8 @@ extern "C" {
       float* y,                                      \
       float c);
 
-DECLARE_F32_VSCALE_UKERNEL_FUNCTION(xnn_f32_vscale_ukernel__avx_unroll32)
-DECLARE_F32_VSCALE_UKERNEL_FUNCTION(xnn_f32_vscale_ukernel__avx512f_unroll64)
+DECLARE_F32_VSCALE_UKERNEL_FUNCTION(xnn_f32_vscale_ukernel__avx_x32)
+DECLARE_F32_VSCALE_UKERNEL_FUNCTION(xnn_f32_vscale_ukernel__avx512f_x64)
 
 
 #ifdef __cplusplus

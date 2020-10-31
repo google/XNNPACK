@@ -14,7 +14,7 @@
 #include <xnnpack/spmm.h>
 
 
-void xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_unroll2(
+void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2(
     uint32_t m,
     uint32_t n,
     const void*restrict input,
@@ -34,7 +34,7 @@ void xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_unroll2(
   const float16x8_t vmin = vld1q_dup_f16((const __fp16*) &params->min);
 
   size_t i = m;
-  while XNN_LIKELY(i >= 16) {
+  while XNN_LIKELY(i >= 8) {
     const __fp16*restrict w = (const __fp16*) weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
@@ -43,82 +43,42 @@ void xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_unroll2(
       uint32_t nnz = *nnzmap++;
       float16x8_t vacc01234567x0 = vld1q_dup_f16(w); w += 1;
       float16x8_t vacc01234567x1 = vmovq_n_f16(0.0f);
-      float16x8_t vacc89ABCDEFx0 = vacc01234567x0;
-      float16x8_t vacc89ABCDEFx1 = vmovq_n_f16(0.0f);
       for (; nnz >= 2; nnz -= 2) {
         const intptr_t diff0 = dmap[0];
         const intptr_t diff1 = dmap[1];
         dmap += 2;
         const float16x8_t va01234567x0 = vld1q_f16(a);
-        const float16x8_t va89ABCDEFx0 = vld1q_f16(a + 8);
         a = (const __fp16*restrict) ((uintptr_t) a + (uintptr_t) diff0);
         const float16x8_t vb0 = vld1q_dup_f16(w); w += 1;
         vacc01234567x0 = vfmaq_f16(vacc01234567x0, va01234567x0, vb0);
-        vacc89ABCDEFx0 = vfmaq_f16(vacc89ABCDEFx0, va89ABCDEFx0, vb0);
         const float16x8_t va01234567x1 = vld1q_f16(a);
-        const float16x8_t va89ABCDEFx1 = vld1q_f16(a + 8);
         a = (const __fp16*restrict) ((uintptr_t) a + (uintptr_t) diff1);
         const float16x8_t vb1 = vld1q_dup_f16(w); w += 1;
         vacc01234567x1 = vfmaq_f16(vacc01234567x1, va01234567x1, vb1);
-        vacc89ABCDEFx1 = vfmaq_f16(vacc89ABCDEFx1, va89ABCDEFx1, vb1);
       }
       float16x8_t vacc01234567 = vacc01234567x0;
-      float16x8_t vacc89ABCDEF = vacc89ABCDEFx0;
       vacc01234567 = vaddq_f16(vacc01234567, vacc01234567x1);
-      vacc89ABCDEF = vaddq_f16(vacc89ABCDEF, vacc89ABCDEFx1);
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;
           const float16x8_t va01234567 = vld1q_f16(a);
-          const float16x8_t va89ABCDEF = vld1q_f16(a + 8);
           a = (const __fp16*restrict) ((uintptr_t) a + (uintptr_t) diff);
           const float16x8_t vb = vld1q_dup_f16(w); w += 1;
           vacc01234567 = vfmaq_f16(vacc01234567, va01234567, vb);
-          vacc89ABCDEF = vfmaq_f16(vacc89ABCDEF, va89ABCDEF, vb);
         } while (--nnz != 0);
       }
       float16x8_t vout01234567 = vmulq_f16(vacc01234567, vscale);
-      float16x8_t vout89ABCDEF = vmulq_f16(vacc89ABCDEF, vscale);
       vout01234567 = vminq_f16(vout01234567, vmax);
-      vout89ABCDEF = vminq_f16(vout89ABCDEF, vmax);
       vout01234567 = vmaxq_f16(vout01234567, vmin);
-      vout89ABCDEF = vmaxq_f16(vout89ABCDEF, vmin);
       vst1q_f16(c, vout01234567);
-      vst1q_f16(c + 8, vout89ABCDEF);
       c += m;
     } while (--j != 0);
     c -= m * n;
-    c += 16;
-    a += 16;
-    i -= 16;
+    c += 8;
+    a += 8;
+    i -= 8;
   }
   if XNN_UNLIKELY(i != 0) {
-    if (i & 8) {
-      const __fp16*restrict w = (const __fp16*) weights;
-      const int32_t* dmap = widx_dmap;
-      const uint32_t* nnzmap = nidx_nnzmap;
-      size_t j = n;
-      do {
-        uint32_t nnz = *nnzmap++;
-        float16x8_t vacc01234567 = vld1q_dup_f16(w); w += 1;
-        if XNN_LIKELY(nnz != 0) {
-          do {
-            const intptr_t diff = *dmap++;
-            const float16x8_t va01234567 = vld1q_f16(a);
-            a = (const __fp16*restrict) ((uintptr_t) a + (uintptr_t) diff);
-            const float16x8_t vb = vld1q_dup_f16(w); w += 1;
-            vacc01234567 = vfmaq_f16(vacc01234567, va01234567, vb);
-          } while (--nnz != 0);
-        }
-        float16x8_t vout01234567 = vminq_f16(vacc01234567, vmax);
-        vout01234567 = vmaxq_f16(vout01234567, vmin);
-        vst1q_f16(c, vout01234567);
-        c += m;
-      } while (--j != 0);
-      c -= m * n;
-      c += 8;
-      a += 8;
-    }
     if (i & 4) {
       const __fp16*restrict w = (const __fp16*) weights;
       const int32_t* dmap = widx_dmap;

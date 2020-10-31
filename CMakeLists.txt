@@ -172,8 +172,8 @@ SET(XNNPACK_OPERATOR_SRCS
   src/operators/leaky-relu-nc.c
   src/operators/max-pooling-nhwc.c
   src/operators/prelu-nc.c
-  src/operators/resize-bilinear-nhwc.c
   src/operators/resize-bilinear-nchw.c
+  src/operators/resize-bilinear-nhwc.c
   src/operators/sigmoid-nc.c
   src/operators/softmax-nc.c
   src/operators/unary-elementwise-nc.c
@@ -714,8 +714,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neon-2x4-acc2.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neon-2x4-acc3.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neon-2x4.c
-  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neon-3x4.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neon-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neon-3x4.c
   src/f32-gavgpool-cw/neon-x4.c
   src/f32-gavgpool/7p7x-minmax-neon-c4.c
   src/f32-gavgpool/7x-minmax-neon-c4.c
@@ -1188,8 +1188,8 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neonfma-2x4-acc2.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neonfma-2x4-acc3.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neonfma-2x4.c
-  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neonfma-3x4.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neonfma-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neonfma-3x4.c
   src/f32-gemm/gen-inc/1x8inc-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen-inc/4x8inc-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen-inc/4x8inc-minmax-neonfma-lane-ld128.c
@@ -1229,12 +1229,12 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/neonfma-rr1-p5-div-x20.c
   src/f32-sigmoid/gen/neonfma-rr1-p5-div-x24.c
   src/f32-spmm/gen/4x1-minmax-neonfma-pipelined.c
-  src/f32-spmm/gen/4x1-minmax-neonfma-unroll2.c
+  src/f32-spmm/gen/4x1-minmax-neonfma-x2.c
   src/f32-spmm/gen/4x1-minmax-neonfma.c
   src/f32-spmm/gen/4x2-minmax-neonfma.c
   src/f32-spmm/gen/4x4-minmax-neonfma.c
   src/f32-spmm/gen/8x1-minmax-neonfma-pipelined.c
-  src/f32-spmm/gen/8x1-minmax-neonfma-unroll2.c
+  src/f32-spmm/gen/8x1-minmax-neonfma-x2.c
   src/f32-spmm/gen/8x1-minmax-neonfma.c
   src/f32-spmm/gen/8x2-minmax-neonfma.c
   src/f32-spmm/gen/8x4-minmax-neonfma.c
@@ -1242,12 +1242,12 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-spmm/gen/12x2-minmax-neonfma.c
   src/f32-spmm/gen/12x4-minmax-neonfma.c
   src/f32-spmm/gen/16x1-minmax-neonfma-pipelined.c
-  src/f32-spmm/gen/16x1-minmax-neonfma-unroll2.c
+  src/f32-spmm/gen/16x1-minmax-neonfma-x2.c
   src/f32-spmm/gen/16x1-minmax-neonfma.c
   src/f32-spmm/gen/16x2-minmax-neonfma.c
   src/f32-spmm/gen/16x4-minmax-neonfma.c
   src/f32-spmm/gen/32x1-minmax-neonfma-pipelined.c
-  src/f32-spmm/gen/32x1-minmax-neonfma-unroll2.c
+  src/f32-spmm/gen/32x1-minmax-neonfma-x2.c
   src/f32-spmm/gen/32x1-minmax-neonfma.c
   src/f32-spmm/gen/32x2-minmax-neonfma.c
   src/f32-spmm/gen/32x4-minmax-neonfma.c
@@ -1313,13 +1313,13 @@ SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-prelu/gen/neonfp16arith-2x16.c
   src/f16-relu/gen/neonfp16arith-x8.c
   src/f16-relu/gen/neonfp16arith-x16.c
-  src/f16-spmm/gen/8x1-minmax-neonfp16arith-unroll2.c
+  src/f16-spmm/gen/8x1-minmax-neonfp16arith-x2.c
   src/f16-spmm/gen/8x1-minmax-neonfp16arith.c
-  src/f16-spmm/gen/16x1-minmax-neonfp16arith-unroll2.c
+  src/f16-spmm/gen/16x1-minmax-neonfp16arith-x2.c
   src/f16-spmm/gen/16x1-minmax-neonfp16arith.c
-  src/f16-spmm/gen/24x1-minmax-neonfp16arith-unroll2.c
+  src/f16-spmm/gen/24x1-minmax-neonfp16arith-x2.c
   src/f16-spmm/gen/24x1-minmax-neonfp16arith.c
-  src/f16-spmm/gen/32x1-minmax-neonfp16arith-unroll2.c
+  src/f16-spmm/gen/32x1-minmax-neonfp16arith-x2.c
   src/f16-spmm/gen/32x1-minmax-neonfp16arith.c
   src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x16.c
@@ -1894,7 +1894,7 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-avx-x16.c
   src/f32-vrnd/gen/vrndz-avx-x8.c
   src/f32-vrnd/gen/vrndz-avx-x16.c
-  src/f32-vscale/avx-unroll32.c
+  src/f32-vscale/avx-x32.c
   src/f32-vsqrt/gen/avx-sqrt-x8.c
   src/f32-vsqrt/gen/avx-sqrt-x16.c
   src/f32-vunary/gen/vabs-avx-x8.c
@@ -2315,7 +2315,7 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-avx512f-x32.c
   src/f32-vrnd/gen/vrndz-avx512f-x16.c
   src/f32-vrnd/gen/vrndz-avx512f-x32.c
-  src/f32-vscale/avx512f-unroll64.c
+  src/f32-vscale/avx512f-x64.c
   src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x16.c
   src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x32.c
   src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x48.c

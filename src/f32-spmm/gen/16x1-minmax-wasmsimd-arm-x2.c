@@ -14,7 +14,7 @@
 #include <xnnpack/spmm.h>
 
 
-void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_unroll2(
+void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_x2(
     uint32_t batch_size,
     uint32_t output_channels,
     const float*restrict input,

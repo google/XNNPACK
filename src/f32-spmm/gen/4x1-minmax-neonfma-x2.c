@@ -14,7 +14,7 @@
 #include <xnnpack/spmm.h>
 
 
-void xnn_f32_spmm_minmax_ukernel_8x1__neonfma_unroll2(
+void xnn_f32_spmm_minmax_ukernel_4x1__neonfma_x2(
     uint32_t batch_size,
     uint32_t output_channels,
     const float*restrict input,
@@ -29,7 +29,7 @@ void xnn_f32_spmm_minmax_ukernel_8x1__neonfma_unroll2(
   const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
   const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
   size_t n = batch_size;
-  while XNN_LIKELY(n >= 8) {
+  while XNN_LIKELY(n >= 4) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
@@ -38,80 +38,41 @@ void xnn_f32_spmm_minmax_ukernel_8x1__neonfma_unroll2(
       uint32_t nnz = *nnzmap++;
       float32x4_t vacc0123x0 = vld1q_dup_f32(w); w += 1;
       float32x4_t vacc0123x1 = vmovq_n_f32(0.0f);
-      float32x4_t vacc4567x0 = vacc0123x0;
-      float32x4_t vacc4567x1 = vmovq_n_f32(0.0f);
       for (; nnz >= 2; nnz -= 2) {
         const intptr_t diff0 = dmap[0];
         const intptr_t diff1 = dmap[1];
         dmap += 2;
         const float32x4_t vi0123x0 = vld1q_f32(input);
-        const float32x4_t vi4567x0 = vld1q_f32(input + 4);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff0);
         const float32x4_t vw0 = vld1q_dup_f32(w); w += 1;
         vacc0123x0 = vfmaq_f32(vacc0123x0, vi0123x0, vw0);
-        vacc4567x0 = vfmaq_f32(vacc4567x0, vi4567x0, vw0);
         const float32x4_t vi0123x1 = vld1q_f32(input);
-        const float32x4_t vi4567x1 = vld1q_f32(input + 4);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff1);
         const float32x4_t vw1 = vld1q_dup_f32(w); w += 1;
         vacc0123x1 = vfmaq_f32(vacc0123x1, vi0123x1, vw1);
-        vacc4567x1 = vfmaq_f32(vacc4567x1, vi4567x1, vw1);
       }
       float32x4_t vacc0123 = vacc0123x0;
-      float32x4_t vacc4567 = vacc4567x0;
       vacc0123 = vaddq_f32(vacc0123, vacc0123x1);
-      vacc4567 = vaddq_f32(vacc4567, vacc4567x1);
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;
           const float32x4_t vi0123 = vld1q_f32(input);
-          const float32x4_t vi4567 = vld1q_f32(input + 4);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
           const float32x4_t vw = vld1q_dup_f32(w); w += 1;
           vacc0123 = vfmaq_f32(vacc0123, vi0123, vw);
-          vacc4567 = vfmaq_f32(vacc4567, vi4567, vw);
         } while (--nnz != 0);
       }
       float32x4_t vout0123 = vminq_f32(vacc0123, vmax);
-      float32x4_t vout4567 = vminq_f32(vacc4567, vmax);
       vout0123 = vmaxq_f32(vout0123, vmin);
-      vout4567 = vmaxq_f32(vout4567, vmin);
       vst1q_f32(output, vout0123);
-      vst1q_f32(output + 4, vout4567);
       output += batch_size;
     } while (--c != 0);
     output -= batch_size * output_channels;
-    output += 8;
-    input += 8;
-    n -= 8;
+    output += 4;
+    input += 4;
+    n -= 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    if (n & 4) {
-      const float*restrict w = weights;
-      const int32_t* dmap = widx_dmap;
-      const uint32_t* nnzmap = nidx_nnzmap;
-      size_t c = output_channels;
-      do {
-        uint32_t nnz = *nnzmap++;
-        float32x4_t vacc0123 = vld1q_dup_f32(w); w += 1;
-        if XNN_LIKELY(nnz != 0) {
-          do {
-            const intptr_t diff = *dmap++;
-            const float32x4_t vi0123 = vld1q_f32(input);
-            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            const float32x4_t vw = vld1q_dup_f32(w); w += 1;
-            vacc0123 = vfmaq_f32(vacc0123, vi0123, vw);
-          } while (--nnz != 0);
-        }
-        float32x4_t vout0123 = vminq_f32(vacc0123, vmax);
-        vout0123 = vmaxq_f32(vout0123, vmin);
-        vst1q_f32(output, vout0123);
-        output += batch_size;
-      } while (--c != 0);
-      output -= batch_size * output_channels;
-      output += 4;
-      input += 4;
-    }
     if (n & 2) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;

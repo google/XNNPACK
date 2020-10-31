@@ -12,7 +12,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/spmm.h>
 
 
-void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_unroll" + str(UNROLL) if UNROLL > 1 else ""}(
+void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
     uint32_t m,
     uint32_t n,
     const void*restrict input,
