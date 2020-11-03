@@ -85,5 +85,25 @@ tools/xngen src/f32-spmm/wasmsimd.c.in -D MR=8  -D NR=1 -D X86=1 -D UNROLL=4 -o 
 tools/xngen src/f32-spmm/wasmsimd.c.in -D MR=16 -D NR=1 -D X86=1 -D UNROLL=4 -o src/f32-spmm/gen/16x1-minmax-wasmsimd-x86-x4.c
 tools/xngen src/f32-spmm/wasmsimd.c.in -D MR=32 -D NR=1 -D X86=1 -D UNROLL=4 -o src/f32-spmm/gen/32x1-minmax-wasmsimd-x86-x4.c
 
+### Microkernels with software pipelining
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=4  -D NR=1 -D X86=0 -D UNROLL=1 -o src/f32-spmm/gen/4x1-minmax-wasmsimd-arm-pipelined.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=8  -D NR=1 -D X86=0 -D UNROLL=1 -o src/f32-spmm/gen/8x1-minmax-wasmsimd-arm-pipelined.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=16 -D NR=1 -D X86=0 -D UNROLL=1 -o src/f32-spmm/gen/16x1-minmax-wasmsimd-arm-pipelined.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=32 -D NR=1 -D X86=0 -D UNROLL=1 -o src/f32-spmm/gen/32x1-minmax-wasmsimd-arm-pipelined.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=4  -D NR=1 -D X86=1 -D UNROLL=1 -o src/f32-spmm/gen/4x1-minmax-wasmsimd-x86-pipelined.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=8  -D NR=1 -D X86=1 -D UNROLL=1 -o src/f32-spmm/gen/8x1-minmax-wasmsimd-x86-pipelined.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=16 -D NR=1 -D X86=1 -D UNROLL=1 -o src/f32-spmm/gen/16x1-minmax-wasmsimd-x86-pipelined.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=32 -D NR=1 -D X86=1 -D UNROLL=1 -o src/f32-spmm/gen/32x1-minmax-wasmsimd-x86-pipelined.c
+
+### Microkernels with software pipelining and 2X unrolling
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=4  -D NR=1 -D X86=0 -D UNROLL=2 -o src/f32-spmm/gen/4x1-minmax-wasmsimd-arm-pipelined-x2.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=8  -D NR=1 -D X86=0 -D UNROLL=2 -o src/f32-spmm/gen/8x1-minmax-wasmsimd-arm-pipelined-x2.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=16 -D NR=1 -D X86=0 -D UNROLL=2 -o src/f32-spmm/gen/16x1-minmax-wasmsimd-arm-pipelined-x2.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=32 -D NR=1 -D X86=0 -D UNROLL=2 -o src/f32-spmm/gen/32x1-minmax-wasmsimd-arm-pipelined-x2.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=4  -D NR=1 -D X86=1 -D UNROLL=2 -o src/f32-spmm/gen/4x1-minmax-wasmsimd-x86-pipelined-x2.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=8  -D NR=1 -D X86=1 -D UNROLL=2 -o src/f32-spmm/gen/8x1-minmax-wasmsimd-x86-pipelined-x2.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=16 -D NR=1 -D X86=1 -D UNROLL=2 -o src/f32-spmm/gen/16x1-minmax-wasmsimd-x86-pipelined-x2.c
+tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=32 -D NR=1 -D X86=1 -D UNROLL=2 -o src/f32-spmm/gen/32x1-minmax-wasmsimd-x86-pipelined-x2.c
+
 ################################## Unit tests #################################
 tools/generate-spmm-test.py --spec test/f32-spmm-minmax.yaml --output test/f32-spmm-minmax.cc
