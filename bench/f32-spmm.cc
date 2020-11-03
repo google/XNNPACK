@@ -447,6 +447,69 @@ BENCHMARK_GEMM(spmm80_8x1__scalar_pipelined)
   static void spmm80_16x1__wasmsimd_x86_x4(benchmark::State& state, const char* net) {
     SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_x4, 16, 1, 0.8f);
   }
+  static void spmm80_4x1__wasmsimd_arm_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_pipelined, 4, 1, 0.8f);
+  }
+
+  static void spmm80_8x1__wasmsimd_arm_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_pipelined, 8, 1, 0.8f);
+  }
+
+  static void spmm80_16x1__wasmsimd_arm_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_pipelined, 16, 1, 0.8f);
+  }
+
+  static void spmm80_32x1__wasmsimd_arm_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm_pipelined, 32, 1, 0.8f);
+  }
+
+  static void spmm80_4x1__wasmsimd_x86_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_pipelined, 4, 1, 0.8f);
+  }
+
+  static void spmm80_8x1__wasmsimd_x86_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86_pipelined, 8, 1, 0.8f);
+  }
+
+  static void spmm80_16x1__wasmsimd_x86_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined, 16, 1, 0.8f);
+  }
+
+  static void spmm80_32x1__wasmsimd_x86_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_pipelined, 32, 1, 0.8f);
+  }
+
+  static void spmm80_32x1__wasmsimd_arm_pipelined_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm_pipelined_x2, 32, 1, 0.8f);
+  }
+
+  static void spmm80_4x1__wasmsimd_arm_pipelined_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_pipelined_x2, 4, 1, 0.8f);
+  }
+
+  static void spmm80_8x1__wasmsimd_arm_pipelined_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_pipelined_x2, 8, 1, 0.8f);
+  }
+
+  static void spmm80_16x1__wasmsimd_arm_pipelined_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_pipelined_x2, 16, 1, 0.8f);
+  }
+
+  static void spmm80_32x1__wasmsimd_x86_pipelined_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_pipelined_x2, 32, 1, 0.8f);
+  }
+
+  static void spmm80_4x1__wasmsimd_x86_pipelined_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_pipelined_x2, 4, 1, 0.8f);
+  }
+
+  static void spmm80_8x1__wasmsimd_x86_pipelined_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86_pipelined_x2, 8, 1, 0.8f);
+  }
+
+  static void spmm80_16x1__wasmsimd_x86_pipelined_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined_x2, 16, 1, 0.8f);
+  }
 
   BENCHMARK_GEMM(spmm80_4x1__wasmsimd_arm)
   BENCHMARK_GEMM(spmm80_4x1__wasmsimd_arm_x2)
@@ -472,6 +535,23 @@ BENCHMARK_GEMM(spmm80_8x1__scalar_pipelined)
   BENCHMARK_GEMM(spmm80_32x1__wasmsimd_x86)
   BENCHMARK_GEMM(spmm80_32x1__wasmsimd_x86_x2)
   BENCHMARK_GEMM(spmm80_32x1__wasmsimd_x86_x4)
+  BENCHMARK_GEMM(spmm80_4x1__wasmsimd_arm_pipelined)
+  BENCHMARK_GEMM(spmm80_4x1__wasmsimd_arm_pipelined_x2)
+  BENCHMARK_GEMM(spmm80_4x1__wasmsimd_x86_pipelined)
+  BENCHMARK_GEMM(spmm80_4x1__wasmsimd_x86_pipelined_x2)
+  BENCHMARK_GEMM(spmm80_8x1__wasmsimd_arm_pipelined)
+  BENCHMARK_GEMM(spmm80_8x1__wasmsimd_arm_pipelined_x2)
+  BENCHMARK_GEMM(spmm80_8x1__wasmsimd_x86_pipelined)
+  BENCHMARK_GEMM(spmm80_8x1__wasmsimd_x86_pipelined_x2)
+  BENCHMARK_GEMM(spmm80_16x1__wasmsimd_arm_pipelined)
+  BENCHMARK_GEMM(spmm80_16x1__wasmsimd_arm_pipelined_x2)
+  BENCHMARK_GEMM(spmm80_16x1__wasmsimd_x86_pipelined)
+  BENCHMARK_GEMM(spmm80_16x1__wasmsimd_x86_pipelined_x2)
+  BENCHMARK_GEMM(spmm80_32x1__wasmsimd_arm_pipelined)
+  BENCHMARK_GEMM(spmm80_32x1__wasmsimd_arm_pipelined_x2)
+  BENCHMARK_GEMM(spmm80_32x1__wasmsimd_x86_pipelined)
+  BENCHMARK_GEMM(spmm80_32x1__wasmsimd_x86_pipelined_x2)
+
 #endif  // XNN_ARCH_WASMSIMD
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
