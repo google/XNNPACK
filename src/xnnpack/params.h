@@ -910,6 +910,30 @@ typedef void (*xnn_x32_fill_ukernel_function)(
     size_t output_stride,
     const uint32_t* fill_value);
 
+typedef void (*xnn_depth_to_space_chw2hwc_ukernel_function)(
+    size_t output_channels,
+    size_t input_height,
+    size_t input_width,
+    size_t block_size,
+    const void* input,
+    void* output,
+    size_t input_channel_stride,
+    size_t input_height_stride,
+    size_t output_height_stride,
+    size_t output_width_stride);
+
+typedef void (*xnn_x32_depth_to_space_chw2hwc_ukernel_function)(
+    size_t output_channels,
+    size_t input_height,
+    size_t input_width,
+    size_t block_size,
+    const uint32_t* input,
+    uint32_t* output,
+    size_t input_channel_stride,
+    size_t input_height_stride,
+    size_t output_height_stride,
+    size_t output_width_stride);
+
 typedef void (*xnn_pad_ukernel_function)(
     size_t rows,
     size_t channels,

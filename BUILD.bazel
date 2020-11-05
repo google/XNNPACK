@@ -498,6 +498,7 @@ SCALAR_UKERNELS = [
     "src/x8-zip/x3-scalar.c",
     "src/x8-zip/x4-scalar.c",
     "src/x8-zip/xm-scalar.c",
+    "src/x32-depth-to-space-chw2hwc/scalar.c",
     "src/x32-fill/scalar-float.c",
     "src/x32-fill/scalar-int.c",
     "src/x32-packx/x2-scalar.c",
@@ -3077,6 +3078,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/clamp.h",
     "src/xnnpack/common.h",
     "src/xnnpack/conv.h",
+    "src/xnnpack/depthtospace.h",
     "src/xnnpack/dwconv.h",
     "src/xnnpack/fill.h",
     "src/xnnpack/gavgpool.h",
@@ -6308,6 +6310,15 @@ xnnpack_unit_test(
     srcs = [
         "test/u8-rmax.cc",
         "test/rmax-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "x32_depth_to_space_chw2hwc_test",
+    srcs = [
+        "test/x32-depth-to-space-chw2hwc.cc",
+        "test/depth-to-space-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

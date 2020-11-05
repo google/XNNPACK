@@ -629,6 +629,7 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x32-pad/scalar-float.c
   src/x32-pad/scalar-int.c
   src/x32-unpool/scalar.c
+  src/x32-depth-to-space-chw2hwc/scalar.c
   src/x32-zip/x2-scalar.c
   src/x32-zip/x3-scalar.c
   src/x32-zip/x4-scalar.c
@@ -4257,6 +4258,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(x32-unpool-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(x32-unpool-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(x32-unpool-test x32-unpool-test)
+
+  ADD_EXECUTABLE(x32-depth-to-space-chw2hwc-test test/x32-depth-to-space-chw2hwc.cc)
+  SET_TARGET_PROPERTIES(x32-depth-to-space-chw2hwc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x32-depth-to-space-chw2hwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(x32-depth-to-space-chw2hwc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(x32-depth-to-space-chw2hwc-test x32-depth-to-space-chw2hwc-test)
 
   ADD_EXECUTABLE(x32-zip-test test/x32-zip.cc)
   SET_TARGET_PROPERTIES(x32-zip-test PROPERTIES
