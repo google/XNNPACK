@@ -29,6 +29,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/conv.h>
 #include <xnnpack/dwconv.h>
+#include <xnnpack/depthtospace.h>
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/fill.h>
@@ -433,6 +434,13 @@ static void init(void) {
         .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__neon,
         .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__neon,
       };
+      #ifndef XNN_NO_NCHW_OPERATORS
+        xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
+          .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+          .channel_tile = 1,
+          .pixel_tile = 1,
+        };
+      #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_X32_OPERATORS
   } else if (!XNN_PLATFORM_MOBILE) {
     /*************************** QU8 micro-kernels ***************************/
@@ -714,6 +722,13 @@ static void init(void) {
         .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__scalar,
         .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__scalar,
       };
+      #ifndef XNN_NO_NCHW_OPERATORS
+        xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
+          .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+          .channel_tile = 1,
+          .pixel_tile = 1,
+        };
+      #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_X32_OPERATORS
   }
 
@@ -1337,6 +1352,13 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__neon,
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__neon,
     };
+    #ifndef XNN_NO_NCHW_OPERATORS
+      xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
+        .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+        .channel_tile = 1,
+        .pixel_tile = 1,
+      };
+    #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1972,6 +1994,13 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__sse2,
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__sse2,
     };
+    #ifndef XNN_NO_NCHW_OPERATORS
+      xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
+        .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+        .channel_tile = 1,
+        .pixel_tile = 1,
+      };
+    #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASMSIMD
@@ -2440,6 +2469,13 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__wasmsimd,
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__wasmsimd,
     };
+    #ifndef XNN_NO_NCHW_OPERATORS
+      xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
+        .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+        .channel_tile = 1,
+        .pixel_tile = 1,
+      };
+    #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASM
@@ -2755,6 +2791,13 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__scalar,
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__scalar,
     };
+    #ifndef XNN_NO_NCHW_OPERATORS
+      xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
+        .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+        .channel_tile = 1,
+        .pixel_tile = 1,
+      };
+    #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
 #else

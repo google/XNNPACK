@@ -207,6 +207,7 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
           return 0;
       }
     case xnn_node_type_global_average_pooling_2d:
+    case xnn_node_type_depth_to_space:
       return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
     case xnn_node_type_add2:
     case xnn_node_type_multiply2:

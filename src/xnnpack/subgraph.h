@@ -89,6 +89,7 @@ enum xnn_node_type {
   xnn_node_type_convolution_2d,
   xnn_node_type_deconvolution_2d,
   xnn_node_type_depthwise_convolution_2d,
+  xnn_node_type_depth_to_space,
   xnn_node_type_divide,
   xnn_node_type_fully_connected,
   xnn_node_type_floor,
@@ -164,6 +165,9 @@ struct xnn_node {
       uint32_t depth_multiplier;
       size_t input_channels;
     } depthwise_convolution_2d;
+    struct {
+      uint32_t block_size;
+    } depth_to_space;
     struct {
       uint32_t padding_top;
       uint32_t padding_right;

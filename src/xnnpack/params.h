@@ -1853,6 +1853,16 @@ struct dwconv_parameters {
   uint8_t incremental_tile;
 };
 
+struct depth_to_space_chw2hwc_parameters {
+  xnn_depth_to_space_chw2hwc_ukernel_function ukernel;
+  // Number of output pixels in a tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
+  uint8_t pixel_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint8_t channel_tile;
+};
+
 struct gavgpool_parameters {
   xnn_gavgpool_unipass_ukernel_function up;
   xnn_gavgpool_multipass_ukernel_function mp;
@@ -2065,6 +2075,8 @@ struct xnn_parameters {
     struct fill_parameters fill;
     xnn_unpool_ukernel_function unpool;
     struct zip_parameters zip;
+    // Depth to space in CHW to HWC layout.
+    struct depth_to_space_chw2hwc_parameters depth_to_space_chw2hwc;
   } x32;
 };
 
