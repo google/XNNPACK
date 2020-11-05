@@ -631,7 +631,12 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x32-pad/scalar-float.c
   src/x32-pad/scalar-int.c
   src/x32-unpool/scalar.c
-  src/x32-depth-to-space-chw2hwc/scalar.c
+  src/x32-depth-to-space-chw2hwc/scalar-c1.c
+  src/x32-depth-to-space-chw2hwc/scalar-c2.c
+  src/x32-depth-to-space-chw2hwc/scalar-c4.c
+  src/x32-depth-to-space-chw2hwc/scalar-c1-ib2.c
+  src/x32-depth-to-space-chw2hwc/scalar-c2-ib2.c
+  src/x32-depth-to-space-chw2hwc/scalar-c4-ib2.c
   src/x32-zip/x2-scalar.c
   src/x32-zip/x3-scalar.c
   src/x32-zip/x4-scalar.c
@@ -4261,7 +4266,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(x32-unpool-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(x32-unpool-test x32-unpool-test)
 
-  ADD_EXECUTABLE(x32-depth-to-space-chw2hwc-test test/x32-depth-to-space-chw2hwc.cc)
+  ADD_EXECUTABLE(x32-depth-to-space-chw2hwc-test test/x32-depthtospace-chw2hwc.cc)
   SET_TARGET_PROPERTIES(x32-depth-to-space-chw2hwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
