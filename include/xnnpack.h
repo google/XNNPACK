@@ -360,6 +360,24 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a DepthToSpace Node and add it to a Subgraph.
+///
+/// The DepthToSpace Node rearranges data from depth into blocks of spatial data (a reverse transform for SpaceToDepth).
+/// For a given input pixel, an output square of pixels with side @a block_size is formed from values in the corresponding
+/// number of its channels. The output depth is therefore @a block_size x @a block_size times smaller than that of the input.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the input tensor. The input tensor must be divisible by @a block_size in the channel dimension.
+/// @param output_id - Value ID for the output tensor.
+/// @param block_size - the size of the spatial block.
+/// @param flags - binary features of the DepthToSpace Node. No supported flags are currently defined.
+enum xnn_status xnn_define_depth_to_space(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t block_size,
+  uint32_t flags);
+
 /// Define a 2D Global Average Pooling Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -1247,6 +1265,25 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_f32(
   size_t input_width,
   uint32_t adjustment_height,
   uint32_t adjustment_width,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_depth_to_space_chw2hwc_x32(
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
+  uint32_t block_size,
+  uint32_t flags,
+  xnn_operator_t* depth_to_space_op_out);
+
+enum xnn_status xnn_setup_depth_to_space_chw2hwc_x32(
+  xnn_operator_t depth_to_space_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  size_t output_height,
+  size_t output_width,
   const float* input,
   float* output,
   pthreadpool_t threadpool);

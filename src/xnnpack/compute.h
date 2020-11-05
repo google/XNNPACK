@@ -430,6 +430,29 @@ struct dwconv2d_context {
       size_t channel);
 #endif
 
+struct depth_to_space_chw2hwc_context {
+  size_t output_channels;
+  size_t input_height;
+  size_t input_width;
+  uint32_t block_size;
+  const void* input;
+  void* output;
+  size_t input_batch_stride;
+  size_t output_batch_stride;
+  size_t input_channel_stride;
+  size_t input_height_stride;
+  size_t output_height_stride;
+  size_t output_width_stride;
+  // Pointer to DEPTH_TO_SPACE micro-kernel function.
+  xnn_depth_to_space_chw2hwc_ukernel_function ukernel;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_depth_to_space_chw2hwc(
+      const struct depth_to_space_chw2hwc_context* context,
+      size_t batch_index);
+#endif
+
 struct max_pooling_context {
   const void** indirect_input;
   size_t indirect_input_height_stride;

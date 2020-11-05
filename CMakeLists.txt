@@ -166,6 +166,7 @@ SET(XNNPACK_OPERATOR_SRCS
   src/operators/convolution-nchw.c
   src/operators/convolution-nhwc.c
   src/operators/deconvolution-nhwc.c
+  src/operators/depth-to-space-chw2hwc.c
   src/operators/fully-connected-nc.c
   src/operators/global-average-pooling-ncw.c
   src/operators/global-average-pooling-nwc.c
@@ -190,6 +191,7 @@ SET(XNNPACK_SUBGRAPH_SRCS
   src/subgraph/convolution-2d.c
   src/subgraph/deconvolution-2d.c
   src/subgraph/depthwise-convolution-2d.c
+  src/subgraph/depth-to-space.c
   src/subgraph/divide.c
   src/subgraph/floor.c
   src/subgraph/fully-connected.c

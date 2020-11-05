@@ -26,6 +26,7 @@ enum xnn_ukernel_type {
   xnn_ukernel_type_channel_shuffle,
   xnn_ukernel_type_conv2d_hwc2chw,
   xnn_ukernel_type_dwconv,
+  xnn_ukernel_type_depth_to_space_chw2hwc,
   xnn_ukernel_type_gemm,
   xnn_ukernel_type_global_average_pooling,
   xnn_ukernel_type_igemm,
@@ -66,6 +67,7 @@ enum xnn_operator_type {
   xnn_operator_type_copy_nc_x32,
   xnn_operator_type_deconvolution_nhwc_f32,
   xnn_operator_type_deconvolution_nhwc_qu8,
+  xnn_operator_type_depth_to_space_nchw2nhwc_x32,
   xnn_operator_type_divide_nd_f32,
   xnn_operator_type_fully_connected_nc_f32,
   xnn_operator_type_fully_connected_nc_qu8,
@@ -260,6 +262,8 @@ struct xnn_operator {
   size_t last_output_width;
   void* last_output;
 
+  uint32_t block_size;
+
   void* zero_buffer;
   void* lookup_table;
   void* pixelwise_buffer;
@@ -320,6 +324,7 @@ struct xnn_operator {
     struct conv2d_context conv2d;
     struct dwconv2d_context dwconv2d;
     struct dwconv_context dwconv;
+    struct depth_to_space_chw2hwc_context depth_to_space_chw;
     struct elementwise_binary_context elementwise_binary;
     struct gemm_context gemm;
     struct global_average_pooling_nwc_context global_average_pooling_nwc;

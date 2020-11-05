@@ -38,6 +38,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Deconvolution 2D";
     case xnn_node_type_depthwise_convolution_2d:
       return "Depthwise Convolution 2D";
+    case xnn_node_type_depth_to_space:
+      return "Depth to Space";
     case xnn_node_type_divide:
       return "Divide";
     case xnn_node_type_fully_connected:

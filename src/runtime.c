@@ -389,6 +389,33 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].inputs[0] = node->inputs[0];
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
+      case xnn_node_type_depth_to_space:
+        status = xnn_status_unsupported_parameter;
+        if (values[node->inputs[0]].layout == xnn_layout_type_nchw) {
+          status = xnn_create_depth_to_space_chw2hwc_x32(
+              values[node->inputs[0]].shape.dim[
+                  values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+              values[node->inputs[0]].shape.dim[
+                  values[node->inputs[0]].shape.num_dims
+                      - 1] /* input stride */,
+              values[node->outputs[0]].shape.dim[
+                  values[node->inputs[0]].shape.num_dims
+                      - 1] /* output stride */,
+              node->params.depth_to_space.block_size,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+        }
+        if (status != xnn_status_success) {
+          goto error;
+        }
+        runtime->opdata[i].batch_size = values[node->inputs[0]].shape.dim[0];
+        runtime->opdata[i].input_height = values[node->inputs[0]].shape.dim[1];
+        runtime->opdata[i].input_width = values[node->inputs[0]].shape.dim[2];
+        runtime->opdata[i].output_height = values[node->outputs[0]].shape.dim[1];
+        runtime->opdata[i].output_width = values[node->outputs[0]].shape.dim[2];
+        runtime->opdata[i].inputs[0] = node->inputs[0];
+        runtime->opdata[i].outputs[0] = node->outputs[0];
+        break;
       case xnn_node_type_divide:
         status = xnn_create_divide_nd_f32(
           node->activation.output_min,
@@ -1037,6 +1064,20 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[opdata->inputs[0]].data,
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
+        break;
+      case xnn_operator_type_depth_to_space_nchw2nhwc_x32:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_depth_to_space_chw2hwc_x32(
+            opdata->operator_object,
+            opdata->batch_size,
+            opdata->input_height,
+            opdata->input_width,
+            opdata->output_height,
+            opdata->output_width,
+            runtime->blobs[opdata->inputs[0]].data,
+            runtime->blobs[opdata->outputs[0]].data,
+            runtime->threadpool);
         break;
       case xnn_operator_type_divide_nd_f32:
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);

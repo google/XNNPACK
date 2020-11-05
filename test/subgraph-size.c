@@ -102,6 +102,9 @@ int main(int argc, char** argv) {
     case 17:
       xnn_delete_runtime(NULL);
       break;
+    case 18:
+      xnn_define_depth_to_space(NULL, 0, 0, 0, 0);
+      break;
   }
 
   xnn_deinitialize();
