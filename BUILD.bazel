@@ -6523,6 +6523,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "depth_to_space_test",
+    srcs = [
+        "test/depth-to-space.cc",
+        "test/depth-to-space-operator-tester.h",
+    ] + OPERATOR_TEST_PARAMS_HDRS,
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "divide_nd_test",
     srcs = [
         "test/binary-elementwise-operator-tester.h",
