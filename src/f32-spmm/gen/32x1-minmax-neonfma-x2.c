@@ -64,6 +64,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_x2(
         const float32x4_t viKLMNx0 = vld1q_f32(input + 20);
         const float32x4_t viOPQRx0 = vld1q_f32(input + 24);
         const float32x4_t viSTUVx0 = vld1q_f32(input + 28);
+        __builtin_prefetch(input + 16);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff0);
         const float32x4_t vw0 = vld1q_dup_f32(w); w += 1;
         vacc0123x0 = vfmaq_f32(vacc0123x0, vi0123x0, vw0);
@@ -82,6 +83,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_x2(
         const float32x4_t viKLMNx1 = vld1q_f32(input + 20);
         const float32x4_t viOPQRx1 = vld1q_f32(input + 24);
         const float32x4_t viSTUVx1 = vld1q_f32(input + 28);
+        __builtin_prefetch(input + 16);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff1);
         const float32x4_t vw1 = vld1q_dup_f32(w); w += 1;
         vacc0123x1 = vfmaq_f32(vacc0123x1, vi0123x1, vw1);

@@ -43,6 +43,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
     float32x4_t viKLMN = vld1q_f32(input + 20);
     float32x4_t viOPQR = vld1q_f32(input + 24);
     float32x4_t viSTUV = vld1q_f32(input + 28);
+    __builtin_prefetch(input + 16);
     size_t c = output_channels;
     do {
       uint32_t nnz = *nnzmap++;
@@ -77,6 +78,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
           viKLMN = vld1q_f32(input + 20);
           viOPQR = vld1q_f32(input + 24);
           viSTUV = vld1q_f32(input + 28);
+          __builtin_prefetch(input + 16);
         } while (--nnz != 0);
       }
       float32x4_t vout0123 = vminq_f32(vacc0123, vmax);

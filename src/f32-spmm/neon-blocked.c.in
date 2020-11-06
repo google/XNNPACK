@@ -45,7 +45,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
           const float32x4_t vi${ABC[0:4]} = vld1q_f32(input);
           $for M in range(4, MR, 4):
             const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
-          $if MR == 16:
+          $if MR >= 16:
             __builtin_prefetch(input + 16);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
           $if NR == 1:

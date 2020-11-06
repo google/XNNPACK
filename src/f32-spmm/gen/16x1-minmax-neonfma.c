@@ -47,7 +47,6 @@ void xnn_f32_spmm_minmax_ukernel_16x1__neonfma(
           const float32x4_t vi4567 = vld1q_f32(input + 4);
           const float32x4_t vi89AB = vld1q_f32(input + 8);
           const float32x4_t viCDEF = vld1q_f32(input + 12);
-          __builtin_prefetch(input + 16);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
           const float32x4_t vw = vld1q_dup_f32(w); w += 1;
           vacc0123 = vfmaq_f32(vacc0123, vi0123, vw);
