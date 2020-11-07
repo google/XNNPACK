@@ -25,6 +25,7 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
 {
   assert(batch_size != 0);
 
+  const uintptr_t output_stride = 2 * batch_size * sizeof(float);
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
   size_t n = batch_size;
@@ -131,7 +132,7 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
       output[1 * batch_size + 5] = vout5x1;
       output[1 * batch_size + 6] = vout6x1;
       output[1 * batch_size + 7] = vout7x1;
-      output += 2 * batch_size;
+      output = (float*restrict) ((uintptr_t) output + output_stride);
       c -= 2;
     }
     if XNN_UNLIKELY(c != 0) {
@@ -261,7 +262,7 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
         output[1 * batch_size + 1] = vout1x1;
         output[1 * batch_size + 2] = vout2x1;
         output[1 * batch_size + 3] = vout3x1;
-        output += 2 * batch_size;
+        output = (float*restrict) ((uintptr_t) output + output_stride);
         c -= 2;
       }
       if XNN_UNLIKELY(c != 0) {
@@ -343,7 +344,7 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
         output[0 * batch_size + 1] = vout1x0;
         output[1 * batch_size + 0] = vout0x1;
         output[1 * batch_size + 1] = vout1x1;
-        output += 2 * batch_size;
+        output = (float*restrict) ((uintptr_t) output + output_stride);
         c -= 2;
       }
       if XNN_UNLIKELY(c != 0) {
@@ -402,7 +403,7 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
         vout0x1 = math_max_f32(vout0x1, vmin);
         output[0 * batch_size + 0] = vout0x0;
         output[1 * batch_size + 0] = vout0x1;
-        output += 2 * batch_size;
+        output = (float*restrict) ((uintptr_t) output + output_stride);
         c -= 2;
       }
       if XNN_UNLIKELY(c != 0) {

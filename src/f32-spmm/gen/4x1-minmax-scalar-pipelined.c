@@ -25,6 +25,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__scalar_pipelined(
 {
   assert(batch_size != 0);
 
+  const uintptr_t output_stride = batch_size * sizeof(float);
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
   size_t n = batch_size;
@@ -74,7 +75,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__scalar_pipelined(
       output[1] = vout1;
       output[2] = vout2;
       output[3] = vout3;
-      output += batch_size;
+      output = (float*restrict) ((uintptr_t) output + output_stride);
     } while (--c != 0);
     output -= batch_size * output_channels;
     output += 4;
@@ -114,7 +115,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__scalar_pipelined(
         vout1 = math_max_f32(vout1, vmin);
         output[0] = vout0;
         output[1] = vout1;
-        output += batch_size;
+        output = (float*restrict) ((uintptr_t) output + output_stride);
       } while (--c != 0);
       output -= batch_size * output_channels;
       output += 2;
@@ -145,7 +146,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__scalar_pipelined(
         float vout0 = math_min_f32(vacc0, vmax);
         vout0 = math_max_f32(vout0, vmin);
         output[0] = vout0;
-        output += batch_size;
+        output = (float*restrict) ((uintptr_t) output + output_stride);
       } while (--c != 0);
       output -= batch_size * output_channels;
       output += 1;

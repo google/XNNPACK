@@ -26,6 +26,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__sse(
 {
   assert(batch_size != 0);
 
+  const uintptr_t output_stride = 1 * batch_size * sizeof(float);
   const __m128 vmin = _mm_load_ps(params->sse.min);
   const __m128 vmax = _mm_load_ps(params->sse.max);
   size_t n = batch_size;
@@ -49,7 +50,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__sse(
       __m128 vout0123 = _mm_min_ps(vacc0123, vmax);
       vout0123 = _mm_max_ps(vout0123, vmin);
       _mm_storeu_ps(output, vout0123);
-      output += 1 * batch_size;
+      output = (float*restrict) ((uintptr_t) output + output_stride);
     } while (--c != 0);
     output -= batch_size * output_channels;
     output += 4;
@@ -79,7 +80,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__sse(
         __m128 vout01 = _mm_min_ps(vacc01, vmax);
         vout01 = _mm_max_ps(vout01, vmin);
         _mm_storel_pi((__m64*) output, vout01);
-        output += 1 * batch_size;
+        output = (float*restrict) ((uintptr_t) output + output_stride);
       } while (--c != 0);
       output -= batch_size * output_channels;
       output += 2;
@@ -105,7 +106,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__sse(
         __m128 vout0 = _mm_min_ss(vacc0, vmax);
         vout0 = _mm_max_ss(vout0, vmin);
         _mm_store_ss(output, vout0);
-        output += 1 * batch_size;
+        output = (float*restrict) ((uintptr_t) output + output_stride);
       } while (--c != 0);
       output -= batch_size * output_channels;
       output += 1;

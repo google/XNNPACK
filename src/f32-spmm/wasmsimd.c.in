@@ -25,6 +25,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_x" + str
 {
   assert(batch_size != 0);
 
+  const uintptr_t output_stride = ${NR} * batch_size * sizeof(float);
   const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
   const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   $if UNROLL > 1:
@@ -94,7 +95,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_x" + str
       wasm_v128_store(output, vout0123);
       $for M in range(4, MR, 4):
         wasm_v128_store(output + ${M}, vout${ABC[M:M+4]});
-      output += ${NR} * batch_size;
+      output = (float*restrict) ((uintptr_t) output + output_stride);
     } while (--c != 0);
     output -= batch_size * output_channels;
     output += ${MR};
@@ -166,7 +167,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_x" + str
 
           $for M in range(4, SUBMR, 4):
             wasm_v128_store(output + ${M}, vout${ABC[M:M+4]});
-          output += ${NR} * batch_size;
+          output = (float*restrict) ((uintptr_t) output + output_stride);
         } while (--c != 0);
         output -= batch_size * output_channels;
         output += ${SUBMR};

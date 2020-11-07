@@ -24,6 +24,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__sse${"_x" + str(UNROLL) if UNROLL 
 {
   assert(batch_size != 0);
 
+  const uintptr_t output_stride = ${NR} * batch_size * sizeof(float);
   const __m128 vmin = _mm_load_ps(params->sse.min);
   const __m128 vmax = _mm_load_ps(params->sse.max);
   size_t n = batch_size;
@@ -85,7 +86,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__sse${"_x" + str(UNROLL) if UNROLL 
       _mm_storeu_ps(output, vout0123);
       $for M in range(4, MR, 4):
         _mm_storeu_ps(output + ${M}, vout${ABC[M:M+4]});
-      output += ${NR} * batch_size;
+      output = (float*restrict) ((uintptr_t) output + output_stride);
     } while (--c != 0);
     output -= batch_size * output_channels;
     output += ${MR};
@@ -153,7 +154,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__sse${"_x" + str(UNROLL) if UNROLL 
             _mm_store_ss(output, vout0);
           $for M in range(4, SUBMR, 4):
             _mm_storeu_ps(output + ${M}, vout${ABC[M:M+4]});
-          output += ${NR} * batch_size;
+          output = (float*restrict) ((uintptr_t) output + output_stride);
         } while (--c != 0);
         output -= batch_size * output_channels;
         output += ${SUBMR};

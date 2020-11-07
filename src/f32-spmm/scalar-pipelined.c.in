@@ -22,6 +22,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
 {
   assert(batch_size != 0);
 
+  const uintptr_t output_stride = batch_size * sizeof(float);
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
   size_t n = batch_size;
@@ -57,7 +58,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
         vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
       $for M in range(MR):
         output[${M}] = vout${ABC[M]};
-      output += batch_size;
+      output = (float*restrict) ((uintptr_t) output + output_stride);
     } while (--c != 0);
     output -= batch_size * output_channels;
     output += ${MR};
@@ -99,7 +100,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar_pipelined(
             vout${ABC[M]} = math_max_f32(vout${ABC[M]}, vmin);
           $for M in range(SUBMR):
             output[${M}] = vout${ABC[M]};
-          output += batch_size;
+          output = (float*restrict) ((uintptr_t) output + output_stride);
         } while (--c != 0);
         output -= batch_size * output_channels;
         output += ${SUBMR};

@@ -26,6 +26,7 @@ void xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_x4(
 {
   assert(batch_size != 0);
 
+  const uintptr_t output_stride = 1 * batch_size * sizeof(float);
   const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
   const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   const v128_t vzero = wasm_f32x4_splat(0.0f);
@@ -106,7 +107,7 @@ void xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_x4(
       vout4567 = wasm_f32x4_max(vout4567, vmin);
       wasm_v128_store(output, vout0123);
       wasm_v128_store(output + 4, vout4567);
-      output += 1 * batch_size;
+      output = (float*restrict) ((uintptr_t) output + output_stride);
     } while (--c != 0);
     output -= batch_size * output_channels;
     output += 8;
@@ -135,7 +136,7 @@ void xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_x4(
         vout0123 = wasm_f32x4_max(vout0123, vmin);
         wasm_v128_store(output, vout0123);
 
-        output += 1 * batch_size;
+        output = (float*restrict) ((uintptr_t) output + output_stride);
       } while (--c != 0);
       output -= batch_size * output_channels;
       output += 4;
@@ -162,7 +163,7 @@ void xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_x4(
         vout01 = wasm_f32x4_max(vout01, vmin);
         *((double*) output) = wasm_f64x2_extract_lane(vout01, 0);
 
-        output += 1 * batch_size;
+        output = (float*restrict) ((uintptr_t) output + output_stride);
       } while (--c != 0);
       output -= batch_size * output_channels;
       output += 2;
@@ -189,7 +190,7 @@ void xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_x4(
         vout0 = wasm_f32x4_max(vout0, vmin);
         *output = wasm_f32x4_extract_lane(vout0, 0);
 
-        output += 1 * batch_size;
+        output = (float*restrict) ((uintptr_t) output + output_stride);
       } while (--c != 0);
       output -= batch_size * output_channels;
       output += 1;
