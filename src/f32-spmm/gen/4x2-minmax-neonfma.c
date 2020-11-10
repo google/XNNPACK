@@ -43,8 +43,9 @@ void xnn_f32_spmm_minmax_ukernel_4x2__neonfma(
           const intptr_t diff = *dmap++;
           const float32x4_t vi0123 = vld1q_f32(input);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          __builtin_prefetch(input + 16);
           const float32x2_t vw = vld1_f32(w); w += 2;
-
+          __builtin_prefetch(w + 32);
           vacc0123c0 = vfmaq_lane_f32(vacc0123c0, vi0123, vw, 0);
           vacc0123c1 = vfmaq_lane_f32(vacc0123c1, vi0123, vw, 1);
         } while (--nnz != 0);
@@ -71,7 +72,9 @@ void xnn_f32_spmm_minmax_ukernel_4x2__neonfma(
             const intptr_t diff = *dmap++;
             const float32x4_t vi0123 = vld1q_f32(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            __builtin_prefetch(input + 16);
             const float32x4_t vw = vld1q_dup_f32(w); w += 1;
+            __builtin_prefetch(w + 32);
             vacc0123 = vfmaq_f32(vacc0123, vi0123, vw);
           } while (--nnz != 0);
         }

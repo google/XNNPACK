@@ -36,8 +36,6 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_pi
     float32x4_t vi0123 = vld1q_f32(input);
     $for M in range(4, MR, 4):
       float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
-    $if MR >= 16:
-      __builtin_prefetch(input + 16);
     size_t c = output_channels;
     do {
       uint32_t nnz = *nnzmap++;
@@ -49,14 +47,14 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_pi
           $for M in range(0, MR, 4):
             vacc${ABC[M:M+4]} = vfmaq_f32(vacc${ABC[M:M+4]}, vi${ABC[M:M+4]}, vw);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-
+          $for M in range(0, MR, 16):
+            __builtin_prefetch(input + ${M+16});
           diff = *dmap++;
           vw = vld1q_dup_f32(w); w += 1;
+          __builtin_prefetch(w + 32);
           vi0123 = vld1q_f32(input);
           $for M in range(4, MR, 4):
             vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
-          $if MR >= 16:
-            __builtin_prefetch(input + 16);
         } while (--nnz != 0);
       }
       $for M in range(0, MR, 4):
@@ -101,10 +99,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_pi
               $for M in range(4, SUBMR, 4):
                 const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
               input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+              $for M in range(0, MR, 16):
+                __builtin_prefetch(input + ${M+16});
               $if SUBMR <= 2:
                 const float32x2_t vb = vld1_dup_f32(w); w += 1;
               $else:
                 const float32x4_t vb = vld1q_dup_f32(w); w += 1;
+              __builtin_prefetch(w + 32);
               $if SUBMR <= 2:
                 vacc${ABC[0:SUBMR]} = vfma_f32(vacc${ABC[0:SUBMR]}, vi${ABC[0:SUBMR]}, vb);
               $else:

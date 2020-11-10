@@ -52,9 +52,10 @@ void xnn_f32_spmm_minmax_ukernel_16x1__neonfma_x2(
         const float32x4_t vi4567x0 = vld1q_f32(input + 4);
         const float32x4_t vi89ABx0 = vld1q_f32(input + 8);
         const float32x4_t viCDEFx0 = vld1q_f32(input + 12);
-        __builtin_prefetch(input + 16);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff0);
+        __builtin_prefetch(input + 16);
         const float32x4_t vw0 = vld1q_dup_f32(w); w += 1;
+        __builtin_prefetch(w + 32);
         vacc0123x0 = vfmaq_f32(vacc0123x0, vi0123x0, vw0);
         vacc4567x0 = vfmaq_f32(vacc4567x0, vi4567x0, vw0);
         vacc89ABx0 = vfmaq_f32(vacc89ABx0, vi89ABx0, vw0);
@@ -63,9 +64,10 @@ void xnn_f32_spmm_minmax_ukernel_16x1__neonfma_x2(
         const float32x4_t vi4567x1 = vld1q_f32(input + 4);
         const float32x4_t vi89ABx1 = vld1q_f32(input + 8);
         const float32x4_t viCDEFx1 = vld1q_f32(input + 12);
-        __builtin_prefetch(input + 16);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff1);
+        __builtin_prefetch(input + 16);
         const float32x4_t vw1 = vld1q_dup_f32(w); w += 1;
+        __builtin_prefetch(w + 32);
         vacc0123x1 = vfmaq_f32(vacc0123x1, vi0123x1, vw1);
         vacc4567x1 = vfmaq_f32(vacc4567x1, vi4567x1, vw1);
         vacc89ABx1 = vfmaq_f32(vacc89ABx1, vi89ABx1, vw1);
@@ -87,7 +89,9 @@ void xnn_f32_spmm_minmax_ukernel_16x1__neonfma_x2(
           const float32x4_t vi89AB = vld1q_f32(input + 8);
           const float32x4_t viCDEF = vld1q_f32(input + 12);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          __builtin_prefetch(input + 16);
           const float32x4_t vw = vld1q_dup_f32(w); w += 1;
+          __builtin_prefetch(w + 32);
           vacc0123 = vfmaq_f32(vacc0123, vi0123, vw);
           vacc4567 = vfmaq_f32(vacc4567, vi4567, vw);
           vacc89AB = vfmaq_f32(vacc89AB, vi89AB, vw);

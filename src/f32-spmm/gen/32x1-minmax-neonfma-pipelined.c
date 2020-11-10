@@ -43,7 +43,6 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
     float32x4_t viKLMN = vld1q_f32(input + 20);
     float32x4_t viOPQR = vld1q_f32(input + 24);
     float32x4_t viSTUV = vld1q_f32(input + 28);
-    __builtin_prefetch(input + 16);
     size_t c = output_channels;
     do {
       uint32_t nnz = *nnzmap++;
@@ -67,9 +66,11 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
           vaccOPQR = vfmaq_f32(vaccOPQR, viOPQR, vw);
           vaccSTUV = vfmaq_f32(vaccSTUV, viSTUV, vw);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-
+          __builtin_prefetch(input + 16);
+          __builtin_prefetch(input + 32);
           diff = *dmap++;
           vw = vld1q_dup_f32(w); w += 1;
+          __builtin_prefetch(w + 32);
           vi0123 = vld1q_f32(input);
           vi4567 = vld1q_f32(input + 4);
           vi89AB = vld1q_f32(input + 8);
@@ -78,7 +79,6 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
           viKLMN = vld1q_f32(input + 20);
           viOPQR = vld1q_f32(input + 24);
           viSTUV = vld1q_f32(input + 28);
-          __builtin_prefetch(input + 16);
         } while (--nnz != 0);
       }
       float32x4_t vout0123 = vminq_f32(vacc0123, vmax);
@@ -132,7 +132,10 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
             const float32x4_t vi89AB = vld1q_f32(input + 8);
             const float32x4_t viCDEF = vld1q_f32(input + 12);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            __builtin_prefetch(input + 16);
+            __builtin_prefetch(input + 32);
             const float32x4_t vb = vld1q_dup_f32(w); w += 1;
+            __builtin_prefetch(w + 32);
             vacc0123 = vfmaq_f32(vacc0123, vi0123, vb);
             vacc4567 = vfmaq_f32(vacc4567, vi4567, vb);
             vacc89AB = vfmaq_f32(vacc89AB, vi89AB, vb);
@@ -172,7 +175,10 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
             const float32x4_t vi0123 = vld1q_f32(input);
             const float32x4_t vi4567 = vld1q_f32(input + 4);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            __builtin_prefetch(input + 16);
+            __builtin_prefetch(input + 32);
             const float32x4_t vb = vld1q_dup_f32(w); w += 1;
+            __builtin_prefetch(w + 32);
             vacc0123 = vfmaq_f32(vacc0123, vi0123, vb);
             vacc4567 = vfmaq_f32(vacc4567, vi4567, vb);
           } while (--nnz != 0);
@@ -202,7 +208,10 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
             const intptr_t diff = *dmap++;
             const float32x4_t vi0123 = vld1q_f32(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            __builtin_prefetch(input + 16);
+            __builtin_prefetch(input + 32);
             const float32x4_t vb = vld1q_dup_f32(w); w += 1;
+            __builtin_prefetch(w + 32);
             vacc0123 = vfmaq_f32(vacc0123, vi0123, vb);
           } while (--nnz != 0);
         }
@@ -228,7 +237,10 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
             const intptr_t diff = *dmap++;
             const float32x2_t vi01 = vld1_f32(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            __builtin_prefetch(input + 16);
+            __builtin_prefetch(input + 32);
             const float32x2_t vb = vld1_dup_f32(w); w += 1;
+            __builtin_prefetch(w + 32);
             vacc01 = vfma_f32(vacc01, vi01, vb);
           } while (--nnz != 0);
         }
@@ -254,7 +266,10 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
             const intptr_t diff = *dmap++;
             const float32x2_t vi0 = vld1_dup_f32(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            __builtin_prefetch(input + 16);
+            __builtin_prefetch(input + 32);
             const float32x2_t vb = vld1_dup_f32(w); w += 1;
+            __builtin_prefetch(w + 32);
             vacc0 = vfma_f32(vacc0, vi0, vb);
           } while (--nnz != 0);
         }
