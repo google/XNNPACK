@@ -82,8 +82,8 @@ enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x32(
     size_t input_width,
     size_t output_height,
     size_t output_width,
-    const float* input,
-    float* output,
+    const void* input,
+    void* output,
     pthreadpool_t threadpool)
 {
   if (depth_to_space_op->type != xnn_operator_type_depth_to_space_nchw2nhwc_x32) {
