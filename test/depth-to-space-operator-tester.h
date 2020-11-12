@@ -120,7 +120,7 @@ class DepthToSpaceOperatorTester {
       xnn_operator_t depth_to_space_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-                xnn_create_depth_to_space_chw2hwc_x32(
+                xnn_create_depth_to_space_nchw2nhwc_x32(
                     input_channels(), input_channels(), output_channels,
                     block_size(), 0, &depth_to_space_op));
       ASSERT_NE(nullptr, depth_to_space_op);
@@ -129,7 +129,7 @@ class DepthToSpaceOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_depth_to_space_op(depth_to_space_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_depth_to_space_chw2hwc_x32(
+                xnn_setup_depth_to_space_nchw2nhwc_x32(
                     depth_to_space_op, batch_size(), input_height(),
                     input_width(), output_height, output_width,
                     input.data(), output.data(), nullptr /* thread pool */));
