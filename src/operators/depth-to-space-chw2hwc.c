@@ -102,16 +102,9 @@ enum xnn_status xnn_setup_depth_to_space_chw2hwc_x32(
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-        "failed to setup %s operator with %zux%zu input: input dimensions must be greater than 1",
+        "failed to setup %s operator with %zux%zu input: input dimensions must be non-zero",
         xnn_operator_type_to_string(xnn_operator_type_depth_to_space_nchw2nhwc_x32), input_width, input_height);
     return xnn_status_invalid_parameter;
-  }
-
-  if (max(input_width, input_height) >= 16777216) {
-    xnn_log_error(
-        "failed to setup %s operator with %zux%zu input: input dimensions must be below 2**24",
-        xnn_operator_type_to_string(xnn_operator_type_depth_to_space_nchw2nhwc_x32), input_width, input_height);
-    return xnn_status_unsupported_parameter;
   }
 
   if (output_width == 0 || output_height == 0) {
@@ -119,13 +112,6 @@ enum xnn_status xnn_setup_depth_to_space_chw2hwc_x32(
         "failed to setup %s operator with %zux%zu output: output dimensions must be non-zero",
         xnn_operator_type_to_string(xnn_operator_type_depth_to_space_nchw2nhwc_x32), output_width, output_height);
     return xnn_status_invalid_parameter;
-  }
-
-  if (max(output_width, output_height) >= 16777216) {
-    xnn_log_error(
-        "failed to setup %s operator with %zux%zu output: output dimensions must be below 2**24",
-        xnn_operator_type_to_string(xnn_operator_type_depth_to_space_nchw2nhwc_x32), output_width, output_height);
-    return xnn_status_unsupported_parameter;
   }
 
   if (batch_size == 0) {
