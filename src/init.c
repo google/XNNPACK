@@ -19,7 +19,9 @@
 #endif
 
 #ifndef __EMSCRIPTEN__
+#ifndef __Fuchsia__
   #include <cpuinfo.h>
+#endif
 #endif
 
 #include <xnnpack.h>
@@ -1362,6 +1364,7 @@ static void init(void) {
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  #ifndef __Fuchsia__
   if (!cpuinfo_has_x86_sse2()) {
     xnn_log_error("XNNPACK initialization failed: SSE2 is not supported");
     return;
@@ -2002,6 +2005,7 @@ static void init(void) {
       };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
+  #endif
 
 #elif XNN_ARCH_WASMSIMD
   /**************************** QS8 micro-kernels ****************************/
@@ -2850,9 +2854,11 @@ static void init(void) {
 
 enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
   #ifndef __EMSCRIPTEN__
+  #ifndef __Fuchsia__
     if (!cpuinfo_initialize()) {
       return xnn_status_out_of_memory;
     }
+  #endif
   #endif
   #ifdef _WIN32
     InitOnceExecuteOnce(&init_guard, &init_windows, NULL, NULL);
@@ -2877,7 +2883,9 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
 
 enum xnn_status xnn_deinitialize(void) {
   #ifndef __EMSCRIPTEN__
+  #ifndef __Fuchsia__
     cpuinfo_deinitialize();
+  #endif
   #endif
   return xnn_status_success;
 }
