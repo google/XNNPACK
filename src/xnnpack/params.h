@@ -853,33 +853,33 @@ typedef void (*xnn_f32_conv_hwc2chw_ukernel_function)(
     const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_spmm_ukernel_function)(
-    uint32_t m,
-    uint32_t n,
-    const void* a,
-    const void* w,
-    const int32_t* dmap,
-    const uint32_t* nmap,
-    void* c,
+    size_t batch_size,
+    size_t output_channels,
+    const void* input,
+    const void* weights,
+    const int32_t* widx_dmap,
+    const uint32_t* nidx_nnzmap,
+    void* output,
     const void* params);
 
 typedef void (*xnn_f16_spmm_minmax_ukernel_function)(
-    uint32_t m,
-    uint32_t n,
-    const void* a,
-    const void* w,
-    const int32_t* dmap,
-    const uint32_t* nmap,
-    void* c,
+    size_t batch_size,
+    size_t output_channels,
+    const void* input,
+    const void* weights,
+    const int32_t* widx_dmap,
+    const uint32_t* nidx_nnzmap,
+    void* output,
     const struct xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_f32_spmm_minmax_ukernel_function)(
-    uint32_t m,
-    uint32_t n,
-    const float* a,
-    const float* w,
-    const int32_t* dmap,
-    const uint32_t* nmap,
-    float* c,
+    size_t batch_size,
+    size_t output_channels,
+    const float* input,
+    const float* weights,
+    const int32_t* widx_dmap,
+    const uint32_t* nidx_nnzmap,
+    float* output,
     const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_packx_ukernel_function)(

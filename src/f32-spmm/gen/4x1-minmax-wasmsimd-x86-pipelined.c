@@ -15,8 +15,8 @@
 
 
 void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_pipelined(
-    uint32_t batch_size,
-    uint32_t output_channels,
+    size_t batch_size,
+    size_t output_channels,
     const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,

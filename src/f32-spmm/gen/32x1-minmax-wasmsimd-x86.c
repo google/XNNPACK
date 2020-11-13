@@ -15,8 +15,8 @@
 
 
 void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86(
-    uint32_t batch_size,
-    uint32_t output_channels,
+    size_t batch_size,
+    size_t output_channels,
     const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
@@ -26,7 +26,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86(
 {
   assert(batch_size != 0);
 
-  const uintptr_t output_stride = 1 * batch_size * sizeof(float);
+  const size_t output_stride = 1 * batch_size * sizeof(float);
   const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
   const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   size_t n = batch_size;

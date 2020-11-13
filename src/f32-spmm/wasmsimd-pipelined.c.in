@@ -14,8 +14,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $ARCH_SUFFIX = "_x86" if X86 else "_arm"
 
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
-    uint32_t batch_size,
-    uint32_t output_channels,
+    size_t batch_size,
+    size_t output_channels,
     const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,

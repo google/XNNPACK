@@ -18,8 +18,8 @@ extern "C" {
 
 #define DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
-    uint32_t m,                                           \
-    uint32_t n,                                           \
+    size_t m,                                             \
+    size_t n,                                             \
     const float* a,                                       \
     const float* w,                                       \
     const int32_t* dmap,                                  \
@@ -107,8 +107,8 @@ DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_32x4__neonf
 
 #define DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
-    uint32_t m,                                           \
-    uint32_t n,                                           \
+    size_t m,                                             \
+    size_t n,                                             \
     const void* a,                                        \
     const void* w,                                        \
     const int32_t* dmap,                                  \
