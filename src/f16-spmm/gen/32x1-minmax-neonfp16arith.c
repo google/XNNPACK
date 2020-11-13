@@ -25,6 +25,7 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith(
     const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch_size != 0);
+  assert(output_channels != 0);
 
   const __fp16*restrict i = (const __fp16*) input;
   __fp16*restrict o = (__fp16*) output;

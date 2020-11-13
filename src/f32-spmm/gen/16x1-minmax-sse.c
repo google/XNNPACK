@@ -25,6 +25,7 @@ void xnn_f32_spmm_minmax_ukernel_16x1__sse(
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch_size != 0);
+  assert(output_channels != 0);
 
   const uintptr_t output_stride = 1 * batch_size * sizeof(float);
   const __m128 vmin = _mm_load_ps(params->sse.min);

@@ -24,6 +24,7 @@ void xnn_f32_spmm_minmax_ukernel_2x1__scalar(
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch_size != 0);
+  assert(output_channels != 0);
 
   const uintptr_t output_stride = 1 * batch_size * sizeof(float);
   const float vmin = params->scalar.min;

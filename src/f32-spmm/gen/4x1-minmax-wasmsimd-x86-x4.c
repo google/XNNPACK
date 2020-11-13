@@ -25,6 +25,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_x4(
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch_size != 0);
+  assert(output_channels != 0);
 
   const size_t output_stride = 1 * batch_size * sizeof(float);
   const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
