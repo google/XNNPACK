@@ -25,6 +25,7 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2(
     const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch_size != 0);
+  assert(batch_size % sizeof(__fp16) == 0);
   assert(output_channels != 0);
 
   const __fp16*restrict i = (const __fp16*) input;
@@ -34,8 +35,9 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2(
   const float16x8_t vmax = vld1q_dup_f16((const __fp16*) &params->max);
   const float16x8_t vmin = vld1q_dup_f16((const __fp16*) &params->min);
 
+  size_t output_decrement = batch_size * output_channels - 8 * sizeof(__fp16);
   size_t n = batch_size;
-  while XNN_LIKELY(n >= 8) {
+  while XNN_LIKELY(n >= 8 * sizeof(__fp16)) {
     const __fp16*restrict w = (const __fp16*) weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
@@ -72,15 +74,15 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2(
       vout01234567 = vminq_f16(vout01234567, vmax);
       vout01234567 = vmaxq_f16(vout01234567, vmin);
       vst1q_f16(o, vout01234567);
-      o += batch_size;
+      o = (__fp16*restrict) ((uintptr_t) o + batch_size);
     } while (--c != 0);
-    o -= batch_size * output_channels;
-    o += 8;
+    o = (__fp16*restrict) ((uintptr_t) o - output_decrement);
     i += 8;
-    n -= 8;
+    n -= 8 * sizeof(__fp16);
   }
   if XNN_UNLIKELY(n != 0) {
-    if (n & 4) {
+    output_decrement += 4 * sizeof(__fp16);
+    if (n & (4 * sizeof(__fp16))) {
       const __fp16*restrict w = (const __fp16*) weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -100,13 +102,13 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2(
         float16x4_t vout0123 = vmin_f16(vacc0123, vget_low_f16(vmax));
         vout0123 = vmax_f16(vout0123, vget_low_f16(vmin));
         vst1_f16(o, vout0123);
-        o += batch_size;
+        o = (__fp16*restrict) ((uintptr_t) o + batch_size);
       } while (--c != 0);
-      o -= batch_size * output_channels;
-      o += 4;
+      o = (__fp16*restrict) ((uintptr_t) o - output_decrement);
       i += 4;
     }
-    if (n & 2) {
+    output_decrement += 2 * sizeof(__fp16);
+    if (n & (2 * sizeof(__fp16))) {
       const __fp16*restrict w = (const __fp16*) weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -126,13 +128,13 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2(
         float16x4_t vout01 = vmin_f16(vacc01, vget_low_f16(vmax));
         vout01 = vmax_f16(vout01, vget_low_f16(vmin));
         vst1_lane_f32(__builtin_assume_aligned(o, 1), vreinterpret_f32_f16(vout01), 0);
-        o += batch_size;
+        o = (__fp16*restrict) ((uintptr_t) o + batch_size);
       } while (--c != 0);
-      o -= batch_size * output_channels;
-      o += 2;
+      o = (__fp16*restrict) ((uintptr_t) o - output_decrement);
       i += 2;
     }
-    if (n & 1) {
+    output_decrement += 1 * sizeof(__fp16);
+    if (n & (1 * sizeof(__fp16))) {
       const __fp16*restrict w = (const __fp16*) weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -152,10 +154,9 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2(
         float16x4_t vout0 = vmin_f16(vacc0, vget_low_f16(vmax));
         vout0 = vmax_f16(vout0, vget_low_f16(vmin));
         vst1_lane_f16(o, vout0, 0);
-        o += batch_size;
+        o = (__fp16*restrict) ((uintptr_t) o + batch_size);
       } while (--c != 0);
-      o -= batch_size * output_channels;
-      o += 1;
+      o = (__fp16*restrict) ((uintptr_t) o - output_decrement);
       i += 1;
     }
   }

@@ -619,8 +619,8 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->compute.type = xnn_parallelization_type_2d_tile_1d;
       convolution_op->compute.task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_spmm;
       convolution_op->compute.range[0] = batch_size;
-      convolution_op->compute.range[1] = input_size;
-      convolution_op->compute.tile[0] = mc;
+      convolution_op->compute.range[1] = input_size * sizeof(float);
+      convolution_op->compute.tile[0] = mc * sizeof(float);
       convolution_op->state = xnn_run_state_ready;
 
       return xnn_status_success;

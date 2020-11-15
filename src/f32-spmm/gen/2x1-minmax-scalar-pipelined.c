@@ -24,13 +24,14 @@ void xnn_f32_spmm_minmax_ukernel_2x1__scalar_pipelined(
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch_size != 0);
+  assert(batch_size % sizeof(float) == 0);
   assert(output_channels != 0);
 
-  const uintptr_t output_stride = batch_size * sizeof(float);
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
+  size_t output_decrement = batch_size * output_channels - 2 * sizeof(float);
   size_t n = batch_size;
-  while XNN_LIKELY(n >= 2) {
+  while XNN_LIKELY(n >= 2 * sizeof(float)) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
@@ -62,15 +63,15 @@ void xnn_f32_spmm_minmax_ukernel_2x1__scalar_pipelined(
       vout1 = math_max_f32(vout1, vmin);
       output[0] = vout0;
       output[1] = vout1;
-      output = (float*restrict) ((uintptr_t) output + output_stride);
+      output = (float*restrict) ((uintptr_t) output + batch_size);
     } while (--c != 0);
-    output -= batch_size * output_channels;
-    output += 2;
+    output = (float*restrict) ((uintptr_t) output - output_decrement);
     input += 2;
-    n -= 2;
+    n -= 2 * sizeof(float);
   }
   if XNN_UNLIKELY(n != 0) {
-    if (n & 1) {
+    output_decrement += 1 * sizeof(float);
+    if (n & (1 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -95,10 +96,10 @@ void xnn_f32_spmm_minmax_ukernel_2x1__scalar_pipelined(
         float vout0 = math_min_f32(vacc0, vmax);
         vout0 = math_max_f32(vout0, vmin);
         output[0] = vout0;
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
       } while (--c != 0);
-      output -= batch_size * output_channels;
-      output += 1;
+      const size_t output_decrement = batch_size * output_channels - 1 * sizeof(float);
+      output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 1;
     }
   }

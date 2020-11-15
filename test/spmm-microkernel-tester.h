@@ -269,7 +269,7 @@ class SpMMMicrokernelTester {
           break;
       }
 
-      spmm(m(), n(),
+      spmm(m() * sizeof(float), n(),
         a.data() + first_kk * m(), w.data(), dmap.data(), nmap.data(), c.data(),
         &params);
 
@@ -436,7 +436,7 @@ class SpMMMicrokernelTester {
       params.max = fp16_ieee_from_fp32_value(c_max);
       params.min = fp16_ieee_from_fp32_value(c_min);
 
-      spmm(m(), n(),
+      spmm(m() * sizeof(uint16_t), n(),
         a.data() + first_kk * m(), w.data(), dmap.data(), nmap.data(), c.data(),
         &params);
 

@@ -23,6 +23,7 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
     const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch_size != 0);
+  assert(batch_size % sizeof(__fp16) == 0);
   assert(output_channels != 0);
 
   const __fp16*restrict i = (const __fp16*) input;
@@ -32,8 +33,9 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
   const float16x8_t vmax = vld1q_dup_f16((const __fp16*) &params->max);
   const float16x8_t vmin = vld1q_dup_f16((const __fp16*) &params->min);
 
+  size_t output_decrement = batch_size * output_channels - ${MR} * sizeof(__fp16);
   size_t n = batch_size;
-  while XNN_LIKELY(n >= ${MR}) {
+  while XNN_LIKELY(n >= ${MR} * sizeof(__fp16)) {
     const __fp16*restrict w = (const __fp16*) weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
@@ -91,17 +93,20 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
       vst1q_f16(o, vout01234567);
       $for M in range(8, MR, 8):
         vst1q_f16(o + ${M}, vout${ABC[M:M+8]});
-      o += batch_size;
+      o = (__fp16*restrict) ((uintptr_t) o + batch_size);
     } while (--c != 0);
-    o -= batch_size * output_channels;
-    o += ${MR};
+    o = (__fp16*restrict) ((uintptr_t) o - output_decrement);
     i += ${MR};
-    n -= ${MR};
+    n -= ${MR} * sizeof(__fp16);
   }
   if XNN_UNLIKELY(n != 0) {
     $for LOG2M in reversed(range((MR - 1).bit_length())):
       $SUBMR = 1 << LOG2M
-      if (n & ${SUBMR}) {
+      $if SUBMR * 2 >= MR:
+        output_decrement += ${MR - SUBMR} * sizeof(__fp16);
+      $else:
+        output_decrement += ${SUBMR} * sizeof(__fp16);
+      if (n & (${SUBMR} * sizeof(__fp16))) {
         const __fp16*restrict w = (const __fp16*) weights;
         const int32_t* dmap = widx_dmap;
         const uint32_t* nnzmap = nidx_nnzmap;
@@ -156,10 +161,9 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
             vst1q_f16(o, vout01234567);
             $for M in range(8, SUBMR, 8):
               vst1q_f16(o + ${M}, vout${ABC[M:M+8]});
-          o += batch_size;
+          o = (__fp16*restrict) ((uintptr_t) o + batch_size);
         } while (--c != 0);
-        o -= batch_size * output_channels;
-        o += ${SUBMR};
+        o = (__fp16*restrict) ((uintptr_t) o - output_decrement);
         i += ${SUBMR};
       }
   }

@@ -25,12 +25,14 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch_size != 0);
+  assert(batch_size % sizeof(float) == 0);
   assert(output_channels != 0);
 
   const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
   const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  size_t output_decrement = batch_size * output_channels - 32 * sizeof(float);
   size_t n = batch_size;
-  while XNN_LIKELY(n >= 32) {
+  while XNN_LIKELY(n >= 32 * sizeof(float)) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
@@ -185,39 +187,42 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
       voutOPQRc3 = vmaxq_f32(voutOPQRc3, vmin);
       voutSTUVc3 = vmaxq_f32(voutSTUVc3, vmin);
 
-      vst1q_f32(output + 0 * batch_size + 0, vout0123c0);
-      vst1q_f32(output + 0 * batch_size + 4, vout4567c0);
-      vst1q_f32(output + 0 * batch_size + 8, vout89ABc0);
-      vst1q_f32(output + 0 * batch_size + 12, voutCDEFc0);
-      vst1q_f32(output + 0 * batch_size + 16, voutGHIJc0);
-      vst1q_f32(output + 0 * batch_size + 20, voutKLMNc0);
-      vst1q_f32(output + 0 * batch_size + 24, voutOPQRc0);
-      vst1q_f32(output + 0 * batch_size + 28, voutSTUVc0);
-      vst1q_f32(output + 1 * batch_size + 0, vout0123c1);
-      vst1q_f32(output + 1 * batch_size + 4, vout4567c1);
-      vst1q_f32(output + 1 * batch_size + 8, vout89ABc1);
-      vst1q_f32(output + 1 * batch_size + 12, voutCDEFc1);
-      vst1q_f32(output + 1 * batch_size + 16, voutGHIJc1);
-      vst1q_f32(output + 1 * batch_size + 20, voutKLMNc1);
-      vst1q_f32(output + 1 * batch_size + 24, voutOPQRc1);
-      vst1q_f32(output + 1 * batch_size + 28, voutSTUVc1);
-      vst1q_f32(output + 2 * batch_size + 0, vout0123c2);
-      vst1q_f32(output + 2 * batch_size + 4, vout4567c2);
-      vst1q_f32(output + 2 * batch_size + 8, vout89ABc2);
-      vst1q_f32(output + 2 * batch_size + 12, voutCDEFc2);
-      vst1q_f32(output + 2 * batch_size + 16, voutGHIJc2);
-      vst1q_f32(output + 2 * batch_size + 20, voutKLMNc2);
-      vst1q_f32(output + 2 * batch_size + 24, voutOPQRc2);
-      vst1q_f32(output + 2 * batch_size + 28, voutSTUVc2);
-      vst1q_f32(output + 3 * batch_size + 0, vout0123c3);
-      vst1q_f32(output + 3 * batch_size + 4, vout4567c3);
-      vst1q_f32(output + 3 * batch_size + 8, vout89ABc3);
-      vst1q_f32(output + 3 * batch_size + 12, voutCDEFc3);
-      vst1q_f32(output + 3 * batch_size + 16, voutGHIJc3);
-      vst1q_f32(output + 3 * batch_size + 20, voutKLMNc3);
-      vst1q_f32(output + 3 * batch_size + 24, voutOPQRc3);
-      vst1q_f32(output + 3 * batch_size + 28, voutSTUVc3);
-      output += 4 * batch_size;
+      vst1q_f32(output + 0, vout0123c0);
+      vst1q_f32(output + 4, vout4567c0);
+      vst1q_f32(output + 8, vout89ABc0);
+      vst1q_f32(output + 12, voutCDEFc0);
+      vst1q_f32(output + 16, voutGHIJc0);
+      vst1q_f32(output + 20, voutKLMNc0);
+      vst1q_f32(output + 24, voutOPQRc0);
+      vst1q_f32(output + 28, voutSTUVc0);
+      output = (float*restrict) ((uintptr_t) output + batch_size);
+      vst1q_f32(output + 0, vout0123c1);
+      vst1q_f32(output + 4, vout4567c1);
+      vst1q_f32(output + 8, vout89ABc1);
+      vst1q_f32(output + 12, voutCDEFc1);
+      vst1q_f32(output + 16, voutGHIJc1);
+      vst1q_f32(output + 20, voutKLMNc1);
+      vst1q_f32(output + 24, voutOPQRc1);
+      vst1q_f32(output + 28, voutSTUVc1);
+      output = (float*restrict) ((uintptr_t) output + batch_size);
+      vst1q_f32(output + 0, vout0123c2);
+      vst1q_f32(output + 4, vout4567c2);
+      vst1q_f32(output + 8, vout89ABc2);
+      vst1q_f32(output + 12, voutCDEFc2);
+      vst1q_f32(output + 16, voutGHIJc2);
+      vst1q_f32(output + 20, voutKLMNc2);
+      vst1q_f32(output + 24, voutOPQRc2);
+      vst1q_f32(output + 28, voutSTUVc2);
+      output = (float*restrict) ((uintptr_t) output + batch_size);
+      vst1q_f32(output + 0, vout0123c3);
+      vst1q_f32(output + 4, vout4567c3);
+      vst1q_f32(output + 8, vout89ABc3);
+      vst1q_f32(output + 12, voutCDEFc3);
+      vst1q_f32(output + 16, voutGHIJc3);
+      vst1q_f32(output + 20, voutKLMNc3);
+      vst1q_f32(output + 24, voutOPQRc3);
+      vst1q_f32(output + 28, voutSTUVc3);
+      output = (float*restrict) ((uintptr_t) output + batch_size);
       c -= 4;
     }
 
@@ -285,17 +290,17 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
         vst1q_f32(output + 20, voutKLMN);
         vst1q_f32(output + 24, voutOPQR);
         vst1q_f32(output + 28, voutSTUV);
-        output += batch_size;
+        output = (float*restrict) ((uintptr_t) output + batch_size);
         c -= 1;
       } while (c != 0);
     }
-    output -= batch_size * output_channels;
-    output += 32;
+    output = (float*restrict) ((uintptr_t) output - output_decrement);
     input += 32;
-    n -= 32;
+    n -= 32 * sizeof(float);
   }
   if XNN_UNLIKELY(n != 0) {
-    if (n & 16) {
+    output_decrement += 16 * sizeof(float);
+    if (n & (16 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -380,23 +385,26 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
         vout89ABc3 = vmaxq_f32(vout89ABc3, vmin);
         voutCDEFc3 = vmaxq_f32(voutCDEFc3, vmin);
 
-        vst1q_f32(output + 0 * batch_size + 0, vout0123c0);
-        vst1q_f32(output + 0 * batch_size + 4, vout4567c0);
-        vst1q_f32(output + 0 * batch_size + 8, vout89ABc0);
-        vst1q_f32(output + 0 * batch_size + 12, voutCDEFc0);
-        vst1q_f32(output + 1 * batch_size + 0, vout0123c1);
-        vst1q_f32(output + 1 * batch_size + 4, vout4567c1);
-        vst1q_f32(output + 1 * batch_size + 8, vout89ABc1);
-        vst1q_f32(output + 1 * batch_size + 12, voutCDEFc1);
-        vst1q_f32(output + 2 * batch_size + 0, vout0123c2);
-        vst1q_f32(output + 2 * batch_size + 4, vout4567c2);
-        vst1q_f32(output + 2 * batch_size + 8, vout89ABc2);
-        vst1q_f32(output + 2 * batch_size + 12, voutCDEFc2);
-        vst1q_f32(output + 3 * batch_size + 0, vout0123c3);
-        vst1q_f32(output + 3 * batch_size + 4, vout4567c3);
-        vst1q_f32(output + 3 * batch_size + 8, vout89ABc3);
-        vst1q_f32(output + 3 * batch_size + 12, voutCDEFc3);
-        output += 4 * batch_size;
+        vst1q_f32(output + 0, vout0123c0);
+        vst1q_f32(output + 4, vout4567c0);
+        vst1q_f32(output + 8, vout89ABc0);
+        vst1q_f32(output + 12, voutCDEFc0);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1q_f32(output + 0, vout0123c1);
+        vst1q_f32(output + 4, vout4567c1);
+        vst1q_f32(output + 8, vout89ABc1);
+        vst1q_f32(output + 12, voutCDEFc1);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1q_f32(output + 0, vout0123c2);
+        vst1q_f32(output + 4, vout4567c2);
+        vst1q_f32(output + 8, vout89ABc2);
+        vst1q_f32(output + 12, voutCDEFc2);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1q_f32(output + 0, vout0123c3);
+        vst1q_f32(output + 4, vout4567c3);
+        vst1q_f32(output + 8, vout89ABc3);
+        vst1q_f32(output + 12, voutCDEFc3);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
         c -= 4;
       }
 
@@ -437,15 +445,15 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
           vst1q_f32(output + 4, vout4567);
           vst1q_f32(output + 8, vout89AB);
           vst1q_f32(output + 12, voutCDEF);
-          output += batch_size;
+          output = (float*restrict) ((uintptr_t) output + batch_size);
           c -= 1;
         } while (c != 0);
       }
-      output -= batch_size * output_channels;
-      output += 16;
+      output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 16;
     }
-    if (n & 8) {
+    output_decrement += 8 * sizeof(float);
+    if (n & (8 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -496,15 +504,18 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
         vout0123c3 = vmaxq_f32(vout0123c3, vmin);
         vout4567c3 = vmaxq_f32(vout4567c3, vmin);
 
-        vst1q_f32(output + 0 * batch_size + 0, vout0123c0);
-        vst1q_f32(output + 0 * batch_size + 4, vout4567c0);
-        vst1q_f32(output + 1 * batch_size + 0, vout0123c1);
-        vst1q_f32(output + 1 * batch_size + 4, vout4567c1);
-        vst1q_f32(output + 2 * batch_size + 0, vout0123c2);
-        vst1q_f32(output + 2 * batch_size + 4, vout4567c2);
-        vst1q_f32(output + 3 * batch_size + 0, vout0123c3);
-        vst1q_f32(output + 3 * batch_size + 4, vout4567c3);
-        output += 4 * batch_size;
+        vst1q_f32(output + 0, vout0123c0);
+        vst1q_f32(output + 4, vout4567c0);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1q_f32(output + 0, vout0123c1);
+        vst1q_f32(output + 4, vout4567c1);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1q_f32(output + 0, vout0123c2);
+        vst1q_f32(output + 4, vout4567c2);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1q_f32(output + 0, vout0123c3);
+        vst1q_f32(output + 4, vout4567c3);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
         c -= 4;
       }
 
@@ -533,15 +544,15 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
 
           vst1q_f32(output + 0, vout0123);
           vst1q_f32(output + 4, vout4567);
-          output += batch_size;
+          output = (float*restrict) ((uintptr_t) output + batch_size);
           c -= 1;
         } while (c != 0);
       }
-      output -= batch_size * output_channels;
-      output += 8;
+      output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 8;
     }
-    if (n & 4) {
+    output_decrement += 4 * sizeof(float);
+    if (n & (4 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -575,11 +586,14 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
         vout0123c2 = vmaxq_f32(vout0123c2, vmin);
         vout0123c3 = vmaxq_f32(vout0123c3, vmin);
 
-        vst1q_f32(output + 0 * batch_size + 0, vout0123c0);
-        vst1q_f32(output + 1 * batch_size + 0, vout0123c1);
-        vst1q_f32(output + 2 * batch_size + 0, vout0123c2);
-        vst1q_f32(output + 3 * batch_size + 0, vout0123c3);
-        output += 4 * batch_size;
+        vst1q_f32(output + 0, vout0123c0);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1q_f32(output + 0, vout0123c1);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1q_f32(output + 0, vout0123c2);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1q_f32(output + 0, vout0123c3);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
         c -= 4;
       }
 
@@ -602,15 +616,15 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
           vout0123 = vmaxq_f32(vout0123, vmin);
 
           vst1q_f32(output + 0, vout0123);
-          output += batch_size;
+          output = (float*restrict) ((uintptr_t) output + batch_size);
           c -= 1;
         } while (c != 0);
       }
-      output -= batch_size * output_channels;
-      output += 4;
+      output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 4;
     }
-    if (n & 2) {
+    output_decrement += 2 * sizeof(float);
+    if (n & (2 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -644,11 +658,14 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
         vout01c2 = vmax_f32(vout01c2, vget_low_f32(vmin));
         vout01c3 = vmax_f32(vout01c3, vget_low_f32(vmin));
 
-        vst1_f32(output + 0 * batch_size + 0, vout01c0);
-        vst1_f32(output + 1 * batch_size + 0, vout01c1);
-        vst1_f32(output + 2 * batch_size + 0, vout01c2);
-        vst1_f32(output + 3 * batch_size + 0, vout01c3);
-        output += 4 * batch_size;
+        vst1_f32(output + 0, vout01c0);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1_f32(output + 0, vout01c1);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1_f32(output + 0, vout01c2);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1_f32(output + 0, vout01c3);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
         c -= 4;
       }
 
@@ -670,15 +687,15 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
           vout01 = vmax_f32(vout01, vget_low_f32(vmin));
 
           vst1_f32(output, vout01);
-          output += batch_size;
+          output = (float*restrict) ((uintptr_t) output + batch_size);
           c -= 1;
         } while (c != 0);
       }
-      output -= batch_size * output_channels;
-      output += 2;
+      output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 2;
     }
-    if (n & 1) {
+    output_decrement += 1 * sizeof(float);
+    if (n & (1 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -712,11 +729,14 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
         vout0c2 = vmax_f32(vout0c2, vget_low_f32(vmin));
         vout0c3 = vmax_f32(vout0c3, vget_low_f32(vmin));
 
-        vst1_lane_f32(output + 0 * batch_size + 0, vout0c0, 0);
-        vst1_lane_f32(output + 1 * batch_size + 0, vout0c1, 0);
-        vst1_lane_f32(output + 2 * batch_size + 0, vout0c2, 0);
-        vst1_lane_f32(output + 3 * batch_size + 0, vout0c3, 0);
-        output += 4 * batch_size;
+        vst1_lane_f32(output + 0, vout0c0, 0);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1_lane_f32(output + 0, vout0c1, 0);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1_lane_f32(output + 0, vout0c2, 0);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
+        vst1_lane_f32(output + 0, vout0c3, 0);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
         c -= 4;
       }
 
@@ -738,12 +758,11 @@ void xnn_f32_spmm_minmax_ukernel_32x4__neonfma(
           vout0 = vmax_f32(vout0, vget_low_f32(vmin));
 
           vst1_lane_f32(output, vout0, 1);
-          output += batch_size;
+          output = (float*restrict) ((uintptr_t) output + batch_size);
           c -= 1;
         } while (c != 0);
       }
-      output -= batch_size * output_channels;
-      output += 1;
+      output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 1;
     }
     }

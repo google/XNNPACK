@@ -25,13 +25,14 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined_x2(
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch_size != 0);
+  assert(batch_size % sizeof(float) == 0);
   assert(output_channels != 0);
 
-  const uintptr_t output_stride = 1 * batch_size * sizeof(float);
   const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
   const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+  size_t output_decrement = batch_size * output_channels - 16 * sizeof(float);
   size_t n = batch_size;
-  while XNN_LIKELY(n >= 16) {
+  while XNN_LIKELY(n >= 16 * sizeof(float)) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
@@ -103,15 +104,15 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined_x2(
       wasm_v128_store(output + 4, vout4567);
       wasm_v128_store(output + 8, vout89AB);
       wasm_v128_store(output + 12, voutCDEF);
-      output = (float*restrict) ((uintptr_t) output + output_stride);
+      output = (float*restrict) ((uintptr_t) output + batch_size);
     } while (--c != 0);
-    output -= batch_size * output_channels;
-    output += 16;
+    output = (float*restrict) ((uintptr_t) output - output_decrement);
     input += 16;
-    n -= 16;
+    n -= 16 * sizeof(float);
   }
   if XNN_UNLIKELY(n != 0) {
-    if (n & 8) {
+    output_decrement += 8 * sizeof(float);
+    if (n & (8 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -138,13 +139,13 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined_x2(
         wasm_v128_store(output, vout0123);
 
         wasm_v128_store(output + 4, vout4567);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
       } while (--c != 0);
-      output -= batch_size * output_channels;
-      output += 8;
+      output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 8;
     }
-    if (n & 4) {
+    output_decrement += 4 * sizeof(float);
+    if (n & (4 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -165,13 +166,13 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined_x2(
         vout0123 = wasm_v128_bitselect(vmin, vout0123, wasm_f32x4_lt(vout0123, vmin));
         wasm_v128_store(output, vout0123);
 
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
       } while (--c != 0);
-      output -= batch_size * output_channels;
-      output += 4;
+      output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 4;
     }
-    if (n & 2) {
+    output_decrement += 2 * sizeof(float);
+    if (n & (2 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -192,13 +193,13 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined_x2(
         vout01 = wasm_v128_bitselect(vmin, vout01, wasm_f32x4_lt(vout01, vmin));
         *((double*) output) = wasm_f64x2_extract_lane(vout01, 0);
 
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
       } while (--c != 0);
-      output -= batch_size * output_channels;
-      output += 2;
+      output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 2;
     }
-    if (n & 1) {
+    output_decrement += 1 * sizeof(float);
+    if (n & (1 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
@@ -219,10 +220,9 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined_x2(
         vout0 = wasm_v128_bitselect(vmin, vout0, wasm_f32x4_lt(vout0, vmin));
         *output = wasm_f32x4_extract_lane(vout0, 0);
 
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*restrict) ((uintptr_t) output + batch_size);
       } while (--c != 0);
-      output -= batch_size * output_channels;
-      output += 1;
+      output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 1;
     }
   }
