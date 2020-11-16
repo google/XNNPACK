@@ -596,13 +596,14 @@ static enum xnn_status setup_convolution2d_nchw(
 
       convolution_op->context.spmm = (struct spmm_context) {
           .n = convolution_op->group_output_channels,
-          .a = (const void*) ((uintptr_t) input + (convolution_op->first_input_channel * input_size * sizeof(float))),
-          .packed_weights = nonzero_values,
+          .scaled_m = input_size * sizeof(float),
+          .input = (const void*) ((uintptr_t) input + (convolution_op->first_input_channel * input_size * sizeof(float))),
+          .nonzero_weights = nonzero_values,
           .input_increments = input_increments,
           .output_channel_nonzeros = output_channel_nonzeros,
-          .c = output,
-          .batched_a_stride = input_batch_stride,
-          .batched_c_stride = output_batch_stride,
+          .output = output,
+          .batched_input_stride = input_batch_stride,
+          .batched_output_stride = output_batch_stride,
           .ukernel = convolution_op->ukernel.spmm.function,
       };
       memcpy(&convolution_op->context.spmm.params, params, sizeof(convolution_op->context.spmm.params));

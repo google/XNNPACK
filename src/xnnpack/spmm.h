@@ -18,13 +18,14 @@ extern "C" {
 
 #define DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
-    size_t m,                                             \
-    size_t n,                                             \
-    const float* a,                                       \
-    const float* w,                                       \
-    const int32_t* dmap,                                  \
-    const uint32_t* nmap,                                 \
-    float* c,                                             \
+    size_t mc,                                            \
+    size_t nc,                                            \
+    const float* input,                                   \
+    const float* weights,                                 \
+    const int32_t* widx_dmap,                             \
+    const uint32_t* nidx_nnzmap,                          \
+    float* output,                                        \
+    size_t output_stride,                                 \
     const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_1x1__scalar)
@@ -107,13 +108,14 @@ DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_32x4__neonf
 
 #define DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
-    size_t m,                                             \
-    size_t n,                                             \
-    const void* a,                                        \
-    const void* w,                                        \
-    const int32_t* dmap,                                  \
-    const uint32_t* nmap,                                 \
-    void* c,                                              \
+    size_t mc,                                            \
+    size_t nc,                                            \
+    const void* input,                                    \
+    const void* weights,                                  \
+    const int32_t* widx_dmap,                             \
+    const uint32_t* nidx_nnzmap,                          \
+    void* output,                                         \
+    size_t output_stride,                                 \
     const struct xnn_f16_scaleminmax_params* params);
 
 DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith)

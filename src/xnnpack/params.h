@@ -860,6 +860,7 @@ typedef void (*xnn_spmm_ukernel_function)(
     const int32_t* widx_dmap,
     const uint32_t* nidx_nnzmap,
     void* output,
+    size_t output_stride,
     const void* params);
 
 typedef void (*xnn_f16_spmm_minmax_ukernel_function)(
@@ -870,6 +871,7 @@ typedef void (*xnn_f16_spmm_minmax_ukernel_function)(
     const int32_t* widx_dmap,
     const uint32_t* nidx_nnzmap,
     void* output,
+    size_t output_stride,
     const struct xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_f32_spmm_minmax_ukernel_function)(
@@ -880,6 +882,7 @@ typedef void (*xnn_f32_spmm_minmax_ukernel_function)(
     const int32_t* widx_dmap,
     const uint32_t* nidx_nnzmap,
     float* output,
+    size_t output_stride,
     const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_packx_ukernel_function)(

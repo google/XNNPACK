@@ -119,20 +119,23 @@ struct spmm_context {
   // N dimension of the B and C matrices.
   // Corresponds to number of output channels in 1x1 convolution.
   size_t n;
+  // M dimension of the A and C matrices, pre-scaled by sizeof(element size).
+  // Corresponds to the stride, in bytes, between adjacent rows of C matrix.
+  size_t scaled_m;
   // Input matrix A.
-  const void* a;
+  const void* input;
   // Packed bias elements and non-zero filter elements.
-  const void* packed_weights;
+  const void* nonzero_weights;
   // Input pointer increments, in bytes, after each processed non-zero weight.
   const int32_t* input_increments;
   // Number of non-zero filter elements per each N (output channel) dimension.
   const uint32_t* output_channel_nonzeros;
   // Output matrix C.
-  void* c;
+  void* output;
   // Stride, in bytes, between matrices A corresponding to different images in batched 1x1 Convolution
-  size_t batched_a_stride;
+  size_t batched_input_stride;
   // Stride, in bytes, between matrices C corresponding to different images in batched 1x1 Convolution
-  size_t batched_c_stride;
+  size_t batched_output_stride;
   // Micro-kernel function pointer.
   xnn_spmm_ukernel_function ukernel;
   // Output activation parameters.

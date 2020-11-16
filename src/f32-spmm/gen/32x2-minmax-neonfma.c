@@ -15,46 +15,46 @@
 
 
 void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
-    size_t batch_size,
-    size_t output_channels,
+    size_t mc,
+    size_t nc,
     const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
     float*restrict output,
+    size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(batch_size != 0);
-  assert(batch_size % sizeof(float) == 0);
-  assert(output_channels != 0);
+  assert(mc != 0);
+  assert(mc % sizeof(float) == 0);
+  assert(nc != 0);
 
   const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
   const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
-  size_t output_decrement = batch_size * output_channels - 32 * sizeof(float);
-  size_t n = batch_size;
-  while XNN_LIKELY(n >= 32 * sizeof(float)) {
+  size_t output_decrement = output_stride * nc - 32 * sizeof(float);
+  while XNN_LIKELY(mc >= 32 * sizeof(float)) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
-    size_t c = output_channels;
-    while (c >= 2) {
+    size_t n = nc;
+    while (n >= 2) {
       uint32_t nnz = *nnzmap++;
-      float32x4_t vacc0123c0 = vld1q_dup_f32(w); w += 1;
-      float32x4_t vacc4567c0 = vacc0123c0;
-      float32x4_t vacc89ABc0 = vacc0123c0;
-      float32x4_t vaccCDEFc0 = vacc0123c0;
-      float32x4_t vaccGHIJc0 = vacc0123c0;
-      float32x4_t vaccKLMNc0 = vacc0123c0;
-      float32x4_t vaccOPQRc0 = vacc0123c0;
-      float32x4_t vaccSTUVc0 = vacc0123c0;
-      float32x4_t vacc0123c1 = vld1q_dup_f32(w); w += 1;
-      float32x4_t vacc4567c1 = vacc0123c1;
-      float32x4_t vacc89ABc1 = vacc0123c1;
-      float32x4_t vaccCDEFc1 = vacc0123c1;
-      float32x4_t vaccGHIJc1 = vacc0123c1;
-      float32x4_t vaccKLMNc1 = vacc0123c1;
-      float32x4_t vaccOPQRc1 = vacc0123c1;
-      float32x4_t vaccSTUVc1 = vacc0123c1;
+      float32x4_t vacc0123n0 = vld1q_dup_f32(w); w += 1;
+      float32x4_t vacc4567n0 = vacc0123n0;
+      float32x4_t vacc89ABn0 = vacc0123n0;
+      float32x4_t vaccCDEFn0 = vacc0123n0;
+      float32x4_t vaccGHIJn0 = vacc0123n0;
+      float32x4_t vaccKLMNn0 = vacc0123n0;
+      float32x4_t vaccOPQRn0 = vacc0123n0;
+      float32x4_t vaccSTUVn0 = vacc0123n0;
+      float32x4_t vacc0123n1 = vld1q_dup_f32(w); w += 1;
+      float32x4_t vacc4567n1 = vacc0123n1;
+      float32x4_t vacc89ABn1 = vacc0123n1;
+      float32x4_t vaccCDEFn1 = vacc0123n1;
+      float32x4_t vaccGHIJn1 = vacc0123n1;
+      float32x4_t vaccKLMNn1 = vacc0123n1;
+      float32x4_t vaccOPQRn1 = vacc0123n1;
+      float32x4_t vaccSTUVn1 = vacc0123n1;
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;
@@ -71,81 +71,81 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
           __builtin_prefetch(input + 32);
           const float32x2_t vw = vld1_f32(w); w += 2;
           __builtin_prefetch(w + 32);
-          vacc0123c0 = vfmaq_lane_f32(vacc0123c0, vi0123, vw, 0);
-          vacc4567c0 = vfmaq_lane_f32(vacc4567c0, vi4567, vw, 0);
-          vacc89ABc0 = vfmaq_lane_f32(vacc89ABc0, vi89AB, vw, 0);
-          vaccCDEFc0 = vfmaq_lane_f32(vaccCDEFc0, viCDEF, vw, 0);
-          vaccGHIJc0 = vfmaq_lane_f32(vaccGHIJc0, viGHIJ, vw, 0);
-          vaccKLMNc0 = vfmaq_lane_f32(vaccKLMNc0, viKLMN, vw, 0);
-          vaccOPQRc0 = vfmaq_lane_f32(vaccOPQRc0, viOPQR, vw, 0);
-          vaccSTUVc0 = vfmaq_lane_f32(vaccSTUVc0, viSTUV, vw, 0);
-          vacc0123c1 = vfmaq_lane_f32(vacc0123c1, vi0123, vw, 1);
-          vacc4567c1 = vfmaq_lane_f32(vacc4567c1, vi4567, vw, 1);
-          vacc89ABc1 = vfmaq_lane_f32(vacc89ABc1, vi89AB, vw, 1);
-          vaccCDEFc1 = vfmaq_lane_f32(vaccCDEFc1, viCDEF, vw, 1);
-          vaccGHIJc1 = vfmaq_lane_f32(vaccGHIJc1, viGHIJ, vw, 1);
-          vaccKLMNc1 = vfmaq_lane_f32(vaccKLMNc1, viKLMN, vw, 1);
-          vaccOPQRc1 = vfmaq_lane_f32(vaccOPQRc1, viOPQR, vw, 1);
-          vaccSTUVc1 = vfmaq_lane_f32(vaccSTUVc1, viSTUV, vw, 1);
+          vacc0123n0 = vfmaq_lane_f32(vacc0123n0, vi0123, vw, 0);
+          vacc4567n0 = vfmaq_lane_f32(vacc4567n0, vi4567, vw, 0);
+          vacc89ABn0 = vfmaq_lane_f32(vacc89ABn0, vi89AB, vw, 0);
+          vaccCDEFn0 = vfmaq_lane_f32(vaccCDEFn0, viCDEF, vw, 0);
+          vaccGHIJn0 = vfmaq_lane_f32(vaccGHIJn0, viGHIJ, vw, 0);
+          vaccKLMNn0 = vfmaq_lane_f32(vaccKLMNn0, viKLMN, vw, 0);
+          vaccOPQRn0 = vfmaq_lane_f32(vaccOPQRn0, viOPQR, vw, 0);
+          vaccSTUVn0 = vfmaq_lane_f32(vaccSTUVn0, viSTUV, vw, 0);
+          vacc0123n1 = vfmaq_lane_f32(vacc0123n1, vi0123, vw, 1);
+          vacc4567n1 = vfmaq_lane_f32(vacc4567n1, vi4567, vw, 1);
+          vacc89ABn1 = vfmaq_lane_f32(vacc89ABn1, vi89AB, vw, 1);
+          vaccCDEFn1 = vfmaq_lane_f32(vaccCDEFn1, viCDEF, vw, 1);
+          vaccGHIJn1 = vfmaq_lane_f32(vaccGHIJn1, viGHIJ, vw, 1);
+          vaccKLMNn1 = vfmaq_lane_f32(vaccKLMNn1, viKLMN, vw, 1);
+          vaccOPQRn1 = vfmaq_lane_f32(vaccOPQRn1, viOPQR, vw, 1);
+          vaccSTUVn1 = vfmaq_lane_f32(vaccSTUVn1, viSTUV, vw, 1);
         } while (--nnz != 0);
       }
-      float32x4_t vout0123c0 = vminq_f32(vacc0123c0, vmax);
-      float32x4_t vout4567c0 = vminq_f32(vacc4567c0, vmax);
-      float32x4_t vout89ABc0 = vminq_f32(vacc89ABc0, vmax);
-      float32x4_t voutCDEFc0 = vminq_f32(vaccCDEFc0, vmax);
-      float32x4_t voutGHIJc0 = vminq_f32(vaccGHIJc0, vmax);
-      float32x4_t voutKLMNc0 = vminq_f32(vaccKLMNc0, vmax);
-      float32x4_t voutOPQRc0 = vminq_f32(vaccOPQRc0, vmax);
-      float32x4_t voutSTUVc0 = vminq_f32(vaccSTUVc0, vmax);
-      float32x4_t vout0123c1 = vminq_f32(vacc0123c1, vmax);
-      float32x4_t vout4567c1 = vminq_f32(vacc4567c1, vmax);
-      float32x4_t vout89ABc1 = vminq_f32(vacc89ABc1, vmax);
-      float32x4_t voutCDEFc1 = vminq_f32(vaccCDEFc1, vmax);
-      float32x4_t voutGHIJc1 = vminq_f32(vaccGHIJc1, vmax);
-      float32x4_t voutKLMNc1 = vminq_f32(vaccKLMNc1, vmax);
-      float32x4_t voutOPQRc1 = vminq_f32(vaccOPQRc1, vmax);
-      float32x4_t voutSTUVc1 = vminq_f32(vaccSTUVc1, vmax);
+      float32x4_t vout0123n0 = vminq_f32(vacc0123n0, vmax);
+      float32x4_t vout4567n0 = vminq_f32(vacc4567n0, vmax);
+      float32x4_t vout89ABn0 = vminq_f32(vacc89ABn0, vmax);
+      float32x4_t voutCDEFn0 = vminq_f32(vaccCDEFn0, vmax);
+      float32x4_t voutGHIJn0 = vminq_f32(vaccGHIJn0, vmax);
+      float32x4_t voutKLMNn0 = vminq_f32(vaccKLMNn0, vmax);
+      float32x4_t voutOPQRn0 = vminq_f32(vaccOPQRn0, vmax);
+      float32x4_t voutSTUVn0 = vminq_f32(vaccSTUVn0, vmax);
+      float32x4_t vout0123n1 = vminq_f32(vacc0123n1, vmax);
+      float32x4_t vout4567n1 = vminq_f32(vacc4567n1, vmax);
+      float32x4_t vout89ABn1 = vminq_f32(vacc89ABn1, vmax);
+      float32x4_t voutCDEFn1 = vminq_f32(vaccCDEFn1, vmax);
+      float32x4_t voutGHIJn1 = vminq_f32(vaccGHIJn1, vmax);
+      float32x4_t voutKLMNn1 = vminq_f32(vaccKLMNn1, vmax);
+      float32x4_t voutOPQRn1 = vminq_f32(vaccOPQRn1, vmax);
+      float32x4_t voutSTUVn1 = vminq_f32(vaccSTUVn1, vmax);
 
-      vout0123c0 = vmaxq_f32(vout0123c0, vmin);
-      vout4567c0 = vmaxq_f32(vout4567c0, vmin);
-      vout89ABc0 = vmaxq_f32(vout89ABc0, vmin);
-      voutCDEFc0 = vmaxq_f32(voutCDEFc0, vmin);
-      voutGHIJc0 = vmaxq_f32(voutGHIJc0, vmin);
-      voutKLMNc0 = vmaxq_f32(voutKLMNc0, vmin);
-      voutOPQRc0 = vmaxq_f32(voutOPQRc0, vmin);
-      voutSTUVc0 = vmaxq_f32(voutSTUVc0, vmin);
-      vout0123c1 = vmaxq_f32(vout0123c1, vmin);
-      vout4567c1 = vmaxq_f32(vout4567c1, vmin);
-      vout89ABc1 = vmaxq_f32(vout89ABc1, vmin);
-      voutCDEFc1 = vmaxq_f32(voutCDEFc1, vmin);
-      voutGHIJc1 = vmaxq_f32(voutGHIJc1, vmin);
-      voutKLMNc1 = vmaxq_f32(voutKLMNc1, vmin);
-      voutOPQRc1 = vmaxq_f32(voutOPQRc1, vmin);
-      voutSTUVc1 = vmaxq_f32(voutSTUVc1, vmin);
+      vout0123n0 = vmaxq_f32(vout0123n0, vmin);
+      vout4567n0 = vmaxq_f32(vout4567n0, vmin);
+      vout89ABn0 = vmaxq_f32(vout89ABn0, vmin);
+      voutCDEFn0 = vmaxq_f32(voutCDEFn0, vmin);
+      voutGHIJn0 = vmaxq_f32(voutGHIJn0, vmin);
+      voutKLMNn0 = vmaxq_f32(voutKLMNn0, vmin);
+      voutOPQRn0 = vmaxq_f32(voutOPQRn0, vmin);
+      voutSTUVn0 = vmaxq_f32(voutSTUVn0, vmin);
+      vout0123n1 = vmaxq_f32(vout0123n1, vmin);
+      vout4567n1 = vmaxq_f32(vout4567n1, vmin);
+      vout89ABn1 = vmaxq_f32(vout89ABn1, vmin);
+      voutCDEFn1 = vmaxq_f32(voutCDEFn1, vmin);
+      voutGHIJn1 = vmaxq_f32(voutGHIJn1, vmin);
+      voutKLMNn1 = vmaxq_f32(voutKLMNn1, vmin);
+      voutOPQRn1 = vmaxq_f32(voutOPQRn1, vmin);
+      voutSTUVn1 = vmaxq_f32(voutSTUVn1, vmin);
 
-      vst1q_f32(output + 0, vout0123c0);
-      vst1q_f32(output + 4, vout4567c0);
-      vst1q_f32(output + 8, vout89ABc0);
-      vst1q_f32(output + 12, voutCDEFc0);
-      vst1q_f32(output + 16, voutGHIJc0);
-      vst1q_f32(output + 20, voutKLMNc0);
-      vst1q_f32(output + 24, voutOPQRc0);
-      vst1q_f32(output + 28, voutSTUVc0);
-      output = (float*restrict) ((uintptr_t) output + batch_size);
-      vst1q_f32(output + 0, vout0123c1);
-      vst1q_f32(output + 4, vout4567c1);
-      vst1q_f32(output + 8, vout89ABc1);
-      vst1q_f32(output + 12, voutCDEFc1);
-      vst1q_f32(output + 16, voutGHIJc1);
-      vst1q_f32(output + 20, voutKLMNc1);
-      vst1q_f32(output + 24, voutOPQRc1);
-      vst1q_f32(output + 28, voutSTUVc1);
-      output = (float*restrict) ((uintptr_t) output + batch_size);
-      c -= 2;
+      vst1q_f32(output + 0, vout0123n0);
+      vst1q_f32(output + 4, vout4567n0);
+      vst1q_f32(output + 8, vout89ABn0);
+      vst1q_f32(output + 12, voutCDEFn0);
+      vst1q_f32(output + 16, voutGHIJn0);
+      vst1q_f32(output + 20, voutKLMNn0);
+      vst1q_f32(output + 24, voutOPQRn0);
+      vst1q_f32(output + 28, voutSTUVn0);
+      output = (float*restrict) ((uintptr_t) output + output_stride);
+      vst1q_f32(output + 0, vout0123n1);
+      vst1q_f32(output + 4, vout4567n1);
+      vst1q_f32(output + 8, vout89ABn1);
+      vst1q_f32(output + 12, voutCDEFn1);
+      vst1q_f32(output + 16, voutGHIJn1);
+      vst1q_f32(output + 20, voutKLMNn1);
+      vst1q_f32(output + 24, voutOPQRn1);
+      vst1q_f32(output + 28, voutSTUVn1);
+      output = (float*restrict) ((uintptr_t) output + output_stride);
+      n -= 2;
     }
 
     // clean up loop, fall back to nr=1
-    if XNN_UNLIKELY(c != 0) {
+    if XNN_UNLIKELY(n != 0) {
       do {
         uint32_t nnz = *nnzmap++;
         float32x4_t vacc0123 = vld1q_dup_f32(w); w += 1;
@@ -208,31 +208,31 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
         vst1q_f32(output + 20, voutKLMN);
         vst1q_f32(output + 24, voutOPQR);
         vst1q_f32(output + 28, voutSTUV);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        c -= 1;
-      } while (c != 0);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        n -= 1;
+      } while (n != 0);
     }
     output = (float*restrict) ((uintptr_t) output - output_decrement);
     input += 32;
-    n -= 32 * sizeof(float);
+    mc -= 32 * sizeof(float);
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(mc != 0) {
     output_decrement += 16 * sizeof(float);
-    if (n & (16 * sizeof(float))) {
+    if (mc & (16 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
-      size_t c = output_channels;
-      while (c >= 2) {
+      size_t n = nc;
+      while (n >= 2) {
         uint32_t nnz = *nnzmap++;
-        float32x4_t vacc0123c0 = vld1q_dup_f32(w); w += 1;
-        float32x4_t vacc4567c0 = vacc0123c0;
-        float32x4_t vacc89ABc0 = vacc0123c0;
-        float32x4_t vaccCDEFc0 = vacc0123c0;
-        float32x4_t vacc0123c1 = vld1q_dup_f32(w); w += 1;
-        float32x4_t vacc4567c1 = vacc0123c1;
-        float32x4_t vacc89ABc1 = vacc0123c1;
-        float32x4_t vaccCDEFc1 = vacc0123c1;
+        float32x4_t vacc0123n0 = vld1q_dup_f32(w); w += 1;
+        float32x4_t vacc4567n0 = vacc0123n0;
+        float32x4_t vacc89ABn0 = vacc0123n0;
+        float32x4_t vaccCDEFn0 = vacc0123n0;
+        float32x4_t vacc0123n1 = vld1q_dup_f32(w); w += 1;
+        float32x4_t vacc4567n1 = vacc0123n1;
+        float32x4_t vacc89ABn1 = vacc0123n1;
+        float32x4_t vaccCDEFn1 = vacc0123n1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
@@ -243,49 +243,49 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
             const float32x2_t vw = vld1_f32(w); w += 2;
 
-            vacc0123c0 = vfmaq_lane_f32(vacc0123c0, vi0123, vw, 0);
-            vacc4567c0 = vfmaq_lane_f32(vacc4567c0, vi4567, vw, 0);
-            vacc89ABc0 = vfmaq_lane_f32(vacc89ABc0, vi89AB, vw, 0);
-            vaccCDEFc0 = vfmaq_lane_f32(vaccCDEFc0, viCDEF, vw, 0);
-            vacc0123c1 = vfmaq_lane_f32(vacc0123c1, vi0123, vw, 1);
-            vacc4567c1 = vfmaq_lane_f32(vacc4567c1, vi4567, vw, 1);
-            vacc89ABc1 = vfmaq_lane_f32(vacc89ABc1, vi89AB, vw, 1);
-            vaccCDEFc1 = vfmaq_lane_f32(vaccCDEFc1, viCDEF, vw, 1);
+            vacc0123n0 = vfmaq_lane_f32(vacc0123n0, vi0123, vw, 0);
+            vacc4567n0 = vfmaq_lane_f32(vacc4567n0, vi4567, vw, 0);
+            vacc89ABn0 = vfmaq_lane_f32(vacc89ABn0, vi89AB, vw, 0);
+            vaccCDEFn0 = vfmaq_lane_f32(vaccCDEFn0, viCDEF, vw, 0);
+            vacc0123n1 = vfmaq_lane_f32(vacc0123n1, vi0123, vw, 1);
+            vacc4567n1 = vfmaq_lane_f32(vacc4567n1, vi4567, vw, 1);
+            vacc89ABn1 = vfmaq_lane_f32(vacc89ABn1, vi89AB, vw, 1);
+            vaccCDEFn1 = vfmaq_lane_f32(vaccCDEFn1, viCDEF, vw, 1);
           } while (--nnz != 0);
         }
-        float32x4_t vout0123c0 = vminq_f32(vacc0123c0, vmax);
-        float32x4_t vout4567c0 = vminq_f32(vacc4567c0, vmax);
-        float32x4_t vout89ABc0 = vminq_f32(vacc89ABc0, vmax);
-        float32x4_t voutCDEFc0 = vminq_f32(vaccCDEFc0, vmax);
-        float32x4_t vout0123c1 = vminq_f32(vacc0123c1, vmax);
-        float32x4_t vout4567c1 = vminq_f32(vacc4567c1, vmax);
-        float32x4_t vout89ABc1 = vminq_f32(vacc89ABc1, vmax);
-        float32x4_t voutCDEFc1 = vminq_f32(vaccCDEFc1, vmax);
+        float32x4_t vout0123n0 = vminq_f32(vacc0123n0, vmax);
+        float32x4_t vout4567n0 = vminq_f32(vacc4567n0, vmax);
+        float32x4_t vout89ABn0 = vminq_f32(vacc89ABn0, vmax);
+        float32x4_t voutCDEFn0 = vminq_f32(vaccCDEFn0, vmax);
+        float32x4_t vout0123n1 = vminq_f32(vacc0123n1, vmax);
+        float32x4_t vout4567n1 = vminq_f32(vacc4567n1, vmax);
+        float32x4_t vout89ABn1 = vminq_f32(vacc89ABn1, vmax);
+        float32x4_t voutCDEFn1 = vminq_f32(vaccCDEFn1, vmax);
 
-        vout0123c0 = vmaxq_f32(vout0123c0, vmin);
-        vout4567c0 = vmaxq_f32(vout4567c0, vmin);
-        vout89ABc0 = vmaxq_f32(vout89ABc0, vmin);
-        voutCDEFc0 = vmaxq_f32(voutCDEFc0, vmin);
-        vout0123c1 = vmaxq_f32(vout0123c1, vmin);
-        vout4567c1 = vmaxq_f32(vout4567c1, vmin);
-        vout89ABc1 = vmaxq_f32(vout89ABc1, vmin);
-        voutCDEFc1 = vmaxq_f32(voutCDEFc1, vmin);
+        vout0123n0 = vmaxq_f32(vout0123n0, vmin);
+        vout4567n0 = vmaxq_f32(vout4567n0, vmin);
+        vout89ABn0 = vmaxq_f32(vout89ABn0, vmin);
+        voutCDEFn0 = vmaxq_f32(voutCDEFn0, vmin);
+        vout0123n1 = vmaxq_f32(vout0123n1, vmin);
+        vout4567n1 = vmaxq_f32(vout4567n1, vmin);
+        vout89ABn1 = vmaxq_f32(vout89ABn1, vmin);
+        voutCDEFn1 = vmaxq_f32(voutCDEFn1, vmin);
 
-        vst1q_f32(output + 0, vout0123c0);
-        vst1q_f32(output + 4, vout4567c0);
-        vst1q_f32(output + 8, vout89ABc0);
-        vst1q_f32(output + 12, voutCDEFc0);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        vst1q_f32(output + 0, vout0123c1);
-        vst1q_f32(output + 4, vout4567c1);
-        vst1q_f32(output + 8, vout89ABc1);
-        vst1q_f32(output + 12, voutCDEFc1);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        c -= 2;
+        vst1q_f32(output + 0, vout0123n0);
+        vst1q_f32(output + 4, vout4567n0);
+        vst1q_f32(output + 8, vout89ABn0);
+        vst1q_f32(output + 12, voutCDEFn0);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        vst1q_f32(output + 0, vout0123n1);
+        vst1q_f32(output + 4, vout4567n1);
+        vst1q_f32(output + 8, vout89ABn1);
+        vst1q_f32(output + 12, voutCDEFn1);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        n -= 2;
       }
 
       // clean up loop, fall back to nr=1
-      if XNN_UNLIKELY(c != 0) {
+      if XNN_UNLIKELY(n != 0) {
         do {
           uint32_t nnz = *nnzmap++;
           float32x4_t vacc0123 = vld1q_dup_f32(w); w += 1;
@@ -321,25 +321,25 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
           vst1q_f32(output + 4, vout4567);
           vst1q_f32(output + 8, vout89AB);
           vst1q_f32(output + 12, voutCDEF);
-          output = (float*restrict) ((uintptr_t) output + batch_size);
-          c -= 1;
-        } while (c != 0);
+          output = (float*restrict) ((uintptr_t) output + output_stride);
+          n -= 1;
+        } while (n != 0);
       }
       output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 16;
     }
     output_decrement += 8 * sizeof(float);
-    if (n & (8 * sizeof(float))) {
+    if (mc & (8 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
-      size_t c = output_channels;
-      while (c >= 2) {
+      size_t n = nc;
+      while (n >= 2) {
         uint32_t nnz = *nnzmap++;
-        float32x4_t vacc0123c0 = vld1q_dup_f32(w); w += 1;
-        float32x4_t vacc4567c0 = vacc0123c0;
-        float32x4_t vacc0123c1 = vld1q_dup_f32(w); w += 1;
-        float32x4_t vacc4567c1 = vacc0123c1;
+        float32x4_t vacc0123n0 = vld1q_dup_f32(w); w += 1;
+        float32x4_t vacc4567n0 = vacc0123n0;
+        float32x4_t vacc0123n1 = vld1q_dup_f32(w); w += 1;
+        float32x4_t vacc4567n1 = vacc0123n1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
@@ -348,33 +348,33 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
             const float32x2_t vw = vld1_f32(w); w += 2;
 
-            vacc0123c0 = vfmaq_lane_f32(vacc0123c0, vi0123, vw, 0);
-            vacc4567c0 = vfmaq_lane_f32(vacc4567c0, vi4567, vw, 0);
-            vacc0123c1 = vfmaq_lane_f32(vacc0123c1, vi0123, vw, 1);
-            vacc4567c1 = vfmaq_lane_f32(vacc4567c1, vi4567, vw, 1);
+            vacc0123n0 = vfmaq_lane_f32(vacc0123n0, vi0123, vw, 0);
+            vacc4567n0 = vfmaq_lane_f32(vacc4567n0, vi4567, vw, 0);
+            vacc0123n1 = vfmaq_lane_f32(vacc0123n1, vi0123, vw, 1);
+            vacc4567n1 = vfmaq_lane_f32(vacc4567n1, vi4567, vw, 1);
           } while (--nnz != 0);
         }
-        float32x4_t vout0123c0 = vminq_f32(vacc0123c0, vmax);
-        float32x4_t vout4567c0 = vminq_f32(vacc4567c0, vmax);
-        float32x4_t vout0123c1 = vminq_f32(vacc0123c1, vmax);
-        float32x4_t vout4567c1 = vminq_f32(vacc4567c1, vmax);
+        float32x4_t vout0123n0 = vminq_f32(vacc0123n0, vmax);
+        float32x4_t vout4567n0 = vminq_f32(vacc4567n0, vmax);
+        float32x4_t vout0123n1 = vminq_f32(vacc0123n1, vmax);
+        float32x4_t vout4567n1 = vminq_f32(vacc4567n1, vmax);
 
-        vout0123c0 = vmaxq_f32(vout0123c0, vmin);
-        vout4567c0 = vmaxq_f32(vout4567c0, vmin);
-        vout0123c1 = vmaxq_f32(vout0123c1, vmin);
-        vout4567c1 = vmaxq_f32(vout4567c1, vmin);
+        vout0123n0 = vmaxq_f32(vout0123n0, vmin);
+        vout4567n0 = vmaxq_f32(vout4567n0, vmin);
+        vout0123n1 = vmaxq_f32(vout0123n1, vmin);
+        vout4567n1 = vmaxq_f32(vout4567n1, vmin);
 
-        vst1q_f32(output + 0, vout0123c0);
-        vst1q_f32(output + 4, vout4567c0);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        vst1q_f32(output + 0, vout0123c1);
-        vst1q_f32(output + 4, vout4567c1);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        c -= 2;
+        vst1q_f32(output + 0, vout0123n0);
+        vst1q_f32(output + 4, vout4567n0);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        vst1q_f32(output + 0, vout0123n1);
+        vst1q_f32(output + 4, vout4567n1);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        n -= 2;
       }
 
       // clean up loop, fall back to nr=1
-      if XNN_UNLIKELY(c != 0) {
+      if XNN_UNLIKELY(n != 0) {
         do {
           uint32_t nnz = *nnzmap++;
           float32x4_t vacc0123 = vld1q_dup_f32(w); w += 1;
@@ -398,23 +398,23 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
 
           vst1q_f32(output + 0, vout0123);
           vst1q_f32(output + 4, vout4567);
-          output = (float*restrict) ((uintptr_t) output + batch_size);
-          c -= 1;
-        } while (c != 0);
+          output = (float*restrict) ((uintptr_t) output + output_stride);
+          n -= 1;
+        } while (n != 0);
       }
       output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 8;
     }
     output_decrement += 4 * sizeof(float);
-    if (n & (4 * sizeof(float))) {
+    if (mc & (4 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
-      size_t c = output_channels;
-      while (c >= 2) {
+      size_t n = nc;
+      while (n >= 2) {
         uint32_t nnz = *nnzmap++;
-        float32x4_t vacc0123c0 = vld1q_dup_f32(w); w += 1;
-        float32x4_t vacc0123c1 = vld1q_dup_f32(w); w += 1;
+        float32x4_t vacc0123n0 = vld1q_dup_f32(w); w += 1;
+        float32x4_t vacc0123n1 = vld1q_dup_f32(w); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
@@ -422,25 +422,25 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
             const float32x2_t vw = vld1_f32(w); w += 2;
 
-            vacc0123c0 = vfmaq_lane_f32(vacc0123c0, vi0123, vw, 0);
-            vacc0123c1 = vfmaq_lane_f32(vacc0123c1, vi0123, vw, 1);
+            vacc0123n0 = vfmaq_lane_f32(vacc0123n0, vi0123, vw, 0);
+            vacc0123n1 = vfmaq_lane_f32(vacc0123n1, vi0123, vw, 1);
           } while (--nnz != 0);
         }
-        float32x4_t vout0123c0 = vminq_f32(vacc0123c0, vmax);
-        float32x4_t vout0123c1 = vminq_f32(vacc0123c1, vmax);
+        float32x4_t vout0123n0 = vminq_f32(vacc0123n0, vmax);
+        float32x4_t vout0123n1 = vminq_f32(vacc0123n1, vmax);
 
-        vout0123c0 = vmaxq_f32(vout0123c0, vmin);
-        vout0123c1 = vmaxq_f32(vout0123c1, vmin);
+        vout0123n0 = vmaxq_f32(vout0123n0, vmin);
+        vout0123n1 = vmaxq_f32(vout0123n1, vmin);
 
-        vst1q_f32(output + 0, vout0123c0);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        vst1q_f32(output + 0, vout0123c1);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        c -= 2;
+        vst1q_f32(output + 0, vout0123n0);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        vst1q_f32(output + 0, vout0123n1);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        n -= 2;
       }
 
       // clean up loop, fall back to nr=1
-      if XNN_UNLIKELY(c != 0) {
+      if XNN_UNLIKELY(n != 0) {
         do {
           uint32_t nnz = *nnzmap++;
           float32x4_t vacc0123 = vld1q_dup_f32(w); w += 1;
@@ -458,23 +458,23 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
           vout0123 = vmaxq_f32(vout0123, vmin);
 
           vst1q_f32(output + 0, vout0123);
-          output = (float*restrict) ((uintptr_t) output + batch_size);
-          c -= 1;
-        } while (c != 0);
+          output = (float*restrict) ((uintptr_t) output + output_stride);
+          n -= 1;
+        } while (n != 0);
       }
       output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 4;
     }
     output_decrement += 2 * sizeof(float);
-    if (n & (2 * sizeof(float))) {
+    if (mc & (2 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
-      size_t c = output_channels;
-      while (c >= 2) {
+      size_t n = nc;
+      while (n >= 2) {
         uint32_t nnz = *nnzmap++;
-        float32x2_t vacc01c0 = vld1_dup_f32(w); w += 1;
-        float32x2_t vacc01c1 = vld1_dup_f32(w); w += 1;
+        float32x2_t vacc01n0 = vld1_dup_f32(w); w += 1;
+        float32x2_t vacc01n1 = vld1_dup_f32(w); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
@@ -482,25 +482,25 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
             const float32x2_t vw = vld1_f32(w); w += 2;
 
-            vacc01c0 = vfma_lane_f32(vacc01c0, vi01, vw, 0);
-            vacc01c1 = vfma_lane_f32(vacc01c1, vi01, vw, 1);
+            vacc01n0 = vfma_lane_f32(vacc01n0, vi01, vw, 0);
+            vacc01n1 = vfma_lane_f32(vacc01n1, vi01, vw, 1);
           } while (--nnz != 0);
         }
-        float32x2_t vout01c0 = vmin_f32(vacc01c0, vget_low_f32(vmax));
-        float32x2_t vout01c1 = vmin_f32(vacc01c1, vget_low_f32(vmax));
+        float32x2_t vout01n0 = vmin_f32(vacc01n0, vget_low_f32(vmax));
+        float32x2_t vout01n1 = vmin_f32(vacc01n1, vget_low_f32(vmax));
 
-        vout01c0 = vmax_f32(vout01c0, vget_low_f32(vmin));
-        vout01c1 = vmax_f32(vout01c1, vget_low_f32(vmin));
+        vout01n0 = vmax_f32(vout01n0, vget_low_f32(vmin));
+        vout01n1 = vmax_f32(vout01n1, vget_low_f32(vmin));
 
-        vst1_f32(output + 0, vout01c0);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        vst1_f32(output + 0, vout01c1);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        c -= 2;
+        vst1_f32(output + 0, vout01n0);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        vst1_f32(output + 0, vout01n1);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        n -= 2;
       }
 
       // clean up loop, fall back to nr=1
-      if XNN_UNLIKELY(c != 0) {
+      if XNN_UNLIKELY(n != 0) {
         do {
           uint32_t nnz = *nnzmap++;
           float32x2_t vacc01 = vld1_dup_f32(w); w += 1;
@@ -517,23 +517,23 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
           vout01 = vmax_f32(vout01, vget_low_f32(vmin));
 
           vst1_f32(output, vout01);
-          output = (float*restrict) ((uintptr_t) output + batch_size);
-          c -= 1;
-        } while (c != 0);
+          output = (float*restrict) ((uintptr_t) output + output_stride);
+          n -= 1;
+        } while (n != 0);
       }
       output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 2;
     }
     output_decrement += 1 * sizeof(float);
-    if (n & (1 * sizeof(float))) {
+    if (mc & (1 * sizeof(float))) {
       const float*restrict w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
-      size_t c = output_channels;
-      while (c >= 2) {
+      size_t n = nc;
+      while (n >= 2) {
         uint32_t nnz = *nnzmap++;
-        float32x2_t vacc0c0 = vld1_dup_f32(w); w += 1;
-        float32x2_t vacc0c1 = vld1_dup_f32(w); w += 1;
+        float32x2_t vacc0n0 = vld1_dup_f32(w); w += 1;
+        float32x2_t vacc0n1 = vld1_dup_f32(w); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
@@ -541,25 +541,25 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
             const float32x2_t vw = vld1_f32(w); w += 2;
 
-            vacc0c0 = vfma_lane_f32(vacc0c0, vi0, vw, 0);
-            vacc0c1 = vfma_lane_f32(vacc0c1, vi0, vw, 1);
+            vacc0n0 = vfma_lane_f32(vacc0n0, vi0, vw, 0);
+            vacc0n1 = vfma_lane_f32(vacc0n1, vi0, vw, 1);
           } while (--nnz != 0);
         }
-        float32x2_t vout0c0 = vmin_f32(vacc0c0, vget_low_f32(vmax));
-        float32x2_t vout0c1 = vmin_f32(vacc0c1, vget_low_f32(vmax));
+        float32x2_t vout0n0 = vmin_f32(vacc0n0, vget_low_f32(vmax));
+        float32x2_t vout0n1 = vmin_f32(vacc0n1, vget_low_f32(vmax));
 
-        vout0c0 = vmax_f32(vout0c0, vget_low_f32(vmin));
-        vout0c1 = vmax_f32(vout0c1, vget_low_f32(vmin));
+        vout0n0 = vmax_f32(vout0n0, vget_low_f32(vmin));
+        vout0n1 = vmax_f32(vout0n1, vget_low_f32(vmin));
 
-        vst1_lane_f32(output + 0, vout0c0, 0);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        vst1_lane_f32(output + 0, vout0c1, 0);
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        c -= 2;
+        vst1_lane_f32(output + 0, vout0n0, 0);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        vst1_lane_f32(output + 0, vout0n1, 0);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        n -= 2;
       }
 
       // clean up loop, fall back to nr=1
-      if XNN_UNLIKELY(c != 0) {
+      if XNN_UNLIKELY(n != 0) {
         do {
           uint32_t nnz = *nnzmap++;
           float32x2_t vacc0 = vld1_dup_f32(w); w += 1;
@@ -576,9 +576,9 @@ void xnn_f32_spmm_minmax_ukernel_32x2__neonfma(
           vout0 = vmax_f32(vout0, vget_low_f32(vmin));
 
           vst1_lane_f32(output, vout0, 1);
-          output = (float*restrict) ((uintptr_t) output + batch_size);
-          c -= 1;
-        } while (c != 0);
+          output = (float*restrict) ((uintptr_t) output + output_stride);
+          n -= 1;
+        } while (n != 0);
       }
       output = (float*restrict) ((uintptr_t) output - output_decrement);
       input += 1;

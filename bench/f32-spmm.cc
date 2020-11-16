@@ -141,12 +141,12 @@ static void SpMMBenchmark(benchmark::State& state,
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    spmm(mc, nc,
+    spmm(mc * sizeof(float), nc,
       a.data() + a_offsets[buffer_index],
       w.data() + buffer_index * w_elements,
       dmap.data() + buffer_index * dmap_elements,
       nmap.data() + buffer_index * nmap_elements,
-      c.data() + buffer_index * c_elements,
+      c.data() + buffer_index * c_elements, mc * sizeof(float),
       &params);
   }
 

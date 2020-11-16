@@ -286,6 +286,24 @@ TEST(${TEST_NAME}, m_gt_${MR}) {
   }
 }
 
+TEST(${TEST_NAME}, output_stride) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (uint32_t n = 1; n < ${max(10, NR * 5)}; n += ${NR + 1}) {
+    for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
+      SpMMMicrokernelTester()
+        .mr(${MR})
+        .nr(${NR})
+        .m(${MR * 2})
+        .n(n)
+        .k(k)
+        .output_stride(${next_prime(MR * 2 + 1)})
+        .sparsity(0.0f)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+}
+
 TEST(${TEST_NAME}, qmin) {
   $if ISA_CHECK:
     ${ISA_CHECK};

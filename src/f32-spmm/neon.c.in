@@ -13,28 +13,28 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
-    size_t batch_size,
-    size_t output_channels,
+    size_t mc,
+    size_t nc,
     const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
     float*restrict output,
+    size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(batch_size != 0);
-  assert(batch_size % sizeof(float) == 0);
-  assert(output_channels != 0);
+  assert(mc != 0);
+  assert(mc % sizeof(float) == 0);
+  assert(nc != 0);
 
   const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
   const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
-  size_t output_decrement = batch_size * output_channels - ${MR} * sizeof(float);
-  size_t n = batch_size;
-  while XNN_LIKELY(n >= ${MR} * sizeof(float)) {
+  size_t output_decrement = output_stride * nc - ${MR} * sizeof(float);
+  while XNN_LIKELY(mc >= ${MR} * sizeof(float)) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
-    size_t c = output_channels;
+    size_t n = nc;
     do {
       uint32_t nnz = *nnzmap++;
       $if UNROLL > 1:
@@ -92,24 +92,24 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"
       vst1q_f32(output, vout0123);
       $for M in range(4, MR, 4):
         vst1q_f32(output + ${M}, vout${ABC[M:M+4]});
-      output = (float*restrict) ((uintptr_t) output + batch_size);
-    } while (--c != 0);
+      output = (float*restrict) ((uintptr_t) output + output_stride);
+    } while (--n != 0);
     output = (float*restrict) ((uintptr_t) output - output_decrement);
     input += ${MR};
-    n -= ${MR} * sizeof(float);
+    mc -= ${MR} * sizeof(float);
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(mc != 0) {
     $for LOG2M in reversed(range((MR - 1).bit_length())):
       $SUBMR = 1 << LOG2M
       $if SUBMR * 2 >= MR:
         output_decrement += ${MR - SUBMR} * sizeof(float);
       $else:
         output_decrement += ${SUBMR} * sizeof(float);
-      if (n & (${SUBMR} * sizeof(float))) {
+      if (mc & (${SUBMR} * sizeof(float))) {
         const float*restrict w = weights;
         const int32_t* dmap = widx_dmap;
         const uint32_t* nnzmap = nidx_nnzmap;
-        size_t c = output_channels;
+        size_t n = nc;
         do {
           uint32_t nnz = *nnzmap++;
           $if SUBMR <= 2:
@@ -156,8 +156,8 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"
             vst1q_f32(output, vout0123);
             $for M in range(4, SUBMR, 4):
               vst1q_f32(output + ${M}, vout${ABC[M:M+4]});
-          output = (float*restrict) ((uintptr_t) output + batch_size);
-        } while (--c != 0);
+          output = (float*restrict) ((uintptr_t) output + output_stride);
+        } while (--n != 0);
         output = (float*restrict) ((uintptr_t) output - output_decrement);
         input += ${SUBMR};
       }

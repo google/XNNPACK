@@ -78,11 +78,12 @@ void xnn_compute_spmm(
   context->ukernel(
       mr_block_size,
       context->n,
-      (const void*) ((uintptr_t) context->a + batch_index * context->batched_a_stride + mr_block_start * sizeof(float)),
-      context->packed_weights,
+      (const void*) ((uintptr_t) context->input + batch_index * context->batched_input_stride + mr_block_start),
+      context->nonzero_weights,
       context->input_increments,
       context->output_channel_nonzeros,
-      (void*) ((uintptr_t) context->c + batch_index * context->batched_c_stride + mr_block_start * sizeof(float)),
+      (void*) ((uintptr_t) context->output + batch_index * context->batched_output_stride + mr_block_start),
+      context->scaled_m,
       &context->params);
 }
 

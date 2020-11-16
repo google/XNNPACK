@@ -14,29 +14,29 @@
 
 
 void xnn_f32_spmm_minmax_ukernel_1x1__scalar(
-    size_t batch_size,
-    size_t output_channels,
+    size_t mc,
+    size_t nc,
     const float*restrict input,
     const float*restrict weights,
     const int32_t*restrict widx_dmap,
     const uint32_t*restrict nidx_nnzmap,
     float*restrict output,
+    size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(batch_size != 0);
-  assert(batch_size % sizeof(float) == 0);
-  assert(output_channels != 0);
+  assert(mc != 0);
+  assert(mc % sizeof(float) == 0);
+  assert(nc != 0);
 
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
-  size_t output_decrement = batch_size * output_channels - 1 * sizeof(float);
-  size_t n = batch_size;
-  while (n >= 1 * sizeof(float)) {
+  size_t output_decrement = output_stride * nc - 1 * sizeof(float);
+  while (mc >= 1 * sizeof(float)) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
-    size_t c = output_channels;
-    while (c >= 1) {
+    size_t n = nc;
+    while (n >= 1) {
       uint32_t nnz = *nnzmap++;
       float vacc0x0 = *w++;
       if XNN_LIKELY(nnz != 0) {
@@ -52,10 +52,10 @@ void xnn_f32_spmm_minmax_ukernel_1x1__scalar(
       vout0x0 = math_max_f32(vout0x0, vmin);
       output[0] = vout0x0;
       output[0] = vout0x0;
-      output = (float*restrict) ((uintptr_t) output + batch_size);
-      c -= 1;
+      output = (float*restrict) ((uintptr_t) output + output_stride);
+      n -= 1;
     }
-    if XNN_UNLIKELY(c != 0) {
+    if XNN_UNLIKELY(n != 0) {
       do {
         uint32_t nnz = *nnzmap++;
         float vacc0 = *w++;
@@ -71,14 +71,14 @@ void xnn_f32_spmm_minmax_ukernel_1x1__scalar(
         float vout0 = math_min_f32(vacc0, vmax);
         vout0 = math_max_f32(vout0, vmin);
         output[0] = vout0;
-        output = (float*restrict) ((uintptr_t) output + batch_size);
-        c -= 1;
-      } while (c != 0);
+        output = (float*restrict) ((uintptr_t) output + output_stride);
+        n -= 1;
+      } while (n != 0);
     }
     output = (float*restrict) ((uintptr_t) output - output_decrement);
     input += 1;
-    n -= 1 * sizeof(float);
+    mc -= 1 * sizeof(float);
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(mc != 0) {
   }
 }
