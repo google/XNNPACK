@@ -581,25 +581,25 @@ static void DWConv2DBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__sse_3x4_acc2)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  static void dwconv2d_chw_3x3p1__psimd_1x4_acc3(benchmark::State& state, const char* net) {
-    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__psimd_1x4_acc3, 3, 3, 1, 1);
+#if XNN_ARCH_WASMSIMD
+  static void dwconv2d_chw_3x3p1__wasmsimd_1x4_acc3(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_arm_1x4_acc3, 3, 3, 1, 1);
   }
-  static void dwconv2d_chw_3x3s2p1__psimd_1x4_acc3(benchmark::State& state, const char* net) {
-    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__psimd_1x4_acc3, 3, 3, 1, 2);
+  static void dwconv2d_chw_3x3s2p1__wasmsimd_1x4_acc3(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_arm_1x4_acc3, 3, 3, 1, 2);
   }
-  static void dwconv2d_chw_5x5p2__psimd_3x4(benchmark::State& state, const char* net) {
-    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__psimd_3x4, 5, 5, 2, 1);
+  static void dwconv2d_chw_5x5p2__wasmsimd_3x4(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4, 5, 5, 2, 1);
   }
-  static void dwconv2d_chw_5x5s2p2__psimd_1x4_acc2(benchmark::State& state, const char* net) {
-    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__psimd_1x4_acc2, 5, 5, 2, 2);
+  static void dwconv2d_chw_5x5s2p2__wasmsimd_1x4_acc2(benchmark::State& state, const char* net) {
+    DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_1x4_acc2, 5, 5, 2, 2);
   }
 
-  BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__psimd_1x4_acc3)
-  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__psimd_1x4_acc3)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__psimd_3x4)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__psimd_1x4_acc2)
-#endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__wasmsimd_1x4_acc3)
+  BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__wasmsimd_1x4_acc3)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__wasmsimd_3x4)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__wasmsimd_1x4_acc2)
+#endif  // XNN_ARCH_WASMSIMD
 
 static void dwconv2d_chw_3x3p1__scalar_1x1(benchmark::State& state, const char* net) {
   DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_1x1, 3, 3, 1, 1);

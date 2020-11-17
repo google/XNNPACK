@@ -638,11 +638,7 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x32-zip/xm-scalar.c)
 
 SET(XNNPACK_PSIMD_FASTMATH_MICROKERNEL_SRCS
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-psimd-2x2.c
-  src/f32-dwconv2d-chw/3x3p1-psimd-1x4-acc3.c
-  src/f32-dwconv2d-chw/3x3s2p1-psimd-1x4-acc3.c
-  src/f32-dwconv2d-chw/5x5p2-psimd-3x4.c
-  src/f32-dwconv2d-chw/5x5s2p2-psimd-1x4-acc2.c)
+  src/f32-conv-hwc2chw/3x3s2p1c3x4-psimd-2x2.c)
 
 SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/qs8-requantization/fp32-psimd.c
