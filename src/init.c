@@ -2395,11 +2395,19 @@ static void init(void) {
       };
     }
     #ifndef XNN_NO_NCHW_OPERATORS
-      xnn_params.f32.spmm = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86,
-        .mr = 32,
-        .nr = 1,
-      };
+      if (is_wasm_x86) {
+        xnn_params.f32.spmm = (struct spmm_parameters) {
+          .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86,
+          .mr = 32,
+          .nr = 1,
+        };
+      } else {
+        xnn_params.f32.spmm = (struct spmm_parameters) {
+          .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm,
+          .mr = 32,
+          .nr = 1,
+        };
+      }
       xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
         .ukernel_with_symm_padding =
           (xnn_conv_hwc2chw_ukernel_function) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__psimd_2x2,
