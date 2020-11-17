@@ -35,7 +35,9 @@ static v128_t extq3_f32(v128_t a, v128_t b) {
     return wasm_v32x4_shuffle(a, b, 3, 4, 5, 6);
 }
 
-void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_1x4_acc2(
+$ARCH_SUFFIX = "_x86" if X86 else "_arm"
+
+void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd${ARCH_SUFFIX}_1x4_acc2(
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -220,8 +222,12 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_1x4_acc2(
 
       v128_t vo0 = wasm_f32x4_add(vo468Ap0, vo468Ap1);
 
-      vo0 = wasm_f32x4_max(vo0, vmin);
-      vo0 = wasm_f32x4_min(vo0, vmax);
+      $if X86:
+         vo0 = wasm_v128_bitselect(vmin, vo0, wasm_f32x4_lt(vo0, vmin));
+         vo0 = wasm_v128_bitselect(vo0, vmax, wasm_f32x4_le(vo0, vmax));
+      $else:
+         vo0 = wasm_f32x4_max(vo0, vmin);
+         vo0 = wasm_f32x4_min(vo0, vmax);
 
       size_t w_tmp = (w + 1 * sizeof(float)) / (2 * sizeof(float));
       if XNN_LIKELY(w_tmp >= 4) {
@@ -369,8 +375,12 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_1x4_acc2(
 
       v128_t vo0 = wasm_f32x4_add(vo468Ap0, vo468Ap1);
 
-      vo0 = wasm_f32x4_max(vo0, vmin);
-      vo0 = wasm_f32x4_min(vo0, vmax);
+      $if X86:
+         vo0 = wasm_v128_bitselect(vmin, vo0, wasm_f32x4_lt(vo0, vmin));
+         vo0 = wasm_v128_bitselect(vo0, vmax, wasm_f32x4_le(vo0, vmax));
+      $else:
+         vo0 = wasm_f32x4_max(vo0, vmin);
+         vo0 = wasm_f32x4_min(vo0, vmax);
 
       size_t w_tmp = (w + 1 * sizeof(float)) / (2 * sizeof(float));
       if XNN_LIKELY(w_tmp >= 4) {

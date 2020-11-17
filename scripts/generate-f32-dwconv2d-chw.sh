@@ -212,5 +212,16 @@ tools/xngen src/f32-dwconv2d-chw/5x5s2p2-scalar.c.in -D ROW_TILE=2 -D ACCUMULATO
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-scalar.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-2x1-acc3.c
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-scalar.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-3x1-acc2.c
 
+################################## WAsm SIMD ##################################
+tools/xngen src/f32-dwconv2d-chw/3x3p1-wasmsimd-1x4-acc3.c.in   -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3p1-wasmsimd-1x4-acc3-arm.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-1x4-acc3.c.in -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-wasmsimd-1x4-acc3-arm.c
+tools/xngen src/f32-dwconv2d-chw/5x5p2-wasmsimd-3x4.c.in        -D X86=0 -o src/f32-dwconv2d-chw/gen/5x5p2-wasmsimd-3x4-arm.c
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-wasmsimd-1x4-acc2.c.in -D X86=0 -o src/f32-dwconv2d-chw/gen/5x5s2p2-wasmsimd-1x4-acc2-arm.c
+
+tools/xngen src/f32-dwconv2d-chw/3x3p1-wasmsimd-1x4-acc3.c.in   -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3p1-wasmsimd-1x4-acc3-x86.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-1x4-acc3.c.in -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3s2p1-wasmsimd-1x4-acc3-x86.c
+tools/xngen src/f32-dwconv2d-chw/5x5p2-wasmsimd-3x4.c.in        -D X86=1 -o src/f32-dwconv2d-chw/gen/5x5p2-wasmsimd-3x4-x86.c
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-wasmsimd-1x4-acc2.c.in -D X86=1 -o src/f32-dwconv2d-chw/gen/5x5s2p2-wasmsimd-1x4-acc2-x86.c
+
 ################################## Unit tests #################################
 tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output test/f32-dwconv2d-chw.cc

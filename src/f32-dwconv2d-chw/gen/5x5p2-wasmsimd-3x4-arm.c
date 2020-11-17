@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-dwconv2d-chw/5x5p2-wasmsimd-3x4.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -26,6 +30,7 @@ static v128_t extq2_f32(v128_t a, v128_t b) {
 static v128_t extq3_f32(v128_t a, v128_t b) {
     return wasm_v32x4_shuffle(a, b, 3, 4, 5, 6);
 }
+
 
 void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
     size_t input_height,
@@ -288,7 +293,6 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo0 = wasm_f32x4_max(vo0, vmin);
       vo1 = wasm_f32x4_max(vo1, vmin);
       vo2 = wasm_f32x4_max(vo2, vmin);
-
       vo0 = wasm_f32x4_min(vo0, vmax);
       vo1 = wasm_f32x4_min(vo1, vmax);
       vo2 = wasm_f32x4_min(vo2, vmax);
@@ -474,7 +478,6 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo0 = wasm_f32x4_max(vo0, vmin);
       vo1 = wasm_f32x4_max(vo1, vmin);
       vo2 = wasm_f32x4_max(vo2, vmin);
-
       vo0 = wasm_f32x4_min(vo0, vmax);
       vo1 = wasm_f32x4_min(vo1, vmax);
       vo2 = wasm_f32x4_min(vo2, vmax);

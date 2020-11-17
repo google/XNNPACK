@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-dwconv2d-chw/3x3p1-wasmsimd-1x4-acc3.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -27,7 +31,8 @@ static v128_t movess_f32(v128_t a, v128_t b) {
   return wasm_v32x4_shuffle(a, b, 4, 1, 2, 3);
 }
 
-void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_arm_1x4_acc3(
+
+void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_x86_1x4_acc3(
     size_t input_height,
     size_t input_width,
     const float* input,
@@ -150,8 +155,8 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_arm_1x4_acc3(
       v128_t vo = wasm_f32x4_add(vo4567p0, vo4567p1);
       vo = wasm_f32x4_add(vo, vo4567p2);
 
-      vo = wasm_f32x4_max(vo, vmin);
-      vo = wasm_f32x4_min(vo, vmax);
+      vo = wasm_v128_bitselect(vmin, vo, wasm_f32x4_lt(vo, vmin));
+      vo = wasm_v128_bitselect(vo, vmax, wasm_f32x4_le(vo, vmax));
 
       wasm_v128_store(output, vo);
       output += 4;
@@ -210,8 +215,8 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_arm_1x4_acc3(
       v128_t vo = wasm_f32x4_add(vo4567p0, vo4567p1);
       vo = wasm_f32x4_add(vo, vo4567p2);
 
-      vo = wasm_f32x4_max(vo, vmin);
-      vo = wasm_f32x4_min(vo, vmax);
+      vo = wasm_v128_bitselect(vmin, vo, wasm_f32x4_lt(vo, vmin));
+      vo = wasm_v128_bitselect(vo, vmax, wasm_f32x4_le(vo, vmax));
 
       if XNN_LIKELY(w == 4 * sizeof(float)) {
         wasm_v128_store(output, vo);
