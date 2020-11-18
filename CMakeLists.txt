@@ -190,8 +190,8 @@ SET(XNNPACK_SUBGRAPH_SRCS
   src/subgraph/clamp.c
   src/subgraph/convolution-2d.c
   src/subgraph/deconvolution-2d.c
-  src/subgraph/depthwise-convolution-2d.c
   src/subgraph/depth-to-space.c
+  src/subgraph/depthwise-convolution-2d.c
   src/subgraph/divide.c
   src/subgraph/floor.c
   src/subgraph/fully-connected.c
@@ -623,6 +623,7 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
   src/x8-zip/xm-scalar.c
+  src/x32-depth-to-space-chw2hwc/scalar.c
   src/x32-fill/scalar-float.c
   src/x32-fill/scalar-int.c
   src/x32-packx/x2-scalar.c
@@ -631,7 +632,6 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x32-pad/scalar-float.c
   src/x32-pad/scalar-int.c
   src/x32-unpool/scalar.c
-  src/x32-depth-to-space-chw2hwc/scalar.c
   src/x32-zip/x2-scalar.c
   src/x32-zip/x3-scalar.c
   src/x32-zip/x4-scalar.c
@@ -1429,8 +1429,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-2x4-acc2.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-2x4-acc3.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-2x4.c
-  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-3x4.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-sse-3x4.c
   src/f32-gavgpool-cw/sse-x4.c
   src/f32-gavgpool/7p7x-minmax-sse-c4.c
   src/f32-gavgpool/7x-minmax-sse-c4.c

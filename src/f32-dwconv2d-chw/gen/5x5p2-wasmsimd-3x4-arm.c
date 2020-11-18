@@ -15,21 +15,6 @@
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
 
-static v128_t splat2_f32(v128_t v) {
-  return wasm_v32x4_shuffle(v, v, 2, 2, 2, 2);
-}
-
-static v128_t extq1_f32(v128_t a, v128_t b) {
-    return wasm_v32x4_shuffle(a, b, 1, 2, 3, 4);
-}
-
-static v128_t extq2_f32(v128_t a, v128_t b) {
-    return wasm_v32x4_shuffle(a, b, 2, 3, 4, 5);
-}
-
-static v128_t extq3_f32(v128_t a, v128_t b) {
-    return wasm_v32x4_shuffle(a, b, 3, 4, 5, 6);
-}
 
 
 void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
@@ -158,13 +143,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi5x4567, vk42));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x4567, vk42));
 
-      const v128_t vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
-      const v128_t vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
-      const v128_t vi2x3456 = extq3_f32(vi2x0123, vi2x4567);
-      const v128_t vi3x3456 = extq3_f32(vi3x0123, vi3x4567);
-      const v128_t vi4x3456 = extq3_f32(vi4x0123, vi4x4567);
-      const v128_t vi5x3456 = extq3_f32(vi5x0123, vi5x4567);
-      const v128_t vi6x3456 = extq3_f32(vi6x0123, vi6x4567);
+      const v128_t vi0x3456 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 3, 4, 5, 6);
+      const v128_t vi1x3456 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 3, 4, 5, 6);
+      const v128_t vi2x3456 = wasm_v32x4_shuffle(vi2x0123, vi2x4567, 3, 4, 5, 6);
+      const v128_t vi3x3456 = wasm_v32x4_shuffle(vi3x0123, vi3x4567, 3, 4, 5, 6);
+      const v128_t vi4x3456 = wasm_v32x4_shuffle(vi4x0123, vi4x4567, 3, 4, 5, 6);
+      const v128_t vi5x3456 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 3, 4, 5, 6);
+      const v128_t vi6x3456 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 3, 4, 5, 6);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x3456, vk01));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x3456, vk01));
@@ -186,13 +171,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi5x3456, vk41));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x3456, vk41));
 
-      const v128_t vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
-      const v128_t vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
-      const v128_t vi2x2345 = extq2_f32(vi2x0123, vi2x4567);
-      const v128_t vi3x2345 = extq2_f32(vi3x0123, vi3x4567);
-      const v128_t vi4x2345 = extq2_f32(vi4x0123, vi4x4567);
-      const v128_t vi5x2345 = extq2_f32(vi5x0123, vi5x4567);
-      const v128_t vi6x2345 = extq2_f32(vi6x0123, vi6x4567);
+      const v128_t vi0x2345 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 2, 3, 4, 5);
+      const v128_t vi1x2345 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 2, 3, 4, 5);
+      const v128_t vi2x2345 = wasm_v32x4_shuffle(vi2x0123, vi2x4567, 2, 3, 4, 5);
+      const v128_t vi3x2345 = wasm_v32x4_shuffle(vi3x0123, vi3x4567, 2, 3, 4, 5);
+      const v128_t vi4x2345 = wasm_v32x4_shuffle(vi4x0123, vi4x4567, 2, 3, 4, 5);
+      const v128_t vi5x2345 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 2, 3, 4, 5);
+      const v128_t vi6x2345 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 2, 3, 4, 5);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x2345, vk00));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x2345, vk00));
@@ -222,13 +207,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vi5x0123 = vi5x4567;
       vi6x0123 = vi6x4567;
 
-      const v128_t vi0x5678 = extq1_f32(vi0x4567, vi0x89AB);
-      const v128_t vi1x5678 = extq1_f32(vi1x4567, vi1x89AB);
-      const v128_t vi2x5678 = extq1_f32(vi2x4567, vi2x89AB);
-      const v128_t vi3x5678 = extq1_f32(vi3x4567, vi3x89AB);
-      const v128_t vi4x5678 = extq1_f32(vi4x4567, vi4x89AB);
-      const v128_t vi5x5678 = extq1_f32(vi5x4567, vi5x89AB);
-      const v128_t vi6x5678 = extq1_f32(vi6x4567, vi6x89AB);
+      const v128_t vi0x5678 = wasm_v32x4_shuffle(vi0x4567, vi0x89AB, 1, 2, 3, 4);
+      const v128_t vi1x5678 = wasm_v32x4_shuffle(vi1x4567, vi1x89AB, 1, 2, 3, 4);
+      const v128_t vi2x5678 = wasm_v32x4_shuffle(vi2x4567, vi2x89AB, 1, 2, 3, 4);
+      const v128_t vi3x5678 = wasm_v32x4_shuffle(vi3x4567, vi3x89AB, 1, 2, 3, 4);
+      const v128_t vi4x5678 = wasm_v32x4_shuffle(vi4x4567, vi4x89AB, 1, 2, 3, 4);
+      const v128_t vi5x5678 = wasm_v32x4_shuffle(vi5x4567, vi5x89AB, 1, 2, 3, 4);
+      const v128_t vi6x5678 = wasm_v32x4_shuffle(vi6x4567, vi6x89AB, 1, 2, 3, 4);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x5678, vk03));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x5678, vk03));
@@ -250,13 +235,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi5x5678, vk43));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x5678, vk43));
 
-      const v128_t vi0x6789 = extq2_f32(vi0x4567, vi0x89AB);
-      const v128_t vi1x6789 = extq2_f32(vi1x4567, vi1x89AB);
-      const v128_t vi2x6789 = extq2_f32(vi2x4567, vi2x89AB);
-      const v128_t vi3x6789 = extq2_f32(vi3x4567, vi3x89AB);
-      const v128_t vi4x6789 = extq2_f32(vi4x4567, vi4x89AB);
-      const v128_t vi5x6789 = extq2_f32(vi5x4567, vi5x89AB);
-      const v128_t vi6x6789 = extq2_f32(vi6x4567, vi6x89AB);
+      const v128_t vi0x6789 = wasm_v32x4_shuffle(vi0x4567, vi0x89AB, 2, 3, 4, 5);
+      const v128_t vi1x6789 = wasm_v32x4_shuffle(vi1x4567, vi1x89AB, 2, 3, 4, 5);
+      const v128_t vi2x6789 = wasm_v32x4_shuffle(vi2x4567, vi2x89AB, 2, 3, 4, 5);
+      const v128_t vi3x6789 = wasm_v32x4_shuffle(vi3x4567, vi3x89AB, 2, 3, 4, 5);
+      const v128_t vi4x6789 = wasm_v32x4_shuffle(vi4x4567, vi4x89AB, 2, 3, 4, 5);
+      const v128_t vi5x6789 = wasm_v32x4_shuffle(vi5x4567, vi5x89AB, 2, 3, 4, 5);
+      const v128_t vi6x6789 = wasm_v32x4_shuffle(vi6x4567, vi6x89AB, 2, 3, 4, 5);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x6789, vk04));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x6789, vk04));
@@ -343,13 +328,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi5x4567, vk42));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x4567, vk42));
 
-      const v128_t vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
-      const v128_t vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
-      const v128_t vi2x3456 = extq3_f32(vi2x0123, vi2x4567);
-      const v128_t vi3x3456 = extq3_f32(vi3x0123, vi3x4567);
-      const v128_t vi4x3456 = extq3_f32(vi4x0123, vi4x4567);
-      const v128_t vi5x3456 = extq3_f32(vi5x0123, vi5x4567);
-      const v128_t vi6x3456 = extq3_f32(vi6x0123, vi6x4567);
+      const v128_t vi0x3456 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 3, 4, 5, 6);
+      const v128_t vi1x3456 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 3, 4, 5, 6);
+      const v128_t vi2x3456 = wasm_v32x4_shuffle(vi2x0123, vi2x4567, 3, 4, 5, 6);
+      const v128_t vi3x3456 = wasm_v32x4_shuffle(vi3x0123, vi3x4567, 3, 4, 5, 6);
+      const v128_t vi4x3456 = wasm_v32x4_shuffle(vi4x0123, vi4x4567, 3, 4, 5, 6);
+      const v128_t vi5x3456 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 3, 4, 5, 6);
+      const v128_t vi6x3456 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 3, 4, 5, 6);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x3456, vk01));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x3456, vk01));
@@ -371,13 +356,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi5x3456, vk41));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x3456, vk41));
 
-      const v128_t vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
-      const v128_t vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
-      const v128_t vi2x2345 = extq2_f32(vi2x0123, vi2x4567);
-      const v128_t vi3x2345 = extq2_f32(vi3x0123, vi3x4567);
-      const v128_t vi4x2345 = extq2_f32(vi4x0123, vi4x4567);
-      const v128_t vi5x2345 = extq2_f32(vi5x0123, vi5x4567);
-      const v128_t vi6x2345 = extq2_f32(vi6x0123, vi6x4567);
+      const v128_t vi0x2345 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 2, 3, 4, 5);
+      const v128_t vi1x2345 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 2, 3, 4, 5);
+      const v128_t vi2x2345 = wasm_v32x4_shuffle(vi2x0123, vi2x4567, 2, 3, 4, 5);
+      const v128_t vi3x2345 = wasm_v32x4_shuffle(vi3x0123, vi3x4567, 2, 3, 4, 5);
+      const v128_t vi4x2345 = wasm_v32x4_shuffle(vi4x0123, vi4x4567, 2, 3, 4, 5);
+      const v128_t vi5x2345 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 2, 3, 4, 5);
+      const v128_t vi6x2345 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 2, 3, 4, 5);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x2345, vk00));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x2345, vk00));
@@ -407,13 +392,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vi5x0123 = vi5x4567;
       vi6x0123 = vi6x4567;
 
-      const v128_t vi0x5678 = extq1_f32(vi0x4567, vi0x89AB);
-      const v128_t vi1x5678 = extq1_f32(vi1x4567, vi1x89AB);
-      const v128_t vi2x5678 = extq1_f32(vi2x4567, vi2x89AB);
-      const v128_t vi3x5678 = extq1_f32(vi3x4567, vi3x89AB);
-      const v128_t vi4x5678 = extq1_f32(vi4x4567, vi4x89AB);
-      const v128_t vi5x5678 = extq1_f32(vi5x4567, vi5x89AB);
-      const v128_t vi6x5678 = extq1_f32(vi6x4567, vi6x89AB);
+      const v128_t vi0x5678 = wasm_v32x4_shuffle(vi0x4567, vi0x89AB, 1, 2, 3, 4);
+      const v128_t vi1x5678 = wasm_v32x4_shuffle(vi1x4567, vi1x89AB, 1, 2, 3, 4);
+      const v128_t vi2x5678 = wasm_v32x4_shuffle(vi2x4567, vi2x89AB, 1, 2, 3, 4);
+      const v128_t vi3x5678 = wasm_v32x4_shuffle(vi3x4567, vi3x89AB, 1, 2, 3, 4);
+      const v128_t vi4x5678 = wasm_v32x4_shuffle(vi4x4567, vi4x89AB, 1, 2, 3, 4);
+      const v128_t vi5x5678 = wasm_v32x4_shuffle(vi5x4567, vi5x89AB, 1, 2, 3, 4);
+      const v128_t vi6x5678 = wasm_v32x4_shuffle(vi6x4567, vi6x89AB, 1, 2, 3, 4);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x5678, vk03));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x5678, vk03));
@@ -435,13 +420,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi5x5678, vk43));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x5678, vk43));
 
-      const v128_t vi0x6789 = extq2_f32(vi0x4567, vi0x89AB);
-      const v128_t vi1x6789 = extq2_f32(vi1x4567, vi1x89AB);
-      const v128_t vi2x6789 = extq2_f32(vi2x4567, vi2x89AB);
-      const v128_t vi3x6789 = extq2_f32(vi3x4567, vi3x89AB);
-      const v128_t vi4x6789 = extq2_f32(vi4x4567, vi4x89AB);
-      const v128_t vi5x6789 = extq2_f32(vi5x4567, vi5x89AB);
-      const v128_t vi6x6789 = extq2_f32(vi6x4567, vi6x89AB);
+      const v128_t vi0x6789 = wasm_v32x4_shuffle(vi0x4567, vi0x89AB, 2, 3, 4, 5);
+      const v128_t vi1x6789 = wasm_v32x4_shuffle(vi1x4567, vi1x89AB, 2, 3, 4, 5);
+      const v128_t vi2x6789 = wasm_v32x4_shuffle(vi2x4567, vi2x89AB, 2, 3, 4, 5);
+      const v128_t vi3x6789 = wasm_v32x4_shuffle(vi3x4567, vi3x89AB, 2, 3, 4, 5);
+      const v128_t vi4x6789 = wasm_v32x4_shuffle(vi4x4567, vi4x89AB, 2, 3, 4, 5);
+      const v128_t vi5x6789 = wasm_v32x4_shuffle(vi5x4567, vi5x89AB, 2, 3, 4, 5);
+      const v128_t vi6x6789 = wasm_v32x4_shuffle(vi6x4567, vi6x89AB, 2, 3, 4, 5);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x6789, vk04));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x6789, vk04));
@@ -523,13 +508,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi5x4567, vk42));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x4567, vk42));
 
-      const v128_t vi0x3456 = extq3_f32(vi0x0123, vi0x4567);
-      const v128_t vi1x3456 = extq3_f32(vi1x0123, vi1x4567);
-      const v128_t vi2x3456 = extq3_f32(vi2x0123, vi2x4567);
-      const v128_t vi3x3456 = extq3_f32(vi3x0123, vi3x4567);
-      const v128_t vi4x3456 = extq3_f32(vi4x0123, vi4x4567);
-      const v128_t vi5x3456 = extq3_f32(vi5x0123, vi5x4567);
-      const v128_t vi6x3456 = extq3_f32(vi6x0123, vi6x4567);
+      const v128_t vi0x3456 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 3, 4, 5, 6);
+      const v128_t vi1x3456 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 3, 4, 5, 6);
+      const v128_t vi2x3456 = wasm_v32x4_shuffle(vi2x0123, vi2x4567, 3, 4, 5, 6);
+      const v128_t vi3x3456 = wasm_v32x4_shuffle(vi3x0123, vi3x4567, 3, 4, 5, 6);
+      const v128_t vi4x3456 = wasm_v32x4_shuffle(vi4x0123, vi4x4567, 3, 4, 5, 6);
+      const v128_t vi5x3456 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 3, 4, 5, 6);
+      const v128_t vi6x3456 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 3, 4, 5, 6);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x3456, vk01));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x3456, vk01));
@@ -551,13 +536,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi5x3456, vk41));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x3456, vk41));
 
-      const v128_t vi0x2345 = extq2_f32(vi0x0123, vi0x4567);
-      const v128_t vi1x2345 = extq2_f32(vi1x0123, vi1x4567);
-      const v128_t vi2x2345 = extq2_f32(vi2x0123, vi2x4567);
-      const v128_t vi3x2345 = extq2_f32(vi3x0123, vi3x4567);
-      const v128_t vi4x2345 = extq2_f32(vi4x0123, vi4x4567);
-      const v128_t vi5x2345 = extq2_f32(vi5x0123, vi5x4567);
-      const v128_t vi6x2345 = extq2_f32(vi6x0123, vi6x4567);
+      const v128_t vi0x2345 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 2, 3, 4, 5);
+      const v128_t vi1x2345 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 2, 3, 4, 5);
+      const v128_t vi2x2345 = wasm_v32x4_shuffle(vi2x0123, vi2x4567, 2, 3, 4, 5);
+      const v128_t vi3x2345 = wasm_v32x4_shuffle(vi3x0123, vi3x4567, 2, 3, 4, 5);
+      const v128_t vi4x2345 = wasm_v32x4_shuffle(vi4x0123, vi4x4567, 2, 3, 4, 5);
+      const v128_t vi5x2345 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 2, 3, 4, 5);
+      const v128_t vi6x2345 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 2, 3, 4, 5);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x2345, vk00));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x2345, vk00));
@@ -580,13 +565,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x2345, vk40));
 
       const v128_t vzero = wasm_f32x4_splat(0.0f);
-      const v128_t vi0x5678 = extq1_f32(vi0x4567, vzero);
-      const v128_t vi1x5678 = extq1_f32(vi1x4567, vzero);
-      const v128_t vi2x5678 = extq1_f32(vi2x4567, vzero);
-      const v128_t vi3x5678 = extq1_f32(vi3x4567, vzero);
-      const v128_t vi4x5678 = extq1_f32(vi4x4567, vzero);
-      const v128_t vi5x5678 = extq1_f32(vi5x4567, vzero);
-      const v128_t vi6x5678 = extq1_f32(vi6x4567, vzero);
+      const v128_t vi0x5678 = wasm_v32x4_shuffle(vi0x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi1x5678 = wasm_v32x4_shuffle(vi1x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi2x5678 = wasm_v32x4_shuffle(vi2x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi3x5678 = wasm_v32x4_shuffle(vi3x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi4x5678 = wasm_v32x4_shuffle(vi4x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi5x5678 = wasm_v32x4_shuffle(vi5x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi6x5678 = wasm_v32x4_shuffle(vi6x4567, vzero, 1, 2, 3, 4);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x5678, vk03));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x5678, vk03));
@@ -608,13 +593,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi5x5678, vk43));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x5678, vk43));
 
-      const v128_t vi0x6789 = extq2_f32(vi0x4567, vzero);
-      const v128_t vi1x6789 = extq2_f32(vi1x4567, vzero);
-      const v128_t vi2x6789 = extq2_f32(vi2x4567, vzero);
-      const v128_t vi3x6789 = extq2_f32(vi3x4567, vzero);
-      const v128_t vi4x6789 = extq2_f32(vi4x4567, vzero);
-      const v128_t vi5x6789 = extq2_f32(vi5x4567, vzero);
-      const v128_t vi6x6789 = extq2_f32(vi6x4567, vzero);
+      const v128_t vi0x6789 = wasm_v32x4_shuffle(vi0x4567, vzero, 2, 3, 4, 5);
+      const v128_t vi1x6789 = wasm_v32x4_shuffle(vi1x4567, vzero, 2, 3, 4, 5);
+      const v128_t vi2x6789 = wasm_v32x4_shuffle(vi2x4567, vzero, 2, 3, 4, 5);
+      const v128_t vi3x6789 = wasm_v32x4_shuffle(vi3x4567, vzero, 2, 3, 4, 5);
+      const v128_t vi4x6789 = wasm_v32x4_shuffle(vi4x4567, vzero, 2, 3, 4, 5);
+      const v128_t vi5x6789 = wasm_v32x4_shuffle(vi5x4567, vzero, 2, 3, 4, 5);
+      const v128_t vi6x6789 = wasm_v32x4_shuffle(vi6x4567, vzero, 2, 3, 4, 5);
 
       vo4567p0 = wasm_f32x4_add(vo4567p0, wasm_f32x4_mul(vi0x6789, vk04));
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x6789, vk04));
@@ -664,9 +649,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_3x4(
           *((double*) o0) = wasm_f64x2_extract_lane(vo0, 0);
           o0 += 2;
 
-          vo0 = splat2_f32(vo0);
-          vo1 = splat2_f32(vo1);
-          vo2 = splat2_f32(vo2);
+          vo0 = wasm_v32x4_shuffle(vo0, vo0, 2, 2, 2, 2);
+          vo1 = wasm_v32x4_shuffle(vo1, vo1, 2, 2, 2, 2);
+          vo2 = wasm_v32x4_shuffle(vo2, vo2, 2, 2, 2, 2);
         }
         if (w & (1 * sizeof(float))) {
           *o2 = wasm_f32x4_extract_lane(vo2, 0);
