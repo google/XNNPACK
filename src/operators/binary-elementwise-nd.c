@@ -57,7 +57,6 @@ static enum xnn_status create_binary_elementwise_nd(
   binary_elementwise_op->ukernel.vbinary.ropc_function = vbinary_fused_ukernels->ropc_ukernel;
 
   binary_elementwise_op->type = operator_type;
-  binary_elementwise_op->ukernel.type = xnn_ukernel_type_binary_elementwise;
 
   binary_elementwise_op->state = xnn_run_state_invalid;
 

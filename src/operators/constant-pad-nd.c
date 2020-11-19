@@ -46,7 +46,6 @@ static enum xnn_status create_constant_pad_nd(
   constant_pad_op->pad_value = padding_value;
 
   constant_pad_op->type = operator_type;
-  constant_pad_op->ukernel.type = xnn_ukernel_type_pad;
 
   constant_pad_op->state = xnn_run_state_invalid;
 

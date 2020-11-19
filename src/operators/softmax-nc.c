@@ -123,7 +123,6 @@ enum xnn_status xnn_create_softmax_nc_qu8(
   softmax_op->output_pixel_stride = output_stride;
 
   softmax_op->type = xnn_operator_type_softmax_nc_qu8;
-  softmax_op->ukernel.type = xnn_ukernel_type_softmax;
 
   softmax_op->state = xnn_run_state_invalid;
 
@@ -239,7 +238,6 @@ enum xnn_status xnn_create_softmax_nc_f32(
   softmax_op->output_pixel_stride = output_stride;
 
   softmax_op->type = xnn_operator_type_softmax_nc_f32;
-  softmax_op->ukernel.type = xnn_ukernel_type_softmax;
 
   softmax_op->state = xnn_run_state_invalid;
 

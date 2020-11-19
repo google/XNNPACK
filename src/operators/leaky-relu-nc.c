@@ -150,7 +150,6 @@ enum xnn_status xnn_create_leaky_relu_nc_qu8(
   leaky_relu_op->output_pixel_stride = output_stride;
 
   leaky_relu_op->type = xnn_operator_type_leaky_relu_nc_qu8;
-  leaky_relu_op->ukernel.type = xnn_ukernel_type_lut;
 
   leaky_relu_op->state = xnn_run_state_invalid;
 

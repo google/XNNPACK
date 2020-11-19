@@ -18,28 +18,15 @@
 
 
 enum xnn_ukernel_type {
-  xnn_ukernel_type_none = 0,
-  xnn_ukernel_type_add,
-  xnn_ukernel_type_argmax_pooling,
+  xnn_ukernel_type_default = 0,
   xnn_ukernel_type_average_pooling,
-  xnn_ukernel_type_binary_elementwise,
-  xnn_ukernel_type_channel_shuffle,
   xnn_ukernel_type_conv2d_hwc2chw,
   xnn_ukernel_type_dwconv,
-  xnn_ukernel_type_depth_to_space_chw2hwc,
   xnn_ukernel_type_gemm,
-  xnn_ukernel_type_global_average_pooling,
   xnn_ukernel_type_igemm,
-  xnn_ukernel_type_lut,
-  xnn_ukernel_type_max_pooling,
-  xnn_ukernel_type_pad,
   xnn_ukernel_type_pixelwise_average_pooling,
-  xnn_ukernel_type_prelu,
-  xnn_ukernel_type_softmax,
   xnn_ukernel_type_spmm,
   xnn_ukernel_type_subconv2d,
-  xnn_ukernel_type_unary_elementwise,
-  xnn_ukernel_type_unpooling,
   xnn_ukernel_type_vmulcaddc,
 };
 

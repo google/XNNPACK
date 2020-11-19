@@ -176,7 +176,6 @@ static enum xnn_status create_max_pooling2d_nhwc(
 
   memcpy(&max_pooling_op->params, params, params_size);
   max_pooling_op->type = operator_type;
-  max_pooling_op->ukernel.type = xnn_ukernel_type_max_pooling;
   max_pooling_op->flags = flags;
 
   max_pooling_op->state = xnn_run_state_invalid;

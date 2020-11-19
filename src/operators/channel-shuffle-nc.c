@@ -86,7 +86,6 @@ static enum xnn_status create_channel_shuffle_nc(
   channel_shuffle_op->output_pixel_stride = output_stride;
 
   channel_shuffle_op->type = operator_type;
-  channel_shuffle_op->ukernel.type = xnn_ukernel_type_channel_shuffle;
 
   channel_shuffle_op->state = xnn_run_state_invalid;
 

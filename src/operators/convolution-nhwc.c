@@ -216,7 +216,7 @@ static enum xnn_status create_convolution2d_nhwc(
 
   const size_t kernel_size = kernel_height * kernel_width;
 
-  enum xnn_ukernel_type ukernel_type = xnn_ukernel_type_none;
+  enum xnn_ukernel_type ukernel_type = xnn_ukernel_type_default;
   const struct dwconv_parameters* dwconv_ukernel = NULL;
   const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
   if (group_input_channels == 1 && group_output_channels == 1 && kernel_size == 1 && unit_subsampling && !any_padding && vmulcaddc_parameters != NULL) {
@@ -230,6 +230,7 @@ static enum xnn_status create_convolution2d_nhwc(
   } else {
     ukernel_type = xnn_ukernel_type_igemm;
   }
+  assert(ukernel_type != xnn_ukernel_type_default);
 
   size_t zero_size = 0;
   switch (ukernel_type) {

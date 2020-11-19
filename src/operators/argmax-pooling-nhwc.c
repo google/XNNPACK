@@ -140,7 +140,6 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->output_pixel_stride = output_pixel_stride;
 
   argmax_pooling_op->type = xnn_operator_type_argmax_pooling_nhwc_f32;
-  argmax_pooling_op->ukernel.type = xnn_ukernel_type_argmax_pooling;
   argmax_pooling_op->flags = flags;
 
   argmax_pooling_op->state = xnn_run_state_invalid;

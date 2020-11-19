@@ -76,7 +76,6 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
   resize_op->output_pixel_stride = output_pixel_stride;
 
   resize_op->type = xnn_operator_type_resize_bilinear_nchw_f32;
-  resize_op->ukernel.type = xnn_ukernel_type_unpooling;
   resize_op->flags = flags;
 
   resize_op->state = xnn_run_state_invalid;

@@ -76,7 +76,6 @@ static enum xnn_status create_unary_elementwise_nc(
 
   unary_elementwise_op->ukernel.vunary.function = ukernel;
   unary_elementwise_op->type = operator_type;
-  unary_elementwise_op->ukernel.type = xnn_ukernel_type_unary_elementwise;
 
   unary_elementwise_op->state = xnn_run_state_invalid;
 

@@ -62,7 +62,6 @@ enum xnn_status xnn_create_depth_to_space_nchw2nhwc_x32(
   depth_to_space_op->block_size = block_size;
 
   depth_to_space_op->type = xnn_operator_type_depth_to_space_nchw2nhwc_x32;
-  depth_to_space_op->ukernel.type = xnn_ukernel_type_depth_to_space_chw2hwc;
   depth_to_space_op->flags = flags;
 
   depth_to_space_op->state = xnn_run_state_invalid;

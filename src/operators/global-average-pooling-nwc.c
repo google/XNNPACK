@@ -103,7 +103,6 @@ static enum xnn_status create_global_average_pooling_nwc(
   memcpy((void*) ((uintptr_t) global_average_pooling_op + params_offset), params, params_size);
 
   global_average_pooling_op->type = operator_type;
-  global_average_pooling_op->ukernel.type = xnn_ukernel_type_global_average_pooling;
 
   global_average_pooling_op->state = xnn_run_state_invalid;
 
