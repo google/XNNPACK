@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-#define DECLARE_X32_DEPTH_TO_SPACE_CHW2HWC_UKERNEL_FUNCTION(fn_name) \
+#define DECLARE_X32_DEPTHTOSPACE2D_CHW2HWC_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                         \
       size_t output_channels,                                        \
       size_t input_height,                                           \
@@ -28,7 +28,7 @@ extern "C" {
       size_t output_height_stride,                                   \
       size_t output_width_stride);
 
-DECLARE_X32_DEPTH_TO_SPACE_CHW2HWC_UKERNEL_FUNCTION(xnn_x32_depth_to_space_chw2hwc_ukernel__scalar)
+DECLARE_X32_DEPTHTOSPACE2D_CHW2HWC_UKERNEL_FUNCTION(xnn_x32_depthtospace2d_chw2hwc_ukernel__scalar)
 
 #ifdef __cplusplus
 }  // extern "C"

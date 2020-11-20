@@ -623,7 +623,7 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
   src/x8-zip/xm-scalar.c
-  src/x32-depth-to-space-chw2hwc/scalar.c
+  src/x32-depthtospace2d-chw2hwc/scalar.c
   src/x32-fill/scalar-float.c
   src/x32-fill/scalar-int.c
   src/x32-packx/x2-scalar.c

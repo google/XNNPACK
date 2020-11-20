@@ -913,7 +913,7 @@ typedef void (*xnn_x32_fill_ukernel_function)(
     size_t output_stride,
     const uint32_t* fill_value);
 
-typedef void (*xnn_depth_to_space_chw2hwc_ukernel_function)(
+typedef void (*xnn_depthtospace2d_chw2hwc_ukernel_function)(
     size_t output_channels,
     size_t input_height,
     size_t input_width,
@@ -925,7 +925,7 @@ typedef void (*xnn_depth_to_space_chw2hwc_ukernel_function)(
     size_t output_height_stride,
     size_t output_width_stride);
 
-typedef void (*xnn_x32_depth_to_space_chw2hwc_ukernel_function)(
+typedef void (*xnn_x32_depthtospace2d_chw2hwc_ukernel_function)(
     size_t output_channels,
     size_t input_height,
     size_t input_width,
@@ -1856,8 +1856,8 @@ struct dwconv_parameters {
   uint8_t incremental_tile;
 };
 
-struct depth_to_space_chw2hwc_parameters {
-  xnn_depth_to_space_chw2hwc_ukernel_function ukernel;
+struct depthtospace2d_chw2hwc_parameters {
+  xnn_depthtospace2d_chw2hwc_ukernel_function ukernel;
   // Number of output pixels in a tile.
   // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
   uint8_t pixel_tile;
@@ -2078,8 +2078,8 @@ struct xnn_parameters {
     struct fill_parameters fill;
     xnn_unpool_ukernel_function unpool;
     struct zip_parameters zip;
-    // Depth to space in CHW to HWC layout.
-    struct depth_to_space_chw2hwc_parameters depth_to_space_chw2hwc;
+    // Depth To Space 2D with CHW->HWC layout conversion.
+    struct depthtospace2d_chw2hwc_parameters depthtospace2d_chw2hwc;
   } x32;
 };
 

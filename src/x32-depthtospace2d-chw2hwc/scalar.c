@@ -8,7 +8,7 @@
 #include <xnnpack/depthtospace.h>
 
 
-void xnn_x32_depth_to_space_chw2hwc_ukernel__scalar(
+void xnn_x32_depthtospace2d_chw2hwc_ukernel__scalar(
     size_t output_channels,
     size_t input_height,
     size_t input_width,

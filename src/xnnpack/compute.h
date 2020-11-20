@@ -433,7 +433,7 @@ struct dwconv2d_context {
       size_t channel);
 #endif
 
-struct depth_to_space_chw2hwc_context {
+struct depthtospace2d_chw2hwc_context {
   size_t output_channels;
   size_t input_height;
   size_t input_width;
@@ -446,13 +446,12 @@ struct depth_to_space_chw2hwc_context {
   size_t input_height_stride;
   size_t output_height_stride;
   size_t output_width_stride;
-  // Pointer to DEPTH_TO_SPACE micro-kernel function.
-  xnn_depth_to_space_chw2hwc_ukernel_function ukernel;
+  xnn_depthtospace2d_chw2hwc_ukernel_function ukernel;
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_depth_to_space_chw2hwc(
-      const struct depth_to_space_chw2hwc_context* context,
+  XNN_PRIVATE void xnn_compute_depthtospace2d_chw2hwc(
+      const struct depthtospace2d_chw2hwc_context* context,
       size_t batch_index);
 #endif
 

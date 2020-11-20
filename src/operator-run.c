@@ -400,8 +400,8 @@ void xnn_compute_dwconv2d_chw(
     &context->params);
 }
 
-void xnn_compute_depth_to_space_chw2hwc(
-    const struct depth_to_space_chw2hwc_context* context,
+void xnn_compute_depthtospace2d_chw2hwc(
+    const struct depthtospace2d_chw2hwc_context* context,
     size_t batch_index)
 {
   context->ukernel(

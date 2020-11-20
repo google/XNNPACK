@@ -149,7 +149,7 @@ class DepthToSpaceMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_x32_depth_to_space_chw2hwc_ukernel_function depth_to_space) const {
+  void Test(xnn_x32_depthtospace2d_chw2hwc_ukernel_function depthtospace2d) const {
     ASSERT_EQ(element_size(), sizeof(uint32_t));
     ASSERT_GE(block_size(), 2);
     ASSERT_GE(input_channel_stride(), input_height() * input_height_stride());
@@ -179,7 +179,7 @@ class DepthToSpaceMicrokernelTester {
       std::generate(input.begin(), input.end(), std::ref(u32rng));
 
       // Call optimized micro-kernel.
-      depth_to_space(
+      depthtospace2d(
         output_channels(),
         input_height(),
         input_width(),

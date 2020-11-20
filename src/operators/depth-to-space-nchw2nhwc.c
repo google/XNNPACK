@@ -112,7 +112,7 @@ enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x32(
   const size_t block_size = depth_to_space_op->block_size;
   const size_t output_height = input_height * block_size;
   const size_t output_width = input_width * block_size;
-  depth_to_space_op->context.depth_to_space_chw = (struct depth_to_space_chw2hwc_context) {
+  depth_to_space_op->context.depthtospace2d_chw = (struct depthtospace2d_chw2hwc_context) {
     .output_channels = depth_to_space_op->channels,
     .input_height = input_height,
     .input_width = input_width,
@@ -125,11 +125,11 @@ enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x32(
     .input_height_stride = input_width * sizeof(float),
     .output_height_stride = output_width * depth_to_space_op->output_pixel_stride * sizeof(float),
     .output_width_stride = depth_to_space_op->output_pixel_stride * sizeof(float),
-    .ukernel = xnn_params.x32.depth_to_space_chw2hwc.ukernel,
+    .ukernel = xnn_params.x32.depthtospace2d_chw2hwc.ukernel,
   };
 
   depth_to_space_op->compute.type = xnn_parallelization_type_1d;
-  depth_to_space_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_depth_to_space_chw2hwc;
+  depth_to_space_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_depthtospace2d_chw2hwc;
   depth_to_space_op->compute.range[0] = batch_size;
   depth_to_space_op->state = xnn_run_state_ready;
 

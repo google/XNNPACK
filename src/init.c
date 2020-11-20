@@ -435,8 +435,8 @@ static void init(void) {
         .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__neon,
       };
       #ifndef XNN_NO_NCHW_OPERATORS
-        xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
-          .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+        xnn_params.x32.depthtospace2d_chw2hwc = (struct depthtospace2d_chw2hwc_parameters) {
+          .ukernel = (xnn_depthtospace2d_chw2hwc_ukernel_function) xnn_x32_depthtospace2d_chw2hwc_ukernel__scalar,
           .channel_tile = 1,
           .pixel_tile = 1,
         };
@@ -723,8 +723,8 @@ static void init(void) {
         .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__scalar,
       };
       #ifndef XNN_NO_NCHW_OPERATORS
-        xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
-          .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+        xnn_params.x32.depthtospace2d_chw2hwc = (struct depthtospace2d_chw2hwc_parameters) {
+          .ukernel = (xnn_depthtospace2d_chw2hwc_ukernel_function) xnn_x32_depthtospace2d_chw2hwc_ukernel__scalar,
           .channel_tile = 1,
           .pixel_tile = 1,
         };
@@ -1353,8 +1353,8 @@ static void init(void) {
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__neon,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
-      xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
-        .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+      xnn_params.x32.depthtospace2d_chw2hwc = (struct depthtospace2d_chw2hwc_parameters) {
+        .ukernel = (xnn_depthtospace2d_chw2hwc_ukernel_function) xnn_x32_depthtospace2d_chw2hwc_ukernel__scalar,
         .channel_tile = 1,
         .pixel_tile = 1,
       };
@@ -1995,8 +1995,8 @@ static void init(void) {
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__sse2,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
-      xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
-        .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+      xnn_params.x32.depthtospace2d_chw2hwc = (struct depthtospace2d_chw2hwc_parameters) {
+        .ukernel = (xnn_depthtospace2d_chw2hwc_ukernel_function) xnn_x32_depthtospace2d_chw2hwc_ukernel__scalar,
         .channel_tile = 1,
         .pixel_tile = 1,
       };
@@ -2505,8 +2505,8 @@ static void init(void) {
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__wasmsimd,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
-      xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
-        .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+      xnn_params.x32.depthtospace2d_chw2hwc = (struct depthtospace2d_chw2hwc_parameters) {
+        .ukernel = (xnn_depthtospace2d_chw2hwc_ukernel_function) xnn_x32_depthtospace2d_chw2hwc_ukernel__scalar,
         .channel_tile = 1,
         .pixel_tile = 1,
       };
@@ -2827,8 +2827,8 @@ static void init(void) {
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__scalar,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
-      xnn_params.x32.depth_to_space_chw2hwc = (struct depth_to_space_chw2hwc_parameters) {
-        .ukernel = (xnn_depth_to_space_chw2hwc_ukernel_function) xnn_x32_depth_to_space_chw2hwc_ukernel__scalar,
+      xnn_params.x32.depthtospace2d_chw2hwc = (struct depthtospace2d_chw2hwc_parameters) {
+        .ukernel = (xnn_depthtospace2d_chw2hwc_ukernel_function) xnn_x32_depthtospace2d_chw2hwc_ukernel__scalar,
         .channel_tile = 1,
         .pixel_tile = 1,
       };
