@@ -91,7 +91,7 @@ void xnn_math_f32_sigmoid__wasmsimd_rr2_lut64_p2_div(
     v128_t vt = wasm_f32x4_add(vz, wasm_f32x4_mul(vn, vln2_hi));
     vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vln2_lo));
 
-    // Compute degree-2 polynomial approxiatmion for exp(-t) on [-log(2)/128, log(2)/128].
+    // Compute degree-2 polynomial approximation for exp(-t) on [-log(2)/128, log(2)/128].
     //   P(t) = 1 + t * (-1 + t * c2) = 1 - (t - t * (t * c2)) = 1 - p
     v128_t vp = wasm_f32x4_mul(vt, vc2);
     vp = wasm_f32x4_sub(vt, wasm_f32x4_mul(vp, vt));

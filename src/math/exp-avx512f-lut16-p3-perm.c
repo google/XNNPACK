@@ -77,7 +77,7 @@ void xnn_math_f32_exp__avx512f_lut16_p3_perm(
     __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_o16_hi, vx);
     vt = _mm512_fmadd_ps(vn, vminus_ln2_o16_lo, vt);
 
-    // Compute degree-3 polynomial approxiatmion for exp(t) on [-log(2)/32, log(2)/32].
+    // Compute degree-3 polynomial approximation for exp(t) on [-log(2)/32, log(2)/32].
     __m512 vp = _mm512_fmadd_ps(vt, vc3, vc2);
     vp = _mm512_mul_ps(vp, vt);
     vp = _mm512_fmadd_ps(vt, vp, vt);

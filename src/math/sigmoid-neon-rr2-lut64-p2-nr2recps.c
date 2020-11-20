@@ -90,7 +90,7 @@ void xnn_math_f32_sigmoid__neon_rr2_lut64_p2_nr2recps(
     float32x4_t vt = vmlaq_f32(vz, vn, vln2_hi);
     vt = vmlaq_f32(vt, vn, vln2_lo);
 
-    // Compute degree-2 polynomial approxiatmion for exp(-t) on [-log(2)/128, log(2)/128].
+    // Compute degree-2 polynomial approximation for exp(-t) on [-log(2)/128, log(2)/128].
     //   P(t) = 1 + t * (-1 + t * c2) = 1 - (t - t * (t * c2)) = 1 - p
     float32x4_t vp = vmulq_f32(vt, vc2);
     vp = vmlsq_f32(vt, vp, vt);

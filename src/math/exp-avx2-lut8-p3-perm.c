@@ -75,7 +75,7 @@ void xnn_math_f32_exp__avx2_lut8_p3_perm(
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_o8_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_o8_lo, vt);
 
-    // Compute degree-3 polynomial approxiatmion for exp(t) on [-log(2)/16, log(2)/16].
+    // Compute degree-3 polynomial approximation for exp(t) on [-log(2)/16, log(2)/16].
     __m256 vp = _mm256_fmadd_ps(vt, vc3, vc2);
 
     // Reconstruct the final f value:

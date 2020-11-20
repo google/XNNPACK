@@ -71,7 +71,7 @@ void xnn_math_f32_expminus__scalar_lut64_p2(
     float vt = vn * vminus_ln2_o64_hi + vx;
     vt = vn * vminus_ln2_o64_lo + vt;
 
-    // Compute degree-2 polynomial approxiatmion for exp(t) on [-log(2)/128, log(2)/128].
+    // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/128, log(2)/128].
     float vp = vt * vc2;
     vp = vp * vt + vt;
 

@@ -86,7 +86,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_p5_x16(
     vt89AB = _mm_add_ps(_mm_mul_ps(vn89AB, vminus_ln2_lo), vt89AB);
     vtCDEF = _mm_add_ps(_mm_mul_ps(vnCDEF, vminus_ln2_lo), vtCDEF);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m128 vp0123 = _mm_add_ps(_mm_mul_ps(vc5, vt0123), vc4);
     __m128 vp4567 = _mm_add_ps(_mm_mul_ps(vc5, vt4567), vc4);
     __m128 vp89AB = _mm_add_ps(_mm_mul_ps(vc5, vt89AB), vc4);
@@ -166,7 +166,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_p5_x16(
     __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_hi), vx);
     vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_lo), vt);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m128 vp = _mm_add_ps(_mm_mul_ps(vc5, vt), vc4);
     vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc3);
     vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc2);
@@ -214,7 +214,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_p5_x16(
     __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_hi), vx);
     vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_lo), vt);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m128 vp = _mm_add_ps(_mm_mul_ps(vc5, vt), vc4);
     vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc3);
     vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc2);

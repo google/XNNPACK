@@ -75,7 +75,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x${ELEMENTS_TILE}${"" if 
     $for N in range(0, ELEMENTS_TILE, 4):
       vt${ABC[N:N+4]} = wasm_f32x4_add(vt${ABC[N:N+4]}, wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_lo));
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     $for N in range(0, ELEMENTS_TILE, 4):
       v128_t vp${ABC[N:N+4]} = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt${ABC[N:N+4]}));
 
@@ -146,7 +146,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x${ELEMENTS_TILE}${"" if 
     v128_t vt = wasm_f32x4_add(vx, wasm_f32x4_mul(vn, vminus_ln2_hi));
     vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt));
     vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp, vt));
     vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp, vt));
@@ -196,7 +196,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x${ELEMENTS_TILE}${"" if 
     v128_t vt = wasm_f32x4_add(vx, wasm_f32x4_mul(vn, vminus_ln2_hi));
     vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt));
     vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp, vt));
     vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp, vt));

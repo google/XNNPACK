@@ -80,7 +80,7 @@ void xnn_math_f32_exp__avx_p5(
     __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2_hi), vx);
     vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2_lo), vt);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc5, vt), vc4);
     vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc3);
     vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc2);

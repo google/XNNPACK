@@ -73,7 +73,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x16(
     vt0 = _mm256_fmadd_ps(vn0, vminus_ln2_lo, vt0);
     vt1 = _mm256_fmadd_ps(vn1, vminus_ln2_lo, vt1);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m256 vp0 = _mm256_fmadd_ps(vc5, vt0, vc4);
     __m256 vp1 = _mm256_fmadd_ps(vc5, vt1, vc4);
 
@@ -133,7 +133,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x16(
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m256 vp = _mm256_fmadd_ps(vc5, vt, vc4);
     vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
@@ -183,7 +183,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x16(
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m256 vp = _mm256_fmadd_ps(vc5, vt, vc4);
     vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);

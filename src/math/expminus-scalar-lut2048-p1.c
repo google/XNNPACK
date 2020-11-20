@@ -71,7 +71,7 @@ void xnn_math_f32_expminus__scalar_lut2048_p1(
     float vt = vn * vminus_ln2_o2048_hi + vx;
     vt = vn * vminus_ln2_o2048_lo + vt;
 
-    // Compute degree-1 polynomial approxiatmion for exp(t) on [-log(2)/2048, log(2)/2048].
+    // Compute degree-1 polynomial approximation for exp(t) on [-log(2)/2048, log(2)/2048].
     const float vp = vt * vc1;
 
     // Reconstruct the final f value:

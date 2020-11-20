@@ -158,7 +158,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x20_acc2(
     vtCDEF = vmlaq_f32(vtCDEF, vnCDEF, vminus_ln2_o64_lo);
     vtGHIJ = vmlaq_f32(vtGHIJ, vnGHIJ, vminus_ln2_o64_lo);
 
-    // Compute degree-2 polynomial approxiatmion for exp(t) on [-log(2)/128, log(2)/128].
+    // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/128, log(2)/128].
     float32x4_t vp0123 = vmulq_f32(vt0123, vc2);
     float32x4_t vp4567 = vmulq_f32(vt4567, vc2);
     float32x4_t vp89AB = vmulq_f32(vt89AB, vc2);
@@ -256,7 +256,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x20_acc2(
     float32x4_t vt = vmlaq_f32(vx, vn, vminus_ln2_o64_hi);
     vt = vmlaq_f32(vt, vn, vminus_ln2_o64_lo);
 
-    // Compute degree-2 polynomial approxiatmion for exp(t) on [-log(2)/128, log(2)/128].
+    // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/128, log(2)/128].
     float32x4_t vp = vmulq_f32(vt, vc2);
     vp = vmlaq_f32(vt, vt, vp);
 
@@ -332,7 +332,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x20_acc2(
     float32x4_t vt = vmlaq_f32(vx, vn, vminus_ln2_o64_hi);
     vt = vmlaq_f32(vt, vn, vminus_ln2_o64_lo);
 
-    // Compute degree-2 polynomial approxiatmion for exp(t) on [-log(2)/128, log(2)/128].
+    // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/128, log(2)/128].
     float32x4_t vp = vmulq_f32(vt, vc2);
     vp = vmlaq_f32(vt, vt, vp);
 

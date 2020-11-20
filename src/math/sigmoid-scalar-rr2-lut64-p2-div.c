@@ -85,7 +85,7 @@ void xnn_math_f32_sigmoid__scalar_rr2_lut64_p2_div(
     float vt = vn * vln2_hi + vz;
     vt = vn * vln2_lo + vt;
 
-    // Compute degree-2 polynomial approxiatmion for exp(-t) on [-log(2)/128, log(2)/128].
+    // Compute degree-2 polynomial approximation for exp(-t) on [-log(2)/128, log(2)/128].
     //   P(t) = 1 + t * (-1 + t * c2) = 1 - (t - t * (t * c2)) = 1 - p
     float vp = vt * vc2;
     vp = vt - vp * vt;

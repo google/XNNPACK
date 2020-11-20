@@ -74,7 +74,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2(
     vt0 = vn0 * vminus_ln2_lo + vt0;
     vt1 = vn1 * vminus_ln2_lo + vt1;
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     float vp0 = vc5 * vt0 + vc4;
     float vp1 = vc5 * vt1 + vc4;
 
@@ -143,7 +143,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x2(
     float vt = vn * vminus_ln2_hi + vx;
     vt = vn * vminus_ln2_lo + vt;
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     float vp = vc5 * vt + vc4;
     vp = vp * vt + vc3;
     vp = vp * vt + vc2;

@@ -93,7 +93,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2_acc2(
     vt0 = vn0 * vminus_ln2_o64_lo + vt0;
     vt1 = vn1 * vminus_ln2_o64_lo + vt1;
 
-    // Compute degree-2 polynomial approxiatmion for exp(t) on [-log(2)/128, log(2)/128].
+    // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/128, log(2)/128].
     float vp0 = vt0 * vc2;
     float vp1 = vt1 * vc2;
 
@@ -171,7 +171,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x2_acc2(
     float vt = vn * vminus_ln2_o64_hi + vx;
     vt = vn * vminus_ln2_o64_lo + vt;
 
-    // Compute degree-2 polynomial approxiatmion for exp(t) on [-log(2)/128, log(2)/128].
+    // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/128, log(2)/128].
     float vp = vt * vc2;
     vp = vp * vt + vt;
 

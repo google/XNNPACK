@@ -105,7 +105,7 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x96_acc3(
     vt10 = _mm256_fmadd_ps(vn10, vminus_ln2_lo, vt10);
     vt11 = _mm256_fmadd_ps(vn11, vminus_ln2_lo, vt11);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m256 vp0 = _mm256_fmadd_ps(vc5, vt0, vc4);
     __m256 vp1 = _mm256_fmadd_ps(vc5, vt1, vc4);
     __m256 vp2 = _mm256_fmadd_ps(vc5, vt2, vc4);
@@ -288,7 +288,7 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x96_acc3(
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m256 vp = _mm256_fmadd_ps(vc5, vt, vc4);
     vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
@@ -331,7 +331,7 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x96_acc3(
     // Correct reduced argument elements for masked out elements.
     vn = _mm256_blendv_ps(vacce, vn, _mm256_castsi256_ps(vmask));
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m256 vp = _mm256_fmadd_ps(vc5, vt, vc4);
     vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);

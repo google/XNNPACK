@@ -86,7 +86,7 @@ void xnn_math_f32_sigmoid__neonfma_rr1_lut64_p2_nr2recps(
     // Compute reduced argument t := (z + n * log(2)). Note that -t = -z - n * log(2).
     float32x4_t vt = vfmaq_f32(vz, vn, vln2);
 
-    // Compute degree-2 polynomial approxiatmion for exp(-t) on [-log(2)/128, log(2)/128].
+    // Compute degree-2 polynomial approximation for exp(-t) on [-log(2)/128, log(2)/128].
     //   P(t) = 1 + t * (-1 + t * c2) = 1 - (t - t * (t * c2)) = 1 - p
     float32x4_t vp = vmulq_f32(vt, vc2);
     vp = vfmsq_f32(vt, vp, vt);

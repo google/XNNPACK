@@ -82,7 +82,7 @@ void xnn_math_f32_exp__avx512f_lut32_p2_perm2(
     __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_o32_hi, vx);
     vt = _mm512_fmadd_ps(vn, vminus_ln2_o32_lo, vt);
 
-    // Compute degree-2 polynomial approxiatmion for exp(t) on [-log(2)/64, log(2)/64].
+    // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/64, log(2)/64].
     __m512 vp = _mm512_fmadd_ps(vt, vc2, vc1);
 
     // Reconstruct the final f value:

@@ -83,7 +83,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_p5_x$
       $for N in range(0, ELEMENTS_TILE, 4):
         vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vt${ABC[N:N+4]}, vn${ABC[N:N+4]}, vminus_ln2_lo);
 
-      // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+      // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
       $for N in range(0, ELEMENTS_TILE, 4):
         float32x4_t vp${ABC[N:N+4]} = ${VMULADDQ_F32}(vc4, vc5, vt${ABC[N:N+4]});
 
@@ -158,7 +158,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_p5_x$
     float32x4_t vt = ${VMULADDQ_F32}(vx, vn, vminus_ln2_hi);
     vt = ${VMULADDQ_F32}(vt, vn, vminus_ln2_lo);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     float32x4_t vp = ${VMULADDQ_F32}(vc4, vc5, vt);
     vp = ${VMULADDQ_F32}(vc3, vp, vt);
     vp = ${VMULADDQ_F32}(vc2, vp, vt);
@@ -215,7 +215,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_p5_x$
     float32x4_t vt = ${VMULADDQ_F32}(vx, vn, vminus_ln2_hi);
     vt = ${VMULADDQ_F32}(vt, vn, vminus_ln2_lo);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     float32x4_t vp = ${VMULADDQ_F32}(vc4, vc5, vt);
     vp = ${VMULADDQ_F32}(vc3, vp, vt);
     vp = ${VMULADDQ_F32}(vc2, vp, vt);

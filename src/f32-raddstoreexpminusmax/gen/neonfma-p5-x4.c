@@ -67,7 +67,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x4(
     float32x4_t vt = vfmaq_f32(vx, vn, vminus_ln2_hi);
     vt = vfmaq_f32(vt, vn, vminus_ln2_lo);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     float32x4_t vp = vfmaq_f32(vc4, vc5, vt);
     vp = vfmaq_f32(vc3, vp, vt);
     vp = vfmaq_f32(vc2, vp, vt);
@@ -124,7 +124,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x4(
     float32x4_t vt = vfmaq_f32(vx, vn, vminus_ln2_hi);
     vt = vfmaq_f32(vt, vn, vminus_ln2_lo);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     float32x4_t vp = vfmaq_f32(vc4, vc5, vt);
     vp = vfmaq_f32(vc3, vp, vt);
     vp = vfmaq_f32(vc2, vp, vt);

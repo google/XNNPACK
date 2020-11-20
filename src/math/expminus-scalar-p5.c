@@ -55,7 +55,7 @@ void xnn_math_f32_expminus__scalar_p5(
     float vt = vn * vminus_ln2_hi + vx;
     vt = vn * vminus_ln2_lo + vt;
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     float vp = vc5 * vt + vc4;
     vp = vp * vt + vc3;
     vp = vp * vt + vc2;

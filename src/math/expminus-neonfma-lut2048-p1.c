@@ -77,7 +77,7 @@ void xnn_math_f32_expminus__neonfma_lut2048_p1(
     float32x4_t vt = vfmaq_f32(vx, vn, vminus_ln2_o2048_hi);
     vt = vfmaq_f32(vt, vn, vminus_ln2_o2048_lo);
 
-    // Compute degree-1 polynomial approxiatmion for exp(t) on [-log(2)/2048, log(2)/2048].
+    // Compute degree-1 polynomial approximation for exp(t) on [-log(2)/2048, log(2)/2048].
     const float32x4_t vp = vmulq_f32(vt, vc1);
 
     // Reconstruct the final f value:

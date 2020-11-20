@@ -65,7 +65,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x4(
 
     vt0123 = wasm_f32x4_add(vt0123, wasm_f32x4_mul(vn0123, vminus_ln2_lo));
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     v128_t vp0123 = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt0123));
 
     vp0123 = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp0123, vt0123));
@@ -118,7 +118,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x4(
     v128_t vt = wasm_f32x4_add(vx, wasm_f32x4_mul(vn, vminus_ln2_hi));
     vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt));
     vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp, vt));
     vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp, vt));
@@ -168,7 +168,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x4(
     v128_t vt = wasm_f32x4_add(vx, wasm_f32x4_mul(vn, vminus_ln2_hi));
     vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt));
     vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp, vt));
     vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp, vt));

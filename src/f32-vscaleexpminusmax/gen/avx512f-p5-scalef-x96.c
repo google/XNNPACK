@@ -80,7 +80,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x96(
     vt4 = _mm512_fmadd_ps(vn4, vminus_ln2_lo, vt4);
     vt5 = _mm512_fmadd_ps(vn5, vminus_ln2_lo, vt5);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m512 vp0 = _mm512_fmadd_ps(vc5, vt0, vc4);
     __m512 vp1 = _mm512_fmadd_ps(vc5, vt1, vc4);
     __m512 vp2 = _mm512_fmadd_ps(vc5, vt2, vc4);
@@ -160,7 +160,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x96(
     __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m512 vp = _mm512_fmadd_ps(vc5, vt, vc4);
     vp = _mm512_fmadd_ps(vp, vt, vc3);
     vp = _mm512_fmadd_ps(vp, vt, vc2);
@@ -198,7 +198,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x96(
     __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
 
-    // Compute degree-5 polynomial approxiatmion for exp(t) on [-log(2)/2, log(2)/2].
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
     __m512 vp = _mm512_fmadd_ps(vc5, vt, vc4);
     vp = _mm512_fmadd_ps(vp, vt, vc3);
     vp = _mm512_fmadd_ps(vp, vt, vc2);
