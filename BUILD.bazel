@@ -2135,6 +2135,7 @@ SSE2_UKERNELS = [
     "src/math/exp-sse2-lut64-p2.c",
     "src/math/exp-sse2-p5.c",
     "src/math/expminus-sse2-p5.c",
+    "src/math/expm1minus-sse2-rr2-p6.c",
     "src/math/roundd-sse2-cvt.c",
     "src/math/roundne-sse2-cvt.c",
     "src/math/roundu-sse2-cvt.c",
@@ -5110,6 +5111,15 @@ xnnpack_benchmark(
     name = "f32_expminus_eval",
     srcs = [
         "eval/f32-expminus.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + ACCURACY_EVAL_HDRS,
+    deps = ACCURACY_EVAL_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_expm1minus_eval",
+    srcs = [
+        "eval/f32-expm1minus.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS,

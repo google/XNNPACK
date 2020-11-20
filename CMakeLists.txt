@@ -1569,6 +1569,7 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/math/exp-sse2-lut64-p2.c
   src/math/exp-sse2-p5.c
   src/math/expminus-sse2-p5.c
+  src/math/expm1minus-sse2-rr2-p6.c
   src/math/roundd-sse2-cvt.c
   src/math/roundne-sse2-cvt.c
   src/math/roundu-sse2-cvt.c
@@ -4337,6 +4338,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE src)
   TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE XNNPACK benchmark fp16)
+
+  ADD_EXECUTABLE(f32-expm1minus-eval eval/f32-expm1minus.cc)
+  SET_TARGET_PROPERTIES(f32-expm1minus-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-eval PRIVATE src)
+  TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE XNNPACK benchmark fp16)
 
   ADD_EXECUTABLE(f32-extexp-eval eval/f32-extexp.cc)
   SET_TARGET_PROPERTIES(f32-extexp-eval PROPERTIES
