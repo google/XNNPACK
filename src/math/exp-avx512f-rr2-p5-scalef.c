@@ -10,7 +10,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_exp__avx512f_p5_scalef(
+void xnn_math_f32_exp__avx512f_rr2_p5_scalef(
     size_t n,
     const float* input,
     float* output)

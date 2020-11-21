@@ -16,7 +16,7 @@
 // Table of exp2(k / 64) values, k = 0..63
 extern XNN_INTERNAL const float xnn_table_exp2_k_over_64[64];
 
-void xnn_math_f32_exp__sse2_lut64_p2(
+void xnn_math_f32_exp__sse2_rr2_lut64_p2(
     size_t n,
     const float* input,
     float* output)

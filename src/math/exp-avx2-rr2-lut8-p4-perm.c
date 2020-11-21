@@ -5,13 +5,14 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stddef.h>
 
 #include <immintrin.h>
 
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_exp__avx2_lut8_p3_perm(
+void xnn_math_f32_exp__avx2_rr2_lut8_p4_perm(
     size_t n,
     const float* input,
     float* output)
@@ -28,8 +29,10 @@ void xnn_math_f32_exp__avx2_lut8_p3_perm(
   const __m256 vminus_ln2_o8_lo = _mm256_set1_ps(0x1.05C61p-32f);
   const __m256 vplus_inf = _mm256_set1_ps(INFINITY);
 
-  const __m256 vc2 = _mm256_set1_ps(0x1.00021Ep-1f);
-  const __m256 vc3 = _mm256_set1_ps(0x1.55559Ap-3f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.000000p-1f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.555C82p-3f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.5558A8p-5f);
+
   const __m256 vtable = _mm256_set_ps(
     0x1.D5818Ep+0f, 0x1.AE89FAp+0f, 0x1.8ACE54p+0f, 0x1.6A09E6p+0f,
     0x1.4BFDAEp+0f, 0x1.306FE0p+0f, 0x1.172B84p+0f, 0x1.000000p+0f);
@@ -76,12 +79,13 @@ void xnn_math_f32_exp__avx2_lut8_p3_perm(
     vt = _mm256_fmadd_ps(vn, vminus_ln2_o8_lo, vt);
 
     // Compute degree-3 polynomial approximation for exp(t) on [-log(2)/16, log(2)/16].
-    __m256 vp = _mm256_fmadd_ps(vt, vc3, vc2);
+    __m256 vp = _mm256_fmadd_ps(vt, vc4, vc3);
+    vp = _mm256_fmadd_ps(vp, vt, vc2);
 
     // Reconstruct the final f value:
-    //   f = so * sn * l * (1 + t * (1 + t * (c2 + t * c3)))
-    //     = so * sn * (l + l * (t + t * (t * (c2 + t * c3))))
-    //     = sn * ((l * so) + (l * so) * p)
+    //   f = so * sn * l * (1 + t * (1 + t * (c2 + t * (c3 + t * c4))))
+    //     = so * sn * (l + l * (t + t * (t * (c2 + t * (c3 + t * c4)))))
+    //     = so * sn * (l + l * p)
     vl = _mm256_mul_ps(vl, vso);
     vp = _mm256_mul_ps(vp, vt);
     vp = _mm256_fmadd_ps(vt, vp, vt);

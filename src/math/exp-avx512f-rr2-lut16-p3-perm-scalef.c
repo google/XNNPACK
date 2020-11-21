@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_exp__avx512f_lut16_p3_perm_scalef(
+void xnn_math_f32_exp__avx512f_rr2_lut16_p3_perm_scalef(
     size_t n,
     const float* input,
     float* output)

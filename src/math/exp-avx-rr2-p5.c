@@ -12,7 +12,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_exp__avx_p5(
+void xnn_math_f32_exp__avx_rr2_p5(
     size_t n,
     const float* input,
     float* output)

@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_exp__avx512f_lut32_p2_perm2(
+void xnn_math_f32_exp__avx512f_rr2_lut32_p2_perm2(
     size_t n,
     const float* input,
     float* output)
