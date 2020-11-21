@@ -6892,6 +6892,11 @@ config_setting(
 )
 
 config_setting(
+    name = "fuchsia",
+    flag_values = {"//tools/cpp:cc_target_os": "fuchsia"},
+)
+
+config_setting(
     name = "android",
     values = {"crosstool_top": "//external:android/crosstool"},
 )
