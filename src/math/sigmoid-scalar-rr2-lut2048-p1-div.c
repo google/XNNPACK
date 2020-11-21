@@ -32,7 +32,7 @@ void xnn_math_f32_sigmoid__scalar_rr2_lut2048_p1_div(
   // Last 13 bits are zeroes
   const float vln2_hi = 0x1.600000p-1f;
   const float vln2_lo = 0x1.7217F8p-8f;
-  // Coefficient of polynomial approximation of exp(-t) ~ 1 + t * c1 on [-log(2)/4096, log(2)/4096]
+  // Coefficient of polynomial approximation of exp(-t) ~ 1 + t * c1 on [-log(2)/2048, log(2)/2048]
   const float vc1 = -0x1.FFFFFEp-1f;
   const float vone = 1.0f;
   // The largest z for which sigmoidf(-z) is normalized.
@@ -72,7 +72,7 @@ void xnn_math_f32_sigmoid__scalar_rr2_lut2048_p1_div(
     // Shift bits 11:19 into 23:31 (position of floating-point exponent).
     const uint32_t ve = fp32_to_bits(vn) << 12;
 
-    // Use bits 0:11 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
+    // Use bits 0:11 of n, as integer, as an index for table lookup of l := 2**frac(n).
     const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
     const float vs = fp32_from_bits(xnn_table_exp2minus_k_over_2048[vidx] + ve);
@@ -85,7 +85,7 @@ void xnn_math_f32_sigmoid__scalar_rr2_lut2048_p1_div(
     float vt = vn * vln2_hi + vz;
     vt = vn * vln2_lo + vt;
 
-    // Compute degree-1 polynomial approximation for exp(-t) on [-log(2)/4096, log(2)/4096]:
+    // Compute degree-1 polynomial approximation for exp(-t) on [-log(2)/2048, log(2)/2048]:
     //   P(t) = 1 + t * c1 = 1 + p
     const float vp = vt * vc1;
 

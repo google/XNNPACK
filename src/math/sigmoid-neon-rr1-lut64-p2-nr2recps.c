@@ -68,7 +68,7 @@ void xnn_math_f32_sigmoid__neon_rr1_lut64_p2_nr2recps(
     // Shift bits 6:14 into 23:31 (position of floating-point exponent).
     const int32x4_t ve = vshlq_n_s32(vreinterpretq_s32_f32(vn), 17);
 
-    // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
+    // Use bits 0:6 of n, as integer, as an index for table lookup of l := 2**frac(n).
     const uint64x2_t vidx = vreinterpretq_u64_s32(vshlq_n_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask), 2));
     const uint64_t vidx_lo = vgetq_lane_u64(vidx, 0);
     const uint64_t vidx_hi = vgetq_lane_u64(vidx, 1);

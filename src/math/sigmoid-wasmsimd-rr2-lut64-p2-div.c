@@ -71,7 +71,7 @@ void xnn_math_f32_sigmoid__wasmsimd_rr2_lut64_p2_div(
     // Shift bits 6:14 into 23:31 (position of floating-point exponent).
     const v128_t ve = wasm_i32x4_shl(vn, 17);
 
-    // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
+    // Use bits 0:6 of n, as integer, as an index for table lookup of l := 2**frac(n).
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
     const uint64_t vidx_lo = wasm_i64x2_extract_lane(vidx, 0);
     const uint64_t vidx_hi = wasm_i64x2_extract_lane(vidx, 1);

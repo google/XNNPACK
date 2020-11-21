@@ -72,7 +72,7 @@ void xnn_math_f32_sigmoid__scalar_rr2_lut64_p2_div(
     // Shift bits 6:14 into 23:31 (position of floating-point exponent).
     const uint32_t ve = fp32_to_bits(vn) << 17;
 
-    // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
+    // Use bits 0:6 of n, as integer, as an index for table lookup of l := 2**frac(n).
     const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
     const float vs = fp32_from_bits(xnn_table_exp2minus_k_over_64[vidx] + ve);

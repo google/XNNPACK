@@ -29,7 +29,7 @@ void xnn_math_f32_sigmoid__neonfma_rr2_lut2048_p1_nr2fma(
   const int32x4_t vindex_mask = vmovq_n_s32(INT32_C(0x7FF));
   const float32x4_t vln2_hi = vmovq_n_f32(0x1.62E43p-1f);
   const float32x4_t vln2_lo = vmovq_n_f32(-0x1.05C61p-29f);
-  // Coefficient of polynomial approximation of exp(-t) ~ 1 + t * c1 on [-log(2)/4096, log(2)/4096]
+  // Coefficient of polynomial approximation of exp(-t) ~ 1 + t * c1 on [-log(2)/2048, log(2)/2048]
   const float32x4_t vc1 = vmovq_n_f32(-0x1.FFFFFEp-1f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
   // The largest z for which sigmoidf(-z) is normalized.
@@ -69,7 +69,7 @@ void xnn_math_f32_sigmoid__neonfma_rr2_lut2048_p1_nr2fma(
     // Shift bits 11:19 into 23:31 (position of floating-point exponent).
     const int32x4_t ve = vshlq_n_s32(vreinterpretq_s32_f32(vn), 12);
 
-    // Use bits 0:11 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
+    // Use bits 0:11 of n, as integer, as an index for table lookup of l := 2**frac(n).
     const uint64x2_t vidx = vreinterpretq_u64_s32(vshlq_n_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask), 2));
     const uint64_t vidx_lo = vgetq_lane_u64(vidx, 0);
     const uint64_t vidx_hi = vgetq_lane_u64(vidx, 1);
@@ -89,7 +89,7 @@ void xnn_math_f32_sigmoid__neonfma_rr2_lut2048_p1_nr2fma(
     float32x4_t vt = vfmaq_f32(vz, vn, vln2_hi);
     vt = vfmaq_f32(vt, vn, vln2_lo);
 
-    // Compute degree-1 polynomial approximation for exp(-t) on [-log(2)/4096, log(2)/4096]:
+    // Compute degree-1 polynomial approximation for exp(-t) on [-log(2)/2048, log(2)/2048]:
     //   P(t) = 1 + t * c1 = 1 + p
     const float32x4_t vp = vmulq_f32(vt, vc1);
 

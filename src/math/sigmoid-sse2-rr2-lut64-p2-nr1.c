@@ -73,7 +73,7 @@ void xnn_math_f32_sigmoid__sse2_rr2_lut64_p2_nr1(
     // Shift bits 6:14 into 23:31 (position of floating-point exponent).
     const __m128i ve = _mm_slli_epi32(_mm_castps_si128(vn), 17);
 
-    // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
+    // Use bits 0:6 of n, as integer, as an index for table lookup of l := 2**frac(n).
     const __m128i vidx = _mm_slli_epi32(_mm_and_si128(_mm_castps_si128(vn), vindex_mask), 2);
 #if XNN_ARCH_X86_64
     const uint64_t vidx_lo = (uint64_t) _mm_cvtsi128_si64(vidx);

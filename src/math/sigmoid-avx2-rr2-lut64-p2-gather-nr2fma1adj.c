@@ -71,7 +71,7 @@ void xnn_math_f32_sigmoid__avx2_rr2_lut64_p2_gather_nr2fma1adj(
     // Shift bits 6:14 into 23:31 (position of floating-point exponent).
     __m256i ve = _mm256_slli_epi32(_mm256_castps_si256(vn), 17);
 
-    // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
+    // Use bits 0:6 of n, as integer, as an index for table lookup of l := 2**frac(n).
     const __m256i vidx = _mm256_castps_si256(_mm256_and_ps(vn, vindex_mask));
     const __m256i vl = _mm256_i32gather_epi32((const int*) xnn_table_exp2minus_k_over_64, vidx, sizeof(float));
     // Adjust exponent of the value l fetched from the table to get the final s value.
