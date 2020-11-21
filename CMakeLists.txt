@@ -572,9 +572,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vunary/gen/vsqr-scalar-x1.c
   src/f32-vunary/gen/vsqr-scalar-x2.c
   src/f32-vunary/gen/vsqr-scalar-x4.c
-  src/math/expminus-scalar-lut64-p2.c
-  src/math/expminus-scalar-lut2048-p1.c
-  src/math/expminus-scalar-p5.c
+  src/math/expminus-scalar-rr2-lut64-p2.c
+  src/math/expminus-scalar-rr2-lut2048-p1.c
+  src/math/expminus-scalar-rr2-p5.c
   src/math/roundd-scalar-addsub.c
   src/math/roundd-scalar-cvt.c
   src/math/roundd-scalar-floor.c
@@ -1097,9 +1097,9 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-vsqrt/gen/neonfma-nr2fma1adj-x40.c
   src/math/exp-neonfma-rr2-lut64-p2.c
   src/math/exp-neonfma-rr2-p5.c
-  src/math/expminus-neonfma-lut64-p2.c
-  src/math/expminus-neonfma-lut2048-p1.c
-  src/math/expminus-neonfma-p5.c
+  src/math/expminus-neonfma-rr2-lut64-p2.c
+  src/math/expminus-neonfma-rr2-lut2048-p1.c
+  src/math/expminus-neonfma-rr2-p5.c
   src/math/sigmoid-neonfma-rr1-lut64-p2-nr1recps1fma.c
   src/math/sigmoid-neonfma-rr1-lut64-p2-nr2fma.c
   src/math/sigmoid-neonfma-rr1-lut64-p2-nr2recps.c
@@ -1568,7 +1568,7 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndz-sse2-x8.c
   src/math/exp-sse2-rr2-lut64-p2.c
   src/math/exp-sse2-rr2-p5.c
-  src/math/expminus-sse2-p5.c
+  src/math/expminus-sse2-rr2-p5.c
   src/math/expm1minus-sse2-rr2-p6.c
   src/math/roundd-sse2-cvt.c
   src/math/roundne-sse2-cvt.c
@@ -2109,7 +2109,7 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/exp-avx2-rr2-lut8-p3-perm.c
   src/math/exp-avx2-rr2-lut8-p4-perm.c
   src/math/exp-avx2-rr2-p5.c
-  src/math/expminus-avx2-p5.c
+  src/math/expminus-avx2-rr2-p5.c
   src/math/extexp-avx2-p5.c
   src/math/sigmoid-avx2-rr1-lut64-p2-gather-div.c
   src/math/sigmoid-avx2-rr1-lut64-p2-gather-nr1fma.c

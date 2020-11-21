@@ -52,46 +52,46 @@ static void ExpError(benchmark::State& state,
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void f32_expminus__sse2_p5(benchmark::State& state) {
-    ExpError(state, xnn_math_f32_expminus__sse2_p5, 4);
+  static void f32_expminus__sse2_rr2_p5(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_expminus__sse2_rr2_p5, 4);
   }
-  static void f32_expminus__avx2_p5(benchmark::State& state) {
-    ExpError(state, xnn_math_f32_expminus__avx2_p5, 8);
+  static void f32_expminus__avx2_rr2_p5(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_expminus__avx2_rr2_p5, 8);
   }
 
-  BENCHMARK(f32_expminus__sse2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expminus__avx2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expminus__sse2_rr2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expminus__avx2_rr2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  static void f32_expminus__neonfma_p5(benchmark::State& state) {
-    ExpError(state, xnn_math_f32_expminus__neonfma_p5, 4);
+  static void f32_expminus__neonfma_rr2_p5(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_expminus__neonfma_rr2_p5, 4);
   }
-  static void f32_expminus__neonfma_lut64_p2(benchmark::State& state) {
-    ExpError(state, xnn_math_f32_expminus__neonfma_lut64_p2, 4);
+  static void f32_expminus__neonfma_rr2_lut64_p2(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_expminus__neonfma_rr2_lut64_p2, 4);
   }
-  static void f32_expminus__neonfma_lut2048_p1(benchmark::State& state) {
-    ExpError(state, xnn_math_f32_expminus__neonfma_lut2048_p1, 4);
+  static void f32_expminus__neonfma_rr2_lut2048_p1(benchmark::State& state) {
+    ExpError(state, xnn_math_f32_expminus__neonfma_rr2_lut2048_p1, 4);
   }
 
-  BENCHMARK(f32_expminus__neonfma_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expminus__neonfma_lut64_p2)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expminus__neonfma_lut2048_p1)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expminus__neonfma_rr2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expminus__neonfma_rr2_lut64_p2)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expminus__neonfma_rr2_lut2048_p1)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-static void f32_expminus__scalar_p5(benchmark::State& state) {
-  ExpError(state, xnn_math_f32_expminus__scalar_p5, 1);
+static void f32_expminus__scalar_rr2_p5(benchmark::State& state) {
+  ExpError(state, xnn_math_f32_expminus__scalar_rr2_p5, 1);
 }
-static void f32_expminus__scalar_lut64_p2(benchmark::State& state) {
-  ExpError(state, xnn_math_f32_expminus__scalar_lut64_p2, 1);
+static void f32_expminus__scalar_rr2_lut64_p2(benchmark::State& state) {
+  ExpError(state, xnn_math_f32_expminus__scalar_rr2_lut64_p2, 1);
 }
-static void f32_expminus__scalar_lut2048_p1(benchmark::State& state) {
-  ExpError(state, xnn_math_f32_expminus__scalar_lut2048_p1, 1);
+static void f32_expminus__scalar_rr2_lut2048_p1(benchmark::State& state) {
+  ExpError(state, xnn_math_f32_expminus__scalar_rr2_lut2048_p1, 1);
 }
 
-BENCHMARK(f32_expminus__scalar_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
-BENCHMARK(f32_expminus__scalar_lut64_p2)->Unit(benchmark::kMillisecond)->Iterations(1);
-BENCHMARK(f32_expminus__scalar_lut2048_p1)->Unit(benchmark::kMillisecond)->Iterations(1);
+BENCHMARK(f32_expminus__scalar_rr2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
+BENCHMARK(f32_expminus__scalar_rr2_lut64_p2)->Unit(benchmark::kMillisecond)->Iterations(1);
+BENCHMARK(f32_expminus__scalar_rr2_lut2048_p1)->Unit(benchmark::kMillisecond)->Iterations(1);
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

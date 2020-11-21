@@ -12,7 +12,7 @@
 #include <fp16/bitcasts.h>
 
 
-void xnn_math_f32_expminus__scalar_p5(
+void xnn_math_f32_expminus__scalar_rr2_p5(
     size_t n,
     const float* input,
     float* output)

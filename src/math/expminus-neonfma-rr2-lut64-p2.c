@@ -15,7 +15,7 @@
 // Table of exp2(k / 64) values decremented (as integer) by (k << 17), k = 0..63
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
-void xnn_math_f32_expminus__neonfma_lut64_p2(
+void xnn_math_f32_expminus__neonfma_rr2_lut64_p2(
     size_t n,
     const float* input,
     float* output)
