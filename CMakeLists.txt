@@ -1569,6 +1569,7 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/math/exp-sse2-rr2-lut64-p2.c
   src/math/exp-sse2-rr2-p5.c
   src/math/expminus-sse2-rr2-p5.c
+  src/math/expm1minus-sse2-rr2-p5.c
   src/math/expm1minus-sse2-rr2-p6.c
   src/math/roundd-sse2-cvt.c
   src/math/roundne-sse2-cvt.c
