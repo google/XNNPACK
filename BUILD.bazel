@@ -6967,6 +6967,12 @@ config_setting(
 )
 
 config_setting(
+    name = "fuchsia_x86_64",
+    flag_values = {"//tools/cpp:cc_target_os": "fuchsia"},
+    values = {"cpu": "x86_64"},
+)
+
+config_setting(
     name = "ios_armv7",
     values = {
         "apple_platform_type": "ios",
