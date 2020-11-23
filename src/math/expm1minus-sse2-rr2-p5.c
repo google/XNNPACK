@@ -20,17 +20,19 @@ void xnn_math_f32_expm1minus__sse2_rr2_p5(
 
   // The largest x for which expm1f(x) is saturated at -1.0f.
   const __m128 vsat_cutoff = _mm_set1_ps(-0x1.154246p+4f);
+  // Large number such that ulp(magic bias) == 1 and magic bias === 127 mod 2**22.
   const __m128 vmagic_bias = _mm_set1_ps(0x1.8000FEp23f);
   const __m128 vlog2e = _mm_set1_ps(0x1.715476p+0f);
   // Last 7 bits are zeroes
   const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
   const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
-
+  // Coefficient of polynomial approximation
+  //   exp(t) - 1 ~ t * (1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
+  // on [-log(2)/2, log(2)/2]
   const __m128 vc5 = _mm_set1_ps(0x1.113780p-7f);
   const __m128 vc4 = _mm_set1_ps(0x1.5704DCp-5f);
   const __m128 vc3 = _mm_set1_ps(0x1.555634p-3f);
   const __m128 vc2 = _mm_set1_ps(0x1.FFFE70p-2f);
-
   const __m128 vone = _mm_set1_ps(1.0f);
 
   for (; n != 0; n -= 4 * sizeof(float)) {
@@ -73,14 +75,14 @@ void xnn_math_f32_expm1minus__sse2_rr2_p5(
     vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc2);
     vp = _mm_mul_ps(vp, vt);
 
-    // Reconstruct the final f value:
-    //   f = s * (1 + t * (1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))) - 1
-    //     = (s - 1) + s * (t + t * p)
-    //     = (s - 1) + ((t * s) + (t * s) * p)
+    // Reconstruct the exp(x) - 1 value:
+    //   exp(x) - 1 = s * (1 + t * (1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))) - 1
+    //              = (s - 1) + s * (t + t * p)
+    //              = ((t * s) + (t * s) * p) + (s - 1)
     vt = _mm_mul_ps(vt, vs);
     const __m128 vsm1 = _mm_sub_ps(vs, vone);
     vp = _mm_add_ps(_mm_mul_ps(vp, vt), vt);
-    __m128 vf = _mm_add_ps(vp, vsm1);
+    const __m128 vf = _mm_add_ps(vp, vsm1);
 
     _mm_storeu_ps(output, vf);
 

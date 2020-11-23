@@ -575,6 +575,10 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/math/expminus-scalar-rr2-lut64-p2.c
   src/math/expminus-scalar-rr2-lut2048-p1.c
   src/math/expminus-scalar-rr2-p5.c
+  src/math/expm1minus-scalar-rr2-lut16-p3.c
+  src/math/expm1minus-scalar-rr2-lut16-p4.c
+  src/math/expm1minus-scalar-rr2-p5.c
+  src/math/expm1minus-scalar-rr2-p6.c
   src/math/roundd-scalar-addsub.c
   src/math/roundd-scalar-cvt.c
   src/math/roundd-scalar-floor.c

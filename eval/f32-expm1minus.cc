@@ -64,6 +64,20 @@ static void Expm1Error(benchmark::State& state,
   BENCHMARK(f32_expm1minus__sse2_rr2_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+static void f32_expm1minus__scalar_rr2_lut16_p3(benchmark::State& state) {
+  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut16_p3, 1);
+}
+static void f32_expm1minus__scalar_rr2_lut16_p4(benchmark::State& state) {
+  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut16_p4, 1);
+}
+static void f32_expm1minus__scalar_rr2_p6(benchmark::State& state) {
+  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_p6, 1);
+}
+
+BENCHMARK(f32_expm1minus__scalar_rr2_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
+BENCHMARK(f32_expm1minus__scalar_rr2_lut16_p4)->Unit(benchmark::kMillisecond)->Iterations(1);
+BENCHMARK(f32_expm1minus__scalar_rr2_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
