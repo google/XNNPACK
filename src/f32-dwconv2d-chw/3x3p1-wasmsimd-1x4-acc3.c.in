@@ -44,6 +44,8 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_1x4_acc3(
   const v128_t vk21 = wasm_v32x4_load_splat(weights + 8);
   const v128_t vk22 = wasm_v32x4_load_splat(weights + 9);
 
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
+
   const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(float));
 
   const float* i0 = zero;
@@ -57,11 +59,11 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_1x4_acc3(
     }
 
     // vi0x3012 = ( vi02, vi01, vi00, vi03 )
-    v128_t vi0x3012 = wasm_f32x4_splat(0.0f);
+    v128_t vi0x3012 = vzero;
     // vi1x3012 = ( vi12, vi11, vi10, vi13 )
-    v128_t vi1x3012 = wasm_f32x4_splat(0.0f);
+    v128_t vi1x3012 = vzero;
     // vi2x3012 = ( vi22, vi21, vi20, vi13 )
-    v128_t vi2x3012 = wasm_f32x4_splat(0.0f);
+    v128_t vi2x3012 = vzero;
     // vi0x4567 = ( vi07, vi06, vi05, vi04 )
     v128_t vi0x4567 = wasm_v128_load(i0);
     i0 += 4;
@@ -138,11 +140,11 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_1x4_acc3(
       vo = wasm_f32x4_add(vo, vo4567p2);
 
       $if X86:
-         vo = wasm_v128_bitselect(vmin, vo, wasm_f32x4_lt(vo, vmin));
-         vo = wasm_v128_bitselect(vo, vmax, wasm_f32x4_le(vo, vmax));
+        vo = wasm_v128_bitselect(vmin, vo, wasm_f32x4_lt(vo, vmin));
+        vo = wasm_v128_bitselect(vo, vmax, wasm_f32x4_le(vo, vmax));
       $else:
-         vo = wasm_f32x4_max(vo, vmin);
-         vo = wasm_f32x4_min(vo, vmax);
+        vo = wasm_f32x4_max(vo, vmin);
+        vo = wasm_f32x4_min(vo, vmax);
 
       wasm_v128_store(output, vo);
       output += 4;
@@ -179,7 +181,6 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_1x4_acc3(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi1x3456, vk10));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi2x3456, vk20));
 
-      const v128_t vzero = wasm_f32x4_splat(0.0f);
       // vi0x8567 = ( vi07, vi06, vi05, 0.0 )
       const v128_t vi0x8567 = wasm_v32x4_shuffle(vi0x4567, vzero, 4, 1, 2, 3);
       // vi1x8567 = ( vi17, vi16, vi15, 0.0 )
@@ -202,11 +203,11 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_1x4_acc3(
       vo = wasm_f32x4_add(vo, vo4567p2);
 
       $if X86:
-         vo = wasm_v128_bitselect(vmin, vo, wasm_f32x4_lt(vo, vmin));
-         vo = wasm_v128_bitselect(vo, vmax, wasm_f32x4_le(vo, vmax));
+        vo = wasm_v128_bitselect(vmin, vo, wasm_f32x4_lt(vo, vmin));
+        vo = wasm_v128_bitselect(vo, vmax, wasm_f32x4_le(vo, vmax));
       $else:
-         vo = wasm_f32x4_max(vo, vmin);
-         vo = wasm_f32x4_min(vo, vmax);
+        vo = wasm_f32x4_max(vo, vmin);
+        vo = wasm_f32x4_min(vo, vmax);
 
       if XNN_LIKELY(w == 4 * sizeof(float)) {
         wasm_v128_store(output, vo);
@@ -215,7 +216,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_1x4_acc3(
         if (w & (2 * sizeof(float))) {
           *((double*) output) = wasm_f64x2_extract_lane(vo, 0);
           output += 2;
-          vo = wasm_v32x4_shuffle(vo, vo, 2, 3, 4 + 2, 4 + 3);
+          vo = wasm_v32x4_shuffle(vo, vo, 2, 3, 0, 1);
         }
         if (w & (1 * sizeof(float))) {
           *output = wasm_f32x4_extract_lane(vo, 0);

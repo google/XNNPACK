@@ -16,15 +16,6 @@
 #include <xnnpack/math.h>
 
 
-// palign with offset of 4
-static v128_t palignr4_f32(v128_t a, v128_t b) {
-  return wasm_v32x4_shuffle(a, b, 1, 2, 3, 4);
-}
-// palign with offset of 12
-static v128_t palignr12_f32(v128_t a, v128_t b) {
-  return wasm_v32x4_shuffle(a, b, 3, 4, 5, 6);
-}
-
 
 void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_x86_5x4(
     size_t input_height,
@@ -152,13 +143,13 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_x86_5x4(
       vo3p0 = wasm_f32x4_add(vo3p0, wasm_f32x4_mul(vi5x4567, vk21));
       vo4p0 = wasm_f32x4_add(vo4p0, wasm_f32x4_mul(vi6x4567, vk21));
 
-      const v128_t vi0x3456 = palignr12_f32(vi0x0123, vi0x4567);
-      const v128_t vi1x3456 = palignr12_f32(vi1x0123, vi1x4567);
-      const v128_t vi2x3456 = palignr12_f32(vi2x0123, vi2x4567);
-      const v128_t vi3x3456 = palignr12_f32(vi3x0123, vi3x4567);
-      const v128_t vi4x3456 = palignr12_f32(vi4x0123, vi4x4567);
-      const v128_t vi5x3456 = palignr12_f32(vi5x0123, vi5x4567);
-      const v128_t vi6x3456 = palignr12_f32(vi6x0123, vi6x4567);
+      const v128_t vi0x3456 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 3, 4, 5, 6);
+      const v128_t vi1x3456 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 3, 4, 5, 6);
+      const v128_t vi2x3456 = wasm_v32x4_shuffle(vi2x0123, vi2x4567, 3, 4, 5, 6);
+      const v128_t vi3x3456 = wasm_v32x4_shuffle(vi3x0123, vi3x4567, 3, 4, 5, 6);
+      const v128_t vi4x3456 = wasm_v32x4_shuffle(vi4x0123, vi4x4567, 3, 4, 5, 6);
+      const v128_t vi5x3456 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 3, 4, 5, 6);
+      const v128_t vi6x3456 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 3, 4, 5, 6);
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x3456, vk00));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x3456, vk00));
@@ -184,13 +175,13 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_x86_5x4(
       vi5x0123 = vi5x4567;
       vi6x0123 = vi6x4567;
 
-      const v128_t vi0x5678 = palignr4_f32(vi0x4567, vi0x89AB);
-      const v128_t vi1x5678 = palignr4_f32(vi1x4567, vi1x89AB);
-      const v128_t vi2x5678 = palignr4_f32(vi2x4567, vi2x89AB);
-      const v128_t vi3x5678 = palignr4_f32(vi3x4567, vi3x89AB);
-      const v128_t vi4x5678 = palignr4_f32(vi4x4567, vi4x89AB);
-      const v128_t vi5x5678 = palignr4_f32(vi5x4567, vi5x89AB);
-      const v128_t vi6x5678 = palignr4_f32(vi6x4567, vi6x89AB);
+      const v128_t vi0x5678 = wasm_v32x4_shuffle(vi0x4567, vi0x89AB, 1, 2, 3, 4);
+      const v128_t vi1x5678 = wasm_v32x4_shuffle(vi1x4567, vi1x89AB, 1, 2, 3, 4);
+      const v128_t vi2x5678 = wasm_v32x4_shuffle(vi2x4567, vi2x89AB, 1, 2, 3, 4);
+      const v128_t vi3x5678 = wasm_v32x4_shuffle(vi3x4567, vi3x89AB, 1, 2, 3, 4);
+      const v128_t vi4x5678 = wasm_v32x4_shuffle(vi4x4567, vi4x89AB, 1, 2, 3, 4);
+      const v128_t vi5x5678 = wasm_v32x4_shuffle(vi5x4567, vi5x89AB, 1, 2, 3, 4);
+      const v128_t vi6x5678 = wasm_v32x4_shuffle(vi6x4567, vi6x89AB, 1, 2, 3, 4);
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x5678, vk02));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x5678, vk02));
@@ -267,13 +258,13 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_x86_5x4(
       vo3p0 = wasm_f32x4_add(vo3p0, wasm_f32x4_mul(vi5x4567, vk21));
       vo4p0 = wasm_f32x4_add(vo4p0, wasm_f32x4_mul(vi6x4567, vk21));
 
-      const v128_t vi0x3456 = palignr12_f32(vi0x0123, vi0x4567);
-      const v128_t vi1x3456 = palignr12_f32(vi1x0123, vi1x4567);
-      const v128_t vi2x3456 = palignr12_f32(vi2x0123, vi2x4567);
-      const v128_t vi3x3456 = palignr12_f32(vi3x0123, vi3x4567);
-      const v128_t vi4x3456 = palignr12_f32(vi4x0123, vi4x4567);
-      const v128_t vi5x3456 = palignr12_f32(vi5x0123, vi5x4567);
-      const v128_t vi6x3456 = palignr12_f32(vi6x0123, vi6x4567);
+      const v128_t vi0x3456 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 3, 4, 5, 6);
+      const v128_t vi1x3456 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 3, 4, 5, 6);
+      const v128_t vi2x3456 = wasm_v32x4_shuffle(vi2x0123, vi2x4567, 3, 4, 5, 6);
+      const v128_t vi3x3456 = wasm_v32x4_shuffle(vi3x0123, vi3x4567, 3, 4, 5, 6);
+      const v128_t vi4x3456 = wasm_v32x4_shuffle(vi4x0123, vi4x4567, 3, 4, 5, 6);
+      const v128_t vi5x3456 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 3, 4, 5, 6);
+      const v128_t vi6x3456 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 3, 4, 5, 6);
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x3456, vk00));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x3456, vk00));
@@ -291,13 +282,13 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_x86_5x4(
       vo3p0 = wasm_f32x4_add(vo3p0, wasm_f32x4_mul(vi5x3456, vk20));
       vo4p0 = wasm_f32x4_add(vo4p0, wasm_f32x4_mul(vi6x3456, vk20));
 
-      const v128_t vi0x5678 = palignr4_f32(vi0x4567, vzero);
-      const v128_t vi1x5678 = palignr4_f32(vi1x4567, vzero);
-      const v128_t vi2x5678 = palignr4_f32(vi2x4567, vzero);
-      const v128_t vi3x5678 = palignr4_f32(vi3x4567, vzero);
-      const v128_t vi4x5678 = palignr4_f32(vi4x4567, vzero);
-      const v128_t vi5x5678 = palignr4_f32(vi5x4567, vzero);
-      const v128_t vi6x5678 = palignr4_f32(vi6x4567, vzero);
+      const v128_t vi0x5678 = wasm_v32x4_shuffle(vi0x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi1x5678 = wasm_v32x4_shuffle(vi1x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi2x5678 = wasm_v32x4_shuffle(vi2x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi3x5678 = wasm_v32x4_shuffle(vi3x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi4x5678 = wasm_v32x4_shuffle(vi4x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi5x5678 = wasm_v32x4_shuffle(vi5x4567, vzero, 1, 2, 3, 4);
+      const v128_t vi6x5678 = wasm_v32x4_shuffle(vi6x4567, vzero, 1, 2, 3, 4);
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x5678, vk02));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x5678, vk02));

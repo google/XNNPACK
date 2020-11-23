@@ -65,6 +65,8 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_x86_1x4_acc2(
   const v128_t vk43 = wasm_v32x4_load_splat(weights + 24);
   const v128_t vk44 = wasm_v32x4_load_splat(weights + 25);
 
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
+
   const uint32_t padding_top_less_1 = padding_top - 1;
   const size_t input_decrement = round_down_po2(input_width - 1 * sizeof(float), 4 * sizeof(float)) + 4 * sizeof(float);
 
@@ -87,11 +89,11 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_x86_1x4_acc2(
       i3 = zero;
     }
 
-    v128_t vi0x0123 = wasm_f32x4_splat(0.0f);
-    v128_t vi1x0123 = wasm_f32x4_splat(0.0f);
-    v128_t vi2x0123 = wasm_f32x4_splat(0.0f);
-    v128_t vi3x0123 = wasm_f32x4_splat(0.0f);
-    v128_t vi4x0123 = wasm_f32x4_splat(0.0f);
+    v128_t vi0x0123 = vzero;
+    v128_t vi1x0123 = vzero;
+    v128_t vi2x0123 = vzero;
+    v128_t vi3x0123 = vzero;
+    v128_t vi4x0123 = vzero;
     v128_t vi0x4567 = wasm_v128_load(i0);
     i0 += 4;
     v128_t vi1x4567 = wasm_v128_load(i1);
@@ -213,7 +215,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_x86_1x4_acc2(
         if (w_tmp & 2) {
           *((double*) output) = wasm_f64x2_extract_lane(vo0, 0);
           output += 2;
-          vo0 = wasm_v32x4_shuffle(vo0, vo0, 2, 2, 2, 2);
+          vo0 = wasm_v32x4_shuffle(vo0, vo0, 2, 3, 0, 1);
         }
         if (w_tmp & 1) {
           *output = wasm_f32x4_extract_lane(vo0, 0);
@@ -225,11 +227,11 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_x86_1x4_acc2(
     {
       v128_t vo468Ap0 = vbias;
 
-      v128_t vi0x89AB = wasm_f32x4_splat(0.0f);
-      v128_t vi1x89AB = wasm_f32x4_splat(0.0f);
-      v128_t vi2x89AB = wasm_f32x4_splat(0.0f);
-      v128_t vi3x89AB = wasm_f32x4_splat(0.0f);
-      v128_t vi4x89AB = wasm_f32x4_splat(0.0f);
+      v128_t vi0x89AB = vzero;
+      v128_t vi1x89AB = vzero;
+      v128_t vi2x89AB = vzero;
+      v128_t vi3x89AB = vzero;
+      v128_t vi4x89AB = vzero;
       if XNN_LIKELY(w > 4 * sizeof(float)) {
         vi0x89AB = wasm_v128_load(i0);
         i0 += 4;
@@ -243,11 +245,11 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_x86_1x4_acc2(
         i4 += 4;
       }
 
-      v128_t vi0xCDEF = wasm_f32x4_splat(0.0f);
-      v128_t vi1xCDEF = wasm_f32x4_splat(0.0f);
-      v128_t vi2xCDEF = wasm_f32x4_splat(0.0f);
-      v128_t vi3xCDEF = wasm_f32x4_splat(0.0f);
-      v128_t vi4xCDEF = wasm_f32x4_splat(0.0f);
+      v128_t vi0xCDEF = vzero;
+      v128_t vi1xCDEF = vzero;
+      v128_t vi2xCDEF = vzero;
+      v128_t vi3xCDEF = vzero;
+      v128_t vi4xCDEF = vzero;
       if XNN_LIKELY(w > 8 * sizeof(float)) {
         vi0xCDEF = wasm_v128_load(i0);
         i0 += 4;
@@ -362,7 +364,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_x86_1x4_acc2(
         if (w_tmp & 2) {
           *((double*) output) = wasm_f64x2_extract_lane(vo0, 0);
           output += 2;
-          vo0 = wasm_v32x4_shuffle(vo0, vo0, 2, 2, 2, 2);
+          vo0 = wasm_v32x4_shuffle(vo0, vo0, 2, 3, 0, 1);
         }
         if (w_tmp & 1) {
           *output = wasm_f32x4_extract_lane(vo0, 0);

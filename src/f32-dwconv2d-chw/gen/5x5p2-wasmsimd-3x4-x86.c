@@ -63,6 +63,8 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
   const v128_t vk43 = wasm_v32x4_load_splat(weights + 24);
   const v128_t vk44 = wasm_v32x4_load_splat(weights + 25);
 
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
+
   const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(float));
 
   const float* i0 = zero;
@@ -94,13 +96,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       i6 = zero;
     }
 
-    v128_t vi0x0123 = wasm_f32x4_splat(0.0f);
-    v128_t vi1x0123 = wasm_f32x4_splat(0.0f);
-    v128_t vi2x0123 = wasm_f32x4_splat(0.0f);
-    v128_t vi3x0123 = wasm_f32x4_splat(0.0f);
-    v128_t vi4x0123 = wasm_f32x4_splat(0.0f);
-    v128_t vi5x0123 = wasm_f32x4_splat(0.0f);
-    v128_t vi6x0123 = wasm_f32x4_splat(0.0f);
+    v128_t vi0x0123 = vzero;
+    v128_t vi1x0123 = vzero;
+    v128_t vi2x0123 = vzero;
+    v128_t vi3x0123 = vzero;
+    v128_t vi4x0123 = vzero;
+    v128_t vi5x0123 = vzero;
+    v128_t vi6x0123 = vzero;
     v128_t vi0x4567 = wasm_v128_load(i0); i0 += 4;
     v128_t vi1x4567 = wasm_v128_load(i1); i1 += 4;
     v128_t vi2x4567 = wasm_v128_load(i2); i2 += 4;
@@ -564,7 +566,6 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo4567p1 = wasm_f32x4_add(vo4567p1, wasm_f32x4_mul(vi5x2345, vk40));
       vo4567p2 = wasm_f32x4_add(vo4567p2, wasm_f32x4_mul(vi6x2345, vk40));
 
-      const v128_t vzero = wasm_f32x4_splat(0.0f);
       const v128_t vi0x5678 = wasm_v32x4_shuffle(vi0x4567, vzero, 1, 2, 3, 4);
       const v128_t vi1x5678 = wasm_v32x4_shuffle(vi1x4567, vzero, 1, 2, 3, 4);
       const v128_t vi2x5678 = wasm_v32x4_shuffle(vi2x4567, vzero, 1, 2, 3, 4);
@@ -649,9 +650,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
           *((double*) o0) = wasm_f64x2_extract_lane(vo0, 0);
           o0 += 2;
 
-          vo0 = wasm_v32x4_shuffle(vo0, vo0, 2, 2, 2, 2);
-          vo1 = wasm_v32x4_shuffle(vo1, vo1, 2, 2, 2, 2);
-          vo2 = wasm_v32x4_shuffle(vo2, vo2, 2, 2, 2, 2);
+          vo0 = wasm_v32x4_shuffle(vo0, vo0, 2, 3, 0, 1);
+          vo1 = wasm_v32x4_shuffle(vo1, vo1, 2, 3, 0, 1);
+          vo2 = wasm_v32x4_shuffle(vo2, vo2, 2, 3, 0, 1);
         }
         if (w & (1 * sizeof(float))) {
           *o2 = wasm_f32x4_extract_lane(vo2, 0);

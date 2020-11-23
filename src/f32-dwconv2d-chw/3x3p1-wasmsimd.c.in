@@ -14,15 +14,6 @@ $assert ACCUMULATORS >= 1
 #include <xnnpack/math.h>
 
 
-// palign with offset of 4
-static v128_t palignr4_f32(v128_t a, v128_t b) {
-  return wasm_v32x4_shuffle(a, b, 1, 2, 3, 4);
-}
-// palign with offset of 12
-static v128_t palignr12_f32(v128_t a, v128_t b) {
-  return wasm_v32x4_shuffle(a, b, 3, 4, 5, 6);
-}
-
 $ARCH_SUFFIX = "_x86" if X86 else "_arm"
 
 void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_${ROW_TILE}x4${"_acc%d" % ACCUMULATORS if ACCUMULATORS > 1 else ""}(
@@ -100,7 +91,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_${ROW_TILE}x4${"
             vo${M}p${K % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${M+K}x4567, vk${K}1));
 
       $for M in range(2 + ROW_TILE):
-        const v128_t vi${M}x3456 = palignr12_f32(vi${M}x0123, vi${M}x4567);
+        const v128_t vi${M}x3456 = wasm_v32x4_shuffle(vi${M}x0123, vi${M}x4567, 3, 4, 5, 6);
 
       $for K in range(3):
         $for M in range(ROW_TILE):
@@ -113,7 +104,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_${ROW_TILE}x4${"
         vi${M}x0123 = vi${M}x4567;
 
       $for M in range(2 + ROW_TILE):
-        const v128_t vi${M}x5678 = palignr4_f32(vi${M}x4567, vi${M}x89AB);
+        const v128_t vi${M}x5678 = wasm_v32x4_shuffle(vi${M}x4567, vi${M}x89AB, 1, 2, 3, 4);
 
       $for K in range(3):
         $for M in range(ROW_TILE):
@@ -163,7 +154,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_${ROW_TILE}x4${"
             vo${M}p${K % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${M+K}x4567, vk${K}1));
 
       $for M in range(2 + ROW_TILE):
-        const v128_t vi${M}x3456 = palignr12_f32(vi${M}x0123, vi${M}x4567);
+        const v128_t vi${M}x3456 = wasm_v32x4_shuffle(vi${M}x0123, vi${M}x4567, 3, 4, 5, 6);
 
       $for K in range(3):
         $for M in range(ROW_TILE):
@@ -173,7 +164,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd${ARCH_SUFFIX}_${ROW_TILE}x4${"
             vo${M}p${(K+3) % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${(K+3) % ACCUMULATORS}, wasm_f32x4_mul(vi${M+K}x3456, vk${K}0));
 
       $for M in range(2 + ROW_TILE):
-        const v128_t vi${M}x5678 = palignr4_f32(vi${M}x4567, vzero);
+        const v128_t vi${M}x5678 = wasm_v32x4_shuffle(vi${M}x4567, vzero, 1, 2, 3, 4);
 
       $for K in range(3):
         $for M in range(ROW_TILE):
