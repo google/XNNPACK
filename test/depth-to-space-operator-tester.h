@@ -130,7 +130,73 @@ class DepthToSpaceOperatorTester {
     return this->iterations_;
   }
 
-  void TestNCHW2NHWCxF32() const {
+  void TestNHWCxX32() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), rng);
+
+    std::vector<int32_t> input(
+      (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels());
+    std::vector<int32_t> output(
+      (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i32rng));
+      std::fill(output.begin(), output.end(), INT32_C(0xDEADBEAF));
+
+      // Create, setup, run, and destroy Depth To Space operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t depth_to_space_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_create_depth_to_space_nhwc_x32(
+                    output_channels(), input_channels_stride(), output_channels_stride(),
+                    block_size(), 0, &depth_to_space_op));
+      ASSERT_NE(nullptr, depth_to_space_op);
+
+      // Smart pointer to automatically delete depth_to_space_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_depth_to_space_op(depth_to_space_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_depth_to_space_nhwc_x32(
+                    depth_to_space_op,
+                    batch_size(), input_height(), input_width(),
+                    input.data(), output.data(), nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(depth_to_space_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t iy = 0; iy < input_height(); iy++) {
+          for (size_t by = 0; by < block_size(); by++) {
+            for (size_t ix = 0; ix < input_width(); ix++) {
+              for (size_t bx = 0; bx < block_size(); bx++) {
+                for (size_t oc = 0; oc < output_channels(); oc++) {
+                  const size_t input_index =
+                    ((i * input_height() + iy) * input_width() + ix) * input_channels_stride() +
+                      (by * block_size() + bx) * output_channels() + oc;
+                  const size_t output_index =
+                    ((i * output_height() + iy * block_size() + by) * output_width() + ix * block_size() + bx) *
+                      output_channels_stride() + oc;
+                  ASSERT_EQ(output[output_index], input[input_index])
+                    << "batch: " << i << " / " << batch_size()
+                    << ", input x: " << ix << " / " << input_width()
+                    << ", input y: " << iy << " / " << input_height()
+                    << ", block x: " << bx << " / " << block_size()
+                    << ", block y: " << by << " / " << block_size()
+                    << ", output channel: " << oc << " / " << output_channels()
+                    << ", input stride: " << input_channels_stride()
+                    << ", output stride: " << output_channels_stride();
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void TestNCHW2NHWCxX32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), rng);
@@ -172,19 +238,21 @@ class DepthToSpaceOperatorTester {
             for (size_t ix = 0; ix < input_width(); ix++) {
               for (size_t bx = 0; bx < block_size(); bx++) {
                 for (size_t oc = 0; oc < output_channels(); oc++) {
-                  const size_t input_offset =
+                  const size_t input_index =
                     i * input_channels_stride() * input_height() * input_width() +
                     (((oc * block_size() + by) * block_size() + bx) * input_height() + iy) * input_width() + ix;
-                  const size_t output_offset =
+                  const size_t output_index =
                     ((i * output_height() + iy * block_size() + by) * output_width() + ix * block_size() + bx) *
                       output_channels_stride() + oc;
-                  ASSERT_EQ(output[output_offset], input[input_offset])
+                  ASSERT_EQ(output[output_index], input[input_index])
                     << "batch: " << i << " / " << batch_size()
                     << ", input x: " << ix << " / " << input_width()
                     << ", input y: " << iy << " / " << input_height()
                     << ", block x: " << bx << " / " << block_size()
                     << ", block y: " << by << " / " << block_size()
-                    << ", output channel: " << oc << " / " << output_channels();
+                    << ", output channel: " << oc << " / " << output_channels()
+                    << ", input stride: " << input_channels_stride()
+                    << ", output stride: " << output_channels_stride();
                 }
               }
             }

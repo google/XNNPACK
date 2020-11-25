@@ -400,6 +400,48 @@ void xnn_compute_dwconv2d_chw(
     &context->params);
 }
 
+void xnn_compute_depthtospace2d_hwc_contiguous(
+    const struct depthtospace2d_hwc_context* context,
+    size_t batch_input_y,
+    size_t input_x,
+    size_t block_y)
+{
+  const size_t input_width = context->input_width;
+  const size_t elements = context->elements;
+  const void* input = (const void*) ((uintptr_t) context->input +
+    (batch_input_y * input_width + input_x) * context->input_width_stride + block_y * elements);
+  void* output = (void*) ((uintptr_t) context->output +
+    ((batch_input_y * context->block_size + block_y) * input_width + input_x) * elements);
+
+  context->ukernel(
+    elements,
+    input,
+    output,
+    NULL);
+}
+
+void xnn_compute_depthtospace2d_hwc_strided(
+    const struct depthtospace2d_hwc_context* context,
+    size_t batch_input_y,
+    size_t input_x,
+    size_t block_y,
+    size_t block_x)
+{
+  const size_t block_size = context->block_size;
+  const size_t elements = context->elements;
+  const void* input = (const void*) ((uintptr_t) context->input +
+    batch_input_y * context->input_height_stride + input_x * context->input_width_stride + (block_y * block_size + block_x) * elements);
+  void* output = (void*) ((uintptr_t) context->output +
+    (batch_input_y * block_size + block_y) * context->output_height_stride +
+    (input_x * block_size + block_x) * context->output_width_stride);
+
+  context->ukernel(
+    elements,
+    input,
+    output,
+    NULL);
+}
+
 void xnn_compute_depthtospace2d_chw2hwc(
     const struct depthtospace2d_chw2hwc_context* context,
     size_t batch_index)
@@ -1098,6 +1140,17 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           op->compute.tile[0], op->compute.tile[1],
           PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
       break;
+    case xnn_parallelization_type_3d:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      pthreadpool_parallelize_3d(
+          threadpool,
+          op->compute.task_3d,
+          &op->context,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2],
+          PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
+      break;
     case xnn_parallelization_type_3d_tile_2d:
       assert(op->compute.range[0] != 0);
       assert(op->compute.range[1] != 0);
@@ -1110,6 +1163,18 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           &op->context,
           op->compute.range[0], op->compute.range[1], op->compute.range[2],
           op->compute.tile[0], op->compute.tile[1],
+          PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
+      break;
+    case xnn_parallelization_type_4d:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      assert(op->compute.range[3] != 0);
+      pthreadpool_parallelize_4d(
+          threadpool,
+          op->compute.task_4d,
+          &op->context,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3],
           PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
       break;
     case xnn_parallelization_type_4d_tile_2d:

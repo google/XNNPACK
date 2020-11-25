@@ -60,6 +60,7 @@ OPERATOR_SRCS = [
     "src/operators/convolution-nhwc.c",
     "src/operators/deconvolution-nhwc.c",
     "src/operators/depth-to-space-nchw2nhwc.c",
+    "src/operators/depth-to-space-nhwc.c",
     "src/operators/fully-connected-nc.c",
     "src/operators/global-average-pooling-ncw.c",
     "src/operators/global-average-pooling-nwc.c",
@@ -6509,6 +6510,15 @@ xnnpack_unit_test(
     name = "depth_to_space_nchw2nhwc_test",
     srcs = [
         "test/depth-to-space-nchw2nhwc.cc",
+        "test/depth-to-space-operator-tester.h",
+    ] + OPERATOR_TEST_PARAMS_HDRS,
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "depth_to_space_nhwc_test",
+    srcs = [
+        "test/depth-to-space-nhwc.cc",
         "test/depth-to-space-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,

@@ -1706,6 +1706,23 @@ enum xnn_status xnn_setup_copy_nc_x32(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_depth_to_space_nhwc_x32(
+  size_t output_channels,
+  size_t input_channel_stride,
+  size_t output_channel_stride,
+  uint32_t block_size,
+  uint32_t flags,
+  xnn_operator_t* depth_to_space_op_out);
+
+enum xnn_status xnn_setup_depth_to_space_nhwc_x32(
+  xnn_operator_t depth_to_space_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_depth_to_space_nchw2nhwc_x32(
   size_t output_channels,
   size_t input_channel_stride,

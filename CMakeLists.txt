@@ -167,6 +167,7 @@ SET(XNNPACK_OPERATOR_SRCS
   src/operators/convolution-nhwc.c
   src/operators/deconvolution-nhwc.c
   src/operators/depth-to-space-nchw2nhwc.c
+  src/operators/depth-to-space-nhwc.c
   src/operators/fully-connected-nc.c
   src/operators/global-average-pooling-ncw.c
   src/operators/global-average-pooling-nwc.c
@@ -2928,6 +2929,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(depth-to-space-nchw2nhwc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(depth-to-space-nchw2nhwc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(depth-to-space-nchw2nhwc-test depth-to-space-nchw2nhwc-test)
+
+  ADD_EXECUTABLE(depth-to-space-nhwc-test test/depth-to-space-nhwc.cc)
+  SET_TARGET_PROPERTIES(depth-to-space-nhwc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(depth-to-space-nhwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(depth-to-space-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(depth-to-space-nhwc-test depth-to-space-nhwc-test)
 
   ADD_EXECUTABLE(divide-nd-test test/divide-nd.cc)
   SET_TARGET_PROPERTIES(divide-nd-test PROPERTIES

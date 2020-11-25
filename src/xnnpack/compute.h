@@ -22,7 +22,9 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_2d,
   xnn_parallelization_type_2d_tile_1d,
   xnn_parallelization_type_2d_tile_2d,
+  xnn_parallelization_type_3d,
   xnn_parallelization_type_3d_tile_2d,
+  xnn_parallelization_type_4d,
   xnn_parallelization_type_4d_tile_2d,
   xnn_parallelization_type_5d_tile_2d,
   xnn_parallelization_type_6d_tile_2d,
@@ -41,7 +43,9 @@ struct compute_parameters {
     pthreadpool_task_2d_t task_2d;
     pthreadpool_task_2d_tile_1d_t task_2d_tile_1d;
     pthreadpool_task_2d_tile_2d_t task_2d_tile_2d;
+    pthreadpool_task_3d_t task_3d;
     pthreadpool_task_3d_tile_2d_t task_3d_tile_2d;
+    pthreadpool_task_4d_t task_4d;
     pthreadpool_task_4d_tile_2d_t task_4d_tile_2d;
     pthreadpool_task_5d_tile_2d_t task_5d_tile_2d;
     pthreadpool_task_6d_tile_2d_t task_6d_tile_2d;
@@ -431,6 +435,34 @@ struct dwconv2d_context {
       const struct dwconv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t channel);
+#endif
+
+struct depthtospace2d_hwc_context {
+  size_t elements;
+  size_t input_width;
+  size_t block_size;
+  const void* input;
+  void* output;
+  size_t input_height_stride;
+  size_t input_width_stride;
+  size_t output_height_stride;
+  size_t output_width_stride;
+  xnn_univector_ukernel_function ukernel;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_depthtospace2d_hwc_contiguous(
+      const struct depthtospace2d_hwc_context* context,
+      size_t batch_input_y,
+      size_t input_x,
+      size_t block_y);
+
+  XNN_PRIVATE void xnn_compute_depthtospace2d_hwc_strided(
+      const struct depthtospace2d_hwc_context* context,
+      size_t batch_input_y,
+      size_t input_x,
+      size_t block_y,
+      size_t block_x);
 #endif
 
 struct depthtospace2d_chw2hwc_context {
