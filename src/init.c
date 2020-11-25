@@ -2419,7 +2419,7 @@ static void init(void) {
       }
       xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
         .ukernel_with_symm_padding =
-          (xnn_conv_hwc2chw_ukernel_function) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__psimd_2x2,
+          (xnn_conv_hwc2chw_ukernel_function) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2,
         .output_channel_tile = 4,
         .output_height_tile = 2,
         .output_width_tile = 2,

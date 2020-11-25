@@ -450,13 +450,13 @@ SCALAR_UKERNELS = [
     "src/f32-vunary/gen/vsqr-scalar-x1.c",
     "src/f32-vunary/gen/vsqr-scalar-x2.c",
     "src/f32-vunary/gen/vsqr-scalar-x4.c",
-    "src/math/expminus-scalar-rr2-lut64-p2.c",
-    "src/math/expminus-scalar-rr2-lut2048-p1.c",
-    "src/math/expminus-scalar-rr2-p5.c",
     "src/math/expm1minus-scalar-rr2-lut16-p3.c",
     "src/math/expm1minus-scalar-rr2-lut16-p4.c",
     "src/math/expm1minus-scalar-rr2-p5.c",
     "src/math/expm1minus-scalar-rr2-p6.c",
+    "src/math/expminus-scalar-rr2-lut64-p2.c",
+    "src/math/expminus-scalar-rr2-lut2048-p1.c",
+    "src/math/expminus-scalar-rr2-p5.c",
     "src/math/roundd-scalar-addsub.c",
     "src/math/roundd-scalar-cvt.c",
     "src/math/roundd-scalar-floor.c",
@@ -707,6 +707,7 @@ WASMSIMD_UKERNELS = [
     "src/f32-clamp/gen/wasmsimd-arm-x8.c",
     "src/f32-clamp/gen/wasmsimd-x86-x4.c",
     "src/f32-clamp/gen/wasmsimd-x86-x8.c",
+    "src/f32-conv-hwc2chw/3x3s2p1c3x4-wasmsimd-2x2.c",
     "src/f32-dwconv/gen/up4x4-minmax-wasmsimd-acc2-arm.c",
     "src/f32-dwconv/gen/up4x4-minmax-wasmsimd-acc2-x86.c",
     "src/f32-dwconv/gen/up4x4-minmax-wasmsimd-arm.c",
@@ -1214,10 +1215,6 @@ WASMSIMD_UKERNELS = [
     "src/x32-zip/x3-wasmsimd.c",
     "src/x32-zip/x4-wasmsimd.c",
     "src/x32-zip/xm-wasmsimd.c",
-]
-
-PSIMD_FASTMATH_UKERNELS = [
-    "src/f32-conv-hwc2chw/3x3s2p1c3x4-psimd-2x2.c",
 ]
 
 PSIMD_ACCMATH_UKERNELS = [
@@ -3287,56 +3284,6 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "psimd_fastmath_ukernels",
-    hdrs = INTERNAL_HDRS,
-    aarch32_copts = [
-        "-marm",
-        "-mfpu=neon",
-    ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-msse2"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    optimized_copts = [
-        "-O3",
-        "-ffast-math",
-    ],
-    psimd_srcs = PSIMD_FASTMATH_UKERNELS,
-    deps = [
-        ":tables",
-        "@FP16",
-        "@psimd",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "psimd_fastmath_ukernels_test_mode",
-    hdrs = INTERNAL_HDRS,
-    aarch32_copts = [
-        "-marm",
-        "-mfpu=neon",
-    ],
-    copts = [
-        "-UNDEBUG",
-        "-DXNN_TEST_MODE=1",
-    ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-msse2"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    optimized_copts = [
-        "-O3",
-        "-ffast-math",
-    ],
-    psimd_srcs = PSIMD_FASTMATH_UKERNELS,
-    deps = [
-        ":tables",
-        "@FP16",
-        "@psimd",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_cc_library(
     name = "psimd_accmath_ukernels",
     hdrs = INTERNAL_HDRS,
     aarch32_copts = [
@@ -3998,7 +3945,6 @@ xnnpack_aggregate_library(
         ":scalar_ukernels",
     ],
     psimd_deps = [
-        ":psimd_fastmath_ukernels",
         ":psimd_accmath_ukernels",
     ],
     wasm_deps = [
@@ -4043,7 +3989,6 @@ xnnpack_aggregate_library(
         ":scalar_ukernels_test_mode",
     ],
     psimd_deps = [
-        ":psimd_fastmath_ukernels_test_mode",
         ":psimd_accmath_ukernels_test_mode",
     ],
     wasm_deps = [
@@ -4088,7 +4033,6 @@ xnnpack_aggregate_library(
         ":scalar_ukernels",
     ],
     psimd_deps = [
-        ":psimd_fastmath_ukernels",
         ":psimd_accmath_ukernels",
     ],
     wasm_deps = [
