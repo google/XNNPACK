@@ -214,10 +214,8 @@ struct xnn_operator {
   size_t input_width;
   size_t input_pixel_stride;
   const void* input;
-  const void** indirection_buffer;
-
-  size_t input2_pixel_stride;
   const void* input2;
+  const void** indirection_buffer;
 
   size_t output_height;
   size_t output_width;
