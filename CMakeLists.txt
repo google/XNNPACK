@@ -639,7 +639,8 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/x32-zip/x2-scalar.c
   src/x32-zip/x3-scalar.c
   src/x32-zip/x4-scalar.c
-  src/x32-zip/xm-scalar.c)
+  src/x32-zip/xm-scalar.c
+  src/xx-copy/memcpy.c)
 
 SET(XNNPACK_PSIMD_ACCMATH_MICROKERNEL_SRCS
   src/qs8-requantization/fp32-psimd.c

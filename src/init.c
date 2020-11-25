@@ -92,6 +92,13 @@ static void init(void) {
     }
   #endif
 
+  /**************************** XX micro-kernels ****************************/
+  #ifndef XNN_NO_XX_OPERATORS
+    init_flags |= XNN_INIT_FLAG_XX;
+
+    xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+  #endif
+
   if (cpuinfo_has_arm_neon()) {
     /**************************** QS8 micro-kernels ****************************/
     #ifndef XNN_NO_QS8_OPERATORS
@@ -734,6 +741,13 @@ static void init(void) {
 
 #elif XNN_ARCH_ARM64
 
+  /**************************** XX micro-kernels ****************************/
+  #ifndef XNN_NO_XX_OPERATORS
+    init_flags |= XNN_INIT_FLAG_XX;
+
+    xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+  #endif
+
   /**************************** QS8 micro-kernels ****************************/
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
@@ -1366,6 +1380,13 @@ static void init(void) {
     xnn_log_error("XNNPACK initialization failed: SSE2 is not supported");
     return;
   }
+
+  /**************************** XX micro-kernels ****************************/
+  #ifndef XNN_NO_XX_OPERATORS
+    init_flags |= XNN_INIT_FLAG_XX;
+
+    xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+  #endif
 
   /**************************** QS8 micro-kernels ****************************/
   #ifndef XNN_NO_QS8_OPERATORS
@@ -2013,6 +2034,14 @@ static void init(void) {
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASMSIMD
+
+  /**************************** XX micro-kernels ****************************/
+  #ifndef XNN_NO_XX_OPERATORS
+    init_flags |= XNN_INIT_FLAG_XX;
+
+    xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+  #endif
+
   /**************************** QS8 micro-kernels ****************************/
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
@@ -2523,6 +2552,14 @@ static void init(void) {
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASM
+
+  /**************************** XX micro-kernels ****************************/
+  #ifndef XNN_NO_XX_OPERATORS
+    init_flags |= XNN_INIT_FLAG_XX;
+
+    xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+  #endif
+
   /**************************** QU8 micro-kernels ****************************/
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;

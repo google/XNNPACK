@@ -599,6 +599,15 @@ DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasm32_shr_x1)
 DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasm32_shr_x2)
 DECLARE_F32_RELU_UKERNEL_FUNCTION(xnn_f32_relu_ukernel__wasm32_shr_x4)
 
+#define DECLARE_XX_VUNARY_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                        \
+      size_t size,                                  \
+      const void* input,                            \
+      void* output,                                 \
+      const void* params);
+
+DECLARE_XX_VUNARY_UKERNEL_FUNCTION(xnn_xx_copy_ukernel__memcpy)
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

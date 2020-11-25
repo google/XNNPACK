@@ -263,10 +263,6 @@ enum xnn_status xnn_create_ceiling_nc_f32(
     ceiling_op_out);
 }
 
-static void memcpy_ukernel(size_t size, const void* input, void* output, const void* params) {
-  memcpy(output, input, size);
-}
-
 enum xnn_status xnn_create_copy_nc_x32(
     size_t channels,
     size_t input_stride,
@@ -278,7 +274,7 @@ enum xnn_status xnn_create_copy_nc_x32(
     channels, input_stride, output_stride, flags,
     NULL, 0,
     xnn_operator_type_copy_nc_x32,
-    memcpy_ukernel,
+    xnn_params.xx.copy,
     copy_op_out);
 }
 
