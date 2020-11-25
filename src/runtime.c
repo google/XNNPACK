@@ -392,7 +392,18 @@ enum xnn_status xnn_create_runtime_v2(
       case xnn_node_type_depth_to_space:
         status = xnn_status_unsupported_parameter;
         if (values[node->inputs[0]].layout == xnn_layout_type_nchw) {
+          assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
           status = xnn_create_depth_to_space_nchw2nhwc_x32(
+              values[node->outputs[0]].shape.dim[values[node->outputs[0]].shape.num_dims - 1] /* output channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->outputs[0]].shape.dim[values[node->outputs[0]].shape.num_dims - 1] /* output stride */,
+              node->params.depth_to_space.block_size,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+        } else {
+          assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
+          assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
+          status = xnn_create_depth_to_space_nhwc_x32(
               values[node->outputs[0]].shape.dim[values[node->outputs[0]].shape.num_dims - 1] /* output channels */,
               values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
               values[node->outputs[0]].shape.dim[values[node->outputs[0]].shape.num_dims - 1] /* output stride */,
@@ -1064,6 +1075,18 @@ enum xnn_status xnn_setup_runtime(
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->outputs[0]].data != NULL);
         status = xnn_setup_depth_to_space_nchw2nhwc_x32(
+            opdata->operator_object,
+            opdata->batch_size,
+            opdata->input_height,
+            opdata->input_width,
+            runtime->blobs[opdata->inputs[0]].data,
+            runtime->blobs[opdata->outputs[0]].data,
+            runtime->threadpool);
+        break;
+      case xnn_operator_type_depth_to_space_nhwc_x32:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_depth_to_space_nhwc_x32(
             opdata->operator_object,
             opdata->batch_size,
             opdata->input_height,
