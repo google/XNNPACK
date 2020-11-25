@@ -2920,14 +2920,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(deconvolution-nhwc-test deconvolution-nhwc-test)
 
-  ADD_EXECUTABLE(depth-to-space-test test/depth-to-space.cc)
-  SET_TARGET_PROPERTIES(depth-to-space-test PROPERTIES
+  ADD_EXECUTABLE(depth-to-space-nchw2nhwc-test test/depth-to-space-nchw2nhwc.cc)
+  SET_TARGET_PROPERTIES(depth-to-space-nchw2nhwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(depth-to-space-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(depth-to-space-test PRIVATE XNNPACK gtest gtest_main)
-  ADD_TEST(depth-to-space-test depth-to-space-test)
+  TARGET_INCLUDE_DIRECTORIES(depth-to-space-nchw2nhwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(depth-to-space-nchw2nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(depth-to-space-nchw2nhwc-test depth-to-space-nchw2nhwc-test)
 
   ADD_EXECUTABLE(divide-nd-test test/divide-nd.cc)
   SET_TARGET_PROPERTIES(divide-nd-test PROPERTIES

@@ -6506,9 +6506,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "depth_to_space_test",
+    name = "depth_to_space_nchw2nhwc_test",
     srcs = [
-        "test/depth-to-space.cc",
+        "test/depth-to-space-nchw2nhwc.cc",
         "test/depth-to-space-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
     deps = OPERATOR_TEST_DEPS,
