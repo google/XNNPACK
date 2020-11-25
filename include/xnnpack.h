@@ -1708,8 +1708,8 @@ enum xnn_status xnn_setup_copy_nc_x32(
 
 enum xnn_status xnn_create_depth_to_space_nchw2nhwc_x32(
   size_t output_channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
+  size_t input_channel_stride,
+  size_t output_channel_stride,
   uint32_t block_size,
   uint32_t flags,
   xnn_operator_t* depth_to_space_op_out);
