@@ -32,20 +32,18 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p1(
 
     size_t p = output_pixels;
     do {
-      const float* i0 = (const float*) ((uintptr_t) i[0] + input_offset);
-      const float* i1 = i0 + 1;
-      const float* i2 = (const float*) ((uintptr_t) i[1] + input_offset);
-      const float* i3 = i2 + 1;
+      const float* itl = (const float*) ((uintptr_t) i[0] + input_offset);
+      const float* ibl = (const float*) ((uintptr_t) i[1] + input_offset);
       i += 2;
 
       const float valphah = w[0];
       const float valphav = w[1];
       w += 2;
 
-      const float vtl = *i0;
-      const float vtr = *i1;
-      const float vbl = *i2;
-      const float vbr = *i3;
+      const float vtl = itl[0];
+      const float vtr = itl[1];
+      const float vbl = ibl[0];
+      const float vbr = ibl[1];
 
       const float vtd = vtr - vtl;
       const float vbd = vbr - vbl;
@@ -58,7 +56,6 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p1(
       const float vo = vt + vd * valphav;
 
       *output++ = vo;
-
     } while (--p != 0);
 
     input_offset += input_increment;

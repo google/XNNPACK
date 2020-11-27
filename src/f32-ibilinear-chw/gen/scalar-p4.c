@@ -32,22 +32,14 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
 
     size_t p = output_pixels;
     for (; p >= 4; p -= 4) {
-      const float* i0 = (const float*) ((uintptr_t) i[0] + input_offset);
-      const float* i1 = i0 + 1;
-      const float* i2 = (const float*) ((uintptr_t) i[1] + input_offset);
-      const float* i3 = i2 + 1;
-      const float* i4 = (const float*) ((uintptr_t) i[2] + input_offset);
-      const float* i5 = i4 + 1;
-      const float* i6 = (const float*) ((uintptr_t) i[3] + input_offset);
-      const float* i7 = i6 + 1;
-      const float* i8 = (const float*) ((uintptr_t) i[4] + input_offset);
-      const float* i9 = i8 + 1;
-      const float* i10 = (const float*) ((uintptr_t) i[5] + input_offset);
-      const float* i11 = i10 + 1;
-      const float* i12 = (const float*) ((uintptr_t) i[6] + input_offset);
-      const float* i13 = i12 + 1;
-      const float* i14 = (const float*) ((uintptr_t) i[7] + input_offset);
-      const float* i15 = i14 + 1;
+      const float* itl0 = (const float*) ((uintptr_t) i[0] + input_offset);
+      const float* ibl0 = (const float*) ((uintptr_t) i[1] + input_offset);
+      const float* itl1 = (const float*) ((uintptr_t) i[2] + input_offset);
+      const float* ibl1 = (const float*) ((uintptr_t) i[3] + input_offset);
+      const float* itl2 = (const float*) ((uintptr_t) i[4] + input_offset);
+      const float* ibl2 = (const float*) ((uintptr_t) i[5] + input_offset);
+      const float* itl3 = (const float*) ((uintptr_t) i[6] + input_offset);
+      const float* ibl3 = (const float*) ((uintptr_t) i[7] + input_offset);
       i += 4 * 2;
 
       const float valphah0 = w[0];
@@ -60,22 +52,22 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
       const float valphav3 = w[7];
       w += 4 * 2;
 
-      const float vtl0 = *i0;
-      const float vtr0 = *i1;
-      const float vbl0 = *i2;
-      const float vbr0 = *i3;
-      const float vtl1 = *i4;
-      const float vtr1 = *i5;
-      const float vbl1 = *i6;
-      const float vbr1 = *i7;
-      const float vtl2 = *i8;
-      const float vtr2 = *i9;
-      const float vbl2 = *i10;
-      const float vbr2 = *i11;
-      const float vtl3 = *i12;
-      const float vtr3 = *i13;
-      const float vbl3 = *i14;
-      const float vbr3 = *i15;
+      const float vtl0 = itl0[0];
+      const float vtr0 = itl0[1];
+      const float vbl0 = ibl0[0];
+      const float vbr0 = ibl0[1];
+      const float vtl1 = itl1[0];
+      const float vtr1 = itl1[1];
+      const float vbl1 = ibl1[0];
+      const float vbr1 = ibl1[1];
+      const float vtl2 = itl2[0];
+      const float vtr2 = itl2[1];
+      const float vbl2 = ibl2[0];
+      const float vbr2 = ibl2[1];
+      const float vtl3 = itl3[0];
+      const float vtr3 = itl3[1];
+      const float vbl3 = ibl3[0];
+      const float vbr3 = ibl3[1];
 
       const float vtd0 = vtr0 - vtl0;
       const float vbd0 = vbr0 - vbl0;
@@ -113,20 +105,18 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
     }
 
     for (; p >= 1; p -= 1) {
-      const float* i0 = (const float*) ((uintptr_t) i[0] + input_offset);
-      const float* i1 = i0 + 1;
-      const float* i2 = (const float*) ((uintptr_t) i[1] + input_offset);
-      const float* i3 = i2 + 1;
+      const float* itl = (const float*) ((uintptr_t) i[0] + input_offset);
+      const float* ibl = (const float*) ((uintptr_t) i[1] + input_offset);
       i += 2;
 
       const float valphah = w[0];
       const float valphav = w[1];
       w += 2;
 
-      const float vtl = *i0;
-      const float vtr = *i1;
-      const float vbl = *i2;
-      const float vbr = *i3;
+      const float vtl = itl[0];
+      const float vtr = itl[1];
+      const float vbl = ibl[0];
+      const float vbr = ibl[1];
 
       const float vtd = vtr - vtl;
       const float vbd = vbr - vbl;

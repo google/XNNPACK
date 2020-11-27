@@ -29,26 +29,9 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
 
   do {
     const float** i = input;
-
     const float* w = weights;
-
-    // The code is best read starting from the bottom (i.e. the scalar case).
-    // Please read the comments there first; only the differences are explained in vectorized versions.
-
     size_t p = output_pixels;
     for (; p >= 8; p -= 8) {
-      // This is just an unrolled loop for `PIXEL_TILE` of 4.
-
-      const v128_t vw0_0123 = wasm_v128_load(w + 0);
-      const v128_t vw1_0123 = wasm_v128_load(w + 4);
-      const v128_t valphah0123 = wasm_v32x4_shuffle(vw0_0123, vw1_0123, 0, 2, 4, 6);
-      const v128_t valphav0123 = wasm_v32x4_shuffle(vw0_0123, vw1_0123, 1, 3, 5, 7);
-      const v128_t vw0_4567 = wasm_v128_load(w + 8);
-      const v128_t vw1_4567 = wasm_v128_load(w + 12);
-      const v128_t valphah4567 = wasm_v32x4_shuffle(vw0_4567, vw1_4567, 0, 2, 4, 6);
-      const v128_t valphav4567 = wasm_v32x4_shuffle(vw0_4567, vw1_4567, 1, 3, 5, 7);
-      w += 2 * 8;
-
       const float* itl0 = (const float*) ((uintptr_t) i[0] + input_offset);
       const float* ibl0 = (const float*) ((uintptr_t) i[1] + input_offset);
       const float* itl1 = (const float*) ((uintptr_t) i[2] + input_offset);
@@ -67,14 +50,42 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
       const float* ibl7 = (const float*) ((uintptr_t) i[15] + input_offset);
       i += 2 * 8;
 
-      const v128_t vtltr01 = wasm_f64x2_make(*(const double*) itl0, *(const double*) itl1);
-      const v128_t vblbr01 = wasm_f64x2_make(*(const double*) ibl0, *(const double*) ibl1);
-      const v128_t vtltr23 = wasm_f64x2_make(*(const double*) itl2, *(const double*) itl3);
-      const v128_t vblbr23 = wasm_f64x2_make(*(const double*) ibl2, *(const double*) ibl3);
-      const v128_t vtltr45 = wasm_f64x2_make(*(const double*) itl4, *(const double*) itl5);
-      const v128_t vblbr45 = wasm_f64x2_make(*(const double*) ibl4, *(const double*) ibl5);
-      const v128_t vtltr67 = wasm_f64x2_make(*(const double*) itl6, *(const double*) itl7);
-      const v128_t vblbr67 = wasm_f64x2_make(*(const double*) ibl6, *(const double*) ibl7);
+      const v128_t vw0123p0 = wasm_v128_load(w + 0);
+      const v128_t vw0123p1 = wasm_v128_load(w + 4);
+      const v128_t vw4567p0 = wasm_v128_load(w + 8);
+      const v128_t vw4567p1 = wasm_v128_load(w + 12);
+      w += 2 * 8;
+
+      const v128_t vtltr0 = wasm_v64x2_load_splat(itl0);
+      const v128_t vblbr0 = wasm_v64x2_load_splat(ibl0);
+      const double vtltr1 = *((const double*) itl1);
+      const double vblbr1 = *((const double*) ibl1);
+      const v128_t vtltr2 = wasm_v64x2_load_splat(itl2);
+      const v128_t vblbr2 = wasm_v64x2_load_splat(ibl2);
+      const double vtltr3 = *((const double*) itl3);
+      const double vblbr3 = *((const double*) ibl3);
+      const v128_t vtltr4 = wasm_v64x2_load_splat(itl4);
+      const v128_t vblbr4 = wasm_v64x2_load_splat(ibl4);
+      const double vtltr5 = *((const double*) itl5);
+      const double vblbr5 = *((const double*) ibl5);
+      const v128_t vtltr6 = wasm_v64x2_load_splat(itl6);
+      const v128_t vblbr6 = wasm_v64x2_load_splat(ibl6);
+      const double vtltr7 = *((const double*) itl7);
+      const double vblbr7 = *((const double*) ibl7);
+
+      const v128_t valphah0123 = wasm_v32x4_shuffle(vw0123p0, vw0123p1, 0, 2, 4, 6);
+      const v128_t valphav0123 = wasm_v32x4_shuffle(vw0123p0, vw0123p1, 1, 3, 5, 7);
+      const v128_t valphah4567 = wasm_v32x4_shuffle(vw4567p0, vw4567p1, 0, 2, 4, 6);
+      const v128_t valphav4567 = wasm_v32x4_shuffle(vw4567p0, vw4567p1, 1, 3, 5, 7);
+
+      const v128_t vtltr01 = wasm_f64x2_replace_lane(vtltr0, 1, vtltr1);
+      const v128_t vblbr01 = wasm_f64x2_replace_lane(vblbr0, 1, vblbr1);
+      const v128_t vtltr23 = wasm_f64x2_replace_lane(vtltr2, 1, vtltr3);
+      const v128_t vblbr23 = wasm_f64x2_replace_lane(vblbr2, 1, vblbr3);
+      const v128_t vtltr45 = wasm_f64x2_replace_lane(vtltr4, 1, vtltr5);
+      const v128_t vblbr45 = wasm_f64x2_replace_lane(vblbr4, 1, vblbr5);
+      const v128_t vtltr67 = wasm_f64x2_replace_lane(vtltr6, 1, vtltr7);
+      const v128_t vblbr67 = wasm_f64x2_replace_lane(vblbr6, 1, vblbr7);
 
       const v128_t vldrd01 = wasm_f32x4_sub(vblbr01, vtltr01);
       const v128_t vldrd23 = wasm_f32x4_sub(vblbr23, vtltr23);
@@ -108,17 +119,6 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
     }
 
     for (; p >= 4; p -= 4) {
-      // Process quadruples of output pixels, each of which requires reading four input pixels.
-
-      // Separate the alternating weights for 4 pixels into two registers.
-      const v128_t vw0 = wasm_v128_load(w);
-      const v128_t vw1 = wasm_v128_load(w + 4);
-      const v128_t valphah = wasm_v32x4_shuffle(vw0, vw1, 0, 2, 4, 6);
-      const v128_t valphav = wasm_v32x4_shuffle(vw0, vw1, 1, 3, 5, 7);
-      w += 2 * 4;
-
-      // Read out pairs of (top-left, top-right) and (bottom-left, bottom-right) pixels
-      // into separate registers as in the scalar case.
       const float* itl0 = (const float*) ((uintptr_t) i[0] + input_offset);
       const float* ibl0 = (const float*) ((uintptr_t) i[1] + input_offset);
       const float* itl1 = (const float*) ((uintptr_t) i[2] + input_offset);
@@ -127,30 +127,41 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
       const float* ibl2 = (const float*) ((uintptr_t) i[5] + input_offset);
       const float* itl3 = (const float*) ((uintptr_t) i[6] + input_offset);
       const float* ibl3 = (const float*) ((uintptr_t) i[7] + input_offset);
-      i += 2 * 4;
+      i += 8;
 
-      const v128_t vtltr01 = wasm_f64x2_make(*(const double*) itl0, *(const double*) itl1);
-      const v128_t vblbr01 = wasm_f64x2_make(*(const double*) ibl0, *(const double*) ibl1);
-      const v128_t vtltr23 = wasm_f64x2_make(*(const double*) itl2, *(const double*) itl3);
-      const v128_t vblbr23 = wasm_f64x2_make(*(const double*) ibl2, *(const double*) ibl3);
+      const v128_t vw0 = wasm_v128_load(w);
+      const v128_t vw1 = wasm_v128_load(w + 4);
+      w += 8;
+
+      const v128_t vtltr0 = wasm_v64x2_load_splat(itl0);
+      const v128_t vblbr0 = wasm_v64x2_load_splat(ibl0);
+      const double vtltr1 = *((const double*) itl1);
+      const double vblbr1 = *((const double*) ibl1);
+      const v128_t vtltr2 = wasm_v64x2_load_splat(itl2);
+      const v128_t vblbr2 = wasm_v64x2_load_splat(ibl2);
+      const double vtltr3 = *((const double*) itl3);
+      const double vblbr3 = *((const double*) ibl3);
+
+      const v128_t valphah = wasm_v32x4_shuffle(vw0, vw1, 0, 2, 4, 6);
+      const v128_t valphav = wasm_v32x4_shuffle(vw0, vw1, 1, 3, 5, 7);
+
+      const v128_t vtltr01 = wasm_f64x2_replace_lane(vtltr0, 1, vtltr1);
+      const v128_t vblbr01 = wasm_f64x2_replace_lane(vblbr0, 1, vblbr1);
+      const v128_t vtltr23 = wasm_f64x2_replace_lane(vtltr2, 1, vtltr3);
+      const v128_t vblbr23 = wasm_f64x2_replace_lane(vblbr2, 1, vblbr3);
 
       const v128_t vldrd01 = wasm_f32x4_sub(vblbr01, vtltr01);
       const v128_t vldrd23 = wasm_f32x4_sub(vblbr23, vtltr23);
 
-      // Shuffle to isolate `left_diff` and `right_diff`, packed in a single `v128` for all 4 pixels.
       const v128_t vld = wasm_v32x4_shuffle(vldrd01, vldrd23, 0, 2, 4, 6);
       const v128_t vrd = wasm_v32x4_shuffle(vldrd01, vldrd23, 1, 3, 5, 7);
 
-      // Shuffle to isolate `top_left` and `top_right`, packed in a single `v128` for all 4 pixels.
       const v128_t vtl = wasm_v32x4_shuffle(vtltr01, vtltr23, 0, 2, 4, 6);
       const v128_t vtr = wasm_v32x4_shuffle(vtltr01, vtltr23, 1, 3, 5, 7);
 
-      // Compute `left` from the equations (*).
       const v128_t vl = wasm_f32x4_add(vtl, wasm_f32x4_mul(vld, valphav));
-      // Compute `right` from the equations (*).
       const v128_t vr = wasm_f32x4_add(vtr, wasm_f32x4_mul(vrd, valphav));
 
-      // Compute the result according to (*).
       const v128_t vd = wasm_f32x4_sub(vr, vl);
       const v128_t vo = wasm_f32x4_add(vl, wasm_f32x4_mul(vd, valphah));
 
@@ -160,10 +171,8 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
 
     if XNN_UNLIKELY(p != 0) {
       if (p & 2) {
-        // This can be understood as a truncated version of the 4-pixel case above.
-
         const v128_t vw = wasm_v128_load(w);
-        w += 2 * 2;
+        w += 4;
 
         const v128_t valphah = wasm_v32x4_shuffle(vw, vw, 0, 2, 0, 2);
         const v128_t valphav = wasm_v32x4_shuffle(vw, vw, 1, 3, 1, 3);
@@ -172,10 +181,10 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
         const float* ibl0 = (const float*) ((uintptr_t) i[1] + input_offset);
         const float* itl1 = (const float*) ((uintptr_t) i[2] + input_offset);
         const float* ibl1 = (const float*) ((uintptr_t) i[3] + input_offset);
-        i += 2 * 2;
+        i += 4;
 
-        const v128_t vtltr = wasm_f64x2_make(*(const double*) itl0, *(const double*) itl1);
-        const v128_t vblbr = wasm_f64x2_make(*(const double*) ibl0, *(const double*) ibl1);
+        const v128_t vtltr = wasm_f64x2_replace_lane(wasm_v64x2_load_splat(itl0), 1, *((const double*) itl1));
+        const v128_t vblbr = wasm_f64x2_replace_lane(wasm_v64x2_load_splat(ibl0), 1, *((const double*) ibl1));
 
         const v128_t vldrd = wasm_f32x4_sub(vblbr, vtltr);
         const v128_t vld = wasm_v32x4_shuffle(vldrd, vldrd, 0, 2, 0, 2);
@@ -200,20 +209,16 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
         //                 alpha_h  * (1 - alpha_v) * top_right +
         //            (1 - alpha_h) *      alpha_v  * bottom_left +
         //                 alpha_h  *      alpha_v  * bottom_right.
-        // Rearranging gives (*):
+        //
+        // Rearranging gives
         //   result =    left + alpha_h * (right        - left),
         // where
         //   left =  top_left + alpha_v * (bottom_left  - top_left),
         //  right = top_right + alpha_v * (bottom_right - top_right).
 
-        const v128_t vw = wasm_v64x2_load_splat((const double*) w);
+        const float alphah = *w;
+        const v128_t valphav = wasm_v32x4_load_splat(w + 1);
         w += 2;
-
-        const float alphah = wasm_f32x4_extract_lane(vw, 0);
-        const v128_t valphav = wasm_v32x4_shuffle(vw, vw, 1, 1, 1, 1);
-
-        // Read adjacent top-left and top-right pixels into one register,
-        // and bottom-left and bottom-right into another.
 
         const float* itl = (const float*) ((uintptr_t) i[0] + input_offset);
         const float* ibl = (const float*) ((uintptr_t) i[1] + input_offset);
@@ -222,12 +227,10 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
         const v128_t vtltr = wasm_v64x2_load_splat(itl);
         const v128_t vblbr = wasm_v64x2_load_splat(ibl);
 
-        // Compute at once (**):
+        // Compute at once
         //    left_diff = bottom_left  - top_left
         //   right_diff = bottom_right - top_right
         const v128_t vldrd = wasm_f32x4_sub(vblbr, vtltr);
-
-        // Compute at once `left` and `right` from the equations.
         const v128_t vlr = wasm_f32x4_add(vtltr, wasm_f32x4_mul(vldrd, valphav));
 
         // Extract them and compute the result.
