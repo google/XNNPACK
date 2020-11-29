@@ -238,6 +238,7 @@ SET(XNNPACK_HOT_SRCS
 SET(XNNPACK_TABLE_SRCS
   src/tables/exp2-k-over-64.c
   src/tables/exp2-k-over-2048.c
+  src/tables/exp2minus-k-over-16.c
   src/tables/exp2minus-k-over-64.c
   src/tables/exp2minus-k-over-2048.c)
 
@@ -4276,14 +4277,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(x32-unpool-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(x32-unpool-test x32-unpool-test)
 
-  ADD_EXECUTABLE(x32-depth-to-space-chw2hwc-test test/x32-depth-to-space-chw2hwc.cc)
-  SET_TARGET_PROPERTIES(x32-depth-to-space-chw2hwc-test PROPERTIES
+  ADD_EXECUTABLE(x32-depthtospace2d-chw2hwc-test test/x32-depthtospace2d-chw2hwc.cc)
+  SET_TARGET_PROPERTIES(x32-depthtospace2d-chw2hwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(x32-depth-to-space-chw2hwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(x32-depth-to-space-chw2hwc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(x32-depth-to-space-chw2hwc-test x32-depth-to-space-chw2hwc-test)
+  TARGET_INCLUDE_DIRECTORIES(x32-depthtospace2d-chw2hwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(x32-depthtospace2d-chw2hwc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(x32-depthtospace2d-chw2hwc-test x32-depthtospace2d-chw2hwc-test)
 
   ADD_EXECUTABLE(x32-zip-test test/x32-zip.cc)
   SET_TARGET_PROPERTIES(x32-zip-test PROPERTIES
