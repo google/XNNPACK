@@ -24,9 +24,9 @@ void xnn_math_f32_expm1minus__scalar_rr2_p5(
   const float vlog2e = 0x1.715476p+0f;
   // The largest x for which expm1f(x) is saturated at -1.0f.
   const float vsat_cutoff = -0x1.154246p+4f;
-  // Last 7 bits are zeroes
-  const float vminus_ln2_hi = -0x1.62E400p-1f;
-  const float vminus_ln2_lo = -0x1.7F7D1Cp-20f;
+  // Last 5 bits are zeroes
+  const float vminus_ln2_hi = -0x1.62E440p-1f;
+  const float vminus_ln2_lo = 0x1.0105C6p-21f;
   // Coefficient of polynomial approximation
   //   exp(t) - 1 ~ t * (1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
   // on [-log(2)/2, log(2)/2]

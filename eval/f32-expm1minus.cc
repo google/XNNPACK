@@ -13,6 +13,7 @@
 #include <benchmark/benchmark.h>
 #include <fp16/fp16.h>
 
+#include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/math-stubs.h>
@@ -20,8 +21,13 @@
 
 static void Expm1Error(benchmark::State& state,
   xnn_f32_unary_math_function expm1,
-  size_t tile_size)
+  size_t tile_size,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
+  if (isa_check && !isa_check(state)) {
+    return;
+  }
+
   // The smallest x for which expm1f(x) is not saturated at -1 (-0x1.154244p+4f).
   const uint32_t min_input = 0xC18AA122;
   // Number of tiles in one block of inputs/outputs. Combining multiple tiles in a block reduce function call overhead.
@@ -52,18 +58,117 @@ static void Expm1Error(benchmark::State& state,
   state.counters["ULPERROR"] = benchmark::Counter(max_ulp_error);
 }
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  static void f32_expm1minus__neon_rr2_lut16_p3(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__neon_rr2_lut16_p3, 4, benchmark::utils::CheckNEON);
+  }
+  static void f32_expm1minus__neon_rr2_p6(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__neon_rr2_p6, 4, benchmark::utils::CheckNEON);
+  }
+
+  static void f32_expm1minus__neonfma_rr1_lut16_p3(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__neonfma_rr1_lut16_p3, 4, benchmark::utils::CheckNEONFMA);
+  }
+  static void f32_expm1minus__neonfma_rr1_p6(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__neonfma_rr1_p6, 4, benchmark::utils::CheckNEONFMA);
+  }
+
+  BENCHMARK(f32_expm1minus__neon_rr2_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__neon_rr2_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
+
+  BENCHMARK(f32_expm1minus__neonfma_rr1_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__neonfma_rr1_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void f32_expm1minus__sse2_rr2_p5(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__sse2_rr2_p5, 4);
+  static void f32_expm1minus__avx512f_rr1_lut16_p3_perm(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__avx512f_rr1_lut16_p3_perm, 16, benchmark::utils::CheckAVX512F);
+  }
+  static void f32_expm1minus__avx512f_rr1_p6(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__avx512f_rr1_p6, 16, benchmark::utils::CheckAVX512F);
+  }
+
+  BENCHMARK(f32_expm1minus__avx512f_rr1_lut16_p3_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__avx512f_rr1_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  static void f32_expm1minus__avx2_rr1_lut4_p4_perm(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__avx2_rr1_lut4_p4_perm, 8, benchmark::utils::CheckAVX2);
+  }
+  static void f32_expm1minus__avx2_rr1_lut8_p4_perm(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__avx2_rr1_lut8_p4_perm, 8, benchmark::utils::CheckAVX2);
+  }
+  static void f32_expm1minus__avx2_rr1_lut16_p3_gather(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__avx2_rr1_lut16_p3_gather, 8, benchmark::utils::CheckAVX2);
+  }
+  static void f32_expm1minus__avx2_rr1_p6(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__avx2_rr1_p6, 8, benchmark::utils::CheckAVX2);
+  }
+
+  BENCHMARK(f32_expm1minus__avx2_rr1_lut4_p4_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__avx2_rr1_lut8_p4_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__avx2_rr1_lut16_p3_gather)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__avx2_rr1_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  static void f32_expm1minus__avx_rr2_lut4_p4_perm(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__avx_rr2_lut4_p4_perm, 8, benchmark::utils::CheckAVX);
+  }
+  static void f32_expm1minus__avx_rr2_lut16_p3(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__avx_rr2_lut16_p3, 8, benchmark::utils::CheckAVX);
+  }
+  static void f32_expm1minus__avx_rr2_p6(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__avx_rr2_p6, 8, benchmark::utils::CheckAVX);
+  }
+
+  BENCHMARK(f32_expm1minus__avx_rr2_lut4_p4_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__avx_rr2_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__avx_rr2_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  static void f32_expm1minus__sse2_rr2_lut16_p3(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__sse2_rr2_lut16_p3, 4);
   }
   static void f32_expm1minus__sse2_rr2_p6(benchmark::State& state) {
     Expm1Error(state, xnn_math_f32_expm1minus__sse2_rr2_p6, 4);
   }
 
-  BENCHMARK(f32_expm1minus__sse2_rr2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__sse2_rr2_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
   BENCHMARK(f32_expm1minus__sse2_rr2_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMSIMD
+  static void f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot, 4);
+  }
+  static void f32_expm1minus__wasmsimd_rr2_lut16_p3_max(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_max, 4);
+  }
+  static void f32_expm1minus__wasmsimd_rr2_p6_andnot(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__wasmsimd_rr2_p6_andnot, 4);
+  }
+  static void f32_expm1minus__wasmsimd_rr2_p6_max(benchmark::State& state) {
+    Expm1Error(state, xnn_math_f32_expm1minus__wasmsimd_rr2_p6_max, 4);
+  }
+
+  BENCHMARK(f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__wasmsimd_rr2_lut16_p3_max)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__wasmsimd_rr2_p6_andnot)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK(f32_expm1minus__wasmsimd_rr2_p6_max)->Unit(benchmark::kMillisecond)->Iterations(1);
+#endif  // XNN_ARCH_WASMSIMD
+
+static void f32_expm1minus__scalar_rr2_lut4_p4(benchmark::State& state) {
+  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut4_p4, 1);
+}
+static void f32_expm1minus__scalar_rr2_lut8_p3(benchmark::State& state) {
+  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut8_p3, 1);
+}
+static void f32_expm1minus__scalar_rr2_lut8_p4(benchmark::State& state) {
+  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut8_p4, 1);
+}
 static void f32_expm1minus__scalar_rr2_lut16_p3(benchmark::State& state) {
   Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut16_p3, 1);
 }
@@ -77,6 +182,9 @@ static void f32_expm1minus__scalar_rr2_p6(benchmark::State& state) {
   Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_p6, 1);
 }
 
+BENCHMARK(f32_expm1minus__scalar_rr2_lut4_p4)->Unit(benchmark::kMillisecond)->Iterations(1);
+BENCHMARK(f32_expm1minus__scalar_rr2_lut8_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
+BENCHMARK(f32_expm1minus__scalar_rr2_lut8_p4)->Unit(benchmark::kMillisecond)->Iterations(1);
 BENCHMARK(f32_expm1minus__scalar_rr2_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
 BENCHMARK(f32_expm1minus__scalar_rr2_lut16_p4)->Unit(benchmark::kMillisecond)->Iterations(1);
 BENCHMARK(f32_expm1minus__scalar_rr2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);

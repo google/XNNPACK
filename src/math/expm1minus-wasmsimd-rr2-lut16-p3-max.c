@@ -6,41 +6,46 @@
 #include <assert.h>
 #include <stddef.h>
 
+#include <wasm_simd128.h>
+
 #include <xnnpack/common.h>
 #include <xnnpack/math-stubs.h>
 
-#include <fp16/bitcasts.h>
-
 
 // Table of exp2(k / 16) values decremented (as integer) by (k << 19), k = 0..15
-extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
+extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_16[16];
 
-void xnn_math_f32_expm1minus__scalar_rr2_lut16_p3(
+void xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_max(
     size_t n,
     const float* input,
     float* output)
 {
   assert(n % (4 * sizeof(float)) == 0);
 
-  // Large number such that ulp(magic bias) == exp2(-4)
-  const float vmagic_bias = 0x1.800000p19f;
-  const float vlog2e = 0x1.715476p+0f;
-  // Mask for the lowest 4 bits
-  const uint32_t vindex_mask = UINT32_C(0xF);
   // The largest x for which expm1f(x) is saturated at -1.0f.
-  const float vsat_cutoff = -0x1.154246p+4f;
+  const v128_t vsat_cutoff = wasm_f32x4_splat(-0x1.154246p+4f);
+  // Large number such that ulp(magic bias) == exp2(-4)
+  const v128_t vmagic_bias = wasm_f32x4_splat(0x1.800000p19f);
+  const v128_t vlog2e = wasm_f32x4_splat(0x1.715476p+0f);
+  // Mask for the lowest 4 bits
+  const v128_t vindex_mask = wasm_i32x4_splat(0xF);
   // Last 9 bits are zeroes
-  const float vminus_ln2_hi = -0x1.62E400p-1f;
-  const float vminus_ln2_lo = -0x1.7F7D1Cp-20f;
+  const v128_t vminus_ln2_hi = wasm_f32x4_splat(-0x1.62E400p-1f);
+  const v128_t vminus_ln2_lo = wasm_f32x4_splat(-0x1.7F7D1Cp-20f);
   // Coefficient of polynomial approximation
   //   exp(t) - 1 ~ t * (1 + t * (c2 + t * c3))
   // on [-log(2)/32, log(2)/32]
-  const float vc3 = 0x1.55561Cp-3f;
-  const float vc2 = 0x1.0001ECp-1f;
-  const float vone = 1.0f;
+  const v128_t vc3 = wasm_f32x4_splat(0x1.55561Cp-3f);
+  const v128_t vc2 = wasm_f32x4_splat(0x1.0001ECp-1f);
+  const v128_t vone = wasm_f32x4_splat(1.0f);
 
-  for (; n != 0; n -= sizeof(float)) {
-    float vx = *input++;
+  for (; n != 0; n -= 4 * sizeof(float)) {
+    v128_t vx = wasm_v128_load(input);
+
+    // The function saturates at -1 for large negative inputs: expm1f(x) == -1.0f for x <= sat_cutoff ~= -17.328680.
+    // To guarantee this behaviour, we clip input at sat_cutoff, and leverage the fact that for our implementation
+    // expm1f(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
+    vx = wasm_f32x4_max(vsat_cutoff, vx);
 
     // Compute reduced argument n := round(x / log(2), 4).
     // We do it by adding a large number (magic bias), which cause rounding of the result to 4 fractional bits, then
@@ -48,7 +53,7 @@ void xnn_math_f32_expm1minus__scalar_rr2_lut16_p3(
     // (|x / log(2)| <= 2**18, i.e. |x| <= 0x1.62E43p+17 = 181704.375), but that is acceptable, because inputs x are
     // restricted to [-17.328680, 0].
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
-    float vn = vx * vlog2e + vmagic_bias;
+    v128_t vn = wasm_f32x4_add(wasm_f32x4_mul(vx, vlog2e), vmagic_bias);
 
     // Create a floating-point number s (scale) such that s := 2**n for valid inputs, i.e. -17.328680 <= x <= 0.0. As n
     // has 4 fractional bits, we split s == 2**n = 2**int(n) * 2**frac(n). We create s in two steps:
@@ -59,41 +64,45 @@ void xnn_math_f32_expm1minus__scalar_rr2_lut16_p3(
     //    lower than -25.
     //
     // Shift bits 4:12 into 23:31 (position of floating-point exponent).
-    const uint32_t ve = fp32_to_bits(vn) << 19;
+    const v128_t ven = wasm_i32x4_shl(vn, 19);
 
     // Use bits 0:4 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
-    const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
+    const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
+    const uint64_t vidx_lo = wasm_i64x2_extract_lane(vidx, 0);
+    const uint64_t vidx_hi = wasm_i64x2_extract_lane(vidx, 1);
+    const float vl0 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx_lo));
+    const float vl1 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) (vidx_lo >> 32)));
+    const float vl2 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx_hi));
+    const float vl3 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) (vidx_hi >> 32)));
+    const v128_t vl = wasm_f32x4_make(vl0, vl1, vl2, vl3);
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ve);
+    const v128_t vs = wasm_i32x4_add(vl, ven);
 
     // Subtract the large number back to get final n := round(x / log(2), 4).
-    vn -= vmagic_bias;
-
-    // The function saturates at -1 for large negative inputs: expm1f(x) == -1.0f for x <= sat_cutoff ~= -17.328680.
-    // To guarantee this behaviour, we zero out s (scale) for x <= sat_cutoff.
-    if XNN_UNPREDICTABLE(vx <= vsat_cutoff) {
-      vs = 0.0f;
-    }
+    vn = wasm_f32x4_sub(vn, vmagic_bias);
 
     // Compute reduced argument t := x - n * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    float vt = vn * vminus_ln2_hi + vx;
-    vt = vn * vminus_ln2_lo + vt;
+    v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_hi), vx);
+    vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_lo), vt);
 
     // Compute degree-3 polynomial approximation for exp(t) - 1 on [-log(2)/32, log(2)/32].
     //   P(t) = t * (1 + t * (c2 + t * c3)) = t + t * (t * (c2 + t * c3)) = t + t * p
-    float vp = vc3 * vt + vc2;
-    vp *= vt;
+    v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc3, vt), vc2);
+    vp = wasm_f32x4_mul(vp, vt);
 
     // Reconstruct the exp(x) - 1 value:
     //   exp(x) - 1 = s * (1 + t * (1 + t * (c2 + t * c3))) - 1
     //              = (s - 1) + s * (t + t * p)
     //              = ((t * s) + (t * s) * p) + (s - 1)
-    vt *= vs;
-    const float vsm1 = vs - vone;
-    vp = vp * vt + vt;
-    const float vf = vp + vsm1;
+    vt = wasm_f32x4_mul(vt, vs);
+    const v128_t vsm1 = wasm_f32x4_sub(vs, vone);
+    vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vt);
+    const v128_t vf = wasm_f32x4_add(vp, vsm1);
 
-    *output++ = vf;
+    wasm_v128_store(output, vf);
+
+    input += 4;
+    output += 4;
   }
 }
