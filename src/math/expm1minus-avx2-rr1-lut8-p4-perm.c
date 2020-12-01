@@ -79,7 +79,7 @@ void xnn_math_f32_expm1minus__avx2_rr1_lut8_p4_perm(
 
     // Compute degree-4 polynomial approximation for exp(t) - 1 on [-log(2)/16, log(2)/16].
     //   P(t) = t * (1 + t * (c2 + t * (c3 + t * c4))) = t + t * (t * (c2 + t * (c3 + t * c4))) = t + t * p
-    __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc4, vt), vc3);
+    __m256 vp = _mm256_fmadd_ps(vc4, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
     vp = _mm256_mul_ps(vp, vt);
 

@@ -1,0 +1,179 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/vunary.h>
+#include <xnnpack/common.h>
+
+
+void xnn_f32_velu_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_p6_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
+
+  const float32x4_t vprescale = vld1q_dup_f32(&params->scalar.prescale);
+  const float32x4_t valpha = vld1q_dup_f32(&params->scalar.alpha);
+  const float32x4_t vbeta = vld1q_dup_f32(&params->scalar.beta);
+
+  const float32x4_t vsat_cutoff = vmovq_n_f32(-0x1.154246p+4f);
+  const float32x4_t vmagic_bias = vmovq_n_f32(0x1.8000FEp23f);
+  const float32x4_t vlog2e = vmovq_n_f32(0x1.715476p+0f);
+  $if FMA:
+    const float32x4_t vminus_ln2 = vmovq_n_f32(-0x1.62E430p-1f);
+  $else:
+    const float32x4_t vminus_ln2_hi = vmovq_n_f32(-0x1.62E440p-1f);
+    const float32x4_t vminus_ln2_lo = vmovq_n_f32(0x1.0105C6p-21f);
+  const float32x4_t vc6 = vmovq_n_f32(0x1.6b7338p-10f);
+  const float32x4_t vc5 = vmovq_n_f32(0x1.12278Ep-7f);
+  const float32x4_t vc4 = vmovq_n_f32(0x1.555716p-5f);
+  const float32x4_t vc3 = vmovq_n_f32(0x1.5554B0p-3f);
+  const float32x4_t vc2 = vmovq_n_f32(0x1.FFFFFEp-2f);
+  const float32x4_t vone = vmovq_n_f32(1.0f);
+
+  $if BATCH_TILE > 4:
+    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(0, BATCH_TILE, 4):
+        float32x4_t vx${ABC[N:N+4]} = vld1q_f32(x); x += 4;
+
+      $for N in range(0, BATCH_TILE, 4):
+        const float32x4_t vz${ABC[N:N+4]} = vmaxq_f32(vmulq_f32(vx${ABC[N:N+4]}, vprescale), vsat_cutoff);
+
+      $for N in range(0, BATCH_TILE, 4):
+        float32x4_t vn${ABC[N:N+4]} = ${VMULADDQ_F32}(vmagic_bias, vz${ABC[N:N+4]}, vlog2e);
+
+      $for N in range(0, BATCH_TILE, 4):
+        float32x4_t vs${ABC[N:N+4]} = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn${ABC[N:N+4]}), 23));
+        vn${ABC[N:N+4]} = vsubq_f32(vn${ABC[N:N+4]}, vmagic_bias);
+
+      $if FMA:
+        $for N in range(0, BATCH_TILE, 4):
+          float32x4_t vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vz${ABC[N:N+4]}, vn${ABC[N:N+4]}, vminus_ln2);
+      $else:
+        $for N in range(0, BATCH_TILE, 4):
+          float32x4_t vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vz${ABC[N:N+4]}, vn${ABC[N:N+4]}, vminus_ln2_hi);
+
+        $for N in range(0, BATCH_TILE, 4):
+          vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vt${ABC[N:N+4]}, vn${ABC[N:N+4]}, vminus_ln2_lo);
+
+      $for N in range(0, BATCH_TILE, 4):
+        float32x4_t vp${ABC[N:N+4]} = ${VMULADDQ_F32}(vc5, vc6, vt${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vp${ABC[N:N+4]} = ${VMULADDQ_F32}(vc4, vp${ABC[N:N+4]}, vt${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vp${ABC[N:N+4]} = ${VMULADDQ_F32}(vc3, vp${ABC[N:N+4]}, vt${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vp${ABC[N:N+4]} = ${VMULADDQ_F32}(vc2, vp${ABC[N:N+4]}, vt${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vp${ABC[N:N+4]} = vmulq_f32(vp${ABC[N:N+4]}, vt${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vt${ABC[N:N+4]} = vmulq_f32(vt${ABC[N:N+4]}, vs${ABC[N:N+4]});
+        vs${ABC[N:N+4]} = vsubq_f32(vs${ABC[N:N+4]}, vone);
+
+      $for N in range(0, BATCH_TILE, 4):
+        vp${ABC[N:N+4]} = ${VMULADDQ_F32}(vt${ABC[N:N+4]}, vp${ABC[N:N+4]}, vt${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        const float32x4_t ve${ABC[N:N+4]} = vmulq_f32(vaddq_f32(vp${ABC[N:N+4]}, vs${ABC[N:N+4]}), valpha);
+
+      $for N in range(0, BATCH_TILE, 4):
+        const uint32x4_t vm${ABC[N:N+4]} = vcltq_f32(vx${ABC[N:N+4]}, vmovq_n_f32(0.0f));
+        vx${ABC[N:N+4]} = vmulq_f32(vx${ABC[N:N+4]}, vbeta);
+
+      $for N in range(0, BATCH_TILE, 4):
+        const float32x4_t vy${ABC[N:N+4]} = vbslq_f32(vm${ABC[N:N+4]}, ve${ABC[N:N+4]}, vx${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vst1q_f32(y, vy${ABC[N:N+4]}); y += 4;
+    }
+  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
+    float32x4_t vx = vld1q_f32(x); x += 4;
+
+    const float32x4_t vz = vmaxq_f32(vmulq_f32(vx, vprescale), vsat_cutoff);
+
+    float32x4_t vn = ${VMULADDQ_F32}(vmagic_bias, vz, vlog2e);
+    float32x4_t vs = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn), 23));
+    vn = vsubq_f32(vn, vmagic_bias);
+
+    $if FMA:
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vminus_ln2);
+    $else:
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vminus_ln2_hi);
+      vt = ${VMULADDQ_F32}(vt, vn, vminus_ln2_lo);
+
+    float32x4_t vp = ${VMULADDQ_F32}(vc5, vc6, vt);
+    vp = ${VMULADDQ_F32}(vc4, vp, vt);
+    vp = ${VMULADDQ_F32}(vc3, vp, vt);
+    vp = ${VMULADDQ_F32}(vc2, vp, vt);
+    vp = vmulq_f32(vp, vt);
+
+    vt = vmulq_f32(vt, vs);
+    vs = vsubq_f32(vs, vone);
+    vp = ${VMULADDQ_F32}(vt, vp, vt);
+    const float32x4_t ve = vmulq_f32(vaddq_f32(vp, vs), valpha);
+
+    const uint32x4_t vm = vcltq_f32(vx, vmovq_n_f32(0.0f));
+    vx = vmulq_f32(vx, vbeta);
+    const float32x4_t vy = vbslq_f32(vm, ve, vx);
+
+    vst1q_f32(y, vy); y += 4;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    float32x4_t vx = vld1q_f32(x);
+
+    const float32x4_t vz = vmaxq_f32(vmulq_f32(vx, vprescale), vsat_cutoff);
+
+    float32x4_t vn = ${VMULADDQ_F32}(vmagic_bias, vz, vlog2e);
+    float32x4_t vs = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn), 23));
+    vn = vsubq_f32(vn, vmagic_bias);
+
+    $if FMA:
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vminus_ln2);
+    $else:
+      float32x4_t vt = ${VMULADDQ_F32}(vz, vn, vminus_ln2_hi);
+      vt = ${VMULADDQ_F32}(vt, vn, vminus_ln2_lo);
+
+    float32x4_t vp = ${VMULADDQ_F32}(vc5, vc6, vt);
+    vp = ${VMULADDQ_F32}(vc4, vp, vt);
+    vp = ${VMULADDQ_F32}(vc3, vp, vt);
+    vp = ${VMULADDQ_F32}(vc2, vp, vt);
+    vp = vmulq_f32(vp, vt);
+
+    vt = vmulq_f32(vt, vs);
+    vs = vsubq_f32(vs, vone);
+    vp = ${VMULADDQ_F32}(vt, vp, vt);
+    const float32x4_t ve = vmulq_f32(vaddq_f32(vp, vs), valpha);
+
+    const uint32x4_t vm = vcltq_f32(vx, vmovq_n_f32(0.0f));
+    vx = vmulq_f32(vx, vbeta);
+    const float32x4_t vy = vbslq_f32(vm, ve, vx);
+
+    float32x2_t vy_lo = vget_low_f32(vy);
+    if (n & (2 * sizeof(float))) {
+      vst1_f32(y, vy_lo); y += 2;
+      vy_lo = vget_high_f32(vy);
+    }
+    if (n & (1 * sizeof(float))) {
+      vst1_lane_f32(y, vy_lo, 0);
+    }
+  }
+}

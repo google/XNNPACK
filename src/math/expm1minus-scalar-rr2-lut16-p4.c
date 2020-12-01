@@ -60,12 +60,12 @@ void xnn_math_f32_expm1minus__scalar_rr2_lut16_p4(
     //    lower than -25.
     //
     // Shift bits 4:12 into 23:31 (position of floating-point exponent).
-    const uint32_t ve = fp32_to_bits(vn) << 19;
+    const uint32_t ven = fp32_to_bits(vn) << 19;
 
     // Use bits 0:4 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
     const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ve);
+    float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ven);
 
     // Subtract the large number back to get final n := round(x / log(2), 4).
     vn -= vmagic_bias;

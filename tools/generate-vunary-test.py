@@ -27,12 +27,13 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_(relu|sigmoid|vabs|vlrelu|vneg|vsqr|vrndne|vrndz|vrndd|vrndu|vsqrt)_(fact_)?ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_(relu|sigmoid|vabs|velu|vlrelu|vneg|vsqr|vrndne|vrndz|vrndd|vrndu|vsqrt)_(fact_)?ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
     "relu": "ReLU",
     "vabs": "Abs",
+    "velu": "ELU",
     "vlrelu": "LeakyReLU",
     "vneg": "Negate",
     "sigmoid": "Sigmoid",
@@ -109,6 +110,46 @@ $if OP_TYPE == "LeakyReLU":
         VUnOpMicrokernelTester()
           .batch_size(batch_size)
           .slope(slope)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+$if OP_TYPE == "ELU":
+  TEST(${TEST_NAME}, prescale) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (float prescale : std::vector<float>({0.1f, 10.0f})) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VUnOpMicrokernelTester()
+          .batch_size(batch_size)
+          .prescale(prescale)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, alpha) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (float alpha : std::vector<float>({0.3f, 3.0f})) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VUnOpMicrokernelTester()
+          .batch_size(batch_size)
+          .alpha(alpha)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, beta) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (float beta : std::vector<float>({0.3f, 3.0f})) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VUnOpMicrokernelTester()
+          .batch_size(batch_size)
+          .beta(beta)
           .Test(${", ".join(TEST_ARGS)});
       }
     }

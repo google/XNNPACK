@@ -98,6 +98,21 @@ union xnn_f32_rnd_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+union xnn_f32_elu_params {
+  struct {
+    float prescale;
+    float alpha;
+    float beta;
+  } scalar;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) float prescale[4];
+    XNN_ALIGN(16) float alpha[4];
+    XNN_ALIGN(16) float beta[4];
+  } sse;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_f32_lrelu_params {
   struct {
     float slope;
@@ -1563,6 +1578,12 @@ typedef void (*xnn_qs8_vadd_minmax_ukernel_function)(
     const int8_t* input_y,
     int8_t* output,
     const union xnn_qs8_add_params* params);
+
+typedef void (*xnn_f32_velu_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_elu_params* params);
 
 typedef void (*xnn_f32_vsqrt_ukernel_function)(
     size_t n,

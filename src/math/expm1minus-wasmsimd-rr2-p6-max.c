@@ -42,7 +42,7 @@ void xnn_math_f32_expm1minus__wasmsimd_rr2_p6_max(
     // The function saturates at -1 for large negative inputs: expm1f(x) == -1.0f for x <= sat_cutoff ~= -17.328680.
     // To guarantee this behaviour, we clip input at sat_cutoff, and leverage the fact that for our implementation
     // expm1f(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
-    vx = wasm_f32x4_max(vsat_cutoff, vx);
+    vx = wasm_f32x4_max(vx, vsat_cutoff);
 
     // Compute reduced argument n := round(x / log(2)).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing

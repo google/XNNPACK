@@ -24,6 +24,7 @@ class VUnOpMicrokernelTester {
  public:
   enum class OpType {
     Abs,
+    ELU,
     LeakyReLU,
     Negate,
     ReLU,
@@ -69,6 +70,33 @@ class VUnOpMicrokernelTester {
     return this->slope_;
   }
 
+  inline VUnOpMicrokernelTester& prescale(float prescale) {
+    this->prescale_ = prescale;
+    return *this;
+  }
+
+  inline float prescale() const {
+    return this->prescale_;
+  }
+
+  inline VUnOpMicrokernelTester& alpha(float alpha) {
+    this->alpha_ = alpha;
+    return *this;
+  }
+
+  inline float alpha() const {
+    return this->alpha_;
+  }
+
+  inline VUnOpMicrokernelTester& beta(float beta) {
+    this->beta_ = beta;
+    return *this;
+  }
+
+  inline float beta() const {
+    return this->beta_;
+  }
+
   inline VUnOpMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
@@ -101,6 +129,9 @@ class VUnOpMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
     switch (op_type) {
+      case OpType::ELU:
+        distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
+        break;
       case OpType::SquareRoot:
         distribution = std::uniform_real_distribution<float>(0.0f, 10.0f);
         break;
@@ -127,6 +158,11 @@ class VUnOpMicrokernelTester {
           case OpType::Abs:
             y_ref[i] = std::abs(x_data[i]);
             break;
+          case OpType::ELU:
+          {
+            y_ref[i] = std::signbit(x_data[i]) ? alpha() * std::expm1(double(x_data[i]) * prescale()) : double(x_data[i]) * beta();
+            break;
+          }
           case OpType::LeakyReLU:
             y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * slope() : x_data[i];
             break;
@@ -166,6 +202,7 @@ class VUnOpMicrokernelTester {
       // Prepare parameters.
       union {
         union xnn_f32_abs_params abs;
+        union xnn_f32_elu_params elu;
         union xnn_f32_relu_params relu;
         union xnn_f32_lrelu_params lrelu;
         union xnn_f32_neg_params neg;
@@ -180,6 +217,16 @@ class VUnOpMicrokernelTester {
               break;
             case Variant::Scalar:
               params.abs = xnn_init_scalar_f32_abs_params();
+              break;
+          }
+          break;
+        case OpType::ELU:
+          switch (variant) {
+            case Variant::Native:
+              params.elu = xnn_init_f32_elu_params(prescale(), alpha(), beta());
+              break;
+            case Variant::Scalar:
+              params.elu = xnn_init_scalar_f32_elu_params(prescale(), alpha(), beta());
               break;
           }
           break;
@@ -244,10 +291,13 @@ class VUnOpMicrokernelTester {
   }
 
  private:
-  size_t batch_size_{1};
-  bool inplace_{false};
-  float slope_{0.5f};
-  uint8_t qmin_{0};
-  uint8_t qmax_{255};
-  size_t iterations_{15};
+  size_t batch_size_ = 1;
+  bool inplace_ = false;
+  float slope_ = 0.5f;
+  float prescale_ = 1.0f;
+  float alpha_ = 1.0f;
+  float beta_ = 1.0f;
+  uint8_t qmin_ = 0;
+  uint8_t qmax_ = 255;
+  size_t iterations_ = 15;
 };
