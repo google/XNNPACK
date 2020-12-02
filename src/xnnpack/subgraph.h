@@ -91,6 +91,7 @@ enum xnn_node_type {
   xnn_node_type_depthwise_convolution_2d,
   xnn_node_type_depth_to_space,
   xnn_node_type_divide,
+  xnn_node_type_elu,
   xnn_node_type_fully_connected,
   xnn_node_type_floor,
   xnn_node_type_global_average_pooling_2d,
@@ -180,6 +181,9 @@ struct xnn_node {
       uint32_t dilation_height;
       uint32_t dilation_width;
     } pooling_2d;
+    struct {
+      float alpha;
+    } elu;
     struct {
       float negative_slope;
     } leaky_relu;

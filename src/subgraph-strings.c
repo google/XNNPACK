@@ -42,6 +42,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Depth To Space";
     case xnn_node_type_divide:
       return "Divide";
+    case xnn_node_type_elu:
+      return "ELU";
     case xnn_node_type_fully_connected:
       return "Fully Connected";
     case xnn_node_type_floor:

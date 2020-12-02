@@ -194,6 +194,7 @@ SET(XNNPACK_SUBGRAPH_SRCS
   src/subgraph/depth-to-space.c
   src/subgraph/depthwise-convolution-2d.c
   src/subgraph/divide.c
+  src/subgraph/elu.c
   src/subgraph/floor.c
   src/subgraph/fully-connected.c
   src/subgraph/global-average-pooling-2d.c
