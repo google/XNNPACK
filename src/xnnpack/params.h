@@ -2056,6 +2056,7 @@ struct xnn_parameters {
     struct ibilinear_parameters ibilinear;
     xnn_univector_ukernel_function abs;
     xnn_univector_ukernel_function clamp;
+    xnn_univector_ukernel_function elu;
     xnn_univector_ukernel_function hswish;
     xnn_univector_ukernel_function lrelu;
     xnn_univector_ukernel_function neg;

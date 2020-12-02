@@ -5050,6 +5050,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "elu_bench",
+    srcs = ["bench/elu.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "floor_bench",
     srcs = ["bench/floor.cc"],
     copts = xnnpack_optional_tflite_copts(),
@@ -6765,6 +6773,15 @@ xnnpack_unit_test(
     srcs = [
         "test/binary-elementwise-operator-tester.h",
         "test/divide-nd.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "elu_nc_test",
+    srcs = [
+        "test/elu-nc.cc",
+        "test/elu-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )

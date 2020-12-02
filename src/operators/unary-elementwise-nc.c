@@ -278,6 +278,30 @@ enum xnn_status xnn_create_copy_nc_x32(
     copy_op_out);
 }
 
+enum xnn_status xnn_create_elu_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float alpha,
+  uint32_t flags,
+  xnn_operator_t* elu_op_out)
+{
+  if (alpha <= 0.0f || !isnormal(alpha)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g alpha parameter: alpha must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_elu_nc_f32), alpha);
+    return xnn_status_invalid_parameter;
+  }
+
+  const union xnn_f32_elu_params params = xnn_init_f32_elu_params(1.0f /* prescale */, alpha, 1.0f /* beta */);
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_elu_nc_f32,
+    xnn_params.f32.elu,
+    elu_op_out);
+}
+
 enum xnn_status xnn_create_floor_nc_f32(
     size_t channels,
     size_t input_stride,
@@ -571,6 +595,28 @@ enum xnn_status xnn_setup_copy_nc_x32(
     batch_size, input, output,
     2 /* log2(sizeof(uint32_t)) */,
     NULL, 0);
+}
+
+enum xnn_status xnn_setup_elu_nc_f32(
+    xnn_operator_t elu_op,
+    size_t batch_size,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  if (elu_op->type != xnn_operator_type_elu_nc_f32) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_elu_nc_f32),
+      xnn_operator_type_to_string(elu_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  elu_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    elu_op,
+    batch_size, input, output,
+    2 /* log2(sizeof(float)) */,
+    &elu_op->params.f32_elu, sizeof(elu_op->params.f32_elu));
 }
 
 enum xnn_status xnn_setup_floor_nc_f32(

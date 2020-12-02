@@ -1286,6 +1286,21 @@ enum xnn_status xnn_setup_divide_nd_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_elu_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float alpha,
+  uint32_t flags,
+  xnn_operator_t* elu_op_out);
+
+enum xnn_status xnn_setup_elu_nc_f32(
+  xnn_operator_t elu_op,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_fully_connected_nc_f32(
   size_t input_channels,
   size_t output_channels,

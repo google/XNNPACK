@@ -37,6 +37,7 @@ XNNPACK implements the following neural network operators:
 - Ceiling (rounding to integer above)
 - Clamp (includes ReLU and ReLU6)
 - Copy
+- ELU
 - Floor (rounding to integer below)
 - HardSwish
 - Leaky ReLU

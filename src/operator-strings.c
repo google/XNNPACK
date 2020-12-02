@@ -68,6 +68,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Depth To Space (NHWC, X32)";
     case xnn_operator_type_divide_nd_f32:
       return "Divide (ND, F32)";
+    case xnn_operator_type_elu_nc_f32:
+      return "ELU (NC, F32)";
     case xnn_operator_type_floor_nc_f32:
       return "Floor (NC, F32)";
     case xnn_operator_type_fully_connected_nc_f32:

@@ -3101,6 +3101,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(divide-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(divide-nd-test divide-nd-test)
 
+  ADD_EXECUTABLE(elu-nc-test test/elu-nc.cc)
+  SET_TARGET_PROPERTIES(elu-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(elu-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(elu-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(elu-nc-test elu-nc-test)
+
   ADD_EXECUTABLE(fully-connected-nc-test test/fully-connected-nc.cc)
   SET_TARGET_PROPERTIES(fully-connected-nc-test PROPERTIES
     CXX_STANDARD 11
@@ -4665,6 +4674,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(deconvolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark bench-utils)
+
+  ADD_EXECUTABLE(elu-bench bench/elu.cc)
+  SET_TARGET_PROPERTIES(elu-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(elu-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  TARGET_LINK_LIBRARIES(elu-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(floor-bench bench/floor.cc)
   SET_TARGET_PROPERTIES(floor-bench PROPERTIES
