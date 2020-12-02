@@ -48,7 +48,7 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x16(
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m512i ven = _mm512_slli_epi32(_mm512_castps_si512(vn), 19);
-    const __m512i vl = _mm512_permutevar_epi32(_mm512_castps_si512(vn), vtable);
+    const __m512i vl = _mm512_permutexvar_epi32(_mm512_castps_si512(vn), vtable);
     __m512 vs = _mm512_castsi512_ps(_mm512_add_epi32(vl, ven));
     vn = _mm512_sub_ps(vn, vmagic_bias);
 
@@ -81,7 +81,7 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x16(
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m512i ven = _mm512_slli_epi32(_mm512_castps_si512(vn), 19);
-    const __m512i vl = _mm512_permutevar_epi32(_mm512_castps_si512(vn), vtable);
+    const __m512i vl = _mm512_permutexvar_epi32(_mm512_castps_si512(vn), vtable);
     __m512 vs = _mm512_castsi512_ps(_mm512_add_epi32(vl, ven));
     vn = _mm512_sub_ps(vn, vmagic_bias);
 

@@ -67,7 +67,7 @@ void xnn_math_f32_expm1minus__avx512f_rr1_lut16_p3_perm(
     const __m512i ven = _mm512_slli_epi32(_mm512_castps_si512(vn), 19);
 
     // Use bits 0:4 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
-    const __m512i vl = _mm512_permutevar_epi32(_mm512_castps_si512(vn), vtable);
+    const __m512i vl = _mm512_permutexvar_epi32(_mm512_castps_si512(vn), vtable);
 
     // Adjust exponent of the value l fetched from the table to get the final s value.
     const __m512 vs = _mm512_castsi512_ps(_mm512_add_epi32(vl, ven));

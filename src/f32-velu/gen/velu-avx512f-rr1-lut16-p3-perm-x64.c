@@ -57,13 +57,13 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
     __m512 vn3 = _mm512_fmadd_ps(vz3, vlog2e, vmagic_bias);
 
     const __m512i ven0 = _mm512_slli_epi32(_mm512_castps_si512(vn0), 19);
-    const __m512i vl0 = _mm512_permutevar_epi32(_mm512_castps_si512(vn0), vtable);
+    const __m512i vl0 = _mm512_permutexvar_epi32(_mm512_castps_si512(vn0), vtable);
     const __m512i ven1 = _mm512_slli_epi32(_mm512_castps_si512(vn1), 19);
-    const __m512i vl1 = _mm512_permutevar_epi32(_mm512_castps_si512(vn1), vtable);
+    const __m512i vl1 = _mm512_permutexvar_epi32(_mm512_castps_si512(vn1), vtable);
     const __m512i ven2 = _mm512_slli_epi32(_mm512_castps_si512(vn2), 19);
-    const __m512i vl2 = _mm512_permutevar_epi32(_mm512_castps_si512(vn2), vtable);
+    const __m512i vl2 = _mm512_permutexvar_epi32(_mm512_castps_si512(vn2), vtable);
     const __m512i ven3 = _mm512_slli_epi32(_mm512_castps_si512(vn3), 19);
-    const __m512i vl3 = _mm512_permutevar_epi32(_mm512_castps_si512(vn3), vtable);
+    const __m512i vl3 = _mm512_permutexvar_epi32(_mm512_castps_si512(vn3), vtable);
 
     __m512 vs0 = _mm512_castsi512_ps(_mm512_add_epi32(vl0, ven0));
     vn0 = _mm512_sub_ps(vn0, vmagic_bias);
@@ -133,7 +133,7 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m512i ven = _mm512_slli_epi32(_mm512_castps_si512(vn), 19);
-    const __m512i vl = _mm512_permutevar_epi32(_mm512_castps_si512(vn), vtable);
+    const __m512i vl = _mm512_permutexvar_epi32(_mm512_castps_si512(vn), vtable);
     __m512 vs = _mm512_castsi512_ps(_mm512_add_epi32(vl, ven));
     vn = _mm512_sub_ps(vn, vmagic_bias);
 
@@ -166,7 +166,7 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m512i ven = _mm512_slli_epi32(_mm512_castps_si512(vn), 19);
-    const __m512i vl = _mm512_permutevar_epi32(_mm512_castps_si512(vn), vtable);
+    const __m512i vl = _mm512_permutexvar_epi32(_mm512_castps_si512(vn), vtable);
     __m512 vs = _mm512_castsi512_ps(_mm512_add_epi32(vl, ven));
     vn = _mm512_sub_ps(vn, vmagic_bias);
 
