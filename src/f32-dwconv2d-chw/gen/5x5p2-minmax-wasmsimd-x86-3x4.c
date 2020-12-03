@@ -105,9 +105,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       const v128_t vi5x89AB = wasm_v128_load(i5); i5 += 4;
       const v128_t vi6x89AB = wasm_v128_load(i6); i6 += 4;
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x4567, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x4567, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x4567, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x4567, wasm_v32x4_shuffle(vw0123, vw0123, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x4567, wasm_v32x4_shuffle(vw0123, vw0123, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x4567, wasm_v32x4_shuffle(vw0123, vw0123, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x4567, wasm_v32x4_shuffle(vw89AB, vw89AB, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x4567, wasm_v32x4_shuffle(vw89AB, vw89AB, 0, 0, 0, 0)));
@@ -117,13 +117,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x4567, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 3, 3, 3, 3)));
 
       const v128_t vi0x3456 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 3, 4, 5, 6);
       const v128_t vi1x3456 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 3, 4, 5, 6);
@@ -133,13 +133,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       const v128_t vi5x3456 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 3, 4, 5, 6);
       const v128_t vi6x3456 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 3, 4, 5, 6);
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x3456, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw4567, vw4567, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw4567, vw4567, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x3456, wasm_v32x4_shuffle(vw4567, vw4567, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x3456, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 0, 0, 0, 0)));
@@ -149,9 +149,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x3456, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x3456, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2, 2, 2, 2)));
 
       const v128_t vi0x2345 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 2, 3, 4, 5);
       vi0x0123 = vi0x4567;
@@ -172,13 +172,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x2345, wasm_v32x4_shuffle(vw0123, vw0123, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw0123, vw0123, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x2345, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 0, 0, 0, 0)));
@@ -204,13 +204,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x5678, wasm_v32x4_shuffle(vw89AB, vw89AB, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vw89AB, vw89AB, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwOP, vwOP, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x5678, wasm_v32x4_shuffle(vwOP, vwOP, 0, 0, 0, 0)));
@@ -235,13 +235,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x6789, wasm_v32x4_shuffle(vw4567, vw4567, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vw4567, vw4567, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x6789, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 0, 0, 0, 0)));
@@ -285,9 +285,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vi5x89AB = wasm_v128_and(vmask, vi5x89AB);
       vi6x89AB = wasm_v128_and(vmask, vi6x89AB);
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x4567, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x4567, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x4567, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x4567, wasm_v32x4_shuffle(vw0123, vw0123, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x4567, wasm_v32x4_shuffle(vw0123, vw0123, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x4567, wasm_v32x4_shuffle(vw0123, vw0123, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x4567, wasm_v32x4_shuffle(vw89AB, vw89AB, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x4567, wasm_v32x4_shuffle(vw89AB, vw89AB, 0, 0, 0, 0)));
@@ -297,13 +297,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x4567, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 3, 3, 3, 3)));
 
       const v128_t vi0x3456 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 3, 4, 5, 6);
       const v128_t vi1x3456 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 3, 4, 5, 6);
@@ -313,13 +313,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       const v128_t vi5x3456 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 3, 4, 5, 6);
       const v128_t vi6x3456 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 3, 4, 5, 6);
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x3456, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw4567, vw4567, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw4567, vw4567, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x3456, wasm_v32x4_shuffle(vw4567, vw4567, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x3456, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 0, 0, 0, 0)));
@@ -329,9 +329,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x3456, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x3456, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2, 2, 2, 2)));
 
       const v128_t vi0x2345 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 2, 3, 4, 5);
       vi0x0123 = vi0x4567;
@@ -352,13 +352,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x2345, wasm_v32x4_shuffle(vw0123, vw0123, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw0123, vw0123, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x2345, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 0, 0, 0, 0)));
@@ -384,13 +384,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x5678, wasm_v32x4_shuffle(vw89AB, vw89AB, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vw89AB, vw89AB, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwOP, vwOP, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x5678, wasm_v32x4_shuffle(vwOP, vwOP, 0, 0, 0, 0)));
@@ -415,13 +415,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x6789, wasm_v32x4_shuffle(vw4567, vw4567, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vw4567, vw4567, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x6789, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 0, 0, 0, 0)));
@@ -460,9 +460,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vi5x4567 = wasm_v128_and(vmask, vi5x4567);
       vi6x4567 = wasm_v128_and(vmask, vi6x4567);
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x4567, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x4567, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x4567, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x4567, wasm_v32x4_shuffle(vw0123, vw0123, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x4567, wasm_v32x4_shuffle(vw0123, vw0123, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x4567, wasm_v32x4_shuffle(vw0123, vw0123, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x4567, wasm_v32x4_shuffle(vw89AB, vw89AB, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x4567, wasm_v32x4_shuffle(vw89AB, vw89AB, 0, 0, 0, 0)));
@@ -472,13 +472,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x4567, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x4567, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 3, 3, 3, 3)));
 
       const v128_t vi0x3456 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 3, 4, 5, 6);
       const v128_t vi1x3456 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 3, 4, 5, 6);
@@ -488,13 +488,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       const v128_t vi5x3456 = wasm_v32x4_shuffle(vi5x0123, vi5x4567, 3, 4, 5, 6);
       const v128_t vi6x3456 = wasm_v32x4_shuffle(vi6x0123, vi6x4567, 3, 4, 5, 6);
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x3456, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x3456, wasm_v32x4_shuffle(vw4567, vw4567, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vw4567, vw4567, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x3456, wasm_v32x4_shuffle(vw4567, vw4567, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x3456, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x3456, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 0, 0, 0, 0)));
@@ -504,9 +504,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x3456, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x3456, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi6x3456, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2, 2, 2, 2)));
 
       const v128_t vi0x2345 = wasm_v32x4_shuffle(vi0x0123, vi0x4567, 2, 3, 4, 5);
       const v128_t vi1x2345 = wasm_v32x4_shuffle(vi1x0123, vi1x4567, 2, 3, 4, 5);
@@ -520,13 +520,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x2345, wasm_v32x4_shuffle(vw0123, vw0123, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw0123, vw0123, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw4567, vw4567, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x2345, wasm_v32x4_shuffle(vw89AB, vw89AB, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x2345, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x2345, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 0, 0, 0, 0)));
@@ -552,13 +552,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x5678, wasm_v32x4_shuffle(vw89AB, vw89AB, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vw89AB, vw89AB, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi5x5678, wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi4x5678, wasm_v32x4_shuffle(vwOP, vwOP, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi5x5678, wasm_v32x4_shuffle(vwOP, vwOP, 0, 0, 0, 0)));
@@ -576,13 +576,13 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi1x6789, wasm_v32x4_shuffle(vw4567, vw4567, 1, 1, 1, 1)));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vw4567, vw4567, 1, 1, 1, 1)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2 + 0, 2 + 0, 2 + 0, 2 + 0)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2, 2, 2, 2)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2, 2, 2, 2)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vw89AB, vw89AB, 2, 2, 2, 2)));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
-      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2 + 1, 2 + 1, 2 + 1, 2 + 1)));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 3, 3, 3, 3)));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 3, 3, 3, 3)));
+      vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi4x6789, wasm_v32x4_shuffle(vwCDEF, vwCDEF, 3, 3, 3, 3)));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi3x6789, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 0, 0, 0, 0)));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x6789, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 0, 0, 0, 0)));
