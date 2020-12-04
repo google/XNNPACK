@@ -310,7 +310,7 @@ union xnn_qs8_gemm_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {
-    XNN_ALIGN(16) int64_t multiplier[2];
+    XNN_ALIGN(16) int32_t multiplier[4];
     XNN_ALIGN(16) int64_t rounding[2];
     XNN_ALIGN(16) int32_t remainder_mask[4];
     XNN_ALIGN(16) int32_t remainder_threshold[4];
@@ -355,7 +355,7 @@ union xnn_qs8_gemm_xw_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {
-    XNN_ALIGN(16) int64_t multiplier[2];
+    XNN_ALIGN(16) int32_t multiplier[4];
     XNN_ALIGN(16) int64_t rounding[2];
     XNN_ALIGN(16) int32_t remainder_mask[4];
     XNN_ALIGN(16) int32_t remainder_threshold[4];
