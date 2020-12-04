@@ -117,10 +117,10 @@ void xnn_f32_sigmoid_ukernel__wasmsimd_p5_div_x16(
     vf89AB = wasm_v128_andnot(vf89AB, wasm_f32x4_gt(vz89AB, vdenorm_cutoff));
     vfCDEF = wasm_v128_andnot(vfCDEF, wasm_f32x4_gt(vzCDEF, vdenorm_cutoff));
 
-    vf0123 = wasm_v128_bitselect(vf0123, wasm_f32x4_sub(vone, vf0123), wasm_i32x4_shr(vx0123, 31));
-    vf4567 = wasm_v128_bitselect(vf4567, wasm_f32x4_sub(vone, vf4567), wasm_i32x4_shr(vx4567, 31));
-    vf89AB = wasm_v128_bitselect(vf89AB, wasm_f32x4_sub(vone, vf89AB), wasm_i32x4_shr(vx89AB, 31));
-    vfCDEF = wasm_v128_bitselect(vfCDEF, wasm_f32x4_sub(vone, vfCDEF), wasm_i32x4_shr(vxCDEF, 31));
+    vf0123 = __builtin_wasm_signselect_i32x4(vf0123, wasm_f32x4_sub(vone, vf0123), vx0123);
+    vf4567 = __builtin_wasm_signselect_i32x4(vf4567, wasm_f32x4_sub(vone, vf4567), vx4567);
+    vf89AB = __builtin_wasm_signselect_i32x4(vf89AB, wasm_f32x4_sub(vone, vf89AB), vx89AB);
+    vfCDEF = __builtin_wasm_signselect_i32x4(vfCDEF, wasm_f32x4_sub(vone, vfCDEF), vxCDEF);
 
     wasm_v128_store(y, vf0123);
     wasm_v128_store(y + 4, vf4567);
@@ -152,7 +152,7 @@ void xnn_f32_sigmoid_ukernel__wasmsimd_p5_div_x16(
 
     v128_t vf = wasm_f32x4_div(ve, vd);
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
-    vf = wasm_v128_bitselect(vf, wasm_f32x4_sub(vone, vf), wasm_i32x4_shr(vx, 31));
+    vf = __builtin_wasm_signselect_i32x4(vf, wasm_f32x4_sub(vone, vf), vx);
 
     wasm_v128_store(y, vf);
     y += 4;
@@ -180,7 +180,7 @@ void xnn_f32_sigmoid_ukernel__wasmsimd_p5_div_x16(
 
     v128_t vf = wasm_f32x4_div(ve, vd);
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
-    vf = wasm_v128_bitselect(vf, wasm_f32x4_sub(vone, vf), wasm_i32x4_shr(vx, 31));
+    vf = __builtin_wasm_signselect_i32x4(vf, wasm_f32x4_sub(vone, vf), vx);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vf, 0);

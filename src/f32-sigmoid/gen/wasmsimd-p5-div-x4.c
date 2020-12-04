@@ -59,7 +59,7 @@ void xnn_f32_sigmoid_ukernel__wasmsimd_p5_div_x4(
 
     v128_t vf = wasm_f32x4_div(ve, vd);
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
-    vf = wasm_v128_bitselect(vf, wasm_f32x4_sub(vone, vf), wasm_i32x4_shr(vx, 31));
+    vf = __builtin_wasm_signselect_i32x4(vf, wasm_f32x4_sub(vone, vf), vx);
 
     wasm_v128_store(y, vf);
     y += 4;
@@ -87,7 +87,7 @@ void xnn_f32_sigmoid_ukernel__wasmsimd_p5_div_x4(
 
     v128_t vf = wasm_f32x4_div(ve, vd);
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
-    vf = wasm_v128_bitselect(vf, wasm_f32x4_sub(vone, vf), wasm_i32x4_shr(vx, 31));
+    vf = __builtin_wasm_signselect_i32x4(vf, wasm_f32x4_sub(vone, vf), vx);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vf, 0);
