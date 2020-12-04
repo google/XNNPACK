@@ -19,8 +19,13 @@
 
 static void f32_relu(
   benchmark::State& state,
-  xnn_f32_relu_ukernel_function f32_relu)
+  xnn_f32_relu_ukernel_function f32_relu,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
+  if (isa_check && !isa_check(state)) {
+    return;
+  }
+
   const size_t elements = state.range(0);
 
   std::random_device random_device;
@@ -61,33 +66,33 @@ static void f32_relu(
     ->Range(1000, 100000000)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_relu, avx_x8, xnn_f32_relu_ukernel__avx_x8)
+  BENCHMARK_CAPTURE(f32_relu, avx_x8, xnn_f32_relu_ukernel__avx_x8, benchmark::utils::CheckAVX)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_relu, avx_x16, xnn_f32_relu_ukernel__avx_x16)
+  BENCHMARK_CAPTURE(f32_relu, avx_x16, xnn_f32_relu_ukernel__avx_x16, benchmark::utils::CheckAVX)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_relu, avx512f_x16, xnn_f32_relu_ukernel__avx512f_x16)
+  BENCHMARK_CAPTURE(f32_relu, avx512f_x16, xnn_f32_relu_ukernel__avx512f_x16, benchmark::utils::CheckAVX512F)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_relu, avx512f_x32, xnn_f32_relu_ukernel__avx512f_x32)
+  BENCHMARK_CAPTURE(f32_relu, avx512f_x32, xnn_f32_relu_ukernel__avx512f_x32, benchmark::utils::CheckAVX512F)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_relu, neon_x4, xnn_f32_relu_ukernel__neon_x4)
+  BENCHMARK_CAPTURE(f32_relu, neon_x4, xnn_f32_relu_ukernel__neon_x4, benchmark::utils::CheckNEON)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_relu, neon_x8, xnn_f32_relu_ukernel__neon_x8)
+  BENCHMARK_CAPTURE(f32_relu, neon_x8, xnn_f32_relu_ukernel__neon_x8, benchmark::utils::CheckNEON)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();

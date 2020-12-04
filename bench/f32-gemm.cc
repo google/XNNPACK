@@ -15,8 +15,6 @@
 #include <random>
 #include <vector>
 
-#include <cpuinfo.h>
-
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_RUY
 #include "ruy/ruy.h"
@@ -38,10 +36,6 @@ static void GEMMBenchmark(benchmark::State& state,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
-    return;
-  }
   if (isa_check && !isa_check(state)) {
     return;
   }
@@ -116,10 +110,6 @@ static void PPMM1PBenchmark(benchmark::State& state,
   size_t mr, size_t nr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
-    return;
-  }
   if (isa_check && !isa_check(state)) {
     return;
   }
@@ -196,10 +186,6 @@ static void PPMM2PBenchmark(benchmark::State& state,
   size_t mr, size_t nr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
-    return;
-  }
   if (isa_check && !isa_check(state)) {
     return;
   }

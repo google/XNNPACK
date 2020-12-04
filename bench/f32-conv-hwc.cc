@@ -10,8 +10,6 @@
 #include <random>
 #include <vector>
 
-#include <cpuinfo.h>
-
 #include <benchmark/benchmark.h>
 #include "bench/dconv.h"
 #include "bench/utils.h"
@@ -25,10 +23,11 @@
 
 static void DConv3X3S2P1Benchmark(benchmark::State& state,
   xnn_f32_conv_hwc_ukernel_function conv,
-  uint32_t output_channels_tile)
+  uint32_t output_channels_tile,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
+  if (isa_check && !isa_check(state)) {
+    return;
   }
 
   const size_t input_height = state.range(0);
@@ -115,16 +114,16 @@ static void DConv3X3S2P1Benchmark(benchmark::State& state,
 
 #if XNN_ARCH_ARM64
   static void f32_conv_hwc_3x3s2p1c3x8__neonfma_2x1(benchmark::State& state, const char* net) {
-    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neonfma_2x1, 8);
+    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neonfma_2x1, 8, benchmark::utils::CheckNEONFMA);
   }
   static void f32_conv_hwc_3x3s2p1c3x4__neonfma_2x1(benchmark::State& state, const char* net) {
-    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x1, 4);
+    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x1, 4, benchmark::utils::CheckNEONFMA);
   }
   static void f32_conv_hwc_3x3s2p1c3x8__neonfma_2x2(benchmark::State& state, const char* net) {
-    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neonfma_2x2, 8);
+    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neonfma_2x2, 8, benchmark::utils::CheckNEONFMA);
   }
   static void f32_conv_hwc_3x3s2p1c3x4__neonfma_2x2(benchmark::State& state, const char* net) {
-    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x2, 4);
+    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neonfma_2x2, 4, benchmark::utils::CheckNEONFMA);
   }
 
   BENCHMARK_DCONV(f32_conv_hwc_3x3s2p1c3x8__neonfma_2x1);
@@ -135,16 +134,16 @@ static void DConv3X3S2P1Benchmark(benchmark::State& state,
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void f32_conv_hwc_3x3s2p1c3x8__neon_2x1(benchmark::State& state, const char* net) {
-    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, 8);
+    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, 8, benchmark::utils::CheckNEON);
   }
   static void f32_conv_hwc_3x3s2p1c3x4__neon_2x1(benchmark::State& state, const char* net) {
-    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, 4);
+    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, 4, benchmark::utils::CheckNEON);
   }
   static void f32_conv_hwc_3x3s2p1c3x8__neon_2x2(benchmark::State& state, const char* net) {
-    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, 8);
+    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, 8, benchmark::utils::CheckNEON);
   }
   static void f32_conv_hwc_3x3s2p1c3x4__neon_2x2(benchmark::State& state, const char* net) {
-    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, 4);
+    DConv3X3S2P1Benchmark(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, 4, benchmark::utils::CheckNEON);
   }
 
   BENCHMARK_DCONV(f32_conv_hwc_3x3s2p1c3x8__neon_2x1);

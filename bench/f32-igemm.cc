@@ -10,8 +10,6 @@
 #include <random>
 #include <vector>
 
-#include <cpuinfo.h>
-
 #include <benchmark/benchmark.h>
 #include "bench/conv.h"
 #include "bench/utils.h"
@@ -30,9 +28,6 @@ static void IGEMMBenchmark(benchmark::State& state,
   uint32_t mr, uint32_t nr, uint32_t kr, uint32_t sr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
-  }
   if (isa_check && !isa_check(state)) {
     return;
   }

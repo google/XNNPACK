@@ -19,8 +19,13 @@
 
 static void f32_rmax(
   benchmark::State& state,
-  xnn_f32_rmax_ukernel_function f32_rmax)
+  xnn_f32_rmax_ukernel_function f32_rmax,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
+  if (isa_check && !isa_check(state)) {
+    return;
+  }
+
   const size_t elements = state.range(0);
 
   std::random_device random_device;
@@ -55,19 +60,19 @@ static void f32_rmax(
     ->Range(1000, 100000000)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_rmax, avx, xnn_f32_rmax_ukernel__avx)
+  BENCHMARK_CAPTURE(f32_rmax, avx, xnn_f32_rmax_ukernel__avx, benchmark::utils::CheckAVX)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_rmax, avx512f, xnn_f32_rmax_ukernel__avx512f)
+  BENCHMARK_CAPTURE(f32_rmax, avx512f, xnn_f32_rmax_ukernel__avx512f, benchmark::utils::CheckAVX512F)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_rmax, neon, xnn_f32_rmax_ukernel__neon)
+  BENCHMARK_CAPTURE(f32_rmax, neon, xnn_f32_rmax_ukernel__neon, benchmark::utils::CheckNEON)
     ->RangeMultiplier(10)
     ->Range(1000, 100000000)
     ->UseRealTime();

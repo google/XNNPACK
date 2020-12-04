@@ -10,8 +10,6 @@
 #include <random>
 #include <vector>
 
-#include <cpuinfo.h>
-
 #include <benchmark/benchmark.h>
 #include "bench/dwconv.h"
 #include "bench/utils.h"
@@ -30,10 +28,6 @@ static void DWConv2DBenchmark(benchmark::State& state,
   uint32_t kh, uint32_t kw, uint32_t pw, uint32_t s,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
-    return;
-  }
   if (isa_check && !isa_check(state)) {
     return;
   }
