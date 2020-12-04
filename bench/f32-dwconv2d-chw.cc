@@ -137,12 +137,16 @@ static void DWConv2DBenchmark(benchmark::State& state,
     }
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 * output_size * channels * kernel_size,
     benchmark::Counter::kIsRate);
 
-  state.counters["BYTES"] = benchmark::Counter(
+  state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) * (output_size + inputSize + kernel_size + 1 /* bias */) * channels * sizeof(float),
     benchmark::Counter::kIsRate);
 }

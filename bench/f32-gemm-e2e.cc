@@ -65,7 +65,11 @@ static void GEMMEnd2EndBenchmark(
       }
     }
   }
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
 }
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY

@@ -130,13 +130,17 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
     deconvolution_op = nullptr;
   }
 
-    state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
-    state.counters["OPS"] = benchmark::Counter(
-    uint64_t(state.iterations()) * 2 *
-      batch_size * input_width * input_width *
-      groups * group_input_channels * group_output_channels *
-      kernel_height * kernel_width,
-    benchmark::Counter::kIsRate);
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["OPS"] = benchmark::Counter(
+  uint64_t(state.iterations()) * 2 *
+    batch_size * input_width * input_width *
+    groups * group_input_channels * group_output_channels *
+    kernel_height * kernel_width,
+  benchmark::Counter::kIsRate);
 }
 #endif  // XNN_NO_QU8_OPERATORS
 
@@ -243,7 +247,11 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
     deconvolution_op = nullptr;
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 *
       batch_size * input_width * input_width *
@@ -427,7 +435,11 @@ void tflite_deconvolution_f32(benchmark::State& state, const char* net) {
     }
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 *
       batch_size * input_width * input_width *

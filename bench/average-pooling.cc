@@ -95,7 +95,10 @@ static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net
   }
   pooling_op = nullptr;
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
 
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
@@ -169,7 +172,10 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
   }
   pooling_op = nullptr;
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
 
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
@@ -304,7 +310,10 @@ void tflite_average_pooling_f32(benchmark::State& state, const char* net) {
     }
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
 
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *

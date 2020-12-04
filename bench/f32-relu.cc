@@ -21,28 +21,33 @@ static void f32_relu(
   benchmark::State& state,
   xnn_f32_relu_ukernel_function f32_relu)
 {
-  const size_t n = state.range(0);
+  const size_t elements = state.range(0);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
 
-  std::vector<float, AlignedAllocator<float, 64>> x(n);
+  std::vector<float, AlignedAllocator<float, 64>> x(elements);
   std::generate(x.begin(), x.end(), std::ref(f32rng));
-  std::vector<float, AlignedAllocator<float, 64>> y(n);
+  std::vector<float, AlignedAllocator<float, 64>> y(elements);
   std::generate(x.begin(), x.end(), std::ref(f32rng));
 
   for (auto _ : state) {
-    f32_relu(n * sizeof(float), x.data(), y.data(), NULL);
+    f32_relu(elements * sizeof(float), x.data(), y.data(), NULL);
   }
 
-    state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
 
-    state.counters["elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * n, benchmark::Counter::kIsRate);
+  const size_t elements_per_iteration = elements;
+  state.counters["elements"] =
+    benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
 
+  const size_t bytes_per_iteration = 2 * elements * sizeof(float);
   state.counters["bytes"] =
-    benchmark::Counter(uint64_t(state.iterations()) * n * sizeof(float), benchmark::Counter::kIsRate);
+    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

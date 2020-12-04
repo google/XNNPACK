@@ -26,9 +26,9 @@ static void f32_vscaleextexp(
     return;
   }
 
-  const size_t n = state.range(0);
+  const size_t elements = state.range(0);
   const size_t cache_line_size_max = 128;
-  const size_t packed_n = benchmark::utils::RoundUp(n, cache_line_size_max / sizeof(float));
+  const size_t packed_n = benchmark::utils::RoundUp(elements, cache_line_size_max / sizeof(float));
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -36,7 +36,7 @@ static void f32_vscaleextexp(
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
-  std::vector<float, AlignedAllocator<float, 64>> x(n);
+  std::vector<float, AlignedAllocator<float, 64>> x(elements);
   std::vector<float, AlignedAllocator<float, 64>> y(packed_n * num_buffers);
 
   std::generate(x.begin(), x.end(), std::ref(f32rng));
@@ -47,7 +47,7 @@ static void f32_vscaleextexp(
   for (auto _ : state) {
     state.PauseTiming();
     float scale[2];
-    raddextexp(n * sizeof(float), x.data(), scale);
+    raddextexp(elements * sizeof(float), x.data(), scale);
     const float ext_mantissa = 1.0f / scale[0];
     const float ext_exponent = -scale[1];
     if (++buffer_index == num_buffers) {
@@ -55,14 +55,21 @@ static void f32_vscaleextexp(
     }
     state.ResumeTiming();
 
-    vscaleextexp(n * sizeof(float), x.data(), y.data() + packed_n * buffer_index, ext_mantissa, ext_exponent);
+    vscaleextexp(elements * sizeof(float), x.data(), y.data() + packed_n * buffer_index, ext_mantissa, ext_exponent);
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  const size_t elements_per_iteration = elements;
   state.counters["elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * n, benchmark::Counter::kIsRate);
+    benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration = 2 * elements * sizeof(float);
   state.counters["bytes"] =
-    benchmark::Counter(uint64_t(state.iterations()) * 2 * sizeof(float) * n, benchmark::Counter::kIsRate);
+    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
 static void CharacteristicArguments(benchmark::internal::Benchmark* b) {

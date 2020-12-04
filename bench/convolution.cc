@@ -143,7 +143,11 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
     convolution_op = nullptr;
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["OPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 *
       batch_size * output_height * output_width *
@@ -259,7 +263,11 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
     convolution_op = nullptr;
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["OPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 *
       batch_size * output_height * output_width *
@@ -375,7 +383,11 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
     convolution_op = nullptr;
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 *
       batch_size * output_height * output_width *
@@ -486,7 +498,11 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
     convolution_op = nullptr;
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 *
       batch_size * output_height * output_width *
@@ -693,7 +709,11 @@ void tflite_convolution_f32(benchmark::State& state, const char* net) {
     }
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 *
       batch_size * output_height * output_width *
@@ -1016,7 +1036,11 @@ void armcl_convolution_f32(benchmark::State& state, const char* net) {
   bias_tensor.allocator()->free();
   output_tensor.allocator()->free();
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 *
       batch_size * output_height * output_width *

@@ -70,7 +70,11 @@ static void global_average_pooling_qu8(benchmark::State& state) {
   }
   global_pooling_op = nullptr;
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
       batch_size * (input_height * input_width + 1) * channels * sizeof(uint8_t),
@@ -129,7 +133,11 @@ static void global_average_pooling_qs8(benchmark::State& state) {
   }
   global_pooling_op = nullptr;
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
       batch_size * (input_height * input_width + 1) * channels * sizeof(int8_t),
@@ -189,7 +197,11 @@ static void global_average_pooling_f16(benchmark::State& state) {
   }
   global_pooling_op = nullptr;
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
       batch_size * (input_height * input_width + 1) * channels * sizeof(uint16_t),
@@ -244,7 +256,11 @@ static void global_average_pooling_f32(benchmark::State& state) {
   }
   global_pooling_op = nullptr;
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
       batch_size * (input_height * input_width + 1) * channels * sizeof(float),

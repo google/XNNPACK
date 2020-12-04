@@ -82,7 +82,10 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   }
   prelu_op = nullptr;
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
 
   const size_t elements_per_iteration = batch_size * height * width * channels;
   state.counters["elements"] =
@@ -207,7 +210,10 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
     }
   }
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
 
   const size_t elements_per_iteration = batch_size * height * width * channels;
   state.counters["elements"] =

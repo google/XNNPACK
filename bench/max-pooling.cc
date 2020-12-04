@@ -86,7 +86,11 @@ void max_pooling_u8(benchmark::State& state, const char* net) {
   }
   pooling_op = nullptr;
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
       batch_size * (input_height * input_width + output_height * output_width) * channels * sizeof(uint8_t),
@@ -159,7 +163,11 @@ void max_pooling_f32(benchmark::State& state, const char* net) {
   }
   pooling_op = nullptr;
 
-  state.counters["Freq"] = benchmark::utils::GetCurrentCpuFrequency();
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
       batch_size * (input_height * input_width + output_height * output_width) * channels * sizeof(float),
