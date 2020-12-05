@@ -26,6 +26,7 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_3d_tile_2d,
   xnn_parallelization_type_4d,
   xnn_parallelization_type_4d_tile_2d,
+  xnn_parallelization_type_5d,
   xnn_parallelization_type_5d_tile_2d,
   xnn_parallelization_type_6d_tile_2d,
 #if XNN_MAX_UARCH_TYPES > 1
@@ -47,6 +48,7 @@ struct compute_parameters {
     pthreadpool_task_3d_tile_2d_t task_3d_tile_2d;
     pthreadpool_task_4d_t task_4d;
     pthreadpool_task_4d_tile_2d_t task_4d_tile_2d;
+    pthreadpool_task_5d_t task_5d;
     pthreadpool_task_5d_tile_2d_t task_5d_tile_2d;
     pthreadpool_task_6d_tile_2d_t task_6d_tile_2d;
 #if XNN_MAX_UARCH_TYPES > 1
@@ -779,7 +781,7 @@ struct elementwise_binary_context {
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_elementwise_binary_5d(
       const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t i, size_t j, size_t k, size_t l, size_t m, size_t l_range, size_t m_range);
+      size_t i, size_t j, size_t k, size_t l, size_t m);
 #endif
 
 struct channel_shuffle_context {
@@ -933,7 +935,7 @@ struct pad_context {
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_pad_5d(
       const struct pad_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t i, size_t j, size_t k, size_t l, size_t m, size_t l_range, size_t m_range);
+      size_t i, size_t j, size_t k, size_t l, size_t m);
 #endif
 
 struct u8_softmax_context {

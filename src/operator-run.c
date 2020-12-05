@@ -734,12 +734,8 @@ void xnn_compute_prelu(
 
 void xnn_compute_pad_5d(
     const struct pad_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t j, size_t k, size_t l, size_t m,
-    size_t l_range, size_t m_range)
+    size_t i, size_t j, size_t k, size_t l, size_t m)
 {
-  assert(l_range == 1);
-  assert(m_range == 1);
-
   const void* input = (const void*) ((uintptr_t) context->input +
     i * context->input_stride[4] + j * context->input_stride[3] + k * context->input_stride[2] + l * context->input_stride[1] + m * context->input_stride[0]);
   void* output = (void*) ((uintptr_t) context->output +
@@ -772,12 +768,8 @@ void xnn_compute_pad_5d(
 
 void xnn_compute_elementwise_binary_5d(
     const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t j, size_t k, size_t l, size_t m,
-    size_t l_range, size_t m_range)
+    size_t i, size_t j, size_t k, size_t l, size_t m)
 {
-  assert(l_range == 1);
-  assert(m_range == 1);
-
   const void* a = (const void*) ((uintptr_t) context->a +
     i * context->a_stride[0] + j * context->a_stride[1] + k * context->a_stride[2] + l * context->a_stride[3] + m * context->a_stride[4]);
   const void* b = (const void*) ((uintptr_t) context->b +
@@ -1190,6 +1182,19 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           &op->context,
           op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3],
           op->compute.tile[0], op->compute.tile[1],
+          PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
+      break;
+    case xnn_parallelization_type_5d:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      assert(op->compute.range[3] != 0);
+      assert(op->compute.range[4] != 0);
+      pthreadpool_parallelize_5d(
+          threadpool,
+          op->compute.task_5d,
+          &op->context,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3], op->compute.range[4],
           PTHREADPOOL_FLAG_DISABLE_DENORMALS /* flags */);
       break;
     case xnn_parallelization_type_5d_tile_2d:

@@ -171,15 +171,13 @@ static enum xnn_status setup_constant_pad_nd(
   constant_pad_op->context.pad.post_paddings[0] =
     constant_pad_op->context.pad.output_size[0] - constant_pad_op->context.pad.pre_paddings[0] - constant_pad_op->context.pad.input_size[0];
 
-  constant_pad_op->compute.type = xnn_parallelization_type_5d_tile_2d;
-  constant_pad_op->compute.task_5d_tile_2d = (pthreadpool_task_5d_tile_2d_t) xnn_compute_pad_5d;
+  constant_pad_op->compute.type = xnn_parallelization_type_5d;
+  constant_pad_op->compute.task_5d = (pthreadpool_task_5d_t) xnn_compute_pad_5d;
   constant_pad_op->compute.range[0] = normalized_output_shape[0];
   constant_pad_op->compute.range[1] = normalized_output_shape[1];
   constant_pad_op->compute.range[2] = normalized_output_shape[2];
   constant_pad_op->compute.range[3] = normalized_output_shape[3];
   constant_pad_op->compute.range[4] = normalized_output_shape[4];
-  constant_pad_op->compute.tile[0] = 1;
-  constant_pad_op->compute.tile[1] = 1;
   constant_pad_op->state = xnn_run_state_ready;
 
   return xnn_status_success;

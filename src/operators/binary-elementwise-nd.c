@@ -552,8 +552,8 @@ static enum xnn_status setup_binary_elementwise_nd(
     y_stride *= compressed_output_shape[i];
   }
 
-  binary_elementwise_op->compute.type = xnn_parallelization_type_5d_tile_2d;
-  binary_elementwise_op->compute.task_5d_tile_2d = (pthreadpool_task_5d_tile_2d_t) xnn_compute_elementwise_binary_5d;
+  binary_elementwise_op->compute.type = xnn_parallelization_type_5d;
+  binary_elementwise_op->compute.task_5d = (pthreadpool_task_5d_t) xnn_compute_elementwise_binary_5d;
   binary_elementwise_op->compute.range[0] = compressed_output_shape[5];
   binary_elementwise_op->compute.range[1] = compressed_output_shape[4];
   binary_elementwise_op->compute.range[2] = compressed_output_shape[3];
