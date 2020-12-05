@@ -1145,11 +1145,11 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-vsqrt/gen/neonfma-nr2fma1adj-x40.c
   src/math/exp-neonfma-rr2-lut64-p2.c
   src/math/exp-neonfma-rr2-p5.c
+  src/math/expm1minus-neonfma-rr1-lut16-p3.c
+  src/math/expm1minus-neonfma-rr1-p6.c
   src/math/expminus-neonfma-rr2-lut64-p2.c
   src/math/expminus-neonfma-rr2-lut2048-p1.c
   src/math/expminus-neonfma-rr2-p5.c
-  src/math/expm1minus-neonfma-rr1-lut16-p3.c
-  src/math/expm1minus-neonfma-rr1-p6.c
   src/math/sigmoid-neonfma-rr1-lut64-p2-nr1recps1fma.c
   src/math/sigmoid-neonfma-rr1-lut64-p2-nr2fma.c
   src/math/sigmoid-neonfma-rr1-lut64-p2-nr2recps.c
@@ -2245,11 +2245,11 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/exp-avx2-rr2-lut8-p3-perm.c
   src/math/exp-avx2-rr2-lut8-p4-perm.c
   src/math/exp-avx2-rr2-p5.c
-  src/math/expminus-avx2-rr2-p5.c
   src/math/expm1minus-avx2-rr1-lut4-p4-perm.c
   src/math/expm1minus-avx2-rr1-lut8-p4-perm.c
   src/math/expm1minus-avx2-rr1-lut16-p3-gather.c
   src/math/expm1minus-avx2-rr1-p6.c
+  src/math/expminus-avx2-rr2-p5.c
   src/math/extexp-avx2-p5.c
   src/math/sigmoid-avx2-rr1-lut64-p2-gather-div.c
   src/math/sigmoid-avx2-rr1-lut64-p2-gather-nr1fma.c
