@@ -61,20 +61,15 @@ void xnn_qs8_requantize_q31__wasmsimd(
     const v128_t w = wasm_v128_load(input + 12);
     input += 16;
 
-    const v128_t x_sign = wasm_i32x4_lt(x, vzero);
-    const v128_t y_sign = wasm_i32x4_lt(y, vzero);
-    const v128_t z_sign = wasm_i32x4_lt(z, vzero);
-    const v128_t w_sign = wasm_i32x4_lt(w, vzero);
+    const v128_t x_lo = __builtin_wasm_widen_low_s_i32x4_i64x2(x);
+    const v128_t y_lo = __builtin_wasm_widen_low_s_i32x4_i64x2(y);
+    const v128_t z_lo = __builtin_wasm_widen_low_s_i32x4_i64x2(z);
+    const v128_t w_lo = __builtin_wasm_widen_low_s_i32x4_i64x2(w);
 
-    const v128_t x_lo = wasm_v32x4_shuffle(x, x_sign, 0, 4, 1, 5);
-    const v128_t y_lo = wasm_v32x4_shuffle(y, y_sign, 0, 4, 1, 5);
-    const v128_t z_lo = wasm_v32x4_shuffle(z, z_sign, 0, 4, 1, 5);
-    const v128_t w_lo = wasm_v32x4_shuffle(w, w_sign, 0, 4, 1, 5);
-
-    const v128_t x_hi = wasm_v32x4_shuffle(x, x_sign, 2, 6, 3, 7);
-    const v128_t y_hi = wasm_v32x4_shuffle(y, y_sign, 2, 6, 3, 7);
-    const v128_t z_hi = wasm_v32x4_shuffle(z, z_sign, 2, 6, 3, 7);
-    const v128_t w_hi = wasm_v32x4_shuffle(w, w_sign, 2, 6, 3, 7);
+    const v128_t x_hi = __builtin_wasm_widen_high_s_i32x4_i64x2(x);
+    const v128_t y_hi = __builtin_wasm_widen_high_s_i32x4_i64x2(y);
+    const v128_t z_hi = __builtin_wasm_widen_high_s_i32x4_i64x2(z);
+    const v128_t w_hi = __builtin_wasm_widen_high_s_i32x4_i64x2(w);
 
     const v128_t x_product_lo = wasm_i64x2_add(wasm_i64x2_mul(x_lo, vmultiplier), vtwice_q31rounding);
     const v128_t y_product_lo = wasm_i64x2_add(wasm_i64x2_mul(y_lo, vmultiplier), vtwice_q31rounding);

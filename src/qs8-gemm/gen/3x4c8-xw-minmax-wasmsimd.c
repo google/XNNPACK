@@ -135,22 +135,18 @@ void xnn_qs8_gemm_xw_minmax_ukernel_3x4c8__wasmsimd(
     v128_t vacc1x0123 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc1x02, vacc1x13, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc1x02, vacc1x13, 2, 6, 3, 7));
     v128_t vacc2x0123 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc2x02, vacc2x13, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc2x02, vacc2x13, 2, 6, 3, 7));
 
-    const v128_t vsign0x0123 = wasm_i32x4_lt(vacc0x0123, vzero);
-    const v128_t vsign1x0123 = wasm_i32x4_lt(vacc1x0123, vzero);
-    const v128_t vsign2x0123 = wasm_i32x4_lt(vacc2x0123, vzero);
-
-    const v128_t vacc0x01 = wasm_v32x4_shuffle(vacc0x0123, vsign0x0123, 0, 4, 1, 5);
-    const v128_t vacc1x01 = wasm_v32x4_shuffle(vacc1x0123, vsign1x0123, 0, 4, 1, 5);
-    const v128_t vacc2x01 = wasm_v32x4_shuffle(vacc2x0123, vsign2x0123, 0, 4, 1, 5);
+    const v128_t vacc0x01 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc0x0123);
+    const v128_t vacc1x01 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc1x0123);
+    const v128_t vacc2x01 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc2x0123);
 
     const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
     const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
     const v128_t vprod0x01 = wasm_i64x2_add(wasm_i64x2_mul(vacc0x01, vmultiplier), vrounding);
-    const v128_t vacc0x23 = wasm_v32x4_shuffle(vacc0x0123, vsign0x0123, 2, 6, 3, 7);
+    const v128_t vacc0x23 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc0x0123);
     const v128_t vprod1x01 = wasm_i64x2_add(wasm_i64x2_mul(vacc1x01, vmultiplier), vrounding);
-    const v128_t vacc1x23 = wasm_v32x4_shuffle(vacc1x0123, vsign1x0123, 2, 6, 3, 7);
+    const v128_t vacc1x23 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc1x0123);
     const v128_t vprod2x01 = wasm_i64x2_add(wasm_i64x2_mul(vacc2x01, vmultiplier), vrounding);
-    const v128_t vacc2x23 = wasm_v32x4_shuffle(vacc2x0123, vsign2x0123, 2, 6, 3, 7);
+    const v128_t vacc2x23 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc2x0123);
 
     const v128_t vprod0x23 = wasm_i64x2_add(wasm_i64x2_mul(vacc0x23, vmultiplier), vrounding);
     const v128_t vprod1x23 = wasm_i64x2_add(wasm_i64x2_mul(vacc1x23, vmultiplier), vrounding);

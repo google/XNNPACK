@@ -134,16 +134,13 @@ void xnn_qs8_igemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX
       v128_t vacc${M}x0123 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc${M}x02, vacc${M}x13, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc${M}x02, vacc${M}x13, 2, 6, 3, 7));
 
     $for M in range(MR):
-      const v128_t vsign${M}x0123 = wasm_i32x4_lt(vacc${M}x0123, vzero);
-
-    $for M in range(MR):
-      const v128_t vacc${M}x01 = wasm_v32x4_shuffle(vacc${M}x0123, vsign${M}x0123, 0, 4, 1, 5);
+      const v128_t vacc${M}x01 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc${M}x0123);
 
     const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
     const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
     $for M in range(MR):
       const v128_t vprod${M}x01 = wasm_i64x2_add(wasm_i64x2_mul(vacc${M}x01, vmultiplier), vrounding);
-      const v128_t vacc${M}x23 = wasm_v32x4_shuffle(vacc${M}x0123, vsign${M}x0123, 2, 6, 3, 7);
+      const v128_t vacc${M}x23 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc${M}x0123);
 
     $for M in range(MR):
       const v128_t vprod${M}x23 = wasm_i64x2_add(wasm_i64x2_mul(vacc${M}x23, vmultiplier), vrounding);

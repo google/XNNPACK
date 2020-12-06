@@ -98,14 +98,12 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c8__wasmsimd_ld128(
 
     v128_t vacc0x0123 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc0x02, vacc0x13, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc0x02, vacc0x13, 2, 6, 3, 7));
 
-    const v128_t vsign0x0123 = wasm_i32x4_lt(vacc0x0123, vzero);
-
-    const v128_t vacc0x01 = wasm_v32x4_shuffle(vacc0x0123, vsign0x0123, 0, 4, 1, 5);
+    const v128_t vacc0x01 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc0x0123);
 
     const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
     const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
     const v128_t vprod0x01 = wasm_i64x2_add(wasm_i64x2_mul(vacc0x01, vmultiplier), vrounding);
-    const v128_t vacc0x23 = wasm_v32x4_shuffle(vacc0x0123, vsign0x0123, 2, 6, 3, 7);
+    const v128_t vacc0x23 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc0x0123);
 
     const v128_t vprod0x23 = wasm_i64x2_add(wasm_i64x2_mul(vacc0x23, vmultiplier), vrounding);
 
