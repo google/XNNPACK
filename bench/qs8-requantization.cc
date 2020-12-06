@@ -116,22 +116,6 @@ BENCHMARK_F(Requantization, q31__scalar)(benchmark::State& state) {
   }
 }
 
-#if !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-  BENCHMARK_F(Requantization, precise__psimd)(benchmark::State& state) {
-    for (auto _ : state) {
-      xnn_qs8_requantize_precise__psimd(
-          n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
-    }
-  }
-
-  BENCHMARK_F(Requantization, fp32__psimd)(benchmark::State& state) {
-    for (auto _ : state) {
-      xnn_qs8_requantize_fp32__psimd(
-          n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
-    }
-  }
-#endif  // !XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC
-
 
 #if XNN_ARCH_WASMSIMD
   BENCHMARK_F(Requantization, fp32__wasmsimd)(benchmark::State& state) {

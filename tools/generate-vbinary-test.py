@@ -275,7 +275,7 @@ def generate_test_cases(ukernel, op_type, activation_type, tester, batch_tile, i
   test_args = [ukernel]
   if tester in ["VBinOpMicrokernelTester", "VBinOpCMicrokernelTester"]:
     test_args.append("%s::OpType::%s" % (tester, op_type))
-  if not isa or isa == "psimd":
+  if not isa:
     test_args.append("%s::Variant::Scalar" % tester)
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),

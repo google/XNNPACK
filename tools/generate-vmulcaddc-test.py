@@ -223,7 +223,7 @@ def generate_test_cases(ukernel, channel_tile, row_tile, isa):
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
-  if not isa or isa == "psimd":
+  if not isa:
     test_args.append("VMulCAddCMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(VMULCADDC_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),

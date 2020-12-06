@@ -133,7 +133,7 @@ def generate_test_cases(ukernel, batch_tile, isa):
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
   test_args = [ukernel]
-  if not isa or isa == "psimd":
+  if not isa:
     test_args.append("ClampMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(CLAMP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),

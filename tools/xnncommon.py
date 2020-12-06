@@ -48,7 +48,6 @@ _ISA_TO_ARCH_MAP = {
   "wasm32": ["wasm", "wasmsimd"],
   "wasm": ["wasm", "wasmsimd"],
   "wasmsimd": ["wasmsimd"],
-  "psimd": [],
 }
 
 _ISA_TO_CHECK_MAP = {
@@ -67,7 +66,6 @@ _ISA_TO_CHECK_MAP = {
   "fma3": "TEST_REQUIRES_X86_FMA3",
   "avx512f": "TEST_REQUIRES_X86_AVX512F",
   "avx512skx": "TEST_REQUIRES_X86_AVX512SKX",
-  "psimd": "TEST_REQUIRES_PSIMD",
 }
 
 
@@ -99,13 +97,7 @@ def postprocess_test_case(test_case, arch, isa, assembly=False):
     guard = " || ".join(map(_ARCH_TO_MACRO_MAP.get, arch))
     if assembly:
       guard += " && XNN_ENABLE_ASSEMBLY"
-    return "#if %s\n" % guard + \
-      _indent(test_case) + "\n" + \
-      "#endif  // %s\n" % guard
-  elif isa == "psimd":
-    guard = "!XNN_ARCH_WASM && !XNN_COMPILER_MSVC && !XNN_COMPILER_ICC"
-    return "#if %s\n" % guard + \
-      _indent(test_case) + "\n" + \
+    return "#if %s\n" % guard + _indent(test_case) + "\n" + \
       "#endif  // %s\n" % guard
   else:
     return test_case

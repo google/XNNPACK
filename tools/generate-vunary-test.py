@@ -177,7 +177,7 @@ def generate_test_cases(ukernel, op_type, batch_tile, isa):
     "xnn_f32_vunary_ukernel_function(%s)" % ukernel,
     "VUnOpMicrokernelTester::OpType::%s" % op_type,
   ]
-  if not isa or isa == "psimd":
+  if not isa:
     test_args.append("VUnOpMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),

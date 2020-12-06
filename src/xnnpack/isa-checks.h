@@ -13,17 +13,6 @@
 #include <xnnpack/common.h>
 
 
-#if XNN_ARCH_WASMSIMD
-  #define TEST_REQUIRES_PSIMD
-#else
-  #define TEST_REQUIRES_PSIMD \
-    do { \
-      if (!cpuinfo_initialize() || !(cpuinfo_has_arm_neon() || cpuinfo_has_x86_sse2())) { \
-        GTEST_SKIP(); \
-      } \
-    } while (0)
-#endif
-
 #define TEST_REQUIRES_X86_SSE \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_x86_sse()) { \
