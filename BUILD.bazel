@@ -1333,6 +1333,13 @@ WASMSIMD_UKERNELS = [
     "src/x32-zip/xm-wasmsimd.c",
 ]
 
+PSIMD_ACCMATH_UKERNELS = [
+    "src/qs8-requantization/fp32-psimd.c",
+    "src/qs8-requantization/precise-psimd.c",
+    "src/qu8-requantization/fp32-psimd.c",
+    "src/qu8-requantization/precise-psimd.c",
+]
+
 # ISA-specific micro-kernels
 NEON_UKERNELS = [
     "src/f32-argmaxpool/4x-neon-c4.c",
@@ -3528,6 +3535,54 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "psimd_accmath_ukernels",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = [
+        "-marm",
+        "-mfpu=neon",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse2"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    optimized_copts = [
+        "-O3",
+    ],
+    psimd_srcs = PSIMD_ACCMATH_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@psimd",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "psimd_accmath_ukernels_test_mode",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = [
+        "-marm",
+        "-mfpu=neon",
+    ],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse2"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    optimized_copts = [
+        "-O3",
+    ],
+    psimd_srcs = PSIMD_ACCMATH_UKERNELS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@psimd",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "neon_ukernels",
     hdrs = INTERNAL_HDRS,
     aarch32_copts = [
@@ -4140,6 +4195,9 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_ukernels",
     ],
+    psimd_deps = [
+        ":psimd_accmath_ukernels",
+    ],
     wasm_deps = [
         ":wasm_ukernels",
         ":asm_ukernels",
@@ -4181,6 +4239,9 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_ukernels_test_mode",
     ],
+    psimd_deps = [
+        ":psimd_accmath_ukernels_test_mode",
+    ],
     wasm_deps = [
         ":wasm_ukernels_test_mode",
         ":asm_ukernels",
@@ -4221,6 +4282,9 @@ xnnpack_aggregate_library(
     ],
     generic_deps = [
         ":scalar_ukernels",
+    ],
+    psimd_deps = [
+        ":psimd_accmath_ukernels",
     ],
     wasm_deps = [
         ":wasm_ukernels",

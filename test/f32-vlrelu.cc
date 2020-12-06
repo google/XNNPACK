@@ -1114,7 +1114,6 @@ TEST(F32_VLRELU__SCALAR_X1, slope) {
   }
 }
 
-
 TEST(F32_VLRELU__SCALAR_X2, batch_eq_2) {
   VUnOpMicrokernelTester()
     .batch_size(2)
@@ -1164,7 +1163,6 @@ TEST(F32_VLRELU__SCALAR_X2, slope) {
     }
   }
 }
-
 
 TEST(F32_VLRELU__SCALAR_X4, batch_eq_4) {
   VUnOpMicrokernelTester()
