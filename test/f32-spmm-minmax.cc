@@ -17,7 +17,7 @@
 #include "spmm-microkernel-tester.h"
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_4X1__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -196,7 +196,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM64
@@ -653,7 +653,7 @@
 #endif  // XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_4X1__NEONFMA_PIPELINED, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -832,10 +832,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_4X1__NEONFMA_X2, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -1042,10 +1042,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_8X1__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -1224,7 +1224,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM64
@@ -1681,7 +1681,7 @@
 #endif  // XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_8X1__NEONFMA_PIPELINED, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -1860,10 +1860,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_8X1__NEONFMA_X2, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -2070,10 +2070,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_12X1__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -2252,7 +2252,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM64
@@ -2709,7 +2709,7 @@
 #endif  // XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_16X1__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -2888,7 +2888,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM64
@@ -3345,7 +3345,7 @@
 #endif  // XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_16X1__NEONFMA_PIPELINED, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -3524,10 +3524,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_16X1__NEONFMA_X2, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -3734,10 +3734,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_32X1__NEONFMA, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -3916,7 +3916,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM64
@@ -4373,7 +4373,7 @@
 #endif  // XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_32X1__NEONFMA_PIPELINED, k_eq_1) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -4552,10 +4552,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_32X1__NEONFMA_X2, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FMA;
     SpMMMicrokernelTester()
@@ -4762,7 +4762,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
