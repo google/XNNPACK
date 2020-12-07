@@ -253,8 +253,6 @@
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_x86_1x4_acc3
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_x86_1x4_acc4
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_x86_2x4_acc2
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_1x4_acc2
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_x86_1x4_acc2
 - name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_1x4_acc2
 - name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_1x4_acc3
 - name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_1x4_acc4
