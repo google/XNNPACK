@@ -4798,7 +4798,7 @@ xnnpack_benchmark(
     name = "f16_spmm_bench",
     srcs = [
         "bench/f16-spmm.cc",
-        "bench/gemm.h",
+        "bench/spmm.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
@@ -4968,7 +4968,7 @@ xnnpack_benchmark(
     name = "f32_spmm_bench",
     srcs = [
         "bench/f32-spmm.cc",
-        "bench/gemm.h",
+        "bench/spmm.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
