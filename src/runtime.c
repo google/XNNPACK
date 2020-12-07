@@ -62,7 +62,7 @@ enum xnn_status xnn_create_runtime_v2(
     goto error;
   }
 
-  xnn_subgraph_optimize(subgraph, 0 /* flags */);
+  xnn_subgraph_optimize(subgraph, flags & XNN_FLAG_SPARSE_INFERENCE);
 
   status = xnn_status_out_of_memory;
 

@@ -27,6 +27,11 @@ extern "C" {
 /// Maximum number of dimensions in tensor shape.
 #define XNN_MAX_TENSOR_DIMS 6
 
+/// Allow sparse inference in a Runtime.
+///
+/// Note: this flag forces XNNPACK to consider sparse inference, but does not guarantee it.
+#define XNN_FLAG_SPARSE_INFERENCE 0x00000001
+
 /// The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
 #define XNN_FLAG_DEPTHWISE_CONVOLUTION 0x00000001
 
@@ -1034,13 +1039,13 @@ enum xnn_status xnn_define_square_root(
 /// Runtime is a combination of an execution plan for subgraph Nodes and a memory manager for subgraph Values.
 typedef struct xnn_runtime* xnn_runtime_t;
 
-/// Create a empty Runtime object from a subgraph.
+/// Create a Runtime object from a subgraph.
 ///
 /// @param subgraph - a Subgraph object with all Values and Nodes that would be handled by the runtime. No Values or
 ///                   Nodes can be added to the runtime once it is constructed.
 /// @param threadpool - the thread pool to be used for parallelisation of computations in the runtime. If the thread
 ///                     pool is NULL, the computation would run on the caller thread without parallelization.
-/// @param flags - binary features of the subgraph. No supported flags are currently defined.
+/// @param flags - binary features of the runtime. The only currently supported value is XNN_FLAG_SPARSE_INFERENCE.
 /// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
 ///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
 ///                      used to create it.
