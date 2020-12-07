@@ -852,6 +852,19 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-sigmoid/gen/neon-rr2-p5-nr2recps-x16.c
   src/f32-sigmoid/gen/neon-rr2-p5-nr2recps-x20.c
   src/f32-sigmoid/gen/neon-rr2-p5-nr2recps-x24.c
+  src/f32-spmm/gen/4x1-minmax-neon-pipelined.c
+  src/f32-spmm/gen/4x1-minmax-neon-x2.c
+  src/f32-spmm/gen/4x1-minmax-neon.c
+  src/f32-spmm/gen/8x1-minmax-neon-pipelined.c
+  src/f32-spmm/gen/8x1-minmax-neon-x2.c
+  src/f32-spmm/gen/8x1-minmax-neon.c
+  src/f32-spmm/gen/12x1-minmax-neon.c
+  src/f32-spmm/gen/16x1-minmax-neon-pipelined.c
+  src/f32-spmm/gen/16x1-minmax-neon-x2.c
+  src/f32-spmm/gen/16x1-minmax-neon.c
+  src/f32-spmm/gen/32x1-minmax-neon-pipelined.c
+  src/f32-spmm/gen/32x1-minmax-neon-x2.c
+  src/f32-spmm/gen/32x1-minmax-neon.c
   src/f32-vbinary/gen/vadd-minmax-neon-x4.c
   src/f32-vbinary/gen/vadd-minmax-neon-x8.c
   src/f32-vbinary/gen/vaddc-minmax-neon-x4.c

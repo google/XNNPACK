@@ -10,8 +10,6 @@
 #include <random>
 #include <vector>
 
-#include <cpuinfo.h>
-
 #include <benchmark/benchmark.h>
 #include "bench/gemm.h"
 #include "bench/utils.h"
@@ -23,10 +21,10 @@
 
 
 static void SpMMBenchmark(benchmark::State& state,
-  xnn_f32_spmm_minmax_ukernel_function spmm, uint32_t mr, uint32_t nr, float sparsity)
+  xnn_f32_spmm_minmax_ukernel_function spmm, uint32_t mr, uint32_t nr, float sparsity,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
+  if (isa_check && !isa_check(state)) {
     return;
   }
 
@@ -162,6 +160,74 @@ static void SpMMBenchmark(benchmark::State& state,
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
 
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  static void spmm80_4x1__neon(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_4x1__neon, 4, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_8x1__neon(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_8x1__neon, 8, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_12x1__neon(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_12x1__neon, 12, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_16x1__neon(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_16x1__neon, 16, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_32x1__neon(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_32x1__neon, 32, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_4x1__neon_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_4x1__neon_x2, 4, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_8x1__neon_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_8x1__neon_x2, 8, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_16x1__neon_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_16x1__neon_x2, 16, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_32x1__neon_x2(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_32x1__neon_x2, 32, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_4x1__neon_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_4x1__neon_pipelined, 4, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_8x1__neon_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_8x1__neon_pipelined, 8, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_16x1__neon_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_16x1__neon_pipelined, 16, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  static void spmm80_32x1__neon_pipelined(benchmark::State& state, const char* net) {
+    SpMMBenchmark(state, xnn_f32_spmm_minmax_ukernel_32x1__neon_pipelined, 32, 1, 0.8f, benchmark::utils::CheckNEON);
+  }
+
+  BENCHMARK_GEMM(spmm80_4x1__neon)
+  BENCHMARK_GEMM(spmm80_4x1__neon_pipelined)
+  BENCHMARK_GEMM(spmm80_4x1__neon_x2)
+  BENCHMARK_GEMM(spmm80_8x1__neon)
+  BENCHMARK_GEMM(spmm80_8x1__neon_pipelined)
+  BENCHMARK_GEMM(spmm80_8x1__neon_x2)
+  BENCHMARK_GEMM(spmm80_12x1__neon)
+  BENCHMARK_GEMM(spmm80_16x1__neon)
+  BENCHMARK_GEMM(spmm80_16x1__neon_pipelined)
+  BENCHMARK_GEMM(spmm80_16x1__neon_x2)
+  BENCHMARK_GEMM(spmm80_32x1__neon)
+  BENCHMARK_GEMM(spmm80_32x1__neon_pipelined)
+  BENCHMARK_GEMM(spmm80_32x1__neon_x2)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM64
   static void spmm80_4x1__neonfma(benchmark::State& state, const char* net) {

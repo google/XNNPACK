@@ -5,6 +5,8 @@
 
 $assert MR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$VMULADD_F32 = "vfma_f32" if FMA else "vmla_f32"
+$VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -48,7 +50,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_pi
       if XNN_LIKELY(nnz != 0) {
         do {
           $for M in range(0, MR, 4):
-            vacc${ABC[M:M+4]} = vfmaq_f32(vacc${ABC[M:M+4]}, vi${ABC[M:M+4]}, vw);
+            vacc${ABC[M:M+4]} = ${VMULADDQ_F32}(vacc${ABC[M:M+4]}, vi${ABC[M:M+4]}, vw);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
           $for M in range(0, MR, 16):
             __builtin_prefetch(input + ${M+16});
@@ -113,10 +115,10 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_pi
                 const float32x4_t vb = vld1q_dup_f32(w); w += 1;
               __builtin_prefetch(w + 32);
               $if SUBMR <= 2:
-                vacc${ABC[0:SUBMR]} = vfma_f32(vacc${ABC[0:SUBMR]}, vi${ABC[0:SUBMR]}, vb);
+                vacc${ABC[0:SUBMR]} = ${VMULADD_F32}(vacc${ABC[0:SUBMR]}, vi${ABC[0:SUBMR]}, vb);
               $else:
                 $for M in range(0, SUBMR, 4):
-                  vacc${ABC[M:M+4]} = vfmaq_f32(vacc${ABC[M:M+4]}, vi${ABC[M:M+4]}, vb);
+                  vacc${ABC[M:M+4]} = ${VMULADDQ_F32}(vacc${ABC[M:M+4]}, vi${ABC[M:M+4]}, vb);
             } while (--nnz != 0);
           }
           $if SUBMR <= 2:

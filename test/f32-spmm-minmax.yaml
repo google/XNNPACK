@@ -2,6 +2,32 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+- name: xnn_f32_spmm_minmax_ukernel_4x1__neon
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_4x1__neon_pipelined
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_4x1__neon_x2
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neon
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neon_pipelined
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neon_x2
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_12x1__neon
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neon
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neon_pipelined
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neon_x2
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_32x1__neon
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x1__neon_pipelined
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x1__neon_x2
+  k-block: 2
 - name: xnn_f32_spmm_minmax_ukernel_4x1__neonfma
   k-block: 1
 - name: xnn_f32_spmm_minmax_ukernel_4x2__neonfma
