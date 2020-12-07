@@ -128,7 +128,6 @@
 - name: xnn_f32_sigmoid_ukernel__neon_rr2_lut2048_p1_nr2recps_x16
 - name: xnn_f32_sigmoid_ukernel__neon_rr2_lut2048_p1_nr2recps_x20
 - name: xnn_f32_sigmoid_ukernel__neon_rr2_lut2048_p1_nr2recps_x24
-- name: xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x16
 - name: xnn_f32_sigmoid_ukernel__sse2_p5_div_x4
 - name: xnn_f32_sigmoid_ukernel__sse2_p5_div_x8
 - name: xnn_f32_sigmoid_ukernel__sse2_p5_div_x12

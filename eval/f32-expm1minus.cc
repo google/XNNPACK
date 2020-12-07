@@ -7,8 +7,12 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <numeric>
 #include <random>
 #include <vector>
+
+#include <cpuinfo.h>
+#include <pthreadpool.h>
 
 #include <benchmark/benchmark.h>
 #include <fp16/fp16.h>
@@ -19,39 +23,86 @@
 #include <xnnpack/math-stubs.h>
 
 
-static void Expm1Error(benchmark::State& state,
+struct ComputeErrorContext {
+  const float* input;
+  const float* output;
+  float* error;
+};
+
+static void ComputeError(
+  struct ComputeErrorContext* context,
+  size_t start,
+  size_t range)
+{
+  const float* input = context->input;
+  const float* output = context->output;
+  float* error = context->error;
+  for (size_t i = start; i < start + range; i++) {
+    const double output_ref = std::expm1(double(input[i]));
+    const double abs_error = std::abs(output_ref - double(output[i]));
+    const float output_abs = std::abs(output_ref);
+    const float output_ulp = fp32_from_bits(fp32_to_bits(output_abs) + 1) - output_abs;
+    error[i] = float(abs_error / output_ulp);
+  }
+}
+
+static void ExpM1Error(benchmark::State& state,
   xnn_f32_unary_math_function expm1,
-  size_t tile_size,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
+  if (!cpuinfo_initialize()) {
+    state.SkipWithError("failed cpuinfo init");
+    return;
+  }
   if (isa_check && !isa_check(state)) {
     return;
   }
 
   // The smallest x for which expm1f(x) is not saturated at -1 (-0x1.154244p+4f).
   const uint32_t min_input = 0xC18AA122;
-  // Number of tiles in one block of inputs/outputs. Combining multiple tiles in a block reduce function call overhead.
-  const size_t num_tiles = 100;
+  // Number of elements in one block of inputs/outputs.
+  // Combining multiple elements in a block reduce function call overhead.
+  const size_t block_size = 16384;
+  // Number of elements in one parallelization tile. Worker threads process this many elements in each task.
+  const size_t tile_size = 64;
 
-  double max_ulp_error = 0.0;
-  std::vector<float, AlignedAllocator<float, 64>> x(tile_size * num_tiles);
-  std::vector<float, AlignedAllocator<float, 64>> y(tile_size * num_tiles);
+  uint32_t num_threads = cpuinfo_get_cores_count();
+  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+    // Use all cores except for the least performant cluster
+    if (cpuinfo_get_clusters_count() > 1) {
+      num_threads -= cpuinfo_get_cluster(cpuinfo_get_clusters_count() - 1)->core_count;
+    }
+  #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+  std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> threadpool(
+    pthreadpool_create(num_threads), pthreadpool_destroy);
+
+  std::vector<float, AlignedAllocator<float, 64>> x(block_size);
+  std::vector<float, AlignedAllocator<float, 64>> y(block_size);
+  std::vector<float> ulp_error(block_size);
+  float max_ulp_error = 0.0f;
+
+  ComputeErrorContext context;
+  context.input = x.data();
+  context.output = y.data();
+  context.error = ulp_error.data();
   for (auto _ : state) {
-    for (uint32_t n = min_input; int32_t(n) < 0; n -= tile_size * num_tiles) {
-      for (uint32_t i = 0; i < tile_size * num_tiles; i++) {
+    for (uint32_t n = min_input; int32_t(n) < 0; n -= block_size) {
+      for (uint32_t i = 0; i < block_size; i++) {
         x[i] = fp32_from_bits(std::max<uint32_t>(n - i, 0x80000000));
       }
       std::fill(y.begin(), y.end(), std::nanf(""));
 
-      expm1(tile_size * num_tiles * sizeof(float), x.data(), y.data());
+      expm1(block_size * sizeof(float), x.data(), y.data());
 
-      for (uint32_t i = 0; i < tile_size * num_tiles; i++) {
-        const double y_ref = std::expm1(double(x[i]));
-        const double abs_error = std::abs(y_ref - double(y[i]));
-        const float y_abs = std::abs(y_ref);
-        const float y_ulp = fp32_from_bits(fp32_to_bits(y_abs) + 1) - y_abs;
-        max_ulp_error = std::max<double>(max_ulp_error, abs_error / y_ulp);
-      }
+      pthreadpool_parallelize_1d_tile_1d(
+          threadpool.get(),
+          reinterpret_cast<pthreadpool_task_1d_tile_1d_t>(ComputeError),
+          static_cast<void*>(&context),
+          block_size, tile_size, 0 /* flags */);
+
+      max_ulp_error = std::accumulate(ulp_error.cbegin(), ulp_error.cend(), max_ulp_error,
+        static_cast<const float& (*)(const float&, const float&)>(std::max<float>));
     }
   }
 
@@ -59,136 +110,135 @@ static void Expm1Error(benchmark::State& state,
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  static void f32_expm1minus__neon_rr2_lut16_p3(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__neon_rr2_lut16_p3, 4, benchmark::utils::CheckNEON);
-  }
-  static void f32_expm1minus__neon_rr2_p6(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__neon_rr2_p6, 4, benchmark::utils::CheckNEON);
-  }
+  BENCHMARK_CAPTURE(ExpM1Error, neon_rr2_lut16_p3,
+                    xnn_math_f32_expm1minus__neon_rr2_lut16_p3,
+                    benchmark::utils::CheckNEON)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, neon_rr2_p6,
+                    xnn_math_f32_expm1minus__neon_rr2_p6,
+                    benchmark::utils::CheckNEON)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
 
-  static void f32_expm1minus__neonfma_rr1_lut16_p3(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__neonfma_rr1_lut16_p3, 4, benchmark::utils::CheckNEONFMA);
-  }
-  static void f32_expm1minus__neonfma_rr1_p6(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__neonfma_rr1_p6, 4, benchmark::utils::CheckNEONFMA);
-  }
-
-  BENCHMARK(f32_expm1minus__neon_rr2_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__neon_rr2_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
-
-  BENCHMARK(f32_expm1minus__neonfma_rr1_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__neonfma_rr1_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, neonfma_rr1_lut16_p3,
+                    xnn_math_f32_expm1minus__neonfma_rr1_lut16_p3,
+                    benchmark::utils::CheckNEONFMA)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, neonfma_rr1_p6,
+                    xnn_math_f32_expm1minus__neonfma_rr1_p6,
+                    benchmark::utils::CheckNEONFMA)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void f32_expm1minus__avx512f_rr1_lut16_p3_perm(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__avx512f_rr1_lut16_p3_perm, 16, benchmark::utils::CheckAVX512F);
-  }
-  static void f32_expm1minus__avx512f_rr1_p6(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__avx512f_rr1_p6, 16, benchmark::utils::CheckAVX512F);
-  }
+  BENCHMARK_CAPTURE(ExpM1Error, avx512f_rr1_lut16_p3_perm,
+                    xnn_math_f32_expm1minus__avx512f_rr1_lut16_p3_perm,
+                    benchmark::utils::CheckAVX512F)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, avx512f_rr1_p6,
+                    xnn_math_f32_expm1minus__avx512f_rr1_p6,
+                    benchmark::utils::CheckAVX512F)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
 
-  BENCHMARK(f32_expm1minus__avx512f_rr1_lut16_p3_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__avx512f_rr1_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(ExpM1Error, avx2_rr1_lut4_p4_perm,
+                    xnn_math_f32_expm1minus__avx2_rr1_lut4_p4_perm,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, avx2_rr1_lut8_p4_perm,
+                    xnn_math_f32_expm1minus__avx2_rr1_lut8_p4_perm,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, avx2_rr1_lut16_p3_gather,
+                    xnn_math_f32_expm1minus__avx2_rr1_lut16_p3_gather,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, avx2_rr1_p6,
+                    xnn_math_f32_expm1minus__avx2_rr1_p6,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void f32_expm1minus__avx2_rr1_lut4_p4_perm(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__avx2_rr1_lut4_p4_perm, 8, benchmark::utils::CheckAVX2);
-  }
-  static void f32_expm1minus__avx2_rr1_lut8_p4_perm(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__avx2_rr1_lut8_p4_perm, 8, benchmark::utils::CheckAVX2);
-  }
-  static void f32_expm1minus__avx2_rr1_lut16_p3_gather(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__avx2_rr1_lut16_p3_gather, 8, benchmark::utils::CheckAVX2);
-  }
-  static void f32_expm1minus__avx2_rr1_p6(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__avx2_rr1_p6, 8, benchmark::utils::CheckAVX2);
-  }
+  BENCHMARK_CAPTURE(ExpM1Error, avx_rr2_lut4_p4_perm,
+                    xnn_math_f32_expm1minus__avx_rr2_lut4_p4_perm,
+                    benchmark::utils::CheckAVX)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, avx_rr2_lut16_p3,
+                    xnn_math_f32_expm1minus__avx_rr2_lut16_p3,
+                    benchmark::utils::CheckAVX)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, avx_rr2_p6,
+                    xnn_math_f32_expm1minus__avx_rr2_p6,
+                    benchmark::utils::CheckAVX)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
 
-  BENCHMARK(f32_expm1minus__avx2_rr1_lut4_p4_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__avx2_rr1_lut8_p4_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__avx2_rr1_lut16_p3_gather)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__avx2_rr1_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void f32_expm1minus__avx_rr2_lut4_p4_perm(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__avx_rr2_lut4_p4_perm, 8, benchmark::utils::CheckAVX);
-  }
-  static void f32_expm1minus__avx_rr2_lut16_p3(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__avx_rr2_lut16_p3, 8, benchmark::utils::CheckAVX);
-  }
-  static void f32_expm1minus__avx_rr2_p6(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__avx_rr2_p6, 8, benchmark::utils::CheckAVX);
-  }
-
-  BENCHMARK(f32_expm1minus__avx_rr2_lut4_p4_perm)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__avx_rr2_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__avx_rr2_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void f32_expm1minus__sse2_rr2_lut16_p3(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__sse2_rr2_lut16_p3, 4);
-  }
-  static void f32_expm1minus__sse2_rr2_p6(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__sse2_rr2_p6, 4);
-  }
-
-  BENCHMARK(f32_expm1minus__sse2_rr2_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__sse2_rr2_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, sse2_rr2_lut16_p3,
+                    xnn_math_f32_expm1minus__sse2_rr2_lut16_p3)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, sse2_rr2_p6,
+                    xnn_math_f32_expm1minus__sse2_rr2_p6)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD
-  static void f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot, 4);
-  }
-  static void f32_expm1minus__wasmsimd_rr2_lut16_p3_max(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_max, 4);
-  }
-  static void f32_expm1minus__wasmsimd_rr2_p6_andnot(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__wasmsimd_rr2_p6_andnot, 4);
-  }
-  static void f32_expm1minus__wasmsimd_rr2_p6_max(benchmark::State& state) {
-    Expm1Error(state, xnn_math_f32_expm1minus__wasmsimd_rr2_p6_max, 4);
-  }
-
-  BENCHMARK(f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__wasmsimd_rr2_lut16_p3_max)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__wasmsimd_rr2_p6_andnot)->Unit(benchmark::kMillisecond)->Iterations(1);
-  BENCHMARK(f32_expm1minus__wasmsimd_rr2_p6_max)->Unit(benchmark::kMillisecond)->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, wasmsimd_rr2_lut16_p3_andnot,
+                    xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, wasmsimd_rr2_lut16_p3_max,
+                    xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_max)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, wasmsimd_rr2_p6_andnot,
+                    xnn_math_f32_expm1minus__wasmsimd_rr2_p6_andnot)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpM1Error, wasmsimd_rr2_p6_max,
+                    xnn_math_f32_expm1minus__wasmsimd_rr2_p6_max)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
 #endif  // XNN_ARCH_WASMSIMD
 
-static void f32_expm1minus__scalar_rr2_lut4_p4(benchmark::State& state) {
-  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut4_p4, 1);
-}
-static void f32_expm1minus__scalar_rr2_lut8_p3(benchmark::State& state) {
-  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut8_p3, 1);
-}
-static void f32_expm1minus__scalar_rr2_lut8_p4(benchmark::State& state) {
-  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut8_p4, 1);
-}
-static void f32_expm1minus__scalar_rr2_lut16_p3(benchmark::State& state) {
-  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut16_p3, 1);
-}
-static void f32_expm1minus__scalar_rr2_lut16_p4(benchmark::State& state) {
-  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_lut16_p4, 1);
-}
-static void f32_expm1minus__scalar_rr2_p5(benchmark::State& state) {
-  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_p5, 1);
-}
-static void f32_expm1minus__scalar_rr2_p6(benchmark::State& state) {
-  Expm1Error(state, xnn_math_f32_expm1minus__scalar_rr2_p6, 1);
-}
-
-BENCHMARK(f32_expm1minus__scalar_rr2_lut4_p4)->Unit(benchmark::kMillisecond)->Iterations(1);
-BENCHMARK(f32_expm1minus__scalar_rr2_lut8_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
-BENCHMARK(f32_expm1minus__scalar_rr2_lut8_p4)->Unit(benchmark::kMillisecond)->Iterations(1);
-BENCHMARK(f32_expm1minus__scalar_rr2_lut16_p3)->Unit(benchmark::kMillisecond)->Iterations(1);
-BENCHMARK(f32_expm1minus__scalar_rr2_lut16_p4)->Unit(benchmark::kMillisecond)->Iterations(1);
-BENCHMARK(f32_expm1minus__scalar_rr2_p5)->Unit(benchmark::kMillisecond)->Iterations(1);
-BENCHMARK(f32_expm1minus__scalar_rr2_p6)->Unit(benchmark::kMillisecond)->Iterations(1);
+BENCHMARK_CAPTURE(ExpM1Error, scalar_rr2_lut4_p4,
+                  xnn_math_f32_expm1minus__scalar_rr2_lut4_p4)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(ExpM1Error, scalar_rr2_lut8_p3,
+                  xnn_math_f32_expm1minus__scalar_rr2_lut8_p3)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(ExpM1Error, scalar_rr2_lut8_p4,
+                  xnn_math_f32_expm1minus__scalar_rr2_lut8_p4)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(ExpM1Error, scalar_rr2_lut16_p3,
+                  xnn_math_f32_expm1minus__scalar_rr2_lut16_p3)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(ExpM1Error, scalar_rr2_lut16_p4,
+                  xnn_math_f32_expm1minus__scalar_rr2_lut16_p4)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(ExpM1Error, scalar_rr2_p5,
+                  xnn_math_f32_expm1minus__scalar_rr2_p5)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(ExpM1Error, scalar_rr2_p6,
+                  xnn_math_f32_expm1minus__scalar_rr2_p6)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

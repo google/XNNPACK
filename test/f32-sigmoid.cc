@@ -4247,53 +4247,6 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(F32_SIGMOID__NEON_FRAC_P9_P10_NR1RECPS_X16, batch_eq_16) {
-    TEST_REQUIRES_ARM_NEON;
-    VUnOpMicrokernelTester()
-      .batch_size(16)
-      .Test(xnn_f32_vunary_ukernel_function(xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x16), VUnOpMicrokernelTester::OpType::Sigmoid);
-  }
-
-  TEST(F32_SIGMOID__NEON_FRAC_P9_P10_NR1RECPS_X16, batch_div_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
-      VUnOpMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x16), VUnOpMicrokernelTester::OpType::Sigmoid);
-    }
-  }
-
-  TEST(F32_SIGMOID__NEON_FRAC_P9_P10_NR1RECPS_X16, batch_lt_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
-      VUnOpMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x16), VUnOpMicrokernelTester::OpType::Sigmoid);
-    }
-  }
-
-  TEST(F32_SIGMOID__NEON_FRAC_P9_P10_NR1RECPS_X16, batch_gt_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
-      VUnOpMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x16), VUnOpMicrokernelTester::OpType::Sigmoid);
-    }
-  }
-
-  TEST(F32_SIGMOID__NEON_FRAC_P9_P10_NR1RECPS_X16, inplace) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      VUnOpMicrokernelTester()
-        .batch_size(batch_size)
-        .inplace(true)
-        .Test(xnn_f32_vunary_ukernel_function(xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x16), VUnOpMicrokernelTester::OpType::Sigmoid);
-    }
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F32_SIGMOID__SSE2_P5_DIV_X4, batch_eq_4) {
     TEST_REQUIRES_X86_SSE2;

@@ -133,11 +133,6 @@ static void f32_sigmoid(
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_sigmoid, neon_frac_p9_p10_nr1recps_x16, xnn_f32_sigmoid_ukernel__neon_frac_p9_p10_nr1recps_x16)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
-    ->UseRealTime();
-
   BENCHMARK_CAPTURE(f32_sigmoid, neonfma_rr1_p5_nr2fma_x4, xnn_f32_sigmoid_ukernel__neonfma_rr1_p5_nr2fma_x4)
     ->RangeMultiplier(10)
     ->Range(1000, 1000000)

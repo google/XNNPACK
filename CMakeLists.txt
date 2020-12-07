@@ -833,7 +833,6 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-relu/gen/neon-x4.c
   src/f32-relu/gen/neon-x8.c
   src/f32-rmax/neon.c
-  src/f32-sigmoid/gen/neon-frac-p9-p10-nr1recps-x16.c
   src/f32-sigmoid/gen/neon-rr2-lut64-p2-nr2recps-x4.c
   src/f32-sigmoid/gen/neon-rr2-lut64-p2-nr2recps-x8.c
   src/f32-sigmoid/gen/neon-rr2-lut64-p2-nr2recps-x12.c
@@ -930,10 +929,6 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/math/roundu-neon-cvt.c
   src/math/roundz-neon-addsub.c
   src/math/roundz-neon-cvt.c
-  src/math/sigmoid-neon-frac-p9-p10-nr1recps.c
-  src/math/sigmoid-neon-rr1-lut64-p2-nr2recps.c
-  src/math/sigmoid-neon-rr1-lut2048-p1-nr2recps.c
-  src/math/sigmoid-neon-rr1-p5-nr2recps.c
   src/math/sigmoid-neon-rr2-lut64-p2-nr2recps.c
   src/math/sigmoid-neon-rr2-lut2048-p1-nr2recps.c
   src/math/sigmoid-neon-rr2-p5-nr2recps.c
@@ -4522,16 +4517,16 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-exp-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE XNNPACK benchmark fp16)
+  TARGET_INCLUDE_DIRECTORIES(f32-exp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-expminus-eval eval/f32-expminus.cc)
   SET_TARGET_PROPERTIES(f32-expminus-eval PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE XNNPACK benchmark fp16)
+  TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-expm1minus-eval eval/f32-expm1minus.cc)
   SET_TARGET_PROPERTIES(f32-expm1minus-eval PROPERTIES
@@ -4539,15 +4534,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE XNNPACK benchmark bench-utils fp16)
+  TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-extexp-eval eval/f32-extexp.cc)
   SET_TARGET_PROPERTIES(f32-extexp-eval PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-extexp-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-extexp-eval PRIVATE XNNPACK benchmark fp16)
+  TARGET_INCLUDE_DIRECTORIES(f32-extexp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-extexp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-roundne-eval eval/f32-roundne.cc)
   SET_TARGET_PROPERTIES(f32-roundne-eval PROPERTIES
@@ -4586,8 +4581,8 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-sigmoid-eval PRIVATE XNNPACK fp16 benchmark)
+  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-sigmoid-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-sqrt-eval eval/f32-sqrt.cc)
   SET_TARGET_PROPERTIES(f32-sqrt-eval PROPERTIES
@@ -4595,7 +4590,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(f32-sqrt-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sqrt-eval PRIVATE XNNPACK fp16 benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(f32-sqrt-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   # ---[ Build end-to-end microbenchmarks
   ADD_LIBRARY(bench-models STATIC

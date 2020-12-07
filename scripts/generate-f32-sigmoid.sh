@@ -110,8 +110,6 @@ tools/xngen src/f32-sigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=16 -D RR_STEPS=2 
 tools/xngen src/f32-sigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=20 -D RR_STEPS=2 -D FMA=0 -D DIV_ALGO=nr2recps -o src/f32-sigmoid/gen/neon-rr2-lut2048-p1-nr2recps-x20.c
 tools/xngen src/f32-sigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=24 -D RR_STEPS=2 -D FMA=0 -D DIV_ALGO=nr2recps -o src/f32-sigmoid/gen/neon-rr2-lut2048-p1-nr2recps-x24.c
 
-tools/xngen src/f32-sigmoid/neon-frac-p9-p10-nr1recps.c.in -D BATCH_TILE=16 -o src/f32-sigmoid/gen/neon-frac-p9-p10-nr1recps-x16.c
-
 ################################### x86 SSE ###################################
 tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=4  -D SSE=2 -o src/f32-sigmoid/gen/sse2-p5-div-x4.c
 tools/xngen src/f32-sigmoid/sse-p5-div.c.in -D BATCH_TILE=8  -D SSE=2 -o src/f32-sigmoid/gen/sse2-p5-div-x8.c
