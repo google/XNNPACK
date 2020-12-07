@@ -684,6 +684,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-conv-hwc/gen/3x3s2p1c3x4-neon-2x2.c
   src/f32-conv-hwc/gen/3x3s2p1c3x8-neon-2x1.c
   src/f32-conv-hwc/gen/3x3s2p1c3x8-neon-2x2.c
+  src/f32-conv-hwc2chw/3x3s2p1c3x4-neon-2x2.c
   src/f32-dwconv/gen/up4x4-minmax-neon-acc2.c
   src/f32-dwconv/gen/up4x4-minmax-neon.c
   src/f32-dwconv/gen/up4x9-minmax-neon-acc2.c
