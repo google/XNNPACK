@@ -80,8 +80,8 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_${"x86" if X86 else "arm"}_$
         i${M} += 8;
 
       $for M in range(1 + 2 * ROW_TILE):
-        const v128_t vi${M}x8ACE = wasm_v32x4_shuffle(vi${M}x89AB, vi${M}xCDEF, 0, 2, 4 + 0, 4 + 2);
-        const v128_t vi${M}x9BDF = wasm_v32x4_shuffle(vi${M}x89AB, vi${M}xCDEF, 1, 3, 4 + 1, 4 + 3);
+        const v128_t vi${M}x8ACE = wasm_v32x4_shuffle(vi${M}x89AB, vi${M}xCDEF, 0, 2, 4, 6);
+        const v128_t vi${M}x9BDF = wasm_v32x4_shuffle(vi${M}x89AB, vi${M}xCDEF, 1, 3, 5, 7);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 1:
@@ -166,8 +166,8 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_${"x86" if X86 else "arm"}_$
         const v128_t vi${M}xCDEF = wasm_v128_load(i${M} + 4);
 
       $for M in range(1 + 2 * ROW_TILE):
-        const v128_t vi${M}x8ACE = wasm_v128_and(vmask_even, wasm_v32x4_shuffle(vi${M}x89AB, vi${M}xCDEF, 0, 2, 4 + 0, 4 + 2));
-        const v128_t vi${M}x9BDF = wasm_v128_and(vmask_odd,  wasm_v32x4_shuffle(vi${M}x89AB, vi${M}xCDEF, 1, 3, 4 + 1, 4 + 3));
+        const v128_t vi${M}x8ACE = wasm_v128_and(vmask_even, wasm_v32x4_shuffle(vi${M}x89AB, vi${M}xCDEF, 0, 2, 4, 6));
+        const v128_t vi${M}x9BDF = wasm_v128_and(vmask_odd,  wasm_v32x4_shuffle(vi${M}x89AB, vi${M}xCDEF, 1, 3, 5, 7));
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 1:

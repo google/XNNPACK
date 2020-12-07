@@ -99,16 +99,16 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_1x4_acc5(
     const v128_t vi4xCDEF = wasm_v128_load(i4 + 4);
     i4 += 8;
 
-    v128_t vi0x8ACE = wasm_v32x4_shuffle(vi0x89AB, vi0xCDEF, 0, 2, 4 + 0, 4 + 2);
-    v128_t vi0x9BDF = wasm_v32x4_shuffle(vi0x89AB, vi0xCDEF, 1, 3, 4 + 1, 4 + 3);
-    v128_t vi1x8ACE = wasm_v32x4_shuffle(vi1x89AB, vi1xCDEF, 0, 2, 4 + 0, 4 + 2);
-    v128_t vi1x9BDF = wasm_v32x4_shuffle(vi1x89AB, vi1xCDEF, 1, 3, 4 + 1, 4 + 3);
-    v128_t vi2x8ACE = wasm_v32x4_shuffle(vi2x89AB, vi2xCDEF, 0, 2, 4 + 0, 4 + 2);
-    v128_t vi2x9BDF = wasm_v32x4_shuffle(vi2x89AB, vi2xCDEF, 1, 3, 4 + 1, 4 + 3);
-    v128_t vi3x8ACE = wasm_v32x4_shuffle(vi3x89AB, vi3xCDEF, 0, 2, 4 + 0, 4 + 2);
-    v128_t vi3x9BDF = wasm_v32x4_shuffle(vi3x89AB, vi3xCDEF, 1, 3, 4 + 1, 4 + 3);
-    v128_t vi4x8ACE = wasm_v32x4_shuffle(vi4x89AB, vi4xCDEF, 0, 2, 4 + 0, 4 + 2);
-    v128_t vi4x9BDF = wasm_v32x4_shuffle(vi4x89AB, vi4xCDEF, 1, 3, 4 + 1, 4 + 3);
+    v128_t vi0x8ACE = wasm_v32x4_shuffle(vi0x89AB, vi0xCDEF, 0, 2, 4, 6);
+    v128_t vi0x9BDF = wasm_v32x4_shuffle(vi0x89AB, vi0xCDEF, 1, 3, 5, 7);
+    v128_t vi1x8ACE = wasm_v32x4_shuffle(vi1x89AB, vi1xCDEF, 0, 2, 4, 6);
+    v128_t vi1x9BDF = wasm_v32x4_shuffle(vi1x89AB, vi1xCDEF, 1, 3, 5, 7);
+    v128_t vi2x8ACE = wasm_v32x4_shuffle(vi2x89AB, vi2xCDEF, 0, 2, 4, 6);
+    v128_t vi2x9BDF = wasm_v32x4_shuffle(vi2x89AB, vi2xCDEF, 1, 3, 5, 7);
+    v128_t vi3x8ACE = wasm_v32x4_shuffle(vi3x89AB, vi3xCDEF, 0, 2, 4, 6);
+    v128_t vi3x9BDF = wasm_v32x4_shuffle(vi3x89AB, vi3xCDEF, 1, 3, 5, 7);
+    v128_t vi4x8ACE = wasm_v32x4_shuffle(vi4x89AB, vi4xCDEF, 0, 2, 4, 6);
+    v128_t vi4x9BDF = wasm_v32x4_shuffle(vi4x89AB, vi4xCDEF, 1, 3, 5, 7);
 
     size_t w = input_width;
     for (; w > 8 * sizeof(float); w -= 8 * sizeof(float)) {
@@ -182,16 +182,16 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_1x4_acc5(
       const v128_t vi4xKLMN = wasm_v128_load(i4 + 4);
       i4 += 8;
 
-      const v128_t vi0xGIKM = wasm_v32x4_shuffle(vi0xGHIJ, vi0xKLMN, 0, 2, 4 + 0, 4 + 2);
-      const v128_t vi0xHJLN = wasm_v32x4_shuffle(vi0xGHIJ, vi0xKLMN, 1, 3, 4 + 1, 4 + 3);
-      const v128_t vi1xGIKM = wasm_v32x4_shuffle(vi1xGHIJ, vi1xKLMN, 0, 2, 4 + 0, 4 + 2);
-      const v128_t vi1xHJLN = wasm_v32x4_shuffle(vi1xGHIJ, vi1xKLMN, 1, 3, 4 + 1, 4 + 3);
-      const v128_t vi2xGIKM = wasm_v32x4_shuffle(vi2xGHIJ, vi2xKLMN, 0, 2, 4 + 0, 4 + 2);
-      const v128_t vi2xHJLN = wasm_v32x4_shuffle(vi2xGHIJ, vi2xKLMN, 1, 3, 4 + 1, 4 + 3);
-      const v128_t vi3xGIKM = wasm_v32x4_shuffle(vi3xGHIJ, vi3xKLMN, 0, 2, 4 + 0, 4 + 2);
-      const v128_t vi3xHJLN = wasm_v32x4_shuffle(vi3xGHIJ, vi3xKLMN, 1, 3, 4 + 1, 4 + 3);
-      const v128_t vi4xGIKM = wasm_v32x4_shuffle(vi4xGHIJ, vi4xKLMN, 0, 2, 4 + 0, 4 + 2);
-      const v128_t vi4xHJLN = wasm_v32x4_shuffle(vi4xGHIJ, vi4xKLMN, 1, 3, 4 + 1, 4 + 3);
+      const v128_t vi0xGIKM = wasm_v32x4_shuffle(vi0xGHIJ, vi0xKLMN, 0, 2, 4, 6);
+      const v128_t vi0xHJLN = wasm_v32x4_shuffle(vi0xGHIJ, vi0xKLMN, 1, 3, 5, 7);
+      const v128_t vi1xGIKM = wasm_v32x4_shuffle(vi1xGHIJ, vi1xKLMN, 0, 2, 4, 6);
+      const v128_t vi1xHJLN = wasm_v32x4_shuffle(vi1xGHIJ, vi1xKLMN, 1, 3, 5, 7);
+      const v128_t vi2xGIKM = wasm_v32x4_shuffle(vi2xGHIJ, vi2xKLMN, 0, 2, 4, 6);
+      const v128_t vi2xHJLN = wasm_v32x4_shuffle(vi2xGHIJ, vi2xKLMN, 1, 3, 5, 7);
+      const v128_t vi3xGIKM = wasm_v32x4_shuffle(vi3xGHIJ, vi3xKLMN, 0, 2, 4, 6);
+      const v128_t vi3xHJLN = wasm_v32x4_shuffle(vi3xGHIJ, vi3xKLMN, 1, 3, 5, 7);
+      const v128_t vi4xGIKM = wasm_v32x4_shuffle(vi4xGHIJ, vi4xKLMN, 0, 2, 4, 6);
+      const v128_t vi4xHJLN = wasm_v32x4_shuffle(vi4xGHIJ, vi4xKLMN, 1, 3, 5, 7);
 
       vo0p2 = wasm_f32x4_add(vo0p2, wasm_f32x4_mul(vi0x79BD, wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2)));
 
