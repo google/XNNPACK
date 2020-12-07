@@ -218,45 +218,45 @@
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_8x16__avx512f_broadcast
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_loadsplat_arm
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_arm_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_loadsplat_arm
+- name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_arm_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_loadsplat_arm
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_arm_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_loadsplat_arm
+- name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_arm_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_loadsplat_arm
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_arm_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_loadsplat_x86
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_x86_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_loadsplat_x86
+- name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_x86_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_loadsplat_x86
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_x86_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_loadsplat_x86
+- name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_x86_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_loadsplat_x86
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_x86_loadsplat
   k-block: 1
-- name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_splat_arm
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_arm_splat
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_splat_arm
+- name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_arm_splat
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_splat_arm
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_arm_splat
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_splat_arm
+- name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_arm_splat
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_splat_arm
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_arm_splat
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_splat_x86
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_x86_splat
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_splat_x86
+- name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_x86_splat
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_splat_x86
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_x86_splat
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_splat_x86
+- name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_x86_splat
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_splat_x86
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_x86_splat
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8s4__wasmsimd_arm
   k-block: 4

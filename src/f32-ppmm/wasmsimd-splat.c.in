@@ -13,7 +13,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/ppmm.h>
 
 
-void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd_splat_${"x86" if X86 else "arm"}(
+void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd_${"x86" if X86 else "arm"}_splat(
   size_t mr,
   size_t nc,
   size_t kc,

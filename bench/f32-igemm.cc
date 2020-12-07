@@ -510,68 +510,68 @@ static void IGEMMBenchmark(benchmark::State& state,
 #endif  /* XNN_ARCH_X86 || XNN_ARCH_X86_64 */
 
 #if XNN_ARCH_WASMSIMD
-  static void f32_igemm_3x8__wasmsimd_loadsplat_arm(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_loadsplat_arm, 3, 8, 1, 1);
+  static void f32_igemm_3x8__wasmsimd_arm_loadsplat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_arm_loadsplat, 3, 8, 1, 1);
   }
 
-  static void f32_igemm_4x8__wasmsimd_loadsplat_arm(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_loadsplat_arm, 4, 8, 1, 1);
+  static void f32_igemm_4x8__wasmsimd_arm_loadsplat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_arm_loadsplat, 4, 8, 1, 1);
   }
 
-  static void f32_igemm_5x8__wasmsimd_loadsplat_arm(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_loadsplat_arm, 5, 8, 1, 1);
+  static void f32_igemm_5x8__wasmsimd_arm_loadsplat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_arm_loadsplat, 5, 8, 1, 1);
   }
 
-  static void f32_igemm_6x8__wasmsimd_loadsplat_arm(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_loadsplat_arm, 6, 8, 1, 1);
+  static void f32_igemm_6x8__wasmsimd_arm_loadsplat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_arm_loadsplat, 6, 8, 1, 1);
   }
 
-  static void f32_igemm_3x8__wasmsimd_loadsplat_x86(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_loadsplat_x86, 3, 8, 1, 1);
+  static void f32_igemm_3x8__wasmsimd_x86_loadsplat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_x86_loadsplat, 3, 8, 1, 1);
   }
 
-  static void f32_igemm_4x8__wasmsimd_loadsplat_x86(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_loadsplat_x86, 4, 8, 1, 1);
+  static void f32_igemm_4x8__wasmsimd_x86_loadsplat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_x86_loadsplat, 4, 8, 1, 1);
   }
 
-  static void f32_igemm_5x8__wasmsimd_loadsplat_x86(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_loadsplat_x86, 5, 8, 1, 1);
+  static void f32_igemm_5x8__wasmsimd_x86_loadsplat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_x86_loadsplat, 5, 8, 1, 1);
   }
 
-  static void f32_igemm_6x8__wasmsimd_loadsplat_x86(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_loadsplat_x86, 6, 8, 1, 1);
+  static void f32_igemm_6x8__wasmsimd_x86_loadsplat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_x86_loadsplat, 6, 8, 1, 1);
   }
 
-  static void f32_igemm_3x8__wasmsimd_splat_arm(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_splat_arm, 3, 8, 1, 1);
+  static void f32_igemm_3x8__wasmsimd_arm_splat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_arm_splat, 3, 8, 1, 1);
   }
 
-  static void f32_igemm_4x8__wasmsimd_splat_arm(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_splat_arm, 4, 8, 1, 1);
+  static void f32_igemm_4x8__wasmsimd_arm_splat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_arm_splat, 4, 8, 1, 1);
   }
 
-  static void f32_igemm_5x8__wasmsimd_splat_arm(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_splat_arm, 5, 8, 1, 1);
+  static void f32_igemm_5x8__wasmsimd_arm_splat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_arm_splat, 5, 8, 1, 1);
   }
 
-  static void f32_igemm_6x8__wasmsimd_splat_arm(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_splat_arm, 6, 8, 1, 1);
+  static void f32_igemm_6x8__wasmsimd_arm_splat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_arm_splat, 6, 8, 1, 1);
   }
 
-  static void f32_igemm_3x8__wasmsimd_splat_x86(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_splat_x86, 3, 8, 1, 1);
+  static void f32_igemm_3x8__wasmsimd_x86_splat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_x86_splat, 3, 8, 1, 1);
   }
 
-  static void f32_igemm_4x8__wasmsimd_splat_x86(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_splat_x86, 4, 8, 1, 1);
+  static void f32_igemm_4x8__wasmsimd_x86_splat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_x86_splat, 4, 8, 1, 1);
   }
 
-  static void f32_igemm_5x8__wasmsimd_splat_x86(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_splat_x86, 5, 8, 1, 1);
+  static void f32_igemm_5x8__wasmsimd_x86_splat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_x86_splat, 5, 8, 1, 1);
   }
 
-  static void f32_igemm_6x8__wasmsimd_splat_x86(benchmark::State& state, const char* net) {
-    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_splat_x86, 6, 8, 1, 1);
+  static void f32_igemm_6x8__wasmsimd_x86_splat(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_x86_splat, 6, 8, 1, 1);
   }
 
   static void f32_igemm_3x8s4__wasmsimd_arm(benchmark::State& state, const char* net) {
@@ -606,22 +606,22 @@ static void IGEMMBenchmark(benchmark::State& state,
     IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x8s4__wasmsimd_x86, 6, 8, 1, 4);
   }
 
-  BENCHMARK_CONV(f32_igemm_3x8__wasmsimd_loadsplat_arm)
-  BENCHMARK_CONV(f32_igemm_4x8__wasmsimd_loadsplat_arm)
-  BENCHMARK_CONV(f32_igemm_5x8__wasmsimd_loadsplat_arm)
-  BENCHMARK_CONV(f32_igemm_6x8__wasmsimd_loadsplat_arm)
-  BENCHMARK_CONV(f32_igemm_3x8__wasmsimd_loadsplat_x86)
-  BENCHMARK_CONV(f32_igemm_4x8__wasmsimd_loadsplat_x86)
-  BENCHMARK_CONV(f32_igemm_5x8__wasmsimd_loadsplat_x86)
-  BENCHMARK_CONV(f32_igemm_6x8__wasmsimd_loadsplat_x86)
-  BENCHMARK_CONV(f32_igemm_3x8__wasmsimd_splat_arm)
-  BENCHMARK_CONV(f32_igemm_4x8__wasmsimd_splat_arm)
-  BENCHMARK_CONV(f32_igemm_5x8__wasmsimd_splat_arm)
-  BENCHMARK_CONV(f32_igemm_6x8__wasmsimd_splat_arm)
-  BENCHMARK_CONV(f32_igemm_3x8__wasmsimd_splat_x86)
-  BENCHMARK_CONV(f32_igemm_4x8__wasmsimd_splat_x86)
-  BENCHMARK_CONV(f32_igemm_5x8__wasmsimd_splat_x86)
-  BENCHMARK_CONV(f32_igemm_6x8__wasmsimd_splat_x86)
+  BENCHMARK_CONV(f32_igemm_3x8__wasmsimd_arm_loadsplat)
+  BENCHMARK_CONV(f32_igemm_4x8__wasmsimd_arm_loadsplat)
+  BENCHMARK_CONV(f32_igemm_5x8__wasmsimd_arm_loadsplat)
+  BENCHMARK_CONV(f32_igemm_6x8__wasmsimd_arm_loadsplat)
+  BENCHMARK_CONV(f32_igemm_3x8__wasmsimd_x86_loadsplat)
+  BENCHMARK_CONV(f32_igemm_4x8__wasmsimd_x86_loadsplat)
+  BENCHMARK_CONV(f32_igemm_5x8__wasmsimd_x86_loadsplat)
+  BENCHMARK_CONV(f32_igemm_6x8__wasmsimd_x86_loadsplat)
+  BENCHMARK_CONV(f32_igemm_3x8__wasmsimd_arm_splat)
+  BENCHMARK_CONV(f32_igemm_4x8__wasmsimd_arm_splat)
+  BENCHMARK_CONV(f32_igemm_5x8__wasmsimd_arm_splat)
+  BENCHMARK_CONV(f32_igemm_6x8__wasmsimd_arm_splat)
+  BENCHMARK_CONV(f32_igemm_3x8__wasmsimd_x86_splat)
+  BENCHMARK_CONV(f32_igemm_4x8__wasmsimd_x86_splat)
+  BENCHMARK_CONV(f32_igemm_5x8__wasmsimd_x86_splat)
+  BENCHMARK_CONV(f32_igemm_6x8__wasmsimd_x86_splat)
   BENCHMARK_CONV(f32_igemm_3x8s4__wasmsimd_arm)
   BENCHMARK_CONV(f32_igemm_4x8s4__wasmsimd_arm)
   BENCHMARK_CONV(f32_igemm_5x8s4__wasmsimd_arm)

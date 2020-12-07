@@ -11,8 +11,8 @@ tools/xngen src/f32-ppmm/scalar.c.in -D MR=4 -D NR=2 -o src/f32-ppmm/gen/4x2-min
 tools/xngen src/f32-ppmm/scalar.c.in -D MR=3 -D NR=3 -o src/f32-ppmm/gen/3x3-minmax-scalar.c
 
 ################################## WAsm SIMD ##################################
-tools/xngen src/f32-ppmm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D X86=0 -o src/f32-ppmm/gen/4x8-minmax-wasmsimd-splat-arm.c
-tools/xngen src/f32-ppmm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D X86=1 -o src/f32-ppmm/gen/4x8-minmax-wasmsimd-splat-x86.c
+tools/xngen src/f32-ppmm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D X86=0 -o src/f32-ppmm/gen/4x8-minmax-wasmsimd-arm-splat.c
+tools/xngen src/f32-ppmm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D X86=1 -o src/f32-ppmm/gen/4x8-minmax-wasmsimd-x86-splat.c
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=0 -o src/f32-ppmm/gen/4x8-minmax-neon.c
