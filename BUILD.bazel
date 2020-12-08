@@ -4478,7 +4478,7 @@ cc_library(
     defines = select({
         ":xnn_enable_sparse_explicit_true": ["XNN_ENABLE_SPARSE=1"],
         ":xnn_enable_sparse_explicit_false": ["XNN_ENABLE_SPARSE=0"],
-        "//conditions:default": ["XNN_ENABLE_SPARSE=0"],
+        "//conditions:default": ["XNN_ENABLE_SPARSE=1"],
     }),
 )
 

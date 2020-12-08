@@ -138,8 +138,7 @@ class SubgraphTester {
   }
 
   inline SubgraphTester& optimize() {
-    const uint32_t flags = XNN_FLAG_SPARSE_INFERENCE;
-    const xnn_status status = xnn_subgraph_optimize(subgraph_.get(), flags);
+    const xnn_status status = xnn_subgraph_optimize(subgraph_.get(), 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
