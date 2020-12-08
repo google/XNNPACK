@@ -175,34 +175,34 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   const bool is_3x3 = kernel_width == 3 && kernel_height == 3 && dilation_height == 1 && dilation_width == 1;
   const bool is_5x5 = kernel_width == 5 && kernel_height == 5 && dilation_height == 1 && dilation_width == 1;
   const bool nhwc_input = (flags & XNN_FLAG_INPUT_NHWC) != 0;
-  if (is_1x1 && !any_padding && !nhwc_input && groups == 1 && xnn_params.f32.spmm.ukernel != NULL) {
+  if (is_1x1 && !any_padding && !nhwc_input && groups == 1) {
     ukernel_type = xnn_ukernel_type_spmm;
   } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
     input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    nhwc_input && groups == 1 && xnn_params.f32.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding != NULL)
+    nhwc_input && groups == 1)
   {
     ukernel_type = xnn_ukernel_type_conv2d_hwc2chw;
   } else if (is_3x3 && subsampling_height == 1 && subsampling_width == 1 &&
     input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1 && xnn_params.f32.dwconv2d_chw_3x3.ukernel != NULL)
+    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_ukernel_type_dwconv;
     dwconv2d_parameters = &xnn_params.f32.dwconv2d_chw_3x3;
   } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
     (input_padding_top == 0 || input_padding_top == 1) && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1 && xnn_params.f32.dwconv2d_chw_3x3s2.ukernel != NULL)
+    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_ukernel_type_dwconv;
     dwconv2d_parameters = &xnn_params.f32.dwconv2d_chw_3x3s2;
   } else if (is_5x5 && subsampling_height == 1 && subsampling_width == 1 &&
     input_padding_top == 2 && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1 && xnn_params.f32.dwconv2d_chw_5x5.ukernel != NULL)
+    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_ukernel_type_dwconv;
     dwconv2d_parameters = &xnn_params.f32.dwconv2d_chw_5x5;
   } else if (is_5x5 && subsampling_height == 2 && subsampling_width == 2 &&
     (input_padding_top == 1 || input_padding_top == 2) && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1 && xnn_params.f32.dwconv2d_chw_5x5s2.ukernel != NULL)
+    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_ukernel_type_dwconv;
     dwconv2d_parameters = &xnn_params.f32.dwconv2d_chw_5x5s2;

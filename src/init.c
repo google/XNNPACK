@@ -419,6 +419,8 @@ static void init(void) {
         .row_tile = 2,
       };
       #ifndef XNN_NO_NCHW_OPERATORS
+        init_flags |= XNN_INIT_FLAG_CHW_OPT;
+
         xnn_params.f32.spmm = (struct spmm_parameters) {
           .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_32x1__neon,
           .mr = 32,
@@ -694,6 +696,8 @@ static void init(void) {
         .row_tile = 2,
       };
       #ifndef XNN_NO_NCHW_OPERATORS
+        init_flags |= XNN_INIT_FLAG_CHW_OPT;
+
         xnn_params.f32.spmm = (struct spmm_parameters) {
           .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_8x1__scalar,
           .mr = 8,
@@ -1328,6 +1332,8 @@ static void init(void) {
       .row_tile = 2,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
+      init_flags |= XNN_INIT_FLAG_CHW_OPT;
+
       xnn_params.f32.spmm = (struct spmm_parameters) {
         .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_16x1__neonfma_pipelined,
         .mr = 16,
@@ -1992,6 +1998,12 @@ static void init(void) {
       .row_tile = 2,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
+      // Sparse microkernels on x86 currently target only SSE, and on processors
+      // with AVX ISA dense inference is expected to be faster than sparse.
+      if (!cpuinfo_has_x86_avx()) {
+        init_flags |= XNN_INIT_FLAG_CHW_OPT;
+      }
+
       xnn_params.f32.spmm = (struct spmm_parameters) {
         .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_32x1__sse,
         .mr = 32,
@@ -2477,6 +2489,8 @@ static void init(void) {
       };
     }
     #ifndef XNN_NO_NCHW_OPERATORS
+      init_flags |= XNN_INIT_FLAG_CHW_OPT;
+
       if (is_wasm_x86) {
         xnn_params.f32.spmm = (struct spmm_parameters) {
           .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86,
@@ -2836,6 +2850,8 @@ static void init(void) {
       .row_tile = 2,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
+      init_flags |= XNN_INIT_FLAG_CHW_OPT;
+
       xnn_params.f32.spmm = (struct spmm_parameters) {
         .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_8x1__scalar,
         .mr = 8,

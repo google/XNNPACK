@@ -2000,6 +2000,8 @@ struct vmulcaddc_parameters {
 #define XNN_INIT_FLAG_X8      0x00000100
 // Indicates that XX XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_XX      0x00000200
+// Indicates that CHW XNNPACK microkernels are optimized for the host platform.
+#define XNN_INIT_FLAG_CHW_OPT 0x00000400
 
 struct xnn_parameters {
   // Bitwise combination of XNN_INIT_FLAG_* flags

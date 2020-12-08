@@ -63,14 +63,6 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f32(
     goto error;
   }
 
-  status = xnn_status_unsupported_parameter;
-  if (xnn_params.f32.gavgpool_cw.ukernel == NULL) {
-    xnn_log_error(
-      "failed to create %s operator: only selected configurations parameters are supported",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32));
-    goto error;
-  }
-
   status = xnn_status_out_of_memory;
 
   global_average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));

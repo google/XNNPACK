@@ -662,7 +662,7 @@ enum xnn_status xnn_subgraph_optimize(
   }
 
   #if XNN_ENABLE_SPARSE
-    if (flags & XNN_FLAG_SPARSE_INFERENCE) {
+    if ((flags & XNN_FLAG_SPARSE_INFERENCE) && (xnn_params.init_flags & XNN_INIT_FLAG_CHW_OPT)) {
       xnn_subgraph_rewrite_for_nchw(subgraph);
     }
   #endif
