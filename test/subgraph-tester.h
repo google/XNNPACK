@@ -21,8 +21,9 @@
 #include <gtest/gtest.h>
 
 enum xnn_tensor_type {
-  kStatic = 0,
-  kDynamic = 1,
+  kStaticDense,
+  kStaticSparse,
+  kDynamic,
 };
 
 class SubgraphTester {
@@ -49,14 +50,22 @@ class SubgraphTester {
                                     uint32_t external_id) {
     const uint32_t flags = 0;
 
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f),
-                            std::ref(rng_));
     void* data = nullptr;
-    if (tensor_type == kStatic) {
-      auto num_elements = std::accumulate(std::begin(dims), std::end(dims), 1,
-                                          std::multiplies<>());
-      std::vector<float> weights(num_elements);
-      std::generate(weights.begin(), weights.end(), std::ref(f32rng));
+    if (tensor_type == kStaticDense || tensor_type == kStaticSparse) {
+      const size_t num_elements = std::accumulate(std::begin(dims), std::end(dims), 1, std::multiplies<>());
+      static_data_.emplace_back(num_elements);
+      std::vector<float>& weights = static_data_.back();
+      auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f), std::ref(rng_));
+      if (tensor_type == kStaticDense) {
+        std::generate(weights.begin(), weights.end(), std::ref(f32rng));
+      } else {
+        // Create tensor with 90% sparsity in two steps:
+        // 1. Generate non-zero elements in the beginning of the vector
+        // 2. Randomize positions of non-zero elements
+        const size_t num_nonzero_elements = num_elements / 10;
+        std::generate(weights.begin(), weights.begin() + num_nonzero_elements, std::ref(f32rng));
+        std::shuffle(weights.begin(), weights.end(), rng_);
+      }
       data = weights.data();
     }
     uint32_t id_out = 0;
@@ -64,6 +73,7 @@ class SubgraphTester {
         xnn_define_tensor_value(subgraph_ptr_, xnn_datatype_fp32, dims.size(),
                                 dims.data(), data, external_id, flags, &id_out);
     assert(xnn_status_success == status_);
+    assert(id_out == external_id);
 
     return *this;
   }
@@ -154,27 +164,12 @@ class SubgraphTester {
     return *this;
   }
 
-  void CheckLayouts(
-      std::map<uint32_t, std::pair<xnn_layout_type, xnn_layout_type>>&
-          expected_layouts) const {
-    for (auto const& item : expected_layouts) {
-      xnn_node* node = &subgraph_ptr_->nodes[item.first];
-
-      for (uint32_t i = 0; i < node->num_inputs; i++) {
-        struct xnn_value* value = &subgraph_ptr_->values[node->inputs[i]];
-        if (value->data != nullptr) {
-          continue;
-        }
-        ASSERT_EQ(item.second.first, value->layout);
-      }
-      for (uint32_t i = 0; i < node->num_outputs; i++) {
-        struct xnn_value* value = &subgraph_ptr_->values[node->outputs[i]];
-        ASSERT_EQ(item.second.second, value->layout);
-      }
-    }
+  inline xnn_layout_type get_layout(uint32_t value_id) const {
+    return subgraph_ptr_->values[value_id].layout;
   }
 
  private:
+  std::vector<std::vector<float>> static_data_;
   xnn_subgraph_t subgraph_ptr_ = nullptr;
   std::mt19937 rng_;
   xnn_status status_;

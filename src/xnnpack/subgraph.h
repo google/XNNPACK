@@ -213,6 +213,12 @@ struct xnn_node {
   uint32_t flags;
   uint32_t layout_flags;
   uint32_t cluster_leader;
+  // Number of filter parameters in all 1x1 Convolutions of the sparse cluster.
+  // This value is properly initialized only in sparse inference analysis of 1x1 Convolutions.
+  size_t num_params;
+  // Number of zero filter parameters in all 1x1 Convolutions of the sparse cluster.
+  // This value is properly initialized only in sparse inference analysis of 1x1 Convolutions.
+  size_t num_zeroes;
 };
 
 struct xnn_operator_data {
