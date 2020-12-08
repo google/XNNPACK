@@ -289,7 +289,7 @@ def xnnpack_aggregate_library(
         }),
     )
 
-def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], automatic = True):
+def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], automatic = True,  timeout = "short"):
     """Unit test binary based on Google Test.
 
     Args:
@@ -303,6 +303,9 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
       deps: The list of additional libraries to be linked. Google Test library
             (with main() function) is always added as a dependency and does not
             need to be explicitly specified.
+      tags: List of arbitrary text tags.
+      automatic: Whether to create the test or testable binary.
+      timeout: How long the test is expected to run before returning.
     """
 
     if automatic:
@@ -335,6 +338,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
                 "//conditions:default": [],
             }),
             tags = tags,
+            timeout = timeout,
         )
     else:
         native.cc_binary(

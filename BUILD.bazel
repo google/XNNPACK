@@ -6799,6 +6799,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "deconvolution_nhwc_test",
+    timeout = "moderate",
     srcs = [
         "test/deconvolution-nhwc.cc",
         "test/deconvolution-operator-tester.h",
