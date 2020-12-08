@@ -1848,8 +1848,6 @@ struct conv_hwc2chw_parameters {
 
 struct dwconv2d_chw_parameters {
   xnn_dwconv2d_chw_ukernel_function ukernel;
-  // Number of input width pixels in a tile.
-  uint8_t input_width_tile;
   // Number of output width pixels in a tile.
   uint8_t output_width_tile;
   // Number of output height pixels in a tile.

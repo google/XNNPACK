@@ -465,7 +465,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
 
       convolution_op->ukernel.dwconv2d = (struct xnn_ukernel_dwconv2d) {
         .chw_function = dwconv2d_parameters->ukernel,
-        .input_width_tile = dwconv2d_parameters->input_width_tile,
         .output_width_tile = dwconv2d_parameters->output_width_tile,
       };
 

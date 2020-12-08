@@ -115,7 +115,6 @@ struct xnn_ukernel_dwconv2d {
   union {
     xnn_dwconv2d_chw_ukernel_function chw_function;
   };
-  uint8_t input_width_tile;
   uint8_t output_width_tile;
 };
 
