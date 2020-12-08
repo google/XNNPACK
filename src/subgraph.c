@@ -254,6 +254,7 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
     case xnn_node_type_bankers_rounding:
     case xnn_node_type_ceiling:
     case xnn_node_type_clamp:
+    case xnn_node_type_elu:
     case xnn_node_type_floor:
     case xnn_node_type_hardswish:
     case xnn_node_type_leaky_relu:
