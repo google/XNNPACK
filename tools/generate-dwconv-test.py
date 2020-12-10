@@ -306,7 +306,7 @@ def generate_test_cases(ukernel, cr, kr, c_block, is_pipelined, isa):
   if activation == "ukernel":
     activation = "linear"
   test_args = [ukernel]
-  if activation != "linear" and (not isa or isa == "psimd"):
+  if activation != "linear" and not isa:
     test_args.append("DWConvMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(DWCONV_TEST_CODE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
