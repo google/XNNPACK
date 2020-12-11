@@ -5,14 +5,16 @@
 
 $assert NR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$SSE_HEADER = {1: "xmmintrin.h", 2: "emmintrin.h"}[SSE]
 #include <assert.h>
 
-#include <xmmintrin.h>
+#include <${SSE_HEADER}>
 
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__sse_dup(
+$ISA = {1: "sse", 2: "sse2"}[SSE]
+void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_dup(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -82,7 +84,10 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__sse_dup(
         $LLLL = str(L) * 4
 
         $for M in range(MR):
-          const __m128 va${M}c${LLLL} = _mm_shuffle_ps(va${M}, va${M}, _MM_SHUFFLE(${L}, ${L}, ${L}, ${L}));
+          $if SSE >= 2 and L < 3:
+            const __m128 va${M}c${LLLL} = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va${M}), _MM_SHUFFLE(${L}, ${L}, ${L}, ${L})));
+          $else:
+            const __m128 va${M}c${LLLL} = _mm_shuffle_ps(va${M}, va${M}, _MM_SHUFFLE(${L}, ${L}, ${L}, ${L}));
 
         $for N in range(0, NR, 4):
           const __m128 vb${ABC[N:N+4]}c${L} = _mm_load_ps(w + ${L * NR + N});

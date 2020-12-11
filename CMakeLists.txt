@@ -1487,16 +1487,28 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/1x8inc-minmax-sse-dup.c
   src/f32-gemm/gen-inc/1x8inc-minmax-sse-load1.c
   src/f32-gemm/gen-inc/1x8s4inc-minmax-sse.c
+  src/f32-gemm/gen-inc/3x8inc-minmax-sse-dup.c
+  src/f32-gemm/gen-inc/3x8inc-minmax-sse-load1.c
+  src/f32-gemm/gen-inc/3x8s4inc-minmax-sse.c
   src/f32-gemm/gen-inc/4x8inc-minmax-sse-dup.c
   src/f32-gemm/gen-inc/4x8inc-minmax-sse-load1.c
   src/f32-gemm/gen-inc/4x8s4inc-minmax-sse.c
+  src/f32-gemm/gen-inc/5x8inc-minmax-sse-dup.c
+  src/f32-gemm/gen-inc/5x8inc-minmax-sse-load1.c
+  src/f32-gemm/gen-inc/5x8s4inc-minmax-sse.c
   src/f32-gemm/gen/1x8-minmax-sse-dup.c
   src/f32-gemm/gen/1x8-minmax-sse-load1.c
   src/f32-gemm/gen/1x8s4-minmax-sse.c
+  src/f32-gemm/gen/3x8-minmax-sse-dup.c
+  src/f32-gemm/gen/3x8-minmax-sse-load1.c
+  src/f32-gemm/gen/3x8s4-minmax-sse.c
   src/f32-gemm/gen/4x2c4-minmax-sse.c
   src/f32-gemm/gen/4x8-minmax-sse-dup.c
   src/f32-gemm/gen/4x8-minmax-sse-load1.c
   src/f32-gemm/gen/4x8s4-minmax-sse.c
+  src/f32-gemm/gen/5x8-minmax-sse-dup.c
+  src/f32-gemm/gen/5x8-minmax-sse-load1.c
+  src/f32-gemm/gen/5x8s4-minmax-sse.c
   src/f32-hswish/gen/hswish-sse-x4.c
   src/f32-hswish/gen/hswish-sse-x8.c
   src/f32-ibilinear/gen/sse-c4.c
@@ -1504,10 +1516,16 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-igemm/gen/1x8-minmax-sse-dup.c
   src/f32-igemm/gen/1x8-minmax-sse-load1.c
   src/f32-igemm/gen/1x8s4-minmax-sse.c
+  src/f32-igemm/gen/3x8-minmax-sse-dup.c
+  src/f32-igemm/gen/3x8-minmax-sse-load1.c
+  src/f32-igemm/gen/3x8s4-minmax-sse.c
   src/f32-igemm/gen/4x2c4-minmax-sse.c
   src/f32-igemm/gen/4x8-minmax-sse-dup.c
   src/f32-igemm/gen/4x8-minmax-sse-load1.c
   src/f32-igemm/gen/4x8s4-minmax-sse.c
+  src/f32-igemm/gen/5x8-minmax-sse-dup.c
+  src/f32-igemm/gen/5x8-minmax-sse-load1.c
+  src/f32-igemm/gen/5x8s4-minmax-sse.c
   src/f32-maxpool/9p8x-minmax-sse-c4.c
   src/f32-pavgpool/9p8x-minmax-sse-c4.c
   src/f32-pavgpool/9x-minmax-sse-c4.c
@@ -1580,6 +1598,18 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-sse2-c4.c
   src/f32-argmaxpool/9p8x-sse2-c4.c
   src/f32-argmaxpool/9x-sse2-c4.c
+  src/f32-gemm/gen-inc/1x8inc-minmax-sse2-dup.c
+  src/f32-gemm/gen-inc/3x8inc-minmax-sse2-dup.c
+  src/f32-gemm/gen-inc/4x8inc-minmax-sse2-dup.c
+  src/f32-gemm/gen-inc/5x8inc-minmax-sse2-dup.c
+  src/f32-gemm/gen/1x8-minmax-sse2-dup.c
+  src/f32-gemm/gen/3x8-minmax-sse2-dup.c
+  src/f32-gemm/gen/4x8-minmax-sse2-dup.c
+  src/f32-gemm/gen/5x8-minmax-sse2-dup.c
+  src/f32-igemm/gen/1x8-minmax-sse2-dup.c
+  src/f32-igemm/gen/3x8-minmax-sse2-dup.c
+  src/f32-igemm/gen/4x8-minmax-sse2-dup.c
+  src/f32-igemm/gen/5x8-minmax-sse2-dup.c
   src/f32-prelu/gen/sse2-2x4.c
   src/f32-prelu/gen/sse2-2x8.c
   src/f32-raddstoreexpminusmax/gen/sse2-p5-x4.c

@@ -300,20 +300,53 @@ tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D X86=0 -D ACTIVA
 tools/xngen src/f32-gemm/sse-load1.c.in -D MR=1 -D NR=8 -D INC=0 -o src/f32-gemm/gen/1x8-minmax-sse-load1.c
 tools/xngen src/f32-gemm/sse-load1.c.in -D MR=1 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/1x8inc-minmax-sse-load1.c
 
+tools/xngen src/f32-gemm/sse-load1.c.in -D MR=3 -D NR=8 -D INC=0 -o src/f32-gemm/gen/3x8-minmax-sse-load1.c
+tools/xngen src/f32-gemm/sse-load1.c.in -D MR=3 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/3x8inc-minmax-sse-load1.c
+
 tools/xngen src/f32-gemm/sse-load1.c.in -D MR=4 -D NR=8 -D INC=0 -o src/f32-gemm/gen/4x8-minmax-sse-load1.c
 tools/xngen src/f32-gemm/sse-load1.c.in -D MR=4 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/4x8inc-minmax-sse-load1.c
-### LOAD4+DUPLICATE micro-kernels
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=0 -o src/f32-gemm/gen/1x8-minmax-sse-dup.c
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/1x8inc-minmax-sse-dup.c
 
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=0 -o src/f32-gemm/gen/4x8-minmax-sse-dup.c
-tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/4x8inc-minmax-sse-dup.c
+tools/xngen src/f32-gemm/sse-load1.c.in -D MR=5 -D NR=8 -D INC=0 -o src/f32-gemm/gen/5x8-minmax-sse-load1.c
+tools/xngen src/f32-gemm/sse-load1.c.in -D MR=5 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/5x8inc-minmax-sse-load1.c
+
+### LOAD4+DUPLICATE micro-kernels
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=0 -D SSE=1 -o src/f32-gemm/gen/1x8-minmax-sse-dup.c
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=1 -D SSE=1 -o src/f32-gemm/gen-inc/1x8inc-minmax-sse-dup.c
+
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=3 -D NR=8 -D INC=0 -D SSE=1 -o src/f32-gemm/gen/3x8-minmax-sse-dup.c
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=3 -D NR=8 -D INC=1 -D SSE=1 -o src/f32-gemm/gen-inc/3x8inc-minmax-sse-dup.c
+
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=0 -D SSE=1 -o src/f32-gemm/gen/4x8-minmax-sse-dup.c
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=1 -D SSE=1 -o src/f32-gemm/gen-inc/4x8inc-minmax-sse-dup.c
+
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=0 -D SSE=1 -o src/f32-gemm/gen/5x8-minmax-sse-dup.c
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=1 -D SSE=1 -o src/f32-gemm/gen-inc/5x8inc-minmax-sse-dup.c
+
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=0 -D SSE=2 -o src/f32-gemm/gen/1x8-minmax-sse2-dup.c
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=1 -D SSE=2 -o src/f32-gemm/gen-inc/1x8inc-minmax-sse2-dup.c
+
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=3 -D NR=8 -D INC=0 -D SSE=2 -o src/f32-gemm/gen/3x8-minmax-sse2-dup.c
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=3 -D NR=8 -D INC=1 -D SSE=2 -o src/f32-gemm/gen-inc/3x8inc-minmax-sse2-dup.c
+
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=0 -D SSE=2 -o src/f32-gemm/gen/4x8-minmax-sse2-dup.c
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=1 -D SSE=2 -o src/f32-gemm/gen-inc/4x8inc-minmax-sse2-dup.c
+
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=0 -D SSE=2 -o src/f32-gemm/gen/5x8-minmax-sse2-dup.c
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=1 -D SSE=2 -o src/f32-gemm/gen-inc/5x8inc-minmax-sse2-dup.c
+
 ### LOAD4+PERMUTE micro-kernels
 tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=1 -D NR=8 -D INC=0 -o src/f32-gemm/gen/1x8s4-minmax-sse.c
 tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=1 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/1x8s4inc-minmax-sse.c
 
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=3 -D NR=8 -D INC=0 -o src/f32-gemm/gen/3x8s4-minmax-sse.c
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=3 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/3x8s4inc-minmax-sse.c
+
 tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=4 -D NR=8 -D INC=0 -o src/f32-gemm/gen/4x8s4-minmax-sse.c
 tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=4 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/4x8s4inc-minmax-sse.c
+
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=5 -D NR=8 -D INC=0 -o src/f32-gemm/gen/5x8s4-minmax-sse.c
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=5 -D NR=8 -D INC=1 -o src/f32-gemm/gen-inc/5x8s4inc-minmax-sse.c
+
 ### MRx2 micro-kernels
 tools/xngen src/f32-gemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -o src/f32-gemm/gen/4x2c4-minmax-sse.c
 

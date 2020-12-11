@@ -182,17 +182,37 @@
   k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_1x8__sse_load1
   k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_3x8__sse_load1
+  k-block: 1
 - name: xnn_f32_gemm_minmax_ukernel_4x8__sse_load1
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_5x8__sse_load1
   k-block: 1
 - name: xnn_f32_gemm_minmax_ukernel_1x8__sse_dup
   k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_3x8__sse_dup
+  k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_4x8__sse_dup
+  k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_5x8__sse_dup
   k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_1x8s4__sse
   k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_3x8s4__sse
+  k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_4x8s4__sse
   k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_5x8s4__sse
+  k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_4x2c4__sse
+  k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_1x8__sse2_dup
+  k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_3x8__sse2_dup
+  k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_4x8__sse2_dup
+  k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_5x8__sse2_dup
   k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_1x8__avx_broadcast
   k-block: 1
