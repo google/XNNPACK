@@ -104,13 +104,11 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x8(
     const v128_t ve0123 = wasm_f32x4_mul(wasm_f32x4_add(vp0123, vs0123), valpha);
     const v128_t ve4567 = wasm_f32x4_mul(wasm_f32x4_add(vp4567, vs4567), valpha);
 
-    const v128_t vm0123 = wasm_i32x4_shr(vx0123, 31);
     vx0123 = wasm_f32x4_mul(vx0123, vbeta);
-    const v128_t vm4567 = wasm_i32x4_shr(vx4567, 31);
     vx4567 = wasm_f32x4_mul(vx4567, vbeta);
 
-    const v128_t vy0123 = wasm_v128_bitselect(ve0123, vx0123, vm0123);
-    const v128_t vy4567 = wasm_v128_bitselect(ve4567, vx4567, vm4567);
+    const v128_t vy0123 = __builtin_wasm_signselect_i32x4(ve0123, vx0123, vx0123);
+    const v128_t vy4567 = __builtin_wasm_signselect_i32x4(ve4567, vx4567, vx4567);
 
     wasm_v128_store(y, vy0123);
     wasm_v128_store(y + 4, vy4567);
@@ -149,9 +147,8 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x8(
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vt);
     const v128_t ve = wasm_f32x4_mul(wasm_f32x4_add(vp, vs), valpha);
 
-    const v128_t vm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    const v128_t vy = wasm_v128_bitselect(ve, vx, vm);
+    const v128_t vy = __builtin_wasm_signselect_i32x4(ve, vx, vx);
 
     wasm_v128_store(y, vy);
     y += 4;
@@ -188,9 +185,8 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x8(
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vt);
     const v128_t ve = wasm_f32x4_mul(wasm_f32x4_add(vp, vs), valpha);
 
-    const v128_t vm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    v128_t vy = wasm_v128_bitselect(ve, vx, vm);
+    v128_t vy = __builtin_wasm_signselect_i32x4(ve, vx, vx);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
