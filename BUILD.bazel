@@ -5357,6 +5357,43 @@ xnnpack_benchmark(
     ],
 )
 
+xnnpack_benchmark(
+    name = "f32_sigmoid_ulp_eval",
+    srcs = [
+        "eval/f32-sigmoid-ulp.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + ACCURACY_EVAL_HDRS,
+    deps = ACCURACY_EVAL_DEPS + [
+        ":bench_utils",
+        "@cpuinfo",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_sqrt_ulp_eval",
+    srcs = [
+        "eval/f32-sqrt-ulp.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + ACCURACY_EVAL_HDRS,
+    deps = ACCURACY_EVAL_DEPS + [
+        ":bench_utils",
+        "@cpuinfo",
+    ],
+)
+
+################### Accuracy verification for math functions ##################
+
+xnnpack_unit_test(
+    name = "f32_expm1minus_eval",
+    srcs = [
+        "eval/f32-expm1minus.cc",
+        "src/xnnpack/AlignedAllocator.h",
+        "src/xnnpack/math-stubs.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    automatic = False,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
 xnnpack_unit_test(
     name = "f32_roundne_eval",
     srcs = [
@@ -5399,30 +5436,6 @@ xnnpack_unit_test(
     ] + MICROKERNEL_TEST_HDRS,
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f32_sigmoid_ulp_eval",
-    srcs = [
-        "eval/f32-sigmoid-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "f32_sqrt_ulp_eval",
-    srcs = [
-        "eval/f32-sqrt-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
-    ],
 )
 
 ######################### Unit tests for micro-kernels #########################
