@@ -60,7 +60,7 @@ static void ExpM1Error(benchmark::State& state,
   }
 
   // The smallest x for which expm1f(x) is not saturated at -1 (-0x1.154244p+4f).
-  const uint32_t min_input = 0xC18AA122;
+  const uint32_t min_input = UINT32_C(0xC18AA122);
   // Number of elements in one block of inputs/outputs.
   // Combining multiple elements in a block reduce function call overhead.
   const size_t block_size = 16384;

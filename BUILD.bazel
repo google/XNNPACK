@@ -5395,6 +5395,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_expminus_eval",
+    srcs = [
+        "eval/f32-expminus.cc",
+        "src/xnnpack/AlignedAllocator.h",
+        "src/xnnpack/math-stubs.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    automatic = False,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_roundne_eval",
     srcs = [
         "eval/f32-roundne.cc",

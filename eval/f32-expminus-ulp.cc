@@ -60,7 +60,7 @@ static void ExpError(benchmark::State& state,
   }
 
   // The smallest x for which expf(x) is normalized (-0x1.5D589Ep6f).
-  const uint32_t min_input = 0xC2AEAC4FL;
+  const uint32_t min_input = UINT32_C(0xC2AEAC4F);
   // Number of elements in one block of inputs/outputs.
   // Combining multiple elements in a block reduce function call overhead.
   const size_t block_size = 16384;
@@ -111,13 +111,13 @@ static void ExpError(benchmark::State& state,
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(ExpError, neonfma_rr2_lut2048_p1,
-                    xnn_math_f32_expminus__neonfma_rr2_lut2048_p1,
+  BENCHMARK_CAPTURE(ExpError, neonfma_rr2_lut64_p2,
+                    xnn_math_f32_expminus__neonfma_rr2_lut64_p2,
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(ExpError, neonfma_rr2_lut64_p2,
-                    xnn_math_f32_expminus__neonfma_rr2_lut64_p2,
+  BENCHMARK_CAPTURE(ExpError, neonfma_rr2_lut2048_p1,
+                    xnn_math_f32_expminus__neonfma_rr2_lut2048_p1,
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
