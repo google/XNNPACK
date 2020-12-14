@@ -119,11 +119,11 @@ void xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x3(
       float vn = vz * vlog2e + vmagic_bias;
       const uint32_t ven = fp32_to_bits(vn) << 19;
       const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
-
       vn -= vmagic_bias;
-      float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ven);
 
       float vt = vn * vminus_ln2_hi + vz;
+      float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ven);
+
       vt = vn * vminus_ln2_lo + vt;
 
       float vp = vc3 * vt + vc2;

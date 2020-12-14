@@ -76,7 +76,6 @@ void xnn_f32_velu_ukernel__wasm_rr2_p6_x6(
     float vs5 = fp32_from_bits(fp32_to_bits(vn5) << 23);
     vn5 -= vmagic_bias;
 
-
     float vt0 = vn0 * vminus_ln2_hi + vz0;
     float vt1 = vn1 * vminus_ln2_hi + vz1;
     float vt2 = vn2 * vminus_ln2_hi + vz2;
@@ -90,6 +89,7 @@ void xnn_f32_velu_ukernel__wasm_rr2_p6_x6(
     vt3 = vn3 * vminus_ln2_lo + vt3;
     vt4 = vn4 * vminus_ln2_lo + vt4;
     vt5 = vn5 * vminus_ln2_lo + vt5;
+
 
     float vp0 = vc6 * vt0 + vc5;
     float vp1 = vc6 * vt1 + vc5;
@@ -186,6 +186,7 @@ void xnn_f32_velu_ukernel__wasm_rr2_p6_x6(
 
       float vt = vn * vminus_ln2_hi + vz;
       vt = vn * vminus_ln2_lo + vt;
+
 
       float vp = vc6 * vt + vc5;
       vp = vp * vt + vc4;

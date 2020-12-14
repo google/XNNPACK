@@ -98,26 +98,32 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x6(
     vt0 = vn0 * vminus_ln2_lo + vt0;
     if XNN_UNPREDICTABLE(vz0 <= vsat_cutoff) {
       vs0 = 0.0f;
+      vt0 = 0.0f;
     }
     vt1 = vn1 * vminus_ln2_lo + vt1;
     if XNN_UNPREDICTABLE(vz1 <= vsat_cutoff) {
       vs1 = 0.0f;
+      vt1 = 0.0f;
     }
     vt2 = vn2 * vminus_ln2_lo + vt2;
     if XNN_UNPREDICTABLE(vz2 <= vsat_cutoff) {
       vs2 = 0.0f;
+      vt2 = 0.0f;
     }
     vt3 = vn3 * vminus_ln2_lo + vt3;
     if XNN_UNPREDICTABLE(vz3 <= vsat_cutoff) {
       vs3 = 0.0f;
+      vt3 = 0.0f;
     }
     vt4 = vn4 * vminus_ln2_lo + vt4;
     if XNN_UNPREDICTABLE(vz4 <= vsat_cutoff) {
       vs4 = 0.0f;
+      vt4 = 0.0f;
     }
     vt5 = vn5 * vminus_ln2_lo + vt5;
     if XNN_UNPREDICTABLE(vz5 <= vsat_cutoff) {
       vs5 = 0.0f;
+      vt5 = 0.0f;
     }
 
     float vp0 = vc3 * vt0 + vc2;
@@ -203,15 +209,16 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x6(
       float vn = vz * vlog2e + vmagic_bias;
       const uint32_t ven = fp32_to_bits(vn) << 19;
       const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
-
       vn -= vmagic_bias;
-      float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ven);
-      if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
-        vs = 0.0f;
-      }
 
       float vt = vn * vminus_ln2_hi + vz;
+      float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ven);
+
       vt = vn * vminus_ln2_lo + vt;
+      if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
+        vs = 0.0f;
+        vt = 0.0f;
+      }
 
       float vp = vc3 * vt + vc2;
       vp *= vt;

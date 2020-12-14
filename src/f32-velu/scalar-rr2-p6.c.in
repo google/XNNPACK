@@ -56,17 +56,18 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_x${BATCH_TILE}
         float vs${N} = fp32_from_bits(fp32_to_bits(vn${N}) << 23);
         vn${N} -= vmagic_bias;
 
-      $if not WASM:
-        $for N in range(BATCH_TILE):
-          if XNN_UNPREDICTABLE(vz${N} <= vsat_cutoff) {
-            vs${N} = 0.0f;
-          }
-
       $for N in range(BATCH_TILE):
         float vt${N} = vn${N} * vminus_ln2_hi + vz${N};
 
       $for N in range(BATCH_TILE):
         vt${N} = vn${N} * vminus_ln2_lo + vt${N};
+
+      $if not WASM:
+        $for N in range(BATCH_TILE):
+          if XNN_UNPREDICTABLE(vz${N} <= vsat_cutoff) {
+            vs${N} = 0.0f;
+            vt${N} = 0.0f;
+          }
 
       $for N in range(BATCH_TILE):
         float vp${N} = vc6 * vt${N} + vc5;
@@ -122,13 +123,15 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_x${BATCH_TILE}
       float vn = vz * vlog2e + vmagic_bias;
       float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
       vn -= vmagic_bias;
-      $if not WASM:
-        if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
-          vs = 0.0f;
-        }
 
       float vt = vn * vminus_ln2_hi + vz;
       vt = vn * vminus_ln2_lo + vt;
+
+      $if not WASM:
+        if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
+          vs = 0.0f;
+          vt = 0.0f;
+        }
 
       float vp = vc6 * vt + vc5;
       vp = vp * vt + vc4;
@@ -166,13 +169,15 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_x${BATCH_TILE}
       float vn = vz * vlog2e + vmagic_bias;
       float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
       vn -= vmagic_bias;
-      $if not WASM:
-        if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
-          vs = 0.0f;
-        }
 
       float vt = vn * vminus_ln2_hi + vz;
       vt = vn * vminus_ln2_lo + vt;
+
+      $if not WASM:
+        if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
+          vs = 0.0f;
+          vt = 0.0f;
+        }
 
       float vp = vc6 * vt + vc5;
       vp = vp * vt + vc4;
@@ -209,13 +214,15 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_x${BATCH_TILE}
         float vn = vz * vlog2e + vmagic_bias;
         float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
         vn -= vmagic_bias;
-        $if not WASM:
-          if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
-            vs = 0.0f;
-          }
 
         float vt = vn * vminus_ln2_hi + vz;
         vt = vn * vminus_ln2_lo + vt;
+
+        $if not WASM:
+          if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
+            vs = 0.0f;
+            vt = 0.0f;
+          }
 
         float vp = vc6 * vt + vc5;
         vp = vp * vt + vc4;

@@ -48,12 +48,14 @@ void xnn_f32_velu_ukernel__scalar_rr2_p6_x1(
     float vn = vz * vlog2e + vmagic_bias;
     float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
     vn -= vmagic_bias;
-    if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
-      vs = 0.0f;
-    }
 
     float vt = vn * vminus_ln2_hi + vz;
     vt = vn * vminus_ln2_lo + vt;
+
+    if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
+      vs = 0.0f;
+      vt = 0.0f;
+    }
 
     float vp = vc6 * vt + vc5;
     vp = vp * vt + vc4;

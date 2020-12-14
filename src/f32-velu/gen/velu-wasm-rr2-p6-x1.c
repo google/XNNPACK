@@ -52,6 +52,7 @@ void xnn_f32_velu_ukernel__wasm_rr2_p6_x1(
     float vt = vn * vminus_ln2_hi + vz;
     vt = vn * vminus_ln2_lo + vt;
 
+
     float vp = vc6 * vt + vc5;
     vp = vp * vt + vc4;
     vp = vp * vt + vc3;

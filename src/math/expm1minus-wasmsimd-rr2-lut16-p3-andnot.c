@@ -76,14 +76,16 @@ void xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot(
     // Subtract the large number back to get final n := round(x / log(2), 4).
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    // The function saturates at -1 for large negative inputs: expm1f(x) == -1.0f for x <= sat_cutoff ~= -17.328680.
-    // To guarantee this behaviour, we zero out s (scale) for x <= sat_cutoff.
-    vs = wasm_v128_andnot(vs, wasm_f32x4_le(vx, vsat_cutoff));
-
     // Compute reduced argument t := x - n * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_hi), vx);
     vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_lo), vt);
+
+    // The function saturates at -1 for large negative inputs: expm1f(x) == -1.0f for x <= sat_cutoff ~= -17.328680.
+    // To guarantee this behaviour, we zero out s (scale) and t (reduced argument) for x <= sat_cutoff.
+    const v128_t vm = wasm_f32x4_le(vx, vsat_cutoff);
+    vs = wasm_v128_andnot(vs, vm);
+    vt = wasm_v128_andnot(vt, vm);
 
     // Compute degree-3 polynomial approximation for exp(t) - 1 on [-log(2)/32, log(2)/32].
     //   P(t) = t * (1 + t * (c2 + t * c3)) = t + t * (t * (c2 + t * c3)) = t + t * p

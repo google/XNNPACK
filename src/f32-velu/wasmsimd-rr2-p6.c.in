@@ -63,17 +63,19 @@ void xnn_f32_velu_ukernel__wasmsimd_${"x86" if X86 else "arm"}_rr2_p6_x${BATCH_T
       $for N in range(0, BATCH_TILE, 4):
         vn${ABC[N:N+4]} = wasm_f32x4_sub(vn${ABC[N:N+4]}, vmagic_bias);
 
-      $if X86:
-        $for N in range(0, BATCH_TILE, 4):
-          vs${ABC[N:N+4]} = wasm_v128_andnot(vs${ABC[N:N+4]}, wasm_f32x4_le(vz${ABC[N:N+4]}, vsat_cutoff));
-
       $for N in range(0, BATCH_TILE, 4):
         v128_t vt${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_hi), vz${ABC[N:N+4]});
+        $if X86:
+          const v128_t vsatm${ABC[N:N+4]} = wasm_f32x4_le(vz${ABC[N:N+4]}, vsat_cutoff);
 
       $for N in range(0, BATCH_TILE, 4):
         vt${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_lo), vt${ABC[N:N+4]});
+        $if X86:
+          vs${ABC[N:N+4]} = wasm_v128_andnot(vs${ABC[N:N+4]}, vsatm${ABC[N:N+4]});
 
       $for N in range(0, BATCH_TILE, 4):
+        $if X86:
+          vt${ABC[N:N+4]} = wasm_v128_andnot(vt${ABC[N:N+4]}, vsatm${ABC[N:N+4]});
         v128_t vp${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vc6, vt${ABC[N:N+4]}), vc5);
 
       $for N in range(0, BATCH_TILE, 4):
@@ -99,11 +101,11 @@ void xnn_f32_velu_ukernel__wasmsimd_${"x86" if X86 else "arm"}_rr2_p6_x${BATCH_T
         const v128_t ve${ABC[N:N+4]} = wasm_f32x4_mul(wasm_f32x4_add(vp${ABC[N:N+4]}, vs${ABC[N:N+4]}), valpha);
 
       $for N in range(0, BATCH_TILE, 4):
-        const v128_t vm${ABC[N:N+4]} = wasm_i32x4_shr(vx${ABC[N:N+4]}, 31);
+        const v128_t vsignm${ABC[N:N+4]} = wasm_i32x4_shr(vx${ABC[N:N+4]}, 31);
         vx${ABC[N:N+4]} = wasm_f32x4_mul(vx${ABC[N:N+4]}, vbeta);
 
       $for N in range(0, BATCH_TILE, 4):
-        const v128_t vy${ABC[N:N+4]} = wasm_v128_bitselect(ve${ABC[N:N+4]}, vx${ABC[N:N+4]}, vm${ABC[N:N+4]});
+        const v128_t vy${ABC[N:N+4]} = wasm_v128_bitselect(ve${ABC[N:N+4]}, vx${ABC[N:N+4]}, vsignm${ABC[N:N+4]});
 
       wasm_v128_store(y, vy${ABC[0:4]});
       $for N in range(4, BATCH_TILE, 4):
@@ -122,11 +124,14 @@ void xnn_f32_velu_ukernel__wasmsimd_${"x86" if X86 else "arm"}_rr2_p6_x${BATCH_T
     v128_t vn = wasm_f32x4_add(wasm_f32x4_mul(vz, vlog2e), vmagic_bias);
     v128_t vs = wasm_i32x4_shl(vn, 23);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
-    $if X86:
-      vs = wasm_v128_andnot(vs, wasm_f32x4_le(vz, vsat_cutoff));
 
     v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_hi), vz);
+    $if X86:
+      const v128_t vsatm = wasm_f32x4_le(vz, vsat_cutoff);
     vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_lo), vt);
+    $if X86:
+      vs = wasm_v128_andnot(vs, vsatm);
+      vt = wasm_v128_andnot(vt, vsatm);
 
     v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc6, vt), vc5);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc4);
@@ -139,9 +144,9 @@ void xnn_f32_velu_ukernel__wasmsimd_${"x86" if X86 else "arm"}_rr2_p6_x${BATCH_T
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vt);
     const v128_t ve = wasm_f32x4_mul(wasm_f32x4_add(vp, vs), valpha);
 
-    const v128_t vm = wasm_i32x4_shr(vx, 31);
+    const v128_t vsignm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    const v128_t vy = wasm_v128_bitselect(ve, vx, vm);
+    const v128_t vy = wasm_v128_bitselect(ve, vx, vsignm);
 
     wasm_v128_store(y, vy);
     y += 4;
@@ -157,11 +162,14 @@ void xnn_f32_velu_ukernel__wasmsimd_${"x86" if X86 else "arm"}_rr2_p6_x${BATCH_T
     v128_t vn = wasm_f32x4_add(wasm_f32x4_mul(vz, vlog2e), vmagic_bias);
     v128_t vs = wasm_i32x4_shl(vn, 23);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
-    $if X86:
-      vs = wasm_v128_andnot(vs, wasm_f32x4_le(vz, vsat_cutoff));
 
     v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_hi), vz);
+    $if X86:
+      const v128_t vsatm = wasm_f32x4_le(vz, vsat_cutoff);
     vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_lo), vt);
+    $if X86:
+      vs = wasm_v128_andnot(vs, vsatm);
+      vt = wasm_v128_andnot(vt, vsatm);
 
     v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc6, vt), vc5);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc4);
@@ -174,9 +182,9 @@ void xnn_f32_velu_ukernel__wasmsimd_${"x86" if X86 else "arm"}_rr2_p6_x${BATCH_T
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vt);
     const v128_t ve = wasm_f32x4_mul(wasm_f32x4_add(vp, vs), valpha);
 
-    const v128_t vm = wasm_i32x4_shr(vx, 31);
+    const v128_t vsignm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    v128_t vy = wasm_v128_bitselect(ve, vx, vm);
+    v128_t vy = wasm_v128_bitselect(ve, vx, vsignm);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
