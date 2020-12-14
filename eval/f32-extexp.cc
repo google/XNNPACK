@@ -7,6 +7,7 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <memory>
 #include <numeric>
 #include <random>
 #include <vector>
