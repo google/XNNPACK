@@ -45,7 +45,7 @@ class SubgraphTester {
                                     uint32_t external_id) {
     void* data = nullptr;
     if (tensor_type == kStaticDense || tensor_type == kStaticSparse) {
-      const size_t num_elements = std::accumulate(std::begin(dims), std::end(dims), 1, std::multiplies<>());
+      const size_t num_elements = std::accumulate(std::begin(dims), std::end(dims), 1, std::multiplies<size_t>());
       static_data_.emplace_back(num_elements);
       std::vector<float>& weights = static_data_.back();
       auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f), std::ref(rng_));
