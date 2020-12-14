@@ -65,10 +65,10 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    strip_prefix = "cpuinfo-6cecd15784fcb6c5c0aa7311c6248879ce2cb8b2",
-    sha256 = "b1f2ee97e46d8917a66bcb47452fc510d511829556c93b83e06841b9b35261a5",
+    strip_prefix = "cpuinfo-ed8b86a253800bafdb7b25c5c399f91bff9cb1f3",
+    sha256 = "a7f9a188148a1660149878f737f42783e72f33a4f842f3e362fee2c981613e53",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/6cecd15784fcb6c5c0aa7311c6248879ce2cb8b2.zip",
+        "https://github.com/pytorch/cpuinfo/archive/ed8b86a253800bafdb7b25c5c399f91bff9cb1f3.zip",
     ],
     build_file = "@//third_party:cpuinfo.BUILD",
     patches = ["@//third_party:cpuinfo.patch"],
