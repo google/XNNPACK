@@ -73,6 +73,12 @@
   #define XNN_PLATFORM_IOS 0
 #endif
 
+#if defined(__APPLE__) && TARGET_OS_MAC
+  #define XNN_PLATFORM_MAC 1
+#else
+  #define XNN_PLATFORM_MAC 0
+#endif
+
 #if XNN_PLATFORM_ANDROID || XNN_PLATFORM_IOS
   #define XNN_PLATFORM_MOBILE 1
 #else

@@ -794,7 +794,7 @@ static void init(void) {
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
-    #if XNN_PLATFORM_IOS
+    #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
       #if XNN_ENABLE_ASSEMBLY
         if (cpuinfo_has_arm_neon_dot()) {
           xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64);
@@ -830,7 +830,7 @@ static void init(void) {
           xnn_params.qs8.gemm.nr = 8;
         }
       #endif  // XNN_ENABLE_ASSEMBLY
-    #else  // !XNN_PLATFORM_IOS
+    #else  // !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
       #if XNN_ENABLE_ASSEMBLY
         if (cpuinfo_has_arm_neon_dot()) {
           switch (cpuinfo_get_core(0)->uarch) {
@@ -901,7 +901,7 @@ static void init(void) {
           xnn_params.qs8.gemm.nr = 8;
         }
       #endif  // XNN_ENABLE_ASSEMBLY
-    #endif  // XNN_PLATFORM_IOS
+    #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
 
     xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up8x9__neon_mul16;
     xnn_params.qs8.dwconv[0].channel_tile = 8;
@@ -1034,7 +1034,7 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    #if XNN_PLATFORM_IOS
+    #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
       #if XNN_ENABLE_ASSEMBLY
         xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75);
         xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75);
@@ -1050,7 +1050,7 @@ static void init(void) {
         xnn_params.f32.gemm.mr = 6;
         xnn_params.f32.gemm.nr = 8;
        #endif  // XNN_ENABLE_ASSEMBLY
-    #else  // !XNN_PLATFORM_IOS
+    #else  // !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
       #if XNN_ENABLE_ASSEMBLY
         switch (cpuinfo_get_core(0)->uarch) {
           case cpuinfo_uarch_cortex_a57:
@@ -1182,7 +1182,7 @@ static void init(void) {
         xnn_params.f32.gemm.mr = 6;
         xnn_params.f32.gemm.nr = 8;
       #endif  // XNN_ENABLE_ASSEMBLY
-    #endif  // XNN_PLATFORM_IOS
+    #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
     xnn_params.f32.gemm2.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_4x2__neonfma_lane_ld64);
     xnn_params.f32.gemm2.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_4x2__neonfma_lane_ld64);
     xnn_params.f32.gemm2.mr = 4;
@@ -1192,11 +1192,11 @@ static void init(void) {
     xnn_params.f32.dwconv[0].channel_tile = 8;
     xnn_params.f32.dwconv[0].primary_tile = 4;
 
-    #if XNN_PLATFORM_IOS
+    #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
       xnn_params.f32.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up8x9__neonfma;
       xnn_params.f32.dwconv[1].channel_tile = 8;
       xnn_params.f32.dwconv[1].primary_tile = 9;
-    #else  // !XNN_PLATFORM_IOS
+    #else  // !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
       switch (cpuinfo_get_core(0)->uarch) {
         case cpuinfo_uarch_kryo:
           xnn_params.f32.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up4x9__neonfma;
@@ -1218,7 +1218,7 @@ static void init(void) {
           xnn_params.f32.dwconv[1].primary_tile = 9;
           break;
       }
-    #endif  // XNN_PLATFORM_IOS
+    #endif  // XNN_PLATFORM_IOS && XNN_PLATFORM_MAC
 
     xnn_params.f32.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f32_dwconv_minmax_ukernel_up4x25__neonfma_acc2;
     xnn_params.f32.dwconv[2].channel_tile = 4;
