@@ -4503,37 +4503,37 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark cpuinfo)
 
   # ---[ Build accuracy microbenchmarks
-  ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc)
-  SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES
+  ADD_EXECUTABLE(f32-exp-ulp-eval eval/f32-exp.cc)
+  SET_TARGET_PROPERTIES(f32-exp-ulp-eval PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-exp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_INCLUDE_DIRECTORIES(f32-exp-ulp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-exp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-expminus-eval eval/f32-expminus.cc)
-  SET_TARGET_PROPERTIES(f32-expminus-eval PROPERTIES
+  ADD_EXECUTABLE(f32-expminus-ulp-eval eval/f32-expminus.cc)
+  SET_TARGET_PROPERTIES(f32-expminus-ulp-eval PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_INCLUDE_DIRECTORIES(f32-expminus-ulp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-expminus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-expm1minus-eval eval/f32-expm1minus.cc)
-  SET_TARGET_PROPERTIES(f32-expm1minus-eval PROPERTIES
+  ADD_EXECUTABLE(f32-expm1minus-ulp-eval eval/f32-expm1minus.cc)
+  SET_TARGET_PROPERTIES(f32-expm1minus-ulp-eval PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-ulp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-extexp-eval eval/f32-extexp.cc)
-  SET_TARGET_PROPERTIES(f32-extexp-eval PROPERTIES
+  ADD_EXECUTABLE(f32-extexp-ulp-eval eval/f32-extexp.cc)
+  SET_TARGET_PROPERTIES(f32-extexp-ulp-eval PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-extexp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-extexp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_INCLUDE_DIRECTORIES(f32-extexp-ulp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-roundne-eval eval/f32-roundne.cc)
   SET_TARGET_PROPERTIES(f32-roundne-eval PROPERTIES
@@ -4567,21 +4567,21 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-roundz-eval PRIVATE src)
   TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE XNNPACK fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-sigmoid-eval eval/f32-sigmoid.cc)
-  SET_TARGET_PROPERTIES(f32-sigmoid-eval PROPERTIES
+  ADD_EXECUTABLE(f32-sigmoid-ulp-eval eval/f32-sigmoid.cc)
+  SET_TARGET_PROPERTIES(f32-sigmoid-ulp-eval PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sigmoid-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-ulp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-sigmoid-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-sqrt-eval eval/f32-sqrt.cc)
-  SET_TARGET_PROPERTIES(f32-sqrt-eval PROPERTIES
+  ADD_EXECUTABLE(f32-sqrt-ulp-eval eval/f32-sqrt.cc)
+  SET_TARGET_PROPERTIES(f32-sqrt-ulp-eval PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-sqrt-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sqrt-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_INCLUDE_DIRECTORIES(f32-sqrt-ulp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   # ---[ Build end-to-end microbenchmarks
   ADD_LIBRARY(bench-models STATIC

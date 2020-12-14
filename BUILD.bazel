@@ -5310,9 +5310,9 @@ xnnpack_benchmark(
 #################### Accuracy evaluation for math functions ####################
 
 xnnpack_benchmark(
-    name = "f32_exp_eval",
+    name = "f32_exp_ulp_eval",
     srcs = [
-        "eval/f32-exp.cc",
+        "eval/f32-exp-ulp.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
@@ -5322,9 +5322,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_expminus_eval",
+    name = "f32_expminus_ulp_eval",
     srcs = [
-        "eval/f32-expminus.cc",
+        "eval/f32-expminus-ulp.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
@@ -5334,9 +5334,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_expm1minus_eval",
+    name = "f32_expm1minus_ulp_eval",
     srcs = [
-        "eval/f32-expm1minus.cc",
+        "eval/f32-expm1minus-ulp.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
@@ -5346,9 +5346,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_extexp_eval",
+    name = "f32_extexp_ulp_eval",
     srcs = [
-        "eval/f32-extexp.cc",
+        "eval/f32-extexp-ulp.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
@@ -5402,9 +5402,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_benchmark(
-    name = "f32_sigmoid_eval",
+    name = "f32_sigmoid_ulp_eval",
     srcs = [
-        "eval/f32-sigmoid.cc",
+        "eval/f32-sigmoid-ulp.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
@@ -5414,9 +5414,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_sqrt_eval",
+    name = "f32_sqrt_ulp_eval",
     srcs = [
-        "eval/f32-sqrt.cc",
+        "eval/f32-sqrt-ulp.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
