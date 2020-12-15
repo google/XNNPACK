@@ -5384,6 +5384,17 @@ xnnpack_benchmark(
 ################### Accuracy verification for math functions ##################
 
 xnnpack_unit_test(
+    name = "f32_exp_eval",
+    srcs = [
+        "eval/f32-exp.cc",
+        "src/xnnpack/AlignedAllocator.h",
+        "src/xnnpack/math-stubs.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    automatic = False,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f32_expm1minus_eval",
     srcs = [
         "eval/f32-expm1minus.cc",
