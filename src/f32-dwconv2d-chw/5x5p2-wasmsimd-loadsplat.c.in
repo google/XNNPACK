@@ -1,0 +1,537 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ROW_TILE >= 1
+$assert ACCUMULATORS >= 1
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
+
+
+$ARCH_SUFFIX = "_x86" if X86 else "_arm"
+
+void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_loadsplat_${ROW_TILE}x4${"_acc%d" % ACCUMULATORS if ACCUMULATORS > 1 else ""}(
+    size_t input_height,
+    size_t input_width,
+    const float* input,
+    const float* weights,
+    const float* zero,
+    float* output,
+    uint32_t padding_top,
+    const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
+  assert(padding_top == 2);
+
+  const v128_t vmask = wasm_v128_load(params->scalar.mask);
+  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+
+  const v128_t vw0123 = wasm_v128_load(weights);
+  const v128_t vw4567 = wasm_v128_load(weights + 4);
+  const v128_t vw89AB = wasm_v128_load(weights + 8);
+  const v128_t vwCDEF = wasm_v128_load(weights + 12);
+  const v128_t vwGHIJ = wasm_v128_load(weights + 16);
+  const v128_t vwKLMN = wasm_v128_load(weights + 20);
+  const v128_t vwOP = wasm_v64x2_load_splat(weights + 24);
+  const v128_t vbias = wasm_v32x4_shuffle(vw0123, vw0123, 0, 0, 0, 0);
+  const v128_t vk00 =  wasm_v32x4_shuffle(vw0123, vw0123, 1, 1, 1, 1);
+  const v128_t vk01 =  wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2);
+  const v128_t vk02 =  wasm_v32x4_shuffle(vw0123, vw0123, 3, 3, 3, 3);
+  const v128_t vk03 =  wasm_v32x4_shuffle(vw4567, vw4567, 0, 0, 0, 0);
+  const v128_t vk04 =  wasm_v32x4_shuffle(vw4567, vw4567, 1, 1, 1, 1);
+  const v128_t vk10 =  wasm_v32x4_shuffle(vw4567, vw4567, 2, 2, 2, 2);
+  const v128_t vk11 =  wasm_v32x4_shuffle(vw4567, vw4567, 3, 3, 3, 3);
+  const v128_t vk12 =  wasm_v32x4_shuffle(vw89AB, vw89AB, 0, 0, 0, 0);
+  const v128_t vk13 =  wasm_v32x4_shuffle(vw89AB, vw89AB, 1, 1, 1, 1);
+  const v128_t vk14 =  wasm_v32x4_shuffle(vw89AB, vw89AB, 2, 2, 2, 2);
+  const v128_t vk20 =  wasm_v32x4_shuffle(vw89AB, vw89AB, 3, 3, 3, 3);
+  const v128_t vk21 =  wasm_v32x4_shuffle(vwCDEF, vwCDEF, 0, 0, 0, 0);
+  const v128_t vk22 =  wasm_v32x4_shuffle(vwCDEF, vwCDEF, 1, 1, 1, 1);
+  const v128_t vk23 =  wasm_v32x4_shuffle(vwCDEF, vwCDEF, 2, 2, 2, 2);
+  const v128_t vk24 =  wasm_v32x4_shuffle(vwCDEF, vwCDEF, 3, 3, 3, 3);
+  const v128_t vk30 =  wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 0, 0, 0, 0);
+  const v128_t vk31 =  wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 1, 1, 1, 1);
+  const v128_t vk32 =  wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 2, 2, 2, 2);
+  const v128_t vk33 =  wasm_v32x4_shuffle(vwGHIJ, vwGHIJ, 3, 3, 3, 3);
+  const v128_t vk34 =  wasm_v32x4_shuffle(vwKLMN, vwKLMN, 0, 0, 0, 0);
+  const v128_t vk40 =  wasm_v32x4_shuffle(vwKLMN, vwKLMN, 1, 1, 1, 1);
+  const v128_t vk41 =  wasm_v32x4_shuffle(vwKLMN, vwKLMN, 2, 2, 2, 2);
+  const v128_t vk42 =  wasm_v32x4_shuffle(vwKLMN, vwKLMN, 3, 3, 3, 3);
+  const v128_t vk43 =  wasm_v32x4_shuffle(vwOP,   vwOP,   0, 0, 0, 0);
+  const v128_t vk44 =  wasm_v32x4_shuffle(vwOP,   vwOP,   1, 1, 1, 1);
+
+  const v128_t vzero = wasm_f32x4_splat(0.0f);
+
+  const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(float));
+
+  const float* i0 = zero;
+  const float* i1 = zero;
+  const float* i2 = input;
+  $for M in range(3, 4 + ROW_TILE):
+    const float* i${M} = (const float*) ((uintptr_t) i${M-1} + input_width);
+
+  float* o0 = output;
+  $for M in range(1, ROW_TILE):
+    float* o${M} = (float*) ((uintptr_t) o${M-1} + input_width);
+
+  size_t output_height = input_height;
+  do {
+    $for M in range(2, 3 + ROW_TILE):
+      if XNN_UNPREDICTABLE(output_height < ${M}) {
+        i${M+1} = zero;
+        $if M <= ROW_TILE:
+          o${M-1} = o${M-2};
+      }
+
+    $for M in range(4 + ROW_TILE):
+      v128_t vi${M}x0123 = vzero;
+
+    $for M in range(4 + ROW_TILE):
+      v128_t vi${M}x4567 = wasm_v128_load(i${M}); i${M} += 4;
+
+    size_t w = input_width;
+    for (; w > 8 * sizeof(float); w -= 4 * sizeof(float)) {
+      $for M in range(ROW_TILE):
+        v128_t vo${M}p0 = vbias;
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x89AB = wasm_v128_load(i${M}); i${M} += 4;
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 1:
+          v128_t vo${M}p1 = wasm_f32x4_mul(vi${M}x4567, vk02);
+        $else:
+          vo${M}p0 = wasm_f32x4_add(vo${M}p0, wasm_f32x4_mul(vi${M}x4567, vk02));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 2:
+          v128_t vo${M}p2 = wasm_f32x4_mul(vi${M+1}x4567, vk12);
+        $else:
+          vo${M}p0 = wasm_f32x4_add(vo${M}p0, wasm_f32x4_mul(vi${M+1}x4567, vk12));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 3:
+          v128_t vo${M}p3 = wasm_f32x4_mul(vi${M+2}x4567, vk22);
+        $else:
+          vo${M}p${4 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${4 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x4567, vk22));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 4:
+          v128_t vo${M}p4 = wasm_f32x4_mul(vi${M+3}x4567, vk32);
+        $else:
+          vo${M}p${5 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${5 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x4567, vk32));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 6:
+          v128_t vo${M}p5 = wasm_f32x4_mul(vi${M+4}x4567, vk42);
+        $else:
+          vo${M}p${6 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${6 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x4567, vk42));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x3456 = wasm_v32x4_shuffle(vi${M}x0123, vi${M}x4567, 3, 4, 5, 6);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${7 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${7 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x3456, vk01));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${8 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${8 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x3456, vk11));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${9 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${9 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x3456, vk21));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${10 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${10 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x3456, vk31));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${11 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${11 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x3456, vk41));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x2345 = wasm_v32x4_shuffle(vi${M}x0123, vi${M}x4567, 2, 3, 4, 5);
+        vi${M}x0123 = vi${M}x4567;
+
+      $for M in range(ROW_TILE):
+        vo${M}p${12 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${12 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x2345, vk00));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${13 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${13 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x2345, vk10));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${14 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${14 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x2345, vk20));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${15 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${15 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x2345, vk30));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${16 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${16 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x2345, vk40));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x5678 = wasm_v32x4_shuffle(vi${M}x4567, vi${M}x89AB, 1, 2, 3, 4);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${17 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${17 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x5678, vk03));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${18 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${18 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x5678, vk13));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${19 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${19 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x5678, vk23));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${20 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${20 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x5678, vk33));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${21 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${21 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x5678, vk43));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x6789 = wasm_v32x4_shuffle(vi${M}x4567, vi${M}x89AB, 2, 3, 4, 5);
+        vi${M}x4567 = vi${M}x89AB;
+
+      $for M in range(ROW_TILE):
+        vo${M}p${22 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${22 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x6789, vk04));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${23 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${23 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x6789, vk14));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${24 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${24 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x6789, vk24));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${25 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${25 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x6789, vk34));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${26 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${26 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x6789, vk44));
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = wasm_f32x4_add(vo${M}p${A}, vo${M}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $if X86:
+        $for M in range(ROW_TILE):
+          v128_t vo${M} = wasm_v128_bitselect(vmin, vo${M}p0, wasm_f32x4_lt(vo${M}p0, vmin));
+        $for M in range(ROW_TILE):
+          vo${M} = wasm_v128_bitselect(vo${M}, vmax, wasm_f32x4_le(vo${M}, vmax));
+      $else:
+        $for M in range(ROW_TILE):
+          v128_t vo${M} = wasm_f32x4_max(vo${M}p0, vmin);
+        $for M in range(ROW_TILE):
+          vo${M} = wasm_f32x4_min(vo${M}, vmax);
+
+      $for M in reversed(range(ROW_TILE)):
+        wasm_v128_store(o${M}, vo${M}); o${M} += 4;
+    }
+    // Always process the last block of 5..8 pixels.
+    if XNN_LIKELY(w > 4 * sizeof(float)) {
+      $for M in range(ROW_TILE):
+        v128_t vo${M}p0 = vbias;
+
+      $for M in range(4 + ROW_TILE):
+        v128_t vi${M}x89AB = wasm_v128_load(i${M}); i${M} += 4;
+
+      $for M in range(4 + ROW_TILE):
+        vi${M}x89AB = wasm_v128_and(vmask, vi${M}x89AB);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 1:
+          v128_t vo${M}p1 = wasm_f32x4_mul(vi${M}x4567, vk02);
+        $else:
+          vo${M}p0 = wasm_f32x4_add(vo${M}p0, wasm_f32x4_mul(vi${M}x4567, vk02));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 2:
+          v128_t vo${M}p2 = wasm_f32x4_mul(vi${M+1}x4567, vk12);
+        $else:
+          vo${M}p0 = wasm_f32x4_add(vo${M}p0, wasm_f32x4_mul(vi${M+1}x4567, vk12));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 3:
+          v128_t vo${M}p3 = wasm_f32x4_mul(vi${M+2}x4567, vk22);
+        $else:
+          vo${M}p${4 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${4 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x4567, vk22));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 4:
+          v128_t vo${M}p4 = wasm_f32x4_mul(vi${M+3}x4567, vk32);
+        $else:
+          vo${M}p${5 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${5 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x4567, vk32));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 6:
+          v128_t vo${M}p5 = wasm_f32x4_mul(vi${M+4}x4567, vk42);
+        $else:
+          vo${M}p${6 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${6 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x4567, vk42));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x3456 = wasm_v32x4_shuffle(vi${M}x0123, vi${M}x4567, 3, 4, 5, 6);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${7 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${7 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x3456, vk01));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${8 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${8 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x3456, vk11));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${9 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${9 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x3456, vk21));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${10 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${10 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x3456, vk31));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${11 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${11 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x3456, vk41));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x2345 = wasm_v32x4_shuffle(vi${M}x0123, vi${M}x4567, 2, 3, 4, 5);
+        vi${M}x0123 = vi${M}x4567;
+
+      $for M in range(ROW_TILE):
+        vo${M}p${12 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${12 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x2345, vk00));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${13 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${13 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x2345, vk10));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${14 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${14 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x2345, vk20));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${15 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${15 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x2345, vk30));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${16 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${16 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x2345, vk40));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x5678 = wasm_v32x4_shuffle(vi${M}x4567, vi${M}x89AB, 1, 2, 3, 4);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${17 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${17 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x5678, vk03));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${18 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${18 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x5678, vk13));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${19 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${19 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x5678, vk23));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${20 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${20 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x5678, vk33));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${21 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${21 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x5678, vk43));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x6789 = wasm_v32x4_shuffle(vi${M}x4567, vi${M}x89AB, 2, 3, 4, 5);
+        vi${M}x4567 = vi${M}x89AB;
+
+      $for M in range(ROW_TILE):
+        vo${M}p${22 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${22 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x6789, vk04));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${23 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${23 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x6789, vk14));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${24 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${24 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x6789, vk24));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${25 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${25 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x6789, vk34));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${26 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${26 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x6789, vk44));
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = wasm_f32x4_add(vo${M}p${A}, vo${M}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $if X86:
+        $for M in range(ROW_TILE):
+          v128_t vo${M} = wasm_v128_bitselect(vmin, vo${M}p0, wasm_f32x4_lt(vo${M}p0, vmin));
+        $for M in range(ROW_TILE):
+          vo${M} = wasm_v128_bitselect(vo${M}, vmax, wasm_f32x4_le(vo${M}, vmax));
+      $else:
+        $for M in range(ROW_TILE):
+          v128_t vo${M} = wasm_f32x4_max(vo${M}p0, vmin);
+        $for M in range(ROW_TILE):
+          vo${M} = wasm_f32x4_min(vo${M}, vmax);
+
+      $for M in reversed(range(ROW_TILE)):
+        wasm_v128_store(o${M}, vo${M}); o${M} += 4;
+
+      w -= 4 * sizeof(float);
+    }
+    assert(w >= 1 * sizeof(float));
+    assert(w <= 4 * sizeof(float));
+    {
+      $for M in range(ROW_TILE):
+        v128_t vo${M}p0 = vbias;
+
+      $for M in range(4 + ROW_TILE):
+        vi${M}x4567 = wasm_v128_and(vmask, vi${M}x4567);
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 1:
+          v128_t vo${M}p1 = wasm_f32x4_mul(vi${M}x4567, vk02);
+        $else:
+          vo${M}p0 = wasm_f32x4_add(vo${M}p0, wasm_f32x4_mul(vi${M}x4567, vk02));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 2:
+          v128_t vo${M}p2 = wasm_f32x4_mul(vi${M+1}x4567, vk12);
+        $else:
+          vo${M}p0 = wasm_f32x4_add(vo${M}p0, wasm_f32x4_mul(vi${M+1}x4567, vk12));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 3:
+          v128_t vo${M}p3 = wasm_f32x4_mul(vi${M+2}x4567, vk22);
+        $else:
+          vo${M}p${4 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${4 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x4567, vk22));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 4:
+          v128_t vo${M}p4 = wasm_f32x4_mul(vi${M+3}x4567, vk32);
+        $else:
+          vo${M}p${5 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${5 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x4567, vk32));
+
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 6:
+          v128_t vo${M}p5 = wasm_f32x4_mul(vi${M+4}x4567, vk42);
+        $else:
+          vo${M}p${6 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${6 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x4567, vk42));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x3456 = wasm_v32x4_shuffle(vi${M}x0123, vi${M}x4567, 3, 4, 5, 6);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${7 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${7 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x3456, vk01));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${8 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${8 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x3456, vk11));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${9 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${9 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x3456, vk21));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${10 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${10 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x3456, vk31));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${11 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${11 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x3456, vk41));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x2345 = wasm_v32x4_shuffle(vi${M}x0123, vi${M}x4567, 2, 3, 4, 5);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${12 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${12 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x2345, vk00));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${13 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${13 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x2345, vk10));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${14 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${14 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x2345, vk20));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${15 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${15 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x2345, vk30));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${16 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${16 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x2345, vk40));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x5678 = wasm_v32x4_shuffle(vi${M}x4567, vzero, 1, 2, 3, 4);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${17 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${17 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x5678, vk03));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${18 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${18 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x5678, vk13));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${19 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${19 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x5678, vk23));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${20 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${20 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x5678, vk33));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${21 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${21 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x5678, vk43));
+
+      $for M in range(4 + ROW_TILE):
+        const v128_t vi${M}x6789 = wasm_v32x4_shuffle(vi${M}x5678, vzero, 1, 2, 3, 4);
+
+      $for M in range(ROW_TILE):
+        vo${M}p${22 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${22 % ACCUMULATORS}, wasm_f32x4_mul(vi${M}x6789, vk04));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${23 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${23 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+1}x6789, vk14));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${24 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${24 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+2}x6789, vk24));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${25 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${25 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+3}x6789, vk34));
+
+      $for M in range(ROW_TILE):
+        vo${M}p${26 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${26 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x6789, vk44));
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = wasm_f32x4_add(vo${M}p${A}, vo${M}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $if X86:
+        $for M in range(ROW_TILE):
+          v128_t vo${M} = wasm_v128_bitselect(vmin, vo${M}p0, wasm_f32x4_lt(vo${M}p0, vmin));
+        $for M in range(ROW_TILE):
+          vo${M} = wasm_v128_bitselect(vo${M}, vmax, wasm_f32x4_le(vo${M}, vmax));
+      $else:
+        $for M in range(ROW_TILE):
+          v128_t vo${M} = wasm_f32x4_max(vo${M}p0, vmin);
+        $for M in range(ROW_TILE):
+          vo${M} = wasm_f32x4_min(vo${M}, vmax);
+
+      if XNN_LIKELY(w & (4 * sizeof(float))) {
+        $for M in reversed(range(ROW_TILE)):
+          wasm_v128_store(o${M}, vo${M}); o${M} += 4;
+      } else {
+        if (w & (2 * sizeof(float))) {
+          $for M in reversed(range(ROW_TILE)):
+            *((double*) o${M}) = wasm_f64x2_extract_lane(vo${M}, 0); o${M} += 2;
+
+          $for M in range(ROW_TILE):
+            vo${M} = wasm_v32x4_shuffle(vo${M}, vo${M}, 2, 3, 0, 1);
+        }
+        if (w & (1 * sizeof(float))) {
+          $for M in reversed(range(ROW_TILE)):
+            *o${M} = wasm_f32x4_extract_lane(vo${M}, 0); o${M} += 1;
+        }
+      }
+    }
+
+    i0 = (const float*) ((uintptr_t) i${ROW_TILE} - input_decrement);
+    i1 = (const float*) ((uintptr_t) i${ROW_TILE+1} - input_decrement);
+    $for M in range(2, 4 + ROW_TILE):
+      i${M} = (const float*) ((uintptr_t) i${M-1} + input_width);
+
+    $if ROW_TILE > 1:
+      o0 = o${ROW_TILE - 1};
+      $for M in range(1, ROW_TILE):
+        o${M} = (float*) ((uintptr_t) o${M-1} + input_width);
+
+    $if ROW_TILE > 1:
+      output_height = doz(output_height, ${ROW_TILE});
+  } while (${"--" if ROW_TILE == 1 else ""}output_height != 0);
+}
