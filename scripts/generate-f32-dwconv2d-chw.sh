@@ -259,6 +259,26 @@ tools/xngen src/f32-dwconv2d-chw/3x3p1-wasmsimd-splat.c.in -D ROW_TILE=1 -D ACCU
 tools/xngen src/f32-dwconv2d-chw/3x3p1-wasmsimd-splat.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-1x4-acc4.c
 tools/xngen src/f32-dwconv2d-chw/3x3p1-wasmsimd-splat.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-2x4-acc2.c
 
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-1x4.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-2x4.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-3x4.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=4 -D ACCUMULATORS=1 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-4x4.c
+
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-1x4-acc2.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-1x4-acc3.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-1x4-acc4.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-2x4-acc2.c
+
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-2x4.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-3x4.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=4 -D ACCUMULATORS=1 -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-4x4.c
+
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc2.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc3.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc4.c
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-loadsplat.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D X86=1 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-2x4-acc2.c
+
 tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-splat.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-1x4.c
 tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-splat.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-2x4.c
 tools/xngen src/f32-dwconv2d-chw/3x3s2p1-wasmsimd-splat.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D X86=0 -o src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-3x4.c
