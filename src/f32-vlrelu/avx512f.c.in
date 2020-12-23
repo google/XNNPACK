@@ -25,34 +25,32 @@ void xnn_f32_vlrelu_ukernel__avx512f_x${BATCH_TILE}(
   assert(n % sizeof(float) == 0);
 
   const __m512 vslope = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.slope));
-  const __m512 vzero = _mm512_setzero_ps();
-
-  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
-    __m512 vacc${ABC[0:16]} = _mm512_loadu_ps(x);
-    $for N in range(16, BATCH_TILE, 16):
-      __m512 vacc${ABC[N:N+16]} = _mm512_loadu_ps(x + ${N});
-    x += ${BATCH_TILE};
-
-    $for N in range(0, BATCH_TILE, 16):
-      const __mmask16 vsign${ABC[N:N+16]} = _mm512_cmp_ps_mask(vacc${ABC[N:N+16]}, vzero, _CMP_LT_OQ);
-
-    $for N in range(0, BATCH_TILE, 16):
-      vacc${ABC[N:N+16]} = _mm512_mask_mul_ps(vacc${ABC[N:N+16]}, vsign${ABC[N:N+16]}, vacc${ABC[N:N+16]}, vslope);
-
-    _mm512_storeu_ps(y, vacc${ABC[0:16]});
-    $for N in range(16, BATCH_TILE, 16):
-      _mm512_storeu_ps(y + ${N}, vacc${ABC[N:N+16]});
-    y += ${BATCH_TILE};
-  }
   $if BATCH_TILE > 16:
-    for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-      __m512 vacc = _mm512_loadu_ps(x);
-      x += 16;
-      const __mmask16 vsign = _mm512_cmp_ps_mask(vacc, vzero, _CMP_LT_OQ);
-      vacc = _mm512_mask_mul_ps(vacc, vsign, vacc, vslope);
-      _mm512_storeu_ps(y, vacc);
-      y += 16;
+    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+      __m512 vacc${ABC[0:16]} = _mm512_loadu_ps(x);
+      $for N in range(16, BATCH_TILE, 16):
+        __m512 vacc${ABC[N:N+16]} = _mm512_loadu_ps(x + ${N});
+      x += ${BATCH_TILE};
+
+      $for N in range(0, BATCH_TILE, 16):
+        const __mmask16 vsign${ABC[N:N+16]} = _mm512_movepi32_mask(_mm512_castps_si512(vacc${ABC[N:N+16]}));
+
+      $for N in range(0, BATCH_TILE, 16):
+        vacc${ABC[N:N+16]} = _mm512_mask_mul_ps(vacc${ABC[N:N+16]}, vsign${ABC[N:N+16]}, vacc${ABC[N:N+16]}, vslope);
+
+      _mm512_storeu_ps(y, vacc${ABC[0:16]});
+      $for N in range(16, BATCH_TILE, 16):
+        _mm512_storeu_ps(y + ${N}, vacc${ABC[N:N+16]});
+      y += ${BATCH_TILE};
     }
+  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
+    __m512 vacc = _mm512_loadu_ps(x);
+    x += 16;
+    const __mmask16 vsign = _mm512_movepi32_mask(_mm512_castps_si512(vacc));
+    vacc = _mm512_mask_mul_ps(vacc, vsign, vacc, vslope);
+    _mm512_storeu_ps(y, vacc);
+    y += 16;
+  }
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 15 * sizeof(float));
@@ -61,7 +59,7 @@ void xnn_f32_vlrelu_ukernel__avx512f_x${BATCH_TILE}(
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
 
     __m512 vacc = _mm512_maskz_loadu_ps(vmask, x);
-    const __mmask16 vsign = _mm512_mask_cmp_ps_mask(vmask, vacc, vzero, _CMP_LT_OQ);
+    const __mmask16 vsign = _mm512_movepi32_mask(_mm512_castps_si512(vacc));
     vacc = _mm512_mask_mul_ps(vacc, vsign, vacc, vslope);
     _mm512_mask_storeu_ps(y, vmask, vacc);
   }
