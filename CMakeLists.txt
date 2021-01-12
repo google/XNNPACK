@@ -949,6 +949,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-gemm/gen/1x16-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/2x8-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/2x16-minmax-neon-mlal-lane.c
+  src/qs8-gemm/gen/4x8-minmax-neon-mlal-lane.c
+  src/qs8-gemm/gen/4x16-minmax-neon-mlal-lane.c
   src/qs8-igemm/gen/1x8-minmax-neon-mlal-lane.c
   src/qs8-igemm/gen/1x16-minmax-neon-mlal-lane.c
   src/qs8-igemm/gen/2x8-minmax-neon-mlal-lane.c
