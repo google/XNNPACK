@@ -70,7 +70,7 @@ class BinaryElementwiseOperatorTester {
   }
 
   inline BinaryElementwiseOperatorTester& input1_scale(float input1_scale) {
-    assert(isfinite(input1_scale));
+    assert(std::isfinite(input1_scale));
     this->input1_scale_ = input1_scale;
     return *this;
   }
@@ -112,7 +112,7 @@ class BinaryElementwiseOperatorTester {
   }
 
   inline BinaryElementwiseOperatorTester& input2_scale(float input2_scale) {
-    assert(isfinite(input2_scale));
+    assert(std::isfinite(input2_scale));
     this->input2_scale_ = input2_scale;
     return *this;
   }
@@ -131,7 +131,7 @@ class BinaryElementwiseOperatorTester {
   }
 
   inline BinaryElementwiseOperatorTester& output_scale(float output_scale) {
-    assert(isfinite(output_scale));
+    assert(std::isfinite(output_scale));
     this->output_scale_ = output_scale;
     return *this;
   }
