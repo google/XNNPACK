@@ -47,7 +47,9 @@ void xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86(
           const v128_t vi0123 = wasm_v128_load(input);
           const v128_t vi4567 = wasm_v128_load(input + 4);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          __builtin_wasm_prefetch_t((void*) (input + 16));
           const v128_t vw = wasm_v32x4_load_splat(w); w += 1;
+          __builtin_wasm_prefetch_t((void*) (w + 32));
           vacc0123 = wasm_f32x4_add(vacc0123, wasm_f32x4_mul(vi0123, vw));
           vacc4567 = wasm_f32x4_add(vacc4567, wasm_f32x4_mul(vi4567, vw));
         } while (--nnz != 0);

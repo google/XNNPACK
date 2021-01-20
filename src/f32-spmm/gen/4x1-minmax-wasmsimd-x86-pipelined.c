@@ -50,6 +50,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_pipelined(
         do {
           vacc0123 = wasm_f32x4_add(vacc0123, wasm_f32x4_mul(vi0123, vw));
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          __builtin_wasm_prefetch_t((void*) (input + 0));
 
           diff = *dmap++;
           vw = wasm_v32x4_load_splat(w); w += 1;

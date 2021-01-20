@@ -69,6 +69,8 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_pipelined_x2(
         vaccOPQR = wasm_f32x4_add(vaccOPQR, wasm_f32x4_mul(viOPQR,   vw));
         vaccSTUV = wasm_f32x4_add(vaccSTUV, wasm_f32x4_mul(viSTUV,   vw));
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+        __builtin_wasm_prefetch_t((void*) (input + 0));
+        __builtin_wasm_prefetch_t((void*) (input + 16));
         diff = *dmap++;
         vw = wasm_v32x4_load_splat(w); w += 1;
         vi0123 = wasm_v128_load(input + 0);
@@ -88,6 +90,8 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_pipelined_x2(
         vaccOPQR = wasm_f32x4_add(vaccOPQR, wasm_f32x4_mul(viOPQR,   vw));
         vaccSTUV = wasm_f32x4_add(vaccSTUV, wasm_f32x4_mul(viSTUV,   vw));
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+        __builtin_wasm_prefetch_t((void*) (input + 0));
+        __builtin_wasm_prefetch_t((void*) (input + 16));
         diff = *dmap++;
         vw = wasm_v32x4_load_splat(w); w += 1;
         vi0123 = wasm_v128_load(input + 0);
@@ -111,6 +115,8 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_pipelined_x2(
           vaccOPQR = wasm_f32x4_add(vaccOPQR, wasm_f32x4_mul(viOPQR, vw));
           vaccSTUV = wasm_f32x4_add(vaccSTUV, wasm_f32x4_mul(viSTUV, vw));
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          __builtin_wasm_prefetch_t((void*) (input + 0));
+          __builtin_wasm_prefetch_t((void*) (input + 16));
 
           diff = *dmap++;
           vw = wasm_v32x4_load_splat(w); w += 1;
