@@ -1,0 +1,205 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert PIXEL_TILE >= 1
+$assert PIXEL_TILE % 4 == 0
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
+$VMULADD_F32 = "vfma_f32" if FMA else "vmla_f32"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/ibilinear.h>
+
+
+void xnn_f32_ibilinear_chw_ukernel__${"neonfma" if FMA else "neon"}_p${PIXEL_TILE}(
+    size_t output_pixels,
+    size_t channels,
+    const float**restrict input,
+    size_t input_offset,
+    const float*restrict weights,
+    float*restrict output,
+    size_t input_increment) XNN_DISABLE_TSAN
+{
+  assert(output_pixels != 0);
+  assert(channels != 0);
+  assert(input_increment % sizeof(float) == 0);
+
+  do {
+    const float** i = input;
+    const float* w = weights;
+    size_t p = output_pixels;
+    $if PIXEL_TILE > 4:
+      for (; p >= ${PIXEL_TILE}; p -= ${PIXEL_TILE}) {
+        $for P in range(PIXEL_TILE):
+          const float* itl${ABC[P]} = (const float*) ((uintptr_t) i[${2 * P}] + input_offset);
+          const float* ibl${ABC[P]} = (const float*) ((uintptr_t) i[${2 * P + 1}] + input_offset);
+        i += 2 * ${PIXEL_TILE};
+
+        $for P in range(0, PIXEL_TILE, 4):
+          const float32x4x2_t vw${ABC[P:P+4]} = vld2q_f32(w + ${2 * P});
+        w += 2 * ${PIXEL_TILE};
+
+        $for P in range(0, PIXEL_TILE):
+          const float32x2_t vtltr${ABC[P]} = vld1_f32(itl${P});
+          const float32x2_t vblbr${ABC[P]} = vld1_f32(ibl${P});
+
+        $for P in range(0, PIXEL_TILE, 4):
+          const float32x4_t valphah${ABC[P:P+4]} = vw${ABC[P:P+4]}.val[0];
+          const float32x4_t valphav${ABC[P:P+4]} = vw${ABC[P:P+4]}.val[1];
+
+        $for P in range(0, PIXEL_TILE, 2):
+          const float32x4_t vtltr${ABC[P:P+2]} = vcombine_f32(vtltr${ABC[P]}, vtltr${ABC[P+1]});
+          const float32x4_t vblbr${ABC[P:P+2]} = vcombine_f32(vblbr${ABC[P]}, vblbr${ABC[P+1]});
+
+        $for P in range(0, PIXEL_TILE, 2):
+          const float32x4_t vldrd${ABC[P:P+2]} = vsubq_f32(vblbr${ABC[P:P+2]}, vtltr${ABC[P:P+2]});
+
+        $for P in range(0, PIXEL_TILE, 4):
+          const float32x4x2_t vld_t${ABC[P:P+4]} = vuzpq_f32(vldrd${ABC[P:P+2]}, vldrd${ABC[P+2:P+4]});
+          const float32x4_t vld${ABC[P:P+4]} = vld_t${ABC[P:P+4]}.val[0];
+          const float32x4_t vrd${ABC[P:P+4]} = vld_t${ABC[P:P+4]}.val[1];
+
+        $for P in range(0, PIXEL_TILE, 4):
+          const float32x4x2_t vtl_t${ABC[P:P+4]} = vuzpq_f32(vtltr${ABC[P:P+2]}, vtltr${ABC[P+2:P+4]});
+          const float32x4_t vtl${ABC[P:P+4]} = vtl_t${ABC[P:P+4]}.val[0];
+          const float32x4_t vtr${ABC[P:P+4]} = vtl_t${ABC[P:P+4]}.val[1];
+
+        $for P in range(0, PIXEL_TILE, 4):
+          const float32x4_t vl${ABC[P:P+4]} = ${VMULADDQ_F32}(vtl${ABC[P:P+4]}, vld${ABC[P:P+4]}, valphav${ABC[P:P+4]});
+          const float32x4_t vr${ABC[P:P+4]} = ${VMULADDQ_F32}(vtr${ABC[P:P+4]}, vrd${ABC[P:P+4]}, valphav${ABC[P:P+4]});
+
+        $for P in range(0, PIXEL_TILE, 4):
+          const float32x4_t vd${ABC[P:P+4]} = vsubq_f32(vr${ABC[P:P+4]}, vl${ABC[P:P+4]});
+
+        $for P in range(0, PIXEL_TILE, 4):
+          const float32x4_t vo${ABC[P:P+4]} = ${VMULADDQ_F32}(vl${ABC[P:P+4]}, vd${ABC[P:P+4]}, valphah${ABC[P:P+4]});
+
+        $for P in range(0, PIXEL_TILE, 4):
+          vst1q_f32(output + ${P}, vo${ABC[P:P+4]});
+        output += ${PIXEL_TILE};
+      }
+
+    for (; p >= 4; p -= 4) {
+      $for P in range(4):
+        const float* itl${P} = (const float*) ((uintptr_t) i[${2 * P}] + input_offset);
+        const float* ibl${P} = (const float*) ((uintptr_t) i[${2 * P + 1}] + input_offset);
+      i += 8;
+
+      const float32x4x2_t vw = vld2q_f32(w);
+      w += 8;
+
+      $for P in range(0, 4):
+        const float32x2_t vtltr${ABC[P]} = vld1_f32(itl${P});
+        const float32x2_t vblbr${ABC[P]} = vld1_f32(ibl${P});
+
+      const float32x4_t valphah = vw.val[0];
+      const float32x4_t valphav = vw.val[1];
+
+      $for P in range(0, 4, 2):
+        const float32x4_t vtltr${ABC[P:P+2]} = vcombine_f32(vtltr${ABC[P]}, vtltr${ABC[P+1]});
+        const float32x4_t vblbr${ABC[P:P+2]} = vcombine_f32(vblbr${ABC[P]}, vblbr${ABC[P+1]});
+
+      $for P in range(0, 4, 2):
+        const float32x4_t vldrd${ABC[P:P+2]} = vsubq_f32(vblbr${ABC[P:P+2]}, vtltr${ABC[P:P+2]});
+
+      const float32x4x2_t vld_t = vuzpq_f32(vldrd01, vldrd23);
+      const float32x4_t vld = vld_t.val[0];
+      const float32x4_t vrd = vld_t.val[1];
+
+      const float32x4x2_t vtl_t = vuzpq_f32(vtltr01, vtltr23);
+      const float32x4_t vtl = vtl_t.val[0];
+      const float32x4_t vtr = vtl_t.val[1];
+
+      const float32x4_t vl = ${VMULADDQ_F32}(vtl, vld, valphav);
+      const float32x4_t vr = ${VMULADDQ_F32}(vtr, vrd, valphav);
+
+      const float32x4_t vd = vsubq_f32(vr, vl);
+      const float32x4_t vo = ${VMULADDQ_F32}(vl, vd, valphah);
+
+      vst1q_f32(output, vo);
+      output += 4;
+    }
+
+    if XNN_UNLIKELY(p != 0) {
+      if (p & 2) {
+        const float32x2x2_t vw = vld2_f32(w);
+        w += 4;
+
+        const float32x2_t valphah = vw.val[0];
+        const float32x2_t valphav = vw.val[1];
+
+        $for P in range(2):
+          const float* itl${P} = (const float*) ((uintptr_t) i[${2 * P}] + input_offset);
+          const float* ibl${P} = (const float*) ((uintptr_t) i[${2 * P + 1}] + input_offset);
+        i += 4;
+
+        $for P in range(0, 2):
+          const float32x2_t vtltr${ABC[P]} = vld1_f32(itl${P});
+          const float32x2_t vblbr${ABC[P]} = vld1_f32(ibl${P});
+
+        $for P in range(0, 2):
+          const float32x2_t vldrd${ABC[P]} = vsub_f32(vblbr${ABC[P]}, vtltr${ABC[P]});
+
+        const float32x2x2_t vld_t = vuzp_f32(vldrd0, vldrd1);
+        const float32x2_t vld = vld_t.val[0];
+        const float32x2_t vrd = vld_t.val[1];
+
+        const float32x2x2_t vtl_t = vuzp_f32(vtltr0, vtltr1);
+        const float32x2_t vtl = vtl_t.val[0];
+        const float32x2_t vtr = vtl_t.val[1];
+
+        const float32x2_t vl = ${VMULADD_F32}(vtl, vld, valphav);
+        const float32x2_t vr = ${VMULADD_F32}(vtr, vrd, valphav);
+
+        const float32x2_t vd = vsub_f32(vr, vl);
+        const float32x2_t vo = ${VMULADD_F32}(vl, vd, valphah);
+
+        vst1_f32(output, vo);
+        output += 2;
+      }
+
+      if (p & 1) {
+        // We are computing the following formula:
+        //   result = (1 - alpha_h) * (1 - alpha_v) * top_left +
+        //                 alpha_h  * (1 - alpha_v) * top_right +
+        //            (1 - alpha_h) *      alpha_v  * bottom_left +
+        //                 alpha_h  *      alpha_v  * bottom_right.
+        //
+        // Rearranging gives
+        //   result =    left + alpha_h * (right        - left),
+        // where
+        //   left =  top_left + alpha_v * (bottom_left  - top_left),
+        //  right = top_right + alpha_v * (bottom_right - top_right).
+
+        const float alphah = *w;
+        const float32x2_t valphav = vld1_dup_f32(w + 1);
+        w += 2;
+
+        const float* itl = (const float*) ((uintptr_t) i[0] + input_offset);
+        const float* ibl = (const float*) ((uintptr_t) i[1] + input_offset);
+        i += 2;
+
+        const float32x2_t vtltr = vld1_f32(itl);
+        const float32x2_t vblbr = vld1_f32(ibl);
+
+        // Compute at once
+        //    left_diff = bottom_left  - top_left
+        //   right_diff = bottom_right - top_right
+        const float32x2_t vldrd = vsub_f32(vblbr, vtltr);
+        const float32x2_t vlr = ${VMULADD_F32}(vtltr, vldrd, valphav);
+
+        // Extract them and compute the result.
+        const float l = vget_lane_f32(vlr, 0);
+        const float r = vget_lane_f32(vlr, 1);
+
+        *output++ = l + alphah * (r - l);
+      }
+    }
+
+    input_offset += input_increment;
+  } while (--channels != 0);
+}

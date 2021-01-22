@@ -774,6 +774,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-hswish/gen/hswish-neon-x16.c
   src/f32-ibilinear/gen/neon-c4.c
   src/f32-ibilinear/gen/neon-c8.c
+  src/f32-ibilinear-chw/gen/neon-p4.c
+  src/f32-ibilinear-chw/gen/neon-p8.c
   src/f32-igemm/gen/1x8-minmax-neon-dup-ld64.c
   src/f32-igemm/gen/1x8-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/1x8s4-minmax-neon.c
@@ -1050,6 +1052,8 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-gemm/gen/8x8s4-minmax-neonfma.c
   src/f32-ibilinear/gen/neonfma-c4.c
   src/f32-ibilinear/gen/neonfma-c8.c
+  src/f32-ibilinear-chw/gen/neonfma-p4.c
+  src/f32-ibilinear-chw/gen/neonfma-p8.c
   src/f32-igemm/gen/1x8-minmax-neonfma-dup-ld64.c
   src/f32-igemm/gen/1x8s4-minmax-neonfma.c
   src/f32-igemm/gen/4x8-minmax-neonfma-dup-ld64.c

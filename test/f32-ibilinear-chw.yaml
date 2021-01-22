@@ -7,3 +7,7 @@
 - name: xnn_f32_ibilinear_chw_ukernel__scalar_p4
 - name: xnn_f32_ibilinear_chw_ukernel__wasmsimd_p4
 - name: xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8
+- name: xnn_f32_ibilinear_chw_ukernel__neon_p4
+- name: xnn_f32_ibilinear_chw_ukernel__neon_p8
+- name: xnn_f32_ibilinear_chw_ukernel__neonfma_p4
+- name: xnn_f32_ibilinear_chw_ukernel__neonfma_p8

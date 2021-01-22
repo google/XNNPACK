@@ -1525,6 +1525,8 @@ NEON_UKERNELS = [
     "src/f32-hswish/gen/hswish-neon-x16.c",
     "src/f32-ibilinear/gen/neon-c4.c",
     "src/f32-ibilinear/gen/neon-c8.c",
+    "src/f32-ibilinear-chw/gen/neon-p4.c",
+    "src/f32-ibilinear-chw/gen/neon-p8.c",
     "src/f32-igemm/gen/1x8-minmax-neon-dup-ld64.c",
     "src/f32-igemm/gen/1x8-minmax-neon-lane-ld64.c",
     "src/f32-igemm/gen/1x8s4-minmax-neon.c",
@@ -1802,6 +1804,8 @@ NEONFMA_UKERNELS = [
     "src/f32-gemm/gen/8x8s4-minmax-neonfma.c",
     "src/f32-ibilinear/gen/neonfma-c4.c",
     "src/f32-ibilinear/gen/neonfma-c8.c",
+    "src/f32-ibilinear-chw/gen/neonfma-p4.c",
+    "src/f32-ibilinear-chw/gen/neonfma-p8.c",
     "src/f32-igemm/gen/1x8-minmax-neonfma-dup-ld64.c",
     "src/f32-igemm/gen/1x8s4-minmax-neonfma.c",
     "src/f32-igemm/gen/4x8-minmax-neonfma-dup-ld64.c",
@@ -6807,6 +6811,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "add_nd_test",
+    timeout = "moderate",
     srcs = [
         "test/add-nd.cc",
         "test/binary-elementwise-operator-tester.h",
@@ -6879,6 +6884,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "convolution_nhwc_test",
+    timeout = "moderate",
     srcs = [
         "test/convolution-nhwc.cc",
         "test/convolution-operator-tester.h",
@@ -6888,6 +6894,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "convolution_nchw_test",
+    timeout = "moderate",
     srcs = [
         "test/convolution-nchw.cc",
         "test/convolution-operator-tester.h",
@@ -7006,6 +7013,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "max_pooling_nhwc_test",
+    timeout = "moderate",
     srcs = [
         "test/max-pooling-nhwc.cc",
         "test/max-pooling-operator-tester.h",
