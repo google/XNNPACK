@@ -14,7 +14,7 @@ $assert 8 <= NR <= 16
 #include <xnnpack/gemm.h>
 
 
-void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c2__neon_mull_padal_dup(
+void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull"}_padal_dup(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -64,6 +64,31 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c2__neon_mull_padal_dup(
         int32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
 
     size_t k = kc;
+
+    $if MLA:
+      while (k >= 16 * sizeof(int8_t)) {
+        $for M in range(MR):
+          const int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} += 8;
+          const int8x8_t va${M}x1 = vld1_s8(a${M}); a${M} += 8;
+
+        $for K in range(4):
+          $for N in range(0, NR, 4):
+            const int8x8_t vb${ABC[N:N+4]}c${K}x0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+        $for K in range(4):
+          $for N in range(0, NR, 4):
+            const int8x8_t vb${ABC[N:N+4]}c${K}x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+        $for K in range(4):
+          $for N in range(0, NR, 4):
+            $for M in range(MR):
+              int16x8_t vprod${M}x${ABC[N:N+4]}c${K} = vmull_s8(vb${ABC[N:N+4]}c${K}x0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}x0), ${K})));
+              vprod${M}x${ABC[N:N+4]}c${K} = vmlal_s8(vprod${M}x${ABC[N:N+4]}c${K}, vb${ABC[N:N+4]}c${K}x1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}x1), ${K})));
+              vacc${M}x${ABC[N:N+4]} = vpadalq_s16(vacc${M}x${ABC[N:N+4]}, vprod${M}x${ABC[N:N+4]}c${K});
+
+        k -= 16 * sizeof(int8_t);
+      }
+
     while (k >= 8 * sizeof(int8_t)) {
       $for M in range(MR):
         const int8x8_t va${M} = vld1_s8(a${M}); a${M} += 8;
@@ -78,6 +103,7 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c2__neon_mull_padal_dup(
 
       k -= 8 * sizeof(int8_t);
     }
+
     if XNN_UNLIKELY(k != 0) {
       $for M in range(MR):
         const int8x8_t va${M} = vld1_s8(a${M}); a${M} = (const int8_t*) ((uintptr_t) a${M} + k);
