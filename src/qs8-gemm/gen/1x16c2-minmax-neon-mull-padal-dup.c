@@ -46,6 +46,8 @@ void xnn_qs8_gemm_minmax_ukernel_1x16c2__neon_mull_padal_dup(
     int32x4_t vacc0xCDEF = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
 
     size_t k = kc;
+
+
     while (k >= 8 * sizeof(int8_t)) {
       const int8x8_t va0 = vld1_s8(a0); a0 += 8;
 
@@ -116,6 +118,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x16c2__neon_mull_padal_dup(
 
       k -= 8 * sizeof(int8_t);
     }
+
     if XNN_UNLIKELY(k != 0) {
       const int8x8_t va0 = vld1_s8(a0); a0 = (const int8_t*) ((uintptr_t) a0 + k);
 
