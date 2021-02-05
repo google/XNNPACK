@@ -13,8 +13,9 @@ $assert 8 <= NR <= 16
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 
+$LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64"}[VARIANT]
 
-void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull"}_padal_dup(
+void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull"}_padal_dup${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -68,8 +69,11 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull"
     $if MLA:
       while (k >= 16 * sizeof(int8_t)) {
         $for M in range(MR):
-          const int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} += 8;
-          const int8x8_t va${M}x1 = vld1_s8(a${M}); a${M} += 8;
+          $if VARIANT == "LD128":
+            const int8x16_t va${M} = vld1q_s8(a${M}); a${M} += 16;
+          $else:
+            const int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} += 8;
+            const int8x8_t va${M}x1 = vld1_s8(a${M}); a${M} += 8;
 
         $for K in range(4):
           $for N in range(0, NR, 4):
@@ -82,8 +86,12 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull"
         $for K in range(4):
           $for N in range(0, NR, 4):
             $for M in range(MR):
-              int16x8_t vprod${M}x${ABC[N:N+4]}c${K} = vmull_s8(vb${ABC[N:N+4]}c${K}x0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}x0), ${K})));
-              vprod${M}x${ABC[N:N+4]}c${K} = vmlal_s8(vprod${M}x${ABC[N:N+4]}c${K}, vb${ABC[N:N+4]}c${K}x1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}x1), ${K})));
+              $if VARIANT == "LD128":
+                int16x8_t vprod${M}x${ABC[N:N+4]}c${K} = vmull_s8(vb${ABC[N:N+4]}c${K}x0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(vget_low_s8(va${M})), ${K})));
+                vprod${M}x${ABC[N:N+4]}c${K} = vmlal_s8(vprod${M}x${ABC[N:N+4]}c${K}, vb${ABC[N:N+4]}c${K}x1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(vget_high_s8(va${M})), ${K})));
+              $else:
+                int16x8_t vprod${M}x${ABC[N:N+4]}c${K} = vmull_s8(vb${ABC[N:N+4]}c${K}x0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}x0), ${K})));
+                vprod${M}x${ABC[N:N+4]}c${K} = vmlal_s8(vprod${M}x${ABC[N:N+4]}c${K}, vb${ABC[N:N+4]}c${K}x1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}x1), ${K})));
               vacc${M}x${ABC[N:N+4]} = vpadalq_s16(vacc${M}x${ABC[N:N+4]}, vprod${M}x${ABC[N:N+4]}c${K});
 
         k -= 16 * sizeof(int8_t);

@@ -949,43 +949,59 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-gavgpool/gen/7x-minmax-neon-c32-acc2.c
   src/qs8-gemm/gen/1x8-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/1x8-minmax-neon-mull-addw-dup.c
-  src/qs8-gemm/gen/1x8c2-minmax-neon-mlal-padal-dup.c
-  src/qs8-gemm/gen/1x8c2-minmax-neon-mull-padal-dup.c
+  src/qs8-gemm/gen/1x8c2-minmax-neon-mlal-padal-dup-ld64.c
+  src/qs8-gemm/gen/1x8c2-minmax-neon-mlal-padal-dup-ld128.c
+  src/qs8-gemm/gen/1x8c2-minmax-neon-mull-padal-dup-ld64.c
+  src/qs8-gemm/gen/1x8c2-minmax-neon-mull-padal-dup-ld128.c
   src/qs8-gemm/gen/1x8c8-minmax-neon-mull-padal.c
   src/qs8-gemm/gen/1x16-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/1x16-minmax-neon-mull-addw-dup.c
-  src/qs8-gemm/gen/1x16c2-minmax-neon-mlal-padal-dup.c
-  src/qs8-gemm/gen/1x16c2-minmax-neon-mull-padal-dup.c
+  src/qs8-gemm/gen/1x16c2-minmax-neon-mlal-padal-dup-ld64.c
+  src/qs8-gemm/gen/1x16c2-minmax-neon-mlal-padal-dup-ld128.c
+  src/qs8-gemm/gen/1x16c2-minmax-neon-mull-padal-dup-ld64.c
+  src/qs8-gemm/gen/1x16c2-minmax-neon-mull-padal-dup-ld128.c
   src/qs8-gemm/gen/1x16c8-minmax-neon-mull-padal.c
   src/qs8-gemm/gen/2x8-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/2x8-minmax-neon-mull-addw-dup.c
-  src/qs8-gemm/gen/2x8c2-minmax-neon-mlal-padal-dup.c
-  src/qs8-gemm/gen/2x8c2-minmax-neon-mull-padal-dup.c
+  src/qs8-gemm/gen/2x8c2-minmax-neon-mlal-padal-dup-ld64.c
+  src/qs8-gemm/gen/2x8c2-minmax-neon-mlal-padal-dup-ld128.c
+  src/qs8-gemm/gen/2x8c2-minmax-neon-mull-padal-dup-ld64.c
+  src/qs8-gemm/gen/2x8c2-minmax-neon-mull-padal-dup-ld128.c
   src/qs8-gemm/gen/2x8c8-minmax-neon-mull-padal.c
   src/qs8-gemm/gen/2x16-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/2x16-minmax-neon-mull-addw-dup.c
-  src/qs8-gemm/gen/2x16c2-minmax-neon-mlal-padal-dup.c
-  src/qs8-gemm/gen/2x16c2-minmax-neon-mull-padal-dup.c
+  src/qs8-gemm/gen/2x16c2-minmax-neon-mlal-padal-dup-ld64.c
+  src/qs8-gemm/gen/2x16c2-minmax-neon-mlal-padal-dup-ld128.c
+  src/qs8-gemm/gen/2x16c2-minmax-neon-mull-padal-dup-ld64.c
+  src/qs8-gemm/gen/2x16c2-minmax-neon-mull-padal-dup-ld128.c
   src/qs8-gemm/gen/2x16c8-minmax-neon-mull-padal.c
   src/qs8-gemm/gen/3x8-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/3x8-minmax-neon-mull-addw-dup.c
-  src/qs8-gemm/gen/3x8c2-minmax-neon-mlal-padal-dup.c
-  src/qs8-gemm/gen/3x8c2-minmax-neon-mull-padal-dup.c
+  src/qs8-gemm/gen/3x8c2-minmax-neon-mlal-padal-dup-ld64.c
+  src/qs8-gemm/gen/3x8c2-minmax-neon-mlal-padal-dup-ld128.c
+  src/qs8-gemm/gen/3x8c2-minmax-neon-mull-padal-dup-ld64.c
+  src/qs8-gemm/gen/3x8c2-minmax-neon-mull-padal-dup-ld128.c
   src/qs8-gemm/gen/3x8c8-minmax-neon-mull-padal.c
   src/qs8-gemm/gen/3x16-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/3x16-minmax-neon-mull-addw-dup.c
-  src/qs8-gemm/gen/3x16c2-minmax-neon-mlal-padal-dup.c
-  src/qs8-gemm/gen/3x16c2-minmax-neon-mull-padal-dup.c
+  src/qs8-gemm/gen/3x16c2-minmax-neon-mlal-padal-dup-ld64.c
+  src/qs8-gemm/gen/3x16c2-minmax-neon-mlal-padal-dup-ld128.c
+  src/qs8-gemm/gen/3x16c2-minmax-neon-mull-padal-dup-ld64.c
+  src/qs8-gemm/gen/3x16c2-minmax-neon-mull-padal-dup-ld128.c
   src/qs8-gemm/gen/3x16c8-minmax-neon-mull-padal.c
   src/qs8-gemm/gen/4x8-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/4x8-minmax-neon-mull-addw-dup.c
-  src/qs8-gemm/gen/4x8c2-minmax-neon-mlal-padal-dup.c
-  src/qs8-gemm/gen/4x8c2-minmax-neon-mull-padal-dup.c
+  src/qs8-gemm/gen/4x8c2-minmax-neon-mlal-padal-dup-ld64.c
+  src/qs8-gemm/gen/4x8c2-minmax-neon-mlal-padal-dup-ld128.c
+  src/qs8-gemm/gen/4x8c2-minmax-neon-mull-padal-dup-ld64.c
+  src/qs8-gemm/gen/4x8c2-minmax-neon-mull-padal-dup-ld128.c
   src/qs8-gemm/gen/4x8c8-minmax-neon-mull-padal.c
   src/qs8-gemm/gen/4x16-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/4x16-minmax-neon-mull-addw-dup.c
-  src/qs8-gemm/gen/4x16c2-minmax-neon-mlal-padal-dup.c
-  src/qs8-gemm/gen/4x16c2-minmax-neon-mull-padal-dup.c
+  src/qs8-gemm/gen/4x16c2-minmax-neon-mlal-padal-dup-ld64.c
+  src/qs8-gemm/gen/4x16c2-minmax-neon-mlal-padal-dup-ld128.c
+  src/qs8-gemm/gen/4x16c2-minmax-neon-mull-padal-dup-ld64.c
+  src/qs8-gemm/gen/4x16c2-minmax-neon-mull-padal-dup-ld128.c
   src/qs8-gemm/gen/4x16c8-minmax-neon-mull-padal.c
   src/qs8-igemm/gen/1x8-minmax-neon-mlal-lane.c
   src/qs8-igemm/gen/1x16-minmax-neon-mlal-lane.c

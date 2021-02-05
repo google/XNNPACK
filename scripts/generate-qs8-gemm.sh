@@ -45,23 +45,41 @@ tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=3 -D NR=16 -o src/qs8-gem
 tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=4 -D NR=16 -o src/qs8-gemm/gen/4x16-minmax-neon-mull-addw-dup.c
 
 ### C2 micro-kernels
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D MR=1 -D NR=8  -o src/qs8-gemm/gen/1x8c2-minmax-neon-mull-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D MR=2 -D NR=8  -o src/qs8-gemm/gen/2x8c2-minmax-neon-mull-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D MR=3 -D NR=8  -o src/qs8-gemm/gen/3x8c2-minmax-neon-mull-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D MR=4 -D NR=8  -o src/qs8-gemm/gen/4x8c2-minmax-neon-mull-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D MR=1 -D NR=16 -o src/qs8-gemm/gen/1x16c2-minmax-neon-mull-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D MR=2 -D NR=16 -o src/qs8-gemm/gen/2x16c2-minmax-neon-mull-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D MR=3 -D NR=16 -o src/qs8-gemm/gen/3x16c2-minmax-neon-mull-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D MR=4 -D NR=16 -o src/qs8-gemm/gen/4x16c2-minmax-neon-mull-padal-dup.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD64 -D MR=1 -D NR=8  -o src/qs8-gemm/gen/1x8c2-minmax-neon-mull-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD64 -D MR=2 -D NR=8  -o src/qs8-gemm/gen/2x8c2-minmax-neon-mull-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD64 -D MR=3 -D NR=8  -o src/qs8-gemm/gen/3x8c2-minmax-neon-mull-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD64 -D MR=4 -D NR=8  -o src/qs8-gemm/gen/4x8c2-minmax-neon-mull-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD64 -D MR=1 -D NR=16 -o src/qs8-gemm/gen/1x16c2-minmax-neon-mull-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD64 -D MR=2 -D NR=16 -o src/qs8-gemm/gen/2x16c2-minmax-neon-mull-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD64 -D MR=3 -D NR=16 -o src/qs8-gemm/gen/3x16c2-minmax-neon-mull-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD64 -D MR=4 -D NR=16 -o src/qs8-gemm/gen/4x16c2-minmax-neon-mull-padal-dup-ld64.c
 
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=1 -D NR=8  -o src/qs8-gemm/gen/1x8c2-minmax-neon-mlal-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=2 -D NR=8  -o src/qs8-gemm/gen/2x8c2-minmax-neon-mlal-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=3 -D NR=8  -o src/qs8-gemm/gen/3x8c2-minmax-neon-mlal-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=4 -D NR=8  -o src/qs8-gemm/gen/4x8c2-minmax-neon-mlal-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=1 -D NR=16 -o src/qs8-gemm/gen/1x16c2-minmax-neon-mlal-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=2 -D NR=16 -o src/qs8-gemm/gen/2x16c2-minmax-neon-mlal-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=3 -D NR=16 -o src/qs8-gemm/gen/3x16c2-minmax-neon-mlal-padal-dup.c
-tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=4 -D NR=16 -o src/qs8-gemm/gen/4x16c2-minmax-neon-mlal-padal-dup.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD64 -D MR=1 -D NR=8  -o src/qs8-gemm/gen/1x8c2-minmax-neon-mlal-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD64 -D MR=2 -D NR=8  -o src/qs8-gemm/gen/2x8c2-minmax-neon-mlal-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD64 -D MR=3 -D NR=8  -o src/qs8-gemm/gen/3x8c2-minmax-neon-mlal-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD64 -D MR=4 -D NR=8  -o src/qs8-gemm/gen/4x8c2-minmax-neon-mlal-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD64 -D MR=1 -D NR=16 -o src/qs8-gemm/gen/1x16c2-minmax-neon-mlal-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD64 -D MR=2 -D NR=16 -o src/qs8-gemm/gen/2x16c2-minmax-neon-mlal-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD64 -D MR=3 -D NR=16 -o src/qs8-gemm/gen/3x16c2-minmax-neon-mlal-padal-dup-ld64.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD64 -D MR=4 -D NR=16 -o src/qs8-gemm/gen/4x16c2-minmax-neon-mlal-padal-dup-ld64.c
+
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD128 -D MR=1 -D NR=8  -o src/qs8-gemm/gen/1x8c2-minmax-neon-mull-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD128 -D MR=2 -D NR=8  -o src/qs8-gemm/gen/2x8c2-minmax-neon-mull-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD128 -D MR=3 -D NR=8  -o src/qs8-gemm/gen/3x8c2-minmax-neon-mull-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD128 -D MR=4 -D NR=8  -o src/qs8-gemm/gen/4x8c2-minmax-neon-mull-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD128 -D MR=1 -D NR=16 -o src/qs8-gemm/gen/1x16c2-minmax-neon-mull-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD128 -D MR=2 -D NR=16 -o src/qs8-gemm/gen/2x16c2-minmax-neon-mull-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD128 -D MR=3 -D NR=16 -o src/qs8-gemm/gen/3x16c2-minmax-neon-mull-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=0 -D VARIANT=LD128 -D MR=4 -D NR=16 -o src/qs8-gemm/gen/4x16c2-minmax-neon-mull-padal-dup-ld128.c
+
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD128 -D MR=1 -D NR=8  -o src/qs8-gemm/gen/1x8c2-minmax-neon-mlal-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD128 -D MR=2 -D NR=8  -o src/qs8-gemm/gen/2x8c2-minmax-neon-mlal-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD128 -D MR=3 -D NR=8  -o src/qs8-gemm/gen/3x8c2-minmax-neon-mlal-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD128 -D MR=4 -D NR=8  -o src/qs8-gemm/gen/4x8c2-minmax-neon-mlal-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD128 -D MR=1 -D NR=16 -o src/qs8-gemm/gen/1x16c2-minmax-neon-mlal-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD128 -D MR=2 -D NR=16 -o src/qs8-gemm/gen/2x16c2-minmax-neon-mlal-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD128 -D MR=3 -D NR=16 -o src/qs8-gemm/gen/3x16c2-minmax-neon-mlal-padal-dup-ld128.c
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D VARIANT=LD128 -D MR=4 -D NR=16 -o src/qs8-gemm/gen/4x16c2-minmax-neon-mlal-padal-dup-ld128.c
 
 ### C8 micro-kernels
 tools/xngen src/qs8-gemm/c8-neon-mull-padal.c.in -D MR=1 -D NR=8  -o src/qs8-gemm/gen/1x8c8-minmax-neon-mull-padal.c
@@ -86,7 +104,7 @@ tools/xngen src/qs8-gemm/MRxNRc4-neondot.c.in -D MR=8  -D NR=16 -o src/qs8-gemm/
 
 ################################### x86 SSE ###################################
 ### C2 micro-kernels
-tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=1 -D SSE=2 -D VARIANT=LD64  -o src/qs8-gemm/gen/1x4c2-minmax-sse2-ld64.c
+tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=1 -D SSE=2 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c2-minmax-sse2-ld64.c
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=4 -D SSE=2 -D VARIANT=LD64     -o src/qs8-gemm/gen/4x4c2-minmax-sse2-ld64.c
 
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=1 -D SSE=3 -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c2-minmax-ssse3-ld64.c

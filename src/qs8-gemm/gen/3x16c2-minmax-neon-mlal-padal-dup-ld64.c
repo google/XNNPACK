@@ -15,7 +15,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_qs8_gemm_minmax_ukernel_3x16c2__neon_mlal_padal_dup(
+void xnn_qs8_gemm_minmax_ukernel_3x16c2__neon_mlal_padal_dup_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
