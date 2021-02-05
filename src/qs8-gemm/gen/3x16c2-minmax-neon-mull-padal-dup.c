@@ -66,142 +66,130 @@ void xnn_qs8_gemm_minmax_ukernel_3x16c2__neon_mull_padal_dup(
     int32x4_t vacc2xCDEF = vacc0xCDEF;
 
     size_t k = kc;
+
+
     while (k >= 8 * sizeof(int8_t)) {
       const int8x8_t va0 = vld1_s8(a0); a0 += 8;
       const int8x8_t va1 = vld1_s8(a1); a1 += 8;
       const int8x8_t va2 = vld1_s8(a2); a2 += 8;
 
       const int8x8_t vb0123c0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x0123c0 = vmull_s8(vb0123c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0)));
-      vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c0);
-      const int16x8_t vprod1x0123c0 = vmull_s8(vb0123c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 0)));
-      vacc1x0123 = vpadalq_s16(vacc1x0123, vprod1x0123c0);
-      const int16x8_t vprod2x0123c0 = vmull_s8(vb0123c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 0)));
-      vacc2x0123 = vpadalq_s16(vacc2x0123, vprod2x0123c0);
       const int8x8_t vb4567c0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x4567c0 = vmull_s8(vb4567c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0)));
-      vacc0x4567 = vpadalq_s16(vacc0x4567, vprod0x4567c0);
-      const int16x8_t vprod1x4567c0 = vmull_s8(vb4567c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 0)));
-      vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c0);
-      const int16x8_t vprod2x4567c0 = vmull_s8(vb4567c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 0)));
-      vacc2x4567 = vpadalq_s16(vacc2x4567, vprod2x4567c0);
       const int8x8_t vb89ABc0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x89ABc0 = vmull_s8(vb89ABc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0)));
-      vacc0x89AB = vpadalq_s16(vacc0x89AB, vprod0x89ABc0);
-      const int16x8_t vprod1x89ABc0 = vmull_s8(vb89ABc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 0)));
-      vacc1x89AB = vpadalq_s16(vacc1x89AB, vprod1x89ABc0);
-      const int16x8_t vprod2x89ABc0 = vmull_s8(vb89ABc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 0)));
-      vacc2x89AB = vpadalq_s16(vacc2x89AB, vprod2x89ABc0);
       const int8x8_t vbCDEFc0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0xCDEFc0 = vmull_s8(vbCDEFc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0)));
-      vacc0xCDEF = vpadalq_s16(vacc0xCDEF, vprod0xCDEFc0);
-      const int16x8_t vprod1xCDEFc0 = vmull_s8(vbCDEFc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 0)));
-      vacc1xCDEF = vpadalq_s16(vacc1xCDEF, vprod1xCDEFc0);
-      const int16x8_t vprod2xCDEFc0 = vmull_s8(vbCDEFc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 0)));
-      vacc2xCDEF = vpadalq_s16(vacc2xCDEF, vprod2xCDEFc0);
       const int8x8_t vb0123c1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x0123c1 = vmull_s8(vb0123c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1)));
-      vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c1);
-      const int16x8_t vprod1x0123c1 = vmull_s8(vb0123c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 1)));
-      vacc1x0123 = vpadalq_s16(vacc1x0123, vprod1x0123c1);
-      const int16x8_t vprod2x0123c1 = vmull_s8(vb0123c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 1)));
-      vacc2x0123 = vpadalq_s16(vacc2x0123, vprod2x0123c1);
       const int8x8_t vb4567c1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x4567c1 = vmull_s8(vb4567c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1)));
-      vacc0x4567 = vpadalq_s16(vacc0x4567, vprod0x4567c1);
-      const int16x8_t vprod1x4567c1 = vmull_s8(vb4567c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 1)));
-      vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c1);
-      const int16x8_t vprod2x4567c1 = vmull_s8(vb4567c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 1)));
-      vacc2x4567 = vpadalq_s16(vacc2x4567, vprod2x4567c1);
       const int8x8_t vb89ABc1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x89ABc1 = vmull_s8(vb89ABc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1)));
-      vacc0x89AB = vpadalq_s16(vacc0x89AB, vprod0x89ABc1);
-      const int16x8_t vprod1x89ABc1 = vmull_s8(vb89ABc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 1)));
-      vacc1x89AB = vpadalq_s16(vacc1x89AB, vprod1x89ABc1);
-      const int16x8_t vprod2x89ABc1 = vmull_s8(vb89ABc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 1)));
-      vacc2x89AB = vpadalq_s16(vacc2x89AB, vprod2x89ABc1);
       const int8x8_t vbCDEFc1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0xCDEFc1 = vmull_s8(vbCDEFc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1)));
-      vacc0xCDEF = vpadalq_s16(vacc0xCDEF, vprod0xCDEFc1);
-      const int16x8_t vprod1xCDEFc1 = vmull_s8(vbCDEFc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 1)));
-      vacc1xCDEF = vpadalq_s16(vacc1xCDEF, vprod1xCDEFc1);
-      const int16x8_t vprod2xCDEFc1 = vmull_s8(vbCDEFc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 1)));
-      vacc2xCDEF = vpadalq_s16(vacc2xCDEF, vprod2xCDEFc1);
       const int8x8_t vb0123c2 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x0123c2 = vmull_s8(vb0123c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2)));
-      vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c2);
-      const int16x8_t vprod1x0123c2 = vmull_s8(vb0123c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 2)));
-      vacc1x0123 = vpadalq_s16(vacc1x0123, vprod1x0123c2);
-      const int16x8_t vprod2x0123c2 = vmull_s8(vb0123c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 2)));
-      vacc2x0123 = vpadalq_s16(vacc2x0123, vprod2x0123c2);
       const int8x8_t vb4567c2 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x4567c2 = vmull_s8(vb4567c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2)));
-      vacc0x4567 = vpadalq_s16(vacc0x4567, vprod0x4567c2);
-      const int16x8_t vprod1x4567c2 = vmull_s8(vb4567c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 2)));
-      vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c2);
-      const int16x8_t vprod2x4567c2 = vmull_s8(vb4567c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 2)));
-      vacc2x4567 = vpadalq_s16(vacc2x4567, vprod2x4567c2);
       const int8x8_t vb89ABc2 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x89ABc2 = vmull_s8(vb89ABc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2)));
-      vacc0x89AB = vpadalq_s16(vacc0x89AB, vprod0x89ABc2);
-      const int16x8_t vprod1x89ABc2 = vmull_s8(vb89ABc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 2)));
-      vacc1x89AB = vpadalq_s16(vacc1x89AB, vprod1x89ABc2);
-      const int16x8_t vprod2x89ABc2 = vmull_s8(vb89ABc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 2)));
-      vacc2x89AB = vpadalq_s16(vacc2x89AB, vprod2x89ABc2);
       const int8x8_t vbCDEFc2 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0xCDEFc2 = vmull_s8(vbCDEFc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2)));
-      vacc0xCDEF = vpadalq_s16(vacc0xCDEF, vprod0xCDEFc2);
-      const int16x8_t vprod1xCDEFc2 = vmull_s8(vbCDEFc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 2)));
-      vacc1xCDEF = vpadalq_s16(vacc1xCDEF, vprod1xCDEFc2);
-      const int16x8_t vprod2xCDEFc2 = vmull_s8(vbCDEFc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 2)));
-      vacc2xCDEF = vpadalq_s16(vacc2xCDEF, vprod2xCDEFc2);
       const int8x8_t vb0123c3 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x0123c3 = vmull_s8(vb0123c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3)));
-      vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c3);
-      const int16x8_t vprod1x0123c3 = vmull_s8(vb0123c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 3)));
-      vacc1x0123 = vpadalq_s16(vacc1x0123, vprod1x0123c3);
-      const int16x8_t vprod2x0123c3 = vmull_s8(vb0123c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 3)));
-      vacc2x0123 = vpadalq_s16(vacc2x0123, vprod2x0123c3);
       const int8x8_t vb4567c3 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x4567c3 = vmull_s8(vb4567c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3)));
-      vacc0x4567 = vpadalq_s16(vacc0x4567, vprod0x4567c3);
-      const int16x8_t vprod1x4567c3 = vmull_s8(vb4567c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 3)));
-      vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c3);
-      const int16x8_t vprod2x4567c3 = vmull_s8(vb4567c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 3)));
-      vacc2x4567 = vpadalq_s16(vacc2x4567, vprod2x4567c3);
       const int8x8_t vb89ABc3 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-      const int16x8_t vprod0x89ABc3 = vmull_s8(vb89ABc3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3)));
-      vacc0x89AB = vpadalq_s16(vacc0x89AB, vprod0x89ABc3);
-      const int16x8_t vprod1x89ABc3 = vmull_s8(vb89ABc3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 3)));
-      vacc1x89AB = vpadalq_s16(vacc1x89AB, vprod1x89ABc3);
-      const int16x8_t vprod2x89ABc3 = vmull_s8(vb89ABc3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 3)));
-      vacc2x89AB = vpadalq_s16(vacc2x89AB, vprod2x89ABc3);
       const int8x8_t vbCDEFc3 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
+      const int16x8_t vprod0x0123c0 = vmull_s8(vb0123c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0)));
+      const int16x8_t vprod0x0123c1 = vmull_s8(vb0123c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1)));
+      const int16x8_t vprod0x0123c2 = vmull_s8(vb0123c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2)));
+      const int16x8_t vprod0x0123c3 = vmull_s8(vb0123c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3)));
+      vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c0);
+      vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c1);
+      vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c2);
+      vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c3);
+      const int16x8_t vprod0x4567c0 = vmull_s8(vb4567c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0)));
+      const int16x8_t vprod0x4567c1 = vmull_s8(vb4567c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1)));
+      const int16x8_t vprod0x4567c2 = vmull_s8(vb4567c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2)));
+      const int16x8_t vprod0x4567c3 = vmull_s8(vb4567c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3)));
+      vacc0x4567 = vpadalq_s16(vacc0x4567, vprod0x4567c0);
+      vacc0x4567 = vpadalq_s16(vacc0x4567, vprod0x4567c1);
+      vacc0x4567 = vpadalq_s16(vacc0x4567, vprod0x4567c2);
+      vacc0x4567 = vpadalq_s16(vacc0x4567, vprod0x4567c3);
+      const int16x8_t vprod0x89ABc0 = vmull_s8(vb89ABc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0)));
+      const int16x8_t vprod0x89ABc1 = vmull_s8(vb89ABc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1)));
+      const int16x8_t vprod0x89ABc2 = vmull_s8(vb89ABc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2)));
+      const int16x8_t vprod0x89ABc3 = vmull_s8(vb89ABc3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3)));
+      vacc0x89AB = vpadalq_s16(vacc0x89AB, vprod0x89ABc0);
+      vacc0x89AB = vpadalq_s16(vacc0x89AB, vprod0x89ABc1);
+      vacc0x89AB = vpadalq_s16(vacc0x89AB, vprod0x89ABc2);
+      vacc0x89AB = vpadalq_s16(vacc0x89AB, vprod0x89ABc3);
+      const int16x8_t vprod0xCDEFc0 = vmull_s8(vbCDEFc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0)));
+      const int16x8_t vprod0xCDEFc1 = vmull_s8(vbCDEFc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1)));
+      const int16x8_t vprod0xCDEFc2 = vmull_s8(vbCDEFc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2)));
       const int16x8_t vprod0xCDEFc3 = vmull_s8(vbCDEFc3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3)));
+      vacc0xCDEF = vpadalq_s16(vacc0xCDEF, vprod0xCDEFc0);
+      vacc0xCDEF = vpadalq_s16(vacc0xCDEF, vprod0xCDEFc1);
+      vacc0xCDEF = vpadalq_s16(vacc0xCDEF, vprod0xCDEFc2);
       vacc0xCDEF = vpadalq_s16(vacc0xCDEF, vprod0xCDEFc3);
+      const int16x8_t vprod1x0123c0 = vmull_s8(vb0123c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 0)));
+      const int16x8_t vprod1x0123c1 = vmull_s8(vb0123c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 1)));
+      const int16x8_t vprod1x0123c2 = vmull_s8(vb0123c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 2)));
+      const int16x8_t vprod1x0123c3 = vmull_s8(vb0123c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 3)));
+      vacc1x0123 = vpadalq_s16(vacc1x0123, vprod1x0123c0);
+      vacc1x0123 = vpadalq_s16(vacc1x0123, vprod1x0123c1);
+      vacc1x0123 = vpadalq_s16(vacc1x0123, vprod1x0123c2);
+      vacc1x0123 = vpadalq_s16(vacc1x0123, vprod1x0123c3);
+      const int16x8_t vprod1x4567c0 = vmull_s8(vb4567c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 0)));
+      const int16x8_t vprod1x4567c1 = vmull_s8(vb4567c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 1)));
+      const int16x8_t vprod1x4567c2 = vmull_s8(vb4567c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 2)));
+      const int16x8_t vprod1x4567c3 = vmull_s8(vb4567c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 3)));
+      vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c0);
+      vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c1);
+      vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c2);
+      vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c3);
+      const int16x8_t vprod1x89ABc0 = vmull_s8(vb89ABc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 0)));
+      const int16x8_t vprod1x89ABc1 = vmull_s8(vb89ABc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 1)));
+      const int16x8_t vprod1x89ABc2 = vmull_s8(vb89ABc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 2)));
+      const int16x8_t vprod1x89ABc3 = vmull_s8(vb89ABc3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 3)));
+      vacc1x89AB = vpadalq_s16(vacc1x89AB, vprod1x89ABc0);
+      vacc1x89AB = vpadalq_s16(vacc1x89AB, vprod1x89ABc1);
+      vacc1x89AB = vpadalq_s16(vacc1x89AB, vprod1x89ABc2);
+      vacc1x89AB = vpadalq_s16(vacc1x89AB, vprod1x89ABc3);
+      const int16x8_t vprod1xCDEFc0 = vmull_s8(vbCDEFc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 0)));
+      const int16x8_t vprod1xCDEFc1 = vmull_s8(vbCDEFc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 1)));
+      const int16x8_t vprod1xCDEFc2 = vmull_s8(vbCDEFc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 2)));
       const int16x8_t vprod1xCDEFc3 = vmull_s8(vbCDEFc3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 3)));
+      vacc1xCDEF = vpadalq_s16(vacc1xCDEF, vprod1xCDEFc0);
+      vacc1xCDEF = vpadalq_s16(vacc1xCDEF, vprod1xCDEFc1);
+      vacc1xCDEF = vpadalq_s16(vacc1xCDEF, vprod1xCDEFc2);
       vacc1xCDEF = vpadalq_s16(vacc1xCDEF, vprod1xCDEFc3);
+      const int16x8_t vprod2x0123c0 = vmull_s8(vb0123c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 0)));
+      const int16x8_t vprod2x0123c1 = vmull_s8(vb0123c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 1)));
+      const int16x8_t vprod2x0123c2 = vmull_s8(vb0123c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 2)));
+      const int16x8_t vprod2x0123c3 = vmull_s8(vb0123c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 3)));
+      vacc2x0123 = vpadalq_s16(vacc2x0123, vprod2x0123c0);
+      vacc2x0123 = vpadalq_s16(vacc2x0123, vprod2x0123c1);
+      vacc2x0123 = vpadalq_s16(vacc2x0123, vprod2x0123c2);
+      vacc2x0123 = vpadalq_s16(vacc2x0123, vprod2x0123c3);
+      const int16x8_t vprod2x4567c0 = vmull_s8(vb4567c0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 0)));
+      const int16x8_t vprod2x4567c1 = vmull_s8(vb4567c1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 1)));
+      const int16x8_t vprod2x4567c2 = vmull_s8(vb4567c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 2)));
+      const int16x8_t vprod2x4567c3 = vmull_s8(vb4567c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 3)));
+      vacc2x4567 = vpadalq_s16(vacc2x4567, vprod2x4567c0);
+      vacc2x4567 = vpadalq_s16(vacc2x4567, vprod2x4567c1);
+      vacc2x4567 = vpadalq_s16(vacc2x4567, vprod2x4567c2);
+      vacc2x4567 = vpadalq_s16(vacc2x4567, vprod2x4567c3);
+      const int16x8_t vprod2x89ABc0 = vmull_s8(vb89ABc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 0)));
+      const int16x8_t vprod2x89ABc1 = vmull_s8(vb89ABc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 1)));
+      const int16x8_t vprod2x89ABc2 = vmull_s8(vb89ABc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 2)));
+      const int16x8_t vprod2x89ABc3 = vmull_s8(vb89ABc3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 3)));
+      vacc2x89AB = vpadalq_s16(vacc2x89AB, vprod2x89ABc0);
+      vacc2x89AB = vpadalq_s16(vacc2x89AB, vprod2x89ABc1);
+      vacc2x89AB = vpadalq_s16(vacc2x89AB, vprod2x89ABc2);
+      vacc2x89AB = vpadalq_s16(vacc2x89AB, vprod2x89ABc3);
+      const int16x8_t vprod2xCDEFc0 = vmull_s8(vbCDEFc0, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 0)));
+      const int16x8_t vprod2xCDEFc1 = vmull_s8(vbCDEFc1, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 1)));
+      const int16x8_t vprod2xCDEFc2 = vmull_s8(vbCDEFc2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 2)));
       const int16x8_t vprod2xCDEFc3 = vmull_s8(vbCDEFc3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 3)));
+      vacc2xCDEF = vpadalq_s16(vacc2xCDEF, vprod2xCDEFc0);
+      vacc2xCDEF = vpadalq_s16(vacc2xCDEF, vprod2xCDEFc1);
+      vacc2xCDEF = vpadalq_s16(vacc2xCDEF, vprod2xCDEFc2);
       vacc2xCDEF = vpadalq_s16(vacc2xCDEF, vprod2xCDEFc3);
 
       k -= 8 * sizeof(int8_t);
     }
+
     if XNN_UNLIKELY(k != 0) {
       const int8x8_t va0 = vld1_s8(a0); a0 = (const int8_t*) ((uintptr_t) a0 + k);
       const int8x8_t va1 = vld1_s8(a1); a1 = (const int8_t*) ((uintptr_t) a1 + k);
