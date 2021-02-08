@@ -4708,6 +4708,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-e2e-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" src)
   TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK benchmark bench-models bench-utils)
 
+  ADD_EXECUTABLE(qs8-gemm-e2e-bench bench/qs8-gemm-e2e.cc)
+  SET_TARGET_PROPERTIES(qs8-gemm-e2e-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-e2e-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" src)
+  TARGET_LINK_LIBRARIES(qs8-gemm-e2e-bench PRIVATE XNNPACK benchmark bench-models bench-utils)
+
   # ---[ Build operator-level microbenchmarks
   ADD_EXECUTABLE(average-pooling-bench bench/average-pooling.cc)
   SET_TARGET_PROPERTIES(average-pooling-bench PROPERTIES
