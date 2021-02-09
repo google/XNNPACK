@@ -78,6 +78,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm(
       v128_t voutKLMN = wasm_f32x4_min(vaccKLMN, vmax);
       v128_t voutOPQR = wasm_f32x4_min(vaccOPQR, vmax);
       v128_t voutSTUV = wasm_f32x4_min(vaccSTUV, vmax);
+
       vout0123 = wasm_f32x4_max(vout0123, vmin);
       vout4567 = wasm_f32x4_max(vout4567, vmin);
       vout89AB = wasm_f32x4_max(vout89AB, vmin);
@@ -86,6 +87,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm(
       voutKLMN = wasm_f32x4_max(voutKLMN, vmin);
       voutOPQR = wasm_f32x4_max(voutOPQR, vmin);
       voutSTUV = wasm_f32x4_max(voutSTUV, vmin);
+
       wasm_v128_store(output, vout0123);
       wasm_v128_store(output + 4, vout4567);
       wasm_v128_store(output + 8, vout89AB);
@@ -109,7 +111,8 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm(
       size_t n = nc;
       do {
         uint32_t nnz = *nnzmap++;
-        v128_t vacc0123 = wasm_v32x4_load_splat(w); w += 1;
+        v128_t vacc0123 = wasm_v32x4_load_splat(w);
+        w += 1;
         v128_t vacc4567 = vacc0123;
         v128_t vacc89AB = vacc0123;
         v128_t vaccCDEF = vacc0123;
@@ -154,7 +157,8 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm(
       size_t n = nc;
       do {
         uint32_t nnz = *nnzmap++;
-        v128_t vacc0123 = wasm_v32x4_load_splat(w); w += 1;
+        v128_t vacc0123 = wasm_v32x4_load_splat(w);
+        w += 1;
         v128_t vacc4567 = vacc0123;
         if XNN_LIKELY(nnz != 0) {
           do {
@@ -187,7 +191,8 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm(
       size_t n = nc;
       do {
         uint32_t nnz = *nnzmap++;
-        v128_t vacc0123 = wasm_v32x4_load_splat(w); w += 1;
+        v128_t vacc0123 = wasm_v32x4_load_splat(w);
+        w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
@@ -214,7 +219,8 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm(
       size_t n = nc;
       do {
         uint32_t nnz = *nnzmap++;
-        v128_t vacc01 = wasm_v32x4_load_splat(w); w += 1;
+        v128_t vacc01 = wasm_v32x4_load_splat(w);
+        w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
@@ -241,7 +247,8 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm(
       size_t n = nc;
       do {
         uint32_t nnz = *nnzmap++;
-        v128_t vacc0 = wasm_v32x4_load_splat(w); w += 1;
+        v128_t vacc0 = wasm_v32x4_load_splat(w);
+        w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;

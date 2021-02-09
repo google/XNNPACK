@@ -49,7 +49,6 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
     i0 = zero;
   }
 
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
   const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
 
@@ -94,11 +93,11 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
       }
 
       // viMx0 = ( iM0c2, iM0c1, iM0c0, --- )
-      v128_t vi0x0 = vzero;
-      v128_t vi1x0 = vzero;
-      v128_t vi2x0 = vzero;
-      v128_t vi3x0 = vzero;
-      v128_t vi4x0 = vzero;
+      v128_t vi0x0 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+      v128_t vi1x0 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+      v128_t vi2x0 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+      v128_t vi3x0 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+      v128_t vi4x0 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
 
       size_t iw = input_width;
       for (; iw >= 4; iw -= 4) {
@@ -323,15 +322,15 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
         vi3x0 = vi3x3;
         vi4x0 = vi4x3;
 
-        vo0x0 = wasm_v128_bitselect(vmin, vo0x0, wasm_f32x4_lt(vo0x0, vmin));
-        vo1x0 = wasm_v128_bitselect(vmin, vo1x0, wasm_f32x4_lt(vo1x0, vmin));
-        vo0x1 = wasm_v128_bitselect(vmin, vo0x1, wasm_f32x4_lt(vo0x1, vmin));
-        vo1x1 = wasm_v128_bitselect(vmin, vo1x1, wasm_f32x4_lt(vo1x1, vmin));
+        vo0x0 = wasm_f32x4_pmax(vmin, vo0x0);
+        vo1x0 = wasm_f32x4_pmax(vmin, vo1x0);
+        vo0x1 = wasm_f32x4_pmax(vmin, vo0x1);
+        vo1x1 = wasm_f32x4_pmax(vmin, vo1x1);
 
-        vo0x0 = wasm_v128_bitselect(vo0x0, vmax, wasm_f32x4_le(vo0x0, vmax));
-        vo1x0 = wasm_v128_bitselect(vo1x0, vmax, wasm_f32x4_le(vo1x0, vmax));
-        vo0x1 = wasm_v128_bitselect(vo0x1, vmax, wasm_f32x4_le(vo0x1, vmax));
-        vo1x1 = wasm_v128_bitselect(vo1x1, vmax, wasm_f32x4_le(vo1x1, vmax));
+        vo0x0 = wasm_f32x4_pmin(vmax, vo0x0);
+        vo1x0 = wasm_f32x4_pmin(vmax, vo1x0);
+        vo0x1 = wasm_f32x4_pmin(vmax, vo0x1);
+        vo1x1 = wasm_f32x4_pmin(vmax, vo1x1);
 
         const v128_t vo0c01 = wasm_v32x4_shuffle(vo0x0, vo0x1, 0, 4 + 0, 1, 4 + 1);
         const v128_t vo0c23 = wasm_v32x4_shuffle(vo0x0, vo0x1, 2, 4 + 2, 3, 4 + 3);
@@ -391,11 +390,11 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
 
         const v128_t vk00c1 = wasm_v128_load(w + 16);
 
-        v128_t vi0x2 = vzero;
-        v128_t vi1x2 = vzero;
-        v128_t vi2x2 = vzero;
-        v128_t vi3x2 = vzero;
-        v128_t vi4x2 = vzero;
+        v128_t vi0x2 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+        v128_t vi1x2 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+        v128_t vi2x2 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+        v128_t vi3x2 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+        v128_t vi4x2 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
         if (iw >= 2) {
           // viMx2 = ( iM3c1, iM3c0, iM2c2, iM2c1 )
           vi0x2 = wasm_v128_load(i0 + 4);
@@ -501,11 +500,11 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
 
         const v128_t vk01c2 = wasm_v128_load(w + 64);
 
-        v128_t vi0x3 = vzero;
-        v128_t vi1x3 = vzero;
-        v128_t vi2x3 = vzero;
-        v128_t vi3x3 = vzero;
-        v128_t vi4x3 = vzero;
+        v128_t vi0x3 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+        v128_t vi1x3 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+        v128_t vi2x3 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+        v128_t vi3x3 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
+        v128_t vi4x3 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
         if (iw > 2) {
           // viMx3 = ( 0.0, 0.0, 0.0, iM3c2 )
           vi0x3 = wasm_v32x4_load_splat(i0 + 8);
@@ -581,15 +580,15 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
           vo1x0 = wasm_f32x4_add(vo1x0, wasm_f32x4_mul(vk22c2, wasm_v32x4_shuffle(vi4x2, vi4x2, 1, 1, 1, 1)));
         }
 
-        vo0x0 = wasm_v128_bitselect(vmin, vo0x0, wasm_f32x4_lt(vo0x0, vmin));
-        vo1x0 = wasm_v128_bitselect(vmin, vo1x0, wasm_f32x4_lt(vo1x0, vmin));
-        vo0x1 = wasm_v128_bitselect(vmin, vo0x1, wasm_f32x4_lt(vo0x1, vmin));
-        vo1x1 = wasm_v128_bitselect(vmin, vo1x1, wasm_f32x4_lt(vo1x1, vmin));
+        vo0x0 = wasm_f32x4_pmax(vmin, vo0x0);
+        vo1x0 = wasm_f32x4_pmax(vmin, vo1x0);
+        vo0x1 = wasm_f32x4_pmax(vmin, vo0x1);
+        vo1x1 = wasm_f32x4_pmax(vmin, vo1x1);
 
-        vo0x0 = wasm_v128_bitselect(vo0x0, vmax, wasm_f32x4_le(vo0x0, vmax));
-        vo1x0 = wasm_v128_bitselect(vo1x0, vmax, wasm_f32x4_le(vo1x0, vmax));
-        vo0x1 = wasm_v128_bitselect(vo0x1, vmax, wasm_f32x4_le(vo0x1, vmax));
-        vo1x1 = wasm_v128_bitselect(vo1x1, vmax, wasm_f32x4_le(vo1x1, vmax));
+        vo0x0 = wasm_f32x4_pmin(vmax, vo0x0);
+        vo1x0 = wasm_f32x4_pmin(vmax, vo1x0);
+        vo0x1 = wasm_f32x4_pmin(vmax, vo0x1);
+        vo1x1 = wasm_f32x4_pmin(vmax, vo1x1);
 
         if (iw == 3) {
           // Exactly 2 output width elements remaining

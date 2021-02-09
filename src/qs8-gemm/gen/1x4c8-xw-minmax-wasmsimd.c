@@ -38,12 +38,11 @@ void xnn_qs8_gemm_xw_minmax_ukernel_1x4c8__wasmsimd(
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
   do {
-    v128_t vacc0x0 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[0]);
-    v128_t vacc0x1 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[1]);
-    v128_t vacc0x2 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[2]);
-    v128_t vacc0x3 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[3]);
+    v128_t vacc0x0 = wasm_f32x4_replace_lane(wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f), 0, ((const float*) w)[0]);
+    v128_t vacc0x1 = wasm_f32x4_replace_lane(wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f), 0, ((const float*) w)[1]);
+    v128_t vacc0x2 = wasm_f32x4_replace_lane(wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f), 0, ((const float*) w)[2]);
+    v128_t vacc0x3 = wasm_f32x4_replace_lane(wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f), 0, ((const float*) w)[3]);
     w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
 
     size_t k = 0;
@@ -81,7 +80,7 @@ void xnn_qs8_gemm_xw_minmax_ukernel_1x4c8__wasmsimd(
 
     v128_t vacc0x0123 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc0x02, vacc0x13, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc0x02, vacc0x13, 2, 6, 3, 7));
 
-    const v128_t vsign0x0123 = wasm_i32x4_lt(vacc0x0123, vzero);
+    const v128_t vsign0x0123 = wasm_i32x4_shr(vacc0x0123, 31);
 
     const v128_t vacc0x01 = wasm_v32x4_shuffle(vacc0x0123, vsign0x0123, 0, 4, 1, 5);
 
@@ -95,7 +94,7 @@ void xnn_qs8_gemm_xw_minmax_ukernel_1x4c8__wasmsimd(
     const v128_t vq31prod0x0123 = wasm_v32x4_shuffle(vprod0x01, vprod0x23, 1, 3, 5, 7);
 
     const v128_t vremainder_mask = wasm_v128_load(params->wasmsimd.remainder_mask);
-    const v128_t vrem0x0123 = wasm_i32x4_add(wasm_v128_and(vq31prod0x0123, vremainder_mask), wasm_i32x4_lt(vq31prod0x0123, vzero));
+    const v128_t vrem0x0123 = wasm_i32x4_add(wasm_v128_and(vq31prod0x0123, vremainder_mask), wasm_i32x4_shr(vq31prod0x0123, 31));
 
     const v128_t vthreshold = wasm_v128_load(params->wasmsimd.remainder_threshold);
     const int32_t vshift = params->wasmsimd.shift;

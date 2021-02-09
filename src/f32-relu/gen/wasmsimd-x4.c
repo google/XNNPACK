@@ -26,7 +26,7 @@ void xnn_f32_relu_ukernel__wasmsimd_x4(
   assert(x != NULL);
   assert(y != NULL);
 
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
+  const v128_t vzero = wasm_i32x4_const(0, 0, 0, 0);
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     v128_t vacc = wasm_v128_load(x);

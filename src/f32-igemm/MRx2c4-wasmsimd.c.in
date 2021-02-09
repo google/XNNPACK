@@ -58,11 +58,11 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__wasmsimd${ARCH_SUF
         c${M} = c${M-1};
       }
 
-  $if ACTIVATION == "MINMAX" and not X86:
+  $if ACTIVATION == "MINMAX":
     const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
     const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   do {
-    v128_t vacc0x0c4 = wasm_f32x4_replace_lane(wasm_f32x4_splat(0.0f), 0, w[0]);
+    v128_t vacc0x0c4 = wasm_f32x4_replace_lane(wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f), 0, w[0]);
     $for N in range(1, NR):
       v128_t vacc0x${N}c4 = wasm_f32x4_replace_lane(vacc0x0c4, 0, w[${N}]);
     $for M in range(1, MR):
@@ -104,7 +104,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__wasmsimd${ARCH_SUF
           const v128_t vb${N} = wasm_v128_load(w + ${N * 4});
         w += ${NR * 4};
 
-        const v128_t vzero = wasm_f32x4_splat(0.0f);
+        const v128_t vzero = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
         $for N in range(NR):
           const v128_t vmask${N} = wasm_f32x4_eq(vb${N}, vzero);
 
@@ -127,22 +127,19 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__wasmsimd${ARCH_SUF
 
     $if ACTIVATION == "MINMAX":
       $if X86:
-        const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
         $for M in range(0, MR, 2):
-          vacc${M}${M+1}x01 = wasm_v128_bitselect(vmin, vacc${M}${M+1}x01, wasm_f32x4_lt(vacc${M}${M+1}x01, vmin));
+          vacc${M}${M+1}x01 = wasm_f32x4_pmax(vmin, vacc${M}${M+1}x01);
+
+        $for M in range(0, MR, 2):
+          vacc${M}${M+1}x01 = wasm_f32x4_pmin(vmax, vacc${M}${M+1}x01);
       $else:
         $for M in range(0, MR, 2):
           vacc${M}${M+1}x01 = wasm_f32x4_max(vacc${M}${M+1}x01, vmin);
 
-      $if X86:
-        const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
-        $for M in range(0, MR, 2):
-          vacc${M}${M+1}x01 = wasm_v128_bitselect(vacc${M}${M+1}x01, vmax, wasm_f32x4_le(vacc${M}${M+1}x01, vmax));
-      $else:
         $for M in range(0, MR, 2):
           vacc${M}${M+1}x01 = wasm_f32x4_min(vacc${M}${M+1}x01, vmax);
     $elif ACTIVATION == "RELU":
-      const v128_t vzero = wasm_f32x4_splat(0.0f);
+      const v128_t vzero = wasm_i32x4_const(0, 0, 0, 0);
       $for M in range(0, MR, 2):
         vacc${M}${M+1}x01 = wasm_i32x4_max(vacc${M}${M+1}x01, vzero);
 

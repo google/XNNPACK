@@ -34,7 +34,6 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_1x4(
   const size_t input_increment = input_stride * 1 - channels;
   const size_t output_increment = output_stride * 1 - channels;
 
-  const v128_t vzero = wasm_i32x4_splat(0);
   do {
     const float* w = weights;
     size_t c = channels;
@@ -46,7 +45,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_1x4(
       i0 += 4;
 
       v128_t vacc0x0123 = wasm_f32x4_mul(vi0x0123, vw0123);
-      const v128_t vmask0x0123 = wasm_i32x4_lt(vi0x0123, vzero);
+      const v128_t vmask0x0123 = wasm_i32x4_shr(vi0x0123, 31);
 
       vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
 
@@ -61,7 +60,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_1x4(
       i0 = (const float*) ((uintptr_t) i0 + c);
 
       v128_t vacc0x0123 = wasm_f32x4_mul(vi0x0123, vw0123);
-      const v128_t vmask0x0123 = wasm_i32x4_lt(vi0x0123, vzero);
+      const v128_t vmask0x0123 = wasm_i32x4_shr(vi0x0123, 31);
 
       vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
 
