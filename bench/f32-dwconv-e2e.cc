@@ -233,25 +233,25 @@ static void DWConvEnd2EndBenchmark(
       32 /* cr */, 9 /* mr */, benchmark::utils::CheckAVX512F);
   }
 
-  BENCHMARK_FP32_END2END(f32_dwconv_up4x9__sse);
-  BENCHMARK_FP32_END2END(f32_dwconv_up4x9__sse_acc2);
-  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__sse);
-  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__sse_acc2);
-
-  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__avx);
-  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__avx_acc2);
-  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__avx);
-  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__avx_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__avx512f);
+  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__avx512f_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_up32x9__avx512f);
+  BENCHMARK_FP32_END2END(f32_dwconv_up32x9__avx512f_acc2);
 
   BENCHMARK_FP32_END2END(f32_dwconv_up8x9__fma3);
   BENCHMARK_FP32_END2END(f32_dwconv_up8x9__fma3_acc2);
   BENCHMARK_FP32_END2END(f32_dwconv_up16x9__fma3);
   BENCHMARK_FP32_END2END(f32_dwconv_up16x9__fma3_acc2);
 
-  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__avx512f);
-  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__avx512f_acc2);
-  BENCHMARK_FP32_END2END(f32_dwconv_up32x9__avx512f);
-  BENCHMARK_FP32_END2END(f32_dwconv_up32x9__avx512f_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__avx);
+  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__avx_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__avx);
+  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__avx_acc2);
+
+  BENCHMARK_FP32_END2END(f32_dwconv_up4x9__sse);
+  BENCHMARK_FP32_END2END(f32_dwconv_up4x9__sse_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__sse);
+  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__sse_acc2);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD

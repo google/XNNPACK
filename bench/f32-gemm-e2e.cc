@@ -886,6 +886,37 @@ static void GEMMEnd2EndBenchmark(
       benchmark::utils::CheckAVX512F);
   }
 
+  BENCHMARK_FP32_END2END(f32_gemm_4x16__avx512f_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_5x16__avx512f_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_6x16__avx512f_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_7x16__avx512f_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_8x16__avx512f_broadcast);
+
+  BENCHMARK_FP32_END2END(f32_gemm_3x16s4__fma3_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_4x16s4__fma3_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_5x16s4__fma3_broadcast);
+
+  BENCHMARK_FP32_END2END(f32_gemm_4x8__fma3_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_5x8__fma3_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_6x8__fma3_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_7x8__fma3_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_8x8__fma3_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_3x16__fma3_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_4x16__fma3_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_5x16__fma3_broadcast);
+
+  BENCHMARK_FP32_END2END(f32_gemm_4x8__avx_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_5x8__avx_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_6x8__avx_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_7x8__avx_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_3x16__avx_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_4x16__avx_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_5x16__avx_broadcast);
+
+  BENCHMARK_FP32_END2END(f32_gemm_3x8__sse2_dup);
+  BENCHMARK_FP32_END2END(f32_gemm_4x8__sse2_dup);
+  BENCHMARK_FP32_END2END(f32_gemm_5x8__sse2_dup);
+
   BENCHMARK_FP32_END2END(f32_gemm_3x8__sse_load1);
   BENCHMARK_FP32_END2END(f32_gemm_4x8__sse_load1);
   BENCHMARK_FP32_END2END(f32_gemm_5x8__sse_load1);
@@ -897,37 +928,6 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_FP32_END2END(f32_gemm_3x8s4__sse);
   BENCHMARK_FP32_END2END(f32_gemm_4x8s4__sse);
   BENCHMARK_FP32_END2END(f32_gemm_5x8s4__sse);
-
-  BENCHMARK_FP32_END2END(f32_gemm_3x8__sse2_dup);
-  BENCHMARK_FP32_END2END(f32_gemm_4x8__sse2_dup);
-  BENCHMARK_FP32_END2END(f32_gemm_5x8__sse2_dup);
-
-  BENCHMARK_FP32_END2END(f32_gemm_4x8__avx_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_5x8__avx_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_6x8__avx_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_7x8__avx_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_3x16__avx_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_4x16__avx_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_5x16__avx_broadcast);
-
-  BENCHMARK_FP32_END2END(f32_gemm_4x8__fma3_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_5x8__fma3_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_6x8__fma3_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_7x8__fma3_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_8x8__fma3_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_3x16__fma3_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_4x16__fma3_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_5x16__fma3_broadcast);
-
-  BENCHMARK_FP32_END2END(f32_gemm_3x16s4__fma3_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_4x16s4__fma3_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_5x16s4__fma3_broadcast);
-
-  BENCHMARK_FP32_END2END(f32_gemm_4x16__avx512f_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_5x16__avx512f_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_6x16__avx512f_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_7x16__avx512f_broadcast);
-  BENCHMARK_FP32_END2END(f32_gemm_8x16__avx512f_broadcast);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD
