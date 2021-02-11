@@ -440,7 +440,7 @@ class GemmMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
     auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+      std::uniform_int_distribution<int32_t>(-127, std::numeric_limits<int8_t>::max()), rng);
 
     std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
     std::vector<int8_t> b(n() * k());

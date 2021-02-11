@@ -64,15 +64,34 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
         int32x4_t vacc${M}x${N} = vacc0x${N};
 
     size_t k = kc;
-    while (k >= 8 * sizeof(int8_t)) {
+    while (k >= 16 * sizeof(int8_t)) {
+      $for M in range(MR):
+        const int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} += 8;
+        const int8x8_t va${M}x1 = vld1_s8(a${M}); a${M} += 8;
+
+      $for N in range(0, NR):
+        const int8x8_t vb${N}x0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+      $for N in range(0, NR):
+        const int8x8_t vb${N}x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+        $for M in range(MR):
+          int16x8_t vprod${M}x${N} = vmull_s8(vb${N}x0, va${M}x0);
+        $for M in range(MR):
+          vprod${M}x${N} = vmlal_s8(vprod${M}x${N}, vb${N}x1, va${M}x1);
+        $for M in range(MR):
+          vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
+
+      k -= 16 * sizeof(int8_t);
+    }
+    if (k >= 8 * sizeof(int8_t)) {
       $for M in range(MR):
         const int8x8_t va${M} = vld1_s8(a${M}); a${M} += 8;
 
       $for N in range(0, NR):
         const int8x8_t vb${N} = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
         $for M in range(MR):
           const int16x8_t vprod${M}x${N} = vmull_s8(vb${N}, va${M});
+        $for M in range(MR):
           vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
 
       k -= 8 * sizeof(int8_t);
@@ -83,9 +102,9 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
 
       $for N in range(0, NR):
         const int8x8_t vb${N} = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
         $for M in range(MR):
           const int16x8_t vprod${M}x${N} = vmull_s8(vb${N}, va${M});
+        $for M in range(MR):
           vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
     }
 
