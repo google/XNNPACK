@@ -1335,18 +1335,18 @@ static void init(void) {
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
       xnn_params.f32.spmm = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_16x1__neonfma_pipelined,
-        .mr = 16,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined,
+        .mr = 32,
         .nr = 1,
       };
       xnn_params.f32.spmm2 = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_16x2__neonfma,
-        .mr = 16,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_32x2__neonfma,
+        .mr = 32,
         .nr = 2,
       };
       xnn_params.f32.spmm4 = (struct spmm_parameters) {
-        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_16x4__neonfma,
-        .mr = 16,
+        .ukernel = (xnn_spmm_ukernel_function) xnn_f32_spmm_minmax_ukernel_32x4__neonfma,
+        .mr = 32,
         .nr = 4,
       };
       xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
