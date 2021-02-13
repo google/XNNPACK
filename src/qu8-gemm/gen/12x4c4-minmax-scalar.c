@@ -166,7 +166,7 @@ void xnn_qu8_gemm_minmax_ukernel_12x4c4__scalar(
     int32_t vacc103 = bias3;
     int32_t vacc113 = bias3;
 
-    w = (const void*)((uintptr_t)w + 4 * sizeof(int32_t));
+    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
 
     // Inner accumulation loop along the 4 columns.
     // Handle 4 rows at each iteration: this is key to modelling what an
@@ -289,25 +289,25 @@ void xnn_qu8_gemm_minmax_ukernel_12x4c4__scalar(
       int32_t vb20 = (int32_t) ((const uint8_t*)w)[2];
       int32_t vb30 = (int32_t) ((const uint8_t*)w)[3];
 
-      w = (const void*)((uintptr_t)w + 4 * sizeof(uint8_t));
+      w = (const void*) ((uintptr_t) w + 4 * sizeof(uint8_t));
       int32_t vb01 = (int32_t) ((const uint8_t*)w)[0];
       int32_t vb11 = (int32_t) ((const uint8_t*)w)[1];
       int32_t vb21 = (int32_t) ((const uint8_t*)w)[2];
       int32_t vb31 = (int32_t) ((const uint8_t*)w)[3];
 
-      w = (const void*)((uintptr_t)w + 4 * sizeof(uint8_t));
+      w = (const void*) ((uintptr_t) w + 4 * sizeof(uint8_t));
       int32_t vb02 = (int32_t) ((const uint8_t*)w)[0];
       int32_t vb12 = (int32_t) ((const uint8_t*)w)[1];
       int32_t vb22 = (int32_t) ((const uint8_t*)w)[2];
       int32_t vb32 = (int32_t) ((const uint8_t*)w)[3];
 
-      w = (const void*)((uintptr_t)w + 4 * sizeof(uint8_t));
+      w = (const void*) ((uintptr_t) w + 4 * sizeof(uint8_t));
       int32_t vb03 = (int32_t) ((const uint8_t*)w)[0];
       int32_t vb13 = (int32_t) ((const uint8_t*)w)[1];
       int32_t vb23 = (int32_t) ((const uint8_t*)w)[2];
       int32_t vb33 = (int32_t) ((const uint8_t*)w)[3];
 
-      w = (const void*)((uintptr_t)w + 4 * sizeof(uint8_t));
+      w = (const void*) ((uintptr_t) w + 4 * sizeof(uint8_t));
 
       // Multiply-accumulate: 12x4 * 4x4 --> 12x4. The inner size 4 here means
       // we're computing 4D dot-products, which makes this a model for
@@ -557,18 +557,18 @@ void xnn_qu8_gemm_minmax_ukernel_12x4c4__scalar(
     }
     // End of accumulation loop. The variable `k` contains the amount by which
     // we advanced the `va` pointers, so we rewind by this amount now.
-    a0 = (const uint8_t*)((uintptr_t)a0 - k);
-    a1 = (const uint8_t*)((uintptr_t)a1 - k);
-    a2 = (const uint8_t*)((uintptr_t)a2 - k);
-    a3 = (const uint8_t*)((uintptr_t)a3 - k);
-    a4 = (const uint8_t*)((uintptr_t)a4 - k);
-    a5 = (const uint8_t*)((uintptr_t)a5 - k);
-    a6 = (const uint8_t*)((uintptr_t)a6 - k);
-    a7 = (const uint8_t*)((uintptr_t)a7 - k);
-    a8 = (const uint8_t*)((uintptr_t)a8 - k);
-    a9 = (const uint8_t*)((uintptr_t)a9 - k);
-    a10 = (const uint8_t*)((uintptr_t)a10 - k);
-    a11 = (const uint8_t*)((uintptr_t)a11 - k);
+    a0 = (const uint8_t*)((uintptr_t) a0 - k);
+    a1 = (const uint8_t*)((uintptr_t) a1 - k);
+    a2 = (const uint8_t*)((uintptr_t) a2 - k);
+    a3 = (const uint8_t*)((uintptr_t) a3 - k);
+    a4 = (const uint8_t*)((uintptr_t) a4 - k);
+    a5 = (const uint8_t*)((uintptr_t) a5 - k);
+    a6 = (const uint8_t*)((uintptr_t) a6 - k);
+    a7 = (const uint8_t*)((uintptr_t) a7 - k);
+    a8 = (const uint8_t*)((uintptr_t) a8 - k);
+    a9 = (const uint8_t*)((uintptr_t) a9 - k);
+    a10 = (const uint8_t*)((uintptr_t) a10 - k);
+    a11 = (const uint8_t*)((uintptr_t) a11 - k);
 
     // Post-accumulation work
 
@@ -976,18 +976,18 @@ void xnn_qu8_gemm_minmax_ukernel_12x4c4__scalar(
       c11[3] = vout113;
 
       // Advance to the next 4 columns.
-      c0 = (uint8_t*)((uintptr_t)c0 + cn_stride);
-      c1 = (uint8_t*)((uintptr_t)c1 + cn_stride);
-      c2 = (uint8_t*)((uintptr_t)c2 + cn_stride);
-      c3 = (uint8_t*)((uintptr_t)c3 + cn_stride);
-      c4 = (uint8_t*)((uintptr_t)c4 + cn_stride);
-      c5 = (uint8_t*)((uintptr_t)c5 + cn_stride);
-      c6 = (uint8_t*)((uintptr_t)c6 + cn_stride);
-      c7 = (uint8_t*)((uintptr_t)c7 + cn_stride);
-      c8 = (uint8_t*)((uintptr_t)c8 + cn_stride);
-      c9 = (uint8_t*)((uintptr_t)c9 + cn_stride);
-      c10 = (uint8_t*)((uintptr_t)c10 + cn_stride);
-      c11 = (uint8_t*)((uintptr_t)c11 + cn_stride);
+      c0 = (uint8_t*)((uintptr_t) c0 + cn_stride);
+      c1 = (uint8_t*)((uintptr_t) c1 + cn_stride);
+      c2 = (uint8_t*)((uintptr_t) c2 + cn_stride);
+      c3 = (uint8_t*)((uintptr_t) c3 + cn_stride);
+      c4 = (uint8_t*)((uintptr_t) c4 + cn_stride);
+      c5 = (uint8_t*)((uintptr_t) c5 + cn_stride);
+      c6 = (uint8_t*)((uintptr_t) c6 + cn_stride);
+      c7 = (uint8_t*)((uintptr_t) c7 + cn_stride);
+      c8 = (uint8_t*)((uintptr_t) c8 + cn_stride);
+      c9 = (uint8_t*)((uintptr_t) c9 + cn_stride);
+      c10 = (uint8_t*)((uintptr_t) c10 + cn_stride);
+      c11 = (uint8_t*)((uintptr_t) c11 + cn_stride);
 
       nc -= 4;
     } else {

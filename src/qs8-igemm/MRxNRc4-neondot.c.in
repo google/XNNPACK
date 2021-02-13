@@ -82,7 +82,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c4__neondot(
         // Load a 8x${NR} block of weights.
         $for K in range(0, 8, 4):
           $for N in range(0, NR, 4):
-            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
 
         // Multiply-accumulate: ${MR}x8 * 8x${NR} --> ${MR}x${NR}.
         $for K in range(0, 8, 4):
@@ -100,7 +100,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c4__neondot(
 
         // Load a 4x${NR} block of weights.
         $for N in range(0, NR, 4):
-          const int8x16_t vb0123x${ABC[N:N+4]} = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+          const int8x16_t vb0123x${ABC[N:N+4]} = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
 
         // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
         $for M in range(MR):
@@ -110,7 +110,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c4__neondot(
         if (k > 4) {
           // Load a 4x${NR} block of weights.
           $for N in range(0, NR, 4):
-            const int8x16_t vb4567x${ABC[N:N+4]} = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+            const int8x16_t vb4567x${ABC[N:N+4]} = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
 
           // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
           $for M in range(MR):

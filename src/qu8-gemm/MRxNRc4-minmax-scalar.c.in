@@ -66,7 +66,7 @@ void xnn_qu8_gemm_minmax_ukernel_${MR}x${NR}c4__scalar(
       $for M in range(MR):
         int32_t vacc${M}${N} = bias${N};
 
-    w = (const void*)((uintptr_t)w + ${NR} * sizeof(int32_t));
+    w = (const void*) ((uintptr_t) w + ${NR} * sizeof(int32_t));
 
     // Inner accumulation loop along the ${NR} columns.
     // Handle 4 rows at each iteration: this is key to modelling what an
@@ -85,7 +85,7 @@ void xnn_qu8_gemm_minmax_ukernel_${MR}x${NR}c4__scalar(
         $for K in range(4):
           int32_t vb${K}${N} = (int32_t) ((const uint8_t*)w)[${K}];
 
-        w = (const void*)((uintptr_t)w + 4 * sizeof(uint8_t));
+        w = (const void*) ((uintptr_t) w + 4 * sizeof(uint8_t));
 
       // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}. The inner size 4 here means
       // we're computing 4D dot-products, which makes this a model for
@@ -101,7 +101,7 @@ void xnn_qu8_gemm_minmax_ukernel_${MR}x${NR}c4__scalar(
     // End of accumulation loop. The variable `k` contains the amount by which
     // we advanced the `va` pointers, so we rewind by this amount now.
     $for M in range(MR):
-      a${M} = (const uint8_t*)((uintptr_t)a${M} - k);
+      a${M} = (const uint8_t*)((uintptr_t) a${M} - k);
 
     // Post-accumulation work
 
@@ -150,7 +150,7 @@ void xnn_qu8_gemm_minmax_ukernel_${MR}x${NR}c4__scalar(
 
       // Advance to the next ${NR} columns.
       $for M in range(MR):
-        c${M} = (uint8_t*)((uintptr_t)c${M} + cn_stride);
+        c${M} = (uint8_t*)((uintptr_t) c${M} + cn_stride);
 
       nc -= ${NR};
     } else {

@@ -152,10 +152,10 @@ void xnn_qs8_gemm_minmax_ukernel_12x8c4__neondot(
       const int8x8_t va11x01234567 = vld1_s8(a11); a11 += 8;
 
       // Load a 8x8 block of weights.
-      const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-      const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-      const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-      const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+      const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+      const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+      const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+      const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
 
       // Multiply-accumulate: 12x8 * 8x8 --> 12x8.
       vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);
@@ -226,8 +226,8 @@ void xnn_qs8_gemm_minmax_ukernel_12x8c4__neondot(
       const int8x8_t va11x01234567 = vld1_s8(a11); a11 += k;
 
       // Load a 4x8 block of weights.
-      const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-      const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+      const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+      const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
 
       // Multiply-accumulate: 12x4 * 4x8 --> 12x8.
       vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);
@@ -257,8 +257,8 @@ void xnn_qs8_gemm_minmax_ukernel_12x8c4__neondot(
 
       if (k > 4) {
         // Load a 4x8 block of weights.
-        const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
-        const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const void*)((const int8_t*)w + 16);
+        const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+        const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
 
         // Multiply-accumulate: 12x4 * 4x8 --> 12x8.
         vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb4567x0123, va0x01234567, 1);
@@ -289,18 +289,18 @@ void xnn_qs8_gemm_minmax_ukernel_12x8c4__neondot(
     }
     // End of accumulation loop. The variable `kc` contains the amount by which
     // we advanced the `va` pointers, so we rewind by this amount now.
-    a0 = (const int8_t*)((uintptr_t)a0 - kc);
-    a1 = (const int8_t*)((uintptr_t)a1 - kc);
-    a2 = (const int8_t*)((uintptr_t)a2 - kc);
-    a3 = (const int8_t*)((uintptr_t)a3 - kc);
-    a4 = (const int8_t*)((uintptr_t)a4 - kc);
-    a5 = (const int8_t*)((uintptr_t)a5 - kc);
-    a6 = (const int8_t*)((uintptr_t)a6 - kc);
-    a7 = (const int8_t*)((uintptr_t)a7 - kc);
-    a8 = (const int8_t*)((uintptr_t)a8 - kc);
-    a9 = (const int8_t*)((uintptr_t)a9 - kc);
-    a10 = (const int8_t*)((uintptr_t)a10 - kc);
-    a11 = (const int8_t*)((uintptr_t)a11 - kc);
+    a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+    a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+    a2 = (const int8_t*) ((uintptr_t) a2 - kc);
+    a3 = (const int8_t*) ((uintptr_t) a3 - kc);
+    a4 = (const int8_t*) ((uintptr_t) a4 - kc);
+    a5 = (const int8_t*) ((uintptr_t) a5 - kc);
+    a6 = (const int8_t*) ((uintptr_t) a6 - kc);
+    a7 = (const int8_t*) ((uintptr_t) a7 - kc);
+    a8 = (const int8_t*) ((uintptr_t) a8 - kc);
+    a9 = (const int8_t*) ((uintptr_t) a9 - kc);
+    a10 = (const int8_t*) ((uintptr_t) a10 - kc);
+    a11 = (const int8_t*) ((uintptr_t) a11 - kc);
 
     // Post-accumulation work
 

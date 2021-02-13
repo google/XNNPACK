@@ -325,7 +325,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__${"neonfma" if FMA else "neon"}_${ROW_T
       $for M in range(ROW_TILE):
         float32x4_t vo${M} = vmaxq_f32(vo${M}p0, vmin);
 
-      $for M in range(ROW_TILE):        
+      $for M in range(ROW_TILE):
         vo${M} = vminq_f32(vo${M}, vmax);
 
       $for M in reversed(range(ROW_TILE)):
