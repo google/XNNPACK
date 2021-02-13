@@ -17,6 +17,7 @@
 // another thread. We deem this acceptable because the values that are
 // read out of bounds do not affect the result, and the the compiler can't know
 // about this undefined behavior.
+
 void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c4__scalar(
     size_t mr,
     size_t nc,
@@ -56,13 +57,11 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c4__scalar(
 
   // Loop over groups of ${NR} columns.
   do {
-    // `vaccMN` is the accumulator at row `M`, column `N`.
-    // Initialize accumulators with bias. ${NR} bias values are loaded from the
-    // weight matrix, at the start of the group of ${NR} columns.
     $for N in range(NR):
-      int32_t bias${N} = ((const int32_t*)w)[${N}];
-      $for M in range(MR):
-        int32_t vacc${M}${N} = bias${N};
+      int32_t vacc0${N} = ((const int32_t*) w)[${N}];
+    $for M in range(1, MR):
+      $for N in range(NR):
+        int32_t vacc${M}${N} = vacc0${N};
 
     w = (const void*) ((uintptr_t) w + ${NR} * sizeof(int32_t));
 

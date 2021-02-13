@@ -21,6 +21,7 @@
 // another thread. We deem this acceptable because the values that are
 // read out of bounds do not affect the result, and the the compiler can't know
 // about this undefined behavior.
+
 void xnn_qs8_gemm_minmax_ukernel_8x8c4__scalar(
     size_t mr,
     size_t nc,
@@ -84,81 +85,70 @@ void xnn_qs8_gemm_minmax_ukernel_8x8c4__scalar(
 
   // Loop over groups of 8 columns.
   do {
-    // `vaccMN` is the accumulator at row `M`, column `N`.
-    // Initialize accumulators with bias. 8 bias values are loaded from the
-    // weight matrix, at the start of the group of 8 columns.
-    int32_t bias0 = ((const int32_t*)w)[0];
-    int32_t vacc00 = bias0;
-    int32_t vacc10 = bias0;
-    int32_t vacc20 = bias0;
-    int32_t vacc30 = bias0;
-    int32_t vacc40 = bias0;
-    int32_t vacc50 = bias0;
-    int32_t vacc60 = bias0;
-    int32_t vacc70 = bias0;
-    int32_t bias1 = ((const int32_t*)w)[1];
-    int32_t vacc01 = bias1;
-    int32_t vacc11 = bias1;
-    int32_t vacc21 = bias1;
-    int32_t vacc31 = bias1;
-    int32_t vacc41 = bias1;
-    int32_t vacc51 = bias1;
-    int32_t vacc61 = bias1;
-    int32_t vacc71 = bias1;
-    int32_t bias2 = ((const int32_t*)w)[2];
-    int32_t vacc02 = bias2;
-    int32_t vacc12 = bias2;
-    int32_t vacc22 = bias2;
-    int32_t vacc32 = bias2;
-    int32_t vacc42 = bias2;
-    int32_t vacc52 = bias2;
-    int32_t vacc62 = bias2;
-    int32_t vacc72 = bias2;
-    int32_t bias3 = ((const int32_t*)w)[3];
-    int32_t vacc03 = bias3;
-    int32_t vacc13 = bias3;
-    int32_t vacc23 = bias3;
-    int32_t vacc33 = bias3;
-    int32_t vacc43 = bias3;
-    int32_t vacc53 = bias3;
-    int32_t vacc63 = bias3;
-    int32_t vacc73 = bias3;
-    int32_t bias4 = ((const int32_t*)w)[4];
-    int32_t vacc04 = bias4;
-    int32_t vacc14 = bias4;
-    int32_t vacc24 = bias4;
-    int32_t vacc34 = bias4;
-    int32_t vacc44 = bias4;
-    int32_t vacc54 = bias4;
-    int32_t vacc64 = bias4;
-    int32_t vacc74 = bias4;
-    int32_t bias5 = ((const int32_t*)w)[5];
-    int32_t vacc05 = bias5;
-    int32_t vacc15 = bias5;
-    int32_t vacc25 = bias5;
-    int32_t vacc35 = bias5;
-    int32_t vacc45 = bias5;
-    int32_t vacc55 = bias5;
-    int32_t vacc65 = bias5;
-    int32_t vacc75 = bias5;
-    int32_t bias6 = ((const int32_t*)w)[6];
-    int32_t vacc06 = bias6;
-    int32_t vacc16 = bias6;
-    int32_t vacc26 = bias6;
-    int32_t vacc36 = bias6;
-    int32_t vacc46 = bias6;
-    int32_t vacc56 = bias6;
-    int32_t vacc66 = bias6;
-    int32_t vacc76 = bias6;
-    int32_t bias7 = ((const int32_t*)w)[7];
-    int32_t vacc07 = bias7;
-    int32_t vacc17 = bias7;
-    int32_t vacc27 = bias7;
-    int32_t vacc37 = bias7;
-    int32_t vacc47 = bias7;
-    int32_t vacc57 = bias7;
-    int32_t vacc67 = bias7;
-    int32_t vacc77 = bias7;
+    int32_t vacc00 = ((const int32_t*) w)[0];
+    int32_t vacc01 = ((const int32_t*) w)[1];
+    int32_t vacc02 = ((const int32_t*) w)[2];
+    int32_t vacc03 = ((const int32_t*) w)[3];
+    int32_t vacc04 = ((const int32_t*) w)[4];
+    int32_t vacc05 = ((const int32_t*) w)[5];
+    int32_t vacc06 = ((const int32_t*) w)[6];
+    int32_t vacc07 = ((const int32_t*) w)[7];
+    int32_t vacc10 = vacc00;
+    int32_t vacc11 = vacc01;
+    int32_t vacc12 = vacc02;
+    int32_t vacc13 = vacc03;
+    int32_t vacc14 = vacc04;
+    int32_t vacc15 = vacc05;
+    int32_t vacc16 = vacc06;
+    int32_t vacc17 = vacc07;
+    int32_t vacc20 = vacc00;
+    int32_t vacc21 = vacc01;
+    int32_t vacc22 = vacc02;
+    int32_t vacc23 = vacc03;
+    int32_t vacc24 = vacc04;
+    int32_t vacc25 = vacc05;
+    int32_t vacc26 = vacc06;
+    int32_t vacc27 = vacc07;
+    int32_t vacc30 = vacc00;
+    int32_t vacc31 = vacc01;
+    int32_t vacc32 = vacc02;
+    int32_t vacc33 = vacc03;
+    int32_t vacc34 = vacc04;
+    int32_t vacc35 = vacc05;
+    int32_t vacc36 = vacc06;
+    int32_t vacc37 = vacc07;
+    int32_t vacc40 = vacc00;
+    int32_t vacc41 = vacc01;
+    int32_t vacc42 = vacc02;
+    int32_t vacc43 = vacc03;
+    int32_t vacc44 = vacc04;
+    int32_t vacc45 = vacc05;
+    int32_t vacc46 = vacc06;
+    int32_t vacc47 = vacc07;
+    int32_t vacc50 = vacc00;
+    int32_t vacc51 = vacc01;
+    int32_t vacc52 = vacc02;
+    int32_t vacc53 = vacc03;
+    int32_t vacc54 = vacc04;
+    int32_t vacc55 = vacc05;
+    int32_t vacc56 = vacc06;
+    int32_t vacc57 = vacc07;
+    int32_t vacc60 = vacc00;
+    int32_t vacc61 = vacc01;
+    int32_t vacc62 = vacc02;
+    int32_t vacc63 = vacc03;
+    int32_t vacc64 = vacc04;
+    int32_t vacc65 = vacc05;
+    int32_t vacc66 = vacc06;
+    int32_t vacc67 = vacc07;
+    int32_t vacc70 = vacc00;
+    int32_t vacc71 = vacc01;
+    int32_t vacc72 = vacc02;
+    int32_t vacc73 = vacc03;
+    int32_t vacc74 = vacc04;
+    int32_t vacc75 = vacc05;
+    int32_t vacc76 = vacc06;
+    int32_t vacc77 = vacc07;
 
     w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
 
