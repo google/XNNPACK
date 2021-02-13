@@ -493,6 +493,8 @@ SCALAR_UKERNELS = [
     "src/math/sigmoid-scalar-rr2-p5-div.c",
     "src/qs8-gemm/gen/8x8c4-minmax-scalar.c",
     "src/qs8-gemm/gen/12x4c4-minmax-scalar.c",
+    "src/qs8-igemm/gen/8x8c4-minmax-scalar.c",
+    "src/qs8-igemm/gen/12x4c4-minmax-scalar.c",
     "src/qs8-requantization/fp32-scalar-lrintf.c",
     "src/qs8-requantization/fp32-scalar-magic.c",
     "src/qs8-requantization/precise-scalar-signed64.c",
