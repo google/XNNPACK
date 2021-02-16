@@ -617,8 +617,6 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/math/sigmoid-scalar-rr2-lut64-p2-div.c
   src/math/sigmoid-scalar-rr2-lut2048-p1-div.c
   src/math/sigmoid-scalar-rr2-p5-div.c
-  src/qs8-gemm/gen/8x8c4-minmax-scalar.c
-  src/qs8-gemm/gen/12x4c4-minmax-scalar.c
   src/qs8-requantization/fp32-scalar-lrintf.c
   src/qs8-requantization/fp32-scalar-magic.c
   src/qs8-requantization/precise-scalar-signed64.c
@@ -631,8 +629,6 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/qu8-gavgpool/7p7x-minmax-scalar-c1.c
   src/qu8-gavgpool/7x-minmax-scalar-c1.c
   src/qu8-gemm/2x2-minmax-scalar.c
-  src/qu8-gemm/gen/8x8c4-minmax-scalar.c
-  src/qu8-gemm/gen/12x4c4-minmax-scalar.c
   src/qu8-igemm/2x2-minmax-scalar.c
   src/qu8-requantization/fp32-scalar-lrintf.c
   src/qu8-requantization/fp32-scalar-magic.c

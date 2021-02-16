@@ -15,10 +15,6 @@
 #include <xnnpack/gemm.h>
 
 
-// This kernel uses ARMv8.2 dot-product instructions.
-//
-// Scalar model: xnn_qs8_gemm_minmax_ukernel_4x16c4__scalar. Refer to
-// that kernel for more comments.
 void xnn_qs8_gemm_minmax_ukernel_4x16c4__neondot(
     size_t mr,
     size_t nc,

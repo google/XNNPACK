@@ -12,8 +12,3 @@
   k-block: 8
 - name: xnn_qu8_gemm_minmax_ukernel_2x2__scalar
   k-block: 1
-- name: xnn_qu8_gemm_minmax_ukernel_8x8c4__scalar
-  k-block: 4
-- name: xnn_qu8_gemm_minmax_ukernel_12x4c4__scalar
-  k-block: 4
-
