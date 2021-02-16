@@ -1003,6 +1003,22 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/3x8c8-minmax-neon-mull-padal.c
   src/qs8-igemm/gen/4x16c8-minmax-neon-mull-padal.c
   src/qs8-igemm/gen/4x8c8-minmax-neon-mull-padal.c
+  src/qs8-igemm/gen/1x16c2-minmax-neon-mlal-padal-dup.c
+  src/qs8-igemm/gen/1x8c2-minmax-neon-mlal-padal-dup.c
+  src/qs8-igemm/gen/2x16c2-minmax-neon-mlal-padal-dup.c
+  src/qs8-igemm/gen/2x8c2-minmax-neon-mlal-padal-dup.c
+  src/qs8-igemm/gen/3x16c2-minmax-neon-mlal-padal-dup.c
+  src/qs8-igemm/gen/3x8c2-minmax-neon-mlal-padal-dup.c
+  src/qs8-igemm/gen/4x16c2-minmax-neon-mlal-padal-dup.c
+  src/qs8-igemm/gen/4x8c2-minmax-neon-mlal-padal-dup.c
+  src/qs8-igemm/gen/1x16c2-minmax-neon-mull-padal-dup.c
+  src/qs8-igemm/gen/1x8c2-minmax-neon-mull-padal-dup.c
+  src/qs8-igemm/gen/2x16c2-minmax-neon-mull-padal-dup.c
+  src/qs8-igemm/gen/2x8c2-minmax-neon-mull-padal-dup.c
+  src/qs8-igemm/gen/3x16c2-minmax-neon-mull-padal-dup.c
+  src/qs8-igemm/gen/3x8c2-minmax-neon-mull-padal-dup.c
+  src/qs8-igemm/gen/4x16c2-minmax-neon-mull-padal-dup.c
+  src/qs8-igemm/gen/4x8c2-minmax-neon-mull-padal-dup.c
   src/qs8-requantization/fp32-neon.c
   src/qs8-requantization/precise-neon.c
   src/qs8-requantization/q31-neon.c
