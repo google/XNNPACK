@@ -63,8 +63,9 @@ void xnn_qs8_gemm_minmax_ukernel_2x8c8__neon_mull_padal(
     int32x4_t vacc1x6 = vacc0x6;
     int32x4_t vacc1x7 = vacc0x7;
 
-    size_t k = kc;
-    while (k >= 16 * sizeof(int8_t)) {
+    // KC loop of 16 with up to 8 remainder
+    size_t k = 0;
+    while ((k + 8 * sizeof(int8_t)) < kc) {
       const int8x8_t va0x0 = vld1_s8(a0); a0 += 8;
       const int8x8_t va0x1 = vld1_s8(a0); a0 += 8;
       const int8x8_t va1x0 = vld1_s8(a1); a1 += 8;
@@ -136,9 +137,9 @@ void xnn_qs8_gemm_minmax_ukernel_2x8c8__neon_mull_padal(
       vacc0x7 = vpadalq_s16(vacc0x7, vprod0x7);
       vacc1x7 = vpadalq_s16(vacc1x7, vprod1x7);
 
-      k -= 16 * sizeof(int8_t);
+      k += 16 * sizeof(int8_t);
     }
-    if (k >= 8 * sizeof(int8_t)) {
+    if (k < kc) {
       const int8x8_t va0 = vld1_s8(a0); a0 += 8;
       const int8x8_t va1 = vld1_s8(a1); a1 += 8;
 
@@ -183,52 +184,7 @@ void xnn_qs8_gemm_minmax_ukernel_2x8c8__neon_mull_padal(
       vacc0x7 = vpadalq_s16(vacc0x7, vprod0x7);
       vacc1x7 = vpadalq_s16(vacc1x7, vprod1x7);
 
-      k -= 8 * sizeof(int8_t);
-    }
-    if XNN_UNLIKELY(k != 0) {
-      const int8x8_t va0 = vld1_s8(a0); a0 += k;
-      const int8x8_t va1 = vld1_s8(a1); a1 += k;
-
-      const int8x8_t vb0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-      const int16x8_t vprod0x0 = vmull_s8(vb0, va0);
-      const int16x8_t vprod1x0 = vmull_s8(vb0, va1);
-      vacc0x0 = vpadalq_s16(vacc0x0, vprod0x0);
-      vacc1x0 = vpadalq_s16(vacc1x0, vprod1x0);
-      const int8x8_t vb1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-      const int16x8_t vprod0x1 = vmull_s8(vb1, va0);
-      const int16x8_t vprod1x1 = vmull_s8(vb1, va1);
-      vacc0x1 = vpadalq_s16(vacc0x1, vprod0x1);
-      vacc1x1 = vpadalq_s16(vacc1x1, vprod1x1);
-      const int8x8_t vb2 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-      const int16x8_t vprod0x2 = vmull_s8(vb2, va0);
-      const int16x8_t vprod1x2 = vmull_s8(vb2, va1);
-      vacc0x2 = vpadalq_s16(vacc0x2, vprod0x2);
-      vacc1x2 = vpadalq_s16(vacc1x2, vprod1x2);
-      const int8x8_t vb3 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-      const int16x8_t vprod0x3 = vmull_s8(vb3, va0);
-      const int16x8_t vprod1x3 = vmull_s8(vb3, va1);
-      vacc0x3 = vpadalq_s16(vacc0x3, vprod0x3);
-      vacc1x3 = vpadalq_s16(vacc1x3, vprod1x3);
-      const int8x8_t vb4 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-      const int16x8_t vprod0x4 = vmull_s8(vb4, va0);
-      const int16x8_t vprod1x4 = vmull_s8(vb4, va1);
-      vacc0x4 = vpadalq_s16(vacc0x4, vprod0x4);
-      vacc1x4 = vpadalq_s16(vacc1x4, vprod1x4);
-      const int8x8_t vb5 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-      const int16x8_t vprod0x5 = vmull_s8(vb5, va0);
-      const int16x8_t vprod1x5 = vmull_s8(vb5, va1);
-      vacc0x5 = vpadalq_s16(vacc0x5, vprod0x5);
-      vacc1x5 = vpadalq_s16(vacc1x5, vprod1x5);
-      const int8x8_t vb6 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-      const int16x8_t vprod0x6 = vmull_s8(vb6, va0);
-      const int16x8_t vprod1x6 = vmull_s8(vb6, va1);
-      vacc0x6 = vpadalq_s16(vacc0x6, vprod0x6);
-      vacc1x6 = vpadalq_s16(vacc1x6, vprod1x6);
-      const int8x8_t vb7 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-      const int16x8_t vprod0x7 = vmull_s8(vb7, va0);
-      const int16x8_t vprod1x7 = vmull_s8(vb7, va1);
-      vacc0x7 = vpadalq_s16(vacc0x7, vprod0x7);
-      vacc1x7 = vpadalq_s16(vacc1x7, vprod1x7);
+      k += 8 * sizeof(int8_t);
     }
 
 #if XNN_ARCH_ARM64
@@ -318,8 +274,8 @@ void xnn_qs8_gemm_minmax_ukernel_2x8c8__neon_mull_padal(
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
-      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+      a0 = (const int8_t*) ((uintptr_t) a0 - k);
+      a1 = (const int8_t*) ((uintptr_t) a1 - k);
 
       nc -= 8;
     } else {
