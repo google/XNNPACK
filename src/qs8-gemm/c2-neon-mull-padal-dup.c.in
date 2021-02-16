@@ -88,7 +88,7 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull"
         k -= 16 * sizeof(int8_t);
       }
 
-    while (k >= 8 * sizeof(int8_t)) {
+    ${"if" if MLA else "while"} (k >= 8 * sizeof(int8_t)) {
       $for M in range(MR):
         const int8x8_t va${M} = vld1_s8(a${M}); a${M} += 8;
 

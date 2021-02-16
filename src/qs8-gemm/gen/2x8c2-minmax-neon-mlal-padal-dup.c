@@ -128,7 +128,7 @@ void xnn_qs8_gemm_minmax_ukernel_2x8c2__neon_mlal_padal_dup(
       k -= 16 * sizeof(int8_t);
     }
 
-    while (k >= 8 * sizeof(int8_t)) {
+    if (k >= 8 * sizeof(int8_t)) {
       const int8x8_t va0 = vld1_s8(a0); a0 += 8;
       const int8x8_t va1 = vld1_s8(a1); a1 += 8;
 
