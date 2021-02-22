@@ -1136,10 +1136,6 @@ static enum xnn_status setup_convolution2d_nhwc(
       convolution_op->compute.range[1] = output_height;
       convolution_op->state = xnn_run_state_ready;
 
-      convolution_op->last_input = input;
-      convolution_op->last_input_height = input_height;
-      convolution_op->last_input_width = input_width;
-
       return xnn_status_success;
     }
     case xnn_ukernel_type_vmulcaddc:
