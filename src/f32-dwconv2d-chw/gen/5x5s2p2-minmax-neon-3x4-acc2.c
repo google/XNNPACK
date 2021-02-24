@@ -15,6 +15,8 @@
 #include <xnnpack/math.h>
 
 
+#pragma GCC diagnostic ignored "-Wframe-larger-than="
+
 void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_3x4_acc2(
     size_t input_height,
     size_t input_width,
