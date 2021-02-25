@@ -91,9 +91,9 @@ void xnn_qs8_gemm_minmax_ukernel_4x8c8__neon_mull_padal(
     int32x4_t vacc3x6 = vacc0x6;
     int32x4_t vacc3x7 = vacc0x7;
 
-    // KC loop of 16 with up to 8 remainder
-    size_t k = 0;
-    while ((k + 8 * sizeof(int8_t)) < kc) {
+    ptrdiff_t k = (ptrdiff_t) kc;
+    // 2x partial unrolled loop to load 16 bytes at a time.
+    while (k > 8) {
       const int8x8_t va0x0 = vld1_s8(a0); a0 += 8;
       const int8x8_t va0x1 = vld1_s8(a0); a0 += 8;
       const int8x8_t va1x0 = vld1_s8(a1); a1 += 8;
@@ -217,9 +217,13 @@ void xnn_qs8_gemm_minmax_ukernel_4x8c8__neon_mull_padal(
       vacc2x7 = vpadalq_s16(vacc2x7, vprod2x7);
       vacc3x7 = vpadalq_s16(vacc3x7, vprod3x7);
 
-      k += 16 * sizeof(int8_t);
+      k -= 16 * sizeof(int8_t);
     }
-    if (k < kc) {
+    // Handle up to 8 final positions of `k`
+    // If kc was 0 or 16, there is no remainder.  k is 0.
+    // If kc was 1 to 8,  there is a remainder of k.
+    // If kc was 9 to 15, the main loop handled the remainder; k underflowed.
+    if XNN_UNLIKELY(k > 0) {
       const int8x8_t va0 = vld1_s8(a0); a0 += 8;
       const int8x8_t va1 = vld1_s8(a1); a1 += 8;
       const int8x8_t va2 = vld1_s8(a2); a2 += 8;
@@ -298,7 +302,7 @@ void xnn_qs8_gemm_minmax_ukernel_4x8c8__neon_mull_padal(
       vacc2x7 = vpadalq_s16(vacc2x7, vprod2x7);
       vacc3x7 = vpadalq_s16(vacc3x7, vprod3x7);
 
-      k += 8 * sizeof(int8_t);
+      k -= 8 * sizeof(int8_t);
     }
 
 #if XNN_ARCH_ARM64
@@ -452,10 +456,10 @@ void xnn_qs8_gemm_minmax_ukernel_4x8c8__neon_mull_padal(
       c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
       c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - k);
-      a1 = (const int8_t*) ((uintptr_t) a1 - k);
-      a2 = (const int8_t*) ((uintptr_t) a2 - k);
-      a3 = (const int8_t*) ((uintptr_t) a3 - k);
+      a0 = (const int8_t*) ((uintptr_t) a0 - (kc - k));
+      a1 = (const int8_t*) ((uintptr_t) a1 - (kc - k));
+      a2 = (const int8_t*) ((uintptr_t) a2 - (kc - k));
+      a3 = (const int8_t*) ((uintptr_t) a3 - (kc - k));
 
       nc -= 8;
     } else {

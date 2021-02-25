@@ -71,18 +71,18 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
         }
       a += ${MR};
 
-      // KC loop of 16 with up to 8 remainder
-      size_t k = 0;
-      while ((k + 8 * sizeof(int8_t)) < kc) {
+      ptrdiff_t k = (ptrdiff_t) kc;
+      // 2x partial unrolled loop to load 16 bytes at a time.
+      while (k > 8) {
         $for M in range(MR):
           const int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} += 8;
           const int8x8_t va${M}x1 = vld1_s8(a${M}); a${M} += 8;
 
         $for N in range(NR):
-          const int8x8_t vb${N}x0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(  int8_t));
+          const int8x8_t vb${N}x0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
         $for N in range(NR):
-          const int8x8_t vb${N}x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(  int8_t));
+          const int8x8_t vb${N}x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
           $for M in range(MR):
             int16x8_t vprod${M}x${N} = vmull_s8(vb${N}x0, va${M}x0);
           $for M in range(MR):
@@ -90,20 +90,22 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
           $for M in range(MR):
             vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
 
-        k += 16 * sizeof(int8_t);
+        k -= 16 * sizeof(int8_t);
       }
-      if (k < kc) {
+      // Handle up to 8 final positions of `k`
+      // If kc was 0 or 16, there is no remainder.  k is 0.
+      // If kc was 1 to 8,  there is a remainder of k.
+      // If kc was 9 to 15, the main loop handled the remainder; k underflowed.
+      if XNN_UNLIKELY(k > 0) {
         $for M in range(MR):
-          const int8x8_t va${M} = vld1_s8(a${M}); a${M} += 8;
+          const int8x8_t va${M} = vld1_s8(a${M});
 
         $for N in range(NR):
-          const int8x8_t vb${N} = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(  int8_t));
+          const int8x8_t vb${N} = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
           $for M in range(MR):
             const int16x8_t vprod${M}x${N} = vmull_s8(vb${N}, va${M});
           $for M in range(MR):
             vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
-
-        k += 8 * sizeof(int8_t);
       }
       p -= ${MR} * sizeof(void*);
     } while (p != 0);

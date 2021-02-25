@@ -63,9 +63,9 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
       $for N in range(NR):
         int32x4_t vacc${M}x${N} = vacc0x${N};
 
-    // KC loop of 16 with up to 8 remainder
-    size_t k = 0;
-    while ((k + 8 * sizeof(int8_t)) < kc) {
+    ptrdiff_t k = (ptrdiff_t) kc;
+    // 2x partial unrolled loop to load 16 bytes at a time.
+    while (k > 8) {
       $for M in range(MR):
         const int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} += 8;
         const int8x8_t va${M}x1 = vld1_s8(a${M}); a${M} += 8;
@@ -82,9 +82,13 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
         $for M in range(MR):
           vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
 
-      k += 16 * sizeof(int8_t);
+      k -= 16 * sizeof(int8_t);
     }
-    if (k < kc) {
+    // Handle up to 8 final positions of `k`
+    // If kc was 0 or 16, there is no remainder.  k is 0.
+    // If kc was 1 to 8,  there is a remainder of k.
+    // If kc was 9 to 15, the main loop handled the remainder; k underflowed.
+    if XNN_UNLIKELY(k > 0) {
       $for M in range(MR):
         const int8x8_t va${M} = vld1_s8(a${M}); a${M} += 8;
 
@@ -95,7 +99,7 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
         $for M in range(MR):
           vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
 
-      k += 8 * sizeof(int8_t);
+      k -= 8 * sizeof(int8_t);
     }
 
 #if XNN_ARCH_ARM64
@@ -206,7 +210,7 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
         c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in range(MR):
-        a${M} = (const int8_t*) ((uintptr_t) a${M} - k);
+        a${M} = (const int8_t*) ((uintptr_t) a${M} - (kc - k));
 
       nc -= ${NR};
     } else {
