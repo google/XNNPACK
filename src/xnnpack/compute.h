@@ -476,10 +476,7 @@ struct depthtospace2d_chw2hwc_context {
   void* output;
   size_t input_batch_stride;
   size_t output_batch_stride;
-  size_t input_channel_stride;
-  size_t input_height_stride;
-  size_t output_height_stride;
-  size_t output_width_stride;
+  size_t output_channel_stride;
   xnn_depthtospace2d_chw2hwc_ukernel_function ukernel;
 };
 

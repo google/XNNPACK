@@ -453,10 +453,7 @@ void xnn_compute_depthtospace2d_chw2hwc(
     context->block_size,
     (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride),
     (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride),
-    context->input_channel_stride,
-    context->input_height_stride,
-    context->output_height_stride,
-    context->output_width_stride);
+    context->output_channel_stride);
 }
 
 void xnn_compute_argmax_pooling_unipass(

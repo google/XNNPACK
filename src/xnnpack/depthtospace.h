@@ -23,10 +23,7 @@ extern "C" {
       size_t block_size,                                             \
       const uint32_t* input,                                         \
       uint32_t* output,                                              \
-      size_t input_channel_stride,                                   \
-      size_t input_height_stride,                                    \
-      size_t output_height_stride,                                   \
-      size_t output_width_stride);
+      size_t output_channel_stride);
 
 DECLARE_X32_DEPTHTOSPACE2D_CHW2HWC_UKERNEL_FUNCTION(xnn_x32_depthtospace2d_chw2hwc_ukernel__scalar)
 

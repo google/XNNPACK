@@ -240,7 +240,7 @@ class DepthToSpaceOperatorTester {
                 for (size_t oc = 0; oc < output_channels(); oc++) {
                   const size_t input_index =
                     i * input_channels_stride() * input_height() * input_width() +
-                    (((oc * block_size() + by) * block_size() + bx) * input_height() + iy) * input_width() + ix;
+                    (((by * block_size() + bx) * output_channels() + oc) * input_height() + iy) * input_width() + ix;
                   const size_t output_index =
                     ((i * output_height() + iy * block_size() + by) * output_width() + ix * block_size() + bx) *
                       output_channels_stride() + oc;

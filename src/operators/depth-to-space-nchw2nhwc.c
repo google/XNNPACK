@@ -138,10 +138,7 @@ enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x32(
     .output = output,
     .input_batch_stride = depth_to_space_op->input_pixel_stride * input_height * input_width * sizeof(float),
     .output_batch_stride = depth_to_space_op->output_pixel_stride * output_height * output_width * sizeof(float),
-    .input_channel_stride = input_height * input_width * sizeof(float),
-    .input_height_stride = input_width * sizeof(float),
-    .output_height_stride = depth_to_space_op->output_pixel_stride * output_width * sizeof(float),
-    .output_width_stride = depth_to_space_op->output_pixel_stride * sizeof(float),
+    .output_channel_stride = depth_to_space_op->output_pixel_stride,
     .ukernel = xnn_params.x32.depthtospace2d_chw2hwc.ukernel,
   };
 

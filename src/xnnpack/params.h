@@ -935,10 +935,7 @@ typedef void (*xnn_depthtospace2d_chw2hwc_ukernel_function)(
     size_t block_size,
     const void* input,
     void* output,
-    size_t input_channel_stride,
-    size_t input_height_stride,
-    size_t output_height_stride,
-    size_t output_width_stride);
+    size_t output_channels_stride);
 
 typedef void (*xnn_x32_depthtospace2d_chw2hwc_ukernel_function)(
     size_t output_channels,
@@ -947,10 +944,7 @@ typedef void (*xnn_x32_depthtospace2d_chw2hwc_ukernel_function)(
     size_t block_size,
     const uint32_t* input,
     uint32_t* output,
-    size_t input_channel_stride,
-    size_t input_height_stride,
-    size_t output_height_stride,
-    size_t output_width_stride);
+    size_t output_channel_stride);
 
 typedef void (*xnn_pad_ukernel_function)(
     size_t rows,
