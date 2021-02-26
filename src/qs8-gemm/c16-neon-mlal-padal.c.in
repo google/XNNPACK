@@ -14,7 +14,7 @@ $assert 8 <= NR <= 16
 #include <xnnpack/gemm.h>
 
 
-void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c16__neon_mull_padal(
+void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c16__neon_mlal_padal(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -74,7 +74,7 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c16__neon_mull_padal(
 
       $for N in range(NR):
         $for M in range(MR):
-          int16x8_t vprod${M}x${N} = vmull_s8(vget_low_s8(vb${N}), vget_low_s8(va${M}x0));
+          int16x8_t vprod${M}x${N} = vmull_s8(vget_low_s8(vb${N}), vget_low_s8(va${M}));
         $for M in range(MR):
           vprod${M}x${N} = vmlal_s8(vprod${M}x${N}, vget_high_s8(vb${N}), vget_high_s8(va${M}));
         $for M in range(MR):
