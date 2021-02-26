@@ -56,7 +56,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
 0:
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
-        SUBS    x0, x2, 8          // k = kc - 8
+        SUBS    x0, x2, 5          // k = kc - 5
         MOV     v17.16b, v16.16b
         MOV     v18.16b, v16.16b
         LDP     q24, q28, [x5], 32
@@ -64,15 +64,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         MOV     v21.16b, v20.16b
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
-        LDR     x11, [sp, 8]      // params
+        LDR     x11, [sp, 8]       // params
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
-        AND     x10, x2, 7         // kc remainder 0 to 7
+        ADD     x10, x2, 3         // rewind = (kc + 3) & ~7
         MOV     v27.16b, v24.16b
         MOV     v29.16b, v28.16b
+        BIC     x10, x10, 7
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
-        # Is there at least 8 bytes?
+        # Is there at least 5 bytes?
         B.LO    3f
 
         # Main loop - 8 bytes of A
@@ -118,18 +119,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v28.4s, v7.16b,  v0.4b[1]
         SDOT    v29.4s, v7.16b,  v1.4b[1]
         SDOT    v30.4s, v7.16b,  v2.4b[1]
-        SDOT    v31.4s, v7.16b,  v3.4b[1]
         SUBS    x0, x0, 8
+        SDOT    v31.4s, v7.16b,  v3.4b[1]
         B.HS    1b
 
-        # Is there a remainder?- 1 to 7 bytes of A
-        CBNZ    x10, 3f
+        # Is there a remainder?- 1 to 4 bytes of A
+        TBNZ    x0, 2, 3f
 
-        .p2align 3
 2:
         # Apply params - scale, shift, bias and clamp
-        LD1R    {v0.4s}, [x11], 4
-        LD1R    {v1.4s}, [x11], 4
+        LD2R    {v0.4s, v1.4s}, [x11], 8
         CMEQ    v2.4s, v1.4s, 0
 
         BIC     v4.16b, v16.16b, v2.16b
@@ -262,31 +261,31 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
 
         # Store full 4 x 16
         ST1     {v4.16b}, [x6], x12
-        SUB      x3,  x3, x2         // a0 -= kc
+        SUB      x3,  x3, x10        // a0 -= rewind
         ST1     {v5.16b}, [x8], x12
-        SUB     x15, x15, x2         // a1 -= kc
+        SUB     x15, x15, x10        // a1 -= rewind
         ST1     {v6.16b}, [x9], x12
-        SUB     x13, x13, x2         // a2 -= kc
+        SUB     x13, x13, x10        // a2 -= rewind
         ST1     {v7.16b}, [x7], x12
-        SUB      x4,  x4, x2         // a3 -= kc
+        SUB      x4,  x4, x10        // a3 -= rewind
         B.NE    0b
         RET
 
-        # Remainder- 1 to 7 bytes of A
+        # Remainder- 1 to 4 bytes of A
         .p2align 3
 3:
-        LD1     {v0.8b},  [x3], x10
-        LDP     q4, q5, [x5], 32
-        LD1     {v1.8b}, [x15], x10
-        LD1     {v2.8b}, [x13], x10
-        LD1     {v3.8b},  [x4], x10
-        CMP     x10, 4
+        LDR     s0,  [x3]
+        LDR     q4, [x5], 16
+        LDR     s1, [x15]
+        LDR     s2, [x13]
+        LDR     s3,  [x4]
         SDOT    v16.4s, v4.16b,  v0.4b[0]
+        LDR     q5, [x5], 16
         SDOT    v17.4s, v4.16b,  v1.4b[0]
         SDOT    v18.4s, v4.16b,  v2.4b[0]
         SDOT    v19.4s, v4.16b,  v3.4b[0]
-        LDP     q6, q7, [x5], 32
         SDOT    v20.4s, v5.16b,  v0.4b[0]
+        LDP     q6, q7, [x5], 32
         SDOT    v21.4s, v5.16b,  v1.4b[0]
         SDOT    v22.4s, v5.16b,  v2.4b[0]
         SDOT    v23.4s, v5.16b,  v3.4b[0]
@@ -298,25 +297,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v29.4s, v7.16b, v1.4b[0]
         SDOT    v30.4s, v7.16b, v2.4b[0]
         SDOT    v31.4s, v7.16b, v3.4b[0]
-        B.LS    2b
-        LDP      q4,  q5, [x5], 32
-        SDOT    v16.4s, v4.16b,  v0.4b[1]
-        SDOT    v17.4s, v4.16b,  v1.4b[1]
-        SDOT    v18.4s, v4.16b,  v2.4b[1]
-        SDOT    v19.4s, v4.16b,  v3.4b[1]
-        LDP      q6,  q7, [x5], 32
-        SDOT    v20.4s, v5.16b,  v0.4b[1]
-        SDOT    v21.4s, v5.16b,  v1.4b[1]
-        SDOT    v22.4s, v5.16b,  v2.4b[1]
-        SDOT    v23.4s, v5.16b,  v3.4b[1]
-        SDOT    v24.4s, v6.16b,  v0.4b[1]
-        SDOT    v25.4s, v6.16b,  v1.4b[1]
-        SDOT    v26.4s, v6.16b,  v2.4b[1]
-        SDOT    v27.4s, v6.16b,  v3.4b[1]
-        SDOT    v28.4s, v7.16b,  v0.4b[1]
-        SDOT    v29.4s, v7.16b,  v1.4b[1]
-        SDOT    v30.4s, v7.16b,  v2.4b[1]
-        SDOT    v31.4s, v7.16b,  v3.4b[1]
         B       2b
 
         # Store odd width

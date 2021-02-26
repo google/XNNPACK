@@ -8,7 +8,7 @@
 # void xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
-#     size_t kc,                 x2 / x0
+#     size_t kc,                 x2 / x0 / x8
 #     const int8_t* restrict a,  x3
 #     size_t a_stride,           (x4)
 #     const void* restrict w,    x5
@@ -29,14 +29,14 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64
 0:
         # Load initial bias from w into accumulators
         LDP     q28, q29, [x5], 32
+        SUBS    x0, x2, 5           // k = kc - 5
         LDP     q30, q31, [x5], 32
-        AND     x8, x2, 7  // remainder is 1 to 7 bytes.
-        LDR     x11, [sp, 8]   // params
+        ADD     x8, x2, 3           // rewind = (kc + 3) & ~7
+        LDR     x11, [sp, 8]        // params
+        BIC     x8, x8, 7
 
-        # Is there at least 8 bytes?
-        SUBS    x0, x2, 8  // k = kc - 8
+        # Is there at least 5 bytes?
         B.LO    3f
-
 
         # Main loop - 8 bytes of A
         .p2align 3
@@ -62,18 +62,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64
         SDOT    v31.4s, v7.16b,  v0.4b[1]
         B.HS    1b
 
-        # Is there a remainder?- 1 to 7 bytes of A
-        CBNZ    x8, 3f
+        # Is there a remainder?- 1 to 4 bytes of A
+        TBNZ    x0, 2, 3f
 
-        .p2align 3
 2:
          # Apply params - scale, shift, bias and clamp
-        LD1R    {v0.4s}, [x11], 4
+        LD2R    {v0.4s, v1.4s}, [x11], 8
         SQRDMULH  v4.4s, v28.4s, v0.4s
-        LD1R    {v1.4s}, [x11], 4
         SQRDMULH  v5.4s, v29.4s, v0.4s
-        SQRDMULH  v6.4s, v30.4s, v0.4s
         CMEQ    v2.4s, v1.4s, 0
+        SQRDMULH  v6.4s, v30.4s, v0.4s
         SQRDMULH  v7.4s, v31.4s, v0.4s
         BIC     v28.16b, v28.16b, v2.16b
         BIC     v29.16b, v29.16b, v2.16b
@@ -105,17 +103,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64
 
         # Store full 1 x 16
         ST1     {v4.16b}, [x6], x12
-        SUB      x3,  x3, x2         // a0 -= kc
+        SUB      x3,  x3, x8         // a0 -= rewind
         B.NE    0b
 
         RET
 
-        # Remainder- 1 to 7 bytes of A
+        # Remainder- 1 to 4 bytes of A
         .p2align 3
 3:
-        LD1     {v0.8b},  [x3], x8
+        LDR     s0,  [x3]
         LDR     q16, [x5, 0]
-        CMP     x8, 4
         LDR     q17, [x5, 16]
         SDOT    v28.4s, v16.16b, v0.4b[0]
         LDR     q18, [x5, 32]
@@ -124,17 +121,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64
         SDOT    v30.4s, v18.16b, v0.4b[0]
         ADD     x5, x5, 64
         SDOT    v31.4s, v19.16b, v0.4b[0]
-        B.LS    2b
-
-        LDR      q4, [x5, 0]
-        LDR      q5, [x5, 16]
-        SDOT    v28.4s, v4.16b,  v0.4b[1]
-        LDR      q6, [x5, 32]
-        SDOT    v29.4s, v5.16b,  v0.4b[1]
-        LDR      q7, [x5, 48]
-        SDOT    v30.4s, v6.16b,  v0.4b[1]
-        ADD     x5, x5, 64
-        SDOT    v31.4s, v7.16b,  v0.4b[1]
         B       2b
 
         # Store odd width
