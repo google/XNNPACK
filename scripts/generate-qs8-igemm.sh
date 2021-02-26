@@ -15,11 +15,10 @@ tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=2 -D VARIANT=LD128 -o src/q
 tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=3 -D VARIANT=LD128 -o src/qs8-igemm/gen/3x4c8-minmax-wasmsimd-ld128.c
 
 ################################### ARM NEON ##################################
-tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=8 -o src/qs8-igemm/gen/1x8-minmax-neon-mlal-lane.c
-tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=2 -D NR=8 -o src/qs8-igemm/gen/2x8-minmax-neon-mlal-lane.c
-tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=3 -D NR=8 -o src/qs8-igemm/gen/3x8-minmax-neon-mlal-lane.c
-tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=8 -o src/qs8-igemm/gen/4x8-minmax-neon-mlal-lane.c
-
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=8  -o src/qs8-igemm/gen/1x8-minmax-neon-mlal-lane.c
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=2 -D NR=8  -o src/qs8-igemm/gen/2x8-minmax-neon-mlal-lane.c
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=3 -D NR=8  -o src/qs8-igemm/gen/3x8-minmax-neon-mlal-lane.c
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=8  -o src/qs8-igemm/gen/4x8-minmax-neon-mlal-lane.c
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -o src/qs8-igemm/gen/1x16-minmax-neon-mlal-lane.c
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=2 -D NR=16 -o src/qs8-igemm/gen/2x16-minmax-neon-mlal-lane.c
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=3 -D NR=16 -o src/qs8-igemm/gen/3x16-minmax-neon-mlal-lane.c
@@ -63,6 +62,15 @@ tools/xngen src/qs8-igemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=1 -D NR=16 
 tools/xngen src/qs8-igemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=2 -D NR=16 -o src/qs8-igemm/gen/2x16c2-minmax-neon-mlal-padal-dup.c
 tools/xngen src/qs8-igemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=3 -D NR=16 -o src/qs8-igemm/gen/3x16c2-minmax-neon-mlal-padal-dup.c
 tools/xngen src/qs8-igemm/c2-neon-mull-padal-dup.c.in -D MLA=1 -D MR=4 -D NR=16 -o src/qs8-igemm/gen/4x16c2-minmax-neon-mlal-padal-dup.c
+
+tools/xngen src/qs8-igemm/neon-mull-addw-dup.c.in -D MR=1 -D NR=8  -o src/qs8-igemm/gen/1x8-minmax-neon-mull-addw-dup.c
+tools/xngen src/qs8-igemm/neon-mull-addw-dup.c.in -D MR=2 -D NR=8  -o src/qs8-igemm/gen/2x8-minmax-neon-mull-addw-dup.c
+tools/xngen src/qs8-igemm/neon-mull-addw-dup.c.in -D MR=3 -D NR=8  -o src/qs8-igemm/gen/3x8-minmax-neon-mull-addw-dup.c
+tools/xngen src/qs8-igemm/neon-mull-addw-dup.c.in -D MR=4 -D NR=8  -o src/qs8-igemm/gen/4x8-minmax-neon-mull-addw-dup.c
+tools/xngen src/qs8-igemm/neon-mull-addw-dup.c.in -D MR=1 -D NR=16 -o src/qs8-igemm/gen/1x16-minmax-neon-mull-addw-dup.c
+tools/xngen src/qs8-igemm/neon-mull-addw-dup.c.in -D MR=2 -D NR=16 -o src/qs8-igemm/gen/2x16-minmax-neon-mull-addw-dup.c
+tools/xngen src/qs8-igemm/neon-mull-addw-dup.c.in -D MR=3 -D NR=16 -o src/qs8-igemm/gen/3x16-minmax-neon-mull-addw-dup.c
+tools/xngen src/qs8-igemm/neon-mull-addw-dup.c.in -D MR=4 -D NR=16 -o src/qs8-igemm/gen/4x16-minmax-neon-mull-addw-dup.c
 
 ### C4 micro-kernels
 tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=1  -D NR=8  -o src/qs8-igemm/gen/1x8c4-minmax-neondot.c

@@ -1,0 +1,321 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert NR % 8 == 0
+$assert 8 <= NR <= 16
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/gemm.h>
+
+
+void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}__neon_mull_addw_dup(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const int8_t** restrict a,
+    const void* restrict w,
+    int8_t* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const int8_t* zero,
+    const union xnn_qs8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(ks != 0);
+  assert(ks % (${MR} * sizeof(void*)) == 0);
+  assert(a_offset % sizeof(int8_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  int8_t* c0 = c;
+  $for M in range(1, MR):
+    int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  do {
+    $for N in range(0, NR, 4):
+      int32x4_t vacc0x${ABC[N:N+4]} = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    $for M in range(1, MR):
+      $for N in range(0, NR, 4):
+        int32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
+
+    size_t p = ks;
+    do {
+      $for M in range(MR):
+        const int8_t* restrict a${M} = a[${M}];
+        if XNN_UNPREDICTABLE(a${M} != zero) {
+          a${M} = (const int8_t*) ((uintptr_t) a${M} + a_offset);
+        }
+      a += ${MR};
+
+      size_t k = kc;
+      while (k >= 8 * sizeof(int8_t)) {
+        $for M in range(MR):
+          const int8x8_t va${M} = vld1_s8(a${M}); a${M} += 8;
+
+        $for K in range(8):
+          $for N in range(0, NR, 8):
+            const int8x8_t vb${ABC[N:N+8]}c${K} = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+            $for M in range(MR):
+              const int16x8_t vprod${M}x${ABC[N:N+8]}c${K} = vmull_s8(vb${ABC[N:N+8]}c${K}, vdup_lane_s8(va${M}, ${K}));
+              vacc${M}x${ABC[N:N+4]} = vaddw_s16(vacc${M}x${ABC[N:N+4]}, vget_low_s16(vprod${M}x${ABC[N:N+8]}c${K}));
+              vacc${M}x${ABC[N+4:N+8]} = vaddw_s16(vacc${M}x${ABC[N+4:N+8]}, vget_high_s16(vprod${M}x${ABC[N:N+8]}c${K}));
+
+        k -= 8 * sizeof(int8_t);
+      }
+      if XNN_UNLIKELY(k != 0) {
+        $for M in range(MR):
+          const int8x8_t va${M} = vld1_s8(a${M}); a${M} = (const int8_t*) ((uintptr_t) a${M} + k);
+
+        $for N in range(0, NR, 8):
+          const int8x8_t vb${ABC[N:N+8]}c0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+        $for M in range(MR):
+          $for N in range(0, NR, 8):
+            const int16x8_t vprod${M}x${ABC[N:N+8]}c0 = vmull_s8(vb${ABC[N:N+8]}c0, vdup_lane_s8(va${M}, 0));
+            vacc${M}x${ABC[N:N+4]} = vaddw_s16(vacc${M}x${ABC[N:N+4]}, vget_low_s16(vprod${M}x${ABC[N:N+8]}c0));
+            vacc${M}x${ABC[N+4:N+8]} = vaddw_s16(vacc${M}x${ABC[N+4:N+8]}, vget_high_s16(vprod${M}x${ABC[N:N+8]}c0));
+
+        if (k >= 2 * sizeof(int8_t)) {
+          $for N in range(0, NR, 8):
+            const int8x8_t vb${ABC[N:N+8]}c1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+          $for M in range(MR):
+            $for N in range(0, NR, 8):
+              const int16x8_t vprod${M}x${ABC[N:N+8]}c1 = vmull_s8(vb${ABC[N:N+8]}c1, vdup_lane_s8(va${M}, 1));
+              vacc${M}x${ABC[N:N+4]} = vaddw_s16(vacc${M}x${ABC[N:N+4]}, vget_low_s16(vprod${M}x${ABC[N:N+8]}c1));
+              vacc${M}x${ABC[N+4:N+8]} = vaddw_s16(vacc${M}x${ABC[N+4:N+8]}, vget_high_s16(vprod${M}x${ABC[N:N+8]}c1));
+
+          if (k > 2 * sizeof(int8_t)) {
+            $for N in range(0, NR, 8):
+              const int8x8_t vb${ABC[N:N+8]}c2 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+            $for M in range(MR):
+              $for N in range(0, NR, 8):
+                const int16x8_t vprod${M}x${ABC[N:N+8]}c2 = vmull_s8(vb${ABC[N:N+8]}c2, vdup_lane_s8(va${M}, 2));
+                vacc${M}x${ABC[N:N+4]} = vaddw_s16(vacc${M}x${ABC[N:N+4]}, vget_low_s16(vprod${M}x${ABC[N:N+8]}c2));
+                vacc${M}x${ABC[N+4:N+8]} = vaddw_s16(vacc${M}x${ABC[N+4:N+8]}, vget_high_s16(vprod${M}x${ABC[N:N+8]}c2));
+
+            if (k >= 4 * sizeof(int8_t)) {
+              $for N in range(0, NR, 8):
+                const int8x8_t vb${ABC[N:N+8]}c3 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+              $for M in range(MR):
+                $for N in range(0, NR, 8):
+                  const int16x8_t vprod${M}x${ABC[N:N+8]}c3 = vmull_s8(vb${ABC[N:N+8]}c3, vdup_lane_s8(va${M}, 3));
+                  vacc${M}x${ABC[N:N+4]} = vaddw_s16(vacc${M}x${ABC[N:N+4]}, vget_low_s16(vprod${M}x${ABC[N:N+8]}c3));
+                  vacc${M}x${ABC[N+4:N+8]} = vaddw_s16(vacc${M}x${ABC[N+4:N+8]}, vget_high_s16(vprod${M}x${ABC[N:N+8]}c3));
+
+              if (k > 4 * sizeof(int8_t)) {
+                $for N in range(0, NR, 8):
+                  const int8x8_t vb${ABC[N:N+8]}c4 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+                $for M in range(MR):
+                  $for N in range(0, NR, 8):
+                    const int16x8_t vprod${M}x${ABC[N:N+8]}c4 = vmull_s8(vb${ABC[N:N+8]}c4, vdup_lane_s8(va${M}, 4));
+                    vacc${M}x${ABC[N:N+4]} = vaddw_s16(vacc${M}x${ABC[N:N+4]}, vget_low_s16(vprod${M}x${ABC[N:N+8]}c4));
+                    vacc${M}x${ABC[N+4:N+8]} = vaddw_s16(vacc${M}x${ABC[N+4:N+8]}, vget_high_s16(vprod${M}x${ABC[N:N+8]}c4));
+
+                if (k >= 6 * sizeof(int8_t)) {
+                  $for N in range(0, NR, 8):
+                    const int8x8_t vb${ABC[N:N+8]}c5 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+                  $for M in range(MR):
+                    $for N in range(0, NR, 8):
+                      const int16x8_t vprod${M}x${ABC[N:N+8]}c5 = vmull_s8(vb${ABC[N:N+8]}c5, vdup_lane_s8(va${M}, 5));
+                      vacc${M}x${ABC[N:N+4]} = vaddw_s16(vacc${M}x${ABC[N:N+4]}, vget_low_s16(vprod${M}x${ABC[N:N+8]}c5));
+                      vacc${M}x${ABC[N+4:N+8]} = vaddw_s16(vacc${M}x${ABC[N+4:N+8]}, vget_high_s16(vprod${M}x${ABC[N:N+8]}c5));
+
+                  if (k > 6 * sizeof(int8_t)) {
+                    $for N in range(0, NR, 8):
+                      const int8x8_t vb${ABC[N:N+8]}c6 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
+
+                    $for M in range(MR):
+                      $for N in range(0, NR, 8):
+                        const int16x8_t vprod${M}x${ABC[N:N+8]}c6 = vmull_s8(vb${ABC[N:N+8]}c6, vdup_lane_s8(va${M}, 6));
+                        vacc${M}x${ABC[N:N+4]} = vaddw_s16(vacc${M}x${ABC[N:N+4]}, vget_low_s16(vprod${M}x${ABC[N:N+8]}c6));
+                        vacc${M}x${ABC[N+4:N+8]} = vaddw_s16(vacc${M}x${ABC[N+4:N+8]}, vget_high_s16(vprod${M}x${ABC[N:N+8]}c6));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      p -= ${MR} * sizeof(void*);
+    } while (p != 0);
+
+    const int32x4_t vmultiplier = vld1q_dup_s32(&params->neon.multiplier);
+    $for M in range(MR):
+      $for N in range(0, NR, 4):
+        vacc${M}x${ABC[N:N+4]} = vqrdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
+
+    const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
+    const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
+    $for M in range(MR):
+      $for N in range(0, NR, 4):
+        vacc${M}x${ABC[N:N+4]} = vsraq_n_s32(vacc${M}x${ABC[N:N+4]}, vbicq_s32(vacc${M}x${ABC[N:N+4]}, vzero_shift_mask), 31);
+
+    $for M in range(MR):
+      $for N in range(0, NR, 4):
+        vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_shift);
+
+    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+#if XNN_ARCH_ARM64
+    $for M in range(MR):
+      $for N in range(0, NR, 8):
+        const int16x8_t vacc${M}x${ABC[N:N+8]} = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vacc${M}x${ABC[N+4:N+8]}), voutput_zero_point);
+
+    $for M in range(MR):
+      $for N in range(0, NR, 16):
+        $if N + 8 < NR:
+          int8x16_t vout${M}x${ABC[N:N+16]} = vqmovn_high_s16(vqmovn_s16(vacc${M}x${ABC[N:N+8]}), vacc${M}x${ABC[N+8:N+16]});
+        $elif M % 2 == 1:
+          int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vqmovn_high_s16(vqmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vacc${M}x${ABC[N:N+8]});
+        $elif M + 1 == MR:
+          int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
+#else
+    $for M in range(MR):
+      $for N in range(0, NR, 8):
+        const int16x8_t vacc${M}x${ABC[N:N+8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vqmovn_s32(vacc${M}x${ABC[N+4:N+8]})), voutput_zero_point);
+
+    $for M in range(MR):
+      $for N in range(0, NR, 16):
+        $if N + 8 < NR:
+          int8x16_t vout${M}x${ABC[N:N+16]} = vcombine_s8(vqmovn_s16(vacc${M}x${ABC[N:N+8]}), vqmovn_s16(vacc${M}x${ABC[N+8:N+16]}));
+        $elif M % 2 == 1:
+          int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vcombine_s8(vqmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vqmovn_s16(vacc${M}x${ABC[N:N+8]}));
+        $elif M + 1 == MR:
+          int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
+#endif
+    $if NR == 8 and MR == 1:
+      const int8x8_t voutput_min = vld1_dup_s8(&params->neon.output_min);
+      const int8x8_t voutput_max = vld1_dup_s8(&params->neon.output_max);
+    $else:
+      const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
+      const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+
+    $for M in reversed(range(MR)):
+      $for N in range(0, NR, 16):
+        $if N + 8 < NR:
+          vout${M}x${ABC[N:N+16]} = vmaxq_s8(vout${M}x${ABC[N:N+16]}, voutput_min);
+        $elif M % 2 == 1:
+          vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vmaxq_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}, voutput_min);
+        $elif M + 1 == MR:
+          $if NR == 8 and MR == 1:
+            vout${M}x${ABC[N:N+8]} = vmax_s8(vout${M}x${ABC[N:N+8]}, voutput_min);
+          $else:
+            vout${M}x${ABC[N:N+8]} = vmax_s8(vout${M}x${ABC[N:N+8]}, vget_low_s8(voutput_min));
+
+    $for M in reversed(range(MR)):
+      $for N in range(0, NR, 16):
+        $if N + 8 < NR:
+          vout${M}x${ABC[N:N+16]} = vminq_s8(vout${M}x${ABC[N:N+16]}, voutput_max);
+        $elif M % 2 == 1:
+          vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vminq_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}, voutput_max);
+        $elif M + 1 == MR:
+          $if NR == 8 and MR == 1:
+            vout${M}x${ABC[N:N+8]} = vmin_s8(vout${M}x${ABC[N:N+8]}, voutput_max);
+          $else:
+            vout${M}x${ABC[N:N+8]} = vmin_s8(vout${M}x${ABC[N:N+8]}, vget_low_s8(voutput_max));
+
+    if (nc >= ${NR}) {
+      $for M in reversed(range(MR)):
+        $for N in range(0, NR, 16):
+          $if N + 8 < NR:
+            vst1q_s8(c${M} + ${N}, vout${M}x${ABC[N:N+16]});
+          $elif M % 2 == 1:
+            vst1_s8(c${M} + ${N}, vget_high_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}));
+            vst1_s8(c${M-1} + ${N}, vget_low_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}));
+          $elif M + 1 == MR:
+            vst1_s8(c${M} + ${N}, vout${M}x${ABC[N:N+8]});
+
+      $for M in reversed(range(MR)):
+        c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
+
+      a = (const int8_t**restrict) ((uintptr_t) a - ks);
+
+      nc -= ${NR};
+    } else {
+      $if NR == 16:
+        $for M in range(MR):
+          $if M % 2 == 1:
+            int8x16_t vout${M-1}x01234567_${M}x01234567 = vcombine_s8(vget_low_s8(vout${M-1}x0123456789ABCDEF), vget_low_s8(vout${M}x0123456789ABCDEF));
+          $elif M + 1 == MR:
+            int8x8_t vout${M}x01234567 = vget_low_s8(vout${M}x0123456789ABCDEF);
+        if (nc & 8) {
+          $for M in reversed(range(MR)):
+            $if M % 2 == 1:
+              vst1_s8(c${M}, vget_high_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]})); c${M} += 8;
+              vst1_s8(c${M-1}, vget_low_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]})); c${M-1} += 8;
+            $elif M + 1 == MR:
+              vst1_s8(c${M}, vout${M}x${ABC[N:N+8]}); c${M} += 8;
+          $for M in reversed(range(MR)):
+            $if M % 2 == 1:
+              vout${M-1}x01234567_${M}x01234567 = vcombine_s8(vget_high_s8(vout${M-1}x0123456789ABCDEF), vget_high_s8(vout${M}x0123456789ABCDEF));
+            $elif M + 1 == MR:
+              vout${M}x01234567 = vget_high_s8(vout${M}x0123456789ABCDEF);
+        }
+      if (nc & 4) {
+        $for M in reversed(range(MR)):
+          $if M % 2 == 1:
+            vst1q_lane_u32(__builtin_assume_aligned(c${M}, 1), vreinterpretq_u32_s8(vout${M-1}x01234567_${M}x01234567), 2); c${M} += 4;
+            vst1q_lane_u32(__builtin_assume_aligned(c${M-1}, 1), vreinterpretq_u32_s8(vout${M-1}x01234567_${M}x01234567), 0); c${M-1} += 4;
+          $elif M + 1 == MR:
+            vst1_lane_u32(__builtin_assume_aligned(c${M}, 1), vreinterpret_u32_s8(vout${M}x01234567), 0); c${M} += 4;
+        $for M in reversed(range(MR)):
+          $if M % 2 == 1:
+            vout${M-1}x01234567_${M}x01234567 = vextq_s8(vout${M-1}x01234567_${M}x01234567, vout${M-1}x01234567_${M}x01234567, 4);
+          $elif M + 1 == MR:
+            vout${M}x01234567 = vext_s8(vout${M}x01234567, vout${M}x01234567, 4);
+      }
+      if (nc & 2) {
+        $for M in reversed(range(MR)):
+          $if M % 2 == 1:
+            vst1q_lane_u16(__builtin_assume_aligned(c${M}, 1), vreinterpretq_u16_s8(vout${M-1}x01234567_${M}x01234567), 4); c${M} += 2;
+            vst1q_lane_u16(__builtin_assume_aligned(c${M-1}, 1), vreinterpretq_u16_s8(vout${M-1}x01234567_${M}x01234567), 0); c${M-1} += 2;
+          $elif M + 1 == MR:
+            vst1_lane_u16(__builtin_assume_aligned(c${M}, 1), vreinterpret_u16_s8(vout${M}x01234567), 0); c${M} += 2;
+        $for M in reversed(range(MR)):
+          $if M % 2 == 1:
+            vout${M-1}x01234567_${M}x01234567 = vextq_s8(vout${M-1}x01234567_${M}x01234567, vout${M-1}x01234567_${M}x01234567, 2);
+          $elif M + 1 == MR:
+            vout${M}x01234567 = vext_s8(vout${M}x01234567, vout${M}x01234567, 2);
+      }
+      if (nc & 1) {
+        $for M in reversed(range(MR)):
+          $if M % 2 == 1:
+            vst1q_lane_s8(c${M}, vout${M-1}x01234567_${M}x01234567, 8);
+            vst1q_lane_s8(c${M-1}, vout${M-1}x01234567_${M}x01234567, 0);
+          $elif M + 1 == MR:
+            vst1_lane_s8(c${M}, vout${M}x01234567, 0);
+      }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}
