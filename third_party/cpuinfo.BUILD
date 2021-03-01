@@ -334,5 +334,5 @@ config_setting(
 
 config_setting(
     name = "emscripten",
-    values = {"crosstool_top": "//toolchain:emscripten"},
+    values = {"crosstool_top": "//emscripten_toolchain:everything"},
 )
