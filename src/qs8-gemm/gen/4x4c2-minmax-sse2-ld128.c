@@ -12,6 +12,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_gemm_minmax_ukernel_4x4c2__sse2_ld128(
@@ -35,6 +36,7 @@ void xnn_qs8_gemm_minmax_ukernel_4x4c2__sse2_ld128(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 2);
   const int8_t* a0 = a;
   int8_t* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -180,21 +182,6 @@ void xnn_qs8_gemm_minmax_ukernel_4x4c2__sse2_ld128(
             _mm_madd_epi16(_mm_shuffle_epi32(vxa2, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
           vacc3x0123 = _mm_add_epi32(vacc3x0123,
             _mm_madd_epi16(_mm_shuffle_epi32(vxa3, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
-
-          if (k > 6 * sizeof(int8_t)) {
-            const __m128i vb3 = _mm_loadl_epi64((const __m128i*) w);
-            const __m128i vxb3 = _mm_unpacklo_epi8(vb3, _mm_cmpgt_epi8(_mm_setzero_si128(), vb3));
-            w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-            vacc0x0123 = _mm_add_epi32(vacc0x0123,
-              _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-            vacc1x0123 = _mm_add_epi32(vacc1x0123,
-              _mm_madd_epi16(_mm_shuffle_epi32(vxa1, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-            vacc2x0123 = _mm_add_epi32(vacc2x0123,
-              _mm_madd_epi16(_mm_shuffle_epi32(vxa2, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-            vacc3x0123 = _mm_add_epi32(vacc3x0123,
-              _mm_madd_epi16(_mm_shuffle_epi32(vxa3, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-          }
         }
       }
     }
@@ -312,15 +299,15 @@ void xnn_qs8_gemm_minmax_ukernel_4x4c2__sse2_ld128(
       vout = _mm_srli_si128(vout, 4);
       *((uint32_t*) c3) = (uint32_t) _mm_cvtsi128_si32(vout);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
-      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
-      a2 = (const int8_t*) ((uintptr_t) a2 - kc);
-      a3 = (const int8_t*) ((uintptr_t) a3 - kc);
-
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
       c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
       c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
+
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+      a2 = (const int8_t*) ((uintptr_t) a2 - kc);
+      a3 = (const int8_t*) ((uintptr_t) a3 - kc);
 
       nc -= 4;
     } else {

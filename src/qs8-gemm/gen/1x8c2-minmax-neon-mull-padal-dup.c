@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_gemm_minmax_ukernel_1x8c2__neon_mull_padal_dup(
@@ -36,6 +36,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x8c2__neon_mull_padal_dup(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 2);
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
@@ -106,16 +107,6 @@ void xnn_qs8_gemm_minmax_ukernel_1x8c2__neon_mull_padal_dup(
           vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c2);
           const int16x8_t vprod0x4567c2 = vmull_s8(vb4567c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2)));
           vacc0x4567 = vpadalq_s16(vacc0x4567, vprod0x4567c2);
-
-          if (k > 6 * sizeof(int8_t)) {
-            const int8x8_t vb0123c3 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-            const int8x8_t vb4567c3 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-            const int16x8_t vprod0x0123c3 = vmull_s8(vb0123c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3)));
-            vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c3);
-            const int16x8_t vprod0x4567c3 = vmull_s8(vb4567c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3)));
-            vacc0x4567 = vpadalq_s16(vacc0x4567, vprod0x4567c3);
-          }
         }
       }
     }

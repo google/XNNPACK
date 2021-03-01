@@ -18,6 +18,7 @@ $else:
   #include <${SSE_HEADER}>
 
 #include <xnnpack/igemm.h>
+#include <xnnpack/math.h>
 
 
 $ISA = {2: "sse2", 3: "ssse3", 4: "sse41", 5: "xop"}[SSE]
@@ -46,6 +47,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 2);
   int8_t* c0 = c;
   $for M in range(1, MR):
     int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
@@ -180,20 +182,6 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
               $else:
                 vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
                   _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
-
-            if (k > 6 * sizeof(int8_t)) {
-              const __m128i vb3 = _mm_loadl_epi64((const __m128i*) w);
-              w = (const void*) ((uintptr_t) w + 8);
-              const __m128i vxb3 = _mm_unpacklo_epi8(vb3, _mm_cmpgt_epi8(_mm_setzero_si128(), vb3));
-
-              $for M in range(MR):
-                $if SSE == 5:
-                  vacc${M}x0123 = _mm_maddd_epi16(
-                    _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(3, 3, 3, 3)), vxb3, vacc${M}x0123);
-                $else:
-                  vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
-                    _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-            }
           }
         }
       }

@@ -12,6 +12,7 @@
 #include <wasm_simd128.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_1x4c8__wasmsimd_ld128(
@@ -39,6 +40,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c8__wasmsimd_ld128(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   int8_t* c0 = c;
 
   const v128_t vzero = wasm_f64x2_splat(0.0);

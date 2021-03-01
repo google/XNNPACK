@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_gemm_minmax_ukernel_1x16c8__neon_mull_padal(
@@ -36,6 +36,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x16c8__neon_mull_padal(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
@@ -291,7 +292,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x16c8__neon_mull_padal(
 
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - (kc - k));
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
       nc -= 16;
     } else {

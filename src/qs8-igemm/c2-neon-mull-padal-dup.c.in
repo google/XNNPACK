@@ -10,8 +10,8 @@ $assert 8 <= NR <= 16
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull"}_padal_dup(
@@ -39,6 +39,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 2);
   int8_t* c0 = c;
   $for M in range(1, MR):
     int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
@@ -143,16 +144,6 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull
               $for N in range(0, NR, 4):
                 const int16x8_t vprod${M}x${ABC[N:N+4]}c2 = vmull_s8(vb${ABC[N:N+4]}c2, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}), 2)));
                 vacc${M}x${ABC[N:N+4]} = vpadalq_s16(vacc${M}x${ABC[N:N+4]}, vprod${M}x${ABC[N:N+4]}c2);
-
-            if (k > 6 * sizeof(int8_t)) {
-              $for N in range(0, NR, 4):
-                const int8x8_t vb${ABC[N:N+4]}c3 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-              $for M in range(MR):
-                $for N in range(0, NR, 4):
-                  const int16x8_t vprod${M}x${ABC[N:N+4]}c3 = vmull_s8(vb${ABC[N:N+4]}c3, vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}), 3)));
-                  vacc${M}x${ABC[N:N+4]} = vpadalq_s16(vacc${M}x${ABC[N:N+4]}, vprod${M}x${ABC[N:N+4]}c3);
-            }
           }
         }
       }

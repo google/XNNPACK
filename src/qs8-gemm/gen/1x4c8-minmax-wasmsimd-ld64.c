@@ -12,6 +12,7 @@
 #include <wasm_simd128.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_gemm_minmax_ukernel_1x4c8__wasmsimd_ld64(
@@ -35,6 +36,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x4c8__wasmsimd_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
@@ -115,9 +117,9 @@ void xnn_qs8_gemm_minmax_ukernel_1x4c8__wasmsimd_ld64(
     if (nc >= 4) {
       *((float*) c0) = (float) wasm_f32x4_extract_lane(vout, 0);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - k);
-
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
       nc -= 4;
     } else {

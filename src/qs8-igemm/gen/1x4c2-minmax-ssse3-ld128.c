@@ -12,6 +12,7 @@
 #include <tmmintrin.h>
 
 #include <xnnpack/igemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_1x4c2__ssse3_ld128(
@@ -39,6 +40,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c2__ssse3_ld128(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 2);
   int8_t* c0 = c;
 
   do {
@@ -110,15 +112,6 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c2__ssse3_ld128(
 
             vacc0x0123 = _mm_add_epi32(vacc0x0123,
               _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
-
-            if (k > 6 * sizeof(int8_t)) {
-              const __m128i vb3 = _mm_loadl_epi64((const __m128i*) w);
-              w = (const void*) ((uintptr_t) w + 8);
-              const __m128i vxb3 = _mm_unpacklo_epi8(vb3, _mm_cmpgt_epi8(_mm_setzero_si128(), vb3));
-
-              vacc0x0123 = _mm_add_epi32(vacc0x0123,
-                _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-            }
           }
         }
       }

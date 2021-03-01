@@ -17,6 +17,7 @@
 #endif
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_gemm_xw_minmax_ukernel_2x4c8__xop(
@@ -40,6 +41,7 @@ void xnn_qs8_gemm_xw_minmax_ukernel_2x4c8__xop(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   const int8_t* a0 = a;
   int8_t* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -144,11 +146,11 @@ void xnn_qs8_gemm_xw_minmax_ukernel_2x4c8__xop(
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
       *((uint32_t*) c1) = (uint32_t) _mm_extract_epi32(vout, 1);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - k);
-      a1 = (const int8_t*) ((uintptr_t) a1 - k);
-
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
+
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
 
       nc -= 4;
     } else {

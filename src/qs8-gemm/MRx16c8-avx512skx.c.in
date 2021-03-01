@@ -12,6 +12,7 @@ $assert MR <= 4
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/math.h>
 
 
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
@@ -36,6 +37,7 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   const int8_t* a0 = a;
   int8_t* c0 = c;
   $for M in range(1, MR):
@@ -196,10 +198,10 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x16c8__avx512skx(
         _mm_storeu_si128((__m128i*) c1, _mm256_extracti128_si256(vout01x0123456789ABCDEF, 1));
 
         $for M in range(MR):
-          a${M} = (const int8_t*) ((uintptr_t) a${M} - k);
+          c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
 
         $for M in range(MR):
-          c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
+          a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
 
         nc -= 16;
       } else {

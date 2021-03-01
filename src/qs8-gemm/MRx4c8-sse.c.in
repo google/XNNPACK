@@ -19,6 +19,7 @@ $else:
   #include <${SSE_HEADER}>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
@@ -45,6 +46,7 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__${ISA}${LOAD_SUFFIX}(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   const int8_t* a0 = a;
   int8_t* c0 = c;
   $for M in range(1, MR):
@@ -244,10 +246,10 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__${ISA}${LOAD_SUFFIX}(
           *((uint32_t*) c${M}) = (uint32_t) _mm_cvtsi128_si32(vout);
 
       $for M in range(MR):
-        a${M} = (const int8_t*) ((uintptr_t) a${M} - k);
+        c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in range(MR):
-        c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
+        a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
 
       nc -= 4;
     } else {

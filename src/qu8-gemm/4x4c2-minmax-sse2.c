@@ -11,6 +11,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qu8_gemm_minmax_ukernel_4x4c2__sse2(
@@ -29,7 +30,12 @@ void xnn_qu8_gemm_minmax_ukernel_4x4c2__sse2(
   assert(mr <= 4);
   assert(nc != 0);
   assert(kc != 0);
+  assert(kc % sizeof(int8_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
 
+  kc = round_up_po2(kc, 2);
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
   const uint8_t* a1 = (const uint8_t*) ((uintptr_t) a0 + a_stride);
@@ -181,21 +187,6 @@ void xnn_qu8_gemm_minmax_ukernel_4x4c2__sse2(
             _mm_madd_epi16(_mm_shuffle_epi32(vxa2, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
           vacc3x0123 = _mm_add_epi32(vacc3x0123,
             _mm_madd_epi16(_mm_shuffle_epi32(vxa3, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
-
-          if (k > 6 * sizeof(uint8_t)) {
-            const __m128i vb3 = _mm_loadl_epi64((const __m128i*) w);
-            w = (const void*) ((uintptr_t) w + 8);
-            const __m128i vxb3 = _mm_sub_epi16(_mm_unpacklo_epi8(vb3, vzero), vb_zero_point);
-
-            vacc0x0123 = _mm_add_epi32(vacc0x0123,
-              _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-            vacc1x0123 = _mm_add_epi32(vacc1x0123,
-              _mm_madd_epi16(_mm_shuffle_epi32(vxa1, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-            vacc2x0123 = _mm_add_epi32(vacc2x0123,
-              _mm_madd_epi16(_mm_shuffle_epi32(vxa2, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-            vacc3x0123 = _mm_add_epi32(vacc3x0123,
-              _mm_madd_epi16(_mm_shuffle_epi32(vxa3, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-          }
         }
       }
     }

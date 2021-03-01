@@ -10,6 +10,7 @@ $assert MR <= 4
 #include <wasm_simd128.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
@@ -39,6 +40,7 @@ void xnn_qs8_igemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   int8_t* c0 = c;
   $for M in range(1, MR):
     int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);

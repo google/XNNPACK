@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
 #include <xnnpack/igemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_6x16c4__neondot(
@@ -40,6 +40,7 @@ void xnn_qs8_igemm_minmax_ukernel_6x16c4__neondot(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 4);
   int8_t* c0 = c;
   int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
@@ -190,7 +191,7 @@ void xnn_qs8_igemm_minmax_ukernel_6x16c4__neondot(
 
         k -= 8 * sizeof(int8_t);
       }
-      // Handle up to 7 final positions of `k`
+      // Handle up to 6 final positions of `k`
       if XNN_UNLIKELY(k != 0) {
         // Load a 6x4 block of activations.
         const int8x8_t va0x01234567 = vld1_s8(a0);

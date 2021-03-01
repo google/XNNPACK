@@ -12,6 +12,7 @@
 #include <smmintrin.h>
 
 #include <xnnpack/igemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64(
@@ -39,6 +40,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   int8_t* c0 = c;
 
   do {

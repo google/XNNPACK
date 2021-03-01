@@ -48,7 +48,12 @@ void xnn_qu8_gemm_minmax_ukernel_2x4c8__sse2(
   assert(mr <= 2);
   assert(nc != 0);
   assert(kc != 0);
+  assert(kc % sizeof(int8_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
   const uint8_t* a1 = (const uint8_t*) ((uintptr_t) a0 + a_stride);
@@ -58,7 +63,6 @@ void xnn_qu8_gemm_minmax_ukernel_2x4c8__sse2(
     c1 = c0;
   }
 
-  const size_t kc_stride = round_up_po2(kc, 8);
   const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->sse2.kernel_zero_point);
 
   do {
@@ -173,8 +177,8 @@ void xnn_qu8_gemm_minmax_ukernel_2x4c8__sse2(
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
       *((uint32_t*) c1) = (uint32_t) _mm_cvtsi128_si32(_mm_srli_epi64(vout, 32));
 
-      a0 = (const uint8_t*) ((uintptr_t) a0 - kc_stride);
-      a1 = (const uint8_t*) ((uintptr_t) a1 - kc_stride);
+      a0 = (const uint8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const uint8_t*) ((uintptr_t) a1 - kc);
 
       c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (uint8_t*) ((uintptr_t) c1 + cn_stride);

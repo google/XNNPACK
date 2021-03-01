@@ -12,6 +12,7 @@
 #include <tmmintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3_ld64(
@@ -35,6 +36,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 2);
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
@@ -99,15 +101,6 @@ void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3_ld64(
 
           vacc0x0123 = _mm_add_epi32(vacc0x0123,
             _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
-
-          if (k > 6 * sizeof(int8_t)) {
-            const __m128i vb3 = _mm_loadl_epi64((const __m128i*) w);
-            const __m128i vxb3 = _mm_unpacklo_epi8(vb3, _mm_cmpgt_epi8(_mm_setzero_si128(), vb3));
-            w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-            vacc0x0123 = _mm_add_epi32(vacc0x0123,
-              _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-          }
         }
       }
     }
@@ -163,9 +156,9 @@ void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3_ld64(
     if (nc >= 4) {
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
-
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
       nc -= 4;
     } else {

@@ -10,8 +10,8 @@ $assert 8 <= NR <= 16
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
@@ -39,6 +39,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   int8_t* c0 = c;
   $for M in range(1, MR):
     int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
@@ -93,9 +94,6 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
         k -= 16 * sizeof(int8_t);
       }
       // Handle up to 8 final positions of `k`
-      // If kc was 0 or 16, there is no remainder.  k is 0.
-      // If kc was 1 to 8,  there is a remainder of k.
-      // If kc was 9 to 15, the main loop handled the remainder; k underflowed.
       if XNN_UNLIKELY(k > 0) {
         $for M in range(MR):
           const int8x8_t va${M} = vld1_s8(a${M});

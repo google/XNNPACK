@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_gemm_minmax_ukernel_3x16c16__neon_mlal_padal(
@@ -36,6 +36,7 @@ void xnn_qs8_gemm_minmax_ukernel_3x16c16__neon_mlal_padal(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 16);
   const int8_t* a0 = a;
   int8_t* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -101,7 +102,7 @@ void xnn_qs8_gemm_minmax_ukernel_3x16c16__neon_mlal_padal(
     int32x4_t vacc2x14 = vacc0x14;
     int32x4_t vacc2x15 = vacc0x15;
 
-    // KC loop of 16 with up to 15 remainder
+    // KC loop of 16
     size_t k = 0;
     while (k < kc) {
       const int8x16_t va0 = vld1q_s8(a0); a0 += 16;
@@ -482,9 +483,9 @@ void xnn_qs8_gemm_minmax_ukernel_3x16c16__neon_mlal_padal(
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
       c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - k);
-      a1 = (const int8_t*) ((uintptr_t) a1 - k);
-      a2 = (const int8_t*) ((uintptr_t) a2 - k);
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+      a2 = (const int8_t*) ((uintptr_t) a2 - kc);
 
       nc -= 16;
     } else {

@@ -11,6 +11,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/igemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qu8_igemm_minmax_ukernel_4x4c2__sse2(
@@ -33,7 +34,12 @@ void xnn_qu8_igemm_minmax_ukernel_4x4c2__sse2(
   assert(kc != 0);
   assert(ks != 0);
   assert(ks % (4 * sizeof(void*)) == 0);
+  assert(a_offset % sizeof(int8_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
 
+  kc = round_up_po2(kc, 2);
   uint8_t* c0 = c;
   uint8_t* c1 = (uint8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
@@ -163,17 +169,6 @@ void xnn_qu8_igemm_minmax_ukernel_4x4c2__sse2(
             vacc1x0123 = _mm_add_epi32(vacc1x0123, _mm_madd_epi16(_mm_shuffle_epi32(vxa1, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
             vacc2x0123 = _mm_add_epi32(vacc2x0123, _mm_madd_epi16(_mm_shuffle_epi32(vxa2, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
             vacc3x0123 = _mm_add_epi32(vacc3x0123, _mm_madd_epi16(_mm_shuffle_epi32(vxa3, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
-
-            if (k > 6 * sizeof(uint8_t)) {
-              const __m128i vb3 = _mm_loadl_epi64((const __m128i*) w);
-              const __m128i vxb3 = _mm_sub_epi16(_mm_unpacklo_epi8(vb3, vzero), vb_zero_point);
-              w = (void*) ((uintptr_t) w + 8);
-
-              vacc0x0123 = _mm_add_epi32(vacc0x0123, _mm_madd_epi16(_mm_shuffle_epi32(vxa0, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-              vacc1x0123 = _mm_add_epi32(vacc1x0123, _mm_madd_epi16(_mm_shuffle_epi32(vxa1, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-              vacc2x0123 = _mm_add_epi32(vacc2x0123, _mm_madd_epi16(_mm_shuffle_epi32(vxa2, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-              vacc3x0123 = _mm_add_epi32(vacc3x0123, _mm_madd_epi16(_mm_shuffle_epi32(vxa3, _MM_SHUFFLE(3, 3, 3, 3)), vxb3));
-            }
           }
         }
       }

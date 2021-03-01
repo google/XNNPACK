@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_4x8c8__neon_mull_padal(
@@ -40,6 +40,7 @@ void xnn_qs8_igemm_minmax_ukernel_4x8c8__neon_mull_padal(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   int8_t* c0 = c;
   int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
@@ -237,9 +238,6 @@ void xnn_qs8_igemm_minmax_ukernel_4x8c8__neon_mull_padal(
         k -= 16 * sizeof(int8_t);
       }
       // Handle up to 8 final positions of `k`
-      // If kc was 0 or 16, there is no remainder.  k is 0.
-      // If kc was 1 to 8,  there is a remainder of k.
-      // If kc was 9 to 15, the main loop handled the remainder; k underflowed.
       if XNN_UNLIKELY(k > 0) {
         const int8x8_t va0 = vld1_s8(a0);
         const int8x8_t va1 = vld1_s8(a1);

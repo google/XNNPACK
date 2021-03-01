@@ -12,6 +12,7 @@
 #include <smmintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qs8_gemm_minmax_ukernel_3x4c8__sse41_ld64(
@@ -35,6 +36,7 @@ void xnn_qs8_gemm_minmax_ukernel_3x4c8__sse41_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
+  kc = round_up_po2(kc, 8);
   const int8_t* a0 = a;
   int8_t* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -176,13 +178,13 @@ void xnn_qs8_gemm_minmax_ukernel_3x4c8__sse41_ld64(
       *((uint32_t*) c1) = (uint32_t) _mm_extract_epi32(vout, 1);
       *((uint32_t*) c2) = (uint32_t) _mm_extract_epi32(vout, 2);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - k);
-      a1 = (const int8_t*) ((uintptr_t) a1 - k);
-      a2 = (const int8_t*) ((uintptr_t) a2 - k);
-
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
       c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
+
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+      a2 = (const int8_t*) ((uintptr_t) a2 - kc);
 
       nc -= 4;
     } else {
