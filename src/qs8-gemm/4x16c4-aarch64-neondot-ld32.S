@@ -52,19 +52,22 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld32
         CSEL     x4, x13, x4, LO   //   a3 = a2
         CSEL     x7,  x9, x7, LO   //   c3 = c2
 
+        ADD     x2, x2, 3          // kc = (kc + 3) & ~3
+        BIC     x2, x2, 3
+
         .p2align 3
 0:
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
-        MOV     x0, x2             // k = kc.  assumes kc > 0
         MOV     v17.16b, v16.16b
         MOV     v18.16b, v16.16b
         LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
+        LDR     x11, [sp, 8]       // params
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
-        LDR     x11, [sp, 8]      // params
+        MOV     x0, x2             // k = kc.  assumes kc > 0
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
         MOV     v27.16b, v24.16b
@@ -80,16 +83,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld32
         LDR     s1, [x15], 4
         LDR     s2, [x13], 4
         LDR     s3,  [x4], 4
-        SDOT    v16.4s, v4.16b,  v0.4b[0]
+        SDOT    v16.4s, v4.16b, v0.4b[0]
         LDR     q5, [x5], 16
-        SDOT    v17.4s, v4.16b,  v1.4b[0]
-        SDOT    v18.4s, v4.16b,  v2.4b[0]
-        SDOT    v19.4s, v4.16b,  v3.4b[0]
-        SDOT    v20.4s, v5.16b,  v0.4b[0]
+        SDOT    v17.4s, v4.16b, v1.4b[0]
+        SDOT    v18.4s, v4.16b, v2.4b[0]
+        SDOT    v19.4s, v4.16b, v3.4b[0]
+        SDOT    v20.4s, v5.16b, v0.4b[0]
         LDR     q6, [x5], 16
-        SDOT    v21.4s, v5.16b,  v1.4b[0]
-        SDOT    v22.4s, v5.16b,  v2.4b[0]
-        SDOT    v23.4s, v5.16b,  v3.4b[0]
+        SDOT    v21.4s, v5.16b, v1.4b[0]
+        SDOT    v22.4s, v5.16b, v2.4b[0]
+        SDOT    v23.4s, v5.16b, v3.4b[0]
         SDOT    v24.4s, v6.16b, v0.4b[0]
         LDR     q7, [x5], 16
         SDOT    v25.4s, v6.16b, v1.4b[0]
@@ -98,9 +101,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld32
         SDOT    v28.4s, v7.16b, v0.4b[0]
         SDOT    v29.4s, v7.16b, v1.4b[0]
         SDOT    v30.4s, v7.16b, v2.4b[0]
-        SDOT    v31.4s, v7.16b, v3.4b[0]
         SUBS    x0, x0, 4
-        B.HI   1b
+        SDOT    v31.4s, v7.16b, v3.4b[0]
+        B.HI    1b
 
         # Apply params - scale, shift, bias and clamp
         LD2R    {v0.4s, v1.4s}, [x11], 8
@@ -234,17 +237,15 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld32
         SMIN    v7.16b, v7.16b, v1.16b
         B.LO    4f
 
-        SUB      x0,  x2, x0         // rewind = kc - k
-
         # Store full 4 x 16
         ST1     {v4.16b}, [x6], x12
-        SUB      x3,  x3, x0         // a0 -= (kc - k)
+        SUB      x3,  x3, x2         // a0 -= kc
         ST1     {v5.16b}, [x8], x12
-        SUB     x15, x15, x0         // a1 -= (kc - k)
+        SUB     x15, x15, x2         // a1 -= kc
         ST1     {v6.16b}, [x9], x12
-        SUB     x13, x13, x0         // a2 -= (kc - k)
+        SUB     x13, x13, x2         // a2 -= kc
         ST1     {v7.16b}, [x7], x12
-        SUB      x4,  x4, x0         // a3 -= (kc - k)
+        SUB      x4,  x4, x2         // a3 -= kc
         B.NE    0b
         RET
 
