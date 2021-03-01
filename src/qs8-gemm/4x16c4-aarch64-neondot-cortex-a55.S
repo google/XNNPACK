@@ -8,7 +8,7 @@
 # void xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
-#     size_t kc,                 x2 / x0 / x10
+#     size_t kc,                 x2 / x0
 #     const int8_t* restrict a,  x3
 #     size_t a_stride,           x4
 #     const void* restrict w,    x5
@@ -54,11 +54,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         CSEL     x4, x13, x4, LO   //   a3 = a2
         CSEL     x7,  x9, x7, LO   //   c3 = c2
 
+        ADD     x2, x2, 3          // kc = (kc + 3) & ~3
+        BIC     x2, x2, 3
+
         .p2align 3
 0:
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
-        SUBS    x0, x2, 16         // k = kc - 16
         MOV     v17.16b, v16.16b
         MOV     v18.16b, v16.16b
         LDP     q24, q28, [x5], 32
@@ -69,8 +71,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         LDR     x11, [sp, 40]      // params
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
-        AND     x10, x2, 15        // kc remainder 0 to 15
         MOV     v27.16b, v24.16b
+        SUBS    x0, x2, 16         // k = kc - 16
         MOV     v29.16b, v28.16b
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
@@ -389,14 +391,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         INS     v11.d[1], x14
         SDOT    v26.4s, v10.16b, v6.4b[1]
         SDOT    v27.4s, v10.16b, v7.4b[1]
+        AND     x0, x2, 15        // kc remainder 0 to 12
 
         // BLOCK 3
         SDOT    v28.4s, v11.16b, v4.4b[1]
         SDOT    v29.4s, v11.16b, v5.4b[1]
         SDOT    v30.4s, v11.16b, v6.4b[1]
         SDOT    v31.4s, v11.16b, v7.4b[1]
-        # Is there a remainder?- 1 to 15 bytes of A
-        CBNZ    x10, 4f
+
+        # Is there a remainder?- 4 to 12 bytes of A
+        CBNZ    x0, 5f
 
         .p2align 3
 3:
@@ -525,7 +529,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SMIN     v5.16b,  v5.16b, v1.16b
         SMIN     v6.16b,  v6.16b, v1.16b
         SMIN     v7.16b,  v7.16b, v1.16b
-        B.LO    5f
+        B.LO    6f
 
         # Store full 4 x 16
         ST1     {v4.16b}, [x6], x12
@@ -542,15 +546,18 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         LDP      d8,  d9, [sp], 32
         RET
 
-        # Remainder- 1 to 15 bytes of A
+        # Remainder- 4 to 12 bytes of A
+        # Although C4, its safe to read 16 bytes.
         .p2align 3
 4:
+        AND     x0, x2, 15        // kc remainder 4 to 12
+5:
         LDP      q8,  q9,  [x5], 32
         LDP     q10, q11,  [x5], 32
-        LD1     {v0.16b},  [x3], x10
-        LD1     {v1.16b}, [x15], x10
-        LD1     {v2.16b}, [x13], x10
-        LD1     {v3.16b},  [x4], x10
+        LD1     {v0.16b},  [x3], x0
+        LD1     {v1.16b}, [x15], x0
+        LD1     {v2.16b}, [x13], x0
+        LD1     {v3.16b},  [x4], x0
         SDOT    v16.4s,  v8.16b, v0.4b[0]
         SDOT    v17.4s,  v8.16b, v1.4b[0]
         SDOT    v18.4s,  v8.16b, v2.4b[0]
@@ -567,7 +574,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v29.4s, v11.16b, v1.4b[0]
         SDOT    v30.4s, v11.16b, v2.4b[0]
         SDOT    v31.4s, v11.16b, v3.4b[0]
-        CMP     x10, 4
+        CMP     x0, 4
         B.LS    3b
         LDP      q8,  q9,  [x5], 32
         LDP     q10, q11,  [x5], 32
@@ -587,7 +594,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v29.4s, v11.16b, v1.4b[1]
         SDOT    v30.4s, v11.16b, v2.4b[1]
         SDOT    v31.4s, v11.16b, v3.4b[1]
-        CMP     x10, 8
+        CMP     x0, 8
         B.LS    3b
         LDP       q8,  q9,  [x5], 32
         LDP      q10, q11,  [x5], 32
@@ -607,32 +614,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v29.4s, v11.16b, v1.4b[2]
         SDOT    v30.4s, v11.16b, v2.4b[2]
         SDOT    v31.4s, v11.16b, v3.4b[2]
-        CMP     x10, 12
-        B.LS    3b
-        LDP       q8,   q9, [x5], 32
-        LDP      q10,  q11, [x5], 32
-        SDOT    v16.4s,  v8.16b, v0.4b[3]
-        SDOT    v17.4s,  v8.16b, v1.4b[3]
-        SDOT    v18.4s,  v8.16b, v2.4b[3]
-        SDOT    v19.4s,  v8.16b, v3.4b[3]
-        SDOT    v20.4s,  v9.16b, v0.4b[3]
-        SDOT    v21.4s,  v9.16b, v1.4b[3]
-        SDOT    v22.4s,  v9.16b, v2.4b[3]
-        SDOT    v23.4s,  v9.16b, v3.4b[3]
-        SDOT    v24.4s, v10.16b, v0.4b[3]
-        SDOT    v25.4s, v10.16b, v1.4b[3]
-        SDOT    v26.4s, v10.16b, v2.4b[3]
-        SDOT    v27.4s, v10.16b, v3.4b[3]
-        SDOT    v28.4s, v11.16b, v0.4b[3]
-        SDOT    v29.4s, v11.16b, v1.4b[3]
-        SDOT    v30.4s, v11.16b, v2.4b[3]
-        SDOT    v31.4s, v11.16b, v3.4b[3]
         B       3b
 
         # Store odd width
         .p2align 3
-5:
-        TBZ     x1, 3, 6f
+6:
+        TBZ     x1, 3, 7f
         STR     d4, [x6], 8
         DUP     d4, v4.d[1]
         STR     d5, [x8], 8
@@ -641,8 +628,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         DUP     d6, v6.d[1]
         STR     d7, [x7], 8
         DUP     d7, v7.d[1]
-6:
-        TBZ     x1, 2, 7f
+7:
+        TBZ     x1, 2, 8f
         STR     s4, [x6], 4
         DUP     s4, v4.s[1]
         STR     s5, [x8], 4
@@ -651,8 +638,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         DUP     s6, v6.s[1]
         STR     s7, [x7], 4
         DUP     s7, v7.s[1]
-7:
-        TBZ     x1, 1, 8f
+8:
+        TBZ     x1, 1, 9f
         ST1     {v4.h}[0], [x6], 2
         DUP      h4, v4.h[1]
         ST1     {v5.h}[0], [x8], 2
@@ -661,13 +648,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         DUP      h6, v6.h[1]
         ST1     {v7.h}[0], [x7], 2
         DUP      h7, v7.h[1]
-8:
-        TBZ     x1, 0, 9f
+9:
+        TBZ     x1, 0, 10f
         ST1     {v4.b}[0], [x6]
         ST1     {v5.b}[0], [x8]
         ST1     {v6.b}[0], [x9]
         ST1     {v7.b}[0], [x7]
-9:
+10:
         LDP     d10, d11, [sp, 16]
         LDP      d8,  d9, [sp], 32
         RET
