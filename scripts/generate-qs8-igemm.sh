@@ -84,15 +84,14 @@ tools/xngen src/qs8-igemm/c16-neon-mlal-padal.c.in -D MR=3 -D NR=16 -o src/qs8-i
 tools/xngen src/qs8-igemm/c16-neon-mlal-padal.c.in -D MR=4 -D NR=16 -o src/qs8-igemm/gen/4x16c16-minmax-neon-mlal-padal.c
 
 ### C4 micro-kernels
-tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=1  -D NR=8  -o src/qs8-igemm/gen/1x8c4-minmax-neondot.c
-tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=4  -D NR=8  -o src/qs8-igemm/gen/4x8c4-minmax-neondot.c
-tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=6  -D NR=8  -o src/qs8-igemm/gen/6x8c4-minmax-neondot.c
-tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=8  -D NR=8  -o src/qs8-igemm/gen/8x8c4-minmax-neondot.c
-tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=12 -D NR=8  -o src/qs8-igemm/gen/12x8c4-minmax-neondot.c
-tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=1  -D NR=16 -o src/qs8-igemm/gen/1x16c4-minmax-neondot.c
-tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=4  -D NR=16 -o src/qs8-igemm/gen/4x16c4-minmax-neondot.c
-tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=6  -D NR=16 -o src/qs8-igemm/gen/6x16c4-minmax-neondot.c
-tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=8  -D NR=16 -o src/qs8-igemm/gen/8x16c4-minmax-neondot.c
+tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=1 -D NR=8  -o src/qs8-igemm/gen/1x8c4-minmax-neondot.c
+tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=2 -D NR=8  -o src/qs8-igemm/gen/2x8c4-minmax-neondot.c
+tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=3 -D NR=8  -o src/qs8-igemm/gen/3x8c4-minmax-neondot.c
+tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=4 -D NR=8  -o src/qs8-igemm/gen/4x8c4-minmax-neondot.c
+tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=1 -D NR=16 -o src/qs8-igemm/gen/1x16c4-minmax-neondot.c
+tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=2 -D NR=16 -o src/qs8-igemm/gen/2x16c4-minmax-neondot.c
+tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=3 -D NR=16 -o src/qs8-igemm/gen/3x16c4-minmax-neondot.c
+tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=4 -D NR=16 -o src/qs8-igemm/gen/4x16c4-minmax-neondot.c
 
 ################################### x86 SSE ###################################
 ### C2 micro-kernels

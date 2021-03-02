@@ -116,21 +116,19 @@
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x8c4__neondot
   k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_2x8c4__neondot
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_3x8c4__neondot
+  k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_4x8c4__neondot
-  k-block: 8
-- name: xnn_qs8_igemm_minmax_ukernel_6x8c4__neondot
-  k-block: 8
-- name: xnn_qs8_igemm_minmax_ukernel_8x8c4__neondot
-  k-block: 8
-- name: xnn_qs8_igemm_minmax_ukernel_12x8c4__neondot
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x16c4__neondot
   k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_2x16c4__neondot
+  k-block: 8
+- name: xnn_qs8_igemm_minmax_ukernel_3x16c4__neondot
+  k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_4x16c4__neondot
-  k-block: 8
-- name: xnn_qs8_igemm_minmax_ukernel_6x16c4__neondot
-  k-block: 8
-- name: xnn_qs8_igemm_minmax_ukernel_8x16c4__neondot
   k-block: 8
 - name: xnn_qs8_igemm_minmax_ukernel_1x4c2__sse2_ld64
   k-block: 8
