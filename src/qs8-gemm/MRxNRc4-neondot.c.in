@@ -87,11 +87,11 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c4__neondot(
 
       k -= 8 * sizeof(int8_t);
     }
-    // Handle up to 6 final positions of `k`
+    // Handle up to 4 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
       // Load a ${MR}x4 block of activations.
       $for M in range(MR):
-        const int8x8_t va${M}x01234567 = vld1_s8(a${M}); a${M} += k;
+        const int8x8_t va${M}x01234567 = vld1_s8(a${M}); a${M} += 4;
 
       // Load a 4x${NR} block of weights.
       $for N in range(0, NR, 4):
@@ -101,17 +101,6 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c4__neondot(
       $for M in range(MR):
         $for N in range(0, NR, 4):
             vacc${M}x${ABC[N:N+4]} = vdotq_lane_s32(vacc${M}x${ABC[N:N+4]}, vb0123x${ABC[N:N+4]}, va${M}x01234567, 0);
-
-      if (k > 4) {
-        // Load a 4x${NR} block of weights.
-        $for N in range(0, NR, 4):
-          const int8x16_t vb4567x${ABC[N:N+4]} = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
-
-        // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
-        $for M in range(MR):
-          $for N in range(0, NR, 4):
-              vacc${M}x${ABC[N:N+4]} = vdotq_lane_s32(vacc${M}x${ABC[N:N+4]}, vb4567x${ABC[N:N+4]}, va${M}x01234567, 1);
-      }
     }
 
     // Post-accumulation work

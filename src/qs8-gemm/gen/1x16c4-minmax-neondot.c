@@ -77,10 +77,10 @@ void xnn_qs8_gemm_minmax_ukernel_1x16c4__neondot(
 
       k -= 8 * sizeof(int8_t);
     }
-    // Handle up to 6 final positions of `k`
+    // Handle up to 4 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
       // Load a 1x4 block of activations.
-      const int8x8_t va0x01234567 = vld1_s8(a0); a0 += k;
+      const int8x8_t va0x01234567 = vld1_s8(a0); a0 += 4;
 
       // Load a 4x16 block of weights.
       const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
@@ -93,20 +93,6 @@ void xnn_qs8_gemm_minmax_ukernel_1x16c4__neondot(
       vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb0123x4567, va0x01234567, 0);
       vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb0123x89AB, va0x01234567, 0);
       vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb0123xCDEF, va0x01234567, 0);
-
-      if (k > 4) {
-        // Load a 4x16 block of weights.
-        const int8x16_t vb4567x0123 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
-        const int8x16_t vb4567x4567 = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
-        const int8x16_t vb4567x89AB = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
-        const int8x16_t vb4567xCDEF = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
-
-        // Multiply-accumulate: 1x4 * 4x16 --> 1x16.
-        vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb4567x0123, va0x01234567, 1);
-        vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb4567x4567, va0x01234567, 1);
-        vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb4567x89AB, va0x01234567, 1);
-        vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb4567xCDEF, va0x01234567, 1);
-      }
     }
 
     // Post-accumulation work
