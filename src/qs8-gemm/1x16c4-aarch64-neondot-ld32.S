@@ -83,7 +83,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld32
         SUBS    x1, x1, 16
         SMAX    v4.16b, v4.16b, v0.16b
         SMIN    v4.16b, v4.16b, v1.16b
-        B.LO    4f
+        B.LO    2f
 
         # Store full 1 x 16
         ST1     {v4.16b}, [x6], x12
@@ -93,22 +93,22 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld32
 
         # Store odd width
         .p2align 3
-4:
-        TBZ     x1, 3, 5f
+2:
+        TBZ     x1, 3, 3f
         STR     d4, [x6], 8
         DUP     d4, v4.d[1]
-5:
-        TBZ     x1, 2, 6f
+3:
+        TBZ     x1, 2, 4f
         STR     s4, [x6], 4
         DUP     s4, v4.s[1]
-6:
-        TBZ     x1, 1, 7f
+4:
+        TBZ     x1, 1, 5f
         ST1     {v4.h}[0], [x6], 2
         DUP     h4, v4.h[1]
-7:
-        TBZ     x1, 0, 8f
+5:
+        TBZ     x1, 0, 6f
         ST1     {v4.b}[0], [x6]
-8:
+6:
         RET
 
 END_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld32
