@@ -10,11 +10,11 @@ $assert 8 <= NR <= 16
 
 #include <arm_neon.h>
 
-#include <xnnpack/gemm.h>
+#include <xnnpack/igemm.h>
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
+void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c8__neon_${"mlal" if MLA else "mull"}_padal(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -72,31 +72,33 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
         }
       a += ${MR};
 
-      ptrdiff_t k = (ptrdiff_t) kc;
-      // 2x partial unrolled loop to load 16 bytes at a time.
-      while (k > 8) {
+      size_t k = kc;
+      $if MLA:
+        // 2x partial unrolled loop to load 16 bytes at a time using MLA.
+        while (k >= 16 * sizeof(int8_t)) {
+          $for M in range(MR):
+            const int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} += 8;
+            const int8x8_t va${M}x1 = vld1_s8(a${M}); a${M} += 8;
+
+          $for N in range(NR):
+            const int8x8_t vb${N}x0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(  int8_t));
+
+          $for N in range(NR):
+            const int8x8_t vb${N}x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(  int8_t));
+            $for M in range(MR):
+              int16x8_t vprod${M}x${N} = vmull_s8(vb${N}x0, va${M}x0);
+            $for M in range(MR):
+              vprod${M}x${N} = vmlal_s8(vprod${M}x${N}, vb${N}x1, va${M}x1);
+            $for M in range(MR):
+              vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
+
+          k -= 16 * sizeof(int8_t);
+        }
+
+      // Handle 8 bytes at a time using MUL.
+      ${"if" if MLA else "while"} (k > 0) {
         $for M in range(MR):
-          const int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} += 8;
-          const int8x8_t va${M}x1 = vld1_s8(a${M}); a${M} += 8;
-
-        $for N in range(NR):
-          const int8x8_t vb${N}x0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-
-        $for N in range(NR):
-          const int8x8_t vb${N}x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
-          $for M in range(MR):
-            int16x8_t vprod${M}x${N} = vmull_s8(vb${N}x0, va${M}x0);
-          $for M in range(MR):
-            vprod${M}x${N} = vmlal_s8(vprod${M}x${N}, vb${N}x1, va${M}x1);
-          $for M in range(MR):
-            vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
-
-        k -= 16 * sizeof(int8_t);
-      }
-      // Handle up to 8 final positions of `k`
-      if XNN_UNLIKELY(k > 0) {
-        $for M in range(MR):
-          const int8x8_t va${M} = vld1_s8(a${M});
+          const int8x8_t va${M} = vld1_s8(a${M}); a${M} += 8;
 
         $for N in range(NR):
           const int8x8_t vb${N} = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
@@ -104,7 +106,10 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c8__neon_mull_padal(
             const int16x8_t vprod${M}x${N} = vmull_s8(vb${N}, va${M});
           $for M in range(MR):
             vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
+
+        k -= 8 * sizeof(int8_t);
       }
+
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
