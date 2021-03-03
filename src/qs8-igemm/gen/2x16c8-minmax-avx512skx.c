@@ -13,7 +13,6 @@
 
 #include <xnnpack/igemm.h>
 #include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx(
@@ -34,12 +33,11 @@ void xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx(
   assert(mr <= 2);
   assert(nc != 0);
   assert(kc != 0);
-  assert(kc % sizeof(int8_t) == 0);
+  assert(kc % (8 * sizeof(int8_t)) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
   int8_t* c0 = c;
   int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr != 2) {

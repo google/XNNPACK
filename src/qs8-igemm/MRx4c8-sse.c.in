@@ -18,7 +18,6 @@ $else:
   #include <${SSE_HEADER}>
 
 #include <xnnpack/igemm.h>
-#include <xnnpack/math.h>
 
 
 $ISA = {2: "sse2", 3: "ssse3", 4: "sse41", 5: "xop"}[SSE]
@@ -40,6 +39,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c8__${ISA}_${"ld128" if LD128 else "ld6
   assert(mr <= ${MR});
   assert(nc != 0);
   assert(kc != 0);
+  assert(kc % (8 * sizeof(int8_t)) == 0);
   assert(ks != 0);
   assert(ks % (${MR} * sizeof(void*)) == 0);
   assert(a_offset % sizeof(int8_t) == 0);
@@ -47,7 +47,6 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c8__${ISA}_${"ld128" if LD128 else "ld6
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
   int8_t* c0 = c;
   $for M in range(1, MR):
     int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);

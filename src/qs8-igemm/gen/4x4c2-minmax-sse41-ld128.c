@@ -12,7 +12,6 @@
 #include <smmintrin.h>
 
 #include <xnnpack/igemm.h>
-#include <xnnpack/math.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128(
@@ -33,6 +32,7 @@ void xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128(
   assert(mr <= 4);
   assert(nc != 0);
   assert(kc != 0);
+  assert(kc % (2 * sizeof(int8_t)) == 0);
   assert(ks != 0);
   assert(ks % (4 * sizeof(void*)) == 0);
   assert(a_offset % sizeof(int8_t) == 0);
@@ -40,7 +40,6 @@ void xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 2);
   int8_t* c0 = c;
   int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {

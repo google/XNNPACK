@@ -32,6 +32,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}__neon_mlal_lane(
   assert(mr <= ${MR});
   assert(nc != 0);
   assert(kc != 0);
+  assert(kc % (1 * sizeof(int8_t)) == 0);
   assert(ks != 0);
   assert(ks % (${MR} * sizeof(void*)) == 0);
   assert(a_offset % sizeof(int8_t) == 0);

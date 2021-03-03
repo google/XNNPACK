@@ -31,7 +31,7 @@ void xnn_qs8_gemm_minmax_ukernel_1x16__neon_mlal_lane(
   assert(mr <= 1);
   assert(nc != 0);
   assert(kc != 0);
-  assert(kc % sizeof(int8_t) == 0);
+  assert(kc % (1 * sizeof(int8_t)) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);

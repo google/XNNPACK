@@ -279,7 +279,7 @@ class GemmMicrokernelTester {
         xnn_init_scalar_qu8_requantization_params(requantization_scale, c_zero_point, qmin(), qmax());
 
       gemm(
-        m(), n(), k(),
+        m(), n(), round_up_po2(k(), kr()),
         a.data(), a_stride() * sizeof(uint8_t),
         packed_w.data(),
         c.data(), cm_stride() * sizeof(uint8_t), cn_stride() * sizeof(uint8_t),
@@ -406,7 +406,7 @@ class GemmMicrokernelTester {
       const uint8_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
 
       igemm(
-        m(), n(), k(), ks() * mr() * sizeof(void*),
+        m(), n(), round_up_po2(k(), kr()), ks() * mr() * sizeof(void*),
         im2col.data(), packed_w.data(),
         c.data(), cm_stride() * sizeof(uint8_t), cn_stride() * sizeof(uint8_t),
         a_offset() * sizeof(uint8_t), zero_pointer,
@@ -499,7 +499,7 @@ class GemmMicrokernelTester {
         xnn_init_scalar_qs8_requantization_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       gemm(
-        m(), n(), k(),
+        m(), n(), round_up_po2(k(), kr()),
         a.data(), a_stride() * sizeof(int8_t),
         packed_w.data(),
         c.data(), cm_stride() * sizeof(int8_t), cn_stride() * sizeof(int8_t),
@@ -592,7 +592,7 @@ class GemmMicrokernelTester {
         xnn_init_scalar_qs8_requantization_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       gemm(
-        m(), n(), k(),
+        m(), n(), round_up_po2(k(), kr()),
         a.data(), a_stride() * sizeof(int8_t),
         packed_w.data(),
         c.data(), cm_stride() * sizeof(int8_t), cn_stride() * sizeof(int8_t),
@@ -718,7 +718,7 @@ class GemmMicrokernelTester {
       const int8_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
 
       igemm(
-        m(), n(), k(), ks() * mr() * sizeof(void*),
+        m(), n(), round_up_po2(k(), kr()), ks() * mr() * sizeof(void*),
         im2col.data(), packed_w.data(),
         c.data(), cm_stride() * sizeof(int8_t), cn_stride() * sizeof(int8_t),
         a_offset() * sizeof(uint8_t), zero_pointer,

@@ -11,7 +11,6 @@
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
-#include <xnnpack/math.h>
 
 
 static inline __m128i sse_reduce4_i32(__m128i x, __m128i y, __m128i z, __m128i w) {
@@ -48,12 +47,12 @@ void xnn_qu8_gemm_minmax_ukernel_2x4c8__sse2(
   assert(mr <= 2);
   assert(nc != 0);
   assert(kc != 0);
-  assert(kc % sizeof(int8_t) == 0);
+  assert(kc % (sizeof(int8_t * sizeof(int8_t)) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  assert(kc % (8 * sizeof(int8_t)) == 0);
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
   const uint8_t* a1 = (const uint8_t*) ((uintptr_t) a0 + a_stride);

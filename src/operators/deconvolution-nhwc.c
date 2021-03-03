@@ -519,12 +519,13 @@ static enum xnn_status setup_conv_path(
   const size_t group_input_channels = deconvolution_op->group_input_channels;
   const size_t group_output_channels = deconvolution_op->group_output_channels;
   const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
+  const uint32_t kr = deconvolution_op->ukernel.igemm.kr;
   const size_t w_stride = bias_element_size +
-    (round_up_po2(group_input_channels, deconvolution_op->ukernel.igemm.kr) * kernel_size << log2_filter_element_size);
+    (round_up_po2(group_input_channels, kr) * kernel_size << log2_filter_element_size);
   deconvolution_op->context.igemm = (struct igemm_context) {
       .ks = kernel_size,
       .ks_scaled = kernel_size * mr * sizeof(void*),
-      .kc = group_input_channels << log2_input_element_size,
+      .kc = round_up_po2(group_input_channels, kr) << log2_input_element_size,
       .w_stride = w_stride,
       .indirect_a = deconvolution_op->indirection_buffer,
       .a_offset = (size_t) ((uintptr_t) input - (uintptr_t) deconvolution_op->last_input),
@@ -684,7 +685,7 @@ static enum xnn_status setup_subconv2d_path(
   if (use_gemm) {
     deconvolution_op->context.subgemm = (struct subgemm_context) {
         .subconvolution_params = deconvolution_op->subconvolution_buffer,
-        .kc = group_input_channels << log2_input_element_size,
+        .kc = round_up_po2(group_input_channels, kr) << log2_input_element_size,
         .a = input,
         .ax_stride = input_pixel_stride,
         .ay_stride = input_width * input_pixel_stride,
@@ -703,7 +704,7 @@ static enum xnn_status setup_subconv2d_path(
   } else {
     deconvolution_op->context.subconv = (struct subconv_context) {
         .subconvolution_params = deconvolution_op->subconvolution_buffer,
-        .kc = group_input_channels << log2_input_element_size,
+        .kc = round_up_po2(group_input_channels, kr) << log2_input_element_size,
         .a_offset = (size_t) ((uintptr_t) input - (uintptr_t) deconvolution_op->last_input),
         .zero = deconvolution_op->zero_buffer,
         .cx_stride = stride_width * output_pixel_stride,
