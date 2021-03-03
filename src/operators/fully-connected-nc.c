@@ -203,7 +203,7 @@ static enum xnn_status setup_fully_connected_nc(
   }
 
   fully_connected_op->context.gemm = (struct gemm_context) {
-    .k_scaled = input_channels << log2_input_element_size,
+    .k_scaled = (round_up_po2(input_channels, fully_connected_op->ukernel.gemm.kr) << log2_input_element_size),
     .w_stride = (round_up_po2(input_channels, fully_connected_op->ukernel.gemm.kr) << log2_input_element_size) + bias_element_size,
     .a = input,
     .a_stride = fully_connected_op->input_pixel_stride << log2_input_element_size,

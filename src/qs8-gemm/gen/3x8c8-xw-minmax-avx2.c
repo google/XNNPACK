@@ -13,7 +13,6 @@
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
 
 
 void xnn_qs8_gemm_xw_minmax_ukernel_3x8c8__avx2(
@@ -32,12 +31,11 @@ void xnn_qs8_gemm_xw_minmax_ukernel_3x8c8__avx2(
   assert(mr <= 3);
   assert(nc != 0);
   assert(kc != 0);
-  assert(kc % sizeof(int8_t) == 0);
+  assert(kc % (8 * sizeof(int8_t)) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
   const int8_t* a0 = a;
   int8_t* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);

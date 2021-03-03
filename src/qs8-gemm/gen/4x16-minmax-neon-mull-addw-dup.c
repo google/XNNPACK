@@ -31,7 +31,7 @@ void xnn_qs8_gemm_minmax_ukernel_4x16__neon_mull_addw_dup(
   assert(mr <= 4);
   assert(nc != 0);
   assert(kc != 0);
-  assert(kc % sizeof(int8_t) == 0);
+  assert(kc % (1 * sizeof(int8_t)) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);

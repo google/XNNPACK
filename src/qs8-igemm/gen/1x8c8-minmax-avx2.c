@@ -13,7 +13,6 @@
 
 #include <xnnpack/igemm.h>
 #include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/math.h>
 
 
 void xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2(
@@ -34,6 +33,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2(
   assert(mr <= 1);
   assert(nc != 0);
   assert(kc != 0);
+  assert(kc % (8 * sizeof(int8_t)) == 0);
   assert(ks != 0);
   assert(ks % (1 * sizeof(void*)) == 0);
   assert(a_offset % sizeof(int8_t) == 0);
@@ -41,7 +41,6 @@ void xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
   int8_t* c0 = c;
 
   do {
