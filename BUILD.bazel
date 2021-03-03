@@ -7453,7 +7453,7 @@ config_setting(
 config_setting(
     name = "emscripten_wasmsimd_tfjs_legacy",
     values = {
-        "crosstool_top": "//emscripten_toolchain:everything",
+        "crosstool_top": "//toolchain:emscripten",
         "cpu": "wasm",
         "copt": "-msimd128",
     },
