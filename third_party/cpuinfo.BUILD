@@ -1,4 +1,6 @@
 # cpuinfo, a library to detect information about the host CPU
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
@@ -333,6 +335,19 @@ config_setting(
 )
 
 config_setting(
-    name = "emscripten",
+    name = "emscripten_official",
     values = {"crosstool_top": "//emscripten_toolchain:everything"},
+)
+
+config_setting(
+    name = "emscripten_tfjs_legacy",
+    values = {"crosstool_top": "//toolchain:emscripten"},
+)
+
+selects.config_setting_group(
+    name = "emscripten",
+    match_any = [
+        ":emscripten_official",
+        ":emscripten_tfjs_legacy",
+    ],
 )

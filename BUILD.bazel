@@ -7,6 +7,7 @@
 #   XNNPACK - optimized floating-point neural network operators library
 
 load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_gcc_std_copts", "xnnpack_min_size_copts", "xnnpack_msvc_std_copts", "xnnpack_optional_armcl_copts", "xnnpack_optional_armcl_deps", "xnnpack_optional_dnnl_copts", "xnnpack_optional_dnnl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_cxxopts", "xnnpack_unit_test", "xnnpack_visibility")
+load("@bazel_skylib//lib:selects.bzl", "selects")
 
 licenses(["notice"])
 
@@ -7412,12 +7413,25 @@ config_setting(
 )
 
 config_setting(
-    name = "emscripten",
+    name = "emscripten_official",
     values = {"crosstool_top": "//emscripten_toolchain:everything"},
 )
 
 config_setting(
-    name = "emscripten_wasm",
+    name = "emscripten_tfjs_legacy",
+    values = {"crosstool_top": "//toolchain:emscripten"},
+)
+
+selects.config_setting_group(
+    name = "emscripten",
+    match_any = [
+        ":emscripten_official",
+        ":emscripten_tfjs_legacy",
+    ],
+)
+
+config_setting(
+    name = "emscripten_wasm_official",
     values = {
         "crosstool_top": "//emscripten_toolchain:everything",
         "cpu": "wasm",
@@ -7425,12 +7439,45 @@ config_setting(
 )
 
 config_setting(
-    name = "emscripten_wasmsimd",
+    name = "emscripten_wasm_tfjs_legacy",
+    values = {
+        "crosstool_top": "//toolchain:emscripten",
+        "cpu": "wasm",
+    },
+)
+
+selects.config_setting_group(
+    name = "emscripten_wasm",
+    match_any = [
+        ":emscripten_wasm_official",
+        ":emscripten_wasm_tfjs_legacy",
+    ],
+)
+
+config_setting(
+    name = "emscripten_wasmsimd_official",
     values = {
         "crosstool_top": "//emscripten_toolchain:everything",
         "cpu": "wasm",
         "copt": "-msimd128",
     },
+)
+
+config_setting(
+    name = "emscripten_wasmsimd_tfjs_legacy",
+    values = {
+        "crosstool_top": "//emscripten_toolchain:everything",
+        "cpu": "wasm",
+        "copt": "-msimd128",
+    },
+)
+
+selects.config_setting_group(
+    name = "emscripten_wasmsimd",
+    match_any = [
+        ":emscripten_wasmsimd_official",
+        ":emscripten_wasmsimd_tfjs_legacy",
+    ],
 )
 
 config_setting(
