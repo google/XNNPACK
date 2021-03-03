@@ -50,4 +50,3 @@ build:macos --apple_platform_type=macos
 
 build:macos_arm64 --config=macos
 build:macos_arm64 --cpu=darwin_arm64
-#build:macos_arm64 --noenable_platform_specific_config
