@@ -1,6 +1,4 @@
 # cpuinfo, a library to detect information about the host CPU
-load("@bazel_skylib//lib:selects.bzl", "selects")
-
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
@@ -122,6 +120,7 @@ cc_library(
         ":tvos_x86_64": COMMON_SRCS + X86_SRCS + MACH_SRCS + MACH_X86_SRCS,
         ":tvos_arm64": COMMON_SRCS + MACH_SRCS + MACH_ARM_SRCS,
         ":emscripten": COMMON_SRCS + EMSCRIPTEN_SRCS,
+        ":emscripten_tfjs_legacy": COMMON_SRCS + EMSCRIPTEN_SRCS,
     }),
     copts = select({
         ":windows_x86_64": [],
@@ -335,19 +334,11 @@ config_setting(
 )
 
 config_setting(
-    name = "emscripten_official",
+    name = "emscripten",
     values = {"crosstool_top": "//emscripten_toolchain:everything"},
 )
 
 config_setting(
     name = "emscripten_tfjs_legacy",
     values = {"crosstool_top": "//toolchain:emscripten"},
-)
-
-selects.config_setting_group(
-    name = "emscripten",
-    match_any = [
-        ":emscripten_official",
-        ":emscripten_tfjs_legacy",
-    ],
 )

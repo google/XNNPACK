@@ -166,7 +166,9 @@ def xnnpack_cc_library(
             ":tvos_arm64": aarch64_srcs,
             ":tvos_x86_64": x86_srcs,
             ":emscripten_wasm": wasm_srcs,
+            ":emscripten_wasm_tfjs_legacy": wasm_srcs,
             ":emscripten_wasmsimd": wasmsimd_srcs,
+            ":emscripten_wasmsimd_tfjs_legacy": wasmsimd_srcs,
             "//conditions:default": [],
         }),
         copts = [
@@ -200,7 +202,9 @@ def xnnpack_cc_library(
             ":tvos_arm64": aarch64_copts,
             ":tvos_x86_64": gcc_x86_copts,
             ":emscripten_wasm": wasm_copts,
+            ":emscripten_wasm_tfjs_legacy": wasm_copts,
             ":emscripten_wasmsimd": wasmsimd_copts,
+            ":emscripten_wasmsimd_tfjs_legacy": wasmsimd_copts,
             "//conditions:default": [],
         }) + select({
             ":windows_x86_64_clang": ["/clang:" + opt for opt in gcc_copts],
@@ -281,7 +285,9 @@ def xnnpack_aggregate_library(
             ":tvos_arm64": aarch64_deps,
             ":tvos_x86_64": x86_deps,
             ":emscripten_wasm": wasm_deps,
+            ":emscripten_wasm_tfjs_legacy": wasm_deps,
             ":emscripten_wasmsimd": wasmsimd_deps,
+            ":emscripten_wasmsimd_tfjs_legacy": wasmsimd_deps,
         }),
     )
 
@@ -324,6 +330,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             }) + copts,
             linkopts = select({
                 ":emscripten": xnnpack_emscripten_test_linkopts(),
+                ":emscripten_tfjs_legacy": xnnpack_emscripten_test_linkopts(),
                 "//conditions:default": [],
             }),
             linkstatic = True,
@@ -331,6 +338,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
                 "@com_google_googletest//:gtest_main",
             ] + deps + select({
                 ":emscripten": xnnpack_emscripten_deps(),
+                ":emscripten_tfjs_legacy": xnnpack_emscripten_deps(),
                 "//conditions:default": [],
             }),
             tags = tags,
@@ -356,6 +364,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             }) + copts,
             linkopts = select({
                 ":emscripten": xnnpack_emscripten_test_linkopts(),
+                ":emscripten_tfjs_legacy": xnnpack_emscripten_test_linkopts(),
                 "//conditions:default": [],
             }),
             linkstatic = True,
@@ -363,6 +372,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
                 "@com_google_googletest//:gtest_main",
             ] + deps + select({
                 ":emscripten": xnnpack_emscripten_deps(),
+                ":emscripten_tfjs_legacy": xnnpack_emscripten_deps(),
                 "//conditions:default": [],
             }),
             testonly = True,
@@ -389,6 +399,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = []):
         ] + copts,
         linkopts = select({
             ":emscripten": xnnpack_emscripten_minimal_linkopts(),
+            ":emscripten_tfjs_legacy": xnnpack_emscripten_minimal_linkopts(),
             "//conditions:default": [],
         }),
         linkstatic = True,
@@ -423,6 +434,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
         }) + copts,
         linkopts = select({
             ":emscripten": xnnpack_emscripten_benchmark_linkopts(),
+            ":emscripten_tfjs_legacy": xnnpack_emscripten_benchmark_linkopts(),
             ":windows_x86_64_mingw": ["-lshlwapi"],
             ":windows_x86_64_msys": ["-lshlwapi"],
             "//conditions:default": [],
@@ -432,6 +444,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
             "@com_google_benchmark//:benchmark",
         ] + deps + select({
             ":emscripten": xnnpack_emscripten_deps(),
+            ":emscripten_tfjs_legacy": xnnpack_emscripten_deps(),
             "//conditions:default": [],
         }),
 	tags = tags,
