@@ -83,3 +83,9 @@ http_archive(
        "https://github.com/google/ruy/archive/9f53ba413e6fc879236dcaa3e008915973d67a4f.zip",
    ],
 )
+
+# Android NDK location and version is auto-detected from $ANDROID_NDK_HOME environment variable
+android_ndk_repository(name = "androidndk")
+
+# Android SDK location and API is auto-detected from $ANDROID_HOME environment variable
+android_sdk_repository(name = "androidsdk")
