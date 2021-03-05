@@ -44,3 +44,9 @@ build:ios_arm64e --watchos_cpus=armv7k
 build:ios_fat --config=ios
 build:ios_fat --ios_multi_cpus=armv7,arm64
 build:ios_fat --watchos_cpus=armv7k
+
+# macOS configs.
+build:macos --apple_platform_type=macos
+
+build:macos_arm64 --config=macos
+build:macos_arm64 --cpu=darwin_arm64
