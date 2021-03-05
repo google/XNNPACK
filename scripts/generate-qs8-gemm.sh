@@ -92,7 +92,6 @@ tools/xngen src/qs8-gemm/MRxNRc4-neondot.c.in -D MR=1  -D NR=8  -o src/qs8-gemm/
 tools/xngen src/qs8-gemm/MRxNRc4-neondot.c.in -D MR=4  -D NR=8  -o src/qs8-gemm/gen/4x8c4-minmax-neondot.c
 tools/xngen src/qs8-gemm/MRxNRc4-neondot.c.in -D MR=6  -D NR=8  -o src/qs8-gemm/gen/6x8c4-minmax-neondot.c
 tools/xngen src/qs8-gemm/MRxNRc4-neondot.c.in -D MR=8  -D NR=8  -o src/qs8-gemm/gen/8x8c4-minmax-neondot.c
-tools/xngen src/qs8-gemm/MRxNRc4-neondot.c.in -D MR=12 -D NR=8  -o src/qs8-gemm/gen/12x8c4-minmax-neondot.c
 tools/xngen src/qs8-gemm/MRxNRc4-neondot.c.in -D MR=1  -D NR=16 -o src/qs8-gemm/gen/1x16c4-minmax-neondot.c
 tools/xngen src/qs8-gemm/MRxNRc4-neondot.c.in -D MR=4  -D NR=16 -o src/qs8-gemm/gen/4x16c4-minmax-neondot.c
 tools/xngen src/qs8-gemm/MRxNRc4-neondot.c.in -D MR=6  -D NR=16 -o src/qs8-gemm/gen/6x16c4-minmax-neondot.c

@@ -1520,7 +1520,6 @@ SET(XNNPACK_NEONDOT_MICROKERNEL_SRCS
   src/qs8-gemm/gen/6x16c4-minmax-neondot.c
   src/qs8-gemm/gen/8x8c4-minmax-neondot.c
   src/qs8-gemm/gen/8x16c4-minmax-neondot.c
-  src/qs8-gemm/gen/12x8c4-minmax-neondot.c
   src/qs8-igemm/gen/1x8c4-minmax-neondot.c
   src/qs8-igemm/gen/1x16c4-minmax-neondot.c
   src/qs8-igemm/gen/4x8c4-minmax-neondot.c
@@ -1528,8 +1527,7 @@ SET(XNNPACK_NEONDOT_MICROKERNEL_SRCS
   src/qs8-igemm/gen/6x8c4-minmax-neondot.c
   src/qs8-igemm/gen/6x16c4-minmax-neondot.c
   src/qs8-igemm/gen/8x8c4-minmax-neondot.c
-  src/qs8-igemm/gen/8x16c4-minmax-neondot.c
-  src/qs8-igemm/gen/12x8c4-minmax-neondot.c)
+  src/qs8-igemm/gen/8x16c4-minmax-neondot.c)
 
 SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-minmax-sse-c4.c

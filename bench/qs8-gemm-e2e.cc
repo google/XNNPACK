@@ -544,16 +544,6 @@ static void GEMMEnd2EndBenchmark(
       benchmark::utils::CheckNEONDOT);
   }
 
-  static void qs8_gemm_minmax_ukernel_12x8c4__neondot(benchmark::State& state, models::ExecutionPlanFactory model) {
-    GEMMEnd2EndBenchmark(state, model,
-      xnn_qs8_gemm_minmax_ukernel_12x8c4__neondot,
-      xnn_qs8_igemm_minmax_ukernel_12x8c4__neondot,
-      xnn_qs8_gemm_minmax_ukernel_1x8c4__neondot,
-      xnn_qs8_igemm_minmax_ukernel_1x8c4__neondot,
-      12 /* mr */, 8  /* nr */, 2 /* log2_kr */, 0 /* log2_sr */,
-      benchmark::utils::CheckNEONDOT);
-  }
-
 #if XNN_ENABLE_FULL_BENCHMARKS
   static void qs8_gemm_minmax_ukernel_1x8c8__neon_mull_padal(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
@@ -810,7 +800,6 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_6x16c4__neondot);
   BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_8x8c4__neondot);
   BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_8x16c4__neondot);
-  BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_12x8c4__neondot);
 
 #if XNN_ENABLE_FULL_BENCHMARKS
   BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_1x8c8__neon_mlal_padal);
