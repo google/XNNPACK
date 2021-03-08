@@ -2792,7 +2792,8 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S
   src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S
   src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S
-  src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S)
+  src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S
+  src/qs8-igemm/4x16c4-aarch64-neondot-cortex-a55.S)
 
 SET(XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SCALAR_MICROKERNEL_SRCS})
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
