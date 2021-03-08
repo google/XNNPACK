@@ -28,12 +28,12 @@
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld32
 0:
         # Load initial bias from w into accumulators
-        LDP     q28, q29, [x5], 32
-        MOV     x0, x2              // k = kc.  assumes kc > 0
-        LDP     q30, q31, [x5], 32
         ADD     x2, x2, 3           // kc = (kc + 3) & ~3
-        LDR     x11, [sp, 8]        // params
+        LDP     q28, q29, [x5], 32
         BIC     x2, x2, 3
+        LDP     q30, q31, [x5], 32
+        MOV     x0, x2              // k = kc.  assumes kc > 0
+        LDR     x11, [sp, 8]        // params
 
         # Main loop - 4 bytes of A
         .p2align 3
@@ -41,12 +41,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld32
         LDR     s0,  [x3], 4
         LDR     q16, [x5], 16
         LDR     q17, [x5], 16
-        SDOT    v28.4s, v16.16b, v0.4b[0]
         LDR     q18, [x5], 16
-        SDOT    v29.4s, v17.16b, v0.4b[0]
         LDR     q19, [x5], 16
-        SDOT    v30.4s, v18.16b, v0.4b[0]
+        SDOT    v28.4s, v16.16b, v0.4b[0]
+        SDOT    v29.4s, v17.16b, v0.4b[0]
         SUBS    x0, x0, 4
+        SDOT    v30.4s, v18.16b, v0.4b[0]
         SDOT    v31.4s, v19.16b, v0.4b[0]
         B.HI    1b
 

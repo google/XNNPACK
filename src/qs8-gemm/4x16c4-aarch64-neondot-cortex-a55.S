@@ -35,27 +35,26 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
         # Clamp A and C pointers
         CMP      x0, 2             // if mr < 2
+        STP      d8,  d9, [sp, -32]!
         ADD     x15, x3, x4        // a1 = a0 + a_stride
         ADD      x8, x6, x7        // c1 = c0 + cm_stride
-        STP      d8,  d9, [sp, -32]!
+        STP     d10, d11, [sp, 16]
         CSEL    x15, x3, x15, LO   //   a1 = a0
         CSEL     x8, x6,  x8, LO   //   c1 = c0
+        ADD      x2, x2, 3         // kc = (kc + 3) & ~3
 
         ADD     x13, x15, x4       // a2 = a1 + a_stride
         ADD      x9,  x8, x7       // c2 = c1 + cm_stride
                                    // if mr <= 2
         CSEL    x13, x15, x13, LS  //   a2 = a1
         CSEL     x9,  x8,  x9, LS  //   c2 = c1
+        BIC      x2, x2, 3
 
         CMP      x0, 4             // if mr < 4
         ADD      x4, x13, x4       // a3 = a2 + a_stride
         ADD      x7,  x9, x7       // c3 = c2 + cm_stride
-        STP     d10, d11, [sp, 16]
         CSEL     x4, x13, x4, LO   //   a3 = a2
         CSEL     x7,  x9, x7, LO   //   c3 = c2
-
-        ADD     x2, x2, 3          // kc = (kc + 3) & ~3
-        BIC     x2, x2, 3
 
         .p2align 3
 0:
@@ -66,9 +65,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
+        LDR     x11, [sp, 40]      // params
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
-        LDR     x11, [sp, 40]      // params
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
         MOV     v27.16b, v24.16b

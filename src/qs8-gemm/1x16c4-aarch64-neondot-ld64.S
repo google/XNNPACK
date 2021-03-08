@@ -8,7 +8,7 @@
 # void xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
-#     size_t kc,                 x2 / x0 / x8
+#     size_t kc,                 x2 / x0
 #     const int8_t* restrict a,  x3
 #     size_t a_stride,           (x4)
 #     const void* restrict w,    x5
@@ -26,16 +26,18 @@
 # unused v8 v9 v10 v11 v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64
+        ADD      x2, x2, 3          // kc = (kc + 3) & ~3
+        BIC      x2, x2, 3
+
+        .p2align 3
 0:
         # Load initial bias from w into accumulators
         LDP     q28, q29, [x5], 32
-        SUBS    x0, x2, 5           // k = kc - 5
+        SUBS     x0, x2, 8          // k = kc - 8
         LDP     q30, q31, [x5], 32
-        ADD     x8, x2, 3           // rewind = (kc + 3) & ~7
         LDR     x11, [sp, 8]        // params
-        BIC     x8, x8, 7
 
-        # Is there at least 5 bytes?
+        # Is there at least 8 bytes?
         B.LO    3f
 
         # Main loop - 8 bytes of A
@@ -43,7 +45,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64
 1:
         LDR     d0,  [x3], 8
         LDR     q16, [x5, 0]
-        SUBS    x0, x0, 8
         LDR     q17, [x5, 16]
         SDOT    v28.4s, v16.16b, v0.4b[0]
         LDR     q18, [x5, 32]
@@ -60,6 +61,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64
         SDOT    v30.4s, v6.16b,  v0.4b[1]
         ADD     x5, x5, 128
         SDOT    v31.4s, v7.16b,  v0.4b[1]
+        SUBS    x0, x0, 8
         B.HS    1b
 
         # Is there a remainder?- 1 to 4 bytes of A
@@ -103,15 +105,15 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld64
 
         # Store full 1 x 16
         ST1     {v4.16b}, [x6], x12
-        SUB      x3,  x3, x8         // a0 -= rewind
+        SUB     x3,  x3, x2          // a0 -= kc
         B.NE    0b
 
         RET
 
-        # Remainder- 1 to 4 bytes of A
+        # Remainder - 4 bytes of A
         .p2align 3
 3:
-        LDR     s0,  [x3]
+        LDR     s0,  [x3], 4
         LDR     q16, [x5, 0]
         LDR     q17, [x5, 16]
         SDOT    v28.4s, v16.16b, v0.4b[0]

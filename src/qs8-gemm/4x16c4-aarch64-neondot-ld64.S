@@ -8,7 +8,7 @@
 # void xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
-#     size_t kc,                 x2 / x0 / x10
+#     size_t kc,                 x2 / x0
 #     const int8_t* restrict a,  x3
 #     size_t a_stride,           x4
 #     const void* restrict w,    x5
@@ -35,10 +35,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
 
         # Clamp A and C pointers
         CMP      x0, 2             // if mr < 2
+        ADD      x2, x2, 3         // kc = (kc + 3) & ~3
         ADD     x15, x3, x4        // a1 = a0 + a_stride
         ADD      x8, x6, x7        // c1 = c0 + cm_stride
         CSEL    x15, x3, x15, LO   //   a1 = a0
         CSEL     x8, x6,  x8, LO   //   c1 = c0
+        BIC      x2, x2, 3
 
         ADD     x13, x15, x4       // a2 = a1 + a_stride
         ADD      x9,  x8, x7       // c2 = c1 + cm_stride
@@ -56,47 +58,45 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
 0:
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
-        SUBS    x0, x2, 5          // k = kc - 5
         MOV     v17.16b, v16.16b
         MOV     v18.16b, v16.16b
         LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
+        LDR     x11, [sp, 8]       // params
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
-        LDR     x11, [sp, 8]       // params
+        SUBS    x0, x2, 8          // k = kc - 8
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
-        ADD     x10, x2, 3         // rewind = (kc + 3) & ~7
         MOV     v27.16b, v24.16b
         MOV     v29.16b, v28.16b
-        BIC     x10, x10, 7
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
-        # Is there at least 5 bytes?
+        # Is there at least 8 bytes?
         B.LO    3f
 
         # Main loop - 8 bytes of A
         .p2align 3
 1:
         LDR     d0,  [x3], 8
-        LDR     q4, [x5], 16
+        LDR     q4,  [x5], 16
         LDR     d1, [x15], 8
         LDR     d2, [x13], 8
         LDR     d3,  [x4], 8
+        LDR     q5,  [x5], 16
         SDOT    v16.4s, v4.16b,  v0.4b[0]
-        LDR     q5, [x5], 16
         SDOT    v17.4s, v4.16b,  v1.4b[0]
+        LDP     q6, q7, [x5], 32
         SDOT    v18.4s, v4.16b,  v2.4b[0]
         SDOT    v19.4s, v4.16b,  v3.4b[0]
         SDOT    v20.4s, v5.16b,  v0.4b[0]
-        LDP     q6, q7, [x5], 32
         SDOT    v21.4s, v5.16b,  v1.4b[0]
         SDOT    v22.4s, v5.16b,  v2.4b[0]
         SDOT    v23.4s, v5.16b,  v3.4b[0]
         SDOT    v24.4s, v6.16b, v0.4b[0]
-        LDP      q4,  q5, [x5], 32
         SDOT    v25.4s, v6.16b, v1.4b[0]
+        LDP     q4, q5, [x5], 32
         SDOT    v26.4s, v6.16b, v2.4b[0]
         SDOT    v27.4s, v6.16b, v3.4b[0]
         SDOT    v28.4s, v7.16b, v0.4b[0]
@@ -104,8 +104,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v30.4s, v7.16b, v2.4b[0]
         SDOT    v31.4s, v7.16b, v3.4b[0]
         SDOT    v16.4s, v4.16b,  v0.4b[1]
-        LDP      q6,  q7, [x5], 32
         SDOT    v17.4s, v4.16b,  v1.4b[1]
+        LDP     q6, q7, [x5], 32
         SDOT    v18.4s, v4.16b,  v2.4b[1]
         SDOT    v19.4s, v4.16b,  v3.4b[1]
         SDOT    v20.4s, v5.16b,  v0.4b[1]
@@ -123,7 +123,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v31.4s, v7.16b,  v3.4b[1]
         B.HS    1b
 
-        # Is there a remainder?- 1 to 4 bytes of A
+        # Is there a remainder?- 4 bytes of A
         TBNZ    x0, 2, 3f
 
 2:
@@ -261,24 +261,24 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
 
         # Store full 4 x 16
         ST1     {v4.16b}, [x6], x12
-        SUB      x3,  x3, x10        // a0 -= rewind
+        SUB      x3,  x3, x2         // a0 -= kc
         ST1     {v5.16b}, [x8], x12
-        SUB     x15, x15, x10        // a1 -= rewind
+        SUB     x15, x15, x2         // a1 -= kc
         ST1     {v6.16b}, [x9], x12
-        SUB     x13, x13, x10        // a2 -= rewind
+        SUB     x13, x13, x2         // a2 -= kc
         ST1     {v7.16b}, [x7], x12
-        SUB      x4,  x4, x10        // a3 -= rewind
+        SUB      x4,  x4, x2         // a3 -= kc
         B.NE    0b
         RET
 
-        # Remainder- 1 to 4 bytes of A
+        # Remainder- 4 bytes of A
         .p2align 3
 3:
-        LDR     s0,  [x3]
+        LDR     s0,  [x3], 4
         LDR     q4, [x5], 16
-        LDR     s1, [x15]
-        LDR     s2, [x13]
-        LDR     s3,  [x4]
+        LDR     s1, [x15], 4
+        LDR     s2, [x13], 4
+        LDR     s3,  [x4], 4
         SDOT    v16.4s, v4.16b,  v0.4b[0]
         LDR     q5, [x5], 16
         SDOT    v17.4s, v4.16b,  v1.4b[0]

@@ -35,10 +35,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld32
 
         # Clamp A and C pointers
         CMP      x0, 2             // if mr < 2
+        ADD      x2, x2, 3         // kc = (kc + 3) & ~3
         ADD     x15, x3, x4        // a1 = a0 + a_stride
         ADD      x8, x6, x7        // c1 = c0 + cm_stride
         CSEL    x15, x3, x15, LO   //   a1 = a0
         CSEL     x8, x6,  x8, LO   //   c1 = c0
+        BIC      x2, x2, 3
 
         ADD     x13, x15, x4       // a2 = a1 + a_stride
         ADD      x9,  x8, x7       // c2 = c1 + cm_stride
@@ -51,9 +53,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld32
         ADD      x7,  x9, x7       // c3 = c2 + cm_stride
         CSEL     x4, x13, x4, LO   //   a3 = a2
         CSEL     x7,  x9, x7, LO   //   c3 = c2
-
-        ADD     x2, x2, 3          // kc = (kc + 3) & ~3
-        BIC     x2, x2, 3
 
         .p2align 3
 0:
@@ -84,24 +83,24 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_ld32
         LDR     s2, [x13], 4
         LDR     s3,  [x4], 4
         SDOT    v16.4s, v4.16b, v0.4b[0]
-        LDR     q5, [x5], 16
         SDOT    v17.4s, v4.16b, v1.4b[0]
+        LDR     q5, [x5], 16
         SDOT    v18.4s, v4.16b, v2.4b[0]
         SDOT    v19.4s, v4.16b, v3.4b[0]
-        SDOT    v20.4s, v5.16b, v0.4b[0]
         LDR     q6, [x5], 16
+        SDOT    v20.4s, v5.16b, v0.4b[0]
         SDOT    v21.4s, v5.16b, v1.4b[0]
+        LDR     q7, [x5], 16
         SDOT    v22.4s, v5.16b, v2.4b[0]
         SDOT    v23.4s, v5.16b, v3.4b[0]
+        SUBS    x0, x0, 4
         SDOT    v24.4s, v6.16b, v0.4b[0]
-        LDR     q7, [x5], 16
         SDOT    v25.4s, v6.16b, v1.4b[0]
         SDOT    v26.4s, v6.16b, v2.4b[0]
         SDOT    v27.4s, v6.16b, v3.4b[0]
         SDOT    v28.4s, v7.16b, v0.4b[0]
         SDOT    v29.4s, v7.16b, v1.4b[0]
         SDOT    v30.4s, v7.16b, v2.4b[0]
-        SUBS    x0, x0, 4
         SDOT    v31.4s, v7.16b, v3.4b[0]
         B.HI    1b
 
