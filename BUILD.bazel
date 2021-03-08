@@ -5369,6 +5369,18 @@ cc_library(
 )
 
 cc_library(
+    name = "qu8_mobilenet_v1",
+    srcs = ["models/qu8-mobilenet-v1.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    linkstatic = True,
+    deps = [
+        ":XNNPACK",
+        "@pthreadpool",
+    ],
+)
+
+cc_library(
     name = "fp32_mobilenet_v2",
     srcs = ["models/fp32-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
@@ -5502,6 +5514,7 @@ xnnpack_benchmark(
         ":fp32_mobilenet_v3_small",
         ":qs8_mobilenet_v1",
         ":qs8_mobilenet_v2",
+        ":qu8_mobilenet_v1",
         "@pthreadpool",
     ],
 )
