@@ -5,6 +5,7 @@
 
 #include <xnnpack.h>
 
+#include <array>
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -16,494 +17,494 @@
 namespace models {
 
 ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
-  alignas(16) static float v0[150528];
-  alignas(16) static float v1[200704];
-  alignas(16) static float v2[200704];
-  alignas(16) static float v3[200704];
-  alignas(16) static float v4[200704];
-  alignas(16) static float v5[200704];
-  alignas(16) static float v6[802816];
-  alignas(16) static float v7[200704];
-  alignas(16) static float v8[75264];
-  alignas(16) static float v9[225792];
-  alignas(16) static float v10[225792];
-  alignas(16) static float v11[75264];
-  alignas(16) static float v12[75264];
-  alignas(16) static float v13[225792];
-  alignas(16) static float v14[56448];
-  alignas(16) static float v15[72];
-  alignas(16) static float v16[24];
-  alignas(16) static float v17[72];
-  alignas(16) static float v18[56448];
-  alignas(16) static float v19[31360];
-  alignas(16) static float v20[94080];
-  alignas(16) static float v21[94080];
-  alignas(16) static float v22[120];
-  alignas(16) static float v23[32];
-  alignas(16) static float v24[120];
-  alignas(16) static float v25[94080];
-  alignas(16) static float v26[31360];
-  alignas(16) static float v27[31360];
-  alignas(16) static float v28[94080];
-  alignas(16) static float v29[94080];
-  alignas(16) static float v30[120];
-  alignas(16) static float v31[32];
-  alignas(16) static float v32[120];
-  alignas(16) static float v33[94080];
-  alignas(16) static float v34[31360];
-  alignas(16) static float v35[31360];
-  alignas(16) static float v36[188160];
-  alignas(16) static float v37[188160];
-  alignas(16) static float v38[47040];
-  alignas(16) static float v39[47040];
-  alignas(16) static float v40[15680];
-  alignas(16) static float v41[39200];
-  alignas(16) static float v42[39200];
-  alignas(16) static float v43[39200];
-  alignas(16) static float v44[39200];
-  alignas(16) static float v45[15680];
-  alignas(16) static float v46[15680];
-  alignas(16) static float v47[36064];
-  alignas(16) static float v48[36064];
-  alignas(16) static float v49[36064];
-  alignas(16) static float v50[36064];
-  alignas(16) static float v51[15680];
-  alignas(16) static float v52[15680];
-  alignas(16) static float v53[36064];
-  alignas(16) static float v54[36064];
-  alignas(16) static float v55[36064];
-  alignas(16) static float v56[36064];
-  alignas(16) static float v57[15680];
-  alignas(16) static float v58[15680];
-  alignas(16) static float v59[94080];
-  alignas(16) static float v60[94080];
-  alignas(16) static float v61[94080];
-  alignas(16) static float v62[94080];
-  alignas(16) static float v63[480];
-  alignas(16) static float v64[120];
-  alignas(16) static float v65[480];
-  alignas(16) static float v66[94080];
-  alignas(16) static float v67[21952];
-  alignas(16) static float v68[131712];
-  alignas(16) static float v69[131712];
-  alignas(16) static float v70[131712];
-  alignas(16) static float v71[131712];
-  alignas(16) static float v72[672];
-  alignas(16) static float v73[168];
-  alignas(16) static float v74[672];
-  alignas(16) static float v75[131712];
-  alignas(16) static float v76[21952];
-  alignas(16) static float v77[21952];
-  alignas(16) static float v78[131712];
-  alignas(16) static float v79[131712];
-  alignas(16) static float v80[32928];
-  alignas(16) static float v81[32928];
-  alignas(16) static float v82[672];
-  alignas(16) static float v83[168];
-  alignas(16) static float v84[672];
-  alignas(16) static float v85[32928];
-  alignas(16) static float v86[7840];
-  alignas(16) static float v87[47040];
-  alignas(16) static float v88[47040];
-  alignas(16) static float v89[47040];
-  alignas(16) static float v90[47040];
-  alignas(16) static float v91[960];
-  alignas(16) static float v92[240];
-  alignas(16) static float v93[960];
-  alignas(16) static float v94[47040];
-  alignas(16) static float v95[7840];
-  alignas(16) static float v96[7840];
-  alignas(16) static float v97[47040];
-  alignas(16) static float v98[47040];
-  alignas(16) static float v99[47040];
-  alignas(16) static float v100[47040];
-  alignas(16) static float v101[960];
-  alignas(16) static float v102[240];
-  alignas(16) static float v103[960];
-  alignas(16) static float v104[47040];
-  alignas(16) static float v105[7840];
-  alignas(16) static float v106[7840];
-  alignas(16) static float v107[47040];
-  alignas(16) static float v108[47040];
-  alignas(16) static float v109[960];
-  alignas(16) static float v110[1280];
-  alignas(16) static float v111[1280];
-  alignas(16) static float v112[1280];
-  alignas(16) static float v113[1001];
-  alignas(16) static float w114[432];
-  alignas(16) static float w115[16];
-  alignas(16) static float w116[144];
-  alignas(16) static float w117[16];
-  alignas(16) static float w118[256];
-  alignas(16) static float w119[16];
-  alignas(16) static float w120[1024];
-  alignas(16) static float w121[64];
-  alignas(16) static float w122[576];
-  alignas(16) static float w123[64];
-  alignas(16) static float w124[1536];
-  alignas(16) static float w125[24];
-  alignas(16) static float w126[1728];
-  alignas(16) static float w127[72];
-  alignas(16) static float w128[648];
-  alignas(16) static float w129[72];
-  alignas(16) static float w130[1728];
-  alignas(16) static float w131[24];
-  alignas(16) static float w132[1728];
-  alignas(16) static float w133[72];
-  alignas(16) static float w134[1800];
-  alignas(16) static float w135[72];
-  alignas(16) static float w136[1728];
-  alignas(16) static float w137[24];
-  alignas(16) static float w138[1728];
-  alignas(16) static float w139[72];
-  alignas(16) static float w140[2880];
-  alignas(16) static float w141[40];
-  alignas(16) static float w142[4800];
-  alignas(16) static float w143[120];
-  alignas(16) static float w144[3000];
-  alignas(16) static float w145[120];
-  alignas(16) static float w146[3840];
-  alignas(16) static float w147[32];
-  alignas(16) static float w148[3840];
-  alignas(16) static float w149[120];
-  alignas(16) static float w150[4800];
-  alignas(16) static float w151[40];
-  alignas(16) static float w152[4800];
-  alignas(16) static float w153[120];
-  alignas(16) static float w154[3000];
-  alignas(16) static float w155[120];
-  alignas(16) static float w156[3840];
-  alignas(16) static float w157[32];
-  alignas(16) static float w158[3840];
-  alignas(16) static float w159[120];
-  alignas(16) static float w160[4800];
-  alignas(16) static float w161[40];
-  alignas(16) static float w162[9600];
-  alignas(16) static float w163[240];
-  alignas(16) static float w164[2160];
-  alignas(16) static float w165[240];
-  alignas(16) static float w166[19200];
-  alignas(16) static float w167[80];
-  alignas(16) static float w168[16000];
-  alignas(16) static float w169[200];
-  alignas(16) static float w170[1800];
-  alignas(16) static float w171[200];
-  alignas(16) static float w172[16000];
-  alignas(16) static float w173[80];
-  alignas(16) static float w174[14720];
-  alignas(16) static float w175[184];
-  alignas(16) static float w176[1656];
-  alignas(16) static float w177[184];
-  alignas(16) static float w178[14720];
-  alignas(16) static float w179[80];
-  alignas(16) static float w180[14720];
-  alignas(16) static float w181[184];
-  alignas(16) static float w182[1656];
-  alignas(16) static float w183[184];
-  alignas(16) static float w184[14720];
-  alignas(16) static float w185[80];
-  alignas(16) static float w186[38400];
-  alignas(16) static float w187[480];
-  alignas(16) static float w188[4320];
-  alignas(16) static float w189[480];
-  alignas(16) static float w190[57600];
-  alignas(16) static float w191[120];
-  alignas(16) static float w192[57600];
-  alignas(16) static float w193[480];
-  alignas(16) static float w194[53760];
-  alignas(16) static float w195[112];
-  alignas(16) static float w196[75264];
-  alignas(16) static float w197[672];
-  alignas(16) static float w198[6048];
-  alignas(16) static float w199[672];
-  alignas(16) static float w200[112896];
-  alignas(16) static float w201[168];
-  alignas(16) static float w202[112896];
-  alignas(16) static float w203[672];
-  alignas(16) static float w204[75264];
-  alignas(16) static float w205[112];
-  alignas(16) static float w206[75264];
-  alignas(16) static float w207[672];
-  alignas(16) static float w208[16800];
-  alignas(16) static float w209[672];
-  alignas(16) static float w210[112896];
-  alignas(16) static float w211[168];
-  alignas(16) static float w212[112896];
-  alignas(16) static float w213[672];
-  alignas(16) static float w214[107520];
-  alignas(16) static float w215[160];
-  alignas(16) static float w216[153600];
-  alignas(16) static float w217[960];
-  alignas(16) static float w218[24000];
-  alignas(16) static float w219[960];
-  alignas(16) static float w220[230400];
-  alignas(16) static float w221[240];
-  alignas(16) static float w222[230400];
-  alignas(16) static float w223[960];
-  alignas(16) static float w224[153600];
-  alignas(16) static float w225[160];
-  alignas(16) static float w226[153600];
-  alignas(16) static float w227[960];
-  alignas(16) static float w228[24000];
-  alignas(16) static float w229[960];
-  alignas(16) static float w230[230400];
-  alignas(16) static float w231[240];
-  alignas(16) static float w232[230400];
-  alignas(16) static float w233[960];
-  alignas(16) static float w234[153600];
-  alignas(16) static float w235[160];
-  alignas(16) static float w236[153600];
-  alignas(16) static float w237[960];
-  alignas(16) static float w238[1228800];
-  alignas(16) static float w239[1280];
-  alignas(16) static float w240[1281280];
-  alignas(16) static float w241[1001];
+  alignas(16) static std::array<float, 150528> v0;
+  alignas(16) static std::array<float, 200704> v1;
+  alignas(16) static std::array<float, 200704> v2;
+  alignas(16) static std::array<float, 200704> v3;
+  alignas(16) static std::array<float, 200704> v4;
+  alignas(16) static std::array<float, 200704> v5;
+  alignas(16) static std::array<float, 802816> v6;
+  alignas(16) static std::array<float, 200704> v7;
+  alignas(16) static std::array<float, 75264> v8;
+  alignas(16) static std::array<float, 225792> v9;
+  alignas(16) static std::array<float, 225792> v10;
+  alignas(16) static std::array<float, 75264> v11;
+  alignas(16) static std::array<float, 75264> v12;
+  alignas(16) static std::array<float, 225792> v13;
+  alignas(16) static std::array<float, 56448> v14;
+  alignas(16) static std::array<float, 72> v15;
+  alignas(16) static std::array<float, 24> v16;
+  alignas(16) static std::array<float, 72> v17;
+  alignas(16) static std::array<float, 56448> v18;
+  alignas(16) static std::array<float, 31360> v19;
+  alignas(16) static std::array<float, 94080> v20;
+  alignas(16) static std::array<float, 94080> v21;
+  alignas(16) static std::array<float, 120> v22;
+  alignas(16) static std::array<float, 32> v23;
+  alignas(16) static std::array<float, 120> v24;
+  alignas(16) static std::array<float, 94080> v25;
+  alignas(16) static std::array<float, 31360> v26;
+  alignas(16) static std::array<float, 31360> v27;
+  alignas(16) static std::array<float, 94080> v28;
+  alignas(16) static std::array<float, 94080> v29;
+  alignas(16) static std::array<float, 120> v30;
+  alignas(16) static std::array<float, 32> v31;
+  alignas(16) static std::array<float, 120> v32;
+  alignas(16) static std::array<float, 94080> v33;
+  alignas(16) static std::array<float, 31360> v34;
+  alignas(16) static std::array<float, 31360> v35;
+  alignas(16) static std::array<float, 188160> v36;
+  alignas(16) static std::array<float, 188160> v37;
+  alignas(16) static std::array<float, 47040> v38;
+  alignas(16) static std::array<float, 47040> v39;
+  alignas(16) static std::array<float, 15680> v40;
+  alignas(16) static std::array<float, 39200> v41;
+  alignas(16) static std::array<float, 39200> v42;
+  alignas(16) static std::array<float, 39200> v43;
+  alignas(16) static std::array<float, 39200> v44;
+  alignas(16) static std::array<float, 15680> v45;
+  alignas(16) static std::array<float, 15680> v46;
+  alignas(16) static std::array<float, 36064> v47;
+  alignas(16) static std::array<float, 36064> v48;
+  alignas(16) static std::array<float, 36064> v49;
+  alignas(16) static std::array<float, 36064> v50;
+  alignas(16) static std::array<float, 15680> v51;
+  alignas(16) static std::array<float, 15680> v52;
+  alignas(16) static std::array<float, 36064> v53;
+  alignas(16) static std::array<float, 36064> v54;
+  alignas(16) static std::array<float, 36064> v55;
+  alignas(16) static std::array<float, 36064> v56;
+  alignas(16) static std::array<float, 15680> v57;
+  alignas(16) static std::array<float, 15680> v58;
+  alignas(16) static std::array<float, 94080> v59;
+  alignas(16) static std::array<float, 94080> v60;
+  alignas(16) static std::array<float, 94080> v61;
+  alignas(16) static std::array<float, 94080> v62;
+  alignas(16) static std::array<float, 480> v63;
+  alignas(16) static std::array<float, 120> v64;
+  alignas(16) static std::array<float, 480> v65;
+  alignas(16) static std::array<float, 94080> v66;
+  alignas(16) static std::array<float, 21952> v67;
+  alignas(16) static std::array<float, 131712> v68;
+  alignas(16) static std::array<float, 131712> v69;
+  alignas(16) static std::array<float, 131712> v70;
+  alignas(16) static std::array<float, 131712> v71;
+  alignas(16) static std::array<float, 672> v72;
+  alignas(16) static std::array<float, 168> v73;
+  alignas(16) static std::array<float, 672> v74;
+  alignas(16) static std::array<float, 131712> v75;
+  alignas(16) static std::array<float, 21952> v76;
+  alignas(16) static std::array<float, 21952> v77;
+  alignas(16) static std::array<float, 131712> v78;
+  alignas(16) static std::array<float, 131712> v79;
+  alignas(16) static std::array<float, 32928> v80;
+  alignas(16) static std::array<float, 32928> v81;
+  alignas(16) static std::array<float, 672> v82;
+  alignas(16) static std::array<float, 168> v83;
+  alignas(16) static std::array<float, 672> v84;
+  alignas(16) static std::array<float, 32928> v85;
+  alignas(16) static std::array<float, 7840> v86;
+  alignas(16) static std::array<float, 47040> v87;
+  alignas(16) static std::array<float, 47040> v88;
+  alignas(16) static std::array<float, 47040> v89;
+  alignas(16) static std::array<float, 47040> v90;
+  alignas(16) static std::array<float, 960> v91;
+  alignas(16) static std::array<float, 240> v92;
+  alignas(16) static std::array<float, 960> v93;
+  alignas(16) static std::array<float, 47040> v94;
+  alignas(16) static std::array<float, 7840> v95;
+  alignas(16) static std::array<float, 7840> v96;
+  alignas(16) static std::array<float, 47040> v97;
+  alignas(16) static std::array<float, 47040> v98;
+  alignas(16) static std::array<float, 47040> v99;
+  alignas(16) static std::array<float, 47040> v100;
+  alignas(16) static std::array<float, 960> v101;
+  alignas(16) static std::array<float, 240> v102;
+  alignas(16) static std::array<float, 960> v103;
+  alignas(16) static std::array<float, 47040> v104;
+  alignas(16) static std::array<float, 7840> v105;
+  alignas(16) static std::array<float, 7840> v106;
+  alignas(16) static std::array<float, 47040> v107;
+  alignas(16) static std::array<float, 47040> v108;
+  alignas(16) static std::array<float, 960> v109;
+  alignas(16) static std::array<float, 1280> v110;
+  alignas(16) static std::array<float, 1280> v111;
+  alignas(16) static std::array<float, 1280> v112;
+  alignas(16) static std::array<float, 1001> v113;
+  alignas(16) static std::array<float, 432> w114;
+  alignas(16) static std::array<float, 16> w115;
+  alignas(16) static std::array<float, 144> w116;
+  alignas(16) static std::array<float, 16> w117;
+  alignas(16) static std::array<float, 256> w118;
+  alignas(16) static std::array<float, 16> w119;
+  alignas(16) static std::array<float, 1024> w120;
+  alignas(16) static std::array<float, 64> w121;
+  alignas(16) static std::array<float, 576> w122;
+  alignas(16) static std::array<float, 64> w123;
+  alignas(16) static std::array<float, 1536> w124;
+  alignas(16) static std::array<float, 24> w125;
+  alignas(16) static std::array<float, 1728> w126;
+  alignas(16) static std::array<float, 72> w127;
+  alignas(16) static std::array<float, 648> w128;
+  alignas(16) static std::array<float, 72> w129;
+  alignas(16) static std::array<float, 1728> w130;
+  alignas(16) static std::array<float, 24> w131;
+  alignas(16) static std::array<float, 1728> w132;
+  alignas(16) static std::array<float, 72> w133;
+  alignas(16) static std::array<float, 1800> w134;
+  alignas(16) static std::array<float, 72> w135;
+  alignas(16) static std::array<float, 1728> w136;
+  alignas(16) static std::array<float, 24> w137;
+  alignas(16) static std::array<float, 1728> w138;
+  alignas(16) static std::array<float, 72> w139;
+  alignas(16) static std::array<float, 2880> w140;
+  alignas(16) static std::array<float, 40> w141;
+  alignas(16) static std::array<float, 4800> w142;
+  alignas(16) static std::array<float, 120> w143;
+  alignas(16) static std::array<float, 3000> w144;
+  alignas(16) static std::array<float, 120> w145;
+  alignas(16) static std::array<float, 3840> w146;
+  alignas(16) static std::array<float, 32> w147;
+  alignas(16) static std::array<float, 3840> w148;
+  alignas(16) static std::array<float, 120> w149;
+  alignas(16) static std::array<float, 4800> w150;
+  alignas(16) static std::array<float, 40> w151;
+  alignas(16) static std::array<float, 4800> w152;
+  alignas(16) static std::array<float, 120> w153;
+  alignas(16) static std::array<float, 3000> w154;
+  alignas(16) static std::array<float, 120> w155;
+  alignas(16) static std::array<float, 3840> w156;
+  alignas(16) static std::array<float, 32> w157;
+  alignas(16) static std::array<float, 3840> w158;
+  alignas(16) static std::array<float, 120> w159;
+  alignas(16) static std::array<float, 4800> w160;
+  alignas(16) static std::array<float, 40> w161;
+  alignas(16) static std::array<float, 9600> w162;
+  alignas(16) static std::array<float, 240> w163;
+  alignas(16) static std::array<float, 2160> w164;
+  alignas(16) static std::array<float, 240> w165;
+  alignas(16) static std::array<float, 19200> w166;
+  alignas(16) static std::array<float, 80> w167;
+  alignas(16) static std::array<float, 16000> w168;
+  alignas(16) static std::array<float, 200> w169;
+  alignas(16) static std::array<float, 1800> w170;
+  alignas(16) static std::array<float, 200> w171;
+  alignas(16) static std::array<float, 16000> w172;
+  alignas(16) static std::array<float, 80> w173;
+  alignas(16) static std::array<float, 14720> w174;
+  alignas(16) static std::array<float, 184> w175;
+  alignas(16) static std::array<float, 1656> w176;
+  alignas(16) static std::array<float, 184> w177;
+  alignas(16) static std::array<float, 14720> w178;
+  alignas(16) static std::array<float, 80> w179;
+  alignas(16) static std::array<float, 14720> w180;
+  alignas(16) static std::array<float, 184> w181;
+  alignas(16) static std::array<float, 1656> w182;
+  alignas(16) static std::array<float, 184> w183;
+  alignas(16) static std::array<float, 14720> w184;
+  alignas(16) static std::array<float, 80> w185;
+  alignas(16) static std::array<float, 38400> w186;
+  alignas(16) static std::array<float, 480> w187;
+  alignas(16) static std::array<float, 4320> w188;
+  alignas(16) static std::array<float, 480> w189;
+  alignas(16) static std::array<float, 57600> w190;
+  alignas(16) static std::array<float, 120> w191;
+  alignas(16) static std::array<float, 57600> w192;
+  alignas(16) static std::array<float, 480> w193;
+  alignas(16) static std::array<float, 53760> w194;
+  alignas(16) static std::array<float, 112> w195;
+  alignas(16) static std::array<float, 75264> w196;
+  alignas(16) static std::array<float, 672> w197;
+  alignas(16) static std::array<float, 6048> w198;
+  alignas(16) static std::array<float, 672> w199;
+  alignas(16) static std::array<float, 112896> w200;
+  alignas(16) static std::array<float, 168> w201;
+  alignas(16) static std::array<float, 112896> w202;
+  alignas(16) static std::array<float, 672> w203;
+  alignas(16) static std::array<float, 75264> w204;
+  alignas(16) static std::array<float, 112> w205;
+  alignas(16) static std::array<float, 75264> w206;
+  alignas(16) static std::array<float, 672> w207;
+  alignas(16) static std::array<float, 16800> w208;
+  alignas(16) static std::array<float, 672> w209;
+  alignas(16) static std::array<float, 112896> w210;
+  alignas(16) static std::array<float, 168> w211;
+  alignas(16) static std::array<float, 112896> w212;
+  alignas(16) static std::array<float, 672> w213;
+  alignas(16) static std::array<float, 107520> w214;
+  alignas(16) static std::array<float, 160> w215;
+  alignas(16) static std::array<float, 153600> w216;
+  alignas(16) static std::array<float, 960> w217;
+  alignas(16) static std::array<float, 24000> w218;
+  alignas(16) static std::array<float, 960> w219;
+  alignas(16) static std::array<float, 230400> w220;
+  alignas(16) static std::array<float, 240> w221;
+  alignas(16) static std::array<float, 230400> w222;
+  alignas(16) static std::array<float, 960> w223;
+  alignas(16) static std::array<float, 153600> w224;
+  alignas(16) static std::array<float, 160> w225;
+  alignas(16) static std::array<float, 153600> w226;
+  alignas(16) static std::array<float, 960> w227;
+  alignas(16) static std::array<float, 24000> w228;
+  alignas(16) static std::array<float, 960> w229;
+  alignas(16) static std::array<float, 230400> w230;
+  alignas(16) static std::array<float, 240> w231;
+  alignas(16) static std::array<float, 230400> w232;
+  alignas(16) static std::array<float, 960> w233;
+  alignas(16) static std::array<float, 153600> w234;
+  alignas(16) static std::array<float, 160> w235;
+  alignas(16) static std::array<float, 153600> w236;
+  alignas(16) static std::array<float, 960> w237;
+  alignas(16) static std::array<float, 1228800> w238;
+  alignas(16) static std::array<float, 1280> w239;
+  alignas(16) static std::array<float, 1281280> w240;
+  alignas(16) static std::array<float, 1001> w241;
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f), std::ref(rng));
-  std::generate(v0, v0 + 150528, std::ref(f32rng));
-  std::generate(v1, v1 + 200704, std::ref(f32rng));
-  std::generate(v2, v2 + 200704, std::ref(f32rng));
-  std::generate(v3, v3 + 200704, std::ref(f32rng));
-  std::generate(v4, v4 + 200704, std::ref(f32rng));
-  std::generate(v5, v5 + 200704, std::ref(f32rng));
-  std::generate(v6, v6 + 802816, std::ref(f32rng));
-  std::generate(v7, v7 + 200704, std::ref(f32rng));
-  std::generate(v8, v8 + 75264, std::ref(f32rng));
-  std::generate(v9, v9 + 225792, std::ref(f32rng));
-  std::generate(v10, v10 + 225792, std::ref(f32rng));
-  std::generate(v11, v11 + 75264, std::ref(f32rng));
-  std::generate(v12, v12 + 75264, std::ref(f32rng));
-  std::generate(v13, v13 + 225792, std::ref(f32rng));
-  std::generate(v14, v14 + 56448, std::ref(f32rng));
-  std::generate(v15, v15 + 72, std::ref(f32rng));
-  std::generate(v16, v16 + 24, std::ref(f32rng));
-  std::generate(v17, v17 + 72, std::ref(f32rng));
-  std::generate(v18, v18 + 56448, std::ref(f32rng));
-  std::generate(v19, v19 + 31360, std::ref(f32rng));
-  std::generate(v20, v20 + 94080, std::ref(f32rng));
-  std::generate(v21, v21 + 94080, std::ref(f32rng));
-  std::generate(v22, v22 + 120, std::ref(f32rng));
-  std::generate(v23, v23 + 32, std::ref(f32rng));
-  std::generate(v24, v24 + 120, std::ref(f32rng));
-  std::generate(v25, v25 + 94080, std::ref(f32rng));
-  std::generate(v26, v26 + 31360, std::ref(f32rng));
-  std::generate(v27, v27 + 31360, std::ref(f32rng));
-  std::generate(v28, v28 + 94080, std::ref(f32rng));
-  std::generate(v29, v29 + 94080, std::ref(f32rng));
-  std::generate(v30, v30 + 120, std::ref(f32rng));
-  std::generate(v31, v31 + 32, std::ref(f32rng));
-  std::generate(v32, v32 + 120, std::ref(f32rng));
-  std::generate(v33, v33 + 94080, std::ref(f32rng));
-  std::generate(v34, v34 + 31360, std::ref(f32rng));
-  std::generate(v35, v35 + 31360, std::ref(f32rng));
-  std::generate(v36, v36 + 188160, std::ref(f32rng));
-  std::generate(v37, v37 + 188160, std::ref(f32rng));
-  std::generate(v38, v38 + 47040, std::ref(f32rng));
-  std::generate(v39, v39 + 47040, std::ref(f32rng));
-  std::generate(v40, v40 + 15680, std::ref(f32rng));
-  std::generate(v41, v41 + 39200, std::ref(f32rng));
-  std::generate(v42, v42 + 39200, std::ref(f32rng));
-  std::generate(v43, v43 + 39200, std::ref(f32rng));
-  std::generate(v44, v44 + 39200, std::ref(f32rng));
-  std::generate(v45, v45 + 15680, std::ref(f32rng));
-  std::generate(v46, v46 + 15680, std::ref(f32rng));
-  std::generate(v47, v47 + 36064, std::ref(f32rng));
-  std::generate(v48, v48 + 36064, std::ref(f32rng));
-  std::generate(v49, v49 + 36064, std::ref(f32rng));
-  std::generate(v50, v50 + 36064, std::ref(f32rng));
-  std::generate(v51, v51 + 15680, std::ref(f32rng));
-  std::generate(v52, v52 + 15680, std::ref(f32rng));
-  std::generate(v53, v53 + 36064, std::ref(f32rng));
-  std::generate(v54, v54 + 36064, std::ref(f32rng));
-  std::generate(v55, v55 + 36064, std::ref(f32rng));
-  std::generate(v56, v56 + 36064, std::ref(f32rng));
-  std::generate(v57, v57 + 15680, std::ref(f32rng));
-  std::generate(v58, v58 + 15680, std::ref(f32rng));
-  std::generate(v59, v59 + 94080, std::ref(f32rng));
-  std::generate(v60, v60 + 94080, std::ref(f32rng));
-  std::generate(v61, v61 + 94080, std::ref(f32rng));
-  std::generate(v62, v62 + 94080, std::ref(f32rng));
-  std::generate(v63, v63 + 480, std::ref(f32rng));
-  std::generate(v64, v64 + 120, std::ref(f32rng));
-  std::generate(v65, v65 + 480, std::ref(f32rng));
-  std::generate(v66, v66 + 94080, std::ref(f32rng));
-  std::generate(v67, v67 + 21952, std::ref(f32rng));
-  std::generate(v68, v68 + 131712, std::ref(f32rng));
-  std::generate(v69, v69 + 131712, std::ref(f32rng));
-  std::generate(v70, v70 + 131712, std::ref(f32rng));
-  std::generate(v71, v71 + 131712, std::ref(f32rng));
-  std::generate(v72, v72 + 672, std::ref(f32rng));
-  std::generate(v73, v73 + 168, std::ref(f32rng));
-  std::generate(v74, v74 + 672, std::ref(f32rng));
-  std::generate(v75, v75 + 131712, std::ref(f32rng));
-  std::generate(v76, v76 + 21952, std::ref(f32rng));
-  std::generate(v77, v77 + 21952, std::ref(f32rng));
-  std::generate(v78, v78 + 131712, std::ref(f32rng));
-  std::generate(v79, v79 + 131712, std::ref(f32rng));
-  std::generate(v80, v80 + 32928, std::ref(f32rng));
-  std::generate(v81, v81 + 32928, std::ref(f32rng));
-  std::generate(v82, v82 + 672, std::ref(f32rng));
-  std::generate(v83, v83 + 168, std::ref(f32rng));
-  std::generate(v84, v84 + 672, std::ref(f32rng));
-  std::generate(v85, v85 + 32928, std::ref(f32rng));
-  std::generate(v86, v86 + 7840, std::ref(f32rng));
-  std::generate(v87, v87 + 47040, std::ref(f32rng));
-  std::generate(v88, v88 + 47040, std::ref(f32rng));
-  std::generate(v89, v89 + 47040, std::ref(f32rng));
-  std::generate(v90, v90 + 47040, std::ref(f32rng));
-  std::generate(v91, v91 + 960, std::ref(f32rng));
-  std::generate(v92, v92 + 240, std::ref(f32rng));
-  std::generate(v93, v93 + 960, std::ref(f32rng));
-  std::generate(v94, v94 + 47040, std::ref(f32rng));
-  std::generate(v95, v95 + 7840, std::ref(f32rng));
-  std::generate(v96, v96 + 7840, std::ref(f32rng));
-  std::generate(v97, v97 + 47040, std::ref(f32rng));
-  std::generate(v98, v98 + 47040, std::ref(f32rng));
-  std::generate(v99, v99 + 47040, std::ref(f32rng));
-  std::generate(v100, v100 + 47040, std::ref(f32rng));
-  std::generate(v101, v101 + 960, std::ref(f32rng));
-  std::generate(v102, v102 + 240, std::ref(f32rng));
-  std::generate(v103, v103 + 960, std::ref(f32rng));
-  std::generate(v104, v104 + 47040, std::ref(f32rng));
-  std::generate(v105, v105 + 7840, std::ref(f32rng));
-  std::generate(v106, v106 + 7840, std::ref(f32rng));
-  std::generate(v107, v107 + 47040, std::ref(f32rng));
-  std::generate(v108, v108 + 47040, std::ref(f32rng));
-  std::generate(v109, v109 + 960, std::ref(f32rng));
-  std::generate(v110, v110 + 1280, std::ref(f32rng));
-  std::generate(v111, v111 + 1280, std::ref(f32rng));
-  std::generate(v112, v112 + 1280, std::ref(f32rng));
-  std::generate(v113, v113 + 1001, std::ref(f32rng));
-  std::generate(w114, w114 + 432, std::ref(f32rng));
-  std::generate(w115, w115 + 16, std::ref(f32rng));
-  std::generate(w116, w116 + 144, std::ref(f32rng));
-  std::generate(w117, w117 + 16, std::ref(f32rng));
-  std::generate(w118, w118 + 256, std::ref(f32rng));
-  std::generate(w119, w119 + 16, std::ref(f32rng));
-  std::generate(w120, w120 + 1024, std::ref(f32rng));
-  std::generate(w121, w121 + 64, std::ref(f32rng));
-  std::generate(w122, w122 + 576, std::ref(f32rng));
-  std::generate(w123, w123 + 64, std::ref(f32rng));
-  std::generate(w124, w124 + 1536, std::ref(f32rng));
-  std::generate(w125, w125 + 24, std::ref(f32rng));
-  std::generate(w126, w126 + 1728, std::ref(f32rng));
-  std::generate(w127, w127 + 72, std::ref(f32rng));
-  std::generate(w128, w128 + 648, std::ref(f32rng));
-  std::generate(w129, w129 + 72, std::ref(f32rng));
-  std::generate(w130, w130 + 1728, std::ref(f32rng));
-  std::generate(w131, w131 + 24, std::ref(f32rng));
-  std::generate(w132, w132 + 1728, std::ref(f32rng));
-  std::generate(w133, w133 + 72, std::ref(f32rng));
-  std::generate(w134, w134 + 1800, std::ref(f32rng));
-  std::generate(w135, w135 + 72, std::ref(f32rng));
-  std::generate(w136, w136 + 1728, std::ref(f32rng));
-  std::generate(w137, w137 + 24, std::ref(f32rng));
-  std::generate(w138, w138 + 1728, std::ref(f32rng));
-  std::generate(w139, w139 + 72, std::ref(f32rng));
-  std::generate(w140, w140 + 2880, std::ref(f32rng));
-  std::generate(w141, w141 + 40, std::ref(f32rng));
-  std::generate(w142, w142 + 4800, std::ref(f32rng));
-  std::generate(w143, w143 + 120, std::ref(f32rng));
-  std::generate(w144, w144 + 3000, std::ref(f32rng));
-  std::generate(w145, w145 + 120, std::ref(f32rng));
-  std::generate(w146, w146 + 3840, std::ref(f32rng));
-  std::generate(w147, w147 + 32, std::ref(f32rng));
-  std::generate(w148, w148 + 3840, std::ref(f32rng));
-  std::generate(w149, w149 + 120, std::ref(f32rng));
-  std::generate(w150, w150 + 4800, std::ref(f32rng));
-  std::generate(w151, w151 + 40, std::ref(f32rng));
-  std::generate(w152, w152 + 4800, std::ref(f32rng));
-  std::generate(w153, w153 + 120, std::ref(f32rng));
-  std::generate(w154, w154 + 3000, std::ref(f32rng));
-  std::generate(w155, w155 + 120, std::ref(f32rng));
-  std::generate(w156, w156 + 3840, std::ref(f32rng));
-  std::generate(w157, w157 + 32, std::ref(f32rng));
-  std::generate(w158, w158 + 3840, std::ref(f32rng));
-  std::generate(w159, w159 + 120, std::ref(f32rng));
-  std::generate(w160, w160 + 4800, std::ref(f32rng));
-  std::generate(w161, w161 + 40, std::ref(f32rng));
-  std::generate(w162, w162 + 9600, std::ref(f32rng));
-  std::generate(w163, w163 + 240, std::ref(f32rng));
-  std::generate(w164, w164 + 2160, std::ref(f32rng));
-  std::generate(w165, w165 + 240, std::ref(f32rng));
-  std::generate(w166, w166 + 19200, std::ref(f32rng));
-  std::generate(w167, w167 + 80, std::ref(f32rng));
-  std::generate(w168, w168 + 16000, std::ref(f32rng));
-  std::generate(w169, w169 + 200, std::ref(f32rng));
-  std::generate(w170, w170 + 1800, std::ref(f32rng));
-  std::generate(w171, w171 + 200, std::ref(f32rng));
-  std::generate(w172, w172 + 16000, std::ref(f32rng));
-  std::generate(w173, w173 + 80, std::ref(f32rng));
-  std::generate(w174, w174 + 14720, std::ref(f32rng));
-  std::generate(w175, w175 + 184, std::ref(f32rng));
-  std::generate(w176, w176 + 1656, std::ref(f32rng));
-  std::generate(w177, w177 + 184, std::ref(f32rng));
-  std::generate(w178, w178 + 14720, std::ref(f32rng));
-  std::generate(w179, w179 + 80, std::ref(f32rng));
-  std::generate(w180, w180 + 14720, std::ref(f32rng));
-  std::generate(w181, w181 + 184, std::ref(f32rng));
-  std::generate(w182, w182 + 1656, std::ref(f32rng));
-  std::generate(w183, w183 + 184, std::ref(f32rng));
-  std::generate(w184, w184 + 14720, std::ref(f32rng));
-  std::generate(w185, w185 + 80, std::ref(f32rng));
-  std::generate(w186, w186 + 38400, std::ref(f32rng));
-  std::generate(w187, w187 + 480, std::ref(f32rng));
-  std::generate(w188, w188 + 4320, std::ref(f32rng));
-  std::generate(w189, w189 + 480, std::ref(f32rng));
-  std::generate(w190, w190 + 57600, std::ref(f32rng));
-  std::generate(w191, w191 + 120, std::ref(f32rng));
-  std::generate(w192, w192 + 57600, std::ref(f32rng));
-  std::generate(w193, w193 + 480, std::ref(f32rng));
-  std::generate(w194, w194 + 53760, std::ref(f32rng));
-  std::generate(w195, w195 + 112, std::ref(f32rng));
-  std::generate(w196, w196 + 75264, std::ref(f32rng));
-  std::generate(w197, w197 + 672, std::ref(f32rng));
-  std::generate(w198, w198 + 6048, std::ref(f32rng));
-  std::generate(w199, w199 + 672, std::ref(f32rng));
-  std::generate(w200, w200 + 112896, std::ref(f32rng));
-  std::generate(w201, w201 + 168, std::ref(f32rng));
-  std::generate(w202, w202 + 112896, std::ref(f32rng));
-  std::generate(w203, w203 + 672, std::ref(f32rng));
-  std::generate(w204, w204 + 75264, std::ref(f32rng));
-  std::generate(w205, w205 + 112, std::ref(f32rng));
-  std::generate(w206, w206 + 75264, std::ref(f32rng));
-  std::generate(w207, w207 + 672, std::ref(f32rng));
-  std::generate(w208, w208 + 16800, std::ref(f32rng));
-  std::generate(w209, w209 + 672, std::ref(f32rng));
-  std::generate(w210, w210 + 112896, std::ref(f32rng));
-  std::generate(w211, w211 + 168, std::ref(f32rng));
-  std::generate(w212, w212 + 112896, std::ref(f32rng));
-  std::generate(w213, w213 + 672, std::ref(f32rng));
-  std::generate(w214, w214 + 107520, std::ref(f32rng));
-  std::generate(w215, w215 + 160, std::ref(f32rng));
-  std::generate(w216, w216 + 153600, std::ref(f32rng));
-  std::generate(w217, w217 + 960, std::ref(f32rng));
-  std::generate(w218, w218 + 24000, std::ref(f32rng));
-  std::generate(w219, w219 + 960, std::ref(f32rng));
-  std::generate(w220, w220 + 230400, std::ref(f32rng));
-  std::generate(w221, w221 + 240, std::ref(f32rng));
-  std::generate(w222, w222 + 230400, std::ref(f32rng));
-  std::generate(w223, w223 + 960, std::ref(f32rng));
-  std::generate(w224, w224 + 153600, std::ref(f32rng));
-  std::generate(w225, w225 + 160, std::ref(f32rng));
-  std::generate(w226, w226 + 153600, std::ref(f32rng));
-  std::generate(w227, w227 + 960, std::ref(f32rng));
-  std::generate(w228, w228 + 24000, std::ref(f32rng));
-  std::generate(w229, w229 + 960, std::ref(f32rng));
-  std::generate(w230, w230 + 230400, std::ref(f32rng));
-  std::generate(w231, w231 + 240, std::ref(f32rng));
-  std::generate(w232, w232 + 230400, std::ref(f32rng));
-  std::generate(w233, w233 + 960, std::ref(f32rng));
-  std::generate(w234, w234 + 153600, std::ref(f32rng));
-  std::generate(w235, w235 + 160, std::ref(f32rng));
-  std::generate(w236, w236 + 153600, std::ref(f32rng));
-  std::generate(w237, w237 + 960, std::ref(f32rng));
-  std::generate(w238, w238 + 1228800, std::ref(f32rng));
-  std::generate(w239, w239 + 1280, std::ref(f32rng));
-  std::generate(w240, w240 + 1281280, std::ref(f32rng));
-  std::generate(w241, w241 + 1001, std::ref(f32rng));
+  std::generate(v0.begin(), v0.end(), std::ref(f32rng));
+  std::generate(v1.begin(), v1.end(), std::ref(f32rng));
+  std::generate(v2.begin(), v2.end(), std::ref(f32rng));
+  std::generate(v3.begin(), v3.end(), std::ref(f32rng));
+  std::generate(v4.begin(), v4.end(), std::ref(f32rng));
+  std::generate(v5.begin(), v5.end(), std::ref(f32rng));
+  std::generate(v6.begin(), v6.end(), std::ref(f32rng));
+  std::generate(v7.begin(), v7.end(), std::ref(f32rng));
+  std::generate(v8.begin(), v8.end(), std::ref(f32rng));
+  std::generate(v9.begin(), v9.end(), std::ref(f32rng));
+  std::generate(v10.begin(), v10.end(), std::ref(f32rng));
+  std::generate(v11.begin(), v11.end(), std::ref(f32rng));
+  std::generate(v12.begin(), v12.end(), std::ref(f32rng));
+  std::generate(v13.begin(), v13.end(), std::ref(f32rng));
+  std::generate(v14.begin(), v14.end(), std::ref(f32rng));
+  std::generate(v15.begin(), v15.end(), std::ref(f32rng));
+  std::generate(v16.begin(), v16.end(), std::ref(f32rng));
+  std::generate(v17.begin(), v17.end(), std::ref(f32rng));
+  std::generate(v18.begin(), v18.end(), std::ref(f32rng));
+  std::generate(v19.begin(), v19.end(), std::ref(f32rng));
+  std::generate(v20.begin(), v20.end(), std::ref(f32rng));
+  std::generate(v21.begin(), v21.end(), std::ref(f32rng));
+  std::generate(v22.begin(), v22.end(), std::ref(f32rng));
+  std::generate(v23.begin(), v23.end(), std::ref(f32rng));
+  std::generate(v24.begin(), v24.end(), std::ref(f32rng));
+  std::generate(v25.begin(), v25.end(), std::ref(f32rng));
+  std::generate(v26.begin(), v26.end(), std::ref(f32rng));
+  std::generate(v27.begin(), v27.end(), std::ref(f32rng));
+  std::generate(v28.begin(), v28.end(), std::ref(f32rng));
+  std::generate(v29.begin(), v29.end(), std::ref(f32rng));
+  std::generate(v30.begin(), v30.end(), std::ref(f32rng));
+  std::generate(v31.begin(), v31.end(), std::ref(f32rng));
+  std::generate(v32.begin(), v32.end(), std::ref(f32rng));
+  std::generate(v33.begin(), v33.end(), std::ref(f32rng));
+  std::generate(v34.begin(), v34.end(), std::ref(f32rng));
+  std::generate(v35.begin(), v35.end(), std::ref(f32rng));
+  std::generate(v36.begin(), v36.end(), std::ref(f32rng));
+  std::generate(v37.begin(), v37.end(), std::ref(f32rng));
+  std::generate(v38.begin(), v38.end(), std::ref(f32rng));
+  std::generate(v39.begin(), v39.end(), std::ref(f32rng));
+  std::generate(v40.begin(), v40.end(), std::ref(f32rng));
+  std::generate(v41.begin(), v41.end(), std::ref(f32rng));
+  std::generate(v42.begin(), v42.end(), std::ref(f32rng));
+  std::generate(v43.begin(), v43.end(), std::ref(f32rng));
+  std::generate(v44.begin(), v44.end(), std::ref(f32rng));
+  std::generate(v45.begin(), v45.end(), std::ref(f32rng));
+  std::generate(v46.begin(), v46.end(), std::ref(f32rng));
+  std::generate(v47.begin(), v47.end(), std::ref(f32rng));
+  std::generate(v48.begin(), v48.end(), std::ref(f32rng));
+  std::generate(v49.begin(), v49.end(), std::ref(f32rng));
+  std::generate(v50.begin(), v50.end(), std::ref(f32rng));
+  std::generate(v51.begin(), v51.end(), std::ref(f32rng));
+  std::generate(v52.begin(), v52.end(), std::ref(f32rng));
+  std::generate(v53.begin(), v53.end(), std::ref(f32rng));
+  std::generate(v54.begin(), v54.end(), std::ref(f32rng));
+  std::generate(v55.begin(), v55.end(), std::ref(f32rng));
+  std::generate(v56.begin(), v56.end(), std::ref(f32rng));
+  std::generate(v57.begin(), v57.end(), std::ref(f32rng));
+  std::generate(v58.begin(), v58.end(), std::ref(f32rng));
+  std::generate(v59.begin(), v59.end(), std::ref(f32rng));
+  std::generate(v60.begin(), v60.end(), std::ref(f32rng));
+  std::generate(v61.begin(), v61.end(), std::ref(f32rng));
+  std::generate(v62.begin(), v62.end(), std::ref(f32rng));
+  std::generate(v63.begin(), v63.end(), std::ref(f32rng));
+  std::generate(v64.begin(), v64.end(), std::ref(f32rng));
+  std::generate(v65.begin(), v65.end(), std::ref(f32rng));
+  std::generate(v66.begin(), v66.end(), std::ref(f32rng));
+  std::generate(v67.begin(), v67.end(), std::ref(f32rng));
+  std::generate(v68.begin(), v68.end(), std::ref(f32rng));
+  std::generate(v69.begin(), v69.end(), std::ref(f32rng));
+  std::generate(v70.begin(), v70.end(), std::ref(f32rng));
+  std::generate(v71.begin(), v71.end(), std::ref(f32rng));
+  std::generate(v72.begin(), v72.end(), std::ref(f32rng));
+  std::generate(v73.begin(), v73.end(), std::ref(f32rng));
+  std::generate(v74.begin(), v74.end(), std::ref(f32rng));
+  std::generate(v75.begin(), v75.end(), std::ref(f32rng));
+  std::generate(v76.begin(), v76.end(), std::ref(f32rng));
+  std::generate(v77.begin(), v77.end(), std::ref(f32rng));
+  std::generate(v78.begin(), v78.end(), std::ref(f32rng));
+  std::generate(v79.begin(), v79.end(), std::ref(f32rng));
+  std::generate(v80.begin(), v80.end(), std::ref(f32rng));
+  std::generate(v81.begin(), v81.end(), std::ref(f32rng));
+  std::generate(v82.begin(), v82.end(), std::ref(f32rng));
+  std::generate(v83.begin(), v83.end(), std::ref(f32rng));
+  std::generate(v84.begin(), v84.end(), std::ref(f32rng));
+  std::generate(v85.begin(), v85.end(), std::ref(f32rng));
+  std::generate(v86.begin(), v86.end(), std::ref(f32rng));
+  std::generate(v87.begin(), v87.end(), std::ref(f32rng));
+  std::generate(v88.begin(), v88.end(), std::ref(f32rng));
+  std::generate(v89.begin(), v89.end(), std::ref(f32rng));
+  std::generate(v90.begin(), v90.end(), std::ref(f32rng));
+  std::generate(v91.begin(), v91.end(), std::ref(f32rng));
+  std::generate(v92.begin(), v92.end(), std::ref(f32rng));
+  std::generate(v93.begin(), v93.end(), std::ref(f32rng));
+  std::generate(v94.begin(), v94.end(), std::ref(f32rng));
+  std::generate(v95.begin(), v95.end(), std::ref(f32rng));
+  std::generate(v96.begin(), v96.end(), std::ref(f32rng));
+  std::generate(v97.begin(), v97.end(), std::ref(f32rng));
+  std::generate(v98.begin(), v98.end(), std::ref(f32rng));
+  std::generate(v99.begin(), v99.end(), std::ref(f32rng));
+  std::generate(v100.begin(), v100.end(), std::ref(f32rng));
+  std::generate(v101.begin(), v101.end(), std::ref(f32rng));
+  std::generate(v102.begin(), v102.end(), std::ref(f32rng));
+  std::generate(v103.begin(), v103.end(), std::ref(f32rng));
+  std::generate(v104.begin(), v104.end(), std::ref(f32rng));
+  std::generate(v105.begin(), v105.end(), std::ref(f32rng));
+  std::generate(v106.begin(), v106.end(), std::ref(f32rng));
+  std::generate(v107.begin(), v107.end(), std::ref(f32rng));
+  std::generate(v108.begin(), v108.end(), std::ref(f32rng));
+  std::generate(v109.begin(), v109.end(), std::ref(f32rng));
+  std::generate(v110.begin(), v110.end(), std::ref(f32rng));
+  std::generate(v111.begin(), v111.end(), std::ref(f32rng));
+  std::generate(v112.begin(), v112.end(), std::ref(f32rng));
+  std::generate(v113.begin(), v113.end(), std::ref(f32rng));
+  std::generate(w114.begin(), w114.end(), std::ref(f32rng));
+  std::generate(w115.begin(), w115.end(), std::ref(f32rng));
+  std::generate(w116.begin(), w116.end(), std::ref(f32rng));
+  std::generate(w117.begin(), w117.end(), std::ref(f32rng));
+  std::generate(w118.begin(), w118.end(), std::ref(f32rng));
+  std::generate(w119.begin(), w119.end(), std::ref(f32rng));
+  std::generate(w120.begin(), w120.end(), std::ref(f32rng));
+  std::generate(w121.begin(), w121.end(), std::ref(f32rng));
+  std::generate(w122.begin(), w122.end(), std::ref(f32rng));
+  std::generate(w123.begin(), w123.end(), std::ref(f32rng));
+  std::generate(w124.begin(), w124.end(), std::ref(f32rng));
+  std::generate(w125.begin(), w125.end(), std::ref(f32rng));
+  std::generate(w126.begin(), w126.end(), std::ref(f32rng));
+  std::generate(w127.begin(), w127.end(), std::ref(f32rng));
+  std::generate(w128.begin(), w128.end(), std::ref(f32rng));
+  std::generate(w129.begin(), w129.end(), std::ref(f32rng));
+  std::generate(w130.begin(), w130.end(), std::ref(f32rng));
+  std::generate(w131.begin(), w131.end(), std::ref(f32rng));
+  std::generate(w132.begin(), w132.end(), std::ref(f32rng));
+  std::generate(w133.begin(), w133.end(), std::ref(f32rng));
+  std::generate(w134.begin(), w134.end(), std::ref(f32rng));
+  std::generate(w135.begin(), w135.end(), std::ref(f32rng));
+  std::generate(w136.begin(), w136.end(), std::ref(f32rng));
+  std::generate(w137.begin(), w137.end(), std::ref(f32rng));
+  std::generate(w138.begin(), w138.end(), std::ref(f32rng));
+  std::generate(w139.begin(), w139.end(), std::ref(f32rng));
+  std::generate(w140.begin(), w140.end(), std::ref(f32rng));
+  std::generate(w141.begin(), w141.end(), std::ref(f32rng));
+  std::generate(w142.begin(), w142.end(), std::ref(f32rng));
+  std::generate(w143.begin(), w143.end(), std::ref(f32rng));
+  std::generate(w144.begin(), w144.end(), std::ref(f32rng));
+  std::generate(w145.begin(), w145.end(), std::ref(f32rng));
+  std::generate(w146.begin(), w146.end(), std::ref(f32rng));
+  std::generate(w147.begin(), w147.end(), std::ref(f32rng));
+  std::generate(w148.begin(), w148.end(), std::ref(f32rng));
+  std::generate(w149.begin(), w149.end(), std::ref(f32rng));
+  std::generate(w150.begin(), w150.end(), std::ref(f32rng));
+  std::generate(w151.begin(), w151.end(), std::ref(f32rng));
+  std::generate(w152.begin(), w152.end(), std::ref(f32rng));
+  std::generate(w153.begin(), w153.end(), std::ref(f32rng));
+  std::generate(w154.begin(), w154.end(), std::ref(f32rng));
+  std::generate(w155.begin(), w155.end(), std::ref(f32rng));
+  std::generate(w156.begin(), w156.end(), std::ref(f32rng));
+  std::generate(w157.begin(), w157.end(), std::ref(f32rng));
+  std::generate(w158.begin(), w158.end(), std::ref(f32rng));
+  std::generate(w159.begin(), w159.end(), std::ref(f32rng));
+  std::generate(w160.begin(), w160.end(), std::ref(f32rng));
+  std::generate(w161.begin(), w161.end(), std::ref(f32rng));
+  std::generate(w162.begin(), w162.end(), std::ref(f32rng));
+  std::generate(w163.begin(), w163.end(), std::ref(f32rng));
+  std::generate(w164.begin(), w164.end(), std::ref(f32rng));
+  std::generate(w165.begin(), w165.end(), std::ref(f32rng));
+  std::generate(w166.begin(), w166.end(), std::ref(f32rng));
+  std::generate(w167.begin(), w167.end(), std::ref(f32rng));
+  std::generate(w168.begin(), w168.end(), std::ref(f32rng));
+  std::generate(w169.begin(), w169.end(), std::ref(f32rng));
+  std::generate(w170.begin(), w170.end(), std::ref(f32rng));
+  std::generate(w171.begin(), w171.end(), std::ref(f32rng));
+  std::generate(w172.begin(), w172.end(), std::ref(f32rng));
+  std::generate(w173.begin(), w173.end(), std::ref(f32rng));
+  std::generate(w174.begin(), w174.end(), std::ref(f32rng));
+  std::generate(w175.begin(), w175.end(), std::ref(f32rng));
+  std::generate(w176.begin(), w176.end(), std::ref(f32rng));
+  std::generate(w177.begin(), w177.end(), std::ref(f32rng));
+  std::generate(w178.begin(), w178.end(), std::ref(f32rng));
+  std::generate(w179.begin(), w179.end(), std::ref(f32rng));
+  std::generate(w180.begin(), w180.end(), std::ref(f32rng));
+  std::generate(w181.begin(), w181.end(), std::ref(f32rng));
+  std::generate(w182.begin(), w182.end(), std::ref(f32rng));
+  std::generate(w183.begin(), w183.end(), std::ref(f32rng));
+  std::generate(w184.begin(), w184.end(), std::ref(f32rng));
+  std::generate(w185.begin(), w185.end(), std::ref(f32rng));
+  std::generate(w186.begin(), w186.end(), std::ref(f32rng));
+  std::generate(w187.begin(), w187.end(), std::ref(f32rng));
+  std::generate(w188.begin(), w188.end(), std::ref(f32rng));
+  std::generate(w189.begin(), w189.end(), std::ref(f32rng));
+  std::generate(w190.begin(), w190.end(), std::ref(f32rng));
+  std::generate(w191.begin(), w191.end(), std::ref(f32rng));
+  std::generate(w192.begin(), w192.end(), std::ref(f32rng));
+  std::generate(w193.begin(), w193.end(), std::ref(f32rng));
+  std::generate(w194.begin(), w194.end(), std::ref(f32rng));
+  std::generate(w195.begin(), w195.end(), std::ref(f32rng));
+  std::generate(w196.begin(), w196.end(), std::ref(f32rng));
+  std::generate(w197.begin(), w197.end(), std::ref(f32rng));
+  std::generate(w198.begin(), w198.end(), std::ref(f32rng));
+  std::generate(w199.begin(), w199.end(), std::ref(f32rng));
+  std::generate(w200.begin(), w200.end(), std::ref(f32rng));
+  std::generate(w201.begin(), w201.end(), std::ref(f32rng));
+  std::generate(w202.begin(), w202.end(), std::ref(f32rng));
+  std::generate(w203.begin(), w203.end(), std::ref(f32rng));
+  std::generate(w204.begin(), w204.end(), std::ref(f32rng));
+  std::generate(w205.begin(), w205.end(), std::ref(f32rng));
+  std::generate(w206.begin(), w206.end(), std::ref(f32rng));
+  std::generate(w207.begin(), w207.end(), std::ref(f32rng));
+  std::generate(w208.begin(), w208.end(), std::ref(f32rng));
+  std::generate(w209.begin(), w209.end(), std::ref(f32rng));
+  std::generate(w210.begin(), w210.end(), std::ref(f32rng));
+  std::generate(w211.begin(), w211.end(), std::ref(f32rng));
+  std::generate(w212.begin(), w212.end(), std::ref(f32rng));
+  std::generate(w213.begin(), w213.end(), std::ref(f32rng));
+  std::generate(w214.begin(), w214.end(), std::ref(f32rng));
+  std::generate(w215.begin(), w215.end(), std::ref(f32rng));
+  std::generate(w216.begin(), w216.end(), std::ref(f32rng));
+  std::generate(w217.begin(), w217.end(), std::ref(f32rng));
+  std::generate(w218.begin(), w218.end(), std::ref(f32rng));
+  std::generate(w219.begin(), w219.end(), std::ref(f32rng));
+  std::generate(w220.begin(), w220.end(), std::ref(f32rng));
+  std::generate(w221.begin(), w221.end(), std::ref(f32rng));
+  std::generate(w222.begin(), w222.end(), std::ref(f32rng));
+  std::generate(w223.begin(), w223.end(), std::ref(f32rng));
+  std::generate(w224.begin(), w224.end(), std::ref(f32rng));
+  std::generate(w225.begin(), w225.end(), std::ref(f32rng));
+  std::generate(w226.begin(), w226.end(), std::ref(f32rng));
+  std::generate(w227.begin(), w227.end(), std::ref(f32rng));
+  std::generate(w228.begin(), w228.end(), std::ref(f32rng));
+  std::generate(w229.begin(), w229.end(), std::ref(f32rng));
+  std::generate(w230.begin(), w230.end(), std::ref(f32rng));
+  std::generate(w231.begin(), w231.end(), std::ref(f32rng));
+  std::generate(w232.begin(), w232.end(), std::ref(f32rng));
+  std::generate(w233.begin(), w233.end(), std::ref(f32rng));
+  std::generate(w234.begin(), w234.end(), std::ref(f32rng));
+  std::generate(w235.begin(), w235.end(), std::ref(f32rng));
+  std::generate(w236.begin(), w236.end(), std::ref(f32rng));
+  std::generate(w237.begin(), w237.end(), std::ref(f32rng));
+  std::generate(w238.begin(), w238.end(), std::ref(f32rng));
+  std::generate(w239.begin(), w239.end(), std::ref(f32rng));
+  std::generate(w240.begin(), w240.end(), std::ref(f32rng));
+  std::generate(w241.begin(), w241.end(), std::ref(f32rng));
 
   ExecutionPlan operators;
   xnn_status status;
@@ -520,7 +521,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     16 /* output_channels_per_group */,
     3 /* input pixel stride */,
     16 /* output pixel stride */,
-    w114, w115,
+    w114.data(), w115.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op0);
@@ -555,7 +556,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     16 /* input pixel stride */,
     16 /* output pixel stride */,
-    w116, w117,
+    w116.data(), w117.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op2);
@@ -577,7 +578,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     16 /* output_channels_per_group */,
     16 /* input pixel stride */,
     16 /* output pixel stride */,
-    w118, w119,
+    w118.data(), w119.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op3);
@@ -610,7 +611,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     64 /* output_channels_per_group */,
     16 /* input pixel stride */,
     64 /* output pixel stride */,
-    w120, w121,
+    w120.data(), w121.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op5);
@@ -632,7 +633,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     64 /* input pixel stride */,
     64 /* output pixel stride */,
-    w122, w123,
+    w122.data(), w123.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op6);
@@ -654,7 +655,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     24 /* output_channels_per_group */,
     64 /* input pixel stride */,
     24 /* output pixel stride */,
-    w124, w125,
+    w124.data(), w125.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op7);
@@ -676,7 +677,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     72 /* output_channels_per_group */,
     24 /* input pixel stride */,
     72 /* output pixel stride */,
-    w126, w127,
+    w126.data(), w127.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op8);
@@ -698,7 +699,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     72 /* input pixel stride */,
     72 /* output pixel stride */,
-    w128, w129,
+    w128.data(), w129.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op9);
@@ -720,7 +721,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     24 /* output_channels_per_group */,
     72 /* input pixel stride */,
     24 /* output pixel stride */,
-    w130, w131,
+    w130.data(), w131.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op10);
@@ -753,7 +754,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     72 /* output_channels_per_group */,
     24 /* input pixel stride */,
     72 /* output pixel stride */,
-    w132, w133,
+    w132.data(), w133.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op12);
@@ -775,7 +776,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     72 /* input pixel stride */,
     72 /* output pixel stride */,
-    w134, w135,
+    w134.data(), w135.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op13);
@@ -809,7 +810,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     24 /* output_channels_per_group */,
     72 /* input pixel stride */,
     24 /* output pixel stride */,
-    w136, w137,
+    w136.data(), w137.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op15);
@@ -831,7 +832,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     72 /* output_channels_per_group */,
     24 /* input pixel stride */,
     72 /* output pixel stride */,
-    w138, w139,
+    w138.data(), w139.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     &op16);
@@ -864,7 +865,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     40 /* output_channels_per_group */,
     72 /* input pixel stride */,
     40 /* output pixel stride */,
-    w140, w141,
+    w140.data(), w141.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op18);
@@ -886,7 +887,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     120 /* output_channels_per_group */,
     40 /* input pixel stride */,
     120 /* output pixel stride */,
-    w142, w143,
+    w142.data(), w143.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op19);
@@ -908,7 +909,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     120 /* input pixel stride */,
     120 /* output pixel stride */,
-    w144, w145,
+    w144.data(), w145.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op20);
@@ -942,7 +943,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     32 /* output_channels_per_group */,
     120 /* input pixel stride */,
     32 /* output pixel stride */,
-    w146, w147,
+    w146.data(), w147.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op22);
@@ -964,7 +965,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     120 /* output_channels_per_group */,
     32 /* input pixel stride */,
     120 /* output pixel stride */,
-    w148, w149,
+    w148.data(), w149.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     &op23);
@@ -997,7 +998,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     40 /* output_channels_per_group */,
     120 /* input pixel stride */,
     40 /* output pixel stride */,
-    w150, w151,
+    w150.data(), w151.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op25);
@@ -1030,7 +1031,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     120 /* output_channels_per_group */,
     40 /* input pixel stride */,
     120 /* output pixel stride */,
-    w152, w153,
+    w152.data(), w153.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op27);
@@ -1052,7 +1053,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     120 /* input pixel stride */,
     120 /* output pixel stride */,
-    w154, w155,
+    w154.data(), w155.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op28);
@@ -1086,7 +1087,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     32 /* output_channels_per_group */,
     120 /* input pixel stride */,
     32 /* output pixel stride */,
-    w156, w157,
+    w156.data(), w157.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op30);
@@ -1108,7 +1109,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     120 /* output_channels_per_group */,
     32 /* input pixel stride */,
     120 /* output pixel stride */,
-    w158, w159,
+    w158.data(), w159.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     &op31);
@@ -1141,7 +1142,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     40 /* output_channels_per_group */,
     120 /* input pixel stride */,
     40 /* output pixel stride */,
-    w160, w161,
+    w160.data(), w161.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op33);
@@ -1174,7 +1175,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     240 /* output_channels_per_group */,
     40 /* input pixel stride */,
     240 /* output pixel stride */,
-    w162, w163,
+    w162.data(), w163.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op35);
@@ -1209,7 +1210,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     240 /* input pixel stride */,
     240 /* output pixel stride */,
-    w164, w165,
+    w164.data(), w165.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op37);
@@ -1244,7 +1245,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     80 /* output_channels_per_group */,
     240 /* input pixel stride */,
     80 /* output pixel stride */,
-    w166, w167,
+    w166.data(), w167.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op39);
@@ -1266,7 +1267,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     200 /* output_channels_per_group */,
     80 /* input pixel stride */,
     200 /* output pixel stride */,
-    w168, w169,
+    w168.data(), w169.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op40);
@@ -1301,7 +1302,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     200 /* input pixel stride */,
     200 /* output pixel stride */,
-    w170, w171,
+    w170.data(), w171.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op42);
@@ -1336,7 +1337,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     80 /* output_channels_per_group */,
     200 /* input pixel stride */,
     80 /* output pixel stride */,
-    w172, w173,
+    w172.data(), w173.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op44);
@@ -1369,7 +1370,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     184 /* output_channels_per_group */,
     80 /* input pixel stride */,
     184 /* output pixel stride */,
-    w174, w175,
+    w174.data(), w175.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op46);
@@ -1404,7 +1405,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     184 /* input pixel stride */,
     184 /* output pixel stride */,
-    w176, w177,
+    w176.data(), w177.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op48);
@@ -1439,7 +1440,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     80 /* output_channels_per_group */,
     184 /* input pixel stride */,
     80 /* output pixel stride */,
-    w178, w179,
+    w178.data(), w179.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op50);
@@ -1472,7 +1473,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     184 /* output_channels_per_group */,
     80 /* input pixel stride */,
     184 /* output pixel stride */,
-    w180, w181,
+    w180.data(), w181.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op52);
@@ -1507,7 +1508,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     184 /* input pixel stride */,
     184 /* output pixel stride */,
-    w182, w183,
+    w182.data(), w183.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op54);
@@ -1542,7 +1543,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     80 /* output_channels_per_group */,
     184 /* input pixel stride */,
     80 /* output pixel stride */,
-    w184, w185,
+    w184.data(), w185.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op56);
@@ -1575,7 +1576,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     480 /* output_channels_per_group */,
     80 /* input pixel stride */,
     480 /* output pixel stride */,
-    w186, w187,
+    w186.data(), w187.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op58);
@@ -1610,7 +1611,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     480 /* input pixel stride */,
     480 /* output pixel stride */,
-    w188, w189,
+    w188.data(), w189.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op60);
@@ -1657,7 +1658,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     120 /* output_channels_per_group */,
     480 /* input pixel stride */,
     120 /* output pixel stride */,
-    w190, w191,
+    w190.data(), w191.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op63);
@@ -1679,7 +1680,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     480 /* output_channels_per_group */,
     120 /* input pixel stride */,
     480 /* output pixel stride */,
-    w192, w193,
+    w192.data(), w193.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     &op64);
@@ -1712,7 +1713,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     112 /* output_channels_per_group */,
     480 /* input pixel stride */,
     112 /* output pixel stride */,
-    w194, w195,
+    w194.data(), w195.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op66);
@@ -1734,7 +1735,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     672 /* output_channels_per_group */,
     112 /* input pixel stride */,
     672 /* output pixel stride */,
-    w196, w197,
+    w196.data(), w197.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op67);
@@ -1769,7 +1770,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     672 /* input pixel stride */,
     672 /* output pixel stride */,
-    w198, w199,
+    w198.data(), w199.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op69);
@@ -1816,7 +1817,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     168 /* output_channels_per_group */,
     672 /* input pixel stride */,
     168 /* output pixel stride */,
-    w200, w201,
+    w200.data(), w201.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op72);
@@ -1838,7 +1839,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     672 /* output_channels_per_group */,
     168 /* input pixel stride */,
     672 /* output pixel stride */,
-    w202, w203,
+    w202.data(), w203.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     &op73);
@@ -1871,7 +1872,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     112 /* output_channels_per_group */,
     672 /* input pixel stride */,
     112 /* output pixel stride */,
-    w204, w205,
+    w204.data(), w205.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op75);
@@ -1904,7 +1905,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     672 /* output_channels_per_group */,
     112 /* input pixel stride */,
     672 /* output pixel stride */,
-    w206, w207,
+    w206.data(), w207.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op77);
@@ -1939,7 +1940,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     672 /* input pixel stride */,
     672 /* output pixel stride */,
-    w208, w209,
+    w208.data(), w209.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op79);
@@ -1986,7 +1987,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     168 /* output_channels_per_group */,
     672 /* input pixel stride */,
     168 /* output pixel stride */,
-    w210, w211,
+    w210.data(), w211.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op82);
@@ -2008,7 +2009,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     672 /* output_channels_per_group */,
     168 /* input pixel stride */,
     672 /* output pixel stride */,
-    w212, w213,
+    w212.data(), w213.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     &op83);
@@ -2041,7 +2042,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     160 /* output_channels_per_group */,
     672 /* input pixel stride */,
     160 /* output pixel stride */,
-    w214, w215,
+    w214.data(), w215.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op85);
@@ -2063,7 +2064,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     960 /* output_channels_per_group */,
     160 /* input pixel stride */,
     960 /* output pixel stride */,
-    w216, w217,
+    w216.data(), w217.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op86);
@@ -2098,7 +2099,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     960 /* input pixel stride */,
     960 /* output pixel stride */,
-    w218, w219,
+    w218.data(), w219.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op88);
@@ -2145,7 +2146,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     240 /* output_channels_per_group */,
     960 /* input pixel stride */,
     240 /* output pixel stride */,
-    w220, w221,
+    w220.data(), w221.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op91);
@@ -2167,7 +2168,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     960 /* output_channels_per_group */,
     240 /* input pixel stride */,
     960 /* output pixel stride */,
-    w222, w223,
+    w222.data(), w223.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     &op92);
@@ -2200,7 +2201,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     160 /* output_channels_per_group */,
     960 /* input pixel stride */,
     160 /* output pixel stride */,
-    w224, w225,
+    w224.data(), w225.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op94);
@@ -2233,7 +2234,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     960 /* output_channels_per_group */,
     160 /* input pixel stride */,
     960 /* output pixel stride */,
-    w226, w227,
+    w226.data(), w227.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op96);
@@ -2268,7 +2269,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1 /* output_channels_per_group */,
     960 /* input pixel stride */,
     960 /* output pixel stride */,
-    w228, w229,
+    w228.data(), w229.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op98);
@@ -2315,7 +2316,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     240 /* output_channels_per_group */,
     960 /* input pixel stride */,
     240 /* output pixel stride */,
-    w230, w231,
+    w230.data(), w231.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op101);
@@ -2337,7 +2338,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     960 /* output_channels_per_group */,
     240 /* input pixel stride */,
     960 /* output pixel stride */,
-    w232, w233,
+    w232.data(), w233.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
     &op102);
@@ -2370,7 +2371,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     160 /* output_channels_per_group */,
     960 /* input pixel stride */,
     160 /* output pixel stride */,
-    w234, w235,
+    w234.data(), w235.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op104);
@@ -2403,7 +2404,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     960 /* output_channels_per_group */,
     160 /* input pixel stride */,
     960 /* output pixel stride */,
-    w236, w237,
+    w236.data(), w237.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op106);
@@ -2450,7 +2451,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1280 /* output_channels_per_group */,
     960 /* input pixel stride */,
     1280 /* output pixel stride */,
-    w238, w239,
+    w238.data(), w239.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op109);
@@ -2497,7 +2498,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     1001 /* output_channels_per_group */,
     1280 /* input pixel stride */,
     1001 /* output pixel stride */,
-    w240, w241,
+    w240.data(), w241.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
     &op112);
@@ -2512,7 +2513,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op0,
     1 /* batch size */, 224 /* input height */, 224 /* input width */,
-    v0 /* input */, v1 /* output */,
+    v0.data() /* input */, v1.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #0" << std::endl;
@@ -2522,7 +2523,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op1,
     12544 /* batch size */,
-    v1 /* input */, v2 /* output */,
+    v1.data() /* input */, v2.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #1" << std::endl;
@@ -2532,7 +2533,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op2,
     1 /* batch size */, 112 /* input height */, 112 /* input width */,
-    v2 /* input */, v3 /* output */,
+    v2.data() /* input */, v3.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #2" << std::endl;
@@ -2542,7 +2543,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op3,
     1 /* batch size */, 112 /* input height */, 112 /* input width */,
-    v3 /* input */, v4 /* output */,
+    v3.data() /* input */, v4.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #3" << std::endl;
@@ -2555,7 +2556,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_add_nd_f32(
       op4,
       4, a_shape, 4, b_shape,
-      v4 /* a */, v2 /* b */, v5 /* output */,
+      v4.data() /* a */, v2.data() /* b */, v5.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -2566,7 +2567,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op5,
     1 /* batch size */, 112 /* input height */, 112 /* input width */,
-    v5 /* input */, v6 /* output */,
+    v5.data() /* input */, v6.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #5" << std::endl;
@@ -2576,7 +2577,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op6,
     1 /* batch size */, 112 /* input height */, 112 /* input width */,
-    v6 /* input */, v7 /* output */,
+    v6.data() /* input */, v7.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #6" << std::endl;
@@ -2586,7 +2587,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op7,
     1 /* batch size */, 56 /* input height */, 56 /* input width */,
-    v7 /* input */, v8 /* output */,
+    v7.data() /* input */, v8.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #7" << std::endl;
@@ -2596,7 +2597,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op8,
     1 /* batch size */, 56 /* input height */, 56 /* input width */,
-    v8 /* input */, v9 /* output */,
+    v8.data() /* input */, v9.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #8" << std::endl;
@@ -2606,7 +2607,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op9,
     1 /* batch size */, 56 /* input height */, 56 /* input width */,
-    v9 /* input */, v10 /* output */,
+    v9.data() /* input */, v10.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #9" << std::endl;
@@ -2616,7 +2617,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op10,
     1 /* batch size */, 56 /* input height */, 56 /* input width */,
-    v10 /* input */, v11 /* output */,
+    v10.data() /* input */, v11.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #10" << std::endl;
@@ -2629,7 +2630,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_add_nd_f32(
       op11,
       4, a_shape, 4, b_shape,
-      v11 /* a */, v8 /* b */, v12 /* output */,
+      v11.data() /* a */, v8.data() /* b */, v12.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -2640,7 +2641,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op12,
     1 /* batch size */, 56 /* input height */, 56 /* input width */,
-    v12 /* input */, v13 /* output */,
+    v12.data() /* input */, v13.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #12" << std::endl;
@@ -2650,7 +2651,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op13,
     1 /* batch size */, 56 /* input height */, 56 /* input width */,
-    v13 /* input */, v14 /* output */,
+    v13.data() /* input */, v14.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #13" << std::endl;
@@ -2660,7 +2661,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op14,
     1 /* batch size */, 784 /* width */,
-    v14 /* input */, v15 /* output */,
+    v14.data() /* input */, v15.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #14" << std::endl;
@@ -2670,7 +2671,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op15,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v15 /* input */, v16 /* output */,
+    v15.data() /* input */, v16.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #15" << std::endl;
@@ -2680,7 +2681,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op16,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v16 /* input */, v17 /* output */,
+    v16.data() /* input */, v17.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #16" << std::endl;
@@ -2693,7 +2694,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_multiply_nd_f32(
       op17,
       4, a_shape, 4, b_shape,
-      v14 /* a */, v17 /* b */, v18 /* output */,
+      v14.data() /* a */, v17.data() /* b */, v18.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -2704,7 +2705,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op18,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    v18 /* input */, v19 /* output */,
+    v18.data() /* input */, v19.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #18" << std::endl;
@@ -2714,7 +2715,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op19,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    v19 /* input */, v20 /* output */,
+    v19.data() /* input */, v20.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #19" << std::endl;
@@ -2724,7 +2725,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op20,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    v20 /* input */, v21 /* output */,
+    v20.data() /* input */, v21.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #20" << std::endl;
@@ -2734,7 +2735,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op21,
     1 /* batch size */, 784 /* width */,
-    v21 /* input */, v22 /* output */,
+    v21.data() /* input */, v22.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #21" << std::endl;
@@ -2744,7 +2745,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op22,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v22 /* input */, v23 /* output */,
+    v22.data() /* input */, v23.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #22" << std::endl;
@@ -2754,7 +2755,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op23,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v23 /* input */, v24 /* output */,
+    v23.data() /* input */, v24.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #23" << std::endl;
@@ -2767,7 +2768,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_multiply_nd_f32(
       op24,
       4, a_shape, 4, b_shape,
-      v21 /* a */, v24 /* b */, v25 /* output */,
+      v21.data() /* a */, v24.data() /* b */, v25.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -2778,7 +2779,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op25,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    v25 /* input */, v26 /* output */,
+    v25.data() /* input */, v26.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #25" << std::endl;
@@ -2791,7 +2792,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_add_nd_f32(
       op26,
       4, a_shape, 4, b_shape,
-      v26 /* a */, v19 /* b */, v27 /* output */,
+      v26.data() /* a */, v19.data() /* b */, v27.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -2802,7 +2803,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op27,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    v27 /* input */, v28 /* output */,
+    v27.data() /* input */, v28.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #27" << std::endl;
@@ -2812,7 +2813,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op28,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    v28 /* input */, v29 /* output */,
+    v28.data() /* input */, v29.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #28" << std::endl;
@@ -2822,7 +2823,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op29,
     1 /* batch size */, 784 /* width */,
-    v29 /* input */, v30 /* output */,
+    v29.data() /* input */, v30.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #29" << std::endl;
@@ -2832,7 +2833,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op30,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v30 /* input */, v31 /* output */,
+    v30.data() /* input */, v31.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #30" << std::endl;
@@ -2842,7 +2843,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op31,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v31 /* input */, v32 /* output */,
+    v31.data() /* input */, v32.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #31" << std::endl;
@@ -2855,7 +2856,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_multiply_nd_f32(
       op32,
       4, a_shape, 4, b_shape,
-      v29 /* a */, v32 /* b */, v33 /* output */,
+      v29.data() /* a */, v32.data() /* b */, v33.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -2866,7 +2867,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op33,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    v33 /* input */, v34 /* output */,
+    v33.data() /* input */, v34.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #33" << std::endl;
@@ -2879,7 +2880,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_add_nd_f32(
       op34,
       4, a_shape, 4, b_shape,
-      v34 /* a */, v27 /* b */, v35 /* output */,
+      v34.data() /* a */, v27.data() /* b */, v35.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -2890,7 +2891,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op35,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    v35 /* input */, v36 /* output */,
+    v35.data() /* input */, v36.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #35" << std::endl;
@@ -2900,7 +2901,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op36,
     784 /* batch size */,
-    v36 /* input */, v37 /* output */,
+    v36.data() /* input */, v37.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #36" << std::endl;
@@ -2910,7 +2911,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op37,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    v37 /* input */, v38 /* output */,
+    v37.data() /* input */, v38.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #37" << std::endl;
@@ -2920,7 +2921,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op38,
     196 /* batch size */,
-    v38 /* input */, v39 /* output */,
+    v38.data() /* input */, v39.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #38" << std::endl;
@@ -2930,7 +2931,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op39,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v39 /* input */, v40 /* output */,
+    v39.data() /* input */, v40.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #39" << std::endl;
@@ -2940,7 +2941,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op40,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v40 /* input */, v41 /* output */,
+    v40.data() /* input */, v41.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #40" << std::endl;
@@ -2950,7 +2951,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op41,
     196 /* batch size */,
-    v41 /* input */, v42 /* output */,
+    v41.data() /* input */, v42.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #41" << std::endl;
@@ -2960,7 +2961,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op42,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v42 /* input */, v43 /* output */,
+    v42.data() /* input */, v43.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #42" << std::endl;
@@ -2970,7 +2971,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op43,
     196 /* batch size */,
-    v43 /* input */, v44 /* output */,
+    v43.data() /* input */, v44.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #43" << std::endl;
@@ -2980,7 +2981,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op44,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v44 /* input */, v45 /* output */,
+    v44.data() /* input */, v45.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #44" << std::endl;
@@ -2993,7 +2994,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_add_nd_f32(
       op45,
       4, a_shape, 4, b_shape,
-      v45 /* a */, v40 /* b */, v46 /* output */,
+      v45.data() /* a */, v40.data() /* b */, v46.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3004,7 +3005,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op46,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v46 /* input */, v47 /* output */,
+    v46.data() /* input */, v47.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #46" << std::endl;
@@ -3014,7 +3015,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op47,
     196 /* batch size */,
-    v47 /* input */, v48 /* output */,
+    v47.data() /* input */, v48.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #47" << std::endl;
@@ -3024,7 +3025,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op48,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v48 /* input */, v49 /* output */,
+    v48.data() /* input */, v49.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #48" << std::endl;
@@ -3034,7 +3035,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op49,
     196 /* batch size */,
-    v49 /* input */, v50 /* output */,
+    v49.data() /* input */, v50.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #49" << std::endl;
@@ -3044,7 +3045,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op50,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v50 /* input */, v51 /* output */,
+    v50.data() /* input */, v51.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #50" << std::endl;
@@ -3057,7 +3058,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_add_nd_f32(
       op51,
       4, a_shape, 4, b_shape,
-      v51 /* a */, v46 /* b */, v52 /* output */,
+      v51.data() /* a */, v46.data() /* b */, v52.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3068,7 +3069,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op52,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v52 /* input */, v53 /* output */,
+    v52.data() /* input */, v53.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #52" << std::endl;
@@ -3078,7 +3079,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op53,
     196 /* batch size */,
-    v53 /* input */, v54 /* output */,
+    v53.data() /* input */, v54.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #53" << std::endl;
@@ -3088,7 +3089,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op54,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v54 /* input */, v55 /* output */,
+    v54.data() /* input */, v55.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #54" << std::endl;
@@ -3098,7 +3099,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op55,
     196 /* batch size */,
-    v55 /* input */, v56 /* output */,
+    v55.data() /* input */, v56.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #55" << std::endl;
@@ -3108,7 +3109,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op56,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v56 /* input */, v57 /* output */,
+    v56.data() /* input */, v57.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #56" << std::endl;
@@ -3121,7 +3122,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_add_nd_f32(
       op57,
       4, a_shape, 4, b_shape,
-      v57 /* a */, v52 /* b */, v58 /* output */,
+      v57.data() /* a */, v52.data() /* b */, v58.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3132,7 +3133,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op58,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v58 /* input */, v59 /* output */,
+    v58.data() /* input */, v59.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #58" << std::endl;
@@ -3142,7 +3143,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op59,
     196 /* batch size */,
-    v59 /* input */, v60 /* output */,
+    v59.data() /* input */, v60.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #59" << std::endl;
@@ -3152,7 +3153,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op60,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v60 /* input */, v61 /* output */,
+    v60.data() /* input */, v61.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #60" << std::endl;
@@ -3162,7 +3163,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op61,
     196 /* batch size */,
-    v61 /* input */, v62 /* output */,
+    v61.data() /* input */, v62.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #61" << std::endl;
@@ -3172,7 +3173,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op62,
     1 /* batch size */, 196 /* width */,
-    v62 /* input */, v63 /* output */,
+    v62.data() /* input */, v63.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #62" << std::endl;
@@ -3182,7 +3183,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op63,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v63 /* input */, v64 /* output */,
+    v63.data() /* input */, v64.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #63" << std::endl;
@@ -3192,7 +3193,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op64,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v64 /* input */, v65 /* output */,
+    v64.data() /* input */, v65.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #64" << std::endl;
@@ -3205,7 +3206,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_multiply_nd_f32(
       op65,
       4, a_shape, 4, b_shape,
-      v62 /* a */, v65 /* b */, v66 /* output */,
+      v62.data() /* a */, v65.data() /* b */, v66.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3216,7 +3217,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op66,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v66 /* input */, v67 /* output */,
+    v66.data() /* input */, v67.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #66" << std::endl;
@@ -3226,7 +3227,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op67,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v67 /* input */, v68 /* output */,
+    v67.data() /* input */, v68.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #67" << std::endl;
@@ -3236,7 +3237,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op68,
     196 /* batch size */,
-    v68 /* input */, v69 /* output */,
+    v68.data() /* input */, v69.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #68" << std::endl;
@@ -3246,7 +3247,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op69,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v69 /* input */, v70 /* output */,
+    v69.data() /* input */, v70.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #69" << std::endl;
@@ -3256,7 +3257,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op70,
     196 /* batch size */,
-    v70 /* input */, v71 /* output */,
+    v70.data() /* input */, v71.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #70" << std::endl;
@@ -3266,7 +3267,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op71,
     1 /* batch size */, 196 /* width */,
-    v71 /* input */, v72 /* output */,
+    v71.data() /* input */, v72.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #71" << std::endl;
@@ -3276,7 +3277,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op72,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v72 /* input */, v73 /* output */,
+    v72.data() /* input */, v73.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #72" << std::endl;
@@ -3286,7 +3287,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op73,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v73 /* input */, v74 /* output */,
+    v73.data() /* input */, v74.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #73" << std::endl;
@@ -3299,7 +3300,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_multiply_nd_f32(
       op74,
       4, a_shape, 4, b_shape,
-      v71 /* a */, v74 /* b */, v75 /* output */,
+      v71.data() /* a */, v74.data() /* b */, v75.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3310,7 +3311,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op75,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v75 /* input */, v76 /* output */,
+    v75.data() /* input */, v76.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #75" << std::endl;
@@ -3323,7 +3324,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_add_nd_f32(
       op76,
       4, a_shape, 4, b_shape,
-      v76 /* a */, v67 /* b */, v77 /* output */,
+      v76.data() /* a */, v67.data() /* b */, v77.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3334,7 +3335,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op77,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v77 /* input */, v78 /* output */,
+    v77.data() /* input */, v78.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #77" << std::endl;
@@ -3344,7 +3345,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op78,
     196 /* batch size */,
-    v78 /* input */, v79 /* output */,
+    v78.data() /* input */, v79.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #78" << std::endl;
@@ -3354,7 +3355,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op79,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v79 /* input */, v80 /* output */,
+    v79.data() /* input */, v80.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #79" << std::endl;
@@ -3364,7 +3365,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op80,
     49 /* batch size */,
-    v80 /* input */, v81 /* output */,
+    v80.data() /* input */, v81.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #80" << std::endl;
@@ -3374,7 +3375,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op81,
     1 /* batch size */, 49 /* width */,
-    v81 /* input */, v82 /* output */,
+    v81.data() /* input */, v82.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #81" << std::endl;
@@ -3384,7 +3385,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op82,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v82 /* input */, v83 /* output */,
+    v82.data() /* input */, v83.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #82" << std::endl;
@@ -3394,7 +3395,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op83,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v83 /* input */, v84 /* output */,
+    v83.data() /* input */, v84.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #83" << std::endl;
@@ -3407,7 +3408,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_multiply_nd_f32(
       op84,
       4, a_shape, 4, b_shape,
-      v81 /* a */, v84 /* b */, v85 /* output */,
+      v81.data() /* a */, v84.data() /* b */, v85.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3418,7 +3419,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op85,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v85 /* input */, v86 /* output */,
+    v85.data() /* input */, v86.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #85" << std::endl;
@@ -3428,7 +3429,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op86,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v86 /* input */, v87 /* output */,
+    v86.data() /* input */, v87.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #86" << std::endl;
@@ -3438,7 +3439,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op87,
     49 /* batch size */,
-    v87 /* input */, v88 /* output */,
+    v87.data() /* input */, v88.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #87" << std::endl;
@@ -3448,7 +3449,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op88,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v88 /* input */, v89 /* output */,
+    v88.data() /* input */, v89.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #88" << std::endl;
@@ -3458,7 +3459,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op89,
     49 /* batch size */,
-    v89 /* input */, v90 /* output */,
+    v89.data() /* input */, v90.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #89" << std::endl;
@@ -3468,7 +3469,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op90,
     1 /* batch size */, 49 /* width */,
-    v90 /* input */, v91 /* output */,
+    v90.data() /* input */, v91.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #90" << std::endl;
@@ -3478,7 +3479,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op91,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v91 /* input */, v92 /* output */,
+    v91.data() /* input */, v92.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #91" << std::endl;
@@ -3488,7 +3489,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op92,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v92 /* input */, v93 /* output */,
+    v92.data() /* input */, v93.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #92" << std::endl;
@@ -3501,7 +3502,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_multiply_nd_f32(
       op93,
       4, a_shape, 4, b_shape,
-      v90 /* a */, v93 /* b */, v94 /* output */,
+      v90.data() /* a */, v93.data() /* b */, v94.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3512,7 +3513,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op94,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v94 /* input */, v95 /* output */,
+    v94.data() /* input */, v95.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #94" << std::endl;
@@ -3525,7 +3526,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_add_nd_f32(
       op95,
       4, a_shape, 4, b_shape,
-      v95 /* a */, v86 /* b */, v96 /* output */,
+      v95.data() /* a */, v86.data() /* b */, v96.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3536,7 +3537,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op96,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v96 /* input */, v97 /* output */,
+    v96.data() /* input */, v97.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #96" << std::endl;
@@ -3546,7 +3547,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op97,
     49 /* batch size */,
-    v97 /* input */, v98 /* output */,
+    v97.data() /* input */, v98.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #97" << std::endl;
@@ -3556,7 +3557,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op98,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v98 /* input */, v99 /* output */,
+    v98.data() /* input */, v99.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #98" << std::endl;
@@ -3566,7 +3567,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op99,
     49 /* batch size */,
-    v99 /* input */, v100 /* output */,
+    v99.data() /* input */, v100.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #99" << std::endl;
@@ -3576,7 +3577,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op100,
     1 /* batch size */, 49 /* width */,
-    v100 /* input */, v101 /* output */,
+    v100.data() /* input */, v101.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #100" << std::endl;
@@ -3586,7 +3587,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op101,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v101 /* input */, v102 /* output */,
+    v101.data() /* input */, v102.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #101" << std::endl;
@@ -3596,7 +3597,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op102,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v102 /* input */, v103 /* output */,
+    v102.data() /* input */, v103.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #102" << std::endl;
@@ -3609,7 +3610,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_multiply_nd_f32(
       op103,
       4, a_shape, 4, b_shape,
-      v100 /* a */, v103 /* b */, v104 /* output */,
+      v100.data() /* a */, v103.data() /* b */, v104.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3620,7 +3621,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op104,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v104 /* input */, v105 /* output */,
+    v104.data() /* input */, v105.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #104" << std::endl;
@@ -3633,7 +3634,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
     status = xnn_setup_add_nd_f32(
       op105,
       4, a_shape, 4, b_shape,
-      v105 /* a */, v96 /* b */, v106 /* output */,
+      v105.data() /* a */, v96.data() /* b */, v106.data() /* output */,
       threadpool /* threadpool */);
   }
   if (status != xnn_status_success) {
@@ -3644,7 +3645,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op106,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v106 /* input */, v107 /* output */,
+    v106.data() /* input */, v107.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #106" << std::endl;
@@ -3654,7 +3655,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op107,
     49 /* batch size */,
-    v107 /* input */, v108 /* output */,
+    v107.data() /* input */, v108.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #107" << std::endl;
@@ -3664,7 +3665,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op108,
     1 /* batch size */, 49 /* width */,
-    v108 /* input */, v109 /* output */,
+    v108.data() /* input */, v109.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #108" << std::endl;
@@ -3674,7 +3675,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op109,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v109 /* input */, v110 /* output */,
+    v109.data() /* input */, v110.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #109" << std::endl;
@@ -3684,7 +3685,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_hardswish_nc_f32(
     op110,
     1 /* batch size */,
-    v110 /* input */, v111 /* output */,
+    v110.data() /* input */, v111.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #110" << std::endl;
@@ -3694,7 +3695,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_global_average_pooling_nwc_f32(
     op111,
     1 /* batch size */, 1 /* width */,
-    v111 /* input */, v112 /* output */,
+    v111.data() /* input */, v112.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #111" << std::endl;
@@ -3704,7 +3705,7 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op112,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v112 /* input */, v113 /* output */,
+    v112.data() /* input */, v113.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #112" << std::endl;
