@@ -19,10 +19,6 @@
 #     const float* zero,                 [sp + 16] -> x12
 #     const xnn_f32_minmax_params params [sp + 24] -> x8
 
-
-#     size_t cn_stride,          [sp] -> x12
-#     const union xnn_qs8_igemm_params params)  [sp + 8] -> x11
-
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
@@ -37,25 +33,25 @@
 # C3   x7 v19 v23 v27 v31
 # unused v12 v13 v14 v15
 
+# x14 temp for A55 loads.
+
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
         # Load cn_stride, a_offset
-        LDP x10, x11, [sp]
+        LDP     x10, x11, [sp]
 
         # Load zero, params pointer
-        LDP x12, x8, [sp, 16]
+        LDP     x12, x8, [sp, 16]
 
         # Save x20-x21 on stack
-        STP x20, x21, [sp, -48]!
-
-        # Save d8-d11 on stack
-        STP  d8,  d9, [sp, 16]
-        STP d10, d11, [sp, 32]
+        STP     x20, x21, [sp, -48]!
 
         # Clamp C pointers
         CMP      x0, 2              // if mr < 2
-        ADD      x16, x6, x7        // c1 = c0 + cm_stride
-        CSEL     x16, x6,  x16, LO  //   c1 = c0
+        STP      d8,  d9, [sp, 16]  // Save d8-d11 on stack
+        ADD     x16, x6, x7         // c1 = c0 + cm_stride
+        STP     d10, d11, [sp, 32]
+        CSEL    x16, x6,  x16, LO   //   c1 = c0
         ADD      x2, x2, 3          // kc = (kc + 3) & ~3
 
         ADD     x17, x16, x7        // c2 = c1 + cm_stride
@@ -84,9 +80,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         MOV     v29.16b, v28.16b
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
-
         MOV     x9, x3  // p = ks
 
+        .p2align 3
 1:
         # Load next 4 A pointers
         LDP     x20, x15, [x4], 16
@@ -578,11 +574,11 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         B.HI    0b
 
         # Restore d8-d15 from stack
-        LDP d10, d11, [sp, 32]
-        LDP  d8,  d9, [sp, 16]
+        LDP     d10, d11, [sp, 32]
+        LDP      d8,  d9, [sp, 16]
 
         # Restore x20-x21 from stack
-        LDP x20, x21, [sp], 48
+        LDP     x20, x21, [sp], 48
         RET
 
         # Remainder- 4 to 12 bytes of A
@@ -695,11 +691,11 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         ST1     {v4.b}[0], [x6]
 11:
         # Restore d8-d15 from stack
-        LDP d10, d11, [sp, 32]
-        LDP  d8,  d9, [sp, 16]
+        LDP     d10, d11, [sp, 32]
+        LDP      d8,  d9, [sp, 16]
 
         # Restore x20-x21 from stack
-        LDP x20, x21, [sp], 48
+        LDP     x20, x21, [sp], 48
         RET
 
 END_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
