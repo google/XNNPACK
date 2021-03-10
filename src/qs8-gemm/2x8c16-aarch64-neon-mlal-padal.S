@@ -31,112 +31,90 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
 
         # Clamp A and C pointers
         CMP     x0, 2             // if mr < 2
-        ADD     x4, x3, x4        // a1 = a0 + a_stride
-        ADD     x7, x6, x7        // c1 = c0 + cm_stride
-        CSEL    x4, x3, x4, LO    //   a1 = a0
-        CSEL    x7, x6, x7, LO    //   c1 = c0
-
-        # Save d10-d15 on stack
         STP     d10, d11, [sp, -48]!
+        ADD     x4, x3, x4        // a1 = a0 + a_stride
         STP     d12, d13, [sp, 16]
+        ADD     x7, x6, x7        // c1 = c0 + cm_stride
         STP     d14, d15, [sp, 32]
-
+        CSEL    x4, x3, x4, LO    //   a1 = a0
         ADD     x2, x2, 15        // kc = (kc + 15) & ~15
+        CSEL    x7, x6, x7, LO    //   c1 = c0
         BIC     x2, x2, 15
-
 
         .p2align 3
 0:
         # Load initial bias from w into accumulators
-
-        MOVI    v16.4s, 0
-        LD1     {v16.s}[0], [x5], 4
-        MOVI    v18.4s, 0
-        LD1     {v18.s}[0], [x5], 4
-        MOVI    v20.4s, 0
-        LD1     {v20.s}[0], [x5], 4
-        MOVI    v22.4s, 0
-        LD1     {v22.s}[0], [x5], 4
-        MOVI    v24.4s, 0
-        LD1     {v24.s}[0], [x5], 4
-        MOVI    v26.4s, 0
-        LD1     {v26.s}[0], [x5], 4
-        MOVI    v28.4s, 0
-        LD1     {v28.s}[0], [x5], 4
-        MOVI    v30.4s, 0
-        LD1     {v30.s}[0], [x5], 4
+        MOV     x0, x2   // k = kc
+        LDP     s16, s18, [x5], 8
         MOV     v17.4s, v16.4s
-        LDP     x10, x9, [sp, 48]  // cn_stride, params
         MOV     v19.4s, v18.4s
+        LDP     s20, s22, [x5], 8
         MOV     v21.4s, v20.4s
         MOV     v23.4s, v22.4s
+        LDP     s24, s26, [x5], 8
         MOV     v25.4s, v24.4s
         MOV     v27.4s, v26.4s
+        LDP     s28, s30, [x5], 8
         MOV     v29.4s, v28.4s
+        LDP     x10, x9, [sp, 48]  // cn_stride, params
         MOV     v31.4s, v30.4s
-
-        # There is 16 bytes for main loop
-        MOV     x0, x2   // k = kc
 
         # Main loop - 16 bytes of A
         .p2align 3
 1:
         LDR     q0, [x3], 16
-        LDP     q4, q5, [x5], 32
+        LDP     q4, q5, [x5]
         LDR     q1, [x4], 16
-        LDP     q6, q7, [x5], 32
+        LDP     q6, q7, [x5, 32]
         SMULL    v2.8h, v4.8b, v0.8b
         SMULL    v3.8h, v4.8b, v1.8b
         SMULL   v10.8h, v5.8b, v0.8b
         SMULL   v11.8h, v5.8b, v1.8b
-        SMULL   v12.8h, v6.8b, v0.8b
-        SMULL   v13.8h, v6.8b, v1.8b
-        SMULL   v14.8h, v7.8b, v0.8b
-        SMULL   v15.8h, v7.8b, v1.8b
-
         SMLAL2   v2.8h, v4.16b, v0.16b
         SMLAL2   v3.8h, v4.16b, v1.16b
         SMLAL2  v10.8h, v5.16b, v0.16b
         SMLAL2  v11.8h, v5.16b, v1.16b
-        SMLAL2  v12.8h, v6.16b, v0.16b
-        SMLAL2  v13.8h, v6.16b, v1.16b
-        SMLAL2  v14.8h, v7.16b, v0.16b
-        SMLAL2  v15.8h, v7.16b, v1.16b
-
-        LDP     q4, q5, [x5], 32
+        SMULL   v12.8h, v6.8b, v0.8b
         SADALP  v16.4s,  v2.8h
-        SADALP  v17.4s,  v3.8h
-        SADALP  v18.4s, v10.8h
-        SADALP  v19.4s, v11.8h
-        LDP     q6, q7, [x5], 32
-        SADALP  v20.4s, v12.8h
-        SADALP  v21.4s, v13.8h
-        SADALP  v22.4s, v14.8h
-        SADALP  v23.4s, v15.8h
-
-        SMULL    v2.8h, v4.8b, v0.8b
-        SMULL    v3.8h, v4.8b, v1.8b
-        SMULL   v10.8h, v5.8b, v0.8b
-        SMULL   v11.8h, v5.8b, v1.8b
-        SMULL   v12.8h, v6.8b, v0.8b
         SMULL   v13.8h, v6.8b, v1.8b
+        SADALP  v17.4s,  v3.8h
         SMULL   v14.8h, v7.8b, v0.8b
+        SADALP  v18.4s, v10.8h
         SMULL   v15.8h, v7.8b, v1.8b
+        SADALP  v19.4s, v11.8h
+        LDP     q4, q5, [x5, 64]
+        SMLAL2  v12.8h, v6.16b, v0.16b
+        SMLAL2  v13.8h, v6.16b, v1.16b
+        SMLAL2  v14.8h, v7.16b, v0.16b
+        SMLAL2  v15.8h, v7.16b, v1.16b
+        SMULL    v2.8h, v4.8b, v0.8b
+        SADALP  v20.4s, v12.8h
+        SMULL    v3.8h, v4.8b, v1.8b
+        SADALP  v21.4s, v13.8h
+        SMULL   v10.8h, v5.8b, v0.8b
+        SADALP  v22.4s, v14.8h
+        SMULL   v11.8h, v5.8b, v1.8b
+        SADALP  v23.4s, v15.8h
+        LDP     q6, q7, [x5, 96]
 
         SMLAL2   v2.8h, v4.16b, v0.16b
         SMLAL2   v3.8h, v4.16b, v1.16b
         SMLAL2  v10.8h, v5.16b, v0.16b
         SMLAL2  v11.8h, v5.16b, v1.16b
+        ADD     x5, x5, 128
+        SMULL   v12.8h, v6.8b, v0.8b
+        SADALP  v24.4s,  v2.8h
+        SMULL   v13.8h, v6.8b, v1.8b
+        SADALP  v25.4s,  v3.8h
+        SMULL   v14.8h, v7.8b, v0.8b
+        SADALP  v26.4s, v10.8h
+        SMULL   v15.8h, v7.8b, v1.8b
+        SADALP  v27.4s, v11.8h
+        SUBS    x0, x0, 16
         SMLAL2  v12.8h, v6.16b, v0.16b
         SMLAL2  v13.8h, v6.16b, v1.16b
         SMLAL2  v14.8h, v7.16b, v0.16b
         SMLAL2  v15.8h, v7.16b, v1.16b
-        SUBS    x0, x0, 16
-
-        SADALP  v24.4s,  v2.8h
-        SADALP  v25.4s,  v3.8h
-        SADALP  v26.4s, v10.8h
-        SADALP  v27.4s, v11.8h
         SADALP  v28.4s, v12.8h
         SADALP  v29.4s, v13.8h
         SADALP  v30.4s, v14.8h
@@ -166,14 +144,14 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SQRDMULH        v3.4s, v3.4s, v4.4s
         CMEQ    v4.4s, v7.4s, 0
         LD1R    {v5.8h}, [x9], 2
-        BIC     v6.16b, v0.16b, v4.16b
+        BIC      v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
         BIC     v17.16b, v2.16b, v4.16b
-        BIC     v4.16b, v3.16b, v4.16b
-        SSRA    v0.4s, v6.4s, 31
+        BIC     v4.16b,  v3.16b, v4.16b
+        SSRA    v0.4s,  v6.4s, 31
         SSRA    v1.4s, v16.4s, 31
         SSRA    v2.4s, v17.4s, 31
-        SSRA    v3.4s, v4.4s, 31
+        SSRA    v3.4s,  v4.4s, 31
         SRSHL   v0.4s, v0.4s, v7.4s
         SRSHL   v1.4s, v1.4s, v7.4s
         SRSHL   v2.4s, v2.4s, v7.4s
@@ -182,13 +160,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SQXTN   v2.4h, v2.4s
         SQXTN2  v0.8h, v1.4s
         SQXTN2  v2.8h, v3.4s
+        SUBS    x1, x1, 8
         SQADD   v0.8h, v0.8h, v5.8h
         SQADD   v1.8h, v2.8h, v5.8h
         SQXTN   v0.8b, v0.8h
         SQXTN2  v0.16b, v1.8h
         LD1R    {v1.16b}, [x9], 1
         LD1R    {v2.16b}, [x9]
-        SUBS    x1, x1, 8
         SMAX    v0.16b, v0.16b, v1.16b
         SMIN    v0.16b, v0.16b, v2.16b
         B.LO    4f
