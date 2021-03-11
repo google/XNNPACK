@@ -20,12 +20,14 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0  x3 v0
-# A1  x4 v1
-# B   x5 v4  v5  v6  v7
-# C0  x7 v2 v10 v12 v14 v16 v18 v20 v22 v24 v26 v28 v30
-# C1  x8 v3 v11 v13 v15 v17 v19 v21 v23 v25 v27 v29 v31
-# unused v8 v9
+# A0  x3  v0
+# A1  x4  v1
+# B   x5  v4  v5  v6  v7
+# C0  x7 v16 v18 v20 v22 v24 v26 v28 v30
+# C1  x8 v17 v19 v21 v23 v25 v27 v29 v31
+# temp0   v2 v10 v12 v14
+# temp1   v3 v11 v13 v15
+# unused  v8 v9
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
 
@@ -152,7 +154,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
         LD1R    {v2.16b}, [x9]
         SMAX    v0.16b, v0.16b, v1.16b
         SMIN    v0.16b, v0.16b, v2.16b
-        B.LO    4f
+        B.LO    2f
 
         # Store full 2 x 8
         ST1     {v0.8b}, [x6], x10
@@ -169,22 +171,22 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
 
         # Store odd width
         .p2align 3
-4:
-        TBZ     x1, 2, 5f
+2:
+        TBZ     x1, 2, 3f
         STR     s0, [x6], 4
         ST1     {v0.s}[2], [x7], 4
         EXT     v0.16b, v0.16b, v0.16b, 4
 
-5:
-        TBZ     x1, 1, 6f
+3:
+        TBZ     x1, 1, 4f
         ST1     {v0.h}[0], [x6], 2
         ST1     {v0.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
-6:
-        TBZ     x1, 0, 7f
+4:
+        TBZ     x1, 0, 5f
         ST1     {v0.b}[0], [x6]
         ST1     {v0.b}[8], [x7]
-7:
+5:
         # Restore d10-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]
