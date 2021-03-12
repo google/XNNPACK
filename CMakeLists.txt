@@ -3947,7 +3947,6 @@ INSTALL(TARGETS XNNPACK
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-
 # ---[ XNNPACK unit tests
 IF(XNNPACK_BUILD_TESTS)
   # ---[ Build google test
@@ -3959,15 +3958,6 @@ IF(XNNPACK_BUILD_TESTS)
   ENDIF()
 
   # ---[ Build size tests
-
-  ADD_EXECUTABLE(x32-packx-test test/x32-packx.cc)
-  SET_TARGET_PROPERTIES(x32-packx-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(x32-packx-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(x32-packx-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(x32-packx-test x32-packx-test)
 
   ADD_EXECUTABLE(operator-size-test test/operator-size.c)
   SET_TARGET_PROPERTIES(operator-size-test PROPERTIES
@@ -4550,7 +4540,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-ibilinear-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-ibilinear-test f32-ibilinear-test)
 
-
   ADD_EXECUTABLE(f32-ibilinear-chw-test test/f32-ibilinear-chw.cc)
   SET_TARGET_PROPERTIES(f32-ibilinear-chw-test PROPERTIES
     CXX_STANDARD 11
@@ -4924,14 +4913,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vdiv-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vdiv-relu-test f32-vdiv-relu-test)
 
-    ADD_EXECUTABLE(f32-vdivc-test test/f32-vdivc.cc)
-    SET_TARGET_PROPERTIES(f32-vdivc-test PROPERTIES
-      CXX_STANDARD 11
-      CXX_STANDARD_REQUIRED YES
-      CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(f32-vdivc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(f32-vdivc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-    ADD_TEST(f32-vdivc-test f32-vdivc-test)
+  ADD_EXECUTABLE(f32-vdivc-test test/f32-vdivc.cc)
+  SET_TARGET_PROPERTIES(f32-vdivc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vdivc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vdivc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vdivc-test f32-vdivc-test)
 
   ADD_EXECUTABLE(f32-vdivc-minmax-test test/f32-vdivc-minmax.cc)
   SET_TARGET_PROPERTIES(f32-vdivc-minmax-test PROPERTIES
@@ -4951,14 +4940,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vdivc-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vdivc-relu-test f32-vdivc-relu-test)
 
-    ADD_EXECUTABLE(f32-vrdivc-test test/f32-vrdivc.cc)
-    SET_TARGET_PROPERTIES(f32-vrdivc-test PROPERTIES
-      CXX_STANDARD 11
-      CXX_STANDARD_REQUIRED YES
-      CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(f32-vrdivc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(f32-vrdivc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-    ADD_TEST(f32-vrdivc-test f32-vrdivc-test)
+  ADD_EXECUTABLE(f32-vrdivc-test test/f32-vrdivc.cc)
+  SET_TARGET_PROPERTIES(f32-vrdivc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrdivc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vrdivc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vrdivc-test f32-vrdivc-test)
 
   ADD_EXECUTABLE(f32-vrdivc-minmax-test test/f32-vrdivc-minmax.cc)
   SET_TARGET_PROPERTIES(f32-vrdivc-minmax-test PROPERTIES
@@ -5040,16 +5029,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vmul-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vmul-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vmul-test f32-vmul-test)
-  IF(NOT CMAKE_SYSTEM_NAME MATCHES "Emscripten")
-    ADD_EXECUTABLE(f32-vmul-minmax-test test/f32-vmul-minmax.cc)
-    SET_TARGET_PROPERTIES(f32-vmul-minmax-test PROPERTIES
-      CXX_STANDARD 11
-      CXX_STANDARD_REQUIRED YES
-      CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(f32-vmul-minmax-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(f32-vmul-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-    ADD_TEST(f32-vmul-minmax-test f32-vmul-minmax-test)
-  ENDIF()
+
+  ADD_EXECUTABLE(f32-vmul-minmax-test test/f32-vmul-minmax.cc)
+  SET_TARGET_PROPERTIES(f32-vmul-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vmul-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vmul-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vmul-minmax-test f32-vmul-minmax-test)
 
   ADD_EXECUTABLE(f32-vmul-relu-test test/f32-vmul-relu.cc)
   SET_TARGET_PROPERTIES(f32-vmul-relu-test PROPERTIES
@@ -5114,16 +5102,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vneg-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vneg-test f32-vneg-test)
 
-  if(NOT CMAKE_SYSTEM_NAME MATCHES "Emscripten")
-    ADD_EXECUTABLE(f32-vrndne-test test/f32-vrndne.cc)
-    SET_TARGET_PROPERTIES(f32-vrndne-test PROPERTIES
-      CXX_STANDARD 11
-      CXX_STANDARD_REQUIRED YES
-      CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(f32-vrndne-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(f32-vrndne-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-    ADD_TEST(f32-vrndne-test f32-vrndne-test)
-  ENDIF()
+  ADD_EXECUTABLE(f32-vrndne-test test/f32-vrndne.cc)
+  SET_TARGET_PROPERTIES(f32-vrndne-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrndne-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-vrndne-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-vrndne-test f32-vrndne-test)
 
   ADD_EXECUTABLE(f32-vrndz-test test/f32-vrndz.cc)
   SET_TARGET_PROPERTIES(f32-vrndz-test PROPERTIES
@@ -5448,6 +5434,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(x32-fill-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(x32-fill-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(x32-fill-test x32-fill-test)
+
+  ADD_EXECUTABLE(x32-packx-test test/x32-packx.cc)
+  SET_TARGET_PROPERTIES(x32-packx-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x32-packx-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(x32-packx-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(x32-packx-test x32-packx-test)
 
   ADD_EXECUTABLE(x32-pad-test test/x32-pad.cc)
   SET_TARGET_PROPERTIES(x32-pad-test PROPERTIES
