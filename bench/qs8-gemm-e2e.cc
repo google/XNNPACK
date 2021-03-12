@@ -145,7 +145,7 @@ static void GEMMEnd2EndBenchmark(
   static void qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal,
-      xnn_qs8_igemm_minmax_ukernel_2x8c16__neon_mlal_padal,
+      xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal,
       xnn_qs8_gemm_minmax_ukernel_1x8c16__neon_mlal_padal,
       xnn_qs8_igemm_minmax_ukernel_1x8c16__neon_mlal_padal,
       2 /* mr */, 8  /* nr */, 4 /* log2_kr */, 0 /* log2_sr */,
