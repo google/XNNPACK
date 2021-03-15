@@ -5,48 +5,47 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal(
+# void xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
-#     const int8_t* restrict a,  x3
-#     size_t a_stride,           x4
-#     const void* restrict w,    x5
+#     size_t ks,                 x3 / x9
+#     const int8_t**restrict a,  x4
+#     const int8_t* restrict w,  x5
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
-#     size_t cn_stride,          [sp] -> x10
-#     const union xnn_qs8_gemm_params params)  [sp + 8] -> x9
+#     size_t cn_stride,                  [sp] -> x10
+#     size_t a_offset,                   [sp + 8] -> x11
+#     const float* zero,                 [sp + 16] -> x12
+#     const xnn_f32_minmax_params params [sp + 24] -> x8
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0  x3  v0
-# A1  x4  v1
-# B   x5  v4  v5  v6  v7
-# C0  x7 v16 v18 v20 v22 v24 v26 v28 v30
-# C1  x8 v17 v19 v21 v23 v25 v27 v29 v31
-# temp0   v2 v10 v12 v14
-# temp1   v3 v11 v13 v15
-# unused  v8 v9
+# A0 x13 v0
+# A1 x15 v1
+# B   x5 v4  v5  v6  v7
+# C0  x7 v2 v10 v12 v14 v16 v18 v20 v22 v24 v26 v28 v30
+# C1  x8 v3 v11 v13 v15 v17 v19 v21 v23 v25 v27 v29 v31
+# unused v8 v9
 
-BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
+BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
 
-        # Clamp A and C pointers
-        CMP     x0, 2             // if mr < 2
+        # Clamp C pointers
+        LDP     x10, x11, [sp]        // Load cn_stride, a_offset
+        CMP     x0, 2                 // if mr < 2
+        LDP     x12, x8, [sp, 16]     // Load zero, params pointer
+        ADD     x7, x6, x7            // c1 = c0 + cm_stride
         STP     d10, d11, [sp, -48]!
-        ADD     x4, x3, x4        // a1 = a0 + a_stride
+        ADD     x2, x2, 15            // kc = (kc + 15) & ~15
         STP     d12, d13, [sp, 16]
-        ADD     x7, x6, x7        // c1 = c0 + cm_stride
+        CSEL    x7, x6, x7, LO        //   c1 = c0
         STP     d14, d15, [sp, 32]
-        CSEL    x4, x3, x4, LO    //   a1 = a0
-        ADD     x2, x2, 15        // kc = (kc + 15) & ~15
-        CSEL    x7, x6, x7, LO    //   c1 = c0
         BIC     x2, x2, 15
 
         .p2align 3
 0:
         # Load initial bias from w into accumulators
-        MOV     x0, x2   // k = kc
         LDP     s16, s18, [x5], 8
         MOV     v17.4s, v16.4s
         MOV     v19.4s, v18.4s
@@ -58,15 +57,29 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         MOV     v27.4s, v26.4s
         LDP     s28, s30, [x5], 8
         MOV     v29.4s, v28.4s
-        LDP     x10, x9, [sp, 48]  // cn_stride, params
         MOV     v31.4s, v30.4s
+        MOV     x9, x3  // p = ks
+
+        .p2align 3
+1:
+        # Load next 2 A pointers
+        LDP     x13, x15, [x4], 16
+
+        CMP     x13, x12           // if a0 == zero
+        ADD     x13, x13, x11      // a0 += a_offset
+        CSEL    x13, x12, x13, EQ  //   a0 = zero, else += a0 + a_offset
+        CMP     x15, x12           // if a1 == zero
+        ADD     x15, x15, x11      // a1 += a_offset
+        CSEL    x15, x12, x15, EQ  //   a1 = zero, else += a1 + a_offset
+
+        MOV     x0, x2             // k = kc
 
         # Main loop - 16 bytes of A
         .p2align 3
-1:
-        LDR     q0, [x3], 16
+2:
+        LDR     q0, [x13], 16
         LDP     q4, q5, [x5]
-        LDR     q1, [x4], 16
+        LDR     q1, [x15], 16
         LDP     q6, q7, [x5, 32]
         SMULL    v2.8h, v4.8b, v0.8b
         SMULL    v3.8h, v4.8b, v1.8b
@@ -121,15 +134,19 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SADALP  v29.4s, v13.8h
         SADALP  v30.4s, v14.8h
         SADALP  v31.4s, v15.8h
+        B.HI    2b
+
+        # ks loop
+        SUBS    x9, x9, 16  // ks -= MR * sizeof(int8_t*)
         B.HI    1b
 
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
         ADDP    v20.4s, v20.4s, v22.4s
-        LD1R    {v4.4s}, [x9], 4
+        LD1R    {v4.4s}, [x8], 4
         ADDP    v24.4s, v24.4s, v26.4s
         ADDP    v28.4s, v28.4s, v30.4s
-        LD1R    {v7.4s}, [x9], 4
+        LD1R    {v7.4s}, [x8], 4
         ADDP    v17.4s, v17.4s, v19.4s
         ADDP    v21.4s, v21.4s, v23.4s
         ADDP    v25.4s, v25.4s, v27.4s
@@ -145,7 +162,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SQRDMULH        v2.4s, v2.4s, v4.4s
         SQRDMULH        v3.4s, v3.4s, v4.4s
         CMEQ    v4.4s, v7.4s, 0
-        LD1R    {v5.8h}, [x9], 2
+        LD1R    {v5.8h}, [x8], 2
         BIC      v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
         BIC     v17.16b, v2.16b, v4.16b
@@ -167,17 +184,20 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SQADD   v1.8h, v2.8h, v5.8h
         SQXTN   v0.8b, v0.8h
         SQXTN2  v0.16b, v1.8h
-        LD1R    {v1.16b}, [x9], 1
-        LD1R    {v2.16b}, [x9]
+        LD1R    {v1.16b}, [x8], 1
+        LD1R    {v2.16b}, [x8]
+        SUB     x8, x8, 11       // rewind params pointer
         SMAX    v0.16b, v0.16b, v1.16b
         SMIN    v0.16b, v0.16b, v2.16b
-        B.LO    4f
+        B.LO    3f
 
         # Store full 2 x 8
-        ST1     {v0.8b}, [x6], x10
-        SUB     x3, x3, x2     // a0 -= kc
         ST1     {v0.d}[1], [x7], x10
-        SUB     x4, x4, x2     // a1 -= kc
+        ST1     {v0.8b}, [x6], x10
+
+        SUB     x4, x4, x3  // a -= ks
+
+        # nc loop
         B.HI    0b
 
         # Restore d10-d15 from stack
@@ -188,29 +208,29 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
 
         # Store odd width
         .p2align 3
-4:
-        TBZ     x1, 2, 5f
-        STR     s0, [x6], 4
+3:
+        TBZ     x1, 2, 4f
         ST1     {v0.s}[2], [x7], 4
+        STR     s0, [x6], 4
         EXT     v0.16b, v0.16b, v0.16b, 4
 
-5:
-        TBZ     x1, 1, 6f
-        ST1     {v0.h}[0], [x6], 2
+4:
+        TBZ     x1, 1, 5f
         ST1     {v0.h}[4], [x7], 2
+        ST1     {v0.h}[0], [x6], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
-6:
-        TBZ     x1, 0, 7f
-        ST1     {v0.b}[0], [x6]
+5:
+        TBZ     x1, 0, 6f
         ST1     {v0.b}[8], [x7]
-7:
+        ST1     {v0.b}[0], [x6]
+6:
         # Restore d10-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]
         LDP     d10, d11, [sp], 48
         RET
 
-END_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
+END_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

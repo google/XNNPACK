@@ -19,11 +19,11 @@ void xnn_math_f32_exp__avx512f_rr2_lut32_p2_perm2(
   assert(n % (16 * sizeof(float)) == 0);
 
   const __m512 vmagic_bias = _mm512_set1_ps(0x1.800000p23f);
+  const __m512 vlog2e_x32  = _mm512_set1_ps(0x1.715476p5f);
   // The smallest x for which expf(x) is non-zero.
   const __m512 vzero_cutoff = _mm512_set1_ps(-0x1.9FE368p6f);
   // The largest x for which expf(x) is finite.
   const __m512 vinf_cutoff = _mm512_set1_ps(0x1.62E42Ep6f);
-  const __m512 vlog2e_x32  = _mm512_set1_ps(0x1.715476p5f);
   const __m512 vminus_ln2_o32_hi = _mm512_set1_ps(-0x1.62e43p-6f);
   const __m512 vminus_ln2_o32_lo = _mm512_set1_ps(0x1.05c61p-34f);
   const __m512 vplus_inf = _mm512_set1_ps(INFINITY);
@@ -57,6 +57,10 @@ void xnn_math_f32_exp__avx512f_rr2_lut32_p2_perm2(
     // inputs at the very end of the algorithm.
     __m512 vn = _mm512_fmadd_ps(vx, vlog2e_x32, vmagic_bias);
 
+    // Detect underflow and overflow of expf(x) for further special handling.
+    const __mmask16 vinvof = _mm512_cmp_ps_mask(vx, vinf_cutoff, _CMP_NGT_UQ);
+    const __mmask16 vinvuf = _mm512_cmp_ps_mask(vx, vzero_cutoff, _CMP_NLT_UQ);
+
     // Create two floating-point numbers, sn (scale, normal) and so (scale, overflow) such that sn * so == 2**n
     // for inputs which don't cause overflow, i.e. -103.97207 <= x <= 88.72283, and -150 <= n <= 128 accordingly.
     // We need to use two numbers rather than one because a normalized single-precision exponent must be in [-127, 126]
@@ -69,7 +73,7 @@ void xnn_math_f32_exp__avx512f_rr2_lut32_p2_perm2(
     ven = _mm512_min_epi32(ven, vmax_exponent);
     veo = _mm512_sub_epi32(veo, ven);
     const __m512 vsn = _mm512_castsi512_ps(_mm512_add_epi32(ven, vdefault_exponent));
-    const __m512 vso = _mm512_castsi512_ps(_mm512_add_epi32(veo, vdefault_exponent));
+    const __m512 vso = _mm512_castsi512_ps(_mm512_maskz_add_epi32(vinvuf, veo, vdefault_exponent));
 
     // Use the low 5 bits of n (as integer) for table lookup.
     const __m512 vl = _mm512_permutex2var_ps(vtable_lo, _mm512_castps_si512(vn), vtable_hi);
@@ -94,10 +98,10 @@ void xnn_math_f32_exp__avx512f_rr2_lut32_p2_perm2(
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = _mm512_maskz_mul_ps(_mm512_cmp_ps_mask(vx, vzero_cutoff, _CMP_NLT_US), vf, vsn);
+    vf = _mm512_maskz_mul_ps(vinvuf, vf, vsn);
     // For inputs above inf cutoff, replace output with +inf.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = _mm512_mask_mul_ps(vplus_inf, _mm512_cmp_ps_mask(vx, vinf_cutoff, _CMP_NGT_US), vso, vf);
+    vf = _mm512_mask_mul_ps(vplus_inf, vinvof, vso, vf);
     _mm512_storeu_ps(output, vf);
 
     input += 16;

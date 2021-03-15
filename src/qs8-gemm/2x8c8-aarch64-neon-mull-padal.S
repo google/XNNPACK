@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal(
+# void xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -29,7 +29,7 @@
 # temp1   v3 v11 v13 v15
 # unused  v8 v9
 
-BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
+BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
 
         # Clamp A and C pointers
         CMP     x0, 2             // if mr < 2
@@ -39,9 +39,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         ADD     x7, x6, x7        // c1 = c0 + cm_stride
         STP     d14, d15, [sp, 32]
         CSEL    x4, x3, x4, LO    //   a1 = a0
-        ADD     x2, x2, 15        // kc = (kc + 15) & ~15
+        ADD     x2, x2, 7         // kc = (kc + 7) & ~7
         CSEL    x7, x6, x7, LO    //   c1 = c0
-        BIC     x2, x2, 15
+        BIC     x2, x2, 7
 
         .p2align 3
 0:
@@ -61,21 +61,17 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         LDP     x10, x9, [sp, 48]  // cn_stride, params
         MOV     v31.4s, v30.4s
 
-        # Main loop - 16 bytes of A
+        # Main loop - 8 bytes of A
         .p2align 3
 1:
-        LDR     q0, [x3], 16
-        LDP     q4, q5, [x5]
-        LDR     q1, [x4], 16
-        LDP     q6, q7, [x5, 32]
+        LDR     d0, [x3], 8
+        LDP     d4, d5, [x5]
+        LDR     d1, [x4], 8
+        LDP     d6, d7, [x5, 16]
         SMULL    v2.8h, v4.8b, v0.8b
         SMULL    v3.8h, v4.8b, v1.8b
         SMULL   v10.8h, v5.8b, v0.8b
         SMULL   v11.8h, v5.8b, v1.8b
-        SMLAL2   v2.8h, v4.16b, v0.16b
-        SMLAL2   v3.8h, v4.16b, v1.16b
-        SMLAL2  v10.8h, v5.16b, v0.16b
-        SMLAL2  v11.8h, v5.16b, v1.16b
         SMULL   v12.8h, v6.8b, v0.8b
         SADALP  v16.4s,  v2.8h
         SMULL   v13.8h, v6.8b, v1.8b
@@ -84,11 +80,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SADALP  v18.4s, v10.8h
         SMULL   v15.8h, v7.8b, v1.8b
         SADALP  v19.4s, v11.8h
-        LDP     q4, q5, [x5, 64]
-        SMLAL2  v12.8h, v6.16b, v0.16b
-        SMLAL2  v13.8h, v6.16b, v1.16b
-        SMLAL2  v14.8h, v7.16b, v0.16b
-        SMLAL2  v15.8h, v7.16b, v1.16b
+        LDP     d4, d5, [x5, 32]
         SMULL    v2.8h, v4.8b, v0.8b
         SADALP  v20.4s, v12.8h
         SMULL    v3.8h, v4.8b, v1.8b
@@ -97,13 +89,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SADALP  v22.4s, v14.8h
         SMULL   v11.8h, v5.8b, v1.8b
         SADALP  v23.4s, v15.8h
-        LDP     q6, q7, [x5, 96]
-
-        SMLAL2   v2.8h, v4.16b, v0.16b
-        SMLAL2   v3.8h, v4.16b, v1.16b
-        SMLAL2  v10.8h, v5.16b, v0.16b
-        SMLAL2  v11.8h, v5.16b, v1.16b
-        ADD     x5, x5, 128
+        LDP     d6, d7, [x5, 48]
         SMULL   v12.8h, v6.8b, v0.8b
         SADALP  v24.4s,  v2.8h
         SMULL   v13.8h, v6.8b, v1.8b
@@ -112,13 +98,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SADALP  v26.4s, v10.8h
         SMULL   v15.8h, v7.8b, v1.8b
         SADALP  v27.4s, v11.8h
-        SUBS    x0, x0, 16
-        SMLAL2  v12.8h, v6.16b, v0.16b
-        SMLAL2  v13.8h, v6.16b, v1.16b
-        SMLAL2  v14.8h, v7.16b, v0.16b
-        SMLAL2  v15.8h, v7.16b, v1.16b
+        ADD     x5, x5, 64
         SADALP  v28.4s, v12.8h
         SADALP  v29.4s, v13.8h
+        SUBS    x0, x0, 8
         SADALP  v30.4s, v14.8h
         SADALP  v31.4s, v15.8h
         B.HI    1b
@@ -171,7 +154,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         LD1R    {v2.16b}, [x9]
         SMAX    v0.16b, v0.16b, v1.16b
         SMIN    v0.16b, v0.16b, v2.16b
-        B.LO    4f
+        B.LO    2f
 
         # Store full 2 x 8
         ST1     {v0.8b}, [x6], x10
@@ -188,29 +171,29 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
 
         # Store odd width
         .p2align 3
-4:
-        TBZ     x1, 2, 5f
+2:
+        TBZ     x1, 2, 3f
         STR     s0, [x6], 4
         ST1     {v0.s}[2], [x7], 4
         EXT     v0.16b, v0.16b, v0.16b, 4
 
-5:
-        TBZ     x1, 1, 6f
+3:
+        TBZ     x1, 1, 4f
         ST1     {v0.h}[0], [x6], 2
         ST1     {v0.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
-6:
-        TBZ     x1, 0, 7f
+4:
+        TBZ     x1, 0, 5f
         ST1     {v0.b}[0], [x6]
         ST1     {v0.b}[8], [x7]
-7:
+5:
         # Restore d10-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]
         LDP     d10, d11, [sp], 48
         RET
 
-END_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
+END_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
