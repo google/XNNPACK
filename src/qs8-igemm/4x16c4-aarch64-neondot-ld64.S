@@ -145,11 +145,11 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         # Is there a remainder?- 4 bytes of A
         TBNZ    x0, 2, 4f
 
-3:
         # ks loop
         SUBS    x9, x9, 32  // ks -= MR * sizeof(int8_t*)
         B.HI    1b
 
+3:
         # Apply params - scale, shift, bias and clamp
         LD2R    {v0.4s, v1.4s}, [x8], 8
         CMEQ    v2.4s, v1.4s, 0
@@ -323,6 +323,10 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v29.4s, v7.16b, v1.4b[0]
         SDOT    v30.4s, v7.16b, v2.4b[0]
         SDOT    v31.4s, v7.16b, v3.4b[0]
+
+        # ks loop
+        SUBS    x9, x9, 32  // ks -= MR * sizeof(int8_t*)
+        B.HI    1b
         B       3b
 
         # Store odd width

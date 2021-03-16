@@ -22,12 +22,14 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0 x13 v0
-# A1 x15 v1
-# B   x5 v4  v5  v6  v7
-# C0  x7 v2 v10 v12 v14 v16 v18 v20 v22 v24 v26 v28 v30
-# C1  x8 v3 v11 v13 v15 v17 v19 v21 v23 v25 v27 v29 v31
-# unused v8 v9
+# A0 x13  v0
+# A1 x15  v1
+# B   x5  v4  v5  v6  v7
+# C0  x7 v16 v18 v20 v22 v24 v26 v28 v30
+# C1  x8 v17 v19 v21 v23 v25 v27 v29 v31
+# temp0   v2 v10 v12 v14
+# temp1   v3 v11 v13 v15
+# unused  v8 v9
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
 
@@ -186,16 +188,15 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SQXTN2  v0.16b, v1.8h
         LD1R    {v1.16b}, [x8], 1
         LD1R    {v2.16b}, [x8]
-        SUB     x8, x8, 11       // rewind params pointer
         SMAX    v0.16b, v0.16b, v1.16b
+        SUB     x8, x8, 11       // rewind params pointer
         SMIN    v0.16b, v0.16b, v2.16b
         B.LO    3f
 
         # Store full 2 x 8
         ST1     {v0.d}[1], [x7], x10
-        ST1     {v0.8b}, [x6], x10
-
         SUB     x4, x4, x3  // a -= ks
+        ST1     {v0.8b}, [x6], x10
 
         # nc loop
         B.HI    0b

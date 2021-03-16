@@ -150,11 +150,11 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         # Is there a remainder?- 8 bytes of A
         TBNZ    x0, 3, 4f
 
-3:
         # ks loop
         SUBS    x9, x9, 16  // ks -= MR * sizeof(int8_t*)
         B.HI    1b
 
+3:
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
         ADDP    v20.4s, v20.4s, v22.4s
@@ -201,8 +201,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         SQXTN2  v0.16b, v1.8h
         LD1R    {v1.16b}, [x8], 1
         LD1R    {v2.16b}, [x8]
-        SUB     x8, x8, 11       // rewind params pointer
         SMAX    v0.16b, v0.16b, v1.16b
+        SUB     x8, x8, 11       // rewind params pointer
         SMIN    v0.16b, v0.16b, v2.16b
         B.LO    5f
 
@@ -264,6 +264,10 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         SADALP  v29.4s, v13.8h
         SADALP  v30.4s, v14.8h
         SADALP  v31.4s, v15.8h
+
+        # ks loop
+        SUBS    x9, x9, 16  // ks -= MR * sizeof(int8_t*)
+        B.HI    1b
         B       3b
 
         # Store odd width
