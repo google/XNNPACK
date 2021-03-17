@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2019 Adobe
+# Copyright (c) 2021 Adobe
 # All Rights Reserved.
 #
 # This source code is licensed under the BSD-style license found in the
