@@ -37,31 +37,25 @@
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
-        # Load cn_stride, a_offset
-        LDP     x10, x11, [sp]
-
-        # Load zero, params pointer
-        LDP     x12, x8, [sp, 16]
-
-        # Save x20-x21 on stack
-        STP     x20, x21, [sp, -48]!
-
         # Clamp C pointers
-        CMP      x0, 2              // if mr < 2
-        STP      d8,  d9, [sp, 16]  // Save d8-d11 on stack
-        ADD     x16, x6, x7         // c1 = c0 + cm_stride
-        STP     d10, d11, [sp, 32]
-        CSEL    x16, x6,  x16, LO   //   c1 = c0
-        ADD      x2, x2, 3          // kc = (kc + 3) & ~3
+        CMP      x0, 2                // if mr < 2
+        LDP     x10, x11, [sp]        // Load cn_stride, a_offset
+        ADD     x16, x6, x7           // c1 = c0 + cm_stride
+        LDP     x12, x8, [sp, 16]     // Load zero, params pointer
+        CSEL    x16, x6,  x16, LO     //   c1 = c0
+        STP     x20, x21, [sp, -48]!  // Save x20-x21 on stack
+        ADD      x2, x2, 3            // kc = (kc + 3) & ~3
+        STP      d8,  d9, [sp, 16]    // Save d8-d11 on stack
 
-        ADD     x17, x16, x7        // c2 = c1 + cm_stride
-                                    // if mr <= 2
-        CSEL    x17, x16, x17, LS   //   c2 = c1
+        ADD     x17, x16, x7          // c2 = c1 + cm_stride
+        STP     d10, d11, [sp, 32]
+                                      // if mr <= 2
+        CSEL    x17, x16, x17, LS     //   c2 = c1
         BIC      x2, x2, 3
 
-        CMP      x0, 4              // if mr < 4
-        ADD      x7,  x17, x7       // c3 = c2 + cm_stride
-        CSEL     x7,  x17, x7, LO   //   c3 = c2
+        CMP      x0, 4                // if mr < 4
+        ADD      x7,  x17, x7         // c3 = c2 + cm_stride
+        CSEL     x7,  x17, x7, LO     //   c3 = c2
 
         .p2align 3
 0:
@@ -430,7 +424,6 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
         .p2align 3
 4:
-
         # ks loop
         SUBS    x9, x9, 32  // ks -= MR * sizeof(int8_t*)
         B.HI    1b
