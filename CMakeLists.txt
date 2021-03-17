@@ -4444,45 +4444,41 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-dwconv2d-chw-test f32-dwconv2d-chw-test)
 
-  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-    ADD_EXECUTABLE(f16-dwconv-minmax-test test/f16-dwconv-minmax.cc)
-    SET_TARGET_PROPERTIES(f16-dwconv-minmax-test PROPERTIES
-      CXX_STANDARD 11
-      CXX_STANDARD_REQUIRED YES
-      CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(f16-dwconv-minmax-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(f16-dwconv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-    ADD_TEST(f16-dwconv-minmax-test f16-dwconv-minmax-test)
+  ADD_EXECUTABLE(f16-dwconv-minmax-test test/f16-dwconv-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-dwconv-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-dwconv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-dwconv-minmax-test f16-dwconv-minmax-test)
 
-    ADD_EXECUTABLE(f32-dwconv-minmax-test test/f32-dwconv-minmax.cc)
-    SET_TARGET_PROPERTIES(f32-dwconv-minmax-test PROPERTIES
-      CXX_STANDARD 11
-      CXX_STANDARD_REQUIRED YES
-      CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(f32-dwconv-minmax-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(f32-dwconv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-    ADD_TEST(f32-dwconv-minmax-test f32-dwconv-minmax-test)
-  ENDIF()
+  ADD_EXECUTABLE(f32-dwconv-minmax-test test/f32-dwconv-minmax.cc)
+  SET_TARGET_PROPERTIES(f32-dwconv-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-dwconv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-dwconv-minmax-test f32-dwconv-minmax-test)
 
-  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-    ADD_EXECUTABLE(f32-gavgpool-cw-test test/f32-gavgpool-cw.cc)
-    SET_TARGET_PROPERTIES(f32-gavgpool-cw-test PROPERTIES
-      CXX_STANDARD 11
-      CXX_STANDARD_REQUIRED YES
-      CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-cw-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(f32-gavgpool-cw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-    ADD_TEST(f32-gavgpool-cw-test f32-gavgpool-cw-test)
+  ADD_EXECUTABLE(f32-gavgpool-cw-test test/f32-gavgpool-cw.cc)
+  SET_TARGET_PROPERTIES(f32-gavgpool-cw-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-cw-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f32-gavgpool-cw-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f32-gavgpool-cw-test f32-gavgpool-cw-test)
 
-    ADD_EXECUTABLE(f16-gavgpool-minmax-test test/f16-gavgpool-minmax.cc)
-    SET_TARGET_PROPERTIES(f16-gavgpool-minmax-test PROPERTIES
-      CXX_STANDARD 11
-      CXX_STANDARD_REQUIRED YES
-      CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(f16-gavgpool-minmax-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(f16-gavgpool-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-    ADD_TEST(f16-gavgpool-minmax-test f16-gavgpool-minmax-test)
-  ENDIF()
+  ADD_EXECUTABLE(f16-gavgpool-minmax-test test/f16-gavgpool-minmax.cc)
+  SET_TARGET_PROPERTIES(f16-gavgpool-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-gavgpool-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(f16-gavgpool-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(f16-gavgpool-minmax-test f16-gavgpool-minmax-test)
 
   ADD_EXECUTABLE(f32-gavgpool-minmax-test test/f32-gavgpool-minmax.cc)
   SET_TARGET_PROPERTIES(f32-gavgpool-minmax-test PROPERTIES
