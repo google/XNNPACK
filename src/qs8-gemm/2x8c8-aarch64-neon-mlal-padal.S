@@ -61,26 +61,27 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         LDP     x10, x9, [sp, 64]  // cn_stride, params
         MOV     v31.4s, v30.4s
         # Is there at least 16 bytes for epilogue?
-        B.LO    3f
+        B.LO    4f
 
         # Prologue
         LDP     d0, d6, [x3], 16   // Read A0
-
-        SUBS    x0, x0, 16         // k = kc - 16
-        # Is there at least 16 bytes for mainloop?
-        B.LO    1f
-
-        # Main loop - 16 bytes of A
-        .p2align 3
-11:
         LDP     d4, d5, [x5]
         LDP     d1, d7, [x4], 16
         LDP     d8, d9, [x5, 64]
         SMULL    v2.8h, v4.8b, v0.8b
         SMULL    v3.8h, v4.8b, v1.8b
+        SUBS    x0, x0, 16         // k = kc - 16
         SMULL   v10.8h, v5.8b, v0.8b
         SMULL   v11.8h, v5.8b, v1.8b
         LDP     d4, d5, [x5, 16]
+
+        # Is there at least 16 bytes for mainloop?
+        B.LO    2f
+
+        # Main loop - 16 bytes of A
+
+        .p2align 3
+1:
         SMLAL    v2.8h, v8.8b, v6.8b
         SMLAL    v3.8h, v8.8b, v7.8b
         SMLAL   v10.8h, v9.8b, v6.8b
@@ -125,32 +126,33 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         SADALP  v26.4s, v10.8h
         SMULL   v15.8h, v5.8b, v1.8b
         SADALP  v27.4s, v11.8h
+        LDP     d4, d5, [x5, 128]  // Read B0
         SMLAL   v12.8h, v8.8b, v6.8b
         SMLAL   v13.8h, v8.8b, v7.8b
-        SMLAL   v14.8h, v9.8b, v6.8b
-        SMLAL   v15.8h, v9.8b, v7.8b
         ADD     x5, x5, 128
-
-        SADALP  v28.4s, v12.8h
-        SADALP  v29.4s, v13.8h
+        SMLAL   v14.8h, v9.8b, v6.8b
         LDP     d0, d6, [x3], 16   // Read A0
-        SADALP  v30.4s, v14.8h
-        SUBS    x0, x0, 16
-        SADALP  v31.4s, v15.8h
-        B.HS    11b
+        SMLAL   v15.8h, v9.8b, v7.8b
 
-        # Epilogue loop - 16 bytes of A
-        # Same as main loop except no read a0
-        .p2align 3
-1:
-        LDP     d4, d5, [x5]
+# start of next loop
         LDP     d1, d7, [x4], 16
         LDP     d8, d9, [x5, 64]
         SMULL    v2.8h, v4.8b, v0.8b
+        SADALP  v28.4s, v12.8h
         SMULL    v3.8h, v4.8b, v1.8b
+        SADALP  v29.4s, v13.8h
         SMULL   v10.8h, v5.8b, v0.8b
+        SADALP  v30.4s, v14.8h
         SMULL   v11.8h, v5.8b, v1.8b
+        SUBS    x0, x0, 16
+        SADALP  v31.4s, v15.8h
         LDP     d4, d5, [x5, 16]
+        B.HS    1b
+
+        # Epilogue loop - 16 bytes of A
+        # Same as main loop except no read a0, b0
+        .p2align 3
+2:
         SMLAL    v2.8h, v8.8b, v6.8b
         SMLAL    v3.8h, v8.8b, v7.8b
         SMLAL   v10.8h, v9.8b, v6.8b
@@ -207,10 +209,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         SADALP  v31.4s, v15.8h
 
         # Is there a remainder?- 8 bytes of A
-        TBNZ    x0, 3, 3f
+        TBNZ    x0, 3, 4f
 
         .p2align 3
-2:
+3:
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
         ADDP    v20.4s, v20.4s, v22.4s
@@ -259,7 +261,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         LD1R    {v2.16b}, [x9]
         SMAX    v0.16b, v0.16b, v1.16b
         SMIN    v0.16b, v0.16b, v2.16b
-        B.LO    4f
+        B.LO    5f
 
         # Store full 2 x 8
         ST1     {v0.8b}, [x6], x10
@@ -277,7 +279,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
 
         # Remainder - 8 bytes of A
         .p2align 3
-3:
+4:
         LDR     d0, [x3], 8
         LDP     d4, d5, [x5]
         LDR     d1, [x4], 8
@@ -317,26 +319,26 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         SADALP  v29.4s, v13.8h
         SADALP  v30.4s, v14.8h
         SADALP  v31.4s, v15.8h
-        B       2b
+        B       3b
 
         # Store odd width
         .p2align 3
-4:
-        TBZ     x1, 2, 5f
+5:
+        TBZ     x1, 2, 6f
         STR     s0, [x6], 4
         ST1     {v0.s}[2], [x7], 4
         EXT     v0.16b, v0.16b, v0.16b, 4
 
-5:
-        TBZ     x1, 1, 6f
+6:
+        TBZ     x1, 1, 7f
         ST1     {v0.h}[0], [x6], 2
         ST1     {v0.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
-6:
-        TBZ     x1, 0, 7f
+7:
+        TBZ     x1, 0, 8f
         ST1     {v0.b}[0], [x6]
         ST1     {v0.b}[8], [x7]
-7:
+8:
         # Restore d8-d15 from stack
         LDP     d14, d15, [sp, 48]
         LDP     d12, d13, [sp, 32]
