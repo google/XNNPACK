@@ -22,12 +22,6 @@ OPTION(XNNPACK_ENABLE_SPARSE "Build XNNPACK with graph rewriting for sparse infe
 OPTION(XNNPACK_BUILD_TESTS "Build XNNPACK unit tests" ON)
 OPTION(XNNPACK_BUILD_BENCHMARKS "Build XNNPACK benchmarks" ON)
 OPTION(XNNPACK_USE_SYSTEM_LIBS "Use system-provided dependency libraries" OFF)
-OPTION(XNNPACK_BUILD_WASM_WITH_SIMD "Build XNNPACK WASM with SIMD" OFF)
-OPTION(XNNPACK_BUILD_WASM_WITH_PTHREAD "Build WASM with threads" OFF)
-
-IF(XNNPACK_BUILD_TESTS OR XNNPACK_BUILD_BENCHMARKS)
-  set(CMAKE_EXECUTABLE_SUFFIX ".html")
-ENDIF()
 
 # --- [ Determine target processor
 SET(XNNPACK_TARGET_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}")
@@ -40,16 +34,6 @@ INCLUDE(GNUInstallDirs)
 
 IF(XNNPACK_BUILD_TESTS)
   ENABLE_TESTING()
-ENDIF()
-
-if(XNNPACK_BUILD_WASM_WITH_SIMD)
-  ADD_COMPILE_OPTIONS(-msimd128)
-  SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} --js-flags=--experimental-wasm-simd ")
-ENDIF()
-
-if(XNNPACK_BUILD_WASM_WITH_PTHREAD)
-  ADD_COMPILE_OPTIONS(-pthread)
-  SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} --js-flags=--experimental-wasm-threads ")
 ENDIF()
 
 IF(XNNPACK_ENABLE_ASSEMBLY)
@@ -3731,7 +3715,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(i[3-6]86|x86_64|AMD64)$" OR IOS_ARCH MATC
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AVX512SKX_MICROKERNEL_SRCS})
 ENDIF()
 IF(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-  MESSAGE("Adding WebAssembly Source Files")
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_WASM_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_WASM_ASM_MICROKERNEL_SRCS})
   if(XNNPACK_BUILD_WASM_WITH_SIMD)
@@ -4409,14 +4392,16 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-clamp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-clamp-test f32-clamp-test)
 
-  ADD_EXECUTABLE(f32-conv-hwc-test test/f32-conv-hwc.cc)
-  SET_TARGET_PROPERTIES(f32-conv-hwc-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-conv-hwc-test f32-conv-hwc-test)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f32-conv-hwc-test test/f32-conv-hwc.cc)
+    SET_TARGET_PROPERTIES(f32-conv-hwc-test PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(f32-conv-hwc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_TEST(f32-conv-hwc-test f32-conv-hwc-test)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-conv-hwc2chw-test test/f32-conv-hwc2chw.cc)
   SET_TARGET_PROPERTIES(f32-conv-hwc2chw-test PROPERTIES
@@ -4508,14 +4493,16 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-gemm-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-gemm-relu-test f32-gemm-relu-test)
 
-  ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-gemm-minmax-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-gemm-minmax-test f32-gemm-minmax-test)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc)
+    SET_TARGET_PROPERTIES(f32-gemm-minmax-test PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_TEST(f32-gemm-minmax-test f32-gemm-minmax-test)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-gemminc-minmax-test test/f32-gemminc-minmax.cc)
   SET_TARGET_PROPERTIES(f32-gemminc-minmax-test PROPERTIES
@@ -5522,121 +5509,122 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       "${CONFU_DEPENDENCIES_BINARY_DIR}/googlebenchmark")
   ENDIF()
 
-  SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -s ASSERTIONS=2 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXIT_RUNTIME=1 -s ALLOW_MEMORY_GROWTH=1 -s TOTAL_MEMORY=436207616")
 
-  ADD_LIBRARY(bench-utils bench/utils.cc)
-  SET_TARGET_PROPERTIES(bench-utils PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(bench-utils PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark cpuinfo)
+    ADD_LIBRARY(bench-utils bench/utils.cc)
+    SET_TARGET_PROPERTIES(bench-utils PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(bench-utils PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark cpuinfo)
 
-  # ---[ Build accuracy microbenchmarks
-  ADD_EXECUTABLE(f32-exp-ulp-eval eval/f32-exp-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-exp-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-exp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-exp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    # ---[ Build accuracy microbenchmarks
+    IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f32-exp-ulp-eval eval/f32-exp-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-exp-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-exp-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-exp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-expminus-ulp-eval eval/f32-expminus-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-expminus-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expminus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expminus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    ADD_EXECUTABLE(f32-expminus-ulp-eval eval/f32-expminus-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-expminus-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-expminus-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-expminus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-expm1minus-ulp-eval eval/f32-expm1minus-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-expm1minus-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    ADD_EXECUTABLE(f32-expm1minus-ulp-eval eval/f32-expm1minus-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-expm1minus-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-extexp-ulp-eval eval/f32-extexp-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-extexp-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-extexp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    ADD_EXECUTABLE(f32-extexp-ulp-eval eval/f32-extexp-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-extexp-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-extexp-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-sigmoid-ulp-eval eval/f32-sigmoid-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-sigmoid-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sigmoid-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    ADD_EXECUTABLE(f32-sigmoid-ulp-eval eval/f32-sigmoid-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-sigmoid-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-sigmoid-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-sqrt-ulp-eval eval/f32-sqrt-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-sqrt-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-sqrt-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    ADD_EXECUTABLE(f32-sqrt-ulp-eval eval/f32-sqrt-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-sqrt-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-sqrt-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  # ---[ Build accuracy tests
-  ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc)
-  SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-exp-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    # ---[ Build accuracy tests
+    ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc)
+    SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-exp-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-expm1minus-eval eval/f32-expm1minus.cc)
-  SET_TARGET_PROPERTIES(f32-expm1minus-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-expm1minus-eval eval/f32-expm1minus.cc)
+    SET_TARGET_PROPERTIES(f32-expm1minus-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-expminus-eval eval/f32-expminus.cc)
-  SET_TARGET_PROPERTIES(f32-expminus-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-expminus-eval eval/f32-expminus.cc)
+    SET_TARGET_PROPERTIES(f32-expminus-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-roundne-eval eval/f32-roundne.cc)
-  SET_TARGET_PROPERTIES(f32-roundne-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundne-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-roundne-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-roundne-eval eval/f32-roundne.cc)
+    SET_TARGET_PROPERTIES(f32-roundne-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-roundne-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-roundne-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-roundd-eval eval/f32-roundd.cc)
-  SET_TARGET_PROPERTIES(f32-roundd-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundd-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-roundd-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-roundd-eval eval/f32-roundd.cc)
+    SET_TARGET_PROPERTIES(f32-roundd-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-roundd-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-roundd-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-roundu-eval eval/f32-roundu.cc)
-  SET_TARGET_PROPERTIES(f32-roundu-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundu-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-roundu-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-roundu-eval eval/f32-roundu.cc)
+    SET_TARGET_PROPERTIES(f32-roundu-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-roundu-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-roundu-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-roundz-eval eval/f32-roundz.cc)
-  SET_TARGET_PROPERTIES(f32-roundz-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundz-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-roundz-eval eval/f32-roundz.cc)
+    SET_TARGET_PROPERTIES(f32-roundz-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-roundz-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ENDIF()
 
   # ---[ Build end-to-end microbenchmarks
   ADD_LIBRARY(bench-models STATIC
@@ -5662,13 +5650,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(bench-models PRIVATE XNNPACK fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(end2end-bench bench/end2end.cc)
-  SET_TARGET_PROPERTIES(end2end-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-models bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(end2end-bench bench/end2end.cc)
+    SET_TARGET_PROPERTIES(end2end-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-models bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-dwconv-e2e-bench bench/f32-dwconv-e2e.cc)
   SET_TARGET_PROPERTIES(f32-dwconv-e2e-bench PROPERTIES
@@ -5726,22 +5716,24 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(channel-shuffle-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(channel-shuffle-bench PRIVATE XNNPACK benchmark bench-utils)
+  
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(convolution-bench bench/convolution.cc)
+    SET_TARGET_PROPERTIES(convolution-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(convolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(convolution-bench bench/convolution.cc)
-  SET_TARGET_PROPERTIES(convolution-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(convolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
-
-  ADD_EXECUTABLE(deconvolution-bench bench/deconvolution.cc)
-  SET_TARGET_PROPERTIES(deconvolution-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(deconvolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark bench-utils)
+    ADD_EXECUTABLE(deconvolution-bench bench/deconvolution.cc)
+    SET_TARGET_PROPERTIES(deconvolution-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(deconvolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(elu-bench bench/elu.cc)
   SET_TARGET_PROPERTIES(elu-bench PROPERTIES
@@ -5759,13 +5751,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(floor-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(floor-bench PRIVATE XNNPACK benchmark bench-utils)
 
-  ADD_EXECUTABLE(global-average-pooling-bench bench/global-average-pooling.cc)
-  SET_TARGET_PROPERTIES(global-average-pooling-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(global-average-pooling-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(global-average-pooling-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(global-average-pooling-bench bench/global-average-pooling.cc)
+    SET_TARGET_PROPERTIES(global-average-pooling-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(global-average-pooling-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(global-average-pooling-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(hardswish-bench bench/hardswish.cc)
   SET_TARGET_PROPERTIES(hardswish-bench PROPERTIES
@@ -5824,77 +5818,80 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK benchmark bench-utils)
 
   # ---[ Build microkernel-level microbenchmarks
-  ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc)
-  SET_TARGET_PROPERTIES(f16-igemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc)
+    SET_TARGET_PROPERTIES(f16-igemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f16-gemm-bench bench/f16-gemm.cc)
-  SET_TARGET_PROPERTIES(f16-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f16-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f16-gemm-bench bench/f16-gemm.cc)
+    SET_TARGET_PROPERTIES(f16-gemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f16-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f16-relu-bench bench/f16-relu.cc)
-  SET_TARGET_PROPERTIES(f16-relu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-relu-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f16-relu-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f16-relu-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f16-relu-bench bench/f16-relu.cc)
+    SET_TARGET_PROPERTIES(f16-relu-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f16-relu-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f16-relu-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f16-relu-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-conv-hwc-bench bench/f32-conv-hwc.cc)
-  SET_TARGET_PROPERTIES(f32-conv-hwc-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-conv-hwc-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-conv-hwc-bench bench/f32-conv-hwc.cc)
+    SET_TARGET_PROPERTIES(f32-conv-hwc-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-conv-hwc-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f16-dwconv-bench bench/f16-dwconv.cc)
-  SET_TARGET_PROPERTIES(f16-dwconv-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f16-dwconv-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f16-dwconv-bench bench/f16-dwconv.cc)
+    SET_TARGET_PROPERTIES(f16-dwconv-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f16-dwconv-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc)
-  SET_TARGET_PROPERTIES(f32-dwconv-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-dwconv2d-chw-bench bench/f32-dwconv2d-chw.cc)
-  SET_TARGET_PROPERTIES(f32-dwconv2d-chw-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc)
+    SET_TARGET_PROPERTIES(f32-dwconv-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-gemm-bench bench/f32-gemm.cc)
-  SET_TARGET_PROPERTIES(f32-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-dwconv2d-chw-bench bench/f32-dwconv2d-chw.cc)
+    SET_TARGET_PROPERTIES(f32-dwconv2d-chw-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+
+    ADD_EXECUTABLE(f32-gemm-bench bench/f32-gemm.cc)
+    SET_TARGET_PROPERTIES(f32-gemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-hswish-bench bench/f32-hswish.cc)
   SET_TARGET_PROPERTIES(f32-hswish-bench PROPERTIES
@@ -5905,44 +5902,47 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-hswish-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-hswish-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-igemm-bench bench/f32-igemm.cc)
-  SET_TARGET_PROPERTIES(f32-igemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-igemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f32-igemm-bench bench/f32-igemm.cc)
+    SET_TARGET_PROPERTIES(f32-igemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-igemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  
 
-  ADD_EXECUTABLE(f32-im2col-gemm-bench bench/f32-im2col-gemm.cc src/im2col.c)
-  SET_TARGET_PROPERTIES(f32-im2col-gemm-bench PROPERTIES
-    C_STANDARD 99
-    C_STANDARD_REQUIRED YES
-    C_EXTENSIONS NO
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-im2col-gemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-im2col-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-im2col-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-im2col-gemm-bench bench/f32-im2col-gemm.cc src/im2col.c)
+    SET_TARGET_PROPERTIES(f32-im2col-gemm-bench PROPERTIES
+      C_STANDARD 99
+      C_STANDARD_REQUIRED YES
+      C_EXTENSIONS NO
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-im2col-gemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-im2col-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-im2col-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-relu-bench bench/f32-relu.cc)
-  SET_TARGET_PROPERTIES(f32-relu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-relu-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-relu-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-relu-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-relu-bench bench/f32-relu.cc)
+    SET_TARGET_PROPERTIES(f32-relu-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-relu-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-relu-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-relu-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-rmax-bench bench/f32-rmax.cc)
-  SET_TARGET_PROPERTIES(f32-rmax-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-rmax-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-rmax-bench bench/f32-rmax.cc)
+    SET_TARGET_PROPERTIES(f32-rmax-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-rmax-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-sigmoid-bench bench/f32-sigmoid.cc)
   SET_TARGET_PROPERTIES(f32-sigmoid-bench PROPERTIES
@@ -5953,14 +5953,16 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-sigmoid-bench PRIVATE XNNPACK benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-spmm-bench bench/f32-spmm.cc)
-  SET_TARGET_PROPERTIES(f32-spmm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-spmm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f32-spmm-bench bench/f32-spmm.cc)
+    SET_TARGET_PROPERTIES(f32-spmm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-spmm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-softmax-bench bench/f32-softmax.cc)
   SET_TARGET_PROPERTIES(f32-softmax-bench PROPERTIES
@@ -5989,48 +5991,51 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(qs8-gemm-bench bench/qs8-gemm.cc)
-  SET_TARGET_PROPERTIES(qs8-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(qs8-gemm-bench bench/qs8-gemm.cc)
+    SET_TARGET_PROPERTIES(qs8-gemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(qs8-requantization-bench bench/qs8-requantization.cc)
-  SET_TARGET_PROPERTIES(qs8-requantization-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(qs8-requantization-bench bench/qs8-requantization.cc)
+    SET_TARGET_PROPERTIES(qs8-requantization-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(qu8-gemm-bench bench/qu8-gemm.cc)
-  SET_TARGET_PROPERTIES(qu8-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(qu8-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(qu8-gemm-bench bench/qu8-gemm.cc)
+    SET_TARGET_PROPERTIES(qu8-gemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(qu8-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(qu8-requantization-bench bench/qu8-requantization.cc)
-  SET_TARGET_PROPERTIES(qu8-requantization-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(qu8-requantization-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(qu8-requantization-bench bench/qu8-requantization.cc)
+    SET_TARGET_PROPERTIES(qu8-requantization-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(qu8-requantization-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(rounding-bench bench/rounding.cc)
-  SET_TARGET_PROPERTIES(rounding-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(rounding-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+
+    ADD_EXECUTABLE(rounding-bench bench/rounding.cc)
+    SET_TARGET_PROPERTIES(rounding-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(rounding-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  ENDIF()
 ENDIF()
