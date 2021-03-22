@@ -65,31 +65,107 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         .p2align 3
 1:
         # Load next 2 A pointers
+        SUBS    x0, x2, 16          // k = kc - 16
         LDP     x13, x15, [x4], 16
-
         CMP     x13, x12           // if a0 == zero
         ADD     x13, x13, x11      // a0 += a_offset
         CSEL    x13, x12, x13, EQ  //   a0 = zero, else += a0 + a_offset
         CMP     x15, x12           // if a1 == zero
         ADD     x15, x15, x11      // a1 += a_offset
         CSEL    x15, x12, x15, EQ  //   a1 = zero, else += a1 + a_offset
-
-        # Is there at least 16 bytes for main loop?
-        SUBS    x0, x2, 16          // k = kc - 16
+        # Is there at least 16 bytes for epilogue?
         B.LO    4f
 
-         # Main loop - 16 bytes of A
-        .p2align 3
-2:
-        LDP     d0, d6, [x13], 16
+        # Prologue
+        LDP     d0, d6, [x13], 16  // Read A0
         LDP     d4, d5, [x5]
         LDP     d1, d7, [x15], 16
         LDP     d8, d9, [x5, 64]
         SMULL    v2.8h, v4.8b, v0.8b
         SMULL    v3.8h, v4.8b, v1.8b
+        SUBS    x0, x0, 16         // k = kc - 16
         SMULL   v10.8h, v5.8b, v0.8b
         SMULL   v11.8h, v5.8b, v1.8b
         LDP     d4, d5, [x5, 16]
+
+        # Is there at least 16 bytes for mainloop?
+        B.LO    2f
+
+        # Main loop - 16 bytes of A
+
+        .p2align 3
+11:
+        SMLAL    v2.8h, v8.8b, v6.8b
+        SMLAL    v3.8h, v8.8b, v7.8b
+        SMLAL   v10.8h, v9.8b, v6.8b
+        SMLAL   v11.8h, v9.8b, v7.8b
+
+        LDP     d8, d9, [x5, 80]
+        SMULL   v12.8h, v4.8b, v0.8b
+        SADALP  v16.4s,  v2.8h
+        SMULL   v13.8h, v4.8b, v1.8b
+        SADALP  v17.4s,  v3.8h
+        SMULL   v14.8h, v5.8b, v0.8b
+        SADALP  v18.4s, v10.8h
+        SMULL   v15.8h, v5.8b, v1.8b
+        SADALP  v19.4s, v11.8h
+        LDP     d4, d5, [x5, 32]
+        SMLAL   v12.8h, v8.8b, v6.8b
+        SMLAL   v13.8h, v8.8b, v7.8b
+        SMLAL   v14.8h, v9.8b, v6.8b
+        SMLAL   v15.8h, v9.8b, v7.8b
+
+        LDP     d8, d9, [x5, 96]
+        SMULL    v2.8h, v4.8b, v0.8b
+        SADALP  v20.4s, v12.8h
+        SMULL    v3.8h, v4.8b, v1.8b
+        SADALP  v21.4s, v13.8h
+        SMULL   v10.8h, v5.8b, v0.8b
+        SADALP  v22.4s, v14.8h
+        SMULL   v11.8h, v5.8b, v1.8b
+        SADALP  v23.4s, v15.8h
+        LDP     d4, d5, [x5, 48]
+        SMLAL    v2.8h, v8.8b, v6.8b
+        SMLAL    v3.8h, v8.8b, v7.8b
+        SMLAL   v10.8h, v9.8b, v6.8b
+        SMLAL   v11.8h, v9.8b, v7.8b
+
+        LDP     d8, d9, [x5, 112]
+        SMULL   v12.8h, v4.8b, v0.8b
+        SADALP  v24.4s,  v2.8h
+        SMULL   v13.8h, v4.8b, v1.8b
+        SADALP  v25.4s,  v3.8h
+        SMULL   v14.8h, v5.8b, v0.8b
+        SADALP  v26.4s, v10.8h
+        SMULL   v15.8h, v5.8b, v1.8b
+        SADALP  v27.4s, v11.8h
+        LDP     d4, d5, [x5, 128]  // Read B0
+        SMLAL   v12.8h, v8.8b, v6.8b
+        SMLAL   v13.8h, v8.8b, v7.8b
+        ADD     x5, x5, 128
+        SMLAL   v14.8h, v9.8b, v6.8b
+        LDP     d0, d6, [x13], 16  // Read A0
+        SMLAL   v15.8h, v9.8b, v7.8b
+
+        # Start of next loop iteration
+        LDP     d1, d7, [x15], 16
+        LDP     d8, d9, [x5, 64]
+        SMULL    v2.8h, v4.8b, v0.8b
+        SADALP  v28.4s, v12.8h
+        SMULL    v3.8h, v4.8b, v1.8b
+        SADALP  v29.4s, v13.8h
+        SMULL   v10.8h, v5.8b, v0.8b
+        SADALP  v30.4s, v14.8h
+        SMULL   v11.8h, v5.8b, v1.8b
+        SUBS    x0, x0, 16
+        SADALP  v31.4s, v15.8h
+        LDP     d4, d5, [x5, 16]
+        B.HS    11b
+
+        # Epilogue loop - 16 bytes of A
+        # Same as main loop except no read a0, b0
+        .p2align 3
+2:
         SMLAL    v2.8h, v8.8b, v6.8b
         SMLAL    v3.8h, v8.8b, v7.8b
         SMLAL   v10.8h, v9.8b, v6.8b
@@ -142,10 +218,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
 
         SADALP  v28.4s, v12.8h
         SADALP  v29.4s, v13.8h
-        SUBS    x0, x0, 16
         SADALP  v30.4s, v14.8h
         SADALP  v31.4s, v15.8h
-        B.HS    2b
 
         # Is there a remainder?- 8 bytes of A
         TBNZ    x0, 3, 4f

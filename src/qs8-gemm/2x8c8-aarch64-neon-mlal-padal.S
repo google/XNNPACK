@@ -134,7 +134,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         LDP     d0, d6, [x3], 16   // Read A0
         SMLAL   v15.8h, v9.8b, v7.8b
 
-# start of next loop
+        # Start of next loop iteration
         LDP     d1, d7, [x4], 16
         LDP     d8, d9, [x5, 64]
         SMULL    v2.8h, v4.8b, v0.8b
