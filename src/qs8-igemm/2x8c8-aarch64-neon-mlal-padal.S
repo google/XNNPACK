@@ -49,17 +49,17 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
 0:
         # Load initial bias from w into accumulators
         LDP     s16, s18, [x5], 8
-        MOV     v17.4s, v16.4s
-        MOV     v19.4s, v18.4s
+        MOV     v17.16b, v16.16b
+        MOV     v19.16b, v18.16b
         LDP     s20, s22, [x5], 8
-        MOV     v21.4s, v20.4s
-        MOV     v23.4s, v22.4s
+        MOV     v21.16b, v20.16b
+        MOV     v23.16b, v22.16b
         LDP     s24, s26, [x5], 8
-        MOV     v25.4s, v24.4s
-        MOV     v27.4s, v26.4s
+        MOV     v25.16b, v24.16b
+        MOV     v27.16b, v26.16b
         LDP     s28, s30, [x5], 8
-        MOV     v29.4s, v28.4s
-        MOV     v31.4s, v30.4s
+        MOV     v29.16b, v28.16b
+        MOV     v31.16b, v30.16b
         MOV     x9, x3  // p = ks
 
         .p2align 3
