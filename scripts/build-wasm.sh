@@ -8,7 +8,6 @@
 
 set -e
 
-rm -rf build/wasm
 mkdir -p build/wasm
 
 CMAKE_ARGS=()
