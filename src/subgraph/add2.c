@@ -56,6 +56,14 @@ enum xnn_status xnn_define_add2(
     return xnn_status_invalid_parameter;
   }
 
+  const struct xnn_value* input1_value = &subgraph->values[input1_id];
+  if (input1_value->type != xnn_value_type_dense_tensor) {
+    xnn_log_error(
+      "failed to define %s operator with the first input ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
+      xnn_node_type_to_string(xnn_node_type_add2), input1_id, input1_value->type);
+    return xnn_status_invalid_parameter;
+  }
+
   if (input2_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with the second input ID #%" PRIu32 ": invalid Value ID",
@@ -63,10 +71,26 @@ enum xnn_status xnn_define_add2(
     return xnn_status_invalid_parameter;
   }
 
+  const struct xnn_value* input2_value = &subgraph->values[input2_id];
+  if (input2_value->type != xnn_value_type_dense_tensor) {
+    xnn_log_error(
+      "failed to define %s operator with the second input ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
+      xnn_node_type_to_string(xnn_node_type_add2), input2_id, input2_value->type);
+    return xnn_status_invalid_parameter;
+  }
+
   if (output_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
       xnn_node_type_to_string(xnn_node_type_add2), output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_value* output_value = &subgraph->values[output_id];
+  if (output_value->type != xnn_value_type_dense_tensor) {
+    xnn_log_error(
+      "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
+      xnn_node_type_to_string(xnn_node_type_add2), output_id, output_value->type);
     return xnn_status_invalid_parameter;
   }
 

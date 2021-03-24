@@ -57,10 +57,26 @@ enum xnn_status xnn_define_fully_connected(
     return xnn_status_invalid_parameter;
   }
 
+  const struct xnn_value* input_value = &subgraph->values[input_id];
+  if (input_value->type != xnn_value_type_dense_tensor) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), input_id, input_value->type);
+    return xnn_status_invalid_parameter;
+  }
+
   if (filter_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with filter ID #%" PRIu32 ": invalid Value ID",
       xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_value* filter_value = &subgraph->values[filter_id];
+  if (filter_value->type != xnn_value_type_dense_tensor) {
+    xnn_log_error(
+      "failed to define %s operator with filter ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id, filter_value->type);
     return xnn_status_invalid_parameter;
   }
 
@@ -71,10 +87,26 @@ enum xnn_status xnn_define_fully_connected(
     return xnn_status_invalid_parameter;
   }
 
+  const struct xnn_value* bias_value = &subgraph->values[bias_id];
+  if (bias_value->type != xnn_value_type_dense_tensor) {
+    xnn_log_error(
+      "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id, bias_value->type);
+    return xnn_status_invalid_parameter;
+  }
+
   if (output_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
       xnn_node_type_to_string(xnn_node_type_fully_connected), output_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_value* output_value = &subgraph->values[output_id];
+  if (output_value->type != xnn_value_type_dense_tensor) {
+    xnn_log_error(
+      "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), output_id, output_value->type);
     return xnn_status_invalid_parameter;
   }
 
