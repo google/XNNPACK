@@ -97,9 +97,9 @@ static void GEMMEnd2EndBenchmark(
   static void qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal,
-      xnn_qs8_igemm_minmax_ukernel_1x8c8__neon_mlal_padal,
+      xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal,
       xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal,
-      xnn_qs8_igemm_minmax_ukernel_1x8c8__neon_mlal_padal,
+      xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal,
       1 /* mr */, 8  /* nr */, 3 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
   }
@@ -139,7 +139,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal,
       xnn_qs8_igemm_minmax_ukernel_2x8c8__neon_mull_padal,
       xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal,
-      xnn_qs8_igemm_minmax_ukernel_1x8c8__neon_mlal_padal,
+      xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal,
       2 /* mr */, 8  /* nr */, 3 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
   }
@@ -148,7 +148,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal,
       xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal,
       xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal,
-      xnn_qs8_igemm_minmax_ukernel_1x8c8__neon_mlal_padal,
+      xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal,
       2 /* mr */, 8  /* nr */, 3 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
   }
