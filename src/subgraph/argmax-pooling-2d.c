@@ -59,8 +59,19 @@ enum xnn_status xnn_define_argmax_pooling_2d(
   if (input_value->type != xnn_value_type_dense_tensor) {
     xnn_log_error(
       "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_average_pooling_2d), input_id, input_value->type);
+      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), input_id, input_value->type);
     return xnn_status_invalid_parameter;
+  }
+
+  switch (input_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), input_id,
+        xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+      return xnn_status_invalid_parameter;
   }
 
   if (output_value_id >= subgraph->num_values) {
@@ -76,6 +87,17 @@ enum xnn_status xnn_define_argmax_pooling_2d(
       "failed to define %s operator with output value ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
       xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), output_value_id, output_value_value->type);
     return xnn_status_invalid_parameter;
+  }
+
+  switch (output_value_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with output value ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), output_value_id,
+        xnn_datatype_to_string(output_value_value->datatype), output_value_value->datatype);
+      return xnn_status_invalid_parameter;
   }
 
   if (output_index_id >= subgraph->num_values) {

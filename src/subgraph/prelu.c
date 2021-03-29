@@ -41,6 +41,17 @@ enum xnn_status xnn_define_prelu(
     return xnn_status_invalid_parameter;
   }
 
+  switch (input_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_prelu), input_id,
+        xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+      return xnn_status_invalid_parameter;
+  }
+
   if (slope_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with slope ID #%" PRIu32 ": invalid Value ID",
@@ -56,6 +67,17 @@ enum xnn_status xnn_define_prelu(
     return xnn_status_invalid_parameter;
   }
 
+  switch (slope_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with slope ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_prelu), slope_id,
+        xnn_datatype_to_string(slope_value->datatype), slope_value->datatype);
+      return xnn_status_invalid_parameter;
+  }
+
   if (output_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
@@ -69,6 +91,17 @@ enum xnn_status xnn_define_prelu(
       "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
       xnn_node_type_to_string(xnn_node_type_prelu), output_id, output_value->type);
     return xnn_status_invalid_parameter;
+  }
+
+  switch (output_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_prelu), output_id,
+        xnn_datatype_to_string(output_value->datatype), output_value->datatype);
+      return xnn_status_invalid_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

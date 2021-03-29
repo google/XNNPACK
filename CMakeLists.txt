@@ -221,6 +221,7 @@ SET(XNNPACK_SUBGRAPH_SRCS
   src/subgraph/unpooling-2d.c)
 
 SET(XNNPACK_LOGGING_SRCS
+  src/datatype-strings.c
   src/operator-strings.c
   src/subgraph-strings.c)
 

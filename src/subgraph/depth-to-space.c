@@ -36,8 +36,19 @@ enum xnn_status xnn_define_depth_to_space(
   if (input_value->type != xnn_value_type_dense_tensor) {
     xnn_log_error(
       "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_clamp), input_id, input_value->type);
+      xnn_node_type_to_string(xnn_node_type_depth_to_space), input_id, input_value->type);
     return xnn_status_invalid_parameter;
+  }
+
+  switch (input_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_depth_to_space), input_id,
+        xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+      return xnn_status_invalid_parameter;
   }
 
   if (output_id >= subgraph->num_values) {
@@ -51,8 +62,19 @@ enum xnn_status xnn_define_depth_to_space(
   if (output_value->type != xnn_value_type_dense_tensor) {
     xnn_log_error(
       "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_clamp), output_id, output_value->type);
+      xnn_node_type_to_string(xnn_node_type_depth_to_space), output_id, output_value->type);
     return xnn_status_invalid_parameter;
+  }
+
+  switch (output_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_depth_to_space), output_id,
+        xnn_datatype_to_string(output_value->datatype), output_value->datatype);
+      return xnn_status_invalid_parameter;
   }
 
   if (block_size < 2) {

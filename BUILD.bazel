@@ -3676,6 +3676,7 @@ LOGGING_SRCS = select({
     # No logging in optimized mode
     ":optimized_build": [],
     "//conditions:default": [
+        "src/datatype-strings.c",
         "src/operator-strings.c",
         "src/subgraph-strings.c",
     ],

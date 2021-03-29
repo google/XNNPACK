@@ -65,6 +65,17 @@ enum xnn_status xnn_define_fully_connected(
     return xnn_status_invalid_parameter;
   }
 
+  switch (input_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), input_id,
+        xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+      return xnn_status_invalid_parameter;
+  }
+
   if (filter_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with filter ID #%" PRIu32 ": invalid Value ID",
@@ -78,6 +89,17 @@ enum xnn_status xnn_define_fully_connected(
       "failed to define %s operator with filter ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
       xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id, filter_value->type);
     return xnn_status_invalid_parameter;
+  }
+
+  switch (filter_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with filter ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id,
+        xnn_datatype_to_string(filter_value->datatype), filter_value->datatype);
+      return xnn_status_invalid_parameter;
   }
 
   if (bias_id >= subgraph->num_values) {
@@ -95,6 +117,17 @@ enum xnn_status xnn_define_fully_connected(
     return xnn_status_invalid_parameter;
   }
 
+  switch (bias_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id,
+        xnn_datatype_to_string(bias_value->datatype), bias_value->datatype);
+      return xnn_status_invalid_parameter;
+  }
+
   if (output_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
@@ -108,6 +141,17 @@ enum xnn_status xnn_define_fully_connected(
       "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
       xnn_node_type_to_string(xnn_node_type_fully_connected), output_id, output_value->type);
     return xnn_status_invalid_parameter;
+  }
+
+  switch (output_value->datatype) {
+    case xnn_datatype_fp32:
+      break;
+    default:
+      xnn_log_error(
+        "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), output_id,
+        xnn_datatype_to_string(output_value->datatype), output_value->datatype);
+      return xnn_status_invalid_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

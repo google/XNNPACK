@@ -30,16 +30,21 @@ extern "C" {
 #endif
 
 #if XNN_LOG_LEVEL == 0
-  inline static const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
+  inline static const char* xnn_datatype_to_string(enum xnn_datatype type) {
     return "Unknown";
   }
 
   inline static const char* xnn_node_type_to_string(enum xnn_node_type type) {
     return "Unknown";
   }
+
+  inline static const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
+    return "Unknown";
+  }
 #else
-  const char* xnn_operator_type_to_string(enum xnn_operator_type type);
+  const char* xnn_datatype_to_string(enum xnn_datatype type);
   const char* xnn_node_type_to_string(enum xnn_node_type type);
+  const char* xnn_operator_type_to_string(enum xnn_operator_type type);
 #endif
 
 #ifdef __cplusplus
