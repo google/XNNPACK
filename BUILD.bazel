@@ -4437,45 +4437,6 @@ xnnpack_aggregate_library(
     ],
 )
 
-# This target must be compatible with Android NDK r17 and compile with Clang 6.
-# It is similar to :ukernels target, but excludes microkernels which require
-# NEON FP16 arithmetics, NEON Dot Product, and newer intrinsics.
-xnnpack_aggregate_library(
-    name = "ukernels_max_compatibility",
-    aarch32_deps = [
-        ":neon_ukernels",
-        ":neonfma_ukernels",
-        ":neonv8_ukernels",
-        ":asm_ukernels",
-    ],
-    aarch64_deps = [
-        ":neon_ukernels",
-        ":neonfma_ukernels",
-        ":neonv8_ukernels",
-        ":asm_ukernels",
-    ],
-    generic_deps = [
-        ":scalar_ukernels",
-    ],
-    wasm_deps = [
-        ":wasm_ukernels",
-    ],
-    wasmsimd_deps = [
-        ":wasm_ukernels",
-    ],
-    x86_deps = [
-        ":sse2_ukernels",
-        ":ssse3_ukernels",
-        ":sse41_ukernels",
-        ":avx_ukernels",
-        ":xop_ukernels",
-        ":fma3_ukernels",
-        ":avx2_ukernels",
-        ":avx512f_ukernels",
-        ":avx512skx_ukernels",
-    ],
-)
-
 xnnpack_cc_library(
     name = "im2col",
     srcs = ["src/im2col.c"],
@@ -4826,7 +4787,7 @@ xnnpack_cc_library(
         ":memory_planner",
         ":operator_run",
         ":operators",
-        ":ukernels_max_compatibility",
+        ":ukernels",
         "@clog",
         "@FP16",
         "@pthreadpool",
@@ -4876,7 +4837,7 @@ xnnpack_cc_library(
         ":memory_planner",
         ":operator_run",
         ":operators",
-        ":ukernels_max_compatibility",
+        ":ukernels",
         "@clog",
         "@FP16",
         "@pthreadpool",
