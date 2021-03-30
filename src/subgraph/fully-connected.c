@@ -91,6 +91,13 @@ enum xnn_status xnn_define_fully_connected(
     return xnn_status_invalid_parameter;
   }
 
+  if (filter_value->data == NULL) {
+    xnn_log_error(
+      "failed to define %s operator with filter ID #%" PRIu32 ": non-static Value",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id);
+    return xnn_status_invalid_parameter;
+  }
+
   switch (filter_value->datatype) {
     case xnn_datatype_fp32:
       break;
@@ -114,6 +121,13 @@ enum xnn_status xnn_define_fully_connected(
     xnn_log_error(
       "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
       xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id, bias_value->type);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (bias_value->data == NULL) {
+    xnn_log_error(
+      "failed to define %s operator with bias ID #%" PRIu32 ": non-static Value",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id);
     return xnn_status_invalid_parameter;
   }
 
