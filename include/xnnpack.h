@@ -172,9 +172,9 @@ enum xnn_datatype {
   xnn_datatype_fp32 = 1,
   /// IEEE754 half-precision floating-point.
   xnn_datatype_fp16 = 2,
-  /// Quantized 8-bit signed integer with per-tensor quantization parameters.
+  /// Quantized 8-bit signed integer with shared per-Value quantization parameters.
   xnn_datatype_qint8 = 3,
-  /// Quantized 32-bit signed integer with per-tensor quantization parameters.
+  /// Quantized 32-bit signed integer with shared per-Value quantization parameters.
   xnn_datatype_qint32 = 4,
 };
 
@@ -209,8 +209,8 @@ enum xnn_status xnn_define_tensor_value(
 ///
 /// @param subgraph - a Subgraph object that will own the created Value.
 /// @param datatype - type of the tensor elements.
-/// @param zero_point - offset from zero of the quantized values in the tensor.
-/// @param scale - multiplication factor to convert quantized values to real representation.
+/// @param zero_point - offset from zero to subtract from the quantized elements in the Value.
+/// @param scale - multiplication factor to convert quantized elements to real representation.
 /// @param num_dims - number of dimensions in the shape.
 /// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
 ///               XNNPACK does not keep any pointers to this array after the function returns.
