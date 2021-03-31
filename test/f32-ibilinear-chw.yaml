@@ -11,3 +11,5 @@
 - name: xnn_f32_ibilinear_chw_ukernel__neon_p8
 - name: xnn_f32_ibilinear_chw_ukernel__neonfma_p4
 - name: xnn_f32_ibilinear_chw_ukernel__neonfma_p8
+- name: xnn_f32_ibilinear_chw_ukernel__sse_p4
+- name: xnn_f32_ibilinear_chw_ukernel__sse_p8

@@ -1622,6 +1622,8 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-hswish/gen/hswish-sse-x8.c
   src/f32-ibilinear/gen/sse-c4.c
   src/f32-ibilinear/gen/sse-c8.c
+  src/f32-ibilinear-chw/gen/sse-p4.c
+  src/f32-ibilinear-chw/gen/sse-p8.c
   src/f32-igemm/gen/1x8-minmax-sse-dup.c
   src/f32-igemm/gen/1x8-minmax-sse-load1.c
   src/f32-igemm/gen/1x8s4-minmax-sse.c

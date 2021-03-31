@@ -471,7 +471,7 @@ static void init(void) {
         xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
           .ukernel = (xnn_ibilinear_chw_ukernel_function) xnn_f32_ibilinear_chw_ukernel__neon_p8,
           .channel_tile = 1,
-          .pixel_tile = 4,
+          .pixel_tile = 8,
         };
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
@@ -1399,7 +1399,7 @@ static void init(void) {
       xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
         .ukernel = (xnn_ibilinear_chw_ukernel_function) xnn_f32_ibilinear_chw_ukernel__neonfma_p8,
         .channel_tile = 1,
-        .pixel_tile = 4,
+        .pixel_tile = 8,
       };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
@@ -2065,9 +2065,9 @@ static void init(void) {
         .channel_tile = 4,
       };
       xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
-        .ukernel = (xnn_ibilinear_chw_ukernel_function) xnn_f32_ibilinear_chw_ukernel__scalar_p4,
+        .ukernel = (xnn_ibilinear_chw_ukernel_function) xnn_f32_ibilinear_chw_ukernel__sse_p8,
         .channel_tile = 1,
-        .pixel_tile = 4,
+        .pixel_tile = 8,
       };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
@@ -2584,7 +2584,7 @@ static void init(void) {
       xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
         .ukernel = (xnn_ibilinear_chw_ukernel_function) xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8,
         .channel_tile = 1,
-        .pixel_tile = 4,
+        .pixel_tile = 8,
       };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
