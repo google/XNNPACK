@@ -4749,54 +4749,6 @@ xnnpack_cc_library(
     }),
 )
 
-xnnpack_cc_library(
-    name = "xnnpack_f32",
-    srcs = [
-        "src/init.c",
-        "src/runtime.c",
-        "src/subgraph.c",
-        "src/tensor.c",
-    ] + SUBGRAPH_SRCS,
-    hdrs = ["include/xnnpack.h"],
-    copts = LOGGING_COPTS + [
-        "-Isrc",
-        "-Iinclude",
-    ] + select({
-        ":debug_build": [],
-        "//conditions:default": xnnpack_min_size_copts(),
-    }) + select({
-        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
-        "//conditions:default": [],
-    }),
-    defines = [
-        "XNN_NO_QS8_OPERATORS",
-        "XNN_NO_QU8_OPERATORS",
-        "XNN_NO_U8_OPERATORS",
-        "XNN_NO_X8_OPERATORS",
-        "XNN_NO_F16_OPERATORS",
-        "XNN_NO_X16_OPERATORS",
-    ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    includes = ["include"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        ":enable_assembly",
-        ":enable_sparse",
-        ":logging_utils",
-        ":memory_planner",
-        ":operator_run",
-        ":operators",
-        ":ukernels",
-        "@clog",
-        "@FP16",
-        "@pthreadpool",
-    ] + select({
-        ":emscripten": [],
-        "//conditions:default": ["@cpuinfo"],
-    }),
-)
-
 # Specialized XNNPACK version for TensorFlow Lite. Excludes operators currently
 # not used by the TensorFlow Lite XNNPACK delegate to minimize code size.
 xnnpack_cc_library(
