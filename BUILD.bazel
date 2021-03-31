@@ -7348,13 +7348,13 @@ config_setting(
 # Enable usage of optimized memory allocation
 config_setting(
     name = "xnn_enable_memopt_explicit_true",
-    define_values = {"xnnpack_enable_memopt": "true"},
+    define_values = {"xnn_enable_memopt": "true"},
 )
 
 # Disable usage of optimized memory allocation
 config_setting(
     name = "xnn_enable_memopt_explicit_false",
-    define_values = {"xnnpack_enable_memopt": "false"},
+    define_values = {"xnn_enable_memopt": "false"},
 )
 
 # Enable QS8 inference in TFLite-specific version
