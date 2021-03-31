@@ -4771,13 +4771,16 @@ xnnpack_cc_library(
         "//conditions:default": [],
     }),
     defines = [
-        "XNN_NO_QS8_OPERATORS",
         "XNN_NO_QU8_OPERATORS",
         "XNN_NO_U8_OPERATORS",
         "XNN_NO_X8_OPERATORS",
         "XNN_NO_F16_OPERATORS",
         "XNN_NO_X16_OPERATORS",
-    ],
+    ] + select({
+        ":xnn_enable_qs8_explicit_true": [],
+        ":xnn_enable_qs8_explicit_false": ["XNN_NO_QS8_OPERATORS"],
+        "//conditions:default": ["XNN_NO_QS8_OPERATORS"],
+    }),
     gcc_copts = xnnpack_gcc_std_copts(),
     includes = ["include"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -7352,6 +7355,18 @@ config_setting(
 config_setting(
     name = "xnn_enable_memopt_explicit_false",
     define_values = {"xnnpack_enable_memopt": "false"},
+)
+
+# Enable QS8 inference in TFLite-specific version
+config_setting(
+    name = "xnn_enable_qs8_explicit_true",
+    define_values = {"xnn_enable_qs8": "true"},
+)
+
+# Disable QS8 inference in TFLite-specific version
+config_setting(
+    name = "xnn_enable_qs8_explicit_false",
+    define_values = {"xnn_enable_qs8": "false"},
 )
 
 # Builds with -c dbg
