@@ -102,11 +102,37 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_add2:
-        status = xnn_create_add_nd_f32(
-          node->activation.output_min,
-          node->activation.output_max,
-          node->flags,
-          &runtime->opdata[i].operator_object);
+        switch (values[node->outputs[0]].datatype) {
+          case xnn_datatype_fp32:
+            status = xnn_create_add_nd_f32(
+              node->activation.output_min,
+              node->activation.output_max,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+#ifndef XNN_NO_QS8_OPERATORS
+          case xnn_datatype_qint8:
+          {
+            const float output_scale = values[node->outputs[0]].quantization.scale;
+            const int32_t output_zero_point = values[node->outputs[0]].quantization.zero_point;
+            const int8_t output_min =
+              (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+            const int8_t output_max =
+              (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+            status = xnn_create_add_nd_qs8(
+              (int8_t) values[node->inputs[0]].quantization.zero_point,
+              values[node->inputs[0]].quantization.scale,
+              (int8_t) values[node->inputs[1]].quantization.zero_point,
+              values[node->inputs[1]].quantization.scale,
+              (int8_t) output_zero_point,
+              output_scale, output_min, output_max, node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+          }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+          default:
+            XNN_UNREACHABLE;
+        }
         if (status != xnn_status_success) {
           goto error;
         }
@@ -242,28 +268,71 @@ enum xnn_status xnn_create_runtime_v2(
         } else {
           assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
           assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
-          status = xnn_create_convolution2d_nhwc_f32(
-            node->params.convolution_2d.input_padding_top,
-            node->params.convolution_2d.input_padding_right,
-            node->params.convolution_2d.input_padding_bottom,
-            node->params.convolution_2d.input_padding_left,
-            node->params.convolution_2d.kernel_height,
-            node->params.convolution_2d.kernel_width,
-            node->params.convolution_2d.subsampling_height,
-            node->params.convolution_2d.subsampling_width,
-            node->params.convolution_2d.dilation_height,
-            node->params.convolution_2d.dilation_width,
-            node->params.convolution_2d.groups,
-            node->params.convolution_2d.group_input_channels,
-            node->params.convolution_2d.group_output_channels,
-            node->params.convolution_2d.group_input_channels * node->params.convolution_2d.groups /* input_pixel_stride */,
-            node->params.convolution_2d.group_output_channels * node->params.convolution_2d.groups /* output_pixel_stride */,
-            values[node->inputs[1]].data,
-            values[node->inputs[2]].data,
-            node->activation.output_min,
-            node->activation.output_max,
-            node->flags,
-            &runtime->opdata[i].operator_object);
+          switch (values[node->outputs[0]].datatype) {
+            case xnn_datatype_fp32:
+              status = xnn_create_convolution2d_nhwc_f32(
+                node->params.convolution_2d.input_padding_top,
+                node->params.convolution_2d.input_padding_right,
+                node->params.convolution_2d.input_padding_bottom,
+                node->params.convolution_2d.input_padding_left,
+                node->params.convolution_2d.kernel_height,
+                node->params.convolution_2d.kernel_width,
+                node->params.convolution_2d.subsampling_height,
+                node->params.convolution_2d.subsampling_width,
+                node->params.convolution_2d.dilation_height,
+                node->params.convolution_2d.dilation_width,
+                node->params.convolution_2d.groups,
+                node->params.convolution_2d.group_input_channels,
+                node->params.convolution_2d.group_output_channels,
+                node->params.convolution_2d.group_input_channels * node->params.convolution_2d.groups /* input_pixel_stride */,
+                node->params.convolution_2d.group_output_channels * node->params.convolution_2d.groups /* output_pixel_stride */,
+                values[node->inputs[1]].data,
+                values[node->inputs[2]].data,
+                node->activation.output_min,
+                node->activation.output_max,
+                node->flags,
+                &runtime->opdata[i].operator_object);
+              break;
+#ifndef XNN_NO_QS8_OPERATORS
+            case xnn_datatype_qint8:
+            {
+              const float output_scale = values[node->outputs[0]].quantization.scale;
+              const int32_t output_zero_point = values[node->outputs[0]].quantization.zero_point;
+              const int8_t output_min =
+                (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+              const int8_t output_max =
+                (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+              status = xnn_create_convolution2d_nhwc_qs8(
+                node->params.convolution_2d.input_padding_top,
+                node->params.convolution_2d.input_padding_right,
+                node->params.convolution_2d.input_padding_bottom,
+                node->params.convolution_2d.input_padding_left,
+                node->params.convolution_2d.kernel_height,
+                node->params.convolution_2d.kernel_width,
+                node->params.convolution_2d.subsampling_height,
+                node->params.convolution_2d.subsampling_width,
+                node->params.convolution_2d.dilation_height,
+                node->params.convolution_2d.dilation_width,
+                node->params.convolution_2d.groups,
+                node->params.convolution_2d.group_input_channels,
+                node->params.convolution_2d.group_output_channels,
+                node->params.convolution_2d.group_input_channels * node->params.convolution_2d.groups /* input_pixel_stride */,
+                node->params.convolution_2d.group_output_channels * node->params.convolution_2d.groups /* output_pixel_stride */,
+                (int8_t) values[node->inputs[0]].quantization.zero_point,
+                values[node->inputs[0]].quantization.scale,
+                values[node->inputs[1]].quantization.scale,
+                values[node->inputs[1]].data,
+                values[node->inputs[2]].data,
+                (int8_t) output_zero_point,
+                output_scale, output_min, output_max, 
+                node->flags,
+                &runtime->opdata[i].operator_object);
+              break;
+            }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+            default:
+              XNN_UNREACHABLE;
+          }
         }
         if (status != xnn_status_success) {
           goto error;
@@ -356,28 +425,71 @@ enum xnn_status xnn_create_runtime_v2(
         } else {
           assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
           assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
-          status = xnn_create_convolution2d_nhwc_f32(
-            node->params.depthwise_convolution_2d.input_padding_top,
-            node->params.depthwise_convolution_2d.input_padding_right,
-            node->params.depthwise_convolution_2d.input_padding_bottom,
-            node->params.depthwise_convolution_2d.input_padding_left,
-            node->params.depthwise_convolution_2d.kernel_height,
-            node->params.depthwise_convolution_2d.kernel_width,
-            node->params.depthwise_convolution_2d.subsampling_height,
-            node->params.depthwise_convolution_2d.subsampling_width,
-            node->params.depthwise_convolution_2d.dilation_height,
-            node->params.depthwise_convolution_2d.dilation_width,
-            node->params.depthwise_convolution_2d.input_channels /* groups */,
-            1 /* group_input_channels */,
-            node->params.depthwise_convolution_2d.depth_multiplier /* group_output_channels */,
-            node->params.depthwise_convolution_2d.input_channels /* input_channel_stride */,
-            node->params.depthwise_convolution_2d.input_channels * node->params.depthwise_convolution_2d.depth_multiplier /* output_channel_stride */,
-            values[node->inputs[1]].data,
-            values[node->inputs[2]].data,
-            node->activation.output_min,
-            node->activation.output_max,
-            node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
-            &runtime->opdata[i].operator_object);
+          switch (values[node->outputs[0]].datatype) {
+            case xnn_datatype_fp32:
+              status = xnn_create_convolution2d_nhwc_f32(
+                node->params.depthwise_convolution_2d.input_padding_top,
+                node->params.depthwise_convolution_2d.input_padding_right,
+                node->params.depthwise_convolution_2d.input_padding_bottom,
+                node->params.depthwise_convolution_2d.input_padding_left,
+                node->params.depthwise_convolution_2d.kernel_height,
+                node->params.depthwise_convolution_2d.kernel_width,
+                node->params.depthwise_convolution_2d.subsampling_height,
+                node->params.depthwise_convolution_2d.subsampling_width,
+                node->params.depthwise_convolution_2d.dilation_height,
+                node->params.depthwise_convolution_2d.dilation_width,
+                node->params.depthwise_convolution_2d.input_channels /* groups */,
+                1 /* group_input_channels */,
+                node->params.depthwise_convolution_2d.depth_multiplier /* group_output_channels */,
+                node->params.depthwise_convolution_2d.input_channels /* input_channel_stride */,
+                node->params.depthwise_convolution_2d.input_channels * node->params.depthwise_convolution_2d.depth_multiplier /* output_channel_stride */,
+                values[node->inputs[1]].data,
+                values[node->inputs[2]].data,
+                node->activation.output_min,
+                node->activation.output_max,
+                node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
+                &runtime->opdata[i].operator_object);
+              break;
+#ifndef XNN_NO_QS8_OPERATORS
+            case xnn_datatype_qint8:
+            {
+              const float output_scale = values[node->outputs[0]].quantization.scale;
+              const int32_t output_zero_point = values[node->outputs[0]].quantization.zero_point;
+              const int8_t output_min =
+                (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+              const int8_t output_max =
+                (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+              status = xnn_create_convolution2d_nhwc_qs8(
+                node->params.depthwise_convolution_2d.input_padding_top,
+                node->params.depthwise_convolution_2d.input_padding_right,
+                node->params.depthwise_convolution_2d.input_padding_bottom,
+                node->params.depthwise_convolution_2d.input_padding_left,
+                node->params.depthwise_convolution_2d.kernel_height,
+                node->params.depthwise_convolution_2d.kernel_width,
+                node->params.depthwise_convolution_2d.subsampling_height,
+                node->params.depthwise_convolution_2d.subsampling_width,
+                node->params.depthwise_convolution_2d.dilation_height,
+                node->params.depthwise_convolution_2d.dilation_width,
+                node->params.depthwise_convolution_2d.input_channels /* groups */,
+                1 /* group_input_channels */,
+                node->params.depthwise_convolution_2d.depth_multiplier /* group_output_channels */,
+                node->params.depthwise_convolution_2d.input_channels /* input_channel_stride */,
+                node->params.depthwise_convolution_2d.input_channels * node->params.depthwise_convolution_2d.depth_multiplier /* output_channel_stride */,
+                (int8_t) values[node->inputs[0]].quantization.zero_point,
+                values[node->inputs[0]].quantization.scale,
+                values[node->inputs[1]].quantization.scale,
+                values[node->inputs[1]].data,
+                values[node->inputs[2]].data,
+                (int8_t) output_zero_point,
+                output_scale, output_min, output_max, 
+                node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
+                &runtime->opdata[i].operator_object);
+              break;
+            }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+            default:
+              XNN_UNREACHABLE;
+          }
         }
         if (status != xnn_status_success) {
           goto error;
@@ -969,6 +1081,23 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
         break;
+#ifndef XNN_NO_QS8_OPERATORS
+      case xnn_operator_type_add_nd_qs8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->inputs[1]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_add_nd_qs8(
+          opdata->operator_object,
+          opdata->shape1.num_dims,
+          opdata->shape1.dim,
+          opdata->shape2.num_dims,
+          opdata->shape2.dim,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->inputs[1]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
       case xnn_operator_type_argmax_pooling_nhwc_f32:
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->outputs[0]].data != NULL);
@@ -1052,6 +1181,20 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
         break;
+#ifndef XNN_NO_QS8_OPERATORS
+      case xnn_operator_type_convolution_nhwc_qs8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_convolution2d_nhwc_qs8(
+          opdata->operator_object,
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
       case xnn_operator_type_copy_nc_x32:
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->outputs[0]].data != NULL);

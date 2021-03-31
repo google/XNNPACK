@@ -66,6 +66,9 @@ enum xnn_status xnn_define_add2(
 
   switch (input1_value->datatype) {
     case xnn_datatype_fp32:
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -92,6 +95,9 @@ enum xnn_status xnn_define_add2(
 
   switch (input2_value->datatype) {
     case xnn_datatype_fp32:
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -118,6 +124,9 @@ enum xnn_status xnn_define_add2(
 
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -125,6 +134,19 @@ enum xnn_status xnn_define_add2(
         xnn_node_type_to_string(xnn_node_type_add2), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
+  }
+
+  if (input1_value->datatype != input2_value->datatype ||
+      input1_value->datatype != output_value->datatype)
+  {
+    xnn_log_error(
+      "failed to define %s operator with input IDs #%" PRIu32 " and #%" PRIu32 " and output ID #%" PRIu32
+      ": mismatching datatypes across the first input (%s), the second input (%s), and output (%s)",
+      xnn_node_type_to_string(xnn_node_type_add2), input1_id, input2_id, output_id,
+      xnn_datatype_to_string(input1_value->datatype),
+      xnn_datatype_to_string(input2_value->datatype),
+      xnn_datatype_to_string(output_value->datatype));
+    return xnn_status_invalid_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

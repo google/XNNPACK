@@ -50,7 +50,7 @@ enum xnn_status xnn_define_tensor_value(
     case xnn_datatype_fp16:
       break;
     default:
-      xnn_log_error("failed to create Quantized Dense Tensor value: unsupported datatype %s (%d)",
+      xnn_log_error("failed to create Dense Tensor value: unsupported datatype %s (%d)",
         xnn_datatype_to_string(datatype), datatype);
       return xnn_status_unsupported_parameter;
   }
