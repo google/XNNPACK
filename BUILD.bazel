@@ -4705,6 +4705,7 @@ xnnpack_cc_library(
         "@pthreadpool",
     ] + select({
         ":emscripten": [],
+        "//tools/cc_target_os:fuchsia": [],
         "//conditions:default": ["@cpuinfo"],
     }),
 )
@@ -4800,6 +4801,7 @@ xnnpack_cc_library(
         "@pthreadpool",
     ] + select({
         ":emscripten": [],
+        "//tools/cc_target_os:fuchsia": [],
         "//conditions:default": ["@cpuinfo"],
     }),
 )
@@ -4843,6 +4845,7 @@ xnnpack_cc_library(
         "@pthreadpool",
     ] + select({
         ":emscripten": [],
+        "//tools/cc_target_os:fuchsia": [],
         "//conditions:default": ["@cpuinfo"],
     }),
 )
@@ -7519,6 +7522,11 @@ config_setting(
         "cpu": "wasm",
         "copt": "-msimd128",
     },
+)
+
+config_setting(
+    name = "fuchsia",
+    flag_values = {"//tools/cpp:cc_target_os": "fuchsia"},
 )
 
 config_setting(
