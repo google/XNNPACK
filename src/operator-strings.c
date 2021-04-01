@@ -74,6 +74,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Floor (NC, F32)";
     case xnn_operator_type_fully_connected_nc_f32:
       return "Fully Connected (NC, F32)";
+    case xnn_operator_type_fully_connected_nc_qs8:
+      return "Fully Connected (NC, QS8)";
     case xnn_operator_type_fully_connected_nc_qu8:
       return "Fully Connected (NC, QU8)";
     case xnn_operator_type_global_average_pooling_nwc_f16:
