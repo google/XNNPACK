@@ -16,7 +16,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vadd.h>
 
 
-$ISA = {2: "sse2", 4: "sse41"}[SSE]
+$ISA = "avx" if AVX else {2: "sse2", 4: "sse41"}[SSE]
 void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TILE}(
     size_t n,
     const int8_t* input_x,

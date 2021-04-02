@@ -37,10 +37,20 @@ tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 
 tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x24.c
 tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x32.c
 
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vadd/gen/minmax-avx-mul16-ld64-x8.c
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vadd/gen/minmax-avx-mul16-ld64-x16.c
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vadd/gen/minmax-avx-mul16-ld64-x24.c
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vadd/gen/minmax-avx-mul16-ld64-x32.c
+
 tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vadd/gen/minmax-sse41-mul32-ld32-x8.c
 tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vadd/gen/minmax-sse41-mul32-ld32-x16.c
 tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vadd/gen/minmax-sse41-mul32-ld32-x24.c
 tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vadd/gen/minmax-sse41-mul32-ld32-x32.c
+
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vadd/gen/minmax-avx-mul32-ld32-x8.c
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vadd/gen/minmax-avx-mul32-ld32-x16.c
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vadd/gen/minmax-avx-mul32-ld32-x24.c
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vadd/gen/minmax-avx-mul32-ld32-x32.c
 
 tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=1 -o src/qs8-vadd/gen/minmax-xop-mul32-ld32-x8.c
 tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=1 -o src/qs8-vadd/gen/minmax-xop-mul32-ld32-x16.c
@@ -57,10 +67,20 @@ tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0
 tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vaddc/gen/minmax-sse41-mul16-ld64-x24.c
 tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vaddc/gen/minmax-sse41-mul16-ld64-x32.c
 
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vaddc/gen/minmax-avx-mul16-ld64-x8.c
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vaddc/gen/minmax-avx-mul16-ld64-x16.c
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vaddc/gen/minmax-avx-mul16-ld64-x24.c
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vaddc/gen/minmax-avx-mul16-ld64-x32.c
+
 tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x8.c
 tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c
 tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x24.c
 tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x32.c
+
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x8.c
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x16.c
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x24.c
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x32.c
 
 tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=1 -o src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x8.c
 tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=1 -o src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x16.c

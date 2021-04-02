@@ -24,7 +24,7 @@ $else:
 #include <xnnpack/vadd.h>
 
 
-$ISA = "xop" if XOP else {4: "sse41"}[SSE]
+$ISA = "xop" if XOP else "avx" if AVX else {4: "sse41"}[SSE]
 void xnn_qs8_vadd_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TILE}(
     size_t n,
     const int8_t* input_x,

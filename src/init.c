@@ -1553,6 +1553,13 @@ static void init(void) {
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,
         .element_tile = 8,
       };
+    } else if (cpuinfo_has_x86_avx()) {
+      xnn_params.qs8.vadd = (struct vbinary_parameters) {
+        .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_x8,
+        .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x8,
+        .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x8,
+        .element_tile = 8,
+      };
     } else if (cpuinfo_has_x86_sse4_1()) {
       xnn_params.qs8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_x8,
