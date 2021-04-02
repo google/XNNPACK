@@ -63,25 +63,24 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         # Is there at least 16 bytes for epilogue?
         B.LO    4f
 
-        # Prologue
-        LDP     d0, d6, [x3], 16   // Read A0
+        # Prologue: load A0 and first B
+        LDP     d0, d6, [x3], 16
         LDP     d4, d5, [x5]
-        LDP     d1, d7, [x4], 16   // Read A1
+
+        # Is there at least 16 bytes for main loop?
+        SUBS    x0, x0, 16         // k = k - 16
+        B.LO    2f
+
+         # Main loop - 16 bytes of A
+        .p2align 3
+1:
+        LDP     d1, d7, [x4], 16
         LDP     d8, d9, [x5, 64]
         SMULL    v2.8h, v4.8b, v0.8b
         SMULL    v3.8h, v4.8b, v1.8b
-        SUBS    x0, x0, 16         // k = k - 16
         SMULL   v10.8h, v5.8b, v0.8b
         SMULL   v11.8h, v5.8b, v1.8b
         LDP     d4, d5, [x5, 16]
-
-        # Is there at least 16 bytes for mainloop?
-        B.LO    2f
-
-        # Main loop - 16 bytes of A
-
-        .p2align 3
-1:
         SMLAL    v2.8h, v8.8b, v6.8b
         SMLAL    v3.8h, v8.8b, v7.8b
         SMLAL   v10.8h, v9.8b, v6.8b
@@ -126,33 +125,32 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         SADALP  v26.4s, v10.8h
         SMULL   v15.8h, v5.8b, v1.8b
         SADALP  v27.4s, v11.8h
-        LDP     d4, d5, [x5, 128]  // Read B0
         SMLAL   v12.8h, v8.8b, v6.8b
         SMLAL   v13.8h, v8.8b, v7.8b
-        ADD     x5, x5, 128
         SMLAL   v14.8h, v9.8b, v6.8b
-        LDP     d0, d6, [x3], 16   // Read A0
         SMLAL   v15.8h, v9.8b, v7.8b
+        ADD     x5, x5, 128
 
-        # Start of next loop iteration
+        SADALP  v28.4s, v12.8h
+        LDP     d0, d6, [x3], 16    // Read A0
+        SADALP  v29.4s, v13.8h
+        SUBS    x0, x0, 16
+        SADALP  v30.4s, v14.8h
+        LDP     d4, d5, [x5]        // Read B
+        SADALP  v31.4s, v15.8h
+        B.HS    1b
+
+        # Epilogue
+        # Same as main loop except no read A0, B
+        .p2align 3
+2:
         LDP     d1, d7, [x4], 16
         LDP     d8, d9, [x5, 64]
         SMULL    v2.8h, v4.8b, v0.8b
-        SADALP  v28.4s, v12.8h
         SMULL    v3.8h, v4.8b, v1.8b
-        SADALP  v29.4s, v13.8h
         SMULL   v10.8h, v5.8b, v0.8b
-        SADALP  v30.4s, v14.8h
         SMULL   v11.8h, v5.8b, v1.8b
-        SUBS    x0, x0, 16
-        SADALP  v31.4s, v15.8h
         LDP     d4, d5, [x5, 16]
-        B.HS    1b
-
-        # Epilogue loop - 16 bytes of A
-        # Same as main loop except no read a0, b0
-        .p2align 3
-2:
         SMLAL    v2.8h, v8.8b, v6.8b
         SMLAL    v3.8h, v8.8b, v7.8b
         SMLAL   v10.8h, v9.8b, v6.8b
