@@ -6,7 +6,7 @@
 $assert SSE in [2, 3, 4]
 $assert not XOP or AVX
 $assert not AVX or SSE == 4
-$assert VARIANT in ["LD64", "LD128", "EXTENDED"]
+$assert VARIANT in ["LD64", "LD128"]
 $assert MR <= 4
 #include <assert.h>
 
@@ -25,8 +25,8 @@ $else:
 #include <xnnpack/math.h>
 
 
-$ISA = "xop" if XOP else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
-void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64"}(
+$ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
+void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${VARIANT.lower()}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -93,7 +93,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
             const __m128i vxa${M} = _mm_unpacklo_epi8(va${M}, _mm_cmpgt_epi8(_mm_setzero_si128(), va${M}));
           a${M} += 8;
 
-        $if LD128:
+        $if VARIANT == "LD128":
           $for K in range(0, 4, 2):
             $if K == 0:
               const __m128i vb${K}${K+1} = _mm_loadu_si128((const __m128i*) w);

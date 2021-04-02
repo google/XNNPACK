@@ -160,6 +160,10 @@
   k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_4x4c2__sse41_ld64
   k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_1x4c2__avx_ld64
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_4x4c2__avx_ld64
+  k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_1x4c2__xop_ld64
   k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_4x4c2__xop_ld64
@@ -176,6 +180,10 @@
   k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_4x4c2__sse41_ld128
   k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_1x4c2__avx_ld128
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_4x4c2__avx_ld128
+  k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_1x4c2__xop_ld128
   k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_4x4c2__xop_ld128
@@ -191,6 +199,10 @@
 - name: xnn_qs8_gemm_xw_minmax_ukernel_1x4c2__sse41
   k-block: 8
 - name: xnn_qs8_gemm_xw_minmax_ukernel_4x4c2__sse41
+  k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_ukernel_1x4c2__avx
+  k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_ukernel_4x4c2__avx
   k-block: 8
 - name: xnn_qs8_gemm_xw_minmax_ukernel_1x4c2__xop
   k-block: 8
@@ -213,6 +225,12 @@
 - name: xnn_qs8_gemm_minmax_ukernel_2x4c8__sse41_ld64
   k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_3x4c8__sse41_ld64
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_1x4c8__avx_ld64
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_2x4c8__avx_ld64
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_3x4c8__avx_ld64
   k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_1x4c8__xop_ld64
   k-block: 8
@@ -238,6 +256,12 @@
   k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_3x4c8__sse41_ld128
   k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_1x4c8__avx_ld128
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_2x4c8__avx_ld128
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_3x4c8__avx_ld128
+  k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_1x4c8__xop_ld128
   k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_2x4c8__xop_ld128
@@ -261,6 +285,12 @@
 - name: xnn_qs8_gemm_xw_minmax_ukernel_2x4c8__sse41
   k-block: 8
 - name: xnn_qs8_gemm_xw_minmax_ukernel_3x4c8__sse41
+  k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_ukernel_1x4c8__avx
+  k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_ukernel_2x4c8__avx
+  k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_ukernel_3x4c8__avx
   k-block: 8
 - name: xnn_qs8_gemm_xw_minmax_ukernel_1x4c8__xop
   k-block: 8

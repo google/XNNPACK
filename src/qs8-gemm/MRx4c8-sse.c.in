@@ -27,7 +27,7 @@ $else:
 
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$ISA = "xop" if XOP else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
+$ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
 void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__${ISA}${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
@@ -100,7 +100,7 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__${ISA}${LOAD_SUFFIX}(
           const __m128i vxb${N+1} = _mm_unpackhi_epi8(vb${N}${N+1}, vsb${N}${N+1});
 
           $for M in range(MR):
-            $if SSE == 5:
+            $if XOP:
               vacc${M}x${N} = _mm_maddd_epi16(vxa${M}, vxb${N}, vacc${M}x${N});
               vacc${M}x${N+1} = _mm_maddd_epi16(vxa${M}, vxb${N+1}, vacc${M}x${N+1});
             $else:

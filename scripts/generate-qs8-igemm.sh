@@ -95,62 +95,76 @@ tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=8  -D NR=16 -o src/qs8-igem
 
 ################################### x86 SSE ###################################
 ### C2 micro-kernels
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/1x4c2-minmax-sse2-ld64.c
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=2 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/4x4c2-minmax-sse2-ld64.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c2-minmax-sse2-ld64.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/4x4c2-minmax-sse2-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/1x4c2-minmax-ssse3-ld64.c
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=3 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/4x4c2-minmax-ssse3-ld64.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c2-minmax-ssse3-ld64.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=3 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/4x4c2-minmax-ssse3-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/1x4c2-minmax-sse41-ld64.c
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=4 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/4x4c2-minmax-sse41-ld64.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c2-minmax-sse41-ld64.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=4 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/4x4c2-minmax-sse41-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=1 -D LD128=0 -o src/qs8-igemm/gen/1x4c2-minmax-xop-ld64.c
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=4 -D AVX=1 -D XOP=1 -D LD128=0 -o src/qs8-igemm/gen/4x4c2-minmax-xop-ld64.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c2-minmax-avx-ld64.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=4 -D AVX=1 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/4x4c2-minmax-avx-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/1x4c2-minmax-sse2-ld128.c
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=2 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/4x4c2-minmax-sse2-ld128.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=1 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c2-minmax-xop-ld64.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=4 -D AVX=1 -D XOP=1 -D VARIANT=LD64  -o src/qs8-igemm/gen/4x4c2-minmax-xop-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/1x4c2-minmax-ssse3-ld128.c
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=3 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/4x4c2-minmax-ssse3-ld128.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c2-minmax-sse2-ld128.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/4x4c2-minmax-sse2-ld128.c
 
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/1x4c2-minmax-sse41-ld128.c
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=4 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/4x4c2-minmax-sse41-ld128.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c2-minmax-ssse3-ld128.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=3 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/4x4c2-minmax-ssse3-ld128.c
 
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=1 -D LD128=1 -o src/qs8-igemm/gen/1x4c2-minmax-xop-ld128.c
-tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=4 -D AVX=1 -D XOP=1 -D LD128=1 -o src/qs8-igemm/gen/4x4c2-minmax-xop-ld128.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c2-minmax-sse41-ld128.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=4 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/4x4c2-minmax-sse41-ld128.c
+
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c2-minmax-avx-ld128.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=4 -D AVX=1 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/4x4c2-minmax-avx-ld128.c
+
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=1 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c2-minmax-xop-ld128.c
+tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=4 -D SSE=4 -D AVX=1 -D XOP=1 -D VARIANT=LD128 -o src/qs8-igemm/gen/4x4c2-minmax-xop-ld128.c
 
 ### C8 micro-kernels
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/1x4c8-minmax-sse2-ld64.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=2 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/2x4c8-minmax-sse2-ld64.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=2 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/3x4c8-minmax-sse2-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c8-minmax-sse2-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/2x4c8-minmax-sse2-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/3x4c8-minmax-sse2-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/1x4c8-minmax-ssse3-ld64.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=3 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/2x4c8-minmax-ssse3-ld64.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=3 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/3x4c8-minmax-ssse3-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c8-minmax-ssse3-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=3 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/2x4c8-minmax-ssse3-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=3 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/3x4c8-minmax-ssse3-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=4 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/1x4c8-minmax-sse41-ld64.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=4 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/2x4c8-minmax-sse41-ld64.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=0 -D XOP=0 -D LD128=0 -o src/qs8-igemm/gen/3x4c8-minmax-sse41-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=4 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c8-minmax-sse41-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=4 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/2x4c8-minmax-sse41-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/3x4c8-minmax-sse41-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=1 -D LD128=0 -o src/qs8-igemm/gen/1x4c8-minmax-xop-ld64.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=4 -D AVX=1 -D XOP=1 -D LD128=0 -o src/qs8-igemm/gen/2x4c8-minmax-xop-ld64.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=1 -D XOP=1 -D LD128=0 -o src/qs8-igemm/gen/3x4c8-minmax-xop-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c8-minmax-avx-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=4 -D AVX=1 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/2x4c8-minmax-avx-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=1 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/3x4c8-minmax-avx-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/1x4c8-minmax-sse2-ld128.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=2 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/2x4c8-minmax-sse2-ld128.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=2 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/3x4c8-minmax-sse2-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=1 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c8-minmax-xop-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=4 -D AVX=1 -D XOP=1 -D VARIANT=LD64  -o src/qs8-igemm/gen/2x4c8-minmax-xop-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=1 -D XOP=1 -D VARIANT=LD64  -o src/qs8-igemm/gen/3x4c8-minmax-xop-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/1x4c8-minmax-ssse3-ld128.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=3 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/2x4c8-minmax-ssse3-ld128.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=3 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/3x4c8-minmax-ssse3-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c8-minmax-sse2-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/2x4c8-minmax-sse2-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/3x4c8-minmax-sse2-ld128.c
 
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=4 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/1x4c8-minmax-sse41-ld128.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=4 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/2x4c8-minmax-sse41-ld128.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=0 -D XOP=0 -D LD128=1 -o src/qs8-igemm/gen/3x4c8-minmax-sse41-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c8-minmax-ssse3-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=3 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/2x4c8-minmax-ssse3-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=3 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/3x4c8-minmax-ssse3-ld128.c
 
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=1 -D LD128=1 -o src/qs8-igemm/gen/1x4c8-minmax-xop-ld128.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=4 -D AVX=1 -D XOP=1 -D LD128=1 -o src/qs8-igemm/gen/2x4c8-minmax-xop-ld128.c
-tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=1 -D XOP=1 -D LD128=1 -o src/qs8-igemm/gen/3x4c8-minmax-xop-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=4 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c8-minmax-sse41-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=4 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/2x4c8-minmax-sse41-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=0 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/3x4c8-minmax-sse41-ld128.c
+
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c8-minmax-avx-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=4 -D AVX=1 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/2x4c8-minmax-avx-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=1 -D XOP=0 -D VARIANT=LD128 -o src/qs8-igemm/gen/3x4c8-minmax-avx-ld128.c
+
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=1 -D SSE=4 -D AVX=1 -D XOP=1 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c8-minmax-xop-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=2 -D SSE=4 -D AVX=1 -D XOP=1 -D VARIANT=LD128 -o src/qs8-igemm/gen/2x4c8-minmax-xop-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=1 -D XOP=1 -D VARIANT=LD128 -o src/qs8-igemm/gen/3x4c8-minmax-xop-ld128.c
 
 ################################### x86 AVX2 ##################################
 ### C8 micro-kernels
@@ -160,10 +174,10 @@ tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=3 -o src/qs8-igemm/gen/3x8c8-mi
 
 ################################## x86 AVX512 #################################
 ### C8 micro-kernels
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=1 -D VARIANT=LD256    -o src/qs8-igemm/gen/1x16c8-minmax-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=2 -D VARIANT=LD256    -o src/qs8-igemm/gen/2x16c8-minmax-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256    -o src/qs8-igemm/gen/3x16c8-minmax-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256    -o src/qs8-igemm/gen/4x16c8-minmax-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=1 -D VARIANT=LD256 -o src/qs8-igemm/gen/1x16c8-minmax-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=2 -D VARIANT=LD256 -o src/qs8-igemm/gen/2x16c8-minmax-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -o src/qs8-igemm/gen/3x16c8-minmax-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -o src/qs8-igemm/gen/4x16c8-minmax-avx512skx.c
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/qs8-igemm-minmax.yaml --output test/qs8-igemm-minmax.cc

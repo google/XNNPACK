@@ -27,7 +27,7 @@ $else:
 
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$ISA = "xop" if XOP else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
+$ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
 void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c2__${ISA}${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
@@ -98,7 +98,7 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c2__${ISA}${LOAD_SUFFIX}(
           const __m128i vxb${K+1} = _mm_unpackhi_epi8(vb${K}${K+1}, vsb${K}${K+1});
 
           $for M in range(MR):
-            $if SSE == 5:
+            $if XOP:
               vacc${M}x0123 = _mm_maddd_epi16(
                 _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}, vacc${M}x0123);
             $else:
@@ -106,7 +106,7 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c2__${ISA}${LOAD_SUFFIX}(
                 _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}));
 
           $for M in range(MR):
-            $if SSE == 5:
+            $if XOP:
               vacc${M}x0123 = _mm_maddd_epi16(
                 _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K+1}, ${K+1}, ${K+1}, ${K+1})), vxb${K+1}, vacc${M}x0123);
             $else:
@@ -164,7 +164,7 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c2__${ISA}${LOAD_SUFFIX}(
         w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
       $for M in range(MR):
-        $if SSE == 5:
+        $if XOP:
           vacc${M}x0123 = _mm_maddd_epi16(
             _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(0, 0, 0, 0)), vxb0, vacc${M}x0123);
         $else:
@@ -184,7 +184,7 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c2__${ISA}${LOAD_SUFFIX}(
           w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
         $for M in range(MR):
-          $if SSE == 5:
+          $if XOP:
             vacc${M}x0123 = _mm_maddd_epi16(
               _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(1, 1, 1, 1)), vxb1, vacc${M}x0123);
           $else:
@@ -204,7 +204,7 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c2__${ISA}${LOAD_SUFFIX}(
             w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
           $for M in range(MR):
-            $if SSE == 5:
+            $if XOP:
               vacc${M}x0123 = _mm_maddd_epi16(
                 _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(2, 2, 2, 2)), vxb2, vacc${M}x0123);
             $else:
