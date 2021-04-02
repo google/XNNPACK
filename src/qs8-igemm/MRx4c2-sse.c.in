@@ -3,25 +3,29 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h", 5: "ammintrin.h"}[SSE]
+$assert SSE in [2, 3, 4]
+$assert not XOP or AVX
+$assert not AVX or SSE == 4
+$assert VARIANT in ["LD64", "LD128", "EXTENDED"]
 $assert MR <= 4
 #include <assert.h>
 
-$if SSE == 5:
+$if XOP:
   #if defined(__GNUC__) || defined(__clang__)
     #include <x86intrin.h>
   #else
     #include <immintrin.h>
-    #include <${SSE_HEADER}>
+    #include <ammintrin.h>
   #endif
 $else:
+  $SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
   #include <${SSE_HEADER}>
 
 #include <xnnpack/igemm.h>
 #include <xnnpack/math.h>
 
 
-$ISA = {2: "sse2", 3: "ssse3", 4: "sse41", 5: "xop"}[SSE]
+$ISA = "xop" if XOP else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
 void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld64"}(
     size_t mr,
     size_t nc,
@@ -83,7 +87,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
       while (k >= 8 * sizeof(int8_t)) {
         $for M in range(MR):
           const __m128i va${M} = _mm_loadl_epi64((const __m128i*) a${M});
-          $if SSE >= 4:
+          $if SSE == 4:
             const __m128i vxa${M} = _mm_cvtepi8_epi16(va${M});
           $else:
             const __m128i vxa${M} = _mm_unpacklo_epi8(va${M}, _mm_cmpgt_epi8(_mm_setzero_si128(), va${M}));
@@ -100,7 +104,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
             const __m128i vxb${K+1} = _mm_unpackhi_epi8(vb${K}${K+1}, vsb${K}${K+1});
 
             $for M in range(MR):
-              $if SSE == 5:
+              $if XOP:
                 vacc${M}x0123 = _mm_maddd_epi16(
                   _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}, vacc${M}x0123);
               $else:
@@ -108,7 +112,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
                   _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}));
 
             $for M in range(MR):
-              $if SSE == 5:
+              $if XOP:
                 vacc${M}x0123 = _mm_maddd_epi16(
                   _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K+1}, ${K+1}, ${K+1}, ${K+1})), vxb${K+1}, vacc${M}x0123);
               $else:
@@ -120,13 +124,13 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
               const __m128i vb${K} = _mm_loadl_epi64((const __m128i*) w);
             $else:
               const __m128i vb${K} = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + ${K * 8}));
-            $if SSE >= 4:
+            $if SSE == 4:
               const __m128i vxb${K} = _mm_cvtepi8_epi16(vb${K});
             $else:
               const __m128i vxb${K} = _mm_unpacklo_epi8(vb${K}, _mm_cmpgt_epi8(_mm_setzero_si128(), vb${K}));
 
             $for M in range(MR):
-              $if SSE == 5:
+              $if XOP:
                 vacc${M}x0123 = _mm_maddd_epi16(
                   _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}, vacc${M}x0123);
               $else:
@@ -139,7 +143,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
       if (k != 0) {
         $for M in range(MR):
           const __m128i va${M} = _mm_loadl_epi64((const __m128i*) a${M});
-          $if SSE >= 4:
+          $if SSE == 4:
             const __m128i vxa${M} = _mm_cvtepi8_epi16(va${M});
           $else:
             const __m128i vxa${M} = _mm_unpacklo_epi8(va${M}, _mm_cmpgt_epi8(_mm_setzero_si128(), va${M}));
@@ -150,7 +154,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
         const __m128i vxb0 = _mm_unpacklo_epi8(vb0, _mm_cmpgt_epi8(_mm_setzero_si128(), vb0));
 
         $for M in range(MR):
-          $if SSE == 5:
+          $if XOP:
             vacc${M}x0123 = _mm_maddd_epi16(
               _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(0, 0, 0, 0)), vxb0, vacc${M}x0123);
           $else:
@@ -163,7 +167,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
           const __m128i vxb1 = _mm_unpacklo_epi8(vb1, _mm_cmpgt_epi8(_mm_setzero_si128(), vb1));
 
           $for M in range(MR):
-            $if SSE == 5:
+            $if XOP:
               vacc${M}x0123 = _mm_maddd_epi16(
                 _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(1, 1, 1, 1)), vxb1, vacc${M}x0123);
             $else:
@@ -176,7 +180,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
             const __m128i vxb2 = _mm_unpacklo_epi8(vb2, _mm_cmpgt_epi8(_mm_setzero_si128(), vb2));
 
             $for M in range(MR):
-              $if SSE == 5:
+              $if XOP:
                 vacc${M}x0123 = _mm_maddd_epi16(
                   _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(2, 2, 2, 2)), vxb2, vacc${M}x0123);
               $else:
@@ -191,7 +195,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
     const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
     const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
 
-    $if SSE >= 4:
+    $if SSE == 4:
       $for M in range(MR):
         const __m128i vacc${M}x1133 = _mm_shuffle_epi32(vacc${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));
 
@@ -275,7 +279,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
 
     if (nc >= 4) {
       $for M in reversed(range(1, MR)):
-        $if SSE >= 4:
+        $if SSE == 4:
           *((uint32_t*) c${M}) = (uint32_t) _mm_extract_epi32(vout, ${M});
         $else:
           *((uint32_t*) c${M}) = (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(${M}, ${M}, ${M}, ${M})));
@@ -294,7 +298,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x4c2__${ISA}_${"ld128" if LD128 else "ld6
         vout = _mm_srli_epi32(vout, 16);
       }
       if (nc & 1) {
-        $if SSE >= 4:
+        $if SSE == 4:
           $for M in reversed(range(MR)):
             *((int8_t*) c${M}) = (int8_t) _mm_extract_epi8(vout, ${M * 4});
         $else:

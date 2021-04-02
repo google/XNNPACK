@@ -3,12 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert SSE == 4
+$assert not XOP or AVX
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
-$if SSE == 5:
+$if XOP:
   #if defined(__GNUC__) || defined(__clang__)
     #include <x86intrin.h>
   #else
@@ -22,7 +24,7 @@ $else:
 #include <xnnpack/vadd.h>
 
 
-$ISA = {4: "sse41", 5: "xop"}[SSE]
+$ISA = "xop" if XOP else {4: "sse41"}[SSE]
 void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TILE}(
     size_t n,
     const int8_t* input_x,
@@ -48,7 +50,7 @@ void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TILE}(
     input_x += ${BATCH_TILE};
     input_y += ${BATCH_TILE};
 
-    $if SSE == 5:
+    $if XOP:
       $for N in range(0, BATCH_TILE, 4):
         __m128i vacc${ABC[N:N+4]} = _mm_macc_epi32(vx${ABC[N:N+4]}, vx_multiplier, vzero_point_product);
     $else:
@@ -94,7 +96,7 @@ void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TILE}(
       $if BATCH_TILE > 8:
         input_x += 8;
 
-      $if SSE == 5:
+      $if XOP:
         __m128i vacc${ABC[0:4]} = _mm_macc_epi32(vx${ABC[0:4]}, vx_multiplier, vzero_point_product);
         __m128i vacc${ABC[4:8]} = _mm_macc_epi32(vx${ABC[4:8]}, vx_multiplier, vzero_point_product);
       $else:
@@ -130,7 +132,7 @@ void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TILE}(
             output += 2;
           }
           if (n & (1 * sizeof(int8_t))) {
-            $if SSE >= 4:
+            $if SSE == 4:
               *output = (int8_t) _mm_extract_epi8(vout${ABC[0:8]}${ABC[0:8]}, 0);
             $else:
               *output = (int32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
@@ -149,7 +151,7 @@ void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TILE}(
           output += 2;
         }
         if (n & (1 * sizeof(int8_t))) {
-          $if SSE >= 4:
+          $if SSE == 4:
             *output = (int8_t) _mm_extract_epi8(vout${ABC[0:8]}${ABC[0:8]}, 0);
           $else:
             *output = (int32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
