@@ -9,7 +9,7 @@
 
 #include <assert.h>
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
   #include <x86intrin.h>
 #else
   #include <immintrin.h>
