@@ -1948,6 +1948,9 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-sse41-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-sse41-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-sse41-mul16.c
+  src/qs8-dwconv/gen/up8x9-minmax-sse41-mul32.c
+  src/qs8-dwconv/gen/up16x9-minmax-sse41-mul32.c
+  src/qs8-dwconv/gen/up24x9-minmax-sse41-mul32.c
   src/qs8-gavgpool/gen/7p7x-minmax-sse41-c8-acc2.c
   src/qs8-gavgpool/gen/7p7x-minmax-sse41-c16-acc2.c
   src/qs8-gavgpool/gen/7p7x-minmax-sse41-c24-acc2.c
@@ -2140,6 +2143,9 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-avx-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-avx-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-avx-mul16.c
+  src/qs8-dwconv/gen/up8x9-minmax-avx-mul32.c
+  src/qs8-dwconv/gen/up16x9-minmax-avx-mul32.c
+  src/qs8-dwconv/gen/up24x9-minmax-avx-mul32.c
   src/qs8-gemm/gen/1x4c2-minmax-avx-ld64.c
   src/qs8-gemm/gen/1x4c2-minmax-avx-ld128.c
   src/qs8-gemm/gen/1x4c2-xw-minmax-avx.c

@@ -1515,7 +1515,7 @@ static void init(void) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up16x9__avx2_mul32;
       xnn_params.qs8.dwconv[0].channel_tile = 16;
     } else if (cpuinfo_has_x86_avx()) {
-      xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up16x9__avx_mul16;
+      xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up16x9__avx_mul32;
       xnn_params.qs8.dwconv[0].channel_tile = 16;
     } else if (cpuinfo_has_x86_sse4_1()) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up8x9__sse41_mul16;
