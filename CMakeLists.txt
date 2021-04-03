@@ -2137,6 +2137,9 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vunary/gen/vneg-avx-x16.c
   src/f32-vunary/gen/vsqr-avx-x8.c
   src/f32-vunary/gen/vsqr-avx-x16.c
+  src/qs8-dwconv/gen/up8x9-minmax-avx-mul16.c
+  src/qs8-dwconv/gen/up16x9-minmax-avx-mul16.c
+  src/qs8-dwconv/gen/up24x9-minmax-avx-mul16.c
   src/qs8-gemm/gen/1x4c2-minmax-avx-ld64.c
   src/qs8-gemm/gen/1x4c2-minmax-avx-ld128.c
   src/qs8-gemm/gen/1x4c2-xw-minmax-avx.c

@@ -15,7 +15,7 @@ $assert KERNEL_TILE >= 2
 #include <xnnpack/dwconv.h>
 
 
-$ISA = {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
+$ISA = "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
 void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul16(
     size_t channels,
     size_t output_width,
