@@ -77,9 +77,11 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         SUBS    x0, x2, 16         // k = kc - 16
         B.LO    5f
 
-        # Prologue: load A0 and first B
-        LDP     d0, d6, [x13], 16
+        # Prologue: load A0, A1 and 2 B's
         LDP     d4, d5, [x5]
+        LDP     d0, d6, [x13], 16
+        LDP     d1, d7, [x15], 16
+        LDP     d8, d9, [x5, 64]
 
         # Is there at least 16 bytes for main loop?
         SUBS    x0, x0, 16         // k = k - 16
@@ -88,8 +90,6 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
          # Main loop - 16 bytes of A
         .p2align 3
 2:
-        LDP     d1, d7, [x15], 16
-        LDP     d8, d9, [x5, 64]
         SMULL    v2.8h, v4.8b, v0.8b
         SMULL    v3.8h, v4.8b, v1.8b
         SMULL   v10.8h, v5.8b, v0.8b
@@ -132,6 +132,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
 
         LDP     d8, d9, [x5, 112]
         SMULL   v12.8h, v4.8b, v0.8b
+        ADD     x5, x5, 128
         SADALP  v24.4s,  v2.8h
         SMULL   v13.8h, v4.8b, v1.8b
         SADALP  v25.4s,  v3.8h
@@ -140,26 +141,25 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
         SMULL   v15.8h, v5.8b, v1.8b
         SADALP  v27.4s, v11.8h
         SMLAL   v12.8h, v8.8b, v6.8b
+        LDP     d4, d5, [x5]        // Read B
         SMLAL   v13.8h, v8.8b, v7.8b
+        SUBS    x0, x0, 16
         SMLAL   v14.8h, v9.8b, v6.8b
+        LDP     d0, d6, [x13], 16   // Read A0
         SMLAL   v15.8h, v9.8b, v7.8b
-        ADD     x5, x5, 128
 
         SADALP  v28.4s, v12.8h
-        LDP     d0, d6, [x13], 16   // Read A0
+        LDP     d1, d7, [x15], 16   // Read A1
         SADALP  v29.4s, v13.8h
-        SUBS    x0, x0, 16
         SADALP  v30.4s, v14.8h
-        LDP     d4, d5, [x5]        // Read B
+        LDP     d8, d9, [x5, 64]    // Read B
         SADALP  v31.4s, v15.8h
         B.HS    2b
 
         # Epilogue
-        # Same as main loop except no read A0, B
+        # Same as main loop except no loads at end of loop
         .p2align 3
 3:
-        LDP     d1, d7, [x15], 16
-        LDP     d8, d9, [x5, 64]
         SMULL    v2.8h, v4.8b, v0.8b
         SMULL    v3.8h, v4.8b, v1.8b
         SMULL   v10.8h, v5.8b, v0.8b
