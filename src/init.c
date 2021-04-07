@@ -18,11 +18,16 @@
   #include <pthread.h>
 #endif
 
+#ifdef _MSC_VER
+  #include <intrin.h>
+#endif
+
 #ifndef __EMSCRIPTEN__
   #include <cpuinfo.h>
 #endif
 
 #include <xnnpack.h>
+#include <xnnpack/allocator.h>
 #include <xnnpack/argmaxpool.h>
 #include <xnnpack/avgpool.h>
 #include <xnnpack/clamp.h>
@@ -39,7 +44,6 @@
 #include <xnnpack/log.h>
 #include <xnnpack/lut.h>
 #include <xnnpack/maxpool.h>
-#include <xnnpack/memory.h>
 #include <xnnpack/pad.h>
 #include <xnnpack/params.h>
 #include <xnnpack/pavgpool.h>
@@ -63,6 +67,8 @@
 #else
   static pthread_once_t init_guard = PTHREAD_ONCE_INIT;
 #endif
+
+static const struct xnn_allocator* volatile init_allocator = NULL;
 
 struct xnn_parameters xnn_params = {
   .init_flags = 0
@@ -2971,6 +2977,8 @@ static void init(void) {
 #else
   #error "Unsupported architecture"
 #endif
+
+  memcpy(&xnn_params.allocator, init_allocator, sizeof(struct xnn_allocator));
   xnn_params.init_flags = init_flags;
 }
 
@@ -2987,21 +2995,20 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
       return xnn_status_out_of_memory;
     }
   #endif
+  if (allocator == NULL) {
+    allocator = &xnn_default_allocator;
+  }
+  #ifdef _MSC_VER
+    _InterlockedCompareExchangePointer(&init_allocator, NULL, allocator);
+  #else
+    __sync_bool_compare_and_swap(&init_allocator, NULL, allocator);
+  #endif
   #ifdef _WIN32
     InitOnceExecuteOnce(&init_guard, &init_windows, NULL, NULL);
   #else
     pthread_once(&init_guard, &init);
   #endif
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) != 0) {
-    if (allocator != NULL) {
-      memcpy(&xnn_params.allocator, allocator, sizeof(struct xnn_allocator));
-    } else {
-      xnn_params.allocator.allocate = &xnn_allocate;
-      xnn_params.allocator.reallocate = &xnn_reallocate;
-      xnn_params.allocator.deallocate = &xnn_deallocate;
-      xnn_params.allocator.aligned_allocate = &xnn_aligned_allocate;
-      xnn_params.allocator.aligned_deallocate = &xnn_aligned_deallocate;
-    }
     return xnn_status_success;
   } else {
     return xnn_status_unsupported_hardware;

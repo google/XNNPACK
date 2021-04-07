@@ -15,6 +15,7 @@
   #include <alloca.h>
 #endif
 
+#include <xnnpack.h>
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
 
@@ -26,6 +27,8 @@
 #else
   #define XNN_ALLOCATION_ALIGNMENT 16
 #endif
+
+XNN_INTERNAL extern const struct xnn_allocator xnn_default_allocator;
 
 inline static void* xnn_allocate_memory(size_t memory_size) {
   return xnn_params.allocator.allocate(xnn_params.allocator.context, memory_size);

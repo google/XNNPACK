@@ -227,9 +227,9 @@ SET(XNNPACK_LOGGING_SRCS
 
 SET(XNNPACK_COLD_SRCS ${XNNPACK_OPERATOR_SRCS} ${XNNPACK_SUBGRAPH_SRCS} ${XNNPACK_LOGGING_SRCS})
 LIST(APPEND XNNPACK_COLD_SRCS
+  src/allocator.c
   src/init.c
   src/memory-planner.c
-  src/memory.c
   src/operator-delete.c
   src/runtime.c
   src/subgraph.c

@@ -3648,7 +3648,6 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/lut.h",
     "src/xnnpack/math.h",
     "src/xnnpack/maxpool.h",
-    "src/xnnpack/memory.h",
     "src/xnnpack/packx.h",
     "src/xnnpack/pad.h",
     "src/xnnpack/params.h",
@@ -4660,7 +4659,7 @@ cc_library(
 xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS + [
-        "src/memory.c",
+        "src/allocator.c",
         "src/operator-delete.c",
     ],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
@@ -4690,7 +4689,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "operators_test_mode",
     srcs = OPERATOR_SRCS + [
-        "src/memory.c",
+        "src/allocator.c",
         "src/operator-delete.c",
     ],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,

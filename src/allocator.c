@@ -10,28 +10,28 @@
   #include <malloc.h>
 #endif
 
+#include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/memory.h>
 
 
 extern int posix_memalign(void **memptr, size_t alignment, size_t size);
 
 
-void* xnn_allocate(void* context, size_t size) {
+static void* xnn_allocate(void* context, size_t size) {
   return malloc(size);
 }
 
-void* xnn_reallocate(void* context, void* pointer, size_t size) {
+static void* xnn_reallocate(void* context, void* pointer, size_t size) {
   return realloc(pointer, size);
 }
 
-void xnn_deallocate(void* context, void* pointer) {
+static void xnn_deallocate(void* context, void* pointer) {
   if XNN_LIKELY(pointer != NULL) {
     free(pointer);
   }
 }
 
-void* xnn_aligned_allocate(void* context, size_t alignment, size_t size) {
+static void* xnn_aligned_allocate(void* context, size_t alignment, size_t size) {
 #if XNN_ARCH_WASM
   assert(alignment <= 2 * sizeof(void*));
   return malloc(size);
@@ -48,7 +48,7 @@ void* xnn_aligned_allocate(void* context, size_t alignment, size_t size) {
 #endif
 }
 
-void xnn_aligned_deallocate(void* context, void* pointer) {
+static void xnn_aligned_deallocate(void* context, void* pointer) {
   if XNN_LIKELY(pointer != NULL) {
     #if defined(_WIN32)
       _aligned_free(pointer);
@@ -57,3 +57,11 @@ void xnn_aligned_deallocate(void* context, void* pointer) {
     #endif
   }
 }
+
+const struct xnn_allocator xnn_default_allocator = {
+  .allocate = xnn_allocate,
+  .reallocate = xnn_reallocate,
+  .deallocate = xnn_deallocate,
+  .aligned_allocate = xnn_aligned_allocate,
+  .aligned_deallocate = xnn_aligned_deallocate,
+};
