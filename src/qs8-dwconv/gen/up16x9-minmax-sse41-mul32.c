@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/dwconv.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_qs8_dwconv_minmax_ukernel_up16x9__sse41_mul32(

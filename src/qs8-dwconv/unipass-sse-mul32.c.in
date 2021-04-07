@@ -12,6 +12,7 @@ $assert KERNEL_TILE >= 2
 #include <immintrin.h>
 
 #include <xnnpack/dwconv.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 $ISA = "avx" if AVX else {4: "sse41"}[SSE]
