@@ -1107,6 +1107,49 @@ static void GEMMEnd2EndBenchmark(
 
 
 #if XNN_ENABLE_FULL_BENCHMARKS
+  static void qs8_gemm_minmax_ukernel_1x4c2__avx_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_ukernel_1x4c2__avx_ld64,
+      xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld64,
+      xnn_qs8_gemm_minmax_ukernel_1x4c2__avx_ld64,
+      xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld64,
+      1 /* mr */, 4 /* nr */, 1 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckAVX);
+  }
+
+  static void qs8_gemm_minmax_ukernel_1x4c2__avx_ld128(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_ukernel_1x4c2__avx_ld128,
+      xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128,
+      xnn_qs8_gemm_minmax_ukernel_1x4c2__avx_ld128,
+      xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128,
+      1 /* mr */, 4 /* nr */, 1 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckAVX);
+  }
+#endif  // XNN_ENABLE_FULL_BENCHMARKS
+
+  static void qs8_gemm_minmax_ukernel_4x4c2__avx_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_ukernel_4x4c2__avx_ld64,
+      xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld64,
+      xnn_qs8_gemm_minmax_ukernel_1x4c2__avx_ld64,
+      xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld64,
+      4 /* mr */, 4 /* nr */, 1 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckAVX);
+  }
+
+  static void qs8_gemm_minmax_ukernel_4x4c2__avx_ld128(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_ukernel_4x4c2__avx_ld128,
+      xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128,
+      xnn_qs8_gemm_minmax_ukernel_1x4c2__avx_ld128,
+      xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128,
+      4 /* mr */, 4 /* nr */, 1 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckAVX);
+  }
+
+
+#if XNN_ENABLE_FULL_BENCHMARKS
   static void qs8_gemm_minmax_ukernel_1x4c8__avx_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qs8_gemm_minmax_ukernel_1x4c8__avx_ld64,
@@ -1505,6 +1548,13 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_2x4c8__xop_ld128);
   BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_3x4c8__xop_ld64);
   BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_3x4c8__xop_ld128);
+
+#if XNN_ENABLE_FULL_BENCHMARKS
+  BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_1x4c2__avx_ld64);
+  BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_1x4c2__avx_ld128);
+#endif  // XNN_ENABLE_FULL_BENCHMARKS
+  BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_4x4c2__avx_ld64);
+  BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_4x4c2__avx_ld128);
 
 #if XNN_ENABLE_FULL_BENCHMARKS
   BENCHMARK_QS8_END2END(qs8_gemm_minmax_ukernel_1x4c8__avx_ld64);
