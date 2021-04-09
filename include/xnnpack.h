@@ -506,7 +506,7 @@ enum xnn_status xnn_define_average_pooling_2d(
 ///                    with [output_channels, input_channels] dimensions.
 /// @param bias_id - Value ID for the bias tensor. The bias tensor must be a 1D
 /// tensor defined in the @a subgraph with
-///                  [output_channels] dimensions.
+///                  [output_channels] dimensions. Optional if the value ID is XNN_INVALID_VALUE_ID.
 /// @param output_id - Value ID for the output tensor. The output tensor must be
 /// defined in the @a subgraph.
 ///                    If XNN_FLAG_TENSORFLOW_RESHAPE_2D is not specified, the
@@ -522,7 +522,8 @@ enum xnn_status xnn_define_average_pooling_2d(
 ///                    output_channels] dimensions where num_input_elements is
 ///                    the total number of elements in the input tensor.
 /// @param flags - binary features of the Fully Connected Node. The only
-///                currently supported value is XNN_FLAG_TENSORFLOW_RESHAPE_2D.
+///                currently supported values are XNN_FLAG_TENSORFLOW_RESHAPE_2D
+///                and XNN_FLAG_TRANSPOSE_WEIGHTS.
 enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                                            float output_min, float output_max,
                                            uint32_t input_id,
