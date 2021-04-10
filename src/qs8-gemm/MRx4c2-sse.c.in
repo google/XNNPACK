@@ -297,7 +297,10 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c2__${ISA}${LOAD_SUFFIX}(
     $for M in range(0, MR, 2):
       vacc${M}${min(M+1, MR-1)}x0123 = _mm_min_epi16(_mm_max_epi16(vacc${M}${min(M+1, MR-1)}x0123, voutput_min), voutput_max);
 
-    __m128i vout = _mm_packs_epi16(vacc0${min(1, MR-1)}x0123, vacc${min(2, MR-1)}${min(3, MR-1)}x0123);
+    $if MR > 2:
+      __m128i vout = _mm_packs_epi16(vacc0${min(1, MR-1)}x0123, vacc${min(2, MR-1)}${min(3, MR-1)}x0123);
+    $else:
+      __m128i vout = _mm_packs_epi16(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
     if (nc >= 4) {
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
