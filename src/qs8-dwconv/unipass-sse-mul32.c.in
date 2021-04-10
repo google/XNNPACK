@@ -3,19 +3,29 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert SSE == 4
+$assert not XOP or AVX
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8
 $assert KERNEL_TILE >= 2
 #include <assert.h>
 
-#include <immintrin.h>
+$if XOP:
+  #if defined(__GNUC__) || defined(__clang__)
+    #include <x86intrin.h>
+  #else
+    #include <immintrin.h>
+    #include <ammintrin.h>
+  #endif
+$else:
+  #include <immintrin.h>
 
 #include <xnnpack/dwconv.h>
 #include <xnnpack/intrinsics-polyfill.h>
 
 
-$ISA = "avx" if AVX else {4: "sse41"}[SSE]
+$ISA = "xop" if XOP else "avx" if AVX else {4: "sse41"}[SSE]
 void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul32(
     size_t channels,
     size_t output_width,
@@ -58,7 +68,10 @@ void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul3
         i${K} += ${CHANNEL_TILE};
 
         $for C in range(0, CHANNEL_TILE, 4):
-          vacc${ABC[C:C+4]} = _mm_add_epi32(vacc${ABC[C:C+4]}, _mm_mullo_epi32(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}));
+          $if XOP:
+            vacc${ABC[C:C+4]} = _mm_macc_epi32(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}, vacc${ABC[C:C+4]});
+          $else:
+            vacc${ABC[C:C+4]} = _mm_add_epi32(vacc${ABC[C:C+4]}, _mm_mullo_epi32(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}));
 
       w = (const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${KERNEL_TILE * CHANNEL_TILE} * sizeof(int8_t));
 
@@ -133,7 +146,10 @@ void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul3
           $if CHANNEL_TILE > 4:
             i${K} += 4;
 
-          vacc${ABC[0:4]} = _mm_add_epi32(vacc${ABC[0:4]}, _mm_mullo_epi32(vi${K}x${ABC[0:4]}, vk${K}x${ABC[0:4]}));
+          $if XOP:
+            vacc${ABC[0:4]} = _mm_macc_epi32(vi${K}x${ABC[0:4]}, vk${K}x${ABC[0:4]}, vacc${ABC[0:4]});
+          $else:
+            vacc${ABC[0:4]} = _mm_add_epi32(vacc${ABC[0:4]}, _mm_mullo_epi32(vi${K}x${ABC[0:4]}, vk${K}x${ABC[0:4]}));
 
         $if CHANNEL_TILE > 4:
           w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));

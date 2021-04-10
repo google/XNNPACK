@@ -1517,6 +1517,10 @@ static void init(void) {
     if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up32x9__avx512skx_mul32;
       xnn_params.qs8.dwconv[0].channel_tile = 32;
+    } else if (cpuinfo_has_x86_xop()) {
+      // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
+      xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up16x9__xop_mul32;
+      xnn_params.qs8.dwconv[0].channel_tile = 16;
     } else if (cpuinfo_has_x86_avx2()) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_ukernel_up16x9__avx2_mul32;
       xnn_params.qs8.dwconv[0].channel_tile = 16;

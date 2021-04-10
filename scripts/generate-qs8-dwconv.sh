@@ -32,13 +32,17 @@ tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=8  -D KERNEL_T
 tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -o src/qs8-dwconv/gen/up16x9-minmax-avx-mul16.c
 tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -o src/qs8-dwconv/gen/up24x9-minmax-avx-mul16.c
 
-tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D SSE=4 -D AVX=0 -o src/qs8-dwconv/gen/up8x9-minmax-sse41-mul32.c
-tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D SSE=4 -D AVX=0 -o src/qs8-dwconv/gen/up16x9-minmax-sse41-mul32.c
-tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -D SSE=4 -D AVX=0 -o src/qs8-dwconv/gen/up24x9-minmax-sse41-mul32.c
+tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-dwconv/gen/up8x9-minmax-sse41-mul32.c
+tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-dwconv/gen/up16x9-minmax-sse41-mul32.c
+tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -D SSE=4 -D AVX=0 -D XOP=0 -o src/qs8-dwconv/gen/up24x9-minmax-sse41-mul32.c
 
-tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -o src/qs8-dwconv/gen/up8x9-minmax-avx-mul32.c
-tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -o src/qs8-dwconv/gen/up16x9-minmax-avx-mul32.c
-tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -o src/qs8-dwconv/gen/up24x9-minmax-avx-mul32.c
+tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-dwconv/gen/up8x9-minmax-avx-mul32.c
+tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-dwconv/gen/up16x9-minmax-avx-mul32.c
+tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -D XOP=0 -o src/qs8-dwconv/gen/up24x9-minmax-avx-mul32.c
+
+tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -D XOP=1 -o src/qs8-dwconv/gen/up8x9-minmax-xop-mul32.c
+tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -D XOP=1 -o src/qs8-dwconv/gen/up16x9-minmax-xop-mul32.c
+tools/xngen src/qs8-dwconv/unipass-sse-mul32.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -D SSE=4 -D AVX=1 -D XOP=1 -o src/qs8-dwconv/gen/up24x9-minmax-xop-mul32.c
 
 ################################### x86 AVX2 ##################################
 tools/xngen src/qs8-dwconv/unipass-avx2-mul16.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up16x9-minmax-avx2-mul16.c
