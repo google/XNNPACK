@@ -214,19 +214,14 @@ void xnn_qs8_dwconv_minmax_ukernel_up16x9__wasmsimd_mul16(
 
       w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t) + 144 * sizeof(int8_t));
 
-      const v128_t vsign0123 = wasm_i32x4_shr(vacc0123, 31);
-      const v128_t vsign4567 = wasm_i32x4_shr(vacc4567, 31);
-      const v128_t vsign89AB = wasm_i32x4_shr(vacc89AB, 31);
-      const v128_t vsignCDEF = wasm_i32x4_shr(vaccCDEF, 31);
-
-      const v128_t vacc01 = wasm_v32x4_shuffle(vacc0123, vsign0123, 0, 4, 1, 5);
-      const v128_t vacc23 = wasm_v32x4_shuffle(vacc0123, vsign0123, 2, 6, 3, 7);
-      const v128_t vacc45 = wasm_v32x4_shuffle(vacc4567, vsign4567, 0, 4, 1, 5);
-      const v128_t vacc67 = wasm_v32x4_shuffle(vacc4567, vsign4567, 2, 6, 3, 7);
-      const v128_t vacc89 = wasm_v32x4_shuffle(vacc89AB, vsign89AB, 0, 4, 1, 5);
-      const v128_t vaccAB = wasm_v32x4_shuffle(vacc89AB, vsign89AB, 2, 6, 3, 7);
-      const v128_t vaccCD = wasm_v32x4_shuffle(vaccCDEF, vsignCDEF, 0, 4, 1, 5);
-      const v128_t vaccEF = wasm_v32x4_shuffle(vaccCDEF, vsignCDEF, 2, 6, 3, 7);
+      const v128_t vacc01 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc0123);
+      const v128_t vacc23 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc0123);
+      const v128_t vacc45 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc4567);
+      const v128_t vacc67 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc4567);
+      const v128_t vacc89 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc89AB);
+      const v128_t vaccAB = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc89AB);
+      const v128_t vaccCD = __builtin_wasm_widen_low_s_i32x4_i64x2(vaccCDEF);
+      const v128_t vaccEF = __builtin_wasm_widen_high_s_i32x4_i64x2(vaccCDEF);
 
       const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
       const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
@@ -359,13 +354,10 @@ void xnn_qs8_dwconv_minmax_ukernel_up16x9__wasmsimd_mul16(
         w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
         k += 8;
 
-      const v128_t vsign0123 = wasm_i32x4_shr(vacc0123, 31);
-      const v128_t vsign4567 = wasm_i32x4_shr(vacc4567, 31);
-
-      const v128_t vacc01 = wasm_v32x4_shuffle(vacc0123, vsign0123, 0, 4, 1, 5);
-      const v128_t vacc23 = wasm_v32x4_shuffle(vacc0123, vsign0123, 2, 6, 3, 7);
-      const v128_t vacc45 = wasm_v32x4_shuffle(vacc4567, vsign4567, 0, 4, 1, 5);
-      const v128_t vacc67 = wasm_v32x4_shuffle(vacc4567, vsign4567, 2, 6, 3, 7);
+      const v128_t vacc01 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc0123);
+      const v128_t vacc23 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc0123);
+      const v128_t vacc45 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc4567);
+      const v128_t vacc67 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc4567);
 
       const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
       const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);

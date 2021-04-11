@@ -167,13 +167,10 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__wasmsimd_mul16(
 
       w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t) + 72 * sizeof(int8_t));
 
-      const v128_t vsign0123 = wasm_i32x4_shr(vacc0123, 31);
-      const v128_t vsign4567 = wasm_i32x4_shr(vacc4567, 31);
-
-      const v128_t vacc01 = wasm_v32x4_shuffle(vacc0123, vsign0123, 0, 4, 1, 5);
-      const v128_t vacc23 = wasm_v32x4_shuffle(vacc0123, vsign0123, 2, 6, 3, 7);
-      const v128_t vacc45 = wasm_v32x4_shuffle(vacc4567, vsign4567, 0, 4, 1, 5);
-      const v128_t vacc67 = wasm_v32x4_shuffle(vacc4567, vsign4567, 2, 6, 3, 7);
+      const v128_t vacc01 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc0123);
+      const v128_t vacc23 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc0123);
+      const v128_t vacc45 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc4567);
+      const v128_t vacc67 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc4567);
 
       const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
       const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
@@ -283,13 +280,10 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__wasmsimd_mul16(
         vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod8x01234567));
 
 
-      const v128_t vsign0123 = wasm_i32x4_shr(vacc0123, 31);
-      const v128_t vsign4567 = wasm_i32x4_shr(vacc4567, 31);
-
-      const v128_t vacc01 = wasm_v32x4_shuffle(vacc0123, vsign0123, 0, 4, 1, 5);
-      const v128_t vacc23 = wasm_v32x4_shuffle(vacc0123, vsign0123, 2, 6, 3, 7);
-      const v128_t vacc45 = wasm_v32x4_shuffle(vacc4567, vsign4567, 0, 4, 1, 5);
-      const v128_t vacc67 = wasm_v32x4_shuffle(vacc4567, vsign4567, 2, 6, 3, 7);
+      const v128_t vacc01 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc0123);
+      const v128_t vacc23 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc0123);
+      const v128_t vacc45 = __builtin_wasm_widen_low_s_i32x4_i64x2(vacc4567);
+      const v128_t vacc67 = __builtin_wasm_widen_high_s_i32x4_i64x2(vacc4567);
 
       const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
       const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
