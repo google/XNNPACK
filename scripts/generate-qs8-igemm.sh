@@ -14,6 +14,18 @@ tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=1 -D VARIANT=LD128 -o src/q
 tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=2 -D VARIANT=LD128 -o src/qs8-igemm/gen/2x4c8-minmax-wasmsimd-ld128.c
 tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=3 -D VARIANT=LD128 -o src/qs8-igemm/gen/3x4c8-minmax-wasmsimd-ld128.c
 
+### C8 ExtMul+Widen micro-kernels
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-extmul-widen.c.in -D MR=1 -o src/qs8-igemm/gen/1x4c8-minmax-wasmsimd-extmul-widen.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-extmul-widen.c.in -D MR=2 -o src/qs8-igemm/gen/2x4c8-minmax-wasmsimd-extmul-widen.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-extmul-widen.c.in -D MR=3 -o src/qs8-igemm/gen/3x4c8-minmax-wasmsimd-extmul-widen.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-extmul-widen.c.in -D MR=4 -o src/qs8-igemm/gen/4x4c8-minmax-wasmsimd-extmul-widen.c
+
+### C8 ExtMul+ExtAddPair micro-kernels
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-extmul-extaddpair.c.in -D MR=1 -o src/qs8-igemm/gen/1x4c8-minmax-wasmsimd-extmul-extaddpair.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-extmul-extaddpair.c.in -D MR=2 -o src/qs8-igemm/gen/2x4c8-minmax-wasmsimd-extmul-extaddpair.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-extmul-extaddpair.c.in -D MR=3 -o src/qs8-igemm/gen/3x4c8-minmax-wasmsimd-extmul-extaddpair.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-extmul-extaddpair.c.in -D MR=4 -o src/qs8-igemm/gen/4x4c8-minmax-wasmsimd-extmul-extaddpair.c
+
 ################################### ARM NEON ##################################
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=8 -o src/qs8-igemm/gen/1x8-minmax-neon-mlal-lane.c
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=2 -D NR=8 -o src/qs8-igemm/gen/2x8-minmax-neon-mlal-lane.c
