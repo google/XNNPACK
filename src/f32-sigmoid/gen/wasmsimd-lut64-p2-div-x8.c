@@ -53,18 +53,22 @@ void xnn_f32_sigmoid_ukernel__wasmsimd_lut64_p2_div_x8(
 
     const uint64_t vidx01 = wasm_i64x2_extract_lane(vidx0123, 0);
     const uint64_t vidx23 = wasm_i64x2_extract_lane(vidx0123, 1);
-    const float vl0   = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx01));
-    const float vl1 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx01 >> 32)));
-    const float vl2 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx23));
-    const float vl3 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx23 >> 32)));
-    const v128_t vl0123 = wasm_f32x4_make(vl0, vl1, vl2, vl3);
+    const v128_t vl0   = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx01));
+    const v128_t vl2 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx23));
+    const v128_t vl1 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx01 >> 32)));
+    const v128_t vl3 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx23 >> 32)));
+    const v128_t vl01 = wasm_v32x4_shuffle(vl0, vl1, 0, 4, 1, 5);
+    const v128_t vl23 = wasm_v32x4_shuffle(vl2, vl3, 0, 4, 1, 5);
+    const v128_t vl0123 = wasm_v32x4_shuffle(vl01, vl23, 0, 1, 4, 5);
     const uint64_t vidx45 = wasm_i64x2_extract_lane(vidx4567, 0);
     const uint64_t vidx67 = wasm_i64x2_extract_lane(vidx4567, 1);
-    const float vl4   = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx45));
-    const float vl5 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx45 >> 32)));
-    const float vl6 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx67));
-    const float vl7 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx67 >> 32)));
-    const v128_t vl4567 = wasm_f32x4_make(vl4, vl5, vl6, vl7);
+    const v128_t vl4   = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx45));
+    const v128_t vl6 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx67));
+    const v128_t vl5 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx45 >> 32)));
+    const v128_t vl7 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx67 >> 32)));
+    const v128_t vl45 = wasm_v32x4_shuffle(vl4, vl5, 0, 4, 1, 5);
+    const v128_t vl67 = wasm_v32x4_shuffle(vl6, vl7, 0, 4, 1, 5);
+    const v128_t vl4567 = wasm_v32x4_shuffle(vl45, vl67, 0, 1, 4, 5);
 
     const v128_t vs0123 = wasm_i32x4_add(vl0123, ve0123);
     const v128_t vs4567 = wasm_i32x4_add(vl4567, ve4567);
@@ -115,11 +119,13 @@ void xnn_f32_sigmoid_ukernel__wasmsimd_lut64_p2_div_x8(
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
     const uint64_t vidx_lo = wasm_i64x2_extract_lane(vidx, 0);
     const uint64_t vidx_hi = wasm_i64x2_extract_lane(vidx, 1);
-    const float vl0 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_lo));
-    const float vl1 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_lo >> 32)));
-    const float vl2 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_hi));
-    const float vl3 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_hi >> 32)));
-    const v128_t vl = wasm_f32x4_make(vl0, vl1, vl2, vl3);
+    const v128_t vl0 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_lo));
+    const v128_t vl1 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_lo >> 32)));
+    const v128_t vl2 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_hi));
+    const v128_t vl3 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_hi >> 32)));
+    const v128_t vl_lo = wasm_v32x4_shuffle(vl0, vl1, 0, 4, 1, 5);
+    const v128_t vl_hi = wasm_v32x4_shuffle(vl2, vl3, 0, 4, 1, 5);
+    const v128_t vl = wasm_v32x4_shuffle(vl_lo, vl_hi, 0, 1, 4, 5);
 
     const v128_t vs = wasm_i32x4_add(vl, ve);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
@@ -151,11 +157,13 @@ void xnn_f32_sigmoid_ukernel__wasmsimd_lut64_p2_div_x8(
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
     const uint64_t vidx_lo = wasm_i64x2_extract_lane(vidx, 0);
     const uint64_t vidx_hi = wasm_i64x2_extract_lane(vidx, 1);
-    const float vl0 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_lo));
-    const float vl1 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_lo >> 32)));
-    const float vl2 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_hi));
-    const float vl3 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_hi >> 32)));
-    const v128_t vl = wasm_f32x4_make(vl0, vl1, vl2, vl3);
+    const v128_t vl0 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_lo));
+    const v128_t vl1 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_lo >> 32)));
+    const v128_t vl2 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_hi));
+    const v128_t vl3 = __builtin_wasm_load32_zero((int*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_hi >> 32)));
+    const v128_t vl_lo = wasm_v32x4_shuffle(vl0, vl1, 0, 4, 1, 5);
+    const v128_t vl_hi = wasm_v32x4_shuffle(vl2, vl3, 0, 4, 1, 5);
+    const v128_t vl = wasm_v32x4_shuffle(vl_lo, vl_hi, 0, 1, 4, 5);
 
     const v128_t vs = wasm_i32x4_add(vl, ve);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
