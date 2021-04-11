@@ -289,12 +289,36 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
   context.set_max_num_threads(threads);
 
   ruy::Matrix<float> ruy_a;
-  ruy::MakeSimpleLayout(nc, kc, ruy::Order::kRowMajor, ruy_a.mutable_layout());
+  ruy::MakeSimpleLayout(mc, kc, ruy::Order::kRowMajor, ruy_a.mutable_layout());
+  ruy_a.set_data(a.data());
   ruy::Matrix<float> ruy_b;
-  ruy::MakeSimpleLayout(kc, mc, ruy::Order::kColMajor, ruy_b.mutable_layout());
-  ruy_b.set_data(a.data());
+  ruy::MakeSimpleLayout(kc, nc, ruy::Order::kColMajor, ruy_b.mutable_layout());
+  // Allow ruy to cache packed matrices for ruy_b only, because ruy_b plays the
+  // role of the NN weights in this benchmark.
+  //
+  // Specifically, this tells ruy that it's OK to assume that equality of pointers implies equality of data. When
+  // we pass a new pointer, that still forces ruy to pack the new data.
+  //
+  // Ruy is not directly comparable to XNNPACK in that it's a general-purpose
+  // matmul library operating on linear-layout input matrices. Like XNNPACK,
+  // Ruy's internal kernels consume data in kernel-specific internal layouts.
+  // Unlike XNNPACK, Ruy has runtime work to do to convert linear-layout
+  // matrices to this kernel-specific internal layout. In NN applications where
+  // one of the sides (the weights) is constant, Ruy can be told to cache that
+  // work. That makes it more similar to XNNPACK, which always (by construction)
+  // takes advantage of that constancy of weights. In TFLite, that caching is
+  // used only in the cases where it's the most beneficial,
+  // (ruy::CachePolicy::kCacheIfLargeSpeeup, see
+  // https://github.com/tensorflow/tensorflow/blob/0e1f4fd4844c687f50c2087a4014116c93db9209/tensorflow/lite/kernels/cpu_backend_gemm_params.h#L38-L41)
+  // This is a trade-off between memory usage and performance, TFLite directly
+  // feeding the weights to the NN arithmetic in-place from their file mapping.
+  // XNNPACK embodies a different trade-off: unconditionally converting the
+  // weights to the kernel's layout upon loading the NN, then using that.
+  // The use of ruy::CachePolicy::kAlwaysCache makes ruy equivalent to that,
+  // after the first iteration through the cold-cache circular buffer.
+  ruy_b.set_cache_policy(ruy::CachePolicy::kAlwaysCache);
   ruy::Matrix<float> ruy_c;
-  ruy::MakeSimpleLayout(nc, mc, ruy::Order::kColMajor, ruy_c.mutable_layout());
+  ruy::MakeSimpleLayout(mc, nc, ruy::Order::kRowMajor, ruy_c.mutable_layout());
 
   ruy::MulParams<float, float> mul_params;
 
@@ -305,13 +329,24 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
   static std::once_flag warmup;
   std::call_once(warmup, [&](){
     auto start = std::chrono::steady_clock::now();
-    do {
-      ruy_a.set_data(k.data());
-      ruy_c.set_data(c.data());
-      mul_params.set_bias(b.data());
+    size_t buffer_index = 0;
+    // For the caching of the weights matrices ruy_b to be effective
+    // (see above ruy_b.set_cache_policy), we need this warmup to loop over all
+    // of the buffers.
+    bool has_looped_over_all_buffers = false;
+    do {        
+      ruy_b.set_data(k.data() + buffer_index * nc * kc);
+      ruy_c.set_data(c.data() + buffer_index * mc * nc);
+      mul_params.set_bias(b.data() + buffer_index * nc);
+
+      ++buffer_index;
+      if (buffer_index == num_buffers) {
+        has_looped_over_all_buffers = true;
+        buffer_index = 0;
+      }
 
       ruy::Mul(ruy_a, ruy_b, mul_params, &context, &ruy_c);
-    } while (std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count() < 0.5);
+    } while (!has_looped_over_all_buffers || std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count() < 0.5);
   });
 
   size_t buffer_index = 0;
@@ -326,7 +361,7 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    ruy_a.set_data(k.data() + buffer_index * nc * kc);
+    ruy_b.set_data(k.data() + buffer_index * nc * kc);
     ruy_c.set_data(c.data() + buffer_index * mc * nc);
     mul_params.set_bias(b.data() + buffer_index * nc);
 
