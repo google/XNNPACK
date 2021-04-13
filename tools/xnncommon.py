@@ -91,10 +91,17 @@ def generate_isa_check_macro(isa):
   return _ISA_TO_CHECK_MAP.get(isa, "")
 
 
+def arch_to_macro(arch, isa):
+  if arch == "aarch32" and isa == "neondot":
+    return _ARCH_TO_MACRO_MAP[arch] + " && !XNN_PLATFORM_IOS"
+  else:
+    return _ARCH_TO_MACRO_MAP[arch]
+
+
 def postprocess_test_case(test_case, arch, isa, assembly=False):
   test_case = _remove_duplicate_newlines(test_case)
   if arch:
-    guard = " || ".join(map(_ARCH_TO_MACRO_MAP.get, arch))
+    guard = " || ".join(arch_to_macro(a, isa) for a in arch)
     if assembly:
       guard += " && XNN_ENABLE_ASSEMBLY"
     return "#if %s\n" % guard + _indent(test_case) + "\n" + \

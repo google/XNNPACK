@@ -4461,7 +4461,13 @@ xnnpack_cc_library(
 
 xnnpack_aggregate_library(
     name = "ukernels",
-    aarch32_deps = [
+    aarch32_ios_deps = [
+        ":neon_ukernels",
+        ":neonfma_ukernels",
+        ":neonv8_ukernels",
+        ":asm_ukernels",
+    ],
+    aarch32_nonios_deps = [
         ":neon_ukernels",
         ":neonfma_ukernels",
         ":neonv8_ukernels",
@@ -4502,7 +4508,13 @@ xnnpack_aggregate_library(
 
 xnnpack_aggregate_library(
     name = "ukernels_test_mode",
-    aarch32_deps = [
+    aarch32_ios_deps = [
+        ":neon_ukernels_test_mode",
+        ":neonfma_ukernels_test_mode",
+        ":neonv8_ukernels_test_mode",
+        ":asm_ukernels",
+    ],
+    aarch32_nonios_deps = [
         ":neon_ukernels_test_mode",
         ":neonfma_ukernels_test_mode",
         ":neonv8_ukernels_test_mode",
