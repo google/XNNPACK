@@ -93,6 +93,13 @@ tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=4  -D NR=16 -o src/qs8-igem
 tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=6  -D NR=16 -o src/qs8-igemm/gen/6x16c4-minmax-neondot.c
 tools/xngen src/qs8-igemm/MRxNRc4-neondot.c.in -D MR=8  -D NR=16 -o src/qs8-igemm/gen/8x16c4-minmax-neondot.c
 
+
+############################### AArch64 assembly ##############################
+# Cortex A75 micro-kernel
+tools/xngen src/qs8-igemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=0 -o src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal.S
+tools/xngen src/qs8-igemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=1 -o src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
+
+
 ################################### x86 SSE ###################################
 ### C2 micro-kernels
 tools/xngen src/qs8-igemm/MRx4c2-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c2-minmax-sse2-ld64.c

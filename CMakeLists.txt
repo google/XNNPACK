@@ -1620,10 +1620,10 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-gemm/gen/5x8s4-minmax-sse.c
   src/f32-hswish/gen/hswish-sse-x4.c
   src/f32-hswish/gen/hswish-sse-x8.c
-  src/f32-ibilinear/gen/sse-c4.c
-  src/f32-ibilinear/gen/sse-c8.c
   src/f32-ibilinear-chw/gen/sse-p4.c
   src/f32-ibilinear-chw/gen/sse-p8.c
+  src/f32-ibilinear/gen/sse-c4.c
+  src/f32-ibilinear/gen/sse-c8.c
   src/f32-igemm/gen/1x8-minmax-sse-dup.c
   src/f32-igemm/gen/1x8-minmax-sse-load1.c
   src/f32-igemm/gen/1x8s4-minmax-sse.c
@@ -1966,10 +1966,10 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/math/roundu-sse41.c
   src/math/roundz-sse41.c
   src/qs8-dwconv/gen/up8x9-minmax-sse41-mul16.c
-  src/qs8-dwconv/gen/up16x9-minmax-sse41-mul16.c
-  src/qs8-dwconv/gen/up24x9-minmax-sse41-mul16.c
   src/qs8-dwconv/gen/up8x9-minmax-sse41-mul32.c
+  src/qs8-dwconv/gen/up16x9-minmax-sse41-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-sse41-mul32.c
+  src/qs8-dwconv/gen/up24x9-minmax-sse41-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-sse41-mul32.c
   src/qs8-gavgpool/gen/7p7x-minmax-sse41-c8-acc2.c
   src/qs8-gavgpool/gen/7p7x-minmax-sse41-c16-acc2.c
@@ -2170,11 +2170,19 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vunary/gen/vneg-avx-x16.c
   src/f32-vunary/gen/vsqr-avx-x8.c
   src/f32-vunary/gen/vsqr-avx-x16.c
+  src/math/exp-avx-rr2-p5.c
+  src/math/expm1minus-avx-rr2-lut4-p4-perm.c
+  src/math/expm1minus-avx-rr2-lut16-p3.c
+  src/math/expm1minus-avx-rr2-p6.c
+  src/math/sigmoid-avx-rr2-lut64-p2-div.c
+  src/math/sigmoid-avx-rr2-p5-div.c
+  src/math/sigmoid-avx-rr2-p5-nr1.c
+  src/math/sigmoid-avx-rr2-p5-nr2.c
   src/qs8-dwconv/gen/up8x9-minmax-avx-mul16.c
-  src/qs8-dwconv/gen/up16x9-minmax-avx-mul16.c
-  src/qs8-dwconv/gen/up24x9-minmax-avx-mul16.c
   src/qs8-dwconv/gen/up8x9-minmax-avx-mul32.c
+  src/qs8-dwconv/gen/up16x9-minmax-avx-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-avx-mul32.c
+  src/qs8-dwconv/gen/up24x9-minmax-avx-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-avx-mul32.c
   src/qs8-gemm/gen/1x4c2-minmax-avx-ld64.c
   src/qs8-gemm/gen/1x4c2-minmax-avx-ld128.c
@@ -2226,15 +2234,7 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x8.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x24.c
-  src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x32.c
-  src/math/exp-avx-rr2-p5.c
-  src/math/expm1minus-avx-rr2-lut4-p4-perm.c
-  src/math/expm1minus-avx-rr2-lut16-p3.c
-  src/math/expm1minus-avx-rr2-p6.c
-  src/math/sigmoid-avx-rr2-lut64-p2-div.c
-  src/math/sigmoid-avx-rr2-p5-div.c
-  src/math/sigmoid-avx-rr2-p5-nr1.c
-  src/math/sigmoid-avx-rr2-p5-nr2.c)
+  src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x32.c)
 
 SET(XNNPACK_XOP_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up8x9-minmax-xop-mul32.c
@@ -2894,20 +2894,22 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-igemm/gen/5x8-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S
+  src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal.S
   src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S
   src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S
-  src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal.S
   src/qs8-gemm/2x8c8-aarch64-neon-mull-padal.S
-  src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S
   src/qs8-gemm/2x8c16-aarch64-neon-mlal-padal.S
   src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S
   src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S
   src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S
+  src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
+  src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal.S
   src/qs8-igemm/1x8c8-aarch64-neon-mlal-padal.S
-  src/qs8-igemm/2x8c8-aarch64-neon-mlal-padal.S
   src/qs8-igemm/2x8c16-aarch64-neon-mlal-padal.S
   src/qs8-igemm/4x16c4-aarch64-neondot-cortex-a55.S
-  src/qs8-igemm/4x16c4-aarch64-neondot-ld64.S)
+  src/qs8-igemm/4x16c4-aarch64-neondot-ld64.S
+  src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
+  src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal.S)
 
 SET(XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SCALAR_MICROKERNEL_SRCS})
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")

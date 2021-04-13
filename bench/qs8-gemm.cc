@@ -568,6 +568,9 @@ static void ruy_st(benchmark::State& state, const char* net)
   static void qs8_gemm_2x8c8__aarch64_neon_mlal_padal(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal, 2, 8, 8, 1, benchmark::utils::CheckNEON);
   }
+  static void qs8_gemm_2x8c8__aarch64_neon_mlal_padal_prfm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal_prfm, 2, 8, 8, 1, benchmark::utils::CheckNEON);
+  }
   static void qs8_gemm_2x8c16__aarch64_neon_mlal_padal(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_qs8_gemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal, 2, 8, 16, 1, benchmark::utils::CheckNEON);
   }
@@ -580,6 +583,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(qs8_gemm_1x8c8__aarch64_neon_mlal_padal)
   BENCHMARK_GEMM(qs8_gemm_2x8c8__aarch64_neon_mull_padal)
   BENCHMARK_GEMM(qs8_gemm_2x8c8__aarch64_neon_mlal_padal)
+  BENCHMARK_GEMM(qs8_gemm_2x8c8__aarch64_neon_mlal_padal_prfm)
   BENCHMARK_GEMM(qs8_gemm_2x8c16__aarch64_neon_mlal_padal)
 #endif  // XNN_ARCH_ARM64
 
