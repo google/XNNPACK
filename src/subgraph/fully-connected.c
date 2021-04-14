@@ -109,37 +109,39 @@ enum xnn_status xnn_define_fully_connected(
       return xnn_status_invalid_parameter;
   }
 
-  if (bias_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with bias ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id);
-    return xnn_status_invalid_parameter;
-  }
-
-  const struct xnn_value* bias_value = &subgraph->values[bias_id];
-  if (bias_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id, bias_value->type);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (bias_value->data == NULL) {
-    xnn_log_error(
-      "failed to define %s operator with bias ID #%" PRIu32 ": non-static Value",
-      xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id);
-    return xnn_status_invalid_parameter;
-  }
-
-  switch (bias_value->datatype) {
-    case xnn_datatype_fp32:
-      break;
-    default:
+  if (bias_id != XNN_INVALID_VALUE_ID) {
+    if (bias_id >= subgraph->num_values) {
       xnn_log_error(
-        "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id,
-        xnn_datatype_to_string(bias_value->datatype), bias_value->datatype);
+        "failed to define %s operator with bias ID #%" PRIu32 ": invalid Value ID",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id);
       return xnn_status_invalid_parameter;
+    }
+
+    const struct xnn_value* bias_value = &subgraph->values[bias_id];
+    if (bias_value->type != xnn_value_type_dense_tensor) {
+      xnn_log_error(
+        "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id, bias_value->type);
+      return xnn_status_invalid_parameter;
+    }
+
+    if (bias_value->data == NULL) {
+      xnn_log_error(
+        "failed to define %s operator with bias ID #%" PRIu32 ": non-static Value",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id);
+      return xnn_status_invalid_parameter;
+    }
+
+    switch (bias_value->datatype) {
+      case xnn_datatype_fp32:
+        break;
+      default:
+        xnn_log_error(
+          "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+          xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id,
+          xnn_datatype_to_string(bias_value->datatype), bias_value->datatype);
+        return xnn_status_invalid_parameter;
+    }
   }
 
   if (output_id >= subgraph->num_values) {
@@ -176,10 +178,16 @@ enum xnn_status xnn_define_fully_connected(
   node->type = xnn_node_type_fully_connected;
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
-  node->num_inputs = 3;
-  node->inputs[0] = input_id;
-  node->inputs[1] = filter_id;
-  node->inputs[2] = bias_id;
+  if (bias_id != XNN_INVALID_VALUE_ID) {
+    node->num_inputs = 3;
+    node->inputs[0] = input_id;
+    node->inputs[1] = filter_id;
+    node->inputs[2] = bias_id;
+  } else {
+    node->num_inputs = 2;
+    node->inputs[0] = input_id;
+    node->inputs[1] = filter_id;
+  }
   node->num_outputs = 1;
   node->outputs[0] = output_id;
   node->flags = flags;

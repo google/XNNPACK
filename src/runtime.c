@@ -569,18 +569,24 @@ enum xnn_status xnn_create_runtime_v2(
       case xnn_node_type_fully_connected:
       {
         const size_t num_input_elements = product_all_dims(&values[node->inputs[0]].shape);
-        const size_t output_channels = values[node->inputs[1]].shape.dim[0];
-        const size_t input_channels = values[node->inputs[1]].shape.dim[1];
+        size_t output_channels, input_channels;
+        if (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+          input_channels = values[node->inputs[1]].shape.dim[0];
+          output_channels = values[node->inputs[1]].shape.dim[1];
+        } else {
+          output_channels = values[node->inputs[1]].shape.dim[0];
+          input_channels = values[node->inputs[1]].shape.dim[1];
+        }
         status = xnn_create_fully_connected_nc_f32(
           input_channels,
           output_channels,
           input_channels /* input stride */,
           output_channels /* output stride */,
           values[node->inputs[1]].data,
-          values[node->inputs[2]].data,
+          node->num_inputs > 2 ? values[node->inputs[2]].data : NULL,
           node->activation.output_min,
           node->activation.output_max,
-          0 /* flags */,
+          node->flags /* flags */,
           &runtime->opdata[i].operator_object);
         if (status != xnn_status_success) {
           goto error;
