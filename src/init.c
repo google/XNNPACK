@@ -880,6 +880,7 @@ static void init(void) {
               xnn_params.qs8.gemm.mr = 2;
               xnn_params.qs8.gemm.nr = 8;
               xnn_params.qs8.gemm.log2_kr = 3;
+              break;
 
             default:
               xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal);
@@ -889,6 +890,7 @@ static void init(void) {
               xnn_params.qs8.gemm.mr = 2;
               xnn_params.qs8.gemm.nr = 8;
               xnn_params.qs8.gemm.log2_kr = 3;
+              break;
           }
         }
         #if XNN_MAX_UARCH_TYPES > 1
