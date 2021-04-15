@@ -240,8 +240,13 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_convolution_2d:
+      {
         assert(values[node->inputs[1]].data != NULL);
-        assert(values[node->inputs[2]].data != NULL);
+        const void* bias_data = NULL;
+        if (node->num_inputs > 2) {
+          bias_data = values[node->inputs[2]].data;
+          assert(bias_data != NULL);
+        }
         if (values[node->outputs[0]].layout == xnn_layout_type_nchw) {
           status = xnn_create_convolution2d_nchw_f32(
             node->params.convolution_2d.input_padding_top,
@@ -260,7 +265,7 @@ enum xnn_status xnn_create_runtime_v2(
             node->params.convolution_2d.group_input_channels * node->params.convolution_2d.groups /* input_pixel_stride */,
             node->params.convolution_2d.group_output_channels * node->params.convolution_2d.groups /* output_pixel_stride */,
             values[node->inputs[1]].data,
-            values[node->inputs[2]].data,
+            bias_data,
             node->activation.output_min,
             node->activation.output_max,
             node->flags | (values[node->inputs[0]].layout == xnn_layout_type_nhwc ? XNN_FLAG_INPUT_NHWC : 0),
@@ -287,7 +292,7 @@ enum xnn_status xnn_create_runtime_v2(
                 node->params.convolution_2d.group_input_channels * node->params.convolution_2d.groups /* input_pixel_stride */,
                 node->params.convolution_2d.group_output_channels * node->params.convolution_2d.groups /* output_pixel_stride */,
                 values[node->inputs[1]].data,
-                values[node->inputs[2]].data,
+                bias_data,
                 node->activation.output_min,
                 node->activation.output_max,
                 node->flags,
@@ -322,9 +327,9 @@ enum xnn_status xnn_create_runtime_v2(
                 values[node->inputs[0]].quantization.scale,
                 values[node->inputs[1]].quantization.scale,
                 values[node->inputs[1]].data,
-                values[node->inputs[2]].data,
+                bias_data,
                 (int8_t) output_zero_point,
-                output_scale, output_min, output_max, 
+                output_scale, output_min, output_max,
                 node->flags,
                 &runtime->opdata[i].operator_object);
               break;
@@ -343,6 +348,7 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].inputs[0] = node->inputs[0];
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
+      }
       case xnn_node_type_clamp:
         status = xnn_create_clamp_nc_f32(
           values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
@@ -396,8 +402,13 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_depthwise_convolution_2d:
+      {
         assert(values[node->inputs[1]].data != NULL);
-        assert(values[node->inputs[2]].data != NULL);
+        const void* bias_data = NULL;
+        if (node->num_inputs > 2) {
+          bias_data = values[node->inputs[2]].data;
+          assert(bias_data != NULL);
+        }
         if (values[node->outputs[0]].layout == xnn_layout_type_nchw) {
           assert(values[node->inputs[0]].layout == xnn_layout_type_nchw);
           status = xnn_create_convolution2d_nchw_f32(
@@ -417,7 +428,7 @@ enum xnn_status xnn_create_runtime_v2(
             node->params.depthwise_convolution_2d.input_channels /* input_channel_stride */,
             node->params.depthwise_convolution_2d.input_channels * node->params.depthwise_convolution_2d.depth_multiplier /* output_channel_stride */,
             values[node->inputs[1]].data,
-            values[node->inputs[2]].data,
+            bias_data,
             node->activation.output_min,
             node->activation.output_max,
             node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
@@ -444,7 +455,7 @@ enum xnn_status xnn_create_runtime_v2(
                 node->params.depthwise_convolution_2d.input_channels /* input_channel_stride */,
                 node->params.depthwise_convolution_2d.input_channels * node->params.depthwise_convolution_2d.depth_multiplier /* output_channel_stride */,
                 values[node->inputs[1]].data,
-                values[node->inputs[2]].data,
+                bias_data,
                 node->activation.output_min,
                 node->activation.output_max,
                 node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
@@ -479,9 +490,9 @@ enum xnn_status xnn_create_runtime_v2(
                 values[node->inputs[0]].quantization.scale,
                 values[node->inputs[1]].quantization.scale,
                 values[node->inputs[1]].data,
-                values[node->inputs[2]].data,
+                bias_data,
                 (int8_t) output_zero_point,
-                output_scale, output_min, output_max, 
+                output_scale, output_min, output_max,
                 node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
                 &runtime->opdata[i].operator_object);
               break;
@@ -501,6 +512,7 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].inputs[0] = node->inputs[0];
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
+      }
       case xnn_node_type_depth_to_space:
         status = xnn_status_unsupported_parameter;
         if (values[node->inputs[0]].layout == xnn_layout_type_nchw) {
@@ -577,13 +589,17 @@ enum xnn_status xnn_create_runtime_v2(
           output_channels = values[node->inputs[1]].shape.dim[0];
           input_channels = values[node->inputs[1]].shape.dim[1];
         }
+        const float* bias_data = NULL;
+        if (node->num_inputs > 2) {
+          bias_data = values[node->inputs[2]].data;
+        }
         status = xnn_create_fully_connected_nc_f32(
           input_channels,
           output_channels,
           input_channels /* input stride */,
           output_channels /* output stride */,
           values[node->inputs[1]].data,
-          node->num_inputs > 2 ? values[node->inputs[2]].data : NULL,
+          bias_data,
           node->activation.output_min,
           node->activation.output_max,
           node->flags /* flags */,

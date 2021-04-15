@@ -316,7 +316,8 @@ enum xnn_status xnn_define_convolution_2d(
 /// @param filter_id - Value ID for the filter tensor. The filter tensor must ge a 4D tensor defined in the @a subgraph
 ///                    with [groups * group_output_channels, kernel_height, kernel_width, group_input_channels]
 ///                    dimensions.
-/// @param bias_id - Value ID for the bias tensor. The bias tensor must be a 1D tensor defined in the @a subgraph with
+/// @param bias_id - Value ID for the bias tensor, or XNN_INVALID_VALUE_ID for a 2D Convolution Node without a bias. If
+///                  present, the bias tensor must be a 1D tensor defined in the @a subgraph with
 ///                  [groups * group_output_channels] dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
 ///                    with [N, OH, OW, groups * group_output_channels] dimensions.
@@ -371,7 +372,8 @@ enum xnn_status xnn_define_deconvolution_2d(
 ///                   with [N, IH, IW, input_channels] dimensions
 /// @param filter_id - Value ID for the filter tensor. The filter tensor must ge a 4D tensor defined in the @a subgraph
 ///                    with [1, kernel_height, kernel_width, input_channels * depth_multiplier] dimensions.
-/// @param bias_id - Value ID for the bias tensor. The bias tensor must be a 1D tensor defined in the @a subgraph with
+/// @param bias_id - Value ID for the bias tensor, or XNN_INVALID_VALUE_ID for a 2D Depthwise Convolution Node without
+///                  a bias. If present, the bias tensor must be a 1D tensor defined in the @a subgraph with
 ///                  [input_channels * depth_multiplier] dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
 ///                    with [N, OH, OW, input_channels * depth_multiplier] dimensions.
@@ -511,11 +513,15 @@ enum xnn_status xnn_define_average_pooling_2d(
 ///                    total number of elements in the input tensor.
 /// @param flags - binary features of the Fully Connected Node. The only currently supported values are
 ///                XNN_FLAG_TENSORFLOW_RESHAPE_2D and XNN_FLAG_TRANSPOSE_WEIGHTS.
-enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
-                                           float output_min, float output_max,
-                                           uint32_t input_id,
-                                           uint32_t filter_id, uint32_t bias_id,
-                                           uint32_t output_id, uint32_t flags);
+enum xnn_status xnn_define_fully_connected(
+  xnn_subgraph_t subgraph,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
+  uint32_t filter_id,
+  uint32_t bias_id,
+  uint32_t output_id,
+  uint32_t flags);
 
 /// Define a 2D Max Pooling Node and add it to a Subgraph.
 ///
