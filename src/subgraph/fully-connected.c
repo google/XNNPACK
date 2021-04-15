@@ -178,16 +178,10 @@ enum xnn_status xnn_define_fully_connected(
   node->type = xnn_node_type_fully_connected;
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
-  if (bias_id != XNN_INVALID_VALUE_ID) {
-    node->num_inputs = 3;
-    node->inputs[0] = input_id;
-    node->inputs[1] = filter_id;
-    node->inputs[2] = bias_id;
-  } else {
-    node->num_inputs = 2;
-    node->inputs[0] = input_id;
-    node->inputs[1] = filter_id;
-  }
+  node->num_inputs = 2 + (size_t) (bias_id != XNN_INVALID_VALUE_ID);
+  node->inputs[0] = input_id;
+  node->inputs[1] = filter_id;
+  node->inputs[2] = bias_id;
   node->num_outputs = 1;
   node->outputs[0] = output_id;
   node->flags = flags;
