@@ -44,8 +44,7 @@ extern "C" {
 /// Match "SAME" padding in TensorFlow. Exact padding values are computed dynamically depending on input size.
 #define XNN_FLAG_TENSORFLOW_SAME_PADDING 0x00000004
 
-/// Implicitly flatten and reshape input of a Fully Connected operator into a 2D
-/// tensor.
+/// Implicitly flatten and reshape input of a Fully Connected operator into a 2D tensor.
 #define XNN_FLAG_TENSORFLOW_RESHAPE_2D 0x00000004
 
 /// Match behaviour of TensorFlow 1.x.
@@ -114,8 +113,8 @@ struct xnn_allocator {
 
 /// Initialize XNNPACK library.
 ///
-/// XNNPACK must be successfully initialized before use.
-/// During initialization, XNNPACK populates internal structures depending on host processor. It can be time-consuming.
+/// XNNPACK must be successfully initialized before use. During initialization, XNNPACK populates internal structures
+/// depending on the host processor. Initialization can be time-consuming.
 ///
 /// @param[in] allocator - structure with function pointers to be use for memory allocation and de-allocation.
 ///                        If this argument is NULL, system-provided memory management functions (e.g. malloc/free)
@@ -400,17 +399,20 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   uint32_t output_id,
   uint32_t flags);
 
-/// Define a DepthToSpace Node and add it to a Subgraph.
+/// Define a Depth To Space Node and add it to a Subgraph.
 ///
-/// The DepthToSpace Node rearranges data from depth into blocks of spatial data (a reverse transform for SpaceToDepth).
-/// For a given input pixel, an output square of pixels with side @a block_size is formed from values in the corresponding
-/// number of its channels. The output depth is therefore @a block_size x @a block_size times smaller than that of the input.
+/// The Depth To Space Node rearranges data from depth into blocks of spatial data (a reverse transform to
+/// Space To Depth). For a given input pixel, an output square of pixels with side @a block_size is formed from values
+/// in the corresponding number of its channels. The output depth is therefore @a block_size x @a block_size times
+/// smaller than that of the input.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param input_id - Value ID for the input tensor. The input tensor must be divisible by @a block_size in the channel dimension.
-/// @param output_id - Value ID for the output tensor.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, IH, IW, OC * block_size * block_size] dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, IH * block_size, IW * block_size, OC] dimensions.
 /// @param block_size - the size of the spatial block.
-/// @param flags - binary features of the DepthToSpace Node. No supported flags are currently defined.
+/// @param flags - binary features of the input_channels Node. No supported flags are currently defined.
 enum xnn_status xnn_define_depth_to_space(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
@@ -423,14 +425,11 @@ enum xnn_status xnn_define_depth_to_space(
 /// @param subgraph - a Subgraph object that will own the created Node.
 /// @param output_min - lower bound for clipping output values.
 /// @param output_max - upper bound for clipping output values.
-/// @param input_id - Value ID for the input tensor. The input tensor must be a
-///                   4D tensor defined in the @a subgraph with [N, H, W, C]
-///                   dimensions
-/// @param output_id - Value ID for the output tensor. The output tensor must be
-///                    a 4D tensor defined in the @a subgraph with [N, 1, 1, C]
-///                    dimensions.
-/// @param flags - binary features of the 2D Global Average Pooling Node. No
-///                supported flags are currently defined.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, H, W, C] dimensions
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, 1, 1, C] dimensions.
+/// @param flags - binary features of the 2D Global Average Pooling Node. No supported flags are currently defined.
 enum xnn_status xnn_define_global_average_pooling_2d(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -485,50 +484,33 @@ enum xnn_status xnn_define_average_pooling_2d(
 /// @param subgraph - a Subgraph object that will own the created Node.
 /// @param output_min - lower bound for clipping output values.
 /// @param output_max - upper bound for clipping output values.
-/// @param input_id - Value ID for the input tensor. The input tensor must be an
-///                   N-dimensional tensor defined in the @a subgraph.
-///                   If XNN_FLAG_TENSORFLOW_RESHAPE_2D is not specified, the
-///                   input tensor must be at least 1D and its last dimension
-///                   must match the last dimension of the filter tensor. In
-///                   particular, if input is a 2D tensor, it must have
-///                   [batch_size, input_channels] dimensions. If
-///                   XNN_FLAG_TENSORFLOW_RESHAPE_2D is specified, the number of
-///                   elements in the input tensor must be divisible by the
-///                   input_channels. The tensor will be first flattened into a
-///                   1D tensor of [num_input_elements] dimensions, then
-///                   reshaped into a 2D tensor of [num_input_elements /
-///                   input_channels, input_channels] dimensions where
-///                   num_input_elements is the total number of elements in the
-///                   input tensor.
-/// @param filter_id - Value ID for the filter tensor. The filter tensor must
-///                    a 2D tensor defined in the @a subgraph. If the
-///                    XNN_FLAG_TRANSPOSE_WEIGHTS flag is not specified, the
-///                    filter tensor must have
-///                    [output_channels, input_channels] dimensions. If the
-///                    XNN_FLAG_TRANSPOSE_WEIGHTS flag is specified, the filter
-///                    tensor must have [input_channels, output_channels]
-///                    dimensions.
-/// @param bias_id - Value ID for the bias tensor, or XNN_INVALID_VALUE_ID for
-///                  a Fully Connected Node without a bias. If present, the
-///                  bias tensor must be a 1D tensor defined in the @a subgraph
-///                  with [output_channels] dimensions.
-/// @param output_id - Value ID for the output tensor. The output tensor must be
-///                    defined in the @a subgraph.
-///                    If XNN_FLAG_TENSORFLOW_RESHAPE_2D is not specified, the
-///                    output tensor must have the same dimensionality as the
-///                    input tensor, all its dimensions but the last one must
-///                    match the corresponding dimensions of the input tensor,
-///                    and the last dimensions of the output tensor must match
-///                    the first dimension of the filter tensor. In particular,
-///                    if input is a 2D tensor, output must be a 2D tensor of
-///                    [batch_size, output_channels] dimensions. If
-///                    XNN_FLAG_TENSORFLOW_RESHAPE_2D is specified, output must
-///                    be a 2D tensor of [num_input_elements / input_channels,
-///                    output_channels] dimensions where num_input_elements is
-///                    the total number of elements in the input tensor.
-/// @param flags - binary features of the Fully Connected Node. The only
-///                currently supported values are XNN_FLAG_TENSORFLOW_RESHAPE_2D
-///                and XNN_FLAG_TRANSPOSE_WEIGHTS.
+/// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the
+///                   @a subgraph. If XNN_FLAG_TENSORFLOW_RESHAPE_2D is not specified, the input tensor must be at least
+///                   1D and its last dimension must match the last dimension of the filter tensor. In particular, if
+///                   input is a 2D tensor, it must have [batch_size, input_channels] dimensions.
+///                   If XNN_FLAG_TENSORFLOW_RESHAPE_2D is specified, the number of elements in the input tensor must be
+///                   divisible by the input_channels. The tensor will be first flattened into a 1D tensor of
+///                   [num_input_elements] dimensions, then reshaped into a 2D tensor of
+///                   [num_input_elements / input_channels, input_channels] dimensions where num_input_elements is the
+///                   total number of elements in the input tensor.
+/// @param filter_id - Value ID for the filter tensor. The filter tensor must a 2D tensor defined in the @a subgraph.
+///                    If the XNN_FLAG_TRANSPOSE_WEIGHTS flag is not specified, the filter tensor must have
+///                    [output_channels, input_channels] dimensions. If the XNN_FLAG_TRANSPOSE_WEIGHTS flag is
+///                    specified, the filter tensor must have [input_channels, output_channels] dimensions.
+/// @param bias_id - Value ID for the bias tensor, or XNN_INVALID_VALUE_ID for a Fully Connected Node without a bias.
+///                  If present, the bias tensor must be a 1D tensor defined in the @a subgraph with [output_channels]
+///                  dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph.
+///                    If XNN_FLAG_TENSORFLOW_RESHAPE_2D is not specified, the output tensor must have the same
+///                    dimensionality as the input tensor, all its dimensions but the last one must match the
+///                    corresponding dimensions of the input tensor, and the last dimensions of the output tensor must
+///                    match the first dimension of the filter tensor. In particular, if input is a 2D tensor, output
+///                    must be a 2D tensor of [batch_size, output_channels] dimensions.
+///                    If XNN_FLAG_TENSORFLOW_RESHAPE_2D is specified, output must be a 2D tensor of
+///                    [num_input_elements / input_channels, output_channels] dimensions where num_input_elements is the
+///                    total number of elements in the input tensor.
+/// @param flags - binary features of the Fully Connected Node. The only currently supported values are
+///                XNN_FLAG_TENSORFLOW_RESHAPE_2D and XNN_FLAG_TRANSPOSE_WEIGHTS.
 enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                                            float output_min, float output_max,
                                            uint32_t input_id,
@@ -831,7 +813,7 @@ enum xnn_status xnn_define_squared_difference(
 /// @param pre_paddings - number of padding elements to insert before input elements for every dimension. This array
 ///                       must have as many elements as the the number of dimensions in the input tensor.
 /// @param post_paddings - number of padding elements to insert after input elements for every dimension. This array
-///                       must have as many elements as the the number of dimensions in the input tensor.
+///                        must have as many elements as the the number of dimensions in the input tensor.
 /// @param padding_value - constant value used to initialize padding elements.
 /// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
@@ -869,7 +851,7 @@ enum xnn_status xnn_define_static_reshape(
 /// @param new_height - height dimension of the output tensor.
 /// @param new_width - width dimension of the output tensor.
 /// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
-///                   with [N, H, W, C] dimensions
+///                   with [N, H, W, C] dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
 ///                    with [N, new_height, new_width, C] dimensions.
 /// @param flags - binary features of the 2D Resize Bilinear Node. The only currently supported values are
@@ -886,7 +868,7 @@ enum xnn_status xnn_define_static_resize_bilinear_2d(
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
 /// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
-///                   with [N, H, W, channels] dimensions
+///                   with [N, H, W, channels] dimensions.
 /// @param slope_id - Value ID for the bias tensor. The bias tensor must be a 1D tensor defined in the @a subgraph with
 ///                   [channels] dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
