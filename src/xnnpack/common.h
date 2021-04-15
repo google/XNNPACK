@@ -196,6 +196,12 @@
   #define XNN_DISABLE_TSAN
 #endif
 
+#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+  #define XNN_DISABLE_MSAN __attribute__((__no_sanitize__("memory")))
+#else
+  #define XNN_DISABLE_MSAN
+#endif
+
 #if defined(__GNUC__)
   #define XNN_INTRINSIC inline __attribute__((__always_inline__, __artificial__))
 #elif defined(_MSC_VER)

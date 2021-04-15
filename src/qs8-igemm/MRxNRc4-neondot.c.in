@@ -26,7 +26,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c4__neondot(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -89,7 +89,7 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c4__neondot(
         $for K in range(0, 8, 4):
           $for M in range(MR):
             $for N in range(0, NR, 4):
-              vacc${M}x${ABC[N:N+4]} = vdotq_lane_s32(vacc${M}x${ABC[N:N+4]}, vb${ABC[K:K+4]}x${ABC[N:N+4]}, va${M}x01234567, ${K/4});
+              vacc${M}x${ABC[N:N+4]} = vdotq_lane_s32(vacc${M}x${ABC[N:N+4]}, vb${ABC[K:K+4]}x${ABC[N:N+4]}, va${M}x01234567, ${K//4});
 
         k -= 8 * sizeof(int8_t);
       }
