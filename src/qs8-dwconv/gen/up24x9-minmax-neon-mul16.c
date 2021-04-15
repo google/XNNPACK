@@ -227,12 +227,12 @@ void xnn_qs8_dwconv_minmax_ukernel_up24x9__neon_mul16(
       vaccGHIJ = vqrdmulhq_s32(vaccGHIJ, vmultiplier);
       vaccKLMN = vqrdmulhq_s32(vaccKLMN, vmultiplier);
 
-      vacc0123 = vsraq_n_s32(vacc0123, vbicq_s32(vacc0123, vzero_shift_mask), 31);
-      vacc4567 = vsraq_n_s32(vacc4567, vbicq_s32(vacc4567, vzero_shift_mask), 31);
-      vacc89AB = vsraq_n_s32(vacc89AB, vbicq_s32(vacc89AB, vzero_shift_mask), 31);
-      vaccCDEF = vsraq_n_s32(vaccCDEF, vbicq_s32(vaccCDEF, vzero_shift_mask), 31);
-      vaccGHIJ = vsraq_n_s32(vaccGHIJ, vbicq_s32(vaccGHIJ, vzero_shift_mask), 31);
-      vaccKLMN = vsraq_n_s32(vaccKLMN, vbicq_s32(vaccKLMN, vzero_shift_mask), 31);
+      vacc0123 = vcltq_s32(vacc0123, vbicq_s32(vacc0123, vzero_shift_mask), vmovq_n_s32(0));
+      vacc4567 = vcltq_s32(vacc4567, vbicq_s32(vacc4567, vzero_shift_mask), vmovq_n_s32(0));
+      vacc89AB = vcltq_s32(vacc89AB, vbicq_s32(vacc89AB, vzero_shift_mask), vmovq_n_s32(0));
+      vaccCDEF = vcltq_s32(vaccCDEF, vbicq_s32(vaccCDEF, vzero_shift_mask), vmovq_n_s32(0));
+      vaccGHIJ = vcltq_s32(vaccGHIJ, vbicq_s32(vaccGHIJ, vzero_shift_mask), vmovq_n_s32(0));
+      vaccKLMN = vcltq_s32(vaccKLMN, vbicq_s32(vaccKLMN, vzero_shift_mask), vmovq_n_s32(0));
 
       vacc0123 = vrshlq_s32(vacc0123, vright_shift);
       vacc4567 = vrshlq_s32(vacc4567, vright_shift);
@@ -321,8 +321,8 @@ void xnn_qs8_dwconv_minmax_ukernel_up24x9__neon_mul16(
         vacc0123 = vqrdmulhq_s32(vacc0123, vmultiplier);
         vacc4567 = vqrdmulhq_s32(vacc4567, vmultiplier);
 
-        vacc0123 = vsraq_n_s32(vacc0123, vbicq_s32(vacc0123, vzero_shift_mask), 31);
-        vacc4567 = vsraq_n_s32(vacc4567, vbicq_s32(vacc4567, vzero_shift_mask), 31);
+        vacc0123 = vcltq_s32(vacc0123, vbicq_s32(vacc0123, vzero_shift_mask), vmovq_n_s32(0));
+        vacc4567 = vcltq_s32(vacc4567, vbicq_s32(vacc4567, vzero_shift_mask), vmovq_n_s32(0));
 
         vacc0123 = vrshlq_s32(vacc0123, vright_shift);
         vacc4567 = vrshlq_s32(vacc4567, vright_shift);

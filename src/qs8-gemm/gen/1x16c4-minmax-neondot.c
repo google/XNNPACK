@@ -105,10 +105,10 @@ void xnn_qs8_gemm_minmax_ukernel_1x16c4__neondot(
     const int32x4_t vproduct0x89AB = vqrdmulhq_n_s32(vacc0x89AB, params->neon.multiplier);
     const int32x4_t vproduct0xCDEF = vqrdmulhq_n_s32(vacc0xCDEF, params->neon.multiplier);
 
-    vacc0x0123 = vsraq_n_s32(vproduct0x0123, vbicq_s32(vacc0x0123, vzero_shift_mask), 31);
-    vacc0x4567 = vsraq_n_s32(vproduct0x4567, vbicq_s32(vacc0x4567, vzero_shift_mask), 31);
-    vacc0x89AB = vsraq_n_s32(vproduct0x89AB, vbicq_s32(vacc0x89AB, vzero_shift_mask), 31);
-    vacc0xCDEF = vsraq_n_s32(vproduct0xCDEF, vbicq_s32(vacc0xCDEF, vzero_shift_mask), 31);
+    vacc0x0123 = vcltq_s32(vproduct0x0123, vbicq_s32(vacc0x0123, vzero_shift_mask), vmovq_n_s32(0));
+    vacc0x4567 = vcltq_s32(vproduct0x4567, vbicq_s32(vacc0x4567, vzero_shift_mask), vmovq_n_s32(0));
+    vacc0x89AB = vcltq_s32(vproduct0x89AB, vbicq_s32(vacc0x89AB, vzero_shift_mask), vmovq_n_s32(0));
+    vacc0xCDEF = vcltq_s32(vproduct0xCDEF, vbicq_s32(vacc0xCDEF, vzero_shift_mask), vmovq_n_s32(0));
 
     vacc0x0123 = vrshlq_s32(vacc0x0123, vright_shift);
     vacc0x4567 = vrshlq_s32(vacc0x4567, vright_shift);

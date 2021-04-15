@@ -131,7 +131,7 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}c8__neon_${"mlal" if MLA else "mull"
     const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
     $for M in range(MR):
       $for N in range(0, NR, 4):
-        vacc${M}x${ABC[N:N+4]} = vsraq_n_s32(vacc${M}x${ABC[N:N+4]}, vbicq_s32(vacc${M}x${ABC[N:N+4]}, vzero_shift_mask), 31);
+        vacc${M}x${ABC[N:N+4]} = vcltq_s32(vacc${M}x${ABC[N:N+4]}, vbicq_s32(vacc${M}x${ABC[N:N+4]}, vzero_shift_mask), vmovq_n_s32(0));
 
     $for M in range(MR):
       $for N in range(0, NR, 4):

@@ -69,10 +69,10 @@ void xnn_qs8_requantize_q31__neon(
     // We leverage the "right shift with rounding" instruction (VRSHL.S32 on ARM NEON, SRSHL in ARM64 Advanced SIMD) to
     // do the shift. However, as this instruction rounds midpoints up, rather than away from zero, we adjust the input
     // by subtracting 1 from negative values, but only if shift is non-zero.
-    const int32x4_t x_adjusted_product = vsraq_n_s32(x_product, vbicq_s32(x, vshift_eq_0_mask), 31);
-    const int32x4_t y_adjusted_product = vsraq_n_s32(y_product, vbicq_s32(y, vshift_eq_0_mask), 31);
-    const int32x4_t z_adjusted_product = vsraq_n_s32(z_product, vbicq_s32(z, vshift_eq_0_mask), 31);
-    const int32x4_t w_adjusted_product = vsraq_n_s32(w_product, vbicq_s32(w, vshift_eq_0_mask), 31);
+    const int32x4_t x_adjusted_product = vcltq_s32(x_product, vbicq_s32(x, vshift_eq_0_mask), vmovq_n_s32(0));
+    const int32x4_t y_adjusted_product = vcltq_s32(y_product, vbicq_s32(y, vshift_eq_0_mask), vmovq_n_s32(0));
+    const int32x4_t z_adjusted_product = vcltq_s32(z_product, vbicq_s32(z, vshift_eq_0_mask), vmovq_n_s32(0));
+    const int32x4_t w_adjusted_product = vcltq_s32(w_product, vbicq_s32(w, vshift_eq_0_mask), vmovq_n_s32(0));
 
     const int32x4_t x_scaled = vrshlq_s32(x_adjusted_product, vshift);
     const int32x4_t y_scaled = vrshlq_s32(y_adjusted_product, vshift);
@@ -94,7 +94,7 @@ void xnn_qs8_requantize_q31__neon(
     // AArch32 version:
     //   4x VQRDMULH.S32 Qd, Qm, Qn
     //   4x VAND Qd, Qm, Dn
-    //   4x VSRA.S32 Qd, Qm, #31
+    //   4x VCLT.S32 Qd, Qm, #0
     //   4x VRSHL.S32 Qd, Qm, Qn
     //   4x VQMOVN.S32 Dd, Qm
     //   2x VADD.S16 Qd, Qm, Qn
@@ -107,7 +107,7 @@ void xnn_qs8_requantize_q31__neon(
     // AArch64 version:
     //   4x SQRDMULH Vd.4S, Vn.4S, Vm.4S
     //   4x AND Vd.16B, Vn.16B, Vm.16B
-    //   4x SSRA Vd.4S, Vn.4S, #31
+    //   4x SCLT Vd.4S, Vn.4S, #0
     //   4x SRSHL Vd.4S, Vn.4S, Vm.4S
     //   2x SQXTN Vd.4H, Vn.4S
     //   2x SQXTN2 Vd.8H, Vn.4S

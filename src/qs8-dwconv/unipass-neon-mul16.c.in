@@ -68,7 +68,7 @@ void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__neon_mul16(
         vacc${ABC[C:C+4]} = vqrdmulhq_s32(vacc${ABC[C:C+4]}, vmultiplier);
 
       $for C in range(0, CHANNEL_TILE, 4):
-        vacc${ABC[C:C+4]} = vsraq_n_s32(vacc${ABC[C:C+4]}, vbicq_s32(vacc${ABC[C:C+4]}, vzero_shift_mask), 31);
+        vacc${ABC[C:C+4]} = vcltq_s32(vacc${ABC[C:C+4]}, vbicq_s32(vacc${ABC[C:C+4]}, vzero_shift_mask), vmovq_n_s32(0));
 
       $for C in range(0, CHANNEL_TILE, 4):
         vacc${ABC[C:C+4]} = vrshlq_s32(vacc${ABC[C:C+4]}, vright_shift);
@@ -146,8 +146,8 @@ void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__neon_mul16(
         vacc${ABC[0:4]} = vqrdmulhq_s32(vacc${ABC[0:4]}, vmultiplier);
         vacc${ABC[4:8]} = vqrdmulhq_s32(vacc${ABC[4:8]}, vmultiplier);
 
-        vacc${ABC[0:4]} = vsraq_n_s32(vacc${ABC[0:4]}, vbicq_s32(vacc${ABC[0:4]}, vzero_shift_mask), 31);
-        vacc${ABC[4:8]} = vsraq_n_s32(vacc${ABC[4:8]}, vbicq_s32(vacc${ABC[4:8]}, vzero_shift_mask), 31);
+        vacc${ABC[0:4]} = vcltq_s32(vacc${ABC[0:4]}, vbicq_s32(vacc${ABC[0:4]}, vzero_shift_mask), vmovq_n_s32(0));
+        vacc${ABC[4:8]} = vcltq_s32(vacc${ABC[4:8]}, vbicq_s32(vacc${ABC[4:8]}, vzero_shift_mask), vmovq_n_s32(0));
 
         vacc${ABC[0:4]} = vrshlq_s32(vacc${ABC[0:4]}, vright_shift);
         vacc${ABC[4:8]} = vrshlq_s32(vacc${ABC[4:8]}, vright_shift);

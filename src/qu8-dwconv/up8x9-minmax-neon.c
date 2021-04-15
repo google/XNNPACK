@@ -147,8 +147,8 @@ void xnn_qu8_dwconv_minmax_ukernel_up8x9__neon(
       vacc_hi = vqrdmulhq_s32(vacc_hi, vmultiplier);
 
       const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
-      vacc_lo = vsraq_n_s32(vacc_lo, vbicq_s32(vacc_lo, vzero_shift_mask), 31);
-      vacc_hi = vsraq_n_s32(vacc_hi, vbicq_s32(vacc_hi, vzero_shift_mask), 31);
+      vacc_lo = vcltq_s32(vacc_lo, vbicq_s32(vacc_lo, vzero_shift_mask), vmovq_n_s32(0));
+      vacc_hi = vcltq_s32(vacc_hi, vbicq_s32(vacc_hi, vzero_shift_mask), vmovq_n_s32(0));
 
       vacc_lo = vrshlq_s32(vacc_lo, vright_shift);
       vacc_hi = vrshlq_s32(vacc_hi, vright_shift);
@@ -238,8 +238,8 @@ void xnn_qu8_dwconv_minmax_ukernel_up8x9__neon(
       vacc_hi = vqrdmulhq_s32(vacc_hi, vmultiplier);
 
       const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
-      vacc_lo = vsraq_n_s32(vacc_lo, vbicq_s32(vacc_lo, vzero_shift_mask), 31);
-      vacc_hi = vsraq_n_s32(vacc_hi, vbicq_s32(vacc_hi, vzero_shift_mask), 31);
+      vacc_lo = vcltq_s32(vacc_lo, vbicq_s32(vacc_lo, vzero_shift_mask), vmovq_n_s32(0));
+      vacc_hi = vcltq_s32(vacc_hi, vbicq_s32(vacc_hi, vzero_shift_mask), vmovq_n_s32(0));
 
       vacc_lo = vrshlq_s32(vacc_lo, vright_shift);
       vacc_hi = vrshlq_s32(vacc_hi, vright_shift);
