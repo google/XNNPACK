@@ -13,6 +13,43 @@
 #include <xnnpack/subgraph.h>
 
 
+static inline bool check_datatypes_with_bias(
+  enum xnn_datatype input_datatype,
+  enum xnn_datatype filter_datatype,
+  enum xnn_datatype bias_datatype,
+  enum xnn_datatype output_datatype)
+{
+  switch (output_datatype) {
+    case xnn_datatype_fp32:
+      return input_datatype == xnn_datatype_fp32 &&
+        filter_datatype == xnn_datatype_fp32 && bias_datatype == xnn_datatype_fp32;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+      return input_datatype == xnn_datatype_qint8 &&
+        filter_datatype == xnn_datatype_qint8 && bias_datatype == xnn_datatype_qint32;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
+static inline bool check_datatypes_without_bias(
+  enum xnn_datatype input_datatype,
+  enum xnn_datatype filter_datatype,
+  enum xnn_datatype output_datatype)
+{
+  switch (output_datatype) {
+    case xnn_datatype_fp32:
+      return input_datatype == xnn_datatype_fp32 && filter_datatype == xnn_datatype_fp32;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+      return input_datatype == xnn_datatype_qint8 && filter_datatype == xnn_datatype_qint8;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 enum xnn_status xnn_define_fully_connected(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -67,6 +104,9 @@ enum xnn_status xnn_define_fully_connected(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -101,6 +141,16 @@ enum xnn_status xnn_define_fully_connected(
   switch (filter_value->datatype) {
     case xnn_datatype_fp32:
       break;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+      if (filter_value->quantization.zero_point != 0) {
+        xnn_log_error(
+          "failed to define %s operator with filter ID #%" PRIu32 ": unsupported quantization zero point %" PRId32 " for datatype %s",
+          xnn_node_type_to_string(xnn_node_type_convolution_2d), filter_id,
+          filter_value->quantization.zero_point, xnn_datatype_to_string(filter_value->datatype));
+      }
+      break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with filter ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -109,6 +159,7 @@ enum xnn_status xnn_define_fully_connected(
       return xnn_status_invalid_parameter;
   }
 
+  const struct xnn_value* bias_value = NULL;
   if (bias_id != XNN_INVALID_VALUE_ID) {
     if (bias_id >= subgraph->num_values) {
       xnn_log_error(
@@ -117,7 +168,7 @@ enum xnn_status xnn_define_fully_connected(
       return xnn_status_invalid_parameter;
     }
 
-    const struct xnn_value* bias_value = &subgraph->values[bias_id];
+    bias_value = &subgraph->values[bias_id];
     if (bias_value->type != xnn_value_type_dense_tensor) {
       xnn_log_error(
         "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
@@ -134,6 +185,9 @@ enum xnn_status xnn_define_fully_connected(
 
     switch (bias_value->datatype) {
       case xnn_datatype_fp32:
+#ifndef XNN_NO_QS8_OPERATORS
+      case xnn_datatype_qint32:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
         break;
       default:
         xnn_log_error(
@@ -161,6 +215,9 @@ enum xnn_status xnn_define_fully_connected(
 
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -168,6 +225,31 @@ enum xnn_status xnn_define_fully_connected(
         xnn_node_type_to_string(xnn_node_type_fully_connected), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
+  }
+
+  if (bias_value != NULL) {
+    if (!check_datatypes_with_bias(input_value->datatype, filter_value->datatype, bias_value->datatype, output_value->datatype)) {
+      xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", bias ID #%" PRIu32 ", and output ID #%" PRIu32
+        ": mismatching datatypes across input (%s), filter (%s), bias (%s), and output (%s)",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), input_id, filter_id, bias_id, output_id,
+        xnn_datatype_to_string(input_value->datatype),
+        xnn_datatype_to_string(filter_value->datatype),
+        xnn_datatype_to_string(bias_value->datatype),
+        xnn_datatype_to_string(output_value->datatype));
+      return xnn_status_invalid_parameter;
+    }
+  } else {
+    if (!check_datatypes_without_bias(input_value->datatype, filter_value->datatype, output_value->datatype)) {
+      xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
+        ": mismatching datatypes across input (%s), filter (%s), and output (%s)",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), input_id, filter_id, output_id,
+        xnn_datatype_to_string(input_value->datatype),
+        xnn_datatype_to_string(filter_value->datatype),
+        xnn_datatype_to_string(output_value->datatype));
+      return xnn_status_invalid_parameter;
+    }
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

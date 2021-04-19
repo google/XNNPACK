@@ -589,21 +589,53 @@ enum xnn_status xnn_create_runtime_v2(
           output_channels = values[node->inputs[1]].shape.dim[0];
           input_channels = values[node->inputs[1]].shape.dim[1];
         }
-        const float* bias_data = NULL;
+        const void* bias_data = NULL;
         if (node->num_inputs > 2) {
           bias_data = values[node->inputs[2]].data;
         }
-        status = xnn_create_fully_connected_nc_f32(
-          input_channels,
-          output_channels,
-          input_channels /* input stride */,
-          output_channels /* output stride */,
-          values[node->inputs[1]].data,
-          bias_data,
-          node->activation.output_min,
-          node->activation.output_max,
-          node->flags /* flags */,
-          &runtime->opdata[i].operator_object);
+        switch (values[node->outputs[0]].datatype) {
+          case xnn_datatype_fp32:
+            status = xnn_create_fully_connected_nc_f32(
+              input_channels,
+              output_channels,
+              input_channels /* input stride */,
+              output_channels /* output stride */,
+              values[node->inputs[1]].data,
+              bias_data,
+              node->activation.output_min,
+              node->activation.output_max,
+              node->flags /* flags */,
+              &runtime->opdata[i].operator_object);
+            break;
+#ifndef XNN_NO_QS8_OPERATORS
+          case xnn_datatype_qint8:
+          {
+            const float output_scale = values[node->outputs[0]].quantization.scale;
+            const int32_t output_zero_point = values[node->outputs[0]].quantization.zero_point;
+            const int8_t output_min =
+              (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+            const int8_t output_max =
+              (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+            status = xnn_create_fully_connected_nc_qs8(
+              input_channels,
+              output_channels,
+              input_channels /* input stride */,
+              output_channels /* output stride */,
+              (int8_t) values[node->inputs[0]].quantization.zero_point,
+              values[node->inputs[0]].quantization.scale,
+              values[node->inputs[1]].quantization.scale,
+              values[node->inputs[1]].data,
+              bias_data,
+              (int8_t) output_zero_point,
+              output_scale, output_min, output_max,
+              node->flags /* flags */,
+              &runtime->opdata[i].operator_object);
+            break;
+          }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+          default:
+            XNN_UNREACHABLE;
+        }
         if (status != xnn_status_success) {
           goto error;
         }
@@ -1310,6 +1342,18 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
         break;
+#ifndef XNN_NO_QS8_OPERATORS
+      case xnn_operator_type_fully_connected_nc_qs8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_fully_connected_nc_qs8(
+          opdata->operator_object,
+          opdata->batch_size,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
       case xnn_operator_type_floor_nc_f32:
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->outputs[0]].data != NULL);
