@@ -15,7 +15,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_qs8_igemm_minmax_ukernel_4x16__neon_mlal_lane(
+void xnn_qs8_igemm_minmax_ukernel_4x16__neon_mlal_lane_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -192,6 +192,8 @@ void xnn_qs8_igemm_minmax_ukernel_4x16__neon_mlal_lane(
         vacc3x89AB = vmlal_lane_s16(vacc3x89AB, vget_low_s16(vxb89ABCDEFc3), vget_low_s16(vxa3), 3);
         vacc3xCDEF = vmlal_lane_s16(vacc3xCDEF, vget_high_s16(vxb89ABCDEFc3), vget_low_s16(vxa3), 3);
 
+        __builtin_prefetch((const int8_t*) w + 480);
+        __builtin_prefetch((const int8_t*) w + 544);
 
         const int8x8_t vb01234567c4 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
         const int16x8_t vxb01234567c4 = vmovl_s8(vb01234567c4);

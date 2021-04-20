@@ -14,7 +14,7 @@ $assert 8 <= NR <= 16
 #include <xnnpack/igemm.h>
 
 
-void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}__neon_mlal_lane(
+void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}__neon_mlal_lane${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -85,6 +85,10 @@ void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}__neon_mlal_lane(
             $for M in range(MR):
               vacc${M}x${ABC[N:N+4]} = vmlal_lane_s16(vacc${M}x${ABC[N:N+4]}, vget_low_s16(vxb${ABC[N:N+8]}c${K}), vget_low_s16(vxa${M}), ${K});
               vacc${M}x${ABC[N+4:N+8]} = vmlal_lane_s16(vacc${M}x${ABC[N+4:N+8]}, vget_high_s16(vxb${ABC[N:N+8]}c${K}), vget_low_s16(vxa${M}), ${K});
+
+        $if PREFETCH:
+          $for N in range(0, NR, 8):
+            __builtin_prefetch((const int8_t*) w + ${N * 8 + 480});
 
         $for K in range(4, 8):
           $for N in range(0, NR, 8):

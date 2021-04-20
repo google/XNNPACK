@@ -80,6 +80,7 @@ void xnn_qs8_igemm_minmax_ukernel_1x8__neon_mlal_lane(
         vacc0x0123 = vmlal_lane_s16(vacc0x0123, vget_low_s16(vxb01234567c3), vget_low_s16(vxa0), 3);
         vacc0x4567 = vmlal_lane_s16(vacc0x4567, vget_high_s16(vxb01234567c3), vget_low_s16(vxa0), 3);
 
+
         const int8x8_t vb01234567c4 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
         const int16x8_t vxb01234567c4 = vmovl_s8(vb01234567c4);
 
