@@ -136,12 +136,12 @@ void xnn_f32_sigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x96(
     __m512 vf4 = _mm512_div_ps(ve4, vd4);
     __m512 vf5 = _mm512_div_ps(ve5, vd5);
 
-    vf0 = _mm512_mask_sub_ps(vf0, _mm512_testn_epi32_mask(_mm512_castps_si512(vx0), vsign_mask), vone, vf0);
-    vf1 = _mm512_mask_sub_ps(vf1, _mm512_testn_epi32_mask(_mm512_castps_si512(vx1), vsign_mask), vone, vf1);
-    vf2 = _mm512_mask_sub_ps(vf2, _mm512_testn_epi32_mask(_mm512_castps_si512(vx2), vsign_mask), vone, vf2);
-    vf3 = _mm512_mask_sub_ps(vf3, _mm512_testn_epi32_mask(_mm512_castps_si512(vx3), vsign_mask), vone, vf3);
-    vf4 = _mm512_mask_sub_ps(vf4, _mm512_testn_epi32_mask(_mm512_castps_si512(vx4), vsign_mask), vone, vf4);
-    vf5 = _mm512_mask_sub_ps(vf5, _mm512_testn_epi32_mask(_mm512_castps_si512(vx5), vsign_mask), vone, vf5);
+    vf0 = _mm512_mask_sub_ps(vf0, _mm512_movepi32_mask(_mm512_castps_si512(vx0)), vone, vf0);
+    vf1 = _mm512_mask_sub_ps(vf1, _mm512_movepi32_mask(_mm512_castps_si512(vx1)), vone, vf1);
+    vf2 = _mm512_mask_sub_ps(vf2, _mm512_movepi32_mask(_mm512_castps_si512(vx2)), vone, vf2);
+    vf3 = _mm512_mask_sub_ps(vf3, _mm512_movepi32_mask(_mm512_castps_si512(vx3)), vone, vf3);
+    vf4 = _mm512_mask_sub_ps(vf4, _mm512_movepi32_mask(_mm512_castps_si512(vx4)), vone, vf4);
+    vf5 = _mm512_mask_sub_ps(vf5, _mm512_movepi32_mask(_mm512_castps_si512(vx5)), vone, vf5);
 
     _mm512_storeu_ps(y, vf0);
     _mm512_storeu_ps(y + 16, vf1);
@@ -173,7 +173,7 @@ void xnn_f32_sigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x96(
 
     __m512 vf = _mm512_div_ps(ve, vd);
 
-    vf = _mm512_mask_sub_ps(vf, _mm512_testn_epi32_mask(_mm512_castps_si512(vx), vsign_mask), vone, vf);
+    vf = _mm512_mask_sub_ps(vf, _mm512_movepi32_mask(_mm512_castps_si512(vx)), vone, vf);
 
     _mm512_storeu_ps(y, vf);
     y += 16;
@@ -205,7 +205,7 @@ void xnn_f32_sigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x96(
 
     __m512 vf = _mm512_div_ps(ve, vd);
 
-    vf = _mm512_mask_sub_ps(vf, _mm512_testn_epi32_mask(_mm512_castps_si512(vx), vsign_mask), vone, vf);
+    vf = _mm512_mask_sub_ps(vf, _mm512_movepi32_mask(_mm512_castps_si512(vx)), vone, vf);
 
     _mm512_mask_storeu_ps(y, vmask, vf);
   }

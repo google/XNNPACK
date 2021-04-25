@@ -116,17 +116,16 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x80(
     vp3 = _mm512_fmadd_ps(vp3, vt3, vt3);
     vp4 = _mm512_fmadd_ps(vp4, vt4, vt4);
 
-    const __m512 vzero = _mm512_setzero_ps();
     __m512 vy0 = _mm512_fmadd_ps(vp0, valpha, vs0);
-    const __mmask16 vsign0 = _mm512_cmp_ps_mask(vx0, vzero, _CMP_NLT_US);
+    const __mmask16 vsign0 = _mm512_movepi32_mask(_mm512_castps_si512(vx0));
     __m512 vy1 = _mm512_fmadd_ps(vp1, valpha, vs1);
-    const __mmask16 vsign1 = _mm512_cmp_ps_mask(vx1, vzero, _CMP_NLT_US);
+    const __mmask16 vsign1 = _mm512_movepi32_mask(_mm512_castps_si512(vx1));
     __m512 vy2 = _mm512_fmadd_ps(vp2, valpha, vs2);
-    const __mmask16 vsign2 = _mm512_cmp_ps_mask(vx2, vzero, _CMP_NLT_US);
+    const __mmask16 vsign2 = _mm512_movepi32_mask(_mm512_castps_si512(vx2));
     __m512 vy3 = _mm512_fmadd_ps(vp3, valpha, vs3);
-    const __mmask16 vsign3 = _mm512_cmp_ps_mask(vx3, vzero, _CMP_NLT_US);
+    const __mmask16 vsign3 = _mm512_movepi32_mask(_mm512_castps_si512(vx3));
     __m512 vy4 = _mm512_fmadd_ps(vp4, valpha, vs4);
-    const __mmask16 vsign4 = _mm512_cmp_ps_mask(vx4, vzero, _CMP_NLT_US);
+    const __mmask16 vsign4 = _mm512_movepi32_mask(_mm512_castps_si512(vx4));
 
     vy0 = _mm512_mask_mul_ps(vy0, vsign0, vx0, vbeta);
     vy1 = _mm512_mask_mul_ps(vy1, vsign1, vx1, vbeta);
@@ -146,7 +145,7 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x80(
     x += 16;
 
     const __m512 vz = _mm512_max_ps(vsat_cutoff, _mm512_mul_ps(vx, vprescale));
-    const __mmask16 vsign = _mm512_cmp_ps_mask(vx, _mm512_setzero_ps(), _CMP_NLT_US);
+    const __mmask16 vsign = _mm512_movepi32_mask(_mm512_castps_si512(vx));
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m512i ven = _mm512_slli_epi32(_mm512_castps_si512(vn), 19);
@@ -179,7 +178,7 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x80(
     __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
 
     const __m512 vz = _mm512_max_ps(vsat_cutoff, _mm512_mul_ps(vx, vprescale));
-    const __mmask16 vsign = _mm512_cmp_ps_mask(vx, _mm512_setzero_ps(), _CMP_NLT_US);
+    const __mmask16 vsign = _mm512_movepi32_mask(_mm512_castps_si512(vx));
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m512i ven = _mm512_slli_epi32(_mm512_castps_si512(vn), 19);

@@ -44,7 +44,7 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x16(
     x += 16;
 
     const __m512 vz = _mm512_max_ps(vsat_cutoff, _mm512_mul_ps(vx, vprescale));
-    const __mmask16 vsign = _mm512_cmp_ps_mask(vx, _mm512_setzero_ps(), _CMP_NLT_US);
+    const __mmask16 vsign = _mm512_movepi32_mask(_mm512_castps_si512(vx));
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m512i ven = _mm512_slli_epi32(_mm512_castps_si512(vn), 19);
@@ -77,7 +77,7 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x16(
     __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
 
     const __m512 vz = _mm512_max_ps(vsat_cutoff, _mm512_mul_ps(vx, vprescale));
-    const __mmask16 vsign = _mm512_cmp_ps_mask(vx, _mm512_setzero_ps(), _CMP_NLT_US);
+    const __mmask16 vsign = _mm512_movepi32_mask(_mm512_castps_si512(vx));
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m512i ven = _mm512_slli_epi32(_mm512_castps_si512(vn), 19);

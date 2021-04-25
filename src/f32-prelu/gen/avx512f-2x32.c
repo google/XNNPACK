@@ -41,7 +41,6 @@ void xnn_f32_prelu_ukernel__avx512f_2x32(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
-  const __m512 vzero = _mm512_setzero_ps();
   do {
     const float* w = weights;
     size_t c = channels;
@@ -57,13 +56,15 @@ void xnn_f32_prelu_ukernel__avx512f_2x32(
       const __m512 vi1xGHIJKLMNOPQRSTUV = _mm512_loadu_ps(i1 + 16);
       i1 += 32;
 
-      const __mmask16 vsign0x0123456789ABCDEF = _mm512_cmp_ps_mask(vi0x0123456789ABCDEF, vzero, _CMP_LT_OQ);
+      const __mmask16 vsign0x0123456789ABCDEF = _mm512_movepi32_mask(_mm512_castps_si512(vi0x0123456789ABCDEF));
+      const __mmask16 vsign0xGHIJKLMNOPQRSTUV = _mm512_movepi32_mask(_mm512_castps_si512(vi0xGHIJKLMNOPQRSTUV));
+
       const __m512 vacc0x0123456789ABCDEF = _mm512_mask_mul_ps(vi0x0123456789ABCDEF, vsign0x0123456789ABCDEF, vi0x0123456789ABCDEF, vw0123456789ABCDEF);
-      const __mmask16 vsign0xGHIJKLMNOPQRSTUV = _mm512_cmp_ps_mask(vi0xGHIJKLMNOPQRSTUV, vzero, _CMP_LT_OQ);
       const __m512 vacc0xGHIJKLMNOPQRSTUV = _mm512_mask_mul_ps(vi0xGHIJKLMNOPQRSTUV, vsign0xGHIJKLMNOPQRSTUV, vi0xGHIJKLMNOPQRSTUV, vwGHIJKLMNOPQRSTUV);
-      const __mmask16 vsign1x0123456789ABCDEF = _mm512_cmp_ps_mask(vi1x0123456789ABCDEF, vzero, _CMP_LT_OQ);
+      const __mmask16 vsign1x0123456789ABCDEF = _mm512_movepi32_mask(_mm512_castps_si512(vi1x0123456789ABCDEF));
+      const __mmask16 vsign1xGHIJKLMNOPQRSTUV = _mm512_movepi32_mask(_mm512_castps_si512(vi1xGHIJKLMNOPQRSTUV));
+
       const __m512 vacc1x0123456789ABCDEF = _mm512_mask_mul_ps(vi1x0123456789ABCDEF, vsign1x0123456789ABCDEF, vi1x0123456789ABCDEF, vw0123456789ABCDEF);
-      const __mmask16 vsign1xGHIJKLMNOPQRSTUV = _mm512_cmp_ps_mask(vi1xGHIJKLMNOPQRSTUV, vzero, _CMP_LT_OQ);
       const __m512 vacc1xGHIJKLMNOPQRSTUV = _mm512_mask_mul_ps(vi1xGHIJKLMNOPQRSTUV, vsign1xGHIJKLMNOPQRSTUV, vi1xGHIJKLMNOPQRSTUV, vwGHIJKLMNOPQRSTUV);
 
       _mm512_storeu_ps(o0, vacc0x0123456789ABCDEF);
@@ -82,9 +83,10 @@ void xnn_f32_prelu_ukernel__avx512f_2x32(
       const __m512 vi1 = _mm512_loadu_ps(i1);
       i1 += 16;
 
-      const __mmask16 vsign0 = _mm512_cmp_ps_mask(vi0, vzero, _CMP_LT_OQ);
+      const __mmask16 vsign0 = _mm512_movepi32_mask(_mm512_castps_si512(vi0));
+      const __mmask16 vsign1 = _mm512_movepi32_mask(_mm512_castps_si512(vi1));
+
       const __m512 vacc0 = _mm512_mask_mul_ps(vi0, vsign0, vi0, vw);
-      const __mmask16 vsign1 = _mm512_cmp_ps_mask(vi1, vzero, _CMP_LT_OQ);
       const __m512 vacc1 = _mm512_mask_mul_ps(vi1, vsign1, vi1, vw);
 
       _mm512_storeu_ps(o0, vacc0);
@@ -105,9 +107,10 @@ void xnn_f32_prelu_ukernel__avx512f_2x32(
       const __m512 vi1 = _mm512_maskz_loadu_ps(vmask, i1);
       i1 = (const float*) ((uintptr_t) i1 + c);
 
-      const __mmask16 vsign0 = _mm512_cmp_ps_mask(vi0, vzero, _CMP_LT_OQ);
+      const __mmask16 vsign0 = _mm512_movepi32_mask(_mm512_castps_si512(vi0));
+      const __mmask16 vsign1 = _mm512_movepi32_mask(_mm512_castps_si512(vi1));
+
       const __m512 vacc0 = _mm512_mask_mul_ps(vi0, vsign0, vi0, vw);
-      const __mmask16 vsign1 = _mm512_cmp_ps_mask(vi1, vzero, _CMP_LT_OQ);
       const __m512 vacc1 = _mm512_mask_mul_ps(vi1, vsign1, vi1, vw);
 
       _mm512_mask_storeu_ps(o0, vmask, vacc0);

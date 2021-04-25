@@ -108,7 +108,7 @@ void xnn_f32_sigmoid_ukernel__avx512f_rr${RR_STEPS}_lut16_p3_perm_scalef_${DIV_A
             vf${ABC[N]} = _mm512_fmadd_ps(_mm512_fnmadd_ps(vf${ABC[N]}, vd${ABC[N]}, ve${ABC[N]}), vr${ABC[N]}, vf${ABC[N]});
 
       $for N in range(SIMD_TILE):
-        vf${ABC[N]} = _mm512_mask_sub_ps(vf${ABC[N]}, _mm512_testn_epi32_mask(_mm512_castps_si512(vx${ABC[N]}), vsign_mask), vone, vf${ABC[N]});
+        vf${ABC[N]} = _mm512_mask_sub_ps(vf${ABC[N]}, _mm512_movepi32_mask(_mm512_castps_si512(vx${ABC[N]})), vone, vf${ABC[N]});
 
       _mm512_storeu_ps(y, vf${ABC[0]});
       $for N in range(1, SIMD_TILE):
@@ -149,7 +149,7 @@ void xnn_f32_sigmoid_ukernel__avx512f_rr${RR_STEPS}_lut16_p3_perm_scalef_${DIV_A
       $if DIV_ALGO == "nr1fma1adj":
         vf = _mm512_fmadd_ps(_mm512_fnmadd_ps(vf, vd, ve), vr, vf);
 
-    vf = _mm512_mask_sub_ps(vf, _mm512_testn_epi32_mask(_mm512_castps_si512(vx), vsign_mask), vone, vf);
+    vf = _mm512_mask_sub_ps(vf, _mm512_movepi32_mask(_mm512_castps_si512(vx)), vone, vf);
 
     _mm512_storeu_ps(y, vf);
     y += 16;
@@ -193,7 +193,7 @@ void xnn_f32_sigmoid_ukernel__avx512f_rr${RR_STEPS}_lut16_p3_perm_scalef_${DIV_A
       $if DIV_ALGO == "nr1fma1adj":
         vf = _mm512_fmadd_ps(_mm512_fnmadd_ps(vf, vd, ve), vr, vf);
 
-    vf = _mm512_mask_sub_ps(vf, _mm512_testn_epi32_mask(_mm512_castps_si512(vx), vsign_mask), vone, vf);
+    vf = _mm512_mask_sub_ps(vf, _mm512_movepi32_mask(_mm512_castps_si512(vx)), vone, vf);
 
     _mm512_mask_storeu_ps(y, vmask, vf);
   }
