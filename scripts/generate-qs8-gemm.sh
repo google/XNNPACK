@@ -107,6 +107,10 @@ tools/xngen src/qs8-gemm/MRxNRc4-neondot.c.in -D MR=8  -D NR=16 -o src/qs8-gemm/
 
 
 ############################### AArch64 assembly ##############################
+# Cortex A53 micro-kernel
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=0 -o src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=1 -o src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
+
 # Cortex A75 micro-kernel
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=0 -o src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal.S
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=1 -o src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
