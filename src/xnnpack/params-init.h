@@ -222,13 +222,14 @@ static inline union xnn_qs8_gemm_params xnn_init_qs8_gemm_params(
     params.neon.output_min = output_min;
     params.neon.output_max = output_max;
   #elif XNN_ARCH_WASMSIMD
-    const int64_t twice_multiplier = INT64_C(2) * (int64_t) multiplier;
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
     const uint32_t remainder_threshold = remainder_mask >> 1;
-    params.wasmsimd.multiplier[0] = twice_multiplier;
-    params.wasmsimd.multiplier[1] = twice_multiplier;
-    params.wasmsimd.rounding[0] = INT64_C(0x80000000);
-    params.wasmsimd.rounding[1] = INT64_C(0x80000000);
+    params.wasmsimd.multiplier[0] = multiplier;
+    params.wasmsimd.multiplier[1] = multiplier;
+    params.wasmsimd.multiplier[2] = multiplier;
+    params.wasmsimd.multiplier[3] = multiplier;
+    params.wasmsimd.rounding[0] = INT64_C(0x40000000);
+    params.wasmsimd.rounding[1] = INT64_C(0x40000000);
     params.wasmsimd.remainder_mask[0] = (int32_t) remainder_mask;
     params.wasmsimd.remainder_mask[1] = (int32_t) remainder_mask;
     params.wasmsimd.remainder_mask[2] = (int32_t) remainder_mask;

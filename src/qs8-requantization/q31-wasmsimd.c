@@ -37,7 +37,6 @@ void xnn_qs8_requantize_q31__wasmsimd(
   const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
   assert(multiplier >= INT32_C(0x40000000));
   assert(multiplier <= INT32_C(0x7FFFFF80));
-  const int64_t twice_multiplier = INT64_C(2) * (int64_t) multiplier;
 
   // Shift is in [0, 31] range.
   const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
@@ -45,7 +44,7 @@ void xnn_qs8_requantize_q31__wasmsimd(
   assert(shift < 32);
 
   const v128_t vzero = wasm_f64x2_splat(0.0);
-  const v128_t vmultiplier = wasm_i64x2_make(twice_multiplier, twice_multiplier);
+  const v128_t vmultiplier = wasm_i32x4_splat(multiplier);
   const v128_t vzero_point = wasm_i16x8_splat((int16_t) zero_point);
 
   const v128_t vqmin = wasm_i8x16_splat(qmin);
@@ -53,7 +52,7 @@ void xnn_qs8_requantize_q31__wasmsimd(
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const v128_t vremainder_mask = wasm_i32x4_splat((int32_t) remainder_mask);
   const v128_t vthreshold = wasm_i32x4_splat((int32_t) (remainder_mask >> 1));
-  const v128_t vtwice_q31rounding = wasm_i64x2_splat(INT64_C(0x80000000));
+  const v128_t vq31rounding = wasm_i64x2_splat(INT64_C(0x40000000));
   for (; n != 0; n -= 16) {
     const v128_t x = wasm_v128_load(input);
     const v128_t y = wasm_v128_load(input + 4);
@@ -61,35 +60,29 @@ void xnn_qs8_requantize_q31__wasmsimd(
     const v128_t w = wasm_v128_load(input + 12);
     input += 16;
 
-    const v128_t x_sign = wasm_i32x4_lt(x, vzero);
-    const v128_t y_sign = wasm_i32x4_lt(y, vzero);
-    const v128_t z_sign = wasm_i32x4_lt(z, vzero);
-    const v128_t w_sign = wasm_i32x4_lt(w, vzero);
+    const v128_t x_product_lo = wasm_i64x2_add(__builtin_wasm_extmul_low_i32x4_s_i64x2(x, vmultiplier), vq31rounding);
+    const v128_t y_product_lo = wasm_i64x2_add(__builtin_wasm_extmul_low_i32x4_s_i64x2(y, vmultiplier), vq31rounding);
+    const v128_t z_product_lo = wasm_i64x2_add(__builtin_wasm_extmul_low_i32x4_s_i64x2(z, vmultiplier), vq31rounding);
+    const v128_t w_product_lo = wasm_i64x2_add(__builtin_wasm_extmul_low_i32x4_s_i64x2(w, vmultiplier), vq31rounding);
 
-    const v128_t x_lo = wasm_v32x4_shuffle(x, x_sign, 0, 4, 1, 5);
-    const v128_t y_lo = wasm_v32x4_shuffle(y, y_sign, 0, 4, 1, 5);
-    const v128_t z_lo = wasm_v32x4_shuffle(z, z_sign, 0, 4, 1, 5);
-    const v128_t w_lo = wasm_v32x4_shuffle(w, w_sign, 0, 4, 1, 5);
+    const v128_t x_product_hi = wasm_i64x2_add(__builtin_wasm_extmul_high_i32x4_s_i64x2(x, vmultiplier), vq31rounding);
+    const v128_t y_product_hi = wasm_i64x2_add(__builtin_wasm_extmul_high_i32x4_s_i64x2(y, vmultiplier), vq31rounding);
+    const v128_t z_product_hi = wasm_i64x2_add(__builtin_wasm_extmul_high_i32x4_s_i64x2(z, vmultiplier), vq31rounding);
+    const v128_t w_product_hi = wasm_i64x2_add(__builtin_wasm_extmul_high_i32x4_s_i64x2(w, vmultiplier), vq31rounding);
 
-    const v128_t x_hi = wasm_v32x4_shuffle(x, x_sign, 2, 6, 3, 7);
-    const v128_t y_hi = wasm_v32x4_shuffle(y, y_sign, 2, 6, 3, 7);
-    const v128_t z_hi = wasm_v32x4_shuffle(z, z_sign, 2, 6, 3, 7);
-    const v128_t w_hi = wasm_v32x4_shuffle(w, w_sign, 2, 6, 3, 7);
+    const v128_t x_q31product_lo = wasm_i64x2_shl(x_product_lo, 1);
+    const v128_t x_q31product_hi = wasm_i64x2_add(x_product_hi, x_product_hi);
+    const v128_t y_q31product_lo = wasm_i64x2_shl(y_product_lo, 1);
+    const v128_t y_q31product_hi = wasm_i64x2_add(y_product_hi, y_product_hi);
+    const v128_t z_q31product_lo = wasm_i64x2_shl(z_product_lo, 1);
+    const v128_t z_q31product_hi = wasm_i64x2_add(z_product_hi, z_product_hi);
+    const v128_t w_q31product_lo = wasm_i64x2_shl(w_product_lo, 1);
+    const v128_t w_q31product_hi = wasm_i64x2_add(w_product_hi, w_product_hi);
 
-    const v128_t x_product_lo = wasm_i64x2_add(wasm_i64x2_mul(x_lo, vmultiplier), vtwice_q31rounding);
-    const v128_t y_product_lo = wasm_i64x2_add(wasm_i64x2_mul(y_lo, vmultiplier), vtwice_q31rounding);
-    const v128_t z_product_lo = wasm_i64x2_add(wasm_i64x2_mul(z_lo, vmultiplier), vtwice_q31rounding);
-    const v128_t w_product_lo = wasm_i64x2_add(wasm_i64x2_mul(w_lo, vmultiplier), vtwice_q31rounding);
-
-    const v128_t x_product_hi = wasm_i64x2_add(wasm_i64x2_mul(x_hi, vmultiplier), vtwice_q31rounding);
-    const v128_t y_product_hi = wasm_i64x2_add(wasm_i64x2_mul(y_hi, vmultiplier), vtwice_q31rounding);
-    const v128_t z_product_hi = wasm_i64x2_add(wasm_i64x2_mul(z_hi, vmultiplier), vtwice_q31rounding);
-    const v128_t w_product_hi = wasm_i64x2_add(wasm_i64x2_mul(w_hi, vmultiplier), vtwice_q31rounding);
-
-    const v128_t x_q31product = wasm_v32x4_shuffle(x_product_lo, x_product_hi, 1, 3, 5, 7);
-    const v128_t y_q31product = wasm_v32x4_shuffle(y_product_lo, y_product_hi, 1, 3, 5, 7);
-    const v128_t z_q31product = wasm_v32x4_shuffle(z_product_lo, z_product_hi, 1, 3, 5, 7);
-    const v128_t w_q31product = wasm_v32x4_shuffle(w_product_lo, w_product_hi, 1, 3, 5, 7);
+    const v128_t x_q31product = wasm_v32x4_shuffle(x_q31product_lo, x_q31product_hi, 1, 3, 5, 7);
+    const v128_t y_q31product = wasm_v32x4_shuffle(y_q31product_lo, y_q31product_hi, 1, 3, 5, 7);
+    const v128_t z_q31product = wasm_v32x4_shuffle(z_q31product_lo, z_q31product_hi, 1, 3, 5, 7);
+    const v128_t w_q31product = wasm_v32x4_shuffle(w_q31product_lo, w_q31product_hi, 1, 3, 5, 7);
 
     const v128_t x_remainder =
         wasm_i32x4_add(wasm_v128_and(x_q31product, vremainder_mask), wasm_i32x4_lt(x_q31product, vzero));
