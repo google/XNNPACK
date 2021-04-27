@@ -59,11 +59,11 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_x86_2x(
       vacc0x0123 = wasm_f32x4_add(vbias0123, wasm_f32x4_mul(vscale0123, vacc0x0123));
       vacc1x0123 = wasm_f32x4_add(vbias0123, wasm_f32x4_mul(vscale0123, vacc1x0123));
 
-      vacc0x0123 = wasm_v128_bitselect(vmin, vacc0x0123, wasm_f32x4_lt(vacc0x0123, vmin));
-      vacc1x0123 = wasm_v128_bitselect(vmin, vacc1x0123, wasm_f32x4_lt(vacc1x0123, vmin));
+      vacc0x0123 = wasm_f32x4_pmax(vmin, vacc0x0123);
+      vacc1x0123 = wasm_f32x4_pmax(vmin, vacc1x0123);
 
-      vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vmax, wasm_f32x4_le(vacc0x0123, vmax));
-      vacc1x0123 = wasm_v128_bitselect(vacc1x0123, vmax, wasm_f32x4_le(vacc1x0123, vmax));
+      vacc0x0123 = wasm_f32x4_pmin(vmax, vacc0x0123);
+      vacc1x0123 = wasm_f32x4_pmin(vmax, vacc1x0123);
 
       wasm_v128_store(o0, vacc0x0123);
       o0 += 4;
@@ -85,11 +85,11 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_x86_2x(
       vacc0 = wasm_f32x4_add(vbias, wasm_f32x4_mul(vscale, vacc0));
       vacc1 = wasm_f32x4_add(vbias, wasm_f32x4_mul(vscale, vacc1));
 
-      vacc0 = wasm_v128_bitselect(vmin, vacc0, wasm_f32x4_lt(vacc0, vmin));
-      vacc1 = wasm_v128_bitselect(vmin, vacc1, wasm_f32x4_lt(vacc1, vmin));
+      vacc0 = wasm_f32x4_pmax(vmin, vacc0);
+      vacc1 = wasm_f32x4_pmax(vmin, vacc1);
 
-      vacc0 = wasm_v128_bitselect(vacc0, vmax, wasm_f32x4_le(vacc0, vmax));
-      vacc1 = wasm_v128_bitselect(vacc1, vmax, wasm_f32x4_le(vacc1, vmax));
+      vacc0 = wasm_f32x4_pmin(vmax, vacc0);
+      vacc1 = wasm_f32x4_pmin(vmax, vacc1);
 
       if (c & (2 * sizeof(float))) {
         *((double*) o0) = wasm_f64x2_extract_lane(vacc0, 0);

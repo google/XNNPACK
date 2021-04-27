@@ -56,8 +56,10 @@ void xnn_f32_gemm_minmax_ukernel_4x2c4__wasmsimd_x86(
     c3 = c2;
   }
 
+  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   do {
-    v128_t vacc0x0c4 = wasm_f32x4_replace_lane(wasm_f32x4_splat(0.0f), 0, w[0]);
+    v128_t vacc0x0c4 = wasm_f32x4_replace_lane(wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f), 0, w[0]);
     v128_t vacc0x1c4 = wasm_f32x4_replace_lane(vacc0x0c4, 0, w[1]);
     v128_t vacc1x0c4 = vacc0x0c4;
     v128_t vacc1x1c4 = vacc0x1c4;
@@ -105,7 +107,7 @@ void xnn_f32_gemm_minmax_ukernel_4x2c4__wasmsimd_x86(
       const v128_t vb1 = wasm_v128_load(w + 4);
       w += 8;
 
-      const v128_t vzero = wasm_f32x4_splat(0.0f);
+      const v128_t vzero = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
       const v128_t vmask0 = wasm_f32x4_eq(vb0, vzero);
       const v128_t vmask1 = wasm_f32x4_eq(vb1, vzero);
 
@@ -139,13 +141,11 @@ void xnn_f32_gemm_minmax_ukernel_4x2c4__wasmsimd_x86(
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 0, 1, 4, 5),
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 2, 3, 6, 7));
 
-    const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-    vacc01x01 = wasm_v128_bitselect(vmin, vacc01x01, wasm_f32x4_lt(vacc01x01, vmin));
-    vacc23x01 = wasm_v128_bitselect(vmin, vacc23x01, wasm_f32x4_lt(vacc23x01, vmin));
+    vacc01x01 = wasm_f32x4_pmax(vmin, vacc01x01);
+    vacc23x01 = wasm_f32x4_pmax(vmin, vacc23x01);
 
-    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
-    vacc01x01 = wasm_v128_bitselect(vacc01x01, vmax, wasm_f32x4_le(vacc01x01, vmax));
-    vacc23x01 = wasm_v128_bitselect(vacc23x01, vmax, wasm_f32x4_le(vacc23x01, vmax));
+    vacc01x01 = wasm_f32x4_pmin(vmax, vacc01x01);
+    vacc23x01 = wasm_f32x4_pmin(vmax, vacc23x01);
 
     if XNN_LIKELY(nc >= 2) {
       *((double*) c2) = wasm_f64x2_extract_lane(vacc23x01, 0);

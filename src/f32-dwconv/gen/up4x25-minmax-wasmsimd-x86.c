@@ -318,9 +318,9 @@ void xnn_f32_dwconv_minmax_ukernel_up4x25__wasmsimd_x86(
       w += 104;
 
 
-      v128_t vacc0123 = wasm_v128_bitselect(vmin, vacc0123p0, wasm_f32x4_lt(vacc0123p0, vmin));
+      v128_t vacc0123 = wasm_f32x4_pmax(vmin, vacc0123p0);
 
-      vacc0123 = wasm_v128_bitselect(vacc0123, vmax, wasm_f32x4_le(vacc0123, vmax));
+      vacc0123 = wasm_f32x4_pmin(vmax, vacc0123);
 
       wasm_v128_store(output, vacc0123);
       output += 4;
@@ -429,8 +429,8 @@ void xnn_f32_dwconv_minmax_ukernel_up4x25__wasmsimd_x86(
       vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi24x0123, vk24x0123));
 
 
-      v128_t vacc0123 = wasm_v128_bitselect(vmin, vacc0123p0, wasm_f32x4_lt(vacc0123p0, vmin));
-      vacc0123 = wasm_v128_bitselect(vacc0123, vmax, wasm_f32x4_le(vacc0123, vmax));
+      v128_t vacc0123 = wasm_f32x4_pmax(vmin, vacc0123p0);
+      vacc0123 = wasm_f32x4_pmin(vmax, vacc0123);
 
       if (c & 2) {
         *((double*) output) = wasm_f64x2_extract_lane(vacc0123, 0);

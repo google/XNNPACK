@@ -27,7 +27,7 @@ void xnn_f32_hswish_ukernel__wasmsimd_x16(
   const v128_t vsixth = wasm_v32x4_load_splat(&params->scalar.sixth);
   const v128_t vthree = wasm_v32x4_load_splat(&params->scalar.three);
   const v128_t vsix = wasm_v32x4_load_splat(&params->scalar.six);
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
+  const v128_t vzero = wasm_i32x4_const(0, 0, 0, 0);
 
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
     v128_t vx0123 = wasm_v128_load(x);

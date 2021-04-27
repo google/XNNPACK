@@ -68,8 +68,6 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_loadsplat_${ROW_
   const v128_t vk43 =  wasm_v32x4_shuffle(vwOP,   vwOP,   0, 0, 0, 0);
   const v128_t vk44 =  wasm_v32x4_shuffle(vwOP,   vwOP,   1, 1, 1, 1);
 
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
-
   const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(float));
 
   const float* i0 = zero;
@@ -92,7 +90,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_loadsplat_${ROW_
       }
 
     $for M in range(4 + ROW_TILE):
-      v128_t vi${M}x0123 = vzero;
+      v128_t vi${M}x0123 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
 
     $for M in range(4 + ROW_TILE):
       v128_t vi${M}x4567 = wasm_v128_load(i${M}); i${M} += 4;
@@ -220,9 +218,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_loadsplat_${ROW_
 
       $if X86:
         $for M in range(ROW_TILE):
-          v128_t vo${M} = wasm_v128_bitselect(vmin, vo${M}p0, wasm_f32x4_lt(vo${M}p0, vmin));
+          v128_t vo${M} = wasm_f32x4_pmax(vmin, vo${M}p0);
         $for M in range(ROW_TILE):
-          vo${M} = wasm_v128_bitselect(vo${M}, vmax, wasm_f32x4_le(vo${M}, vmax));
+          vo${M} = wasm_f32x4_pmin(vmax, vo${M});
       $else:
         $for M in range(ROW_TILE):
           v128_t vo${M} = wasm_f32x4_max(vo${M}p0, vmin);
@@ -358,9 +356,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_loadsplat_${ROW_
 
       $if X86:
         $for M in range(ROW_TILE):
-          v128_t vo${M} = wasm_v128_bitselect(vmin, vo${M}p0, wasm_f32x4_lt(vo${M}p0, vmin));
+          v128_t vo${M} = wasm_f32x4_pmax(vmin, vo${M}p0);
         $for M in range(ROW_TILE):
-          vo${M} = wasm_v128_bitselect(vo${M}, vmax, wasm_f32x4_le(vo${M}, vmax));
+          vo${M} = wasm_f32x4_pmin(vmax, vo${M});
       $else:
         $for M in range(ROW_TILE):
           v128_t vo${M} = wasm_f32x4_max(vo${M}p0, vmin);
@@ -447,6 +445,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_loadsplat_${ROW_
       $for M in range(ROW_TILE):
         vo${M}p${16 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${16 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x2345, vk40));
 
+      const v128_t vzero = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
       $for M in range(4 + ROW_TILE):
         const v128_t vi${M}x5678 = wasm_v32x4_shuffle(vi${M}x4567, vzero, 1, 2, 3, 4);
 
@@ -494,9 +493,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_loadsplat_${ROW_
 
       $if X86:
         $for M in range(ROW_TILE):
-          v128_t vo${M} = wasm_v128_bitselect(vmin, vo${M}p0, wasm_f32x4_lt(vo${M}p0, vmin));
+          v128_t vo${M} = wasm_f32x4_pmax(vmin, vo${M}p0);
         $for M in range(ROW_TILE):
-          vo${M} = wasm_v128_bitselect(vo${M}, vmax, wasm_f32x4_le(vo${M}, vmax));
+          vo${M} = wasm_f32x4_pmin(vmax, vo${M});
       $else:
         $for M in range(ROW_TILE):
           v128_t vo${M} = wasm_f32x4_max(vo${M}p0, vmin);

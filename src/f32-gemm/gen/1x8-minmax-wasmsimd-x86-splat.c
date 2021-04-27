@@ -38,6 +38,8 @@ void xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_splat(
   const float* a0 = a;
   float* c0 = c;
 
+  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
   do {
     v128_t vacc0x0123 = wasm_v128_load(w + 0);
     v128_t vacc0x4567 = wasm_v128_load(w + 4);
@@ -96,13 +98,11 @@ void xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_splat(
       } while (k != 0);
     }
 
-    const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-    vacc0x0123 = wasm_v128_bitselect(vmin, vacc0x0123, wasm_f32x4_lt(vacc0x0123, vmin));
-    vacc0x4567 = wasm_v128_bitselect(vmin, vacc0x4567, wasm_f32x4_lt(vacc0x4567, vmin));
+    vacc0x0123 = wasm_f32x4_pmax(vmin, vacc0x0123);
+    vacc0x4567 = wasm_f32x4_pmax(vmin, vacc0x4567);
 
-    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
-    vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vmax, wasm_f32x4_le(vacc0x0123, vmax));
-    vacc0x4567 = wasm_v128_bitselect(vacc0x4567, vmax, wasm_f32x4_le(vacc0x4567, vmax));
+    vacc0x0123 = wasm_f32x4_pmin(vmax, vacc0x0123);
+    vacc0x4567 = wasm_f32x4_pmin(vmax, vacc0x4567);
 
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c0, vacc0x0123);

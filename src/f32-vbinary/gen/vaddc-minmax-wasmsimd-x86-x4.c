@@ -38,12 +38,9 @@ void xnn_f32_vaddc_minmax_ukernel__wasmsimd_x86_x4(
     v128_t vy0123 = wasm_f32x4_add(va0123, vb);
 
 
-    const v128_t vltmask0123 = wasm_f32x4_lt(vy0123, vy_min);
+    vy0123 = wasm_f32x4_pmax(vy_min, vy0123);
 
-    const v128_t vngtmask0123 = wasm_f32x4_le(vy0123, vy_max);
-    vy0123 = wasm_v128_bitselect(vy_min, vy0123, vltmask0123);
-
-    vy0123 = wasm_v128_bitselect(vy0123, vy_max, vngtmask0123);
+    vy0123 = wasm_f32x4_pmin(vy_max, vy0123);
 
     wasm_v128_store(y, vy0123);
     y += 4;
@@ -53,10 +50,8 @@ void xnn_f32_vaddc_minmax_ukernel__wasmsimd_x86_x4(
 
     v128_t vy = wasm_f32x4_add(va, vb);
 
-    const v128_t vltmask = wasm_f32x4_lt(vy, vy_min);
-    const v128_t vngtmask = wasm_f32x4_le(vy, vy_max);
-    vy = wasm_v128_bitselect(vy_min, vy, vltmask);
-    vy = wasm_v128_bitselect(vy, vy_max, vngtmask);
+    vy = wasm_f32x4_pmax(vy_min, vy);
+    vy = wasm_f32x4_pmin(vy_max, vy);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vy, 0);

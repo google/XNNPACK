@@ -50,24 +50,15 @@ void xnn_f32_vdiv_minmax_ukernel__wasmsimd_x86_x16(
     v128_t vyCDEF = wasm_f32x4_div(vaCDEF, vbCDEF);
 
 
-    const v128_t vltmask0123 = wasm_f32x4_lt(vy0123, vy_min);
-    const v128_t vltmask4567 = wasm_f32x4_lt(vy4567, vy_min);
-    const v128_t vltmask89AB = wasm_f32x4_lt(vy89AB, vy_min);
-    const v128_t vltmaskCDEF = wasm_f32x4_lt(vyCDEF, vy_min);
+    vy0123 = wasm_f32x4_pmax(vy_min, vy0123);
+    vy4567 = wasm_f32x4_pmax(vy_min, vy4567);
+    vy89AB = wasm_f32x4_pmax(vy_min, vy89AB);
+    vyCDEF = wasm_f32x4_pmax(vy_min, vyCDEF);
 
-    const v128_t vngtmask0123 = wasm_f32x4_le(vy0123, vy_max);
-    vy0123 = wasm_v128_bitselect(vy_min, vy0123, vltmask0123);
-    const v128_t vngtmask4567 = wasm_f32x4_le(vy4567, vy_max);
-    vy4567 = wasm_v128_bitselect(vy_min, vy4567, vltmask4567);
-    const v128_t vngtmask89AB = wasm_f32x4_le(vy89AB, vy_max);
-    vy89AB = wasm_v128_bitselect(vy_min, vy89AB, vltmask89AB);
-    const v128_t vngtmaskCDEF = wasm_f32x4_le(vyCDEF, vy_max);
-    vyCDEF = wasm_v128_bitselect(vy_min, vyCDEF, vltmaskCDEF);
-
-    vy0123 = wasm_v128_bitselect(vy0123, vy_max, vngtmask0123);
-    vy4567 = wasm_v128_bitselect(vy4567, vy_max, vngtmask4567);
-    vy89AB = wasm_v128_bitselect(vy89AB, vy_max, vngtmask89AB);
-    vyCDEF = wasm_v128_bitselect(vyCDEF, vy_max, vngtmaskCDEF);
+    vy0123 = wasm_f32x4_pmin(vy_max, vy0123);
+    vy4567 = wasm_f32x4_pmin(vy_max, vy4567);
+    vy89AB = wasm_f32x4_pmin(vy_max, vy89AB);
+    vyCDEF = wasm_f32x4_pmin(vy_max, vyCDEF);
 
     wasm_v128_store(y, vy0123);
     wasm_v128_store(y + 4, vy4567);
@@ -84,10 +75,8 @@ void xnn_f32_vdiv_minmax_ukernel__wasmsimd_x86_x16(
 
     v128_t vy = wasm_f32x4_div(va, vb);
 
-    const v128_t vltmask = wasm_f32x4_lt(vy, vy_min);
-    const v128_t vngtmask = wasm_f32x4_le(vy, vy_max);
-    vy = wasm_v128_bitselect(vy_min, vy, vltmask);
-    vy = wasm_v128_bitselect(vy, vy_max, vngtmask);
+    vy = wasm_f32x4_pmax(vy_min, vy);
+    vy = wasm_f32x4_pmin(vy_max, vy);
 
     wasm_v128_store(y, vy);
     y += 4;
@@ -98,10 +87,8 @@ void xnn_f32_vdiv_minmax_ukernel__wasmsimd_x86_x16(
 
     v128_t vy = wasm_f32x4_div(va, vb);
 
-    const v128_t vltmask = wasm_f32x4_lt(vy, vy_min);
-    const v128_t vngtmask = wasm_f32x4_le(vy, vy_max);
-    vy = wasm_v128_bitselect(vy_min, vy, vltmask);
-    vy = wasm_v128_bitselect(vy, vy_max, vngtmask);
+    vy = wasm_f32x4_pmax(vy_min, vy);
+    vy = wasm_f32x4_pmin(vy_max, vy);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vy, 0);

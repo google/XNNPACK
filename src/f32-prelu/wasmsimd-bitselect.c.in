@@ -47,7 +47,6 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_${ROW_TILE}x${CHANNEL_TILE}(
   const size_t input_increment = input_stride * ${ROW_TILE} - channels;
   const size_t output_increment = output_stride * ${ROW_TILE} - channels;
 
-  const v128_t vzero = wasm_i32x4_splat(0);
   do {
     const float* w = weights;
     size_t c = channels;
@@ -66,7 +65,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_${ROW_TILE}x${CHANNEL_TILE}(
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
           v128_t vacc${M}x${ABC[C:C+4]} = wasm_f32x4_mul(vi${M}x${ABC[C:C+4]}, vw${ABC[C:C+4]});
-          const v128_t vmask${M}x${ABC[C:C+4]} = wasm_i32x4_lt(vi${M}x${ABC[C:C+4]}, vzero);
+          const v128_t vmask${M}x${ABC[C:C+4]} = wasm_i32x4_shr(vi${M}x${ABC[C:C+4]}, 31);
 
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
@@ -89,7 +88,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_${ROW_TILE}x${CHANNEL_TILE}(
 
         $for M in range(ROW_TILE):
           v128_t vacc${M}x0123 = wasm_f32x4_mul(vi${M}x0123, vw0123);
-          const v128_t vmask${M}x0123 = wasm_i32x4_lt(vi${M}x0123, vzero);
+          const v128_t vmask${M}x0123 = wasm_i32x4_shr(vi${M}x0123, 31);
 
         $for M in range(ROW_TILE):
           vacc${M}x0123 = wasm_v128_bitselect(vacc${M}x0123, vi${M}x0123, vmask${M}x0123);
@@ -108,7 +107,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_${ROW_TILE}x${CHANNEL_TILE}(
 
       $for M in range(ROW_TILE):
         v128_t vacc${M}x0123 = wasm_f32x4_mul(vi${M}x0123, vw0123);
-        const v128_t vmask${M}x0123 = wasm_i32x4_lt(vi${M}x0123, vzero);
+        const v128_t vmask${M}x0123 = wasm_i32x4_shr(vi${M}x0123, 31);
 
       $for M in range(ROW_TILE):
         vacc${M}x0123 = wasm_v128_bitselect(vacc${M}x0123, vi${M}x0123, vmask${M}x0123);

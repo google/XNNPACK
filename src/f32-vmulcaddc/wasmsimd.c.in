@@ -74,11 +74,11 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__wasmsimd_${"x86" if X86 
       $if X86:
         $for M in range(ROW_TILE):
           $for C in range(0, CHANNEL_TILE, 4):
-            vacc${M}x${ABC[C:C+4]} = wasm_v128_bitselect(vmin, vacc${M}x${ABC[C:C+4]}, wasm_f32x4_lt(vacc${M}x${ABC[C:C+4]}, vmin));
+            vacc${M}x${ABC[C:C+4]} = wasm_f32x4_pmax(vmin, vacc${M}x${ABC[C:C+4]});
 
         $for M in range(ROW_TILE):
           $for C in range(0, CHANNEL_TILE, 4):
-            vacc${M}x${ABC[C:C+4]} = wasm_v128_bitselect(vacc${M}x${ABC[C:C+4]}, vmax, wasm_f32x4_le(vacc${M}x${ABC[C:C+4]}, vmax));
+            vacc${M}x${ABC[C:C+4]} = wasm_f32x4_pmin(vmax, vacc${M}x${ABC[C:C+4]});
       $else:
         $for M in range(ROW_TILE):
           $for C in range(0, CHANNEL_TILE, 4):
@@ -111,10 +111,10 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__wasmsimd_${"x86" if X86 
 
         $if X86:
           $for M in range(ROW_TILE):
-            vacc${M} = wasm_v128_bitselect(vmin, vacc${M}, wasm_f32x4_lt(vacc${M}, vmin));
+            vacc${M} = wasm_f32x4_pmax(vmin, vacc${M});
 
           $for M in range(ROW_TILE):
-            vacc${M} = wasm_v128_bitselect(vacc${M}, vmax, wasm_f32x4_le(vacc${M}, vmax));
+            vacc${M} = wasm_f32x4_pmin(vmax, vacc${M});
         $else:
           $for M in range(ROW_TILE):
             vacc${M} = wasm_f32x4_max(vacc${M}, vmin);
@@ -142,10 +142,10 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__wasmsimd_${"x86" if X86 
 
       $if X86:
         $for M in range(ROW_TILE):
-          vacc${M} = wasm_v128_bitselect(vmin, vacc${M}, wasm_f32x4_lt(vacc${M}, vmin));
+          vacc${M} = wasm_f32x4_pmax(vmin, vacc${M});
 
         $for M in range(ROW_TILE):
-          vacc${M} = wasm_v128_bitselect(vacc${M}, vmax, wasm_f32x4_le(vacc${M}, vmax));
+          vacc${M} = wasm_f32x4_pmin(vmax, vacc${M});
       $else:
         $for M in range(ROW_TILE):
           vacc${M} = wasm_f32x4_max(vacc${M}, vmin);

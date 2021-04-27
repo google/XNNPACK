@@ -33,7 +33,7 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4(
   const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.output_max);
 
   while (channels >= 4) {
-    v128_t vsum0 = wasm_f64x2_splat(0.0);
+    v128_t vsum0 = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
     v128_t vsum1 = vsum0;
     v128_t vsum2 = vsum0;
     v128_t vsum3 = vsum0;
@@ -78,10 +78,8 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4(
     const v128_t vsum = wasm_f32x4_add(wasm_v32x4_shuffle(vsum01, vsum23, 0, 2, 4, 6), wasm_v32x4_shuffle(vsum01, vsum23, 1, 3, 5, 7));
     v128_t vout = wasm_f32x4_mul(vsum, vmultiplier);
 
-    const v128_t vufmask = wasm_f32x4_lt(vout, vmin);
-    const v128_t vofmask = wasm_f32x4_le(vmax, vout);
-    vout = wasm_v128_bitselect(vmin, vout, vufmask);
-    vout = wasm_v128_bitselect(vmax, vout, vofmask);
+    vout = wasm_f32x4_pmax(vmin, vout);
+    vout = wasm_f32x4_pmin(vmax, vout);
 
     wasm_v128_store(output, vout);
     output += 4;
@@ -93,7 +91,7 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4(
   }
 
   while (channels != 0) {
-    v128_t vsum = wasm_f64x2_splat(0.0);
+    v128_t vsum = wasm_f32x4_const(0.0f, 0.0f, 0.0f, 0.0f);
     size_t n = elements;
     while (n >= 4 * sizeof(float)) {
       const v128_t vi0 = wasm_v128_load(i0);
@@ -113,10 +111,8 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4(
 
     v128_t vout = wasm_f32x4_mul(vsum, vmultiplier);
 
-    const v128_t vufmask = wasm_f32x4_lt(vout, vmin);
-    const v128_t vofmask = wasm_f32x4_le(vmax, vout);
-    vout = wasm_v128_bitselect(vmin, vout, vufmask);
-    vout = wasm_v128_bitselect(vmax, vout, vofmask);
+    vout = wasm_f32x4_pmax(vmin, vout);
+    vout = wasm_f32x4_pmin(vmax, vout);
 
     *output++ = wasm_f32x4_extract_lane(vout, 0);
     channels -= 1;
