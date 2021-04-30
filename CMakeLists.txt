@@ -3,6 +3,8 @@
 #
 # Copyright 2019 Google LLC
 #
+# Portions Copyright (c) 2021 Adobe
+#
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
@@ -20,6 +22,8 @@ OPTION(XNNPACK_ENABLE_SPARSE "Build XNNPACK with graph rewriting for sparse infe
 OPTION(XNNPACK_BUILD_TESTS "Build XNNPACK unit tests" ON)
 OPTION(XNNPACK_BUILD_BENCHMARKS "Build XNNPACK benchmarks" ON)
 OPTION(XNNPACK_USE_SYSTEM_LIBS "Use system-provided dependency libraries" OFF)
+OPTION(XNNPACK_BUILD_WASM_WITH_SIMD "BUILD WASM Library with SIMD enabled" OFF)
+OPTION(XNNPACK_BUILD_WASM_WITH_THREADS "Build WASM Library with threads enabled" OFF)
 
 # --- [ Determine target processor
 SET(XNNPACK_TARGET_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}")
@@ -82,7 +86,7 @@ ENDIF()
 
 IF(NOT CMAKE_SYSTEM_NAME)
   MESSAGE(FATAL_ERROR "CMAKE_SYSTEM_NAME not defined")
-ELSEIF(NOT CMAKE_SYSTEM_NAME MATCHES "^(Darwin|Linux|Android|Windows|CYGWIN|MSYS)$")
+ELSEIF(NOT CMAKE_SYSTEM_NAME MATCHES "^(Darwin|Linux|Android|Windows|CYGWIN|MSYS|Emscripten)$")
   MESSAGE(FATAL_ERROR "Unrecognized CMAKE_SYSTEM_NAME = ${CMAKE_SYSTEM_NAME}")
 ENDIF()
 
@@ -2939,6 +2943,884 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
   src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S)
 
+set(XNNPACK_WASM_MICROKERNEL_SRCS
+  src/f32-avgpool/9p8x-minmax-wasm-c1.c
+  src/f32-avgpool/9x-minmax-wasm-c1.c
+  src/f32-clamp/gen/wasm-x1.c
+  src/f32-clamp/gen/wasm-x2.c
+  src/f32-clamp/gen/wasm-x4.c
+  src/f32-dwconv/gen/up1x4-minmax-wasm-acc2.c
+  src/f32-dwconv/gen/up1x4-minmax-wasm.c
+  src/f32-dwconv/gen/up1x4-wasm-acc2.c
+  src/f32-dwconv/gen/up1x4-wasm.c
+  src/f32-dwconv/gen/up1x9-minmax-wasm-acc2.c
+  src/f32-dwconv/gen/up1x9-minmax-wasm.c
+  src/f32-dwconv/gen/up1x9-wasm-acc2.c
+  src/f32-dwconv/gen/up1x9-wasm.c
+  src/f32-dwconv/gen/up1x25-minmax-wasm-acc2.c
+  src/f32-dwconv/gen/up1x25-minmax-wasm.c
+  src/f32-dwconv/gen/up1x25-wasm-acc2.c
+  src/f32-dwconv/gen/up1x25-wasm.c
+  src/f32-dwconv/gen/up2x4-minmax-wasm-acc2.c
+  src/f32-dwconv/gen/up2x4-minmax-wasm.c
+  src/f32-dwconv/gen/up2x4-wasm-acc2.c
+  src/f32-dwconv/gen/up2x4-wasm.c
+  src/f32-dwconv/gen/up2x9-minmax-wasm-acc2.c
+  src/f32-dwconv/gen/up2x9-minmax-wasm.c
+  src/f32-dwconv/gen/up2x9-wasm-acc2.c
+  src/f32-dwconv/gen/up2x9-wasm.c
+  src/f32-dwconv/gen/up2x25-minmax-wasm-acc2.c
+  src/f32-dwconv/gen/up2x25-minmax-wasm.c
+  src/f32-dwconv/gen/up2x25-wasm-acc2.c
+  src/f32-dwconv/gen/up2x25-wasm.c
+  src/f32-gavgpool/7p7x-minmax-wasm-c1.c
+  src/f32-gavgpool/7x-minmax-wasm-c1.c
+  src/f32-gemm/gen-inc/1x4inc-minmax-wasm.c
+  src/f32-gemm/gen-inc/2x4inc-minmax-wasm.c
+  src/f32-gemm/gen-inc/4x4inc-minmax-wasm.c
+  src/f32-gemm/gen/1x4-minmax-wasm.c
+  src/f32-gemm/gen/1x4-relu-wasm.c
+  src/f32-gemm/gen/1x4-wasm.c
+  src/f32-gemm/gen/2x4-minmax-wasm.c
+  src/f32-gemm/gen/2x4-relu-wasm.c
+  src/f32-gemm/gen/2x4-wasm.c
+  src/f32-gemm/gen/4x2-minmax-wasm.c
+  src/f32-gemm/gen/4x2-relu-wasm.c
+  src/f32-gemm/gen/4x2-wasm.c
+  src/f32-gemm/gen/4x4-minmax-wasm.c
+  src/f32-gemm/gen/4x4-relu-wasm.c
+  src/f32-gemm/gen/4x4-wasm.c
+  src/f32-hswish/gen/hswish-wasm-x1.c
+  src/f32-hswish/gen/hswish-wasm-x2.c
+  src/f32-hswish/gen/hswish-wasm-x4.c
+  src/f32-igemm/gen/1x4-minmax-wasm.c
+  src/f32-igemm/gen/1x4-relu-wasm.c
+  src/f32-igemm/gen/1x4-wasm.c
+  src/f32-igemm/gen/2x4-minmax-wasm.c
+  src/f32-igemm/gen/2x4-relu-wasm.c
+  src/f32-igemm/gen/2x4-wasm.c
+  src/f32-igemm/gen/4x2-minmax-wasm.c
+  src/f32-igemm/gen/4x2-relu-wasm.c
+  src/f32-igemm/gen/4x2-wasm.c
+  src/f32-igemm/gen/4x4-minmax-wasm.c
+  src/f32-igemm/gen/4x4-relu-wasm.c
+  src/f32-igemm/gen/4x4-wasm.c
+  src/f32-maxpool/9p8x-minmax-wasm-c1.c
+  src/f32-pavgpool/9p8x-minmax-wasm-c1.c
+  src/f32-pavgpool/9x-minmax-wasm-c1.c
+  src/f32-prelu/gen/wasm-2x1.c
+  src/f32-prelu/gen/wasm-2x4.c
+  src/f32-relu/gen/wasm-x1.c
+  src/f32-relu/gen/wasm-x2.c
+  src/f32-relu/gen/wasm-x4.c
+  src/f32-relu/gen/wasm-x8.c
+  src/f32-vbinary/gen/vadd-minmax-wasm-x1.c
+  src/f32-vbinary/gen/vadd-minmax-wasm-x2.c
+  src/f32-vbinary/gen/vadd-minmax-wasm-x4.c
+  src/f32-vbinary/gen/vadd-minmax-wasm-x8.c
+  src/f32-vbinary/gen/vadd-relu-wasm-x1.c
+  src/f32-vbinary/gen/vadd-relu-wasm-x2.c
+  src/f32-vbinary/gen/vadd-relu-wasm-x4.c
+  src/f32-vbinary/gen/vadd-relu-wasm-x8.c
+  src/f32-vbinary/gen/vaddc-minmax-wasm-x1.c
+  src/f32-vbinary/gen/vaddc-minmax-wasm-x2.c
+  src/f32-vbinary/gen/vaddc-minmax-wasm-x4.c
+  src/f32-vbinary/gen/vaddc-minmax-wasm-x8.c
+  src/f32-vbinary/gen/vaddc-relu-wasm-x1.c
+  src/f32-vbinary/gen/vaddc-relu-wasm-x2.c
+  src/f32-vbinary/gen/vaddc-relu-wasm-x4.c
+  src/f32-vbinary/gen/vaddc-relu-wasm-x8.c
+  src/f32-vbinary/gen/vdiv-minmax-wasm-x1.c
+  src/f32-vbinary/gen/vdiv-minmax-wasm-x2.c
+  src/f32-vbinary/gen/vdiv-minmax-wasm-x4.c
+  src/f32-vbinary/gen/vdiv-minmax-wasm-x8.c
+  src/f32-vbinary/gen/vdiv-relu-wasm-x1.c
+  src/f32-vbinary/gen/vdiv-relu-wasm-x2.c
+  src/f32-vbinary/gen/vdiv-relu-wasm-x4.c
+  src/f32-vbinary/gen/vdiv-relu-wasm-x8.c
+  src/f32-vbinary/gen/vdivc-minmax-wasm-x1.c
+  src/f32-vbinary/gen/vdivc-minmax-wasm-x2.c
+  src/f32-vbinary/gen/vdivc-minmax-wasm-x4.c
+  src/f32-vbinary/gen/vdivc-minmax-wasm-x8.c
+  src/f32-vbinary/gen/vdivc-relu-wasm-x1.c
+  src/f32-vbinary/gen/vdivc-relu-wasm-x2.c
+  src/f32-vbinary/gen/vdivc-relu-wasm-x4.c
+  src/f32-vbinary/gen/vdivc-relu-wasm-x8.c
+  src/f32-vbinary/gen/vmax-wasm-x1.c
+  src/f32-vbinary/gen/vmax-wasm-x2.c
+  src/f32-vbinary/gen/vmax-wasm-x4.c
+  src/f32-vbinary/gen/vmax-wasm-x8.c
+  src/f32-vbinary/gen/vmaxc-wasm-x1.c
+  src/f32-vbinary/gen/vmaxc-wasm-x2.c
+  src/f32-vbinary/gen/vmaxc-wasm-x4.c
+  src/f32-vbinary/gen/vmaxc-wasm-x8.c
+  src/f32-vbinary/gen/vmin-wasm-x1.c
+  src/f32-vbinary/gen/vmin-wasm-x2.c
+  src/f32-vbinary/gen/vmin-wasm-x4.c
+  src/f32-vbinary/gen/vmin-wasm-x8.c
+  src/f32-vbinary/gen/vminc-wasm-x1.c
+  src/f32-vbinary/gen/vminc-wasm-x2.c
+  src/f32-vbinary/gen/vminc-wasm-x4.c
+  src/f32-vbinary/gen/vminc-wasm-x8.c
+  src/f32-vbinary/gen/vmul-minmax-wasm-x1.c
+  src/f32-vbinary/gen/vmul-minmax-wasm-x2.c
+  src/f32-vbinary/gen/vmul-minmax-wasm-x4.c
+  src/f32-vbinary/gen/vmul-minmax-wasm-x8.c
+  src/f32-vbinary/gen/vmul-relu-wasm-x1.c
+  src/f32-vbinary/gen/vmul-relu-wasm-x2.c
+  src/f32-vbinary/gen/vmul-relu-wasm-x4.c
+  src/f32-vbinary/gen/vmul-relu-wasm-x8.c
+  src/f32-vbinary/gen/vmulc-minmax-wasm-x1.c
+  src/f32-vbinary/gen/vmulc-minmax-wasm-x2.c
+  src/f32-vbinary/gen/vmulc-minmax-wasm-x4.c
+  src/f32-vbinary/gen/vmulc-minmax-wasm-x8.c
+  src/f32-vbinary/gen/vmulc-relu-wasm-x1.c
+  src/f32-vbinary/gen/vmulc-relu-wasm-x2.c
+  src/f32-vbinary/gen/vmulc-relu-wasm-x4.c
+  src/f32-vbinary/gen/vmulc-relu-wasm-x8.c
+  src/f32-vbinary/gen/vrdivc-minmax-wasm-x1.c
+  src/f32-vbinary/gen/vrdivc-minmax-wasm-x2.c
+  src/f32-vbinary/gen/vrdivc-minmax-wasm-x4.c
+  src/f32-vbinary/gen/vrdivc-minmax-wasm-x8.c
+  src/f32-vbinary/gen/vrdivc-relu-wasm-x1.c
+  src/f32-vbinary/gen/vrdivc-relu-wasm-x2.c
+  src/f32-vbinary/gen/vrdivc-relu-wasm-x4.c
+  src/f32-vbinary/gen/vrdivc-relu-wasm-x8.c
+  src/f32-vbinary/gen/vrsubc-minmax-wasm-x1.c
+  src/f32-vbinary/gen/vrsubc-minmax-wasm-x2.c
+  src/f32-vbinary/gen/vrsubc-minmax-wasm-x4.c
+  src/f32-vbinary/gen/vrsubc-minmax-wasm-x8.c
+  src/f32-vbinary/gen/vrsubc-relu-wasm-x1.c
+  src/f32-vbinary/gen/vrsubc-relu-wasm-x2.c
+  src/f32-vbinary/gen/vrsubc-relu-wasm-x4.c
+  src/f32-vbinary/gen/vrsubc-relu-wasm-x8.c
+  src/f32-vbinary/gen/vsub-minmax-wasm-x1.c
+  src/f32-vbinary/gen/vsub-minmax-wasm-x2.c
+  src/f32-vbinary/gen/vsub-minmax-wasm-x4.c
+  src/f32-vbinary/gen/vsub-minmax-wasm-x8.c
+  src/f32-vbinary/gen/vsub-relu-wasm-x1.c
+  src/f32-vbinary/gen/vsub-relu-wasm-x2.c
+  src/f32-vbinary/gen/vsub-relu-wasm-x4.c
+  src/f32-vbinary/gen/vsub-relu-wasm-x8.c
+  src/f32-vbinary/gen/vsubc-minmax-wasm-x1.c
+  src/f32-vbinary/gen/vsubc-minmax-wasm-x2.c
+  src/f32-vbinary/gen/vsubc-minmax-wasm-x4.c
+  src/f32-vbinary/gen/vsubc-minmax-wasm-x8.c
+  src/f32-vbinary/gen/vsubc-relu-wasm-x1.c
+  src/f32-vbinary/gen/vsubc-relu-wasm-x2.c
+  src/f32-vbinary/gen/vsubc-relu-wasm-x4.c
+  src/f32-vbinary/gen/vsubc-relu-wasm-x8.c
+  src/f32-velu/gen/velu-wasm-rr2-lut16-p3-x1.c
+  src/f32-velu/gen/velu-wasm-rr2-lut16-p3-x2.c
+  src/f32-velu/gen/velu-wasm-rr2-lut16-p3-x3.c
+  src/f32-velu/gen/velu-wasm-rr2-lut16-p3-x4.c
+  src/f32-velu/gen/velu-wasm-rr2-lut16-p3-x5.c
+  src/f32-velu/gen/velu-wasm-rr2-lut16-p3-x6.c
+  src/f32-velu/gen/velu-wasm-rr2-p6-x1.c
+  src/f32-velu/gen/velu-wasm-rr2-p6-x2.c
+  src/f32-velu/gen/velu-wasm-rr2-p6-x3.c
+  src/f32-velu/gen/velu-wasm-rr2-p6-x4.c
+  src/f32-velu/gen/velu-wasm-rr2-p6-x5.c
+  src/f32-velu/gen/velu-wasm-rr2-p6-x6.c
+  src/f32-vlrelu/gen/vlrelu-wasm-x1.c
+  src/f32-vlrelu/gen/vlrelu-wasm-x2.c
+  src/f32-vlrelu/gen/vlrelu-wasm-x4.c
+  src/f32-vmulcaddc/gen/c1-minmax-wasm-2x.c
+  src/f32-vmulcaddc/gen/c2-minmax-wasm-2x.c
+  src/f32-vmulcaddc/gen/c4-minmax-wasm-2x.c)
+
+set(XNNPACK_WASM_SIMD_SRCS
+  src/f32-argmaxpool/4x-wasmsimd-c4.c
+  src/f32-argmaxpool/9p8x-wasmsimd-c4.c
+  src/f32-argmaxpool/9x-wasmsimd-c4.c
+  src/f32-avgpool/9p8x-minmax-wasmsimd-arm-c4.c
+  src/f32-avgpool/9p8x-minmax-wasmsimd-x86-c4.c
+  src/f32-avgpool/9x-minmax-wasmsimd-arm-c4.c
+  src/f32-avgpool/9x-minmax-wasmsimd-x86-c4.c
+  src/f32-clamp/gen/wasmsimd-arm-x4.c
+  src/f32-clamp/gen/wasmsimd-arm-x8.c
+  src/f32-clamp/gen/wasmsimd-x86-x4.c
+  src/f32-clamp/gen/wasmsimd-x86-x8.c
+  src/f32-conv-hwc2chw/3x3s2p1c3x4-wasmsimd-2x2.c
+  src/f32-dwconv/gen/up4x4-minmax-wasmsimd-arm-acc2.c
+  src/f32-dwconv/gen/up4x4-minmax-wasmsimd-arm.c
+  src/f32-dwconv/gen/up4x4-minmax-wasmsimd-x86-acc2.c
+  src/f32-dwconv/gen/up4x4-minmax-wasmsimd-x86.c
+  src/f32-dwconv/gen/up4x4-wasmsimd.c
+  src/f32-dwconv/gen/up4x9-minmax-wasmsimd-arm-acc2.c
+  src/f32-dwconv/gen/up4x9-minmax-wasmsimd-arm.c
+  src/f32-dwconv/gen/up4x9-minmax-wasmsimd-x86-acc2.c
+  src/f32-dwconv/gen/up4x9-minmax-wasmsimd-x86.c
+  src/f32-dwconv/gen/up4x9-wasmsimd.c
+  src/f32-dwconv/gen/up4x25-minmax-wasmsimd-arm-acc2.c
+  src/f32-dwconv/gen/up4x25-minmax-wasmsimd-arm.c
+  src/f32-dwconv/gen/up4x25-minmax-wasmsimd-x86-acc2.c
+  src/f32-dwconv/gen/up4x25-minmax-wasmsimd-x86.c
+  src/f32-dwconv/gen/up4x25-wasmsimd.c
+  src/f32-dwconv/gen/up8x4-minmax-wasmsimd-arm-acc2.c
+  src/f32-dwconv/gen/up8x4-minmax-wasmsimd-arm.c
+  src/f32-dwconv/gen/up8x4-minmax-wasmsimd-x86-acc2.c
+  src/f32-dwconv/gen/up8x4-minmax-wasmsimd-x86.c
+  src/f32-dwconv/gen/up8x4-wasmsimd.c
+  src/f32-dwconv/gen/up8x9-minmax-wasmsimd-arm-acc2.c
+  src/f32-dwconv/gen/up8x9-minmax-wasmsimd-arm.c
+  src/f32-dwconv/gen/up8x9-minmax-wasmsimd-x86-acc2.c
+  src/f32-dwconv/gen/up8x9-minmax-wasmsimd-x86.c
+  src/f32-dwconv/gen/up8x9-wasmsimd.c
+  src/f32-dwconv/gen/up8x25-minmax-wasmsimd-arm-acc2.c
+  src/f32-dwconv/gen/up8x25-minmax-wasmsimd-arm.c
+  src/f32-dwconv/gen/up8x25-minmax-wasmsimd-x86-acc2.c
+  src/f32-dwconv/gen/up8x25-minmax-wasmsimd-x86.c
+  src/f32-dwconv/gen/up8x25-wasmsimd.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-loadsplat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-loadsplat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-loadsplat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-loadsplat-1x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-loadsplat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-loadsplat-2x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-loadsplat-3x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-loadsplat-4x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-loadsplat-5x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-loadsplat-6x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-splat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-splat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-splat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-splat-1x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-splat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-splat-2x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-splat-3x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-splat-4x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-splat-5x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-arm-splat-6x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-loadsplat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-loadsplat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-loadsplat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-loadsplat-1x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-loadsplat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-loadsplat-2x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-loadsplat-3x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-loadsplat-4x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-loadsplat-5x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-loadsplat-6x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-1x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-2x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-3x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-4x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-5x4.c
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-wasmsimd-x86-splat-6x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-1x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-2x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-3x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-loadsplat-4x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-1x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-2x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-3x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-arm-splat-4x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-1x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-2x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-3x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-loadsplat-4x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-1x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-2x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-3x4.c
+  src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-wasmsimd-x86-splat-4x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-4x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-4x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-loadsplat-5x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-4x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-4x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-arm-splat-5x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-4x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-4x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-loadsplat-5x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-4x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-4x4.c
+  src/f32-dwconv2d-chw/gen/5x5p2-minmax-wasmsimd-x86-splat-5x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-loadsplat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-loadsplat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-loadsplat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-loadsplat-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-loadsplat-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-loadsplat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-loadsplat-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-loadsplat-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-loadsplat-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-loadsplat-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-splat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-splat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-splat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-splat-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-splat-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-splat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-splat-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-splat-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-splat-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-arm-splat-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-loadsplat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-loadsplat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-loadsplat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-loadsplat-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-loadsplat-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-loadsplat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-loadsplat-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-loadsplat-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-loadsplat-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-loadsplat-3x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-splat-1x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-splat-1x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-splat-1x4-acc4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-splat-1x4-acc5.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-splat-1x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-splat-2x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-splat-2x4-acc3.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-splat-2x4.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-splat-3x4-acc2.c
+  src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-wasmsimd-x86-splat-3x4.c
+  src/f32-gavgpool-cw/wasmsimd-arm-x4.c
+  src/f32-gavgpool-cw/wasmsimd-x86-x4.c
+  src/f32-gavgpool/7p7x-minmax-wasmsimd-arm-c4.c
+  src/f32-gavgpool/7p7x-minmax-wasmsimd-x86-c4.c
+  src/f32-gavgpool/7x-minmax-wasmsimd-arm-c4.c
+  src/f32-gavgpool/7x-minmax-wasmsimd-x86-c4.c
+  src/f32-gemm/gen-inc/1x8inc-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-gemm/gen-inc/1x8inc-minmax-wasmsimd-arm-splat.c
+  src/f32-gemm/gen-inc/1x8inc-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-gemm/gen-inc/1x8inc-minmax-wasmsimd-x86-splat.c
+  src/f32-gemm/gen-inc/1x8s4inc-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen-inc/1x8s4inc-minmax-wasmsimd-x86.c
+  src/f32-gemm/gen-inc/3x8inc-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-gemm/gen-inc/3x8inc-minmax-wasmsimd-arm-splat.c
+  src/f32-gemm/gen-inc/3x8inc-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-gemm/gen-inc/3x8inc-minmax-wasmsimd-x86-splat.c
+  src/f32-gemm/gen-inc/3x8s4inc-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen-inc/3x8s4inc-minmax-wasmsimd-x86.c
+  src/f32-gemm/gen-inc/4x8inc-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-gemm/gen-inc/4x8inc-minmax-wasmsimd-arm-splat.c
+  src/f32-gemm/gen-inc/4x8inc-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-gemm/gen-inc/4x8inc-minmax-wasmsimd-x86-splat.c
+  src/f32-gemm/gen-inc/4x8s4inc-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen-inc/4x8s4inc-minmax-wasmsimd-x86.c
+  src/f32-gemm/gen-inc/5x8inc-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-gemm/gen-inc/5x8inc-minmax-wasmsimd-arm-splat.c
+  src/f32-gemm/gen-inc/5x8inc-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-gemm/gen-inc/5x8inc-minmax-wasmsimd-x86-splat.c
+  src/f32-gemm/gen-inc/5x8s4inc-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen-inc/5x8s4inc-minmax-wasmsimd-x86.c
+  src/f32-gemm/gen-inc/6x8inc-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-gemm/gen-inc/6x8inc-minmax-wasmsimd-arm-splat.c
+  src/f32-gemm/gen-inc/6x8inc-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-gemm/gen-inc/6x8inc-minmax-wasmsimd-x86-splat.c
+  src/f32-gemm/gen-inc/6x8s4inc-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen-inc/6x8s4inc-minmax-wasmsimd-x86.c
+  src/f32-gemm/gen/1x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-gemm/gen/1x8-minmax-wasmsimd-arm-splat.c
+  src/f32-gemm/gen/1x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-gemm/gen/1x8-minmax-wasmsimd-x86-splat.c
+  src/f32-gemm/gen/1x8-relu-wasmsimd-splat.c
+  src/f32-gemm/gen/1x8-wasmsimd-splat.c
+  src/f32-gemm/gen/1x8s4-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen/1x8s4-minmax-wasmsimd-x86.c
+  src/f32-gemm/gen/3x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-gemm/gen/3x8-minmax-wasmsimd-arm-splat.c
+  src/f32-gemm/gen/3x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-gemm/gen/3x8-minmax-wasmsimd-x86-splat.c
+  src/f32-gemm/gen/3x8s4-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen/3x8s4-minmax-wasmsimd-x86.c
+  src/f32-gemm/gen/4x2c4-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen/4x2c4-minmax-wasmsimd-x86.c
+  src/f32-gemm/gen/4x2c4-relu-wasmsimd.c
+  src/f32-gemm/gen/4x2c4-wasmsimd.c
+  src/f32-gemm/gen/4x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-gemm/gen/4x8-minmax-wasmsimd-arm-splat.c
+  src/f32-gemm/gen/4x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-gemm/gen/4x8-minmax-wasmsimd-x86-splat.c
+  src/f32-gemm/gen/4x8-relu-wasmsimd-splat.c
+  src/f32-gemm/gen/4x8-wasmsimd-splat.c
+  src/f32-gemm/gen/4x8s4-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen/4x8s4-minmax-wasmsimd-x86.c
+  src/f32-gemm/gen/5x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-gemm/gen/5x8-minmax-wasmsimd-arm-splat.c
+  src/f32-gemm/gen/5x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-gemm/gen/5x8-minmax-wasmsimd-x86-splat.c
+  src/f32-gemm/gen/5x8-relu-wasmsimd-splat.c
+  src/f32-gemm/gen/5x8-wasmsimd-splat.c
+  src/f32-gemm/gen/5x8s4-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen/5x8s4-minmax-wasmsimd-x86.c
+  src/f32-gemm/gen/6x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-gemm/gen/6x8-minmax-wasmsimd-arm-splat.c
+  src/f32-gemm/gen/6x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-gemm/gen/6x8-minmax-wasmsimd-x86-splat.c
+  src/f32-gemm/gen/6x8s4-minmax-wasmsimd-arm.c
+  src/f32-gemm/gen/6x8s4-minmax-wasmsimd-x86.c
+  src/f32-hswish/gen/hswish-wasmsimd-x4.c
+  src/f32-hswish/gen/hswish-wasmsimd-x8.c
+  src/f32-hswish/gen/hswish-wasmsimd-x16.c
+  src/f32-ibilinear-chw/gen/wasmsimd-p4.c
+  src/f32-ibilinear-chw/gen/wasmsimd-p8.c
+  src/f32-ibilinear/gen/wasmsimd-c4.c
+  src/f32-ibilinear/gen/wasmsimd-c8.c
+  src/f32-igemm/gen/1x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-igemm/gen/1x8-minmax-wasmsimd-arm-splat.c
+  src/f32-igemm/gen/1x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-igemm/gen/1x8-minmax-wasmsimd-x86-splat.c
+  src/f32-igemm/gen/1x8-relu-wasmsimd-splat.c
+  src/f32-igemm/gen/1x8-wasmsimd-splat.c
+  src/f32-igemm/gen/1x8s4-minmax-wasmsimd-arm.c
+  src/f32-igemm/gen/1x8s4-minmax-wasmsimd-x86.c
+  src/f32-igemm/gen/3x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-igemm/gen/3x8-minmax-wasmsimd-arm-splat.c
+  src/f32-igemm/gen/3x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-igemm/gen/3x8-minmax-wasmsimd-x86-splat.c
+  src/f32-igemm/gen/3x8s4-minmax-wasmsimd-arm.c
+  src/f32-igemm/gen/3x8s4-minmax-wasmsimd-x86.c
+  src/f32-igemm/gen/4x2c4-minmax-wasmsimd-arm.c
+  src/f32-igemm/gen/4x2c4-minmax-wasmsimd-x86.c
+  src/f32-igemm/gen/4x2c4-relu-wasmsimd.c
+  src/f32-igemm/gen/4x2c4-wasmsimd.c
+  src/f32-igemm/gen/4x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-igemm/gen/4x8-minmax-wasmsimd-arm-splat.c
+  src/f32-igemm/gen/4x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-igemm/gen/4x8-minmax-wasmsimd-x86-splat.c
+  src/f32-igemm/gen/4x8-relu-wasmsimd-splat.c
+  src/f32-igemm/gen/4x8-wasmsimd-splat.c
+  src/f32-igemm/gen/4x8s4-minmax-wasmsimd-arm.c
+  src/f32-igemm/gen/4x8s4-minmax-wasmsimd-x86.c
+  src/f32-igemm/gen/5x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-igemm/gen/5x8-minmax-wasmsimd-arm-splat.c
+  src/f32-igemm/gen/5x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-igemm/gen/5x8-minmax-wasmsimd-x86-splat.c
+  src/f32-igemm/gen/5x8-relu-wasmsimd-splat.c
+  src/f32-igemm/gen/5x8-wasmsimd-splat.c
+  src/f32-igemm/gen/5x8s4-minmax-wasmsimd-arm.c
+  src/f32-igemm/gen/5x8s4-minmax-wasmsimd-x86.c
+  src/f32-igemm/gen/6x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-igemm/gen/6x8-minmax-wasmsimd-arm-splat.c
+  src/f32-igemm/gen/6x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-igemm/gen/6x8-minmax-wasmsimd-x86-splat.c
+  src/f32-igemm/gen/6x8s4-minmax-wasmsimd-arm.c
+  src/f32-igemm/gen/6x8s4-minmax-wasmsimd-x86.c
+  src/f32-maxpool/9p8x-minmax-wasmsimd-arm-c4.c
+  src/f32-maxpool/9p8x-minmax-wasmsimd-x86-c4.c
+  src/f32-pavgpool/9p8x-minmax-wasmsimd-arm-c4.c
+  src/f32-pavgpool/9p8x-minmax-wasmsimd-x86-c4.c
+  src/f32-pavgpool/9x-minmax-wasmsimd-arm-c4.c
+  src/f32-pavgpool/9x-minmax-wasmsimd-x86-c4.c
+  src/f32-ppmm/gen/4x8-minmax-wasmsimd-arm-splat.c
+  src/f32-ppmm/gen/4x8-minmax-wasmsimd-x86-splat.c
+  src/f32-prelu/gen/wasmsimd-bitselect-1x4.c
+  src/f32-prelu/gen/wasmsimd-bitselect-1x8.c
+  src/f32-prelu/gen/wasmsimd-bitselect-1x16.c
+  src/f32-prelu/gen/wasmsimd-bitselect-2x4.c
+  src/f32-prelu/gen/wasmsimd-bitselect-2x8.c
+  src/f32-prelu/gen/wasmsimd-bitselect-2x16.c
+  src/f32-prelu/gen/wasmsimd-bitselect-4x4.c
+  src/f32-prelu/gen/wasmsimd-bitselect-4x8.c
+  src/f32-prelu/gen/wasmsimd-bitselect-4x16.c
+  src/f32-prelu/gen/wasmsimd-minmax-1x4.c
+  src/f32-prelu/gen/wasmsimd-minmax-1x8.c
+  src/f32-prelu/gen/wasmsimd-minmax-1x16.c
+  src/f32-prelu/gen/wasmsimd-minmax-2x4.c
+  src/f32-prelu/gen/wasmsimd-minmax-2x8.c
+  src/f32-prelu/gen/wasmsimd-minmax-2x16.c
+  src/f32-prelu/gen/wasmsimd-minmax-4x4.c
+  src/f32-prelu/gen/wasmsimd-minmax-4x8.c
+  src/f32-prelu/gen/wasmsimd-minmax-4x16.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x4.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x8.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x12.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x16.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x20-acc5.c
+  src/f32-raddstoreexpminusmax/gen/wasmsimd-p5-x20.c
+  src/f32-relu/gen/wasmsimd-x4.c
+  src/f32-relu/gen/wasmsimd-x8.c
+  src/f32-relu/gen/wasmsimd-x16.c
+  src/f32-rmax/wasmsimd-arm.c
+  src/f32-rmax/wasmsimd-x86.c
+  src/f32-sigmoid/gen/wasmsimd-lut64-p2-div-x4.c
+  src/f32-sigmoid/gen/wasmsimd-lut64-p2-div-x8.c
+  src/f32-sigmoid/gen/wasmsimd-lut64-p2-div-x12.c
+  src/f32-sigmoid/gen/wasmsimd-lut64-p2-div-x16.c
+  src/f32-sigmoid/gen/wasmsimd-lut64-p2-div-x20.c
+  src/f32-sigmoid/gen/wasmsimd-lut64-p2-div-x24.c
+  src/f32-sigmoid/gen/wasmsimd-p5-div-x4.c
+  src/f32-sigmoid/gen/wasmsimd-p5-div-x8.c
+  src/f32-sigmoid/gen/wasmsimd-p5-div-x12.c
+  src/f32-sigmoid/gen/wasmsimd-p5-div-x16.c
+  src/f32-sigmoid/gen/wasmsimd-p5-div-x20.c
+  src/f32-sigmoid/gen/wasmsimd-p5-div-x24.c
+  src/f32-spmm/gen/4x1-minmax-wasmsimd-arm-pipelined-x2.c
+  src/f32-spmm/gen/4x1-minmax-wasmsimd-arm-pipelined.c
+  src/f32-spmm/gen/4x1-minmax-wasmsimd-arm-x2.c
+  src/f32-spmm/gen/4x1-minmax-wasmsimd-arm-x4.c
+  src/f32-spmm/gen/4x1-minmax-wasmsimd-arm.c
+  src/f32-spmm/gen/4x1-minmax-wasmsimd-x86-pipelined-x2.c
+  src/f32-spmm/gen/4x1-minmax-wasmsimd-x86-pipelined.c
+  src/f32-spmm/gen/4x1-minmax-wasmsimd-x86-x2.c
+  src/f32-spmm/gen/4x1-minmax-wasmsimd-x86-x4.c
+  src/f32-spmm/gen/4x1-minmax-wasmsimd-x86.c
+  src/f32-spmm/gen/8x1-minmax-wasmsimd-arm-pipelined-x2.c
+  src/f32-spmm/gen/8x1-minmax-wasmsimd-arm-pipelined.c
+  src/f32-spmm/gen/8x1-minmax-wasmsimd-arm-x2.c
+  src/f32-spmm/gen/8x1-minmax-wasmsimd-arm-x4.c
+  src/f32-spmm/gen/8x1-minmax-wasmsimd-arm.c
+  src/f32-spmm/gen/8x1-minmax-wasmsimd-x86-pipelined-x2.c
+  src/f32-spmm/gen/8x1-minmax-wasmsimd-x86-pipelined.c
+  src/f32-spmm/gen/8x1-minmax-wasmsimd-x86-x2.c
+  src/f32-spmm/gen/8x1-minmax-wasmsimd-x86-x4.c
+  src/f32-spmm/gen/8x1-minmax-wasmsimd-x86.c
+  src/f32-spmm/gen/16x1-minmax-wasmsimd-arm-pipelined-x2.c
+  src/f32-spmm/gen/16x1-minmax-wasmsimd-arm-pipelined.c
+  src/f32-spmm/gen/16x1-minmax-wasmsimd-arm-x2.c
+  src/f32-spmm/gen/16x1-minmax-wasmsimd-arm-x4.c
+  src/f32-spmm/gen/16x1-minmax-wasmsimd-arm.c
+  src/f32-spmm/gen/16x1-minmax-wasmsimd-x86-pipelined-x2.c
+  src/f32-spmm/gen/16x1-minmax-wasmsimd-x86-pipelined.c
+  src/f32-spmm/gen/16x1-minmax-wasmsimd-x86-x2.c
+  src/f32-spmm/gen/16x1-minmax-wasmsimd-x86-x4.c
+  src/f32-spmm/gen/16x1-minmax-wasmsimd-x86.c
+  src/f32-spmm/gen/32x1-minmax-wasmsimd-arm-pipelined-x2.c
+  src/f32-spmm/gen/32x1-minmax-wasmsimd-arm-pipelined.c
+  src/f32-spmm/gen/32x1-minmax-wasmsimd-arm-x2.c
+  src/f32-spmm/gen/32x1-minmax-wasmsimd-arm-x4.c
+  src/f32-spmm/gen/32x1-minmax-wasmsimd-arm.c
+  src/f32-spmm/gen/32x1-minmax-wasmsimd-x86-pipelined-x2.c
+  src/f32-spmm/gen/32x1-minmax-wasmsimd-x86-pipelined.c
+  src/f32-spmm/gen/32x1-minmax-wasmsimd-x86-x2.c
+  src/f32-spmm/gen/32x1-minmax-wasmsimd-x86-x4.c
+  src/f32-spmm/gen/32x1-minmax-wasmsimd-x86.c
+  src/f32-vbinary/gen/vadd-minmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vadd-minmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vadd-minmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vadd-minmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vadd-relu-wasmsimd-x4.c
+  src/f32-vbinary/gen/vadd-relu-wasmsimd-x8.c
+  src/f32-vbinary/gen/vadd-relu-wasmsimd-x16.c
+  src/f32-vbinary/gen/vadd-wasmsimd-x4.c
+  src/f32-vbinary/gen/vadd-wasmsimd-x8.c
+  src/f32-vbinary/gen/vadd-wasmsimd-x16.c
+  src/f32-vbinary/gen/vaddc-minmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vaddc-minmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vaddc-minmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vaddc-minmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vaddc-minmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vaddc-minmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vaddc-relu-wasmsimd-x4.c
+  src/f32-vbinary/gen/vaddc-relu-wasmsimd-x8.c
+  src/f32-vbinary/gen/vaddc-relu-wasmsimd-x16.c
+  src/f32-vbinary/gen/vaddc-wasmsimd-x4.c
+  src/f32-vbinary/gen/vaddc-wasmsimd-x8.c
+  src/f32-vbinary/gen/vaddc-wasmsimd-x16.c
+  src/f32-vbinary/gen/vdiv-minmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vdiv-minmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vdiv-minmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vdiv-minmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vdiv-minmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vdiv-minmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vdiv-relu-wasmsimd-x4.c
+  src/f32-vbinary/gen/vdiv-relu-wasmsimd-x8.c
+  src/f32-vbinary/gen/vdiv-relu-wasmsimd-x16.c
+  src/f32-vbinary/gen/vdiv-wasmsimd-x4.c
+  src/f32-vbinary/gen/vdiv-wasmsimd-x8.c
+  src/f32-vbinary/gen/vdiv-wasmsimd-x16.c
+  src/f32-vbinary/gen/vdivc-minmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vdivc-minmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vdivc-minmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vdivc-minmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vdivc-minmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vdivc-minmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vdivc-relu-wasmsimd-x4.c
+  src/f32-vbinary/gen/vdivc-relu-wasmsimd-x8.c
+  src/f32-vbinary/gen/vdivc-relu-wasmsimd-x16.c
+  src/f32-vbinary/gen/vdivc-wasmsimd-x4.c
+  src/f32-vbinary/gen/vdivc-wasmsimd-x8.c
+  src/f32-vbinary/gen/vdivc-wasmsimd-x16.c
+  src/f32-vbinary/gen/vmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vmaxc-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vmaxc-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vmaxc-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vmaxc-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vmaxc-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vmaxc-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vmin-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vmin-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vmin-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vmin-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vmin-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vmin-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vminc-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vminc-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vminc-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vminc-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vminc-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vminc-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vmul-minmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vmul-minmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vmul-minmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vmul-minmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vmul-minmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vmul-minmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vmul-relu-wasmsimd-x4.c
+  src/f32-vbinary/gen/vmul-relu-wasmsimd-x8.c
+  src/f32-vbinary/gen/vmul-relu-wasmsimd-x16.c
+  src/f32-vbinary/gen/vmul-wasmsimd-x4.c
+  src/f32-vbinary/gen/vmul-wasmsimd-x8.c
+  src/f32-vbinary/gen/vmul-wasmsimd-x16.c
+  src/f32-vbinary/gen/vmulc-minmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vmulc-minmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vmulc-minmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vmulc-minmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vmulc-minmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vmulc-minmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vmulc-relu-wasmsimd-x4.c
+  src/f32-vbinary/gen/vmulc-relu-wasmsimd-x8.c
+  src/f32-vbinary/gen/vmulc-relu-wasmsimd-x16.c
+  src/f32-vbinary/gen/vmulc-wasmsimd-x4.c
+  src/f32-vbinary/gen/vmulc-wasmsimd-x8.c
+  src/f32-vbinary/gen/vmulc-wasmsimd-x16.c
+  src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vrdivc-minmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vrdivc-relu-wasmsimd-x4.c
+  src/f32-vbinary/gen/vrdivc-relu-wasmsimd-x8.c
+  src/f32-vbinary/gen/vrdivc-relu-wasmsimd-x16.c
+  src/f32-vbinary/gen/vrdivc-wasmsimd-x4.c
+  src/f32-vbinary/gen/vrdivc-wasmsimd-x8.c
+  src/f32-vbinary/gen/vrdivc-wasmsimd-x16.c
+  src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vrsubc-minmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vrsubc-relu-wasmsimd-x4.c
+  src/f32-vbinary/gen/vrsubc-relu-wasmsimd-x8.c
+  src/f32-vbinary/gen/vrsubc-relu-wasmsimd-x16.c
+  src/f32-vbinary/gen/vrsubc-wasmsimd-x4.c
+  src/f32-vbinary/gen/vrsubc-wasmsimd-x8.c
+  src/f32-vbinary/gen/vrsubc-wasmsimd-x16.c
+  src/f32-vbinary/gen/vsqrdiff-wasmsimd-x4.c
+  src/f32-vbinary/gen/vsqrdiff-wasmsimd-x8.c
+  src/f32-vbinary/gen/vsqrdiff-wasmsimd-x16.c
+  src/f32-vbinary/gen/vsqrdiffc-wasmsimd-x4.c
+  src/f32-vbinary/gen/vsqrdiffc-wasmsimd-x8.c
+  src/f32-vbinary/gen/vsqrdiffc-wasmsimd-x16.c
+  src/f32-vbinary/gen/vsub-minmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vsub-minmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vsub-minmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vsub-minmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vsub-relu-wasmsimd-x4.c
+  src/f32-vbinary/gen/vsub-relu-wasmsimd-x8.c
+  src/f32-vbinary/gen/vsub-relu-wasmsimd-x16.c
+  src/f32-vbinary/gen/vsub-wasmsimd-x4.c
+  src/f32-vbinary/gen/vsub-wasmsimd-x8.c
+  src/f32-vbinary/gen/vsub-wasmsimd-x16.c
+  src/f32-vbinary/gen/vsubc-minmax-wasmsimd-arm-x4.c
+  src/f32-vbinary/gen/vsubc-minmax-wasmsimd-arm-x8.c
+  src/f32-vbinary/gen/vsubc-minmax-wasmsimd-arm-x16.c
+  src/f32-vbinary/gen/vsubc-minmax-wasmsimd-x86-x4.c
+  src/f32-vbinary/gen/vsubc-minmax-wasmsimd-x86-x8.c
+  src/f32-vbinary/gen/vsubc-minmax-wasmsimd-x86-x16.c
+  src/f32-vbinary/gen/vsubc-relu-wasmsimd-x4.c
+  src/f32-vbinary/gen/vsubc-relu-wasmsimd-x8.c
+  src/f32-vbinary/gen/vsubc-relu-wasmsimd-x16.c
+  src/f32-vbinary/gen/vsubc-wasmsimd-x4.c
+  src/f32-vbinary/gen/vsubc-wasmsimd-x8.c
+  src/f32-vbinary/gen/vsubc-wasmsimd-x16.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-lut16-p3-x4.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-lut16-p3-x8.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-lut16-p3-x12.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-lut16-p3-x16.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-lut16-p3-x20.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-lut16-p3-x24.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-p6-x4.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-p6-x8.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-p6-x12.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-p6-x16.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-p6-x20.c
+  src/f32-velu/gen/velu-wasmsimd-arm-rr2-p6-x24.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-lut16-p3-x4.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-lut16-p3-x8.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-lut16-p3-x12.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-lut16-p3-x16.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-lut16-p3-x20.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-lut16-p3-x24.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-p6-x4.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-p6-x8.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-p6-x12.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-p6-x16.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-p6-x20.c
+  src/f32-velu/gen/velu-wasmsimd-x86-rr2-p6-x24.c
+  src/f32-vlrelu/gen/vlrelu-wasmsimd-bitselect-x4.c
+  src/f32-vlrelu/gen/vlrelu-wasmsimd-bitselect-x8.c
+  src/f32-vlrelu/gen/vlrelu-wasmsimd-minmax-x4.c
+  src/f32-vlrelu/gen/vlrelu-wasmsimd-minmax-x8.c
+  src/f32-vmulcaddc/gen/c4-minmax-wasmsimd-arm-2x.c
+  src/f32-vmulcaddc/gen/c4-minmax-wasmsimd-x86-2x.c
+  src/f32-vmulcaddc/gen/c8-minmax-wasmsimd-arm-2x.c
+  src/f32-vmulcaddc/gen/c8-minmax-wasmsimd-x86-2x.c
+  src/f32-vrnd/gen/vrndd-wasmsimd-addsub-x4.c
+  src/f32-vrnd/gen/vrndd-wasmsimd-addsub-x8.c
+  src/f32-vrnd/gen/vrndd-wasmsimd-cvt-x4.c
+  src/f32-vrnd/gen/vrndd-wasmsimd-cvt-x8.c
+  src/f32-vrnd/gen/vrndne-wasmsimd-addsub-x4.c
+  src/f32-vrnd/gen/vrndne-wasmsimd-addsub-x8.c
+  src/f32-vrnd/gen/vrndu-wasmsimd-addsub-x4.c
+  src/f32-vrnd/gen/vrndu-wasmsimd-addsub-x8.c
+  src/f32-vrnd/gen/vrndu-wasmsimd-cvt-x4.c
+  src/f32-vrnd/gen/vrndu-wasmsimd-cvt-x8.c
+  src/f32-vrnd/gen/vrndz-wasmsimd-addsub-x4.c
+  src/f32-vrnd/gen/vrndz-wasmsimd-addsub-x8.c
+  src/f32-vrnd/gen/vrndz-wasmsimd-cvt-x4.c
+  src/f32-vrnd/gen/vrndz-wasmsimd-cvt-x8.c
+  src/f32-vsqrt/gen/wasmsimd-sqrt-x4.c
+  src/f32-vsqrt/gen/wasmsimd-sqrt-x8.c
+  src/f32-vunary/gen/vabs-wasmsimd-x4.c
+  src/f32-vunary/gen/vabs-wasmsimd-x8.c
+  src/f32-vunary/gen/vneg-wasmsimd-x4.c
+  src/f32-vunary/gen/vneg-wasmsimd-x8.c
+  src/f32-vunary/gen/vsqr-wasmsimd-x4.c
+  src/f32-vunary/gen/vsqr-wasmsimd-x8.c
+  src/math/expm1minus-wasmsimd-rr2-lut16-p3-andnot.c
+  src/math/expm1minus-wasmsimd-rr2-lut16-p3-max.c
+  src/math/expm1minus-wasmsimd-rr2-p6-andnot.c
+  src/math/expm1minus-wasmsimd-rr2-p6-max.c
+  src/math/roundd-wasmsimd-addsub.c
+  src/math/roundd-wasmsimd-cvt.c
+  src/math/roundne-wasmsimd-addsub.c
+  src/math/roundu-wasmsimd-addsub.c
+  src/math/roundu-wasmsimd-cvt.c
+  src/math/roundz-wasmsimd-addsub.c
+  src/math/roundz-wasmsimd-cvt.c
+  src/math/sigmoid-wasmsimd-rr2-lut64-p2-div.c
+  src/math/sigmoid-wasmsimd-rr2-p5-div.c
+  src/qs8-dwconv/gen/up8x9-minmax-wasmsimd-mul16.c
+  src/qs8-dwconv/gen/up16x9-minmax-wasmsimd-mul16.c
+  src/qs8-dwconv/gen/up24x9-minmax-wasmsimd-mul16.c
+  src/qs8-gavgpool/gen/7p7x-minmax-wasmsimd-c8-acc2.c
+  src/qs8-gavgpool/gen/7p7x-minmax-wasmsimd-c16-acc2.c
+  src/qs8-gavgpool/gen/7p7x-minmax-wasmsimd-c24-acc2.c
+  src/qs8-gavgpool/gen/7x-minmax-wasmsimd-c8-acc2.c
+  src/qs8-gavgpool/gen/7x-minmax-wasmsimd-c16-acc2.c
+  src/qs8-gavgpool/gen/7x-minmax-wasmsimd-c24-acc2.c
+  src/qs8-gemm/gen/1x4c8-minmax-wasmsimd-ld64.c
+  src/qs8-gemm/gen/1x4c8-minmax-wasmsimd-ld128.c
+  src/qs8-gemm/gen/1x4c8-xw-minmax-wasmsimd.c
+  src/qs8-gemm/gen/2x4c8-minmax-wasmsimd-ld64.c
+  src/qs8-gemm/gen/2x4c8-minmax-wasmsimd-ld128.c
+  src/qs8-gemm/gen/2x4c8-xw-minmax-wasmsimd.c
+  src/qs8-gemm/gen/3x4c8-minmax-wasmsimd-ld64.c
+  src/qs8-gemm/gen/3x4c8-minmax-wasmsimd-ld128.c
+  src/qs8-gemm/gen/3x4c8-xw-minmax-wasmsimd.c
+  src/qs8-igemm/gen/1x4c8-minmax-wasmsimd-ld64.c
+  src/qs8-igemm/gen/1x4c8-minmax-wasmsimd-ld128.c
+  src/qs8-igemm/gen/2x4c8-minmax-wasmsimd-ld64.c
+  src/qs8-igemm/gen/2x4c8-minmax-wasmsimd-ld128.c
+  src/qs8-igemm/gen/3x4c8-minmax-wasmsimd-ld64.c
+  src/qs8-igemm/gen/3x4c8-minmax-wasmsimd-ld128.c
+  src/qs8-requantization/fp32-wasmsimd.c
+  src/qs8-requantization/q31-wasmsimd.c
+  src/qs8-vadd/gen/minmax-wasmsimd-x8.c
+  src/qs8-vadd/gen/minmax-wasmsimd-x16.c
+  src/qs8-vadd/gen/minmax-wasmsimd-x24.c
+  src/qs8-vadd/gen/minmax-wasmsimd-x32.c
+  src/qs8-vaddc/gen/minmax-wasmsimd-x8.c
+  src/qs8-vaddc/gen/minmax-wasmsimd-x16.c
+  src/qs8-vaddc/gen/minmax-wasmsimd-x24.c
+  src/qs8-vaddc/gen/minmax-wasmsimd-x32.c
+  src/qu8-requantization/fp32-wasmsimd.c
+  src/qu8-requantization/q31-wasmsimd.c
+  src/x32-fill/wasmsimd.c
+  src/x32-packx/x4-wasmsimd.c
+  src/x32-pad/wasmsimd.c
+  src/x32-unpool/wasmsimd.c
+  src/x32-zip/x2-wasmsimd.c
+  src/x32-zip/x3-wasmsimd.c
+  src/x32-zip/x4-wasmsimd.c
+  src/x32-zip/xm-wasmsimd.c)
+
+set(XNNPACK_WASM_ASM_MICROKERNEL_SRCS
+  src/f32-relu/wasm_shr_x1.S
+  src/f32-relu/wasm_shr_x2.S
+  src/f32-relu/wasm_shr_x4.S)
+
 SET(XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SCALAR_MICROKERNEL_SRCS})
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_NEON_MICROKERNEL_SRCS})
@@ -2973,6 +3855,17 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(i[3-6]86|x86_64|AMD64)$" OR IOS_ARCH MATC
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AVX2_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AVX512F_MICROKERNEL_SRCS})
   LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_AVX512SKX_MICROKERNEL_SRCS})
+ENDIF()
+IF(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_WASM_MICROKERNEL_SRCS})
+  LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_WASM_ASM_MICROKERNEL_SRCS})
+  IF(XNNPACK_BUILD_WASM_WITH_SIMD)
+    SET_PROPERTY(SOURCE ${XNNPACK_WASM_SIMD_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -msimd128 ")
+    LIST(APPEND XNNPACK_MICROKERNEL_SRCS ${XNNPACK_WASM_SIMD_SRCS})
+  ENDIF()
+  IF(XNNPACK_BUILD_WASM_WITH_THREADS)
+    SET_PROPERTY(SOURCE ${XNNPACK_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -pthread ")
+  ENDIF()
 ENDIF()
 
 IF(XNNPACK_LIBRARY_TYPE STREQUAL "default")
@@ -3209,6 +4102,15 @@ IF(XNNPACK_BUILD_TESTS)
   ENDIF()
 
   # ---[ Build size tests
+  IF(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    SET(CMAKE_EXECUTABLE_SUFFIX ".html")
+    IF(XNNPACK_BUILD_WASM_WITH_SIMD)
+      SET_PROPERTY(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} APPEND_STRING PROPERTY LINK_FLAGS " --experimental-wasm-simd ")
+    ENDIF()
+    IF(XNNPACK_BUILD_WASM_WITH_THREADS)
+      SET_PROPERTY(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} APPEND_STRING PROPERTY LINK_FLAGS " --experimental-wasm-threads ")
+    ENDIF()
+  ENDIF()
 
   ADD_EXECUTABLE(operator-size-test test/operator-size.c)
   SET_TARGET_PROPERTIES(operator-size-test PROPERTIES
@@ -3647,14 +4549,16 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-clamp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-clamp-test f32-clamp-test)
 
-  ADD_EXECUTABLE(f32-conv-hwc-test test/f32-conv-hwc.cc)
-  SET_TARGET_PROPERTIES(f32-conv-hwc-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-conv-hwc-test f32-conv-hwc-test)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f32-conv-hwc-test test/f32-conv-hwc.cc)
+    SET_TARGET_PROPERTIES(f32-conv-hwc-test PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(f32-conv-hwc-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_TEST(f32-conv-hwc-test f32-conv-hwc-test)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-conv-hwc2chw-test test/f32-conv-hwc2chw.cc)
   SET_TARGET_PROPERTIES(f32-conv-hwc2chw-test PROPERTIES
@@ -3746,14 +4650,16 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-gemm-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-gemm-relu-test f32-gemm-relu-test)
 
-  ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-gemm-minmax-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(f32-gemm-minmax-test f32-gemm-minmax-test)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc)
+    SET_TARGET_PROPERTIES(f32-gemm-minmax-test PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_TEST(f32-gemm-minmax-test f32-gemm-minmax-test)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-gemminc-minmax-test test/f32-gemminc-minmax.cc)
   SET_TARGET_PROPERTIES(f32-gemminc-minmax-test PROPERTIES
@@ -4760,119 +5666,132 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       "${CONFU_DEPENDENCIES_BINARY_DIR}/googlebenchmark")
   ENDIF()
 
-  ADD_LIBRARY(bench-utils bench/utils.cc)
-  SET_TARGET_PROPERTIES(bench-utils PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(bench-utils PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark cpuinfo)
+  IF(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    SET(CMAKE_EXECUTABLE_SUFFIX ".html")
+    IF(XNNPACK_BUILD_WASM_WITH_SIMD)
+      SET_PROPERTY(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} APPEND_STRING PROPERTY LINK_FLAGS " --experimental-wasm-simd ")
+    ENDIF()
+    IF(XNNPACK_BUILD_WASM_WITH_THREADS)
+      SET_PROPERTY(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} APPEND_STRING PROPERTY LINK_FLAGS " --experimental-wasm-threads ")
+    ENDIF()
+  ENDIF()
 
-  # ---[ Build accuracy microbenchmarks
-  ADD_EXECUTABLE(f32-exp-ulp-eval eval/f32-exp-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-exp-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-exp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-exp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-expminus-ulp-eval eval/f32-expminus-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-expminus-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expminus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expminus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    ADD_LIBRARY(bench-utils bench/utils.cc)
+    SET_TARGET_PROPERTIES(bench-utils PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(bench-utils PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark cpuinfo)
 
-  ADD_EXECUTABLE(f32-expm1minus-ulp-eval eval/f32-expm1minus-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-expm1minus-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    # ---[ Build accuracy microbenchmarks
+    IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f32-exp-ulp-eval eval/f32-exp-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-exp-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-exp-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-exp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-extexp-ulp-eval eval/f32-extexp-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-extexp-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-extexp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    ADD_EXECUTABLE(f32-expminus-ulp-eval eval/f32-expminus-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-expminus-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-expminus-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-expminus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-sigmoid-ulp-eval eval/f32-sigmoid-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-sigmoid-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sigmoid-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    ADD_EXECUTABLE(f32-expm1minus-ulp-eval eval/f32-expm1minus-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-expm1minus-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-sqrt-ulp-eval eval/f32-sqrt-ulp.cc)
-  SET_TARGET_PROPERTIES(f32-sqrt-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-sqrt-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+    ADD_EXECUTABLE(f32-extexp-ulp-eval eval/f32-extexp-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-extexp-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-extexp-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  # ---[ Build accuracy tests
-  ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc)
-  SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-exp-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-sigmoid-ulp-eval eval/f32-sigmoid-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-sigmoid-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-sigmoid-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-expm1minus-eval eval/f32-expm1minus.cc)
-  SET_TARGET_PROPERTIES(f32-expm1minus-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-sqrt-ulp-eval eval/f32-sqrt-ulp.cc)
+    SET_TARGET_PROPERTIES(f32-sqrt-ulp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-sqrt-ulp-eval PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(f32-expminus-eval eval/f32-expminus.cc)
-  SET_TARGET_PROPERTIES(f32-expminus-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    # ---[ Build accuracy tests
+    ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc)
+    SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-exp-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-roundne-eval eval/f32-roundne.cc)
-  SET_TARGET_PROPERTIES(f32-roundne-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundne-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-roundne-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-expm1minus-eval eval/f32-expm1minus.cc)
+    SET_TARGET_PROPERTIES(f32-expm1minus-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-roundd-eval eval/f32-roundd.cc)
-  SET_TARGET_PROPERTIES(f32-roundd-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundd-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-roundd-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-expminus-eval eval/f32-expminus.cc)
+    SET_TARGET_PROPERTIES(f32-expminus-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-roundu-eval eval/f32-roundu.cc)
-  SET_TARGET_PROPERTIES(f32-roundu-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundu-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-roundu-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-roundne-eval eval/f32-roundne.cc)
+    SET_TARGET_PROPERTIES(f32-roundne-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-roundne-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-roundne-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
 
-  ADD_EXECUTABLE(f32-roundz-eval eval/f32-roundz.cc)
-  SET_TARGET_PROPERTIES(f32-roundz-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundz-eval PRIVATE src)
-  TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+    ADD_EXECUTABLE(f32-roundd-eval eval/f32-roundd.cc)
+    SET_TARGET_PROPERTIES(f32-roundd-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-roundd-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-roundd-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+
+    ADD_EXECUTABLE(f32-roundu-eval eval/f32-roundu.cc)
+    SET_TARGET_PROPERTIES(f32-roundu-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-roundu-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-roundu-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+
+    ADD_EXECUTABLE(f32-roundz-eval eval/f32-roundz.cc)
+    SET_TARGET_PROPERTIES(f32-roundz-eval PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(f32-roundz-eval PRIVATE src)
+    TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ENDIF()
 
   # ---[ Build end-to-end microbenchmarks
   ADD_LIBRARY(bench-models STATIC
@@ -4898,13 +5817,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(bench-models PRIVATE XNNPACK fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(end2end-bench bench/end2end.cc)
-  SET_TARGET_PROPERTIES(end2end-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-models bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(end2end-bench bench/end2end.cc)
+    SET_TARGET_PROPERTIES(end2end-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-models bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-dwconv-e2e-bench bench/f32-dwconv-e2e.cc)
   SET_TARGET_PROPERTIES(f32-dwconv-e2e-bench PROPERTIES
@@ -4962,22 +5883,24 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(channel-shuffle-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(channel-shuffle-bench PRIVATE XNNPACK benchmark bench-utils)
+  
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(convolution-bench bench/convolution.cc)
+    SET_TARGET_PROPERTIES(convolution-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(convolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(convolution-bench bench/convolution.cc)
-  SET_TARGET_PROPERTIES(convolution-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(convolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
-
-  ADD_EXECUTABLE(deconvolution-bench bench/deconvolution.cc)
-  SET_TARGET_PROPERTIES(deconvolution-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(deconvolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark bench-utils)
+    ADD_EXECUTABLE(deconvolution-bench bench/deconvolution.cc)
+    SET_TARGET_PROPERTIES(deconvolution-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(deconvolution-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(elu-bench bench/elu.cc)
   SET_TARGET_PROPERTIES(elu-bench PROPERTIES
@@ -4995,13 +5918,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(floor-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(floor-bench PRIVATE XNNPACK benchmark bench-utils)
 
-  ADD_EXECUTABLE(global-average-pooling-bench bench/global-average-pooling.cc)
-  SET_TARGET_PROPERTIES(global-average-pooling-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(global-average-pooling-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(global-average-pooling-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(global-average-pooling-bench bench/global-average-pooling.cc)
+    SET_TARGET_PROPERTIES(global-average-pooling-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(global-average-pooling-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(global-average-pooling-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(hardswish-bench bench/hardswish.cc)
   SET_TARGET_PROPERTIES(hardswish-bench PROPERTIES
@@ -5060,77 +5985,80 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK benchmark bench-utils)
 
   # ---[ Build microkernel-level microbenchmarks
-  ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc)
-  SET_TARGET_PROPERTIES(f16-igemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc)
+    SET_TARGET_PROPERTIES(f16-igemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f16-gemm-bench bench/f16-gemm.cc)
-  SET_TARGET_PROPERTIES(f16-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f16-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f16-gemm-bench bench/f16-gemm.cc)
+    SET_TARGET_PROPERTIES(f16-gemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f16-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f16-relu-bench bench/f16-relu.cc)
-  SET_TARGET_PROPERTIES(f16-relu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-relu-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f16-relu-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f16-relu-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f16-relu-bench bench/f16-relu.cc)
+    SET_TARGET_PROPERTIES(f16-relu-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f16-relu-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f16-relu-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f16-relu-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-conv-hwc-bench bench/f32-conv-hwc.cc)
-  SET_TARGET_PROPERTIES(f32-conv-hwc-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-conv-hwc-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-conv-hwc-bench bench/f32-conv-hwc.cc)
+    SET_TARGET_PROPERTIES(f32-conv-hwc-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-conv-hwc-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f16-dwconv-bench bench/f16-dwconv.cc)
-  SET_TARGET_PROPERTIES(f16-dwconv-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f16-dwconv-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f16-dwconv-bench bench/f16-dwconv.cc)
+    SET_TARGET_PROPERTIES(f16-dwconv-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f16-dwconv-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc)
-  SET_TARGET_PROPERTIES(f32-dwconv-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-dwconv2d-chw-bench bench/f32-dwconv2d-chw.cc)
-  SET_TARGET_PROPERTIES(f32-dwconv2d-chw-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc)
+    SET_TARGET_PROPERTIES(f32-dwconv-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-gemm-bench bench/f32-gemm.cc)
-  SET_TARGET_PROPERTIES(f32-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-dwconv2d-chw-bench bench/f32-dwconv2d-chw.cc)
+    SET_TARGET_PROPERTIES(f32-dwconv2d-chw-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+
+    ADD_EXECUTABLE(f32-gemm-bench bench/f32-gemm.cc)
+    SET_TARGET_PROPERTIES(f32-gemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-hswish-bench bench/f32-hswish.cc)
   SET_TARGET_PROPERTIES(f32-hswish-bench PROPERTIES
@@ -5141,44 +6069,47 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-hswish-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-hswish-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-igemm-bench bench/f32-igemm.cc)
-  SET_TARGET_PROPERTIES(f32-igemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-igemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f32-igemm-bench bench/f32-igemm.cc)
+    SET_TARGET_PROPERTIES(f32-igemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-igemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  
 
-  ADD_EXECUTABLE(f32-im2col-gemm-bench bench/f32-im2col-gemm.cc src/im2col.c)
-  SET_TARGET_PROPERTIES(f32-im2col-gemm-bench PROPERTIES
-    C_STANDARD 99
-    C_STANDARD_REQUIRED YES
-    C_EXTENSIONS NO
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-im2col-gemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-im2col-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-im2col-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-im2col-gemm-bench bench/f32-im2col-gemm.cc src/im2col.c)
+    SET_TARGET_PROPERTIES(f32-im2col-gemm-bench PROPERTIES
+      C_STANDARD 99
+      C_STANDARD_REQUIRED YES
+      C_EXTENSIONS NO
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-im2col-gemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-im2col-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-im2col-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-relu-bench bench/f32-relu.cc)
-  SET_TARGET_PROPERTIES(f32-relu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-relu-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-relu-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-relu-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-relu-bench bench/f32-relu.cc)
+    SET_TARGET_PROPERTIES(f32-relu-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-relu-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-relu-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-relu-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-rmax-bench bench/f32-rmax.cc)
-  SET_TARGET_PROPERTIES(f32-rmax-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-rmax-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(f32-rmax-bench bench/f32-rmax.cc)
+    SET_TARGET_PROPERTIES(f32-rmax-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-rmax-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-sigmoid-bench bench/f32-sigmoid.cc)
   SET_TARGET_PROPERTIES(f32-sigmoid-bench PROPERTIES
@@ -5189,14 +6120,16 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-sigmoid-bench PRIVATE XNNPACK benchmark bench-utils)
 
-  ADD_EXECUTABLE(f32-spmm-bench bench/f32-spmm.cc)
-  SET_TARGET_PROPERTIES(f32-spmm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(f32-spmm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(f32-spmm-bench bench/f32-spmm.cc)
+    SET_TARGET_PROPERTIES(f32-spmm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(f32-spmm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  ENDIF()
 
   ADD_EXECUTABLE(f32-softmax-bench bench/f32-softmax.cc)
   SET_TARGET_PROPERTIES(f32-softmax-bench PROPERTIES
@@ -5225,48 +6158,51 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
   TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(qs8-gemm-bench bench/qs8-gemm.cc)
-  SET_TARGET_PROPERTIES(qs8-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    ADD_EXECUTABLE(qs8-gemm-bench bench/qs8-gemm.cc)
+    SET_TARGET_PROPERTIES(qs8-gemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(qs8-requantization-bench bench/qs8-requantization.cc)
-  SET_TARGET_PROPERTIES(qs8-requantization-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(qs8-requantization-bench bench/qs8-requantization.cc)
+    SET_TARGET_PROPERTIES(qs8-requantization-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(qu8-gemm-bench bench/qu8-gemm.cc)
-  SET_TARGET_PROPERTIES(qu8-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(qu8-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(qu8-gemm-bench bench/qu8-gemm.cc)
+    SET_TARGET_PROPERTIES(qu8-gemm-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(qu8-gemm-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(qu8-requantization-bench bench/qu8-requantization.cc)
-  SET_TARGET_PROPERTIES(qu8-requantization-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(qu8-requantization-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+    ADD_EXECUTABLE(qu8-requantization-bench bench/qu8-requantization.cc)
+    SET_TARGET_PROPERTIES(qu8-requantization-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(qu8-requantization-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
 
-  ADD_EXECUTABLE(rounding-bench bench/rounding.cc)
-  SET_TARGET_PROPERTIES(rounding-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE src)
-  TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-  TARGET_LINK_LIBRARIES(rounding-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+
+    ADD_EXECUTABLE(rounding-bench bench/rounding.cc)
+    SET_TARGET_PROPERTIES(rounding-bench PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE src)
+    TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    TARGET_LINK_LIBRARIES(rounding-bench PRIVATE XNNPACK cpuinfo fp16 benchmark bench-utils)
+  ENDIF()
 ENDIF()
