@@ -944,14 +944,6 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-gavgpool/gen/7x-minmax-neon-c16-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-neon-c24-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-neon-c32-acc2.c
-  src/qs8-gemm/gen/6x8-minmax-neon-mlal-lane-prfm.c
-  src/qs8-gemm/gen/6x16-minmax-neon-mlal-lane-prfm.c
-  src/qs8-gemm/gen/6x8-minmax-neon-mlal-lane.c
-  src/qs8-gemm/gen/6x16-minmax-neon-mlal-lane.c
-  src/qs8-igemm/gen/6x8-minmax-neon-mlal-lane-prfm.c
-  src/qs8-igemm/gen/6x16-minmax-neon-mlal-lane-prfm.c
-  src/qs8-igemm/gen/6x8-minmax-neon-mlal-lane.c
-  src/qs8-igemm/gen/6x16-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/1x8-minmax-neon-mlal-lane-prfm.c
   src/qs8-gemm/gen/1x8-minmax-neon-mlal-lane.c
   src/qs8-gemm/gen/1x8-minmax-neon-mull-addw-dup.c
@@ -1016,6 +1008,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-gemm/gen/4x16c8-minmax-neon-mlal-padal.c
   src/qs8-gemm/gen/4x16c8-minmax-neon-mull-padal.c
   src/qs8-gemm/gen/4x16c16-minmax-neon-mlal-padal.c
+  src/qs8-gemm/gen/6x8-minmax-neon-mlal-lane-prfm.c
+  src/qs8-gemm/gen/6x8-minmax-neon-mlal-lane.c
+  src/qs8-gemm/gen/6x16-minmax-neon-mlal-lane-prfm.c
+  src/qs8-gemm/gen/6x16-minmax-neon-mlal-lane.c
   src/qs8-igemm/gen/1x8-minmax-neon-mlal-lane-prfm.c
   src/qs8-igemm/gen/1x8-minmax-neon-mlal-lane.c
   src/qs8-igemm/gen/1x8-minmax-neon-mull-addw-dup.c
@@ -1080,6 +1076,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/4x16c8-minmax-neon-mlal-padal.c
   src/qs8-igemm/gen/4x16c8-minmax-neon-mull-padal.c
   src/qs8-igemm/gen/4x16c16-minmax-neon-mlal-padal.c
+  src/qs8-igemm/gen/6x8-minmax-neon-mlal-lane-prfm.c
+  src/qs8-igemm/gen/6x8-minmax-neon-mlal-lane.c
+  src/qs8-igemm/gen/6x16-minmax-neon-mlal-lane-prfm.c
+  src/qs8-igemm/gen/6x16-minmax-neon-mlal-lane.c
   src/qs8-requantization/fp32-neon.c
   src/qs8-requantization/precise-neon.c
   src/qs8-requantization/q31-neon.c
@@ -2926,20 +2926,22 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S
   src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S
   src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S
-  src/qs8-gemm/gen/1x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
   src/qs8-gemm/gen/1x8c8-aarch64-neon-mlal-padal-cortex-a53.S
+  src/qs8-gemm/gen/1x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
+  src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S
+  src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
   src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
   src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal.S
-  src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
-  src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S
   src/qs8-igemm/1x8c8-aarch64-neon-mlal-padal.S
   src/qs8-igemm/2x8c16-aarch64-neon-mlal-padal.S
   src/qs8-igemm/4x16c4-aarch64-neondot-cortex-a55.S
   src/qs8-igemm/4x16c4-aarch64-neondot-ld64.S
-  src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
-  src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal.S
+  src/qs8-igemm/gen/1x8c8-aarch64-neon-mlal-padal-cortex-a53.S
+  src/qs8-igemm/gen/1x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
+  src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S
   src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
-  src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S)
+  src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
+  src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal.S)
 
 SET(XNNPACK_MICROKERNEL_SRCS ${XNNPACK_SCALAR_MICROKERNEL_SRCS})
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")

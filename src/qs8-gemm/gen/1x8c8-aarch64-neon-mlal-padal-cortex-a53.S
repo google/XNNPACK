@@ -17,7 +17,7 @@
 #     size_t a_stride,           (x4)
 #     const void* restrict w,    x5
 #     int8_t* restrict c,        x6
-#     size_t cm_stride,          x7
+#     size_t cm_stride,          (x7)
 #     size_t cn_stride,          [sp] -> x10
 #     const union xnn_qs8_gemm_params params)  [sp + 8] -> x9
 
@@ -38,8 +38,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         # Clamp A and C pointers
         STP     d8, d9, [sp, -64]!
         STP     d10, d11, [sp, 16]
-        STP     d12, d13, [sp, 32]
         ADD     x2, x2, 7             // kc = (kc + 7) & ~7
+        STP     d12, d13, [sp, 32]
         STP     d14, d15, [sp, 48]
         BIC     x2, x2, 7
 
@@ -58,7 +58,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         LDP     d4, d5, [x5]          // Read B
         LDR     x17, [x5, 64]         // Read B
         LDP     d0, d6, [x3], 16      // Read A0
-        LDR     x16, [x5, 16]
+        LDR     x16, [x5, 16]         // Read B
 
         # Is there at least 16 bytes for main loop?
         SUBS    x0, x0, 16            // k = k - 16
@@ -224,7 +224,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         LD1R    {v1.16b}, [x9], 1
         LD1R    {v2.16b}, [x9]
         SMAX    v0.8b, v0.8b, v1.8b
-        SUB     x9, x9, 11
+        SUB     x9, x9, 11       // rewind params pointer
         SMIN    v0.8b, v0.8b, v2.8b
         B.LO    5f
 
