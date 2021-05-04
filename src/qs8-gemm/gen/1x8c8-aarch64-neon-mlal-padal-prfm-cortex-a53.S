@@ -56,7 +56,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_c
 
         # Prologue: load A0 and 2 B's
         LDP     d4, d5, [x5]          // Read B
-        LDR     x17, [x5, 64]         // Read B
+        LDP     d8, d9, [x5, 64]      // Read B
         LDP     d0, d6, [x3], 16      // Read A0
         LDR     x16, [x5, 16]         // Read B
 
@@ -68,12 +68,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_c
          # 4 groups of 2 mul/mla/adap + 2 load = 10 cycles.
          # 1 load for A0 = + cycles.  Total 10 * 4 + 1 = 41 cycles.
 
-         # TODO: move load after mla.
         .p2align 3
 1:
         // Group 0 - 10 cycles - includes prfm
-        LDR     d9, [x5, 72]          // Read B
-        INS     v8.d[0], x17
         SMULL    v2.8h, v4.8b, v0.8b
         LDR     x17, [x5, 80]
         SMULL   v10.8h, v5.8b, v0.8b
@@ -82,14 +79,14 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_c
         SMLAL    v2.8h, v8.8b, v6.8b
         LDR     x16, [x5, 32]
         SMLAL   v10.8h, v9.8b, v6.8b
-        PRFM PLDL1KEEP, [x5, 448]
-        SADALP  v16.4s,  v2.8h
-        PRFM PLDL1KEEP, [x5, 512]
-        SADALP  v18.4s, v10.8h
-
-        // Group 1- 10 cycles
         LDR     d9, [x5, 88]
         INS     v8.d[0], x17
+        SADALP  v16.4s,  v2.8h
+        PRFM PLDL1KEEP, [x5, 448]
+        SADALP  v18.4s, v10.8h
+        PRFM PLDL1KEEP, [x5, 512]
+
+        // Group 1- 10 cycles
         SMULL   v12.8h, v4.8b, v0.8b
         LDR     x17, [x5, 96]
         SMULL   v14.8h, v5.8b, v0.8b
@@ -98,12 +95,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_c
         SMLAL   v12.8h, v8.8b, v6.8b
         LDR     x16, [x5, 48]
         SMLAL   v14.8h, v9.8b, v6.8b
+        LDR     d9, [x5, 104]
+        INS     v8.d[0], x17
         SADALP  v20.4s, v12.8h
         SADALP  v22.4s, v14.8h
 
         // Group 2 - 10 cycles
-        LDR     d9, [x5, 104]
-        INS     v8.d[0], x17
         SMULL    v2.8h, v4.8b, v0.8b
         LDR     x17, [x5, 112]
         SMULL   v10.8h, v5.8b, v0.8b
@@ -112,14 +109,14 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_c
         SMLAL    v2.8h, v8.8b, v6.8b
         LDR     x16, [x5, 128]
         SMLAL   v10.8h, v9.8b, v6.8b
+        LDR     d9, [x5, 120]
+        INS     v8.d[0], x17
         SADALP  v24.4s,  v2.8h
         LDR     x7, [x3], 8          // Read A0
         SADALP  v26.4s, v10.8h
         SUBS    x0, x0, 16
 
         // Group 3 - includes 1 cycle to read A0 = 11 cycles
-        LDR     d9, [x5, 120]
-        INS     v8.d[0], x17
         SMULL   v12.8h, v4.8b, v0.8b
         LDR     x17, [x5, 192]        // Read B
         SMULL   v14.8h, v5.8b, v0.8b
@@ -130,6 +127,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_c
         SMLAL   v14.8h, v9.8b, v6.8b
         LDR     d6, [x3], 8           // Read A0
         INS     v0.d[0], x7
+        LDR     d9, [x5, 200]         // Read B
+        INS     v8.d[0], x17
         SADALP  v28.4s, v12.8h
         ADD     x5, x5, 128
         SADALP  v30.4s, v14.8h
@@ -140,9 +139,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_c
 
         .p2align 3
 2:
-        // Group 0 - 10 cycles - includes prfm
-        LDR     d9, [x5, 72]          // Read B
-        INS     v8.d[0], x17
+        // Group 0 - 10 cycles
         SMULL    v2.8h, v4.8b, v0.8b
         LDR     x17, [x5, 80]
         SMULL   v10.8h, v5.8b, v0.8b
@@ -151,12 +148,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_c
         SMLAL    v2.8h, v8.8b, v6.8b
         LDR     x16, [x5, 32]
         SMLAL   v10.8h, v9.8b, v6.8b
+        LDR     d9, [x5, 88]
+        INS     v8.d[0], x17
         SADALP  v16.4s,  v2.8h
         SADALP  v18.4s, v10.8h
 
         // Group 1- 10 cycles
-        LDR     d9, [x5, 88]
-        INS     v8.d[0], x17
         SMULL   v12.8h, v4.8b, v0.8b
         LDR     x17, [x5, 96]
         SMULL   v14.8h, v5.8b, v0.8b
@@ -165,12 +162,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_c
         SMLAL   v12.8h, v8.8b, v6.8b
         LDR     x16, [x5, 48]
         SMLAL   v14.8h, v9.8b, v6.8b
+        LDR     d9, [x5, 104]
+        INS     v8.d[0], x17
         SADALP  v20.4s, v12.8h
         SADALP  v22.4s, v14.8h
 
         // Group 2 - 10 cycles
-        LDR     d9, [x5, 104]
-        INS     v8.d[0], x17
         SMULL    v2.8h, v4.8b, v0.8b
         LDR     x17, [x5, 112]
         SMULL   v10.8h, v5.8b, v0.8b
@@ -178,18 +175,18 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_c
         INS     v4.d[0], x16
         SMLAL    v2.8h, v8.8b, v6.8b
         SMLAL   v10.8h, v9.8b, v6.8b
-        SADALP  v24.4s,  v2.8h
-        SADALP  v26.4s, v10.8h
-
-        // Group 3 - 9 cycles
         LDR     d9, [x5, 120]
         INS     v8.d[0], x17
+        SADALP  v24.4s,  v2.8h
+        SADALP  v26.4s, v10.8h
+        ADD     x5, x5, 128
+
+        // Group 3 - 8 cycles
         SMULL   v12.8h, v4.8b, v0.8b
         SMULL   v14.8h, v5.8b, v0.8b
         SMLAL   v12.8h, v8.8b, v6.8b
         SMLAL   v14.8h, v9.8b, v6.8b
         SADALP  v28.4s, v12.8h
-        ADD     x5, x5, 128
         SADALP  v30.4s, v14.8h
 
         # Is there a remainder?- 8 bytes of A
