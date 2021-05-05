@@ -124,8 +124,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal_prfm_c
         LDR     x16, [x5, 48]
         SMLAL   v14.8h, v9.8b, v6.8b
         SMLAL   v15.8h, v9.8b, v7.8b
+        PRFM PLDL1KEEP, [x3, 128]
         SADALP  v20.4s, v12.8h
         SADALP  v21.4s, v13.8h
+        PRFM PLDL1KEEP, [x4, 128]
         SADALP  v22.4s, v14.8h
         SADALP  v23.4s, v15.8h
 

@@ -54,7 +54,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         # Is there at least 16 bytes for epilogue?
         B.LO    4f
 
-        # Prologue: load A0 and 2 B's
+        # Prologue: load A0 and 4 B's
         LDP     d4, d5, [x5]          // Read B
         LDP     d8, d9, [x5, 64]      // Read B
         LDP     d0, d6, [x3], 16      // Read A0
@@ -66,7 +66,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
 
          # Main loop - 16 bytes of A
          # 4 groups of 2 mul/mla/adap + 2 load = 10 cycles.
-         # 1 load for A0 = + cycles.  Total 10 * 4 + 1 = 41 cycles.
+         # 1 load for A0 = +1 cycle.  Total 10 * 4 + 1 = 41 cycles.
 
         .p2align 3
 1:

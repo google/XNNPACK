@@ -96,6 +96,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal${"_prf
         LDR     d9, [x5, 104]
         INS     v8.d[0], x17
         SADALP  v20.4s, v12.8h
+        $if PREFETCH:
+          PRFM PLDL1KEEP, [x3, 128]
         SADALP  v22.4s, v14.8h
 
         // Group 2 - 10 cycles
