@@ -11,8 +11,8 @@
 #if defined(__SSE2__)
 #include <emmintrin.h>
 
-// GCC any, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-16
-#if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)) || \
+// GCC pre-11, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-16
+#if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && __GNUC__ < 11) || \
     (defined(__clang__) && !defined(__apple_build_version__) && (__clang_major__ < 8)) || \
     (defined(__clang__) && defined(__ANDROID__) && (__clang_major__ == 8) && (__clang_minor__ == 0) && (__clang_patchlevel__ < 7)) || \
     (defined(__clang__) && defined(__apple_build_version__) && (__apple_build_version__ < 11000000)) || \
@@ -27,7 +27,7 @@ static XNN_INTRINSIC
 void _mm_storeu_si32(const void* address, __m128i v) {
   *((int*) address) = _mm_cvtsi128_si32(v);
 }
-#endif  // GCC any, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-16
+#endif  // GCC pre-11, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-16
 #endif  // SSE2
 
 #ifdef __AVX512F__
