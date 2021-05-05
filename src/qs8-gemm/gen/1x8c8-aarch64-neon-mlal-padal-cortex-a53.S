@@ -21,13 +21,13 @@
 #     size_t cn_stride,          [sp] -> x10
 #     const union xnn_qs8_gemm_params params)  [sp + 8] -> x9
 
-# d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
+# d2-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
 # A0  x3  v0  v6
-# B   x5  v4  v5  v8  v9
+# B   x5  v4  v5  v2  v3
 # C0  x6 v16 v18 v20 v22 v24 v26 v28 v30
-# temp0   v2 v10 v12 v14
+# temp0  v17 v19 v21 v23
 # x16, x17, x7 tenporary a53 gpr load data
 
 
@@ -35,12 +35,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
 
         LDP     x10, x9, [sp]         // cn_stride, params
 
-        # Clamp A and C pointers
-        STP     d8, d9, [sp, -64]!
-        STP     d10, d11, [sp, 16]
         ADD     x2, x2, 7             // kc = (kc + 7) & ~7
-        STP     d12, d13, [sp, 32]
-        STP     d14, d15, [sp, 48]
         BIC     x2, x2, 7
 
         .p2align 3
@@ -55,81 +50,81 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         B.LO    4f
 
         # Prologue: load A0 and 4 B's
-        LDP     d4, d5, [x5]          // Read B
-        LDP     d8, d9, [x5, 64]      // Read B
         LDP     d0, d6, [x3], 16      // Read A0
+        LDP     d4, d5, [x5]          // Read B
+        LDP     d2, d3, [x5, 64]      // Read B
         LDR     x16, [x5, 16]         // Read B
 
         # Is there at least 16 bytes for main loop?
         SUBS    x0, x0, 16            // k = k - 16
         B.LO    2f
 
-         # Main loop - 16 bytes of A
-         # 4 groups of 2 mul/mla/adap + 2 load = 10 cycles.
-         # 1 load for A0 = +1 cycle.  Total 10 * 4 + 1 = 41 cycles.
+        # Main loop - 16 bytes of A
+        # 4 groups of 2 mul/mla/adap + 2 load = 10 cycles.
+        # 1 load for A0 = +1 cycle.  Total 41 cycles.
 
         .p2align 3
 1:
-        // Group 0 - 10 cycles - includes prfm
-        SMULL    v2.8h, v4.8b, v0.8b
+        // Group 0 - 6 cycles
+        SMULL   v17.8h, v4.8b, v0.8b
         LDR     x17, [x5, 80]
-        SMULL   v10.8h, v5.8b, v0.8b
+        SMULL   v19.8h, v5.8b, v0.8b
         LDR     d5, [x5, 24]
         INS     v4.d[0], x16
-        SMLAL    v2.8h, v8.8b, v6.8b
+        SMLAL   v17.8h, v2.8b, v6.8b
         LDR     x16, [x5, 32]
-        SMLAL   v10.8h, v9.8b, v6.8b
-        LDR     d9, [x5, 88]
-        INS     v8.d[0], x17
-        SADALP  v16.4s,  v2.8h
-        SADALP  v18.4s, v10.8h
+        SMLAL   v19.8h, v3.8b, v6.8b
+        LDR     d3, [x5, 88]
+        INS     v2.d[0], x17
 
-        // Group 1- 10 cycles
-        SMULL   v12.8h, v4.8b, v0.8b
+        // Group 1 - 10 cycles
+        SMULL   v21.8h, v4.8b, v0.8b
         LDR     x17, [x5, 96]
-        SMULL   v14.8h, v5.8b, v0.8b
+        SMULL   v23.8h, v5.8b, v0.8b
+        SADALP  v16.4s, v17.8h
+        SADALP  v18.4s, v19.8h
         LDR     d5, [x5, 40]
         INS     v4.d[0], x16
-        SMLAL   v12.8h, v8.8b, v6.8b
+        SMLAL   v21.8h, v2.8b, v6.8b
         LDR     x16, [x5, 48]
-        SMLAL   v14.8h, v9.8b, v6.8b
-        LDR     d9, [x5, 104]
-        INS     v8.d[0], x17
-        SADALP  v20.4s, v12.8h
-        SADALP  v22.4s, v14.8h
+        SMLAL   v23.8h, v3.8b, v6.8b
+        LDR     d3, [x5, 104]
+        INS     v2.d[0], x17
 
         // Group 2 - 10 cycles
-        SMULL    v2.8h, v4.8b, v0.8b
+        SMULL   v17.8h, v4.8b, v0.8b
         LDR     x17, [x5, 112]
-        SMULL   v10.8h, v5.8b, v0.8b
+        SMULL   v19.8h, v5.8b, v0.8b
+        SADALP  v20.4s, v21.8h
+        SADALP  v22.4s, v23.8h
         LDR     d5, [x5, 56]
         INS     v4.d[0], x16
-        SMLAL    v2.8h, v8.8b, v6.8b
+        SMLAL   v17.8h, v2.8b, v6.8b
         LDR     x16, [x5, 128]
-        SMLAL   v10.8h, v9.8b, v6.8b
-        LDR     d9, [x5, 120]
-        INS     v8.d[0], x17
-        SADALP  v24.4s,  v2.8h
-        LDR     x7, [x3], 8          // Read A0
-        SADALP  v26.4s, v10.8h
-        SUBS    x0, x0, 16
+        SMLAL   v19.8h, v3.8b, v6.8b
+        LDR     d3, [x5, 120]
+        INS     v2.d[0], x17
 
-        // Group 3 - includes 1 cycle to read A0 = 11 cycles
-        SMULL   v12.8h, v4.8b, v0.8b
+        // Group 3 - 15 cycles
+        SMULL   v21.8h, v4.8b, v0.8b
+        LDR     x7, [x3], 8           // Read A0
+        SMULL   v23.8h, v5.8b, v0.8b
         LDR     x17, [x5, 192]        // Read B
-        SMULL   v14.8h, v5.8b, v0.8b
+        SADALP  v24.4s, v17.8h
+        SUBS    x0, x0, 16
+        SADALP  v26.4s, v19.8h
         LDR     d5, [x5, 136]         // Read B
         INS     v4.d[0], x16
-        SMLAL   v12.8h, v8.8b, v6.8b
+        SMLAL   v21.8h, v2.8b, v6.8b
         LDR     x16, [x5, 144]
-        SMLAL   v14.8h, v9.8b, v6.8b
+        SMLAL   v23.8h, v3.8b, v6.8b
         LDR     d6, [x3], 8           // Read A0
         INS     v0.d[0], x7
-        LDR     d9, [x5, 200]         // Read B
-        INS     v8.d[0], x17
-        SADALP  v28.4s, v12.8h
+        LDR     d3, [x5, 200]         // Read B
+        INS     v2.d[0], x17
+        SADALP  v28.4s, v21.8h
         ADD     x5, x5, 128
-        SADALP  v30.4s, v14.8h
+        SADALP  v30.4s, v23.8h
         B.HS    1b
 
         # Epilogue
@@ -137,55 +132,55 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
 
         .p2align 3
 2:
-        // Group 0 - 10 cycles
-        SMULL    v2.8h, v4.8b, v0.8b
+        // Group 0 - 6 cycles
+        SMULL   v17.8h, v4.8b, v0.8b
         LDR     x17, [x5, 80]
-        SMULL   v10.8h, v5.8b, v0.8b
+        SMULL   v19.8h, v5.8b, v0.8b
         LDR     d5, [x5, 24]
         INS     v4.d[0], x16
-        SMLAL    v2.8h, v8.8b, v6.8b
+        SMLAL   v17.8h, v2.8b, v6.8b
         LDR     x16, [x5, 32]
-        SMLAL   v10.8h, v9.8b, v6.8b
-        LDR     d9, [x5, 88]
-        INS     v8.d[0], x17
-        SADALP  v16.4s,  v2.8h
-        SADALP  v18.4s, v10.8h
+        SMLAL   v19.8h, v3.8b, v6.8b
+        LDR     d3, [x5, 88]
+        INS     v2.d[0], x17
 
-        // Group 1- 10 cycles
-        SMULL   v12.8h, v4.8b, v0.8b
+        // Group 1 - 10 cycles
+        SMULL   v21.8h, v4.8b, v0.8b
         LDR     x17, [x5, 96]
-        SMULL   v14.8h, v5.8b, v0.8b
+        SMULL   v23.8h, v5.8b, v0.8b
+        SADALP  v16.4s, v17.8h
+        SADALP  v18.4s, v19.8h
         LDR     d5, [x5, 40]
         INS     v4.d[0], x16
-        SMLAL   v12.8h, v8.8b, v6.8b
+        SMLAL   v21.8h, v2.8b, v6.8b
         LDR     x16, [x5, 48]
-        SMLAL   v14.8h, v9.8b, v6.8b
-        LDR     d9, [x5, 104]
-        INS     v8.d[0], x17
-        SADALP  v20.4s, v12.8h
-        SADALP  v22.4s, v14.8h
+        SMLAL   v23.8h, v3.8b, v6.8b
+        LDR     d3, [x5, 104]
+        INS     v2.d[0], x17
 
         // Group 2 - 10 cycles
-        SMULL    v2.8h, v4.8b, v0.8b
+        SMULL   v17.8h, v4.8b, v0.8b
         LDR     x17, [x5, 112]
-        SMULL   v10.8h, v5.8b, v0.8b
+        SMULL   v19.8h, v5.8b, v0.8b
+        SADALP  v20.4s, v21.8h
+        SADALP  v22.4s, v23.8h
         LDR     d5, [x5, 56]
         INS     v4.d[0], x16
-        SMLAL    v2.8h, v8.8b, v6.8b
-        SMLAL   v10.8h, v9.8b, v6.8b
-        LDR     d9, [x5, 120]
-        INS     v8.d[0], x17
-        SADALP  v24.4s,  v2.8h
-        SADALP  v26.4s, v10.8h
-        ADD     x5, x5, 128
+        SMLAL   v17.8h, v2.8b, v6.8b
+        SMLAL   v19.8h, v3.8b, v6.8b
+        LDR     d3, [x5, 120]
+        INS     v2.d[0], x17
 
-        // Group 3 - 8 cycles
-        SMULL   v12.8h, v4.8b, v0.8b
-        SMULL   v14.8h, v5.8b, v0.8b
-        SMLAL   v12.8h, v8.8b, v6.8b
-        SMLAL   v14.8h, v9.8b, v6.8b
-        SADALP  v28.4s, v12.8h
-        SADALP  v30.4s, v14.8h
+        // Group 3 - 12 cycles
+        SMULL   v21.8h, v4.8b, v0.8b
+        SMULL   v23.8h, v5.8b, v0.8b
+        SADALP  v24.4s, v17.8h
+        SADALP  v26.4s, v19.8h
+        SMLAL   v21.8h, v2.8b, v6.8b
+        SMLAL   v23.8h, v3.8b, v6.8b
+        SADALP  v28.4s, v21.8h
+        ADD     x5, x5, 128
+        SADALP  v30.4s, v23.8h
 
         # Is there a remainder?- 8 bytes of A
         TBNZ    x0, 3, 4f
@@ -209,7 +204,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         LD1R    {v5.8h}, [x9], 2
         BIC      v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
-        SSRA    v0.4s,  v6.4s, 31
+        SSRA    v0.4s, v6.4s, 31
         SSRA    v1.4s, v16.4s, 31
         SRSHL   v0.4s, v0.4s, v7.4s
         SRSHL   v1.4s, v1.4s, v7.4s
@@ -219,50 +214,43 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         SQADD   v0.8h, v0.8h, v5.8h
         SQXTN   v0.8b, v0.8h
         LD1R    {v1.16b}, [x9], 1
-        LD1R    {v2.16b}, [x9]
+        LD1R    {v17.16b}, [x9]
         SMAX    v0.8b, v0.8b, v1.8b
         SUB     x9, x9, 11       // rewind params pointer
-        SMIN    v0.8b, v0.8b, v2.8b
+        SMIN    v0.8b, v0.8b, v17.8b
         B.LO    5f
 
         # Store full 1 x 8
         ST1     {v0.8b}, [x6], x10
         SUB     x3, x3, x2     // a0 -= kc
         B.HI    0b
-
-        # Restore d8-d15 from stack
-        LDP     d14, d15, [sp, 48]
-        LDP     d12, d13, [sp, 32]
-        LDP     d10, d11, [sp, 16]
-        LDP     d8, d9, [sp], 64
         RET
 
         # Remainder - 8 bytes of A
-        # todo: consider using prologue for loads
         .p2align 3
 4:
         LDR     d0, [x3], 8
         LDP     d4, d5, [x5]
         LDP     d6, d7, [x5, 16]
-        SMULL    v2.8h, v4.8b, v0.8b
-        SMULL   v10.8h, v5.8b, v0.8b
-        SMULL   v12.8h, v6.8b, v0.8b
-        SADALP  v16.4s,  v2.8h
-        SMULL   v14.8h, v7.8b, v0.8b
-        SADALP  v18.4s, v10.8h
+        SMULL   v17.8h, v4.8b, v0.8b
+        SMULL   v19.8h, v5.8b, v0.8b
+        SMULL   v21.8h, v6.8b, v0.8b
+        SMULL   v23.8h, v7.8b, v0.8b
         LDP     d4, d5, [x5, 32]
-        SMULL    v2.8h, v4.8b, v0.8b
-        SADALP  v20.4s, v12.8h
-        SMULL   v10.8h, v5.8b, v0.8b
-        SADALP  v22.4s, v14.8h
         LDP     d6, d7, [x5, 48]
-        SMULL   v12.8h, v6.8b, v0.8b
-        SADALP  v24.4s,  v2.8h
-        SMULL   v14.8h, v7.8b, v0.8b
-        SADALP  v26.4s, v10.8h
+        SADALP  v16.4s, v17.8h
+        SADALP  v18.4s, v19.8h
+        SADALP  v20.4s, v21.8h
+        SADALP  v22.4s, v23.8h
+        SMULL   v17.8h, v4.8b, v0.8b
+        SMULL   v19.8h, v5.8b, v0.8b
+        SMULL   v21.8h, v6.8b, v0.8b
+        SMULL   v23.8h, v7.8b, v0.8b
         ADD     x5, x5, 64
-        SADALP  v28.4s, v12.8h
-        SADALP  v30.4s, v14.8h
+        SADALP  v24.4s, v17.8h
+        SADALP  v26.4s, v19.8h
+        SADALP  v28.4s, v21.8h
+        SADALP  v30.4s, v23.8h
         B       3b
 
         # Store odd width
@@ -280,11 +268,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         TBZ     x1, 0, 8f
         ST1     {v0.b}[0], [x6]
 8:
-        # Restore d8-d15 from stack
-        LDP     d14, d15, [sp, 48]
-        LDP     d12, d13, [sp, 32]
-        LDP     d10, d11, [sp, 16]
-        LDP     d8, d9, [sp], 64
         RET
 
 END_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53
