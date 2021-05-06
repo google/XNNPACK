@@ -1451,8 +1451,6 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/math/sigmoid-neonfma-rr2-p5-div.c)
 
 SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
-  src/f16-clamp/gen/neonfp16arith-x8.c
-  src/f16-clamp/gen/neonfp16arith-x16.c
   src/f16-dwconv/gen/up8x4-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up8x4-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up8x9-minmax-neonfp16arith-acc2.c
@@ -1529,6 +1527,8 @@ SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/vsub-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x16.c
+  src/f16-vclamp/gen/neonfp16arith-x8.c
+  src/f16-vclamp/gen/neonfp16arith-x16.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x8.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c
