@@ -1,0 +1,60 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <xnnpack/vunary.h>
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+
+
+void xnn_f32_vrelu_ukernel__wasm_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
+
+  const float vzero = 0.0f;
+
+  $if BATCH_TILE > 1:
+    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(BATCH_TILE):
+        float vacc${ABC[N]} = x[${N}];
+      x += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        vacc${ABC[N]} = __builtin_wasm_max_f32(vacc${ABC[N]}, vzero);
+
+      $for N in range(BATCH_TILE):
+        y[${N}] = vacc${ABC[N]};
+      y += ${BATCH_TILE};
+    }
+    if XNN_UNLIKELY(n != 0) {
+      $if BATCH_TILE > 2:
+        do {
+          float vacc = *x++;
+          vacc = __builtin_wasm_max_f32(vacc, vzero);
+          *y++ = vacc;
+          n -= sizeof(float);
+        } while (n != 0);
+      $else:
+        float vacc = *x;
+        vacc = __builtin_wasm_max_f32(vacc, vzero);
+        *y = vacc;
+    }
+  $else:
+    for (; n >= sizeof(float); n -= sizeof(float)) {
+      float vacc = *x++;
+      vacc = __builtin_wasm_max_f32(vacc, vzero);
+      *y++ = vacc;
+    }
+}

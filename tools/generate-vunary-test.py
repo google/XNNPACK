@@ -27,22 +27,22 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_(relu|sigmoid|vabs|velu|vlrelu|vneg|vsqr|vrndne|vrndz|vrndd|vrndu|vsqrt)_(fact_)?ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_v(relu|sigmoid|abs|elu|lrelu|neg|sqr|rndne|rndz|rndd|rndu|sqrt)_(fact_)?ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
     "relu": "ReLU",
-    "vabs": "Abs",
-    "velu": "ELU",
-    "vlrelu": "LeakyReLU",
-    "vneg": "Negate",
+    "abs": "Abs",
+    "elu": "ELU",
+    "lrelu": "LeakyReLU",
+    "neg": "Negate",
     "sigmoid": "Sigmoid",
-    "vrndne": "RoundToNearestEven",
-    "vrndz": "RoundTowardsZero",
-    "vrndu": "RoundUp",
-    "vrndd": "RoundDown",
-    "vsqr": "Square",
-    "vsqrt": "SquareRoot",
+    "rndne": "RoundToNearestEven",
+    "rndz": "RoundTowardsZero",
+    "rndu": "RoundUp",
+    "rndd": "RoundDown",
+    "sqr": "Square",
+    "sqrt": "SquareRoot",
   }[match.group(2)]
   batch_tile = int(match.group(5))
 
