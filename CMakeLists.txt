@@ -572,15 +572,15 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndz-scalar-libm-x1.c
   src/f32-vrnd/gen/vrndz-scalar-libm-x2.c
   src/f32-vrnd/gen/vrndz-scalar-libm-x4.c
-  src/f32-vsigmoid/gen/scalar-lut64-p2-div-x1.c
-  src/f32-vsigmoid/gen/scalar-lut64-p2-div-x2.c
-  src/f32-vsigmoid/gen/scalar-lut64-p2-div-x4.c
-  src/f32-vsigmoid/gen/scalar-lut2048-p1-div-x1.c
-  src/f32-vsigmoid/gen/scalar-lut2048-p1-div-x2.c
-  src/f32-vsigmoid/gen/scalar-lut2048-p1-div-x4.c
-  src/f32-vsigmoid/gen/scalar-p5-div-x1.c
-  src/f32-vsigmoid/gen/scalar-p5-div-x2.c
-  src/f32-vsigmoid/gen/scalar-p5-div-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-scalar-lut64-p2-div-x1.c
+  src/f32-vsigmoid/gen/vsigmoid-scalar-lut64-p2-div-x2.c
+  src/f32-vsigmoid/gen/vsigmoid-scalar-lut64-p2-div-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-scalar-lut2048-p1-div-x1.c
+  src/f32-vsigmoid/gen/vsigmoid-scalar-lut2048-p1-div-x2.c
+  src/f32-vsigmoid/gen/vsigmoid-scalar-lut2048-p1-div-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-scalar-p5-div-x1.c
+  src/f32-vsigmoid/gen/vsigmoid-scalar-p5-div-x2.c
+  src/f32-vsigmoid/gen/vsigmoid-scalar-p5-div-x4.c
   src/f32-vsqrt/gen/scalar-sqrt-x1.c
   src/f32-vsqrt/gen/scalar-sqrt-x2.c
   src/f32-vsqrt/gen/scalar-sqrt-x4.c
@@ -893,24 +893,24 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-neon-x8.c
   src/f32-vrnd/gen/vrndz-neon-x4.c
   src/f32-vrnd/gen/vrndz-neon-x8.c
-  src/f32-vsigmoid/gen/neon-rr2-lut64-p2-nr2recps-x4.c
-  src/f32-vsigmoid/gen/neon-rr2-lut64-p2-nr2recps-x8.c
-  src/f32-vsigmoid/gen/neon-rr2-lut64-p2-nr2recps-x12.c
-  src/f32-vsigmoid/gen/neon-rr2-lut64-p2-nr2recps-x16.c
-  src/f32-vsigmoid/gen/neon-rr2-lut64-p2-nr2recps-x20.c
-  src/f32-vsigmoid/gen/neon-rr2-lut64-p2-nr2recps-x24.c
-  src/f32-vsigmoid/gen/neon-rr2-lut2048-p1-nr2recps-x4.c
-  src/f32-vsigmoid/gen/neon-rr2-lut2048-p1-nr2recps-x8.c
-  src/f32-vsigmoid/gen/neon-rr2-lut2048-p1-nr2recps-x12.c
-  src/f32-vsigmoid/gen/neon-rr2-lut2048-p1-nr2recps-x16.c
-  src/f32-vsigmoid/gen/neon-rr2-lut2048-p1-nr2recps-x20.c
-  src/f32-vsigmoid/gen/neon-rr2-lut2048-p1-nr2recps-x24.c
-  src/f32-vsigmoid/gen/neon-rr2-p5-nr2recps-x4.c
-  src/f32-vsigmoid/gen/neon-rr2-p5-nr2recps-x8.c
-  src/f32-vsigmoid/gen/neon-rr2-p5-nr2recps-x12.c
-  src/f32-vsigmoid/gen/neon-rr2-p5-nr2recps-x16.c
-  src/f32-vsigmoid/gen/neon-rr2-p5-nr2recps-x20.c
-  src/f32-vsigmoid/gen/neon-rr2-p5-nr2recps-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut64-p2-nr2recps-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut64-p2-nr2recps-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut64-p2-nr2recps-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut64-p2-nr2recps-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut64-p2-nr2recps-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut64-p2-nr2recps-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut2048-p1-nr2recps-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut2048-p1-nr2recps-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut2048-p1-nr2recps-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut2048-p1-nr2recps-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut2048-p1-nr2recps-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-lut2048-p1-nr2recps-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-p5-nr2recps-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-p5-nr2recps-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-p5-nr2recps-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-p5-nr2recps-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-p5-nr2recps-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neon-rr2-p5-nr2recps-x24.c
   src/f32-vunary/gen/vabs-neon-x4.c
   src/f32-vunary/gen/vabs-neon-x8.c
   src/f32-vunary/gen/vneg-neon-x4.c
@@ -1217,60 +1217,60 @@ SET(XNNPACK_NEONFMA_MICROKERNEL_SRCS
   src/f32-velu/gen/velu-neonfma-rr1-p6-x24.c
   src/f32-vmulcaddc/gen/c4-minmax-neonfma-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-neonfma-2x.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr1recps1fma-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr1recps1fma-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr1recps1fma-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr1recps1fma-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr1recps1fma-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr1recps1fma-x24.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2fma-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2fma-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2fma-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2fma-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2fma-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2fma-x24.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2recps-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2recps-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2recps-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2recps-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2recps-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-nr2recps-x24.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr1recps1fma-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr1recps1fma-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr1recps1fma-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr1recps1fma-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr1recps1fma-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr1recps1fma-x24.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2fma-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2fma-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2fma-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2fma-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2fma-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2fma-x24.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2recps-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2recps-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2recps-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2recps-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2recps-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-nr2recps-x24.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr1recps1fma-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr1recps1fma-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr1recps1fma-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr1recps1fma-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr1recps1fma-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr1recps1fma-x24.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2fma-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2fma-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2fma-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2fma-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2fma-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2fma-x24.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2recps-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2recps-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2recps-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2recps-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2recps-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-nr2recps-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr1recps1fma-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr1recps1fma-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr1recps1fma-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr1recps1fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr1recps1fma-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr1recps1fma-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2fma-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2fma-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2fma-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2fma-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2fma-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2recps-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2recps-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2recps-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2recps-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2recps-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2recps-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr1recps1fma-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr1recps1fma-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr1recps1fma-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr1recps1fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr1recps1fma-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr1recps1fma-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2fma-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2fma-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2fma-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2fma-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2fma-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2recps-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2recps-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2recps-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2recps-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2recps-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-nr2recps-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr1recps1fma-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr1recps1fma-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr1recps1fma-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr1recps1fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr1recps1fma-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr1recps1fma-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2fma-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2fma-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2fma-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2fma-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2fma-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2recps-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2recps-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2recps-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2recps-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2recps-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-nr2recps-x24.c
   src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x4.c
   src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x8.c
   src/f32-vsqrt/gen/neonfma-nr1rsqrts1fma1adj-x12.c
@@ -1423,24 +1423,24 @@ SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vdivc-minmax-neon-x8.c
   src/f32-vbinary/gen/vrdivc-minmax-neon-x4.c
   src/f32-vbinary/gen/vrdivc-minmax-neon-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-div-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-div-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-div-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-div-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-div-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut64-p2-div-x24.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-div-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-div-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-div-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-div-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-div-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-lut2048-p1-div-x24.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-div-x4.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-div-x8.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-div-x12.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-div-x16.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-div-x20.c
-  src/f32-vsigmoid/gen/neonfma-rr1-p5-div-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-div-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-div-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-div-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-div-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-div-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-div-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-div-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-div-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-div-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut2048-p1-div-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-div-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-div-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-div-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-div-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-p5-div-x24.c
   src/f32-vsqrt/gen/neon-sqrt-x4.c
   src/f32-vsqrt/gen/neon-sqrt-x8.c
   src/math/sigmoid-neonfma-rr1-lut64-p2-div.c
@@ -1527,14 +1527,14 @@ SET(XNNPACK_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/vsub-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x16.c
-  src/f16-vclamp/gen/neonfp16arith-x8.c
-  src/f16-vclamp/gen/neonfp16arith-x16.c
+  src/f16-vclamp/gen/vclamp-neonfp16arith-x8.c
+  src/f16-vclamp/gen/vclamp-neonfp16arith-x16.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x8.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c
   src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c
-  src/f16-vrelu/gen/neonfp16arith-x8.c
-  src/f16-vrelu/gen/neonfp16arith-x16.c)
+  src/f16-vrelu/gen/vrelu-neonfp16arith-x8.c
+  src/f16-vrelu/gen/vrelu-neonfp16arith-x16.c)
 
 SET(XNNPACK_NEONDOT_MICROKERNEL_SRCS
   src/qs8-gemm/gen/1x8c4-minmax-neondot.c
@@ -1781,18 +1781,18 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-sse2-x8.c
   src/f32-vrnd/gen/vrndz-sse2-x4.c
   src/f32-vrnd/gen/vrndz-sse2-x8.c
-  src/f32-vsigmoid/gen/sse2-lut64-p2-div-x4.c
-  src/f32-vsigmoid/gen/sse2-lut64-p2-div-x8.c
-  src/f32-vsigmoid/gen/sse2-lut64-p2-div-x12.c
-  src/f32-vsigmoid/gen/sse2-lut64-p2-div-x16.c
-  src/f32-vsigmoid/gen/sse2-lut64-p2-div-x20.c
-  src/f32-vsigmoid/gen/sse2-lut64-p2-div-x24.c
-  src/f32-vsigmoid/gen/sse2-p5-div-x4.c
-  src/f32-vsigmoid/gen/sse2-p5-div-x8.c
-  src/f32-vsigmoid/gen/sse2-p5-div-x12.c
-  src/f32-vsigmoid/gen/sse2-p5-div-x16.c
-  src/f32-vsigmoid/gen/sse2-p5-div-x20.c
-  src/f32-vsigmoid/gen/sse2-p5-div-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-lut64-p2-div-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-lut64-p2-div-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-lut64-p2-div-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-lut64-p2-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-lut64-p2-div-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-lut64-p2-div-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x24.c
   src/math/exp-sse2-rr2-lut64-p2.c
   src/math/exp-sse2-rr2-p5.c
   src/math/expm1minus-sse2-rr2-lut16-p3.c
@@ -1973,18 +1973,18 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-sse41-x8.c
   src/f32-vrnd/gen/vrndz-sse41-x4.c
   src/f32-vrnd/gen/vrndz-sse41-x8.c
-  src/f32-vsigmoid/gen/sse41-lut64-p2-div-x4.c
-  src/f32-vsigmoid/gen/sse41-lut64-p2-div-x8.c
-  src/f32-vsigmoid/gen/sse41-lut64-p2-div-x12.c
-  src/f32-vsigmoid/gen/sse41-lut64-p2-div-x16.c
-  src/f32-vsigmoid/gen/sse41-lut64-p2-div-x20.c
-  src/f32-vsigmoid/gen/sse41-lut64-p2-div-x24.c
-  src/f32-vsigmoid/gen/sse41-p5-div-x4.c
-  src/f32-vsigmoid/gen/sse41-p5-div-x8.c
-  src/f32-vsigmoid/gen/sse41-p5-div-x12.c
-  src/f32-vsigmoid/gen/sse41-p5-div-x16.c
-  src/f32-vsigmoid/gen/sse41-p5-div-x20.c
-  src/f32-vsigmoid/gen/sse41-p5-div-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-lut64-p2-div-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-lut64-p2-div-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-lut64-p2-div-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-lut64-p2-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-lut64-p2-div-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-lut64-p2-div-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x4.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x12.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x20.c
+  src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x24.c
   src/math/roundd-sse41.c
   src/math/roundne-sse41.c
   src/math/roundu-sse41.c
@@ -2166,26 +2166,26 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndz-avx-x8.c
   src/f32-vrnd/gen/vrndz-avx-x16.c
   src/f32-vscale/avx-x32.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-div-x8.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-div-x16.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-div-x24.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-div-x32.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-div-x40.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-div-x48.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-div-x56.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-div-x64.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-div-x72.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-div-x80.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-nr2-x8.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-nr2-x16.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-nr2-x24.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-nr2-x32.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-nr2-x40.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-nr2-x48.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-nr2-x56.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-nr2-x64.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-nr2-x72.c
-  src/f32-vsigmoid/gen/avx-rr2-p5-nr2-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x40.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x56.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x72.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-nr2-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-nr2-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-nr2-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-nr2-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-nr2-x40.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-nr2-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-nr2-x56.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-nr2-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-nr2-x72.c
+  src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-nr2-x80.c
   src/f32-vsqrt/gen/avx-sqrt-x8.c
   src/f32-vsqrt/gen/avx-sqrt-x16.c
   src/f32-vunary/gen/vabs-avx-x8.c
@@ -2480,36 +2480,36 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/f32-vscaleextexp/gen/avx2-p5-x80.c
   src/f32-vscaleextexp/gen/avx2-p5-x88.c
   src/f32-vscaleextexp/gen/avx2-p5-x96.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-div-x8.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-div-x16.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-div-x24.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-div-x32.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-div-x40.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-div-x48.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-div-x56.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-div-x64.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-div-x72.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-div-x80.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr1fma-x8.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr1fma-x16.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr1fma-x24.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr1fma-x32.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr1fma-x40.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr1fma-x48.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr1fma-x56.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr1fma-x64.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr1fma-x72.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr1fma-x80.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr2fma-x8.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr2fma-x16.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr2fma-x24.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr2fma-x32.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr2fma-x40.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr2fma-x48.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr2fma-x56.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr2fma-x64.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr2fma-x72.c
-  src/f32-vsigmoid/gen/avx2-rr1-p5-nr2fma-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x40.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x56.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x72.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr1fma-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr1fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr1fma-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr1fma-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr1fma-x40.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr1fma-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr1fma-x56.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr1fma-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr1fma-x72.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr1fma-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr2fma-x8.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr2fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr2fma-x24.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr2fma-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr2fma-x40.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr2fma-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr2fma-x56.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr2fma-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr2fma-x72.c
+  src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-nr2fma-x80.c
   src/math/exp-avx2-rr2-lut8-p3-perm.c
   src/math/exp-avx2-rr2-lut8-p4-perm.c
   src/math/exp-avx2-rr2-p5.c
@@ -2716,54 +2716,54 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-vscaleextexp/gen/avx512f-p5-scalef-x160.c
   src/f32-vscaleextexp/gen/avx512f-p5-scalef-x176.c
   src/f32-vscaleextexp/gen/avx512f-p5-scalef-x192.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x16.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x32.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x48.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x64.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x80.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x96.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x112.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-div-x128.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x16.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x32.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x48.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x64.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x80.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x96.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x112.c
-  src/f32-vsigmoid/gen/avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x128.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-div-x16.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-div-x32.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-div-x48.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-div-x64.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-div-x80.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-div-x96.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-div-x112.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-div-x128.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x16.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x32.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x48.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x64.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x80.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x96.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x112.c
-  src/f32-vsigmoid/gen/avx512f-rr1-p5-scalef-nr1fma-x128.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x16.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x32.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x48.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x64.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x80.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x96.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x112.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-div-x128.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x16.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x32.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x48.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x64.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x80.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x96.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x112.c
-  src/f32-vsigmoid/gen/avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x128.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-div-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-div-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-div-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-div-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-div-x96.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-div-x112.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-div-x128.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x96.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x112.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-lut16-p3-perm-scalef-nr1fma-x128.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-div-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-div-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-div-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-div-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-div-x96.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-div-x112.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-div-x128.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-nr1fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-nr1fma-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-nr1fma-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-nr1fma-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-nr1fma-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-nr1fma-x96.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-nr1fma-x112.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr1-p5-scalef-nr1fma-x128.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-x96.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-x112.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-x128.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x16.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x32.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x48.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x64.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x80.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x96.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x112.c
+  src/f32-vsigmoid/gen/vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x128.c
   src/f32-vsqrt/gen/avx512f-nr1fma1adj-x16.c
   src/f32-vsqrt/gen/avx512f-nr1fma1adj-x32.c
   src/f32-vsqrt/gen/avx512f-nr1fma1adj-x48.c
