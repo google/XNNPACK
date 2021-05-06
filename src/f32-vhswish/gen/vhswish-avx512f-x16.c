@@ -13,7 +13,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/hswish.h>
+#include <xnnpack/vunary.h>
 
 
 void xnn_f32_vhswish_ukernel__avx512f_x16(

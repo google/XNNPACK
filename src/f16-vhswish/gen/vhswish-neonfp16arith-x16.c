@@ -12,7 +12,7 @@
 #include <arm_neon.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/hswish.h>
+#include <xnnpack/vunary.h>
 
 
 void xnn_f16_vhswish_ukernel__neonfp16arith_x16(

@@ -14,9 +14,9 @@
 
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/hswish.h>
 #include <xnnpack/params.h>
 #include <xnnpack/params-init.h>
+#include <xnnpack/vunary.h>
 
 
 static void f32_vhswish(

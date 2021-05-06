@@ -3728,7 +3728,6 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/fill.h",
     "src/xnnpack/gavgpool.h",
     "src/xnnpack/gemm.h",
-    "src/xnnpack/hswish.h",
     "src/xnnpack/ibilinear.h",
     "src/xnnpack/igemm.h",
     "src/xnnpack/intrinsics-polyfill.h",

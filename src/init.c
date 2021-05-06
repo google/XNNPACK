@@ -38,7 +38,6 @@
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/fill.h>
-#include <xnnpack/hswish.h>
 #include <xnnpack/ibilinear.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/log.h>

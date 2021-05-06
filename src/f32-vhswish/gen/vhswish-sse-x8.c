@@ -12,7 +12,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/hswish.h>
+#include <xnnpack/vunary.h>
 
 
 void xnn_f32_vhswish_ukernel__sse_x8(

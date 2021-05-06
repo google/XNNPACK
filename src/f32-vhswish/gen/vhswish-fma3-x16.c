@@ -12,7 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/hswish.h>
+#include <xnnpack/vunary.h>
 
 
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
