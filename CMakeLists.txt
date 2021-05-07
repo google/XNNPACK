@@ -532,9 +532,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsubc-scalar-x2.c
   src/f32-vbinary/gen/vsubc-scalar-x4.c
   src/f32-vbinary/gen/vsubc-scalar-x8.c
-  src/f32-vclamp/gen/scalar-x1.c
-  src/f32-vclamp/gen/scalar-x2.c
-  src/f32-vclamp/gen/scalar-x4.c
+  src/f32-vclamp/gen/vclamp-scalar-x1.c
+  src/f32-vclamp/gen/vclamp-scalar-x2.c
+  src/f32-vclamp/gen/vclamp-scalar-x4.c
   src/f32-velu/gen/velu-scalar-rr2-lut16-p3-x1.c
   src/f32-velu/gen/velu-scalar-rr2-lut16-p3-x2.c
   src/f32-velu/gen/velu-scalar-rr2-lut16-p3-x3.c
@@ -556,10 +556,10 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/f32-vmulcaddc/gen/c1-minmax-scalar-2x.c
   src/f32-vmulcaddc/gen/c2-minmax-scalar-2x.c
   src/f32-vmulcaddc/gen/c4-minmax-scalar-2x.c
-  src/f32-vrelu/gen/scalar-x1.c
-  src/f32-vrelu/gen/scalar-x2.c
-  src/f32-vrelu/gen/scalar-x4.c
-  src/f32-vrelu/gen/scalar-x8.c
+  src/f32-vrelu/gen/vrelu-scalar-x1.c
+  src/f32-vrelu/gen/vrelu-scalar-x2.c
+  src/f32-vrelu/gen/vrelu-scalar-x4.c
+  src/f32-vrelu/gen/vrelu-scalar-x8.c
   src/f32-vrnd/gen/vrndd-scalar-libm-x1.c
   src/f32-vrnd/gen/vrndd-scalar-libm-x2.c
   src/f32-vrnd/gen/vrndd-scalar-libm-x4.c
@@ -862,8 +862,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsub-minmax-neon-x8.c
   src/f32-vbinary/gen/vsubc-minmax-neon-x4.c
   src/f32-vbinary/gen/vsubc-minmax-neon-x8.c
-  src/f32-vclamp/gen/neon-x4.c
-  src/f32-vclamp/gen/neon-x8.c
+  src/f32-vclamp/gen/vclamp-neon-x4.c
+  src/f32-vclamp/gen/vclamp-neon-x8.c
   src/f32-velu/gen/velu-neon-rr2-lut16-p3-x4.c
   src/f32-velu/gen/velu-neon-rr2-lut16-p3-x8.c
   src/f32-velu/gen/velu-neon-rr2-lut16-p3-x12.c
@@ -883,8 +883,8 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/f32-vlrelu/gen/vlrelu-neon-x8.c
   src/f32-vmulcaddc/gen/c4-minmax-neon-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-neon-2x.c
-  src/f32-vrelu/gen/neon-x4.c
-  src/f32-vrelu/gen/neon-x8.c
+  src/f32-vrelu/gen/vrelu-neon-x4.c
+  src/f32-vrelu/gen/vrelu-neon-x8.c
   src/f32-vrnd/gen/vrndd-neon-x4.c
   src/f32-vrnd/gen/vrndd-neon-x8.c
   src/f32-vrnd/gen/vrndne-neon-x4.c
@@ -1700,16 +1700,16 @@ SET(XNNPACK_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsub-minmax-sse-x8.c
   src/f32-vbinary/gen/vsubc-minmax-sse-x4.c
   src/f32-vbinary/gen/vsubc-minmax-sse-x8.c
-  src/f32-vclamp/gen/sse-x4.c
-  src/f32-vclamp/gen/sse-x8.c
+  src/f32-vclamp/gen/vclamp-sse-x4.c
+  src/f32-vclamp/gen/vclamp-sse-x8.c
   src/f32-vhswish/gen/vhswish-sse-x4.c
   src/f32-vhswish/gen/vhswish-sse-x8.c
   src/f32-vlrelu/gen/vlrelu-sse-x4.c
   src/f32-vlrelu/gen/vlrelu-sse-x8.c
   src/f32-vmulcaddc/gen/c4-minmax-sse-2x.c
   src/f32-vmulcaddc/gen/c8-minmax-sse-2x.c
-  src/f32-vrelu/gen/sse-x4.c
-  src/f32-vrelu/gen/sse-x8.c
+  src/f32-vrelu/gen/vrelu-sse-x4.c
+  src/f32-vrelu/gen/vrelu-sse-x8.c
   src/f32-vsqrt/gen/sse-sqrt-x4.c
   src/f32-vsqrt/gen/sse-sqrt-x8.c
   src/f32-vunary/gen/vabs-sse-x4.c
@@ -2133,8 +2133,8 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsub-minmax-avx-x16.c
   src/f32-vbinary/gen/vsubc-minmax-avx-x8.c
   src/f32-vbinary/gen/vsubc-minmax-avx-x16.c
-  src/f32-vclamp/gen/avx-x8.c
-  src/f32-vclamp/gen/avx-x16.c
+  src/f32-vclamp/gen/vclamp-avx-x8.c
+  src/f32-vclamp/gen/vclamp-avx-x16.c
   src/f32-velu/gen/velu-avx-rr2-lut4-p4-perm-x8.c
   src/f32-velu/gen/velu-avx-rr2-lut4-p4-perm-x16.c
   src/f32-velu/gen/velu-avx-rr2-lut4-p4-perm-x24.c
@@ -2454,8 +2454,8 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/f32-velu/gen/velu-avx2-rr1-p6-x64.c
   src/f32-velu/gen/velu-avx2-rr1-p6-x72.c
   src/f32-velu/gen/velu-avx2-rr1-p6-x80.c
-  src/f32-vrelu/gen/avx-x8.c
-  src/f32-vrelu/gen/avx-x16.c
+  src/f32-vrelu/gen/vrelu-avx-x8.c
+  src/f32-vrelu/gen/vrelu-avx-x16.c
   src/f32-vscaleexpminusmax/gen/avx2-p5-x8.c
   src/f32-vscaleexpminusmax/gen/avx2-p5-x16.c
   src/f32-vscaleexpminusmax/gen/avx2-p5-x24.c
@@ -2659,8 +2659,8 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vsub-minmax-avx512f-x32.c
   src/f32-vbinary/gen/vsubc-minmax-avx512f-x16.c
   src/f32-vbinary/gen/vsubc-minmax-avx512f-x32.c
-  src/f32-vclamp/gen/avx512f-x16.c
-  src/f32-vclamp/gen/avx512f-x32.c
+  src/f32-vclamp/gen/vclamp-avx512f-x16.c
+  src/f32-vclamp/gen/vclamp-avx512f-x32.c
   src/f32-velu/gen/velu-avx512f-rr1-lut16-p3-perm-x16.c
   src/f32-velu/gen/velu-avx512f-rr1-lut16-p3-perm-x32.c
   src/f32-velu/gen/velu-avx512f-rr1-lut16-p3-perm-x48.c
@@ -2681,8 +2681,8 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-vhswish/gen/vhswish-avx512f-x32.c
   src/f32-vlrelu/gen/vlrelu-avx512f-x16.c
   src/f32-vlrelu/gen/vlrelu-avx512f-x32.c
-  src/f32-vrelu/gen/avx512f-x16.c
-  src/f32-vrelu/gen/avx512f-x32.c
+  src/f32-vrelu/gen/vrelu-avx512f-x16.c
+  src/f32-vrelu/gen/vrelu-avx512f-x32.c
   src/f32-vrnd/gen/vrndd-avx512f-x16.c
   src/f32-vrnd/gen/vrndd-avx512f-x32.c
   src/f32-vrnd/gen/vrndne-avx512f-x16.c
