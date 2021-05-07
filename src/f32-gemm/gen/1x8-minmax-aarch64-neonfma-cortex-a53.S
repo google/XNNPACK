@@ -45,11 +45,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53
         LDP q16, q17, [x5], 32
 
         MOVI v18.4s, 0  // second set of C for pipelining FMLA
-        PRFM PLDL1KEEP, [x5]
+        PRFM    PLDL1KEEP, [x5]
         MOVI v19.4s, 0
-        PRFM PLDL1KEEP, [x5, 64]
-        PRFM PLDL1KEEP, [x5, 128]
-        PRFM PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP, [x5, 64]
+        PRFM    PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 192]
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS x0, x2, 32  // k = kc - 32

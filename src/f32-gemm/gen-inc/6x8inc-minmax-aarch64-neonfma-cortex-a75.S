@@ -105,16 +105,16 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
         LDP q26, q27, [x15], 32
         LDP q28, q29, [x15], 32
         LDP q30, q31, [x15], 32
-        PRFM PLDL1KEEP, [x5, 0]  // Prefetch B
-        PRFM PLDL1KEEP, [x5, 64]
-        PRFM PLDL1KEEP, [x5, 128]
-        PRFM PLDL1KEEP, [x5, 192]
-        PRFM PLDL1KEEP,  [x3]    // Prefetch A
-        PRFM PLDL1KEEP,  [x9]
-        PRFM PLDL1KEEP, [x10]
-        PRFM PLDL1KEEP, [x11]
-        PRFM PLDL1KEEP, [x12]
-        PRFM PLDL1KEEP,  [x4]
+        PRFM    PLDL1KEEP, [x5, 0]  // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 64]
+        PRFM    PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP,  [x3]    // Prefetch A
+        PRFM    PLDL1KEEP,  [x9]
+        PRFM    PLDL1KEEP, [x10]
+        PRFM    PLDL1KEEP, [x11]
+        PRFM    PLDL1KEEP, [x12]
+        PRFM    PLDL1KEEP,  [x4]
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS x0, x2, 32  // k = kc - 32
@@ -154,12 +154,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
 
         FMLA v31.4s, v13.4s,  v5.s[0]
         FMLA v20.4s, v14.4s,  v0.s[1]
-        PRFM PLDL1KEEP, [x5, 128]      // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 128]      // Prefetch B
         FMLA v22.4s, v14.4s,  v1.s[1]
         FMLA v24.4s, v14.4s,  v2.s[1]
         FMLA v26.4s, v14.4s,  v3.s[1]
         FMLA v28.4s, v14.4s,  v4.s[1]
-        PRFM PLDL1KEEP, [x5, 256]
+        PRFM    PLDL1KEEP, [x5, 256]
         FMLA v30.4s, v14.4s,  v5.s[1]
         FMLA v21.4s, v15.4s,  v0.s[1]
         FMLA v23.4s, v15.4s,  v1.s[1]
@@ -288,12 +288,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
 
         FMLA v31.4s, v13.4s,  v5.s[0]
         FMLA v20.4s, v14.4s,  v0.s[1]
-        PRFM PLDL1KEEP, [x5, 128]      // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 128]      // Prefetch B
         FMLA v22.4s, v14.4s,  v1.s[1]
         FMLA v24.4s, v14.4s,  v2.s[1]
         FMLA v26.4s, v14.4s,  v3.s[1]
         FMLA v28.4s, v14.4s,  v4.s[1]
-        PRFM PLDL1KEEP, [x5, 256]
+        PRFM    PLDL1KEEP, [x5, 256]
         FMLA v30.4s, v14.4s,  v5.s[1]
         FMLA v21.4s, v15.4s,  v0.s[1]
         FMLA v23.4s, v15.4s,  v1.s[1]

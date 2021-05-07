@@ -102,17 +102,17 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a55
         LDP q20, q21, [x5], 32
         MOV x9, x3  // p = ks
         MOV v22.16b, v20.16b
-        PRFM PLDL1KEEP, [x5, 0]  // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 0]  // Prefetch B
         MOV v23.16b, v21.16b
-        PRFM PLDL1KEEP, [x5, 64]
+        PRFM    PLDL1KEEP, [x5, 64]
         MOV v24.16b, v20.16b
-        PRFM PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 128]
         MOV v25.16b, v21.16b
-        PRFM PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP, [x5, 192]
         MOV v26.16b, v20.16b
-        PRFM PLDL1KEEP, [x5, 256]
+        PRFM    PLDL1KEEP, [x5, 256]
         MOV v27.16b, v21.16b
-        PRFM PLDL1KEEP, [x5, 320]
+        PRFM    PLDL1KEEP, [x5, 320]
         MOV v28.16b, v20.16b
         MOV v29.16b, v21.16b
         MOV v30.16b, v20.16b

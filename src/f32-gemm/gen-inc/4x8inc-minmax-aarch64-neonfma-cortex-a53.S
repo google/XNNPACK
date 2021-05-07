@@ -98,18 +98,18 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDP q22, q23, [x15], 32
         LDP q24, q25, [x15], 32
         LDP q26, q27, [x15], 32
-        PRFM PLDL1KEEP,  [x3,  0]  // Prefetch A
-        PRFM PLDL1KEEP,  [x3, 64]
-        PRFM PLDL1KEEP,  [x9,  0]
-        PRFM PLDL1KEEP,  [x9, 64]
-        PRFM PLDL1KEEP, [x10,  0]
-        PRFM PLDL1KEEP, [x10, 64]
-        PRFM PLDL1KEEP, [x11,  0]
-        PRFM PLDL1KEEP, [x11, 64]
-        PRFM PLDL1KEEP, [x5,   0]  // Prefetch B
-        PRFM PLDL1KEEP, [x5,  64]
-        PRFM PLDL1KEEP, [x5, 128]
-        PRFM PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP,  [x3,  0]  // Prefetch A
+        PRFM    PLDL1KEEP,  [x3, 64]
+        PRFM    PLDL1KEEP,  [x9,  0]
+        PRFM    PLDL1KEEP,  [x9, 64]
+        PRFM    PLDL1KEEP, [x10,  0]
+        PRFM    PLDL1KEEP, [x10, 64]
+        PRFM    PLDL1KEEP, [x11,  0]
+        PRFM    PLDL1KEEP, [x11, 64]
+        PRFM    PLDL1KEEP, [x5,   0]  // Prefetch B
+        PRFM    PLDL1KEEP, [x5,  64]
+        PRFM    PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 192]
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
@@ -192,7 +192,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR  x4, [x9], 8               // a1
         FMLA v22.4s, v12.4s,  v3.s[2]
         FMLA v24.4s, v12.4s,  v4.s[0]
-        PRFM PLDL1KEEP, [x3, 128]      // Prefetch A0
+        PRFM    PLDL1KEEP, [x3, 128]      // Prefetch A0
 
         // BLOCK 1
         LDR  d16, [x5, 64]
@@ -201,7 +201,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR  x4, [x5, 72]  // b
         FMLA v21.4s, v13.4s,  v3.s[0]
         FMLA v23.4s, v13.4s,  v3.s[2]
-        PRFM PLDL1KEEP, [x9, 128]      // Prefetch A1
+        PRFM    PLDL1KEEP, [x9, 128]      // Prefetch A1
 
         // BLOCK 2
         LDR   d1, [x10], 8             // a2
@@ -210,7 +210,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR  x4, [x11], 8              // a3
         FMLA v27.4s, v13.4s,  v4.s[2]
         FMLA v20.4s, v14.4s,  v3.s[1]
-        PRFM PLDL1KEEP, [x10, 128]     // Prefetch A2
+        PRFM    PLDL1KEEP, [x10, 128]     // Prefetch A2
 
         // BLOCK 3
         LDR  d17, [x5, 80]
@@ -219,7 +219,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR  x4, [x5, 88]
         FMLA v24.4s, v14.4s,  v4.s[1]
         FMLA v26.4s, v14.4s,  v4.s[3]
-        PRFM PLDL1KEEP, [x11, 128]     // Prefetch A3
+        PRFM    PLDL1KEEP, [x11, 128]     // Prefetch A3
 
         // BLOCK 4
         LDR  d18, [x5, 96]
@@ -228,7 +228,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR  x4, [x5, 104]
         FMLA v23.4s, v15.4s,  v3.s[3]
         FMLA v25.4s, v15.4s,  v4.s[1]
-        PRFM PLDL1KEEP, [x5, 192]      // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 192]      // Prefetch B
 
         // BLOCK 5
         // NOTE that block needs to be 4 cycles for LDR not to stall
@@ -237,7 +237,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA v27.4s, v15.4s,  v4.s[3]
         LDR  x4, [x5, 120]
         SUBS x0, x0, 16
-        PRFM PLDL1KEEP, [x5, 256]      // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 256]      // Prefetch B
         ADD x5, x5, 128
         B.HS 1b
 

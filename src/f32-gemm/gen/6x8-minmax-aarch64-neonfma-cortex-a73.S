@@ -101,25 +101,25 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a73
         # Load initial bias from w into accumulators
         LDP q20, q21, [x5], 32
         MOV v22.16b, v20.16b
-        PRFM PLDL1KEEP, [x5, 0]  // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 0]  // Prefetch B
         MOV v23.16b, v21.16b
-        PRFM PLDL1KEEP, [x5, 64]
+        PRFM    PLDL1KEEP, [x5, 64]
         MOV v24.16b, v20.16b
-        PRFM PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 128]
         MOV v25.16b, v21.16b
-        PRFM PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP, [x5, 192]
         MOV v26.16b, v20.16b
-        PRFM PLDL1KEEP,  [x3]    // Prefetch A
+        PRFM    PLDL1KEEP,  [x3]    // Prefetch A
         MOV v27.16b, v21.16b
-        PRFM PLDL1KEEP,  [x9]
+        PRFM    PLDL1KEEP,  [x9]
         MOV v28.16b, v20.16b
-        PRFM PLDL1KEEP, [x10]
+        PRFM    PLDL1KEEP, [x10]
         MOV v29.16b, v21.16b
-        PRFM PLDL1KEEP, [x11]
+        PRFM    PLDL1KEEP, [x11]
         MOV v30.16b, v20.16b
-        PRFM PLDL1KEEP, [x12]
+        PRFM    PLDL1KEEP, [x12]
         MOV v31.16b, v21.16b
-        PRFM PLDL1KEEP,  [x4]
+        PRFM    PLDL1KEEP,  [x4]
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS x0, x2, 32  // k = kc - 32
@@ -181,10 +181,10 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a73
         LDP  q14,  q15, [x5], 32
         FMLA v24.4s, v16.4s,  v2.s[2]
         FMLA v26.4s, v16.4s,  v3.s[2]
-        PRFM PLDL1KEEP, [x5, 128]      // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 128]      // Prefetch B
         FMLA v28.4s, v16.4s,  v4.s[2]
         FMLA v30.4s, v16.4s,  v5.s[2]
-        PRFM PLDL1KEEP, [x5, 256]
+        PRFM    PLDL1KEEP, [x5, 256]
         FMLA v21.4s, v17.4s,  v0.s[2]
         FMLA v23.4s, v17.4s,  v1.s[2]
         FMLA v25.4s, v17.4s,  v2.s[2]

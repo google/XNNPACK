@@ -105,16 +105,16 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_ld64
         LDP q26, q27, [x15], 32
         LDP q28, q29, [x15], 32
         LDP q30, q31, [x15], 32
-        PRFM PLDL1KEEP, [x5, 0]  // Prefetch B
-        PRFM PLDL1KEEP, [x5, 64]
-        PRFM PLDL1KEEP, [x5, 128]
-        PRFM PLDL1KEEP, [x5, 192]
-        PRFM PLDL1KEEP,  [x3]    // Prefetch A
-        PRFM PLDL1KEEP,  [x9]
-        PRFM PLDL1KEEP, [x10]
-        PRFM PLDL1KEEP, [x11]
-        PRFM PLDL1KEEP, [x12]
-        PRFM PLDL1KEEP,  [x4]
+        PRFM    PLDL1KEEP, [x5, 0]  // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 64]
+        PRFM    PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP,  [x3]    // Prefetch A
+        PRFM    PLDL1KEEP,  [x9]
+        PRFM    PLDL1KEEP, [x10]
+        PRFM    PLDL1KEEP, [x11]
+        PRFM    PLDL1KEEP, [x12]
+        PRFM    PLDL1KEEP,  [x4]
 
         # Is there at least 2 floats (8 bytes) for main loop?
         SUBS x0, x2, 8  // k = kc - 8

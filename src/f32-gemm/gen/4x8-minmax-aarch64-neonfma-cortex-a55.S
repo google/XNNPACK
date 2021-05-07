@@ -95,23 +95,23 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         # Load initial bias from w into accumulators
         LDP q20, q21, [x5], 32
         MOV v22.16b, v20.16b
-        PRFM PLDL1KEEP,  [x3,  0]    // Prefetch A
-        PRFM PLDL1KEEP,  [x3, 64]
+        PRFM    PLDL1KEEP,  [x3,  0]    // Prefetch A
+        PRFM    PLDL1KEEP,  [x3, 64]
         MOV v23.16b, v21.16b
-        PRFM PLDL1KEEP,  [x9,  0]
-        PRFM PLDL1KEEP,  [x9, 64]
+        PRFM    PLDL1KEEP,  [x9,  0]
+        PRFM    PLDL1KEEP,  [x9, 64]
         MOV v24.16b, v20.16b
-        PRFM PLDL1KEEP, [x10,  0]
-        PRFM PLDL1KEEP, [x10, 64]
+        PRFM    PLDL1KEEP, [x10,  0]
+        PRFM    PLDL1KEEP, [x10, 64]
         MOV v25.16b, v21.16b
-        PRFM PLDL1KEEP, [x11,  0]
-        PRFM PLDL1KEEP, [x11, 64]
+        PRFM    PLDL1KEEP, [x11,  0]
+        PRFM    PLDL1KEEP, [x11, 64]
         MOV v26.16b, v20.16b
-        PRFM PLDL1KEEP, [x5,   0]  // Prefetch B
+        PRFM    PLDL1KEEP, [x5,   0]  // Prefetch B
         MOV v27.16b, v21.16b
-        PRFM PLDL1KEEP, [x5,  64]
-        PRFM PLDL1KEEP, [x5, 128]
-        PRFM PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP, [x5,  64]
+        PRFM    PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 192]
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16

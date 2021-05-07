@@ -51,12 +51,12 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53
         # Load initial bias from w into accumulators
         LD1 {v20.16b, v21.16b, v22.16b}, [x5], 48
 
-        PRFM PLDL1KEEP, [x5]
-        PRFM PLDL1KEEP, [x5, 64]
-        PRFM PLDL1KEEP, [x5, 128]
-        PRFM PLDL1KEEP, [x5, 192]
-        PRFM PLDL1KEEP, [x5, 256]
-        PRFM PLDL1KEEP, [x5, 320]
+        PRFM    PLDL1KEEP, [x5]
+        PRFM    PLDL1KEEP, [x5, 64]
+        PRFM    PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP, [x5, 256]
+        PRFM    PLDL1KEEP, [x5, 320]
 
         MOV x9, x3  // p = ks
 
@@ -110,18 +110,18 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53
         LDR d1, [x8], 8         // a0
         INS v3.d[1], x15
         FMLA v20.4s, v2.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP, [x5, 192]
 
         # BLOCK 1
         INS v4.d[1], x16
         FMLA v21.4s, v3.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 256]
+        PRFM    PLDL1KEEP, [x5, 256]
 
         # BLOCK 2
         LDR d23, [x5]       // vb0x0123
         INS v5.d[1], x17
         LDR x14, [x5, 8]
-        PRFM PLDL1KEEP, [x5, 320]
+        PRFM    PLDL1KEEP, [x5, 320]
         FMLA v22.4s, v4.4s, v0.s[0]
 
         # BLOCK 3
@@ -204,18 +204,18 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53
         LDR d1, [x8], 8         // a0
         INS v3.d[1], x15
         FMLA v20.4s, v2.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP, [x5, 192]
 
         # BLOCK 1
         INS v4.d[1], x16
         FMLA v21.4s, v3.4s, v0.s[0]
-        PRFM PLDL1KEEP, [x5, 256]
+        PRFM    PLDL1KEEP, [x5, 256]
 
         # BLOCK 2
         LDR d23, [x5]       // vb0x0123
         INS v5.d[1], x17
         LDR x14, [x5, 8]
-        PRFM PLDL1KEEP, [x5, 320]
+        PRFM    PLDL1KEEP, [x5, 320]
         FMLA v22.4s, v4.4s, v0.s[0]
 
         # BLOCK 3

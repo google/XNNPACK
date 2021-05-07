@@ -98,18 +98,18 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         LDP q22, q23, [x15], 32
         LDP q24, q25, [x15], 32
         LDP q26, q27, [x15], 32
-        PRFM PLDL1KEEP,  [x3,  0]  // Prefetch A
-        PRFM PLDL1KEEP,  [x3, 64]
-        PRFM PLDL1KEEP,  [x9,  0]
-        PRFM PLDL1KEEP,  [x9, 64]
-        PRFM PLDL1KEEP, [x10,  0]
-        PRFM PLDL1KEEP, [x10, 64]
-        PRFM PLDL1KEEP, [x11,  0]
-        PRFM PLDL1KEEP, [x11, 64]
-        PRFM PLDL1KEEP, [x5,   0]  // Prefetch B
-        PRFM PLDL1KEEP, [x5,  64]
-        PRFM PLDL1KEEP, [x5, 128]
-        PRFM PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP,  [x3,  0]  // Prefetch A
+        PRFM    PLDL1KEEP,  [x3, 64]
+        PRFM    PLDL1KEEP,  [x9,  0]
+        PRFM    PLDL1KEEP,  [x9, 64]
+        PRFM    PLDL1KEEP, [x10,  0]
+        PRFM    PLDL1KEEP, [x10, 64]
+        PRFM    PLDL1KEEP, [x11,  0]
+        PRFM    PLDL1KEEP, [x11, 64]
+        PRFM    PLDL1KEEP, [x5,   0]  // Prefetch B
+        PRFM    PLDL1KEEP, [x5,  64]
+        PRFM    PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 192]
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS x0, x2, 16  // k = kc - 16
