@@ -45,6 +45,12 @@
   #define XNN_ARCH_PPC64 0
 #endif
 
+#if defined(__riscv) || defined(__riscv__)
+  #define XNN_ARCH_RISCV 1
+#else
+  #define XNN_ARCH_RISCV 0
+#endif
+
 #if defined(__wasm__)
   #if defined(__wasm_simd128__)
     #define XNN_ARCH_WASMSIMD 1
