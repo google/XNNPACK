@@ -1,0 +1,149 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+
+#include <xnnpack/scalar-utils.h>
+#include <xnnpack/gemm.h>
+
+
+void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}__scalar(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const int8_t**restrict a,
+    const void*restrict w,
+    int8_t*restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const int8_t* zero,
+    const union xnn_qs8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(ks != 0);
+  assert(ks % (${MR} * sizeof(void*)) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  int8_t* c0 = c;
+  $for M in range(1, MR):
+    int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  do {
+    $for N in range(NR):
+      int32_t vacc0x${N} = ((const int32_t*) w)[${N}];
+    $for M in range(1, MR):
+      $for N in range(NR):
+        int32_t vacc${M}x${N} = vacc0x${N};
+    w = (const void*) ((uintptr_t) w + ${NR} * sizeof(int32_t));
+
+    size_t p = ks;
+    do {
+      $for M in range(MR):
+        const int8_t* restrict a${M} = a[${M}];
+        assert(a${M} != NULL);
+        if XNN_UNPREDICTABLE(a${M} != zero) {
+          a${M} = (const int8_t*) ((uintptr_t) a${M} + a_offset);
+        }
+      a += ${MR};
+
+      size_t k = kc;
+      do {
+        $for M in range(MR):
+          const int32_t va${M} = (int32_t) *a${M}++;
+
+        $for N in range(NR):
+          const int32_t vb${N} = ((const int8_t*) w)[${N}];
+        w = (const void*) ((uintptr_t) w + ${NR} * sizeof(int8_t));
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}x${N} += va${M} * vb${N};
+
+        k -= sizeof(int8_t);
+      } while (k != 0);
+      p -= ${MR} * sizeof(void*);
+    } while (p != 0);
+
+    const int32_t vmultiplier = params->scalar.multiplier;
+    $for M in range(MR):
+      $for N in range(NR):
+        const int64_t vproduct${M}x${N} = (int64_t) vacc${M}x${N} * (int64_t) vmultiplier;
+
+    const int64_t vq31rounding = INT64_C(0x40000000);
+    $for M in range(MR):
+      $for N in range(NR):
+        const int32_t vq31product${M}x${N} = (int32_t) (uint32_t) ((uint64_t) (vproduct${M}x${N} + vq31rounding) >> 31);
+
+    const int32_t vremainder_mask = params->scalar.remainder_mask;
+    $for M in range(MR):
+      $for N in range(NR):
+        const int32_t vremainder${M}x${N} = (vq31product${M}x${N} & vremainder_mask) - (int32_t) (vq31product${M}x${N} < 0);
+
+    const uint32_t vshift = params->scalar.shift;
+    const int32_t vremainder_threshold = params->scalar.remainder_threshold;
+    $for M in range(MR):
+      $for N in range(NR):
+        int32_t vout${M}x${N} = asr_s32(vq31product${M}x${N}, vshift) + (int32_t) (vremainder${M}x${N} > vremainder_threshold);
+
+    const int32_t vout_min = params->scalar.output_min_less_zero_point;
+    $for M in range(MR):
+      $for N in range(NR):
+        vout${M}x${N} = XNN_UNPREDICTABLE(vout${M}x${N} < vout_min) ? vout_min : vout${M}x${N};
+
+    const int32_t vout_max = params->scalar.output_max_less_zero_point;
+    $for M in range(MR):
+      $for N in range(NR):
+        vout${M}x${N} = XNN_UNPREDICTABLE(vout${M}x${N} > vout_max) ? vout_max : vout${M}x${N};
+
+    const int32_t voutput_zero_point = params->scalar.output_zero_point;
+    $for M in range(MR):
+      $for N in range(NR):
+        vout${M}x${N} += voutput_zero_point;
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in reversed(range(MR)):
+        $for N in range(NR):
+          c${M}[${N}] = (int8_t) vout${M}x${N};
+
+      $for M in reversed(range(MR)):
+        c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
+
+      a = (const int8_t**restrict) ((uintptr_t) a - ks);
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(NR.bit_length() - 1)):
+        if (nc & ${1 << LOG2N}) {
+          $for M in reversed(range(MR)):
+            $for N in range(1 << LOG2N):
+              c${M}[${N}] = (int8_t) vout${M}x${N};
+            $if LOG2N != 0:
+              $for N in range(1 << (LOG2N - 1)):
+                vout${M}x${N} = vout${M}x${N + (1 << LOG2N)};
+              c${M} += ${1 << LOG2N};
+        }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

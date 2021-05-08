@@ -4,6 +4,17 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+#################################### Scalar ###################################
+tools/xngen src/qs8-igemm/scalar.c.in -D MR=1 -D NR=2 -o src/qs8-igemm/gen/1x2-minmax-scalar.c
+tools/xngen src/qs8-igemm/scalar.c.in -D MR=2 -D NR=2 -o src/qs8-igemm/gen/2x2-minmax-scalar.c
+tools/xngen src/qs8-igemm/scalar.c.in -D MR=3 -D NR=2 -o src/qs8-igemm/gen/3x2-minmax-scalar.c
+tools/xngen src/qs8-igemm/scalar.c.in -D MR=4 -D NR=2 -o src/qs8-igemm/gen/4x2-minmax-scalar.c
+
+tools/xngen src/qs8-igemm/scalar.c.in -D MR=1 -D NR=4 -o src/qs8-igemm/gen/1x4-minmax-scalar.c
+tools/xngen src/qs8-igemm/scalar.c.in -D MR=2 -D NR=4 -o src/qs8-igemm/gen/2x4-minmax-scalar.c
+tools/xngen src/qs8-igemm/scalar.c.in -D MR=3 -D NR=4 -o src/qs8-igemm/gen/3x4-minmax-scalar.c
+tools/xngen src/qs8-igemm/scalar.c.in -D MR=4 -D NR=4 -o src/qs8-igemm/gen/4x4-minmax-scalar.c
+
 ################################## WAsm SIMD ##################################
 ### C8 micro-kernels
 tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=1 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c8-minmax-wasmsimd-ld64.c
