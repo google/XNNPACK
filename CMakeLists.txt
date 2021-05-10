@@ -618,6 +618,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/math/sigmoid-scalar-rr2-lut64-p2-div.c
   src/math/sigmoid-scalar-rr2-lut2048-p1-div.c
   src/math/sigmoid-scalar-rr2-p5-div.c
+  src/qs8-dwconv/gen/up1x9-minmax-scalar.c
+  src/qs8-dwconv/gen/up2x9-minmax-scalar.c
+  src/qs8-dwconv/gen/up4x9-minmax-scalar.c
   src/qs8-gemm/gen/1x2-minmax-scalar.c
   src/qs8-gemm/gen/2x2-minmax-scalar.c
   src/qs8-gemm/gen/3x2-minmax-scalar.c

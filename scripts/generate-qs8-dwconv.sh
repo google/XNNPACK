@@ -4,6 +4,11 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################### Scalar ###################################
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up1x9-minmax-scalar.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up2x9-minmax-scalar.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up4x9-minmax-scalar.c
+
 ################################## ARM NEON ##################################
 tools/xngen src/qs8-dwconv/unipass-neon-mul16.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up8x9-minmax-neon-mul16.c
 tools/xngen src/qs8-dwconv/unipass-neon-mul16.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up16x9-minmax-neon-mul16.c
