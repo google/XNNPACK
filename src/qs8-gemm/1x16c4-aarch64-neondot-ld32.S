@@ -28,12 +28,12 @@
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld32
 0:
         # Load initial bias from w into accumulators
-        ADD     x2, x2, 3           // kc = (kc + 3) & ~3
+        ADD     x2, x2, 3               // kc = (kc + 3) & ~3
         LDP     q28, q29, [x5], 32
         BIC     x2, x2, 3
         LDP     q30, q31, [x5], 32
-        MOV     x0, x2              // k = kc.  assumes kc > 0
-        LDR     x11, [sp, 8]        // params
+        MOV     x0, x2                  // k = kc.  assumes kc > 0
+        LDR     x11, [sp, 8]            // params
 
         # Main loop - 4 bytes of A
         .p2align 3
@@ -53,23 +53,23 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld32
         # Apply params - scale, shift, bias and clamp
         LD2R    {v0.4s, v1.4s}, [x11], 8
         CMEQ    v2.4s, v1.4s, 0
-        SQRDMULH  v4.4s, v28.4s, v0.4s
-        SQRDMULH  v5.4s, v29.4s, v0.4s
-        SQRDMULH  v6.4s, v30.4s, v0.4s
-        SQRDMULH  v7.4s, v31.4s, v0.4s
+        SQRDMULH v4.4s, v28.4s, v0.4s
+        SQRDMULH v5.4s, v29.4s, v0.4s
+        SQRDMULH v6.4s, v30.4s, v0.4s
+        SQRDMULH v7.4s, v31.4s, v0.4s
         BIC     v28.16b, v28.16b, v2.16b
         BIC     v29.16b, v29.16b, v2.16b
         BIC     v30.16b, v30.16b, v2.16b
         BIC     v31.16b, v31.16b, v2.16b
-        SSRA    v4.4s, v28.4s, 31  // signed shift right accumulate
+        SSRA    v4.4s, v28.4s, 31       // signed shift right accumulate
         SSRA    v5.4s, v29.4s, 31
         SSRA    v6.4s, v30.4s, 31
         SSRA    v7.4s, v31.4s, 31
-        SRSHL   v4.4s, v4.4s, v1.4s  // signed rounding shift left
+        SRSHL   v4.4s, v4.4s, v1.4s     // signed rounding shift left
         SRSHL   v5.4s, v5.4s, v1.4s
         SRSHL   v6.4s, v6.4s, v1.4s
         SRSHL   v7.4s, v7.4s, v1.4s
-        LD1R    {v2.8h}, [x11], 2   // add bias
+        LD1R    {v2.8h}, [x11], 2       // add bias
         SQXTN   v4.4h, v4.4s
         SQXTN   v6.4h, v6.4s
         SQXTN2  v4.8h, v5.4s
@@ -77,7 +77,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld32
         LD2R    {v0.16b, v1.16b}, [x11]   // clamp to min/max
         SQADD   v4.8h, v4.8h, v2.8h
         SQADD   v6.8h, v6.8h, v2.8h
-        LDR     x12, [sp]   // cn_stride
+        LDR     x12, [sp]               // cn_stride
         SQXTN   v4.8b, v4.8h
         SQXTN2  v4.16b, v6.8h
         SUBS    x1, x1, 16
@@ -87,7 +87,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x16c4__aarch64_neondot_ld32
 
         # Store full 1 x 16
         ST1     {v4.16b}, [x6], x12
-        SUB      x3,  x3, x2         // a0 -= kc
+        SUB     x3,  x3, x2             // a0 -= kc
         B.NE    0b
         RET
 

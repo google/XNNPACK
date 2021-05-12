@@ -38,183 +38,183 @@
 BEGIN_FUNCTION xnn_f32_gemm_ukernel_4x4__aarch32_vfp_ld64
         .arm
 #ifndef __APPLE__
-        .arch armv6
-        .fpu vfp
+        .arch   armv6
+        .fpu    vfp
 #endif
         // Push 96 bytes
-        PUSH   {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
-        VPUSH  {d8-d15}                            // +64 = 96
+        PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
+        VPUSH   {d8-d15}                            // +64 = 96
 
-        LDR     r11, [sp, 96]         // Load a_stride
-        LDRD    r6, r7, [sp, 104]     // Load c and cm_stride
+        LDR     r11, [sp, 96]           // Load a_stride
+        LDRD    r6, r7, [sp, 104]       // Load c and cm_stride
 
         // Clamp A and C pointers
-        CMP    r0, 2                 // if mr >= 2
-        ADD    r12, r3, r11          //   a1 = a0 + a_stride
-        ADD    r4, r6, r7            //   c1 = c0 + cm_stride
-        MOVLO  r12, r3               // a1
-        MOVLO  r4, r6                // c1
+        CMP     r0, 2                   // if mr >= 2
+        ADD     r12, r3, r11            //   a1 = a0 + a_stride
+        ADD     r4, r6, r7              //   c1 = c0 + cm_stride
+        MOVLO   r12, r3                 // a1
+        MOVLO   r4, r6                  // c1
 
-        LDR     r9, [sp, 100]        // Load w
+        LDR     r9, [sp, 100]           // Load w
 
                                      // if mr > 2
-        ADD    r10, r12, r11         //   a2 = a1 + a_stride
-        ADD    r8, r4, r7            //   c2 = c1 + cm_stride
-        MOVLS  r10, r12              // a2
-        MOVLS  r8, r4                // c2
+        ADD     r10, r12, r11           //   a2 = a1 + a_stride
+        ADD     r8, r4, r7              //   c2 = c1 + cm_stride
+        MOVLS   r10, r12                // a2
+        MOVLS   r8, r4                  // c2
 
-        CMP    r0, 4                 // if mr >=4
-        ADD    r0, r10, r11          //   a3 = a2 + a_stride
-        ADD    r7, r8, r7            //   c3 = c2 + cm_stride
-        LDR    r11, [sp, 112]        // Load cn_stride
-        MOVLO  r0, r10               // a3
-        MOVLO  r7, r8                // c3
+        CMP     r0, 4                   // if mr >=4
+        ADD     r0, r10, r11            //   a3 = a2 + a_stride
+        ADD     r7, r8, r7              //   c3 = c2 + cm_stride
+        LDR     r11, [sp, 112]          // Load cn_stride
+        MOVLO   r0, r10                 // a3
+        MOVLO   r7, r8                  // c3
 
 0:
         # Load initial bias from w into accumulators
-        VLDM        r9!, {d8-d9}   // Bias
-        SUBS        r5, r2, 8
-        VMOV.F64    d10, d8
-        VMOV.F64    d12, d8
-        VMOV.F64    d14, d8
-        VMOV.F64    d11, d9
-        VMOV.F64    d13, d9
-        VMOV.F64    d15, d9
-        BLO         3f               // less than 2 channels?
+        VLDM    r9!, {d8-d9}            // Bias
+        SUBS    r5, r2, 8
+        VMOV.F64 d10, d8
+        VMOV.F64 d12, d8
+        VMOV.F64 d14, d8
+        VMOV.F64 d11, d9
+        VMOV.F64 d13, d9
+        VMOV.F64 d15, d9
+        BLO     3f                      // less than 2 channels?
 
         // Main loop - 2 floats of A (8 bytes)
 1:
-        VLDM        r3!, {d0}        // A0
-        VLDM        r9!, {d4-d5}     // B0
-        VLDM       r12!, {d1}        // A1
-        VLDM       r10!, {d2}        // A2
-        VLDM        r0!, {d3}        // A3
+        VLDM    r3!, {d0}               // A0
+        VLDM    r9!, {d4-d5}            // B0
+        VLDM    r12!, {d1}              // A1
+        VLDM    r10!, {d2}              // A2
+        VLDM    r0!, {d3}               // A3
 
-        VMLA.F32    s16, s8, s0
-        VMLA.F32    s17, s9, s0
-        VMLA.F32    s20, s8, s2
-        VMLA.F32    s21, s9, s2
-        VMLA.F32    s24, s8, s4
-        VMLA.F32    s25, s9, s4
-        VMLA.F32    s28, s8, s6
-        VMLA.F32    s29, s9, s6
+        VMLA.F32 s16, s8, s0
+        VMLA.F32 s17, s9, s0
+        VMLA.F32 s20, s8, s2
+        VMLA.F32 s21, s9, s2
+        VMLA.F32 s24, s8, s4
+        VMLA.F32 s25, s9, s4
+        VMLA.F32 s28, s8, s6
+        VMLA.F32 s29, s9, s6
 
-        VLDM        r9!, {d6-d7}     // B1
+        VLDM    r9!, {d6-d7}            // B1
 
-        VMLA.F32    s18, s10, s0
-        VMLA.F32    s19, s11, s0
-        VMLA.F32    s22, s10, s2
-        VMLA.F32    s23, s11, s2
-        VMLA.F32    s26, s10, s4
-        VMLA.F32    s27, s11, s4
-        VMLA.F32    s30, s10, s6
-        VMLA.F32    s31, s11, s6
+        VMLA.F32 s18, s10, s0
+        VMLA.F32 s19, s11, s0
+        VMLA.F32 s22, s10, s2
+        VMLA.F32 s23, s11, s2
+        VMLA.F32 s26, s10, s4
+        VMLA.F32 s27, s11, s4
+        VMLA.F32 s30, s10, s6
+        VMLA.F32 s31, s11, s6
 
-        VMLA.F32    s16, s12, s1
-        VMLA.F32    s17, s13, s1
-        VMLA.F32    s20, s12, s3
-        VMLA.F32    s21, s13, s3
-        VMLA.F32    s24, s12, s5
-        VMLA.F32    s25, s13, s5
-        VMLA.F32    s28, s12, s7
-        VMLA.F32    s29, s13, s7
+        VMLA.F32 s16, s12, s1
+        VMLA.F32 s17, s13, s1
+        VMLA.F32 s20, s12, s3
+        VMLA.F32 s21, s13, s3
+        VMLA.F32 s24, s12, s5
+        VMLA.F32 s25, s13, s5
+        VMLA.F32 s28, s12, s7
+        VMLA.F32 s29, s13, s7
 
-        SUBS        r5, r5, 8
+        SUBS    r5, r5, 8
 
-        VMLA.F32    s18, s14, s1
-        VMLA.F32    s19, s15, s1
-        VMLA.F32    s22, s14, s3
-        VMLA.F32    s23, s15, s3
-        VMLA.F32    s26, s14, s5
-        VMLA.F32    s27, s15, s5
-        VMLA.F32    s30, s14, s7
-        VMLA.F32    s31, s15, s7
+        VMLA.F32 s18, s14, s1
+        VMLA.F32 s19, s15, s1
+        VMLA.F32 s22, s14, s3
+        VMLA.F32 s23, s15, s3
+        VMLA.F32 s26, s14, s5
+        VMLA.F32 s27, s15, s5
+        VMLA.F32 s30, s14, s7
+        VMLA.F32 s31, s15, s7
 
-        BHS         1b
+        BHS     1b
 
         // Is there a remainder?- 1 floats of A (4 bytes)
-        TST         r5, 4
-        BNE         3f
+        TST     r5, 4
+        BNE     3f
 
 2:
 
-        SUBS        r1, r1, 4
-        BLO         4f
+        SUBS    r1, r1, 4
+        BLO     4f
 
         // Store full 4 x 4
-        VSTM        r6, {d8-d9}
-        SUB         r0, r0, r2
-        ADD         r6, r11
-        VSTM        r4, {d10-d11}
-        SUB         r10, r10, r2
-        ADD         r4, r11
-        VSTM        r8, {d12-d13}
-        SUB         r12, r12, r2
-        ADD         r8, r11
-        VSTM        r7, {d14-d15}
-        SUB         r3, r3, r2
-        ADD         r7, r11
-        BHI         0b
+        VSTM    r6, {d8-d9}
+        SUB     r0, r0, r2
+        ADD     r6, r11
+        VSTM    r4, {d10-d11}
+        SUB     r10, r10, r2
+        ADD     r4, r11
+        VSTM    r8, {d12-d13}
+        SUB     r12, r12, r2
+        ADD     r8, r11
+        VSTM    r7, {d14-d15}
+        SUB     r3, r3, r2
+        ADD     r7, r11
+        BHI     0b
 
-        VPOP        {d8-d15}
-        POP         {r4, r5, r6, r7, r8, r9, r10, r11}
-        BX          lr
+        VPOP    {d8-d15}
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
+        BX      lr
 
 3:
         // Remainder- 1 floats of A (4 bytes)
-        VLDM         r3!, {s0}       // A0
-        VLDM         r9!, {d6-d7}    // B
-        VLDM        r12!, {s1}       // A1
-        VLDM        r10!, {s2}       // A2
-        VLDM         r0!, {s3}       // A3
+        VLDM    r3!, {s0}               // A0
+        VLDM    r9!, {d6-d7}            // B
+        VLDM    r12!, {s1}              // A1
+        VLDM    r10!, {s2}              // A2
+        VLDM    r0!, {s3}               // A3
 
-        VMLA.F32    s16, s12, s0
-        VMLA.F32    s17, s13, s0
-        VMLA.F32    s18, s14, s0
-        VMLA.F32    s19, s15, s0
+        VMLA.F32 s16, s12, s0
+        VMLA.F32 s17, s13, s0
+        VMLA.F32 s18, s14, s0
+        VMLA.F32 s19, s15, s0
 
-        VMLA.F32    s20, s12, s1
-        VMLA.F32    s21, s13, s1
-        VMLA.F32    s22, s14, s1
-        VMLA.F32    s23, s15, s1
+        VMLA.F32 s20, s12, s1
+        VMLA.F32 s21, s13, s1
+        VMLA.F32 s22, s14, s1
+        VMLA.F32 s23, s15, s1
 
-        VMLA.F32    s24, s12, s2
-        VMLA.F32    s25, s13, s2
-        VMLA.F32    s26, s14, s2
-        VMLA.F32    s27, s15, s2
+        VMLA.F32 s24, s12, s2
+        VMLA.F32 s25, s13, s2
+        VMLA.F32 s26, s14, s2
+        VMLA.F32 s27, s15, s2
 
-        VMLA.F32    s28, s12, s3
-        VMLA.F32    s29, s13, s3
-        VMLA.F32    s30, s14, s3
-        VMLA.F32    s31, s15, s3
+        VMLA.F32 s28, s12, s3
+        VMLA.F32 s29, s13, s3
+        VMLA.F32 s30, s14, s3
+        VMLA.F32 s31, s15, s3
 
-        B           2b
+        B       2b
 
         // Store odd width
 4:
-        TST        r1, 2
-        BEQ        5f
-        VSTM       r6!, {d8}
-        VMOV.F32   s16, s18
-        VSTM       r4!, {d10}
-        VMOV.F32   s20, s22
-        VSTM       r8!, {d12}
-        VMOV.F32   s24, s26
-        VSTM       r7!, {d14}
-        VMOV.F32   s28, s30
+        TST     r1, 2
+        BEQ     5f
+        VSTM    r6!, {d8}
+        VMOV.F32 s16, s18
+        VSTM    r4!, {d10}
+        VMOV.F32 s20, s22
+        VSTM    r8!, {d12}
+        VMOV.F32 s24, s26
+        VSTM    r7!, {d14}
+        VMOV.F32 s28, s30
 
 5:
-        TST         r1, 1
-        BEQ         6f
-        VSTR        s16, [r6]
-        VSTR        s20, [r4]
-        VSTR        s24, [r8]
-        VSTR        s28, [r7]
+        TST     r1, 1
+        BEQ     6f
+        VSTR    s16, [r6]
+        VSTR    s20, [r4]
+        VSTR    s24, [r8]
+        VSTR    s28, [r7]
 
 6:
-        VPOP        {d8-d15}
-        POP         {r4, r5, r6, r7, r8, r9, r10, r11}
-        BX          lr
+        VPOP    {d8-d15}
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
+        BX      lr
 
 END_FUNCTION xnn_f32_gemm_ukernel_4x4__aarch32_vfp_ld64
 

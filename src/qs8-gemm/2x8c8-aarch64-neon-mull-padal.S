@@ -32,21 +32,21 @@
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
 
         # Clamp A and C pointers
-        CMP     x0, 2             // if mr < 2
+        CMP     x0, 2                   // if mr < 2
         STP     d10, d11, [sp, -48]!
-        ADD     x4, x3, x4        // a1 = a0 + a_stride
+        ADD     x4, x3, x4              // a1 = a0 + a_stride
         STP     d12, d13, [sp, 16]
-        ADD     x7, x6, x7        // c1 = c0 + cm_stride
+        ADD     x7, x6, x7              // c1 = c0 + cm_stride
         STP     d14, d15, [sp, 32]
-        CSEL    x4, x3, x4, LO    //   a1 = a0
-        ADD     x2, x2, 7         // kc = (kc + 7) & ~7
-        CSEL    x7, x6, x7, LO    //   c1 = c0
+        CSEL    x4, x3, x4, LO          //   a1 = a0
+        ADD     x2, x2, 7               // kc = (kc + 7) & ~7
+        CSEL    x7, x6, x7, LO          //   c1 = c0
         BIC     x2, x2, 7
 
         .p2align 3
 0:
         # Load initial bias from w into accumulators
-        MOV     x0, x2   // k = kc
+        MOV     x0, x2                  // k = kc
         LDP     s16, s18, [x5], 8
         MOV     v17.16b, v16.16b
         MOV     v19.16b, v18.16b
@@ -58,7 +58,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
         MOV     v27.16b, v26.16b
         LDP     s28, s30, [x5], 8
         MOV     v29.16b, v28.16b
-        LDP     x10, x9, [sp, 48]  // cn_stride, params
+        LDP     x10, x9, [sp, 48]       // cn_stride, params
         MOV     v31.16b, v30.16b
 
         # Main loop - 8 bytes of A
@@ -68,8 +68,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
         LDP     d4, d5, [x5]
         LDR     d1, [x4], 8
         LDP     d6, d7, [x5, 16]
-        SMULL    v2.8h, v4.8b, v0.8b
-        SMULL    v3.8h, v4.8b, v1.8b
+        SMULL   v2.8h, v4.8b, v0.8b
+        SMULL   v3.8h, v4.8b, v1.8b
         SMULL   v10.8h, v5.8b, v0.8b
         SMULL   v11.8h, v5.8b, v1.8b
         SMULL   v12.8h, v6.8b, v0.8b
@@ -81,9 +81,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
         SMULL   v15.8h, v7.8b, v1.8b
         SADALP  v19.4s, v11.8h
         LDP     d4, d5, [x5, 32]
-        SMULL    v2.8h, v4.8b, v0.8b
+        SMULL   v2.8h, v4.8b, v0.8b
         SADALP  v20.4s, v12.8h
-        SMULL    v3.8h, v4.8b, v1.8b
+        SMULL   v3.8h, v4.8b, v1.8b
         SADALP  v21.4s, v13.8h
         SMULL   v10.8h, v5.8b, v0.8b
         SADALP  v22.4s, v14.8h
@@ -123,13 +123,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
         ADDP    v3.4s, v25.4s, v29.4s
 
         # Apply params - scale, shift, bias and clamp
-        SQRDMULH        v0.4s, v0.4s, v4.4s
-        SQRDMULH        v1.4s, v1.4s, v4.4s
-        SQRDMULH        v2.4s, v2.4s, v4.4s
-        SQRDMULH        v3.4s, v3.4s, v4.4s
+        SQRDMULH v0.4s, v0.4s, v4.4s
+        SQRDMULH v1.4s, v1.4s, v4.4s
+        SQRDMULH v2.4s, v2.4s, v4.4s
+        SQRDMULH v3.4s, v3.4s, v4.4s
         CMEQ    v4.4s, v7.4s, 0
         LD1R    {v5.8h}, [x9], 2
-        BIC      v6.16b, v0.16b, v4.16b
+        BIC     v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
         BIC     v17.16b, v2.16b, v4.16b
         BIC     v4.16b,  v3.16b, v4.16b
@@ -158,9 +158,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mull_padal
 
         # Store full 2 x 8
         ST1     {v0.8b}, [x6], x10
-        SUB     x3, x3, x2     // a0 -= kc
+        SUB     x3, x3, x2              // a0 -= kc
         ST1     {v0.d}[1], [x7], x10
-        SUB     x4, x4, x2     // a1 -= kc
+        SUB     x4, x4, x2              // a1 -= kc
         B.HI    0b
 
         # Restore d10-d15 from stack

@@ -33,16 +33,16 @@
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53
 
-        LDP     x10, x9, [sp]         // cn_stride, params
+        LDP     x10, x9, [sp]           // cn_stride, params
 
-        ADD     x2, x2, 7             // kc = (kc + 7) & ~7
+        ADD     x2, x2, 7               // kc = (kc + 7) & ~7
         BIC     x2, x2, 7
 
         .p2align 3
 0:
         # Load initial bias from w into accumulators
         LDP     s16, s18, [x5], 8
-        SUBS    x0, x2, 16            // k = kc - 16
+        SUBS    x0, x2, 16              // k = kc - 16
         LDP     s20, s22, [x5], 8
         LDP     s24, s26, [x5], 8
         LDP     s28, s30, [x5], 8
@@ -50,13 +50,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         B.LO    4f
 
         # Prologue: load A0 and 4 B's
-        LDP     d0, d6, [x3], 16      // Read A0
-        LDP     d4, d5, [x5]          // Read B
-        LDP     d2, d3, [x5, 64]      // Read B
-        LDR     x16, [x5, 16]         // Read B
+        LDP     d0, d6, [x3], 16        // Read A0
+        LDP     d4, d5, [x5]            // Read B
+        LDP     d2, d3, [x5, 64]        // Read B
+        LDR     x16, [x5, 16]           // Read B
 
         # Is there at least 16 bytes for main loop?
-        SUBS    x0, x0, 16            // k = k - 16
+        SUBS    x0, x0, 16              // k = k - 16
         B.LO    2f
 
         # Main loop - 16 bytes of A
@@ -107,20 +107,20 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
 
         // Group 3 - 15 cycles
         SMULL   v21.8h, v4.8b, v0.8b
-        LDR     x7, [x3], 8           // Read A0
+        LDR     x7, [x3], 8             // Read A0
         SMULL   v23.8h, v5.8b, v0.8b
-        LDR     x17, [x5, 192]        // Read B
+        LDR     x17, [x5, 192]          // Read B
         SADALP  v24.4s, v17.8h
         SUBS    x0, x0, 16
         SADALP  v26.4s, v19.8h
-        LDR     d5, [x5, 136]         // Read B
+        LDR     d5, [x5, 136]           // Read B
         INS     v4.d[0], x16
         SMLAL   v21.8h, v2.8b, v6.8b
         LDR     x16, [x5, 144]
         SMLAL   v23.8h, v3.8b, v6.8b
-        LDR     d6, [x3], 8           // Read A0
+        LDR     d6, [x3], 8             // Read A0
         INS     v0.d[0], x7
-        LDR     d3, [x5, 200]         // Read B
+        LDR     d3, [x5, 200]           // Read B
         INS     v2.d[0], x17
         SADALP  v28.4s, v21.8h
         ADD     x5, x5, 128
@@ -198,11 +198,11 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         ADDP    v1.4s, v24.4s, v28.4s
 
         # Apply params - scale, shift, bias and clamp
-        SQRDMULH        v0.4s, v0.4s, v4.4s
-        SQRDMULH        v1.4s, v1.4s, v4.4s
+        SQRDMULH v0.4s, v0.4s, v4.4s
+        SQRDMULH v1.4s, v1.4s, v4.4s
         CMEQ    v4.4s, v7.4s, 0
         LD1R    {v5.8h}, [x9], 2
-        BIC      v6.16b, v0.16b, v4.16b
+        BIC     v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
         SSRA    v0.4s, v6.4s, 31
         SSRA    v1.4s, v16.4s, 31
@@ -216,13 +216,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex
         LD1R    {v1.16b}, [x9], 1
         LD1R    {v17.16b}, [x9]
         SMAX    v0.8b, v0.8b, v1.8b
-        SUB     x9, x9, 11       // rewind params pointer
+        SUB     x9, x9, 11              // rewind params pointer
         SMIN    v0.8b, v0.8b, v17.8b
         B.LO    5f
 
         # Store full 1 x 8
         ST1     {v0.8b}, [x6], x10
-        SUB     x3, x3, x2     // a0 -= kc
+        SUB     x3, x3, x2              // a0 -= kc
         B.HI    0b
         RET
 

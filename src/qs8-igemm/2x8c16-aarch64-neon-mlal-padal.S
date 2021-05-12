@@ -34,14 +34,14 @@
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
 
         # Clamp C pointers
-        LDP     x10, x11, [sp]        // Load cn_stride, a_offset
-        CMP     x0, 2                 // if mr < 2
-        LDP     x12, x8, [sp, 16]     // Load zero, params pointer
-        ADD     x7, x6, x7            // c1 = c0 + cm_stride
+        LDP     x10, x11, [sp]          // Load cn_stride, a_offset
+        CMP     x0, 2                   // if mr < 2
+        LDP     x12, x8, [sp, 16]       // Load zero, params pointer
+        ADD     x7, x6, x7              // c1 = c0 + cm_stride
         STP     d10, d11, [sp, -48]!
-        ADD     x2, x2, 15            // kc = (kc + 15) & ~15
+        ADD     x2, x2, 15              // kc = (kc + 15) & ~15
         STP     d12, d13, [sp, 16]
-        CSEL    x7, x6, x7, LO        //   c1 = c0
+        CSEL    x7, x6, x7, LO          //   c1 = c0
         STP     d14, d15, [sp, 32]
         BIC     x2, x2, 15
 
@@ -60,21 +60,21 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         LDP     s28, s30, [x5], 8
         MOV     v29.16b, v28.16b
         MOV     v31.16b, v30.16b
-        MOV     x9, x3  // p = ks
+        MOV     x9, x3                  // p = ks
 
         .p2align 3
 1:
         # Load next 2 A pointers
         LDP     x13, x15, [x4], 16
 
-        CMP     x13, x12           // if a0 == zero
-        ADD     x13, x13, x11      // a0 += a_offset
-        CSEL    x13, x12, x13, EQ  //   a0 = zero, else += a0 + a_offset
-        CMP     x15, x12           // if a1 == zero
-        ADD     x15, x15, x11      // a1 += a_offset
-        CSEL    x15, x12, x15, EQ  //   a1 = zero, else += a1 + a_offset
+        CMP     x13, x12                // if a0 == zero
+        ADD     x13, x13, x11           // a0 += a_offset
+        CSEL    x13, x12, x13, EQ       //   a0 = zero, else += a0 + a_offset
+        CMP     x15, x12                // if a1 == zero
+        ADD     x15, x15, x11           // a1 += a_offset
+        CSEL    x15, x12, x15, EQ       //   a1 = zero, else += a1 + a_offset
 
-        MOV     x0, x2             // k = kc
+        MOV     x0, x2                  // k = kc
 
         # Main loop - 16 bytes of A
         .p2align 3
@@ -83,12 +83,12 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         LDP     q4, q5, [x5]
         LDR     q1, [x15], 16
         LDP     q6, q7, [x5, 32]
-        SMULL    v2.8h, v4.8b, v0.8b
-        SMULL    v3.8h, v4.8b, v1.8b
+        SMULL   v2.8h, v4.8b, v0.8b
+        SMULL   v3.8h, v4.8b, v1.8b
         SMULL   v10.8h, v5.8b, v0.8b
         SMULL   v11.8h, v5.8b, v1.8b
-        SMLAL2   v2.8h, v4.16b, v0.16b
-        SMLAL2   v3.8h, v4.16b, v1.16b
+        SMLAL2  v2.8h, v4.16b, v0.16b
+        SMLAL2  v3.8h, v4.16b, v1.16b
         SMLAL2  v10.8h, v5.16b, v0.16b
         SMLAL2  v11.8h, v5.16b, v1.16b
         SMULL   v12.8h, v6.8b, v0.8b
@@ -104,9 +104,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SMLAL2  v13.8h, v6.16b, v1.16b
         SMLAL2  v14.8h, v7.16b, v0.16b
         SMLAL2  v15.8h, v7.16b, v1.16b
-        SMULL    v2.8h, v4.8b, v0.8b
+        SMULL   v2.8h, v4.8b, v0.8b
         SADALP  v20.4s, v12.8h
-        SMULL    v3.8h, v4.8b, v1.8b
+        SMULL   v3.8h, v4.8b, v1.8b
         SADALP  v21.4s, v13.8h
         SMULL   v10.8h, v5.8b, v0.8b
         SADALP  v22.4s, v14.8h
@@ -114,8 +114,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         SADALP  v23.4s, v15.8h
         LDP     q6, q7, [x5, 96]
 
-        SMLAL2   v2.8h, v4.16b, v0.16b
-        SMLAL2   v3.8h, v4.16b, v1.16b
+        SMLAL2  v2.8h, v4.16b, v0.16b
+        SMLAL2  v3.8h, v4.16b, v1.16b
         SMLAL2  v10.8h, v5.16b, v0.16b
         SMLAL2  v11.8h, v5.16b, v1.16b
         ADD     x5, x5, 128
@@ -139,7 +139,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         B.HI    2b
 
         # ks loop
-        SUBS    x9, x9, 16  // ks -= MR * sizeof(int8_t*)
+        SUBS    x9, x9, 16              // ks -= MR * sizeof(int8_t*)
         B.HI    1b
 
         # Add columns
@@ -159,13 +159,13 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         ADDP    v3.4s, v25.4s, v29.4s
 
         # Apply params - scale, shift, bias and clamp
-        SQRDMULH        v0.4s, v0.4s, v4.4s
-        SQRDMULH        v1.4s, v1.4s, v4.4s
-        SQRDMULH        v2.4s, v2.4s, v4.4s
-        SQRDMULH        v3.4s, v3.4s, v4.4s
+        SQRDMULH v0.4s, v0.4s, v4.4s
+        SQRDMULH v1.4s, v1.4s, v4.4s
+        SQRDMULH v2.4s, v2.4s, v4.4s
+        SQRDMULH v3.4s, v3.4s, v4.4s
         CMEQ    v4.4s, v7.4s, 0
         LD1R    {v5.8h}, [x8], 2
-        BIC      v6.16b, v0.16b, v4.16b
+        BIC     v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
         BIC     v17.16b, v2.16b, v4.16b
         BIC     v4.16b,  v3.16b, v4.16b
@@ -189,13 +189,13 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c16__aarch64_neon_mlal_padal
         LD1R    {v1.16b}, [x8], 1
         LD1R    {v2.16b}, [x8]
         SMAX    v0.16b, v0.16b, v1.16b
-        SUB     x8, x8, 11       // rewind params pointer
+        SUB     x8, x8, 11              // rewind params pointer
         SMIN    v0.16b, v0.16b, v2.16b
         B.LO    3f
 
         # Store full 2 x 8
         ST1     {v0.d}[1], [x7], x10
-        SUB     x4, x4, x3  // a -= ks
+        SUB     x4, x4, x3              // a -= ks
         ST1     {v0.8b}, [x6], x10
 
         # nc loop
