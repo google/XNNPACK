@@ -649,6 +649,12 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/qs8-requantization/precise-scalar-unsigned32.c
   src/qs8-requantization/precise-scalar-unsigned64.c
   src/qs8-requantization/q31-scalar.c
+  src/qs8-vadd/gen/minmax-scalar-x1.c
+  src/qs8-vadd/gen/minmax-scalar-x2.c
+  src/qs8-vadd/gen/minmax-scalar-x4.c
+  src/qs8-vaddc/gen/minmax-scalar-x1.c
+  src/qs8-vaddc/gen/minmax-scalar-x2.c
+  src/qs8-vaddc/gen/minmax-scalar-x4.c
   src/qu8-avgpool/9p8x-minmax-scalar-c1.c
   src/qu8-avgpool/9x-minmax-scalar-c1.c
   src/qu8-dwconv/up1x9-minmax-scalar.c

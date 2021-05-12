@@ -4,6 +4,15 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################### Scalar ###################################
+tools/xngen src/qs8-vadd/scalar.c.in -D BATCH_TILE=1 -o src/qs8-vadd/gen/minmax-scalar-x1.c
+tools/xngen src/qs8-vadd/scalar.c.in -D BATCH_TILE=2 -o src/qs8-vadd/gen/minmax-scalar-x2.c
+tools/xngen src/qs8-vadd/scalar.c.in -D BATCH_TILE=4 -o src/qs8-vadd/gen/minmax-scalar-x4.c
+
+tools/xngen src/qs8-vaddc/scalar.c.in -D BATCH_TILE=1 -o src/qs8-vaddc/gen/minmax-scalar-x1.c
+tools/xngen src/qs8-vaddc/scalar.c.in -D BATCH_TILE=2 -o src/qs8-vaddc/gen/minmax-scalar-x2.c
+tools/xngen src/qs8-vaddc/scalar.c.in -D BATCH_TILE=4 -o src/qs8-vaddc/gen/minmax-scalar-x4.c
+
 ################################## WAsm SIMD ##################################
 tools/xngen src/qs8-vadd/wasmsimd.c.in -D BATCH_TILE=8  -o src/qs8-vadd/gen/minmax-wasmsimd-x8.c
 tools/xngen src/qs8-vadd/wasmsimd.c.in -D BATCH_TILE=16 -o src/qs8-vadd/gen/minmax-wasmsimd-x16.c
