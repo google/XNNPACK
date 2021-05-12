@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
 #include <xnnpack/scalar-utils.h>
 
 
@@ -195,64 +196,59 @@ void xnn_qs8_dwconv_minmax_ukernel_up2x9__scalar(
       int32_t vout0 = asr_s32(vq31product0, vshift) + (int32_t) (vremainder0 > vremainder_threshold);
       int32_t vout1 = asr_s32(vq31product1, vshift) + (int32_t) (vremainder1 > vremainder_threshold);
 
-      vout0 = XNN_UNPREDICTABLE(vout0 < vout_min) ? vout_min : vout0;
-      vout1 = XNN_UNPREDICTABLE(vout1 < vout_min) ? vout_min : vout1;
+      vout0 = math_max_s32(vout0, vout_min);
+      vout1 = math_max_s32(vout1, vout_min);
 
-      vout0 = XNN_UNPREDICTABLE(vout0 > vout_max) ? vout_max : vout0;
-      vout1 = XNN_UNPREDICTABLE(vout1 > vout_max) ? vout_max : vout1;
+      vout0 = math_min_s32(vout0, vout_max);
+      vout1 = math_min_s32(vout1, vout_max);
 
       vout0 += voutput_zero_point;
       vout1 += voutput_zero_point;
 
-      output[0] = vout0;
-      output[1] = vout1;
+      output[0] = (int8_t) vout0;
+      output[1] = (int8_t) vout1;
       output += 2;
     }
     if XNN_UNLIKELY(c != 0) {
-      const int8_t* k = (const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t));
-      {
-        int32_t vacc = *((const int32_t*) w);
+      int32_t vacc = *((const int32_t*) w);
 
-        const int32_t vi0 = *i0++;
-        const int32_t vk0 = k[0];
-        vacc += vi0 * vk0;
-        const int32_t vi1 = *i1++;
-        const int32_t vk1 = k[2];
-        vacc += vi1 * vk1;
-        const int32_t vi2 = *i2++;
-        const int32_t vk2 = k[4];
-        vacc += vi2 * vk2;
-        const int32_t vi3 = *i3++;
-        const int32_t vk3 = k[6];
-        vacc += vi3 * vk3;
-        const int32_t vi4 = *i4++;
-        const int32_t vk4 = k[8];
-        vacc += vi4 * vk4;
-        const int32_t vi5 = *i5++;
-        const int32_t vk5 = k[10];
-        vacc += vi5 * vk5;
-        const int32_t vi6 = *i6++;
-        const int32_t vk6 = k[12];
-        vacc += vi6 * vk6;
-        const int32_t vi7 = *i7++;
-        const int32_t vk7 = k[14];
-        vacc += vi7 * vk7;
-        const int32_t vi8 = *i8++;
-        const int32_t vk8 = k[16];
-        vacc += vi8 * vk8;
+      const int32_t vi0 = *i0;
+      const int32_t vk0 = ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[0];
+      vacc += vi0 * vk0;
+      const int32_t vi1 = *i1;
+      const int32_t vk1 = ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[2];
+      vacc += vi1 * vk1;
+      const int32_t vi2 = *i2;
+      const int32_t vk2 = ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[4];
+      vacc += vi2 * vk2;
+      const int32_t vi3 = *i3;
+      const int32_t vk3 = ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[6];
+      vacc += vi3 * vk3;
+      const int32_t vi4 = *i4;
+      const int32_t vk4 = ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[8];
+      vacc += vi4 * vk4;
+      const int32_t vi5 = *i5;
+      const int32_t vk5 = ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[10];
+      vacc += vi5 * vk5;
+      const int32_t vi6 = *i6;
+      const int32_t vk6 = ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[12];
+      vacc += vi6 * vk6;
+      const int32_t vi7 = *i7;
+      const int32_t vk7 = ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[14];
+      vacc += vi7 * vk7;
+      const int32_t vi8 = *i8;
+      const int32_t vk8 = ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[16];
+      vacc += vi8 * vk8;
 
-        w = (const void*) ((uintptr_t) w + sizeof(int32_t));
+      const int64_t vproduct = (int64_t) vacc * (int64_t) vmultiplier;
+      const int32_t vq31product = (int32_t) (uint32_t) ((uint64_t) (vproduct + vq31rounding) >> 31);
+      const int32_t vremainder = (vq31product & vremainder_mask) - (int32_t) (vq31product < 0);
 
-        const int64_t vproduct = (int64_t) vacc * (int64_t) vmultiplier;
-        const int32_t vq31product = (int32_t) (uint32_t) ((uint64_t) (vproduct + vq31rounding) >> 31);
-        const int32_t vremainder = (vq31product & vremainder_mask) - (int32_t) (vq31product < 0);
-
-        int32_t vout = asr_s32(vq31product, vshift) + (int32_t) (vremainder > vremainder_threshold);
-        vout = XNN_UNPREDICTABLE(vout < vout_min) ? vout_min : vout;
-        vout = XNN_UNPREDICTABLE(vout > vout_max) ? vout_max : vout;
-        vout += voutput_zero_point;
-        *output++ = vout;
-      }
+      int32_t vout = asr_s32(vq31product, vshift) + (int32_t) (vremainder > vremainder_threshold);
+      vout = math_max_s32(vout, vout_min);
+      vout = math_min_s32(vout, vout_max);
+      vout += voutput_zero_point;
+      *output++ = (int8_t) vout;
     }
 
     output = (int8_t*) ((uintptr_t) output + output_increment);

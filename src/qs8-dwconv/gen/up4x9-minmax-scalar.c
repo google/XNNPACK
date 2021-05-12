@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
 #include <xnnpack/scalar-utils.h>
 
 
@@ -259,31 +260,32 @@ void xnn_qs8_dwconv_minmax_ukernel_up4x9__scalar(
       int32_t vout2 = asr_s32(vq31product2, vshift) + (int32_t) (vremainder2 > vremainder_threshold);
       int32_t vout3 = asr_s32(vq31product3, vshift) + (int32_t) (vremainder3 > vremainder_threshold);
 
-      vout0 = XNN_UNPREDICTABLE(vout0 < vout_min) ? vout_min : vout0;
-      vout1 = XNN_UNPREDICTABLE(vout1 < vout_min) ? vout_min : vout1;
-      vout2 = XNN_UNPREDICTABLE(vout2 < vout_min) ? vout_min : vout2;
-      vout3 = XNN_UNPREDICTABLE(vout3 < vout_min) ? vout_min : vout3;
+      vout0 = math_max_s32(vout0, vout_min);
+      vout1 = math_max_s32(vout1, vout_min);
+      vout2 = math_max_s32(vout2, vout_min);
+      vout3 = math_max_s32(vout3, vout_min);
 
-      vout0 = XNN_UNPREDICTABLE(vout0 > vout_max) ? vout_max : vout0;
-      vout1 = XNN_UNPREDICTABLE(vout1 > vout_max) ? vout_max : vout1;
-      vout2 = XNN_UNPREDICTABLE(vout2 > vout_max) ? vout_max : vout2;
-      vout3 = XNN_UNPREDICTABLE(vout3 > vout_max) ? vout_max : vout3;
+      vout0 = math_min_s32(vout0, vout_max);
+      vout1 = math_min_s32(vout1, vout_max);
+      vout2 = math_min_s32(vout2, vout_max);
+      vout3 = math_min_s32(vout3, vout_max);
 
       vout0 += voutput_zero_point;
       vout1 += voutput_zero_point;
       vout2 += voutput_zero_point;
       vout3 += voutput_zero_point;
 
-      output[0] = vout0;
-      output[1] = vout1;
-      output[2] = vout2;
-      output[3] = vout3;
+      output[0] = (int8_t) vout0;
+      output[1] = (int8_t) vout1;
+      output[2] = (int8_t) vout2;
+      output[3] = (int8_t) vout3;
       output += 4;
     }
     if XNN_UNLIKELY(c != 0) {
       const int8_t* k = (const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t));
       do {
         int32_t vacc = *((const int32_t*) w);
+        w = (const void*) ((uintptr_t) w + sizeof(int32_t));
 
         const int32_t vi0 = *i0++;
         const int32_t vk0 = k[0];
@@ -312,8 +314,6 @@ void xnn_qs8_dwconv_minmax_ukernel_up4x9__scalar(
         const int32_t vi8 = *i8++;
         const int32_t vk8 = k[32];
         vacc += vi8 * vk8;
-
-        w = (const void*) ((uintptr_t) w + sizeof(int32_t));
         k += 1;
 
         const int64_t vproduct = (int64_t) vacc * (int64_t) vmultiplier;
@@ -321,10 +321,10 @@ void xnn_qs8_dwconv_minmax_ukernel_up4x9__scalar(
         const int32_t vremainder = (vq31product & vremainder_mask) - (int32_t) (vq31product < 0);
 
         int32_t vout = asr_s32(vq31product, vshift) + (int32_t) (vremainder > vremainder_threshold);
-        vout = XNN_UNPREDICTABLE(vout < vout_min) ? vout_min : vout;
-        vout = XNN_UNPREDICTABLE(vout > vout_max) ? vout_max : vout;
+        vout = math_max_s32(vout, vout_min);
+        vout = math_min_s32(vout, vout_max);
         vout += voutput_zero_point;
-        *output++ = vout;
+        *output++ = (int8_t) vout;
       } while (--c != 0);
     }
 

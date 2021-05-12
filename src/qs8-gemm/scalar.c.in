@@ -5,6 +5,7 @@
 
 #include <assert.h>
 
+#include <xnnpack/math.h>
 #include <xnnpack/scalar-utils.h>
 #include <xnnpack/gemm.h>
 
@@ -95,12 +96,12 @@ void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}__scalar(
     const int32_t vout_min = params->scalar.output_min_less_zero_point;
     $for M in range(MR):
       $for N in range(NR):
-        vout${M}x${N} = XNN_UNPREDICTABLE(vout${M}x${N} < vout_min) ? vout_min : vout${M}x${N};
+        vout${M}x${N} = math_max_s32(vout${M}x${N}, vout_min);
 
     const int32_t vout_max = params->scalar.output_max_less_zero_point;
     $for M in range(MR):
       $for N in range(NR):
-        vout${M}x${N} = XNN_UNPREDICTABLE(vout${M}x${N} > vout_max) ? vout_max : vout${M}x${N};
+        vout${M}x${N} = math_min_s32(vout${M}x${N}, vout_max);
 
     const int32_t voutput_zero_point = params->scalar.output_zero_point;
     $for M in range(MR):

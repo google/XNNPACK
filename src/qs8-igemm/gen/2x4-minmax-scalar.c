@@ -9,6 +9,7 @@
 
 #include <assert.h>
 
+#include <xnnpack/math.h>
 #include <xnnpack/scalar-utils.h>
 #include <xnnpack/gemm.h>
 
@@ -135,24 +136,24 @@ void xnn_qs8_igemm_minmax_ukernel_2x4__scalar(
     int32_t vout1x3 = asr_s32(vq31product1x3, vshift) + (int32_t) (vremainder1x3 > vremainder_threshold);
 
     const int32_t vout_min = params->scalar.output_min_less_zero_point;
-    vout0x0 = XNN_UNPREDICTABLE(vout0x0 < vout_min) ? vout_min : vout0x0;
-    vout0x1 = XNN_UNPREDICTABLE(vout0x1 < vout_min) ? vout_min : vout0x1;
-    vout0x2 = XNN_UNPREDICTABLE(vout0x2 < vout_min) ? vout_min : vout0x2;
-    vout0x3 = XNN_UNPREDICTABLE(vout0x3 < vout_min) ? vout_min : vout0x3;
-    vout1x0 = XNN_UNPREDICTABLE(vout1x0 < vout_min) ? vout_min : vout1x0;
-    vout1x1 = XNN_UNPREDICTABLE(vout1x1 < vout_min) ? vout_min : vout1x1;
-    vout1x2 = XNN_UNPREDICTABLE(vout1x2 < vout_min) ? vout_min : vout1x2;
-    vout1x3 = XNN_UNPREDICTABLE(vout1x3 < vout_min) ? vout_min : vout1x3;
+    vout0x0 = math_max_s32(vout0x0, vout_min);
+    vout0x1 = math_max_s32(vout0x1, vout_min);
+    vout0x2 = math_max_s32(vout0x2, vout_min);
+    vout0x3 = math_max_s32(vout0x3, vout_min);
+    vout1x0 = math_max_s32(vout1x0, vout_min);
+    vout1x1 = math_max_s32(vout1x1, vout_min);
+    vout1x2 = math_max_s32(vout1x2, vout_min);
+    vout1x3 = math_max_s32(vout1x3, vout_min);
 
     const int32_t vout_max = params->scalar.output_max_less_zero_point;
-    vout0x0 = XNN_UNPREDICTABLE(vout0x0 > vout_max) ? vout_max : vout0x0;
-    vout0x1 = XNN_UNPREDICTABLE(vout0x1 > vout_max) ? vout_max : vout0x1;
-    vout0x2 = XNN_UNPREDICTABLE(vout0x2 > vout_max) ? vout_max : vout0x2;
-    vout0x3 = XNN_UNPREDICTABLE(vout0x3 > vout_max) ? vout_max : vout0x3;
-    vout1x0 = XNN_UNPREDICTABLE(vout1x0 > vout_max) ? vout_max : vout1x0;
-    vout1x1 = XNN_UNPREDICTABLE(vout1x1 > vout_max) ? vout_max : vout1x1;
-    vout1x2 = XNN_UNPREDICTABLE(vout1x2 > vout_max) ? vout_max : vout1x2;
-    vout1x3 = XNN_UNPREDICTABLE(vout1x3 > vout_max) ? vout_max : vout1x3;
+    vout0x0 = math_min_s32(vout0x0, vout_max);
+    vout0x1 = math_min_s32(vout0x1, vout_max);
+    vout0x2 = math_min_s32(vout0x2, vout_max);
+    vout0x3 = math_min_s32(vout0x3, vout_max);
+    vout1x0 = math_min_s32(vout1x0, vout_max);
+    vout1x1 = math_min_s32(vout1x1, vout_max);
+    vout1x2 = math_min_s32(vout1x2, vout_max);
+    vout1x3 = math_min_s32(vout1x3, vout_max);
 
     const int32_t voutput_zero_point = params->scalar.output_zero_point;
     vout0x0 += voutput_zero_point;

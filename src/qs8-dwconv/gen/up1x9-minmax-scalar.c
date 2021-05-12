@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
 #include <xnnpack/scalar-utils.h>
 
 
@@ -124,10 +125,10 @@ void xnn_qs8_dwconv_minmax_ukernel_up1x9__scalar(
       const int32_t vremainder = (vq31product & vremainder_mask) - (int32_t) (vq31product < 0);
 
       int32_t vout = asr_s32(vq31product, vshift) + (int32_t) (vremainder > vremainder_threshold);
-      vout = XNN_UNPREDICTABLE(vout < vout_min) ? vout_min : vout;
-      vout = XNN_UNPREDICTABLE(vout > vout_max) ? vout_max : vout;
+      vout = math_max_s32(vout, vout_min);
+      vout = math_min_s32(vout, vout_max);
       vout += voutput_zero_point;
-      *output++ = vout;
+      *output++ = (int8_t) vout;
     } while (--c != 0);
 
     output = (int8_t*) ((uintptr_t) output + output_increment);

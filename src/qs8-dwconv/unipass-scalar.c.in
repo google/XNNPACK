@@ -7,6 +7,7 @@ $assert KERNEL_TILE >= 2
 #include <assert.h>
 
 #include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
 #include <xnnpack/scalar-utils.h>
 
 
@@ -44,7 +45,28 @@ void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__scalar(
 
     size_t c = channels;
     const void* w = weights;
-    $if CHANNEL_TILE > 1:
+    $if CHANNEL_TILE == 1:
+      do {
+        int32_t vacc = *((const int32_t*) w);
+
+        $for K in range(KERNEL_TILE):
+          const int32_t vi${K} = *i${K}++;
+          const int32_t vk${K} = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[${K}];
+          vacc += vi${K} * vk${K};
+
+        w = (const void*) ((uintptr_t) w + sizeof(int32_t) + ${KERNEL_TILE} * sizeof(int8_t));
+
+        const int64_t vproduct = (int64_t) vacc * (int64_t) vmultiplier;
+        const int32_t vq31product = (int32_t) (uint32_t) ((uint64_t) (vproduct + vq31rounding) >> 31);
+        const int32_t vremainder = (vq31product & vremainder_mask) - (int32_t) (vq31product < 0);
+
+        int32_t vout = asr_s32(vq31product, vshift) + (int32_t) (vremainder > vremainder_threshold);
+        vout = math_max_s32(vout, vout_min);
+        vout = math_min_s32(vout, vout_max);
+        vout += voutput_zero_point;
+        *output++ = (int8_t) vout;
+      } while (--c != 0);
+    $else:
       for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
         $for C in range(CHANNEL_TILE):
           int32_t vacc${C} = ((const int32_t*) w)[${C}];
@@ -76,64 +98,58 @@ void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__scalar(
           int32_t vout${C} = asr_s32(vq31product${C}, vshift) + (int32_t) (vremainder${C} > vremainder_threshold);
 
         $for C in range(CHANNEL_TILE):
-          vout${C} = XNN_UNPREDICTABLE(vout${C} < vout_min) ? vout_min : vout${C};
+          vout${C} = math_max_s32(vout${C}, vout_min);
 
         $for C in range(CHANNEL_TILE):
-          vout${C} = XNN_UNPREDICTABLE(vout${C} > vout_max) ? vout_max : vout${C};
+          vout${C} = math_min_s32(vout${C}, vout_max);
 
         $for C in range(CHANNEL_TILE):
           vout${C} += voutput_zero_point;
 
         $for C in range(CHANNEL_TILE):
-          output[${C}] = vout${C};
+          output[${C}] = (int8_t) vout${C};
         output += ${CHANNEL_TILE};
       }
-    $if CHANNEL_TILE == 1:
-      do {
-        int32_t vacc = *((const int32_t*) w);
-
-        $for K in range(KERNEL_TILE):
-          const int32_t vi${K} = *i${K}++;
-          const int32_t vk${K} = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[${K}];
-          vacc += vi${K} * vk${K};
-
-        w = (const void*) ((uintptr_t) w + sizeof(int32_t) + ${KERNEL_TILE} * sizeof(int8_t));
-
-        const int64_t vproduct = (int64_t) vacc * (int64_t) vmultiplier;
-        const int32_t vq31product = (int32_t) (uint32_t) ((uint64_t) (vproduct + vq31rounding) >> 31);
-        const int32_t vremainder = (vq31product & vremainder_mask) - (int32_t) (vq31product < 0);
-
-        int32_t vout = asr_s32(vq31product, vshift) + (int32_t) (vremainder > vremainder_threshold);
-        vout = XNN_UNPREDICTABLE(vout < vout_min) ? vout_min : vout;
-        vout = XNN_UNPREDICTABLE(vout > vout_max) ? vout_max : vout;
-        vout += voutput_zero_point;
-        *output++ = vout;
-      } while (--c != 0);
-    $else:
       if XNN_UNLIKELY(c != 0) {
-        const int8_t* k = (const int8_t*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t));
-        ${"do " if CHANNEL_TILE > 2 else ""}{
+        $if CHANNEL_TILE == 2:
           int32_t vacc = *((const int32_t*) w);
 
           $for K in range(KERNEL_TILE):
-            const int32_t vi${K} = *i${K}++;
-            const int32_t vk${K} = k[${K * CHANNEL_TILE}];
+            const int32_t vi${K} = *i${K};
+            const int32_t vk${K} = ((const int8_t*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t)))[${K * CHANNEL_TILE}];
             vacc += vi${K} * vk${K};
-
-          w = (const void*) ((uintptr_t) w + sizeof(int32_t));
-          $if CHANNEL_TILE > 2:
-            k += 1;
 
           const int64_t vproduct = (int64_t) vacc * (int64_t) vmultiplier;
           const int32_t vq31product = (int32_t) (uint32_t) ((uint64_t) (vproduct + vq31rounding) >> 31);
           const int32_t vremainder = (vq31product & vremainder_mask) - (int32_t) (vq31product < 0);
 
           int32_t vout = asr_s32(vq31product, vshift) + (int32_t) (vremainder > vremainder_threshold);
-          vout = XNN_UNPREDICTABLE(vout < vout_min) ? vout_min : vout;
-          vout = XNN_UNPREDICTABLE(vout > vout_max) ? vout_max : vout;
+          vout = math_max_s32(vout, vout_min);
+          vout = math_min_s32(vout, vout_max);
           vout += voutput_zero_point;
-          *output++ = vout;
-        }${" while (--c != 0);" if CHANNEL_TILE > 2 else ""}
+          *output++ = (int8_t) vout;
+        $else:
+          const int8_t* k = (const int8_t*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t));
+          do {
+            int32_t vacc = *((const int32_t*) w);
+            w = (const void*) ((uintptr_t) w + sizeof(int32_t));
+
+            $for K in range(KERNEL_TILE):
+              const int32_t vi${K} = *i${K}++;
+              const int32_t vk${K} = k[${K * CHANNEL_TILE}];
+              vacc += vi${K} * vk${K};
+            k += 1;
+
+            const int64_t vproduct = (int64_t) vacc * (int64_t) vmultiplier;
+            const int32_t vq31product = (int32_t) (uint32_t) ((uint64_t) (vproduct + vq31rounding) >> 31);
+            const int32_t vremainder = (vq31product & vremainder_mask) - (int32_t) (vq31product < 0);
+
+            int32_t vout = asr_s32(vq31product, vshift) + (int32_t) (vremainder > vremainder_threshold);
+            vout = math_max_s32(vout, vout_min);
+            vout = math_min_s32(vout, vout_max);
+            vout += voutput_zero_point;
+            *output++ = (int8_t) vout;
+          } while (--c != 0);
       }
 
     output = (int8_t*) ((uintptr_t) output + output_increment);

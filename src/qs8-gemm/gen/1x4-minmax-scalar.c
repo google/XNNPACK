@@ -9,6 +9,7 @@
 
 #include <assert.h>
 
+#include <xnnpack/math.h>
 #include <xnnpack/scalar-utils.h>
 #include <xnnpack/gemm.h>
 
@@ -84,16 +85,16 @@ void xnn_qs8_gemm_minmax_ukernel_1x4__scalar(
     int32_t vout0x3 = asr_s32(vq31product0x3, vshift) + (int32_t) (vremainder0x3 > vremainder_threshold);
 
     const int32_t vout_min = params->scalar.output_min_less_zero_point;
-    vout0x0 = XNN_UNPREDICTABLE(vout0x0 < vout_min) ? vout_min : vout0x0;
-    vout0x1 = XNN_UNPREDICTABLE(vout0x1 < vout_min) ? vout_min : vout0x1;
-    vout0x2 = XNN_UNPREDICTABLE(vout0x2 < vout_min) ? vout_min : vout0x2;
-    vout0x3 = XNN_UNPREDICTABLE(vout0x3 < vout_min) ? vout_min : vout0x3;
+    vout0x0 = math_max_s32(vout0x0, vout_min);
+    vout0x1 = math_max_s32(vout0x1, vout_min);
+    vout0x2 = math_max_s32(vout0x2, vout_min);
+    vout0x3 = math_max_s32(vout0x3, vout_min);
 
     const int32_t vout_max = params->scalar.output_max_less_zero_point;
-    vout0x0 = XNN_UNPREDICTABLE(vout0x0 > vout_max) ? vout_max : vout0x0;
-    vout0x1 = XNN_UNPREDICTABLE(vout0x1 > vout_max) ? vout_max : vout0x1;
-    vout0x2 = XNN_UNPREDICTABLE(vout0x2 > vout_max) ? vout_max : vout0x2;
-    vout0x3 = XNN_UNPREDICTABLE(vout0x3 > vout_max) ? vout_max : vout0x3;
+    vout0x0 = math_min_s32(vout0x0, vout_max);
+    vout0x1 = math_min_s32(vout0x1, vout_max);
+    vout0x2 = math_min_s32(vout0x2, vout_max);
+    vout0x3 = math_min_s32(vout0x3, vout_max);
 
     const int32_t voutput_zero_point = params->scalar.output_zero_point;
     vout0x0 += voutput_zero_point;
