@@ -61,6 +61,14 @@ inline static size_t subtract_modulo(size_t a, size_t b, size_t m) {
   return XNN_UNPREDICTABLE(a >= b) ? a - b : a - b + m;
 }
 
+inline static int32_t math_min_s32(int32_t a, int32_t b) {
+  return XNN_UNPREDICTABLE(a < b) ? a : b;
+}
+
+inline static int32_t math_max_s32(int32_t a, int32_t b) {
+  return XNN_UNPREDICTABLE(a > b) ? a : b;
+}
+
 inline static uint32_t math_min_u32(uint32_t a, uint32_t b) {
   return XNN_UNPREDICTABLE(a < b) ? a : b;
 }

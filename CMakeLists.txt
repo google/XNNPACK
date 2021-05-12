@@ -621,6 +621,12 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up1x9-minmax-scalar.c
   src/qs8-dwconv/gen/up2x9-minmax-scalar.c
   src/qs8-dwconv/gen/up4x9-minmax-scalar.c
+  src/qs8-gavgpool/gen/7p7x-minmax-scalar-c1.c
+  src/qs8-gavgpool/gen/7p7x-minmax-scalar-c2.c
+  src/qs8-gavgpool/gen/7p7x-minmax-scalar-c4.c
+  src/qs8-gavgpool/gen/7x-minmax-scalar-c1.c
+  src/qs8-gavgpool/gen/7x-minmax-scalar-c2.c
+  src/qs8-gavgpool/gen/7x-minmax-scalar-c4.c
   src/qs8-gemm/gen/1x2-minmax-scalar.c
   src/qs8-gemm/gen/2x2-minmax-scalar.c
   src/qs8-gemm/gen/3x2-minmax-scalar.c

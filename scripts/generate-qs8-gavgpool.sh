@@ -4,6 +4,15 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################### Scalar ####################################
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=1 -D ACCUMULATORS=1 -o src/qs8-gavgpool/gen/7x-minmax-scalar-c1.c
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=2 -D ACCUMULATORS=1 -o src/qs8-gavgpool/gen/7x-minmax-scalar-c2.c
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=4 -D ACCUMULATORS=1 -o src/qs8-gavgpool/gen/7x-minmax-scalar-c4.c
+
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=1 -D ACCUMULATORS=1 -o src/qs8-gavgpool/gen/7p7x-minmax-scalar-c1.c
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=2 -D ACCUMULATORS=1 -o src/qs8-gavgpool/gen/7p7x-minmax-scalar-c2.c
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=4 -D ACCUMULATORS=1 -o src/qs8-gavgpool/gen/7p7x-minmax-scalar-c4.c
+
 ################################## ARM NEON ###################################
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D ACCUMULATORS=2 -o src/qs8-gavgpool/gen/7x-minmax-neon-c8-acc2.c
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D ACCUMULATORS=2 -o src/qs8-gavgpool/gen/7x-minmax-neon-c16-acc2.c
