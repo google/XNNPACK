@@ -1967,7 +1967,7 @@ struct vmulcaddc_parameters {
   uint8_t row_tile;
 };
 
-#define XNN_MAX_QS8_DWCONV_UKERNELS 1
+#define XNN_MAX_QS8_DWCONV_UKERNELS 2
 #define XNN_MAX_QU8_DWCONV_UKERNELS 1
 #define XNN_MAX_F16_DWCONV_UKERNELS 3
 #define XNN_MAX_F32_DWCONV_UKERNELS 3
