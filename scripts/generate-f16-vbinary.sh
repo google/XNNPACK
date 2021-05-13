@@ -40,19 +40,19 @@ tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=RSUB     -D BATCH_TILE
 tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=RSUB     -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vrsubc-minmax-neonfp16arith-x16.c
 
 ################################## Unit tests #################################
-tools/generate-vbinary-test.py --tester VBinOpMicrokernelTester  --spec test/f16-vadd-minmax.yaml --output test/f16-vadd-minmax.cc
-tools/generate-vbinary-test.py --tester VBinOpMicrokernelTester  --spec test/f16-vdiv-minmax.yaml --output test/f16-vdiv-minmax.cc
-tools/generate-vbinary-test.py --tester VBinOpMicrokernelTester  --spec test/f16-vmax.yaml --output test/f16-vmax.cc
-tools/generate-vbinary-test.py --tester VBinOpMicrokernelTester  --spec test/f16-vmin.yaml --output test/f16-vmin.cc
-tools/generate-vbinary-test.py --tester VBinOpMicrokernelTester  --spec test/f16-vmul-minmax.yaml --output test/f16-vmul-minmax.cc
-tools/generate-vbinary-test.py --tester VBinOpMicrokernelTester  --spec test/f16-vsqrdiff.yaml --output test/f16-vsqrdiff.cc
-tools/generate-vbinary-test.py --tester VBinOpMicrokernelTester  --spec test/f16-vsub-minmax.yaml --output test/f16-vsub-minmax.cc
-tools/generate-vbinary-test.py --tester VBinOpCMicrokernelTester --spec test/f16-vaddc-minmax.yaml --output test/f16-vaddc-minmax.cc
-tools/generate-vbinary-test.py --tester VBinOpCMicrokernelTester --spec test/f16-vdivc-minmax.yaml --output test/f16-vdivc-minmax.cc
-tools/generate-vbinary-test.py --tester VBinOpCMicrokernelTester --spec test/f16-vrdivc-minmax.yaml --output test/f16-vrdivc-minmax.cc
-tools/generate-vbinary-test.py --tester VBinOpCMicrokernelTester --spec test/f16-vmaxc.yaml --output test/f16-vmaxc.cc
-tools/generate-vbinary-test.py --tester VBinOpCMicrokernelTester --spec test/f16-vminc.yaml --output test/f16-vminc.cc
-tools/generate-vbinary-test.py --tester VBinOpCMicrokernelTester --spec test/f16-vmulc-minmax.yaml --output test/f16-vmulc-minmax.cc
-tools/generate-vbinary-test.py --tester VBinOpCMicrokernelTester --spec test/f16-vsqrdiffc.yaml --output test/f16-vsqrdiffc.cc
-tools/generate-vbinary-test.py --tester VBinOpCMicrokernelTester --spec test/f16-vsubc-minmax.yaml --output test/f16-vsubc-minmax.cc
-tools/generate-vbinary-test.py --tester VBinOpCMicrokernelTester --spec test/f16-vrsubc-minmax.yaml --output test/f16-vrsubc-minmax.cc
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f16-vadd-minmax.yaml --output test/f16-vadd-minmax.cc
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f16-vdiv-minmax.yaml --output test/f16-vdiv-minmax.cc
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f16-vmax.yaml --output test/f16-vmax.cc
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f16-vmin.yaml --output test/f16-vmin.cc
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f16-vmul-minmax.yaml --output test/f16-vmul-minmax.cc
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f16-vsqrdiff.yaml --output test/f16-vsqrdiff.cc
+tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --spec test/f16-vsub-minmax.yaml --output test/f16-vsub-minmax.cc
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f16-vaddc-minmax.yaml --output test/f16-vaddc-minmax.cc
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f16-vdivc-minmax.yaml --output test/f16-vdivc-minmax.cc
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f16-vrdivc-minmax.yaml --output test/f16-vrdivc-minmax.cc
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f16-vmaxc.yaml --output test/f16-vmaxc.cc
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f16-vminc.yaml --output test/f16-vminc.cc
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f16-vmulc-minmax.yaml --output test/f16-vmulc-minmax.cc
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f16-vsqrdiffc.yaml --output test/f16-vsqrdiffc.cc
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f16-vsubc-minmax.yaml --output test/f16-vsubc-minmax.cc
+tools/generate-vbinary-test.py --tester VBinaryCMicrokernelTester --spec test/f16-vrsubc-minmax.yaml --output test/f16-vrsubc-minmax.cc

@@ -22,7 +22,7 @@
 #include <xnnpack/params.h>
 
 
-class VBinOpMicrokernelTester {
+class VBinaryMicrokernelTester {
  public:
   enum class OpType {
     Add,
@@ -39,7 +39,7 @@ class VBinOpMicrokernelTester {
     Scalar,
   };
 
-  inline VBinOpMicrokernelTester& batch_size(size_t batch_size) {
+  inline VBinaryMicrokernelTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
@@ -49,7 +49,7 @@ class VBinOpMicrokernelTester {
     return this->batch_size_;
   }
 
-  inline VBinOpMicrokernelTester& inplace_a(bool inplace_a) {
+  inline VBinaryMicrokernelTester& inplace_a(bool inplace_a) {
     this->inplace_a_ = inplace_a;
     return *this;
   }
@@ -58,7 +58,7 @@ class VBinOpMicrokernelTester {
     return this->inplace_a_;
   }
 
-  inline VBinOpMicrokernelTester& inplace_b(bool inplace_b) {
+  inline VBinaryMicrokernelTester& inplace_b(bool inplace_b) {
     this->inplace_b_ = inplace_b;
     return *this;
   }
@@ -67,7 +67,7 @@ class VBinOpMicrokernelTester {
     return this->inplace_b_;
   }
 
-  inline VBinOpMicrokernelTester& qmin(uint8_t qmin) {
+  inline VBinaryMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
@@ -76,7 +76,7 @@ class VBinOpMicrokernelTester {
     return this->qmin_;
   }
 
-  inline VBinOpMicrokernelTester& qmax(uint8_t qmax) {
+  inline VBinaryMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
@@ -85,7 +85,7 @@ class VBinOpMicrokernelTester {
     return this->qmax_;
   }
 
-  inline VBinOpMicrokernelTester& iterations(size_t iterations) {
+  inline VBinaryMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }

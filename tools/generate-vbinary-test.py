@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(
   description='Vector binary operation microkernel test generator')
 parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
                     choices=["VAddMicrokernelTester", "VAddCMicrokernelTester",
-                    "VBinOpMicrokernelTester", "VBinOpCMicrokernelTester"],
+                    "VBinaryMicrokernelTester", "VBinaryCMicrokernelTester"],
                     help="Tester class to be used in the generated test")
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Specification (YAML) file")
@@ -104,7 +104,7 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   }
 }
 
-$if TESTER in ["VAddCMicrokernelTester", "VBinOpCMicrokernelTester"]:
+$if TESTER in ["VAddCMicrokernelTester", "VBinaryCMicrokernelTester"]:
   TEST(${TEST_NAME}, inplace) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -273,7 +273,7 @@ def generate_test_cases(ukernel, op_type, activation_type, tester, batch_tile, i
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
   test_args = [ukernel]
-  if tester in ["VBinOpMicrokernelTester", "VBinOpCMicrokernelTester"]:
+  if tester in ["VBinaryMicrokernelTester", "VBinaryCMicrokernelTester"]:
     test_args.append("%s::OpType::%s" % (tester, op_type))
   if not isa:
     test_args.append("%s::Variant::Scalar" % tester)
@@ -301,14 +301,14 @@ def main(args):
     microkernel_header = {
       "VAddMicrokernelTester": "xnnpack/vadd.h",
       "VAddCMicrokernelTester": "xnnpack/vadd.h",
-      "VBinOpMicrokernelTester": "xnnpack/vbinary.h",
-      "VBinOpCMicrokernelTester": "xnnpack/vbinary.h",
+      "VBinaryMicrokernelTester": "xnnpack/vbinary.h",
+      "VBinaryCMicrokernelTester": "xnnpack/vbinary.h",
     }[options.tester]
     tester_header = {
       "VAddMicrokernelTester": "vadd-microkernel-tester.h",
       "VAddCMicrokernelTester": "vaddc-microkernel-tester.h",
-      "VBinOpMicrokernelTester": "vbinary-microkernel-tester.h",
-      "VBinOpCMicrokernelTester": "vbinaryc-microkernel-tester.h",
+      "VBinaryMicrokernelTester": "vbinary-microkernel-tester.h",
+      "VBinaryCMicrokernelTester": "vbinaryc-microkernel-tester.h",
     }[options.tester]
     tests = """\
 // Copyright 2019 Google LLC
