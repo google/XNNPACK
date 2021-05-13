@@ -56,7 +56,7 @@ BINOP_TEST_TEMPLATE = """\
 TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  VUnOpMicrokernelTester()
+  VUnaryMicrokernelTester()
     .batch_size(${BATCH_TILE})
     .Test(${", ".join(TEST_ARGS)});
 }
@@ -66,7 +66,7 @@ $if BATCH_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
-      VUnOpMicrokernelTester()
+      VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -76,7 +76,7 @@ $if BATCH_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t batch_size = 1; batch_size < ${BATCH_TILE}; batch_size++) {
-      VUnOpMicrokernelTester()
+      VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -86,7 +86,7 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
-    VUnOpMicrokernelTester()
+    VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -96,7 +96,7 @@ TEST(${TEST_NAME}, inplace) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-    VUnOpMicrokernelTester()
+    VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
       .Test(${", ".join(TEST_ARGS)});
@@ -109,7 +109,7 @@ $if OP_TYPE == "Clamp":
       ${ISA_CHECK};
     for (uint8_t qmin = 1; qmin < 255; qmin++) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        VUnOpMicrokernelTester()
+        VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
           .Test(${", ".join(TEST_ARGS)});
@@ -122,7 +122,7 @@ $if OP_TYPE == "Clamp":
       ${ISA_CHECK};
     for (uint8_t qmax = 1; qmax < 255; qmax++) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        VUnOpMicrokernelTester()
+        VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
           .Test(${", ".join(TEST_ARGS)});
@@ -136,7 +136,7 @@ $if OP_TYPE == "ELU":
       ${ISA_CHECK};
     for (float prescale : std::vector<float>({0.1f, 10.0f})) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        VUnOpMicrokernelTester()
+        VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .prescale(prescale)
           .Test(${", ".join(TEST_ARGS)});
@@ -149,7 +149,7 @@ $if OP_TYPE == "ELU":
       ${ISA_CHECK};
     for (float alpha : std::vector<float>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        VUnOpMicrokernelTester()
+        VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .alpha(alpha)
           .Test(${", ".join(TEST_ARGS)});
@@ -162,7 +162,7 @@ $if OP_TYPE == "ELU":
       ${ISA_CHECK};
     for (float beta : std::vector<float>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        VUnOpMicrokernelTester()
+        VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .beta(beta)
           .Test(${", ".join(TEST_ARGS)});
@@ -176,7 +176,7 @@ $if OP_TYPE == "LeakyReLU":
       ${ISA_CHECK};
     for (float slope : std::vector<float>({-0.7f, 0.3f, 1.3f})) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        VUnOpMicrokernelTester()
+        VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .slope(slope)
           .Test(${", ".join(TEST_ARGS)});
@@ -204,10 +204,10 @@ def generate_test_cases(ukernel, op_type, batch_tile, isa):
   _, datatype, _ = ukernel.split("_", 2)
   test_args = [
     "xnn_f32_vunary_ukernel_function(%s)" % ukernel,
-    "VUnOpMicrokernelTester::OpType::%s" % op_type,
+    "VUnaryMicrokernelTester::OpType::%s" % op_type,
   ]
   if not isa:
-    test_args.append("VUnOpMicrokernelTester::Variant::Scalar")
+    test_args.append("VUnaryMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,

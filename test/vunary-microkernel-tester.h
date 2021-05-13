@@ -20,7 +20,7 @@
 #include <xnnpack/params.h>
 
 
-class VUnOpMicrokernelTester {
+class VUnaryMicrokernelTester {
  public:
   enum class OpType {
     Abs,
@@ -44,7 +44,7 @@ class VUnOpMicrokernelTester {
     Scalar,
   };
 
-  inline VUnOpMicrokernelTester& batch_size(size_t batch_size) {
+  inline VUnaryMicrokernelTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
@@ -54,7 +54,7 @@ class VUnOpMicrokernelTester {
     return this->batch_size_;
   }
 
-  inline VUnOpMicrokernelTester& inplace(bool inplace) {
+  inline VUnaryMicrokernelTester& inplace(bool inplace) {
     this->inplace_ = inplace;
     return *this;
   }
@@ -63,7 +63,7 @@ class VUnOpMicrokernelTester {
     return this->inplace_;
   }
 
-  inline VUnOpMicrokernelTester& slope(float slope) {
+  inline VUnaryMicrokernelTester& slope(float slope) {
     this->slope_ = slope;
     return *this;
   }
@@ -72,7 +72,7 @@ class VUnOpMicrokernelTester {
     return this->slope_;
   }
 
-  inline VUnOpMicrokernelTester& prescale(float prescale) {
+  inline VUnaryMicrokernelTester& prescale(float prescale) {
     this->prescale_ = prescale;
     return *this;
   }
@@ -81,7 +81,7 @@ class VUnOpMicrokernelTester {
     return this->prescale_;
   }
 
-  inline VUnOpMicrokernelTester& alpha(float alpha) {
+  inline VUnaryMicrokernelTester& alpha(float alpha) {
     this->alpha_ = alpha;
     return *this;
   }
@@ -90,7 +90,7 @@ class VUnOpMicrokernelTester {
     return this->alpha_;
   }
 
-  inline VUnOpMicrokernelTester& beta(float beta) {
+  inline VUnaryMicrokernelTester& beta(float beta) {
     this->beta_ = beta;
     return *this;
   }
@@ -99,7 +99,7 @@ class VUnOpMicrokernelTester {
     return this->beta_;
   }
 
-  inline VUnOpMicrokernelTester& qmin(uint8_t qmin) {
+  inline VUnaryMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
@@ -108,7 +108,7 @@ class VUnOpMicrokernelTester {
     return this->qmin_;
   }
 
-  inline VUnOpMicrokernelTester& qmax(uint8_t qmax) {
+  inline VUnaryMicrokernelTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
@@ -117,7 +117,7 @@ class VUnOpMicrokernelTester {
     return this->qmax_;
   }
 
-  inline VUnOpMicrokernelTester& iterations(size_t iterations) {
+  inline VUnaryMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
