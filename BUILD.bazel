@@ -6313,7 +6313,7 @@ xnnpack_unit_test(
     name = "f32_vhswish_test",
     srcs = [
         "test/f32-vhswish.cc",
-        "test/vhswish-microkernel-tester.h",
+        "test/vunary-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

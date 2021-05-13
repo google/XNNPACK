@@ -25,6 +25,7 @@ class VUnOpMicrokernelTester {
   enum class OpType {
     Abs,
     ELU,
+    HardSwish,
     LeakyReLU,
     Negate,
     ReLU,
@@ -130,6 +131,7 @@ class VUnOpMicrokernelTester {
     auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
     switch (op_type) {
       case OpType::ELU:
+      case OpType::HardSwish:
         distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
         break;
       case OpType::SquareRoot:
@@ -163,6 +165,9 @@ class VUnOpMicrokernelTester {
             y_ref[i] = std::signbit(x_data[i]) ? alpha() * std::expm1(double(x_data[i]) * prescale()) : double(x_data[i]) * beta();
             break;
           }
+          case OpType::HardSwish:
+            y_ref[i] = (x_data[i] / 6.0f) * std::max(std::min(x_data[i] + 3.0f, 6.0f), 0.0f);
+            break;
           case OpType::LeakyReLU:
             y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * slope() : x_data[i];
             break;
@@ -203,6 +208,7 @@ class VUnOpMicrokernelTester {
       union {
         union xnn_f32_abs_params abs;
         union xnn_f32_elu_params elu;
+        union xnn_f32_hswish_params hswish;
         union xnn_f32_relu_params relu;
         union xnn_f32_lrelu_params lrelu;
         union xnn_f32_neg_params neg;
@@ -229,6 +235,16 @@ class VUnOpMicrokernelTester {
               params.elu = xnn_init_scalar_f32_elu_params(prescale(), alpha(), beta());
               break;
           }
+          break;
+        case OpType::HardSwish:
+          switch (variant) {
+            case Variant::Native:
+              params.hswish = xnn_init_f32_hswish_params();
+              break;
+            case Variant::Scalar:
+              params.hswish = xnn_init_scalar_f32_hswish_params();
+              break;
+          };
           break;
         case OpType::LeakyReLU:
           switch (variant) {

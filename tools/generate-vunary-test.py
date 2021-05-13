@@ -27,20 +27,21 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_v(relu|sigmoid|abs|elu|lrelu|neg|sqr|rndne|rndz|rndd|rndu|sqrt)_(fact_)?ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_v(abs|elu|hswish|lrelu|neg|relu|rndd|rndne|rndu|rndz|sigmoid|sqr|sqrt)_(fact_)?ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
-    "relu": "ReLU",
     "abs": "Abs",
     "elu": "ELU",
+    "hswish": "HardSwish",
     "lrelu": "LeakyReLU",
     "neg": "Negate",
-    "sigmoid": "Sigmoid",
+    "relu": "ReLU",
+    "rndd": "RoundDown",
     "rndne": "RoundToNearestEven",
     "rndz": "RoundTowardsZero",
     "rndu": "RoundUp",
-    "rndd": "RoundDown",
+    "sigmoid": "Sigmoid",
     "sqr": "Square",
     "sqrt": "SquareRoot",
   }[match.group(2)]
