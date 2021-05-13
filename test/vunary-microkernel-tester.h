@@ -324,6 +324,42 @@ class VUnaryMicrokernelTester {
     }
   }
 
+  inline void Test(xnn_f32_vabs_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  inline void Test(xnn_f32_vclamp_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  inline void Test(xnn_f32_velu_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  inline void Test(xnn_f32_vhswish_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  inline void Test(xnn_f32_vlrelu_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  inline void Test(xnn_f32_vneg_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  inline void Test(xnn_f32_vrelu_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  inline void Test(xnn_f32_vround_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  inline void Test(xnn_f32_vsqrt_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
  private:
   size_t batch_size_ = 1;
   bool inplace_ = false;

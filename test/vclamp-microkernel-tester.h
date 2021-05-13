@@ -79,7 +79,7 @@ class ClampMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_u8_clamp_ukernel_function clamp, Variant variant = Variant::Native) const {
+  void Test(xnn_u8_vclamp_ukernel_function clamp, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -128,7 +128,7 @@ class ClampMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_clamp_ukernel_function clamp) const {
+  void Test(xnn_f16_vclamp_ukernel_function clamp) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), rng);

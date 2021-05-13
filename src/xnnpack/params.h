@@ -1489,19 +1489,19 @@ typedef void (*xnn_univector_ukernel_function)(
     void* y,
     const void* params);
 
-typedef void (*xnn_f16_clamp_ukernel_function)(
+typedef void (*xnn_f16_vclamp_ukernel_function)(
     size_t n,
     const void* x,
     void* y,
     const struct xnn_f16_minmax_params* params);
 
-typedef void (*xnn_f32_clamp_ukernel_function)(
+typedef void (*xnn_f32_vclamp_ukernel_function)(
     size_t n,
     const float* x,
     float* y,
     const union xnn_f32_minmax_params* params);
 
-typedef void (*xnn_u8_clamp_ukernel_function)(
+typedef void (*xnn_u8_vclamp_ukernel_function)(
     size_t n,
     const uint8_t* x,
     uint8_t* y,
@@ -1530,6 +1530,30 @@ typedef void (*xnn_f32_vhswish_ukernel_function)(
     const float* x,
     float* y,
     const union xnn_f32_hswish_params* params);
+
+typedef void (*xnn_f32_vabs_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_abs_params* params);
+
+typedef void (*xnn_f32_vlrelu_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_lrelu_params* params);
+
+typedef void (*xnn_f32_vneg_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_neg_params* params);
+
+typedef void (*xnn_f32_vround_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_rnd_params* params);
 
 typedef void (*xnn_rmax_ukernel_function)(
     size_t n,
