@@ -9,4 +9,4 @@ tools/xngen src/f16-vhswish/neonfp16arith.c.in -D BATCH_TILE=8  -o src/f16-vhswi
 tools/xngen src/f16-vhswish/neonfp16arith.c.in -D BATCH_TILE=16 -o src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c
 
 ################################## Unit tests #################################
-tools/generate-vhswish-test.py --spec test/f16-vhswish.yaml --output test/f16-vhswish.cc
+tools/generate-vunary-test.py --spec test/f16-vhswish.yaml --output test/f16-vhswish.cc

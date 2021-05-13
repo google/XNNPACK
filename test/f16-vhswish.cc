@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/f16-vhswish.yaml
-//   Generator: tools/generate-vhswish-test.py
+//   Generator: tools/generate-vunary-test.py
 
 
 #include <gtest/gtest.h>
@@ -14,51 +14,51 @@
 #include <xnnpack/isa-checks.h>
 
 #include <xnnpack/vunary.h>
-#include "vhswish-microkernel-tester.h"
+#include "vunary-microkernel-tester.h"
 
 
 #if XNN_ARCH_ARM64
   TEST(F16_VHSWISH__NEONFP16ARITH_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    HSwishMicrokernelTester()
+    VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x8);
+      .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x8, VUnaryMicrokernelTester::OpType::HardSwish);
   }
 
   TEST(F16_VHSWISH__NEONFP16ARITH_X8, batch_div_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
-      HSwishMicrokernelTester()
+      VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x8);
+        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x8, VUnaryMicrokernelTester::OpType::HardSwish);
     }
   }
 
   TEST(F16_VHSWISH__NEONFP16ARITH_X8, batch_lt_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
-      HSwishMicrokernelTester()
+      VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x8);
+        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x8, VUnaryMicrokernelTester::OpType::HardSwish);
     }
   }
 
   TEST(F16_VHSWISH__NEONFP16ARITH_X8, batch_gt_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t batch_size = 9; batch_size < 16; batch_size++) {
-      HSwishMicrokernelTester()
+      VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x8);
+        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x8, VUnaryMicrokernelTester::OpType::HardSwish);
     }
   }
 
   TEST(F16_VHSWISH__NEONFP16ARITH_X8, inplace) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      HSwishMicrokernelTester()
+      VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x8);
+        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x8, VUnaryMicrokernelTester::OpType::HardSwish);
     }
   }
 #endif  // XNN_ARCH_ARM64
@@ -67,45 +67,45 @@
 #if XNN_ARCH_ARM64
   TEST(F16_VHSWISH__NEONFP16ARITH_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    HSwishMicrokernelTester()
+    VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x16);
+      .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x16, VUnaryMicrokernelTester::OpType::HardSwish);
   }
 
   TEST(F16_VHSWISH__NEONFP16ARITH_X16, batch_div_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
-      HSwishMicrokernelTester()
+      VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x16);
+        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x16, VUnaryMicrokernelTester::OpType::HardSwish);
     }
   }
 
   TEST(F16_VHSWISH__NEONFP16ARITH_X16, batch_lt_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
-      HSwishMicrokernelTester()
+      VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x16);
+        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x16, VUnaryMicrokernelTester::OpType::HardSwish);
     }
   }
 
   TEST(F16_VHSWISH__NEONFP16ARITH_X16, batch_gt_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t batch_size = 17; batch_size < 32; batch_size++) {
-      HSwishMicrokernelTester()
+      VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x16);
+        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x16, VUnaryMicrokernelTester::OpType::HardSwish);
     }
   }
 
   TEST(F16_VHSWISH__NEONFP16ARITH_X16, inplace) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      HSwishMicrokernelTester()
+      VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x16);
+        .Test(xnn_f16_vhswish_ukernel__neonfp16arith_x16, VUnaryMicrokernelTester::OpType::HardSwish);
     }
   }
 #endif  // XNN_ARCH_ARM64

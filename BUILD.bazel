@@ -5996,7 +5996,7 @@ xnnpack_unit_test(
     name = "f16_vclamp_test",
     srcs = [
         "test/f16-vclamp.cc",
-        "test/vclamp-microkernel-tester.h",
+        "test/vunary-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -6032,7 +6032,7 @@ xnnpack_unit_test(
     name = "f16_vhswish_test",
     srcs = [
         "test/f16-vhswish.cc",
-        "test/vhswish-microkernel-tester.h",
+        "test/vunary-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -7058,7 +7058,7 @@ xnnpack_unit_test(
     name = "u8_vclamp_test",
     srcs = [
         "test/u8-vclamp.cc",
-        "test/vclamp-microkernel-tester.h",
+        "test/vunary-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

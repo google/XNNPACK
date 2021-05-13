@@ -1657,6 +1657,18 @@ typedef void (*xnn_vunary_ukernel_function)(
     void* y,
     const void* params);
 
+typedef void (*xnn_u8_vunary_ukernel_function)(
+    size_t n,
+    const uint8_t* x,
+    uint8_t* y,
+    const void* params);
+
+typedef void (*xnn_f16_vunary_ukernel_function)(
+    size_t n,
+    const uint16_t* x,
+    uint16_t* y,
+    const void* params);
+
 typedef void (*xnn_f32_vunary_ukernel_function)(
     size_t n,
     const float* x,

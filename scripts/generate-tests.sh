@@ -10,7 +10,7 @@ tools/generate-gemm-test.py --spec test/qu8-igemm-minmax.yaml --output test/qu8-
 tools/generate-dwconv-test.py --spec test/qu8-dwconv-minmax.yaml --output test/qu8-dwconv-minmax.cc
 
 ### Tests for U8 micro-kernels
-tools/generate-vclamp-test.py --spec test/u8-vclamp.yaml --output test/u8-vclamp.cc
+tools/generate-vunary-test.py --spec test/u8-vclamp.yaml --output test/u8-vclamp.cc
 
 ### Tests for packing micro-kernels
 tools/generate-pack-test.py --spec test/x32-packx.yaml --output test/x32-packx.cc

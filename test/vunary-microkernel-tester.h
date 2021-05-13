@@ -135,8 +135,10 @@ class VUnaryMicrokernelTester {
         distribution = std::uniform_real_distribution<float>(0.0f, 255.0f);
         break;
       case OpType::ELU:
-      case OpType::HardSwish:
         distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
+        break;
+      case OpType::HardSwish:
+        distribution = std::uniform_real_distribution<float>(-4.0f, 4.0f);
         break;
       case OpType::SquareRoot:
         distribution = std::uniform_real_distribution<float>(0.0f, 10.0f);
@@ -358,6 +360,162 @@ class VUnaryMicrokernelTester {
 
   inline void Test(xnn_f32_vsqrt_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  void Test(xnn_f16_vunary_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
+    switch (op_type) {
+      case OpType::Clamp:
+        distribution = std::uniform_real_distribution<float>(0.0f, 255.0f);
+        break;
+      case OpType::ELU:
+      case OpType::HardSwish:
+        distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
+        break;
+      case OpType::SquareRoot:
+        distribution = std::uniform_real_distribution<float>(0.0f, 10.0f);
+        break;
+      default:
+        break;
+    }
+    auto f32rng = std::bind(distribution, std::ref(rng));
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), std::ref(f16rng));
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f16rng));
+      } else {
+        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+      }
+      const uint16_t* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        switch (op_type) {
+          case OpType::Clamp:
+            y_ref[i] = std::max(std::min(fp16_ieee_to_fp32_value(x_data[i]), float(qmax())), float(qmin()));
+            break;
+          case OpType::HardSwish:
+          {
+            const float x_value = fp16_ieee_to_fp32_value(x_data[i]);
+            y_ref[i] = (x_value / 6.0f) * std::max(std::min(x_value + 3.0f, 6.0f), 0.0f);
+            break;
+          }
+          case OpType::ReLU:
+            y_ref[i] = std::max(fp16_ieee_to_fp32_value(x_data[i]), 0.0f);
+            break;
+          default:
+            GTEST_FAIL() << "Unexpected op type";
+        }
+      }
+
+      // Prepare parameters.
+      union {
+        struct xnn_f16_hswish_params hswish;
+        struct xnn_f16_minmax_params minmax;
+      } params;
+      switch (op_type) {
+        case OpType::HardSwish:
+          params.hswish = xnn_init_f16_hswish_params();
+          break;
+        case OpType::Clamp:
+          params.minmax = xnn_init_f16_minmax_params(
+            fp16_ieee_from_fp32_value(float(qmin())), fp16_ieee_from_fp32_value(float(qmax())));
+          break;
+        case OpType::ReLU:
+          break;
+        default:
+          GTEST_FAIL() << "Unexpected op type";
+      }
+
+      // Call optimized micro-kernel.
+      vunary(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::max(1.0e-3f, std::abs(y_ref[i]) * 1.0e-2f))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
+      }
+    }
+  }
+
+  inline void Test(xnn_f16_vclamp_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f16_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  inline void Test(xnn_f16_vhswish_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_f16_vunary_ukernel_function(vunary), op_type, variant);
+  }
+
+  void Test(xnn_u8_vunary_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    ASSERT_EQ(op_type, OpType::Clamp);
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto distribution = std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max());
+    auto u8rng = std::bind(distribution, std::ref(rng));
+
+    std::vector<uint8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<uint8_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
+    std::vector<uint8_t> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), std::ref(u8rng));
+      if (inplace()) {
+        std::copy(x.cbegin(), x.cend(), y.begin());
+      } else {
+        std::fill(y.begin(), y.end(), UINT8_C(0xA5));
+      }
+      const uint8_t* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        switch (op_type) {
+          case OpType::Clamp:
+            y_ref[i] = std::min(std::max(x_data[i], qmin()), qmax());
+            break;
+          default:
+            GTEST_FAIL() << "Unexpected op type";
+        }
+      }
+
+      // Prepare parameters.
+      union {
+        union xnn_u8_minmax_params minmax;
+      } params;
+      switch (op_type) {
+        case OpType::Clamp:
+          switch (variant) {
+            case Variant::Native:
+              params.minmax = xnn_init_u8_minmax_params(qmin(), qmax());
+              break;
+            case Variant::Scalar:
+              params.minmax = xnn_init_scalar_u8_minmax_params(qmin(), qmax());
+              break;
+          }
+          break;
+        default:
+          GTEST_FAIL() << "Unexpected op type";
+      }
+
+      // Call optimized micro-kernel.
+      vunary(batch_size() * sizeof(uint8_t), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(uint32_t(y_ref[i]), uint32_t(y[i]))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << uint32_t(x[i]);
+      }
+    }
+  }
+
+  inline void Test(xnn_u8_vclamp_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+    Test(xnn_u8_vunary_ukernel_function(vunary), op_type, variant);
   }
 
  private:
