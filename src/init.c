@@ -30,7 +30,6 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/argmaxpool.h>
 #include <xnnpack/avgpool.h>
-#include <xnnpack/clamp.h>
 #include <xnnpack/common.h>
 #include <xnnpack/conv.h>
 #include <xnnpack/dwconv.h>

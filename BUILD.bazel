@@ -3792,7 +3792,6 @@ AARCH64_ASM_UKERNELS = [
 INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/argmaxpool.h",
     "src/xnnpack/avgpool.h",
-    "src/xnnpack/clamp.h",
     "src/xnnpack/common.h",
     "src/xnnpack/conv.h",
     "src/xnnpack/depthtospace.h",
@@ -6480,7 +6479,7 @@ xnnpack_unit_test(
     name = "f32_vclamp_test",
     srcs = [
         "test/f32-vclamp.cc",
-        "test/vclamp-microkernel-tester.h",
+        "test/vunary-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

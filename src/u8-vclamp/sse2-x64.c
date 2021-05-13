@@ -10,7 +10,7 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/clamp.h>
+#include <xnnpack/vunary.h>
 
 
 void xnn_u8_vclamp_ukernel__sse2_x64(

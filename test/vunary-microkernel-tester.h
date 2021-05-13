@@ -24,6 +24,7 @@ class VUnOpMicrokernelTester {
  public:
   enum class OpType {
     Abs,
+    Clamp,
     ELU,
     HardSwish,
     LeakyReLU,
@@ -130,6 +131,9 @@ class VUnOpMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
     switch (op_type) {
+      case OpType::Clamp:
+        distribution = std::uniform_real_distribution<float>(0.0f, 255.0f);
+        break;
       case OpType::ELU:
       case OpType::HardSwish:
         distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
@@ -159,6 +163,9 @@ class VUnOpMicrokernelTester {
         switch (op_type) {
           case OpType::Abs:
             y_ref[i] = std::abs(x_data[i]);
+            break;
+          case OpType::Clamp:
+            y_ref[i] = std::max(std::min(x_data[i], float(qmax())), float(qmin()));
             break;
           case OpType::ELU:
           {
@@ -209,9 +216,10 @@ class VUnOpMicrokernelTester {
         union xnn_f32_abs_params abs;
         union xnn_f32_elu_params elu;
         union xnn_f32_hswish_params hswish;
-        union xnn_f32_relu_params relu;
         union xnn_f32_lrelu_params lrelu;
+        union xnn_f32_minmax_params minmax;
         union xnn_f32_neg_params neg;
+        union xnn_f32_relu_params relu;
         union xnn_f32_rnd_params rnd;
         union xnn_f32_sqrt_params sqrt;
       } params;
@@ -223,6 +231,16 @@ class VUnOpMicrokernelTester {
               break;
             case Variant::Scalar:
               params.abs = xnn_init_scalar_f32_abs_params();
+              break;
+          }
+          break;
+        case OpType::Clamp:
+          switch (variant) {
+            case Variant::Native:
+              params.minmax = xnn_init_f32_minmax_params(float(qmin()), float(qmax()));
+              break;
+            case Variant::Scalar:
+              params.minmax = xnn_init_scalar_f32_minmax_params(float(qmin()), float(qmax()));
               break;
           }
           break;

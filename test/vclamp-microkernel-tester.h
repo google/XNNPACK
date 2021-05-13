@@ -172,55 +172,6 @@ class ClampMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_clamp_ukernel_function clamp, Variant variant = Variant::Native) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), rng);
-
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f32rng));
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
-      } else {
-        std::fill(y.begin(), y.end(), std::nanf(""));
-      }
-      const float* x_data = inplace() ? y.data() : x.data();
-
-      // Prepare parameters.
-      xnn_f32_minmax_params params = { };
-      switch (variant) {
-        case Variant::Native:
-          params = xnn_init_f32_minmax_params(float(qmin()), float(qmax()));
-          break;
-        case Variant::Scalar:
-          params = xnn_init_scalar_f32_minmax_params(float(qmin()), float(qmax()));
-          break;
-      }
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = std::max(std::min(x_data[i], float(qmax())), float(qmin()));
-      }
-
-      // Call optimized micro-kernel.
-      clamp(batch_size() * sizeof(float), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_LE(y[i], float(qmax()))
-          << "at position " << i << ", batch_size = " << batch_size();
-        ASSERT_GE(y[i], float(qmin()))
-          << "at position " << i << ", batch_size = " << batch_size();
-        ASSERT_EQ(y_ref[i], y[i])
-          << "at position " << i << ", batch_size = " << batch_size()
-          << ", qmin = " << uint32_t(qmin()) << ", qmax = " << uint32_t(qmax());
-      }
-    }
-  }
-
  private:
   size_t batch_size_{1};
   bool inplace_{false};

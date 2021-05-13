@@ -5,7 +5,7 @@
 
 #include <assert.h>
 
-#include <xnnpack/clamp.h>
+#include <xnnpack/vunary.h>
 
 
 void xnn_u8_vclamp_ukernel__scalar_x4(
