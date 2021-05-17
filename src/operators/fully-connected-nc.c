@@ -303,8 +303,9 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     return xnn_status_unsupported_parameter;
   }
 
-  const union xnn_qu8_gemm_params params = xnn_init_qu8_gemm_params(
-    kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
+  union xnn_qu8_gemm_params params;
+  xnn_init_qu8_gemm_params(
+    &params, kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   const struct xnn_qu8_packing_params packing_params = {
     .input_zero_point = input_zero_point,
     .kernel_zero_point = kernel_zero_point,
@@ -380,8 +381,9 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     return xnn_status_unsupported_parameter;
   }
 
-  const union xnn_qs8_gemm_params params = xnn_init_qs8_gemm_params(
-    requantization_scale, output_zero_point, output_min, output_max);
+  union xnn_qs8_gemm_params params;
+  xnn_init_qs8_gemm_params(
+    &params, requantization_scale, output_zero_point, output_min, output_max);
   const struct xnn_qs8_packing_params packing_params = {
     .input_zero_point = input_zero_point,
   };
@@ -440,7 +442,8 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     gemm_ukernels = &xnn_params.f32.gemm.linear;
   }
 
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
+  union xnn_f32_minmax_params params;
+  xnn_init_f32_minmax_params(&params, output_min, output_max);
   return create_fully_connected_nc(
     input_channels, output_channels,
     input_stride, output_stride,

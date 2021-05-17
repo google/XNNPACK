@@ -123,8 +123,8 @@ static void DWConvBenchmark(benchmark::State& state,
   std::vector<uint16_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
-  xnn_f16_minmax_params params =
-    xnn_init_f16_minmax_params(-std::numeric_limits<uint16_t>::infinity(), +std::numeric_limits<uint16_t>::infinity());
+  xnn_f16_minmax_params params;
+  xnn_init_f16_minmax_params(&params, UINT16_C(0xFC00)  /* -inf */, UINT16_C(0x7C00)  /* inf */);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

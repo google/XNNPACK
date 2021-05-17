@@ -218,11 +218,11 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
   // Number of rows read in the AVGPOOL micro-kernel.
   const size_t avgpool_nrows =
     round_up(doz(pooling_size, xnn_params.qu8.avgpool.mr), xnn_params.qu8.avgpool.qr) + xnn_params.qu8.avgpool.mr;
-  average_pooling_op->params.qu8_avgpool =
-    xnn_init_qu8_avgpool_params(
-      (int32_t) -((uint32_t) input_zero_point * (uint32_t) avgpool_nrows),
-      input_scale / (output_scale * (float) pooling_size),
-      output_zero_point, output_min, output_max);
+  xnn_init_qu8_avgpool_params(
+    &average_pooling_op->params.qu8_avgpool,
+    (int32_t) -((uint32_t) input_zero_point * (uint32_t) avgpool_nrows),
+    input_scale / (output_scale * (float) pooling_size),
+    output_zero_point, output_min, output_max);
 
   average_pooling_op->type = xnn_operator_type_average_pooling_nhwc_qu8;
   average_pooling_op->ukernel.type = xnn_ukernel_type_average_pooling;
@@ -379,12 +379,11 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   average_pooling_op->output_pixel_stride = output_pixel_stride;
 
   average_pooling_op->type = xnn_operator_type_average_pooling_nhwc_f32;
-  average_pooling_op->params.f32_scaleminmax =
-    xnn_init_f32_scaleminmax_params(1.0f / (float) pooling_size, output_min, output_max);
+  xnn_init_f32_scaleminmax_params(&average_pooling_op->params.f32_scaleminmax,
+    1.0f / (float) pooling_size, output_min, output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   if (any_padding || tf_same_padding) {
-    average_pooling_op->params.f32_minmax =
-      xnn_init_f32_minmax_params(output_min, output_max);
+    xnn_init_f32_minmax_params(&average_pooling_op->params.f32_minmax, output_min, output_max);
     average_pooling_op->ukernel.type = xnn_ukernel_type_pixelwise_average_pooling;
   } else {
     average_pooling_op->ukernel.type = xnn_ukernel_type_average_pooling;
@@ -659,13 +658,13 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
   const size_t input_size = input_height * input_width;
   const size_t pooling_size = average_pooling_op->kernel_height * average_pooling_op->kernel_width;
   const size_t gavgpool_nrows = round_up(input_size, xnn_params.qu8.gavgpool.mr);
-  average_pooling_op->params.qu8_gavgpool =
-    xnn_init_qu8_avgpool_params(
-      -(average_pooling_op->input_zero_point * (int32_t) gavgpool_nrows),
-      average_pooling_op->input_scale / (average_pooling_op->output_scale * (float) pooling_size),
-      average_pooling_op->output_zero_point,
-      average_pooling_op->output_min,
-      average_pooling_op->output_max);
+  xnn_init_qu8_avgpool_params(
+    &average_pooling_op->params.qu8_gavgpool,
+    -(average_pooling_op->input_zero_point * (int32_t) gavgpool_nrows),
+    average_pooling_op->input_scale / (average_pooling_op->output_scale * (float) pooling_size),
+    average_pooling_op->output_zero_point,
+    average_pooling_op->output_min,
+    average_pooling_op->output_max);
 
   return setup_average_pooling2d(
     average_pooling_op,

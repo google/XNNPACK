@@ -264,19 +264,20 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<uint8_t>::max())), long(std::numeric_limits<uint8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_qu8_gemm_params quantization_params = { };
+      union xnn_qu8_gemm_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_qu8_gemm_params(
-            b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
+          xnn_init_qu8_gemm_params(
+            &quantization_params, b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_qu8_gemm_params(
-            b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
+          xnn_init_scalar_qu8_gemm_params(
+            &quantization_params, b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
           break;
       }
-      const union xnn_qu8_requantization_params scalar_requantization_params =
-        xnn_init_scalar_qu8_requantization_params(requantization_scale, c_zero_point, qmin(), qmax());
+      union xnn_qu8_requantization_params scalar_requantization_params;
+      xnn_init_scalar_qu8_requantization_params(
+        &scalar_requantization_params, requantization_scale, c_zero_point, qmin(), qmax());
 
       gemm(
         m(), n(), k(),
@@ -389,19 +390,20 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<uint8_t>::max())), long(std::numeric_limits<uint8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_qu8_gemm_params quantization_params = { };
+      union xnn_qu8_gemm_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_qu8_gemm_params(
-            b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
+          xnn_init_qu8_gemm_params(
+            &quantization_params, b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_qu8_gemm_params(
-            b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
+          xnn_init_scalar_qu8_gemm_params(
+            &quantization_params, b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
           break;
       }
-      const union xnn_qu8_requantization_params scalar_requantization_params =
-        xnn_init_scalar_qu8_requantization_params(requantization_scale, c_zero_point, qmin(), qmax());
+      union xnn_qu8_requantization_params scalar_requantization_params;
+      xnn_init_scalar_qu8_requantization_params(
+        &scalar_requantization_params, requantization_scale, c_zero_point, qmin(), qmax());
 
       const uint8_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
 
@@ -486,17 +488,20 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<int8_t>::max())), long(std::numeric_limits<int8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_qs8_gemm_params quantization_params = { };
+      union xnn_qs8_gemm_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_qs8_gemm_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          xnn_init_qs8_gemm_params(
+            &quantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_qs8_gemm_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          xnn_init_scalar_qs8_gemm_params(
+            &quantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
       }
-      const union xnn_qs8_requantization_params scalar_requantization_params =
-        xnn_init_scalar_qs8_requantization_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+      union xnn_qs8_requantization_params scalar_requantization_params;
+      xnn_init_scalar_qs8_requantization_params(
+        &scalar_requantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       gemm(
         m(), n(), k(),
@@ -579,17 +584,20 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<int8_t>::max())), long(std::numeric_limits<int8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_qs8_gemm_xw_params quantization_params = { };
+      union xnn_qs8_gemm_xw_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_qs8_gemm_xw_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          xnn_init_qs8_gemm_xw_params(
+            &quantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_qs8_gemm_xw_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          xnn_init_scalar_qs8_gemm_xw_params(
+            &quantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
       }
-      const union xnn_qs8_requantization_params scalar_requantization_params =
-        xnn_init_scalar_qs8_requantization_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+      union xnn_qs8_requantization_params scalar_requantization_params;
+      xnn_init_scalar_qs8_requantization_params(
+        &scalar_requantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       gemm(
         m(), n(), k(),
@@ -703,17 +711,20 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<int8_t>::max())), long(std::numeric_limits<int8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_qs8_gemm_params quantization_params = { };
+      union xnn_qs8_gemm_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_qs8_gemm_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          xnn_init_qs8_gemm_params(
+            &quantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_qs8_gemm_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          xnn_init_scalar_qs8_gemm_params(
+            &quantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
       }
-      const union xnn_qs8_requantization_params scalar_requantization_params =
-        xnn_init_scalar_qs8_requantization_params(requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+      union xnn_qs8_requantization_params scalar_requantization_params;
+      xnn_init_scalar_qs8_requantization_params(
+        &scalar_requantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       const int8_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
 
@@ -793,7 +804,9 @@ class GemmMicrokernelTester {
       const float c_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax())));
 
       // Prepare parameters.
-      xnn_f16_scaleminmax_params params = xnn_init_f16_scaleminmax_params(
+      xnn_f16_scaleminmax_params params;
+      xnn_init_f16_scaleminmax_params(
+        &params,
         UINT16_C(0x3C00) /* 1.0 */,
         fp16_ieee_from_fp32_value(c_min),
         fp16_ieee_from_fp32_value(c_max));
@@ -902,7 +915,9 @@ class GemmMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_f16_scaleminmax_params params = xnn_init_f16_scaleminmax_params(
+      xnn_f16_scaleminmax_params params;
+      xnn_init_f16_scaleminmax_params(
+        &params,
         UINT16_C(0x3C00) /* 1.0 */,
         fp16_ieee_from_fp32_value(c_min),
         fp16_ieee_from_fp32_value(c_max));
@@ -987,13 +1002,13 @@ class GemmMicrokernelTester {
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
       // Prepare parameters.
-      xnn_f32_minmax_params params = { };
+      xnn_f32_minmax_params params;
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_minmax_params(c_min, c_max);
+          xnn_init_f32_minmax_params(&params, c_min, c_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
+          xnn_init_scalar_f32_minmax_params(&params, c_min, c_max);
           break;
       }
 
@@ -1190,13 +1205,13 @@ class GemmMicrokernelTester {
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
       // Prepare parameters.
-      xnn_f32_minmax_params params = { };
+      xnn_f32_minmax_params params;
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_minmax_params(c_min, c_max);
+          xnn_init_f32_minmax_params(&params, c_min, c_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
+          xnn_init_scalar_f32_minmax_params(&params, c_min, c_max);
           break;
       }
 
@@ -1281,13 +1296,13 @@ class GemmMicrokernelTester {
       const float c_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
       // Prepare parameters.
-      xnn_f32_minmax_params params = { };
+      xnn_f32_minmax_params params;
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_minmax_params(c_min, c_max);
+          xnn_init_f32_minmax_params(&params, c_min, c_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
+          xnn_init_scalar_f32_minmax_params(&params, c_min, c_max);
           break;
       }
 
@@ -1596,13 +1611,13 @@ class GemmMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_f32_minmax_params params = { };
+      xnn_f32_minmax_params params;
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_minmax_params(c_min, c_max);
+          xnn_init_f32_minmax_params(&params, c_min, c_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_minmax_params(c_min, c_max);
+          xnn_init_scalar_f32_minmax_params(&params, c_min, c_max);
           break;
       }
 

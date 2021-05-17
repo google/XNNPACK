@@ -229,60 +229,60 @@ class VUnaryMicrokernelTester {
         case OpType::Abs:
           switch (variant) {
             case Variant::Native:
-              params.abs = xnn_init_f32_abs_params();
+              xnn_init_f32_abs_params(&params.abs);
               break;
             case Variant::Scalar:
-              params.abs = xnn_init_scalar_f32_abs_params();
+              xnn_init_scalar_f32_abs_params(&params.abs);
               break;
           }
           break;
         case OpType::Clamp:
           switch (variant) {
             case Variant::Native:
-              params.minmax = xnn_init_f32_minmax_params(float(qmin()), float(qmax()));
+              xnn_init_f32_minmax_params(&params.minmax, float(qmin()), float(qmax()));
               break;
             case Variant::Scalar:
-              params.minmax = xnn_init_scalar_f32_minmax_params(float(qmin()), float(qmax()));
+              xnn_init_scalar_f32_minmax_params(&params.minmax, float(qmin()), float(qmax()));
               break;
           }
           break;
         case OpType::ELU:
           switch (variant) {
             case Variant::Native:
-              params.elu = xnn_init_f32_elu_params(prescale(), alpha(), beta());
+              xnn_init_f32_elu_params(&params.elu, prescale(), alpha(), beta());
               break;
             case Variant::Scalar:
-              params.elu = xnn_init_scalar_f32_elu_params(prescale(), alpha(), beta());
+              xnn_init_scalar_f32_elu_params(&params.elu, prescale(), alpha(), beta());
               break;
           }
           break;
         case OpType::HardSwish:
           switch (variant) {
             case Variant::Native:
-              params.hswish = xnn_init_f32_hswish_params();
+              xnn_init_f32_hswish_params(&params.hswish);
               break;
             case Variant::Scalar:
-              params.hswish = xnn_init_scalar_f32_hswish_params();
+              xnn_init_scalar_f32_hswish_params(&params.hswish);
               break;
           };
           break;
         case OpType::LeakyReLU:
           switch (variant) {
             case Variant::Native:
-              params.lrelu = xnn_init_f32_lrelu_params(slope());
+              xnn_init_f32_lrelu_params(&params.lrelu, slope());
               break;
             case Variant::Scalar:
-              params.lrelu = xnn_init_scalar_f32_lrelu_params(slope());
+              xnn_init_scalar_f32_lrelu_params(&params.lrelu, slope());
               break;
           }
           break;
         case OpType::Negate:
           switch (variant) {
             case Variant::Native:
-              params.neg = xnn_init_f32_neg_params();
+              xnn_init_f32_neg_params(&params.neg);
               break;
             case Variant::Scalar:
-              params.neg = xnn_init_scalar_f32_neg_params();
+              xnn_init_scalar_f32_neg_params(&params.neg);
               break;
           }
           break;
@@ -292,10 +292,10 @@ class VUnaryMicrokernelTester {
         case OpType::RoundDown:
           switch (variant) {
             case Variant::Native:
-              params.rnd = xnn_init_f32_rnd_params();
+              xnn_init_f32_rnd_params(&params.rnd);
               break;
             case Variant::Scalar:
-              params.rnd = xnn_init_scalar_f32_rnd_params();
+              xnn_init_scalar_f32_rnd_params(&params.rnd);
               break;
           }
           break;
@@ -306,10 +306,10 @@ class VUnaryMicrokernelTester {
         case OpType::SquareRoot:
           switch (variant) {
             case Variant::Native:
-              params.sqrt = xnn_init_f32_sqrt_params();
+              xnn_init_f32_sqrt_params(&params.sqrt);
               break;
             case Variant::Scalar:
-              params.sqrt = xnn_init_scalar_f32_sqrt_params();
+              xnn_init_scalar_f32_sqrt_params(&params.sqrt);
               break;
           }
           break;
@@ -422,10 +422,10 @@ class VUnaryMicrokernelTester {
       } params;
       switch (op_type) {
         case OpType::HardSwish:
-          params.hswish = xnn_init_f16_hswish_params();
+          xnn_init_f16_hswish_params(&params.hswish);
           break;
         case OpType::Clamp:
-          params.minmax = xnn_init_f16_minmax_params(
+          xnn_init_f16_minmax_params(&params.minmax,
             fp16_ieee_from_fp32_value(float(qmin())), fp16_ieee_from_fp32_value(float(qmax())));
           break;
         case OpType::ReLU:
@@ -492,10 +492,10 @@ class VUnaryMicrokernelTester {
         case OpType::Clamp:
           switch (variant) {
             case Variant::Native:
-              params.minmax = xnn_init_u8_minmax_params(qmin(), qmax());
+              xnn_init_u8_minmax_params(&params.minmax, qmin(), qmax());
               break;
             case Variant::Scalar:
-              params.minmax = xnn_init_scalar_u8_minmax_params(qmin(), qmax());
+              xnn_init_scalar_u8_minmax_params(&params.minmax, qmin(), qmax());
               break;
           }
           break;

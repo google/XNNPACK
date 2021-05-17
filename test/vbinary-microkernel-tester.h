@@ -221,7 +221,9 @@ class VBinaryMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_f16_minmax_params params = xnn_init_f16_minmax_params(
+      xnn_f16_minmax_params params;
+      xnn_init_f16_minmax_params(
+        &params,
         fp16_ieee_from_fp32_value(y_min),
         fp16_ieee_from_fp32_value(y_max));
 
@@ -360,13 +362,13 @@ class VBinaryMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_f32_minmax_params params = { };
+      xnn_f32_minmax_params params;
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_minmax_params(y_min, y_max);
+          xnn_init_f32_minmax_params(&params, y_min, y_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_minmax_params(y_min, y_max);
+          xnn_init_scalar_f32_minmax_params(&params, y_min, y_max);
           break;
       }
 

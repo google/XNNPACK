@@ -163,7 +163,8 @@ enum xnn_status xnn_create_clamp_nc_u8(
     return xnn_status_invalid_parameter;
   }
 
-  const union xnn_u8_minmax_params params = xnn_init_u8_minmax_params(output_min, output_max);
+  union xnn_u8_minmax_params params;
+  xnn_init_u8_minmax_params(&params, output_min, output_max);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -206,7 +207,8 @@ enum xnn_status xnn_create_clamp_nc_f32(
   xnn_univector_ukernel_function clamp_ukernel = (relu_activation && (xnn_params.f32.relu != NULL)) ?
     xnn_params.f32.relu : xnn_params.f32.clamp;
 
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
+  union xnn_f32_minmax_params params;
+  xnn_init_f32_minmax_params(&params, output_min, output_max);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -222,7 +224,8 @@ enum xnn_status xnn_create_abs_nc_f32(
     uint32_t flags,
     xnn_operator_t* abs_op_out)
 {
-  const union xnn_f32_abs_params params = xnn_init_f32_abs_params();
+  union xnn_f32_abs_params params;
+  xnn_init_f32_abs_params(&params);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -238,7 +241,8 @@ enum xnn_status xnn_create_bankers_rounding_nc_f32(
     uint32_t flags,
     xnn_operator_t* rounding_op_out)
 {
-  const union xnn_f32_rnd_params params = xnn_init_f32_rnd_params();
+  union xnn_f32_rnd_params params;
+  xnn_init_f32_rnd_params(&params);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -254,7 +258,8 @@ enum xnn_status xnn_create_ceiling_nc_f32(
     uint32_t flags,
     xnn_operator_t* ceiling_op_out)
 {
-  const union xnn_f32_rnd_params params = xnn_init_f32_rnd_params();
+  union xnn_f32_rnd_params params;
+  xnn_init_f32_rnd_params(&params);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -293,7 +298,8 @@ enum xnn_status xnn_create_elu_nc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  const union xnn_f32_elu_params params = xnn_init_f32_elu_params(1.0f /* prescale */, alpha, 1.0f /* beta */);
+  union xnn_f32_elu_params params;
+  xnn_init_f32_elu_params(&params, 1.0f /* prescale */, alpha, 1.0f /* beta */);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -309,7 +315,8 @@ enum xnn_status xnn_create_floor_nc_f32(
     uint32_t flags,
     xnn_operator_t* floor_op_out)
 {
-  const union xnn_f32_rnd_params params = xnn_init_f32_rnd_params();
+  union xnn_f32_rnd_params params;
+  xnn_init_f32_rnd_params(&params);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -337,7 +344,8 @@ enum xnn_status xnn_create_hardswish_nc_f16(
     return xnn_status_unsupported_hardware;
   }
 
-  const struct xnn_f16_hswish_params params = xnn_init_f16_hswish_params();
+  struct xnn_f16_hswish_params params;
+  xnn_init_f16_hswish_params(&params);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -353,7 +361,8 @@ enum xnn_status xnn_create_hardswish_nc_f32(
     uint32_t flags,
     xnn_operator_t* hardswish_op_out)
 {
-  const union xnn_f32_hswish_params params = xnn_init_f32_hswish_params();
+  union xnn_f32_hswish_params params;
+  xnn_init_f32_hswish_params(&params);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -378,7 +387,8 @@ enum xnn_status xnn_create_leaky_relu_nc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  const union xnn_f32_lrelu_params params = xnn_init_f32_lrelu_params(negative_slope);
+  union xnn_f32_lrelu_params params;
+  xnn_init_f32_lrelu_params(&params, negative_slope);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -394,7 +404,8 @@ enum xnn_status xnn_create_negate_nc_f32(
     uint32_t flags,
     xnn_operator_t* negate_op_out)
 {
-  const union xnn_f32_neg_params params = xnn_init_f32_neg_params();
+  union xnn_f32_neg_params params;
+  xnn_init_f32_neg_params(&params);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -440,7 +451,8 @@ enum xnn_status xnn_create_square_root_nc_f32(
     uint32_t flags,
     xnn_operator_t* sqrt_op_out)
 {
-  const union xnn_f32_sqrt_params params = xnn_init_f32_sqrt_params();
+  union xnn_f32_sqrt_params params;
+  xnn_init_f32_sqrt_params(&params);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
@@ -456,7 +468,8 @@ enum xnn_status xnn_create_truncation_nc_f32(
     uint32_t flags,
     xnn_operator_t* truncation_op_out)
 {
-  const union xnn_f32_rnd_params params = xnn_init_f32_rnd_params();
+  union xnn_f32_rnd_params params;
+  xnn_init_f32_rnd_params(&params);
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),

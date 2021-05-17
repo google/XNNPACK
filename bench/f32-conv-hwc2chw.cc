@@ -79,8 +79,8 @@ static void DConvHWC2CHW3X3S2P1Benchmark(benchmark::State& state,
   std::vector<float> output(output_elements * num_buffers);
   std::fill(output.begin(), output.end(), std::nanf(""));
 
-  xnn_f32_minmax_params params =
-    xnn_init_f32_minmax_params(-std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+  xnn_f32_minmax_params params;
+  xnn_init_f32_minmax_params(&params, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {

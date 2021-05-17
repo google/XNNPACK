@@ -159,26 +159,29 @@ class VAddCMicrokernelTester {
       const int8_t b = i8rng();
 
       // Prepare parameters.
-      xnn_qs8_add_params quantization_params = { };
+      xnn_qs8_add_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_qs8_add_params(
+          xnn_init_qs8_add_params(
+            &quantization_params,
             int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),
             a_scale() / y_scale(), b_scale() / y_scale(),
             int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_qs8_add_params(
+          xnn_init_scalar_qs8_add_params(
+            &quantization_params,
             int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),
             a_scale() / y_scale(), b_scale() / y_scale(),
             int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
       }
-      const xnn_qs8_add_params scalar_quantization_params =
-          xnn_init_scalar_qs8_add_params(
-            int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),
-            a_scale() / y_scale(), b_scale() / y_scale(),
-            int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+      xnn_qs8_add_params scalar_quantization_params;
+      xnn_init_scalar_qs8_add_params(
+        &scalar_quantization_params,
+        int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),
+        a_scale() / y_scale(), b_scale() / y_scale(),
+        int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {

@@ -486,8 +486,9 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     .input_zero_point = input_zero_point,
     .kernel_zero_point = kernel_zero_point,
   };
-  const union xnn_qu8_gemm_params params = xnn_init_qu8_gemm_params(
-    kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
+  union xnn_qu8_gemm_params params;
+  xnn_init_qu8_gemm_params(
+    &params, kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,
@@ -580,8 +581,9 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
   }
 
   const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point, };
-  const union xnn_qs8_gemm_params params = xnn_init_qs8_gemm_params(
-    requantization_scale, output_zero_point, output_min, output_max);
+  union xnn_qs8_gemm_params params;
+  xnn_init_qs8_gemm_params(
+    &params, requantization_scale, output_zero_point, output_min, output_max);
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,
@@ -655,14 +657,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  const struct {
+  struct {
     struct xnn_f16_minmax_params minmax;
     struct xnn_f16_scaleminmax_params scaleminmax;
-  } params = {
-    .minmax = xnn_init_f16_minmax_params(fp16_output_min, fp16_output_max),
-    .scaleminmax = xnn_init_f16_scaleminmax_params(
-        UINT16_C(0x3C00) /* 1.0 */, fp16_output_min, fp16_output_max),
-  };
+  } params;
+  xnn_init_f16_minmax_params(&params.minmax, fp16_output_min, fp16_output_max);
+  xnn_init_f16_scaleminmax_params(&params.scaleminmax, UINT16_C(0x3C00) /* 1.0 */, fp16_output_min, fp16_output_max);
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,
@@ -734,7 +734,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
 
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
   const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
+  union xnn_f32_minmax_params params;
+  xnn_init_f32_minmax_params(&params, output_min, output_max);
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,

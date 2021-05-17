@@ -73,7 +73,8 @@ static void GEMMBenchmark(benchmark::State& state,
   std::vector<int8_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), 0xA5);
 
-  union xnn_qs8_gemm_params quantization_params = xnn_init_qs8_gemm_params(0.75f, 127, -127, 126);
+  union xnn_qs8_gemm_params quantization_params;
+  xnn_init_qs8_gemm_params(&quantization_params, 0.75f, 127, -127, 126);
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -154,7 +155,8 @@ static void GEMMBenchmark(benchmark::State& state,
   std::vector<int8_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), 0xA5);
 
-  union xnn_qs8_gemm_xw_params quantization_params = xnn_init_qs8_gemm_xw_params(0.75f, 127, -127, 126);
+  union xnn_qs8_gemm_xw_params quantization_params;
+  xnn_init_qs8_gemm_xw_params(&quantization_params, 0.75f, 127, -127, 126);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

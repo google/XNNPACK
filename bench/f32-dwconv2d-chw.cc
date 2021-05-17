@@ -109,8 +109,9 @@ static void DWConv2DBenchmark(benchmark::State& state,
   std::vector<float> output(o_elements * num_buffers);
   std::fill(output.begin(), output.end(), std::nanf(""));
 
-  xnn_f32_chw_params chw_params =
-    xnn_init_f32_chw_params(input_width, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+  xnn_f32_chw_params chw_params;
+  xnn_init_f32_chw_params(
+    &chw_params, input_width, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {

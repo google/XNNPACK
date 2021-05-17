@@ -39,8 +39,8 @@ static void f32_elu(
   std::generate(x.begin(), x.end(), std::ref(f32rng));
   std::fill(y.begin(), y.end(), std::nanf(""));
 
-  const union xnn_f32_elu_params params =
-    xnn_init_f32_elu_params(1.0f /* prescale */, 1.0f /* alpha */, 1.0f /* beta */);
+  union xnn_f32_elu_params params;
+  xnn_init_f32_elu_params(&params, 1.0f /* prescale */, 1.0f /* alpha */, 1.0f /* beta */);
   for (auto _ : state) {
     elu(elements * sizeof(float), x.data(), y.data(), &params);
   }

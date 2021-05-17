@@ -365,8 +365,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     return xnn_status_unsupported_parameter;
   }
 
-  const union xnn_qu8_gemm_params params = xnn_init_qu8_gemm_params(
-    kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
+  union xnn_qu8_gemm_params params;
+  xnn_init_qu8_gemm_params(
+    &params, kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   const struct xnn_qu8_packing_params packing_params = {
     .input_zero_point = input_zero_point,
     .kernel_zero_point = kernel_zero_point,
@@ -448,7 +449,8 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     gemm_ukernels = &gemm_parameters->linear;
   }
 
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
+  union xnn_f32_minmax_params params;
+  xnn_init_f32_minmax_params(&params, output_min, output_max);
   return create_deconvolution2d_nhwc(
     output_padding_top, output_padding_right, output_padding_bottom, output_padding_left,
     kernel_height, kernel_width,

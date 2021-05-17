@@ -95,10 +95,9 @@ static enum xnn_status create_binary_elementwise_nd_f16(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_f16_minmax_params params = xnn_init_f16_minmax_params(
-    fp16_ieee_from_fp32_value(output_min),
-    fp16_ieee_from_fp32_value(output_max));
-
+  struct xnn_f16_minmax_params params;
+  xnn_init_f16_minmax_params(
+    &params, fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
   return create_binary_elementwise_nd(
     flags,
     &params,
@@ -150,8 +149,8 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     vbinary_fused_ukernels = &vbinary->linear;
   }
 
-  const union xnn_f32_minmax_params params = xnn_init_f32_minmax_params(output_min, output_max);
-
+  union xnn_f32_minmax_params params;
+  xnn_init_f32_minmax_params(&params, output_min, output_max);
   return create_binary_elementwise_nd(
     flags,
     &params,
@@ -218,15 +217,16 @@ enum xnn_status xnn_create_add_nd_qs8(
     return xnn_status_unsupported_parameter;
   }
 
-  const struct {
+  struct {
     union xnn_qs8_add_params qs8_add;
     union xnn_qs8_add_params qs8_radd;
-  } params = {
-    .qs8_add = xnn_init_qs8_add_params(
-      input1_zero_point, input2_zero_point, output_zero_point, input1_output_scale, input2_output_scale, output_min, output_max),
-    .qs8_radd = xnn_init_qs8_add_params(
-      input2_zero_point, input1_zero_point, output_zero_point, input2_output_scale, input1_output_scale, output_min, output_max),
-  };
+  } params;
+  xnn_init_qs8_add_params(
+    &params.qs8_add, input1_zero_point, input2_zero_point, output_zero_point,
+    input1_output_scale, input2_output_scale, output_min, output_max);
+  xnn_init_qs8_add_params(
+    &params.qs8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    input2_output_scale, input1_output_scale, output_min, output_max);
   return create_binary_elementwise_nd(
     flags,
     &params,

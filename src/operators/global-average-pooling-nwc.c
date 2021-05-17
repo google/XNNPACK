@@ -239,10 +239,9 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
     return xnn_status_unsupported_parameter;
   }
 
-  const union xnn_qu8_avgpool_params params =
-    xnn_init_qu8_avgpool_params(
-      0 /* bias */, 1.0f /* scale */,
-      output_zero_point, output_min, output_max);
+  union xnn_qu8_avgpool_params params;
+  xnn_init_qu8_avgpool_params(
+    &params, 0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
   const enum xnn_status status = create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
     0 /* log2(sizeof(uint8_t)) */,
@@ -302,10 +301,9 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
     return xnn_status_unsupported_parameter;
   }
 
-  const union xnn_qs8_avgpool_params params =
-    xnn_init_qs8_avgpool_params(
-      0 /* bias */, 1.0f /* scale */,
-      output_zero_point, output_min, output_max);
+  union xnn_qs8_avgpool_params params;
+  xnn_init_qs8_avgpool_params(
+    &params, 0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
   const enum xnn_status status = create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
     0 /* log2(sizeof(int8_t)) */,
@@ -355,11 +353,11 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_f16_scaleminmax_params params =
-    xnn_init_f16_scaleminmax_params(
-      UINT16_C(0x7E00) /* NaN */,
-      fp16_ieee_from_fp32_value(output_min),
-      fp16_ieee_from_fp32_value(output_max));
+  struct xnn_f16_scaleminmax_params params;
+  xnn_init_f16_scaleminmax_params(
+    &params, UINT16_C(0x7E00) /* NaN */,
+    fp16_ieee_from_fp32_value(output_min),
+    fp16_ieee_from_fp32_value(output_max));
   return create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
     1 /* log2(sizeof(uint16_t)) */,
@@ -400,9 +398,8 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  const union xnn_f32_scaleminmax_params params =
-    xnn_init_f32_scaleminmax_params(
-      0.0f /* scale */, output_min, output_max);
+  union xnn_f32_scaleminmax_params params;
+  xnn_init_f32_scaleminmax_params(&params, 0.0f /* scale */, output_min, output_max);
   return create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
     2 /* log2(sizeof(float)) */,

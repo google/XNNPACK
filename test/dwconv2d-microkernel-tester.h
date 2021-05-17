@@ -211,13 +211,13 @@ class DWConv2DMicrokernelTester {
       const float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
 
       // Prepare parameters.
-      xnn_f32_chw_params chw_params = { };
+      xnn_f32_chw_params chw_params;
       switch (variant) {
         case Variant::Native:
-          chw_params = xnn_init_f32_chw_params(input_width(), output_min, output_max);
+          xnn_init_f32_chw_params(&chw_params, input_width(), output_min, output_max);
           break;
         case Variant::Scalar:
-          chw_params = xnn_init_scalar_f32_chw_params(input_width(), output_min, output_max);
+          xnn_init_scalar_f32_chw_params(&chw_params, input_width(), output_min, output_max);
           break;
       }
 

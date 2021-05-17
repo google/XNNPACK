@@ -237,19 +237,20 @@ class DWConvMicrokernelTester {
 
       // Prepare parameters.
       const float requantization_scale = 1.0f / float(output_scale);
-      union xnn_qu8_gemm_params quantization_params = { };
+      union xnn_qu8_gemm_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_qu8_gemm_params(
-            kernel_zero_point(), requantization_scale, output_zero_point, qmin(), qmax());
+          xnn_init_qu8_gemm_params(
+            &quantization_params, kernel_zero_point(), requantization_scale, output_zero_point, qmin(), qmax());
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_qu8_gemm_params(
-            kernel_zero_point(), requantization_scale, output_zero_point, qmin(), qmax());
+          xnn_init_scalar_qu8_gemm_params(
+            &quantization_params, kernel_zero_point(), requantization_scale, output_zero_point, qmin(), qmax());
           break;
       }
-      const union xnn_qu8_requantization_params scalar_requantization_params =
-        xnn_init_scalar_qu8_requantization_params(requantization_scale, output_zero_point, qmin(), qmax());
+      union xnn_qu8_requantization_params scalar_requantization_params;
+      xnn_init_scalar_qu8_requantization_params(
+        &scalar_requantization_params, requantization_scale, output_zero_point, qmin(), qmax());
 
       // Renormalize reference results.
       for (size_t x = 0; x < width(); x++) {
@@ -350,19 +351,20 @@ class DWConvMicrokernelTester {
 
       // Prepare parameters.
       const float requantization_scale = 1.0f / float(output_scale);
-      union xnn_qs8_gemm_params quantization_params = { };
+      union xnn_qs8_gemm_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          quantization_params = xnn_init_qs8_gemm_params(
-            requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          xnn_init_qs8_gemm_params(
+            &quantization_params, requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
         case Variant::Scalar:
-          quantization_params = xnn_init_scalar_qs8_gemm_params(
-            requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+          xnn_init_scalar_qs8_gemm_params(
+            &quantization_params, requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
       }
-      const union xnn_qs8_requantization_params scalar_requantization_params =
-        xnn_init_scalar_qs8_requantization_params(requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+      union xnn_qs8_requantization_params scalar_requantization_params;
+      xnn_init_scalar_qs8_requantization_params(
+        &scalar_requantization_params, requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       // Renormalize reference results.
       for (size_t x = 0; x < width(); x++) {
@@ -452,7 +454,9 @@ class DWConvMicrokernelTester {
       const float output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
 
       // Prepare parameters.
-      xnn_f16_minmax_params params = xnn_init_f16_minmax_params(
+      xnn_f16_minmax_params params;
+      xnn_init_f16_minmax_params(
+        &params,
         fp16_ieee_from_fp32_value(output_min),
         fp16_ieee_from_fp32_value(output_max));
 
@@ -612,13 +616,13 @@ class DWConvMicrokernelTester {
       const float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
 
       // Prepare parameters.
-      xnn_f32_minmax_params params = { };
+      xnn_f32_minmax_params params;
       switch (variant) {
         case Variant::Native:
-          params = xnn_init_f32_minmax_params(output_min, output_max);
+          xnn_init_f32_minmax_params(&params, output_min, output_max);
           break;
         case Variant::Scalar:
-          params = xnn_init_scalar_f32_minmax_params(output_min, output_max);
+          xnn_init_scalar_f32_minmax_params(&params, output_min, output_max);
           break;
       }
 

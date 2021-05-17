@@ -38,7 +38,8 @@ static void f32_vhswish(
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   std::fill(output.begin(), output.end(), std::nanf(""));
 
-  const union xnn_f32_hswish_params params = xnn_init_f32_hswish_params();
+  union xnn_f32_hswish_params params;
+  xnn_init_f32_hswish_params(&params);
   for (auto _ : state) {
     hswish(elements * sizeof(float), input.data(), output.data(), &params);
   }
