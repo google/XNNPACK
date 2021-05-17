@@ -127,6 +127,8 @@ tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFET
 tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=1 -o src/qs8-gemm/gen/1x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=0 -o src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=1 -o src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=0 -o src/qs8-gemm/gen/4x16-aarch64-neon-mlal-lane-cortex-a53.S
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=1 -o src/qs8-gemm/gen/4x16-aarch64-neon-mlal-lane-prfm-cortex-a53.S
 
 # Cortex A75 micro-kernel
 tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=0 -o src/qs8-gemm/gen/1x8c8-aarch64-neon-mlal-padal.S

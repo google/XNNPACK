@@ -3,6 +3,10 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+- name: xnn_qs8_gemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane_cortex_a53
+  k-block: 8
 - name: xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal
   k-block: 16
 - name: xnn_qs8_gemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm
