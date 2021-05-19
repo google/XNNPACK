@@ -157,7 +157,7 @@ static void tflite_floor_f32(benchmark::State& state) {
   builder.Finish(model_buffer);
 
   const tflite::Model* model = tflite::GetModel(builder.GetBufferPointer());
-  tflite::ops::builtin::BuiltinOpResolver resolver;
+  tflite::ops::builtin::BuiltinOpResolverWithoutDefaultDelegates resolver;
   tflite::InterpreterBuilder interpreterBuilder(model, resolver);
   std::unique_ptr<tflite::Interpreter> interpreter;
   if (interpreterBuilder(&interpreter) != kTfLiteOk) {
