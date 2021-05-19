@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-igemm/2x8c8-aarch64-neon-mlal-padal.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -30,7 +34,7 @@
 # temp0   v2 v10 v12 v14
 # temp1   v3 v11 v13 v15
 
-BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_prfm" if PREFETCH else ""}${"_cortex_a73" if VARIANT == "CORTEX_A73" else ""}
+BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal_prfm_cortex_a73
 
         # Clamp C pointers
         LDP     x10, x11, [sp]          // Load cn_stride, a_offset
@@ -92,15 +96,13 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
 2:
         SMULL   v2.8h, v4.8b, v0.8b
         SMULL   v3.8h, v4.8b, v1.8b
-        $if PREFETCH:
-          PRFM    PLDL1KEEP, [x5, 448]
+        PRFM    PLDL1KEEP, [x5, 448]
         SMULL   v10.8h, v5.8b, v0.8b
         SMULL   v11.8h, v5.8b, v1.8b
         LDP     d4, d5, [x5, 16]
         SMLAL   v2.8h, v8.8b, v6.8b
         SMLAL   v3.8h, v8.8b, v7.8b
-        $if PREFETCH:
-          PRFM    PLDL1KEEP, [x5, 512]
+        PRFM    PLDL1KEEP, [x5, 512]
         SMLAL   v10.8h, v9.8b, v6.8b
         SMLAL   v11.8h, v9.8b, v7.8b
 
@@ -116,8 +118,6 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         LDP     d4, d5, [x5, 32]
         SMLAL   v12.8h, v8.8b, v6.8b
         SMLAL   v13.8h, v8.8b, v7.8b
-        $if PREFETCH and VARIANT != "CORTEX_A73":
-          PRFM    PLDL1KEEP, [x13, 128]
         SMLAL   v14.8h, v9.8b, v6.8b
         SMLAL   v15.8h, v9.8b, v7.8b
 
@@ -133,8 +133,6 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         LDP     d4, d5, [x5, 48]
         SMLAL   v2.8h, v8.8b, v6.8b
         SMLAL   v3.8h, v8.8b, v7.8b
-        $if PREFETCH and VARIANT != "CORTEX_A73":
-          PRFM    PLDL1KEEP, [x15, 128]
         SMLAL   v10.8h, v9.8b, v6.8b
         SMLAL   v11.8h, v9.8b, v7.8b
 
@@ -376,7 +374,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         LDP     d8, d9, [sp], 64
         RET
 
-END_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_prfm" if PREFETCH else ""}
+END_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

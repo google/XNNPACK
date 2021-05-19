@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -5,49 +9,49 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal(
+# void xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
-#     size_t ks,                 x3 / x9
-#     const int8_t**restrict a,  x4
-#     const int8_t* restrict w,  x5
+#     const int8_t* restrict a,  x3
+#     size_t a_stride,           x4
+#     const void* restrict w,    x5
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
-#     size_t cn_stride,                  [sp] -> x10
-#     size_t a_offset,                   [sp + 8] -> x11
-#     const float* zero,                 [sp + 16] -> x12
-#     const xnn_f32_minmax_params params [sp + 24] -> x8
+#     size_t cn_stride,          [sp] -> x10
+#     const union xnn_qs8_gemm_params params)  [sp + 8] -> x9
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0 x13  v0  v6
-# A1 x15  v1  v7
+# A0  x3  v0  v6
+# A1  x4  v1  v7
 # B   x5  v4  v5  v8  v9
 # C0  x6 v16 v18 v20 v22 v24 v26 v28 v30
 # C1  x7 v17 v19 v21 v23 v25 v27 v29 v31
 # temp0   v2 v10 v12 v14
 # temp1   v3 v11 v13 v15
 
-BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_prfm" if PREFETCH else ""}${"_cortex_a73" if VARIANT == "CORTEX_A73" else ""}
 
-        # Clamp C pointers
-        LDP     x10, x11, [sp]          // Load cn_stride, a_offset
+BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal_cortex_a73
+
+        # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
-        LDP     x12, x8, [sp, 16]       // Load zero, params pointer
-        ADD     x7, x6, x7              // c1 = c0 + cm_stride
         STP     d8, d9, [sp, -64]!
-        ADD     x2, x2, 7               // kc = (kc + 7) & ~7
+        ADD     x4, x3, x4              // a1 = a0 + a_stride
         STP     d10, d11, [sp, 16]
-        CSEL    x7, x6, x7, LO          //   c1 = c0
+        ADD     x7, x6, x7              // c1 = c0 + cm_stride
         STP     d12, d13, [sp, 32]
-        BIC     x2, x2, 7
+        CSEL    x4, x3, x4, LO          //   a1 = a0
         STP     d14, d15, [sp, 48]
+        ADD     x2, x2, 7               // kc = (kc + 7) & ~7
+        CSEL    x7, x6, x7, LO          //   c1 = c0
+        BIC     x2, x2, 7
 
         .p2align 3
 0:
         # Load initial bias from w into accumulators
+        SUBS    x0, x2, 16              // k = kc - 16
         LDP     s16, s18, [x5], 8
         MOV     v17.16b, v16.16b
         MOV     v19.16b, v18.16b
@@ -59,48 +63,31 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         MOV     v27.16b, v26.16b
         LDP     s28, s30, [x5], 8
         MOV     v29.16b, v28.16b
+        LDP     x10, x9, [sp, 64]       // cn_stride, params
         MOV     v31.16b, v30.16b
-        MOV     x9, x3                  // p = ks
-
-        .p2align 3
-1:
-        # Load next 2 A pointers
-        LDP     x13, x15, [x4], 16
-        CMP     x13, x12                // if a0 == zero
-        ADD     x13, x13, x11           // a0 += a_offset
-        CSEL    x13, x12, x13, EQ       //   a0 = zero, else += a0 + a_offset
-        CMP     x15, x12                // if a1 == zero
-        ADD     x15, x15, x11           // a1 += a_offset
-        CSEL    x15, x12, x15, EQ       //   a1 = zero, else += a1 + a_offset
-
         # Is there at least 16 bytes for epilogue?
-        SUBS    x0, x2, 16              // k = kc - 16
-        B.LO    5f
+        B.LO    4f
 
         # Prologue: load A0, A1 and 2 B's
         LDP     d4, d5, [x5]
-        LDP     d0, d6, [x13], 16
-        LDP     d1, d7, [x15], 16
+        LDP     d0, d6, [x3], 16
+        LDP     d1, d7, [x4], 16
         LDP     d8, d9, [x5, 64]
 
         # Is there at least 16 bytes for main loop?
         SUBS    x0, x0, 16              // k = k - 16
-        B.LO    3f
+        B.LO    2f
 
          # Main loop - 16 bytes of A
         .p2align 3
-2:
+1:
         SMULL   v2.8h, v4.8b, v0.8b
         SMULL   v3.8h, v4.8b, v1.8b
-        $if PREFETCH:
-          PRFM    PLDL1KEEP, [x5, 448]
         SMULL   v10.8h, v5.8b, v0.8b
         SMULL   v11.8h, v5.8b, v1.8b
         LDP     d4, d5, [x5, 16]
         SMLAL   v2.8h, v8.8b, v6.8b
         SMLAL   v3.8h, v8.8b, v7.8b
-        $if PREFETCH:
-          PRFM    PLDL1KEEP, [x5, 512]
         SMLAL   v10.8h, v9.8b, v6.8b
         SMLAL   v11.8h, v9.8b, v7.8b
 
@@ -116,8 +103,6 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         LDP     d4, d5, [x5, 32]
         SMLAL   v12.8h, v8.8b, v6.8b
         SMLAL   v13.8h, v8.8b, v7.8b
-        $if PREFETCH and VARIANT != "CORTEX_A73":
-          PRFM    PLDL1KEEP, [x13, 128]
         SMLAL   v14.8h, v9.8b, v6.8b
         SMLAL   v15.8h, v9.8b, v7.8b
 
@@ -133,8 +118,6 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         LDP     d4, d5, [x5, 48]
         SMLAL   v2.8h, v8.8b, v6.8b
         SMLAL   v3.8h, v8.8b, v7.8b
-        $if PREFETCH and VARIANT != "CORTEX_A73":
-          PRFM    PLDL1KEEP, [x15, 128]
         SMLAL   v10.8h, v9.8b, v6.8b
         SMLAL   v11.8h, v9.8b, v7.8b
 
@@ -153,21 +136,21 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         SMLAL   v13.8h, v8.8b, v7.8b
         SUBS    x0, x0, 16
         SMLAL   v14.8h, v9.8b, v6.8b
-        LDP     d0, d6, [x13], 16       // Read A0
+        LDP     d0, d6, [x3], 16        // Read A0
         SMLAL   v15.8h, v9.8b, v7.8b
 
         SADALP  v28.4s, v12.8h
-        LDP     d1, d7, [x15], 16       // Read A1
+        LDP     d1, d7, [x4], 16        // Read A1
         SADALP  v29.4s, v13.8h
         SADALP  v30.4s, v14.8h
         LDP     d8, d9, [x5, 64]        // Read B
         SADALP  v31.4s, v15.8h
-        B.HS    2b
+        B.HS    1b
 
         # Epilogue
         # Same as main loop except no loads at end of loop
         .p2align 3
-3:
+2:
         SMULL   v2.8h, v4.8b, v0.8b
         SMULL   v3.8h, v4.8b, v1.8b
         SMULL   v10.8h, v5.8b, v0.8b
@@ -229,20 +212,17 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         SADALP  v31.4s, v15.8h
 
         # Is there a remainder?- 8 bytes of A
-        TBNZ    x0, 3, 5f
+        TBNZ    x0, 3, 4f
 
-        # ks loop
-        SUBS    x9, x9, 16              // ks -= MR * sizeof(int8_t*)
-        B.HI    1b
-
-4:
+        .p2align 3
+3:
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
         ADDP    v20.4s, v20.4s, v22.4s
-        LD1R    {v4.4s}, [x8], 4
+        LD1R    {v4.4s}, [x9], 4
         ADDP    v24.4s, v24.4s, v26.4s
         ADDP    v28.4s, v28.4s, v30.4s
-        LD1R    {v7.4s}, [x8], 4
+        LD1R    {v7.4s}, [x9], 4
         ADDP    v17.4s, v17.4s, v19.4s
         ADDP    v21.4s, v21.4s, v23.4s
         ADDP    v25.4s, v25.4s, v27.4s
@@ -258,7 +238,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         SQRDMULH v2.4s, v2.4s, v4.4s
         SQRDMULH v3.4s, v3.4s, v4.4s
         CMEQ    v4.4s, v7.4s, 0
-        LD1R    {v5.8h}, [x8], 2
+        LD1R    {v5.8h}, [x9], 2
         BIC     v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
         BIC     v17.16b, v2.16b, v4.16b
@@ -280,20 +260,17 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         SQADD   v1.8h, v2.8h, v5.8h
         SQXTN   v0.8b, v0.8h
         SQXTN2  v0.16b, v1.8h
-        LD1R    {v1.16b}, [x8], 1
-        LD1R    {v2.16b}, [x8]
+        LD1R    {v1.16b}, [x9], 1
+        LD1R    {v2.16b}, [x9]
         SMAX    v0.16b, v0.16b, v1.16b
-        SUB     x8, x8, 11              // rewind params pointer
         SMIN    v0.16b, v0.16b, v2.16b
-        B.LO    6f
+        B.LO    5f
 
         # Store full 2 x 8
-        ST1     {v0.d}[1], [x7], x10
         ST1     {v0.8b}, [x6], x10
-
-        SUB     x4, x4, x3              // a -= ks
-
-        # nc loop
+        SUB     x3, x3, x2              // a0 -= kc
+        ST1     {v0.d}[1], [x7], x10
+        SUB     x4, x4, x2              // a1 -= kc
         B.HI    0b
 
         # Restore d8-d15 from stack
@@ -305,10 +282,10 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
 
         # Remainder - 8 bytes of A
         .p2align 3
-5:
-        LDR     d0, [x13]
+4:
+        LDR     d0, [x3], 8
         LDP     d4, d5, [x5]
-        LDR     d1, [x15]
+        LDR     d1, [x4], 8
         LDP     d6, d7, [x5, 16]
         SMULL   v2.8h, v4.8b, v0.8b
         SMULL   v3.8h, v4.8b, v1.8b
@@ -345,30 +322,26 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         SADALP  v29.4s, v13.8h
         SADALP  v30.4s, v14.8h
         SADALP  v31.4s, v15.8h
-
-        # ks loop
-        SUBS    x9, x9, 16              // ks -= MR * sizeof(int8_t*)
-        B.HI    1b
-        B       4b
+        B       3b
 
         # Store odd width
         .p2align 3
-6:
-        TBZ     x1, 2, 7f
-        ST1     {v0.s}[2], [x7], 4
+5:
+        TBZ     x1, 2, 6f
         STR     s0, [x6], 4
+        ST1     {v0.s}[2], [x7], 4
         EXT     v0.16b, v0.16b, v0.16b, 4
 
-7:
-        TBZ     x1, 1, 8f
-        ST1     {v0.h}[4], [x7], 2
+6:
+        TBZ     x1, 1, 7f
         ST1     {v0.h}[0], [x6], 2
+        ST1     {v0.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
-8:
-        TBZ     x1, 0, 9f
-        ST1     {v0.b}[8], [x7]
+7:
+        TBZ     x1, 0, 8f
         ST1     {v0.b}[0], [x6]
-9:
+        ST1     {v0.b}[8], [x7]
+8:
         # Restore d8-d15 from stack
         LDP     d14, d15, [sp, 48]
         LDP     d12, d13, [sp, 32]
@@ -376,8 +349,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_pr
         LDP     d8, d9, [sp], 64
         RET
 
-END_FUNCTION xnn_qs8_igemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal${"_prfm" if PREFETCH else ""}
+END_FUNCTION xnn_qs8_gemm_minmax_ukernel_2x8c8__aarch64_neon_mlal_padal
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
 #endif
+

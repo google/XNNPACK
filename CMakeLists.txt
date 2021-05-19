@@ -2997,7 +2997,9 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-gemm/gen/1x8c8-aarch64-neon-mlal-padal-prfm.S
   src/qs8-gemm/gen/1x8c8-aarch64-neon-mlal-padal.S
   src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S
+  src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a73.S
   src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
+  src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a73.S
   src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
   src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal.S
   src/qs8-gemm/gen/4x16-aarch64-neon-mlal-lane-cortex-a53.S
@@ -3010,7 +3012,9 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-igemm/gen/1x8c8-aarch64-neon-mlal-padal-prfm.S
   src/qs8-igemm/gen/1x8c8-aarch64-neon-mlal-padal.S
   src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S
+  src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a73.S
   src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a53.S
+  src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a73.S
   src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
   src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal.S
   src/qs8-igemm/gen/4x16-aarch64-neon-mlal-lane-cortex-a53.S

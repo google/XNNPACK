@@ -135,6 +135,8 @@ tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=0 -o src
 tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=1 -o src/qs8-gemm/gen/1x8c8-aarch64-neon-mlal-padal-prfm.S
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=0 -o src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal.S
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=1 -o src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=0 -D VARIANT=CORTEX_A73  -o src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a73.S
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=1 -D VARIANT=CORTEX_A73  -o src/qs8-gemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a73.S
 
 
 ################################### x86 SSE ###################################

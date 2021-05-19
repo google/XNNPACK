@@ -131,7 +131,8 @@ tools/xngen src/qs8-igemm/1x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=0 -o sr
 tools/xngen src/qs8-igemm/1x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=1 -o src/qs8-igemm/gen/1x8c8-aarch64-neon-mlal-padal-prfm.S
 tools/xngen src/qs8-igemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=0 -o src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal.S
 tools/xngen src/qs8-igemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=1 -o src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm.S
-
+tools/xngen src/qs8-igemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=0 -D VARIANT=CORTEX_A73  -o src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-cortex-a73.S
+tools/xngen src/qs8-igemm/2x8c8-aarch64-neon-mlal-padal.S.in -D PREFETCH=1 -D VARIANT=CORTEX_A73  -o src/qs8-igemm/gen/2x8c8-aarch64-neon-mlal-padal-prfm-cortex-a73.S
 
 ################################### x86 SSE ###################################
 ### C2 micro-kernels
