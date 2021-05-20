@@ -123,14 +123,14 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
 
 0:
        # Load initial bias from w into accumulators
-       LDR q24, [x5], 16
-       MOV v25.16b, v24.16b
-       MOV v26.16b, v24.16b
-       MOV v27.16b, v24.16b
-       MOV v28.16b, v24.16b
-       MOV v29.16b, v24.16b
-       MOV v30.16b, v24.16b
-       MOV v31.16b, v24.16b
+       LDR     q24, [x5], 16
+       MOV     v25.16b, v24.16b
+       MOV     v26.16b, v24.16b
+       MOV     v27.16b, v24.16b
+       MOV     v28.16b, v24.16b
+       MOV     v29.16b, v24.16b
+       MOV     v30.16b, v24.16b
+       MOV     v31.16b, v24.16b
 
          # Is there at least 4 halffloats (8 bytes)?
         SUBS    x0, x2, 8               // k = kc - 8
