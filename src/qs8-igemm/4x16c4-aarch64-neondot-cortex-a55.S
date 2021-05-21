@@ -17,7 +17,7 @@
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const float* zero,                 [sp + 16] -> x12
-#     const xnn_f32_minmax_params params [sp + 24] -> x8
+#     const xnn_f32_minmax_params params [sp + 24] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -33,7 +33,7 @@
 # C3   x7 v19 v23 v27 v31
 # unused v12 v13 v14 v15
 
-# x21 temp for Cortex-A55 loads
+# x8 temp for Cortex-A55 loads
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
@@ -43,7 +43,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         ADD     x16, x6, x7             // c1 = c0 + cm_stride
         LDP     x12, x8, [sp, 16]       // Load zero, params pointer
         CSEL    x16, x6,  x16, LO       //   c1 = c0
-        STP     x20, x21, [sp, -48]!    // Save x20-x21 on stack
+        STR     x20, [sp, -48]!         // Save x20 on stack
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
         STP     d8,  d9, [sp, 16]       // Save d8-d11 on stack
 
@@ -107,7 +107,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         LDR     d3, [x20], 8
         SUBS    x0, x0, 16              // is there 16 for main loop?
         LDR     d9,  [x5], 8
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         # Is there at least 16 bytes for main loop?
         B.LO    3f
 
@@ -123,9 +123,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v16.4s,  v8.16b, v0.4b[0]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v1.4b[0]
-        INS     v9.d[1], x21
+        INS     v9.d[1], x8
         SDOT    v18.4s,  v8.16b, v2.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v19.4s,  v8.16b, v3.4b[0]
         LDR     d4,  [x13], 8
 
@@ -133,9 +133,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v20.4s,  v9.16b, v0.4b[0]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v1.4b[0]
-        INS     v10.d[1], x21
+        INS     v10.d[1], x8
         SDOT    v22.4s,  v9.16b, v2.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v23.4s,  v9.16b, v3.4b[0]
         LDR     d5, [x14], 8
 
@@ -143,9 +143,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v24.4s, v10.16b, v0.4b[0]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v1.4b[0]
-        INS     v11.d[1], x21
+        INS     v11.d[1], x8
         SDOT    v26.4s, v10.16b, v2.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[0]
         LDR     d6, [x15], 8
 
@@ -153,9 +153,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v28.4s, v11.16b, v0.4b[0]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[0]
-        INS     v8.d[1], x21
+        INS     v8.d[1], x8
         SDOT    v30.4s, v11.16b, v2.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v31.4s, v11.16b, v3.4b[0]
         LDR     d7,  [x20], 8
 
@@ -163,45 +163,45 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v16.4s,  v8.16b, v0.4b[1]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v1.4b[1]
-        INS     v9.d[1], x21
+        INS     v9.d[1], x8
         SDOT    v18.4s,  v8.16b, v2.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v19.4s,  v8.16b, v3.4b[1]
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v0.4b[1]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v1.4b[1]
-        INS     v10.d[1], x21
+        INS     v10.d[1], x8
         SDOT    v22.4s,  v9.16b, v2.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v23.4s,  v9.16b, v3.4b[1]
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v0.4b[1]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v1.4b[1]
-        INS     v11.d[1], x21
+        INS     v11.d[1], x8
         SDOT    v26.4s, v10.16b, v2.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[1]
 
         // BLOCK 4
         SDOT    v28.4s, v11.16b, v0.4b[1]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[1]
-        INS     v8.d[1], x21
+        INS     v8.d[1], x8
         SDOT    v30.4s, v11.16b, v2.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v31.4s, v11.16b, v3.4b[1]
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v4.4b[0]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v5.4b[0]
-        INS     v9.d[1], x21
+        INS     v9.d[1], x8
         SDOT    v18.4s,  v8.16b, v6.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v19.4s,  v8.16b, v7.4b[0]
         LDR     d0,  [x13], 8
 
@@ -209,9 +209,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v20.4s,  v9.16b, v4.4b[0]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v5.4b[0]
-        INS     v10.d[1], x21
+        INS     v10.d[1], x8
         SDOT    v22.4s,  v9.16b, v6.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v23.4s,  v9.16b, v7.4b[0]
         LDR     d1, [x14], 8
 
@@ -219,9 +219,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v24.4s, v10.16b, v4.4b[0]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v5.4b[0]
-        INS     v11.d[1], x21
+        INS     v11.d[1], x8
         SDOT    v26.4s, v10.16b, v6.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v27.4s, v10.16b, v7.4b[0]
         LDR     d2, [x15], 8
 
@@ -229,9 +229,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v28.4s, v11.16b, v4.4b[0]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v5.4b[0]
-        INS     v8.d[1], x21
+        INS     v8.d[1], x8
         SDOT    v30.4s, v11.16b, v6.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v31.4s, v11.16b, v7.4b[0]
         LDR     d3,  [x20], 8
 
@@ -239,27 +239,27 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v16.4s,  v8.16b, v4.4b[1]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v5.4b[1]
-        INS     v9.d[1], x21
+        INS     v9.d[1], x8
         SDOT    v18.4s,  v8.16b, v6.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v19.4s,  v8.16b, v7.4b[1]
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v4.4b[1]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v5.4b[1]
-        INS     v10.d[1], x21
+        INS     v10.d[1], x8
         SDOT    v22.4s,  v9.16b, v6.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v23.4s,  v9.16b, v7.4b[1]
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v4.4b[1]
         LDR     d8,  [x5], 8            // First B values for block 0 and 1
         SDOT    v25.4s, v10.16b, v5.4b[1]
-        INS     v11.d[1], x21
+        INS     v11.d[1], x8
         SDOT    v26.4s, v10.16b, v6.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v27.4s, v10.16b, v7.4b[1]
         SUBS    x0, x0, 16
 
@@ -267,9 +267,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v28.4s, v11.16b, v4.4b[1]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v5.4b[1]
-        INS     v8.d[1], x21
+        INS     v8.d[1], x8
         SDOT    v30.4s, v11.16b, v6.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v31.4s, v11.16b, v7.4b[1]
         B.HS    2b
 
@@ -279,9 +279,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v16.4s,  v8.16b, v0.4b[0]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v1.4b[0]
-        INS     v9.d[1], x21
+        INS     v9.d[1], x8
         SDOT    v18.4s,  v8.16b, v2.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v19.4s,  v8.16b, v3.4b[0]
         LDR     d4,  [x13], 8
 
@@ -289,9 +289,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v20.4s,  v9.16b, v0.4b[0]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v1.4b[0]
-        INS     v10.d[1], x21
+        INS     v10.d[1], x8
         SDOT    v22.4s,  v9.16b, v2.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v23.4s,  v9.16b, v3.4b[0]
         LDR     d5, [x14], 8
 
@@ -299,9 +299,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v24.4s, v10.16b, v0.4b[0]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v1.4b[0]
-        INS     v11.d[1], x21
+        INS     v11.d[1], x8
         SDOT    v26.4s, v10.16b, v2.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[0]
         LDR     d6, [x15], 8
 
@@ -309,9 +309,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v28.4s, v11.16b, v0.4b[0]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[0]
-        INS     v8.d[1], x21
+        INS     v8.d[1], x8
         SDOT    v30.4s, v11.16b, v2.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v31.4s, v11.16b, v3.4b[0]
         LDR     d7,  [x20], 8
 
@@ -319,96 +319,96 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v16.4s,  v8.16b, v0.4b[1]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v1.4b[1]
-        INS     v9.d[1], x21
+        INS     v9.d[1], x8
         SDOT    v18.4s,  v8.16b, v2.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v19.4s,  v8.16b, v3.4b[1]
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v0.4b[1]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v1.4b[1]
-        INS     v10.d[1], x21
+        INS     v10.d[1], x8
         SDOT    v22.4s,  v9.16b, v2.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v23.4s,  v9.16b, v3.4b[1]
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v0.4b[1]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v1.4b[1]
-        INS     v11.d[1], x21
+        INS     v11.d[1], x8
         SDOT    v26.4s, v10.16b, v2.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[1]
 
         // BLOCK 4
         SDOT    v28.4s, v11.16b, v0.4b[1]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[1]
-        INS     v8.d[1], x21
+        INS     v8.d[1], x8
         SDOT    v30.4s, v11.16b, v2.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v31.4s, v11.16b, v3.4b[1]
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v4.4b[0]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v5.4b[0]
-        INS     v9.d[1], x21
+        INS     v9.d[1], x8
         SDOT    v18.4s,  v8.16b, v6.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v19.4s,  v8.16b, v7.4b[0]
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v4.4b[0]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v5.4b[0]
-        INS     v10.d[1], x21
+        INS     v10.d[1], x8
         SDOT    v22.4s,  v9.16b, v6.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v23.4s,  v9.16b, v7.4b[0]
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v4.4b[0]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v5.4b[0]
-        INS     v11.d[1], x21
+        INS     v11.d[1], x8
         SDOT    v26.4s, v10.16b, v6.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v27.4s, v10.16b, v7.4b[0]
 
         // BLOCK 3
         SDOT    v28.4s, v11.16b, v4.4b[0]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v5.4b[0]
-        INS     v8.d[1], x21
+        INS     v8.d[1], x8
         SDOT    v30.4s, v11.16b, v6.4b[0]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v31.4s, v11.16b, v7.4b[0]
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v4.4b[1]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v5.4b[1]
-        INS     v9.d[1], x21
+        INS     v9.d[1], x8
         SDOT    v18.4s,  v8.16b, v6.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v19.4s,  v8.16b, v7.4b[1]
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v4.4b[1]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v5.4b[1]
-        INS     v10.d[1], x21
+        INS     v10.d[1], x8
         SDOT    v22.4s,  v9.16b, v6.4b[1]
-        LDR     x21,  [x5], 8
+        LDR     x8,  [x5], 8
         SDOT    v23.4s,  v9.16b, v7.4b[1]
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v4.4b[1]
         SDOT    v25.4s, v10.16b, v5.4b[1]
-        INS     v11.d[1], x21
+        INS     v11.d[1], x8
         SDOT    v26.4s, v10.16b, v6.4b[1]
         SDOT    v27.4s, v10.16b, v7.4b[1]
         AND     x0, x2, 15              // kc remainder 0 to 12
@@ -416,6 +416,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         // BLOCK 3
         SDOT    v28.4s, v11.16b, v4.4b[1]
         SDOT    v29.4s, v11.16b, v5.4b[1]
+        LDR     x8, [sp, 72]            // reload params pointer
         SDOT    v30.4s, v11.16b, v6.4b[1]
         SDOT    v31.4s, v11.16b, v7.4b[1]
 
@@ -570,8 +571,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         LDP     d10, d11, [sp, 32]
         LDP     d8,  d9, [sp, 16]
 
-        # Restore x20-x21 from stack
-        LDP     x20, x21, [sp], 48
+        # Restore x20 from stack
+        LDR     x20, [sp], 48
         RET
 
         # Remainder- 4 to 12 bytes of A
@@ -687,8 +688,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         LDP     d10, d11, [sp, 32]
         LDP     d8,  d9, [sp, 16]
 
-        # Restore x20-x21 from stack
-        LDP     x20, x21, [sp], 48
+        # Restore x20 from stack
+        LDR     x20, [sp], 48
         RET
 
 END_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
