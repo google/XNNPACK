@@ -22,10 +22,10 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0  x20  v0
-# A1  x15  v1
-# A2  x13  v2
-# A3  x21  v3
+# A0  x13  v0
+# A1  x14  v1
+# A2  x15  v2
+# A3  x20  v3
 # B    x5  v4  v5  v6  v7
 # C0   x6 v16 v20 v24 v28
 # C1  x16 v17 v21 v25 v29
@@ -44,12 +44,12 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
 
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
         LDP     x12, x8, [sp, 16]       // Load zero, params pointer
-                                      // if mr <= 2
+                                        // if mr <= 2
         CSEL    x17, x16, x17, LS       //   c2 = c1
         BIC     x2, x2, 3
 
         CMP     x0, 4                   // if mr < 4
-        STP     x20, x21, [sp, -16]!    // Save x20-x21 on stack
+        STR     x20, [sp, -8]!          // Save x20 on stack
         ADD     x7,  x17, x7            // c3 = c2 + cm_stride
         CSEL    x7,  x17, x7, LO        //   c3 = c2
 
@@ -75,21 +75,21 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         .p2align 3
 1:
         # Load next 4 A pointers
-        LDP     x20, x15, [x4], 16
-        LDP     x13, x21, [x4], 16
+        LDP     x13, x14, [x4], 16
+        LDP     x15, x20, [x4], 16
 
-        CMP     x20, x12                // if a0 == zero
-        ADD     x20, x20, x11           // a0 += a_offset
-        CSEL    x20, x12, x20, EQ       //   a0 = zero, else += a0 + a_offset
-        CMP     x15, x12                // if a1 == zero
-        ADD     x15, x15, x11           // a1 += a_offset
-        CSEL    x15, x12, x15, EQ       //   a1 = zero, else += a1 + a_offset
-        CMP     x13, x12                // if a2 == zero
-        ADD     x13, x13, x11           // a2 += a_offset
-        CSEL    x13, x12, x13, EQ       //   a2 = zero, else += a2 + a_offset
-        CMP     x21, x12                // if a3 == zero
-        ADD     x21, x21, x11           // a3 += a_offset
-        CSEL    x21, x12, x21, EQ       //   a3 = zero, else += a3 + a_offset
+        CMP     x13, x12                // if a0 == zero
+        ADD     x13, x13, x11           // a0 += a_offset
+        CSEL    x13, x12, x13, EQ       //   a0 = zero, else += a0 + a_offset
+        CMP     x14, x12                // if a1 == zero
+        ADD     x14, x14, x11           // a1 += a_offset
+        CSEL    x14, x12, x14, EQ       //   a1 = zero, else += a1 + a_offset
+        CMP     x15, x12                // if a2 == zero
+        ADD     x15, x15, x11           // a2 += a_offset
+        CSEL    x15, x12, x15, EQ       //   a2 = zero, else += a2 + a_offset
+        CMP     x20, x12                // if a3 == zero
+        ADD     x20, x20, x11           // a3 += a_offset
+        CSEL    x20, x12, x20, EQ       //   a3 = zero, else += a3 + a_offset
 
         # Is there at least 8 bytes for main loop?
         SUBS    x0, x2, 8               // k = kc - 8
@@ -98,11 +98,11 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         # Main loop - 8 bytes of A
         .p2align 3
 2:
-        LDR     d0, [x20], 8
+        LDR     d0, [x13], 8
         LDR     q4,  [x5], 16
-        LDR     d1, [x15], 8
-        LDR     d2, [x13], 8
-        LDR     d3, [x21], 8
+        LDR     d1, [x14], 8
+        LDR     d2, [x15], 8
+        LDR     d3, [x20], 8
         LDR     q5,  [x5], 16
         SDOT    v16.4s, v4.16b,  v0.4b[0]
         SDOT    v17.4s, v4.16b,  v1.4b[0]
@@ -293,18 +293,18 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         # nc loop
         B.HI    0b
 
-        # Restore x20-x21 from stack
-        LDP     x20, x21, [sp], 16
+        # Restore x20 from stack
+        LDR     x20, [sp], 8
         RET
 
         # Remainder- 4 bytes of A
         .p2align 3
 4:
-        LDR     s0, [x20], 4
+        LDR     s0, [x13], 4
         LDR     q4,  [x5], 16
-        LDR     s1, [x15], 4
-        LDR     s2, [x13], 4
-        LDR     s3, [x21], 4
+        LDR     s1, [x14], 4
+        LDR     s2, [x15], 4
+        LDR     s3, [x20], 4
         LDR     q5,  [x5], 16
         SDOT    v16.4s, v4.16b,  v0.4b[0]
         SDOT    v17.4s, v4.16b,  v1.4b[0]
@@ -368,8 +368,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64
         ST1     {v5.b}[0], [x16]
         ST1     {v4.b}[0], [x6]
 9:
-        # Restore x20-x21 from stack
-        LDP     x20, x21, [sp], 16
+        # Restore x20 from stack
+        LDR     x20, [sp], 8
         RET
 
 END_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_ld64

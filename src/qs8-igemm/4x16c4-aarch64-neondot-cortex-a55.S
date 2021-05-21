@@ -22,10 +22,10 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0  x20  v0  v4
-# A1  x15  v1  v5
-# A2  x13  v2  v6
-# A3  x21  v3  v7
+# A0  x13  v0  v4
+# A1  x14  v1  v5
+# A2  x15  v2  v6
+# A3  x20  v3  v7
 # B    x5  v8  v9 v10 v11
 # C0   x6 v16 v20 v24 v28
 # C1  x16 v17 v21 v25 v29
@@ -33,7 +33,7 @@
 # C3   x7 v19 v23 v27 v31
 # unused v12 v13 v14 v15
 
-# x14 temp for A55 loads.
+# x21 temp for Cortex-A55 loads
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
@@ -49,7 +49,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
         STP     d10, d11, [sp, 32]
-                                      // if mr <= 2
+                                        // if mr <= 2
         CSEL    x17, x16, x17, LS       //   c2 = c1
         BIC     x2, x2, 3
 
@@ -79,35 +79,35 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         .p2align 3
 1:
         # Load next 4 A pointers
-        LDP     x20, x15, [x4], 16
-        LDP     x13, x21, [x4], 16
+        LDP     x13, x14, [x4], 16
+        LDP     x15, x20, [x4], 16
 
-        CMP     x20, x12                // if a0 == zero
-        ADD     x20, x20, x11           // a0 += a_offset
-        CSEL    x20, x12, x20, EQ       //   a0 = zero, else += a0 + a_offset
-        CMP     x15, x12                // if a1 == zero
-        ADD     x15, x15, x11           // a1 += a_offset
-        CSEL    x15, x12, x15, EQ       //   a1 = zero, else += a1 + a_offset
-        CMP     x13, x12                // if a2 == zero
-        ADD     x13, x13, x11           // a2 += a_offset
-        CSEL    x13, x12, x13, EQ       //   a2 = zero, else += a2 + a_offset
-        CMP     x21, x12                // if a3 == zero
-        ADD     x21, x21, x11           // a3 += a_offset
-        CSEL    x21, x12, x21, EQ       //   a3 = zero, else += a3 + a_offset
+        CMP     x13, x12                // if a0 == zero
+        ADD     x13, x13, x11           // a0 += a_offset
+        CSEL    x13, x12, x13, EQ       //   a0 = zero, else += a0 + a_offset
+        CMP     x14, x12                // if a1 == zero
+        ADD     x14, x14, x11           // a1 += a_offset
+        CSEL    x14, x12, x14, EQ       //   a1 = zero, else += a1 + a_offset
+        CMP     x15, x12                // if a2 == zero
+        ADD     x15, x15, x11           // a2 += a_offset
+        CSEL    x15, x12, x15, EQ       //   a2 = zero, else += a2 + a_offset
+        CMP     x20, x12                // if a3 == zero
+        ADD     x20, x20, x11           // a3 += a_offset
+        CSEL    x20, x12, x20, EQ       //   a3 = zero, else += a3 + a_offset
 
         # Is there at least 16 bytes for prologue/epilogue?
         SUBS    x0, x2, 16              // k = kc - 16
         B.LO    5f
 
         # prologue - read A and B values for block 0 and 1
-        LDR     d0, [x20], 8
+        LDR     d0, [x13], 8
         LDR     q8,  [x5], 16
-        LDR     d1, [x15], 8
-        LDR     d2, [x13], 8
-        LDR     d3, [x21], 8
+        LDR     d1, [x14], 8
+        LDR     d2, [x15], 8
+        LDR     d3, [x20], 8
         SUBS    x0, x0, 16              // is there 16 for main loop?
         LDR     d9,  [x5], 8
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         # Is there at least 16 bytes for main loop?
         B.LO    3f
 
@@ -123,143 +123,143 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v16.4s,  v8.16b, v0.4b[0]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v1.4b[0]
-        INS     v9.d[1], x14
+        INS     v9.d[1], x21
         SDOT    v18.4s,  v8.16b, v2.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v19.4s,  v8.16b, v3.4b[0]
-        LDR     d4,  [x20], 8
+        LDR     d4,  [x13], 8
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v0.4b[0]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v1.4b[0]
-        INS     v10.d[1], x14
+        INS     v10.d[1], x21
         SDOT    v22.4s,  v9.16b, v2.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v23.4s,  v9.16b, v3.4b[0]
-        LDR     d5, [x15], 8
+        LDR     d5, [x14], 8
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v0.4b[0]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v1.4b[0]
-        INS     v11.d[1], x14
+        INS     v11.d[1], x21
         SDOT    v26.4s, v10.16b, v2.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[0]
-        LDR     d6, [x13], 8
+        LDR     d6, [x15], 8
 
         // BLOCK 3
         SDOT    v28.4s, v11.16b, v0.4b[0]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[0]
-        INS     v8.d[1], x14
+        INS     v8.d[1], x21
         SDOT    v30.4s, v11.16b, v2.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v31.4s, v11.16b, v3.4b[0]
-        LDR     d7,  [x21], 8
+        LDR     d7,  [x20], 8
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v0.4b[1]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v1.4b[1]
-        INS     v9.d[1], x14
+        INS     v9.d[1], x21
         SDOT    v18.4s,  v8.16b, v2.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v19.4s,  v8.16b, v3.4b[1]
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v0.4b[1]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v1.4b[1]
-        INS     v10.d[1], x14
+        INS     v10.d[1], x21
         SDOT    v22.4s,  v9.16b, v2.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v23.4s,  v9.16b, v3.4b[1]
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v0.4b[1]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v1.4b[1]
-        INS     v11.d[1], x14
+        INS     v11.d[1], x21
         SDOT    v26.4s, v10.16b, v2.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[1]
 
         // BLOCK 4
         SDOT    v28.4s, v11.16b, v0.4b[1]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[1]
-        INS     v8.d[1], x14
+        INS     v8.d[1], x21
         SDOT    v30.4s, v11.16b, v2.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v31.4s, v11.16b, v3.4b[1]
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v4.4b[0]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v5.4b[0]
-        INS     v9.d[1], x14
+        INS     v9.d[1], x21
         SDOT    v18.4s,  v8.16b, v6.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v19.4s,  v8.16b, v7.4b[0]
-        LDR     d0,  [x20], 8
+        LDR     d0,  [x13], 8
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v4.4b[0]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v5.4b[0]
-        INS     v10.d[1], x14
+        INS     v10.d[1], x21
         SDOT    v22.4s,  v9.16b, v6.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v23.4s,  v9.16b, v7.4b[0]
-        LDR     d1, [x15], 8
+        LDR     d1, [x14], 8
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v4.4b[0]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v5.4b[0]
-        INS     v11.d[1], x14
+        INS     v11.d[1], x21
         SDOT    v26.4s, v10.16b, v6.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v27.4s, v10.16b, v7.4b[0]
-        LDR     d2, [x13], 8
+        LDR     d2, [x15], 8
 
         // BLOCK 3
         SDOT    v28.4s, v11.16b, v4.4b[0]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v5.4b[0]
-        INS     v8.d[1], x14
+        INS     v8.d[1], x21
         SDOT    v30.4s, v11.16b, v6.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v31.4s, v11.16b, v7.4b[0]
-        LDR     d3,  [x21], 8
+        LDR     d3,  [x20], 8
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v4.4b[1]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v5.4b[1]
-        INS     v9.d[1], x14
+        INS     v9.d[1], x21
         SDOT    v18.4s,  v8.16b, v6.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v19.4s,  v8.16b, v7.4b[1]
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v4.4b[1]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v5.4b[1]
-        INS     v10.d[1], x14
+        INS     v10.d[1], x21
         SDOT    v22.4s,  v9.16b, v6.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v23.4s,  v9.16b, v7.4b[1]
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v4.4b[1]
         LDR     d8,  [x5], 8            // First B values for block 0 and 1
         SDOT    v25.4s, v10.16b, v5.4b[1]
-        INS     v11.d[1], x14
+        INS     v11.d[1], x21
         SDOT    v26.4s, v10.16b, v6.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v27.4s, v10.16b, v7.4b[1]
         SUBS    x0, x0, 16
 
@@ -267,9 +267,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v28.4s, v11.16b, v4.4b[1]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v5.4b[1]
-        INS     v8.d[1], x14
+        INS     v8.d[1], x21
         SDOT    v30.4s, v11.16b, v6.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v31.4s, v11.16b, v7.4b[1]
         B.HS    2b
 
@@ -279,136 +279,136 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         SDOT    v16.4s,  v8.16b, v0.4b[0]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v1.4b[0]
-        INS     v9.d[1], x14
+        INS     v9.d[1], x21
         SDOT    v18.4s,  v8.16b, v2.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v19.4s,  v8.16b, v3.4b[0]
-        LDR     d4,  [x20], 8
+        LDR     d4,  [x13], 8
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v0.4b[0]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v1.4b[0]
-        INS     v10.d[1], x14
+        INS     v10.d[1], x21
         SDOT    v22.4s,  v9.16b, v2.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v23.4s,  v9.16b, v3.4b[0]
-        LDR     d5, [x15], 8
+        LDR     d5, [x14], 8
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v0.4b[0]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v1.4b[0]
-        INS     v11.d[1], x14
+        INS     v11.d[1], x21
         SDOT    v26.4s, v10.16b, v2.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[0]
-        LDR     d6, [x13], 8
+        LDR     d6, [x15], 8
 
         // BLOCK 3
         SDOT    v28.4s, v11.16b, v0.4b[0]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[0]
-        INS     v8.d[1], x14
+        INS     v8.d[1], x21
         SDOT    v30.4s, v11.16b, v2.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v31.4s, v11.16b, v3.4b[0]
-        LDR     d7,  [x21], 8
+        LDR     d7,  [x20], 8
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v0.4b[1]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v1.4b[1]
-        INS     v9.d[1], x14
+        INS     v9.d[1], x21
         SDOT    v18.4s,  v8.16b, v2.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v19.4s,  v8.16b, v3.4b[1]
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v0.4b[1]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v1.4b[1]
-        INS     v10.d[1], x14
+        INS     v10.d[1], x21
         SDOT    v22.4s,  v9.16b, v2.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v23.4s,  v9.16b, v3.4b[1]
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v0.4b[1]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v1.4b[1]
-        INS     v11.d[1], x14
+        INS     v11.d[1], x21
         SDOT    v26.4s, v10.16b, v2.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[1]
 
         // BLOCK 4
         SDOT    v28.4s, v11.16b, v0.4b[1]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[1]
-        INS     v8.d[1], x14
+        INS     v8.d[1], x21
         SDOT    v30.4s, v11.16b, v2.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v31.4s, v11.16b, v3.4b[1]
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v4.4b[0]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v5.4b[0]
-        INS     v9.d[1], x14
+        INS     v9.d[1], x21
         SDOT    v18.4s,  v8.16b, v6.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v19.4s,  v8.16b, v7.4b[0]
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v4.4b[0]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v5.4b[0]
-        INS     v10.d[1], x14
+        INS     v10.d[1], x21
         SDOT    v22.4s,  v9.16b, v6.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v23.4s,  v9.16b, v7.4b[0]
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v4.4b[0]
         LDR     d8,  [x5], 8
         SDOT    v25.4s, v10.16b, v5.4b[0]
-        INS     v11.d[1], x14
+        INS     v11.d[1], x21
         SDOT    v26.4s, v10.16b, v6.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v27.4s, v10.16b, v7.4b[0]
 
         // BLOCK 3
         SDOT    v28.4s, v11.16b, v4.4b[0]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v5.4b[0]
-        INS     v8.d[1], x14
+        INS     v8.d[1], x21
         SDOT    v30.4s, v11.16b, v6.4b[0]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v31.4s, v11.16b, v7.4b[0]
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v4.4b[1]
         LDR     d10,  [x5], 8
         SDOT    v17.4s,  v8.16b, v5.4b[1]
-        INS     v9.d[1], x14
+        INS     v9.d[1], x21
         SDOT    v18.4s,  v8.16b, v6.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v19.4s,  v8.16b, v7.4b[1]
 
         // BLOCK 1
         SDOT    v20.4s,  v9.16b, v4.4b[1]
         LDR     d11,  [x5], 8
         SDOT    v21.4s,  v9.16b, v5.4b[1]
-        INS     v10.d[1], x14
+        INS     v10.d[1], x21
         SDOT    v22.4s,  v9.16b, v6.4b[1]
-        LDR     x14,  [x5], 8
+        LDR     x21,  [x5], 8
         SDOT    v23.4s,  v9.16b, v7.4b[1]
 
         // BLOCK 2
         SDOT    v24.4s, v10.16b, v4.4b[1]
         SDOT    v25.4s, v10.16b, v5.4b[1]
-        INS     v11.d[1], x14
+        INS     v11.d[1], x21
         SDOT    v26.4s, v10.16b, v6.4b[1]
         SDOT    v27.4s, v10.16b, v7.4b[1]
         AND     x0, x2, 15              // kc remainder 0 to 12
@@ -580,11 +580,11 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
 5:
         AND     x0, x2, 15              // kc remainder 4 to 12
 6:
-        LDR     q0, [x20]
+        LDR     q0, [x13]
         LDP     q8,  q9,  [x5], 32
-        LDR     q1, [x15]
-        LDR     q2, [x13]
-        LDR     q3, [x21]
+        LDR     q1, [x14]
+        LDR     q2, [x15]
+        LDR     q3, [x20]
         LDP     q10, q11, [x5], 32
         SDOT    v16.4s,  v8.16b, v0.4b[0]
         SDOT    v17.4s,  v8.16b, v1.4b[0]

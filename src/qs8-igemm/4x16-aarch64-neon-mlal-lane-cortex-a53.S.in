@@ -22,10 +22,10 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0  x20  v0
-# A1  x15  v1
-# A2  x13  v2
-# A3  x21  v3
+# A0  x13  v0
+# A1  x14  v1
+# A2  x15  v2
+# A3  x20  v3
 # B    x5  v4  v5  v6
 # C0   x6 v16 v20 v24 v28
 # C1  x16 v17 v21 v25 v29
@@ -33,7 +33,7 @@
 # C3   x7 v19 v23 v27 v31
 # temp    v7
 # unused  v8 v9 v10 v11 v12 v13 v14 v15
-# x14, x22, x23 reserved for a53 temp
+# x21, x22, x23 temp for Cortex-A53 loads
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
 
@@ -76,34 +76,34 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         .p2align 3
 1:
         # Load next 4 A pointers
-        LDP     x20, x15, [x4], 16
-        LDP     x13, x21, [x4], 16
+        LDP     x13, x14, [x4], 16
+        LDP     x15, x20, [x4], 16
 
-        CMP     x20, x12                // if a0 == zero
-        ADD     x20, x20, x11           // a0 += a_offset
-        CSEL    x20, x12, x20, EQ       //   a0 = zero, else += a0 + a_offset
-        CMP     x15, x12                // if a1 == zero
-        ADD     x15, x15, x11           // a1 += a_offset
-        CSEL    x15, x12, x15, EQ       //   a1 = zero, else += a1 + a_offset
-        CMP     x13, x12                // if a2 == zero
-        ADD     x13, x13, x11           // a2 += a_offset
-        CSEL    x13, x12, x13, EQ       //   a2 = zero, else += a2 + a_offset
-        CMP     x21, x12                // if a3 == zero
-        ADD     x21, x21, x11           // a3 += a_offset
-        CSEL    x21, x12, x21, EQ       //   a3 = zero, else += a3 + a_offset
+        CMP     x13, x12                // if a0 == zero
+        ADD     x13, x13, x11           // a0 += a_offset
+        CSEL    x13, x12, x13, EQ       //   a0 = zero, else += a0 + a_offset
+        CMP     x14, x12                // if a1 == zero
+        ADD     x14, x14, x11           // a1 += a_offset
+        CSEL    x14, x12, x14, EQ       //   a1 = zero, else += a1 + a_offset
+        CMP     x15, x12                // if a2 == zero
+        ADD     x15, x15, x11           // a2 += a_offset
+        CSEL    x15, x12, x15, EQ       //   a2 = zero, else += a2 + a_offset
+        CMP     x20, x12                // if a3 == zero
+        ADD     x20, x20, x11           // a3 += a_offset
+        CSEL    x20, x12, x20, EQ       //   a3 = zero, else += a3 + a_offset
 
         # Is there at least 8 bytes for epilogue?
         SUBS    x0, x2, 8               // k = kc - 8
         B.LO    4f
 
         # Prologue
-        LDR     d0, [x20], 8
+        LDR     d0, [x13], 8
         LDP     d4, d6, [x5]
-        LDR     d1, [x15], 8
-        LDR     d2, [x13], 8
-        LDR     d3, [x21], 8
+        LDR     d1, [x14], 8
+        LDR     d2, [x15], 8
+        LDR     d3, [x20], 8
         SXTL    v0.8h, v0.8b
-        LDR     x14, [x5, 16]
+        LDR     x23, [x5, 16]
         SXTL    v4.8h, v4.8b
         SXTL    v1.8h, v1.8b
         SXTL    v2.8h, v2.8b
@@ -120,21 +120,21 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v16.4s, v4.4h, v0.h[0]
         SMLAL2  v20.4s, v4.8h, v0.h[0]
         $if PREFETCH:
-          PRFM    PLDL1KEEP, [x20, 128]
+          PRFM    PLDL1KEEP, [x13, 128]
         SMLAL   v17.4s, v4.4h, v1.h[0]
         SMLAL2  v21.4s, v4.8h, v1.h[0]
         $if PREFETCH:
-          PRFM    PLDL1KEEP, [x15, 128]
+          PRFM    PLDL1KEEP, [x14, 128]
         SMLAL   v18.4s, v4.4h, v2.h[0]
         SMLAL2  v22.4s, v4.8h, v2.h[0]
         $if PREFETCH:
-          PRFM    PLDL1KEEP, [x13, 128]
+          PRFM    PLDL1KEEP, [x15, 128]
         SMLAL   v19.4s, v4.4h, v3.h[0]
         SMLAL2  v23.4s, v4.8h, v3.h[0]
         $if PREFETCH:
-          PRFM    PLDL1KEEP, [x21, 128]
+          PRFM    PLDL1KEEP, [x20, 128]
         LDR     d4, [x5, 24]
-        INS     v5.d[0], x14
+        INS     v5.d[0], x23
         SMLAL   v24.4s, v6.4h, v0.h[0]
         SMLAL2  v28.4s, v6.8h, v0.h[0]
         $if PREFETCH:
@@ -148,7 +148,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v30.4s, v6.8h, v2.h[0]
         SMLAL   v27.4s, v6.4h, v3.h[0]
         SMLAL2  v31.4s, v6.8h, v3.h[0]
-        LDR     x14, [x5, 32]
+        LDR     x23, [x5, 32]
         SMLAL   v16.4s, v5.4h, v0.h[1]
         SMLAL2  v20.4s, v5.8h, v0.h[1]
         SMLAL   v17.4s, v5.4h, v1.h[1]
@@ -159,7 +159,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v5.4h, v3.h[1]
         SMLAL2  v23.4s, v5.8h, v3.h[1]
         LDR     d5, [x5, 40]
-        INS     v6.d[0], x14
+        INS     v6.d[0], x23
         SMLAL   v24.4s, v4.4h, v0.h[1]
         SMLAL2  v28.4s, v4.8h, v0.h[1]
         SMLAL   v25.4s, v4.4h, v1.h[1]
@@ -169,7 +169,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v30.4s, v4.8h, v2.h[1]
         SMLAL   v27.4s, v4.4h, v3.h[1]
         SMLAL2  v31.4s, v4.8h, v3.h[1]
-        LDR     x14, [x5, 48]
+        LDR     x23, [x5, 48]
         SMLAL   v16.4s, v6.4h, v0.h[2]
         SMLAL2  v20.4s, v6.8h, v0.h[2]
         SMLAL   v17.4s, v6.4h, v1.h[2]
@@ -180,7 +180,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v6.4h, v3.h[2]
         SMLAL2  v23.4s, v6.8h, v3.h[2]
         LDR     d6, [x5, 56]
-        INS     v4.d[0], x14
+        INS     v4.d[0], x23
         SMLAL   v24.4s, v5.4h, v0.h[2]
         SMLAL2  v28.4s, v5.8h, v0.h[2]
         SMLAL   v25.4s, v5.4h, v1.h[2]
@@ -190,7 +190,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v30.4s, v5.8h, v2.h[2]
         SMLAL   v27.4s, v5.4h, v3.h[2]
         SMLAL2  v31.4s, v5.8h, v3.h[2]
-        LDR     x14, [x5, 64]
+        LDR     x23, [x5, 64]
         SMLAL   v16.4s, v4.4h, v0.h[3]
         SMLAL2  v20.4s, v4.8h, v0.h[3]
         SMLAL   v17.4s, v4.4h, v1.h[3]
@@ -201,7 +201,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v4.4h, v3.h[3]
         SMLAL2  v23.4s, v4.8h, v3.h[3]
         LDR     d4, [x5, 72]
-        INS     v5.d[0], x14
+        INS     v5.d[0], x23
         SMLAL   v24.4s, v6.4h, v0.h[3]
         SMLAL2  v28.4s, v6.8h, v0.h[3]
         SXTL    v5.8h, v5.8b
@@ -211,7 +211,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v30.4s, v6.8h, v2.h[3]
         SMLAL   v27.4s, v6.4h, v3.h[3]
         SMLAL2  v31.4s, v6.8h, v3.h[3]
-        LDR     x14, [x5, 80]
+        LDR     x23, [x5, 80]
         SMLAL   v16.4s, v5.4h, v0.h[4]
         SMLAL2  v20.4s, v5.8h, v0.h[4]
         SMLAL   v17.4s, v5.4h, v1.h[4]
@@ -222,7 +222,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v5.4h, v3.h[4]
         SMLAL2  v23.4s, v5.8h, v3.h[4]
         LDR     d5, [x5, 88]
-        INS     v6.d[0], x14
+        INS     v6.d[0], x23
         SMLAL   v24.4s, v4.4h, v0.h[4]
         SMLAL2  v28.4s, v4.8h, v0.h[4]
         SMLAL   v25.4s, v4.4h, v1.h[4]
@@ -232,7 +232,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v30.4s, v4.8h, v2.h[4]
         SMLAL   v27.4s, v4.4h, v3.h[4]
         SMLAL2  v31.4s, v4.8h, v3.h[4]
-        LDR     x14, [x5, 96]
+        LDR     x23, [x5, 96]
         SMLAL   v16.4s, v6.4h, v0.h[5]
         SMLAL2  v20.4s, v6.8h, v0.h[5]
         SMLAL   v17.4s, v6.4h, v1.h[5]
@@ -243,7 +243,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v6.4h, v3.h[5]
         SMLAL2  v23.4s, v6.8h, v3.h[5]
         LDR     d6, [x5, 104]
-        INS     v4.d[0], x14
+        INS     v4.d[0], x23
         SMLAL   v24.4s, v5.4h, v0.h[5]
         SMLAL2  v28.4s, v5.8h, v0.h[5]
         SMLAL   v25.4s, v5.4h, v1.h[5]
@@ -262,13 +262,13 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v22.4s, v4.8h, v2.h[6]
         SMLAL   v19.4s, v4.4h, v3.h[6]
         SMLAL2  v23.4s, v4.8h, v3.h[6]
-        LDR     x14, [x5, 112]
+        LDR     x23, [x5, 112]
         SMLAL   v24.4s, v6.4h, v0.h[6]
         SMLAL2  v28.4s, v6.8h, v0.h[6]
         SMLAL   v25.4s, v6.4h, v1.h[6]
         SMLAL2  v29.4s, v6.8h, v1.h[6]
         LDR     d5, [x5, 120]
-        INS     v4.d[0], x14
+        INS     v4.d[0], x23
         SXTL    v4.8h, v4.8b
         ADD     x5, x5, 128
 
@@ -284,13 +284,13 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SXTL    v5.8h, v5.8b
         SMLAL   v18.4s, v4.4h, v2.h[7]
         SMLAL2  v22.4s, v4.8h, v2.h[7]
-        LDR     x14, [x5]
+        LDR     x23, [x5]
         SMLAL   v19.4s, v4.4h, v3.h[7]
         SMLAL2  v23.4s, v4.8h, v3.h[7]
-        LDR     x22, [x20], 8
+        LDR     x21, [x13], 8
         SMLAL   v24.4s, v5.4h, v0.h[7]
         SMLAL2  v28.4s, v5.8h, v0.h[7]
-        LDR     x23, [x13], 8
+        LDR     x22, [x15], 8
         SMLAL   v25.4s, v5.4h, v1.h[7]
         SMLAL2  v29.4s, v5.8h, v1.h[7]
         SMLAL   v26.4s, v5.4h, v2.h[7]
@@ -299,18 +299,18 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v31.4s, v5.8h, v3.h[7]
 
         # Loads for next loop
-        LDR     d1, [x15], 8
-        INS     v0.d[0], x22
-        LDR     d3, [x21], 8
-        INS     v2.d[0], x23
+        LDR     d1, [x14], 8
+        INS     v0.d[0], x21
+        LDR     d3, [x20], 8
+        INS     v2.d[0], x22
         LDR     d6, [x5, 8]
-        INS     v4.d[0], x14
+        INS     v4.d[0], x23
         SXTL    v0.8h, v0.8b
         SXTL    v1.8h, v1.8b
         SUBS    x0, x0, 8
         SXTL    v4.8h, v4.8b
         SXTL    v2.8h, v2.8b
-        LDR     x14, [x5, 16]
+        LDR     x23, [x5, 16]
         SXTL    v3.8h, v3.8b
         SXTL    v6.8h, v6.8b
         B.HS    2b
@@ -328,7 +328,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v4.4h, v3.h[0]
         SMLAL2  v23.4s, v4.8h, v3.h[0]
         LDR     d4, [x5, 24]
-        INS     v5.d[0], x14
+        INS     v5.d[0], x23
         SMLAL   v24.4s, v6.4h, v0.h[0]
         SMLAL2  v28.4s, v6.8h, v0.h[0]
         SMLAL   v25.4s, v6.4h, v1.h[0]
@@ -338,7 +338,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v30.4s, v6.8h, v2.h[0]
         SMLAL   v27.4s, v6.4h, v3.h[0]
         SMLAL2  v31.4s, v6.8h, v3.h[0]
-        LDR     x14, [x5, 32]
+        LDR     x23, [x5, 32]
         SMLAL   v16.4s, v5.4h, v0.h[1]
         SMLAL2  v20.4s, v5.8h, v0.h[1]
         SMLAL   v17.4s, v5.4h, v1.h[1]
@@ -349,7 +349,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v5.4h, v3.h[1]
         SMLAL2  v23.4s, v5.8h, v3.h[1]
         LDR     d5, [x5, 40]
-        INS     v6.d[0], x14
+        INS     v6.d[0], x23
         SMLAL   v24.4s, v4.4h, v0.h[1]
         SMLAL2  v28.4s, v4.8h, v0.h[1]
         SMLAL   v25.4s, v4.4h, v1.h[1]
@@ -359,7 +359,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v30.4s, v4.8h, v2.h[1]
         SMLAL   v27.4s, v4.4h, v3.h[1]
         SMLAL2  v31.4s, v4.8h, v3.h[1]
-        LDR     x14, [x5, 48]
+        LDR     x23, [x5, 48]
         SMLAL   v16.4s, v6.4h, v0.h[2]
         SMLAL2  v20.4s, v6.8h, v0.h[2]
         SMLAL   v17.4s, v6.4h, v1.h[2]
@@ -370,7 +370,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v6.4h, v3.h[2]
         SMLAL2  v23.4s, v6.8h, v3.h[2]
         LDR     d6, [x5, 56]
-        INS     v4.d[0], x14
+        INS     v4.d[0], x23
         SMLAL   v24.4s, v5.4h, v0.h[2]
         SMLAL2  v28.4s, v5.8h, v0.h[2]
         SMLAL   v25.4s, v5.4h, v1.h[2]
@@ -380,7 +380,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v30.4s, v5.8h, v2.h[2]
         SMLAL   v27.4s, v5.4h, v3.h[2]
         SMLAL2  v31.4s, v5.8h, v3.h[2]
-        LDR     x14, [x5, 64]
+        LDR     x23, [x5, 64]
         SMLAL   v16.4s, v4.4h, v0.h[3]
         SMLAL2  v20.4s, v4.8h, v0.h[3]
         SMLAL   v17.4s, v4.4h, v1.h[3]
@@ -391,7 +391,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v4.4h, v3.h[3]
         SMLAL2  v23.4s, v4.8h, v3.h[3]
         LDR     d4, [x5, 72]
-        INS     v5.d[0], x14
+        INS     v5.d[0], x23
         SMLAL   v24.4s, v6.4h, v0.h[3]
         SMLAL2  v28.4s, v6.8h, v0.h[3]
         SXTL    v5.8h, v5.8b
@@ -401,7 +401,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v30.4s, v6.8h, v2.h[3]
         SMLAL   v27.4s, v6.4h, v3.h[3]
         SMLAL2  v31.4s, v6.8h, v3.h[3]
-        LDR     x14, [x5, 80]
+        LDR     x23, [x5, 80]
         SMLAL   v16.4s, v5.4h, v0.h[4]
         SMLAL2  v20.4s, v5.8h, v0.h[4]
         SMLAL   v17.4s, v5.4h, v1.h[4]
@@ -412,7 +412,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v5.4h, v3.h[4]
         SMLAL2  v23.4s, v5.8h, v3.h[4]
         LDR     d5, [x5, 88]
-        INS     v6.d[0], x14
+        INS     v6.d[0], x23
         SMLAL   v24.4s, v4.4h, v0.h[4]
         SMLAL2  v28.4s, v4.8h, v0.h[4]
         SMLAL   v25.4s, v4.4h, v1.h[4]
@@ -422,7 +422,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v30.4s, v4.8h, v2.h[4]
         SMLAL   v27.4s, v4.4h, v3.h[4]
         SMLAL2  v31.4s, v4.8h, v3.h[4]
-        LDR     x14, [x5, 96]
+        LDR     x23, [x5, 96]
         SMLAL   v16.4s, v6.4h, v0.h[5]
         SMLAL2  v20.4s, v6.8h, v0.h[5]
         SMLAL   v17.4s, v6.4h, v1.h[5]
@@ -433,7 +433,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL   v19.4s, v6.4h, v3.h[5]
         SMLAL2  v23.4s, v6.8h, v3.h[5]
         LDR     d6, [x5, 104]
-        INS     v4.d[0], x14
+        INS     v4.d[0], x23
         SMLAL   v24.4s, v5.4h, v0.h[5]
         SMLAL2  v28.4s, v5.8h, v0.h[5]
         SMLAL   v25.4s, v5.4h, v1.h[5]
@@ -452,13 +452,13 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
         SMLAL2  v22.4s, v4.8h, v2.h[6]
         SMLAL   v19.4s, v4.4h, v3.h[6]
         SMLAL2  v23.4s, v4.8h, v3.h[6]
-        LDR     x14, [x5, 112]
+        LDR     x23, [x5, 112]
         SMLAL   v24.4s, v6.4h, v0.h[6]
         SMLAL2  v28.4s, v6.8h, v0.h[6]
         SMLAL   v25.4s, v6.4h, v1.h[6]
         SMLAL2  v29.4s, v6.8h, v1.h[6]
         LDR     d5, [x5, 120]
-        INS     v4.d[0], x14
+        INS     v4.d[0], x23
         SXTL    v4.8h, v4.8b
         SMLAL   v26.4s, v6.4h, v2.h[6]
         SMLAL2  v30.4s, v6.8h, v2.h[6]
@@ -645,11 +645,11 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm
 4:
         AND     x0, x2, 7              // kc remainder 1 to 7
 
-        LD1     {v0.8b}, [x20], x0
+        LD1     {v0.8b}, [x13], x0
         LDP     d4, d5, [x5], 16
-        LD1     {v1.8b}, [x15], x0
-        LD1     {v2.8b}, [x13], x0
-        LD1     {v3.8b}, [x21], x0
+        LD1     {v1.8b}, [x14], x0
+        LD1     {v2.8b}, [x15], x0
+        LD1     {v3.8b}, [x20], x0
         SXTL    v0.8h, v0.8b
         SXTL    v4.8h, v4.8b
         SXTL    v5.8h, v5.8b
