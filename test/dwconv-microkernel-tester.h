@@ -32,11 +32,6 @@
 
 class DWConvMicrokernelTester {
  public:
-  enum class Variant {
-    Native,
-    Scalar,
-  };
-
   inline DWConvMicrokernelTester& width(uint32_t width) {
     assert(width >= 1);
     this->width_ = width;
@@ -169,7 +164,7 @@ class DWConvMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_qu8_dwconv_minmax_unipass_ukernel_function dwconv_minmax, Variant variant = Variant::Native) const {
+  void Test(xnn_qu8_dwconv_minmax_unipass_ukernel_function dwconv_minmax, xnn_init_qu8_gemm_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
@@ -238,16 +233,8 @@ class DWConvMicrokernelTester {
       // Prepare parameters.
       const float requantization_scale = 1.0f / float(output_scale);
       union xnn_qu8_gemm_params quantization_params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_qu8_gemm_params(
-            &quantization_params, kernel_zero_point(), requantization_scale, output_zero_point, qmin(), qmax());
-          break;
-        case Variant::Scalar:
-          xnn_init_scalar_qu8_gemm_params(
-            &quantization_params, kernel_zero_point(), requantization_scale, output_zero_point, qmin(), qmax());
-          break;
-      }
+      init_params(&quantization_params,
+        kernel_zero_point(), requantization_scale, output_zero_point, qmin(), qmax());
       union xnn_qu8_requantization_params scalar_requantization_params;
       xnn_init_scalar_qu8_requantization_params(
         &scalar_requantization_params, requantization_scale, output_zero_point, qmin(), qmax());
@@ -282,7 +269,7 @@ class DWConvMicrokernelTester {
     }
   }
 
-  void Test(xnn_qs8_dwconv_minmax_unipass_ukernel_function dwconv_minmax, Variant variant = Variant::Native) const {
+  void Test(xnn_qs8_dwconv_minmax_unipass_ukernel_function dwconv_minmax, xnn_init_qs8_gemm_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
@@ -352,16 +339,8 @@ class DWConvMicrokernelTester {
       // Prepare parameters.
       const float requantization_scale = 1.0f / float(output_scale);
       union xnn_qs8_gemm_params quantization_params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_qs8_gemm_params(
-            &quantization_params, requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-          break;
-        case Variant::Scalar:
-          xnn_init_scalar_qs8_gemm_params(
-            &quantization_params, requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-          break;
-      }
+      init_params(&quantization_params,
+        requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
       union xnn_qs8_requantization_params scalar_requantization_params;
       xnn_init_scalar_qs8_requantization_params(
         &scalar_requantization_params, requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
@@ -396,7 +375,7 @@ class DWConvMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_dwconv_minmax_unipass_ukernel_function dwconv_minmax, Variant variant = Variant::Native) const {
+  void Test(xnn_f16_dwconv_minmax_unipass_ukernel_function dwconv_minmax, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
@@ -455,8 +434,7 @@ class DWConvMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_minmax_params params;
-      xnn_init_f16_minmax_params(
-        &params,
+      init_params(&params,
         fp16_ieee_from_fp32_value(output_min),
         fp16_ieee_from_fp32_value(output_max));
 
@@ -559,7 +537,7 @@ class DWConvMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_dwconv_minmax_unipass_ukernel_function dwconv_minmax, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_dwconv_minmax_unipass_ukernel_function dwconv_minmax, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
@@ -617,14 +595,7 @@ class DWConvMicrokernelTester {
 
       // Prepare parameters.
       xnn_f32_minmax_params params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_f32_minmax_params(&params, output_min, output_max);
-          break;
-        case Variant::Scalar:
-          xnn_init_scalar_f32_minmax_params(&params, output_min, output_max);
-          break;
-      }
+      init_params(&params, output_min, output_max);
 
       // Clamp reference results.
       for (float& output_val : output_ref) {

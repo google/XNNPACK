@@ -322,51 +322,6 @@ union xnn_qs8_gemm_params {
 #endif  // XNN_ARCH_WASMSIMD
 };
 
-union xnn_qs8_gemm_xw_params {
-  struct {
-    int32_t multiplier;
-    int32_t remainder_mask;
-    int32_t remainder_threshold;
-    uint32_t shift;
-    int32_t output_min_less_zero_point;
-    int32_t output_max_less_zero_point;
-    int32_t output_zero_point;
-  } scalar;
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    int32_t multiplier;
-    int32_t right_shift;
-    int16_t output_zero_point;
-    int8_t output_min;
-    int8_t output_max;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) uint32_t multiplier[4];
-    XNN_ALIGN(16) uint64_t rounding[2];
-    XNN_ALIGN(16) int32_t remainder_mask[4];
-    XNN_ALIGN(16) int32_t remainder_threshold[4];
-    XNN_ALIGN(16) uint64_t shift[2];
-    XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) int16_t output_min[8];
-    XNN_ALIGN(16) int16_t output_max[8];
-  } sse2;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD
-  struct {
-    XNN_ALIGN(16) int64_t multiplier[2];
-    XNN_ALIGN(16) int64_t rounding[2];
-    XNN_ALIGN(16) int32_t remainder_mask[4];
-    XNN_ALIGN(16) int32_t remainder_threshold[4];
-    int32_t shift;
-    XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) int8_t output_min[16];
-    XNN_ALIGN(16) int8_t output_max[16];
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD
-};
-
 union xnn_qu8_add_params {
   struct {
     int32_t zero_point_product;
@@ -710,18 +665,6 @@ typedef void (*xnn_qs8_gemm_ukernel_function)(
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_qs8_gemm_params* params);
-
-typedef void (*xnn_qs8_gemm_xw_ukernel_function)(
-    size_t mr,
-    size_t nr,
-    size_t k,
-    const int8_t* a,
-    size_t a_stride,
-    const void* w,
-    int8_t* c,
-    size_t cm_stride,
-    size_t cn_stride,
-    const union xnn_qs8_gemm_xw_params* params);
 
 typedef void (*xnn_igemm_ukernel_function)(
     size_t mr,

@@ -28,6 +28,7 @@ parser.set_defaults(defines=list())
 def split_ukernel_name(name):
   common_name, target_name = name.split("__", 1)
   common_parts = common_name.split("_")
+  xw = "gemm_xw_" in common_name
   param_spec = common_parts[-1]
   if "s" in param_spec:
     param_spec, sr = param_spec.split("s", 1)
@@ -41,7 +42,7 @@ def split_ukernel_name(name):
     kr = 1
   mr, nr = map(int, param_spec.split("x"))
   arch, isa = xnncommon.parse_target_name(target_name)
-  return mr, nr, kr, sr, arch, isa
+  return mr, nr, kr, sr, xw, arch, isa
 
 
 GEMM_TEST_CODE = """\
@@ -49,6 +50,8 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   GemmMicrokernelTester()
+    $if EXTENDED_WEIGHTS:
+      .extended_weights(true)
     .mr(${MR})
     .nr(${NR})
     .kr(${KR})
@@ -63,6 +66,8 @@ TEST(${TEST_NAME}, strided_cn) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   GemmMicrokernelTester()
+    $if EXTENDED_WEIGHTS:
+      .extended_weights(true)
     .mr(${MR})
     .nr(${NR})
     .kr(${KR})
@@ -79,6 +84,8 @@ $if UKERNEL_TYPE != "IGEMM":
     $if ISA_CHECK:
       ${ISA_CHECK};
     GemmMicrokernelTester()
+      $if EXTENDED_WEIGHTS:
+        .extended_weights(true)
       .mr(${MR})
       .nr(${NR})
       .kr(${KR})
@@ -96,6 +103,8 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile) {
   for (uint32_t m = 1; m <= ${MR}; m++) {
     for (uint32_t n = 1; n <= ${NR}; n++) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -114,6 +123,8 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_m) {
     ${ISA_CHECK};
   for (uint32_t m = 1; m <= ${MR}; m++) {
     GemmMicrokernelTester()
+      $if EXTENDED_WEIGHTS:
+        .extended_weights(true)
       .mr(${MR})
       .nr(${NR})
       .kr(${KR})
@@ -132,6 +143,8 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_n) {
     ${ISA_CHECK};
   for (uint32_t n = 1; n <= ${NR}; n++) {
     GemmMicrokernelTester()
+      $if EXTENDED_WEIGHTS:
+        .extended_weights(true)
       .mr(${MR})
       .nr(${NR})
       .kr(${KR})
@@ -149,6 +162,8 @@ $if IS_PIPELINED:
     $if ISA_CHECK:
       ${ISA_CHECK};
     GemmMicrokernelTester()
+      $if EXTENDED_WEIGHTS:
+        .extended_weights(true)
       .mr(${MR})
       .nr(${NR})
       .kr(${KR})
@@ -164,6 +179,8 @@ $if IS_PIPELINED:
       $if ISA_CHECK:
         ${ISA_CHECK};
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -181,6 +198,8 @@ $if IS_PIPELINED:
     for (uint32_t m = 1; m <= ${MR}; m++) {
       for (uint32_t n = 1; n <= ${NR}; n++) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -200,6 +219,8 @@ $if KBLOCK > 1:
       ${ISA_CHECK};
     for (size_t k = 1; k < ${ADJKBLOCK}; k++) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -217,6 +238,8 @@ $if KBLOCK > 1:
         ${ISA_CHECK};
       for (size_t k = 1; k < ${ADJKBLOCK}; k++) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -236,6 +259,8 @@ $if KBLOCK > 1:
       for (uint32_t m = 1; m <= ${MR}; m++) {
         for (uint32_t n = 1; n <= ${NR}; n++) {
           GemmMicrokernelTester()
+            $if EXTENDED_WEIGHTS:
+              .extended_weights(true)
             .mr(${MR})
             .nr(${NR})
             .kr(${KR})
@@ -255,6 +280,8 @@ TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}) {
     ${ISA_CHECK};
   for (size_t k = ${ADJKBLOCK + 1}; k < ${KBLOCK * 10 if KBLOCK == 1 else KBLOCK * 2}; k++) {
     GemmMicrokernelTester()
+      $if EXTENDED_WEIGHTS:
+        .extended_weights(true)
       .mr(${MR})
       .nr(${NR})
       .kr(${KR})
@@ -272,6 +299,8 @@ $if UKERNEL_TYPE.startswith("GEMM"):
       ${ISA_CHECK};
     for (size_t k = ${ADJKBLOCK + 1}; k < ${10 if KBLOCK == 1 else KBLOCK * 2}; k++) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -291,6 +320,8 @@ TEST(${TEST_NAME}, k_gt_${KBLOCK}_subtile) {
     for (uint32_t m = 1; m <= ${MR}; m++) {
       for (uint32_t n = 1; n <= ${NR}; n++) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -311,6 +342,8 @@ $if KBLOCK > 1:
       ${ISA_CHECK};
     for (size_t k = ${ADJKBLOCK + KBLOCK}; k <= ${KBLOCK * 10}; k += ${KBLOCK}) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -328,6 +361,8 @@ $if KBLOCK > 1:
         ${ISA_CHECK};
       for (size_t k = ${ADJKBLOCK + KBLOCK}; k <= ${KBLOCK * 10}; k += ${KBLOCK}) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -347,6 +382,8 @@ $if KBLOCK > 1:
       for (uint32_t m = 1; m <= ${MR}; m++) {
         for (uint32_t n = 1; n <= ${NR}; n++) {
           GemmMicrokernelTester()
+            $if EXTENDED_WEIGHTS:
+              .extended_weights(true)
             .mr(${MR})
             .nr(${NR})
             .kr(${KR})
@@ -367,6 +404,8 @@ TEST(${TEST_NAME}, n_gt_${NR}) {
   for (uint32_t n = ${NR + 1}; n < ${NR * 2}; n++) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -385,6 +424,8 @@ TEST(${TEST_NAME}, n_gt_${NR}_strided_cn) {
   for (uint32_t n = ${NR + 1}; n < ${NR * 2}; n++) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -405,6 +446,8 @@ $if UKERNEL_TYPE != "IGEMM":
     for (uint32_t n = ${NR + 1}; n < ${NR * 2}; n++) {
       for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -425,6 +468,8 @@ TEST(${TEST_NAME}, n_gt_${NR}_subtile) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       for (uint32_t m = 1; m <= ${MR}; m++) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -445,6 +490,8 @@ TEST(${TEST_NAME}, n_div_${NR}) {
   for (uint32_t n = ${2 * NR}; n <= ${3 * NR}; n += ${NR}) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -463,6 +510,8 @@ TEST(${TEST_NAME}, n_div_${NR}_strided_cn) {
   for (uint32_t n = ${2 * NR}; n <= ${3 * NR}; n += ${NR}) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -483,6 +532,8 @@ $if UKERNEL_TYPE != "IGEMM":
     for (uint32_t n = ${2 * NR}; n <= ${3 * NR}; n += ${NR}) {
       for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -503,6 +554,8 @@ TEST(${TEST_NAME}, n_div_${NR}_subtile) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       for (uint32_t m = 1; m <= ${MR}; m++) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -523,6 +576,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -542,6 +597,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
       for (uint32_t m = 1; m <= ${MR}; m++) {
         for (uint32_t n = 1; n <= ${NR}; n++) {
           GemmMicrokernelTester()
+            $if EXTENDED_WEIGHTS:
+              .extended_weights(true)
             .mr(${MR})
             .nr(${NR})
             .kr(${KR})
@@ -563,6 +620,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
     for (uint32_t n = ${NR + 1}; n < ${NR * 2}; n++) {
       for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -582,6 +641,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
     for (uint32_t n = ${2 * NR}; n <= ${3 * NR}; n += ${NR}) {
       for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -602,6 +663,8 @@ TEST(${TEST_NAME}, strided_cm_subtile) {
     for (uint32_t m = 1; m <= ${MR}; m++) {
       for (uint32_t n = 1; n <= ${NR}; n++) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -623,6 +686,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -642,6 +707,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
     for (uint32_t mz = 0; mz < ${MR}; mz++) {
       for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
         GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
           .mr(${MR})
           .nr(${NR})
           .kr(${KR})
@@ -662,6 +729,8 @@ $if ACTIVATION == "MINMAX":
     $if ISA_CHECK:
       ${ISA_CHECK};
     GemmMicrokernelTester()
+      $if EXTENDED_WEIGHTS:
+        .extended_weights(true)
       .mr(${MR})
       .nr(${NR})
       .kr(${KR})
@@ -677,6 +746,8 @@ $if ACTIVATION == "MINMAX":
     $if ISA_CHECK:
       ${ISA_CHECK};
     GemmMicrokernelTester()
+      $if EXTENDED_WEIGHTS:
+        .extended_weights(true)
       .mr(${MR})
       .nr(${NR})
       .kr(${KR})
@@ -692,6 +763,8 @@ TEST(${TEST_NAME}, strided_cm) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   GemmMicrokernelTester()
+    $if EXTENDED_WEIGHTS:
+      .extended_weights(true)
     .mr(${MR})
     .nr(${NR})
     .kr(${KR})
@@ -709,6 +782,8 @@ $if DATATYPE == "qu8":
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -726,6 +801,8 @@ $if DATATYPE == "qu8":
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -743,6 +820,8 @@ $if DATATYPE == "qu8":
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
         .mr(${MR})
         .nr(${NR})
         .kr(${KR})
@@ -758,8 +837,8 @@ $if DATATYPE == "qu8":
 """
 
 
-def generate_test_cases(ukernel, mr, nr, kr, sr,
-                        k_block, is_pipelined, isa):
+def generate_test_cases(ukernel, mr, nr, kr, sr, xw,
+                        k_block, init_fn, is_pipelined, isa):
   """Generates all tests cases for a GEMM micro-kernel.
 
   Args:
@@ -768,8 +847,10 @@ def generate_test_cases(ukernel, mr, nr, kr, sr,
     nr: NR parameter of the GEMM micro-kernel.
     kr: KR parameter of the GEMM micro-kernel.
     sr: SR parameter of the GEMM micro-kernel.
+    xw: boolean indicator for microkernel with extended weights.
     k_block: Number of K values processed per one iteration of the main loop of
              the micro-kernel.
+    init_fn: C name of the function to initialize microkernel parameters.
     is_pipelined: Indicates if the micro-kernel is implemented with software
                   pipelining. Additional test cases are generated for software
                   pipelined micro-kernels to separately test prologue + epiloque
@@ -785,8 +866,8 @@ def generate_test_cases(ukernel, mr, nr, kr, sr,
   if activation == "ukernel":
     activation = "linear"
   test_args = [ukernel]
-  if activation not in ["linear", "relu"] and not isa:
-    test_args.append("GemmMicrokernelTester::Variant::Scalar")
+  if init_fn:
+    test_args.append(init_fn)
   return xngen.preprocess(GEMM_TEST_CODE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -797,6 +878,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr,
       "NR": nr,
       "KR": kr,
       "SR": sr,
+      "EXTENDED_WEIGHTS": xw,
       "KBLOCK": k_block,
       "ADJKBLOCK": 2 * k_block if is_pipelined else k_block,
       "IS_PIPELINED": is_pipelined,
@@ -841,15 +923,16 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       k_block = int(ukernel_spec["k-block"])
+      init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       assembly = bool(ukernel_spec.get("assembly", False))
-      mr, nr, kr, sr, arch, isa = split_ukernel_name(name)
+      mr, nr, kr, sr, xw, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(
-        name, mr, nr, kr, sr, k_block, pipelined, isa)
+        name, mr, nr, kr, sr, xw, k_block, init_fn, pipelined, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
 
     with codecs.open(options.output, "w", encoding="utf-8") as output_file:

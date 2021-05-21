@@ -3,38 +3,50 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 - name: xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith_acc2
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up16x25__neonfp16arith
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up16x25__neonfp16arith_acc2
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up8x9__neonfp16arith
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up8x9__neonfp16arith_acc2
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up16x9__neonfp16arith
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up16x9__neonfp16arith_acc2
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up8x4__neonfp16arith
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up8x4__neonfp16arith_acc2
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64
 - name: xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith_acc2
+  init: xnn_init_f16_minmax_params
   arch:
     - aarch64

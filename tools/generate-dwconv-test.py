@@ -282,7 +282,7 @@ TEST(${TEST_NAME}, zero) {
 }
 """
 
-def generate_test_cases(ukernel, cr, kr, c_block, is_pipelined, isa):
+def generate_test_cases(ukernel, cr, kr, c_block, init_fn, is_pipelined, isa):
   """Generates all tests cases for a DWCONV micro-kernel.
 
   Args:
@@ -291,6 +291,7 @@ def generate_test_cases(ukernel, cr, kr, c_block, is_pipelined, isa):
     kr: KR parameter of the DWCONV micro-kernel.
     k_block: Number of C values processed per one iteration of the main loop of
              the micro-kernel.
+    init_fn: C name of the function to initialize microkernel parameters.
     is_pipelined: Indicates if the micro-kernel is implemented with software
                   pipelining. Additional test cases are generated for software
                   pipelined micro-kernels to separately test prologue + epiloque
@@ -306,8 +307,8 @@ def generate_test_cases(ukernel, cr, kr, c_block, is_pipelined, isa):
   if activation == "ukernel":
     activation = "linear"
   test_args = [ukernel]
-  if activation != "linear" and not isa:
-    test_args.append("DWConvMicrokernelTester::Variant::Scalar")
+  if init_fn:
+    test_args.append(init_fn)
   return xngen.preprocess(DWCONV_TEST_CODE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -358,6 +359,7 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
+      init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       assembly = bool(ukernel_spec.get("assembly", False))
       cr, kr, arch, isa = split_ukernel_name(name)
@@ -365,7 +367,7 @@ def main(args):
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, cr, kr, cr, pipelined, isa)
+      test_case = generate_test_cases(name, cr, kr, cr, init_fn, pipelined, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
 
     with codecs.open(options.output, "w", encoding="utf-8") as output_file:

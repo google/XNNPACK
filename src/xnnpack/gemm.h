@@ -761,7 +761,7 @@ DECLARE_QS8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_gemm_minmax_ukernel_4x4__scalar
       int8_t* c,                                             \
       size_t cm_stride,                                      \
       size_t cn_stride,                                      \
-      const union xnn_qs8_gemm_xw_params* params);
+      const union xnn_qs8_gemm_params* params);
 
 DECLARE_QS8_GEMM_XW_MINMAX_UKERNEL_FUNCTION(xnn_qs8_gemm_xw_minmax_ukernel_1x4c2__sse2)
 DECLARE_QS8_GEMM_XW_MINMAX_UKERNEL_FUNCTION(xnn_qs8_gemm_xw_minmax_ukernel_2x4c2__sse2)
