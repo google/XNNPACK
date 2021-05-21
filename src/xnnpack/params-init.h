@@ -27,37 +27,6 @@
 #include <xnnpack/params.h>
 
 
-typedef void (*xnn_init_qs8_gemm_params_fn)(
-  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max);
-
-typedef void (*xnn_init_qu8_gemm_params_fn)(
-  union xnn_qu8_gemm_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t kernel_zero_point,
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max);
-
-typedef void (*xnn_init_f16_minmax_params_fn)(
-  struct xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t min,
-  uint16_t max);
-
-typedef void (*xnn_init_f16_scaleminmax_params_fn)(
-  struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale,
-  uint16_t min,
-  uint16_t max);
-
-typedef void (*xnn_init_f32_minmax_params_fn)(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max);
-
 static inline void xnn_init_scalar_qu8_gemm_params(
   union xnn_qu8_gemm_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,

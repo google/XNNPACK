@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
@@ -23,7 +25,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
-#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 
 
@@ -487,8 +488,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     .kernel_zero_point = kernel_zero_point,
   };
   union xnn_qu8_gemm_params params;
-  xnn_init_qu8_gemm_params(
-    &params, kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
+  if XNN_LIKELY(xnn_params.qu8.gemm.init.qu8 != NULL) {
+    xnn_params.qu8.gemm.init.qu8(&params,
+      kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
+  }
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,
@@ -582,8 +585,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
 
   const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point, };
   union xnn_qs8_gemm_params params;
-  xnn_init_qs8_gemm_params(
-    &params, requantization_scale, output_zero_point, output_min, output_max);
+  if XNN_LIKELY(xnn_params.qs8.gemm.init.qs8 != NULL) {
+    xnn_params.qs8.gemm.init.qs8(&params,
+      requantization_scale, output_zero_point, output_min, output_max);
+  }
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,
@@ -661,8 +666,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     struct xnn_f16_minmax_params minmax;
     struct xnn_f16_scaleminmax_params scaleminmax;
   } params;
-  xnn_init_f16_minmax_params(&params.minmax, fp16_output_min, fp16_output_max);
-  xnn_init_f16_scaleminmax_params(&params.scaleminmax, UINT16_C(0x3C00) /* 1.0 */, fp16_output_min, fp16_output_max);
+  if XNN_LIKELY(xnn_params.f16.dwconv[0].init.f16 != NULL) {
+    xnn_params.f16.dwconv[0].init.f16(&params.minmax, fp16_output_min, fp16_output_max);
+  }
+  if XNN_LIKELY(xnn_params.f16.gemm.init.f16 != NULL) {
+    xnn_params.f16.gemm.init.f16(&params.scaleminmax, UINT16_C(0x3C00) /* 1.0 */, fp16_output_min, fp16_output_max);
+  }
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,
@@ -735,7 +744,9 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
   const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
   union xnn_f32_minmax_params params;
-  xnn_init_f32_minmax_params(&params, output_min, output_max);
+  if XNN_LIKELY(xnn_params.f32.gemm.init.f32 != NULL) {
+    xnn_params.f32.gemm.init.f32(&params, output_min, output_max);
+  }
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,

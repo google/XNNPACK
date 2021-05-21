@@ -19,7 +19,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
-#include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 
 
@@ -304,8 +303,10 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
   }
 
   union xnn_qu8_gemm_params params;
-  xnn_init_qu8_gemm_params(
-    &params, kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
+  if XNN_LIKELY(xnn_params.qu8.gemm.init.qu8 != NULL) {
+    xnn_params.qu8.gemm.init.qu8(&params,
+      kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
+  }
   const struct xnn_qu8_packing_params packing_params = {
     .input_zero_point = input_zero_point,
     .kernel_zero_point = kernel_zero_point,
@@ -382,8 +383,9 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
   }
 
   union xnn_qs8_gemm_params params;
-  xnn_init_qs8_gemm_params(
-    &params, requantization_scale, output_zero_point, output_min, output_max);
+  if XNN_LIKELY(xnn_params.qs8.gemm.init.qs8 != NULL) {
+    xnn_params.qs8.gemm.init.qs8(&params, requantization_scale, output_zero_point, output_min, output_max);
+  }
   const struct xnn_qs8_packing_params packing_params = {
     .input_zero_point = input_zero_point,
   };
@@ -443,7 +445,9 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   }
 
   union xnn_f32_minmax_params params;
-  xnn_init_f32_minmax_params(&params, output_min, output_max);
+  if XNN_LIKELY(xnn_params.f32.gemm.init.f32 != NULL) {
+    xnn_params.f32.gemm.init.f32(&params, output_min, output_max);
+  }
   return create_fully_connected_nc(
     input_channels, output_channels,
     input_stride, output_stride,

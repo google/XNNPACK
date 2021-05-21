@@ -15,6 +15,7 @@
 #include <xnnpack.h>
 #include <xnnpack/common.h>
 
+
 struct xnn_f16_default_params {
   // Empty; serves to differentiate pointer types for micro-kernels without fused activation.
   char _; // Dummy member variable to comply with the C standard
@@ -1715,6 +1716,37 @@ typedef void (*xnn_f32_vscaleextexp_ukernel_function)(
     float scale_mantissa,
     float scale_exponent);
 
+typedef void (*xnn_init_qs8_gemm_params_fn)(
+  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max);
+
+typedef void (*xnn_init_qu8_gemm_params_fn)(
+  union xnn_qu8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t kernel_zero_point,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max);
+
+typedef void (*xnn_init_f16_minmax_params_fn)(
+  struct xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t min,
+  uint16_t max);
+
+typedef void (*xnn_init_f16_scaleminmax_params_fn)(
+  struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t scale,
+  uint16_t min,
+  uint16_t max);
+
+typedef void (*xnn_init_f32_minmax_params_fn)(
+  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max);
+
 struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_function function[XNN_MAX_UARCH_TYPES];
 };
@@ -1777,6 +1809,12 @@ struct gemm_parameters {
   struct gemm_fused_ukernels minmax;
   struct gemm_fused_ukernels relu;
   struct gemm_fused_ukernels linear;
+  union {
+    xnn_init_qs8_gemm_params_fn qs8;
+    xnn_init_qu8_gemm_params_fn qu8;
+    xnn_init_f16_scaleminmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
   uint8_t mr;
   uint8_t nr;
   uint8_t log2_kr;
@@ -1843,6 +1881,12 @@ union dwconv_fused_ukernels {
 struct dwconv_parameters {
   union dwconv_fused_ukernels minmax;
   union dwconv_fused_ukernels linear;
+  union {
+    xnn_init_qs8_gemm_params_fn qs8;
+    xnn_init_qu8_gemm_params_fn qu8;
+    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
   uint8_t channel_tile;
   uint8_t primary_tile;
   uint8_t incremental_tile;
