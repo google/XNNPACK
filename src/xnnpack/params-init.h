@@ -27,7 +27,7 @@
 #include <xnnpack/params.h>
 
 
-static inline void xnn_init_scalar_qu8_gemm_params(
+static inline void xnn_init_qu8_gemm_scalar_params(
   union xnn_qu8_gemm_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
   float scale,
@@ -63,7 +63,8 @@ static inline void xnn_init_scalar_qu8_gemm_params(
   params->scalar.output_zero_point = (int32_t) (uint32_t) output_zero_point;
 }
 
-static inline void xnn_init_qu8_gemm_params(
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+static inline void xnn_init_qu8_gemm_sse2_params(
   union xnn_qu8_gemm_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
   float scale,
@@ -84,59 +85,69 @@ static inline void xnn_init_qu8_gemm_params(
   assert(shift >= 0);
   assert(shift < 32);
 
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
-    const uint32_t remainder_threshold = remainder_mask >> 1;
-    for (uint32_t i = 0; i < 8; i++) {
-      params->sse2.kernel_zero_point[i] = (int16_t) (uint16_t) kernel_zero_point;
-    }
-    params->sse2.multiplier[0] = multiplier;
-    params->sse2.multiplier[1] = multiplier;
-    params->sse2.multiplier[2] = multiplier;
-    params->sse2.multiplier[3] = multiplier;
-    params->sse2.rounding[0] = UINT64_C(0x40000000);
-    params->sse2.rounding[1] = UINT64_C(0x40000000);
-    params->sse2.remainder_mask[0] = (int32_t) remainder_mask;
-    params->sse2.remainder_mask[1] = (int32_t) remainder_mask;
-    params->sse2.remainder_mask[2] = (int32_t) remainder_mask;
-    params->sse2.remainder_mask[3] = (int32_t) remainder_mask;
-    params->sse2.remainder_threshold[0] = (int32_t) remainder_threshold;
-    params->sse2.remainder_threshold[1] = (int32_t) remainder_threshold;
-    params->sse2.remainder_threshold[2] = (int32_t) remainder_threshold;
-    params->sse2.remainder_threshold[3] = (int32_t) remainder_threshold;
-    params->sse2.shift[0] = (uint64_t) (uint32_t) shift;
-    params->sse2.shift[1] = (uint64_t) (uint32_t) shift;
-    for (uint32_t i = 0; i < 8; i++) {
-      params->sse2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
-    }
-    for (uint32_t i = 0; i < 16; i++) {
-      params->sse2.output_min[i] = output_min;
-      params->sse2.output_max[i] = output_max;
-    }
-  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-    params->neon.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
-    params->neon.multiplier = multiplier;
-    params->neon.right_shift = -shift;
-    params->neon.output_zero_point = (int16_t) (uint16_t) output_zero_point;
-    params->neon.output_min = output_min;
-    params->neon.output_max = output_max;
-  #else
-    const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
-    const uint32_t remainder_threshold = remainder_mask >> 1;
-    params->scalar.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
-    params->scalar.multiplier = multiplier;
-    params->scalar.remainder_mask = (int32_t) remainder_mask;
-    params->scalar.remainder_threshold = (int32_t) remainder_threshold;
-    params->scalar.shift = (uint32_t) shift;
-    params->scalar.output_min_less_zero_point =
-      (int32_t) (uint32_t) output_min - (int32_t) (uint32_t) output_zero_point;
-    params->scalar.output_max_less_zero_point =
-      (int32_t) (uint32_t) output_max - (int32_t) (uint32_t) output_zero_point;
-    params->scalar.output_zero_point = (int32_t) (uint32_t) output_zero_point;
-  #endif
+  const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
+  const uint32_t remainder_threshold = remainder_mask >> 1;
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.kernel_zero_point[i] = (int16_t) (uint16_t) kernel_zero_point;
+  }
+  params->sse2.multiplier[0] = multiplier;
+  params->sse2.multiplier[1] = multiplier;
+  params->sse2.multiplier[2] = multiplier;
+  params->sse2.multiplier[3] = multiplier;
+  params->sse2.rounding[0] = UINT64_C(0x40000000);
+  params->sse2.rounding[1] = UINT64_C(0x40000000);
+  params->sse2.remainder_mask[0] = (int32_t) remainder_mask;
+  params->sse2.remainder_mask[1] = (int32_t) remainder_mask;
+  params->sse2.remainder_mask[2] = (int32_t) remainder_mask;
+  params->sse2.remainder_mask[3] = (int32_t) remainder_mask;
+  params->sse2.remainder_threshold[0] = (int32_t) remainder_threshold;
+  params->sse2.remainder_threshold[1] = (int32_t) remainder_threshold;
+  params->sse2.remainder_threshold[2] = (int32_t) remainder_threshold;
+  params->sse2.remainder_threshold[3] = (int32_t) remainder_threshold;
+  params->sse2.shift[0] = (uint64_t) (uint32_t) shift;
+  params->sse2.shift[1] = (uint64_t) (uint32_t) shift;
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->sse2.output_min[i] = output_min;
+    params->sse2.output_max[i] = output_max;
+  }
 }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-static inline void xnn_init_scalar_qs8_gemm_params(
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+static inline void xnn_init_qu8_gemm_neon_params(
+  union xnn_qu8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t kernel_zero_point,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  // Compute requantization parameters.
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
+  const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
+  assert(multiplier >= INT32_C(0x40000000));
+  assert(multiplier <= INT32_C(0x7FFFFF80));
+
+  // Shift is in [0, 31] range.
+  const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
+  assert(shift >= 0);
+  assert(shift < 32);
+
+  params->neon.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
+  params->neon.multiplier = multiplier;
+  params->neon.right_shift = -shift;
+  params->neon.output_zero_point = (int16_t) (uint16_t) output_zero_point;
+  params->neon.output_min = output_min;
+  params->neon.output_max = output_max;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+static inline void xnn_init_qs8_gemm_scalar_params(
   union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
@@ -168,7 +179,8 @@ static inline void xnn_init_scalar_qs8_gemm_params(
   params->scalar.output_zero_point = (int32_t) output_zero_point;
 }
 
-static inline void xnn_init_qs8_gemm_params(
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+static inline void xnn_init_qs8_gemm_sse2_params(
   union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
@@ -188,72 +200,107 @@ static inline void xnn_init_qs8_gemm_params(
   assert(shift >= 0);
   assert(shift < 32);
 
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
-    const uint32_t remainder_threshold = remainder_mask >> 1;
-    params->sse2.multiplier[0] = multiplier;
-    params->sse2.multiplier[1] = multiplier;
-    params->sse2.multiplier[2] = multiplier;
-    params->sse2.multiplier[3] = multiplier;
-    params->sse2.rounding[0] = UINT64_C(0x40000000);
-    params->sse2.rounding[1] = UINT64_C(0x40000000);
-    params->sse2.remainder_mask[0] = (int32_t) remainder_mask;
-    params->sse2.remainder_mask[1] = (int32_t) remainder_mask;
-    params->sse2.remainder_mask[2] = (int32_t) remainder_mask;
-    params->sse2.remainder_mask[3] = (int32_t) remainder_mask;
-    params->sse2.remainder_threshold[0] = (int32_t) remainder_threshold;
-    params->sse2.remainder_threshold[1] = (int32_t) remainder_threshold;
-    params->sse2.remainder_threshold[2] = (int32_t) remainder_threshold;
-    params->sse2.remainder_threshold[3] = (int32_t) remainder_threshold;
-    params->sse2.shift[0] = (uint64_t) (uint32_t) shift;
-    params->sse2.shift[1] = (uint64_t) (uint32_t) shift;
-    for (uint32_t i = 0; i < 8; i++) {
-      params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
-      params->sse2.output_min[i] = (int16_t) output_min;
-      params->sse2.output_max[i] = (int16_t) output_max;
-    }
-  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-    params->neon.multiplier = multiplier;
-    params->neon.right_shift = -shift;
-    params->neon.output_zero_point = (int16_t) output_zero_point;
-    params->neon.output_min = output_min;
-    params->neon.output_max = output_max;
-  #elif XNN_ARCH_WASMSIMD
-    const int64_t twice_multiplier = INT64_C(2) * (int64_t) multiplier;
-    const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
-    const uint32_t remainder_threshold = remainder_mask >> 1;
-    params->wasmsimd.multiplier[0] = twice_multiplier;
-    params->wasmsimd.multiplier[1] = twice_multiplier;
-    params->wasmsimd.rounding[0] = INT64_C(0x80000000);
-    params->wasmsimd.rounding[1] = INT64_C(0x80000000);
-    params->wasmsimd.remainder_mask[0] = (int32_t) remainder_mask;
-    params->wasmsimd.remainder_mask[1] = (int32_t) remainder_mask;
-    params->wasmsimd.remainder_mask[2] = (int32_t) remainder_mask;
-    params->wasmsimd.remainder_mask[3] = (int32_t) remainder_mask;
-    params->wasmsimd.remainder_threshold[0] = (int32_t) remainder_threshold;
-    params->wasmsimd.remainder_threshold[1] = (int32_t) remainder_threshold;
-    params->wasmsimd.remainder_threshold[2] = (int32_t) remainder_threshold;
-    params->wasmsimd.remainder_threshold[3] = (int32_t) remainder_threshold;
-    params->wasmsimd.shift = shift;
-    for (uint32_t i = 0; i < 8; i++) {
-      params->wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
-    }
-    for (uint32_t i = 0; i < 16; i++) {
-      params->wasmsimd.output_min[i] = output_min;
-      params->wasmsimd.output_max[i] = output_max;
-    }
-  #else
-    const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
-    const uint32_t remainder_threshold = remainder_mask >> 1;
-    params->scalar.multiplier = multiplier;
-    params->scalar.remainder_mask = (int32_t) remainder_mask;
-    params->scalar.remainder_threshold = (int32_t) remainder_threshold;
-    params->scalar.shift = (uint32_t) shift;
-    params->scalar.output_min_less_zero_point = (int32_t) output_min - (int32_t) output_zero_point;
-    params->scalar.output_max_less_zero_point = (int32_t) output_max - (int32_t) output_zero_point;
-    params->scalar.output_zero_point = (int32_t) output_zero_point;
-  #endif
+  const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
+  const uint32_t remainder_threshold = remainder_mask >> 1;
+  params->sse2.multiplier[0] = multiplier;
+  params->sse2.multiplier[1] = multiplier;
+  params->sse2.multiplier[2] = multiplier;
+  params->sse2.multiplier[3] = multiplier;
+  params->sse2.rounding[0] = UINT64_C(0x40000000);
+  params->sse2.rounding[1] = UINT64_C(0x40000000);
+  params->sse2.remainder_mask[0] = (int32_t) remainder_mask;
+  params->sse2.remainder_mask[1] = (int32_t) remainder_mask;
+  params->sse2.remainder_mask[2] = (int32_t) remainder_mask;
+  params->sse2.remainder_mask[3] = (int32_t) remainder_mask;
+  params->sse2.remainder_threshold[0] = (int32_t) remainder_threshold;
+  params->sse2.remainder_threshold[1] = (int32_t) remainder_threshold;
+  params->sse2.remainder_threshold[2] = (int32_t) remainder_threshold;
+  params->sse2.remainder_threshold[3] = (int32_t) remainder_threshold;
+  params->sse2.shift[0] = (uint64_t) (uint32_t) shift;
+  params->sse2.shift[1] = (uint64_t) (uint32_t) shift;
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
+    params->sse2.output_min[i] = (int16_t) output_min;
+    params->sse2.output_max[i] = (int16_t) output_max;
+  }
 }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+static inline void xnn_init_qs8_gemm_neon_params(
+  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  // Compute requantization parameters.
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
+  const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
+  assert(multiplier >= INT32_C(0x40000000));
+  assert(multiplier <= INT32_C(0x7FFFFF80));
+
+  // Shift is in [0, 31] range.
+  const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
+  assert(shift >= 0);
+  assert(shift < 32);
+
+  params->neon.multiplier = multiplier;
+  params->neon.right_shift = -shift;
+  params->neon.output_zero_point = (int16_t) output_zero_point;
+  params->neon.output_min = output_min;
+  params->neon.output_max = output_max;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_WASMSIMD
+static inline void xnn_init_qs8_gemm_wasmsimd_params(
+  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  // Compute requantization parameters.
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
+  const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
+  assert(multiplier >= INT32_C(0x40000000));
+  assert(multiplier <= INT32_C(0x7FFFFF80));
+
+  // Shift is in [0, 31] range.
+  const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
+  assert(shift >= 0);
+  assert(shift < 32);
+
+  const int64_t twice_multiplier = INT64_C(2) * (int64_t) multiplier;
+  const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
+  const uint32_t remainder_threshold = remainder_mask >> 1;
+  params->wasmsimd.multiplier[0] = twice_multiplier;
+  params->wasmsimd.multiplier[1] = twice_multiplier;
+  params->wasmsimd.rounding[0] = INT64_C(0x80000000);
+  params->wasmsimd.rounding[1] = INT64_C(0x80000000);
+  params->wasmsimd.remainder_mask[0] = (int32_t) remainder_mask;
+  params->wasmsimd.remainder_mask[1] = (int32_t) remainder_mask;
+  params->wasmsimd.remainder_mask[2] = (int32_t) remainder_mask;
+  params->wasmsimd.remainder_mask[3] = (int32_t) remainder_mask;
+  params->wasmsimd.remainder_threshold[0] = (int32_t) remainder_threshold;
+  params->wasmsimd.remainder_threshold[1] = (int32_t) remainder_threshold;
+  params->wasmsimd.remainder_threshold[2] = (int32_t) remainder_threshold;
+  params->wasmsimd.remainder_threshold[3] = (int32_t) remainder_threshold;
+  params->wasmsimd.shift = shift;
+  for (uint32_t i = 0; i < 8; i++) {
+    params->wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->wasmsimd.output_min[i] = output_min;
+    params->wasmsimd.output_max[i] = output_max;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD
 
 static inline void xnn_init_qu8_avgpool_params(
   union xnn_qu8_avgpool_params params[XNN_MIN_ELEMENTS(1)],
