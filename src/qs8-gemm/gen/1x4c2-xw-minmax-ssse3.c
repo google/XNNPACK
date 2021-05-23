@@ -146,6 +146,7 @@ void xnn_qs8_gemm_xw_minmax_ukernel_1x4c2__ssse3(
 
     __m128i vout = _mm_packs_epi16(vacc00x0123, vacc00x0123);
 
+
     if (nc >= 4) {
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
 

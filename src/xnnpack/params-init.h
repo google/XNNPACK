@@ -224,6 +224,99 @@ static inline void xnn_init_qs8_gemm_sse2_params(
     params->sse2.output_max[i] = (int16_t) output_max;
   }
 }
+
+static inline void xnn_init_qs8_gemm_sse4_params(
+  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  // Compute requantization parameters.
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
+  const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
+  assert(multiplier >= INT32_C(0x40000000));
+  assert(multiplier <= INT32_C(0x7FFFFF80));
+
+  // Shift is in [0, 31] range.
+  const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
+  assert(shift >= 0);
+  assert(shift < 32);
+
+  const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
+  const uint32_t remainder_threshold = remainder_mask >> 1;
+  params->sse4.multiplier[0] = multiplier;
+  params->sse4.multiplier[1] = multiplier;
+  params->sse4.multiplier[2] = multiplier;
+  params->sse4.multiplier[3] = multiplier;
+  params->sse4.rounding[0] = UINT64_C(0x40000000);
+  params->sse4.rounding[1] = UINT64_C(0x40000000);
+  params->sse4.remainder_mask[0] = (int32_t) remainder_mask;
+  params->sse4.remainder_mask[1] = (int32_t) remainder_mask;
+  params->sse4.remainder_mask[2] = (int32_t) remainder_mask;
+  params->sse4.remainder_mask[3] = (int32_t) remainder_mask;
+  params->sse4.remainder_threshold[0] = (int32_t) remainder_threshold;
+  params->sse4.remainder_threshold[1] = (int32_t) remainder_threshold;
+  params->sse4.remainder_threshold[2] = (int32_t) remainder_threshold;
+  params->sse4.remainder_threshold[3] = (int32_t) remainder_threshold;
+  params->sse4.shift[0] = (uint64_t) (uint32_t) shift;
+  params->sse4.shift[1] = (uint64_t) (uint32_t) shift;
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse4.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->sse4.output_min[i] = output_min;
+    params->sse4.output_max[i] = output_max;
+  }
+}
+
+static inline void xnn_init_qs8_gemm_avx2_params(
+  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  // Compute requantization parameters.
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
+  const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
+  assert(multiplier >= INT32_C(0x40000000));
+  assert(multiplier <= INT32_C(0x7FFFFF80));
+
+  // Shift is in [0, 31] range.
+  const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
+  assert(shift >= 0);
+  assert(shift < 32);
+
+  const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
+  const uint32_t remainder_threshold = remainder_mask >> 1;
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx2.multiplier[i] = multiplier;
+  }
+  params->avx2.rounding[0] = UINT64_C(0x40000000);
+  params->avx2.rounding[1] = UINT64_C(0x40000000);
+  params->avx2.rounding[2] = UINT64_C(0x40000000);
+  params->avx2.rounding[3] = UINT64_C(0x40000000);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx2.remainder_mask[i] = (int32_t) remainder_mask;
+    params->avx2.remainder_threshold[i] = (int32_t) remainder_threshold;
+  }
+  params->avx2.shift[0] = (uint64_t) (uint32_t) shift;
+  params->avx2.shift[1] = (uint64_t) (uint32_t) shift;
+  params->avx2.shift[2] = (uint64_t) (uint32_t) shift;
+  params->avx2.shift[3] = (uint64_t) (uint32_t) shift;
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 32; i++) {
+    params->avx2.output_min[i] = output_min;
+    params->avx2.output_max[i] = output_max;
+  }
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

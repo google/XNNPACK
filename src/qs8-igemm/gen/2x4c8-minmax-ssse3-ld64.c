@@ -180,6 +180,7 @@ void xnn_qs8_igemm_minmax_ukernel_2x4c8__ssse3_ld64(
 
     __m128i vout = _mm_packs_epi16(vacc01x0123, vacc01x0123);
 
+
     if (nc >= 4) {
       *((uint32_t*) c1) = (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(1, 1, 1, 1)));
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);

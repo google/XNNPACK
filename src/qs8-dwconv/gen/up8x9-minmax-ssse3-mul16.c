@@ -249,7 +249,7 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__ssse3_mul16(
         _mm_add_epi32(_mm_and_si128(vq31prod4567, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vq31prod4567));
 
       const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->sse2.remainder_threshold);
-      const __m128i vshift = _mm_load_si128((const __m128i*) params->sse2.shift);
+      const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->sse2.shift);
       vacc0123 =
         _mm_sub_epi32(_mm_sra_epi32(vq31prod0123, vshift), _mm_cmpgt_epi32(vrem0123, vremainder_threshold));
       vacc4567 =
@@ -259,10 +259,13 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__ssse3_mul16(
       __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
 
       const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
+      vout01234567 = _mm_max_epi16(vout01234567, voutput_min);
+
       const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
-      vout01234567 = _mm_min_epi16(_mm_max_epi16(vout01234567, voutput_min), voutput_max);
+      vout01234567 = _mm_min_epi16(vout01234567, voutput_max);
 
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
+
 
       _mm_storel_epi64((__m128i*) output, vout0123456701234567);
       output += 8;
@@ -429,7 +432,7 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__ssse3_mul16(
           _mm_add_epi32(_mm_and_si128(vq31prod4567, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vq31prod4567));
 
         const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->sse2.remainder_threshold);
-        const __m128i vshift = _mm_load_si128((const __m128i*) params->sse2.shift);
+        const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->sse2.shift);
         vacc0123 =
           _mm_sub_epi32(_mm_sra_epi32(vq31prod0123, vshift), _mm_cmpgt_epi32(vrem0123, vremainder_threshold));
         vacc4567 =
@@ -438,11 +441,11 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__ssse3_mul16(
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
-        const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
-        vout01234567 = _mm_min_epi16(_mm_max_epi16(vout01234567, voutput_min), voutput_max);
+        vout01234567 = _mm_max_epi16(vout01234567, _mm_load_si128((const __m128i*) params->sse2.output_min));
+        vout01234567 = _mm_min_epi16(vout01234567, _mm_load_si128((const __m128i*) params->sse2.output_max));
 
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
+
 
         if (c & 4) {
           *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);

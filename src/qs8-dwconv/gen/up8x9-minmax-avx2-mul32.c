@@ -139,8 +139,8 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__avx2_mul32(
 
       w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t) + 72 * sizeof(int8_t));
 
-      const __m256i vmultiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.multiplier));
-      const __m256i vrounding = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.rounding));
+      const __m256i vmultiplier = _mm256_load_si256((const __m256i*) params->avx2.multiplier);
+      const __m256i vrounding = _mm256_load_si256((const __m256i*) params->avx2.rounding);
 
       const __m256i vacc1357 = _mm256_shuffle_epi32(vacc01234567, _MM_SHUFFLE(3, 3, 1, 1));
 
@@ -152,23 +152,24 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__avx2_mul32(
 
       const __m256i vq31prod01234567 = _mm256_blend_epi16(vq31prod0246, vq31prod1357, 0xCC);
 
-      const __m256i vremainder_mask = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_mask));
+      const __m256i vremainder_mask = _mm256_load_si256((const __m256i*) params->avx2.remainder_mask);
       const __m256i vrem01234567 =
         _mm256_add_epi32(_mm256_and_si256(vq31prod01234567, vremainder_mask), _mm256_cmpgt_epi32(_mm256_setzero_si256(), vq31prod01234567));
 
-      const __m256i vremainder_threshold = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_threshold));
-      const __m128i vshift = _mm_load_si128((const __m128i*) params->sse2.shift);
+      const __m256i vremainder_threshold = _mm256_load_si256((const __m256i*) params->avx2.remainder_threshold);
+      const __m128i vshift = _mm_load_si128((const __m128i*) params->avx2.shift);
       vacc01234567 =
         _mm256_sub_epi32(_mm256_sra_epi32(vq31prod01234567, vshift), _mm256_cmpgt_epi32(vrem01234567, vremainder_threshold));
 
-      const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
+      const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->avx2.output_zero_point);
       __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
-      vout01234567 = _mm_min_epi16(_mm_max_epi16(vout01234567, voutput_min), voutput_max);
-
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
+
+      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx2.output_min);
+      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx2.output_max);
+      vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
+      vout0123456701234567 = _mm_min_epi8(vout0123456701234567, voutput_max);
 
       _mm_storel_epi64((__m128i*) output, vout0123456701234567);
       output += 8;
@@ -224,8 +225,8 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__avx2_mul32(
         vacc01234567 = _mm256_add_epi32(vacc01234567, _mm256_mullo_epi32(vi8x01234567, vk8x01234567));
 
 
-        const __m256i vmultiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.multiplier));
-        const __m256i vrounding = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.rounding));
+        const __m256i vmultiplier = _mm256_load_si256((const __m256i*) params->avx2.multiplier);
+        const __m256i vrounding = _mm256_load_si256((const __m256i*) params->avx2.rounding);
 
         const __m256i vacc1357 = _mm256_shuffle_epi32(vacc01234567, _MM_SHUFFLE(3, 3, 1, 1));
 
@@ -237,23 +238,23 @@ void xnn_qs8_dwconv_minmax_ukernel_up8x9__avx2_mul32(
 
         const __m256i vq31prod01234567 = _mm256_blend_epi16(vq31prod0246, vq31prod1357, 0xCC);
 
-        const __m256i vremainder_mask = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_mask));
+        const __m256i vremainder_mask = _mm256_load_si256((const __m256i*) params->avx2.remainder_mask);
         const __m256i vrem01234567 =
           _mm256_add_epi32(_mm256_and_si256(vq31prod01234567, vremainder_mask), _mm256_cmpgt_epi32(_mm256_setzero_si256(), vq31prod01234567));
 
-        const __m256i vremainder_threshold = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_threshold));
-        const __m128i vshift = _mm_load_si128((const __m128i*) params->sse2.shift);
+        const __m256i vremainder_threshold = _mm256_load_si256((const __m256i*) params->avx2.remainder_threshold);
+        const __m128i vshift = _mm_load_si128((const __m128i*) params->avx2.shift);
         vacc01234567 =
           _mm256_sub_epi32(_mm256_sra_epi32(vq31prod01234567, vshift), _mm256_cmpgt_epi32(vrem01234567, vremainder_threshold));
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
+        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->avx2.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
-        const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
-        vout01234567 = _mm_min_epi16(_mm_max_epi16(vout01234567, voutput_min), voutput_max);
-
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
+        const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx2.output_max);
+        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx2.output_min);
+        vout0123456701234567 = _mm_min_epi8(vout0123456701234567, voutput_max);
+        vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
         if (c & 4) {
           *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);

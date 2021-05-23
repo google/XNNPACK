@@ -308,6 +308,26 @@ union xnn_qs8_gemm_params {
     XNN_ALIGN(16) int16_t output_min[8];
     XNN_ALIGN(16) int16_t output_max[8];
   } sse2;
+  struct {
+    XNN_ALIGN(16) uint32_t multiplier[4];
+    XNN_ALIGN(16) uint64_t rounding[2];
+    XNN_ALIGN(16) int32_t remainder_mask[4];
+    XNN_ALIGN(16) int32_t remainder_threshold[4];
+    XNN_ALIGN(16) uint64_t shift[2];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int8_t output_min[16];
+    XNN_ALIGN(16) int8_t output_max[16];
+  } sse4;
+  struct {
+    XNN_ALIGN(32) uint32_t multiplier[8];
+    XNN_ALIGN(32) uint64_t rounding[4];
+    XNN_ALIGN(32) int32_t remainder_mask[8];
+    XNN_ALIGN(32) int32_t remainder_threshold[8];
+    XNN_ALIGN(32) uint64_t shift[4];
+    XNN_ALIGN(32) int16_t output_zero_point[16];
+    XNN_ALIGN(32) int8_t output_min[32];
+    XNN_ALIGN(32) int8_t output_max[32];
+  } avx2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {

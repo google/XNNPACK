@@ -45429,7 +45429,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__SSE41_LD64, strided_cn) {
@@ -45443,7 +45443,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__SSE41_LD64, k_eq_8_subtile) {
@@ -45459,7 +45459,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -45476,7 +45476,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -45492,7 +45492,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -45507,7 +45507,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -45525,7 +45525,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -45542,7 +45542,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -45560,7 +45560,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -45577,7 +45577,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -45595,7 +45595,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -45613,7 +45613,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -45631,7 +45631,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -45650,7 +45650,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -45668,7 +45668,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -45686,7 +45686,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -45705,7 +45705,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -45723,7 +45723,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -45742,7 +45742,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -45761,7 +45761,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -45779,7 +45779,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -45799,7 +45799,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -45818,7 +45818,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -45837,7 +45837,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -45853,7 +45853,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__SSE41_LD64, qmax) {
@@ -45867,7 +45867,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__SSE41_LD64, strided_cm) {
@@ -45881,7 +45881,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -45897,7 +45897,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__SSE41_LD64, strided_cn) {
@@ -45911,7 +45911,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__SSE41_LD64, k_eq_8_subtile) {
@@ -45927,7 +45927,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -45944,7 +45944,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -45960,7 +45960,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -45975,7 +45975,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -45993,7 +45993,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46010,7 +46010,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46028,7 +46028,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46045,7 +46045,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46063,7 +46063,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46081,7 +46081,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46099,7 +46099,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46118,7 +46118,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46136,7 +46136,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46154,7 +46154,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46173,7 +46173,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46191,7 +46191,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46210,7 +46210,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46229,7 +46229,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46247,7 +46247,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46267,7 +46267,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46286,7 +46286,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46305,7 +46305,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46321,7 +46321,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__SSE41_LD64, qmax) {
@@ -46335,7 +46335,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__SSE41_LD64, strided_cm) {
@@ -46349,7 +46349,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -46365,7 +46365,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__SSE41_LD64, strided_cn) {
@@ -46379,7 +46379,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__SSE41_LD64, k_eq_8_subtile) {
@@ -46395,7 +46395,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46412,7 +46412,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46428,7 +46428,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46443,7 +46443,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46461,7 +46461,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46478,7 +46478,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46496,7 +46496,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46513,7 +46513,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46531,7 +46531,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46549,7 +46549,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46567,7 +46567,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46586,7 +46586,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46604,7 +46604,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46622,7 +46622,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46641,7 +46641,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46659,7 +46659,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46678,7 +46678,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46697,7 +46697,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46715,7 +46715,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46735,7 +46735,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46754,7 +46754,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46773,7 +46773,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46789,7 +46789,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__SSE41_LD64, qmax) {
@@ -46803,7 +46803,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__SSE41_LD64, strided_cm) {
@@ -46817,7 +46817,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -46833,7 +46833,7 @@
       .m(4)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__SSE41_LD64, strided_cn) {
@@ -46847,7 +46847,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__SSE41_LD64, k_eq_8_subtile) {
@@ -46863,7 +46863,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -46880,7 +46880,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46896,7 +46896,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46911,7 +46911,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46929,7 +46929,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46946,7 +46946,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46964,7 +46964,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -46981,7 +46981,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -46999,7 +46999,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47017,7 +47017,7 @@
           .m(4)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47035,7 +47035,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47054,7 +47054,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47072,7 +47072,7 @@
           .m(4)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47090,7 +47090,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47109,7 +47109,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47127,7 +47127,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47146,7 +47146,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47165,7 +47165,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47183,7 +47183,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47203,7 +47203,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47222,7 +47222,7 @@
         .k(k)
         .ks(3)
         .a_offset(163)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47241,7 +47241,7 @@
           .ks(3)
           .a_offset(163)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47257,7 +47257,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__SSE41_LD64, qmax) {
@@ -47271,7 +47271,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__SSE41_LD64, strided_cm) {
@@ -47285,7 +47285,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -47301,7 +47301,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__XOP_LD64, strided_cn) {
@@ -47315,7 +47315,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__XOP_LD64, k_eq_8_subtile) {
@@ -47331,7 +47331,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47348,7 +47348,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47364,7 +47364,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47379,7 +47379,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47397,7 +47397,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47414,7 +47414,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47432,7 +47432,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47449,7 +47449,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47467,7 +47467,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47485,7 +47485,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47503,7 +47503,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47522,7 +47522,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47540,7 +47540,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47558,7 +47558,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47577,7 +47577,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47595,7 +47595,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47614,7 +47614,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47633,7 +47633,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47651,7 +47651,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47671,7 +47671,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47690,7 +47690,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47709,7 +47709,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47725,7 +47725,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__XOP_LD64, qmax) {
@@ -47739,7 +47739,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__XOP_LD64, strided_cm) {
@@ -47753,7 +47753,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -47769,7 +47769,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__XOP_LD64, strided_cn) {
@@ -47783,7 +47783,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__XOP_LD64, k_eq_8_subtile) {
@@ -47799,7 +47799,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47816,7 +47816,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47832,7 +47832,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47847,7 +47847,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47865,7 +47865,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47882,7 +47882,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47900,7 +47900,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47917,7 +47917,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -47935,7 +47935,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -47953,7 +47953,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47971,7 +47971,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -47990,7 +47990,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48008,7 +48008,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48026,7 +48026,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48045,7 +48045,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48063,7 +48063,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48082,7 +48082,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48101,7 +48101,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48119,7 +48119,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48139,7 +48139,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48158,7 +48158,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48177,7 +48177,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48193,7 +48193,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__XOP_LD64, qmax) {
@@ -48207,7 +48207,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__XOP_LD64, strided_cm) {
@@ -48221,7 +48221,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -48237,7 +48237,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__XOP_LD64, strided_cn) {
@@ -48251,7 +48251,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__XOP_LD64, k_eq_8_subtile) {
@@ -48267,7 +48267,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48284,7 +48284,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48300,7 +48300,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48315,7 +48315,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48333,7 +48333,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48350,7 +48350,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48368,7 +48368,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48385,7 +48385,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48403,7 +48403,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48421,7 +48421,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48439,7 +48439,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48458,7 +48458,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48476,7 +48476,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48494,7 +48494,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48513,7 +48513,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48531,7 +48531,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48550,7 +48550,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48569,7 +48569,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48587,7 +48587,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48607,7 +48607,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48626,7 +48626,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48645,7 +48645,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48661,7 +48661,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__XOP_LD64, qmax) {
@@ -48675,7 +48675,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__XOP_LD64, strided_cm) {
@@ -48689,7 +48689,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -48705,7 +48705,7 @@
       .m(4)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__XOP_LD64, strided_cn) {
@@ -48719,7 +48719,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__XOP_LD64, k_eq_8_subtile) {
@@ -48735,7 +48735,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48752,7 +48752,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48768,7 +48768,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48783,7 +48783,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48801,7 +48801,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48818,7 +48818,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48836,7 +48836,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48853,7 +48853,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -48871,7 +48871,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48889,7 +48889,7 @@
           .m(4)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48907,7 +48907,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48926,7 +48926,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48944,7 +48944,7 @@
           .m(4)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48962,7 +48962,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -48981,7 +48981,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -48999,7 +48999,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -49018,7 +49018,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -49037,7 +49037,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -49055,7 +49055,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -49075,7 +49075,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -49094,7 +49094,7 @@
         .k(k)
         .ks(3)
         .a_offset(163)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -49113,7 +49113,7 @@
           .ks(3)
           .a_offset(163)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -49129,7 +49129,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__XOP_LD64, qmax) {
@@ -49143,7 +49143,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__XOP_LD64, strided_cm) {
@@ -49157,7 +49157,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -52917,7 +52917,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__SSE41_LD128, strided_cn) {
@@ -52931,7 +52931,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__SSE41_LD128, k_eq_8_subtile) {
@@ -52947,7 +52947,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -52964,7 +52964,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -52980,7 +52980,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -52995,7 +52995,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53013,7 +53013,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53030,7 +53030,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53048,7 +53048,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53065,7 +53065,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53083,7 +53083,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53101,7 +53101,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53119,7 +53119,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53138,7 +53138,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53156,7 +53156,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53174,7 +53174,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53193,7 +53193,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53211,7 +53211,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53230,7 +53230,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53249,7 +53249,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53267,7 +53267,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53287,7 +53287,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53306,7 +53306,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53325,7 +53325,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53341,7 +53341,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__SSE41_LD128, qmax) {
@@ -53355,7 +53355,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__SSE41_LD128, strided_cm) {
@@ -53369,7 +53369,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -53385,7 +53385,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__SSE41_LD128, strided_cn) {
@@ -53399,7 +53399,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__SSE41_LD128, k_eq_8_subtile) {
@@ -53415,7 +53415,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53432,7 +53432,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53448,7 +53448,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53463,7 +53463,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53481,7 +53481,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53498,7 +53498,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53516,7 +53516,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53533,7 +53533,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53551,7 +53551,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53569,7 +53569,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53587,7 +53587,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53606,7 +53606,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53624,7 +53624,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53642,7 +53642,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53661,7 +53661,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53679,7 +53679,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53698,7 +53698,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53717,7 +53717,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53735,7 +53735,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53755,7 +53755,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53774,7 +53774,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53793,7 +53793,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53809,7 +53809,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__SSE41_LD128, qmax) {
@@ -53823,7 +53823,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__SSE41_LD128, strided_cm) {
@@ -53837,7 +53837,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -53853,7 +53853,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__SSE41_LD128, strided_cn) {
@@ -53867,7 +53867,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__SSE41_LD128, k_eq_8_subtile) {
@@ -53883,7 +53883,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -53900,7 +53900,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53916,7 +53916,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53931,7 +53931,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53949,7 +53949,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -53966,7 +53966,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -53984,7 +53984,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54001,7 +54001,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54019,7 +54019,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54037,7 +54037,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54055,7 +54055,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54074,7 +54074,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54092,7 +54092,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54110,7 +54110,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54129,7 +54129,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54147,7 +54147,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54166,7 +54166,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54185,7 +54185,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54203,7 +54203,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54223,7 +54223,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54242,7 +54242,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54261,7 +54261,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54277,7 +54277,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__SSE41_LD128, qmax) {
@@ -54291,7 +54291,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__SSE41_LD128, strided_cm) {
@@ -54305,7 +54305,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -54321,7 +54321,7 @@
       .m(4)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__SSE41_LD128, strided_cn) {
@@ -54335,7 +54335,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__SSE41_LD128, k_eq_8_subtile) {
@@ -54351,7 +54351,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54368,7 +54368,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54384,7 +54384,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54399,7 +54399,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54417,7 +54417,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54434,7 +54434,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54452,7 +54452,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54469,7 +54469,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54487,7 +54487,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54505,7 +54505,7 @@
           .m(4)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54523,7 +54523,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54542,7 +54542,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54560,7 +54560,7 @@
           .m(4)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54578,7 +54578,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54597,7 +54597,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54615,7 +54615,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54634,7 +54634,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54653,7 +54653,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54671,7 +54671,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54691,7 +54691,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54710,7 +54710,7 @@
         .k(k)
         .ks(3)
         .a_offset(163)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54729,7 +54729,7 @@
           .ks(3)
           .a_offset(163)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54745,7 +54745,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__SSE41_LD128, qmax) {
@@ -54759,7 +54759,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__SSE41_LD128, strided_cm) {
@@ -54773,7 +54773,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -54789,7 +54789,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__AVX_LD128, strided_cn) {
@@ -54803,7 +54803,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__AVX_LD128, k_eq_8_subtile) {
@@ -54819,7 +54819,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54836,7 +54836,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54852,7 +54852,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54867,7 +54867,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54885,7 +54885,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54902,7 +54902,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54920,7 +54920,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54937,7 +54937,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -54955,7 +54955,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -54973,7 +54973,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -54991,7 +54991,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55010,7 +55010,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55028,7 +55028,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55046,7 +55046,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55065,7 +55065,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55083,7 +55083,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55102,7 +55102,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55121,7 +55121,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55139,7 +55139,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55159,7 +55159,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55178,7 +55178,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55197,7 +55197,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55213,7 +55213,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__AVX_LD128, qmax) {
@@ -55227,7 +55227,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__AVX_LD128, strided_cm) {
@@ -55241,7 +55241,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -55257,7 +55257,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__AVX_LD128, strided_cn) {
@@ -55271,7 +55271,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__AVX_LD128, k_eq_8_subtile) {
@@ -55287,7 +55287,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55304,7 +55304,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55320,7 +55320,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55335,7 +55335,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55353,7 +55353,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55370,7 +55370,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55388,7 +55388,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55405,7 +55405,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55423,7 +55423,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55441,7 +55441,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55459,7 +55459,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55478,7 +55478,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55496,7 +55496,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55514,7 +55514,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55533,7 +55533,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55551,7 +55551,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55570,7 +55570,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55589,7 +55589,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55607,7 +55607,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55627,7 +55627,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55646,7 +55646,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55665,7 +55665,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55681,7 +55681,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__AVX_LD128, qmax) {
@@ -55695,7 +55695,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__AVX_LD128, strided_cm) {
@@ -55709,7 +55709,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -55725,7 +55725,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__AVX_LD128, strided_cn) {
@@ -55739,7 +55739,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__AVX_LD128, k_eq_8_subtile) {
@@ -55755,7 +55755,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55772,7 +55772,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55788,7 +55788,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55803,7 +55803,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55821,7 +55821,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55838,7 +55838,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55856,7 +55856,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55873,7 +55873,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -55891,7 +55891,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55909,7 +55909,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55927,7 +55927,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55946,7 +55946,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -55964,7 +55964,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -55982,7 +55982,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56001,7 +56001,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56019,7 +56019,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56038,7 +56038,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56057,7 +56057,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56075,7 +56075,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56095,7 +56095,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56114,7 +56114,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56133,7 +56133,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56149,7 +56149,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__AVX_LD128, qmax) {
@@ -56163,7 +56163,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__AVX_LD128, strided_cm) {
@@ -56177,7 +56177,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -56193,7 +56193,7 @@
       .m(4)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__AVX_LD128, strided_cn) {
@@ -56207,7 +56207,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__AVX_LD128, k_eq_8_subtile) {
@@ -56223,7 +56223,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56240,7 +56240,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56256,7 +56256,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56271,7 +56271,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56289,7 +56289,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56306,7 +56306,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56324,7 +56324,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56341,7 +56341,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56359,7 +56359,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56377,7 +56377,7 @@
           .m(4)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56395,7 +56395,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56414,7 +56414,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56432,7 +56432,7 @@
           .m(4)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56450,7 +56450,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56469,7 +56469,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56487,7 +56487,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56506,7 +56506,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56525,7 +56525,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56543,7 +56543,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56563,7 +56563,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56582,7 +56582,7 @@
         .k(k)
         .ks(3)
         .a_offset(163)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56601,7 +56601,7 @@
           .ks(3)
           .a_offset(163)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56617,7 +56617,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__AVX_LD128, qmax) {
@@ -56631,7 +56631,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__AVX_LD128, strided_cm) {
@@ -56645,7 +56645,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -56661,7 +56661,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__XOP_LD128, strided_cn) {
@@ -56675,7 +56675,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__XOP_LD128, k_eq_8_subtile) {
@@ -56691,7 +56691,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56708,7 +56708,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56724,7 +56724,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56739,7 +56739,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56757,7 +56757,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56774,7 +56774,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56792,7 +56792,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56809,7 +56809,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56827,7 +56827,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56845,7 +56845,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56863,7 +56863,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56882,7 +56882,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56900,7 +56900,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56918,7 +56918,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -56937,7 +56937,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56955,7 +56955,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -56974,7 +56974,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -56993,7 +56993,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57011,7 +57011,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57031,7 +57031,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57050,7 +57050,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57069,7 +57069,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57085,7 +57085,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__XOP_LD128, qmax) {
@@ -57099,7 +57099,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C2__XOP_LD128, strided_cm) {
@@ -57113,7 +57113,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -57129,7 +57129,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__XOP_LD128, strided_cn) {
@@ -57143,7 +57143,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__XOP_LD128, k_eq_8_subtile) {
@@ -57159,7 +57159,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57176,7 +57176,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57192,7 +57192,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57207,7 +57207,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57225,7 +57225,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57242,7 +57242,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57260,7 +57260,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57277,7 +57277,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57295,7 +57295,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57313,7 +57313,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57331,7 +57331,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57350,7 +57350,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57368,7 +57368,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57386,7 +57386,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57405,7 +57405,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57423,7 +57423,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57442,7 +57442,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57461,7 +57461,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57479,7 +57479,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57499,7 +57499,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57518,7 +57518,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57537,7 +57537,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57553,7 +57553,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__XOP_LD128, qmax) {
@@ -57567,7 +57567,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C2__XOP_LD128, strided_cm) {
@@ -57581,7 +57581,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -57597,7 +57597,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__XOP_LD128, strided_cn) {
@@ -57611,7 +57611,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__XOP_LD128, k_eq_8_subtile) {
@@ -57627,7 +57627,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57644,7 +57644,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57660,7 +57660,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57675,7 +57675,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57693,7 +57693,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57710,7 +57710,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57728,7 +57728,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57745,7 +57745,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57763,7 +57763,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57781,7 +57781,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57799,7 +57799,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57818,7 +57818,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57836,7 +57836,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57854,7 +57854,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57873,7 +57873,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57891,7 +57891,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -57910,7 +57910,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57929,7 +57929,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57947,7 +57947,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -57967,7 +57967,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -57986,7 +57986,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -58005,7 +58005,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -58021,7 +58021,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__XOP_LD128, qmax) {
@@ -58035,7 +58035,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C2__XOP_LD128, strided_cm) {
@@ -58049,7 +58049,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -58065,7 +58065,7 @@
       .m(4)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__XOP_LD128, strided_cn) {
@@ -58079,7 +58079,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__XOP_LD128, k_eq_8_subtile) {
@@ -58095,7 +58095,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -58112,7 +58112,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -58128,7 +58128,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -58143,7 +58143,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -58161,7 +58161,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -58178,7 +58178,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -58196,7 +58196,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -58213,7 +58213,7 @@
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -58231,7 +58231,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -58249,7 +58249,7 @@
           .m(4)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -58267,7 +58267,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -58286,7 +58286,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -58304,7 +58304,7 @@
           .m(4)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -58322,7 +58322,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -58341,7 +58341,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -58359,7 +58359,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -58378,7 +58378,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -58397,7 +58397,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -58415,7 +58415,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -58435,7 +58435,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -58454,7 +58454,7 @@
         .k(k)
         .ks(3)
         .a_offset(163)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -58473,7 +58473,7 @@
           .ks(3)
           .a_offset(163)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -58489,7 +58489,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__XOP_LD128, qmax) {
@@ -58503,7 +58503,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X4C2__XOP_LD128, strided_cm) {
@@ -58517,7 +58517,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x4c2__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -61341,7 +61341,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__SSE41_LD64, strided_cn) {
@@ -61355,7 +61355,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__SSE41_LD64, k_eq_8_subtile) {
@@ -61371,7 +61371,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -61388,7 +61388,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61404,7 +61404,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61419,7 +61419,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61437,7 +61437,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -61454,7 +61454,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61472,7 +61472,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -61489,7 +61489,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61507,7 +61507,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -61525,7 +61525,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -61543,7 +61543,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -61562,7 +61562,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -61580,7 +61580,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -61598,7 +61598,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -61617,7 +61617,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -61635,7 +61635,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61654,7 +61654,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -61673,7 +61673,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -61691,7 +61691,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -61711,7 +61711,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -61730,7 +61730,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61749,7 +61749,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -61765,7 +61765,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__SSE41_LD64, qmax) {
@@ -61779,7 +61779,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__SSE41_LD64, strided_cm) {
@@ -61793,7 +61793,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -61809,7 +61809,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__SSE41_LD64, strided_cn) {
@@ -61823,7 +61823,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__SSE41_LD64, k_eq_8_subtile) {
@@ -61839,7 +61839,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -61856,7 +61856,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61872,7 +61872,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61887,7 +61887,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61905,7 +61905,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -61922,7 +61922,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61940,7 +61940,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -61957,7 +61957,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -61975,7 +61975,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -61993,7 +61993,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62011,7 +62011,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62030,7 +62030,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62048,7 +62048,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62066,7 +62066,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62085,7 +62085,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62103,7 +62103,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62122,7 +62122,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62141,7 +62141,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62159,7 +62159,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62179,7 +62179,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62198,7 +62198,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62217,7 +62217,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62233,7 +62233,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__SSE41_LD64, qmax) {
@@ -62247,7 +62247,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__SSE41_LD64, strided_cm) {
@@ -62261,7 +62261,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -62277,7 +62277,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__SSE41_LD64, strided_cn) {
@@ -62291,7 +62291,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__SSE41_LD64, k_eq_8_subtile) {
@@ -62307,7 +62307,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62324,7 +62324,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62340,7 +62340,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62355,7 +62355,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62373,7 +62373,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62390,7 +62390,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62408,7 +62408,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62425,7 +62425,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62443,7 +62443,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62461,7 +62461,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62479,7 +62479,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62498,7 +62498,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62516,7 +62516,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62534,7 +62534,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62553,7 +62553,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62571,7 +62571,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62590,7 +62590,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62609,7 +62609,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62627,7 +62627,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62647,7 +62647,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62666,7 +62666,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62685,7 +62685,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62701,7 +62701,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__SSE41_LD64, qmax) {
@@ -62715,7 +62715,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__SSE41_LD64, strided_cm) {
@@ -62729,7 +62729,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -62745,7 +62745,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__AVX_LD64, strided_cn) {
@@ -62759,7 +62759,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__AVX_LD64, k_eq_8_subtile) {
@@ -62775,7 +62775,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62792,7 +62792,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62808,7 +62808,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62823,7 +62823,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62841,7 +62841,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62858,7 +62858,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62876,7 +62876,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62893,7 +62893,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -62911,7 +62911,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62929,7 +62929,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62947,7 +62947,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -62966,7 +62966,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -62984,7 +62984,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63002,7 +63002,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63021,7 +63021,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63039,7 +63039,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63058,7 +63058,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63077,7 +63077,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63095,7 +63095,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63115,7 +63115,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63134,7 +63134,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63153,7 +63153,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63169,7 +63169,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__AVX_LD64, qmax) {
@@ -63183,7 +63183,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__AVX_LD64, strided_cm) {
@@ -63197,7 +63197,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -63213,7 +63213,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__AVX_LD64, strided_cn) {
@@ -63227,7 +63227,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__AVX_LD64, k_eq_8_subtile) {
@@ -63243,7 +63243,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63260,7 +63260,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63276,7 +63276,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63291,7 +63291,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63309,7 +63309,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63326,7 +63326,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63344,7 +63344,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63361,7 +63361,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63379,7 +63379,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63397,7 +63397,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63415,7 +63415,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63434,7 +63434,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63452,7 +63452,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63470,7 +63470,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63489,7 +63489,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63507,7 +63507,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63526,7 +63526,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63545,7 +63545,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63563,7 +63563,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63583,7 +63583,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63602,7 +63602,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63621,7 +63621,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63637,7 +63637,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__AVX_LD64, qmax) {
@@ -63651,7 +63651,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__AVX_LD64, strided_cm) {
@@ -63665,7 +63665,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -63681,7 +63681,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__AVX_LD64, strided_cn) {
@@ -63695,7 +63695,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__AVX_LD64, k_eq_8_subtile) {
@@ -63711,7 +63711,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63728,7 +63728,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63744,7 +63744,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63759,7 +63759,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63777,7 +63777,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63794,7 +63794,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63812,7 +63812,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63829,7 +63829,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63847,7 +63847,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63865,7 +63865,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63883,7 +63883,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63902,7 +63902,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63920,7 +63920,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63938,7 +63938,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -63957,7 +63957,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -63975,7 +63975,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -63994,7 +63994,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64013,7 +64013,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64031,7 +64031,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64051,7 +64051,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64070,7 +64070,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64089,7 +64089,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64105,7 +64105,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__AVX_LD64, qmax) {
@@ -64119,7 +64119,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__AVX_LD64, strided_cm) {
@@ -64133,7 +64133,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -64149,7 +64149,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__XOP_LD64, strided_cn) {
@@ -64163,7 +64163,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__XOP_LD64, k_eq_8_subtile) {
@@ -64179,7 +64179,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64196,7 +64196,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64212,7 +64212,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64227,7 +64227,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64245,7 +64245,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64262,7 +64262,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64280,7 +64280,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64297,7 +64297,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64315,7 +64315,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64333,7 +64333,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64351,7 +64351,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64370,7 +64370,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64388,7 +64388,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64406,7 +64406,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64425,7 +64425,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64443,7 +64443,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64462,7 +64462,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64481,7 +64481,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64499,7 +64499,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64519,7 +64519,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64538,7 +64538,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64557,7 +64557,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64573,7 +64573,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__XOP_LD64, qmax) {
@@ -64587,7 +64587,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__XOP_LD64, strided_cm) {
@@ -64601,7 +64601,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -64617,7 +64617,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__XOP_LD64, strided_cn) {
@@ -64631,7 +64631,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__XOP_LD64, k_eq_8_subtile) {
@@ -64647,7 +64647,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64664,7 +64664,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64680,7 +64680,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64695,7 +64695,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64713,7 +64713,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64730,7 +64730,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64748,7 +64748,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64765,7 +64765,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64783,7 +64783,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64801,7 +64801,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64819,7 +64819,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64838,7 +64838,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64856,7 +64856,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64874,7 +64874,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64893,7 +64893,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64911,7 +64911,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -64930,7 +64930,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -64949,7 +64949,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64967,7 +64967,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -64987,7 +64987,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -65006,7 +65006,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -65025,7 +65025,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -65041,7 +65041,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__XOP_LD64, qmax) {
@@ -65055,7 +65055,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__XOP_LD64, strided_cm) {
@@ -65069,7 +65069,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -65085,7 +65085,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__XOP_LD64, strided_cn) {
@@ -65099,7 +65099,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__XOP_LD64, k_eq_8_subtile) {
@@ -65115,7 +65115,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -65132,7 +65132,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -65148,7 +65148,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -65163,7 +65163,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -65181,7 +65181,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -65198,7 +65198,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -65216,7 +65216,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -65233,7 +65233,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -65251,7 +65251,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -65269,7 +65269,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -65287,7 +65287,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -65306,7 +65306,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -65324,7 +65324,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -65342,7 +65342,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -65361,7 +65361,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -65379,7 +65379,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -65398,7 +65398,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -65417,7 +65417,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -65435,7 +65435,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -65455,7 +65455,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -65474,7 +65474,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -65493,7 +65493,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -65509,7 +65509,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__XOP_LD64, qmax) {
@@ -65523,7 +65523,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__XOP_LD64, strided_cm) {
@@ -65537,7 +65537,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld64, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -68361,7 +68361,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__SSE41_LD128, strided_cn) {
@@ -68375,7 +68375,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__SSE41_LD128, k_eq_8_subtile) {
@@ -68391,7 +68391,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -68408,7 +68408,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68424,7 +68424,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68439,7 +68439,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68457,7 +68457,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -68474,7 +68474,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68492,7 +68492,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -68509,7 +68509,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68527,7 +68527,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -68545,7 +68545,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -68563,7 +68563,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -68582,7 +68582,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -68600,7 +68600,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -68618,7 +68618,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -68637,7 +68637,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -68655,7 +68655,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68674,7 +68674,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -68693,7 +68693,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -68711,7 +68711,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -68731,7 +68731,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -68750,7 +68750,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68769,7 +68769,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -68785,7 +68785,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__SSE41_LD128, qmax) {
@@ -68799,7 +68799,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__SSE41_LD128, strided_cm) {
@@ -68813,7 +68813,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -68829,7 +68829,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__SSE41_LD128, strided_cn) {
@@ -68843,7 +68843,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__SSE41_LD128, k_eq_8_subtile) {
@@ -68859,7 +68859,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -68876,7 +68876,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68892,7 +68892,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68907,7 +68907,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68925,7 +68925,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -68942,7 +68942,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68960,7 +68960,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -68977,7 +68977,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -68995,7 +68995,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69013,7 +69013,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69031,7 +69031,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69050,7 +69050,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69068,7 +69068,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69086,7 +69086,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69105,7 +69105,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69123,7 +69123,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69142,7 +69142,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69161,7 +69161,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69179,7 +69179,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69199,7 +69199,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69218,7 +69218,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69237,7 +69237,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69253,7 +69253,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__SSE41_LD128, qmax) {
@@ -69267,7 +69267,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__SSE41_LD128, strided_cm) {
@@ -69281,7 +69281,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -69297,7 +69297,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__SSE41_LD128, strided_cn) {
@@ -69311,7 +69311,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__SSE41_LD128, k_eq_8_subtile) {
@@ -69327,7 +69327,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69344,7 +69344,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69360,7 +69360,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69375,7 +69375,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69393,7 +69393,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69410,7 +69410,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69428,7 +69428,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69445,7 +69445,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69463,7 +69463,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69481,7 +69481,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69499,7 +69499,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69518,7 +69518,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69536,7 +69536,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69554,7 +69554,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69573,7 +69573,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69591,7 +69591,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69610,7 +69610,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69629,7 +69629,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69647,7 +69647,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69667,7 +69667,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69686,7 +69686,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69705,7 +69705,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69721,7 +69721,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__SSE41_LD128, qmax) {
@@ -69735,7 +69735,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__SSE41_LD128, strided_cm) {
@@ -69749,7 +69749,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__sse41_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -69765,7 +69765,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__AVX_LD128, strided_cn) {
@@ -69779,7 +69779,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__AVX_LD128, k_eq_8_subtile) {
@@ -69795,7 +69795,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69812,7 +69812,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69828,7 +69828,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69843,7 +69843,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69861,7 +69861,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69878,7 +69878,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69896,7 +69896,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69913,7 +69913,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -69931,7 +69931,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -69949,7 +69949,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69967,7 +69967,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -69986,7 +69986,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70004,7 +70004,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70022,7 +70022,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70041,7 +70041,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70059,7 +70059,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70078,7 +70078,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70097,7 +70097,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70115,7 +70115,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70135,7 +70135,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70154,7 +70154,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70173,7 +70173,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70189,7 +70189,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__AVX_LD128, qmax) {
@@ -70203,7 +70203,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__AVX_LD128, strided_cm) {
@@ -70217,7 +70217,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -70233,7 +70233,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__AVX_LD128, strided_cn) {
@@ -70247,7 +70247,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__AVX_LD128, k_eq_8_subtile) {
@@ -70263,7 +70263,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70280,7 +70280,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70296,7 +70296,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70311,7 +70311,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70329,7 +70329,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70346,7 +70346,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70364,7 +70364,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70381,7 +70381,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70399,7 +70399,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70417,7 +70417,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70435,7 +70435,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70454,7 +70454,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70472,7 +70472,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70490,7 +70490,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70509,7 +70509,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70527,7 +70527,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70546,7 +70546,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70565,7 +70565,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70583,7 +70583,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70603,7 +70603,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70622,7 +70622,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70641,7 +70641,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70657,7 +70657,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__AVX_LD128, qmax) {
@@ -70671,7 +70671,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__AVX_LD128, strided_cm) {
@@ -70685,7 +70685,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -70701,7 +70701,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__AVX_LD128, strided_cn) {
@@ -70715,7 +70715,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__AVX_LD128, k_eq_8_subtile) {
@@ -70731,7 +70731,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70748,7 +70748,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70764,7 +70764,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70779,7 +70779,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70797,7 +70797,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70814,7 +70814,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70832,7 +70832,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70849,7 +70849,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -70867,7 +70867,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70885,7 +70885,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70903,7 +70903,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70922,7 +70922,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70940,7 +70940,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70958,7 +70958,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -70977,7 +70977,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -70995,7 +70995,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71014,7 +71014,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71033,7 +71033,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71051,7 +71051,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71071,7 +71071,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71090,7 +71090,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71109,7 +71109,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71125,7 +71125,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__AVX_LD128, qmax) {
@@ -71139,7 +71139,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__AVX_LD128, strided_cm) {
@@ -71153,7 +71153,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__avx_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -71169,7 +71169,7 @@
       .m(1)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__XOP_LD128, strided_cn) {
@@ -71183,7 +71183,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__XOP_LD128, k_eq_8_subtile) {
@@ -71199,7 +71199,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71216,7 +71216,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71232,7 +71232,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71247,7 +71247,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71265,7 +71265,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71282,7 +71282,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71300,7 +71300,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71317,7 +71317,7 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71335,7 +71335,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71353,7 +71353,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71371,7 +71371,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71390,7 +71390,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71408,7 +71408,7 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71426,7 +71426,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71445,7 +71445,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71463,7 +71463,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71482,7 +71482,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71501,7 +71501,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71519,7 +71519,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71539,7 +71539,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71558,7 +71558,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71577,7 +71577,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71593,7 +71593,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__XOP_LD128, qmax) {
@@ -71607,7 +71607,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X4C8__XOP_LD128, strided_cm) {
@@ -71621,7 +71621,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -71637,7 +71637,7 @@
       .m(2)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__XOP_LD128, strided_cn) {
@@ -71651,7 +71651,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__XOP_LD128, k_eq_8_subtile) {
@@ -71667,7 +71667,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71684,7 +71684,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71700,7 +71700,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71715,7 +71715,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71733,7 +71733,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71750,7 +71750,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71768,7 +71768,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71785,7 +71785,7 @@
         .m(2)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71803,7 +71803,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71821,7 +71821,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71839,7 +71839,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71858,7 +71858,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71876,7 +71876,7 @@
           .m(2)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71894,7 +71894,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71913,7 +71913,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71931,7 +71931,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -71950,7 +71950,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -71969,7 +71969,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -71987,7 +71987,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -72007,7 +72007,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -72026,7 +72026,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -72045,7 +72045,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -72061,7 +72061,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__XOP_LD128, qmax) {
@@ -72075,7 +72075,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X4C8__XOP_LD128, strided_cm) {
@@ -72089,7 +72089,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -72105,7 +72105,7 @@
       .m(3)
       .n(4)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__XOP_LD128, strided_cn) {
@@ -72119,7 +72119,7 @@
       .n(4)
       .k(8)
       .cn_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__XOP_LD128, k_eq_8_subtile) {
@@ -72135,7 +72135,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -72152,7 +72152,7 @@
         .n(4)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -72168,7 +72168,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -72183,7 +72183,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -72201,7 +72201,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -72218,7 +72218,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -72236,7 +72236,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -72253,7 +72253,7 @@
         .m(3)
         .n(4)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -72271,7 +72271,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -72289,7 +72289,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -72307,7 +72307,7 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -72326,7 +72326,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -72344,7 +72344,7 @@
           .m(3)
           .n(4)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -72362,7 +72362,7 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -72381,7 +72381,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -72399,7 +72399,7 @@
         .n(4)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -72418,7 +72418,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -72437,7 +72437,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -72455,7 +72455,7 @@
           .n(4)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -72475,7 +72475,7 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -72494,7 +72494,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -72513,7 +72513,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -72529,7 +72529,7 @@
       .n(4)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__XOP_LD128, qmax) {
@@ -72543,7 +72543,7 @@
       .n(4)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X4C8__XOP_LD128, strided_cm) {
@@ -72557,7 +72557,7 @@
       .n(4)
       .k(8)
       .cm_stride(7)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x4c8__xop_ld128, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -72573,7 +72573,7 @@
       .m(1)
       .n(8)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X8C8__AVX2, strided_cn) {
@@ -72587,7 +72587,7 @@
       .n(8)
       .k(8)
       .cn_stride(11)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X8C8__AVX2, k_eq_8_subtile) {
@@ -72603,7 +72603,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -72620,7 +72620,7 @@
         .n(8)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -72636,7 +72636,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -72651,7 +72651,7 @@
         .m(1)
         .n(8)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -72669,7 +72669,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -72686,7 +72686,7 @@
         .m(1)
         .n(8)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -72704,7 +72704,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -72721,7 +72721,7 @@
         .m(1)
         .n(8)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -72739,7 +72739,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -72757,7 +72757,7 @@
           .m(1)
           .n(8)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -72775,7 +72775,7 @@
           .n(8)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -72794,7 +72794,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -72812,7 +72812,7 @@
           .m(1)
           .n(8)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -72830,7 +72830,7 @@
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -72849,7 +72849,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -72867,7 +72867,7 @@
         .n(8)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -72886,7 +72886,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -72905,7 +72905,7 @@
           .n(8)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -72923,7 +72923,7 @@
           .n(8)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -72943,7 +72943,7 @@
             .k(k)
             .cm_stride(11)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -72962,7 +72962,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -72981,7 +72981,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -72997,7 +72997,7 @@
       .n(8)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X8C8__AVX2, qmax) {
@@ -73011,7 +73011,7 @@
       .n(8)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X8C8__AVX2, strided_cm) {
@@ -73025,7 +73025,7 @@
       .n(8)
       .k(8)
       .cm_stride(11)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -73041,7 +73041,7 @@
       .m(2)
       .n(8)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X8C8__AVX2, strided_cn) {
@@ -73055,7 +73055,7 @@
       .n(8)
       .k(8)
       .cn_stride(11)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X8C8__AVX2, k_eq_8_subtile) {
@@ -73071,7 +73071,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73088,7 +73088,7 @@
         .n(8)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73104,7 +73104,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73119,7 +73119,7 @@
         .m(2)
         .n(8)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73137,7 +73137,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73154,7 +73154,7 @@
         .m(2)
         .n(8)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73172,7 +73172,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73189,7 +73189,7 @@
         .m(2)
         .n(8)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73207,7 +73207,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73225,7 +73225,7 @@
           .m(2)
           .n(8)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73243,7 +73243,7 @@
           .n(8)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73262,7 +73262,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73280,7 +73280,7 @@
           .m(2)
           .n(8)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73298,7 +73298,7 @@
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73317,7 +73317,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73335,7 +73335,7 @@
         .n(8)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73354,7 +73354,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73373,7 +73373,7 @@
           .n(8)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73391,7 +73391,7 @@
           .n(8)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73411,7 +73411,7 @@
             .k(k)
             .cm_stride(11)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73430,7 +73430,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73449,7 +73449,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73465,7 +73465,7 @@
       .n(8)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X8C8__AVX2, qmax) {
@@ -73479,7 +73479,7 @@
       .n(8)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X8C8__AVX2, strided_cm) {
@@ -73493,7 +73493,7 @@
       .n(8)
       .k(8)
       .cm_stride(11)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -73509,7 +73509,7 @@
       .m(3)
       .n(8)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X8C8__AVX2, strided_cn) {
@@ -73523,7 +73523,7 @@
       .n(8)
       .k(8)
       .cn_stride(11)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X8C8__AVX2, k_eq_8_subtile) {
@@ -73539,7 +73539,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73556,7 +73556,7 @@
         .n(8)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73572,7 +73572,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73587,7 +73587,7 @@
         .m(3)
         .n(8)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73605,7 +73605,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73622,7 +73622,7 @@
         .m(3)
         .n(8)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73640,7 +73640,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73657,7 +73657,7 @@
         .m(3)
         .n(8)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73675,7 +73675,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73693,7 +73693,7 @@
           .m(3)
           .n(8)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73711,7 +73711,7 @@
           .n(8)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73730,7 +73730,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73748,7 +73748,7 @@
           .m(3)
           .n(8)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73766,7 +73766,7 @@
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73785,7 +73785,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73803,7 +73803,7 @@
         .n(8)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73822,7 +73822,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73841,7 +73841,7 @@
           .n(8)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73859,7 +73859,7 @@
           .n(8)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73879,7 +73879,7 @@
             .k(k)
             .cm_stride(11)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
         }
       }
     }
@@ -73898,7 +73898,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
     }
   }
 
@@ -73917,7 +73917,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
       }
     }
   }
@@ -73933,7 +73933,7 @@
       .n(8)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X8C8__AVX2, qmax) {
@@ -73947,7 +73947,7 @@
       .n(8)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X8C8__AVX2, strided_cm) {
@@ -73961,7 +73961,7 @@
       .n(8)
       .k(8)
       .cm_stride(11)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x8c8__avx2, xnn_init_qs8_gemm_avx2_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -73977,7 +73977,7 @@
       .m(1)
       .n(16)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X16C8__AVX512SKX, strided_cn) {
@@ -73991,7 +73991,7 @@
       .n(16)
       .k(8)
       .cn_stride(19)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X16C8__AVX512SKX, k_eq_8_subtile) {
@@ -74007,7 +74007,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74024,7 +74024,7 @@
         .n(16)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74040,7 +74040,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74055,7 +74055,7 @@
         .m(1)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74073,7 +74073,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74090,7 +74090,7 @@
         .m(1)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74108,7 +74108,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74125,7 +74125,7 @@
         .m(1)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74143,7 +74143,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74161,7 +74161,7 @@
           .m(1)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74179,7 +74179,7 @@
           .n(16)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74198,7 +74198,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74216,7 +74216,7 @@
           .m(1)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74234,7 +74234,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74253,7 +74253,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74271,7 +74271,7 @@
         .n(16)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74290,7 +74290,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74309,7 +74309,7 @@
           .n(16)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74327,7 +74327,7 @@
           .n(16)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74347,7 +74347,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74366,7 +74366,7 @@
         .k(k)
         .ks(3)
         .a_offset(43)
-        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74385,7 +74385,7 @@
           .ks(3)
           .a_offset(43)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74401,7 +74401,7 @@
       .n(16)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X16C8__AVX512SKX, qmax) {
@@ -74415,7 +74415,7 @@
       .n(16)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_1X16C8__AVX512SKX, strided_cm) {
@@ -74429,7 +74429,7 @@
       .n(16)
       .k(8)
       .cm_stride(19)
-      .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_1x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -74445,7 +74445,7 @@
       .m(2)
       .n(16)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X16C8__AVX512SKX, strided_cn) {
@@ -74459,7 +74459,7 @@
       .n(16)
       .k(8)
       .cn_stride(19)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X16C8__AVX512SKX, k_eq_8_subtile) {
@@ -74475,7 +74475,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74492,7 +74492,7 @@
         .n(16)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74508,7 +74508,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74523,7 +74523,7 @@
         .m(2)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74541,7 +74541,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74558,7 +74558,7 @@
         .m(2)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74576,7 +74576,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74593,7 +74593,7 @@
         .m(2)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74611,7 +74611,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74629,7 +74629,7 @@
           .m(2)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74647,7 +74647,7 @@
           .n(16)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74666,7 +74666,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74684,7 +74684,7 @@
           .m(2)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74702,7 +74702,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74721,7 +74721,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74739,7 +74739,7 @@
         .n(16)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74758,7 +74758,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74777,7 +74777,7 @@
           .n(16)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74795,7 +74795,7 @@
           .n(16)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74815,7 +74815,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -74834,7 +74834,7 @@
         .k(k)
         .ks(3)
         .a_offset(83)
-        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74853,7 +74853,7 @@
           .ks(3)
           .a_offset(83)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74869,7 +74869,7 @@
       .n(16)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X16C8__AVX512SKX, qmax) {
@@ -74883,7 +74883,7 @@
       .n(16)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_2X16C8__AVX512SKX, strided_cm) {
@@ -74897,7 +74897,7 @@
       .n(16)
       .k(8)
       .cm_stride(19)
-      .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_2x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -74913,7 +74913,7 @@
       .m(3)
       .n(16)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X16C8__AVX512SKX, strided_cn) {
@@ -74927,7 +74927,7 @@
       .n(16)
       .k(8)
       .cn_stride(19)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X16C8__AVX512SKX, k_eq_8_subtile) {
@@ -74943,7 +74943,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -74960,7 +74960,7 @@
         .n(16)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74976,7 +74976,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -74991,7 +74991,7 @@
         .m(3)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75009,7 +75009,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75026,7 +75026,7 @@
         .m(3)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75044,7 +75044,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75061,7 +75061,7 @@
         .m(3)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75079,7 +75079,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75097,7 +75097,7 @@
           .m(3)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75115,7 +75115,7 @@
           .n(16)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75134,7 +75134,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75152,7 +75152,7 @@
           .m(3)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75170,7 +75170,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75189,7 +75189,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75207,7 +75207,7 @@
         .n(16)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75226,7 +75226,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75245,7 +75245,7 @@
           .n(16)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75263,7 +75263,7 @@
           .n(16)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75283,7 +75283,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75302,7 +75302,7 @@
         .k(k)
         .ks(3)
         .a_offset(127)
-        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75321,7 +75321,7 @@
           .ks(3)
           .a_offset(127)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75337,7 +75337,7 @@
       .n(16)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X16C8__AVX512SKX, qmax) {
@@ -75351,7 +75351,7 @@
       .n(16)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_3X16C8__AVX512SKX, strided_cm) {
@@ -75365,7 +75365,7 @@
       .n(16)
       .k(8)
       .cm_stride(19)
-      .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_3x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -75381,7 +75381,7 @@
       .m(4)
       .n(16)
       .k(8)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X16C8__AVX512SKX, strided_cn) {
@@ -75395,7 +75395,7 @@
       .n(16)
       .k(8)
       .cn_stride(19)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X16C8__AVX512SKX, k_eq_8_subtile) {
@@ -75411,7 +75411,7 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75428,7 +75428,7 @@
         .n(16)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75444,7 +75444,7 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75459,7 +75459,7 @@
         .m(4)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75477,7 +75477,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75494,7 +75494,7 @@
         .m(4)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75512,7 +75512,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75529,7 +75529,7 @@
         .m(4)
         .n(16)
         .k(k)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75547,7 +75547,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75565,7 +75565,7 @@
           .m(4)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75583,7 +75583,7 @@
           .n(16)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75602,7 +75602,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75620,7 +75620,7 @@
           .m(4)
           .n(16)
           .k(k)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75638,7 +75638,7 @@
           .n(n)
           .k(k)
           .cn_stride(19)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75657,7 +75657,7 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75675,7 +75675,7 @@
         .n(16)
         .k(k)
         .ks(3)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75694,7 +75694,7 @@
             .k(k)
             .ks(3)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75713,7 +75713,7 @@
           .n(16)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75731,7 +75731,7 @@
           .n(16)
           .k(k)
           .ks(3)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75751,7 +75751,7 @@
             .k(k)
             .cm_stride(19)
             .iterations(1)
-            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+            .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
         }
       }
     }
@@ -75770,7 +75770,7 @@
         .k(k)
         .ks(3)
         .a_offset(163)
-        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+        .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
     }
   }
 
@@ -75789,7 +75789,7 @@
           .ks(3)
           .a_offset(163)
           .zero_index(mz)
-          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+          .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
       }
     }
   }
@@ -75805,7 +75805,7 @@
       .n(16)
       .k(8)
       .qmin(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X16C8__AVX512SKX, qmax) {
@@ -75819,7 +75819,7 @@
       .n(16)
       .k(8)
       .qmax(128)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 
   TEST(QS8_IGEMM_MINMAX_4X16C8__AVX512SKX, strided_cm) {
@@ -75833,7 +75833,7 @@
       .n(16)
       .k(8)
       .cm_stride(19)
-      .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse2_params);
+      .Test(xnn_qs8_igemm_minmax_ukernel_4x16c8__avx512skx, xnn_init_qs8_gemm_sse4_params);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 

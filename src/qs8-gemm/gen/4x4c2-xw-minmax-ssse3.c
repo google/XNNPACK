@@ -262,7 +262,7 @@ void xnn_qs8_gemm_xw_minmax_ukernel_4x4c2__ssse3(
       _mm_add_epi32(_mm_and_si128(vq31prod3x0123, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vq31prod3x0123));
 
     const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->sse2.remainder_threshold);
-    const __m128i vshift = _mm_load_si128((const __m128i*) params->sse2.shift);
+    const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->sse2.shift);
     vacc0x0123 =
       _mm_sub_epi32(_mm_sra_epi32(vq31prod0x0123, vshift), _mm_cmpgt_epi32(vrem0x0123, vremainder_threshold));
     vacc1x0123 =
@@ -282,6 +282,7 @@ void xnn_qs8_gemm_xw_minmax_ukernel_4x4c2__ssse3(
     vacc23x0123 = _mm_min_epi16(_mm_max_epi16(vacc23x0123, voutput_min), voutput_max);
 
     __m128i vout = _mm_packs_epi16(vacc01x0123, vacc23x0123);
+
 
     if (nc >= 4) {
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);

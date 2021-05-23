@@ -55,14 +55,14 @@ void xnn_qs8_gemm_minmax_ukernel_3x16c8__avx512skx(
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
   const __mmask16 vblend_mask = _cvtu32_mask16(0xAAAA);
-  const __m512i vmultiplier = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.multiplier));
-  const __m512i vrounding = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.rounding));
-  const __m512i vremainder_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.remainder_mask));
-  const __m512i vremainder_threshold = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.remainder_threshold));
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->sse2.shift);
-  const __m512i voutput_zero_point = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.output_zero_point));
-  const __m512i voutput_min = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.output_min));
-  const __m512i voutput_max = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.output_max));
+  const __m512i vmultiplier = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse4.multiplier));
+  const __m512i vrounding = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse4.rounding));
+  const __m512i vremainder_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse4.remainder_mask));
+  const __m512i vremainder_threshold = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse4.remainder_threshold));
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->sse4.shift);
+  const __m512i voutput_zero_point = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse4.output_zero_point));
+  const __m512i voutput_min = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse4.output_min));
+  const __m512i voutput_max = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse4.output_max));
   do {
     __m512i vacc0x0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
     __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((uintptr_t) w + 4 * sizeof(int32_t)));
@@ -165,15 +165,14 @@ void xnn_qs8_gemm_minmax_ukernel_3x16c8__avx512skx(
     vacc2x084C195D2A6E3B7F =
       _mm512_mask_sub_epi32(vacc2x084C195D2A6E3B7F, _mm512_cmpgt_epi32_mask(vrem2x084C195D2A6E3B7F, vremainder_threshold), vacc2x084C195D2A6E3B7F, vminus_one);
 
-    __m512i vacc01x084Cx195Dx2A6Ex3B7F = _mm512_adds_epi16(_mm512_packs_epi32(vacc0x084C195D2A6E3B7F, vacc1x084C195D2A6E3B7F), voutput_zero_point);
-    __m512i vacc22x084Cx195Dx2A6Ex3B7F = _mm512_adds_epi16(_mm512_packs_epi32(vacc2x084C195D2A6E3B7F, vacc2x084C195D2A6E3B7F), voutput_zero_point);
-
-    vacc01x084Cx195Dx2A6Ex3B7F = _mm512_min_epi16(_mm512_max_epi16(vacc01x084Cx195Dx2A6Ex3B7F, voutput_min), voutput_max);
-    vacc22x084Cx195Dx2A6Ex3B7F = _mm512_min_epi16(_mm512_max_epi16(vacc22x084Cx195Dx2A6Ex3B7F, voutput_min), voutput_max);
+    const __m512i vacc01x084Cx195Dx2A6Ex3B7F = _mm512_adds_epi16(_mm512_packs_epi32(vacc0x084C195D2A6E3B7F, vacc1x084C195D2A6E3B7F), voutput_zero_point);
+    const __m512i vacc22x084Cx195Dx2A6Ex3B7F = _mm512_adds_epi16(_mm512_packs_epi32(vacc2x084C195D2A6E3B7F, vacc2x084C195D2A6E3B7F), voutput_zero_point);
 
     __m512i vout0122x084Cx195Dx2A6Ex3B7F = _mm512_packs_epi16(vacc01x084Cx195Dx2A6Ex3B7F, vacc22x084Cx195Dx2A6Ex3B7F);
     vout0122x084Cx195Dx2A6Ex3B7F = _mm512_permutexvar_epi32(_mm512_set_epi32(15, 11, 7, 3, 14, 10, 6, 2, 13, 9, 5, 1, 12, 8, 4, 0), vout0122x084Cx195Dx2A6Ex3B7F);
-    const __m512i vout0122x0123456789ABCDEF = _mm512_shuffle_epi8(vout0122x084Cx195Dx2A6Ex3B7F, _mm512_set_epi8(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0, 15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0, 15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0, 15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0));
+    __m512i vout0122x0123456789ABCDEF = _mm512_shuffle_epi8(vout0122x084Cx195Dx2A6Ex3B7F, _mm512_set_epi8(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0, 15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0, 15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0, 15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0));
+    vout0122x0123456789ABCDEF = _mm512_max_epi8(vout0122x0123456789ABCDEF, voutput_min);
+    vout0122x0123456789ABCDEF = _mm512_min_epi8(vout0122x0123456789ABCDEF, voutput_max);
 
     if (nc >= 16) {
       _mm_storeu_si128((__m128i*) c0, _mm512_castsi512_si128(vout0122x0123456789ABCDEF));
