@@ -6916,6 +6916,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "qs8_gemm_minmax_test",
+    timeout = "moderate",
     srcs = [
         "test/qs8-gemm-minmax.cc",
         "test/gemm-microkernel-tester.h",
@@ -6926,6 +6927,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "qs8_igemm_minmax_test",
+    timeout = "moderate",
     srcs = [
         "test/qs8-igemm-minmax.cc",
         "test/gemm-microkernel-tester.h",
