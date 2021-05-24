@@ -36,7 +36,7 @@
 # temp   v7
 # unused v8 v9 v10 v11 v12 v13 v14 v15
 
-# x10 x12 x17 a53 temp registers
+# x10 x17 a53 temp registers
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53
 
@@ -233,6 +233,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cor
         SMLAL   v27.4s, v5.4h, v3.h[5]
         SMLAL2  v31.4s, v5.8h, v3.h[5]
         SXTL    v6.8h, v6.8b
+        LDR     x17, [x5, 112]
         SMLAL   v16.4s, v4.4h, v0.h[6]
         SMLAL2  v20.4s, v4.8h, v0.h[6]
         SMLAL   v17.4s, v4.4h, v1.h[6]
@@ -241,55 +242,53 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cor
         SMLAL2  v22.4s, v4.8h, v2.h[6]
         SMLAL   v19.4s, v4.4h, v3.h[6]
         SMLAL2  v23.4s, v4.8h, v3.h[6]
-        LDR     x17, [x5, 112]
+        LDR     d5, [x5, 120]
+        INS     v4.d[0], x17
         SMLAL   v24.4s, v6.4h, v0.h[6]
         SMLAL2  v28.4s, v6.8h, v0.h[6]
         SMLAL   v25.4s, v6.4h, v1.h[6]
         SMLAL2  v29.4s, v6.8h, v1.h[6]
-        LDR     d5, [x5, 120]
-        INS     v4.d[0], x17
         SXTL    v4.8h, v4.8b
         ADD     x5, x5, 128
 
         SMLAL   v26.4s, v6.4h, v2.h[6]
         SMLAL2  v30.4s, v6.8h, v2.h[6]
+        LDR     x17, [x5]
         SMLAL   v27.4s, v6.4h, v3.h[6]
         SMLAL2  v31.4s, v6.8h, v3.h[6]
+        SXTL    v5.8h, v5.8b
+        LDR     x10, [x3], 8
 
         SMLAL   v16.4s, v4.4h, v0.h[7]
         SMLAL2  v20.4s, v4.8h, v0.h[7]
         SMLAL   v17.4s, v4.4h, v1.h[7]
         SMLAL2  v21.4s, v4.8h, v1.h[7]
-        SXTL    v5.8h, v5.8b
         SMLAL   v18.4s, v4.4h, v2.h[7]
         SMLAL2  v22.4s, v4.8h, v2.h[7]
-        LDR     x17, [x5]
         SMLAL   v19.4s, v4.4h, v3.h[7]
         SMLAL2  v23.4s, v4.8h, v3.h[7]
-        LDR     x10, [x3], 8
+        LDR     d6, [x5, 8]
+        INS     v4.d[0], x17
         SMLAL   v24.4s, v5.4h, v0.h[7]
         SMLAL2  v28.4s, v5.8h, v0.h[7]
-        LDR     x12, [x13], 8
+        LDR     x17, [x13], 8
         SMLAL   v25.4s, v5.4h, v1.h[7]
         SMLAL2  v29.4s, v5.8h, v1.h[7]
+        LDR     d1, [x15], 8
+        INS     v0.d[0], x10
         SMLAL   v26.4s, v5.4h, v2.h[7]
         SMLAL2  v30.4s, v5.8h, v2.h[7]
         SMLAL   v27.4s, v5.4h, v3.h[7]
         SMLAL2  v31.4s, v5.8h, v3.h[7]
-
-        # Loads for next loop
-        LDR     d1, [x15], 8
-        INS     v0.d[0], x10
         LDR     d3, [x4], 8
-        INS     v2.d[0], x12
-        LDR     d6, [x5, 8]
-        INS     v4.d[0], x17
+        INS     v2.d[0], x17
+
         SXTL    v0.8h, v0.8b
         SXTL    v1.8h, v1.8b
-        SUBS    x0, x0, 8
+        LDR     x17, [x5, 16]
         SXTL    v4.8h, v4.8b
         SXTL    v2.8h, v2.8b
-        LDR     x17, [x5, 16]
+        SUBS    x0, x0, 8
         SXTL    v3.8h, v3.8b
         SXTL    v6.8h, v6.8b
         B.HS    1b
