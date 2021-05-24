@@ -26,11 +26,6 @@
 
 class VMulCAddCMicrokernelTester {
  public:
-  enum class Variant {
-    Native,
-    Scalar,
-  };
-
   inline VMulCAddCMicrokernelTester& channel_tile(size_t channel_tile) {
     this->channel_tile_ = channel_tile;
     return *this;
@@ -118,7 +113,7 @@ class VMulCAddCMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f16_vmulcaddc_ukernel_function vmulcaddc, Variant variant = Variant::Native) const {
+  void Test(xnn_f16_vmulcaddc_ukernel_function vmulcaddc, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
@@ -168,8 +163,7 @@ class VMulCAddCMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_minmax_params params;
-      xnn_init_f16_minmax_params(
-        &params, fp16_ieee_from_fp32_value(y_min), fp16_ieee_from_fp32_value(y_max));
+      init_params(&params, fp16_ieee_from_fp32_value(y_min), fp16_ieee_from_fp32_value(y_max));
 
       // Call optimized micro-kernel.
       vmulcaddc(rows(), channels() * sizeof(uint16_t),
@@ -189,7 +183,7 @@ class VMulCAddCMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vmulcaddc_ukernel_function vmulcaddc, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_vmulcaddc_ukernel_function vmulcaddc, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
@@ -236,14 +230,7 @@ class VMulCAddCMicrokernelTester {
 
       // Prepare parameters.
       xnn_f32_minmax_params params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_f32_minmax_params(&params, y_min, y_max);
-          break;
-        case Variant::Scalar:
-          xnn_init_f32_minmax_scalar_params(&params, y_min, y_max);
-          break;
-      }
+      init_params(&params, y_min, y_max);
 
       // Call optimized micro-kernel.
       vmulcaddc(rows(), channels() * sizeof(float),

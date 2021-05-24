@@ -3,8 +3,10 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 - name: xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x
+  init: xnn_init_f16_minmax_params
   arch:
   - aarch64
 - name: xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x
+  init: xnn_init_f16_minmax_params
   arch:
   - aarch64

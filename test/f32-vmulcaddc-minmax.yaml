@@ -3,18 +3,34 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__neonfma_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c8__neonfma_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__neon_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c8__neon_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x
+  init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c8__sse_2x
+  init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_arm_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmsimd_arm_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_x86_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmsimd_x86_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c1__wasm_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c2__wasm_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__wasm_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c1__scalar_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c2__scalar_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__scalar_2x
+  init: xnn_init_f32_minmax_scalar_params
