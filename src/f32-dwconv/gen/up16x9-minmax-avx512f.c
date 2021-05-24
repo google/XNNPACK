@@ -30,8 +30,8 @@ void xnn_f32_dwconv_minmax_ukernel_up16x9__avx512f(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m512 vmax = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));
-  const __m512 vmin = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
+  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+  const __m512 vmin = _mm512_set1_ps(params->scalar.min);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);

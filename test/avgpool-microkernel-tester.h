@@ -676,7 +676,7 @@ class AvgPoolMicrokernelTester {
           xnn_init_f32_minmax_params(&params, output_min, output_max);
           break;
         case Variant::Scalar:
-          xnn_init_scalar_f32_minmax_params(&params, output_min, output_max);
+          xnn_init_f32_minmax_scalar_params(&params, output_min, output_max);
           break;
       }
 
@@ -774,7 +774,7 @@ class AvgPoolMicrokernelTester {
           xnn_init_f32_minmax_params(&params, output_min, output_max);
           break;
         case Variant::Scalar:
-          xnn_init_scalar_f32_minmax_params(&params, output_min, output_max);
+          xnn_init_f32_minmax_scalar_params(&params, output_min, output_max);
           break;
       }
 

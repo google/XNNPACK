@@ -72,13 +72,13 @@ void xnn_f32_igemm_minmax_ukernel_1x16__fma3_broadcast(
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    const __m256 vmax = _mm256_broadcast_ps((const __m128*) params->sse.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
-
-    const __m256 vmin = _mm256_broadcast_ps((const __m128*) params->sse.min);
+    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
     vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
+
+    const __m256 vmax = _mm256_load_ps(params->avx.max);
+    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
+    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c0, vacc0x01234567);

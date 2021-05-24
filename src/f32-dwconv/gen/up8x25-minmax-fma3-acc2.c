@@ -31,8 +31,8 @@ void xnn_f32_dwconv_minmax_ukernel_up8x25__fma3_acc2(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m256 vmax = _mm256_broadcast_ps((const __m128*) params->sse.max);
-  const __m256 vmin = _mm256_broadcast_ps((const __m128*) params->sse.min);
+  const __m256 vmax = _mm256_load_ps(params->avx.max);
+  const __m256 vmin = _mm256_load_ps(params->avx.min);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);

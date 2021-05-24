@@ -117,16 +117,7 @@ void xnn_f32_gemminc_minmax_ukernel_7x8__fma3_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    const __m256 vmax = _mm256_broadcast_ps((const __m128*) params->sse.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc1x01234567 = _mm256_min_ps(vacc1x01234567, vmax);
-    vacc2x01234567 = _mm256_min_ps(vacc2x01234567, vmax);
-    vacc3x01234567 = _mm256_min_ps(vacc3x01234567, vmax);
-    vacc4x01234567 = _mm256_min_ps(vacc4x01234567, vmax);
-    vacc5x01234567 = _mm256_min_ps(vacc5x01234567, vmax);
-    vacc6x01234567 = _mm256_min_ps(vacc6x01234567, vmax);
-
-    const __m256 vmin = _mm256_broadcast_ps((const __m128*) params->sse.min);
+    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
     vacc1x01234567 = _mm256_max_ps(vacc1x01234567, vmin);
     vacc2x01234567 = _mm256_max_ps(vacc2x01234567, vmin);
@@ -134,6 +125,15 @@ void xnn_f32_gemminc_minmax_ukernel_7x8__fma3_broadcast(
     vacc4x01234567 = _mm256_max_ps(vacc4x01234567, vmin);
     vacc5x01234567 = _mm256_max_ps(vacc5x01234567, vmin);
     vacc6x01234567 = _mm256_max_ps(vacc6x01234567, vmin);
+
+    const __m256 vmax = _mm256_load_ps(params->avx.max);
+    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
+    vacc1x01234567 = _mm256_min_ps(vacc1x01234567, vmax);
+    vacc2x01234567 = _mm256_min_ps(vacc2x01234567, vmax);
+    vacc3x01234567 = _mm256_min_ps(vacc3x01234567, vmax);
+    vacc4x01234567 = _mm256_min_ps(vacc4x01234567, vmax);
+    vacc5x01234567 = _mm256_min_ps(vacc5x01234567, vmax);
+    vacc6x01234567 = _mm256_min_ps(vacc6x01234567, vmax);
 
     if XNN_LIKELY(nc >= 8) {
       _mm256_storeu_ps(c6, vacc6x01234567);

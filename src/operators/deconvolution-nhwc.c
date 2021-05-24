@@ -452,7 +452,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
 
   union xnn_f32_minmax_params params;
   if XNN_LIKELY(xnn_params.f32.gemm.init.f32 != NULL) {
-    xnn_params.f32.gemm.init.f32(&params, output_min, output_max);
+    gemm_parameters->init.f32(&params, output_min, output_max);
   }
   return create_deconvolution2d_nhwc(
     output_padding_top, output_padding_right, output_padding_bottom, output_padding_left,

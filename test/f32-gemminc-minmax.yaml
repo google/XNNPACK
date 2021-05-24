@@ -3,441 +3,441 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a57
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a75
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__aarch64_neonfma_cortex_a75
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a55
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a73
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_ld128
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   assembly: true
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__neon_lane_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__neon_lane_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__neon_lane_ld128
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__neon_lane_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__neon_lane_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__neon_lane_ld128
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__neonfma_lane_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   arch:
     - aarch64
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__neonfma_lane_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   arch:
     - aarch64
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__neonfma_lane_ld128
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   arch:
     - aarch64
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__neonfma_lane_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   arch:
     - aarch64
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__neonfma_lane_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   arch:
     - aarch64
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__neonfma_lane_ld128
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   arch:
     - aarch64
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__neon_dup_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__neon_dup_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__neon_dup_ld128
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__neon_dup_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__neon_dup_ld128
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__neonfma_dup_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__neonfma_dup_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__neonfma_dup_ld128
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__neonfma_dup_ld64
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__neonfma_dup_ld128
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8s4__neon
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8s4__neon
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_6x8s4__neon
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_8x8s4__neon
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8s4__neonfma
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8s4__neonfma
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_6x8s4__neonfma
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_8x8s4__neonfma
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__sse_load1
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_3x8__sse_load1
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__sse_load1
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__sse_load1
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__sse_dup
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_3x8__sse_dup
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__sse_dup
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__sse_dup
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8s4__sse
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_3x8s4__sse
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8s4__sse
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_5x8s4__sse
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__sse2_dup
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_3x8__sse2_dup
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__sse2_dup
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__sse2_dup
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__avx_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__avx_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__avx_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__avx_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_7x8__avx_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_1x16__avx_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_3x16__avx_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_4x16__avx_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_5x16__avx_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_7x8__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_8x8__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_1x16__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_3x16__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_4x16__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_5x16__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_1x16s4__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_3x16s4__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x16s4__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_5x16s4__fma3_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_avx_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x16__avx512f_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_4x16__avx512f_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_5x16__avx512f_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_6x16__avx512f_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_7x16__avx512f_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_8x16__avx512f_broadcast
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_arm_loadsplat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_arm_loadsplat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_arm_loadsplat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_arm_loadsplat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_arm_loadsplat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_x86_loadsplat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_x86_loadsplat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_x86_loadsplat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_x86_loadsplat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_x86_loadsplat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_arm_splat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_arm_splat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_arm_splat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_arm_splat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_arm_splat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_x86_splat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_3x8__wasmsimd_x86_splat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__wasmsimd_x86_splat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__wasmsimd_x86_splat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__wasmsimd_x86_splat
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8s4__wasmsimd_arm
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_3x8s4__wasmsimd_arm
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8s4__wasmsimd_arm
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_5x8s4__wasmsimd_arm
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_6x8s4__wasmsimd_arm
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8s4__wasmsimd_x86
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_3x8s4__wasmsimd_x86
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8s4__wasmsimd_x86
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_5x8s4__wasmsimd_x86
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_6x8s4__wasmsimd_x86
-  init: xnn_init_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x4__wasm
-  init: xnn_init_scalar_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_2x4__wasm
-  init: xnn_init_scalar_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_4x4__wasm
-  init: xnn_init_scalar_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_1x4__scalar
-  init: xnn_init_scalar_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_2x4__scalar
-  init: xnn_init_scalar_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_gemminc_minmax_ukernel_4x4__scalar
-  init: xnn_init_scalar_f32_minmax_params
+  init: xnn_init_f32_minmax_scalar_params
   k-block: 1

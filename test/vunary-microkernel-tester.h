@@ -242,7 +242,7 @@ class VUnaryMicrokernelTester {
               xnn_init_f32_minmax_params(&params.minmax, float(qmin()), float(qmax()));
               break;
             case Variant::Scalar:
-              xnn_init_scalar_f32_minmax_params(&params.minmax, float(qmin()), float(qmax()));
+              xnn_init_f32_minmax_scalar_params(&params.minmax, float(qmin()), float(qmax()));
               break;
           }
           break;

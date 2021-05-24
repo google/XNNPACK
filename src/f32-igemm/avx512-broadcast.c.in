@@ -93,15 +93,15 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    const __m512 vmax = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));
-    $for N in range(0, NR, 16):
-      $for M in range(MR):
-        vacc${M}x${ABC[N:N+16]} = _mm512_min_ps(vacc${M}x${ABC[N:N+16]}, vmax);
-
-    const __m512 vmin = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
+    const __m512 vmin = _mm512_set1_ps(params->scalar.min);
     $for N in range(0, NR, 16):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+16]} = _mm512_max_ps(vacc${M}x${ABC[N:N+16]}, vmin);
+
+    const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+    $for N in range(0, NR, 16):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+16]} = _mm512_min_ps(vacc${M}x${ABC[N:N+16]}, vmax);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):

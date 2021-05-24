@@ -58,6 +58,10 @@ union xnn_f32_minmax_params {
     XNN_ALIGN(16) float min[4];
     XNN_ALIGN(16) float max[4];
   } sse;
+  struct {
+    XNN_ALIGN(32) float min[8];
+    XNN_ALIGN(32) float max[8];
+  } avx;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 

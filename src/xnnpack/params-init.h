@@ -895,7 +895,31 @@ static inline void xnn_init_f32_minmax_params(
   #endif
 }
 
-static inline void xnn_init_scalar_f32_minmax_params(
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+static inline void xnn_init_f32_minmax_sse_params(
+  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max)
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.min[i] = output_min;
+    params->sse.max[i] = output_max;
+  }
+}
+
+static inline void xnn_init_f32_minmax_avx_params(
+  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.min[i] = output_min;
+    params->avx.max[i] = output_max;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+static inline void xnn_init_f32_minmax_scalar_params(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max)

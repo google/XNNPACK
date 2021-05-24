@@ -82,17 +82,17 @@ void xnn_f32_gemm_minmax_ukernel_4x16__avx512f_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    const __m512 vmax = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));
-    vacc0x0123456789ABCDEF = _mm512_min_ps(vacc0x0123456789ABCDEF, vmax);
-    vacc1x0123456789ABCDEF = _mm512_min_ps(vacc1x0123456789ABCDEF, vmax);
-    vacc2x0123456789ABCDEF = _mm512_min_ps(vacc2x0123456789ABCDEF, vmax);
-    vacc3x0123456789ABCDEF = _mm512_min_ps(vacc3x0123456789ABCDEF, vmax);
-
-    const __m512 vmin = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
+    const __m512 vmin = _mm512_set1_ps(params->scalar.min);
     vacc0x0123456789ABCDEF = _mm512_max_ps(vacc0x0123456789ABCDEF, vmin);
     vacc1x0123456789ABCDEF = _mm512_max_ps(vacc1x0123456789ABCDEF, vmin);
     vacc2x0123456789ABCDEF = _mm512_max_ps(vacc2x0123456789ABCDEF, vmin);
     vacc3x0123456789ABCDEF = _mm512_max_ps(vacc3x0123456789ABCDEF, vmin);
+
+    const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+    vacc0x0123456789ABCDEF = _mm512_min_ps(vacc0x0123456789ABCDEF, vmax);
+    vacc1x0123456789ABCDEF = _mm512_min_ps(vacc1x0123456789ABCDEF, vmax);
+    vacc2x0123456789ABCDEF = _mm512_min_ps(vacc2x0123456789ABCDEF, vmax);
+    vacc3x0123456789ABCDEF = _mm512_min_ps(vacc3x0123456789ABCDEF, vmax);
 
     if XNN_LIKELY(nc >= 16) {
       _mm512_storeu_ps(c3, vacc3x0123456789ABCDEF);

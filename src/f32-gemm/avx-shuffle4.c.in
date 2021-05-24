@@ -120,15 +120,15 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}s4__${ISA}_br
       } while (k != 0);
     }
 
-    const __m256 vmax = _mm256_broadcast_ps((const __m128*) params->sse.max);
-    $for N in range(0, NR, 8):
-      $for M in range(MR):
-        vacc${M}x${ABC[N:N+8]} = _mm256_min_ps(vacc${M}x${ABC[N:N+8]}, vmax);
-
-    const __m256 vmin = _mm256_broadcast_ps((const __m128*) params->sse.min);
+    const __m256 vmin = _mm256_load_ps(params->avx.min);
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+8]} = _mm256_max_ps(vacc${M}x${ABC[N:N+8]}, vmin);
+
+    const __m256 vmax = _mm256_load_ps(params->avx.max);
+    $for N in range(0, NR, 8):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+8]} = _mm256_min_ps(vacc${M}x${ABC[N:N+8]}, vmax);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
