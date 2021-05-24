@@ -26,7 +26,6 @@
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
-#include <xnnpack/params-init.h>
 
 
 static inline size_t compute_output_dimension(
@@ -707,8 +706,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
   }
 
   struct xnn_f16_minmax_params vmulcaddc_params;
-  if XNN_LIKELY(xnn_params.f16.vmulcaddc.ukernel != NULL) {
-    xnn_init_f16_minmax_params(&vmulcaddc_params, fp16_output_min, fp16_output_max);
+  if XNN_LIKELY(xnn_params.f16.vmulcaddc.init.f16 != NULL) {
+    xnn_params.f16.vmulcaddc.init.f16(&vmulcaddc_params, fp16_output_min, fp16_output_max);
   }
 
   return create_convolution2d_nhwc(
@@ -798,8 +797,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   }
 
   union xnn_f32_minmax_params vmulcaddc_params;
-  if XNN_LIKELY(xnn_params.f32.vmulcaddc.ukernel != NULL) {
-    xnn_init_f32_minmax_params(&vmulcaddc_params, output_min, output_max);
+  if XNN_LIKELY(xnn_params.f32.vmulcaddc.init.f32 != NULL) {
+    xnn_params.f32.vmulcaddc.init.f32(&vmulcaddc_params, output_min, output_max);
   }
 
   return create_convolution2d_nhwc(

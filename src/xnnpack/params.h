@@ -2010,6 +2010,10 @@ struct pad_parameters {
 
 struct vmulcaddc_parameters {
   xnn_vmulcaddc_ukernel_function ukernel;
+  union {
+    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
   uint8_t channel_tile;
   uint8_t row_tile;
 };
