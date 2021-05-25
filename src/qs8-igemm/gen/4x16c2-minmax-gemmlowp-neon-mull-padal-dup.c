@@ -27,7 +27,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c2__neon_mull_padal_dup(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(mr != 0);
   assert(mr <= 4);

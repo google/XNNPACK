@@ -302,7 +302,7 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     return xnn_status_unsupported_parameter;
   }
 
-  union xnn_qu8_gemm_params params;
+  union xnn_qu8_conv_minmax_params params;
   if XNN_LIKELY(xnn_params.qu8.gemm.init.qu8 != NULL) {
     xnn_params.qu8.gemm.init.qu8(&params,
       kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
@@ -382,7 +382,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     return xnn_status_unsupported_parameter;
   }
 
-  union xnn_qs8_gemm_params params;
+  union xnn_qs8_conv_minmax_params params;
   if XNN_LIKELY(xnn_params.qs8.gemm.init.qs8 != NULL) {
     xnn_params.qs8.gemm.init.qs8(&params, requantization_scale, output_zero_point, output_min, output_max);
   }
@@ -487,8 +487,8 @@ enum xnn_status xnn_setup_fully_connected_nc_qu8(
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
-    &fully_connected_op->params.qu8_gemm,
-    sizeof(fully_connected_op->params.qu8_gemm),
+    &fully_connected_op->params.qu8_conv_minmax,
+    sizeof(fully_connected_op->params.qu8_conv_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -515,8 +515,8 @@ enum xnn_status xnn_setup_fully_connected_nc_qs8(
     0 /* log2(sizeof(filter element)) = log2(sizeof(int8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(int8_t)) */,
-    &fully_connected_op->params.qs8_gemm,
-    sizeof(fully_connected_op->params.qs8_gemm),
+    &fully_connected_op->params.qs8_conv_minmax,
+    sizeof(fully_connected_op->params.qs8_conv_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 

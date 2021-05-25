@@ -216,7 +216,7 @@ class GemmMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_qu8_gemm_ukernel_function gemm, xnn_init_qu8_gemm_params_fn init_params) const {
+  void Test(xnn_qu8_gemm_minmax_ukernel_function gemm, xnn_init_qu8_conv_minmax_params_fn init_params) const {
     ASSERT_LE(m(), mr());
 
     std::random_device random_device;
@@ -268,7 +268,7 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<uint8_t>::max())), long(std::numeric_limits<uint8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_qu8_gemm_params quantization_params;
+      union xnn_qu8_conv_minmax_params quantization_params;
       init_params(&quantization_params,
         b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
       union xnn_qu8_requantization_params scalar_requantization_params;
@@ -303,7 +303,7 @@ class GemmMicrokernelTester {
     }
   }
 
-  void Test(xnn_qu8_igemm_ukernel_function igemm, xnn_init_qu8_gemm_params_fn init_params) const {
+  void Test(xnn_qu8_igemm_minmax_ukernel_function igemm, xnn_init_qu8_conv_minmax_params_fn init_params) const {
     ASSERT_LE(m(), mr());
 
     std::random_device random_device;
@@ -386,7 +386,7 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<uint8_t>::max())), long(std::numeric_limits<uint8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_qu8_gemm_params quantization_params;
+      union xnn_qu8_conv_minmax_params quantization_params;
       init_params(&quantization_params,
         b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
       union xnn_qu8_requantization_params scalar_requantization_params;
@@ -423,7 +423,7 @@ class GemmMicrokernelTester {
     }
   }
 
-  void Test(xnn_qs8_gemm_ukernel_function gemm, xnn_init_qs8_gemm_params_fn init_params) const {
+  void Test(xnn_qs8_gemm_minmax_ukernel_function gemm, xnn_init_qs8_conv_minmax_params_fn init_params) const {
     ASSERT_LE(m(), mr());
 
     std::random_device random_device;
@@ -482,7 +482,7 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<int8_t>::max())), long(std::numeric_limits<int8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_qs8_gemm_params quantization_params;
+      union xnn_qs8_conv_minmax_params quantization_params;
       init_params(&quantization_params,
         requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
       union xnn_qs8_requantization_params scalar_requantization_params;
@@ -517,7 +517,7 @@ class GemmMicrokernelTester {
     }
   }
 
-  void Test(xnn_qs8_igemm_ukernel_function igemm, xnn_init_qs8_gemm_params_fn init_params) const {
+  void Test(xnn_qs8_igemm_minmax_ukernel_function igemm, xnn_init_qs8_conv_minmax_params_fn init_params) const {
     ASSERT_LE(m(), mr());
 
     std::random_device random_device;
@@ -601,7 +601,7 @@ class GemmMicrokernelTester {
         long(std::numeric_limits<int8_t>::max())), long(std::numeric_limits<int8_t>::min())));
 
       const float requantization_scale = 1.0f / float(c_scale);
-      union xnn_qs8_gemm_params quantization_params;
+      union xnn_qs8_conv_minmax_params quantization_params;
       init_params(&quantization_params,
         requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
       union xnn_qs8_requantization_params scalar_requantization_params;

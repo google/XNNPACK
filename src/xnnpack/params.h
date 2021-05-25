@@ -246,7 +246,7 @@ union xnn_f32_hswish_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_qu8_gemm_params {
+union xnn_qu8_conv_minmax_params {
   struct {
     int32_t kernel_zero_point;
     int32_t multiplier;
@@ -282,7 +282,7 @@ union xnn_qu8_gemm_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_qs8_gemm_params {
+union xnn_qs8_conv_minmax_params {
   struct {
     int32_t multiplier;
     int32_t remainder_mask;
@@ -667,7 +667,7 @@ typedef void (*xnn_f16_igemm_minmax_ukernel_function)(
     const void* zero,
     const struct xnn_f16_scaleminmax_params* params);
 
-typedef void (*xnn_qu8_gemm_ukernel_function)(
+typedef void (*xnn_qu8_gemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t k,
@@ -677,9 +677,9 @@ typedef void (*xnn_qu8_gemm_ukernel_function)(
     uint8_t* c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qu8_gemm_params* params);
+    const union xnn_qu8_conv_minmax_params* params);
 
-typedef void (*xnn_qs8_gemm_ukernel_function)(
+typedef void (*xnn_qs8_gemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t k,
@@ -689,7 +689,7 @@ typedef void (*xnn_qs8_gemm_ukernel_function)(
     int8_t* c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_gemm_params* params);
+    const union xnn_qs8_conv_minmax_params* params);
 
 typedef void (*xnn_igemm_ukernel_function)(
     size_t mr,
@@ -747,7 +747,7 @@ typedef void (*xnn_f32_igemm_minmax_ukernel_function)(
     const float* zero,
     const union xnn_f32_minmax_params* params);
 
-typedef void (*xnn_qu8_igemm_ukernel_function)(
+typedef void (*xnn_qu8_igemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t kc,
@@ -759,9 +759,9 @@ typedef void (*xnn_qu8_igemm_ukernel_function)(
     size_t cn_stride,
     size_t a_offset,
     const uint8_t* zero,
-    const union xnn_qu8_gemm_params* params);
+    const union xnn_qu8_conv_minmax_params* params);
 
-typedef void (*xnn_qs8_igemm_ukernel_function)(
+typedef void (*xnn_qs8_igemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t kc,
@@ -773,7 +773,7 @@ typedef void (*xnn_qs8_igemm_ukernel_function)(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_gemm_params* params);
+    const union xnn_qs8_conv_minmax_params* params);
 
 typedef void (*xnn_conv_hwc_ukernel_function)(
     size_t input_height,
@@ -1069,7 +1069,7 @@ typedef void (*xnn_qu8_dwconv_minmax_unipass_ukernel_function)(
     size_t output_increment,
     size_t input_offset,
     const uint8_t* zero,
-    const union xnn_qu8_gemm_params* params);
+    const union xnn_qu8_conv_minmax_params* params);
 
 typedef void (*xnn_qs8_dwconv_minmax_unipass_ukernel_function)(
     size_t channels,
@@ -1081,7 +1081,7 @@ typedef void (*xnn_qs8_dwconv_minmax_unipass_ukernel_function)(
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union xnn_qs8_gemm_params* params);
+    const union xnn_qs8_conv_minmax_params* params);
 
 typedef void (*xnn_dwconv_multipass_ukernel_function)(
     size_t channels,
@@ -1740,15 +1740,15 @@ typedef void (*xnn_f32_vscaleextexp_ukernel_function)(
     float scale_mantissa,
     float scale_exponent);
 
-typedef void (*xnn_init_qs8_gemm_params_fn)(
-  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+typedef void (*xnn_init_qs8_conv_minmax_params_fn)(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max);
 
-typedef void (*xnn_init_qu8_gemm_params_fn)(
-  union xnn_qu8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+typedef void (*xnn_init_qu8_conv_minmax_params_fn)(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
   float scale,
   uint8_t output_zero_point,
@@ -1834,8 +1834,8 @@ struct gemm_parameters {
   struct gemm_fused_ukernels relu;
   struct gemm_fused_ukernels linear;
   union {
-    xnn_init_qs8_gemm_params_fn qs8;
-    xnn_init_qu8_gemm_params_fn qu8;
+    xnn_init_qs8_conv_minmax_params_fn qs8;
+    xnn_init_qu8_conv_minmax_params_fn qu8;
     xnn_init_f16_scaleminmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;
   } init;
@@ -1906,8 +1906,8 @@ struct dwconv_parameters {
   union dwconv_fused_ukernels minmax;
   union dwconv_fused_ukernels linear;
   union {
-    xnn_init_qs8_gemm_params_fn qs8;
-    xnn_init_qu8_gemm_params_fn qu8;
+    xnn_init_qs8_conv_minmax_params_fn qs8;
+    xnn_init_qu8_conv_minmax_params_fn qu8;
     xnn_init_f16_minmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;
   } init;

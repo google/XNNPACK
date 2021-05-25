@@ -27,8 +27,8 @@
 #include <xnnpack/params.h>
 
 
-static inline void xnn_init_qu8_gemm_scalar_params(
-  union xnn_qu8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+static inline void xnn_init_qu8_conv_minmax_scalar_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
   float scale,
   uint8_t output_zero_point,
@@ -64,8 +64,8 @@ static inline void xnn_init_qu8_gemm_scalar_params(
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-static inline void xnn_init_qu8_gemm_sse2_params(
-  union xnn_qu8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+static inline void xnn_init_qu8_conv_minmax_sse2_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
   float scale,
   uint8_t output_zero_point,
@@ -117,8 +117,8 @@ static inline void xnn_init_qu8_gemm_sse2_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-static inline void xnn_init_qu8_gemm_neon_params(
-  union xnn_qu8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+static inline void xnn_init_qu8_conv_minmax_neon_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
   float scale,
   uint8_t output_zero_point,
@@ -147,8 +147,8 @@ static inline void xnn_init_qu8_gemm_neon_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-static inline void xnn_init_qs8_gemm_scalar_params(
-  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+static inline void xnn_init_qs8_conv_minmax_scalar_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
@@ -180,8 +180,8 @@ static inline void xnn_init_qs8_gemm_scalar_params(
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-static inline void xnn_init_qs8_gemm_sse2_params(
-  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+static inline void xnn_init_qs8_conv_minmax_sse2_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
@@ -225,8 +225,8 @@ static inline void xnn_init_qs8_gemm_sse2_params(
   }
 }
 
-static inline void xnn_init_qs8_gemm_sse4_params(
-  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+static inline void xnn_init_qs8_conv_minmax_sse4_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
@@ -272,8 +272,8 @@ static inline void xnn_init_qs8_gemm_sse4_params(
   }
 }
 
-static inline void xnn_init_qs8_gemm_avx2_params(
-  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+static inline void xnn_init_qs8_conv_minmax_avx2_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
@@ -320,8 +320,8 @@ static inline void xnn_init_qs8_gemm_avx2_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-static inline void xnn_init_qs8_gemm_neon_params(
-  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+static inline void xnn_init_qs8_conv_minmax_neon_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
@@ -349,8 +349,8 @@ static inline void xnn_init_qs8_gemm_neon_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_WASMSIMD
-static inline void xnn_init_qs8_gemm_wasmsimd_params(
-  union xnn_qs8_gemm_params params[XNN_MIN_ELEMENTS(1)],
+static inline void xnn_init_qs8_conv_minmax_wasmsimd_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,

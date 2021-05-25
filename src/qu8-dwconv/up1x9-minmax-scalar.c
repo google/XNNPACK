@@ -17,7 +17,7 @@ void xnn_qu8_dwconv_minmax_ukernel_up1x9__scalar(
     size_t output_increment,
     size_t input_offset,
     const uint8_t* zero,
-    const union xnn_qu8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const int32_t vkernel_zero_point = params->scalar.kernel_zero_point;
   const int32_t vmultiplier = params->scalar.multiplier;

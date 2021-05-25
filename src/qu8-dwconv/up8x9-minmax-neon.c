@@ -22,7 +22,7 @@ void xnn_qu8_dwconv_minmax_ukernel_up8x9__neon(
     size_t output_increment,
     size_t input_offset,
     const uint8_t* zero,
-    const union xnn_qu8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const uint8x8_t vkernel_zero_point = vld1_dup_u8((const uint8_t*) &params->neon.kernel_zero_point);
   const int32x4_t vmultiplier = vld1q_dup_s32(&params->neon.multiplier);

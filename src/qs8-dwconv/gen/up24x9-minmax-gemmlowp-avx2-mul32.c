@@ -24,7 +24,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x9__avx2_mul32(
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union xnn_qs8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(channels != 0);
   assert(output_width != 0);

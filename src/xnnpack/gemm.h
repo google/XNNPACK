@@ -495,7 +495,7 @@ DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_gemm_minmax_ukernel_8x16__neonf
       uint8_t* c,                                         \
       size_t cm_stride,                                   \
       size_t cn_stride,                                   \
-      const union xnn_qu8_gemm_params* params);
+      const union xnn_qu8_conv_minmax_params* params);
 
 DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_ukernel_4x8__neon)
 DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_ukernel_8x8__neon)
@@ -516,7 +516,7 @@ DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_ukernel_2x2__scalar
       int8_t* c,                                          \
       size_t cm_stride,                                   \
       size_t cn_stride,                                   \
-      const union xnn_qs8_gemm_params* params);
+      const union xnn_qs8_conv_minmax_params* params);
 
 DECLARE_QS8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8__neon_mlal_lane)
 DECLARE_QS8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8__neon_mlal_lane)
@@ -761,7 +761,7 @@ DECLARE_QS8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x
       int8_t* c,                                             \
       size_t cm_stride,                                      \
       size_t cn_stride,                                      \
-      const union xnn_qs8_gemm_params* params);
+      const union xnn_qs8_conv_minmax_params* params);
 
 DECLARE_QS8_GEMM_XW_MINMAX_UKERNEL_FUNCTION(xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_1x4c2__sse2)
 DECLARE_QS8_GEMM_XW_MINMAX_UKERNEL_FUNCTION(xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_2x4c2__sse2)

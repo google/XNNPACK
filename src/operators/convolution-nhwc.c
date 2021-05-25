@@ -494,13 +494,13 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
   };
 
 
-  union xnn_qu8_gemm_params gemm_params;
+  union xnn_qu8_conv_minmax_params gemm_params;
   if XNN_LIKELY(xnn_params.qu8.gemm.init.qu8 != NULL) {
     xnn_params.qu8.gemm.init.qu8(&gemm_params,
       kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   }
 
-  union xnn_qu8_gemm_params dwconv_params;
+  union xnn_qu8_conv_minmax_params dwconv_params;
   const struct dwconv_parameters* dwconv_ukernel =
     find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.qu8.dwconv, XNN_MAX_QU8_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
@@ -603,13 +603,13 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
 
   const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point, };
 
-  union xnn_qs8_gemm_params gemm_params;
+  union xnn_qs8_conv_minmax_params gemm_params;
   if XNN_LIKELY(xnn_params.qs8.gemm.init.qs8 != NULL) {
     xnn_params.qs8.gemm.init.qs8(&gemm_params,
       requantization_scale, output_zero_point, output_min, output_max);
   }
 
-  union xnn_qs8_gemm_params dwconv_params;
+  union xnn_qs8_conv_minmax_params dwconv_params;
   const struct dwconv_parameters* dwconv_ukernel =
     find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.qs8.dwconv, XNN_MAX_QS8_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {

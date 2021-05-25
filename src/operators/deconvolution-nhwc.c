@@ -364,7 +364,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     return xnn_status_unsupported_parameter;
   }
 
-  union xnn_qu8_gemm_params params;
+  union xnn_qu8_conv_minmax_params params;
   if XNN_LIKELY(xnn_params.qu8.gemm.init.qu8 != NULL) {
     xnn_params.qu8.gemm.init.qu8(&params,
       kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
@@ -905,7 +905,7 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_qu8(
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
-    &deconvolution_op->params.qu8_gemm, sizeof(deconvolution_op->params.qu8_gemm),
+    &deconvolution_op->params.qu8_conv_minmax, sizeof(deconvolution_op->params.qu8_conv_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 

@@ -42,7 +42,7 @@ void xnn_qu8_gemm_minmax_ukernel_2x4c8__sse2(
     uint8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qu8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(mr != 0);
   assert(mr <= 2);

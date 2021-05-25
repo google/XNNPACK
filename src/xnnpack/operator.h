@@ -276,7 +276,7 @@ struct xnn_operator {
       union xnn_f32_scaleminmax_params f32_scaleminmax;
     };
     union xnn_f32_chw_params f32_chw;
-    union xnn_qs8_gemm_params qs8_gemm;
+    union xnn_qs8_conv_minmax_params qs8_conv_minmax;
     // Average Pooling normally use qs8_avgpool_params, but also initialize qs8_gavgpool_params in case it needs to switch
     // to Global Average Pooling operation.
     struct {
@@ -289,7 +289,7 @@ struct xnn_operator {
       union xnn_qs8_add_params qs8_radd;
     };
     union xnn_qu8_add_params qu8_add;
-    union xnn_qu8_gemm_params qu8_gemm;
+    union xnn_qu8_conv_minmax_params qu8_conv_minmax;
     // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch
     // to Global Average Pooling operation.
     struct {

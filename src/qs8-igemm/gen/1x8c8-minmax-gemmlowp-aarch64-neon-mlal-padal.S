@@ -21,7 +21,7 @@
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const float* zero,                 [sp + 16] -> x12
-#     const xnn_f32_minmax_params params [sp + 24] -> x8
+#     const xnn_qs8_conv_minmax_params params [sp + 24] -> x8
 
 # d2-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 

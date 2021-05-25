@@ -26,10 +26,10 @@
 static void GEMMEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory,
-  xnn_qs8_gemm_ukernel_function gemm,
-  xnn_qs8_igemm_ukernel_function igemm,
-  xnn_qs8_gemm_ukernel_function gemm1,
-  xnn_qs8_igemm_ukernel_function igemm1,
+  xnn_qs8_gemm_minmax_ukernel_function gemm,
+  xnn_qs8_igemm_minmax_ukernel_function igemm,
+  xnn_qs8_gemm_minmax_ukernel_function gemm1,
+  xnn_qs8_igemm_minmax_ukernel_function igemm1,
   uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

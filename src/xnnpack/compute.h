@@ -75,8 +75,8 @@ struct gemm_context {
   uint32_t log2_csize;
   struct xnn_hmp_gemm_ukernel ukernel;
   union {
-    union xnn_qs8_gemm_params qs8;
-    union xnn_qu8_gemm_params qu8;
+    union xnn_qs8_conv_minmax_params qs8;
+    union xnn_qu8_conv_minmax_params qu8;
     struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
@@ -178,8 +178,8 @@ struct igemm_context {
   uint32_t log2_csize;
   struct xnn_hmp_igemm_ukernel ukernel;
   union {
-    union xnn_qs8_gemm_params qs8;
-    union xnn_qu8_gemm_params qu8;
+    union xnn_qs8_conv_minmax_params qs8;
+    union xnn_qu8_conv_minmax_params qu8;
     struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
@@ -274,8 +274,8 @@ struct subgemm_context {
   uint32_t log2_csize;
   struct xnn_hmp_gemm_ukernel ukernel;
   union {
-    union xnn_qs8_gemm_params qs8;
-    union xnn_qu8_gemm_params qu8;
+    union xnn_qs8_conv_minmax_params qs8;
+    union xnn_qu8_conv_minmax_params qu8;
     struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
@@ -320,8 +320,8 @@ struct subconv_context {
   uint32_t log2_csize;
   struct xnn_hmp_igemm_ukernel ukernel;
   union {
-    union xnn_qs8_gemm_params qs8;
-    union xnn_qu8_gemm_params qu8;
+    union xnn_qs8_conv_minmax_params qs8;
+    union xnn_qu8_conv_minmax_params qu8;
     struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
@@ -394,8 +394,8 @@ struct dwconv_context {
   const void* zero;
   size_t output_increment;
   union {
-    union xnn_qs8_gemm_params qs8;
-    union xnn_qu8_gemm_params qu8;
+    union xnn_qs8_conv_minmax_params qs8;
+    union xnn_qu8_conv_minmax_params qu8;
     struct xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;

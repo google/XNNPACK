@@ -3,14 +3,14 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 - name: xnn_qu8_igemm_minmax_ukernel_4x8__neon
-  init: xnn_init_qu8_gemm_neon_params
+  init: xnn_init_qu8_conv_minmax_neon_params
   k-block: 8
 - name: xnn_qu8_igemm_minmax_ukernel_8x8__neon
-  init: xnn_init_qu8_gemm_neon_params
+  init: xnn_init_qu8_conv_minmax_neon_params
   k-block: 8
 - name: xnn_qu8_igemm_minmax_ukernel_4x4c2__sse2
-  init: xnn_init_qu8_gemm_sse2_params
+  init: xnn_init_qu8_conv_minmax_sse2_params
   k-block: 8
 - name: xnn_qu8_igemm_minmax_ukernel_2x2__scalar
-  init: xnn_init_qu8_gemm_scalar_params
+  init: xnn_init_qu8_conv_minmax_scalar_params
   k-block: 1

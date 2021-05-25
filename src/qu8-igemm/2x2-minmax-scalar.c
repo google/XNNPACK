@@ -21,7 +21,7 @@ void xnn_qu8_igemm_minmax_ukernel_2x2__scalar(
     size_t cn_stride,
     size_t a_offset,
     const uint8_t* zero,
-    const union xnn_qu8_gemm_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 2);

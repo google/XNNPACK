@@ -27,7 +27,7 @@ void xnn_qs8_igemm${GEMM_SUFFIX}_minmax_gemmlowp_ukernel_${MR}x4c8__wasmsimd${LO
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_gemm${GEMM_SUFFIX}_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(mr != 0);
   assert(mr <= ${MR});
