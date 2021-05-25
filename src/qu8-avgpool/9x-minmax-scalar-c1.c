@@ -8,8 +8,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/scalar-utils.h>
 #include <xnnpack/avgpool.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1(

@@ -10,7 +10,6 @@
 #include <assert.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/scalar-utils.h>
 #include <xnnpack/vadd.h>
 
 

@@ -11,7 +11,6 @@
 
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/math.h>
-#include <xnnpack/scalar-utils.h>
 
 
 void xnn_qs8_gavgpool_minmax_ukernel_7x__scalar_c2(

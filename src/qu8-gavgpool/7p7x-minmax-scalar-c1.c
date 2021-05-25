@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/scalar-utils.h>
 #include <xnnpack/gavgpool.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qu8_gavgpool_minmax_ukernel_7p7x__scalar_c1(

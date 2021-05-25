@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include <xnnpack/scalar-utils.h>
 #include <xnnpack/igemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qu8_igemm_minmax_ukernel_2x2__scalar(

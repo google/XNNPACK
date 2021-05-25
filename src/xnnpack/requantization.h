@@ -8,23 +8,16 @@
 
 #pragma once
 
-#if defined(__cplusplus) && (__cplusplus >= 201103L)
-  #include <cstdint>
-  #include <cstddef>
-  #include <cassert>
-  #include <cmath>
-#else
-  #include <stdint.h>
-  #include <stddef.h>
-  #include <assert.h>
-  #include <math.h>
-#endif
+#include <stdint.h>
+#include <stddef.h>
+#include <assert.h>
+#include <math.h>
 
 #include <fp16.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/params.h>
-#include <xnnpack/scalar-utils.h>
 
 
 static inline uint8_t xnn_qu8_requantize_gemmlowp(
@@ -35,17 +28,12 @@ static inline uint8_t xnn_qu8_requantize_gemmlowp(
   const int32_t q31product = (int32_t) (uint32_t) ((uint64_t) (product + INT64_C(0x40000000)) >> 31);
   const int32_t remainder = (q31product & params.gemmlowp.remainder_mask) - (int32_t) (n < 0);
   n = asr_s32(q31product, params.gemmlowp.shift) + (int32_t) (remainder > params.gemmlowp.remainder_threshold);
-  if (n < params.gemmlowp.min_less_zero_point) {
-    n = params.gemmlowp.min_less_zero_point;
-  }
-  if (n > params.gemmlowp.max_less_zero_point) {
-    n = params.gemmlowp.max_less_zero_point;
-  }
-
+  n = math_max_s32(n, params.gemmlowp.min_less_zero_point);
+  n = math_min_s32(n, params.gemmlowp.max_less_zero_point);
   return (uint8_t) (n + params.gemmlowp.zero_point);
 }
 
-static inline uint8_t xnn_qs8_requantize_gemmlowp(
+static inline int8_t xnn_qs8_requantize_gemmlowp(
   int32_t n,
   union xnn_qs8_requantization_params params)
 {
@@ -53,13 +41,8 @@ static inline uint8_t xnn_qs8_requantize_gemmlowp(
   const int32_t q31product = (int32_t) (uint32_t) ((uint64_t) (product + INT64_C(0x40000000)) >> 31);
   const int32_t remainder = (q31product & params.gemmlowp.remainder_mask) - (int32_t) (n < 0);
   n = asr_s32(q31product, params.gemmlowp.shift) + (int32_t) (remainder > params.gemmlowp.remainder_threshold);
-  if (n < params.gemmlowp.min_less_zero_point) {
-    n = params.gemmlowp.min_less_zero_point;
-  }
-  if (n > params.gemmlowp.max_less_zero_point) {
-    n = params.gemmlowp.max_less_zero_point;
-  }
-
+  n = math_max_s32(n, params.gemmlowp.min_less_zero_point);
+  n = math_min_s32(n, params.gemmlowp.max_less_zero_point);
   return (int8_t) (n + params.gemmlowp.zero_point);
 }
 

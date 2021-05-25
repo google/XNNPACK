@@ -12,7 +12,7 @@
 
 #include <fp16/bitcasts.h>
 
-#include <xnnpack/scalar-utils.h>
+#include <xnnpack/math.h>
 #include <xnnpack/requantization-stubs.h>
 
 

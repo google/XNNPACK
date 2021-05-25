@@ -9,7 +9,6 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/scalar-utils.h>
 #include <xnnpack/vadd.h>
 
 

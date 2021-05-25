@@ -3819,7 +3819,6 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/raddextexp.h",
     "src/xnnpack/raddstoreexpminusmax.h",
     "src/xnnpack/rmax.h",
-    "src/xnnpack/scalar-utils.h",
     "src/xnnpack/spmm.h",
     "src/xnnpack/unpool.h",
     "src/xnnpack/vadd.h",

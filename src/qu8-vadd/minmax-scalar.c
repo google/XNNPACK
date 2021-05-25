@@ -6,8 +6,8 @@
 #include <assert.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/scalar-utils.h>
 #include <xnnpack/vadd.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qu8_vadd_minmax_ukernel__scalar(

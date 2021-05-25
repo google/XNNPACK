@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack/scalar-utils.h>
 #include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qu8_dwconv_minmax_ukernel_up1x9__scalar(

@@ -11,7 +11,6 @@
 
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
-#include <xnnpack/scalar-utils.h>
 
 
 void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up2x25__scalar(
