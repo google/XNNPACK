@@ -271,9 +271,9 @@ class GemmMicrokernelTester {
       union xnn_qu8_conv_minmax_params quantization_params;
       init_params(&quantization_params,
         b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
-      union xnn_qu8_requantization_params scalar_requantization_params;
-      xnn_init_scalar_qu8_requantization_params(
-        &scalar_requantization_params, requantization_scale, c_zero_point, qmin(), qmax());
+      union xnn_qu8_requantization_params requantization_params;
+      xnn_init_qu8_requantization_gemmlowp_params(&requantization_params,
+        requantization_scale, c_zero_point, qmin(), qmax());
 
       gemm(
         m(), n(), k(),
@@ -284,7 +284,7 @@ class GemmMicrokernelTester {
 
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
-          c_ref[m_index * n() + n_index] = xnn_qu8_requantize_gemmlowp(acc[m_index * n() + n_index], scalar_requantization_params);
+          c_ref[m_index * n() + n_index] = xnn_qu8_requantize_gemmlowp(acc[m_index * n() + n_index], requantization_params);
         }
       }
 
@@ -389,9 +389,9 @@ class GemmMicrokernelTester {
       union xnn_qu8_conv_minmax_params quantization_params;
       init_params(&quantization_params,
         b_zero_point(), requantization_scale, c_zero_point, qmin(), qmax());
-      union xnn_qu8_requantization_params scalar_requantization_params;
-      xnn_init_scalar_qu8_requantization_params(
-        &scalar_requantization_params, requantization_scale, c_zero_point, qmin(), qmax());
+      union xnn_qu8_requantization_params requantization_params;
+      xnn_init_qu8_requantization_gemmlowp_params(&requantization_params,
+        requantization_scale, c_zero_point, qmin(), qmax());
 
       const uint8_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
 
@@ -404,7 +404,7 @@ class GemmMicrokernelTester {
 
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
-          c_ref[m_index * n() + n_index] = xnn_qu8_requantize_gemmlowp(acc[m_index * n() + n_index], scalar_requantization_params);
+          c_ref[m_index * n() + n_index] = xnn_qu8_requantize_gemmlowp(acc[m_index * n() + n_index], requantization_params);
         }
       }
 
@@ -485,9 +485,9 @@ class GemmMicrokernelTester {
       union xnn_qs8_conv_minmax_params quantization_params;
       init_params(&quantization_params,
         requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-      union xnn_qs8_requantization_params scalar_requantization_params;
-      xnn_init_scalar_qs8_requantization_params(
-        &scalar_requantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+      union xnn_qs8_requantization_params requantization_params;
+      xnn_init_qs8_requantization_gemmlowp_params(&requantization_params,
+        requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       gemm(
         m(), n(), k(),
@@ -498,7 +498,7 @@ class GemmMicrokernelTester {
 
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
-          c_ref[m_index * n() + n_index] = xnn_qs8_requantize_gemmlowp(acc[m_index * n() + n_index], scalar_requantization_params);
+          c_ref[m_index * n() + n_index] = xnn_qs8_requantize_gemmlowp(acc[m_index * n() + n_index], requantization_params);
         }
       }
 
@@ -604,9 +604,9 @@ class GemmMicrokernelTester {
       union xnn_qs8_conv_minmax_params quantization_params;
       init_params(&quantization_params,
         requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-      union xnn_qs8_requantization_params scalar_requantization_params;
-      xnn_init_scalar_qs8_requantization_params(
-        &scalar_requantization_params, requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+      union xnn_qs8_requantization_params requantization_params;
+      xnn_init_qs8_requantization_gemmlowp_params(&requantization_params,
+        requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       const int8_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
 
@@ -619,7 +619,7 @@ class GemmMicrokernelTester {
 
       for (size_t m_index = 0; m_index < m(); m_index++) {
         for (size_t n_index = 0; n_index < n(); n_index++) {
-          c_ref[m_index * n() + n_index] = xnn_qs8_requantize_gemmlowp(acc[m_index * n() + n_index], scalar_requantization_params);
+          c_ref[m_index * n() + n_index] = xnn_qs8_requantize_gemmlowp(acc[m_index * n() + n_index], requantization_params);
         }
       }
 

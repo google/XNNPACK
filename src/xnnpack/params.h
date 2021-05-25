@@ -523,30 +523,6 @@ union xnn_qs8_avgpool_params {
 #endif  // XNN_ARCH_WASMSIMD
 };
 
-union xnn_qu8_requantization_params {
-  struct {
-    int32_t multiplier;
-    int32_t remainder_mask;
-    int32_t remainder_threshold;
-    uint32_t shift;
-    int32_t min_less_zero_point;
-    int32_t max_less_zero_point;
-    int32_t zero_point;
-  } gemmlowp;
-};
-
-union xnn_qs8_requantization_params {
-  struct {
-    int32_t multiplier;
-    int32_t remainder_mask;
-    int32_t remainder_threshold;
-    uint32_t shift;
-    int32_t min_less_zero_point;
-    int32_t max_less_zero_point;
-    int32_t zero_point;
-  } gemmlowp;
-};
-
 typedef void (*xnn_ppmm_ukernel_function)(
     size_t mr,
     size_t nc,
