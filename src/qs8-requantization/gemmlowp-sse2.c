@@ -10,21 +10,21 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <tmmintrin.h>
+#include <emmintrin.h>
 
 #include <fp16/bitcasts.h>
 
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qu8_requantize_q31__ssse3(
+void xnn_qs8_requantize_gemmlowp__sse2(
     size_t n,
     const int32_t* input,
     float scale,
-    uint8_t zero_point,
-    uint8_t qmin,
-    uint8_t qmax,
-    uint8_t* output)
+    int8_t zero_point,
+    int8_t qmin,
+    int8_t qmax,
+    int8_t* output)
 {
   assert(n % 16 == 0);
   assert(scale < 1.0f);
@@ -44,9 +44,9 @@ void xnn_qu8_requantize_q31__ssse3(
   assert(shift < 32);
 
   const __m128i vmultiplier = _mm_set1_epi32(multiplier);
-  const __m128i vzero_point = _mm_set1_epi16((short) (uint16_t) zero_point);
-  const __m128i vqmin = _mm_set1_epi8((char) qmin);
-  const __m128i vqmax = _mm_set1_epi8((char) qmax);
+  const __m128i vzero_point = _mm_set1_epi16((short) zero_point);
+  const __m128i vqmin = _mm_set1_epi16((short) qmin);
+  const __m128i vqmax = _mm_set1_epi16((short) qmax);
   const __m128i vshift = _mm_cvtsi32_si128((int) shift);
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const __m128i vremainder_mask = _mm_set1_epi32((int) remainder_mask);
@@ -59,15 +59,15 @@ void xnn_qu8_requantize_q31__ssse3(
     const __m128i w = _mm_loadu_si128((const __m128i*) (input + 12));
     input += 16;
 
-    const __m128i x_abs = _mm_abs_epi32(x);
-    const __m128i y_abs = _mm_abs_epi32(y);
-    const __m128i z_abs = _mm_abs_epi32(z);
-    const __m128i w_abs = _mm_abs_epi32(w);
-
     const __m128i x_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), x);
     const __m128i y_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), y);
     const __m128i z_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), z);
     const __m128i w_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), w);
+
+    const __m128i x_abs = _mm_sub_epi32(_mm_xor_si128(x, x_neg_mask), x_neg_mask);
+    const __m128i y_abs = _mm_sub_epi32(_mm_xor_si128(y, y_neg_mask), y_neg_mask);
+    const __m128i z_abs = _mm_sub_epi32(_mm_xor_si128(z, z_neg_mask), z_neg_mask);
+    const __m128i w_abs = _mm_sub_epi32(_mm_xor_si128(w, w_neg_mask), w_neg_mask);
 
     const __m128i x_abs_rev = _mm_shuffle_epi32(x_abs, _MM_SHUFFLE(2, 3, 0, 1));
     const __m128i y_abs_rev = _mm_shuffle_epi32(y_abs, _MM_SHUFFLE(2, 3, 0, 1));
@@ -157,30 +157,30 @@ void xnn_qu8_requantize_q31__ssse3(
 
     const __m128i xy_packed = _mm_adds_epi16(_mm_packs_epi32(x_scaled, y_scaled), vzero_point);
     const __m128i zw_packed = _mm_adds_epi16(_mm_packs_epi32(z_scaled, w_scaled), vzero_point);
-    const __m128i xyzw_packed = _mm_packus_epi16(xy_packed, zw_packed);
-    const __m128i xyzw_clamped = _mm_max_epu8(_mm_min_epu8(xyzw_packed, vqmax), vqmin);
+    const __m128i xy_clamped = _mm_max_epi16(_mm_min_epi16(xy_packed, vqmax), vqmin);
+    const __m128i zw_clamped = _mm_max_epi16(_mm_min_epi16(zw_packed, vqmax), vqmin);
+    const __m128i xyzw_clamped = _mm_packs_epi16(xy_clamped, zw_clamped);
 
     // 16x PSHUFD
     // 4x SHUFPS
     // 8x PMULUDQ
     // 8x PXOR (setzero)
-    // 8x PXOR
+    // 12x PXOR
     // 4x PAND
     // 8x PADDQ
     // 4x PADDD
-    // 2x PADDW
     // 8x PSUBQ
-    // 4x PSUBD
+    // 8x PSUBD
     // 8x PSRLQ (immediate)
     // 4x PSRAD (register)
     // 12x PCMPGTD
-    // 4x PABSD
     // 2x PACKSSDW
-    // 1x PACKUSWB
-    // 1x PMAXUB
-    // 1x PMINUB
+    // 2x PADDSW
+    // 2x PMAXSW
+    // 2x PMINSW
+    // 1x PACKSSWB
     // ---------------------
-    // 107 instructions total
+    // 113 instructions total
 
     _mm_storeu_si128((__m128i*) output, xyzw_clamped);
     output += 16;

@@ -16,7 +16,7 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qs8_requantize_q31__scalar(
+void xnn_qs8_requantize_gemmlowp__scalar(
     size_t n,
     const int32_t* input,
     float scale,

@@ -17,14 +17,14 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qs8_requantize_q31__sse4(
+void xnn_qu8_requantize_gemmlowp__sse4(
     size_t n,
     const int32_t* input,
     float scale,
-    int8_t zero_point,
-    int8_t qmin,
-    int8_t qmax,
-    int8_t* output)
+    uint8_t zero_point,
+    uint8_t qmin,
+    uint8_t qmax,
+    uint8_t* output)
 {
   assert(n % 16 == 0);
   assert(scale < 1.0f);
@@ -44,7 +44,7 @@ void xnn_qs8_requantize_q31__sse4(
   assert(shift < 32);
 
   const __m128i vmultiplier = _mm_set1_epi32(multiplier);
-  const __m128i vzero_point = _mm_set1_epi16((short) zero_point);
+  const __m128i vzero_point = _mm_set1_epi16((short) (uint16_t) zero_point);
   const __m128i vqmin = _mm_set1_epi8((char) qmin);
   const __m128i vqmax = _mm_set1_epi8((char) qmax);
   const __m128i vshift = _mm_cvtsi32_si128((int) shift);
@@ -108,13 +108,14 @@ void xnn_qs8_requantize_q31__sse4(
 
     const __m128i xy_packed = _mm_adds_epi16(_mm_packs_epi32(x_scaled, y_scaled), vzero_point);
     const __m128i zw_packed = _mm_adds_epi16(_mm_packs_epi32(z_scaled, w_scaled), vzero_point);
-    const __m128i xyzw_packed = _mm_packs_epi16(xy_packed, zw_packed);
-    const __m128i xyzw_clamped = _mm_max_epi8(_mm_min_epi8(xyzw_packed, vqmax), vqmin);
+    const __m128i xyzw_packed = _mm_packus_epi16(xy_packed, zw_packed);
+    const __m128i xyzw_clamped = _mm_max_epu8(_mm_min_epu8(xyzw_packed, vqmax), vqmin);
 
     // 4x PSHUFD
     // 8x PMULDQ
     // 12x PADDQ
     // 4x PADDD
+    // 2x PADDW
     // 4x PSUBD
     // 4x PSLRQ (immediate)
     // 4x PSRAD (register)
@@ -123,10 +124,9 @@ void xnn_qs8_requantize_q31__sse4(
     // 4x PXOR (setzero)
     // 8x PCMPGTD
     // 2x PACKSSDW
-    // 2x PADDSW
-    // 1x PACKSSWB
-    // 1x PMAXSB
-    // 1x PMINSB
+    // 1x PACKUSWB
+    // 1x PMAXUB
+    // 1x PMINUB
     // ---------------------
     // 67 instructions total
 

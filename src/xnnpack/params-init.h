@@ -1572,13 +1572,13 @@ static inline void xnn_init_scalar_qu8_requantization_params(
 
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
-  params->q31.multiplier = multiplier;
-  params->q31.remainder_mask = (int32_t) remainder_mask;
-  params->q31.remainder_threshold = (int32_t) remainder_threshold;
-  params->q31.shift = (uint32_t) shift;
-  params->q31.min_less_zero_point = (int32_t) (uint32_t) min - (int32_t) (uint32_t) zero_point;
-  params->q31.max_less_zero_point = (int32_t) (uint32_t) max - (int32_t) (uint32_t) zero_point;
-  params->q31.zero_point = (int32_t) (uint32_t) zero_point;
+  params->gemmlowp.multiplier = multiplier;
+  params->gemmlowp.remainder_mask = (int32_t) remainder_mask;
+  params->gemmlowp.remainder_threshold = (int32_t) remainder_threshold;
+  params->gemmlowp.shift = (uint32_t) shift;
+  params->gemmlowp.min_less_zero_point = (int32_t) (uint32_t) min - (int32_t) (uint32_t) zero_point;
+  params->gemmlowp.max_less_zero_point = (int32_t) (uint32_t) max - (int32_t) (uint32_t) zero_point;
+  params->gemmlowp.zero_point = (int32_t) (uint32_t) zero_point;
 }
 
 static inline void xnn_init_scalar_qs8_requantization_params(
@@ -1605,11 +1605,11 @@ static inline void xnn_init_scalar_qs8_requantization_params(
 
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
-  params->q31.multiplier = multiplier;
-  params->q31.remainder_mask = (int32_t) remainder_mask;
-  params->q31.remainder_threshold = (int32_t) remainder_threshold;
-  params->q31.shift = (uint32_t) shift;
-  params->q31.min_less_zero_point = (int32_t) min - (int32_t) zero_point;
-  params->q31.max_less_zero_point = (int32_t) max - (int32_t) zero_point;
-  params->q31.zero_point = (int32_t) zero_point;
+  params->gemmlowp.multiplier = multiplier;
+  params->gemmlowp.remainder_mask = (int32_t) remainder_mask;
+  params->gemmlowp.remainder_threshold = (int32_t) remainder_threshold;
+  params->gemmlowp.shift = (uint32_t) shift;
+  params->gemmlowp.min_less_zero_point = (int32_t) min - (int32_t) zero_point;
+  params->gemmlowp.max_less_zero_point = (int32_t) max - (int32_t) zero_point;
+  params->gemmlowp.zero_point = (int32_t) zero_point;
 }

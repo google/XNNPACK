@@ -17,14 +17,14 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qs8_requantize_q31__wasmsimd(
+void xnn_qu8_requantize_gemmlowp__wasmsimd(
     size_t n,
     const int32_t* input,
     float scale,
-    int8_t zero_point,
-    int8_t qmin,
-    int8_t qmax,
-    int8_t* output)
+    uint8_t zero_point,
+    uint8_t qmin,
+    uint8_t qmax,
+    uint8_t* output)
 {
   assert(n % 16 == 0);
   assert(scale < 1.0f);
@@ -46,10 +46,10 @@ void xnn_qs8_requantize_q31__wasmsimd(
 
   const v128_t vzero = wasm_f64x2_splat(0.0);
   const v128_t vmultiplier = wasm_i64x2_make(twice_multiplier, twice_multiplier);
-  const v128_t vzero_point = wasm_i16x8_splat((int16_t) zero_point);
+  const v128_t vzero_point = wasm_i16x8_splat((int16_t) (uint16_t) zero_point);
 
-  const v128_t vqmin = wasm_i8x16_splat(qmin);
-  const v128_t vqmax = wasm_i8x16_splat(qmax);
+  const v128_t vqmin = wasm_i8x16_splat((int8_t) qmin);
+  const v128_t vqmax = wasm_i8x16_splat((int8_t) qmax);
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const v128_t vremainder_mask = wasm_i32x4_splat((int32_t) remainder_mask);
   const v128_t vthreshold = wasm_i32x4_splat((int32_t) (remainder_mask >> 1));
@@ -111,8 +111,8 @@ void xnn_qs8_requantize_q31__wasmsimd(
 
     const v128_t xy_packed = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(x_scaled, y_scaled), vzero_point);
     const v128_t zw_packed = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(z_scaled, w_scaled), vzero_point);
-    const v128_t xyzw_packed = wasm_i8x16_narrow_i16x8(xy_packed, zw_packed);
-    const v128_t xyzw_clamped = wasm_i8x16_min(wasm_i8x16_max(xyzw_packed, vqmin), vqmax);
+    const v128_t xyzw_packed = wasm_u8x16_narrow_i16x8(xy_packed, zw_packed);
+    const v128_t xyzw_clamped = wasm_u8x16_min(wasm_u8x16_max(xyzw_packed, vqmin), vqmax);
 
     // 12x v128.shuffle
     // 8x i32x4.lt
@@ -125,9 +125,9 @@ void xnn_qs8_requantize_q31__wasmsimd(
     // 4x i32x4.shr_s
     // 2x i16x8.narrow_i32x4_s
     // 2x i16x8.add_saturate_s
-    // 1x i8x16.narrow_i16x8_s
-    // 1x i8x16.max_s
-    // 1x i8x16.min_s
+    // 1x i8x16.narrow_i16x8_u
+    // 1x i8x16.max_u
+    // 1x i8x16.min_u
     // ---------------------
     // 63 instructions total
 

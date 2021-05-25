@@ -532,7 +532,7 @@ union xnn_qu8_requantization_params {
     int32_t min_less_zero_point;
     int32_t max_less_zero_point;
     int32_t zero_point;
-  } q31;
+  } gemmlowp;
 };
 
 union xnn_qs8_requantization_params {
@@ -544,7 +544,7 @@ union xnn_qs8_requantization_params {
     int32_t min_less_zero_point;
     int32_t max_less_zero_point;
     int32_t zero_point;
-  } q31;
+  } gemmlowp;
 };
 
 typedef void (*xnn_ppmm_ukernel_function)(

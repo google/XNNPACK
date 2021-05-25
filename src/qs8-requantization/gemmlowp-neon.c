@@ -17,7 +17,7 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qs8_requantize_q31__neon(
+void xnn_qs8_requantize_gemmlowp__neon(
     size_t n,
     const int32_t* input,
     float scale,
