@@ -4601,14 +4601,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vrsubc-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vrsubc-relu-test f32-vrsubc-relu-test)
 
-  ADD_EXECUTABLE(qs8-dwconv-minmax-test test/qs8-dwconv-minmax.cc)
-  SET_TARGET_PROPERTIES(qs8-dwconv-minmax-test PROPERTIES
+  ADD_EXECUTABLE(qs8-dwconv-minmax-gemmlowp-test test/qs8-dwconv-minmax-gemmlowp.cc)
+  SET_TARGET_PROPERTIES(qs8-dwconv-minmax-gemmlowp-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-minmax-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(qs8-dwconv-minmax-test qs8-dwconv-minmax-test)
+  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-minmax-gemmlowp-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-gemmlowp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-dwconv-minmax-gemmlowp-test qs8-dwconv-minmax-gemmlowp-test)
 
   ADD_EXECUTABLE(qs8-gavgpool-minmax-test test/qs8-gavgpool-minmax.cc)
   SET_TARGET_PROPERTIES(qs8-gavgpool-minmax-test PROPERTIES
