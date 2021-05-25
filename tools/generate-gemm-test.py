@@ -42,7 +42,12 @@ def split_ukernel_name(name):
     kr = 1
   mr, nr = map(int, param_spec.split("x"))
   arch, isa = xnncommon.parse_target_name(target_name)
-  return mr, nr, kr, sr, xw, arch, isa
+
+  requantization = common_parts[-3]
+  if requantization not in ["gemmlowp", "fp32"]:
+    requantization = None
+
+  return mr, nr, kr, sr, xw, requantization, arch, isa
 
 
 GEMM_TEST_CODE = """\
@@ -838,7 +843,7 @@ $if DATATYPE == "qu8":
 
 
 def generate_test_cases(ukernel, mr, nr, kr, sr, xw,
-                        k_block, init_fn, is_pipelined, isa):
+                        k_block, init_fn, requantization, is_pipelined, isa):
   """Generates all tests cases for a GEMM micro-kernel.
 
   Args:
@@ -851,6 +856,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw,
     k_block: Number of K values processed per one iteration of the main loop of
              the micro-kernel.
     init_fn: C name of the function to initialize microkernel parameters.
+    requantization: name of the requantization scheme used by the microkernel.
     is_pipelined: Indicates if the micro-kernel is implemented with software
                   pipelining. Additional test cases are generated for software
                   pipelined micro-kernels to separately test prologue + epiloque
@@ -868,6 +874,11 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw,
   test_args = [ukernel]
   if init_fn:
     test_args.append(init_fn)
+    if requantization:
+      test_args += [
+        "xnn_init_qs8_requantization_%s_params" % requantization,
+        "xnn_qs8_requantize_%s" % requantization
+      ]
   return xngen.preprocess(GEMM_TEST_CODE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -926,13 +937,13 @@ def main(args):
       init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       assembly = bool(ukernel_spec.get("assembly", False))
-      mr, nr, kr, sr, xw, arch, isa = split_ukernel_name(name)
+      mr, nr, kr, sr, xw, requantization, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(
-        name, mr, nr, kr, sr, xw, k_block, init_fn, pipelined, isa)
+        name, mr, nr, kr, sr, xw, k_block, init_fn, requantization, pipelined, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
 
     with codecs.open(options.output, "w", encoding="utf-8") as output_file:

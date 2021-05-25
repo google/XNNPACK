@@ -67,15 +67,15 @@ static inline void xnn_init_qu8_requantization_gemmlowp_params(
 
 static inline uint8_t xnn_qu8_requantize_gemmlowp(
   int32_t n,
-  union xnn_qu8_requantization_params params)
+  union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)])
 {
-  const int64_t product = (int64_t) n * (int64_t) params.gemmlowp.multiplier;
+  const int64_t product = (int64_t) n * (int64_t) params->gemmlowp.multiplier;
   const int32_t q31product = (int32_t) (uint32_t) ((uint64_t) (product + INT64_C(0x40000000)) >> 31);
-  const int32_t remainder = (q31product & params.gemmlowp.remainder_mask) - (int32_t) (n < 0);
-  n = asr_s32(q31product, params.gemmlowp.shift) + (int32_t) (remainder > params.gemmlowp.remainder_threshold);
-  n = math_max_s32(n, params.gemmlowp.min_less_zero_point);
-  n = math_min_s32(n, params.gemmlowp.max_less_zero_point);
-  return (uint8_t) (n + params.gemmlowp.zero_point);
+  const int32_t remainder = (q31product & params->gemmlowp.remainder_mask) - (int32_t) (n < 0);
+  n = asr_s32(q31product, params->gemmlowp.shift) + (int32_t) (remainder > params->gemmlowp.remainder_threshold);
+  n = math_max_s32(n, params->gemmlowp.min_less_zero_point);
+  n = math_min_s32(n, params->gemmlowp.max_less_zero_point);
+  return (uint8_t) (n + params->gemmlowp.zero_point);
 }
 
 
@@ -89,7 +89,24 @@ union xnn_qs8_requantization_params {
     int32_t max_less_zero_point;
     int32_t zero_point;
   } gemmlowp;
+  struct {
+    float scale;
+    long min_less_zero_point;
+    long max_less_zero_point;
+    int32_t zero_point;
+  } fp32;
 };
+
+typedef void (*xnn_init_qs8_requantization_params_fn)(
+  union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max);
+
+typedef int8_t (*xnn_qs8_requantize_fn)(
+  int32_t n,
+  union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)]);
 
 static inline void xnn_init_qs8_requantization_gemmlowp_params(
   union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)],
@@ -126,15 +143,45 @@ static inline void xnn_init_qs8_requantization_gemmlowp_params(
 
 static inline int8_t xnn_qs8_requantize_gemmlowp(
   int32_t n,
-  union xnn_qs8_requantization_params params)
+  union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)])
 {
-  const int64_t product = (int64_t) n * (int64_t) params.gemmlowp.multiplier;
+  const int64_t product = (int64_t) n * (int64_t) params->gemmlowp.multiplier;
   const int32_t q31product = (int32_t) (uint32_t) ((uint64_t) (product + INT64_C(0x40000000)) >> 31);
-  const int32_t remainder = (q31product & params.gemmlowp.remainder_mask) - (int32_t) (n < 0);
-  n = asr_s32(q31product, params.gemmlowp.shift) + (int32_t) (remainder > params.gemmlowp.remainder_threshold);
-  n = math_max_s32(n, params.gemmlowp.min_less_zero_point);
-  n = math_min_s32(n, params.gemmlowp.max_less_zero_point);
-  return (int8_t) (n + params.gemmlowp.zero_point);
+  const int32_t remainder = (q31product & params->gemmlowp.remainder_mask) - (int32_t) (n < 0);
+  n = asr_s32(q31product, params->gemmlowp.shift) + (int32_t) (remainder > params->gemmlowp.remainder_threshold);
+  n = math_max_s32(n, params->gemmlowp.min_less_zero_point);
+  n = math_min_s32(n, params->gemmlowp.max_less_zero_point);
+  return (int8_t) (n + params->gemmlowp.zero_point);
+}
+
+static inline void xnn_init_qs8_requantization_fp32_params(
+  union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t zero_point,
+  int8_t min,
+  int8_t max)
+{
+  // Validate requantization parameters.
+  assert(scale < 1.0f);
+  assert(scale >= 0x1.0p-32f);
+
+  params->fp32.scale = scale;
+  params->fp32.min_less_zero_point = (long) ((int32_t) min - (int32_t) zero_point);
+  params->fp32.max_less_zero_point = (long) ((int32_t) max - (int32_t) zero_point);
+  params->fp32.zero_point = (int32_t) zero_point;
+}
+
+static inline int8_t xnn_qs8_requantize_fp32(
+  int32_t n,
+  union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)])
+{
+  const float scaled_n = (float) n * params->fp32.scale;
+  long rounded_n = lrintf(scaled_n);
+  rounded_n =
+    XNN_UNPREDICTABLE(rounded_n < params->fp32.min_less_zero_point) ? params->fp32.min_less_zero_point : rounded_n;
+  rounded_n =
+    XNN_UNPREDICTABLE(rounded_n > params->fp32.max_less_zero_point) ? params->fp32.max_less_zero_point : rounded_n;
+  return (int8_t) ((int32_t) rounded_n + params->fp32.zero_point);
 }
 
 inline static uint8_t xnn_qu8_requantize_precise(
