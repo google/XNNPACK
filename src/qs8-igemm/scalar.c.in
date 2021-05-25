@@ -85,7 +85,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}__scalar(
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    const int32_t vmultiplier = params->scalar.multiplier;
+    const int32_t vmultiplier = params->gemmlowp_scalar.multiplier;
     $for M in range(MR):
       $for N in range(NR):
         const int64_t vproduct${M}x${N} = (int64_t) vacc${M}x${N} * (int64_t) vmultiplier;
@@ -95,28 +95,28 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}__scalar(
       $for N in range(NR):
         const int32_t vq31product${M}x${N} = (int32_t) (uint32_t) ((uint64_t) (vproduct${M}x${N} + vq31rounding) >> 31);
 
-    const int32_t vremainder_mask = params->scalar.remainder_mask;
+    const int32_t vremainder_mask = params->gemmlowp_scalar.remainder_mask;
     $for M in range(MR):
       $for N in range(NR):
         const int32_t vremainder${M}x${N} = (vq31product${M}x${N} & vremainder_mask) - (int32_t) (vq31product${M}x${N} < 0);
 
-    const uint32_t vshift = params->scalar.shift;
-    const int32_t vremainder_threshold = params->scalar.remainder_threshold;
+    const uint32_t vshift = params->gemmlowp_scalar.shift;
+    const int32_t vremainder_threshold = params->gemmlowp_scalar.remainder_threshold;
     $for M in range(MR):
       $for N in range(NR):
         int32_t vout${M}x${N} = asr_s32(vq31product${M}x${N}, vshift) + (int32_t) (vremainder${M}x${N} > vremainder_threshold);
 
-    const int32_t vout_min = params->scalar.output_min_less_zero_point;
+    const int32_t vout_min = params->gemmlowp_scalar.output_min_less_zero_point;
     $for M in range(MR):
       $for N in range(NR):
         vout${M}x${N} = math_max_s32(vout${M}x${N}, vout_min);
 
-    const int32_t vout_max = params->scalar.output_max_less_zero_point;
+    const int32_t vout_max = params->gemmlowp_scalar.output_max_less_zero_point;
     $for M in range(MR):
       $for N in range(NR):
         vout${M}x${N} = math_min_s32(vout${M}x${N}, vout_max);
 
-    const int32_t voutput_zero_point = params->scalar.output_zero_point;
+    const int32_t voutput_zero_point = params->gemmlowp_scalar.output_zero_point;
     $for M in range(MR):
       $for N in range(NR):
         vout${M}x${N} += voutput_zero_point;

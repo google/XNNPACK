@@ -28,14 +28,14 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up1x25__scalar(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const int32_t vmultiplier = params->scalar.multiplier;
+  const int32_t vmultiplier = params->gemmlowp_scalar.multiplier;
   const int64_t vq31rounding = INT64_C(0x40000000);
-  const int32_t vremainder_mask = params->scalar.remainder_mask;
-  const uint32_t vshift = params->scalar.shift;
-  const int32_t vremainder_threshold = params->scalar.remainder_threshold;
-  const int32_t vout_min = params->scalar.output_min_less_zero_point;
-  const int32_t vout_max = params->scalar.output_max_less_zero_point;
-  const int32_t voutput_zero_point = params->scalar.output_zero_point;
+  const int32_t vremainder_mask = params->gemmlowp_scalar.remainder_mask;
+  const uint32_t vshift = params->gemmlowp_scalar.shift;
+  const int32_t vremainder_threshold = params->gemmlowp_scalar.remainder_threshold;
+  const int32_t vout_min = params->gemmlowp_scalar.output_min_less_zero_point;
+  const int32_t vout_max = params->gemmlowp_scalar.output_max_less_zero_point;
+  const int32_t voutput_zero_point = params->gemmlowp_scalar.output_zero_point;
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);

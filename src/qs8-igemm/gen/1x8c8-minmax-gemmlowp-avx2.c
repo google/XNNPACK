@@ -104,8 +104,8 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__avx2(
     const __m256i vpermute_mask = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
     __m256i vacc0x01234567 = _mm256_permutevar8x32_epi32(vacc0x02461357, vpermute_mask);
 
-    const __m256i vmultiplier = _mm256_load_si256((const __m256i*) params->avx2.multiplier);
-    const __m256i vrounding = _mm256_load_si256((const __m256i*) params->avx2.rounding);
+    const __m256i vmultiplier = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.multiplier);
+    const __m256i vrounding = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.rounding);
 
     const __m256i vacc0x11335577 = _mm256_shuffle_epi32(vacc0x01234567, _MM_SHUFFLE(3, 3, 1, 1));
 
@@ -118,24 +118,24 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__avx2(
 
     const __m256i vq31prod0x01234567 = _mm256_blend_epi16(vq31prod0x0246, vq31prod0x1357, 0xCC);
 
-    const __m256i vremainder_mask = _mm256_load_si256((const __m256i*) params->avx2.remainder_mask);
+    const __m256i vremainder_mask = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.remainder_mask);
     const __m256i vrem0x01234567 =
       _mm256_add_epi32(_mm256_and_si256(vq31prod0x01234567, vremainder_mask), _mm256_cmpgt_epi32(_mm256_setzero_si256(), vq31prod0x01234567));
 
-    const __m256i vremainder_threshold = _mm256_load_si256((const __m256i*) params->avx2.remainder_threshold);
-    const __m128i vshift = _mm_load_si128((const __m128i*) params->avx2.shift);
+    const __m256i vremainder_threshold = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.remainder_threshold);
+    const __m128i vshift = _mm_load_si128((const __m128i*) params->gemmlowp_avx2.shift);
     vacc0x01234567 =
       _mm256_sub_epi32(_mm256_sra_epi32(vq31prod0x01234567, vshift), _mm256_cmpgt_epi32(vrem0x01234567, vremainder_threshold));
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
+    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.output_zero_point);
     __m256i vacc00x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc0x01234567), voutput_zero_point);
 
     vacc00x01234567 = _mm256_permute4x64_epi64(vacc00x01234567, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256i vout = _mm256_packs_epi16(vacc00x01234567, vacc00x01234567);
 
-    vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->avx2.output_min));
-    vout = _mm256_min_epi8(vout, _mm256_load_si256((const __m256i*) params->avx2.output_max));
+    vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.output_min));
+    vout = _mm256_min_epi8(vout, _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.output_max));
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);

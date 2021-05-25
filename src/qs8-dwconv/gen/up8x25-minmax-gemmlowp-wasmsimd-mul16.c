@@ -399,8 +399,8 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x25__wasmsimd_mul16(
       const v128_t vacc45 = wasm_v32x4_shuffle(vacc4567, vsign4567, 0, 4, 1, 5);
       const v128_t vacc67 = wasm_v32x4_shuffle(vacc4567, vsign4567, 2, 6, 3, 7);
 
-      const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
-      const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
+      const v128_t vmultiplier = wasm_v128_load(params->gemmlowp_wasmsimd.multiplier);
+      const v128_t vrounding = wasm_v128_load(params->gemmlowp_wasmsimd.rounding);
       const v128_t vprod01 = wasm_i64x2_add(wasm_i64x2_mul(vacc01, vmultiplier), vrounding);
       const v128_t vprod23 = wasm_i64x2_add(wasm_i64x2_mul(vacc23, vmultiplier), vrounding);
       const v128_t vprod45 = wasm_i64x2_add(wasm_i64x2_mul(vacc45, vmultiplier), vrounding);
@@ -409,20 +409,20 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x25__wasmsimd_mul16(
       const v128_t vq31prod0123 = wasm_v32x4_shuffle(vprod01, vprod23, 1, 3, 5, 7);
       const v128_t vq31prod4567 = wasm_v32x4_shuffle(vprod45, vprod67, 1, 3, 5, 7);
 
-      const v128_t vremainder_mask = wasm_v128_load(params->wasmsimd.remainder_mask);
+      const v128_t vremainder_mask = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_mask);
       const v128_t vrem0123 = wasm_i32x4_add(wasm_v128_and(vq31prod0123, vremainder_mask), wasm_i32x4_shr(vq31prod0123, 31));
       const v128_t vrem4567 = wasm_i32x4_add(wasm_v128_and(vq31prod4567, vremainder_mask), wasm_i32x4_shr(vq31prod4567, 31));
 
-      const v128_t vthreshold = wasm_v128_load(params->wasmsimd.remainder_threshold);
-      const int32_t vshift = params->wasmsimd.shift;
+      const v128_t vthreshold = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_threshold);
+      const int32_t vshift = params->gemmlowp_wasmsimd.shift;
       vacc0123 = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod0123, vshift), wasm_i32x4_gt(vrem0123, vthreshold));
       vacc4567 = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod4567, vshift), wasm_i32x4_gt(vrem4567, vthreshold));
 
-      const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
+      const v128_t voutput_zero_point = wasm_v128_load(params->gemmlowp_wasmsimd.output_zero_point);
       v128_t vout01234567 = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc0123, vacc4567), voutput_zero_point);
 
-      const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
-      const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
+      const v128_t voutput_min = wasm_v128_load(params->gemmlowp_wasmsimd.output_min);
+      const v128_t voutput_max = wasm_v128_load(params->gemmlowp_wasmsimd.output_max);
       v128_t vout0123456701234567 = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout01234567, vout01234567), voutput_min), voutput_max);
 
       *((double*) output) = wasm_f64x2_extract_lane(vout0123456701234567, 0);
@@ -643,8 +643,8 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x25__wasmsimd_mul16(
       const v128_t vacc45 = wasm_v32x4_shuffle(vacc4567, vsign4567, 0, 4, 1, 5);
       const v128_t vacc67 = wasm_v32x4_shuffle(vacc4567, vsign4567, 2, 6, 3, 7);
 
-      const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
-      const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
+      const v128_t vmultiplier = wasm_v128_load(params->gemmlowp_wasmsimd.multiplier);
+      const v128_t vrounding = wasm_v128_load(params->gemmlowp_wasmsimd.rounding);
       const v128_t vprod01 = wasm_i64x2_add(wasm_i64x2_mul(vacc01, vmultiplier), vrounding);
       const v128_t vprod23 = wasm_i64x2_add(wasm_i64x2_mul(vacc23, vmultiplier), vrounding);
       const v128_t vprod45 = wasm_i64x2_add(wasm_i64x2_mul(vacc45, vmultiplier), vrounding);
@@ -653,20 +653,20 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x25__wasmsimd_mul16(
       const v128_t vq31prod0123 = wasm_v32x4_shuffle(vprod01, vprod23, 1, 3, 5, 7);
       const v128_t vq31prod4567 = wasm_v32x4_shuffle(vprod45, vprod67, 1, 3, 5, 7);
 
-      const v128_t vremainder_mask = wasm_v128_load(params->wasmsimd.remainder_mask);
+      const v128_t vremainder_mask = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_mask);
       const v128_t vrem0123 = wasm_i32x4_add(wasm_v128_and(vq31prod0123, vremainder_mask), wasm_i32x4_shr(vq31prod0123, 31));
       const v128_t vrem4567 = wasm_i32x4_add(wasm_v128_and(vq31prod4567, vremainder_mask), wasm_i32x4_shr(vq31prod4567, 31));
 
-      const v128_t vthreshold = wasm_v128_load(params->wasmsimd.remainder_threshold);
-      const int32_t vshift = params->wasmsimd.shift;
+      const v128_t vthreshold = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_threshold);
+      const int32_t vshift = params->gemmlowp_wasmsimd.shift;
       vacc0123 = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod0123, vshift), wasm_i32x4_gt(vrem0123, vthreshold));
       vacc4567 = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod4567, vshift), wasm_i32x4_gt(vrem4567, vthreshold));
 
-      const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
+      const v128_t voutput_zero_point = wasm_v128_load(params->gemmlowp_wasmsimd.output_zero_point);
       v128_t vout01234567 = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc0123, vacc4567), voutput_zero_point);
 
-      const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
-      const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
+      const v128_t voutput_min = wasm_v128_load(params->gemmlowp_wasmsimd.output_min);
+      const v128_t voutput_max = wasm_v128_load(params->gemmlowp_wasmsimd.output_max);
       v128_t vout0123456701234567 = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout01234567, vout01234567), voutput_min), voutput_max);
 
       if (c & 4) {

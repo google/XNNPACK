@@ -147,7 +147,7 @@ static inline void xnn_init_qu8_conv_minmax_neon_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-static inline void xnn_init_qs8_conv_minmax_scalar_params(
+static inline void xnn_init_qs8_conv_minmax_gemmlowp_scalar_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
@@ -170,17 +170,17 @@ static inline void xnn_init_qs8_conv_minmax_scalar_params(
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
 
-  params->scalar.multiplier = multiplier;
-  params->scalar.remainder_mask = (int32_t) remainder_mask;
-  params->scalar.remainder_threshold = (int32_t) remainder_threshold;
-  params->scalar.shift = (uint32_t) shift;
-  params->scalar.output_min_less_zero_point = (int32_t) output_min - (int32_t) output_zero_point;
-  params->scalar.output_max_less_zero_point = (int32_t) output_max - (int32_t) output_zero_point;
-  params->scalar.output_zero_point = (int32_t) output_zero_point;
+  params->gemmlowp_scalar.multiplier = multiplier;
+  params->gemmlowp_scalar.remainder_mask = (int32_t) remainder_mask;
+  params->gemmlowp_scalar.remainder_threshold = (int32_t) remainder_threshold;
+  params->gemmlowp_scalar.shift = (uint32_t) shift;
+  params->gemmlowp_scalar.output_min_less_zero_point = (int32_t) output_min - (int32_t) output_zero_point;
+  params->gemmlowp_scalar.output_max_less_zero_point = (int32_t) output_max - (int32_t) output_zero_point;
+  params->gemmlowp_scalar.output_zero_point = (int32_t) output_zero_point;
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-static inline void xnn_init_qs8_conv_minmax_sse2_params(
+static inline void xnn_init_qs8_conv_minmax_gemmlowp_sse2_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
@@ -202,30 +202,30 @@ static inline void xnn_init_qs8_conv_minmax_sse2_params(
 
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
-  params->sse2.multiplier[0] = multiplier;
-  params->sse2.multiplier[1] = multiplier;
-  params->sse2.multiplier[2] = multiplier;
-  params->sse2.multiplier[3] = multiplier;
-  params->sse2.rounding[0] = UINT64_C(0x40000000);
-  params->sse2.rounding[1] = UINT64_C(0x40000000);
-  params->sse2.remainder_mask[0] = (int32_t) remainder_mask;
-  params->sse2.remainder_mask[1] = (int32_t) remainder_mask;
-  params->sse2.remainder_mask[2] = (int32_t) remainder_mask;
-  params->sse2.remainder_mask[3] = (int32_t) remainder_mask;
-  params->sse2.remainder_threshold[0] = (int32_t) remainder_threshold;
-  params->sse2.remainder_threshold[1] = (int32_t) remainder_threshold;
-  params->sse2.remainder_threshold[2] = (int32_t) remainder_threshold;
-  params->sse2.remainder_threshold[3] = (int32_t) remainder_threshold;
-  params->sse2.shift[0] = (uint64_t) (uint32_t) shift;
-  params->sse2.shift[1] = (uint64_t) (uint32_t) shift;
+  params->gemmlowp_sse2.multiplier[0] = multiplier;
+  params->gemmlowp_sse2.multiplier[1] = multiplier;
+  params->gemmlowp_sse2.multiplier[2] = multiplier;
+  params->gemmlowp_sse2.multiplier[3] = multiplier;
+  params->gemmlowp_sse2.rounding[0] = UINT64_C(0x40000000);
+  params->gemmlowp_sse2.rounding[1] = UINT64_C(0x40000000);
+  params->gemmlowp_sse2.remainder_mask[0] = (int32_t) remainder_mask;
+  params->gemmlowp_sse2.remainder_mask[1] = (int32_t) remainder_mask;
+  params->gemmlowp_sse2.remainder_mask[2] = (int32_t) remainder_mask;
+  params->gemmlowp_sse2.remainder_mask[3] = (int32_t) remainder_mask;
+  params->gemmlowp_sse2.remainder_threshold[0] = (int32_t) remainder_threshold;
+  params->gemmlowp_sse2.remainder_threshold[1] = (int32_t) remainder_threshold;
+  params->gemmlowp_sse2.remainder_threshold[2] = (int32_t) remainder_threshold;
+  params->gemmlowp_sse2.remainder_threshold[3] = (int32_t) remainder_threshold;
+  params->gemmlowp_sse2.shift[0] = (uint64_t) (uint32_t) shift;
+  params->gemmlowp_sse2.shift[1] = (uint64_t) (uint32_t) shift;
   for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
-    params->sse2.output_min[i] = (int16_t) output_min;
-    params->sse2.output_max[i] = (int16_t) output_max;
+    params->gemmlowp_sse2.output_zero_point[i] = (int16_t) output_zero_point;
+    params->gemmlowp_sse2.output_min[i] = (int16_t) output_min;
+    params->gemmlowp_sse2.output_max[i] = (int16_t) output_max;
   }
 }
 
-static inline void xnn_init_qs8_conv_minmax_sse4_params(
+static inline void xnn_init_qs8_conv_minmax_gemmlowp_sse4_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
@@ -247,32 +247,32 @@ static inline void xnn_init_qs8_conv_minmax_sse4_params(
 
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
-  params->sse4.multiplier[0] = multiplier;
-  params->sse4.multiplier[1] = multiplier;
-  params->sse4.multiplier[2] = multiplier;
-  params->sse4.multiplier[3] = multiplier;
-  params->sse4.rounding[0] = UINT64_C(0x40000000);
-  params->sse4.rounding[1] = UINT64_C(0x40000000);
-  params->sse4.remainder_mask[0] = (int32_t) remainder_mask;
-  params->sse4.remainder_mask[1] = (int32_t) remainder_mask;
-  params->sse4.remainder_mask[2] = (int32_t) remainder_mask;
-  params->sse4.remainder_mask[3] = (int32_t) remainder_mask;
-  params->sse4.remainder_threshold[0] = (int32_t) remainder_threshold;
-  params->sse4.remainder_threshold[1] = (int32_t) remainder_threshold;
-  params->sse4.remainder_threshold[2] = (int32_t) remainder_threshold;
-  params->sse4.remainder_threshold[3] = (int32_t) remainder_threshold;
-  params->sse4.shift[0] = (uint64_t) (uint32_t) shift;
-  params->sse4.shift[1] = (uint64_t) (uint32_t) shift;
+  params->gemmlowp_sse4.multiplier[0] = multiplier;
+  params->gemmlowp_sse4.multiplier[1] = multiplier;
+  params->gemmlowp_sse4.multiplier[2] = multiplier;
+  params->gemmlowp_sse4.multiplier[3] = multiplier;
+  params->gemmlowp_sse4.rounding[0] = UINT64_C(0x40000000);
+  params->gemmlowp_sse4.rounding[1] = UINT64_C(0x40000000);
+  params->gemmlowp_sse4.remainder_mask[0] = (int32_t) remainder_mask;
+  params->gemmlowp_sse4.remainder_mask[1] = (int32_t) remainder_mask;
+  params->gemmlowp_sse4.remainder_mask[2] = (int32_t) remainder_mask;
+  params->gemmlowp_sse4.remainder_mask[3] = (int32_t) remainder_mask;
+  params->gemmlowp_sse4.remainder_threshold[0] = (int32_t) remainder_threshold;
+  params->gemmlowp_sse4.remainder_threshold[1] = (int32_t) remainder_threshold;
+  params->gemmlowp_sse4.remainder_threshold[2] = (int32_t) remainder_threshold;
+  params->gemmlowp_sse4.remainder_threshold[3] = (int32_t) remainder_threshold;
+  params->gemmlowp_sse4.shift[0] = (uint64_t) (uint32_t) shift;
+  params->gemmlowp_sse4.shift[1] = (uint64_t) (uint32_t) shift;
   for (uint32_t i = 0; i < 8; i++) {
-    params->sse4.output_zero_point[i] = (int16_t) output_zero_point;
+    params->gemmlowp_sse4.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 16; i++) {
-    params->sse4.output_min[i] = output_min;
-    params->sse4.output_max[i] = output_max;
+    params->gemmlowp_sse4.output_min[i] = output_min;
+    params->gemmlowp_sse4.output_max[i] = output_max;
   }
 }
 
-static inline void xnn_init_qs8_conv_minmax_avx2_params(
+static inline void xnn_init_qs8_conv_minmax_gemmlowp_avx2_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
@@ -295,32 +295,51 @@ static inline void xnn_init_qs8_conv_minmax_avx2_params(
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
   for (uint32_t i = 0; i < 8; i++) {
-    params->avx2.multiplier[i] = multiplier;
+    params->gemmlowp_avx2.multiplier[i] = multiplier;
   }
-  params->avx2.rounding[0] = UINT64_C(0x40000000);
-  params->avx2.rounding[1] = UINT64_C(0x40000000);
-  params->avx2.rounding[2] = UINT64_C(0x40000000);
-  params->avx2.rounding[3] = UINT64_C(0x40000000);
+  params->gemmlowp_avx2.rounding[0] = UINT64_C(0x40000000);
+  params->gemmlowp_avx2.rounding[1] = UINT64_C(0x40000000);
+  params->gemmlowp_avx2.rounding[2] = UINT64_C(0x40000000);
+  params->gemmlowp_avx2.rounding[3] = UINT64_C(0x40000000);
   for (uint32_t i = 0; i < 8; i++) {
-    params->avx2.remainder_mask[i] = (int32_t) remainder_mask;
-    params->avx2.remainder_threshold[i] = (int32_t) remainder_threshold;
+    params->gemmlowp_avx2.remainder_mask[i] = (int32_t) remainder_mask;
+    params->gemmlowp_avx2.remainder_threshold[i] = (int32_t) remainder_threshold;
   }
-  params->avx2.shift[0] = (uint64_t) (uint32_t) shift;
-  params->avx2.shift[1] = (uint64_t) (uint32_t) shift;
-  params->avx2.shift[2] = (uint64_t) (uint32_t) shift;
-  params->avx2.shift[3] = (uint64_t) (uint32_t) shift;
+  params->gemmlowp_avx2.shift[0] = (uint64_t) (uint32_t) shift;
+  params->gemmlowp_avx2.shift[1] = (uint64_t) (uint32_t) shift;
+  params->gemmlowp_avx2.shift[2] = (uint64_t) (uint32_t) shift;
+  params->gemmlowp_avx2.shift[3] = (uint64_t) (uint32_t) shift;
   for (uint32_t i = 0; i < 16; i++) {
-    params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
+    params->gemmlowp_avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 32; i++) {
-    params->avx2.output_min[i] = output_min;
-    params->avx2.output_max[i] = output_max;
+    params->gemmlowp_avx2.output_min[i] = output_min;
+    params->gemmlowp_avx2.output_max[i] = output_max;
+  }
+}
+
+static inline void xnn_init_qs8_conv_minmax_fp32_avx2_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->fp32_avx2.scale[i] = scale;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->fp32_avx2.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 32; i++) {
+    params->fp32_avx2.output_min[i] = output_min;
+    params->fp32_avx2.output_max[i] = output_max;
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-static inline void xnn_init_qs8_conv_minmax_neon_params(
+static inline void xnn_init_qs8_conv_minmax_gemmlowp_neon_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
@@ -340,16 +359,16 @@ static inline void xnn_init_qs8_conv_minmax_neon_params(
   assert(shift >= 0);
   assert(shift < 32);
 
-  params->neon.multiplier = multiplier;
-  params->neon.right_shift = -shift;
-  params->neon.output_zero_point = (int16_t) output_zero_point;
-  params->neon.output_min = output_min;
-  params->neon.output_max = output_max;
+  params->gemmlowp_neon.multiplier = multiplier;
+  params->gemmlowp_neon.right_shift = -shift;
+  params->gemmlowp_neon.output_zero_point = (int16_t) output_zero_point;
+  params->gemmlowp_neon.output_min = output_min;
+  params->gemmlowp_neon.output_max = output_max;
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_WASMSIMD
-static inline void xnn_init_qs8_conv_minmax_wasmsimd_params(
+static inline void xnn_init_qs8_conv_minmax_gemmlowp_wasmsimd_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
@@ -372,25 +391,25 @@ static inline void xnn_init_qs8_conv_minmax_wasmsimd_params(
   const int64_t twice_multiplier = INT64_C(2) * (int64_t) multiplier;
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
-  params->wasmsimd.multiplier[0] = twice_multiplier;
-  params->wasmsimd.multiplier[1] = twice_multiplier;
-  params->wasmsimd.rounding[0] = INT64_C(0x80000000);
-  params->wasmsimd.rounding[1] = INT64_C(0x80000000);
-  params->wasmsimd.remainder_mask[0] = (int32_t) remainder_mask;
-  params->wasmsimd.remainder_mask[1] = (int32_t) remainder_mask;
-  params->wasmsimd.remainder_mask[2] = (int32_t) remainder_mask;
-  params->wasmsimd.remainder_mask[3] = (int32_t) remainder_mask;
-  params->wasmsimd.remainder_threshold[0] = (int32_t) remainder_threshold;
-  params->wasmsimd.remainder_threshold[1] = (int32_t) remainder_threshold;
-  params->wasmsimd.remainder_threshold[2] = (int32_t) remainder_threshold;
-  params->wasmsimd.remainder_threshold[3] = (int32_t) remainder_threshold;
-  params->wasmsimd.shift = shift;
+  params->gemmlowp_wasmsimd.multiplier[0] = twice_multiplier;
+  params->gemmlowp_wasmsimd.multiplier[1] = twice_multiplier;
+  params->gemmlowp_wasmsimd.rounding[0] = INT64_C(0x80000000);
+  params->gemmlowp_wasmsimd.rounding[1] = INT64_C(0x80000000);
+  params->gemmlowp_wasmsimd.remainder_mask[0] = (int32_t) remainder_mask;
+  params->gemmlowp_wasmsimd.remainder_mask[1] = (int32_t) remainder_mask;
+  params->gemmlowp_wasmsimd.remainder_mask[2] = (int32_t) remainder_mask;
+  params->gemmlowp_wasmsimd.remainder_mask[3] = (int32_t) remainder_mask;
+  params->gemmlowp_wasmsimd.remainder_threshold[0] = (int32_t) remainder_threshold;
+  params->gemmlowp_wasmsimd.remainder_threshold[1] = (int32_t) remainder_threshold;
+  params->gemmlowp_wasmsimd.remainder_threshold[2] = (int32_t) remainder_threshold;
+  params->gemmlowp_wasmsimd.remainder_threshold[3] = (int32_t) remainder_threshold;
+  params->gemmlowp_wasmsimd.shift = shift;
   for (uint32_t i = 0; i < 8; i++) {
-    params->wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
+    params->gemmlowp_wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 16; i++) {
-    params->wasmsimd.output_min[i] = output_min;
-    params->wasmsimd.output_max[i] = output_max;
+    params->gemmlowp_wasmsimd.output_min[i] = output_min;
+    params->gemmlowp_wasmsimd.output_max[i] = output_max;
   }
 }
 #endif  // XNN_ARCH_WASMSIMD

@@ -31,14 +31,14 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx512skx_mul32(
   assert(output_width != 0);
 
   const __mmask16 vblend_mask = _cvtu32_mask16(0xAAAA);
-  const __m512i vmultiplier = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.multiplier));
-  const __m512i vrounding = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.rounding));
-  const __m512i vremainder_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.remainder_mask));
-  const __m512i vremainder_threshold = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.remainder_threshold));
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->sse2.shift);
-  const __m512i voutput_zero_point = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.output_zero_point));
-  const __m512i voutput_min = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.output_min));
-  const __m512i voutput_max = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse2.output_max));
+  const __m512i vmultiplier = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.multiplier));
+  const __m512i vrounding = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.rounding));
+  const __m512i vremainder_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.remainder_mask));
+  const __m512i vremainder_threshold = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.remainder_threshold));
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->gemmlowp_sse2.shift);
+  const __m512i voutput_zero_point = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_zero_point));
+  const __m512i voutput_min = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_min));
+  const __m512i voutput_max = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_max));
   const __m256i vpermute_mask = _mm256_set_epi32(7, 3, 5, 1, 6, 2, 4, 0);
 
   do {

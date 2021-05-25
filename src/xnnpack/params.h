@@ -291,7 +291,7 @@ union xnn_qs8_conv_minmax_params {
     int32_t output_min_less_zero_point;
     int32_t output_max_less_zero_point;
     int32_t output_zero_point;
-  } scalar;
+  } gemmlowp_scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int32_t multiplier;
@@ -299,7 +299,7 @@ union xnn_qs8_conv_minmax_params {
     int16_t output_zero_point;
     int8_t output_min;
     int8_t output_max;
-  } neon;
+  } gemmlowp_neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -311,7 +311,7 @@ union xnn_qs8_conv_minmax_params {
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int16_t output_min[8];
     XNN_ALIGN(16) int16_t output_max[8];
-  } sse2;
+  } gemmlowp_sse2;
   struct {
     XNN_ALIGN(16) uint32_t multiplier[4];
     XNN_ALIGN(16) uint64_t rounding[2];
@@ -321,7 +321,7 @@ union xnn_qs8_conv_minmax_params {
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];
     XNN_ALIGN(16) int8_t output_max[16];
-  } sse4;
+  } gemmlowp_sse4;
   struct {
     XNN_ALIGN(32) uint32_t multiplier[8];
     XNN_ALIGN(32) uint64_t rounding[4];
@@ -331,7 +331,25 @@ union xnn_qs8_conv_minmax_params {
     XNN_ALIGN(32) int16_t output_zero_point[16];
     XNN_ALIGN(32) int8_t output_min[32];
     XNN_ALIGN(32) int8_t output_max[32];
-  } avx2;
+  } gemmlowp_avx2;
+  struct {
+    XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int16_t output_min[8];
+    XNN_ALIGN(16) int16_t output_max[8];
+  } fp32_sse2;
+  struct {
+    XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int8_t output_min[16];
+    XNN_ALIGN(16) int8_t output_max[16];
+  } fp32_sse4;
+  struct {
+    XNN_ALIGN(32) float scale[8];
+    XNN_ALIGN(32) int16_t output_zero_point[16];
+    XNN_ALIGN(32) int8_t output_min[32];
+    XNN_ALIGN(32) int8_t output_max[32];
+  } fp32_avx2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {
@@ -343,7 +361,7 @@ union xnn_qs8_conv_minmax_params {
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];
     XNN_ALIGN(16) int8_t output_max[16];
-  } wasmsimd;
+  } gemmlowp_wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD
 };
 

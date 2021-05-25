@@ -150,12 +150,12 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA e
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    const int32x4_t vmultiplier = vld1q_dup_s32(&params->neon.multiplier);
+    const int32x4_t vmultiplier = vld1q_dup_s32(&params->gemmlowp_neon.multiplier);
     $for M in range(MR):
       $for N in range(0, NR, 4):
         vacc${M}x${ABC[N:N+4]} = vqrdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
 
-    const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
+    const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
     const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
     $for M in range(MR):
       $for N in range(0, NR, 4):
@@ -165,7 +165,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA e
       $for N in range(0, NR, 4):
         vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_shift);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->gemmlowp_neon.output_zero_point);
 #if XNN_ARCH_ARM64
     $for M in range(MR):
       $for N in range(0, NR, 8):
@@ -194,11 +194,11 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA e
           int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
 #endif
     $if NR == 8 and MR == 1:
-      const int8x8_t voutput_min = vld1_dup_s8(&params->neon.output_min);
-      const int8x8_t voutput_max = vld1_dup_s8(&params->neon.output_max);
+      const int8x8_t voutput_min = vld1_dup_s8(&params->gemmlowp_neon.output_min);
+      const int8x8_t voutput_max = vld1_dup_s8(&params->gemmlowp_neon.output_max);
     $else:
-      const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-      const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+      const int8x16_t voutput_min = vld1q_dup_s8(&params->gemmlowp_neon.output_min);
+      const int8x16_t voutput_max = vld1q_dup_s8(&params->gemmlowp_neon.output_max);
 
     $for M in reversed(range(MR)):
       $for N in range(0, NR, 16):

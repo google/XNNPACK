@@ -696,8 +696,8 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__avx_mul32(
 
       w = (const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 600 * sizeof(int8_t));
 
-      const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse4.multiplier);
-      const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse4.rounding);
+      const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.multiplier);
+      const __m128i vrounding = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.rounding);
 
       const __m128i vacc13 = _mm_shuffle_epi32(vacc0123, _MM_SHUFFLE(3, 3, 1, 1));
       const __m128i vprod02 = _mm_add_epi64(_mm_mul_epi32(vacc0123, vmultiplier), vrounding);
@@ -738,7 +738,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__avx_mul32(
       const __m128i vq31prodGHIJ = _mm_blend_epi16(vq31prodGI, vq31prodHJ, 0xCC);
       const __m128i vq31prodKLMN = _mm_blend_epi16(vq31prodKM, vq31prodLN, 0xCC);
 
-      const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->sse4.remainder_mask);
+      const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.remainder_mask);
       const __m128i vrem0123 =
         _mm_add_epi32(_mm_and_si128(vq31prod0123, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vq31prod0123));
       const __m128i vrem4567 =
@@ -752,8 +752,8 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__avx_mul32(
       const __m128i vremKLMN =
         _mm_add_epi32(_mm_and_si128(vq31prodKLMN, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vq31prodKLMN));
 
-      const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->sse4.remainder_threshold);
-      const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->sse4.shift);
+      const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.remainder_threshold);
+      const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->gemmlowp_sse4.shift);
       vacc0123 =
         _mm_sub_epi32(_mm_sra_epi32(vq31prod0123, vshift), _mm_cmpgt_epi32(vrem0123, vremainder_threshold));
       vacc4567 =
@@ -767,13 +767,13 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__avx_mul32(
       vaccKLMN =
         _mm_sub_epi32(_mm_sra_epi32(vq31prodKLMN, vshift), _mm_cmpgt_epi32(vremKLMN, vremainder_threshold));
 
-      const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse4.output_zero_point);
+      const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_zero_point);
       __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
       __m128i vout89ABCDEF = _mm_adds_epi16(_mm_packs_epi32(vacc89AB, vaccCDEF), voutput_zero_point);
       __m128i voutGHIJKLMN = _mm_adds_epi16(_mm_packs_epi32(vaccGHIJ, vaccKLMN), voutput_zero_point);
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse4.output_min);
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse4.output_max);
+      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_min);
+      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_max);
       __m128i vout0123456789ABCDEF = _mm_packs_epi16(vout01234567, vout89ABCDEF);
       vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
       vout0123456789ABCDEF = _mm_min_epi8(vout0123456789ABCDEF, voutput_max);
@@ -944,8 +944,8 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__avx_mul32(
         w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
         k += 4;
 
-        const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse4.multiplier);
-        const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse4.rounding);
+        const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.multiplier);
+        const __m128i vrounding = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.rounding);
 
         const __m128i vacc13 = _mm_shuffle_epi32(vacc0123, _MM_SHUFFLE(3, 3, 1, 1));
 
@@ -957,21 +957,21 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__avx_mul32(
 
         const __m128i vq31prod0123 = _mm_blend_epi16(vq31prod02, vq31prod13, 0xCC);
 
-        const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->sse4.remainder_mask);
+        const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.remainder_mask);
         const __m128i vrem0123 =
           _mm_add_epi32(_mm_and_si128(vq31prod0123, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vq31prod0123));
 
-        const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->sse4.remainder_threshold);
-        const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->sse4.shift);
+        const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.remainder_threshold);
+        const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->gemmlowp_sse4.shift);
         vacc0123 =
           _mm_sub_epi32(_mm_sra_epi32(vq31prod0123, vshift), _mm_cmpgt_epi32(vrem0123, vremainder_threshold));
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse4.output_zero_point);
+        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_zero_point);
         __m128i vout0123 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc0123), voutput_zero_point);
 
         vout0123 = _mm_packs_epi16(vout0123, vout0123);
-        vout0123 = _mm_max_epi8(vout0123, _mm_load_si128((const __m128i*) params->sse4.output_min));
-        vout0123 = _mm_min_epi8(vout0123, _mm_load_si128((const __m128i*) params->sse4.output_max));
+        vout0123 = _mm_max_epi8(vout0123, _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_min));
+        vout0123 = _mm_min_epi8(vout0123, _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_max));
 
         if XNN_LIKELY(c >= 4) {
           _mm_storeu_si32(output, vout0123);

@@ -29,16 +29,16 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__ne
   assert(channels != 0);
   assert(output_width != 0);
 
-  const int32x4_t vmultiplier = vld1q_dup_s32(&params->neon.multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
+  const int32x4_t vmultiplier = vld1q_dup_s32(&params->gemmlowp_neon.multiplier);
+  const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
   const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->gemmlowp_neon.output_zero_point);
   $if CHANNEL_TILE == 8:
-    const int8x8_t voutput_min = vld1_dup_s8(&params->neon.output_min);
-    const int8x8_t voutput_max = vld1_dup_s8(&params->neon.output_max);
+    const int8x8_t voutput_min = vld1_dup_s8(&params->gemmlowp_neon.output_min);
+    const int8x8_t voutput_max = vld1_dup_s8(&params->gemmlowp_neon.output_max);
   $else:
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-    const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+    const int8x16_t voutput_min = vld1q_dup_s8(&params->gemmlowp_neon.output_min);
+    const int8x16_t voutput_max = vld1q_dup_s8(&params->gemmlowp_neon.output_max);
   do {
     $for K in range(KERNEL_TILE):
       const int8_t* i${K} = input[${K}];

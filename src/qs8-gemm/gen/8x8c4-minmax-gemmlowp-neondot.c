@@ -195,25 +195,25 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_8x8c4__neondot(
     }
 
     // Post-accumulation work
-    const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
+    const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
     const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
 
-    const int32x4_t vproduct0x0123 = vqrdmulhq_n_s32(vacc0x0123, params->neon.multiplier);
-    const int32x4_t vproduct0x4567 = vqrdmulhq_n_s32(vacc0x4567, params->neon.multiplier);
-    const int32x4_t vproduct1x0123 = vqrdmulhq_n_s32(vacc1x0123, params->neon.multiplier);
-    const int32x4_t vproduct1x4567 = vqrdmulhq_n_s32(vacc1x4567, params->neon.multiplier);
-    const int32x4_t vproduct2x0123 = vqrdmulhq_n_s32(vacc2x0123, params->neon.multiplier);
-    const int32x4_t vproduct2x4567 = vqrdmulhq_n_s32(vacc2x4567, params->neon.multiplier);
-    const int32x4_t vproduct3x0123 = vqrdmulhq_n_s32(vacc3x0123, params->neon.multiplier);
-    const int32x4_t vproduct3x4567 = vqrdmulhq_n_s32(vacc3x4567, params->neon.multiplier);
-    const int32x4_t vproduct4x0123 = vqrdmulhq_n_s32(vacc4x0123, params->neon.multiplier);
-    const int32x4_t vproduct4x4567 = vqrdmulhq_n_s32(vacc4x4567, params->neon.multiplier);
-    const int32x4_t vproduct5x0123 = vqrdmulhq_n_s32(vacc5x0123, params->neon.multiplier);
-    const int32x4_t vproduct5x4567 = vqrdmulhq_n_s32(vacc5x4567, params->neon.multiplier);
-    const int32x4_t vproduct6x0123 = vqrdmulhq_n_s32(vacc6x0123, params->neon.multiplier);
-    const int32x4_t vproduct6x4567 = vqrdmulhq_n_s32(vacc6x4567, params->neon.multiplier);
-    const int32x4_t vproduct7x0123 = vqrdmulhq_n_s32(vacc7x0123, params->neon.multiplier);
-    const int32x4_t vproduct7x4567 = vqrdmulhq_n_s32(vacc7x4567, params->neon.multiplier);
+    const int32x4_t vproduct0x0123 = vqrdmulhq_n_s32(vacc0x0123, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct0x4567 = vqrdmulhq_n_s32(vacc0x4567, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct1x0123 = vqrdmulhq_n_s32(vacc1x0123, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct1x4567 = vqrdmulhq_n_s32(vacc1x4567, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct2x0123 = vqrdmulhq_n_s32(vacc2x0123, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct2x4567 = vqrdmulhq_n_s32(vacc2x4567, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct3x0123 = vqrdmulhq_n_s32(vacc3x0123, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct3x4567 = vqrdmulhq_n_s32(vacc3x4567, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct4x0123 = vqrdmulhq_n_s32(vacc4x0123, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct4x4567 = vqrdmulhq_n_s32(vacc4x4567, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct5x0123 = vqrdmulhq_n_s32(vacc5x0123, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct5x4567 = vqrdmulhq_n_s32(vacc5x4567, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct6x0123 = vqrdmulhq_n_s32(vacc6x0123, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct6x4567 = vqrdmulhq_n_s32(vacc6x4567, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct7x0123 = vqrdmulhq_n_s32(vacc7x0123, params->gemmlowp_neon.multiplier);
+    const int32x4_t vproduct7x4567 = vqrdmulhq_n_s32(vacc7x4567, params->gemmlowp_neon.multiplier);
 
     vacc0x0123 = vsraq_n_s32(vproduct0x0123, vbicq_s32(vacc0x0123, vzero_shift_mask), 31);
     vacc0x4567 = vsraq_n_s32(vproduct0x4567, vbicq_s32(vacc0x4567, vzero_shift_mask), 31);
@@ -249,7 +249,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_8x8c4__neondot(
     vacc7x0123 = vrshlq_s32(vacc7x0123, vright_shift);
     vacc7x4567 = vrshlq_s32(vacc7x4567, vright_shift);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->gemmlowp_neon.output_zero_point);
 #if XNN_ARCH_ARM64
     const int16x8_t vacc0x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567), voutput_zero_point);
     const int16x8_t vacc1x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc1x0123), vacc1x4567), voutput_zero_point);
@@ -279,8 +279,8 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_8x8c4__neondot(
     int8x16_t vout4x01234567_5x01234567 = vcombine_s8(vqmovn_s16(vacc4x01234567), vqmovn_s16(vacc5x01234567));
     int8x16_t vout6x01234567_7x01234567 = vcombine_s8(vqmovn_s16(vacc6x01234567), vqmovn_s16(vacc7x01234567));
 #endif
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-    const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+    const int8x16_t voutput_min = vld1q_dup_s8(&params->gemmlowp_neon.output_min);
+    const int8x16_t voutput_max = vld1q_dup_s8(&params->gemmlowp_neon.output_max);
 
     vout0x01234567_1x01234567 = vmaxq_s8(vout0x01234567_1x01234567, voutput_min);
     vout2x01234567_3x01234567 = vmaxq_s8(vout2x01234567_3x01234567, voutput_min);

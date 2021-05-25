@@ -75,7 +75,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x4__scalar(
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    const int32_t vmultiplier = params->scalar.multiplier;
+    const int32_t vmultiplier = params->gemmlowp_scalar.multiplier;
     const int64_t vproduct0x0 = (int64_t) vacc0x0 * (int64_t) vmultiplier;
     const int64_t vproduct0x1 = (int64_t) vacc0x1 * (int64_t) vmultiplier;
     const int64_t vproduct0x2 = (int64_t) vacc0x2 * (int64_t) vmultiplier;
@@ -87,32 +87,32 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x4__scalar(
     const int32_t vq31product0x2 = (int32_t) (uint32_t) ((uint64_t) (vproduct0x2 + vq31rounding) >> 31);
     const int32_t vq31product0x3 = (int32_t) (uint32_t) ((uint64_t) (vproduct0x3 + vq31rounding) >> 31);
 
-    const int32_t vremainder_mask = params->scalar.remainder_mask;
+    const int32_t vremainder_mask = params->gemmlowp_scalar.remainder_mask;
     const int32_t vremainder0x0 = (vq31product0x0 & vremainder_mask) - (int32_t) (vq31product0x0 < 0);
     const int32_t vremainder0x1 = (vq31product0x1 & vremainder_mask) - (int32_t) (vq31product0x1 < 0);
     const int32_t vremainder0x2 = (vq31product0x2 & vremainder_mask) - (int32_t) (vq31product0x2 < 0);
     const int32_t vremainder0x3 = (vq31product0x3 & vremainder_mask) - (int32_t) (vq31product0x3 < 0);
 
-    const uint32_t vshift = params->scalar.shift;
-    const int32_t vremainder_threshold = params->scalar.remainder_threshold;
+    const uint32_t vshift = params->gemmlowp_scalar.shift;
+    const int32_t vremainder_threshold = params->gemmlowp_scalar.remainder_threshold;
     int32_t vout0x0 = asr_s32(vq31product0x0, vshift) + (int32_t) (vremainder0x0 > vremainder_threshold);
     int32_t vout0x1 = asr_s32(vq31product0x1, vshift) + (int32_t) (vremainder0x1 > vremainder_threshold);
     int32_t vout0x2 = asr_s32(vq31product0x2, vshift) + (int32_t) (vremainder0x2 > vremainder_threshold);
     int32_t vout0x3 = asr_s32(vq31product0x3, vshift) + (int32_t) (vremainder0x3 > vremainder_threshold);
 
-    const int32_t vout_min = params->scalar.output_min_less_zero_point;
+    const int32_t vout_min = params->gemmlowp_scalar.output_min_less_zero_point;
     vout0x0 = math_max_s32(vout0x0, vout_min);
     vout0x1 = math_max_s32(vout0x1, vout_min);
     vout0x2 = math_max_s32(vout0x2, vout_min);
     vout0x3 = math_max_s32(vout0x3, vout_min);
 
-    const int32_t vout_max = params->scalar.output_max_less_zero_point;
+    const int32_t vout_max = params->gemmlowp_scalar.output_max_less_zero_point;
     vout0x0 = math_min_s32(vout0x0, vout_max);
     vout0x1 = math_min_s32(vout0x1, vout_max);
     vout0x2 = math_min_s32(vout0x2, vout_max);
     vout0x3 = math_min_s32(vout0x3, vout_max);
 
-    const int32_t voutput_zero_point = params->scalar.output_zero_point;
+    const int32_t voutput_zero_point = params->gemmlowp_scalar.output_zero_point;
     vout0x0 += voutput_zero_point;
     vout0x1 += voutput_zero_point;
     vout0x2 += voutput_zero_point;

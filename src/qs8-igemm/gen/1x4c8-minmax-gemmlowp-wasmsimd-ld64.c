@@ -100,8 +100,8 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x4c8__wasmsimd_ld64(
 
     const v128_t vacc0x01 = wasm_v32x4_shuffle(vacc0x0123, vsign0x0123, 0, 4, 1, 5);
 
-    const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
-    const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
+    const v128_t vmultiplier = wasm_v128_load(params->gemmlowp_wasmsimd.multiplier);
+    const v128_t vrounding = wasm_v128_load(params->gemmlowp_wasmsimd.rounding);
     const v128_t vprod0x01 = wasm_i64x2_add(wasm_i64x2_mul(vacc0x01, vmultiplier), vrounding);
     const v128_t vacc0x23 = wasm_v32x4_shuffle(vacc0x0123, vsign0x0123, 2, 6, 3, 7);
 
@@ -109,22 +109,22 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x4c8__wasmsimd_ld64(
 
     const v128_t vq31prod0x0123 = wasm_v32x4_shuffle(vprod0x01, vprod0x23, 1, 3, 5, 7);
 
-    const v128_t vremainder_mask = wasm_v128_load(params->wasmsimd.remainder_mask);
+    const v128_t vremainder_mask = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_mask);
     const v128_t vrem0x0123 = wasm_i32x4_add(wasm_v128_and(vq31prod0x0123, vremainder_mask), wasm_i32x4_lt(vq31prod0x0123, vzero));
 
-    const v128_t vthreshold = wasm_v128_load(params->wasmsimd.remainder_threshold);
-    const int32_t vshift = params->wasmsimd.shift;
+    const v128_t vthreshold = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_threshold);
+    const int32_t vshift = params->gemmlowp_wasmsimd.shift;
     vacc0x0123 = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod0x0123, vshift), wasm_i32x4_gt(vrem0x0123, vthreshold));
 
-    const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
+    const v128_t voutput_zero_point = wasm_v128_load(params->gemmlowp_wasmsimd.output_zero_point);
     v128_t vacc00x0123 = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc0x0123, vacc0x0123), voutput_zero_point);
 
     v128_t vout = wasm_i8x16_narrow_i16x8(vacc00x0123, vacc00x0123);
 
-    const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
+    const v128_t voutput_min = wasm_v128_load(params->gemmlowp_wasmsimd.output_min);
     vout = wasm_i8x16_max(vout, voutput_min);
 
-    const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
+    const v128_t voutput_max = wasm_v128_load(params->gemmlowp_wasmsimd.output_max);
     vout = wasm_i8x16_min(vout, voutput_max);
 
     if (nc >= 4) {
