@@ -293,4 +293,4 @@ tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -o src/
 tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -o src/qs8-gemm/gen/4x16c8-minmax-gemmlowp-avx512skx.c
 
 ################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/qs8-gemm-minmax.yaml --output test/qs8-gemm-minmax.cc
+tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-gemmlowp.yaml --output test/qs8-gemm-minmax-gemmlowp.cc

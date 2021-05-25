@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm(
+# void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -32,7 +32,7 @@
 # temp0  v17 v19 v21 v23
 
 
-BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm
+BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm
 
         # Clamp C pointers
         LDP     x10, x11, [sp]          // Load cn_stride, a_offset
@@ -266,7 +266,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm
 9:
         RET
 
-END_FUNCTION xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm
+END_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

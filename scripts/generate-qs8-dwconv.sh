@@ -115,4 +115,4 @@ tools/xngen src/qs8-dwconv/unipass-avx512skx-mul32.c.in -D CHANNEL_TILE=16 -D KE
 tools/xngen src/qs8-dwconv/unipass-avx512skx-mul32.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -o src/qs8-dwconv/gen/up32x25-minmax-gemmlowp-avx512skx-mul32.c
 
 ################################## Unit tests #################################
-tools/generate-dwconv-test.py --spec test/qs8-dwconv-minmax.yaml --output test/qs8-dwconv-minmax.cc
+tools/generate-dwconv-test.py --spec test/qs8-dwconv-minmax-gemmlowp.yaml --output test/qs8-dwconv-minmax-gemmlowp.cc

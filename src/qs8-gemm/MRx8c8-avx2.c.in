@@ -15,7 +15,7 @@ $assert MR <= 4
 
 
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x8c8__avx2(
+void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_gemmlowp_ukernel_${MR}x8c8__avx2(
     size_t mr,
     size_t nc,
     size_t kc,

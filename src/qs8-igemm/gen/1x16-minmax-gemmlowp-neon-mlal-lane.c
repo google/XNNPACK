@@ -15,7 +15,7 @@
 #include <xnnpack/igemm.h>
 
 
-void xnn_qs8_igemm_minmax_ukernel_1x16__neon_mlal_lane(
+void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16__neon_mlal_lane(
     size_t mr,
     size_t nc,
     size_t kc,

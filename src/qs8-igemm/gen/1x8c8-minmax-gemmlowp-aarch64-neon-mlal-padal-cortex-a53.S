@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53(
+# void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -33,7 +33,7 @@
 # x16, x17, x7 tenporary a53 gpr load data
 
 
-BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53
+BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53
 
         # Clamp C pointers
         LDP     x10, x11, [sp]          // Load cn_stride, a_offset
@@ -290,7 +290,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_corte
 9:
         RET
 
-END_FUNCTION xnn_qs8_igemm_minmax_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53
+END_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

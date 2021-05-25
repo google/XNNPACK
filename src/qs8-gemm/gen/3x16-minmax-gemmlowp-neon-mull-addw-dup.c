@@ -15,7 +15,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_qs8_gemm_minmax_ukernel_3x16__neon_mull_addw_dup(
+void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x16__neon_mull_addw_dup(
     size_t mr,
     size_t nc,
     size_t kc,

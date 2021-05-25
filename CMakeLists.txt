@@ -4619,23 +4619,23 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-gavgpool-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qs8-gavgpool-test qs8-gavgpool-minmax-test)
 
-  ADD_EXECUTABLE(qs8-gemm-minmax-test test/qs8-gemm-minmax.cc)
-  SET_TARGET_PROPERTIES(qs8-gemm-minmax-test PROPERTIES
+  ADD_EXECUTABLE(qs8-gemm-minmax-gemmlowp-test test/qs8-gemm-minmax-gemmlowp.cc)
+  SET_TARGET_PROPERTIES(qs8-gemm-minmax-gemmlowp-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(qs8-gemm-minmax-test qs8-gemm-minmax-test)
+  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-gemmlowp-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-gemmlowp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-gemm-minmax-gemmlowp-test qs8-gemm-minmax-gemmlowp-test)
 
-  ADD_EXECUTABLE(qs8-igemm-minmax-test test/qs8-igemm-minmax.cc)
-  SET_TARGET_PROPERTIES(qs8-igemm-minmax-test PROPERTIES
+  ADD_EXECUTABLE(qs8-igemm-minmax-gemmlowp-test test/qs8-igemm-minmax-gemmlowp.cc)
+  SET_TARGET_PROPERTIES(qs8-igemm-minmax-gemmlowp-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(qs8-igemm-minmax-test qs8-igemm-minmax-test)
+  TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-gemmlowp-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-gemmlowp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-igemm-minmax-gemmlowp-test qs8-igemm-minmax-gemmlowp-test)
 
   ADD_EXECUTABLE(qs8-vadd-minmax-test test/qs8-vadd-minmax.cc)
   SET_TARGET_PROPERTIES(qs8-vadd-minmax-test PROPERTIES

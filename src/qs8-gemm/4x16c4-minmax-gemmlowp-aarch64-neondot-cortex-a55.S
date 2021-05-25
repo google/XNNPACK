@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55(
+# void xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cortex_a55(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -31,7 +31,7 @@
 # C3  x7 v19 v23 v27 v31
 # unused v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
+BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -658,7 +658,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         LDP     d8,  d9, [sp], 32
         RET
 
-END_FUNCTION xnn_qs8_gemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
+END_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

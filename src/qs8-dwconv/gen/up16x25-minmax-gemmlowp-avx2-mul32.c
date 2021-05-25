@@ -14,7 +14,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_qs8_dwconv_minmax_ukernel_up16x25__avx2_mul32(
+void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -417,7 +417,7 @@ void xnn_qs8_dwconv_minmax_ukernel_up16x25__avx2_mul32(
         _mm256_add_epi32(_mm256_and_si256(vq31prod89ABCDEF, vremainder_mask), _mm256_cmpgt_epi32(_mm256_setzero_si256(), vq31prod89ABCDEF));
 
       const __m256i vremainder_threshold = _mm256_load_si256((const __m256i*) params->avx2.remainder_threshold);
-      const __m128i vshift = _mm_load_si128((const __m128i*) params->avx2.shift);
+      const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->avx2.shift);
       vacc01234567 =
         _mm256_sub_epi32(_mm256_sra_epi32(vq31prod01234567, vshift), _mm256_cmpgt_epi32(vrem01234567, vremainder_threshold));
       vacc89ABCDEF =

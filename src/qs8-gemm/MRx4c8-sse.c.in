@@ -29,7 +29,7 @@ $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
 $PARAMS_STRUCT = "sse4" if SSE >= 4 else "sse2"
 $ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
-void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__${ISA}${LOAD_SUFFIX}(
+void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_gemmlowp_ukernel_${MR}x4c8__${ISA}${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,

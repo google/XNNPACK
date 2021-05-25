@@ -14,7 +14,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_qs8_dwconv_minmax_ukernel_up16x25__neon_mul16(
+void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__neon_mul16(
     size_t channels,
     size_t output_width,
     const int8_t** input,

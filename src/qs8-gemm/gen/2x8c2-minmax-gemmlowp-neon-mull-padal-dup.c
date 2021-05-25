@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_gemm_minmax_ukernel_2x8c2__neon_mull_padal_dup(
+void xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c2__neon_mull_padal_dup(
     size_t mr,
     size_t nc,
     size_t kc,

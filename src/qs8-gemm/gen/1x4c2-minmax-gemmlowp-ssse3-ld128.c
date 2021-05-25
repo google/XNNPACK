@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_gemm_minmax_ukernel_1x4c2__ssse3_ld128(
+void xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x4c2__ssse3_ld128(
     size_t mr,
     size_t nc,
     size_t kc,

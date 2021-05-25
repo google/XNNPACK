@@ -15,7 +15,7 @@ $assert MR <= 4
 
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-void xnn_qs8_igemm${GEMM_SUFFIX}_minmax_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX}(
+void xnn_qs8_igemm${GEMM_SUFFIX}_minmax_gemmlowp_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,

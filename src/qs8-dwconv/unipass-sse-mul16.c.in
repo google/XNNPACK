@@ -17,7 +17,7 @@ $assert KERNEL_TILE >= 2
 
 $PARAMS_STRUCT = "sse4" if SSE >= 4 else "sse2"
 $ISA = "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
-void xnn_qs8_dwconv_minmax_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul16(
+void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul16(
     size_t channels,
     size_t output_width,
     const int8_t** input,

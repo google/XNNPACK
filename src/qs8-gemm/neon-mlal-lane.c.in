@@ -14,7 +14,7 @@ $assert 8 <= NR <= 16
 #include <xnnpack/gemm.h>
 
 
-void xnn_qs8_gemm_minmax_ukernel_${MR}x${NR}__neon_mlal_lane${"_prfm" if PREFETCH else ""}(
+void xnn_qs8_gemm_minmax_gemmlowp_ukernel_${MR}x${NR}__neon_mlal_lane${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
     size_t kc,

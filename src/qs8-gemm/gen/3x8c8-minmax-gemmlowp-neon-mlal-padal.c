@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_gemm_minmax_ukernel_3x8c8__neon_mlal_padal(
+void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x8c8__neon_mlal_padal(
     size_t mr,
     size_t nc,
     size_t kc,

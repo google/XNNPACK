@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55(
+# void xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cortex_a55(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -35,7 +35,7 @@
 
 # x8 temp for Cortex-A55 loads
 
-BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
+BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
@@ -692,7 +692,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
         LDR     x20, [sp], 48
         RET
 
-END_FUNCTION xnn_qs8_igemm_minmax_ukernel_4x16c4__aarch64_neondot_cortex_a55
+END_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

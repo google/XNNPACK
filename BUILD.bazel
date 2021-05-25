@@ -6895,9 +6895,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_dwconv_minmax_test",
+    name = "qs8_dwconv_minmax_gemmlowp_test",
     srcs = [
-        "test/qs8-dwconv-minmax.cc",
+        "test/qs8-dwconv-minmax-gemmlowp.cc",
         "test/dwconv-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
@@ -6915,10 +6915,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_gemm_minmax_test",
+    name = "qs8_gemm_minmax_gemmlowp_test",
     timeout = "moderate",
     srcs = [
-        "test/qs8-gemm-minmax.cc",
+        "test/qs8-gemm-minmax-gemmlowp.cc",
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
@@ -6926,10 +6926,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_igemm_minmax_test",
+    name = "qs8_igemm_minmax_gemmlowp_test",
     timeout = "moderate",
     srcs = [
-        "test/qs8-igemm-minmax.cc",
+        "test/qs8-igemm-minmax-gemmlowp.cc",
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,

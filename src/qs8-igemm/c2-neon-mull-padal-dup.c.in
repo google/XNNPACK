@@ -14,7 +14,7 @@ $assert 8 <= NR <= 16
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_igemm_minmax_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull"}_padal_dup(
+void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA else "mull"}_padal_dup(
     size_t mr,
     size_t nc,
     size_t kc,
