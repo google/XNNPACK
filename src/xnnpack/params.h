@@ -168,15 +168,9 @@ union xnn_f32_chw_params {
 
 union xnn_u8_minmax_params {
   struct {
-    int32_t min;
-    int32_t max;
-  } scalar;
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
     uint8_t min;
     uint8_t max;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+  } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) uint8_t min[16];

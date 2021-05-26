@@ -21,8 +21,8 @@ void xnn_u8_vclamp_ukernel__neon_x64(
 {
   assert(n != 0);
 
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->neon.max);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->neon.min);
+  const uint8x16_t voutput_max = vld1q_dup_u8(&params->scalar.max);
+  const uint8x16_t voutput_min = vld1q_dup_u8(&params->scalar.min);
 
   for (; n >= 64; n -= 64) {
     const uint8x16_t vx0 = vld1q_u8(x); x += 16;

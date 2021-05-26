@@ -1310,12 +1310,9 @@ static inline void xnn_init_u8_minmax_params(
       params->sse2.min[i] = output_min;
       params->sse2.max[i] = output_max;
     }
-  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-    params->neon.min = output_min;
-    params->neon.max = output_max;
   #else
-    params->scalar.min = (int32_t) (uint32_t) output_min;
-    params->scalar.max = (int32_t) (uint32_t) output_max;
+    params->scalar.min = output_min;
+    params->scalar.max = output_max;
   #endif
 }
 
