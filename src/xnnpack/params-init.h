@@ -372,6 +372,25 @@ static inline void xnn_init_qs8_conv_minmax_fp32_avx2_params(
     params->fp32_avx2.output_max[i] = output_max;
   }
 }
+
+static inline void xnn_init_qs8_conv_minmax_fp32_avx512_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  for (uint32_t i = 0; i < 16; i++) {
+    params->fp32_avx512.scale[i] = scale;
+  }
+  for (uint32_t i = 0; i < 32; i++) {
+    params->fp32_avx512.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 64; i++) {
+    params->fp32_avx512.output_min[i] = output_min;
+    params->fp32_avx512.output_max[i] = output_max;
+  }
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

@@ -360,6 +360,12 @@ union xnn_qs8_conv_minmax_params {
     XNN_ALIGN(32) int8_t output_min[32];
     XNN_ALIGN(32) int8_t output_max[32];
   } fp32_avx2;
+  struct {
+    XNN_ALIGN(64) float scale[16];
+    XNN_ALIGN(64) int16_t output_zero_point[32];
+    XNN_ALIGN(64) int8_t output_min[64];
+    XNN_ALIGN(64) int8_t output_max[64];
+  } fp32_avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {
