@@ -1224,8 +1224,8 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_gemm_6x16_gemmlowp__neon_mlal_lane_prfm);
 
 #if XNN_ENABLE_FULL_BENCHMARKS
-  BENCHMARK_QS8_END2END(qs8_gemm_minmax_gemmlowp_ukernel_1x8__neon_mull_addw_dup);
-  BENCHMARK_QS8_END2END(qs8_gemm_minmax_gemmlowp_ukernel_1x16__neon_mull_addw_dup);
+  BENCHMARK_QS8_END2END(qs8_gemm_1x8_gemmlowp__neon_mull_addw_dup);
+  BENCHMARK_QS8_END2END(qs8_gemm_1x16_gemmlowp__neon_mull_addw_dup);
 #endif  // XNN_ENABLE_FULL_BENCHMARKS
   BENCHMARK_QS8_END2END(qs8_gemm_2x8_gemmlowp__neon_mull_addw_dup);
   BENCHMARK_QS8_END2END(qs8_gemm_2x16_gemmlowp__neon_mull_addw_dup);
