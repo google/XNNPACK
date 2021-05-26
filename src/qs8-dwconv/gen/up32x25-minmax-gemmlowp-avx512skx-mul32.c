@@ -31,14 +31,14 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx512skx_mul32(
   assert(output_width != 0);
 
   const __mmask16 vblend_mask = _cvtu32_mask16(0xAAAA);
-  const __m512i vmultiplier = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.multiplier));
-  const __m512i vrounding = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.rounding));
-  const __m512i vremainder_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.remainder_mask));
-  const __m512i vremainder_threshold = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.remainder_threshold));
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->gemmlowp_sse2.shift);
-  const __m512i voutput_zero_point = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_zero_point));
-  const __m512i voutput_min = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_min));
-  const __m512i voutput_max = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_max));
+  const __m512i vmultiplier = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.multiplier));
+  const __m512i vrounding = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.rounding));
+  const __m512i vremainder_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.remainder_mask));
+  const __m512i vremainder_threshold = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.remainder_threshold));
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.shift);
+  const __m512i voutput_zero_point = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_zero_point));
+  const __m256i voutput_min = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_min));
+  const __m256i voutput_max = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_max));
   const __m256i vpermute_mask = _mm256_set_epi32(7, 3, 5, 1, 6, 2, 4, 0);
 
   do {
@@ -434,9 +434,6 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx512skx_mul32(
       __m512i vout0123GHIJ4567KLMN89ABOPQRCDEFSTUV = _mm512_adds_epi16(_mm512_packs_epi32(vacc0123456789ABCDEF, vaccGHIJKLMNOPQRSTUV), voutput_zero_point);
       __m256i voutGHIJOPQRKLMNSTUV = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vaccGHIJKLMNOPQRSTUV), _mm512_extracti32x8_epi32(vaccGHIJKLMNOPQRSTUV, 1)), _mm512_castsi512_si256(voutput_zero_point));
 
-      vout0123GHIJ4567KLMN89ABOPQRCDEFSTUV = _mm512_min_epi16(_mm512_max_epi16(vout0123GHIJ4567KLMN89ABOPQRCDEFSTUV, voutput_min), voutput_max);
-      voutGHIJOPQRKLMNSTUV = _mm256_min_epi16(_mm256_max_epi16(voutGHIJOPQRKLMNSTUV, _mm512_castsi512_si256(voutput_min)), _mm512_castsi512_si256(voutput_max));
-
       const __m256i vout0123GHIJ4567KLMN = _mm512_castsi512_si256(vout0123GHIJ4567KLMN89ABOPQRCDEFSTUV);
       const __m256i vout89ABOPQRCDEFSTUV = _mm512_extracti32x8_epi32(vout0123GHIJ4567KLMN89ABOPQRCDEFSTUV, 1);
       const __m256i vout0123GHIJ89ABOPQR4567KLMNCDEFSTUV = _mm256_packs_epi16(vout0123GHIJ4567KLMN, vout89ABOPQRCDEFSTUV);
@@ -444,6 +441,11 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx512skx_mul32(
       const __m128i voutGHIJOPQR = _mm256_castsi256_si128(voutGHIJOPQRKLMNSTUV);
       const __m128i voutKLMNSTUV = _mm256_extracti128_si256(voutGHIJOPQRKLMNSTUV, 1);
       __m128i voutGHIJKLMNOPQRSTUV = _mm_shuffle_epi32(_mm_packs_epi16(voutGHIJOPQR, voutKLMNSTUV), _MM_SHUFFLE(3, 1, 2, 0));
+
+      vout0123456789ABCDEFGHIJKLMNOPQRSTUV = _mm256_max_epi8(vout0123456789ABCDEFGHIJKLMNOPQRSTUV, voutput_min);
+      vout0123456789ABCDEFGHIJKLMNOPQRSTUV = _mm256_min_epi8(vout0123456789ABCDEFGHIJKLMNOPQRSTUV, voutput_max);
+      voutGHIJKLMNOPQRSTUV = _mm_max_epi8(voutGHIJKLMNOPQRSTUV, _mm256_castsi256_si128(voutput_min));
+      voutGHIJKLMNOPQRSTUV = _mm_min_epi8(voutGHIJKLMNOPQRSTUV, _mm256_castsi256_si128(voutput_max));
 
       _mm256_storeu_si256((__m256i*) output, vout0123456789ABCDEFGHIJKLMNOPQRSTUV);
       _mm_storeu_si128((__m128i*) (output + 16), voutGHIJKLMNOPQRSTUV);
@@ -627,11 +629,11 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx512skx_mul32(
 
         __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0123456789ABCDEF, 1)), _mm512_castsi512_si256(voutput_zero_point));
 
-        vout012389AB4567CDEF = _mm256_min_epi16(_mm256_max_epi16(vout012389AB4567CDEF, _mm512_castsi512_si256(voutput_min)), _mm512_castsi512_si256(voutput_max));
-
         const __m128i vout012389AB = _mm256_castsi256_si128(vout012389AB4567CDEF);
         const __m128i vout4567CDEF = _mm256_extracti128_si256(vout012389AB4567CDEF, 1);
         __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packs_epi16(vout012389AB, vout4567CDEF), _MM_SHUFFLE(3, 1, 2, 0));
+        vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, _mm256_castsi256_si128(voutput_min));
+        vout0123456789ABCDEF = _mm_min_epi8(vout0123456789ABCDEF, _mm256_castsi256_si128(voutput_max));
 
         if XNN_LIKELY(c >= 16) {
           _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
