@@ -333,6 +333,16 @@ union xnn_qs8_conv_minmax_params {
     XNN_ALIGN(32) int8_t output_max[32];
   } gemmlowp_avx2;
   struct {
+    int64_t multiplier;
+    uint64_t rounding;
+    int32_t remainder_mask;
+    int32_t remainder_threshold;
+    uint64_t shift;
+    XNN_ALIGN(64) int16_t output_zero_point[32];
+    XNN_ALIGN(64) int8_t output_min[64];
+    XNN_ALIGN(64) int8_t output_max[64];
+  } gemmlowp_avx512;
+  struct {
     XNN_ALIGN(16) float scale[4];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int16_t output_min[8];

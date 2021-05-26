@@ -31,14 +31,14 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx512skx_mul32(
   assert(output_width != 0);
 
   const __mmask16 vblend_mask = _cvtu32_mask16(0xAAAA);
-  const __m512i vmultiplier = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.multiplier));
-  const __m512i vrounding = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.rounding));
-  const __m512i vremainder_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.remainder_mask));
-  const __m512i vremainder_threshold = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.remainder_threshold));
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.shift);
-  const __m256i voutput_zero_point = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_zero_point));
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_max);
+  const __m512i vmultiplier = _mm512_set1_epi64(params->gemmlowp_avx512.multiplier);
+  const __m512i vrounding = _mm512_set1_epi64(params->gemmlowp_avx512.rounding);
+  const __m512i vremainder_mask = _mm512_set1_epi32(params->gemmlowp_avx512.remainder_mask);
+  const __m512i vremainder_threshold = _mm512_set1_epi32(params->gemmlowp_avx512.remainder_threshold);
+  const __m128i vshift = _mm_loadl_epi64((const __m128i*) &params->gemmlowp_avx512.shift);
+  const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->gemmlowp_avx512.output_zero_point);
+  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->gemmlowp_avx512.output_min);
+  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->gemmlowp_avx512.output_max);
 
   do {
     const int8_t* i0 = input[0];

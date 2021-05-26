@@ -55,14 +55,14 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x16c8__avx512skx(
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
   const __mmask16 vblend_mask = _cvtu32_mask16(0xAAAA);
-  const __m512i vmultiplier = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.multiplier));
-  const __m512i vrounding = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.rounding));
-  const __m512i vremainder_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.remainder_mask));
-  const __m512i vremainder_threshold = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.remainder_threshold));
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.shift);
-  const __m512i voutput_zero_point = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_zero_point));
-  const __m512i voutput_min = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_min));
-  const __m512i voutput_max = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_max));
+  const __m512i vmultiplier = _mm512_set1_epi64(params->gemmlowp_avx512.multiplier);
+  const __m512i vrounding = _mm512_set1_epi64(params->gemmlowp_avx512.rounding);
+  const __m512i vremainder_mask = _mm512_set1_epi32(params->gemmlowp_avx512.remainder_mask);
+  const __m512i vremainder_threshold = _mm512_set1_epi32(params->gemmlowp_avx512.remainder_threshold);
+  const __m128i vshift = _mm_loadl_epi64((const __m128i*) &params->gemmlowp_avx512.shift);
+  const __m512i voutput_zero_point = _mm512_load_si512(params->gemmlowp_avx512.output_zero_point);
+  const __m512i voutput_min = _mm512_load_si512(params->gemmlowp_avx512.output_min);
+  const __m512i voutput_max = _mm512_load_si512(params->gemmlowp_avx512.output_max);
   do {
     __m512i vacc0x0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
     __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((uintptr_t) w + 4 * sizeof(int32_t)));

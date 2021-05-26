@@ -65,9 +65,9 @@
 - name: xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul32
   init: xnn_init_qs8_conv_minmax_gemmlowp_avx2_params
 - name: xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx512skx_mul32
-  init: xnn_init_qs8_conv_minmax_gemmlowp_sse4_params
+  init: xnn_init_qs8_conv_minmax_gemmlowp_avx512_params
 - name: xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx512skx_mul32
-  init: xnn_init_qs8_conv_minmax_gemmlowp_sse4_params
+  init: xnn_init_qs8_conv_minmax_gemmlowp_avx512_params
 - name: xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x9__wasmsimd_mul16
   init: xnn_init_qs8_conv_minmax_gemmlowp_wasmsimd_params
 - name: xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__wasmsimd_mul16
@@ -143,9 +143,9 @@
 - name: xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul32
   init: xnn_init_qs8_conv_minmax_gemmlowp_avx2_params
 - name: xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx512skx_mul32
-  init: xnn_init_qs8_conv_minmax_gemmlowp_sse4_params
+  init: xnn_init_qs8_conv_minmax_gemmlowp_avx512_params
 - name: xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx512skx_mul32
-  init: xnn_init_qs8_conv_minmax_gemmlowp_sse4_params
+  init: xnn_init_qs8_conv_minmax_gemmlowp_avx512_params
 - name: xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x25__wasmsimd_mul16
   init: xnn_init_qs8_conv_minmax_gemmlowp_wasmsimd_params
 - name: xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__wasmsimd_mul16
