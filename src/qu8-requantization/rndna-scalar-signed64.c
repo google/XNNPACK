@@ -16,7 +16,7 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qu8_requantize_precise__scalar_signed64(
+void xnn_qu8_requantize_rndna__scalar_signed64(
     size_t n,
     const int32_t* input,
     float scale,

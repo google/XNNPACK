@@ -90,9 +90,9 @@ class Requantization : public benchmark::Fixture {
     }
   }
 
-  BENCHMARK_F(Requantization, precise__neon)(benchmark::State& state) {
+  BENCHMARK_F(Requantization, rndna__neon)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_qs8_requantize_precise__neon(
+      xnn_qs8_requantize_rndna__neon(
           n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
     }
   }
@@ -135,23 +135,23 @@ class Requantization : public benchmark::Fixture {
     }
   }
 
-  BENCHMARK_F(Requantization, precise__sse2)(benchmark::State& state) {
+  BENCHMARK_F(Requantization, rndna__sse2)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_qs8_requantize_precise__sse2(
+      xnn_qs8_requantize_rndna__sse2(
           n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
     }
   }
 
-  BENCHMARK_F(Requantization, precise__ssse3)(benchmark::State& state) {
+  BENCHMARK_F(Requantization, rndna__ssse3)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_qs8_requantize_precise__ssse3(
+      xnn_qs8_requantize_rndna__ssse3(
           n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
     }
   }
 
-  BENCHMARK_F(Requantization, precise__sse4)(benchmark::State& state) {
+  BENCHMARK_F(Requantization, rndna__sse4)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_qs8_requantize_precise__sse4(
+      xnn_qs8_requantize_rndna__sse4(
           n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
     }
   }
@@ -196,23 +196,23 @@ BENCHMARK_F(Requantization, gemmlowp__scalar)(benchmark::State& state) {
   }
 }
 
-BENCHMARK_F(Requantization, precise__scalar_signed64)(benchmark::State& state) {
+BENCHMARK_F(Requantization, rndna__scalar_signed64)(benchmark::State& state) {
   for (auto _ : state) {
-    xnn_qs8_requantize_precise__scalar_signed64(
+    xnn_qs8_requantize_rndna__scalar_signed64(
         n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
   }
 }
 
-BENCHMARK_F(Requantization, precise__scalar_unsigned32)(benchmark::State& state) {
+BENCHMARK_F(Requantization, rndna__scalar_unsigned32)(benchmark::State& state) {
   for (auto _ : state) {
-    xnn_qs8_requantize_precise__scalar_unsigned32(
+    xnn_qs8_requantize_rndna__scalar_unsigned32(
         n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
   }
 }
 
-BENCHMARK_F(Requantization, precise__scalar_unsigned64)(benchmark::State& state) {
+BENCHMARK_F(Requantization, rndna__scalar_unsigned64)(benchmark::State& state) {
   for (auto _ : state) {
-    xnn_qs8_requantize_precise__scalar_unsigned64(
+    xnn_qs8_requantize_rndna__scalar_unsigned64(
         n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
   }
 }

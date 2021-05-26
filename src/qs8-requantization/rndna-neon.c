@@ -17,14 +17,14 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qu8_requantize_precise__neon(
+void xnn_qs8_requantize_rndna__neon(
     size_t n,
     const int32_t* input,
     float scale,
-    uint8_t zero_point,
-    uint8_t qmin,
-    uint8_t qmax,
-    uint8_t* output)
+    int8_t zero_point,
+    int8_t qmin,
+    int8_t qmax,
+    int8_t* output)
 {
   assert(n % 16 == 0);
   assert(scale < 1.0f);
@@ -41,10 +41,10 @@ void xnn_qu8_requantize_precise__neon(
 #else
   const int32x2_t vmultiplier = vdup_n_s32(multiplier);
 #endif
-  const int16x8_t vzero_point = vdupq_n_s16((int16_t)(uint16_t) zero_point);
+  const int16x8_t vzero_point = vdupq_n_s16((int16_t) zero_point);
   const int64x2_t vshift = vdupq_n_s64(-shift);
-  const uint8x16_t vqmin = vdupq_n_u8(qmin);
-  const uint8x16_t vqmax = vdupq_n_u8(qmax);
+  const int8x16_t vqmin = vdupq_n_s8(qmin);
+  const int8x16_t vqmax = vdupq_n_s8(qmax);
   for (; n != 0; n -= 16) {
     const int32x4_t x = vld1q_s32(input);
     const int32x4_t y = vld1q_s32(input + 4);
@@ -114,7 +114,7 @@ void xnn_qu8_requantize_precise__neon(
 
     const int16x8_t xy_packed = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(x_scaled), y_scaled), vzero_point);
     const int16x8_t zw_packed = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(z_scaled), w_scaled), vzero_point);
-    const uint8x16_t xyzw_packed = vqmovun_high_s16(vqmovun_s16(xy_packed), zw_packed);
+    const int8x16_t xyzw_packed = vqmovn_high_s16(vqmovn_s16(xy_packed), zw_packed);
 #else
     const int32x4_t x_scaled = vcombine_s32(vmovn_s64(x01_scaled), vmovn_s64(x23_scaled));
     const int32x4_t y_scaled = vcombine_s32(vmovn_s64(y01_scaled), vmovn_s64(y23_scaled));
@@ -123,10 +123,10 @@ void xnn_qu8_requantize_precise__neon(
 
     const int16x8_t xy_packed = vqaddq_s16(vcombine_s16(vqmovn_s32(x_scaled), vqmovn_s32(y_scaled)), vzero_point);
     const int16x8_t zw_packed = vqaddq_s16(vcombine_s16(vqmovn_s32(z_scaled), vqmovn_s32(w_scaled)), vzero_point);
-    const uint8x16_t xyzw_packed = vcombine_u8(vqmovun_s16(xy_packed), vqmovun_s16(zw_packed));
+    const int8x16_t xyzw_packed = vcombine_s8(vqmovn_s16(xy_packed), vqmovn_s16(zw_packed));
 #endif
 
-    const uint8x16_t xyzw_clamped = vmaxq_u8(vminq_u8(xyzw_packed, vqmax), vqmin);
+    const int8x16_t xyzw_clamped = vmaxq_s8(vminq_s8(xyzw_packed, vqmax), vqmin);
 
     // AArch32 version:
     //   4x VCLT.S32 Qd, Qm, #0
@@ -153,14 +153,14 @@ void xnn_qu8_requantize_precise__neon(
     //   2x SQXTN Vd.4H, Vn.4S
     //   2x SQXTN2 Vd.8H, Vn.4S
     //   2x ADD Vd.8H, Vn.8H, Vm.8H
-    //   1x SQXTUN Vd.8B, Vn.8H
-    //   1x SQXTUN2 Vd.16B, Vn.8H
-    //   1x UMIN Vd.16B, Vn.16B, Vm.16B
-    //   1x UMAX Vd.16B, Vn.16B, Vm.16B
+    //   1x SQXTN Vd.8B, Vn.8H
+    //   1x SQXTN2 Vd.16B, Vn.8H
+    //   1x SMIN Vd.16B, Vn.16B, Vm.16B
+    //   1x SMAX Vd.16B, Vn.16B, Vm.16B
     // ---------------------
     // 42 instructions total
 
-    vst1q_u8(output, xyzw_clamped);
+    vst1q_s8(output, xyzw_clamped);
     output += 16;
   }
 }

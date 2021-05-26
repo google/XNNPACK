@@ -16,14 +16,14 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qs8_requantize_precise__scalar_unsigned32(
+void xnn_qu8_requantize_rndna__scalar_unsigned32(
     size_t n,
     const int32_t* input,
     float scale,
-    int8_t zero_point,
-    int8_t qmin,
-    int8_t qmax,
-    int8_t* output)
+    uint8_t zero_point,
+    uint8_t qmin,
+    uint8_t qmax,
+    uint8_t* output)
 {
   assert(n % 4 == 0);
   assert(scale < 1.0f);
@@ -39,8 +39,8 @@ void xnn_qs8_requantize_precise__scalar_unsigned32(
   const uint32_t rounding_hi = (uint32_t)(rounding >> 32);
   const uint32_t rounding_lo = (uint32_t) rounding;
   const uint32_t shift_minus_32 = shift - 32;
-  const int32_t smin = (int32_t) qmin - (int32_t) zero_point;
-  const int32_t smax = (int32_t) qmax - (int32_t) zero_point;
+  const int32_t smin = (int32_t)(uint32_t) qmin - (int32_t)(uint32_t) zero_point;
+  const int32_t smax = (int32_t)(uint32_t) qmax - (int32_t)(uint32_t) zero_point;
   for (; n != 0; n -= 4) {
     const int32_t x = input[0];
     const int32_t y = input[1];
@@ -84,26 +84,26 @@ void xnn_qs8_requantize_precise__scalar_unsigned32(
     // To avoid full 64-bit shift, we leverage the fact that shift >= 32, and do it in two steps:
     // - Shift by 32, which can be implemented by extacting the high 32-bit word on 32-bit systems.
     // - Shift by (shift - 32), which can be implemented as a 32-bit shift of high word of addition result.
-    const uint32_t x_carry_lo = (uint32_t) ((int32_t) ((uint32_t) x_product & rounding_lo) < 0);
-    const uint32_t y_carry_lo = (uint32_t) ((int32_t) ((uint32_t) y_product & rounding_lo) < 0);
-    const uint32_t z_carry_lo = (uint32_t) ((int32_t) ((uint32_t) z_product & rounding_lo) < 0);
-    const uint32_t w_carry_lo = (uint32_t) ((int32_t) ((uint32_t) w_product & rounding_lo) < 0);
+    const uint32_t x_carry_lo = (uint32_t)((int32_t)((uint32_t) x_product & rounding_lo) < 0);
+    const uint32_t y_carry_lo = (uint32_t)((int32_t)((uint32_t) y_product & rounding_lo) < 0);
+    const uint32_t z_carry_lo = (uint32_t)((int32_t)((uint32_t) z_product & rounding_lo) < 0);
+    const uint32_t w_carry_lo = (uint32_t)((int32_t)((uint32_t) w_product & rounding_lo) < 0);
 
-    const uint32_t x_product_hi = (uint32_t) (x_product >> 32);
-    const uint32_t y_product_hi = (uint32_t) (y_product >> 32);
-    const uint32_t z_product_hi = (uint32_t) (z_product >> 32);
-    const uint32_t w_product_hi = (uint32_t) (w_product >> 32);
+    const uint32_t x_product_hi = (uint32_t)(x_product >> 32);
+    const uint32_t y_product_hi = (uint32_t)(y_product >> 32);
+    const uint32_t z_product_hi = (uint32_t)(z_product >> 32);
+    const uint32_t w_product_hi = (uint32_t)(w_product >> 32);
 
-    const uint32_t x_abs_scaled = (uint32_t) (x_product_hi + rounding_hi + x_carry_lo) >> shift_minus_32;
-    const uint32_t y_abs_scaled = (uint32_t) (y_product_hi + rounding_hi + y_carry_lo) >> shift_minus_32;
-    const uint32_t z_abs_scaled = (uint32_t) (z_product_hi + rounding_hi + z_carry_lo) >> shift_minus_32;
-    const uint32_t w_abs_scaled = (uint32_t) (w_product_hi + rounding_hi + w_carry_lo) >> shift_minus_32;
+    const uint32_t x_abs_scaled = (uint32_t)(x_product_hi + rounding_hi + x_carry_lo) >> shift_minus_32;
+    const uint32_t y_abs_scaled = (uint32_t)(y_product_hi + rounding_hi + y_carry_lo) >> shift_minus_32;
+    const uint32_t z_abs_scaled = (uint32_t)(z_product_hi + rounding_hi + z_carry_lo) >> shift_minus_32;
+    const uint32_t w_abs_scaled = (uint32_t)(w_product_hi + rounding_hi + w_carry_lo) >> shift_minus_32;
 
     // Copy the sign of input to scaled absolute input value.
-    const int32_t x_scaled = (int32_t) (x >= 0 ? x_abs_scaled : -x_abs_scaled);
-    const int32_t y_scaled = (int32_t) (y >= 0 ? y_abs_scaled : -y_abs_scaled);
-    const int32_t z_scaled = (int32_t) (z >= 0 ? z_abs_scaled : -z_abs_scaled);
-    const int32_t w_scaled = (int32_t) (w >= 0 ? w_abs_scaled : -w_abs_scaled);
+    const int32_t x_scaled = (int32_t)(x >= 0 ? x_abs_scaled : -x_abs_scaled);
+    const int32_t y_scaled = (int32_t)(y >= 0 ? y_abs_scaled : -y_abs_scaled);
+    const int32_t z_scaled = (int32_t)(z >= 0 ? z_abs_scaled : -z_abs_scaled);
+    const int32_t w_scaled = (int32_t)(w >= 0 ? w_abs_scaled : -w_abs_scaled);
 
     // Clamp scaled value with zero point between (qmin - zero point) and (qmax - zero point).
     const int32_t x_clamped = x_scaled < smin ? smin : x_scaled > smax ? smax : x_scaled;
@@ -121,10 +121,10 @@ void xnn_qs8_requantize_precise__scalar_unsigned32(
     const int32_t z_biased = z_clamped + zero_point;
     const int32_t w_biased = w_clamped + zero_point;
 
-    output[0] = (int8_t) x_biased;
-    output[1] = (int8_t) y_biased;
-    output[2] = (int8_t) z_biased;
-    output[3] = (int8_t) w_biased;
+    output[0] = (uint8_t) x_biased;
+    output[1] = (uint8_t) y_biased;
+    output[2] = (uint8_t) z_biased;
+    output[3] = (uint8_t) w_biased;
     output += 4;
   }
 }

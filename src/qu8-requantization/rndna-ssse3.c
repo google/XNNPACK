@@ -10,21 +10,21 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <emmintrin.h>
+#include <tmmintrin.h>
 
 #include <fp16/bitcasts.h>
 
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qs8_requantize_precise__sse2(
+void xnn_qu8_requantize_rndna__ssse3(
     size_t n,
     const int32_t* input,
     float scale,
-    int8_t zero_point,
-    int8_t qmin,
-    int8_t qmax,
-    int8_t* output)
+    uint8_t zero_point,
+    uint8_t qmin,
+    uint8_t qmax,
+    uint8_t* output)
 {
   assert(n % 16 == 0);
   assert(scale < 1.0f);
@@ -38,9 +38,9 @@ void xnn_qs8_requantize_precise__sse2(
   const uint64_t rounding = UINT64_C(1) << (shift - 1);
 
   const __m128i vmultiplier = _mm_set1_epi32(multiplier);
-  const __m128i vzero_point = _mm_set1_epi16((short) zero_point);
-  const __m128i vqmin = _mm_set1_epi8((short) qmin);
-  const __m128i vqmax = _mm_set1_epi8((short) qmax);
+  const __m128i vzero_point = _mm_set1_epi16((short) (uint16_t) zero_point);
+  const __m128i vqmin = _mm_set1_epi8((char) qmin);
+  const __m128i vqmax = _mm_set1_epi8((char) qmax);
   const __m128i vshift = _mm_cvtsi32_si128((int) shift);
   const __m128i vrounding = _mm_set1_epi64x(rounding);
   for (; n != 0; n -= 16) {
@@ -50,15 +50,10 @@ void xnn_qs8_requantize_precise__sse2(
     const __m128i w = _mm_loadu_si128((const __m128i*) (input + 12));
     input += 16;
 
-    const __m128i x_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), x);
-    const __m128i y_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), y);
-    const __m128i z_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), z);
-    const __m128i w_neg_mask = _mm_cmpgt_epi32(_mm_setzero_si128(), w);
-
-    const __m128i x_abs0123 = _mm_sub_epi32(_mm_xor_si128(x, x_neg_mask), x_neg_mask);
-    const __m128i y_abs0123 = _mm_sub_epi32(_mm_xor_si128(y, y_neg_mask), y_neg_mask);
-    const __m128i z_abs0123 = _mm_sub_epi32(_mm_xor_si128(z, z_neg_mask), z_neg_mask);
-    const __m128i w_abs0123 = _mm_sub_epi32(_mm_xor_si128(w, w_neg_mask), w_neg_mask);
+    const __m128i x_abs0123 = _mm_abs_epi32(x);
+    const __m128i y_abs0123 = _mm_abs_epi32(y);
+    const __m128i z_abs0123 = _mm_abs_epi32(z);
+    const __m128i w_abs0123 = _mm_abs_epi32(w);
 
     const __m128i x_abs1032 = _mm_shuffle_epi32(x_abs0123, _MM_SHUFFLE(2, 3, 0, 1));
     const __m128i y_abs1032 = _mm_shuffle_epi32(y_abs0123, _MM_SHUFFLE(2, 3, 0, 1));
@@ -98,32 +93,30 @@ void xnn_qs8_requantize_precise__sse2(
     const __m128i z_abs_scaled = _mm_shuffle_epi32(z_abs_scaled0213, _MM_SHUFFLE(3, 1, 2, 0));
     const __m128i w_abs_scaled = _mm_shuffle_epi32(w_abs_scaled0213, _MM_SHUFFLE(3, 1, 2, 0));
 
-    const __m128i x_scaled = _mm_sub_epi32(_mm_xor_si128(x_abs_scaled, x_neg_mask), x_neg_mask);
-    const __m128i y_scaled = _mm_sub_epi32(_mm_xor_si128(y_abs_scaled, y_neg_mask), y_neg_mask);
-    const __m128i z_scaled = _mm_sub_epi32(_mm_xor_si128(z_abs_scaled, z_neg_mask), z_neg_mask);
-    const __m128i w_scaled = _mm_sub_epi32(_mm_xor_si128(w_abs_scaled, w_neg_mask), w_neg_mask);
+    const __m128i x_scaled = _mm_sign_epi32(x_abs_scaled, x);
+    const __m128i y_scaled = _mm_sign_epi32(y_abs_scaled, y);
+    const __m128i z_scaled = _mm_sign_epi32(z_abs_scaled, z);
+    const __m128i w_scaled = _mm_sign_epi32(w_abs_scaled, w);
 
     const __m128i xy_packed = _mm_adds_epi16(_mm_packs_epi32(x_scaled, y_scaled), vzero_point);
     const __m128i zw_packed = _mm_adds_epi16(_mm_packs_epi32(z_scaled, w_scaled), vzero_point);
-    const __m128i xy_clamped = _mm_max_epi16(_mm_min_epi16(xy_packed, vqmax), vqmin);
-    const __m128i zw_clamped = _mm_max_epi16(_mm_min_epi16(zw_packed, vqmax), vqmin);
-    const __m128i xyzw_clamped = _mm_packs_epi16(xy_clamped, zw_clamped);
+    const __m128i xyzw_packed = _mm_packus_epi16(xy_packed, zw_packed);
+    const __m128i xyzw_clamped = _mm_max_epu8(_mm_min_epu8(xyzw_packed, vqmax), vqmin);
 
-    // 4x PXOR (setzero)
-    // 8x PSUBD
-    // 8x PXOR
+    // 4x PABSD
     // 8x PSHUFD
     // 8x PMULUDQ
     // 8x PSRLQ
     // 8x PADDQ
     // 4x SHUFPS
+    // 4x PSIGND
     // 2x PACKSSDW
-    // 2x PADDSW
-    // 2x PMAXSW
-    // 2x PMINSW
-    // 1x PACKSSWB
+    // 1x PACKUSWB
+    // 2x PADDW
+    // 1x PMAXUB
+    // 1x PMINUB
     // ---------------------
-    // 63 instructions total
+    // 51 instructions total
 
     _mm_storeu_si128((__m128i*) output, xyzw_clamped);
     output += 16;

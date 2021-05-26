@@ -649,9 +649,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/qs8-requantization/fp32-scalar-lrintf.c
   src/qs8-requantization/fp32-scalar-magic.c
   src/qs8-requantization/gemmlowp-scalar.c
-  src/qs8-requantization/precise-scalar-signed64.c
-  src/qs8-requantization/precise-scalar-unsigned32.c
-  src/qs8-requantization/precise-scalar-unsigned64.c
+  src/qs8-requantization/rndna-scalar-signed64.c
+  src/qs8-requantization/rndna-scalar-unsigned32.c
+  src/qs8-requantization/rndna-scalar-unsigned64.c
   src/qs8-vadd/gen/minmax-scalar-x1.c
   src/qs8-vadd/gen/minmax-scalar-x2.c
   src/qs8-vadd/gen/minmax-scalar-x4.c
@@ -668,9 +668,9 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/qu8-requantization/fp32-scalar-lrintf.c
   src/qu8-requantization/fp32-scalar-magic.c
   src/qu8-requantization/gemmlowp-scalar.c
-  src/qu8-requantization/precise-scalar-signed64.c
-  src/qu8-requantization/precise-scalar-unsigned32.c
-  src/qu8-requantization/precise-scalar-unsigned64.c
+  src/qu8-requantization/rndna-scalar-signed64.c
+  src/qu8-requantization/rndna-scalar-unsigned32.c
+  src/qu8-requantization/rndna-scalar-unsigned64.c
   src/qu8-vadd/minmax-scalar.c
   src/u8-lut32norm/scalar.c
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
@@ -1120,7 +1120,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/6x16-minmax-gemmlowp-neon-mlal-lane.c
   src/qs8-requantization/fp32-neon.c
   src/qs8-requantization/gemmlowp-neon.c
-  src/qs8-requantization/precise-neon.c
+  src/qs8-requantization/rndna-neon.c
   src/qs8-vadd/gen/minmax-neon-ld64-x8.c
   src/qs8-vadd/gen/minmax-neon-ld64-x16.c
   src/qs8-vadd/gen/minmax-neon-ld64-x24.c
@@ -1140,7 +1140,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qu8-igemm/8x8-minmax-neon.c
   src/qu8-requantization/fp32-neon.c
   src/qu8-requantization/gemmlowp-neon.c
-  src/qu8-requantization/precise-neon.c
+  src/qu8-requantization/rndna-neon.c
   src/qu8-vadd/minmax-neon.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
@@ -1895,7 +1895,7 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/qs8-igemm/gen/4x4c2-minmax-gemmlowp-sse2-ld128.c
   src/qs8-requantization/fp32-sse2.c
   src/qs8-requantization/gemmlowp-sse2.c
-  src/qs8-requantization/precise-sse2.c
+  src/qs8-requantization/rndna-sse2.c
   src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x8.c
   src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x16.c
   src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x24.c
@@ -1914,7 +1914,7 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/qu8-igemm/4x4c2-minmax-sse2.c
   src/qu8-requantization/fp32-sse2.c
   src/qu8-requantization/gemmlowp-sse2.c
-  src/qu8-requantization/precise-sse2.c
+  src/qu8-requantization/rndna-sse2.c
   src/qu8-vadd/minmax-sse2.c
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
@@ -1988,9 +1988,9 @@ SET(XNNPACK_SSSE3_MICROKERNEL_SRCS
   src/qs8-igemm/gen/4x4c2-minmax-gemmlowp-ssse3-ld64.c
   src/qs8-igemm/gen/4x4c2-minmax-gemmlowp-ssse3-ld128.c
   src/qs8-requantization/gemmlowp-ssse3.c
-  src/qs8-requantization/precise-ssse3.c
+  src/qs8-requantization/rndna-ssse3.c
   src/qu8-requantization/gemmlowp-ssse3.c
-  src/qu8-requantization/precise-ssse3.c)
+  src/qu8-requantization/rndna-ssse3.c)
 
 SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/gen/sse41-2x4.c
@@ -2088,7 +2088,7 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/qs8-igemm/gen/4x4c2-minmax-gemmlowp-sse41-ld128.c
   src/qs8-requantization/fp32-sse4.c
   src/qs8-requantization/gemmlowp-sse4.c
-  src/qs8-requantization/precise-sse4.c
+  src/qs8-requantization/rndna-sse4.c
   src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x8.c
   src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x16.c
   src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x24.c
@@ -2106,7 +2106,7 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x24.c
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x32.c
   src/qu8-requantization/gemmlowp-sse4.c
-  src/qu8-requantization/precise-sse4.c)
+  src/qu8-requantization/rndna-sse4.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x4-minmax-avx-acc2.c

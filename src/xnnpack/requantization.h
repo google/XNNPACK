@@ -184,7 +184,7 @@ static inline int8_t xnn_qs8_requantize_fp32(
   return (int8_t) ((int32_t) rounded_n + params->fp32.zero_point);
 }
 
-inline static uint8_t xnn_qu8_requantize_precise(
+inline static uint8_t xnn_qu8_requantize_rndna(
   int32_t value,
   float scale,
   uint8_t zero_point,
@@ -232,7 +232,7 @@ inline static uint8_t xnn_qu8_requantize_precise(
   return biased_value;
 }
 
-inline static int8_t xnn_qs8_requantize_precise(
+inline static int8_t xnn_qs8_requantize_rndna(
   int32_t value,
   float scale,
   int8_t zero_point,

@@ -486,7 +486,7 @@ class RequantizationTester {
     }
   }
 
-  void TestRandomCasesPrecise(xnn_qu8_requantization_function requantize) {
+  void TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantization_function requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
@@ -523,13 +523,13 @@ class RequantizationTester {
 
       for (size_t i = 0; i < inputs.size(); i++) {
         const uint8_t reference_output =
-          xnn_qu8_requantize_precise(inputs[i], scale, zero_point(), qmin(), qmax());
+          xnn_qu8_requantize_rndna(inputs[i], scale, zero_point(), qmin(), qmax());
         ASSERT_EQ(uint32_t(reference_output), uint32_t(outputs[i]));
       }
     }
   }
 
-  void TestRandomCasesPrecise(xnn_qs8_requantization_function requantize) {
+  void TestRandomCasesRoundToNearestTiesAway(xnn_qs8_requantization_function requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
@@ -566,7 +566,7 @@ class RequantizationTester {
 
       for (size_t i = 0; i < inputs.size(); i++) {
         const int8_t reference_output =
-          xnn_qs8_requantize_precise(inputs[i], scale, zero_point(), qmin(), qmax());
+          xnn_qs8_requantize_rndna(inputs[i], scale, zero_point(), qmin(), qmax());
         ASSERT_EQ(int32_t(reference_output), int32_t(outputs[i]));
       }
     }

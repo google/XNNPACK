@@ -17,7 +17,7 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qs8_requantize_precise__sse4(
+void xnn_qs8_requantize_rndna__sse4(
     size_t n,
     const int32_t* input,
     float scale,
