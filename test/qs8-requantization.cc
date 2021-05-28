@@ -383,7 +383,7 @@ TEST(QS8_RNDNU__SCALAR, random_cases) {
     .qmin(std::numeric_limits<int8_t>::min())
     .qmax(std::numeric_limits<int8_t>::max())
     .iterations(100)
-    .TestRandomCasesRoundToNearestTiesAway(xnn_qs8_requantize_rndnu__scalar);
+    .TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantize_rndnu__scalar);
 }
 
 
@@ -844,7 +844,7 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .iterations(100)
-      .TestRandomCasesRoundToNearestTiesAway(xnn_qs8_requantize_rndnu__sse4);
+      .TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantize_rndnu__sse4);
   }
 
 
@@ -1247,7 +1247,7 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .iterations(100)
-      .TestRandomCasesRoundToNearestTiesAway(xnn_qs8_requantize_rndnu__neon);
+      .TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantize_rndnu__neon);
   }
 
 
