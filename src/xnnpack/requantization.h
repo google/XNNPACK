@@ -280,6 +280,43 @@ inline static int8_t xnn_qs8_requantize_rndna(
   return biased_value;
 }
 
+inline static int8_t xnn_qs8_requantize_rndnu(
+  int32_t value,
+  float scale,
+  int8_t zero_point,
+  int8_t qmin,
+  int8_t qmax)
+{
+  assert(scale < 1.0f);
+  assert(scale >= 0x1.0p-32f);
+
+  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t multiplier = (scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000);
+  const uint32_t shift = 127 + 23 - (scale_bits >> 23);
+  assert(shift >= 24);
+  assert(shift < 56);
+
+  // Compute full 64-bit product of 32-bit factors
+  const int64_t product = (int64_t) value * (int64_t) multiplier;
+
+  // Shift the full 64-bit product right with rounding.
+  // Rounding is performed towards closest integer, with midpoints rounded up.
+  const int64_t rounding = INT64_C(1) << (shift - 1);
+  const int32_t scaled_value = (int32_t) asr_s64(product + rounding, shift);
+
+  // Clamp scaled value with zero point between smin and smax.
+  int32_t clamped_value = scaled_value;
+  const int32_t smin = (int32_t) qmin - (int32_t) zero_point;
+  clamped_value = math_max_s32(clamped_value, smin);
+  const int32_t smax = (int32_t) qmax - (int32_t) zero_point;
+  clamped_value = math_min_s32(clamped_value, smax);
+
+  // Add zero point to clamped value.
+  const int32_t biased_value = clamped_value + (int32_t) zero_point;
+
+  return (int8_t) biased_value;
+}
+
 static inline uint8_t xnn_qu8_quantize_avgpool(
   int32_t n,
   union xnn_qu8_avgpool_params params)

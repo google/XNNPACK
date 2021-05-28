@@ -16,7 +16,7 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qs8_requantize_rndna__scalar_unsigned64(
+void xnn_qs8_requantize_rndnu__scalar(
     size_t n,
     const int32_t* input,
     float scale,
@@ -30,12 +30,12 @@ void xnn_qs8_requantize_rndna__scalar_unsigned64(
   assert(scale >= 0x1.0p-32f);
 
   const uint32_t scale_bits = fp32_to_bits(scale);
-  const uint32_t multiplier = (scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000);
+  const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
   const uint32_t shift = 127 + 23 - (scale_bits >> 23);
   assert(shift >= 24);
   assert(shift < 56);
 
-  const uint64_t rounding = UINT64_C(1) << (shift - 1);
+  const int64_t rounding = INT64_C(1) << (shift - 1);
   const int32_t smin = (int32_t) qmin - (int32_t) zero_point;
   const int32_t smax = (int32_t) qmax - (int32_t) zero_point;
   for (; n != 0; n -= 4) {
@@ -45,37 +45,24 @@ void xnn_qs8_requantize_rndna__scalar_unsigned64(
     const int32_t w = input[3];
     input += 4;
 
-    // Compute absolute value of input as unsigned 32-bit int.
-    // All further computations will work with unsigned values to avoid undefined behaviour on signed operations.
-    const uint32_t x_abs = (x >= 0) ? (uint32_t) x : -(uint32_t) x;
-    const uint32_t y_abs = (y >= 0) ? (uint32_t) y : -(uint32_t) y;
-    const uint32_t z_abs = (z >= 0) ? (uint32_t) z : -(uint32_t) z;
-    const uint32_t w_abs = (w >= 0) ? (uint32_t) w : -(uint32_t) w;
+    // Compute full 64-bit product of signed 32-bit factors.
+    //
+    // Note: multiplier can be treated as either signed or unsigned.
+    const int64_t x_product = (int64_t) x * (int64_t) multiplier;
+    const int64_t y_product = (int64_t) y * (int64_t) multiplier;
+    const int64_t z_product = (int64_t) z * (int64_t) multiplier;
+    const int64_t w_product = (int64_t) w * (int64_t) multiplier;
 
-    // Compute full 64-bit product of 32-bit factors.
-    const uint64_t x_product = (uint64_t) x_abs * (uint64_t) multiplier;
-    const uint64_t y_product = (uint64_t) y_abs * (uint64_t) multiplier;
-    const uint64_t z_product = (uint64_t) z_abs * (uint64_t) multiplier;
-    const uint64_t w_product = (uint64_t) w_abs * (uint64_t) multiplier;
-
-    // Shift the full 64-bit product right with rounding.
-    // Rounding is performed towards closest integer, with midpoints rounded up (same as away from zero).
+    // Arithmetically shift the full 64-bit product right with rounding.
+    // Rounding is performed towards closest integer, with midpoints rounded up.
     //
     // Note that although rounding is precomputed, it is dependent on shift value, and on processors with 64-bit
     // "right shift with rounding" instruction each line below can be represented by just one such instruction
-    // (e.g. VRSHL.U64 on ARM NEON, URSHL in ARM64 Advanced SIMD).
-    const uint32_t x_abs_scaled = (uint32_t) ((x_product + rounding) >> shift);
-    const uint32_t y_abs_scaled = (uint32_t) ((y_product + rounding) >> shift);
-    const uint32_t z_abs_scaled = (uint32_t) ((z_product + rounding) >> shift);
-    const uint32_t w_abs_scaled = (uint32_t) ((w_product + rounding) >> shift);
-
-    // Copy the sign of input to scaled absolute input value.
-    //
-    // On x86 processors with SSSE3 instruction set, this operation nicely maps to PSIGND instruction.
-    const int32_t x_scaled = (int32_t) (x >= 0 ? x_abs_scaled : -x_abs_scaled);
-    const int32_t y_scaled = (int32_t) (y >= 0 ? y_abs_scaled : -y_abs_scaled);
-    const int32_t z_scaled = (int32_t) (z >= 0 ? z_abs_scaled : -z_abs_scaled);
-    const int32_t w_scaled = (int32_t) (w >= 0 ? w_abs_scaled : -w_abs_scaled);
+    // (e.g. VRSHL.S64 on ARM NEON, SRSHL in ARM64 Advanced SIMD).
+    const int32_t x_scaled = (int32_t) asr_s64(x_product + rounding, shift);
+    const int32_t y_scaled = (int32_t) asr_s64(y_product + rounding, shift);
+    const int32_t z_scaled = (int32_t) asr_s64(z_product + rounding, shift);
+    const int32_t w_scaled = (int32_t) asr_s64(w_product + rounding, shift);
 
     // Clamp scaled value with zero point between (qmin - zero point) and (qmax - zero point).
     const int32_t x_clamped = math_min_s32(math_max_s32(x_scaled, smin), smax);

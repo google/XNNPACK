@@ -79,7 +79,7 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_away) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_rndna__scalar_unsigned32);
+        .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__scalar_unsigned32);
     }
   }
 }
@@ -162,7 +162,7 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED64, divide_by_po2_with_rounding_away) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_rndna__scalar_unsigned64);
+        .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__scalar_unsigned64);
     }
   }
 }
@@ -245,7 +245,7 @@ TEST(QU8_RNDNA__SCALAR_SIGNED64, divide_by_po2_with_rounding_away) {
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
-        .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_rndna__scalar_signed64);
+        .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__scalar_signed64);
     }
   }
 }
@@ -414,7 +414,7 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_rndna__sse2);
+          .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__sse2);
       }
     }
   }
@@ -497,7 +497,7 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_rndna__ssse3);
+          .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__ssse3);
       }
     }
   }
@@ -580,7 +580,7 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_rndna__sse4);
+          .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__sse4);
       }
     }
   }
@@ -854,7 +854,7 @@ TEST(QU8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingAway(xnn_qu8_requantize_rndna__neon);
+          .TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantize_rndna__neon);
       }
     }
   }

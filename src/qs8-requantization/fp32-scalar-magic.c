@@ -13,6 +13,7 @@
 
 #include <fp16/bitcasts.h>
 
+#include <xnnpack/math.h>
 #include <xnnpack/requantization-stubs.h>
 
 
@@ -45,10 +46,10 @@ void xnn_qs8_requantize_fp32__scalar_magic(
     const float z_scaled = (float) z * scale;
     const float w_scaled = (float) w * scale;
 
-    const float x_clamped = x_scaled < fmin ? fmin : x_scaled > fmax ? fmax : x_scaled;
-    const float y_clamped = y_scaled < fmin ? fmin : y_scaled > fmax ? fmax : y_scaled;
-    const float z_clamped = z_scaled < fmin ? fmin : z_scaled > fmax ? fmax : z_scaled;
-    const float w_clamped = w_scaled < fmin ? fmin : w_scaled > fmax ? fmax : w_scaled;
+    const float x_clamped = math_min_f32(math_max_f32(x_scaled, fmin), fmax);
+    const float y_clamped = math_min_f32(math_max_f32(y_scaled, fmin), fmax);
+    const float z_clamped = math_min_f32(math_max_f32(z_scaled, fmin), fmax);
+    const float w_clamped = math_min_f32(math_max_f32(w_scaled, fmin), fmax);
 
     const int32_t x_biased = (int32_t) fp32_to_bits(x_clamped + fmagic) - imagic;
     const int32_t y_biased = (int32_t) fp32_to_bits(y_clamped + fmagic) - imagic;

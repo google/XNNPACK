@@ -71,16 +71,16 @@ void xnn_qs8_requantize_rndna__scalar_signed64(
     const int32_t w_scaled = (int32_t) asr_s64(w_adjusted_product + rounding, shift);
 
     // Clamp scaled value with zero point between (qmin - zero point) and (qmax - zero point).
-    const int32_t x_clamped = x_scaled < smin ? smin : x_scaled > smax ? smax : x_scaled;
-    const int32_t y_clamped = y_scaled < smin ? smin : y_scaled > smax ? smax : y_scaled;
-    const int32_t z_clamped = z_scaled < smin ? smin : z_scaled > smax ? smax : z_scaled;
-    const int32_t w_clamped = w_scaled < smin ? smin : w_scaled > smax ? smax : w_scaled;
+    const int32_t x_clamped = math_min_s32(math_max_s32(x_scaled, smin), smax);
+    const int32_t y_clamped = math_min_s32(math_max_s32(y_scaled, smin), smax);
+    const int32_t z_clamped = math_min_s32(math_max_s32(z_scaled, smin), smax);
+    const int32_t w_clamped = math_min_s32(math_max_s32(w_scaled, smin), smax);
 
     // Add zero point to clamped value.
     // The result is guaranteed to be in [qmin, qmax] range.
     //
     // This addition can not be safely done before clamping, because scaled values are in [-2147483520, 2147483519]
-    // range, so addition of zero point (which can be up to 255) can overflow signed 32-bit integer.
+    // range, so addition of zero point (which can be up to 127) can overflow signed 32-bit integer.
     const int32_t x_biased = x_clamped + zero_point;
     const int32_t y_biased = y_clamped + zero_point;
     const int32_t z_biased = z_clamped + zero_point;

@@ -96,6 +96,13 @@ class Requantization : public benchmark::Fixture {
           n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
     }
   }
+
+  BENCHMARK_F(Requantization, rndnu__neon)(benchmark::State& state) {
+    for (auto _ : state) {
+      xnn_qs8_requantize_rndnu__neon(
+          n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
+    }
+  }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
@@ -152,6 +159,13 @@ class Requantization : public benchmark::Fixture {
   BENCHMARK_F(Requantization, rndna__sse4)(benchmark::State& state) {
     for (auto _ : state) {
       xnn_qs8_requantize_rndna__sse4(
+          n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
+    }
+  }
+
+  BENCHMARK_F(Requantization, rndnu__sse4)(benchmark::State& state) {
+    for (auto _ : state) {
+      xnn_qs8_requantize_rndnu__sse4(
           n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
     }
   }
@@ -213,6 +227,13 @@ BENCHMARK_F(Requantization, rndna__scalar_unsigned32)(benchmark::State& state) {
 BENCHMARK_F(Requantization, rndna__scalar_unsigned64)(benchmark::State& state) {
   for (auto _ : state) {
     xnn_qs8_requantize_rndna__scalar_unsigned64(
+        n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
+  }
+}
+
+BENCHMARK_F(Requantization, rndnu__scalar)(benchmark::State& state) {
+  for (auto _ : state) {
+    xnn_qs8_requantize_rndnu__scalar(
         n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
   }
 }

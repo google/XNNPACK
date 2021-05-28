@@ -36,8 +36,8 @@ void xnn_qu8_requantize_rndna__scalar_signed64(
   assert(shift < 56);
 
   const int64_t rounding = INT64_C(1) << (shift - 1);
-  const int32_t smin = (int32_t)(uint32_t) qmin - (int32_t)(uint32_t) zero_point;
-  const int32_t smax = (int32_t)(uint32_t) qmax - (int32_t)(uint32_t) zero_point;
+  const int32_t smin = (int32_t) (uint32_t) qmin - (int32_t) (uint32_t) zero_point;
+  const int32_t smax = (int32_t) (uint32_t) qmax - (int32_t) (uint32_t) zero_point;
   for (; n != 0; n -= 4) {
     const int32_t x = input[0];
     const int32_t y = input[1];
@@ -54,10 +54,10 @@ void xnn_qu8_requantize_rndna__scalar_signed64(
     const int64_t w_product = (int64_t) w * (int64_t) multiplier;
 
     // Adjust product before subsequent shift with rounding up to simulate shift with rounding away from zero.
-    const int64_t x_adjusted_product = x_product - (int64_t)(x < 0);
-    const int64_t y_adjusted_product = y_product - (int64_t)(y < 0);
-    const int64_t z_adjusted_product = z_product - (int64_t)(z < 0);
-    const int64_t w_adjusted_product = w_product - (int64_t)(w < 0);
+    const int64_t x_adjusted_product = x_product - (int64_t) (x < 0);
+    const int64_t y_adjusted_product = y_product - (int64_t) (y < 0);
+    const int64_t z_adjusted_product = z_product - (int64_t) (z < 0);
+    const int64_t w_adjusted_product = w_product - (int64_t) (w < 0);
 
     // Arithmetically shift the full 64-bit product right with rounding.
     // Rounding is performed towards closest integer, with midpoints rounded up.
@@ -71,10 +71,10 @@ void xnn_qu8_requantize_rndna__scalar_signed64(
     const int32_t w_scaled = (int32_t) asr_s64(w_adjusted_product + rounding, shift);
 
     // Clamp scaled value with zero point between (qmin - zero point) and (qmax - zero point).
-    const int32_t x_clamped = x_scaled < smin ? smin : x_scaled > smax ? smax : x_scaled;
-    const int32_t y_clamped = y_scaled < smin ? smin : y_scaled > smax ? smax : y_scaled;
-    const int32_t z_clamped = z_scaled < smin ? smin : z_scaled > smax ? smax : z_scaled;
-    const int32_t w_clamped = w_scaled < smin ? smin : w_scaled > smax ? smax : w_scaled;
+    const int32_t x_clamped = math_min_s32(math_max_s32(x_scaled, smin), smax);
+    const int32_t y_clamped = math_min_s32(math_max_s32(y_scaled, smin), smax);
+    const int32_t z_clamped = math_min_s32(math_max_s32(z_scaled, smin), smax);
+    const int32_t w_clamped = math_min_s32(math_max_s32(w_scaled, smin), smax);
 
     // Add zero point to clamped value.
     // The result is guaranteed to be in [qmin, qmax] range.

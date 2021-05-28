@@ -43,10 +43,10 @@ void xnn_qu8_requantize_gemmlowp__scalar(
   assert(shift < 32);
 
   const int64_t q31rounding = INT64_C(0x40000000);
-  const int32_t remainder_mask = (int32_t)((UINT32_C(1) << shift) - UINT32_C(1));
-  const int32_t threshold = (int32_t)((uint32_t) remainder_mask >> 1);
-  const int32_t smin = (int32_t)(uint32_t) qmin - (int32_t)(uint32_t) zero_point;
-  const int32_t smax = (int32_t)(uint32_t) qmax - (int32_t)(uint32_t) zero_point;
+  const int32_t remainder_mask = (int32_t) ((UINT32_C(1) << shift) - UINT32_C(1));
+  const int32_t threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
+  const int32_t smin = (int32_t) (uint32_t) qmin - (int32_t) (uint32_t) zero_point;
+  const int32_t smax = (int32_t) (uint32_t) qmax - (int32_t) (uint32_t) zero_point;
   for (; n != 0; n -= 4) {
     const int32_t x = input[0];
     const int32_t y = input[1];
@@ -66,10 +66,10 @@ void xnn_qu8_requantize_gemmlowp__scalar(
     // Add rounding value (0x40000000) and then shift right by 31 bits and extract the low 32-bit word.
     // Note: casts to unsigned types are needed to avoid undefined behavior.
     // Given the multiplier range, the result of Q31 multiplication is in [-2147483520, 2147483519] range.
-    const int32_t x_q31product = (int32_t)(uint32_t)((uint64_t)(x_product + q31rounding) >> 31);
-    const int32_t y_q31product = (int32_t)(uint32_t)((uint64_t)(y_product + q31rounding) >> 31);
-    const int32_t z_q31product = (int32_t)(uint32_t)((uint64_t)(z_product + q31rounding) >> 31);
-    const int32_t w_q31product = (int32_t)(uint32_t)((uint64_t)(w_product + q31rounding) >> 31);
+    const int32_t x_q31product = (int32_t) (uint32_t) ((uint64_t) (x_product + q31rounding) >> 31);
+    const int32_t y_q31product = (int32_t) (uint32_t) ((uint64_t) (y_product + q31rounding) >> 31);
+    const int32_t z_q31product = (int32_t) (uint32_t) ((uint64_t) (z_product + q31rounding) >> 31);
+    const int32_t w_q31product = (int32_t) (uint32_t) ((uint64_t) (w_product + q31rounding) >> 31);
 
     // Arithmetically shift the adjusted product right with rounding.
     // Rounding is performed towards closest integer, with midpoints rounded away from zero.
@@ -95,21 +95,21 @@ void xnn_qu8_requantize_gemmlowp__scalar(
     //
     // Among these options, option 3 is the most performant across the board, although option 1 is promising for 64-bit
     // instruction sets.
-    const int32_t x_remainder = (x_q31product & remainder_mask) - (int32_t)(x_q31product < 0);
-    const int32_t y_remainder = (y_q31product & remainder_mask) - (int32_t)(y_q31product < 0);
-    const int32_t z_remainder = (z_q31product & remainder_mask) - (int32_t)(z_q31product < 0);
-    const int32_t w_remainder = (w_q31product & remainder_mask) - (int32_t)(w_q31product < 0);
+    const int32_t x_remainder = (x_q31product & remainder_mask) - (int32_t) (x_q31product < 0);
+    const int32_t y_remainder = (y_q31product & remainder_mask) - (int32_t) (y_q31product < 0);
+    const int32_t z_remainder = (z_q31product & remainder_mask) - (int32_t) (z_q31product < 0);
+    const int32_t w_remainder = (w_q31product & remainder_mask) - (int32_t) (w_q31product < 0);
 
-    const int32_t x_scaled = asr_s32(x_q31product, shift) + (int32_t)(x_remainder > threshold);
-    const int32_t y_scaled = asr_s32(y_q31product, shift) + (int32_t)(y_remainder > threshold);
-    const int32_t z_scaled = asr_s32(z_q31product, shift) + (int32_t)(z_remainder > threshold);
-    const int32_t w_scaled = asr_s32(w_q31product, shift) + (int32_t)(w_remainder > threshold);
+    const int32_t x_scaled = asr_s32(x_q31product, shift) + (int32_t) (x_remainder > threshold);
+    const int32_t y_scaled = asr_s32(y_q31product, shift) + (int32_t) (y_remainder > threshold);
+    const int32_t z_scaled = asr_s32(z_q31product, shift) + (int32_t) (z_remainder > threshold);
+    const int32_t w_scaled = asr_s32(w_q31product, shift) + (int32_t) (w_remainder > threshold);
 
     // Clamp scaled value with zero point between (qmin - zero point) and (qmax - zero point).
-    const int32_t x_clamped = x_scaled < smin ? smin : x_scaled > smax ? smax : x_scaled;
-    const int32_t y_clamped = y_scaled < smin ? smin : y_scaled > smax ? smax : y_scaled;
-    const int32_t z_clamped = z_scaled < smin ? smin : z_scaled > smax ? smax : z_scaled;
-    const int32_t w_clamped = w_scaled < smin ? smin : w_scaled > smax ? smax : w_scaled;
+    const int32_t x_clamped = math_min_s32(math_max_s32(x_scaled, smin), smax);
+    const int32_t y_clamped = math_min_s32(math_max_s32(y_scaled, smin), smax);
+    const int32_t z_clamped = math_min_s32(math_max_s32(z_scaled, smin), smax);
+    const int32_t w_clamped = math_min_s32(math_max_s32(w_scaled, smin), smax);
 
     // Add zero point to clamped value.
     // The result is guaranteed to be in [qmin, qmax] range.

@@ -100,6 +100,10 @@ DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndna__scalar_unsigned32)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndna__scalar_unsigned64)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndna__scalar_signed64)
 
+DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__neon)
+DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__sse4)
+DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__scalar)
+
 
 #ifdef __cplusplus
 }  // extern "C"
