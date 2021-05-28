@@ -63,7 +63,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75
         CSEL    x8, x12, x8, EQ         //   a0 = zero, else += a0 + a_offset
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
-        SUBS    x0, x2, 32              // k = kc - 32   // k = kc
+        SUBS    x0, x2, 32              // k = kc - 32
         B.LO    4f
 
         # 16 prologue

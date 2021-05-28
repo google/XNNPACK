@@ -97,7 +97,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
 
         # Is there at least 8 bytes for epilogue?
         SUBS    x0, x2, 8               // k = kc - 8
-        B.LO    4f
+        B.LO    5f
 
         # Prologue
         LDR     d0, [x13], 8
@@ -115,11 +115,11 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
 
         SUBS    x0, x0, 8               // k = k - 8
         # Is there at least 8 bytes for main loop?
-        B.LO    21f
+        B.LO    3f
 
         # Main loop - 8 bytes of A
         .p2align 3
- 2:
+2:
         SMLAL   v16.4s, v4.4h, v0.h[0]
         SMLAL2  v20.4s, v4.8h, v0.h[0]
         SMLAL   v17.4s, v4.4h, v1.h[0]
@@ -308,7 +308,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         # Epilogue.  Same as main loop but no preloads in final group
 
         .p2align 3
- 21:
+3:
         SMLAL   v16.4s, v4.4h, v0.h[0]
         SMLAL2  v20.4s, v4.8h, v0.h[0]
         SMLAL   v17.4s, v4.4h, v1.h[0]
@@ -476,9 +476,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         SMLAL2  v31.4s, v5.8h, v3.h[7]
 
         # Is there a remainder?- 1 to 7 bytes of A
-        CBNZ    x0, 4f
+        CBNZ    x0, 5f
 
-3:
+4:
         # ks loop
         SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
         B.HI    1b
@@ -613,7 +613,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         SMIN    v5.16b, v5.16b, v1.16b
         SMIN    v6.16b, v6.16b, v1.16b
         SMIN    v7.16b, v7.16b, v1.16b
-        B.LO    5f
+        B.LO    6f
 
         # Store full 4 x 16
         ST1     {v7.16b},  [x7], x10
@@ -632,8 +632,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
 
         # Remainder- 1 to 7 bytes of A
         .p2align 3
-4:
-        AND     x0, x2, 7              // kc remainder 1 to 7
+5:
+        AND     x0, x2, 7               // kc remainder 1 to 7
 
         LD1     {v0.8b}, [x13], x0
         LDP     d4, d5, [x5], 16
@@ -663,7 +663,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         SMLAL   v27.4s, v5.4h, v3.h[0]
         SMLAL2  v31.4s, v5.8h, v3.h[0]
         CMP     x0, 2
-        B.LO    3b
+        B.LO    4b
 
         LDP     d4, d5, [x5], 16
         SXTL    v4.8h, v4.8b
@@ -684,7 +684,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         SMLAL2  v23.4s, v4.8h, v3.h[1]
         SMLAL   v27.4s, v5.4h, v3.h[1]
         SMLAL2  v31.4s, v5.8h, v3.h[1]
-        B.EQ    3b
+        B.EQ    4b
 
         LDP     d4, d5, [x5], 16
         SXTL    v4.8h, v4.8b
@@ -706,7 +706,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         SMLAL   v27.4s, v5.4h, v3.h[2]
         SMLAL2  v31.4s, v5.8h, v3.h[2]
         CMP     x0, 4
-        B.LO    3b
+        B.LO    4b
 
         LDP     d4, d5, [x5], 16
         SXTL    v4.8h, v4.8b
@@ -727,7 +727,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         SMLAL2  v23.4s, v4.8h, v3.h[3]
         SMLAL   v27.4s, v5.4h, v3.h[3]
         SMLAL2  v31.4s, v5.8h, v3.h[3]
-        B.EQ    3b
+        B.EQ    4b
 
         LDP     d4, d5, [x5], 16
         SXTL    v4.8h, v4.8b
@@ -749,7 +749,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         SMLAL   v27.4s, v5.4h, v3.h[4]
         SMLAL2  v31.4s, v5.8h, v3.h[4]
         CMP     x0, 6
-        B.LO    3b
+        B.LO    4b
 
         LDP     d4, d5, [x5], 16
         SXTL    v4.8h, v4.8b
@@ -770,7 +770,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         SMLAL2  v23.4s, v4.8h, v3.h[5]
         SMLAL   v27.4s, v5.4h, v3.h[5]
         SMLAL2  v31.4s, v5.8h, v3.h[5]
-        B.EQ    3b
+        B.EQ    4b
 
         LDP     d4, d5, [x5], 16
         SXTL    v4.8h, v4.8b
@@ -791,12 +791,12 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         SMLAL2  v23.4s, v4.8h, v3.h[6]
         SMLAL   v27.4s, v5.4h, v3.h[6]
         SMLAL2  v31.4s, v5.8h, v3.h[6]
-        B       3b
+        B       4b
 
         # Store odd width
         .p2align 3
-5:
-        TBZ     x1, 3, 6f
+6:
+        TBZ     x1, 3, 7f
         STR     d7, [x7], 8
         DUP     d7, v7.d[1]
         STR     d6, [x17], 8
@@ -805,8 +805,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         DUP     d5, v5.d[1]
         STR     d4, [x6], 8
         DUP     d4, v4.d[1]
-6:
-        TBZ     x1, 2, 7f
+7:
+        TBZ     x1, 2, 8f
         STR     s7, [x7], 4
         DUP     s7, v7.s[1]
         STR     s6, [x17], 4
@@ -815,8 +815,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         DUP     s5, v5.s[1]
         STR     s4, [x6], 4
         DUP     s4, v4.s[1]
-7:
-        TBZ     x1, 1, 8f
+8:
+        TBZ     x1, 1, 9f
         ST1     {v7.h}[0], [x7], 2
         DUP     h7, v7.h[1]
         ST1     {v6.h}[0], [x17], 2
@@ -825,13 +825,13 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         DUP     h5, v5.h[1]
         ST1     {v4.h}[0], [x6], 2
         DUP     h4, v4.h[1]
-8:
-        TBZ     x1, 0, 9f
+9:
+        TBZ     x1, 0, 10f
         ST1     {v7.b}[0], [x7]
         ST1     {v6.b}[0], [x17]
         ST1     {v5.b}[0], [x16]
         ST1     {v4.b}[0], [x6]
-9:
+10:
         # Restore x20-x21 from stack
         LDP     x20, x21, [sp], 16
         RET
