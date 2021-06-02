@@ -113,10 +113,6 @@ class GemmMicrokernelTester {
     return n() % nr() == 0 ? n() : (n() / nr() + 1) * nr();
   }
 
-  inline size_t bias_n() const {
-    return n() % nr() == 0 ? n() : (n() / nr() + 1) * nr();
-  }
-
   inline GemmMicrokernelTester& a_stride(size_t a_stride) {
     this->a_stride_ = a_stride;
     return *this;
@@ -227,7 +223,7 @@ class GemmMicrokernelTester {
     std::vector<uint8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> b(n() * k());
     std::vector<int32_t> bias(n());
-    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k() + bias_n() * sizeof(int32_t) / sizeof(uint8_t));
+    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(uint8_t));
     std::vector<uint8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<int32_t> acc(m() * n());
     std::vector<uint8_t> c_ref(m() * n());
@@ -313,7 +309,7 @@ class GemmMicrokernelTester {
 
     std::vector<uint8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> b(n() * ks() * k());
-    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(ks() * packed_n() * packed_k() + bias_n() * sizeof(int32_t) / sizeof(uint8_t));
+    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(ks() * packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(uint8_t));
     std::vector<int32_t> bias(n());
     std::vector<uint8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<int32_t> acc(m() * n());
@@ -440,8 +436,8 @@ class GemmMicrokernelTester {
     std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
     std::vector<int8_t> b(n() * k());
     std::vector<int32_t> bias(n());
-    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + bias_n() * sizeof(int32_t) / sizeof(int8_t));
-    std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_xw(packed_n() * packed_k() + bias_n() * sizeof(int32_t) / sizeof(int16_t));
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
+    std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_xw(packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int16_t));
     std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<int32_t> acc(m() * n());
     std::vector<int8_t> c_ref(m() * n());
@@ -538,7 +534,7 @@ class GemmMicrokernelTester {
 
     std::vector<int8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<int8_t> b(n() * ks() * k());
-    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(ks() * packed_n() * packed_k() + bias_n() * sizeof(int32_t) / sizeof(int8_t));
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(ks() * packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
     std::vector<int32_t> bias(n());
     std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<int32_t> acc(m() * n());
@@ -661,7 +657,7 @@ class GemmMicrokernelTester {
 
     std::vector<uint16_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> b(n() * k());
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(packed_n() * packed_k() + bias_n());
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(packed_n() * packed_k() + packed_n());
     std::vector<uint16_t> bias(n());
     std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
@@ -734,7 +730,7 @@ class GemmMicrokernelTester {
 
     std::vector<uint16_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> b(n() * ks() * k());
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(ks() * packed_k() * packed_n() + bias_n());
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
     std::vector<uint16_t> bias(n());
     std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
@@ -855,7 +851,7 @@ class GemmMicrokernelTester {
     std::vector<float> a(packed_k() * mr());
     std::vector<float> b(n() * k());
     std::vector<float> bias(n());
-    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + bias_n());
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
     std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
 
@@ -931,7 +927,7 @@ class GemmMicrokernelTester {
     std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(n() * k());
     std::vector<float> bias(n());
-    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + bias_n());
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
     std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
 
@@ -991,7 +987,7 @@ class GemmMicrokernelTester {
     std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(n() * k());
     std::vector<float> bias(n());
-    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + bias_n());
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
     std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
 
@@ -1055,7 +1051,7 @@ class GemmMicrokernelTester {
     std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(n() * k());
     std::vector<float> bias(n());
-    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + bias_n());
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
     std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
 
@@ -1138,7 +1134,7 @@ class GemmMicrokernelTester {
     std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(n() * k());
     std::vector<float> bias(n());
-    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k());  // no bias_n()
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k());  // no packed_n()
     std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
     std::vector<float, AlignedAllocator<float, 64>> acc(mr() * packed_n());
@@ -1220,7 +1216,7 @@ class GemmMicrokernelTester {
 
     std::vector<float> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(n() * ks() * k());
-    std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + bias_n());
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
     std::vector<float> bias(n());
     std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
@@ -1312,7 +1308,7 @@ class GemmMicrokernelTester {
 
     std::vector<float> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(n() * ks() * k());
-    std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + bias_n());
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
     std::vector<float> bias(n());
     std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
@@ -1408,7 +1404,7 @@ class GemmMicrokernelTester {
 
     std::vector<float> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(n() * ks() * k());
-    std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + bias_n());
+    std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
     std::vector<float> bias(n());
     std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
     std::vector<float> c_ref(m() * n());
