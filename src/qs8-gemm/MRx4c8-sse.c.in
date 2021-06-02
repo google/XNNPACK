@@ -6,6 +6,7 @@
 $assert SSE in [2, 3, 4]
 $assert not XOP or AVX
 $assert not AVX or SSE == 4
+$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
 $assert VARIANT in ["LD64", "LD128", "EXTENDED"]
 $assert MR <= 4
 #include <assert.h>
@@ -27,9 +28,9 @@ $else:
 
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$PARAMS_STRUCT = "gemmlowp_sse4" if SSE >= 4 else "gemmlowp_sse2"
+$PARAMS_STRUCT = REQUANTIZATION.lower() + ("_sse4" if SSE >= 4 else "_sse2")
 $ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
-void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_gemmlowp_ukernel_${MR}x4c8__${ISA}${LOAD_SUFFIX}(
+void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c8__${ISA}${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -152,90 +153,101 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_gemmlowp_ukernel_${MR}x4c8__${ISA}${LOAD_
       $for M in range(MR):
         __m128i vacc${M}x0123 = _mm_add_epi32(_mm_unpacklo_epi32(vacc${M}x02, vacc${M}x13), _mm_unpackhi_epi32(vacc${M}x02, vacc${M}x13));
 
-    const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.multiplier);
-    const __m128i vrounding = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.rounding);
+    $if REQUANTIZATION == "GEMMLOWP":
+      const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.multiplier);
+      const __m128i vrounding = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.rounding);
 
-    $if SSE == 4:
+      $if SSE == 4:
+        $for M in range(MR):
+          const __m128i vacc${M}x1133 = _mm_shuffle_epi32(vacc${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));
+
+        $for M in range(MR):
+          const __m128i vprod${M}x02 = _mm_add_epi64(_mm_mul_epi32(vacc${M}x0123, vmultiplier), vrounding);
+
+        $for M in range(MR):
+          const __m128i vprod${M}x13 = _mm_add_epi64(_mm_mul_epi32(vacc${M}x1133, vmultiplier), vrounding);
+
+        $for M in range(MR):
+          const __m128i vq31prod${M}x02 = _mm_srli_epi64(vprod${M}x02, 31);
+          const __m128i vq31prod${M}x13 = _mm_add_epi64(vprod${M}x13, vprod${M}x13);
+
+        $for M in range(MR):
+          const __m128i vq31prod${M}x0123 = _mm_blend_epi16(vq31prod${M}x02, vq31prod${M}x13, 0xCC);
+      $else:
+        $for M in range(MR):
+          const __m128i vnmask${M}x0123 = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc${M}x0123);
+
+        $for M in range(MR):
+          $if SSE >= 3:
+            const __m128i vabsacc${M}x0123 = _mm_abs_epi32(vacc${M}x0123);
+          $else:
+            const __m128i vabsacc${M}x0123 = _mm_sub_epi32(_mm_xor_si128(vacc${M}x0123, vnmask${M}x0123), vnmask${M}x0123);
+
+        $for M in range(MR):
+          const __m128i vabsacc${M}x1133 = _mm_shuffle_epi32(vabsacc${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));
+
+        $for M in range(MR):
+          const __m128i vabsprod${M}x02 = _mm_mul_epu32(vabsacc${M}x0123, vmultiplier);
+
+        $for M in range(MR):
+          const __m128i vnmask${M}x02 = _mm_shuffle_epi32(vnmask${M}x0123, _MM_SHUFFLE(2, 2, 0, 0));
+
+        $for M in range(MR):
+          const __m128i vprod${M}x02 = _mm_sub_epi64(_mm_xor_si128(vabsprod${M}x02, vnmask${M}x02), vnmask${M}x02);
+
+        $for M in range(MR):
+          const __m128i vq31prod${M}x02 = _mm_srli_epi64(_mm_add_epi64(vprod${M}x02, vrounding), 31);
+
+        $for M in range(MR):
+          const __m128i vabsprod${M}x13 = _mm_mul_epu32(vabsacc${M}x1133, vmultiplier);
+
+        $for M in range(MR):
+          const __m128i vnmask${M}x13 = _mm_shuffle_epi32(vnmask${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));
+
+        $for M in range(MR):
+          const __m128i vprod${M}x13 = _mm_sub_epi64(_mm_xor_si128(vabsprod${M}x13, vnmask${M}x13), vnmask${M}x13);
+
+        $for M in range(MR):
+          const __m128i vq31prod${M}x13 = _mm_srli_epi64(_mm_add_epi64(vprod${M}x13, vrounding), 31);
+
+        $for M in range(MR):
+          const __m128i vq31prod${M}x0213 = _mm_castps_si128(_mm_shuffle_ps(
+              _mm_castsi128_ps(vq31prod${M}x02), _mm_castsi128_ps(vq31prod${M}x13), _MM_SHUFFLE(2, 0, 2, 0)));
+
+        $for M in range(MR):
+          const __m128i vq31prod${M}x0123 = _mm_shuffle_epi32(vq31prod${M}x0213, _MM_SHUFFLE(3, 1, 2, 0));
+
+      const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.remainder_mask);
       $for M in range(MR):
-        const __m128i vacc${M}x1133 = _mm_shuffle_epi32(vacc${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));
+        const __m128i vrem${M}x0123 =
+          _mm_add_epi32(_mm_and_si128(vq31prod${M}x0123, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vq31prod${M}x0123));
+
+      const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.remainder_threshold);
+      $if M > 1:
+        const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->${PARAMS_STRUCT}.shift);
+      $else:
+        const __m128i vshift = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.shift);
+      $for M in range(MR):
+        vacc${M}x0123 =
+          _mm_sub_epi32(_mm_sra_epi32(vq31prod${M}x0123, vshift), _mm_cmpgt_epi32(vrem${M}x0123, vremainder_threshold));
+    $elif REQUANTIZATION == "FP32":
+      $for M in range(MR):
+        __m128 vscaled${M}x0123 = _mm_cvtepi32_ps(vacc${M}x0123);
+
+      const __m128 vscale = _mm_load_ps(params->fp32_${"sse4" if SSE >= 4 else "sse2"}.scale);
+      $for M in range(MR):
+        vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale);
 
       $for M in range(MR):
-        const __m128i vprod${M}x02 = _mm_add_epi64(_mm_mul_epi32(vacc${M}x0123, vmultiplier), vrounding);
-
-      $for M in range(MR):
-        const __m128i vprod${M}x13 = _mm_add_epi64(_mm_mul_epi32(vacc${M}x1133, vmultiplier), vrounding);
-
-      $for M in range(MR):
-        const __m128i vq31prod${M}x02 = _mm_srli_epi64(vprod${M}x02, 31);
-        const __m128i vq31prod${M}x13 = _mm_add_epi64(vprod${M}x13, vprod${M}x13);
-
-      $for M in range(MR):
-        const __m128i vq31prod${M}x0123 = _mm_blend_epi16(vq31prod${M}x02, vq31prod${M}x13, 0xCC);
-    $else:
-      $for M in range(MR):
-        const __m128i vnmask${M}x0123 = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc${M}x0123);
-
-      $for M in range(MR):
-        $if SSE >= 3:
-          const __m128i vabsacc${M}x0123 = _mm_abs_epi32(vacc${M}x0123);
-        $else:
-          const __m128i vabsacc${M}x0123 = _mm_sub_epi32(_mm_xor_si128(vacc${M}x0123, vnmask${M}x0123), vnmask${M}x0123);
-
-      $for M in range(MR):
-        const __m128i vabsacc${M}x1133 = _mm_shuffle_epi32(vabsacc${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));
-
-      $for M in range(MR):
-        const __m128i vabsprod${M}x02 = _mm_mul_epu32(vabsacc${M}x0123, vmultiplier);
-
-      $for M in range(MR):
-        const __m128i vnmask${M}x02 = _mm_shuffle_epi32(vnmask${M}x0123, _MM_SHUFFLE(2, 2, 0, 0));
-
-      $for M in range(MR):
-        const __m128i vprod${M}x02 = _mm_sub_epi64(_mm_xor_si128(vabsprod${M}x02, vnmask${M}x02), vnmask${M}x02);
-
-      $for M in range(MR):
-        const __m128i vq31prod${M}x02 = _mm_srli_epi64(_mm_add_epi64(vprod${M}x02, vrounding), 31);
-
-      $for M in range(MR):
-        const __m128i vabsprod${M}x13 = _mm_mul_epu32(vabsacc${M}x1133, vmultiplier);
-
-      $for M in range(MR):
-        const __m128i vnmask${M}x13 = _mm_shuffle_epi32(vnmask${M}x0123, _MM_SHUFFLE(3, 3, 1, 1));
-
-      $for M in range(MR):
-        const __m128i vprod${M}x13 = _mm_sub_epi64(_mm_xor_si128(vabsprod${M}x13, vnmask${M}x13), vnmask${M}x13);
-
-      $for M in range(MR):
-        const __m128i vq31prod${M}x13 = _mm_srli_epi64(_mm_add_epi64(vprod${M}x13, vrounding), 31);
-
-      $for M in range(MR):
-        const __m128i vq31prod${M}x0213 = _mm_castps_si128(_mm_shuffle_ps(
-            _mm_castsi128_ps(vq31prod${M}x02), _mm_castsi128_ps(vq31prod${M}x13), _MM_SHUFFLE(2, 0, 2, 0)));
-
-      $for M in range(MR):
-        const __m128i vq31prod${M}x0123 = _mm_shuffle_epi32(vq31prod${M}x0213, _MM_SHUFFLE(3, 1, 2, 0));
-
-    const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.remainder_mask);
-    $for M in range(MR):
-      const __m128i vrem${M}x0123 =
-        _mm_add_epi32(_mm_and_si128(vq31prod${M}x0123, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vq31prod${M}x0123));
-
-    const __m128i vremainder_threshold = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.remainder_threshold);
-    $if M > 1:
-      const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->${PARAMS_STRUCT}.shift);
-    $else:
-      const __m128i vshift = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.shift);
-    $for M in range(MR):
-      vacc${M}x0123 =
-        _mm_sub_epi32(_mm_sra_epi32(vq31prod${M}x0123, vshift), _mm_cmpgt_epi32(vrem${M}x0123, vremainder_threshold));
+        vacc${M}x0123 = _mm_cvtps_epi32(vscaled${M}x0123);
 
     const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
     $for M in range(0, MR, 2):
       __m128i vacc${M}${min(M+1, MR-1)}x0123 = _mm_adds_epi16(_mm_packs_epi32(vacc${M}x0123, vacc${min(M+1, MR-1)}x0123), voutput_zero_point);
 
     $if SSE < 4:
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_min);
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_max);
+      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
+      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_max);
       $for M in range(0, MR, 2):
         vacc${M}${min(M+1, MR-1)}x0123 = _mm_min_epi16(_mm_max_epi16(vacc${M}${min(M+1, MR-1)}x0123, voutput_min), voutput_max);
 
@@ -245,8 +257,8 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_gemmlowp_ukernel_${MR}x4c8__${ISA}${LOAD_
       __m128i vout = _mm_packs_epi16(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
     $if SSE == 4:
-      vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_min));
-      vout = _mm_min_epi8(vout, _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_max));
+      vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min));
+      vout = _mm_min_epi8(vout, _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_max));
 
     if (nc >= 4) {
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
