@@ -18,7 +18,7 @@
 #     const int8_t* restrict w,  x5
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
-#     size_t cn_stride,                  [sp] -> x10
+#     size_t cn_stride,                  [sp] -> (x0)
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const float* zero,                 [sp + 16] -> x12
 #     const xnn_qs8_conv_minmax_params params [sp + 24] -> (x8)
@@ -29,7 +29,7 @@
 # A0  x13  v0  v4
 # A1  x14  v1  v5
 # A2  x15  v2  v6
-# A3  x20  v3  v7
+# A3  x10  v3  v7
 # B    x5  v8  v9 v10 v11
 # C0   x6 v16 v20 v24 v28
 # C1  x16 v17 v21 v25 v29
@@ -43,16 +43,15 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
-        LDP     x10, x11, [sp]          // Load cn_stride, a_offset
+        LDR     x11, [sp, 8]            // Load a_offset
         ADD     x16, x6, x7             // c1 = c0 + cm_stride
         LDP     x12, x8, [sp, 16]       // Load zero, params pointer
         CSEL    x16, x6,  x16, LO       //   c1 = c0
-        STR     x20, [sp, -48]!         // Save x20 on stack
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
-        STP     d8,  d9, [sp, 16]       // Save d8-d11 on stack
+        STP     d8,  d9, [sp, -32]!     // Save d8-d11 on stack
 
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
-        STP     d10, d11, [sp, 32]
+        STP     d10, d11, [sp, 16]
                                         // if mr <= 2
         CSEL    x17, x16, x17, LS       //   c2 = c1
         BIC     x2, x2, 3
@@ -84,7 +83,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
 1:
         # Load next 4 A pointers
         LDP     x13, x14, [x4], 16
-        LDP     x15, x20, [x4], 16
+        LDP     x15, x10, [x4], 16
 
         CMP     x13, x12                // if a0 == zero
         ADD     x13, x13, x11           // a0 += a_offset
@@ -95,9 +94,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         CMP     x15, x12                // if a2 == zero
         ADD     x15, x15, x11           // a2 += a_offset
         CSEL    x15, x12, x15, EQ       //   a2 = zero, else += a2 + a_offset
-        CMP     x20, x12                // if a3 == zero
-        ADD     x20, x20, x11           // a3 += a_offset
-        CSEL    x20, x12, x20, EQ       //   a3 = zero, else += a3 + a_offset
+        CMP     x10, x12                // if a3 == zero
+        ADD     x10, x10, x11           // a3 += a_offset
+        CSEL    x10, x12, x10, EQ       //   a3 = zero, else += a3 + a_offset
 
         # Is there at least 16 bytes for prologue/epilogue?
         SUBS    x0, x2, 16              // k = kc - 16
@@ -108,7 +107,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         LDR     q8,  [x5], 16
         LDR     d1, [x14], 8
         LDR     d2, [x15], 8
-        LDR     d3, [x20], 8
+        LDR     d3, [x10], 8
         SUBS    x0, x0, 16              // is there 16 for main loop?
         LDR     d9,  [x5], 8
         LDR     x8,  [x5], 8
@@ -161,7 +160,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         SDOT    v30.4s, v11.16b, v2.4b[0]
         LDR     x8,  [x5], 8
         SDOT    v31.4s, v11.16b, v3.4b[0]
-        LDR     d7,  [x20], 8
+        LDR     d7,  [x10], 8
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v0.4b[1]
@@ -237,7 +236,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         SDOT    v30.4s, v11.16b, v6.4b[0]
         LDR     x8,  [x5], 8
         SDOT    v31.4s, v11.16b, v7.4b[0]
-        LDR     d3,  [x20], 8
+        LDR     d3,  [x10], 8
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v4.4b[1]
@@ -317,7 +316,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         SDOT    v30.4s, v11.16b, v2.4b[0]
         LDR     x8,  [x5], 8
         SDOT    v31.4s, v11.16b, v3.4b[0]
-        LDR     d7,  [x20], 8
+        LDR     d7,  [x10], 8
 
         // BLOCK 0
         SDOT    v16.4s,  v8.16b, v0.4b[1]
@@ -420,7 +419,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         // BLOCK 3
         SDOT    v28.4s, v11.16b, v4.4b[1]
         SDOT    v29.4s, v11.16b, v5.4b[1]
-        LDR     x8, [sp, 72]            // reload params pointer
+        LDR     x8, [sp, 56]            // reload params pointer
         SDOT    v30.4s, v11.16b, v6.4b[1]
         SDOT    v31.4s, v11.16b, v7.4b[1]
 
@@ -551,6 +550,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
 
         SMAX    v4.16b,  v4.16b, v0.16b
         SMAX    v5.16b,  v5.16b, v0.16b
+        LDR     x0, [sp, 32]            // Load cn_stride
         SMAX    v6.16b,  v6.16b, v0.16b
         SMAX    v7.16b,  v7.16b, v0.16b
         SUBS    x1, x1, 16
@@ -561,10 +561,10 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         B.LO    7f
 
         # Store full 4 x 16
-        ST1     {v7.16b},  [x7], x10
-        ST1     {v6.16b}, [x17], x10
-        ST1     {v5.16b}, [x16], x10
-        ST1     {v4.16b},  [x6], x10
+        ST1     {v7.16b},  [x7], x0
+        ST1     {v6.16b}, [x17], x0
+        ST1     {v5.16b}, [x16], x0
+        ST1     {v4.16b},  [x6], x0
 
         SUB     x4, x4, x3              // a -= ks
 
@@ -572,11 +572,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         B.HI    0b
 
         # Restore d8-d15 from stack
-        LDP     d10, d11, [sp, 32]
-        LDP     d8,  d9, [sp, 16]
-
-        # Restore x20 from stack
-        LDR     x20, [sp], 48
+        LDP     d10, d11, [sp, 16]
+        LDP     d8,  d9, [sp], 32
         RET
 
         # Remainder- 4 to 12 bytes of A
@@ -589,7 +586,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         LDP     q8,  q9,  [x5], 32
         LDR     q1, [x14]
         LDR     q2, [x15]
-        LDR     q3, [x20]
+        LDR     q3, [x10]
         LDP     q10, q11, [x5], 32
         SDOT    v16.4s,  v8.16b, v0.4b[0]
         SDOT    v17.4s,  v8.16b, v1.4b[0]
@@ -689,11 +686,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         ST1     {v4.b}[0], [x6]
 11:
         # Restore d8-d15 from stack
-        LDP     d10, d11, [sp, 32]
-        LDP     d8,  d9, [sp, 16]
-
-        # Restore x20 from stack
-        LDR     x20, [sp], 48
+        LDP     d10, d11, [sp, 16]
+        LDP     d8,  d9, [sp], 32
         RET
 
 END_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cortex_a55
