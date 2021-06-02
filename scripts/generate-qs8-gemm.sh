@@ -161,11 +161,6 @@ tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=2 -D SSE=3 -D AVX=0 -D XOP=0 -D R
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=3 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=GEMMLOWP -D VARIANT=LD64     -o src/qs8-gemm/gen/3x4c2-minmax-gemmlowp-ssse3-ld64.c
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=4 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=GEMMLOWP -D VARIANT=LD64     -o src/qs8-gemm/gen/4x4c2-minmax-gemmlowp-ssse3-ld64.c
 
-tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=FP32     -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c2-minmax-fp32-ssse3-ld64.c
-tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=2 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=FP32     -D VARIANT=LD64     -o src/qs8-gemm/gen/2x4c2-minmax-fp32-ssse3-ld64.c
-tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=3 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=FP32     -D VARIANT=LD64     -o src/qs8-gemm/gen/3x4c2-minmax-fp32-ssse3-ld64.c
-tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=4 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=FP32     -D VARIANT=LD64     -o src/qs8-gemm/gen/4x4c2-minmax-fp32-ssse3-ld64.c
-
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=0 -D XOP=0 -D REQUANTIZATION=GEMMLOWP -D VARIANT=LD64     -o src/qs8-gemm/gen/1x4c2-minmax-gemmlowp-sse41-ld64.c
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=2 -D SSE=4 -D AVX=0 -D XOP=0 -D REQUANTIZATION=GEMMLOWP -D VARIANT=LD64     -o src/qs8-gemm/gen/2x4c2-minmax-gemmlowp-sse41-ld64.c
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=3 -D SSE=4 -D AVX=0 -D XOP=0 -D REQUANTIZATION=GEMMLOWP -D VARIANT=LD64     -o src/qs8-gemm/gen/3x4c2-minmax-gemmlowp-sse41-ld64.c
@@ -210,11 +205,6 @@ tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D R
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=2 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=GEMMLOWP -D VARIANT=LD128    -o src/qs8-gemm/gen/2x4c2-minmax-gemmlowp-ssse3-ld128.c
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=3 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=GEMMLOWP -D VARIANT=LD128    -o src/qs8-gemm/gen/3x4c2-minmax-gemmlowp-ssse3-ld128.c
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=4 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=GEMMLOWP -D VARIANT=LD128    -o src/qs8-gemm/gen/4x4c2-minmax-gemmlowp-ssse3-ld128.c
-
-tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=1 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=FP32     -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c2-minmax-fp32-ssse3-ld128.c
-tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=2 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=FP32     -D VARIANT=LD128    -o src/qs8-gemm/gen/2x4c2-minmax-fp32-ssse3-ld128.c
-tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=3 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=FP32     -D VARIANT=LD128    -o src/qs8-gemm/gen/3x4c2-minmax-fp32-ssse3-ld128.c
-tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=4 -D SSE=3 -D AVX=0 -D XOP=0 -D REQUANTIZATION=FP32     -D VARIANT=LD128    -o src/qs8-gemm/gen/4x4c2-minmax-fp32-ssse3-ld128.c
 
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=1 -D SSE=4 -D AVX=0 -D XOP=0 -D REQUANTIZATION=GEMMLOWP -D VARIANT=LD128    -o src/qs8-gemm/gen/1x4c2-minmax-gemmlowp-sse41-ld128.c
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=2 -D SSE=4 -D AVX=0 -D XOP=0 -D REQUANTIZATION=GEMMLOWP -D VARIANT=LD128    -o src/qs8-gemm/gen/2x4c2-minmax-gemmlowp-sse41-ld128.c

@@ -7,6 +7,7 @@ $assert SSE in [2, 3, 4]
 $assert not XOP or AVX
 $assert not AVX or SSE == 4
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert SSE != 3 or REQUANTIZATION != "FP32"
 $assert VARIANT in ["LD64", "LD128"]
 $assert MR <= 4
 #include <assert.h>

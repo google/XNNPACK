@@ -3,6 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert SSE in [2, 3, 4]
+$assert not AVX or SSE == 4
+$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert SSE != 3 or REQUANTIZATION != "FP32"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
 $assert CHANNEL_TILE % 8 == 0

@@ -54,17 +54,9 @@ tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=8  -D KERNEL_T
 tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D SSE=3 -D AVX=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-dwconv/gen/up16x9-minmax-gemmlowp-ssse3-mul16.c
 tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -D SSE=3 -D AVX=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-dwconv/gen/up24x9-minmax-gemmlowp-ssse3-mul16.c
 
-tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D SSE=3 -D AVX=0 -D REQUANTIZATION=FP32 -o src/qs8-dwconv/gen/up8x9-minmax-fp32-ssse3-mul16.c
-tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D SSE=3 -D AVX=0 -D REQUANTIZATION=FP32 -o src/qs8-dwconv/gen/up16x9-minmax-fp32-ssse3-mul16.c
-tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=9 -D SSE=3 -D AVX=0 -D REQUANTIZATION=FP32 -o src/qs8-dwconv/gen/up24x9-minmax-fp32-ssse3-mul16.c
-
 tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D SSE=3 -D AVX=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-dwconv/gen/up8x25-minmax-gemmlowp-ssse3-mul16.c
 tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D SSE=3 -D AVX=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-dwconv/gen/up16x25-minmax-gemmlowp-ssse3-mul16.c
 tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=25 -D SSE=3 -D AVX=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-dwconv/gen/up24x25-minmax-gemmlowp-ssse3-mul16.c
-
-tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D SSE=3 -D AVX=0 -D REQUANTIZATION=FP32 -o src/qs8-dwconv/gen/up8x25-minmax-fp32-ssse3-mul16.c
-tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D SSE=3 -D AVX=0 -D REQUANTIZATION=FP32 -o src/qs8-dwconv/gen/up16x25-minmax-fp32-ssse3-mul16.c
-tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=24 -D KERNEL_TILE=25 -D SSE=3 -D AVX=0 -D REQUANTIZATION=FP32 -o src/qs8-dwconv/gen/up24x25-minmax-fp32-ssse3-mul16.c
 
 tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D SSE=4 -D AVX=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-dwconv/gen/up8x9-minmax-gemmlowp-sse41-mul16.c
 tools/xngen src/qs8-dwconv/unipass-sse-mul16.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D SSE=4 -D AVX=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-dwconv/gen/up16x9-minmax-gemmlowp-sse41-mul16.c
