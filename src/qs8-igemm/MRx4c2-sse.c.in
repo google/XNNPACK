@@ -288,8 +288,8 @@ void xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c2__${ISA}_${
       __m128i vacc${M}${min(M+1, MR-1)}x0123 = _mm_adds_epi16(_mm_packs_epi32(vacc${M}x0123, vacc${min(M+1, MR-1)}x0123), voutput_zero_point);
 
     $if SSE < 4:
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_min);
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_max);
+      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
+      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_max);
       $for M in range(0, MR, 2):
         vacc${M}${min(M+1, MR-1)}x0123 = _mm_min_epi16(_mm_max_epi16(vacc${M}${min(M+1, MR-1)}x0123, voutput_min), voutput_max);
 
@@ -299,8 +299,8 @@ void xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c2__${ISA}_${
       __m128i vout = _mm_packs_epi16(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
     $if SSE == 4:
-      vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_min));
-      vout = _mm_min_epi8(vout, _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_max));
+      vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min));
+      vout = _mm_min_epi8(vout, _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_max));
 
     if (nc >= 4) {
       $for M in reversed(range(1, MR)):

@@ -131,8 +131,8 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c2__sse41_ld128(
 
     __m128i vout = _mm_packs_epi16(vacc00x0123, vacc00x0123);
 
-    vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_min));
-    vout = _mm_min_epi8(vout, _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_max));
+    vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->fp32_sse4.output_min));
+    vout = _mm_min_epi8(vout, _mm_load_si128((const __m128i*) params->fp32_sse4.output_max));
 
     if (nc >= 4) {
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);

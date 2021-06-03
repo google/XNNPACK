@@ -225,8 +225,8 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld128(
     __m128i vacc01x0123 = _mm_adds_epi16(_mm_packs_epi32(vacc0x0123, vacc1x0123), voutput_zero_point);
     __m128i vacc23x0123 = _mm_adds_epi16(_mm_packs_epi32(vacc2x0123, vacc3x0123), voutput_zero_point);
 
-    const __m128i voutput_min = _mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_min);
-    const __m128i voutput_max = _mm_load_si128((const __m128i*) params->gemmlowp_sse2.output_max);
+    const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse2.output_min);
+    const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_sse2.output_max);
     vacc01x0123 = _mm_min_epi16(_mm_max_epi16(vacc01x0123, voutput_min), voutput_max);
     vacc23x0123 = _mm_min_epi16(_mm_max_epi16(vacc23x0123, voutput_min), voutput_max);
 
