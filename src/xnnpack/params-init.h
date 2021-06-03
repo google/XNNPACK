@@ -505,6 +505,123 @@ static inline void xnn_init_qs8_conv_minmax_gemmlowp_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD
 
+static inline void xnn_init_qc8_scale_fp32_params(
+  size_t channels,
+  size_t channels_tile,
+  size_t stride,
+  const float scale[XNN_MIN_ELEMENTS(1)],
+  void* packed_w)
+{
+  for (size_t tile_start = 0; tile_start < channels; tile_start += channels_tile) {
+    const size_t tile_size = min(channels - tile_start, channels_tile);
+    for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
+      ((float*) packed_w)[tile_offset] = scale[tile_start + tile_offset];
+    }
+    packed_w = (void*) ((uintptr_t) packed_w + stride);
+  }
+}
+
+static inline void xnn_init_qs8_minmax_scalar_params(
+  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->scalar.output_min_less_zero_point = (int32_t) output_min - (int32_t) output_zero_point;
+  params->scalar.output_max_less_zero_point = (int32_t) output_max - (int32_t) output_zero_point;
+  params->scalar.output_zero_point = (int32_t) output_zero_point;
+}
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+static inline void xnn_init_qs8_minmax_sse2_params(
+  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
+    params->sse2.output_min[i] = (int16_t) output_min;
+    params->sse2.output_max[i] = (int16_t) output_max;
+  }
+}
+
+static inline void xnn_init_qs8_minmax_sse4_params(
+  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse4.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->sse4.output_min[i] = output_min;
+    params->sse4.output_max[i] = output_max;
+  }
+}
+
+static inline void xnn_init_qs8_minmax_avx2_params(
+  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 32; i++) {
+    params->avx2.output_min[i] = output_min;
+    params->avx2.output_max[i] = output_max;
+  }
+}
+
+static inline void xnn_init_qs8_minmax_avx512_params(
+  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  for (uint32_t i = 0; i < 32; i++) {
+    params->avx512.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 64; i++) {
+    params->avx512.output_min[i] = output_min;
+    params->avx512.output_max[i] = output_max;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+static inline void xnn_init_qs8_minmax_neon_params(
+  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->neon.output_zero_point = (int16_t) output_zero_point;
+  params->neon.output_min = output_min;
+  params->neon.output_max = output_max;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_WASMSIMD
+static inline void xnn_init_qs8_minmax_wasmsimd_params(
+  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->wasmsimd.output_min[i] = output_min;
+    params->wasmsimd.output_max[i] = output_max;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD
+
 static inline void xnn_init_qu8_avgpool_params(
   union xnn_qu8_avgpool_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,

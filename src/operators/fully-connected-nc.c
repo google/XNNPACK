@@ -134,6 +134,7 @@ static enum xnn_status create_fully_connected_nc(
       nr, kr, sr,
       kernel, bias,
       fully_connected_op->packed_weights,
+      0 /* extra bytes */,
       packing_params);
   }
 

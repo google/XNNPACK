@@ -276,6 +276,50 @@ union xnn_qu8_conv_minmax_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+union xnn_qs8_minmax_params {
+  struct {
+    int32_t output_min_less_zero_point;
+    int32_t output_max_less_zero_point;
+    int32_t output_zero_point;
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int16_t output_zero_point;
+    uint8_t output_min;
+    uint8_t output_max;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int16_t output_min[8];
+    XNN_ALIGN(16) int16_t output_max[8];
+  } sse2;
+  struct {
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int8_t output_min[16];
+    XNN_ALIGN(16) int8_t output_max[16];
+  } sse4;
+  struct {
+    XNN_ALIGN(32) int16_t output_zero_point[16];
+    XNN_ALIGN(32) int8_t output_min[32];
+    XNN_ALIGN(32) int8_t output_max[32];
+  } avx2;
+  struct {
+    XNN_ALIGN(64) int16_t output_zero_point[32];
+    XNN_ALIGN(64) int8_t output_min[64];
+    XNN_ALIGN(64) int8_t output_max[64];
+  } avx512;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int8_t output_min[16];
+    XNN_ALIGN(16) int8_t output_max[16];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD
+};
+
 union xnn_qs8_conv_minmax_params {
   struct {
     int32_t multiplier;
@@ -671,17 +715,17 @@ typedef void (*xnn_f16_igemm_minmax_ukernel_function)(
     const void* zero,
     const struct xnn_f16_scaleminmax_params* params);
 
-typedef void (*xnn_qu8_gemm_minmax_ukernel_function)(
+typedef void (*xnn_qc8_gemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
     size_t k,
-    const uint8_t* a,
+    const int8_t* a,
     size_t a_stride,
     const void* w,
-    uint8_t* c,
+    int8_t* c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qu8_conv_minmax_params* params);
+    const union xnn_qs8_minmax_params* params);
 
 typedef void (*xnn_qs8_gemm_minmax_ukernel_function)(
     size_t mr,
@@ -694,6 +738,18 @@ typedef void (*xnn_qs8_gemm_minmax_ukernel_function)(
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_qs8_conv_minmax_params* params);
+
+typedef void (*xnn_qu8_gemm_minmax_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const uint8_t* a,
+    size_t a_stride,
+    const void* w,
+    uint8_t* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_qu8_conv_minmax_params* params);
 
 typedef void (*xnn_igemm_ukernel_function)(
     size_t mr,
@@ -1758,6 +1814,12 @@ typedef void (*xnn_init_qu8_conv_minmax_params_fn)(
   uint8_t output_zero_point,
   uint8_t output_min,
   uint8_t output_max);
+
+typedef void (*xnn_init_qs8_minmax_params_fn)(
+  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max);
 
 typedef void (*xnn_init_f16_minmax_params_fn)(
   struct xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],

@@ -2755,6 +2755,12 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/math/sigmoid-avx2-rr2-p5-div.c
   src/math/sigmoid-avx2-rr2-p5-nr1fma.c
   src/math/sigmoid-avx2-rr2-p5-nr2fma.c
+  src/qc8-gemm/gen/1x8c8-minmax-fp32-avx2.c
+  src/qc8-gemm/gen/1x8c8-xw-minmax-fp32-avx2.c
+  src/qc8-gemm/gen/2x8c8-minmax-fp32-avx2.c
+  src/qc8-gemm/gen/2x8c8-xw-minmax-fp32-avx2.c
+  src/qc8-gemm/gen/3x8c8-minmax-fp32-avx2.c
+  src/qc8-gemm/gen/3x8c8-xw-minmax-fp32-avx2.c
   src/qs8-dwconv/gen/up8x9-minmax-fp32-avx2-mul32.c
   src/qs8-dwconv/gen/up8x9-minmax-gemmlowp-avx2-mul32.c
   src/qs8-dwconv/gen/up8x25-minmax-fp32-avx2-mul32.c
@@ -2781,12 +2787,15 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up32x25-minmax-gemmlowp-avx2-mul32.c
   src/qs8-gemm/gen/1x8c8-minmax-fp32-avx2.c
   src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-avx2.c
+  src/qs8-gemm/gen/1x8c8-xw-minmax-fp32-avx2.c
   src/qs8-gemm/gen/1x8c8-xw-minmax-gemmlowp-avx2.c
   src/qs8-gemm/gen/2x8c8-minmax-fp32-avx2.c
   src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-avx2.c
+  src/qs8-gemm/gen/2x8c8-xw-minmax-fp32-avx2.c
   src/qs8-gemm/gen/2x8c8-xw-minmax-gemmlowp-avx2.c
   src/qs8-gemm/gen/3x8c8-minmax-fp32-avx2.c
   src/qs8-gemm/gen/3x8c8-minmax-gemmlowp-avx2.c
+  src/qs8-gemm/gen/3x8c8-xw-minmax-fp32-avx2.c
   src/qs8-gemm/gen/3x8c8-xw-minmax-gemmlowp-avx2.c
   src/qs8-igemm/gen/1x8c8-minmax-fp32-avx2.c
   src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-avx2.c
@@ -4793,6 +4802,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-vrsubc-relu-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(f32-vrsubc-relu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(f32-vrsubc-relu-test f32-vrsubc-relu-test)
+
+  ADD_EXECUTABLE(qc8-gemm-minmax-fp32-test test/qc8-gemm-minmax-fp32.cc)
+  SET_TARGET_PROPERTIES(qc8-gemm-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qc8-gemm-minmax-fp32-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qc8-gemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qc8-gemm-minmax-fp32-test qc8-gemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qs8-dwconv-minmax-gemmlowp-test test/qs8-dwconv-minmax-gemmlowp.cc)
   SET_TARGET_PROPERTIES(qs8-dwconv-minmax-gemmlowp-test PROPERTIES
