@@ -3090,6 +3090,14 @@ SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/math/sqrt-avx512f-nr2fma.c)
 
 SET(XNNPACK_AVX512SKX_MICROKERNEL_SRCS
+  src/qc8-gemm/gen/1x16c8-minmax-fp32-avx512skx.c
+  src/qc8-gemm/gen/2x16c8-minmax-fp32-avx512skx.c
+  src/qc8-gemm/gen/3x16c8-minmax-fp32-avx512skx.c
+  src/qc8-gemm/gen/4x16c8-minmax-fp32-avx512skx.c
+  src/qc8-igemm/gen/1x16c8-minmax-fp32-avx512skx.c
+  src/qc8-igemm/gen/2x16c8-minmax-fp32-avx512skx.c
+  src/qc8-igemm/gen/3x16c8-minmax-fp32-avx512skx.c
+  src/qc8-igemm/gen/4x16c8-minmax-fp32-avx512skx.c
   src/qs8-dwconv/gen/up16x9-minmax-fp32-avx512skx-mul32.c
   src/qs8-dwconv/gen/up16x9-minmax-gemmlowp-avx512skx-mul32.c
   src/qs8-dwconv/gen/up16x25-minmax-fp32-avx512skx-mul32.c

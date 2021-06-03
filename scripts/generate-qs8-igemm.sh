@@ -334,15 +334,20 @@ tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=3 -D CHANNELWISE=1 -D REQUANTIZ
 
 ################################## x86 AVX512 #################################
 ### C8 micro-kernels
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=1 -D VARIANT=LD256 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/1x16c8-minmax-gemmlowp-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=2 -D VARIANT=LD256 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/2x16c8-minmax-gemmlowp-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/3x16c8-minmax-gemmlowp-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/4x16c8-minmax-gemmlowp-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=1 -D VARIANT=LD256 -D CHANNELWISE=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/1x16c8-minmax-gemmlowp-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=2 -D VARIANT=LD256 -D CHANNELWISE=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/2x16c8-minmax-gemmlowp-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D CHANNELWISE=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/3x16c8-minmax-gemmlowp-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D CHANNELWISE=0 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/4x16c8-minmax-gemmlowp-avx512skx.c
 
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=1 -D VARIANT=LD256 -D REQUANTIZATION=FP32 -o src/qs8-igemm/gen/1x16c8-minmax-fp32-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=2 -D VARIANT=LD256 -D REQUANTIZATION=FP32 -o src/qs8-igemm/gen/2x16c8-minmax-fp32-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D REQUANTIZATION=FP32 -o src/qs8-igemm/gen/3x16c8-minmax-fp32-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D REQUANTIZATION=FP32 -o src/qs8-igemm/gen/4x16c8-minmax-fp32-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=1 -D VARIANT=LD256 -D CHANNELWISE=0 -D REQUANTIZATION=FP32 -o src/qs8-igemm/gen/1x16c8-minmax-fp32-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=2 -D VARIANT=LD256 -D CHANNELWISE=0 -D REQUANTIZATION=FP32 -o src/qs8-igemm/gen/2x16c8-minmax-fp32-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D CHANNELWISE=0 -D REQUANTIZATION=FP32 -o src/qs8-igemm/gen/3x16c8-minmax-fp32-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D CHANNELWISE=0 -D REQUANTIZATION=FP32 -o src/qs8-igemm/gen/4x16c8-minmax-fp32-avx512skx.c
+
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=1 -D VARIANT=LD256 -D CHANNELWISE=1 -D REQUANTIZATION=FP32 -o src/qc8-igemm/gen/1x16c8-minmax-fp32-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=2 -D VARIANT=LD256 -D CHANNELWISE=1 -D REQUANTIZATION=FP32 -o src/qc8-igemm/gen/2x16c8-minmax-fp32-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D CHANNELWISE=1 -D REQUANTIZATION=FP32 -o src/qc8-igemm/gen/3x16c8-minmax-fp32-avx512skx.c
+tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D CHANNELWISE=1 -D REQUANTIZATION=FP32 -o src/qc8-igemm/gen/4x16c8-minmax-fp32-avx512skx.c
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-gemmlowp.yaml --output test/qs8-igemm-minmax-gemmlowp.cc
