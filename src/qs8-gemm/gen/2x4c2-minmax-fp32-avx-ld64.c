@@ -15,6 +15,7 @@
 #include <xnnpack/math.h>
 
 
+
 void xnn_qs8_gemm_minmax_fp32_ukernel_2x4c2__avx_ld64(
     size_t mr,
     size_t nc,

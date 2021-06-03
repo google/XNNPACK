@@ -7,6 +7,7 @@ $assert SSE in [2, 3, 4]
 $assert not XOP or AVX
 $assert not AVX or SSE == 4
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 $assert SSE != 3 or REQUANTIZATION != "FP32"
 $assert VARIANT in ["LD64", "LD128", "EXTENDED"]
 $assert MR <= 4
@@ -27,11 +28,14 @@ $else:
 #include <xnnpack/math.h>
 
 
+
+$DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$PARAMS_STRUCT = REQUANTIZATION.lower() + ("_sse4" if SSE >= 4 else "_sse2")
+$GEMM_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + ("sse4" if SSE >= 4 else "sse2")
 $ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
-void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c2__${ISA}${LOAD_SUFFIX}(
+void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c2__${ISA}${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -41,7 +45,7 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union ${GEMM_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -298,9 +302,15 @@ void xnn_qs8_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4
       $for M in range(MR):
         __m128 vscaled${M}x0123 = _mm_cvtepi32_ps(vacc${M}x0123);
 
-      const __m128 vscale = _mm_load_ps(params->fp32_${"sse4" if SSE >= 4 else "sse2"}.scale);
-      $for M in range(MR):
-        vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale);
+      $if CHANNELWISE:
+        const __m128 vscale0123 = _mm_loadu_ps((const float*) w);
+        w = (const void*) ((uintptr_t) w + 4 * sizeof(float));
+        $for M in range(MR):
+          vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale0123);
+      $else:
+        const __m128 vscale = _mm_load_ps(params->${PARAMS_STRUCT}.scale);
+        $for M in range(MR):
+          vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale);
 
       $for M in range(MR):
         vacc${M}x0123 = _mm_cvtps_epi32(vscaled${M}x0123);
