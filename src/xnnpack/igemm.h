@@ -652,6 +652,26 @@ DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_gemmlowp_ukernel_
 DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x4__scalar)
 
 
+#define DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                               \
+      size_t mr,                                           \
+      size_t nr,                                           \
+      size_t kc,                                           \
+      size_t ks,                                           \
+      const int8_t** a,                                    \
+      const void* w,                                       \
+      int8_t* c,                                           \
+      size_t cm_stride,                                    \
+      size_t cn_stride,                                    \
+      size_t a_offset,                                     \
+      const int8_t* zero,                                  \
+      const union xnn_qs8_minmax_params* params);
+
+DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__avx2)
+DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__avx2)
+DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_3x8c8__avx2)
+
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

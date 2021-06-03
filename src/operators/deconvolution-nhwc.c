@@ -217,6 +217,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
         groups, group_output_channels, kernel_size, group_input_channels,
         nr, kr, sr,
         kernel, bias, deconvolution_op->packed_weights,
+        0 /* extra bytes */,
         packing_params);
       break;
     case xnn_ukernel_type_subconv2d:

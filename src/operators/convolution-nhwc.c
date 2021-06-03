@@ -355,7 +355,7 @@ static enum xnn_status create_convolution2d_nhwc(
             pack_conv_goki_w(
               groups, group_output_channels, kernel_size, group_input_channels,
               nr, kr, sr,
-              kernel, bias, convolution_op->packed_weights, packing_params);
+              kernel, bias, convolution_op->packed_weights, 0 /* extra bytes */, packing_params);
           }
           convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
             .mr = gemm_parameters->mr,

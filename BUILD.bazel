@@ -3543,6 +3543,9 @@ AVX2_UKERNELS = [
     "src/qc8-gemm/gen/2x8c8-xw-minmax-fp32-avx2.c",
     "src/qc8-gemm/gen/3x8c8-minmax-fp32-avx2.c",
     "src/qc8-gemm/gen/3x8c8-xw-minmax-fp32-avx2.c",
+    "src/qc8-igemm/gen/1x8c8-minmax-fp32-avx2.c",
+    "src/qc8-igemm/gen/2x8c8-minmax-fp32-avx2.c",
+    "src/qc8-igemm/gen/3x8c8-minmax-fp32-avx2.c",
     "src/qs8-dwconv/gen/up8x9-minmax-fp32-avx2-mul32.c",
     "src/qs8-dwconv/gen/up8x9-minmax-gemmlowp-avx2-mul32.c",
     "src/qs8-dwconv/gen/up8x25-minmax-fp32-avx2-mul32.c",
@@ -7116,6 +7119,17 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qc8-gemm-minmax-fp32.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qc8_igemm_minmax_fp32_test",
+    timeout = "moderate",
+    srcs = [
+        "test/qc8-igemm-minmax-fp32.cc",
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,

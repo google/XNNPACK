@@ -83,7 +83,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   std::fill(w.begin(), w.end(), 0.0f);
   xnn_pack_f32_conv_goki_w(
     1 /* groups */, group_output_channels, kernel_size, group_input_channels,
-    nr, kr, sr, k.data(), b.data(), w.data(), nullptr);
+    nr, kr, sr, k.data(), b.data(), w.data(), 0 /* extra bytes */, nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }

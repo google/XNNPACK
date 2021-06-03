@@ -60,7 +60,7 @@ void xnn_pack_f32_gemm_goi_w(
         }
         packed_w += (nr - nr_block_size) * kr;
       }
-      packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
+      packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -116,7 +116,7 @@ void xnn_pack_f16_gemm_goi_w(
         }
         packed_w += (nr - nr_block_size) * kr;
       }
-      packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -494,6 +494,7 @@ void xnn_pack_f32_conv_goki_w(
   const float* k,
   const float* b,
   float* packed_w,
+  size_t extra_bytes,
   const void* params)
 {
   const size_t skr = sr * kr;
@@ -532,6 +533,7 @@ void xnn_pack_f32_conv_goki_w(
           packed_w += (nr - nr_block_size) * kr;
         }
       }
+      packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
     }
     k += ks * kc * nc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -551,6 +553,7 @@ void xnn_pack_f16_conv_goki_w(
   const uint16_t* k,
   const uint16_t* b,
   uint16_t* packed_w,
+  size_t extra_bytes,
   const void* params)
 {
   const size_t skr = sr * kr;
@@ -589,6 +592,7 @@ void xnn_pack_f16_conv_goki_w(
           packed_w += (nr - nr_block_size) * kr;
         }
       }
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     k += ks * kc * nc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -608,6 +612,7 @@ void xnn_pack_qu8_conv_goki_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
+  size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
   assert(sr == 1);
@@ -648,6 +653,7 @@ void xnn_pack_qu8_conv_goki_w(
           packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * kr * sizeof(uint8_t));
         }
       }
+      packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
     }
     k += ks * kc * nc;
     if XNN_UNPREDICTABLE(b != NULL) {
@@ -667,6 +673,7 @@ void xnn_pack_qs8_conv_goki_w(
   const int8_t* k,
   const int32_t* b,
   void* packed_w,
+  size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
   assert(sr == 1);
@@ -706,6 +713,7 @@ void xnn_pack_qs8_conv_goki_w(
           packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * kr * sizeof(int8_t));
         }
       }
+      packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
     }
     k += ks * kc * nc;
     if XNN_UNPREDICTABLE(b != NULL) {
