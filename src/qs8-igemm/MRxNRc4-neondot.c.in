@@ -6,6 +6,7 @@
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert NR % 8 == 0
 $assert 8 <= NR <= 16
+$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -14,7 +15,8 @@ $assert 8 <= NR <= 16
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c4__neondot(
+$PARAMS_STRUCT = {"GEMMLOWP": "gemmlowp_neon", "FP32": "fp32_neonv8"}[REQUANTIZATION]
+void xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -111,22 +113,37 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c4__neondot(
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    const int32x4_t vmultiplier = vld1q_dup_s32(&params->gemmlowp_neon.multiplier);
-    $for M in range(MR):
-      $for N in range(0, NR, 4):
-        vacc${M}x${ABC[N:N+4]} = vqrdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
+    $if REQUANTIZATION == "GEMMLOWP":
+      const int32x4_t vmultiplier = vld1q_dup_s32(&params->gemmlowp_neon.multiplier);
+      const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
+      const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
 
-    const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
-    const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
-    $for M in range(MR):
-      $for N in range(0, NR, 4):
-        vacc${M}x${ABC[N:N+4]} = vsraq_n_s32(vacc${M}x${ABC[N:N+4]}, vbicq_s32(vacc${M}x${ABC[N:N+4]}, vzero_shift_mask), 31);
+      $for M in range(MR):
+        $for N in range(0, NR, 4):
+          const int32x4_t vproduct${M}x${ABC[N:N+4]} = vqrdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
 
-    $for M in range(MR):
-      $for N in range(0, NR, 4):
-        vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_shift);
+      $for M in range(MR):
+        $for N in range(0, NR, 4):
+          vacc${M}x${ABC[N:N+4]} = vsraq_n_s32(vproduct${M}x${ABC[N:N+4]}, vbicq_s32(vacc${M}x${ABC[N:N+4]}, vzero_shift_mask), 31);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->gemmlowp_neon.output_zero_point);
+      $for M in range(MR):
+        $for N in range(0, NR, 4):
+          vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_shift);
+    $elif REQUANTIZATION == "FP32":
+      const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neonv8.scale);
+      $for M in range(MR):
+        $for N in range(0, NR, 4):
+          float32x4_t vproduct${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
+
+      $for M in range(MR):
+        $for N in range(0, NR, 4):
+          vproduct${M}x${ABC[N:N+4]} = vmulq_f32(vproduct${M}x${ABC[N:N+4]}, vscale);
+
+      $for M in range(MR):
+        $for N in range(0, NR, 4):
+          vacc${M}x${ABC[N:N+4]} = vcvtnq_s32_f32(vproduct${M}x${ABC[N:N+4]});
+
+    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
 #if XNN_ARCH_ARM64
     $for M in range(MR):
       $for N in range(0, NR, 8):
@@ -155,11 +172,11 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c4__neondot(
           int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
 #endif
     $if NR == 8 and MR == 1:
-      const int8x8_t voutput_min = vld1_dup_s8(&params->gemmlowp_neon.output_min);
-      const int8x8_t voutput_max = vld1_dup_s8(&params->gemmlowp_neon.output_max);
+      const int8x8_t voutput_min = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_min);
+      const int8x8_t voutput_max = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_max);
     $else:
-      const int8x16_t voutput_min = vld1q_dup_s8(&params->gemmlowp_neon.output_min);
-      const int8x16_t voutput_max = vld1q_dup_s8(&params->gemmlowp_neon.output_max);
+      const int8x16_t voutput_min = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_min);
+      const int8x16_t voutput_max = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_max);
 
     $for M in reversed(range(MR)):
       $for N in range(0, NR, 16):

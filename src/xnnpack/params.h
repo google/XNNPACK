@@ -338,6 +338,12 @@ union xnn_qs8_conv_minmax_params {
     int8_t output_min;
     int8_t output_max;
   } gemmlowp_neon;
+  struct {
+    float scale;
+    int16_t output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+  } fp32_neonv8;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {

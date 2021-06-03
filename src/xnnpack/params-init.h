@@ -456,6 +456,19 @@ static inline void xnn_init_qs8_conv_minmax_gemmlowp_neon_params(
   params->gemmlowp_neon.output_min = output_min;
   params->gemmlowp_neon.output_max = output_max;
 }
+
+static inline void xnn_init_qs8_conv_minmax_fp32_neonv8_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->fp32_neonv8.scale = scale;
+  params->fp32_neonv8.output_zero_point = (int16_t) output_zero_point;
+  params->fp32_neonv8.output_min = output_min;
+  params->fp32_neonv8.output_max = output_max;
+}
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_WASMSIMD
