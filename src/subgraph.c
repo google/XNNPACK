@@ -453,6 +453,7 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
       subgraph->nodes[node->cluster_leader].num_zeroes += num_zeroes;
     }
   }
+  bool use_nchw_layout = false;
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
     if ((subgraph->nodes[node->cluster_leader].layout_flags & XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER) != 0) {
@@ -481,8 +482,12 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
       if (value->layout != xnn_layout_type_nchw) {
         value->layout = xnn_layout_type_nchw;
         xnn_log_info("set Value #%"PRIu32" layout to NCHW", node->inputs[i]);
+        use_nchw_layout = true;
       }
     }
+  }
+  if (use_nchw_layout) {
+    xnn_log_info("XNNPACK has switched to sparse inference mode!");
   }
 }
 
