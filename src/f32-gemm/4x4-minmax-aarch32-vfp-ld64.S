@@ -43,7 +43,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
         .arch   armv6
         .fpu    vfp
 #endif
-        // Push 96 bytes
+        # Push 96 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
         VPUSH   {d8-d15}                            // +64 = 96
 
@@ -51,7 +51,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
         LDRD    r6, r7, [sp, 104]       // Load c and cm_stride
         LDR     r5,  [sp, 116]          // Load params
 
-        // Clamp A and C pointers
+        # Clamp A and C pointers
         CMP     r0, 2                   // if mr >= 2
         ADD     r12, r3, r11            //   a1 = a0 + a_stride
         ADD     r4, r6, r7              //   c1 = c0 + cm_stride
@@ -60,7 +60,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
 
         LDR     r9, [sp, 100]           // Load w
 
-                                     // if mr > 2
+                                        // if mr > 2
         ADD     r10, r12, r11           //   a2 = a1 + a_stride
         ADD     r8, r4, r7              //   c2 = c1 + cm_stride
         MOVLS   r10, r12                // a2
@@ -88,7 +88,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
         VMOV.F64 d15, d9
         BLO     3f                      // less than 2 channels?
 
-        // Main loop - 2 floats of A (8 bytes)
+        # Main loop - 2 floats of A (8 bytes)
 1:
         VLDM    r3!, {d0}               // A0
         VLDM    r9!, {d6-d7}            // B0
@@ -137,12 +137,12 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
 
         BHS     1b
 
-        // Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 floats of A (4 bytes)
         TST     r5, 4
         BNE     3f
 
 2:
-        // Clamp
+        # Clamp
         VCMPE.F32 s8, s16
         VMRS    APSR_nzcv, FPSCR
         VCMPE.F32 s8, s17
@@ -243,7 +243,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
         SUBS    r1, r1, 4
         BLO     4f
 
-        // Store full 4 x 4
+        # Store full 4 x 4
         VSTM    r6, {d8-d9}
         SUB     r0, r0, r2
         ADD     r6, r11
@@ -263,7 +263,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
         BX      lr
 
 3:
-        // Remainder- 1 floats of A (4 bytes)
+        # Remainder- 1 floats of A (4 bytes)
         VLDM    r3!, {s0}               // A0
         VLDM    r9!, {d6-d7}            // B
         VLDM    r12!, {s1}              // A1
@@ -292,7 +292,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
 
         B       2b
 
-        // Store odd width
+        # Store odd width
 4:
         TST     r1, 2
         BEQ     5f

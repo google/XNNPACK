@@ -87,7 +87,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
 
         .p2align 3
 1:
-        // Group 0 - 18 cycles - includes prfm
+        # BLOCK 0 - 18 cycles - includes prfm
         LDR     d9, [x5, 72]            // Read B
         INS     v8.d[0], x17
         SMULL   v2.8h, v4.8b, v0.8b
@@ -107,7 +107,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
         SADALP  v18.4s, v10.8h
         SADALP  v19.4s, v11.8h
 
-        // Group 1- 18 cycles
+        # BLOCK 1- 18 cycles
         LDR     d9, [x5, 88]
         INS     v8.d[0], x17
         SMULL   v12.8h, v4.8b, v0.8b
@@ -127,7 +127,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
         SADALP  v22.4s, v14.8h
         SADALP  v23.4s, v15.8h
 
-        // Group 2 - 18 cycles
+        # BLOCK 2 - 18 cycles
         LDR     d9, [x5, 104]
         INS     v8.d[0], x17
         SMULL   v2.8h, v4.8b, v0.8b
@@ -150,7 +150,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
         SADALP  v27.4s, v11.8h
         SUBS    x0, x0, 16
 
-        // Group 3 - includes 2 cycles to read A0, A1 = 20 cycles
+        # BLOCK 3 - includes 2 cycles to read A0, A1 = 20 cycles
         LDR     d9, [x5, 120]
         INS     v8.d[0], x17
         SMULL   v12.8h, v4.8b, v0.8b
@@ -181,7 +181,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
 
         .p2align 3
 2:
-        // Group 0 - 18 cycles
+        # BLOCK 0 - 18 cycles
         LDR     d9, [x5, 72]            // Read B
         INS     v8.d[0], x17
         SMULL   v2.8h, v4.8b, v0.8b
@@ -201,7 +201,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
         SADALP  v18.4s, v10.8h
         SADALP  v19.4s, v11.8h
 
-        // Group 1- 18 cycles
+        # BLOCK 1- 18 cycles
         LDR     d9, [x5, 88]
         INS     v8.d[0], x17
         SMULL   v12.8h, v4.8b, v0.8b
@@ -221,7 +221,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
         SADALP  v22.4s, v14.8h
         SADALP  v23.4s, v15.8h
 
-        // Group 2 - 18 cycles
+        # BLOCK 2 - 18 cycles
         LDR     d9, [x5, 104]
         INS     v8.d[0], x17
         SMULL   v2.8h, v4.8b, v0.8b
@@ -241,7 +241,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
         SADALP  v26.4s, v10.8h
         SADALP  v27.4s, v11.8h
 
-        // Group 3 - includes 2 cycles to read A0, A1 = 20 cycles
+        # BLOCK 3 - includes 2 cycles to read A0, A1 = 20 cycles
         LDR     d9, [x5, 120]
         INS     v8.d[0], x17
         SMULL   v12.8h, v4.8b, v0.8b

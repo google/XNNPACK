@@ -73,7 +73,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a73
         STP     d10, d11, [sp, 16]
         ADD     x10, x9, x4             // a2 = a1 + a_stride
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
-                                 // if mr <= 2
+                                        // if mr <= 2
         CSEL    x10, x9, x10, LS        //   a2 = a1
         CSEL    x17, x16, x17, LS       //   c2 = c1
 
@@ -87,7 +87,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a73
         STP     d14, d15, [sp, 48]
         ADD     x12, x11, x4            // a4 = a3 + a_stride
         ADD     x13, x14, x7            // c4 = c3 + cm_stride
-                                 // if mr <= 4
+                                        // if mr <= 4
         CSEL    x12, x11, x12, LS       //   a4 = a3
         CSEL    x13, x14, x13, LS       //   c4 = c3
 

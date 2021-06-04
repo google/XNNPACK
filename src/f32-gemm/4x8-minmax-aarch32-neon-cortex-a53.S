@@ -45,8 +45,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         .arch   armv7-a
         .fpu    neon
 #endif
-        // Push 100 bytes
-        // r2 will be reloaded in outer loop
+        # Push 100 bytes
+        # r2 will be reloaded in outer loop
         VPUSH   {d8-d15}                                // 64
         PUSH    {r2, r4, r5, r6, r7, r8, r9, r10, r11}  // +36 = 100
 
@@ -55,13 +55,13 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         LDR     r6, [sp, 112]           // cm_stride
         LDR     r9, [sp, 104]           // w
 
-        // Clamp A and C pointers
+        # Clamp A and C pointers
         CMP     r0, 2                   // if mr >= 2
         ADD     r12, r3, r7             //   a1 = a0 + a_stride
         ADD     r4, r11, r6             //   c1 = c0 + cm_stride
         MOVLO   r12, r3                 // a1
         MOVLO   r4, r11                 // c1
-                                     // if mr > 2
+                                        // if mr > 2
         ADD     r10, r12, r7            //   a2 = a1 + a_stride
         ADD     r8, r4, r6              //   c2 = c1 + cm_stride
         MOVLS   r10, r12                // a2
@@ -101,7 +101,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         PLD     [r9, 320]
         BLO     4f                      // less than 4 channels?
 
-        // Prologue
+        # Prologue
         VLD1.32 {d0},  [r3]!            // A0
         VLD1.32 {d1}, [r12]!            // A1
         VLD1.32 {d2}, [r10]!            // A2
@@ -119,7 +119,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         .p2align 3
 1:
         # First group of 16 FMA, Second group loads
-        // BLOCK 0
+        # BLOCK 0
         VLD1.32 {d4}, [r3]!             // A0
         VMOV    d15, r0, r2             // b1 VMOV b from second group
         VMLA.F32 q8, q4, d0[0]
@@ -129,7 +129,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q12, q4, d2[0]
         PLD     [r3, 128]               // Prefetch A0
 
-        // BLOCK 1
+        # BLOCK 1
         VLDR    d12, [r9, 32]           // B1
         VMOV    d5, r0, r2              // a1 VMOV
         VMLA.F32 q14, q4, d3[0]
@@ -139,7 +139,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q11, q5, d1[0]
         PLD     [r12, 128]              // Prefetch A1
 
-        // BLOCK 2
+        # BLOCK 2
         VLD1.32 {d6}, [r10]!            // A2
         VMOV    d9, r0, r2              // b0 VMOV
         VMLA.F32 q13, q5, d2[0]
@@ -149,7 +149,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q8, q6, d0[1]
         PLD     [r10, 128]              // Prefetch A2
 
-        // BLOCK 3
+        # BLOCK 3
         VLDR    d14, [r9, 48]           // B1
         VMOV    d7, r0, r2              // a3 VMOV
         VMLA.F32 q10, q6, d1[1]
@@ -159,7 +159,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q14, q6, d3[1]
         PLD     [r7, 128]               // Prefetch A3
 
-        // BLOCK 4
+        # BLOCK 4
         VLDR    d8, [r9, 64]            // B0
         VMOV    d11, r0, r2             // B0 VMOV
         VMLA.F32 q9, q7, d0[1]
@@ -169,7 +169,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q13, q7, d2[1]
         PLD     [r9, 384]               // Prefetch B
 
-        // BLOCK 5
+        # BLOCK 5
         VLDR    d10, [r9, 80]           // B0
         VMOV    d13, r0, r2             // b1 VMOV b from second group
         VMLA.F32 q15, q7, d3[1]
@@ -180,7 +180,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         PLD     [r9, 448]               // Prefetch B
 
         # Second group of 16 FMA, First group of loads
-        // BLOCK 0
+        # BLOCK 0
         VLD1.32 {d0}, [r3]!             // A0
         VMOV    d15, r0, r2             // b1 VMOV b from second group
         VMLA.F32 q8, q4, d4[0]
@@ -188,9 +188,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q10, q4, d5[0]
         LDR     r2, [r12, 12]           // A1 high
         VMLA.F32 q12, q4, d6[0]
-        // NOP
+        # NOP
 
-        // BLOCK 1
+        # BLOCK 1
         VLDR    d12, [r9, 96]           // B1
         VMOV    d1, r0, r2              // a1 VMOV
         VMLA.F32 q14, q4, d7[0]
@@ -198,9 +198,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q9, q5, d4[0]
         LDR     r2, [r9, 140]           // B0 high
         VMLA.F32 q11, q5, d5[0]
-        // NOP
+        # NOP
 
-        // BLOCK 2
+        # BLOCK 2
         VLD1.32 {d2}, [r10]!            // A2
         VMOV    d9, r0, r2              // b0 VMOV
         VMLA.F32 q13, q5, d6[0]
@@ -208,9 +208,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q15, q5, d7[0]
         LDR     r2, [r7, 12]            // A3 high
         VMLA.F32 q8, q6, d4[1]
-        // NOP
+        # NOP
 
-        // BLOCK 3
+        # BLOCK 3
         VLDR    d14, [r9, 112]          // B1
         VMOV    d3, r0, r2              // a3 VMOV
         VMLA.F32 q10, q6, d5[1]
@@ -220,7 +220,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q14, q6, d7[1]
         ADD     r12, r12, 16            // A1++
 
-        // BLOCK 4
+        # BLOCK 4
         VLDR    d8, [r9, 128]           // B0
         VMOV    d11, r0, r2             // B0 VMOV
         VMLA.F32 q9, q7, d4[1]
@@ -230,7 +230,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q13, q7, d6[1]
         ADD     r7, r7, 16              // A3++
 
-        // BLOCK 5
+        # BLOCK 5
         VLDR    d10, [r9, 144]          // B0
         VMOV    d13, r0, r2             // b1 VMOV b
         VMLA.F32 q15, q7, d7[1]
@@ -243,7 +243,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         # Epilogue - 4 floats of A (16 bytes)
 2:
         # First group of 16 FMA, Second group loads
-        // BLOCK 0
+        # BLOCK 0
         VLD1.32 {d4}, [r3]!             // A0
         VMOV    d15, r0, r2             // b1 VMOV b from second group
         VMLA.F32 q8, q4, d0[0]
@@ -251,9 +251,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q10, q4, d1[0]
         LDR     r2, [r12, 4]            // A1 high
         VMLA.F32 q12, q4, d2[0]
-        // NOP
+        # NOP
 
-        // BLOCK 1
+        # BLOCK 1
         VLDR    d12, [r9, 32]           // B1
         VMOV    d5, r0, r2              // a1 VMOV
         VMLA.F32 q14, q4, d3[0]
@@ -261,9 +261,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q9, q5, d0[0]
         LDR     r2, [r9, 76]            // B0 high
         VMLA.F32 q11, q5, d1[0]
-        // NOP
+        # NOP
 
-        // BLOCK 2
+        # BLOCK 2
         VLD1.32 {d6}, [r10]!            // A2
         VMOV    d9, r0, r2              // b0 VMOV
         VMLA.F32 q13, q5, d2[0]
@@ -271,9 +271,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q15, q5, d3[0]
         LDR     r2, [r7, 4]             // A3 high
         VMLA.F32 q8, q6, d0[1]
-        // NOP
+        # NOP
 
-        // BLOCK 3
+        # BLOCK 3
         VLDR    d14, [r9, 48]           // B1
         VMOV    d7, r0, r2              // a3 VMOV
         VMLA.F32 q10, q6, d1[1]
@@ -281,9 +281,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q12, q6, d2[1]
         LDR     r2, [r9, 92]            // B0 high
         VMLA.F32 q14, q6, d3[1]
-        // NOP
+        # NOP
 
-        // BLOCK 4
+        # BLOCK 4
         VLDR    d8, [r9, 64]            // B0
         VMOV    d11, r0, r2             // B0 VMOV
         VMLA.F32 q9, q7, d0[1]
@@ -291,9 +291,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q11, q7, d1[1]
         LDR     r2, [r9, 108]           // B1 high
         VMLA.F32 q13, q7, d2[1]
-        // NOP
+        # NOP
 
-        // BLOCK 5
+        # BLOCK 5
         VLDR    d10, [r9, 80]           // B0
         VMOV    d13, r0, r2             // b1 VMOV b
         VMLA.F32 q15, q7, d3[1]
@@ -304,57 +304,57 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         NOP
 
         # Second group of 16 FMA, First group of loads
-        // BLOCK 0
+        # BLOCK 0
         VLDR    d12, [r9, 96]           // B1
         VMOV    d15, r0, r2             // b1 VMOV b from second group
         VMLA.F32 q8, q4, d4[0]
         VMLA.F32 q10, q4, d5[0]
         VMLA.F32 q12, q4, d6[0]
 
-        // BLOCK 1
+        # BLOCK 1
         VLDR    d14, [r9, 112]          // B1
         VMLA.F32 q14, q4, d7[0]
         VMLA.F32 q9, q5, d4[0]
         VMLA.F32 q11, q5, d5[0]
         ADD     r12, r12, 8             // A1++
 
-        // BLOCK 2
+        # BLOCK 2
         ADD     r7, r7, 8               // A3++ VLDR B1 lands here
         ADD     r9, r9, 128             // B++
         VMLA.F32 q13, q5, d6[0]
         VMLA.F32 q15, q5, d7[0]
         VMLA.F32 q8, q6, d4[1]
 
-        // BLOCK 3
+        # BLOCK 3
         VMLA.F32 q10, q6, d5[1]
         VMLA.F32 q12, q6, d6[1]
         VMLA.F32 q14, q6, d7[1]
         TST     r5, 15
 
-        // BLOCK 4
+        # BLOCK 4
         VMLA.F32 q9, q7, d4[1]
         VMLA.F32 q11, q7, d5[1]
         VMLA.F32 q13, q7, d6[1]
 
-        // BLOCK 5
+        # BLOCK 5
         VMLA.F32 q15, q7, d7[1]
 
-        // Is there a remainder?- 1 to 3 floats of A (4, 8 or 12 bytes)
+        # Is there a remainder?- 1 to 3 floats of A (4, 8 or 12 bytes)
         BNE     4f
 
         .p2align 3
 3:
-        // Load params pointer
+        # Load params pointer
         LDR     r0, [sp, 116]           // cn_stride
         LDR     r5, [sp, 120]           // params
         LDR     r2, [sp, 0]             // kc
         SUBS    r1, r1, 8
 
-        // Load min/max values
+        # Load min/max values
         VLD1.32 {d4[],d5[]}, [r5]!
         VLD1.32 {d6[],d7[]}, [r5]
 
-        // Clamp
+        # Clamp
         VMAX.F32 q8,  q8, q2
         VMAX.F32 q9,  q9, q2
         VMAX.F32 q10, q10, q2
@@ -372,7 +372,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMIN.F32 q14, q14, q3
         VMIN.F32 q15, q15, q3
 
-        // Store full 4 x 8
+        # Store full 4 x 8
         BLO     6f
         VST1.32 {d16-d19}, [r11], r0
         SUB     r7, r7, r2
@@ -391,11 +391,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
 
         .p2align 3
 4:
-        // Is there a remainder?- 2 floats of A (8 bytes)
+        # Is there a remainder?- 2 floats of A (8 bytes)
         TST     r5, 8
         BEQ     5f
 
-        // Remainder - 2 floats of A (8 bytes)
+        # Remainder - 2 floats of A (8 bytes)
         VLD1.32 {d0}, [r3]!             // A0
         VLDM    r9!, {d8-d11}           // B0
         VLD1.32 {d1}, [r12]!            // A1
@@ -420,12 +420,12 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q14, q6, d3[1]
         VMLA.F32 q15, q7, d3[1]
 
-        // Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 floats of A (4 bytes)
         TST     r5, 4
         BEQ     3b
 
 5:
-        // Remainder- 1 floats of A (4 bytes)
+        # Remainder- 1 floats of A (4 bytes)
         VLDM    r3!,  {s0}              // A0
         VLDM    r9!, {d8-d11}           // B0
         VLDM    r12!, {s2}              // A1
@@ -441,7 +441,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q15, q5, d3[0]
         B       3b
 
-        // Store odd width
+        # Store odd width
 6:
         TST     r1, 4
         BEQ     7f

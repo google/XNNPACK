@@ -44,7 +44,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld32
 
         ADD     x13, x15, x4            // a2 = a1 + a_stride
         ADD     x9,  x8, x7             // c2 = c1 + cm_stride
-                                   // if mr <= 2
+                                        // if mr <= 2
         CSEL    x13, x15, x13, LS       //   a2 = a1
         CSEL    x9,  x8,  x9, LS        //   c2 = c1
 

@@ -76,7 +76,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
 
         .p2align 3
 2:
-        // Group 0 - 4 cycles
+        # BLOCK 0 - 4 cycles
         SMULL   v17.8h, v4.8b, v0.8b
         SMULL   v19.8h, v5.8b, v0.8b
         LDP     d4, d5, [x5, 16]
@@ -84,7 +84,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
         SMLAL   v19.8h, v3.8b, v6.8b
         LDP     d2, d3, [x5, 80]
 
-        // Group 1 - 6 cycles
+        # BLOCK 1 - 6 cycles
         SMULL   v21.8h, v4.8b, v0.8b
         SMULL   v23.8h, v5.8b, v0.8b
         PRFM    PLDL1KEEP, [x5, 448]
@@ -96,7 +96,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
         SMLAL   v23.8h, v3.8b, v6.8b
         LDP     d2, d3, [x5, 96]
 
-        // Group 2 - 6 cycles
+        # BLOCK 2 - 6 cycles
         SMULL   v17.8h, v4.8b, v0.8b
         SMULL   v19.8h, v5.8b, v0.8b
         PRFM    PLDL1KEEP, [x13, 128]
@@ -107,7 +107,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
         SMLAL   v19.8h, v3.8b, v6.8b
         LDP     d2, d3, [x5, 112]
 
-        // Group 3 - 14 cycles
+        # BLOCK 3 - 14 cycles
         SMULL   v21.8h, v4.8b, v0.8b
         ADD     x5, x5, 128
         SMULL   v23.8h, v5.8b, v0.8b
@@ -128,7 +128,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
 
         .p2align 3
 3:
-       // Group 0 - 4 cycles
+       # BLOCK 0 - 4 cycles
         SMULL   v17.8h, v4.8b, v0.8b
         SMULL   v19.8h, v5.8b, v0.8b
         LDP     d4, d5, [x5, 16]
@@ -136,7 +136,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
         SMLAL   v19.8h, v3.8b, v6.8b
         LDP     d2, d3, [x5, 80]
 
-        // Group 1 - 6 cycles
+        # BLOCK 1 - 6 cycles
         SMULL   v21.8h, v4.8b, v0.8b
         SMULL   v23.8h, v5.8b, v0.8b
         PRFM    PLDL1KEEP, [x5, 448]
@@ -148,7 +148,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
         SMLAL   v23.8h, v3.8b, v6.8b
         LDP     d2, d3, [x5, 96]
 
-        // Group 2 - 6 cycles
+        # BLOCK 2 - 6 cycles
         SMULL   v17.8h, v4.8b, v0.8b
         SMULL   v19.8h, v5.8b, v0.8b
         PRFM    PLDL1KEEP, [x13, 128]
@@ -159,7 +159,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
         SMLAL   v19.8h, v3.8b, v6.8b
         LDP     d2, d3, [x5, 112]
 
-        // Group 3 - 8 cycles
+        # BLOCK 3 - 8 cycles
         SMULL   v21.8h, v4.8b, v0.8b
         ADD     x5, x5, 128
         SMULL   v23.8h, v5.8b, v0.8b

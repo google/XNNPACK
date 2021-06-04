@@ -70,7 +70,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a73
 
         STP     d10, d11, [sp, 16]
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
-                                 // if mr <= 2
+                                        // if mr <= 2
         CSEL    x17, x16, x17, LS       //   c2 = c1
 
         STP     d12, d13, [sp, 32]
@@ -80,7 +80,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a73
 
         STP     d14, d15, [sp, 48]
         ADD     x13, x10, x7            // c4 = c3 + cm_stride
-                                 // if mr <= 4
+                                        // if mr <= 4
         CSEL    x13, x10, x13, LS       //   c4 = c3
 
         # Save x20,x21,x22,x23 on stack

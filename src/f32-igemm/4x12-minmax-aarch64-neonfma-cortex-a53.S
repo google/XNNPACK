@@ -77,7 +77,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         CSEL    x17, x6, x17, LO        //   c1 = c0
 
         ADD     x10, x17, x7            // c2 = c1 + cm_stride
-                                 // if mr <= 2
+                                        // if mr <= 2
 
         CSEL    x10, x17, x10, LS       //   c2 = c1
 

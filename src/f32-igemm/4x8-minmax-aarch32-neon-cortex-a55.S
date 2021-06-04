@@ -44,7 +44,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         .arch   armv7-a
         .fpu    neon
 #endif
-        // Push 104 bytes
+        # Push 104 bytes
         PUSH    {r3, r4, r5, r6, r7, r8, r9, r10, r11, r14}  // +40
         VPUSH   {d8-d15}                                     // +64 = 104
 
@@ -54,7 +54,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         LDR     r9, [sp, 108]           // w
         MOV     r14, r3                 // p = ks
 
-        // Clamp C pointers
+        # Clamp C pointers
         CMP     r0, 2                   // if mr >= 2
         ADD     r4, r11, r6             //   c1 = c0 + cm_stride
         MOVLO   r4, r11                 // c1
@@ -103,7 +103,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         PLD     [r7,  0]
         PLD     [r7, 64]
 
-        // Add a_offset
+        # Add a_offset
         CMP     r3,  r0                 // if a0 == zero
         ADD     r3,  r3, r5             // a0 += a_offset
         MOVEQ   r3,  r0                 //   a0 = zero, else += a0 + a_offset
@@ -120,7 +120,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         SUBS    r5, r2, 16              // kc - 16
         BLO     5f                      // less than 4 channels?
 
-        // Prologue
+        # Prologue
         VLD1.32 {d0},  [r3]!            // A0
         VLD1.32 {d1}, [r12]!            // A1
         VLD1.32 {d2}, [r10]!            // A2
@@ -137,35 +137,35 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         .p2align 3
 2:
         # First group of 16 FMA, Second group loads
-        // BLOCK 0
+        # BLOCK 0
         VMLA.F32 q8, q4, d0[0]
         VLD1.32 {d4}, [r3]!             // A0
         VMLA.F32 q10, q4, d1[0]
         VLD1.32 {d5}, [r12]!            // A1
         VMLA.F32 q12, q4, d2[0]
 
-        // BLOCK 1
+        # BLOCK 1
         VMLA.F32 q14, q4, d3[0]
         VLDR    d12, [r9, 32]           // B1
         VMLA.F32 q9, q5, d0[0]
         VLDR    d9, [r9, 72]            // B0
         VMLA.F32 q11, q5, d1[0]
 
-        // BLOCK 2
+        # BLOCK 2
         VMLA.F32 q13, q5, d2[0]
         VLD1.32 {d6}, [r10]!            // A2
         VMLA.F32 q15, q5, d3[0]
         VLD1.32 {d7}, [r7]!             // A3
         VMLA.F32 q8, q6, d0[1]
 
-        // BLOCK 3
+        # BLOCK 3
         VMLA.F32 q10, q6, d1[1]
         VLDR    d14, [r9, 48]           // B1
         VMLA.F32 q12, q6, d2[1]
         VLDR    d11, [r9, 88]           // B0
         VMLA.F32 q14, q6, d3[1]
 
-        // BLOCK 4
+        # BLOCK 4
         VMLA.F32 q9, q7, d0[1]
         VLDR    d8, [r9, 64]            // B0
         VMLA.F32 q11, q7, d1[1]
@@ -173,26 +173,26 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         VMLA.F32 q13, q7, d2[1]
         VLDR    d10, [r9, 80]           // B0
 
-        // BLOCK 5
+        # BLOCK 5
         VMLA.F32 q15, q7, d3[1]
         VLDR    d15, [r9, 120]          // B1
 
         # Second group of 16 FMA, First group of loads
-        // BLOCK 0
+        # BLOCK 0
         VMLA.F32 q8, q4, d4[0]
         VLD1.32 {d0}, [r3]!             // A0
         VMLA.F32 q10, q4, d5[0]
         VLD1.32 {d1}, [r12]!            // A1
         VMLA.F32 q12, q4, d6[0]
 
-        // BLOCK 1
+        # BLOCK 1
         VMLA.F32 q14, q4, d7[0]
         VLDR    d12, [r9, 96]           // B1
         VMLA.F32 q9, q5, d4[0]
         VLDR    d9, [r9, 136]           // B0
         VMLA.F32 q11, q5, d5[0]
 
-        // BLOCK 2
+        # BLOCK 2
         VMLA.F32 q13, q5, d6[0]
         VLD1.32 {d2}, [r10]!            // A2
         VMLA.F32 q15, q5, d7[0]
@@ -200,14 +200,14 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         VMLA.F32 q8, q6, d4[1]
         SUBS    r5, r5, 16
 
-        // BLOCK 3
+        # BLOCK 3
         VMLA.F32 q10, q6, d5[1]
         VLDR    d14, [r9, 112]          // B1
         VMLA.F32 q12, q6, d6[1]
         VLDR    d11, [r9, 152]          // B0
         VMLA.F32 q14, q6, d7[1]
 
-        // BLOCK 4
+        # BLOCK 4
         VMLA.F32 q9, q7, d4[1]
         VLDR    d8, [r9, 128]           // B0
         VMLA.F32 q11, q7, d5[1]
@@ -215,7 +215,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         VMLA.F32 q13, q7, d6[1]
         VLDR    d10, [r9, 144]          // B0
 
-        // BLOCK 5
+        # BLOCK 5
         VMLA.F32 q15, q7, d7[1]
         VLDR    d15, [r9, 184]          // B1
         ADD     r9, r9, 128             // B++
@@ -224,35 +224,35 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         # Epilogue - 4 floats of A (16 bytes)
 3:
         # First group of 16 FMA, Second group loads
-        // BLOCK 0
+        # BLOCK 0
         VMLA.F32 q8, q4, d0[0]
         VLD1.32 {d4}, [r3]!             // A0
         VMLA.F32 q10, q4, d1[0]
         VLD1.32 {d5}, [r12]!            // A1
         VMLA.F32 q12, q4, d2[0]
 
-        // BLOCK 1
+        # BLOCK 1
         VMLA.F32 q14, q4, d3[0]
         VLDR    d12, [r9, 32]           // B1
         VMLA.F32 q9, q5, d0[0]
         VLDR    d9, [r9, 72]            // B0
         VMLA.F32 q11, q5, d1[0]
 
-        // BLOCK 2
+        # BLOCK 2
         VMLA.F32 q13, q5, d2[0]
         VLD1.32 {d6}, [r10]!            // A2
         VMLA.F32 q15, q5, d3[0]
         VLD1.32 {d7}, [r7]!             // A3
         VMLA.F32 q8, q6, d0[1]
 
-        // BLOCK 3
+        # BLOCK 3
         VMLA.F32 q10, q6, d1[1]
         VLDR    d14, [r9, 48]           // B1
         VMLA.F32 q12, q6, d2[1]
         VLDR    d11, [r9, 88]           // B0
         VMLA.F32 q14, q6, d3[1]
 
-        // BLOCK 4
+        # BLOCK 4
         VMLA.F32 q9, q7, d0[1]
         VLDR    d8, [r9, 64]            // B0
         VMLA.F32 q11, q7, d1[1]
@@ -260,44 +260,44 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         VMLA.F32 q13, q7, d2[1]
         VLDR    d10, [r9, 80]           // B0
 
-        // BLOCK 5
+        # BLOCK 5
         VMLA.F32 q15, q7, d3[1]
         VLDR    d15, [r9, 120]          // B1
 
         # Second group of 16 FMA, First group of loads
-        // BLOCK 0
+        # BLOCK 0
         VMLA.F32 q8, q4, d4[0]
         VLDR    d12, [r9, 96]           // B1
         VMLA.F32 q10, q4, d5[0]
         VMLA.F32 q12, q4, d6[0]
 
-        // BLOCK 1
+        # BLOCK 1
         VMLA.F32 q14, q4, d7[0]
         VLDR    d14, [r9, 112]          // B1
         VMLA.F32 q9, q5, d4[0]
         VMLA.F32 q11, q5, d5[0]
 
-        // BLOCK 2
+        # BLOCK 2
         VMLA.F32 q13, q5, d6[0]
         VMLA.F32 q15, q5, d7[0]
         VMLA.F32 q8, q6, d4[1]
         ADD     r9, r9, 128             // B++
 
-        // BLOCK 3
+        # BLOCK 3
         VMLA.F32 q10, q6, d5[1]
         VMLA.F32 q12, q6, d6[1]
         VMLA.F32 q14, q6, d7[1]
         TST     r5, 15
 
-        // BLOCK 4
+        # BLOCK 4
         VMLA.F32 q9, q7, d4[1]
         VMLA.F32 q11, q7, d5[1]
         VMLA.F32 q13, q7, d6[1]
 
-        // BLOCK 5
+        # BLOCK 5
         VMLA.F32 q15, q7, d7[1]
 
-        // Is there a remainder?- 1 to 3 floats of A (4, 8 or 12 bytes)
+        # Is there a remainder?- 1 to 3 floats of A (4, 8 or 12 bytes)
         BNE     5f
 
         .p2align 3
@@ -308,16 +308,16 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         # ks loop
         BHI     1b
 
-        // Load params pointer
+        # Load params pointer
         LDR     r0, [sp, 132]           // params
         LDR     r14, [sp, 64]           // p = ks
-        // Load min/max values
+        # Load min/max values
         VLD1.32 {d4[],d5[]}, [r0]!
         VLD1.32 {d6[],d7[]}, [r0]
         SUBS    r1, r1, 8
         LDR     r0, [sp, 120]           // cn_stride
 
-        // Clamp
+        # Clamp
         VMAX.F32 q8,  q8, q2
         VMAX.F32 q9,  q9, q2
         VMAX.F32 q10, q10, q2
@@ -335,7 +335,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         VMIN.F32 q14, q14, q3
         VMIN.F32 q15, q15, q3
 
-        // Store full 4 x 8
+        # Store full 4 x 8
         BLO     7f
         VST1.32 {d28-d31},  [r6], r0
         VST1.32 {d24-d27},  [r8], r0
@@ -352,11 +352,11 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
 
         .p2align 3
 5:
-        // Is there a remainder?- 2 floats of A (8 bytes)
+        # Is there a remainder?- 2 floats of A (8 bytes)
         TST     r5, 8
         BEQ     6f
 
-        // Remainder - 2 floats of A (8 bytes)
+        # Remainder - 2 floats of A (8 bytes)
         VLD1.32 {d0}, [r3]!             // A0
         VLDM    r9!, {d8-d11}           // B0
         VLD1.32 {d1}, [r12]!            // A1
@@ -381,12 +381,12 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         VMLA.F32 q14, q6, d3[1]
         VMLA.F32 q15, q7, d3[1]
 
-        // Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 floats of A (4 bytes)
         TST     r5, 4
         BEQ     4b
 
 6:
-        // Remainder- 1 floats of A (4 bytes)
+        # Remainder- 1 floats of A (4 bytes)
         VLDM    r3!, {s0}               // A0
         VLDM    r9!, {d8-d11}           // B0
         VLDM    r12!, {s2}              // A1
@@ -402,7 +402,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         VMLA.F32 q15, q5, d3[0]
         B       4b
 
-        // Store odd width
+        # Store odd width
 7:
         TST     r1, 4
         BEQ     8f

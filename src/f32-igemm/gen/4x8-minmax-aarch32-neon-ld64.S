@@ -48,8 +48,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         .arch   armv7-a
         .fpu    neon
 #endif
-        // Push 112 bytes
-        // r2 will be reloaded in outer loop.  r3 is ks
+        # Push 112 bytes
+        # r2 will be reloaded in outer loop.  r3 is ks
         PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r14}  // +44
         SUB     sp, sp, 4                                        // 4
         VPUSH   {d8-d15}                                         // +64 = 112
@@ -61,18 +61,18 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         LDR     r5, [sp, 140]           // params
         MOV     r14, r3                 // p = ks
 
-        // Clamp C pointers
+        # Clamp C pointers
         CMP     r0, 2                   // if mr >= 2
         ADD     r4, r11, r6             //   c1 = c0 + cm_stride
         MOVLO   r4, r11                 // c1
-                                          // if mr > 2
+                                        // if mr > 2
         ADD     r8, r4, r6              //   c2 = c1 + cm_stride
         MOVLS   r8, r4                  // c2
         CMP     r0, 4                   // if mr >=4
         ADD     r6, r8, r6              //   c3 = c2 + cm_stride
         MOVLO   r6, r8                  // c3
 
-        // Load min/max values
+        # Load min/max values
         VLD1.32 {d4[], d5[]}, [r5]!
         VLD1.32 {d6[], d7[]}, [r5]
 
@@ -94,7 +94,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         LDR     r0, [r2, 12]
         ADD     r2, r2, 16
 
-        // Add a_offset
+        # Add a_offset
         LDR     r5, [sp, 132]           // a_offset
         LDR     r7, [sp, 136]           // zero
         CMP     r3,  r7                 // if a0 == zero
@@ -115,7 +115,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         SUBS    r5, r5, 8               // kc - 8
         BLO     4f                      // less than 2 channels?
 
-        // Main loop - 2 floats of A (8 bytes)
+        # Main loop - 2 floats of A (8 bytes)
 2:
         VLD1.32 {d0}, [r3]!             // A0
         VLDM    r9!, {d8-d11}           // B0
@@ -143,7 +143,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VMLA.F32 q15, q7, d3[1]
         BHS     2b
 
-        // Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 floats of A (4 bytes)
         TST     r5, 4
         BNE     4f
 
@@ -155,7 +155,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         LDR     r7, [sp, 128]           // cn_stride
         LDR     r14, [sp, 72]           // p = ks
 
-        // Clamp
+        # Clamp
         VMAX.F32 q8,  q8, q2
         SUBS    r1, r1, 8
         VMAX.F32 q9,  q9, q2
@@ -174,7 +174,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VMIN.F32 q14, q14, q3
         VMIN.F32 q15, q15, q3
 
-        // Store full 4 x 8
+        # Store full 4 x 8
         BLO     5f
         VST1.32 {d28-d31},  [r6], r7
         VST1.32 {d24-d27},  [r8], r7
@@ -188,7 +188,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 4:
-        // Remainder- 1 floats of A (4 bytes)
+        # Remainder- 1 floats of A (4 bytes)
         VLDM    r3!, {s0}               // A0
         VLDM    r9!, {d8-d11}           // B0
         VLDM    r12!, {s2}              // A1
@@ -204,7 +204,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VMLA.F32 q15, q5, d3[0]
         B       3b
 
-        // Store odd width
+        # Store odd width
 5:
         TST     r1, 4
         BEQ     6f

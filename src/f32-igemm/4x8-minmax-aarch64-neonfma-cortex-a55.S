@@ -67,7 +67,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         CSEL    x16, x6, x16, LO        //   c1 = c0
 
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
-                                 // if mr <= 2
+                                        // if mr <= 2
         CSEL    x17, x16, x17, LS       //   c2 = c1
 
         CMP     x0, 4                   // if mr < 4
@@ -83,7 +83,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         # Load min/max values
         LD2R    {v6.4s, v7.4s}, [x8]
 
-        // Save x19, d12-d15 on stack
+        # Save x19, d12-d15 on stack
         STP     d12, d13, [sp, -48]!
         STP     d14, d15, [sp, 16]
         STR     x19,      [sp, 32]
@@ -152,7 +152,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         # 32 FMA + 8 LD64 A + 8 LDR B
 2:
         # First group of 16 FMA, Second group loads
-        // BLOCK 0
+        # BLOCK 0
         FMLA    v20.4s, v16.4s,  v0.s[0]
         LDR     d3, [x13], 8              // a0
         FMLA    v22.4s, v16.4s,  v0.s[2]
@@ -160,7 +160,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v24.4s, v16.4s,  v1.s[0]
         LDR     x19, [x14], 8              // a1
 
-        // BLOCK 1
+        # BLOCK 1
         FMLA    v26.4s, v16.4s,  v1.s[2]
         LDR     d12, [x5]
         FMLA    v21.4s, v17.4s,  v0.s[0]
@@ -168,7 +168,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v23.4s, v17.4s,  v0.s[2]
         LDR     x19, [x5, 8]            // b
 
-        // BLOCK 2
+        # BLOCK 2
         FMLA    v25.4s, v17.4s,  v1.s[0]
         LDR     d4, [x15], 8              // a2
         FMLA    v27.4s, v17.4s,  v1.s[2]
@@ -176,7 +176,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v20.4s, v18.4s,  v0.s[1]
         LDR     x19, [x8], 8               // a3
 
-        // BLOCK 3
+        # BLOCK 3
         FMLA    v22.4s, v18.4s,  v0.s[3]
         LDR     d13, [x5, 16]
         FMLA    v24.4s, v18.4s,  v1.s[1]
@@ -184,7 +184,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v26.4s, v18.4s,  v1.s[3]
         LDR     x19, [x5, 24]
 
-        // BLOCK 4
+        # BLOCK 4
         FMLA    v21.4s, v19.4s,  v0.s[1]
         LDR     d14, [x5, 32]
         FMLA    v23.4s, v19.4s,  v0.s[3]
@@ -192,8 +192,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v25.4s, v19.4s,  v1.s[1]
         LDR     x19, [x5, 40]
 
-        // BLOCK 5
-        // NOPs to ensure 4 cycle LDR lands on next LDR
+        # BLOCK 5
+        # NOPs to ensure 4 cycle LDR lands on next LDR
         FMLA    v27.4s, v19.4s,  v1.s[3]
         LDR     d15, [x5, 48]
         NOP
@@ -202,7 +202,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         LDR     x19, [x5, 56]
 
         # Second group of 16 FMA, First group of loads
-        // BLOCK 0
+        # BLOCK 0
         FMLA    v20.4s, v12.4s,  v3.s[0]
         LDR     d0, [x13], 8              // a0
         FMLA    v22.4s, v12.4s,  v3.s[2]
@@ -210,7 +210,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v24.4s, v12.4s,  v4.s[0]
         LDR     x19, [x14], 8              // a1
 
-        // BLOCK 1
+        # BLOCK 1
         FMLA    v26.4s, v12.4s,  v4.s[2]
         LDR     d16, [x5, 64]
         FMLA    v21.4s, v13.4s,  v3.s[0]
@@ -218,7 +218,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v23.4s, v13.4s,  v3.s[2]
         LDR     x19, [x5, 72]           // b
 
-        // BLOCK 2
+        # BLOCK 2
         FMLA    v25.4s, v13.4s,  v4.s[0]
         LDR     d1, [x15], 8             // a2
         FMLA    v27.4s, v13.4s,  v4.s[2]
@@ -226,7 +226,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v20.4s, v14.4s,  v3.s[1]
         LDR     x19, [x8], 8             // a3
 
-        // BLOCK 3
+        # BLOCK 3
         FMLA    v22.4s, v14.4s,  v3.s[3]
         LDR     d17, [x5, 80]
         FMLA    v24.4s, v14.4s,  v4.s[1]
@@ -234,7 +234,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v26.4s, v14.4s,  v4.s[3]
         LDR     x19, [x5, 88]
 
-        // BLOCK 4
+        # BLOCK 4
         FMLA    v21.4s, v15.4s,  v3.s[1]
         LDR     d18, [x5, 96]
         FMLA    v23.4s, v15.4s,  v3.s[3]
@@ -242,8 +242,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v25.4s, v15.4s,  v4.s[1]
         LDR     x19, [x5, 104]
 
-        // BLOCK 5
-        // NOTE that block needs to be 4 cycles for LDR not to stall
+        # BLOCK 5
+        # NOTE that block needs to be 4 cycles for LDR not to stall
         FMLA    v27.4s, v15.4s,  v4.s[3]
         LDR     d19, [x5, 112]
         INS     v18.d[1], x19
@@ -255,7 +255,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         # 32 FMA + 8 LD64 A + 8 LDR B
 3:
         # First group of 16 FMA, Second group loads
-        // BLOCK 0
+        # BLOCK 0
         LDR     d3, [x13], 8              // a0
         INS     v19.d[1], x19              // b from second group
         FMLA    v20.4s, v16.4s,  v0.s[0]
@@ -263,7 +263,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v22.4s, v16.4s,  v0.s[2]
         FMLA    v24.4s, v16.4s,  v1.s[0]
 
-        // BLOCK 1
+        # BLOCK 1
         LDR     d12, [x5]
         INS     v3.d[1], x19               // a1 ins
         FMLA    v26.4s, v16.4s,  v1.s[2]
@@ -271,7 +271,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v21.4s, v17.4s,  v0.s[0]
         FMLA    v23.4s, v17.4s,  v0.s[2]
 
-        // BLOCK 2
+        # BLOCK 2
         LDR     d4, [x15], 8             // a2
         INS     v12.d[1], x19           // b  ins
         FMLA    v25.4s, v17.4s,  v1.s[0]
@@ -279,7 +279,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v27.4s, v17.4s,  v1.s[2]
         FMLA    v20.4s, v18.4s,  v0.s[1]
 
-        // BLOCK 3
+        # BLOCK 3
         LDR     d13, [x5, 16]
         INS     v4.d[1], x19               // a3 ins
         FMLA    v22.4s, v18.4s,  v0.s[3]
@@ -287,7 +287,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v24.4s, v18.4s,  v1.s[1]
         FMLA    v26.4s, v18.4s,  v1.s[3]
 
-        // BLOCK 4
+        # BLOCK 4
         LDR     d14, [x5, 32]
         INS     v13.d[1], x19           // b
         FMLA    v21.4s, v19.4s,  v0.s[1]
@@ -295,8 +295,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v23.4s, v19.4s,  v0.s[3]
         FMLA    v25.4s, v19.4s,  v1.s[1]
 
-        // BLOCK 5
-        // NOPs to ensure 4 cycle LDR lands on next LDR
+        # BLOCK 5
+        # NOPs to ensure 4 cycle LDR lands on next LDR
         LDR     d15, [x5, 48]
         INS     v14.d[1], x19
         FMLA    v27.4s, v19.4s,  v1.s[3]
@@ -307,34 +307,34 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         NOP
 
         # Second group of 16 FMA, no loads
-        // BLOCK 0
+        # BLOCK 0
         INS     v15.d[1], x19           // b from previous
         FMLA    v20.4s, v12.4s,  v3.s[0]
         FMLA    v22.4s, v12.4s,  v3.s[2]
         FMLA    v24.4s, v12.4s,  v4.s[0]
 
-        // BLOCK 1
+        # BLOCK 1
         FMLA    v26.4s, v12.4s,  v4.s[2]
         FMLA    v21.4s, v13.4s,  v3.s[0]
         FMLA    v23.4s, v13.4s,  v3.s[2]
 
-        // BLOCK 2
+        # BLOCK 2
         FMLA    v25.4s, v13.4s,  v4.s[0]
         FMLA    v27.4s, v13.4s,  v4.s[2]
         FMLA    v20.4s, v14.4s,  v3.s[1]
 
-        // BLOCK 3
+        # BLOCK 3
         FMLA    v22.4s, v14.4s,  v3.s[3]
         FMLA    v24.4s, v14.4s,  v4.s[1]
         FMLA    v26.4s, v14.4s,  v4.s[3]
 
-        // BLOCK 4
+        # BLOCK 4
         FMLA    v21.4s, v15.4s,  v3.s[1]
         FMLA    v23.4s, v15.4s,  v3.s[3]
         FMLA    v25.4s, v15.4s,  v4.s[1]
         ADD     x5, x5, 64
 
-        // BLOCK 5
+        # BLOCK 5
         FMLA    v27.4s, v15.4s,  v4.s[3]
 
 4:
@@ -383,7 +383,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         # nc loop
         B.HI    0b
 
-        // Restore x19, d12-d15 from stack
+        # Restore x19, d12-d15 from stack
         LDR     x19,      [sp, 32]
         LDP     d14, d15, [sp, 16]
         LDP     d12, d13, [sp], 48
@@ -466,7 +466,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         STR     s22, [x16]
         STR     s20,  [x6]
 11:
-        // Restore x19, d12-d15 from stack
+        # Restore x19, d12-d15 from stack
         LDR     x19,      [sp, 32]
         LDP     d14, d15, [sp, 16]
         LDP     d12, d13, [sp], 48

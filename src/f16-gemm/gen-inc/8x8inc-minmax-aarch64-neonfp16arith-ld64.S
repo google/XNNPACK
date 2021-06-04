@@ -85,7 +85,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
 
         ADD     x10, x9, x4             // a2 = a1 + a_stride
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
-                                 // if mr <= 2
+                                        // if mr <= 2
         CSEL    x10, x9, x10, LS        //   a2 = a1
         CSEL    x17, x16, x17, LS       //   c2 = c1
 
@@ -97,7 +97,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
 
         ADD     x12, x11, x4            // a4 = a3 + a_stride
         ADD     x13, x14, x7            // c4 = c3 + cm_stride
-                                 // if mr <= 4
+                                        // if mr <= 4
         CSEL    x12, x11, x12, LS       //   a4 = a3
         CSEL    x13, x14, x13, LS       //   c4 = c3
 
@@ -109,7 +109,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
 
         ADD     x20, x19, x4            // a6 = a5 + a_stride
         ADD     x22, x21, x7            // c6 = c5 + cm_stride
-                                 // if mr <= 6
+                                        // if mr <= 6
         CSEL    x20, x19, x20, LS       //   a6 = a5
         CSEL    x22, x21, x22, LS       //   c6 = c5
 

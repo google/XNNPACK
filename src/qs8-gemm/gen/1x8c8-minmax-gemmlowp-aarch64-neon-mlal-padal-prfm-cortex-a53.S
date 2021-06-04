@@ -65,7 +65,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
 
         .p2align 3
 1:
-        // Group 0 - 6 cycles
+        # BLOCK 0 - 6 cycles
         SMULL   v17.8h, v4.8b, v0.8b
         LDR     x17, [x5, 80]
         SMULL   v19.8h, v5.8b, v0.8b
@@ -77,7 +77,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
         LDR     d3, [x5, 88]
         INS     v2.d[0], x17
 
-        // Group 1 - 10 cycles
+        # BLOCK 1 - 10 cycles
         SMULL   v21.8h, v4.8b, v0.8b
         LDR     x17, [x5, 96]
         SMULL   v23.8h, v5.8b, v0.8b
@@ -93,7 +93,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
         LDR     d3, [x5, 104]
         INS     v2.d[0], x17
 
-        // Group 2 - 10 cycles
+        # BLOCK 2 - 10 cycles
         SMULL   v17.8h, v4.8b, v0.8b
         LDR     x17, [x5, 112]
         SMULL   v19.8h, v5.8b, v0.8b
@@ -108,7 +108,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
         LDR     d3, [x5, 120]
         INS     v2.d[0], x17
 
-        // Group 3 - 15 cycles
+        # BLOCK 3 - 15 cycles
         SMULL   v21.8h, v4.8b, v0.8b
         LDR     x7, [x3], 8             // Read A0
         SMULL   v23.8h, v5.8b, v0.8b
@@ -135,7 +135,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
 
         .p2align 3
 2:
-        // Group 0 - 6 cycles
+        # BLOCK 0 - 6 cycles
         SMULL   v17.8h, v4.8b, v0.8b
         LDR     x17, [x5, 80]
         SMULL   v19.8h, v5.8b, v0.8b
@@ -147,7 +147,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
         LDR     d3, [x5, 88]
         INS     v2.d[0], x17
 
-        // Group 1 - 10 cycles
+        # BLOCK 1 - 10 cycles
         SMULL   v21.8h, v4.8b, v0.8b
         LDR     x17, [x5, 96]
         SMULL   v23.8h, v5.8b, v0.8b
@@ -161,7 +161,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
         LDR     d3, [x5, 104]
         INS     v2.d[0], x17
 
-        // Group 2 - 10 cycles
+        # BLOCK 2 - 10 cycles
         SMULL   v17.8h, v4.8b, v0.8b
         LDR     x17, [x5, 112]
         SMULL   v19.8h, v5.8b, v0.8b
@@ -174,7 +174,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
         LDR     d3, [x5, 120]
         INS     v2.d[0], x17
 
-        // Group 3 - 12 cycles
+        # BLOCK 3 - 12 cycles
         SMULL   v21.8h, v4.8b, v0.8b
         SMULL   v23.8h, v5.8b, v0.8b
         SADALP  v24.4s, v17.8h
