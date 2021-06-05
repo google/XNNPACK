@@ -28,7 +28,7 @@ void xnn_qs8_requantize_rndnu__sse4(
   assert(scale >= 0x1.0p-32f);
 
   const uint32_t scale_bits = fp32_to_bits(scale);
-  const int32_t multiplier = ((int32_t) (scale_bits << 7) & INT32_C(0x3FFFF800)) | INT32_C(0x40000000);
+  const int32_t multiplier = ((int32_t) (scale_bits << 7) & INT32_C(0x3FFFFF80)) | INT32_C(0x40000000);
   const uint32_t shift = 127 + 30 - (scale_bits >> 23);
   assert(shift >= 31);
   assert(shift < 63);
