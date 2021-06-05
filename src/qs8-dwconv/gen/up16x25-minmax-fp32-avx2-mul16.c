@@ -630,6 +630,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul16(
         vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
         vacc89ABCDEF = _mm256_cvtps_epi32(vscaled89ABCDEF);
 
+
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_avx2.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
         __m128i vout89ABCDEF = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc89ABCDEF), _mm256_extracti128_si256(vacc89ABCDEF, 1)), voutput_zero_point);

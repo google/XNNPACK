@@ -1108,6 +1108,7 @@ void xnn_pack_f32_dwconv_ghw_w(
   const float* k,
   const float* b,
   float* packed_w,
+  size_t extra_bytes,
   const void* params)
 {
   for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
@@ -1132,6 +1133,7 @@ void xnn_pack_f32_dwconv_ghw_w(
         packed_w += cr - cr_block_size;
       }
     }
+    packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
@@ -1143,6 +1145,7 @@ void xnn_pack_f16_dwconv_ghw_w(
   const uint16_t* k,
   const uint16_t* b,
   uint16_t* packed_w,
+  size_t extra_bytes,
   const void* params)
 {
   for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
@@ -1167,6 +1170,7 @@ void xnn_pack_f16_dwconv_ghw_w(
         packed_w += cr - cr_block_size;
       }
     }
+    packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
@@ -1178,6 +1182,7 @@ void xnn_pack_qu8_dwconv_ghw_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
+  size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
   const int32_t izp = (int32_t) params->input_zero_point;
@@ -1209,6 +1214,7 @@ void xnn_pack_qu8_dwconv_ghw_w(
         packed_w = (void*) ((uintptr_t) packed_w + (cr - cr_block_size) * sizeof(uint8_t));
       }
     }
+    packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
@@ -1220,6 +1226,7 @@ void xnn_pack_qs8_dwconv_ghw_w(
   const int8_t* k,
   const int32_t* b,
   void* packed_w,
+  size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
   const int32_t izp = (int32_t) params->input_zero_point;
@@ -1250,6 +1257,7 @@ void xnn_pack_qs8_dwconv_ghw_w(
         packed_w = (void*) ((uintptr_t) packed_w + (cr - cr_block_size) * sizeof(int8_t));
       }
     }
+    packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 

@@ -844,7 +844,6 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16(
         vacc01234567 = _mm256_add_epi32(vacc01234567, _mm256_cvtepi16_epi32(_mm256_castsi256_si128(vprod24x0123456789ABCDEF)));
         vacc89ABCDEF = _mm256_add_epi32(vacc89ABCDEF, _mm256_cvtepi16_epi32(vprod24x89ABCDEF));
 
-        w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t));
         k += 16;
 
         const __m256i vmultiplier = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.multiplier);
@@ -878,6 +877,8 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16(
           _mm256_sub_epi32(_mm256_sra_epi32(vq31prod01234567, vshift), _mm256_cmpgt_epi32(vrem01234567, vremainder_threshold));
         vacc89ABCDEF =
           _mm256_sub_epi32(_mm256_sra_epi32(vq31prod89ABCDEF, vshift), _mm256_cmpgt_epi32(vrem89ABCDEF, vremainder_threshold));
+
+        w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t));
 
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->gemmlowp_avx2.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);

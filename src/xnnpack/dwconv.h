@@ -465,6 +465,28 @@ DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_gemmlow
 DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up4x25__scalar)
 
 
+#define DECLARE_QC8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                        \
+    size_t channels,                                                \
+    size_t output_width,                                            \
+    const int8_t** input,                                           \
+    const void* weights,                                            \
+    int8_t* output,                                                 \
+    size_t input_stride,                                            \
+    size_t output_increment,                                        \
+    size_t input_offset,                                            \
+    const int8_t* zero,                                             \
+    const union xnn_qs8_minmax_params* params);
+
+DECLARE_QC8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul16)
+DECLARE_QC8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qc8_dwconv_minmax_fp32_ukernel_up32x25__avx2_mul16)
+
+DECLARE_QC8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__avx2_mul32)
+DECLARE_QC8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32)
+DECLARE_QC8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qc8_dwconv_minmax_fp32_ukernel_up24x25__avx2_mul32)
+DECLARE_QC8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qc8_dwconv_minmax_fp32_ukernel_up32x25__avx2_mul32)
+
+
 #define DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                      \
     size_t input_height,                                          \

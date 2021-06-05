@@ -91,7 +91,7 @@ static void DWConvBenchmark(benchmark::State& state,
   std::vector<uint16_t, AlignedAllocator<uint16_t, 32>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0.0f);
   xnn_pack_f16_dwconv_ghw_w(kernel_height, kernel_width, channels, cr,
-      k.data(), b.data(), w.data(), nullptr);
+      k.data(), b.data(), w.data(), 0 /* extra bytes */, nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }

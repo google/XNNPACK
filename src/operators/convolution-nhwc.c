@@ -289,7 +289,7 @@ static enum xnn_status create_convolution2d_nhwc(
         pack_dwconv_ghw_w(
           kernel_height, kernel_width,
           groups, dwconv_ukernel->channel_tile,
-          kernel, bias, convolution_op->packed_weights, packing_params);
+          kernel, bias, convolution_op->packed_weights, 0 /* extra bytes */, packing_params);
       }
 
       const union dwconv_fused_ukernels* ukernels = &dwconv_ukernel->minmax;

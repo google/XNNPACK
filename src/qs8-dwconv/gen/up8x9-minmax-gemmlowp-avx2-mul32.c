@@ -247,6 +247,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x9__avx2_mul32(
         vacc01234567 =
           _mm256_sub_epi32(_mm256_sra_epi32(vq31prod01234567, vshift), _mm256_cmpgt_epi32(vrem01234567, vremainder_threshold));
 
+
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->gemmlowp_avx2.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
 
