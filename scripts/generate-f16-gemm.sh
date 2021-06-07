@@ -21,6 +21,10 @@ tools/xngen src/f16-gemm/4x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16
 tools/xngen src/f16-gemm/6x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16-gemm/gen-inc/6x8inc-minmax-aarch64-neonfp16arith-ld64.S
 tools/xngen src/f16-gemm/8x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16-gemm/gen-inc/8x8inc-minmax-aarch64-neonfp16arith-ld64.S
 
+### Cortex A55 micro-kernels
+tools/xngen src/f16-gemm/6x16-aarch64-neonfp16arith-cortex-a55.S.in -D INC=0 -o src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-cortex-a55.S
+tools/xngen src/f16-gemm/6x16-aarch64-neonfp16arith-cortex-a55.S.in -D INC=1 -o src/f16-gemm/gen-inc/6x16inc-minmax-aarch64-neonfp16arith-cortex-a55.S
+
 ########################## ARM NEON with FP16 compute #########################
 ### LD64 micro-kernels
 tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=1 -D NR=8 -D INC=0 -o src/f16-gemm/gen/1x8-minmax-neonfp16arith-ld64.c
