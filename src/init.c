@@ -1090,6 +1090,10 @@ static void init(void) {
             xnn_params.f16.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a55);
             break;
 
+          case cpuinfo_uarch_cortex_a75:
+            xnn_params.f16.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a75);
+            break;
+
           default:
             xnn_params.f16.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32);
             break;
@@ -1114,6 +1118,14 @@ static void init(void) {
                   xnn_params.f16.gemm.minmax.gemm.function[i] = (xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a55;
                 }
                 break;
+
+              /* Cortex A75 is the medium core Exynos 9820 (M4) */
+              case cpuinfo_uarch_cortex_a75:
+                if (mr == 6 && nr == 16) {
+                  xnn_params.f16.gemm.minmax.gemm.function[i] = (xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a75;
+                }
+                break;
+
               default:
                 break;
             }
