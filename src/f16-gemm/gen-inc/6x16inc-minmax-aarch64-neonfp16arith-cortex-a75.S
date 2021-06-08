@@ -55,6 +55,7 @@
 # C   v28 v29
 # C   v30 v31
 # Clamp v6, (v4), (v5)
+# unused     v7
 # unused A   v8 v9 v10 v11
 # unused B   v12 v13 v14 v15
 
@@ -112,7 +113,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex
         SUBS    x0, x2, 4               // k = kc - 4
         B.LO    4f
 
-        # Prologue - load 6 A and 2 B
+        # Prologue - load 4 A and 2 B
 
         LDR     s0,  [x3], 4
         LDR     q16, [x5], 16
@@ -120,8 +121,6 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex
         LDR     s1,  [x9], 4
         LDR     s2, [x10], 4
         LDR     s3, [x11], 4
-        LDR     s4, [x12], 4
-        LDR     s5,  [x4], 4
 
         # Is there at least 2 halffloats for main loop?
         SUBS    x0, x0, 4
@@ -131,12 +130,14 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex
         # 24 FMA + 6 ld32 A + 4 LDR B
 1:
         FMLA    v20.8h, v16.8h,  v0.h[0]
-        LDR     q18, [x5], 16
+        LDR     s4, [x12], 4
         FMLA    v21.8h, v17.8h,  v0.h[0]
+        LDR     s5,  [x4], 4
         FMLA    v22.8h, v16.8h,  v1.h[0]
-        LDR     q19, [x5], 16
+        LDR     q18, [x5], 16
         FMLA    v23.8h, v17.8h,  v1.h[0]
         FMLA    v24.8h, v16.8h,  v2.h[0]
+        LDR     q19, [x5], 16
         FMLA    v25.8h, v17.8h,  v2.h[0]
         FMLA    v26.8h, v16.8h,  v3.h[0]
         FMLA    v27.8h, v17.8h,  v3.h[0]
@@ -144,8 +145,8 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex
         FMLA    v29.8h, v17.8h,  v4.h[0]
         FMLA    v30.8h, v16.8h,  v5.h[0]
         FMLA    v31.8h, v17.8h,  v5.h[0]
-
         SUBS    x0, x0, 4
+
         FMLA    v20.8h, v18.8h,  v0.h[1]
         LDR     q16, [x5], 16
         FMLA    v21.8h, v19.8h,  v0.h[1]
@@ -153,49 +154,49 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex
         LDR     q17, [x5], 16
         FMLA    v23.8h, v19.8h,  v1.h[1]
         FMLA    v24.8h, v18.8h,  v2.h[1]
+        LDR     s0,  [x3], 4
         FMLA    v25.8h, v19.8h,  v2.h[1]
         FMLA    v26.8h, v18.8h,  v3.h[1]
-        LDR     s0,  [x3], 4
-        FMLA    v27.8h, v19.8h,  v3.h[1]
         LDR     s1,  [x9], 4
+        FMLA    v27.8h, v19.8h,  v3.h[1]
         FMLA    v28.8h, v18.8h,  v4.h[1]
         LDR     s2, [x10], 4
         FMLA    v29.8h, v19.8h,  v4.h[1]
-        LDR     s3, [x11], 4
         FMLA    v30.8h, v18.8h,  v5.h[1]
-        LDR     s4, [x12], 4
+        LDR     s3, [x11], 4
         FMLA    v31.8h, v19.8h,  v5.h[1]
-        LDR     s5,  [x4], 4
         B.HS    1b
 
         # Epilogue - same as main loop but no loads for next loop
 2:
         FMLA    v20.8h, v16.8h,  v0.h[0]
-        FMLA    v22.8h, v16.8h,  v1.h[0]
-        FMLA    v24.8h, v16.8h,  v2.h[0]
-        FMLA    v26.8h, v16.8h,  v3.h[0]
-        LDR     q18, [x5], 16
-        LDR     q19, [x5], 16
-        FMLA    v28.8h, v16.8h,  v4.h[0]
-        FMLA    v30.8h, v16.8h,  v5.h[0]
+        LDR     s4, [x12], 4
         FMLA    v21.8h, v17.8h,  v0.h[0]
+        LDR     s5,  [x4], 4
+        FMLA    v22.8h, v16.8h,  v1.h[0]
+        LDR     q18, [x5], 16
         FMLA    v23.8h, v17.8h,  v1.h[0]
+        FMLA    v24.8h, v16.8h,  v2.h[0]
+        LDR     q19, [x5], 16
         FMLA    v25.8h, v17.8h,  v2.h[0]
+        FMLA    v26.8h, v16.8h,  v3.h[0]
         FMLA    v27.8h, v17.8h,  v3.h[0]
+        FMLA    v28.8h, v16.8h,  v4.h[0]
         FMLA    v29.8h, v17.8h,  v4.h[0]
+        FMLA    v30.8h, v16.8h,  v5.h[0]
         FMLA    v31.8h, v17.8h,  v5.h[0]
 
         FMLA    v20.8h, v18.8h,  v0.h[1]
-        FMLA    v22.8h, v18.8h,  v1.h[1]
-        FMLA    v24.8h, v18.8h,  v2.h[1]
-        FMLA    v26.8h, v18.8h,  v3.h[1]
-        FMLA    v28.8h, v18.8h,  v4.h[1]
-        FMLA    v30.8h, v18.8h,  v5.h[1]
         FMLA    v21.8h, v19.8h,  v0.h[1]
+        FMLA    v22.8h, v18.8h,  v1.h[1]
         FMLA    v23.8h, v19.8h,  v1.h[1]
+        FMLA    v24.8h, v18.8h,  v2.h[1]
         FMLA    v25.8h, v19.8h,  v2.h[1]
+        FMLA    v26.8h, v18.8h,  v3.h[1]
         FMLA    v27.8h, v19.8h,  v3.h[1]
+        FMLA    v28.8h, v18.8h,  v4.h[1]
         FMLA    v29.8h, v19.8h,  v4.h[1]
+        FMLA    v30.8h, v18.8h,  v5.h[1]
         FMLA    v31.8h, v19.8h,  v5.h[1]
 
         # Is there a remainder?- 1 halffloat of A (2 bytes)
@@ -216,8 +217,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex
         FMUL    v29.8h, v29.8h, v6.8h
         FMUL    v30.8h, v30.8h, v6.8h
         FMUL    v31.8h, v31.8h, v6.8h
-        # Load cn_stride
-        LDR     x0, [sp, 0]
+        LDR     x0, [sp]               // reload cn_stride
         FMAX    v20.8h, v20.8h, v4.8h
         FMAX    v21.8h, v21.8h, v4.8h
         FMAX    v22.8h, v22.8h, v4.8h
