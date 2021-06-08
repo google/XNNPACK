@@ -221,7 +221,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a7
         FMUL    v29.8h, v29.8h, v6.8h
         FMUL    v30.8h, v30.8h, v6.8h
         FMUL    v31.8h, v31.8h, v6.8h
-        LDR     x0, [sp]               // reload cn_stride
+        LDR     x0, [sp]                // Reload cn_stride
         FMAX    v20.8h, v20.8h, v4.8h
         FMAX    v21.8h, v21.8h, v4.8h
         FMAX    v22.8h, v22.8h, v4.8h
