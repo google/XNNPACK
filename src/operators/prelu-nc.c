@@ -84,6 +84,7 @@ enum xnn_status xnn_create_prelu_nc_f32(
   prelu_op->output_pixel_stride = output_stride;
 
   prelu_op->type = xnn_operator_type_prelu_nc_f32;
+  prelu_op->flags = flags;
 
   prelu_op->state = xnn_run_state_invalid;
 

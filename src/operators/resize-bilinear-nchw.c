@@ -20,6 +20,7 @@
 #include <xnnpack/params.h>
 #include <xnnpack/indirection.h>
 
+
 enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
     size_t channels,
     size_t input_pixel_stride,

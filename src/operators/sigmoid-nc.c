@@ -141,6 +141,7 @@ enum xnn_status xnn_create_sigmoid_nc_qu8(
   sigmoid_op->output_pixel_stride = output_stride;
 
   sigmoid_op->type = xnn_operator_type_sigmoid_nc_qu8;
+  sigmoid_op->flags = flags;
 
   sigmoid_op->state = xnn_run_state_invalid;
 

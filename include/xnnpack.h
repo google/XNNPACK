@@ -53,6 +53,9 @@ extern "C" {
 /// Align corners of input and output images in resize operations.
 #define XNN_FLAG_ALIGN_CORNERS 0x00000008
 
+/// Yield worker threads of the thread pool to the system scheduler after the inference.
+#define XNN_FLAG_YIELD_WORKERS 0x00000010
+
 /// Status code for any XNNPACK function call.
 enum xnn_status {
   /// The call succeeded, and all output arguments now contain valid data.

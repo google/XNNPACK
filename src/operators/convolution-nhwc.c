@@ -407,6 +407,7 @@ static enum xnn_status create_convolution2d_nhwc(
 
   convolution_op->type = operator_type;
   convolution_op->ukernel.type = ukernel_type;
+  convolution_op->flags = flags & ~XNN_FLAG_TENSORFLOW_SAME_PADDING;
   if (tf_same_padding) {
     convolution_op->flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
   }

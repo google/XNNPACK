@@ -261,6 +261,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
 
   memcpy(&deconvolution_op->params, params, params_size);
   deconvolution_op->type = operator_type;
+  deconvolution_op->flags = flags & ~XNN_FLAG_TENSORFLOW_SAME_PADDING;
   deconvolution_op->ukernel.type = ukernel_type;
   deconvolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
     .general_case = gemm_ukernels->igemm,
@@ -284,7 +285,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
       deconvolution_op->padding_bottom = padding_height - padding_top;
       deconvolution_op->padding_right = padding_width - padding_left;
     } else {
-      deconvolution_op->flags = XNN_FLAG_TENSORFLOW_SAME_PADDING;
+      deconvolution_op->flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
     }
   }
 

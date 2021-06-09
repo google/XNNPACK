@@ -114,6 +114,7 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   unpooling_op->output_pixel_stride = output_pixel_stride;
 
   unpooling_op->type = xnn_operator_type_unpooling_nhwc_x32;
+  unpooling_op->flags = flags;
 
   unpooling_op->state = xnn_run_state_invalid;
 

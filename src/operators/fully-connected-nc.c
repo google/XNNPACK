@@ -145,6 +145,7 @@ static enum xnn_status create_fully_connected_nc(
 
   memcpy(&fully_connected_op->params, params, params_size);
   fully_connected_op->type = operator_type;
+  fully_connected_op->flags = flags;
 
   fully_connected_op->ukernel.type = xnn_ukernel_type_gemm;
   fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm) {

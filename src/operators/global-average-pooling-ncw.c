@@ -77,6 +77,7 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f32(
   xnn_init_f32_gavgpool_params(&global_average_pooling_op->params.f32_gavgpool, nanf(""), output_min, output_max, 0);
 
   global_average_pooling_op->type = xnn_operator_type_global_average_pooling_ncw_f32;
+  global_average_pooling_op->flags = flags;
 
   global_average_pooling_op->state = xnn_run_state_invalid;
 

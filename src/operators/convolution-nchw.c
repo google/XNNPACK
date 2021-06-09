@@ -499,6 +499,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
 
   convolution_op->type = xnn_operator_type_convolution_nchw_f32;
   convolution_op->ukernel.type = ukernel_type;
+  convolution_op->flags = flags;
 
   convolution_op->state = xnn_run_state_invalid;
 
