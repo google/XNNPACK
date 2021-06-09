@@ -1077,7 +1077,9 @@ typedef struct xnn_runtime* xnn_runtime_t;
 ///                   Nodes can be added to the runtime once it is constructed.
 /// @param threadpool - the thread pool to be used for parallelisation of computations in the runtime. If the thread
 ///                     pool is NULL, the computation would run on the caller thread without parallelization.
-/// @param flags - binary features of the runtime. The only currently supported value is XNN_FLAG_SPARSE_INFERENCE.
+/// @param flags - binary features of the runtime. The only currently supported values are XNN_FLAG_SPARSE_INFERENCE
+///                and XNN_FLAG_YIELD_WORKERS. If XNN_FLAG_YIELD_WORKERS is specified, worker threads would be yielded
+///                to the system scheduler after processing the last operator in the Runtime.
 /// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
 ///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
 ///                      used to create it.
