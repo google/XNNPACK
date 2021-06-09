@@ -163,9 +163,16 @@ class Requantization : public benchmark::Fixture {
     }
   }
 
-  BENCHMARK_F(Requantization, rndnu__sse4)(benchmark::State& state) {
+  BENCHMARK_F(Requantization, rndnu__sse4_sra)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_qs8_requantize_rndnu__sse4(
+      xnn_qs8_requantize_rndnu__sse4_sra(
+          n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
+    }
+  }
+
+  BENCHMARK_F(Requantization, rndnu__sse4_srl)(benchmark::State& state) {
+    for (auto _ : state) {
+      xnn_qs8_requantize_rndnu__sse4_srl(
           n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
     }
   }

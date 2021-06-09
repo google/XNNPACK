@@ -762,20 +762,20 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
 
 
   /*
-   * Round-to-nearest, ties up, SSE4.1 implementation using extended signed multiplication and static blend instructions.
+   * Round-to-nearest, ties up, SSE4.1 implementation using arithmetic shift right.
    */
 
-  TEST(QS8_RNDNU__SSE4, exact_divide_by_po2) {
+  TEST(QS8_RNDNU__SSE4_SRA, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__sse4);
+        .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__sse4_sra);
     }
   }
 
-  TEST(QS8_RNDNU__SSE4, exact_divide_by_po2_with_zero_point) {
+  TEST(QS8_RNDNU__SSE4_SRA, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = std::numeric_limits<int8_t>::min();
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
@@ -786,12 +786,12 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__sse4);
+          .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__sse4_sra);
       }
     }
   }
 
-  TEST(QS8_RNDNU__SSE4, divide_by_po2_with_rounding_up) {
+  TEST(QS8_RNDNU__SSE4_SRA, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = std::numeric_limits<int8_t>::min();
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
@@ -802,12 +802,12 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qs8_requantize_rndnu__sse4);
+          .TestDivideByPO2WithRoundingUp(xnn_qs8_requantize_rndnu__sse4_sra);
       }
     }
   }
 
-  TEST(QS8_RNDNU__SSE4, divide_by_po2_with_rounding_down) {
+  TEST(QS8_RNDNU__SSE4_SRA, divide_by_po2_with_rounding_down) {
     for (int32_t zero_point = std::numeric_limits<int8_t>::min();
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
@@ -818,12 +818,12 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingDown(xnn_qs8_requantize_rndnu__sse4);
+          .TestDivideByPO2WithRoundingDown(xnn_qs8_requantize_rndnu__sse4_sra);
       }
     }
   }
 
-  TEST(QS8_RNDNU__SSE4, divide_by_po2_with_rounding_away) {
+  TEST(QS8_RNDNU__SSE4_SRA, divide_by_po2_with_rounding_away) {
     for (int32_t zero_point = std::numeric_limits<int8_t>::min();
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
@@ -834,17 +834,104 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingTiesUp(xnn_qs8_requantize_rndnu__sse4);
+          .TestDivideByPO2WithRoundingTiesUp(xnn_qs8_requantize_rndnu__sse4_sra);
       }
     }
   }
 
-  TEST(QS8_RNDNU__SSE4, random_cases) {
+  TEST(QS8_RNDNU__SSE4_SRA, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .iterations(100)
-      .TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantize_rndnu__sse4);
+      .TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantize_rndnu__sse4_sra);
+  }
+
+
+  /*
+   * Round-to-nearest, ties up, SSE4.1 implementation using logical shift right.
+   */
+
+  TEST(QS8_RNDNU__SSE4_SRL, exact_divide_by_po2) {
+    for (uint32_t s = 1; s < 32; s++) {
+      RequantizationTester()
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+        .s(s)
+        .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__sse4_srl);
+    }
+  }
+
+  TEST(QS8_RNDNU__SSE4_SRL, exact_divide_by_po2_with_zero_point) {
+    for (int32_t zero_point = std::numeric_limits<int8_t>::min();
+         zero_point <= std::numeric_limits<int8_t>::max();
+         zero_point++)
+    {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .s(s)
+          .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__sse4_srl);
+      }
+    }
+  }
+
+  TEST(QS8_RNDNU__SSE4_SRL, divide_by_po2_with_rounding_up) {
+    for (int32_t zero_point = std::numeric_limits<int8_t>::min();
+         zero_point <= std::numeric_limits<int8_t>::max();
+         zero_point++)
+    {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingUp(xnn_qs8_requantize_rndnu__sse4_srl);
+      }
+    }
+  }
+
+  TEST(QS8_RNDNU__SSE4_SRL, divide_by_po2_with_rounding_down) {
+    for (int32_t zero_point = std::numeric_limits<int8_t>::min();
+         zero_point <= std::numeric_limits<int8_t>::max();
+         zero_point++)
+    {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingDown(xnn_qs8_requantize_rndnu__sse4_srl);
+      }
+    }
+  }
+
+  TEST(QS8_RNDNU__SSE4_SRL, divide_by_po2_with_rounding_away) {
+    for (int32_t zero_point = std::numeric_limits<int8_t>::min();
+         zero_point <= std::numeric_limits<int8_t>::max();
+         zero_point++)
+    {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingTiesUp(xnn_qs8_requantize_rndnu__sse4_srl);
+      }
+    }
+  }
+
+  TEST(QS8_RNDNU__SSE4_SRL, random_cases) {
+    RequantizationTester()
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
+      .iterations(100)
+      .TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantize_rndnu__sse4_srl);
   }
 
 
