@@ -69,6 +69,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         CSEL    x9, x3, x9, LO          //   a1 = a0
         CSEL    x16, x6, x16, LO        //   c1 = c0
 
+        # Load min/max values
+        LD2R    {v6.4s, v7.4s}, [x8]
+
         ADD     x10, x9, x4             // a2 = a1 + a_stride
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
                                         // if mr <= 2
@@ -93,8 +96,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         CSEL    x4, x12, x4, LO         //   a5 = a4
         CSEL    x7, x13, x7, LO         //   c5 = c4
 
-        # Load min/max values
-        LD2R    {v6.4s, v7.4s}, [x8]
 
 0:
         # Load initial bias from w into accumulators

@@ -92,6 +92,10 @@ tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D X86=0 -D ACTIV
 tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D X86=0 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/4x2c4-wasmsimd.c
 
 ############################### AArch64 assembly ##############################
+### LD64 micro-kernels
+tools/xngen src/f32-igemm/4x8-aarch64-neonfma-ld64.S.in  -o src/f32-igemm/gen/4x8-minmax-aarch64-neonfma-ld64.S
+tools/xngen src/f32-igemm/6x8-aarch64-neonfma-ld64.S.in  -o src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-ld64.S
+
 ### Cortex A75 / A57 micro-kernels
 tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S.in  -D PREFETCH=0 -o src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-cortex-a57.S
 tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S.in  -D PREFETCH=1 -o src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-cortex-a75.S

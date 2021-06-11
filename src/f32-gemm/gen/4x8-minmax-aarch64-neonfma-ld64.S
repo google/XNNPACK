@@ -35,13 +35,22 @@
 # x10 c2
 # x7  c3 / cm_stride
 
+# Vector register usage
+# A0  v0
+# A1  v1
+# A2  v2
+# A3  v3
+# B  v20 v21 v22 v23
+# C  v16 v17
+# C  v18 v19
+# C  v28 v29
+# C  v30 v31
+# Clamp v4 v5
+
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
 
         # Load cn_stride, params pointer
         LDP     x14, x8, [sp]
-
-        # Load min/max values
-        LD2R    {v4.4s, v5.4s}, [x8]
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -49,6 +58,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
         ADD     x9, x6, x7              // c1 = c0 + cm_stride
         CSEL    x11, x3, x11, LO        //   a1 = a0
         CSEL    x9, x6, x9, LO          //   c1 = c0
+
+        # Load min/max values
+        LD2R    {v4.4s, v5.4s}, [x8]
 
         ADD     x12, x11, x4            // a2 = a1 + a_stride
         ADD     x10, x9, x7             // c2 = c1 + cm_stride
@@ -96,9 +108,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
         FMLA    v17.4s, v23.4s, v0.s[1]
         FMLA    v18.4s, v22.4s, v1.s[1]
         FMLA    v19.4s, v23.4s, v1.s[1]
+        SUBS    x0, x0, 8
         FMLA    v28.4s, v22.4s, v2.s[1]
         FMLA    v29.4s, v23.4s, v2.s[1]
-        SUBS    x0, x0, 8
         FMLA    v30.4s, v22.4s, v3.s[1]
         FMLA    v31.4s, v23.4s, v3.s[1]
         B.HS    1b
