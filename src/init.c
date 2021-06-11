@@ -1091,6 +1091,7 @@ static void init(void) {
             break;
 
           case cpuinfo_uarch_cortex_a75:
+          case cpuinfo_uarch_cortex_x1:
             xnn_params.f16.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a75);
             break;
 
