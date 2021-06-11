@@ -18,7 +18,8 @@
 #     const void*restrict w,    x5
 #     uint8_t*restrict c,       x6
 #     size_t cm_stride,         x7
-#     size_t cn_stride,         [sp] -> (x0)
+#     size_t cn_stride,         [sp] -> x8
+
 #     const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> x8
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
@@ -71,6 +72,9 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a7
         CSEL    x9, x3, x9, LO          //   a1 = a0
         CSEL    x16, x6, x16, LO        //   c1 = c0
 
+        # Load params
+        LDR     d6, [x8]
+
         ADD     x10, x9, x4             // a2 = a1 + a_stride
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
                                         // if mr <= 2
@@ -95,9 +99,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a7
         CSEL    x4, x12, x4, LO         //   a5 = a4
         CSEL    x7, x13, x7, LO         //   c5 = c4
 
-        # Load params scale value
-        LD1R    {v6.8h}, [x8]
-        ADD     x8, x8, 2
+        LDR     x8, [sp]                // load cn_stride
 
 0:
         # Load initial bias from w into accumulators
@@ -207,21 +209,20 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a7
         TBNZ    x0, 1, 4f
 3:
         # Scale and Clamp
-        FMUL    v20.8h, v20.8h, v6.8h
-        # Load params values
-        LD2R    {v4.8h, v5.8h}, [x8]
-        FMUL    v21.8h, v21.8h, v6.8h
-        FMUL    v22.8h, v22.8h, v6.8h
-        FMUL    v23.8h, v23.8h, v6.8h
-        FMUL    v24.8h, v24.8h, v6.8h
-        FMUL    v25.8h, v25.8h, v6.8h
-        FMUL    v26.8h, v26.8h, v6.8h
-        FMUL    v27.8h, v27.8h, v6.8h
-        FMUL    v28.8h, v28.8h, v6.8h
-        FMUL    v29.8h, v29.8h, v6.8h
-        FMUL    v30.8h, v30.8h, v6.8h
-        FMUL    v31.8h, v31.8h, v6.8h
-        LDR     x0, [sp]                // Reload cn_stride
+        FMUL    v20.8h, v20.8h, v6.h[0]
+        DUP     v4.8h, v6.h[1]
+        FMUL    v21.8h, v21.8h, v6.h[0]
+        DUP     v5.8h, v6.h[2]
+        FMUL    v22.8h, v22.8h, v6.h[0]
+        FMUL    v23.8h, v23.8h, v6.h[0]
+        FMUL    v24.8h, v24.8h, v6.h[0]
+        FMUL    v25.8h, v25.8h, v6.h[0]
+        FMUL    v26.8h, v26.8h, v6.h[0]
+        FMUL    v27.8h, v27.8h, v6.h[0]
+        FMUL    v28.8h, v28.8h, v6.h[0]
+        FMUL    v29.8h, v29.8h, v6.h[0]
+        FMUL    v30.8h, v30.8h, v6.h[0]
+        FMUL    v31.8h, v31.8h, v6.h[0]
         FMAX    v20.8h, v20.8h, v4.8h
         FMAX    v21.8h, v21.8h, v4.8h
         FMAX    v22.8h, v22.8h, v4.8h
@@ -251,17 +252,17 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a7
         # Store full 6 x 16
         B.LO    5f
 
-        ST1     {v20.16b, v21.16b},  [x6], x0
+        ST1     {v20.16b, v21.16b},  [x6], x8
         SUB     x3,  x3, x2             // a0 -= kc
-        ST1     {v22.16b, v23.16b}, [x16], x0
+        ST1     {v22.16b, v23.16b}, [x16], x8
         SUB     x9,  x9, x2             // a1 -= kc
-        ST1     {v24.16b, v25.16b}, [x17], x0
+        ST1     {v24.16b, v25.16b}, [x17], x8
         SUB     x10, x10, x2            // a2 -= kc
-        ST1     {v26.16b, v27.16b}, [x14], x0
+        ST1     {v26.16b, v27.16b}, [x14], x8
         SUB     x11, x11, x2            // a3 -= kc
-        ST1     {v28.16b, v29.16b}, [x13], x0
+        ST1     {v28.16b, v29.16b}, [x13], x8
         SUB     x12, x12, x2            // a4 -= kc
-        ST1     {v30.16b, v31.16b},  [x7], x0
+        ST1     {v30.16b, v31.16b},  [x7], x8
         SUB     x4,  x4, x2             // a5 -= kc
 
         B.HI    0b

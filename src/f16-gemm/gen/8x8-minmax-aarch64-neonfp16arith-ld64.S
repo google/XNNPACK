@@ -18,7 +18,8 @@
 #     const void*restrict w,    x5
 #     uint8_t*restrict c,       x6
 #     size_t cm_stride,         x7
-#     size_t cn_stride,         [sp] -> (x0)
+#     size_t cn_stride,         [sp] -> x8
+
 #     const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> x8
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
@@ -82,6 +83,9 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         CSEL    x9, x3, x9, LO          //   a1 = a0
         CSEL    x16, x6, x16, LO        //   c1 = c0
 
+        # Load params
+        LD3R    {v20.8h, v21.8h, v22.8h}, [x8]
+
         ADD     x10, x9, x4             // a2 = a1 + a_stride
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
                                         // if mr <= 2
@@ -118,8 +122,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         CSEL    x4, x20, x4, LO         //   a7 = a5
         CSEL    x7, x22, x7, LO         //   c7 = c5
 
-        # Load params scale value
-        LD3R    {v20.8h, v21.8h, v22.8h}, [x8]
+        LDR     x8, [sp, 32]            // load cn_stride
 
 0:
        # Load initial bias from w into accumulators
@@ -203,8 +206,6 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         FMUL    v29.8h, v29.8h, v20.8h
         FMUL    v30.8h, v30.8h, v20.8h
         FMUL    v31.8h, v31.8h, v20.8h
-        # Load cn_stride
-        LDR     x0, [sp, 32]
         FMAX    v24.8h, v24.8h, v21.8h
         FMAX    v25.8h, v25.8h, v21.8h
         FMAX    v26.8h, v26.8h, v21.8h
@@ -226,21 +227,21 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         # Store full 8 x 8
         B.LO    6f
 
-        ST1     {v24.16b},  [x6], x0
+        ST1     {v24.16b},  [x6], x8
         SUB     x3,  x3, x2             // a0 -= kc
-        ST1     {v25.16b}, [x16], x0
+        ST1     {v25.16b}, [x16], x8
         SUB     x9,  x9, x2             // a1 -= kc
-        ST1     {v26.16b}, [x17], x0
+        ST1     {v26.16b}, [x17], x8
         SUB     x10, x10, x2            // a2 -= kc
-        ST1     {v27.16b}, [x14], x0
+        ST1     {v27.16b}, [x14], x8
         SUB     x11, x11, x2            // a3 -= kc
-        ST1     {v28.16b}, [x13], x0
+        ST1     {v28.16b}, [x13], x8
         SUB     x12, x12, x2            // a4 -= kc
-        ST1     {v29.16b}, [x21], x0
+        ST1     {v29.16b}, [x21], x8
         SUB     x19, x19, x2            // a6 -= kc
-        ST1     {v30.16b}, [x22], x0
+        ST1     {v30.16b}, [x22], x8
         SUB     x20, x20, x2            // a6 -= kc
-        ST1     {v31.16b},  [x7], x0
+        ST1     {v31.16b},  [x7], x8
         SUB     x4,  x4, x2             // a7 -= kc
 
         B.HI    0b

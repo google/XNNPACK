@@ -31,6 +31,7 @@ struct xnn_f16_scaleminmax_params {
   uint16_t scale;
   uint16_t min;
   uint16_t max;
+  uint16_t pad;  // pad to 8 bytes for neonfp16arith assembly.
 };
 
 struct xnn_f16_minmax_params {

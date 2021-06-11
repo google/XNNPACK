@@ -984,6 +984,7 @@ static inline void xnn_init_f16_scaleminmax_params(
   params->scale = scale;
   params->min = min;
   params->max = max;
+  params->pad = 0;  // unused.
 }
 
 static inline void xnn_init_f32_scaleminmax_params(
