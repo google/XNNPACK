@@ -1057,7 +1057,6 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul16(
         vacc0123 = _mm_add_epi32(vacc0123, _mm_unpacklo_epi16(vp24x01234567lo, vp24x01234567hi));
         vacc4567 = _mm_add_epi32(vacc4567, _mm_unpackhi_epi16(vp24x01234567lo, vp24x01234567hi));
 
-        w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
         k += 8;
 
         __m128 vscaled0123 = _mm_cvtepi32_ps(vacc0123);
@@ -1069,6 +1068,8 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul16(
 
         vacc0123 = _mm_cvtps_epi32(vscaled0123);
         vacc4567 = _mm_cvtps_epi32(vscaled4567);
+
+        w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
 
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);

@@ -476,6 +476,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx512skx_mul32(
         vscaled0123456789ABCDEF = _mm512_mul_ps(vscaled0123456789ABCDEF, vscale);
         vacc0123456789ABCDEF = _mm512_cvtps_epi32(vscaled0123456789ABCDEF);
 
+
         __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0123456789ABCDEF, 1)), voutput_zero_point);
 
         const __m128i vout012389AB = _mm256_castsi256_si128(vout012389AB4567CDEF);

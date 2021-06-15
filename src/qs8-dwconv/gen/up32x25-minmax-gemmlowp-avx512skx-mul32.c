@@ -609,7 +609,6 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx512skx_mul32(
 
         vacc0123456789ABCDEF = _mm512_add_epi32(vacc0123456789ABCDEF, _mm512_mullo_epi32(vi24x0123456789ABCDEF, vk24x0123456789ABCDEF));
 
-        w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t));
         k += 16;
 
         const __m512i vacc13579BDF = _mm512_shuffle_epi32(vacc0123456789ABCDEF, _MM_SHUFFLE(3, 3, 1, 1));
@@ -626,6 +625,8 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx512skx_mul32(
 
         vacc0123456789ABCDEF = _mm512_sra_epi32(vq31prod0123456789ABCDEF, vshift);
         vacc0123456789ABCDEF = _mm512_mask_sub_epi32(vacc0123456789ABCDEF, _mm512_cmpgt_epi32_mask(vrem0123456789ABCDEF, vremainder_threshold), vacc0123456789ABCDEF, _mm512_set1_epi32(-1));
+
+        w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t));
 
         __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0123456789ABCDEF, 1)), _mm512_castsi512_si256(voutput_zero_point));
 

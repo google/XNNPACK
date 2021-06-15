@@ -265,12 +265,13 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up32x9__avx512skx_mul32(
 
         vacc0123456789ABCDEF = _mm512_add_epi32(vacc0123456789ABCDEF, _mm512_mullo_epi32(vi8x0123456789ABCDEF, vk8x0123456789ABCDEF));
 
-        w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t));
         k += 16;
 
         __m512 vscaled0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0123456789ABCDEF);
         vscaled0123456789ABCDEF = _mm512_mul_ps(vscaled0123456789ABCDEF, vscale);
         vacc0123456789ABCDEF = _mm512_cvtps_epi32(vscaled0123456789ABCDEF);
+
+        w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t));
 
         __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0123456789ABCDEF, 1)), _mm512_castsi512_si256(voutput_zero_point));
 

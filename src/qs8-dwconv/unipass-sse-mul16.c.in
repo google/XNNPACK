@@ -6,6 +6,7 @@
 $assert SSE in [2, 3, 4]
 $assert not AVX or SSE == 4
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 $assert SSE != 3 or REQUANTIZATION != "FP32"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
@@ -19,9 +20,11 @@ $assert KERNEL_TILE >= 2
 #include <xnnpack/dwconv.h>
 
 
-$PARAMS_STRUCT = REQUANTIZATION.lower() + ("_sse4" if SSE >= 4 else "_sse2")
+$DATATYPE = "qc8" if CHANNELWISE else "qs8"
+$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + ("sse4" if SSE >= 4 else "sse2")
 $ISA = "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
-void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul16(
+void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -31,7 +34,7 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -145,9 +148,17 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
         $for C in range(0, CHANNEL_TILE, 4):
           __m128 vscaled${ABC[C:C+4]} = _mm_cvtepi32_ps(vacc${ABC[C:C+4]});
 
-        const __m128 vscale = _mm_load_ps(params->${PARAMS_STRUCT}.scale);
-        $for C in range(0, CHANNEL_TILE, 4):
-          vscaled${ABC[C:C+4]} = _mm_mul_ps(vscaled${ABC[C:C+4]}, vscale);
+        $if CHANNELWISE:
+          const __m128 vscale${ABC[0:4]} = _mm_loadu_ps((const float*) w);
+          $for C in range(4, CHANNEL_TILE, 4):
+            const __m128 vscale${ABC[C:C+4]} = _mm_loadu_ps((const float*) ((uintptr_t) w + ${C} * sizeof(float)));
+          w = (const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(float));
+          $for C in range(0, CHANNEL_TILE, 4):
+            vscaled${ABC[C:C+4]} = _mm_mul_ps(vscaled${ABC[C:C+4]}, vscale${ABC[C:C+4]});
+        $else:
+          const __m128 vscale = _mm_load_ps(params->${PARAMS_STRUCT}.scale);
+          $for C in range(0, CHANNEL_TILE, 4):
+            vscaled${ABC[C:C+4]} = _mm_mul_ps(vscaled${ABC[C:C+4]}, vscale);
 
         $for C in range(0, CHANNEL_TILE, 4):
           vacc${ABC[C:C+4]} = _mm_cvtps_epi32(vscaled${ABC[C:C+4]});
@@ -232,7 +243,6 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
           vacc${ABC[4:8]} = _mm_add_epi32(vacc${ABC[4:8]}, _mm_unpackhi_epi16(vp${K}x${ABC[0:8]}lo, vp${K}x${ABC[0:8]}hi));
 
         $if CHANNEL_TILE > 8:
-          w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
           k += 8;
 
         $if REQUANTIZATION == "GEMMLOWP":
@@ -314,12 +324,21 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
           __m128 vscaled${ABC[0:4]} = _mm_cvtepi32_ps(vacc${ABC[0:4]});
           __m128 vscaled${ABC[4:8]} = _mm_cvtepi32_ps(vacc${ABC[4:8]});
 
-          const __m128 vscale = _mm_load_ps(params->${PARAMS_STRUCT}.scale);
-          vscaled${ABC[0:4]} = _mm_mul_ps(vscaled${ABC[0:4]}, vscale);
-          vscaled${ABC[4:8]} = _mm_mul_ps(vscaled${ABC[4:8]}, vscale);
+          $if CHANNELWISE:
+            const __m128 vscale${ABC[0:4]} = _mm_loadu_ps((const float*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${CHANNEL_TILE * KERNEL_TILE} * sizeof(int8_t)));
+            const __m128 vscale${ABC[4:8]} = _mm_loadu_ps((const float*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${CHANNEL_TILE * KERNEL_TILE} * sizeof(int8_t) + 4 * sizeof(float)));
+            vscaled${ABC[0:4]} = _mm_mul_ps(vscaled${ABC[0:4]}, vscale${ABC[0:4]});
+            vscaled${ABC[4:8]} = _mm_mul_ps(vscaled${ABC[4:8]}, vscale${ABC[4:8]});
+          $else:
+            const __m128 vscale = _mm_load_ps(params->${PARAMS_STRUCT}.scale);
+            vscaled${ABC[0:4]} = _mm_mul_ps(vscaled${ABC[0:4]}, vscale);
+            vscaled${ABC[4:8]} = _mm_mul_ps(vscaled${ABC[4:8]}, vscale);
 
           vacc${ABC[0:4]} = _mm_cvtps_epi32(vscaled${ABC[0:4]});
           vacc${ABC[4:8]} = _mm_cvtps_epi32(vscaled${ABC[4:8]});
+
+        $if CHANNEL_TILE > 8:
+          w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
 
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
         __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(vacc${ABC[0:4]}, vacc${ABC[4:8]}), voutput_zero_point);

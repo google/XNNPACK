@@ -1319,7 +1319,6 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__sse41_mul16(
         vacc0123 = _mm_add_epi32(vacc0123, _mm_unpacklo_epi16(vp24x01234567lo, vp24x01234567hi));
         vacc4567 = _mm_add_epi32(vacc4567, _mm_unpackhi_epi16(vp24x01234567lo, vp24x01234567hi));
 
-        w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
         k += 8;
 
         const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.multiplier);
@@ -1354,6 +1353,8 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__sse41_mul16(
           _mm_sub_epi32(_mm_sra_epi32(vq31prod0123, vshift), _mm_cmpgt_epi32(vrem0123, vremainder_threshold));
         vacc4567 =
           _mm_sub_epi32(_mm_sra_epi32(vq31prod4567, vshift), _mm_cmpgt_epi32(vrem4567, vremainder_threshold));
+
+        w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
 
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);

@@ -570,12 +570,13 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__avx_mul32(
 
         vacc0123 = _mm_add_epi32(vacc0123, _mm_mullo_epi32(vi24x0123, vk24x0123));
 
-        w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
         k += 4;
 
         __m128 vscaled0123 = _mm_cvtepi32_ps(vacc0123);
         vscaled0123 = _mm_mul_ps(vscaled0123, _mm_load_ps(params->fp32_sse4.scale));
         vacc0123 = _mm_cvtps_epi32(vscaled0123);
+
+        w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
 
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.output_zero_point);
         __m128i vout0123 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc0123), voutput_zero_point);

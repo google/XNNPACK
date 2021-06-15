@@ -248,6 +248,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx512skx_mul32(
         vacc0123456789ABCDEF = _mm512_sra_epi32(vq31prod0123456789ABCDEF, vshift);
         vacc0123456789ABCDEF = _mm512_mask_sub_epi32(vacc0123456789ABCDEF, _mm512_cmpgt_epi32_mask(vrem0123456789ABCDEF, vremainder_threshold), vacc0123456789ABCDEF, _mm512_set1_epi32(-1));
 
+
         __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0123456789ABCDEF, 1)), voutput_zero_point);
 
         const __m128i vout012389AB = _mm256_castsi256_si128(vout012389AB4567CDEF);
