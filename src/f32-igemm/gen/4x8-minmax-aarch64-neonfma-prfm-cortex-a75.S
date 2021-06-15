@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a57(
+# void xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75(
 #     size_t mr,                         x0
 #     size_t nc,                         x1
 #     size_t kc,                         x2 / x0
@@ -52,7 +52,7 @@
 # C  v30 v31
 # Clamp v4 v5
 
-BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a57
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
 
         # Load cn_stride, a_offset
         LDP     x10, x11, [sp]
@@ -162,12 +162,16 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a57
         LDR     q7, [x15], 16
         FMLA    v31.4s, v23.4s, v3.s[1]
         FMLA    v16.4s, v24.4s, v0.s[2]
+        PRFM    PLDL1KEEP, [x5, 128]
         FMLA    v17.4s, v25.4s, v0.s[2]
         FMLA    v18.4s, v24.4s, v1.s[2]
+        PRFM    PLDL1KEEP, [x5, 192]
         FMLA    v19.4s, v25.4s, v1.s[2]
         FMLA    v28.4s, v24.4s, v2.s[2]
+        PRFM    PLDL1KEEP, [x5, 256]
         FMLA    v29.4s, v25.4s, v2.s[2]
         FMLA    v30.4s, v24.4s, v3.s[2]
+        PRFM    PLDL1KEEP, [x5, 320]
         FMLA    v31.4s, v25.4s, v3.s[2]
         FMLA    v16.4s, v26.4s, v0.s[3]
         FMLA    v17.4s, v27.4s, v0.s[3]
@@ -487,7 +491,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a57
         LDR     x20, [sp], 80
         RET
 
-END_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a57
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

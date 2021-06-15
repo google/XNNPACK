@@ -18,12 +18,12 @@
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57
+- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75
+- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
@@ -38,12 +38,12 @@
   k-block: 4
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a57
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a75
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
@@ -78,12 +78,12 @@
   k-block: 4
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
+- name: xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a75
+- name: xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
@@ -103,12 +103,12 @@
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
+- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
   assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
+- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true

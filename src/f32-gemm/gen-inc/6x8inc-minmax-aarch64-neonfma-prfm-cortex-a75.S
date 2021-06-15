@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57(
+# void xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -19,7 +19,8 @@
 #     uint8_t*restrict c,       x6
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> (x0)
-#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> x8
+#     const float*restrict acc,  [sp + 8] -> x15
+#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 16] -> x8
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -56,10 +57,10 @@
 # C   v30 v31
 # Clamp v6 v7
 
-BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
+BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75
 
-        # Load params pointer
-        LDR     x8, [sp, 8]
+        # Load acc, params pointer
+        LDP     x15, x8, [sp, 8]
 
         # Clamp A and C pointers / Save d8-d15 on stack
         STP     d8,  d9, [sp, -64]!
@@ -97,18 +98,23 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
         CSEL    x7, x13, x7, LO         //   c5 = c4
 
 0:
-        # Load initial bias from w into accumulators
-        LDP     q20, q21, [x5], 32
-        MOV     v22.16b, v20.16b
-        MOV     v23.16b, v21.16b
-        MOV     v24.16b, v20.16b
-        MOV     v25.16b, v21.16b
-        MOV     v26.16b, v20.16b
-        MOV     v27.16b, v21.16b
-        MOV     v28.16b, v20.16b
-        MOV     v29.16b, v21.16b
-        MOV     v30.16b, v20.16b
-        MOV     v31.16b, v21.16b
+        # Load initial accumulators
+        LDP     q20, q21, [x15], 32
+        LDP     q22, q23, [x15], 32
+        LDP     q24, q25, [x15], 32
+        LDP     q26, q27, [x15], 32
+        LDP     q28, q29, [x15], 32
+        LDP     q30, q31, [x15], 32
+        PRFM    PLDL1KEEP, [x5, 0]      // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 64]
+        PRFM    PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP,  [x3]        // Prefetch A
+        PRFM    PLDL1KEEP,  [x9]
+        PRFM    PLDL1KEEP, [x10]
+        PRFM    PLDL1KEEP, [x11]
+        PRFM    PLDL1KEEP, [x12]
+        PRFM    PLDL1KEEP,  [x4]
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS    x0, x2, 32              // k = kc - 32
@@ -148,10 +154,12 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
 
         FMLA    v31.4s, v13.4s,  v5.s[0]
         FMLA    v20.4s, v14.4s,  v0.s[1]
+        PRFM    PLDL1KEEP, [x5, 128]      // Prefetch B
         FMLA    v22.4s, v14.4s,  v1.s[1]
         FMLA    v24.4s, v14.4s,  v2.s[1]
         FMLA    v26.4s, v14.4s,  v3.s[1]
         FMLA    v28.4s, v14.4s,  v4.s[1]
+        PRFM    PLDL1KEEP, [x5, 256]
         FMLA    v30.4s, v14.4s,  v5.s[1]
         FMLA    v21.4s, v15.4s,  v0.s[1]
         FMLA    v23.4s, v15.4s,  v1.s[1]
@@ -280,10 +288,12 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
 
         FMLA    v31.4s, v13.4s,  v5.s[0]
         FMLA    v20.4s, v14.4s,  v0.s[1]
+        PRFM    PLDL1KEEP, [x5, 128]      // Prefetch B
         FMLA    v22.4s, v14.4s,  v1.s[1]
         FMLA    v24.4s, v14.4s,  v2.s[1]
         FMLA    v26.4s, v14.4s,  v3.s[1]
         FMLA    v28.4s, v14.4s,  v4.s[1]
+        PRFM    PLDL1KEEP, [x5, 256]
         FMLA    v30.4s, v14.4s,  v5.s[1]
         FMLA    v21.4s, v15.4s,  v0.s[1]
         FMLA    v23.4s, v15.4s,  v1.s[1]
@@ -421,23 +431,23 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
         # Store full 6 x 8
         B.LO    7f
 
-        STP     q20, q21,  [x6]
-        ADD     x6,  x6, x0
-        SUB     x3,  x3, x2             // a0 -= kc
-        STP     q22, q23, [x16]
-        ADD     x16, x16, x0
-        SUB     x9,  x9, x2             // a1 -= kc
-        STP     q24, q25, [x17]
-        ADD     x17, x17, x0
-        SUB     x10, x10, x2            // a2 -= kc
-        STP     q26, q27, [x14]
-        ADD     x14, x14, x0
-        SUB     x11, x11, x2            // a3 -= kc
-        STP     q28, q29, [x13]
-        ADD     x13, x13, x0
-        SUB     x12, x12, x2            // a4 -= kc
         STP     q30, q31,  [x7]
         ADD     x7, x7, x0
+        SUB     x3,  x3, x2             // a0 -= kc
+        STP     q28, q29, [x13]
+        ADD     x13, x13, x0
+        SUB     x9,  x9, x2             // a1 -= kc
+        STP     q26, q27, [x14]
+        ADD     x14, x14, x0
+        SUB     x10, x10, x2            // a2 -= kc
+        STP     q24, q25, [x17]
+        ADD     x17, x17, x0
+        SUB     x11, x11, x2            // a3 -= kc
+        STP     q22, q23, [x16]
+        ADD     x16, x16, x0
+        SUB     x12, x12, x2            // a4 -= kc
+        STP     q20, q21,  [x6]
+        ADD     x6,  x6, x0
         SUB     x4,  x4, x2             // a5 -= kc
 
         B.HI    0b
@@ -596,41 +606,41 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
         # Store odd width
 7:
         TBZ     x1, 2, 8f
-        STR     q20,  [x6], 16
-        MOV     v20.16b, v21.16b
-        STR     q22, [x16], 16
-        MOV     v22.16b, v23.16b
-        STR     q24, [x17], 16
-        MOV     v24.16b, v25.16b
-        STR     q26, [x14], 16
-        MOV     v26.16b, v27.16b
-        STR     q28, [x13], 16
-        MOV     v28.16b, v29.16b
         STR     q30,  [x7], 16
         MOV     v30.16b, v31.16b
+        STR     q28, [x13], 16
+        MOV     v28.16b, v29.16b
+        STR     q26, [x14], 16
+        MOV     v26.16b, v27.16b
+        STR     q24, [x17], 16
+        MOV     v24.16b, v25.16b
+        STR     q22, [x16], 16
+        MOV     v22.16b, v23.16b
+        STR     q20,  [x6], 16
+        MOV     v20.16b, v21.16b
 8:
         TBZ     x1, 1, 9f
-        STR     d20,  [x6], 8
-        DUP     d20, v20.d[1]
-        STR     d22, [x16], 8
-        DUP     d22, v22.d[1]
-        STR     d24, [x17], 8
-        DUP     d24, v24.d[1]
-        STR     d26, [x14], 8
-        DUP     d26, v26.d[1]
-        STR     d28, [x13], 8
-        DUP     d28, v28.d[1]
         STR     d30,  [x7], 8
         DUP     d30, v30.d[1]
+        STR     d28, [x13], 8
+        DUP     d28, v28.d[1]
+        STR     d26, [x14], 8
+        DUP     d26, v26.d[1]
+        STR     d24, [x17], 8
+        DUP     d24, v24.d[1]
+        STR     d22, [x16], 8
+        DUP     d22, v22.d[1]
+        STR     d20,  [x6], 8
+        DUP     d20, v20.d[1]
 
 9:
         TBZ     x1, 0, 10f
-        STR     s20,  [x6]
-        STR     s22, [x16]
-        STR     s24, [x17]
-        STR     s26, [x14]
-        STR     s28, [x13]
         STR     s30,  [x7]
+        STR     s28, [x13]
+        STR     s26, [x14]
+        STR     s24, [x17]
+        STR     s22, [x16]
+        STR     s20,  [x6]
 10:
         # Restore d8-d15 from stack
         LDP     d14, d15, [sp, 48]
@@ -639,7 +649,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
         LDP     d8,  d9, [sp], 64
         RET
 
-END_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a57
+END_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

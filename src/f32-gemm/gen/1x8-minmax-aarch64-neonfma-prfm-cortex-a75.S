@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57(
+# void xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -31,7 +31,7 @@
 
 # Clamp v4 v5
 
-BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57
+BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
 
         # Load cn_stride, params pointer
         LDP     x14, x8, [sp]
@@ -43,7 +43,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57
         LDP     q16, q17, [x5], 32
 
         MOVI    v18.4s, 0               // second set of C for pipelining FMLA
+        PRFM    PLDL1KEEP, [x5]
         MOVI    v19.4s, 0
+        PRFM    PLDL1KEEP, [x5, 64]
+        PRFM    PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 192]
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS    x0, x2, 32              // k = kc - 32
@@ -70,6 +74,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57
         FMLA    v17.4s, v21.4s, v0.s[0]
         LDP     q20, q21, [x5], 32
         FMLA    v18.4s, v22.4s, v0.s[1]
+        PRFM    PLDL1KEEP, [x5, 96]
         FMLA    v19.4s, v23.4s, v0.s[1]
         LDP     q22, q23, [x5], 32
         FMLA    v16.4s, v24.4s, v0.s[2]
@@ -208,7 +213,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57
 12:
         RET
 
-END_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a57
+END_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

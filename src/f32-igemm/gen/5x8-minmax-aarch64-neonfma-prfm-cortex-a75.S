@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57(
+# void xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_prfm_cortex_a75(
 #     size_t mr,                         x0
 #     size_t nc,                         x1
 #     size_t kc,                         x2 / x0
@@ -60,7 +60,7 @@
 # C   v28 v29
 # Clamp v30 v31
 
-BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_prfm_cortex_a75
 
         # Clamp C pointers / Save d8-d15 on stack
         STP     d8,  d9, [sp, -64]!
@@ -98,12 +98,16 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
         LDP     q20, q21, [x5], 32
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v21.16b
+        PRFM    PLDL1KEEP, [x5, 0]      // Prefetch B
         MOV     v24.16b, v20.16b
         MOV     v25.16b, v21.16b
+        PRFM    PLDL1KEEP, [x5, 64]
         MOV     v26.16b, v20.16b
         MOV     v27.16b, v21.16b
+        PRFM    PLDL1KEEP, [x5, 128]
         MOV     v28.16b, v20.16b
         MOV     v29.16b, v21.16b
+        PRFM    PLDL1KEEP, [x5, 192]
 
         MOV     x9, x3                  // p = ks
 
@@ -156,9 +160,11 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
         FMLA    v22.4s, v12.4s,  v2.s[0]
         FMLA    v24.4s, v12.4s,  v4.s[0]
         FMLA    v26.4s, v12.4s,  v6.s[0]
+        PRFM    PLDL1KEEP, [x5, 128]      // Prefetch B
         FMLA    v28.4s, v12.4s,  v8.s[0]
         FMLA    v21.4s, v13.4s,  v0.s[0]
         FMLA    v23.4s, v13.4s,  v2.s[0]
+        PRFM    PLDL1KEEP, [x5, 256]
         FMLA    v25.4s, v13.4s,  v4.s[0]
         FMLA    v27.4s, v13.4s,  v6.s[0]
         FMLA    v29.4s, v13.4s,  v8.s[0]
@@ -270,9 +276,11 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
         FMLA    v22.4s, v12.4s,  v2.s[0]
         FMLA    v24.4s, v12.4s,  v4.s[0]
         FMLA    v26.4s, v12.4s,  v6.s[0]
+        PRFM    PLDL1KEEP, [x5, 128]      // Prefetch B
         FMLA    v28.4s, v12.4s,  v8.s[0]
         FMLA    v21.4s, v13.4s,  v0.s[0]
         FMLA    v23.4s, v13.4s,  v2.s[0]
+        PRFM    PLDL1KEEP, [x5, 256]
         FMLA    v25.4s, v13.4s,  v4.s[0]
         FMLA    v27.4s, v13.4s,  v6.s[0]
         FMLA    v29.4s, v13.4s,  v8.s[0]
@@ -590,7 +598,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
         LDP     d8,  d9, [sp], 64
         RET
 
-END_FUNCTION xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a57
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_prfm_cortex_a75
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

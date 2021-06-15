@@ -3326,47 +3326,47 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma.S
   src/f32-gemm/gen-inc/1x8inc-minmax-aarch64-neonfma-cortex-a53.S
-  src/f32-gemm/gen-inc/1x8inc-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen-inc/1x8inc-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen-inc/1x8inc-minmax-aarch64-neonfma-ld64.S
+  src/f32-gemm/gen-inc/1x8inc-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen-inc/1x12inc-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-gemm/gen-inc/4x8inc-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-gemm/gen-inc/4x8inc-minmax-aarch64-neonfma-cortex-a55.S
-  src/f32-gemm/gen-inc/4x8inc-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen-inc/4x8inc-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen-inc/4x8inc-minmax-aarch64-neonfma-ld64.S
   src/f32-gemm/gen-inc/4x8inc-minmax-aarch64-neonfma-ld128.S
+  src/f32-gemm/gen-inc/4x8inc-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen-inc/4x12inc-minmax-aarch64-neonfma-cortex-a53.S
-  src/f32-gemm/gen-inc/5x8inc-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen-inc/5x8inc-minmax-aarch64-neonfma-cortex-a75.S
+  src/f32-gemm/gen-inc/5x8inc-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-cortex-a55.S
-  src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-cortex-a73.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-ld64.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-ld128.S
+  src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-cortex-a53.S
-  src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-ld64.S
+  src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen/1x12-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-cortex-a55.S
-  src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-ld64.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-ld128.S
+  src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen/4x12-minmax-aarch64-neonfma-cortex-a53.S
-  src/f32-gemm/gen/5x8-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen/5x8-minmax-aarch64-neonfma-cortex-a75.S
+  src/f32-gemm/gen/5x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-cortex-a55.S
-  src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-cortex-a73.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-ld64.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-ld128.S
+  src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-igemm/1x8-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-igemm/1x12-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-igemm/4x8-minmax-aarch64-neonfma-cortex-a53.S
@@ -3375,16 +3375,16 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-igemm/6x8-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-igemm/6x8-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-igemm/6x8-minmax-aarch64-neonfma-cortex-a73.S
-  src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-cortex-a57.S
   src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-cortex-a75.S
-  src/f32-igemm/gen/4x8-minmax-aarch64-neonfma-cortex-a57.S
+  src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-igemm/gen/4x8-minmax-aarch64-neonfma-cortex-a75.S
-  src/f32-igemm/gen/5x8-minmax-aarch64-neonfma-cortex-a57.S
-  src/f32-igemm/gen/5x8-minmax-aarch64-neonfma-cortex-a75.S
-  src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a57.S
-  src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-igemm/gen/4x8-minmax-aarch64-neonfma-ld64.S
+  src/f32-igemm/gen/4x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
+  src/f32-igemm/gen/5x8-minmax-aarch64-neonfma-cortex-a75.S
+  src/f32-igemm/gen/5x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
+  src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-ld64.S
+  src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal-cortex-a53.S
   src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal-prfm-cortex-a53.S
   src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal-prfm.S
