@@ -5401,8 +5401,14 @@ xnnpack_cc_library(
         "XNN_NO_X16_OPERATORS",
     ] + select({
         ":xnn_enable_qs8_explicit_true": [],
-        ":xnn_enable_qs8_explicit_false": ["XNN_NO_QS8_OPERATORS"],
-        "//conditions:default": ["XNN_NO_QS8_OPERATORS"],
+        ":xnn_enable_qs8_explicit_false": [
+            "XNN_NO_QC8_OPERATORS",
+            "XNN_NO_QS8_OPERATORS",
+        ],
+        "//conditions:default": [
+            "XNN_NO_QC8_OPERATORS",
+            "XNN_NO_QS8_OPERATORS",
+        ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     includes = ["include"],

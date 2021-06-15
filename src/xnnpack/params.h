@@ -1933,6 +1933,7 @@ struct gemm_parameters {
   struct gemm_fused_ukernels relu;
   struct gemm_fused_ukernels linear;
   union {
+    xnn_init_qs8_minmax_params_fn qc8;
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qu8_conv_minmax_params_fn qu8;
     xnn_init_f16_scaleminmax_params_fn f16;
@@ -2005,6 +2006,7 @@ struct dwconv_parameters {
   union dwconv_fused_ukernels minmax;
   union dwconv_fused_ukernels linear;
   union {
+    xnn_init_qs8_minmax_params_fn qc8;
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qu8_conv_minmax_params_fn qu8;
     xnn_init_f16_minmax_params_fn f16;
@@ -2117,6 +2119,7 @@ struct vmulcaddc_parameters {
   uint8_t row_tile;
 };
 
+#define XNN_MAX_QC8_DWCONV_UKERNELS 2
 #define XNN_MAX_QS8_DWCONV_UKERNELS 2
 #define XNN_MAX_QU8_DWCONV_UKERNELS 1
 #define XNN_MAX_F16_DWCONV_UKERNELS 3
@@ -2134,18 +2137,20 @@ struct vmulcaddc_parameters {
 #define XNN_INIT_FLAG_F16     0x00000008
 // Indicates that X16 XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_X16     0x00000010
+// Indicates that QC8 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_QC8     0x00000020
 // Indicates that QS8 XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_QS8     0x00000020
+#define XNN_INIT_FLAG_QS8     0x00000040
 // Indicates that QU8 XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_QU8     0x00000040
+#define XNN_INIT_FLAG_QU8     0x00000080
 // Indicates that U8 XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_U8      0x00000080
+#define XNN_INIT_FLAG_U8      0x00000100
 // Indicates that X8 XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_X8      0x00000100
+#define XNN_INIT_FLAG_X8      0x00000200
 // Indicates that XX XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_XX      0x00000200
+#define XNN_INIT_FLAG_XX      0x00000400
 // Indicates that CHW XNNPACK microkernels are optimized for the host platform.
-#define XNN_INIT_FLAG_CHW_OPT 0x00000400
+#define XNN_INIT_FLAG_CHW_OPT 0x00000800
 
 struct xnn_parameters {
   // Bitwise combination of XNN_INIT_FLAG_* flags
@@ -2154,6 +2159,10 @@ struct xnn_parameters {
   struct {
     xnn_univector_ukernel_function copy;
   } xx;
+  struct {
+    struct gemm_parameters gemm;
+    struct dwconv_parameters dwconv[XNN_MAX_QC8_DWCONV_UKERNELS];
+  } qc8;
   struct {
     struct gemm_parameters gemm;
     struct dwconv_parameters dwconv[XNN_MAX_QS8_DWCONV_UKERNELS];
