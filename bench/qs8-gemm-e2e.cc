@@ -172,6 +172,17 @@ static void GEMMEnd2EndBenchmark(
       benchmark::utils::CheckNEONDOT);
   }
 
+  static void qs8_gemm_4x16c4_gemmlowp__aarch64_neondot_ld128(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld128,
+      xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld128,
+      xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x16c4__aarch64_neondot_ld64,
+      xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c4__neondot,
+      xnn_init_qs8_conv_minmax_gemmlowp_neon_params,
+      4 /* mr */, 16 /* nr */, 2 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEONDOT);
+  }
+
   static void qs8_gemm_4x16_gemmlowp__aarch64_neon_mlal_lane_cortex_a53(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lane_cortex_a53,
@@ -261,6 +272,7 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_gemm_4x16c4_gemmlowp__aarch64_neondot_cortex_a55)
   BENCHMARK_QS8_END2END(qs8_gemm_4x16c4_gemmlowp__aarch64_neondot_ld32)
   BENCHMARK_QS8_END2END(qs8_gemm_4x16c4_gemmlowp__aarch64_neondot_ld64)
+  BENCHMARK_QS8_END2END(qs8_gemm_4x16c4_gemmlowp__aarch64_neondot_ld128)
 #if XNN_ENABLE_FULL_BENCHMARKS
   BENCHMARK_QS8_END2END(qs8_gemm_1x8c8_gemmlowp__aarch64_neon_mlal_padal_prfm)
   BENCHMARK_QS8_END2END(qs8_gemm_1x8c8_gemmlowp__aarch64_neon_mlal_padal)

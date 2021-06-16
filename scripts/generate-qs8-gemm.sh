@@ -151,6 +151,7 @@ tools/xngen src/qs8-gemm/2x8c8-minmax-gemmlowp-aarch64-neon-mull-padal.S.in     
 tools/xngen src/qs8-gemm/4x16c4-minmax-gemmlowp-aarch64-neondot-cortex-a55.S.in -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-cortex-a55.S
 tools/xngen src/qs8-gemm/4x16c4-minmax-gemmlowp-aarch64-neondot-ld32.S.in       -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld32.S
 tools/xngen src/qs8-gemm/4x16c4-minmax-gemmlowp-aarch64-neondot-ld64.S.in       -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld64.S
+tools/xngen src/qs8-gemm/4x16c4-minmax-gemmlowp-aarch64-neondot-ld128.S.in      -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld128.S
 
 ################################### x86 SSE ###################################
 ### C2 micro-kernels

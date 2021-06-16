@@ -841,9 +841,9 @@ static void init(void) {
     #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
       #if XNN_ENABLE_ASSEMBLY
         if (cpuinfo_has_arm_neon_dot()) {
-          xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld64);
+          xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld128);
           xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x16c4__neondot);
-          xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld64);
+          xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld128);
           xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c4__neondot);
           xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_gemmlowp_neon_params;
           xnn_params.qs8.gemm.mr = 4;
@@ -887,6 +887,11 @@ static void init(void) {
             case cpuinfo_uarch_cortex_a55:
               xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cortex_a55);
               xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cortex_a55);
+              break;
+            case cpuinfo_uarch_cortex_x1:
+            case cpuinfo_uarch_cortex_a78:
+              xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld128);
+              xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld128);
               break;
             default:
               xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld64);
