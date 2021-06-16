@@ -269,8 +269,11 @@ static void GEMMEnd2EndBenchmark(
 #endif  // XNN_ENABLE_FULL_BENCHMARKS
   BENCHMARK_QS8_END2END(qs8_gemm_4x16_gemmlowp__aarch64_neon_mlal_lane_prfm_cortex_a53)
   BENCHMARK_QS8_END2END(qs8_gemm_4x16_gemmlowp__aarch64_neon_mlal_lane_cortex_a53)
+#if XNN_ENABLE_FULL_BENCHMARKS
+  // TODO(b/191163579): Fix a53 microkernel benchmark.
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_cortex_a53)
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_prfm_cortex_a53)
+#endif
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal)
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_prfm)
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mull_padal)
