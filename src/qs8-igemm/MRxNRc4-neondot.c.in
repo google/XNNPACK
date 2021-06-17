@@ -12,6 +12,8 @@ $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
 #include <arm_neon.h>
 
 #include <xnnpack/igemm.h>
+$if REQUANTIZATION == "FP32":
+  #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
 

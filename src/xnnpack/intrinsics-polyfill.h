@@ -128,4 +128,16 @@ __m512i _mm512_set_epi8(
 }
 #endif  // GCC pre-9
 
+// AArch32 GCC, see
+// - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71233
+// - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95399
+#if XNN_ARCH_ARM && defined(__GNUC__) && !defined(__clang__) && defined(__ARM_NEON__)
+#include <arm_neon.h>
+
+static XNN_INTRINSIC
+int32x4_t vcvtnq_s32_f32(float32x4_t v) {
+  return vcvtq_s32_f32(vrndnq_f32(v));
+}
+#endif  // AArch32 GCC
+
 #endif  // __AVX512F__
