@@ -234,16 +234,28 @@ static void GEMMEnd2EndBenchmark(
       2 /* mr */, 8  /* nr */, 3 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
   }
+
   static void qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_cortex_a53(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_padal_cortex_a53,
-      xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_padal_cortex_a53,
-      xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53,
-      xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53,
+      xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_padal,
+      xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal,
+      xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal,
       xnn_init_qs8_conv_minmax_gemmlowp_neon_params,
       2 /* mr */, 8  /* nr */, 3 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
   }
+
+//  static void qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_cortex_a53(benchmark::State& state, models::ExecutionPlanFactory model) {
+//    GEMMEnd2EndBenchmark(state, model,
+//      xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_padal_cortex_a53,
+//      xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_padal_cortex_a53,
+//      xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53,
+//      xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53,
+//      xnn_init_qs8_conv_minmax_gemmlowp_neon_params,
+//      2 /* mr */, 8  /* nr */, 3 /* log2_kr */, 0 /* log2_sr */,
+//      benchmark::utils::CheckNEON);
+//  }
   static void qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_prfm_cortex_a53(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_padal_prfm_cortex_a53,
@@ -265,6 +277,8 @@ static void GEMMEnd2EndBenchmark(
       benchmark::utils::CheckNEON);
   }
 
+  BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_cortex_a53)
+  BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_prfm_cortex_a53)
 #if XNN_ENABLE_FULL_BENCHMARKS
   BENCHMARK_QS8_END2END(qs8_gemm_1x16c4_gemmlowp__aarch64_neondot_ld32)
   BENCHMARK_QS8_END2END(qs8_gemm_1x16c4_gemmlowp__aarch64_neondot_ld64)
@@ -281,11 +295,6 @@ static void GEMMEnd2EndBenchmark(
 #endif  // XNN_ENABLE_FULL_BENCHMARKS
   BENCHMARK_QS8_END2END(qs8_gemm_4x16_gemmlowp__aarch64_neon_mlal_lane_prfm_cortex_a53)
   BENCHMARK_QS8_END2END(qs8_gemm_4x16_gemmlowp__aarch64_neon_mlal_lane_cortex_a53)
-#if XNN_ENABLE_FULL_BENCHMARKS
-  // TODO(b/191163579): Fix a53 microkernel benchmark.
-  BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_cortex_a53)
-  BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_prfm_cortex_a53)
-#endif
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal)
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mlal_padal_prfm)
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8_gemmlowp__aarch64_neon_mull_padal)

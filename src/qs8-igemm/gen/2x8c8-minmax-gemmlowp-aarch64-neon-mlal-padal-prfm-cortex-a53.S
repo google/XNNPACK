@@ -251,7 +251,6 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pa
         INS     v4.d[0], x16
         SMLAL   v2.8h, v8.8b, v6.8b
         SMLAL   v3.8h, v8.8b, v7.8b
-        LDR     x16, [x5, 128]
         SMLAL   v10.8h, v9.8b, v6.8b
         SMLAL   v11.8h, v9.8b, v7.8b
         SADALP  v24.4s,  v2.8h
@@ -264,7 +263,6 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pa
         INS     v8.d[0], x17
         SMULL   v12.8h, v4.8b, v0.8b
         SMULL   v13.8h, v4.8b, v1.8b
-        ADD     x5, x5, 128
         SMULL   v14.8h, v5.8b, v0.8b
         SMULL   v15.8h, v5.8b, v1.8b
         SMLAL   v12.8h, v8.8b, v6.8b
@@ -273,6 +271,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pa
         SMLAL   v15.8h, v9.8b, v7.8b
         SADALP  v28.4s, v12.8h
         SADALP  v29.4s, v13.8h
+        ADD     x5, x5, 128
         SADALP  v30.4s, v14.8h
         SADALP  v31.4s, v15.8h
 
