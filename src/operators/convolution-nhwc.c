@@ -26,6 +26,7 @@
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
+#include <xnnpack/params-init.h>
 
 
 static inline size_t compute_output_dimension(
@@ -90,6 +91,9 @@ static enum xnn_status create_convolution2d_nhwc(
     const void* packing_params,
     int input_padding_byte,
     int packed_weights_padding_byte,
+    size_t extra_weights_bytes,
+    xnn_init_qc8_scale_params_fn init_scale_params,
+    const float* scale_params,
     const void* gemm_params,
     size_t gemm_params_size,
     const void* dwconv_params,
@@ -269,7 +273,7 @@ static enum xnn_status create_convolution2d_nhwc(
       assert(dwconv_ukernel->primary_tile == kernel_size);
 
       const size_t c_stride = round_up_po2(groups, dwconv_ukernel->channel_tile);
-      const size_t packed_weights_size = ((kernel_size << log2_filter_element_size) + bias_element_size) * c_stride;
+      const size_t packed_weights_size = ((kernel_size << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * c_stride;
       convolution_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights == NULL) {
         xnn_log_error(
@@ -284,12 +288,22 @@ static enum xnn_status create_convolution2d_nhwc(
         pack_dwconv_hwg_w(
           kernel_height, kernel_width,
           groups, dwconv_ukernel->channel_tile,
-          kernel, bias, convolution_op->packed_weights, packing_params);
+          kernel, bias, convolution_op->packed_weights, extra_weights_bytes, packing_params);
       } else {
         pack_dwconv_ghw_w(
           kernel_height, kernel_width,
           groups, dwconv_ukernel->channel_tile,
-          kernel, bias, convolution_op->packed_weights, 0 /* extra bytes */, packing_params);
+          kernel, bias, convolution_op->packed_weights, extra_weights_bytes, packing_params);
+      }
+
+      if (scale_params != NULL) {
+        assert(init_scale_params != NULL);
+
+        init_scale_params(
+          groups, dwconv_ukernel->channel_tile,
+          dwconv_ukernel->channel_tile * ((kernel_size << log2_filter_element_size) + bias_element_size + extra_weights_bytes),
+          scale_params,
+          (void*) ((uintptr_t) convolution_op->packed_weights + dwconv_ukernel->channel_tile * ((kernel_size << log2_filter_element_size) + bias_element_size)));
       }
 
       const union dwconv_fused_ukernels* ukernels = &dwconv_ukernel->minmax;
@@ -314,7 +328,7 @@ static enum xnn_status create_convolution2d_nhwc(
       const size_t n_stride = round_up(group_output_channels, nr);
       const size_t k_stride = round_up_po2(group_input_channels, kr);
 
-      const size_t packed_group_weights_size = ((kernel_size * k_stride << log2_filter_element_size) + bias_element_size) * n_stride;
+      const size_t packed_group_weights_size = ((kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * n_stride;
       convolution_op->packed_weights = xnn_allocate_simd_memory(packed_group_weights_size * groups);
       if (convolution_op->packed_weights == NULL) {
         xnn_log_error(
@@ -336,7 +350,7 @@ static enum xnn_status create_convolution2d_nhwc(
           pack_gemm_goi_w(
               groups, group_output_channels, group_input_channels,
               nr, kr, sr,
-              kernel, bias, convolution_op->packed_weights, 0 /* extra bytes */, packing_params);
+              kernel, bias, convolution_op->packed_weights, gemm_parameters->nr * extra_weights_bytes, packing_params);
           convolution_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
             .mr = gemm_parameters->mr,
             .nr = nr,
@@ -350,12 +364,12 @@ static enum xnn_status create_convolution2d_nhwc(
             pack_conv_kgo_w(
               groups, group_output_channels, kernel_size,
               nr, kr,
-              kernel, bias, convolution_op->packed_weights, packing_params);
+              kernel, bias, convolution_op->packed_weights, gemm_parameters->nr * extra_weights_bytes, packing_params);
           } else {
             pack_conv_goki_w(
               groups, group_output_channels, kernel_size, group_input_channels,
               nr, kr, sr,
-              kernel, bias, convolution_op->packed_weights, 0 /* extra bytes */, packing_params);
+              kernel, bias, convolution_op->packed_weights, gemm_parameters->nr * extra_weights_bytes, packing_params);
           }
           convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
             .mr = gemm_parameters->mr,
@@ -367,6 +381,22 @@ static enum xnn_status create_convolution2d_nhwc(
           break;
         default:
           XNN_UNREACHABLE;
+      }
+
+      if (scale_params != NULL) {
+        assert(init_scale_params != NULL);
+
+        void* group_weights = (void*)
+          ((uintptr_t) convolution_op->packed_weights + gemm_parameters->nr * ((kernel_size * k_stride << log2_filter_element_size) + bias_element_size));
+        const size_t weights_stride = (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
+        for (uint32_t group = 0; group < groups; group++) {
+          init_scale_params(
+            group_output_channels, gemm_parameters->nr,
+            gemm_parameters->nr * weights_stride,
+            scale_params, group_weights);
+          scale_params += group_output_channels;
+          group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);
+        }
       }
 
       zero_size = XNN_EXTRA_BYTES + (k_stride << log2_input_element_size);
@@ -527,6 +557,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     (xnn_pack_conv_kgo_w_function) xnn_pack_qu8_conv_kgo_w,
     (xnn_pack_conv_goki_w_function) xnn_pack_qu8_conv_goki_w,
     &packing_params, input_zero_point /* input padding byte */, kernel_zero_point /* packed weights padding byte */,
+    0 /* extra weights bytes */, NULL /* init scale params fn */, NULL /* scale params */,
     &gemm_params, sizeof(gemm_params),
     &dwconv_params, sizeof(dwconv_params),
     NULL /* vmulcaddc params */, 0,
@@ -636,12 +667,131 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     (xnn_pack_conv_kgo_w_function) xnn_pack_qs8_conv_kgo_w,
     (xnn_pack_conv_goki_w_function) xnn_pack_qs8_conv_goki_w,
     &packing_params, input_zero_point /* input padding byte */, 0 /* packed weights padding byte */,
+    0 /* extra weights bytes */, NULL /* init scale params fn */, NULL /* scale params */,
     &gemm_params, sizeof(gemm_params),
     &dwconv_params, sizeof(dwconv_params),
     NULL /* vmulcaddc params */, 0,
     &xnn_params.qs8.gemm, dwconv_ukernel, NULL /* vmulcaddc parameters */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QS8,
     xnn_operator_type_convolution_nhwc_qs8,
+    convolution_op_out);
+}
+
+enum xnn_status xnn_create_convolution2d_nhwc_qc8(
+    uint32_t input_padding_top,
+    uint32_t input_padding_right,
+    uint32_t input_padding_bottom,
+    uint32_t input_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t subsampling_height,
+    uint32_t subsampling_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    size_t input_channel_stride,
+    size_t output_channel_stride,
+    int8_t input_zero_point,
+    float input_scale,
+    const float* kernel_scale,
+    const int8_t* kernel,
+    const int32_t* bias,
+    int8_t output_zero_point,
+    float output_scale,
+    int8_t output_min,
+    int8_t output_max,
+    uint32_t flags,
+    xnn_operator_t* convolution_op_out)
+{
+  if (input_scale <= 0.0f || !isnormal(input_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  for (size_t output_channel = 0; output_channel < groups * group_output_channels; output_channel++) {
+    if (kernel_scale[output_channel] <= 0.0f || !isnormal(kernel_scale[output_channel])) {
+      xnn_log_error(
+        "failed to create %s operator with %.7g kernel scale in output channel #%zu: "
+        "scale must be finite, normalized, and positive",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8), kernel_scale[output_channel],
+        output_channel);
+      return xnn_status_invalid_parameter;
+    }
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  float* requantization_scale = XNN_SIMD_ALLOCA(groups * group_output_channels * sizeof(float));
+  for (size_t output_channel = 0; output_channel < groups * group_output_channels; output_channel++) {
+    requantization_scale[output_channel] = input_scale * kernel_scale[output_channel] / output_scale;
+    if (requantization_scale[output_channel] >= 1.0f) {
+      xnn_log_error(
+        "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale in output channel #%zu: "
+        "requantization scale %.7g is greater or equal to 1.0",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8),
+        input_scale, kernel_scale[output_channel], output_scale,
+        output_channel, requantization_scale[output_channel]);
+      return xnn_status_unsupported_parameter;
+    }
+  }
+
+  const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point, };
+
+  union xnn_qs8_minmax_params gemm_params;
+  if XNN_LIKELY(xnn_params.qc8.gemm.init.qc8 != NULL) {
+    xnn_params.qc8.gemm.init.qc8(&gemm_params,
+      output_zero_point, output_min, output_max);
+  }
+
+  union xnn_qs8_minmax_params dwconv_params;
+  const struct dwconv_parameters* dwconv_ukernel =
+    find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.qc8.dwconv, XNN_MAX_QC8_DWCONV_UKERNELS);
+  if XNN_LIKELY(dwconv_ukernel != NULL) {
+    dwconv_ukernel->init.qc8(&dwconv_params,
+      output_zero_point, output_min, output_max);
+  }
+
+  return create_convolution2d_nhwc(
+    input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+    kernel_height, kernel_width,
+    subsampling_height, subsampling_width,
+    dilation_height, dilation_width,
+    groups, group_input_channels, group_output_channels,
+    input_channel_stride, output_channel_stride,
+    kernel, bias, flags,
+    0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
+    0 /* log2(sizeof(filter element)) = log2(sizeof(int8_t)) */,
+    sizeof(int32_t) /* sizeof(bias element) */,
+    (xnn_pack_vmulcaddc_w_function) NULL,
+    (xnn_pack_dwconv_hwg_w_function) xnn_pack_qs8_dwconv_hwg_w,
+    (xnn_pack_dwconv_ghw_w_function) xnn_pack_qs8_dwconv_ghw_w,
+    (xnn_pack_gemm_goi_w_function) xnn_pack_qs8_gemm_goi_w,
+    (xnn_pack_conv_kgo_w_function) xnn_pack_qs8_conv_kgo_w,
+    (xnn_pack_conv_goki_w_function) xnn_pack_qs8_conv_goki_w,
+    &packing_params, input_zero_point /* input padding byte */, 0 /* packed weights padding byte */,
+    sizeof(float) /* extra weights bytes */, xnn_init_qc8_scale_fp32_params, requantization_scale,
+    &gemm_params, sizeof(gemm_params),
+    &dwconv_params, sizeof(dwconv_params),
+    NULL /* vmulcaddc params */, 0,
+    &xnn_params.qc8.gemm, dwconv_ukernel, NULL /* vmulcaddc parameters */,
+    false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QC8,
+    xnn_operator_type_convolution_nhwc_qc8,
     convolution_op_out);
 }
 
@@ -729,6 +879,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     (xnn_pack_conv_kgo_w_function) xnn_pack_f16_conv_kgo_w,
     (xnn_pack_conv_goki_w_function) xnn_pack_f16_conv_goki_w,
     NULL /* packing params */, 0 /* input padding byte */, 0 /* packed weights padding byte */,
+    0 /* extra weights bytes */, NULL /* init scale params fn */, NULL /* scale params */,
     &gemm_params, sizeof(gemm_params),
     &dwconv_params, sizeof(dwconv_params),
     &vmulcaddc_params, sizeof(vmulcaddc_params),
@@ -820,6 +971,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     (xnn_pack_conv_kgo_w_function) xnn_pack_f32_conv_kgo_w,
     (xnn_pack_conv_goki_w_function) xnn_pack_f32_conv_goki_w,
     NULL /* packing params */, 0 /* input padding byte */, 0 /* packed weights padding byte */,
+    0 /* extra weights bytes */, NULL /* init scale params fn */, NULL /* scale params */,
     &gemm_params, sizeof(gemm_params),
     &dwconv_params, sizeof(dwconv_params),
     &vmulcaddc_params, sizeof(vmulcaddc_params),
@@ -839,7 +991,7 @@ static enum xnn_status setup_convolution2d_nhwc(
   uint32_t datatype_init_flags,
   uint32_t log2_input_element_size,
   uint32_t log2_filter_element_size,
-  uint32_t bias_element_size,
+  uint32_t extra_weights_elements_size,
   uint32_t log2_output_element_size,
   size_t num_threads)
 {
@@ -917,7 +1069,7 @@ static enum xnn_status setup_convolution2d_nhwc(
 
       const size_t groups = convolution_op->groups;
       const size_t group_input_channels = convolution_op->group_input_channels;
-      const size_t w_stride = bias_element_size +
+      const size_t w_stride = extra_weights_elements_size +
         (round_up_po2(group_input_channels, convolution_op->ukernel.gemm.kr) << log2_filter_element_size);
       const size_t group_output_channels = convolution_op->group_output_channels;
 
@@ -1034,7 +1186,8 @@ static enum xnn_status setup_convolution2d_nhwc(
       }
 
       const size_t group_input_channels = convolution_op->group_input_channels;
-      const size_t w_stride = (round_up_po2(group_input_channels, convolution_op->ukernel.igemm.kr) * kernel_size << log2_filter_element_size) + bias_element_size;
+      const size_t w_stride = extra_weights_elements_size +
+        (round_up_po2(group_input_channels, convolution_op->ukernel.igemm.kr) * kernel_size << log2_filter_element_size);
       const size_t group_output_channels = convolution_op->group_output_channels;
       convolution_op->context.igemm = (struct igemm_context) {
           .ks = kernel_size,
@@ -1265,7 +1418,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qu8(
     XNN_INIT_FLAG_QU8,
     0 /* log2(sizeof(input element)) = log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
-    sizeof(int32_t) /* sizeof(bias element) */,
+    sizeof(int32_t) /* sizeof(extra weights elements) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
     pthreadpool_get_threads_count(threadpool));
 }
@@ -1293,7 +1446,35 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qs8(
     XNN_INIT_FLAG_QS8,
     0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(int8_t)) */,
-    sizeof(int32_t) /* sizeof(bias element) */,
+    sizeof(int32_t) /* sizeof(extra weights elements) */,
+    0 /* log2(sizeof(output element)) = log2(sizeof(int8_t)) */,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_convolution2d_nhwc_qc8(
+    xnn_operator_t convolution_op,
+    size_t batch_size,
+    size_t input_height,
+    size_t input_width,
+    const int8_t* input,
+    int8_t* output,
+    pthreadpool_t threadpool)
+{
+  if (convolution_op->type != xnn_operator_type_convolution_nhwc_qc8) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8),
+      xnn_operator_type_to_string(convolution_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  return setup_convolution2d_nhwc(
+    convolution_op,
+    batch_size, input_height, input_width,
+    input, output,
+    XNN_INIT_FLAG_QC8,
+    0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
+    0 /* log2(sizeof(filter element)) = log2(sizeof(int8_t)) */,
+    sizeof(int32_t) + sizeof(float) /* sizeof(extra weights elements) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(int8_t)) */,
     pthreadpool_get_threads_count(threadpool));
 }
@@ -1321,7 +1502,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f16(
     XNN_INIT_FLAG_F16,
     1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
-    sizeof(uint16_t) /* sizeof(bias element) */,
+    sizeof(uint16_t) /* sizeof(extra weights elements) */,
     1 /* log2(sizeof(output element)) = log2(sizeof(uint16_t)) */,
     pthreadpool_get_threads_count(threadpool));
 }
@@ -1349,7 +1530,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f32(
     XNN_INIT_FLAG_F32,
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
-    sizeof(float) /* sizeof(bias element) */,
+    sizeof(float) /* sizeof(extra weights elements) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
     pthreadpool_get_threads_count(threadpool));
 }

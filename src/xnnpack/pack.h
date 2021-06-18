@@ -245,6 +245,7 @@ typedef void (*xnn_pack_conv_kgo_w_function)(
   const void* k,
   const void* b,
   void* packed_w,
+  size_t extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_conv_kgo_w(
@@ -256,6 +257,7 @@ XNN_INTERNAL void xnn_pack_f32_conv_kgo_w(
   const float* k,
   const float* b,
   float* packed_w,
+  size_t extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f16_conv_kgo_w(
@@ -267,6 +269,7 @@ XNN_INTERNAL void xnn_pack_f16_conv_kgo_w(
   const uint16_t* k,
   const uint16_t* b,
   uint16_t* packed_w,
+  size_t extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_qu8_conv_kgo_w(
@@ -278,6 +281,7 @@ XNN_INTERNAL void xnn_pack_qu8_conv_kgo_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
+  size_t extra_bytes,
   const struct xnn_qu8_packing_params* params);
 
 XNN_INTERNAL void xnn_pack_qs8_conv_kgo_w(
@@ -289,6 +293,7 @@ XNN_INTERNAL void xnn_pack_qs8_conv_kgo_w(
   const int8_t* k,
   const int32_t* b,
   void* packed_w,
+  size_t extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
 
@@ -425,6 +430,7 @@ typedef void (*xnn_pack_dwconv_hwg_w_function)(
   const void* k,
   const void* b,
   void* packed_w,
+  size_t extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_dwconv_hwg_w(
@@ -435,6 +441,7 @@ XNN_INTERNAL void xnn_pack_f32_dwconv_hwg_w(
   const float* k,
   const float* b,
   float* packed_w,
+  size_t extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f16_dwconv_hwg_w(
@@ -445,6 +452,7 @@ XNN_INTERNAL void xnn_pack_f16_dwconv_hwg_w(
   const uint16_t* k,
   const uint16_t* b,
   uint16_t* packed_w,
+  size_t extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_qu8_dwconv_hwg_w(
@@ -455,6 +463,7 @@ XNN_INTERNAL void xnn_pack_qu8_dwconv_hwg_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_w,
+  size_t extra_bytes,
   const struct xnn_qu8_packing_params* params);
 
 XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
@@ -465,6 +474,7 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
   const int8_t* k,
   const int32_t* b,
   void* packed_w,
+  size_t extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
 

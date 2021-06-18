@@ -1870,6 +1870,13 @@ typedef void (*xnn_init_f32_minmax_params_fn)(
   float output_min,
   float output_max);
 
+typedef void (*xnn_init_qc8_scale_params_fn)(
+  size_t channels,
+  size_t channels_tile,
+  size_t stride,
+  const float scale[XNN_MIN_ELEMENTS(1)],
+  void* packed_w);
+
 struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_function function[XNN_MAX_UARCH_TYPES];
 };
