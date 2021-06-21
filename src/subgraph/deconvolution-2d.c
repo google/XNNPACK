@@ -241,6 +241,8 @@ enum xnn_status xnn_define_deconvolution_2d(
   node->params.deconvolution_2d.upsampling_width = upsampling_width;
   node->params.deconvolution_2d.dilation_height = dilation_height;
   node->params.deconvolution_2d.dilation_width = dilation_width;
+  node->params.deconvolution_2d.adjustment_height = adjustment_height;
+  node->params.deconvolution_2d.adjustment_width = adjustment_width;
   node->params.deconvolution_2d.groups = groups;
   node->params.deconvolution_2d.group_input_channels = group_input_channels;
   node->params.deconvolution_2d.group_output_channels = group_output_channels;
