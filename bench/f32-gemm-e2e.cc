@@ -134,7 +134,7 @@ static void GEMMEnd2EndBenchmark(
   static void f32_gemm_4x8__aarch64_neonfma_ld128(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_ld128,
-      xnn_f32_igemm_minmax_ukernel_4x8__neonfma_lane_ld128,
+      xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       xnn_init_f32_minmax_scalar_params,
@@ -215,7 +215,7 @@ static void GEMMEnd2EndBenchmark(
   static void f32_gemm_6x8__aarch64_neonfma_ld128(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld128,
-      xnn_f32_igemm_minmax_ukernel_6x8__neonfma_lane_ld64,
+      xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       xnn_init_f32_minmax_scalar_params,
