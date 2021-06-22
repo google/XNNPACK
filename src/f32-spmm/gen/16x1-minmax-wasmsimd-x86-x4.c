@@ -68,8 +68,10 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_x4(
         const v128_t vi89ABx0 = wasm_v128_load(input + 8);
         const v128_t viCDEFx0 = wasm_v128_load(input + 12);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff0);
+        __builtin_wasm_prefetch_t((void*) (input + 16));
         const v128_t vw0 = wasm_v32x4_load_splat(w);
         w += 1;
+        __builtin_wasm_prefetch_t((void*) (w + 32));
         vacc0123x0 = wasm_f32x4_add(vacc0123x0, wasm_f32x4_mul(vi0123x0, vw0));
         vacc4567x0 = wasm_f32x4_add(vacc4567x0, wasm_f32x4_mul(vi4567x0, vw0));
         vacc89ABx0 = wasm_f32x4_add(vacc89ABx0, wasm_f32x4_mul(vi89ABx0, vw0));
@@ -79,8 +81,10 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_x4(
         const v128_t vi89ABx1 = wasm_v128_load(input + 8);
         const v128_t viCDEFx1 = wasm_v128_load(input + 12);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff1);
+        __builtin_wasm_prefetch_t((void*) (input + 16));
         const v128_t vw1 = wasm_v32x4_load_splat(w);
         w += 1;
+        __builtin_wasm_prefetch_t((void*) (w + 32));
         vacc0123x1 = wasm_f32x4_add(vacc0123x1, wasm_f32x4_mul(vi0123x1, vw1));
         vacc4567x1 = wasm_f32x4_add(vacc4567x1, wasm_f32x4_mul(vi4567x1, vw1));
         vacc89ABx1 = wasm_f32x4_add(vacc89ABx1, wasm_f32x4_mul(vi89ABx1, vw1));
@@ -90,8 +94,10 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_x4(
         const v128_t vi89ABx2 = wasm_v128_load(input + 8);
         const v128_t viCDEFx2 = wasm_v128_load(input + 12);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff2);
+        __builtin_wasm_prefetch_t((void*) (input + 16));
         const v128_t vw2 = wasm_v32x4_load_splat(w);
         w += 1;
+        __builtin_wasm_prefetch_t((void*) (w + 32));
         vacc0123x2 = wasm_f32x4_add(vacc0123x2, wasm_f32x4_mul(vi0123x2, vw2));
         vacc4567x2 = wasm_f32x4_add(vacc4567x2, wasm_f32x4_mul(vi4567x2, vw2));
         vacc89ABx2 = wasm_f32x4_add(vacc89ABx2, wasm_f32x4_mul(vi89ABx2, vw2));
@@ -101,8 +107,10 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_x4(
         const v128_t vi89ABx3 = wasm_v128_load(input + 8);
         const v128_t viCDEFx3 = wasm_v128_load(input + 12);
         input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff3);
+        __builtin_wasm_prefetch_t((void*) (input + 16));
         const v128_t vw3 = wasm_v32x4_load_splat(w);
         w += 1;
+        __builtin_wasm_prefetch_t((void*) (w + 32));
         vacc0123x3 = wasm_f32x4_add(vacc0123x3, wasm_f32x4_mul(vi0123x3, vw3));
         vacc4567x3 = wasm_f32x4_add(vacc4567x3, wasm_f32x4_mul(vi4567x3, vw3));
         vacc89ABx3 = wasm_f32x4_add(vacc89ABx3, wasm_f32x4_mul(vi89ABx3, vw3));
@@ -132,7 +140,9 @@ void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_x4(
           const v128_t vi89AB = wasm_v128_load(input + 8);
           const v128_t viCDEF = wasm_v128_load(input + 12);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          __builtin_wasm_prefetch_t((void*) (input + 16));
           const v128_t vw = wasm_v32x4_load_splat(w); w += 1;
+          __builtin_wasm_prefetch_t((void*) (w + 32));
           vacc0123 = wasm_f32x4_add(vacc0123, wasm_f32x4_mul(vi0123, vw));
           vacc4567 = wasm_f32x4_add(vacc4567, wasm_f32x4_mul(vi4567, vw));
           vacc89AB = wasm_f32x4_add(vacc89AB, wasm_f32x4_mul(vi89AB, vw));

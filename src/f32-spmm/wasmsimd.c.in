@@ -58,8 +58,11 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_x" + str
             $for M in range(4, MR, 4):
               const v128_t vi${ABC[M:M+4]}x${K} = wasm_v128_load(input + ${M});
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff${K});
+            $for M in range(0, MR, 16):
+              __builtin_wasm_prefetch_t((void*) (input + ${M+16}));
             const v128_t vw${K} = wasm_v32x4_load_splat(w);
             w += 1;
+            __builtin_wasm_prefetch_t((void*) (w + 32));
             $for M in range(0, MR, 4):
               vacc${ABC[M:M+4]}x${K} = wasm_f32x4_add(vacc${ABC[M:M+4]}x${K}, wasm_f32x4_mul(vi${ABC[M:M+4]}x${K}, vw${K}));
         }
@@ -79,7 +82,10 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}${"_x" + str
           $for M in range(4, MR, 4):
             const v128_t vi${ABC[M:M+4]} = wasm_v128_load(input + ${M});
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          $for M in range(0, MR, 16):
+            __builtin_wasm_prefetch_t((void*) (input + ${M+16}));
           const v128_t vw = wasm_v32x4_load_splat(w); w += 1;
+          __builtin_wasm_prefetch_t((void*) (w + 32));
           $for M in range(0, MR, 4):
             vacc${ABC[M:M+4]} = wasm_f32x4_add(vacc${ABC[M:M+4]}, wasm_f32x4_mul(vi${ABC[M:M+4]}, vw));
         } while (--nnz != 0);
