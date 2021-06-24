@@ -19,14 +19,17 @@ static inline bool check_datatypes_with_bias(
   enum xnn_datatype bias_datatype,
   enum xnn_datatype output_datatype)
 {
-  switch (output_datatype) {
+  switch (filter_datatype) {
     case xnn_datatype_fp32:
       return input_datatype == xnn_datatype_fp32 &&
-        filter_datatype == xnn_datatype_fp32 && bias_datatype == xnn_datatype_fp32;
+        bias_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
       return input_datatype == xnn_datatype_qint8 &&
-        filter_datatype == xnn_datatype_qint8 && bias_datatype == xnn_datatype_qint32;
+        bias_datatype == xnn_datatype_qint32 && output_datatype == xnn_datatype_qint8;
+    case xnn_datatype_qcint8:
+      return input_datatype == xnn_datatype_qint8 &&
+        bias_datatype == xnn_datatype_qcint32 && output_datatype == xnn_datatype_qint8;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
     default:
       XNN_UNREACHABLE;
@@ -38,12 +41,13 @@ static inline bool check_datatypes_without_bias(
   enum xnn_datatype filter_datatype,
   enum xnn_datatype output_datatype)
 {
-  switch (output_datatype) {
+  switch (filter_datatype) {
     case xnn_datatype_fp32:
-      return input_datatype == xnn_datatype_fp32 && filter_datatype == xnn_datatype_fp32;
+      return input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-      return input_datatype == xnn_datatype_qint8 && filter_datatype == xnn_datatype_qint8;
+    case xnn_datatype_qcint8:
+      return input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_qint8;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
     default:
       XNN_UNREACHABLE;
@@ -227,6 +231,8 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
           filter_value->quantization.zero_point, xnn_datatype_to_string(filter_value->datatype));
       }
       break;
+    case xnn_datatype_qcint8:
+      break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
     default:
       xnn_log_error(
@@ -264,6 +270,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
       case xnn_datatype_fp32:
 #ifndef XNN_NO_QS8_OPERATORS
       case xnn_datatype_qint32:
+      case xnn_datatype_qcint32:
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
         break;
       default:
@@ -309,7 +316,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", bias ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), bias (%s), and output (%s)",
-        xnn_node_type_to_string(xnn_node_type_convolution_2d), input_id, filter_id, bias_id, output_id,
+        xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d), input_id, filter_id, bias_id, output_id,
         xnn_datatype_to_string(input_value->datatype),
         xnn_datatype_to_string(filter_value->datatype),
         xnn_datatype_to_string(bias_value->datatype),
@@ -321,13 +328,34 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), and output (%s)",
-        xnn_node_type_to_string(xnn_node_type_convolution_2d), input_id, filter_id, output_id,
+        xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d), input_id, filter_id, output_id,
         xnn_datatype_to_string(input_value->datatype),
         xnn_datatype_to_string(filter_value->datatype),
         xnn_datatype_to_string(output_value->datatype));
       return xnn_status_invalid_parameter;
     }
   }
+
+#ifndef XNN_NO_QS8_OPERATORS
+  if (filter_value->datatype == xnn_datatype_qcint8) {
+    if (filter_value->quantization.channel_dimension != filter_value->shape.num_dims - 1) {
+      xnn_log_error(
+        "failed to define %s operator with filter ID #%" PRIu32 ": invalid channel dimension %zu",
+        xnn_node_type_to_string(xnn_node_type_convolution_2d), input_id, filter_value->quantization.channel_dimension);
+      return xnn_status_invalid_parameter;
+    }
+
+    if (bias_value != NULL) {
+      assert(bias_value->datatype == xnn_datatype_qcint32);
+      if (bias_value->quantization.channel_dimension != 0) {
+        xnn_log_error(
+          "failed to define %s operator with bias ID #%" PRIu32 ": invalid channel dimension %zu",
+          xnn_node_type_to_string(xnn_node_type_convolution_2d), bias_id, bias_value->quantization.channel_dimension);
+        return xnn_status_invalid_parameter;
+      }
+    }
+  }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
