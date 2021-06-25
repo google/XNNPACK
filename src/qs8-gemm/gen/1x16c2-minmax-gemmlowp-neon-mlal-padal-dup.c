@@ -36,7 +36,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x16c2__neon_mlal_padal_dup(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 2);
+  kc = round_up_po2(kc, 2 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
 

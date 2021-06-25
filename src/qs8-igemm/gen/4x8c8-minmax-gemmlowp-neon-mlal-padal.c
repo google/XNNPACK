@@ -40,7 +40,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x8c8__neon_mlal_padal(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
   int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
@@ -239,7 +239,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x8c8__neon_mlal_padal(
       }
 
       // Handle 8 bytes at a time using MUL.
-      if (k > 0) {
+      if (k != 0) {
         const int8x8_t va0 = vld1_s8(a0); a0 += 8;
         const int8x8_t va1 = vld1_s8(a1); a1 += 8;
         const int8x8_t va2 = vld1_s8(a2); a2 += 8;

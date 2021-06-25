@@ -40,7 +40,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c16__neon_mlal_padal(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 16);
+  kc = round_up_po2(kc, 16 * sizeof(int8_t));
   int8_t* c0 = c;
 
   do {
@@ -70,8 +70,8 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c16__neon_mlal_padal(
       a += 1;
 
       // KC loop of 16 with up to 15 remainder
-      size_t k = 0;
-      while (k < kc) {
+      size_t k = kc;
+      while (k != 0) {
         const int8x16_t va0 = vld1q_s8(a0); a0 += 16;
 
         const int8x16_t vb0 = vld1q_s8(w); w = (const void*) ((uintptr_t) w + 16 * sizeof(int8_t));
@@ -140,7 +140,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c16__neon_mlal_padal(
         vprod0x15 = vmlal_s8(vprod0x15, vget_high_s8(vb15), vget_high_s8(va0));
         vacc0x15 = vpadalq_s16(vacc0x15, vprod0x15);
 
-        k += 16 * sizeof(int8_t);
+        k -= 16 * sizeof(int8_t);
       }
 
       p -= 1 * sizeof(void*);

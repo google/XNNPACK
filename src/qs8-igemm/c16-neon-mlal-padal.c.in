@@ -39,7 +39,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c16__neon_mlal_padal(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 16);
+  kc = round_up_po2(kc, 16 * sizeof(int8_t));
   int8_t* c0 = c;
   $for M in range(1, MR):
     int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
@@ -73,8 +73,8 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c16__neon_mlal_padal(
       a += ${MR};
 
       // KC loop of 16 with up to 15 remainder
-      size_t k = 0;
-      while (k < kc) {
+      size_t k = kc;
+      while (k != 0) {
         $for M in range(MR):
           const int8x16_t va${M} = vld1q_s8(a${M}); a${M} += 16;
 
@@ -89,7 +89,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c16__neon_mlal_padal(
           $for M in range(MR):
             vacc${M}x${N} = vpadalq_s16(vacc${M}x${N}, vprod${M}x${N});
 
-        k += 16 * sizeof(int8_t);
+        k -= 16 * sizeof(int8_t);
       }
 
       p -= ${MR} * sizeof(void*);

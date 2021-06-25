@@ -39,7 +39,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_${MR}x${NR}c2__neon_${"mlal" if MLA e
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 2);
+  kc = round_up_po2(kc, 2 * sizeof(int8_t));
   int8_t* c0 = c;
   $for M in range(1, MR):
     int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);

@@ -40,7 +40,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c8__neon_mull_padal(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
 
   do {
@@ -72,7 +72,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c8__neon_mull_padal(
       size_t k = kc;
 
       // Handle 8 bytes at a time using MUL.
-      while (k > 0) {
+      while (k != 0) {
         const int8x8_t va0 = vld1_s8(a0); a0 += 8;
 
         const int8x8_t vb0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));

@@ -40,7 +40,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_6x8c4__neondot(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 4);
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   int8_t* c0 = c;
   int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {

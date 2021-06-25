@@ -39,7 +39,7 @@ void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondo
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 4);
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
   $for M in range(1, MR):

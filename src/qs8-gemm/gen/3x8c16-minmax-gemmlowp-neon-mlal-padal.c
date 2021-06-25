@@ -36,7 +36,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x8c16__neon_mlal_padal(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 16);
+  kc = round_up_po2(kc, 16 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -79,8 +79,8 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x8c16__neon_mlal_padal(
     int32x4_t vacc2x7 = vacc0x7;
 
     // KC loop of 16
-    size_t k = 0;
-    while (k < kc) {
+    size_t k = kc;
+    while (k != 0) {
       const int8x16_t va0 = vld1q_s8(a0); a0 += 16;
       const int8x16_t va1 = vld1q_s8(a1); a1 += 16;
       const int8x16_t va2 = vld1q_s8(a2); a2 += 16;
@@ -167,7 +167,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x8c16__neon_mlal_padal(
       vacc1x7 = vpadalq_s16(vacc1x7, vprod1x7);
       vacc2x7 = vpadalq_s16(vacc2x7, vprod2x7);
 
-      k += 16 * sizeof(int8_t);
+      k -= 16 * sizeof(int8_t);
     }
 
 #if XNN_ARCH_ARM64

@@ -35,7 +35,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_${MR}x${NR}c8__neon_${"mlal" if MLA el
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
   $for M in range(1, MR):
@@ -88,7 +88,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_${MR}x${NR}c8__neon_${"mlal" if MLA el
       }
 
     // Handle 8 bytes at a time using MUL.
-    ${"if" if MLA else "while"} (k > 0) {
+    ${"if" if MLA else "while"} (k != 0) {
       $for M in range(MR):
         const int8x8_t va${M} = vld1_s8(a${M}); a${M} += 8;
 
