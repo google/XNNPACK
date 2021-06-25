@@ -341,6 +341,13 @@ union xnn_qs8_conv_minmax_params {
   } gemmlowp_neon;
   struct {
     float scale;
+    float output_min_less_zero_point;
+    float output_max_less_zero_point;
+    float magic_bias;
+    int32_t magic_bias_less_zero_point;
+  } fp32_neon;
+  struct {
+    float scale;
     int16_t output_zero_point;
     int8_t output_min;
     int8_t output_max;

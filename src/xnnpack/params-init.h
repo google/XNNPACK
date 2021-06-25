@@ -441,7 +441,7 @@ static inline void xnn_init_qs8_conv_minmax_gemmlowp_neon_params(
   const uint32_t scale_bits = fp32_to_bits(scale);
 
   // Multiplier is in [0x40000000, 0x7FFFFF80] range.
-  const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
+  const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
   assert(multiplier >= INT32_C(0x40000000));
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
@@ -455,6 +455,20 @@ static inline void xnn_init_qs8_conv_minmax_gemmlowp_neon_params(
   params->gemmlowp_neon.output_zero_point = (int16_t) output_zero_point;
   params->gemmlowp_neon.output_min = output_min;
   params->gemmlowp_neon.output_max = output_max;
+}
+
+static inline void xnn_init_qs8_conv_minmax_fp32_neon_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->fp32_neon.scale = scale;
+  params->fp32_neon.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  params->fp32_neon.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_neon.magic_bias = 12582912.0f;
+  params->fp32_neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
 static inline void xnn_init_qs8_conv_minmax_fp32_neonv8_params(

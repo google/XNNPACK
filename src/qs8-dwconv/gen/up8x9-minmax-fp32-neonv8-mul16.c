@@ -14,7 +14,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon_mul16(
+void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x9__neonv8_mul16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -29,12 +29,10 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon_mul16(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const int32x4_t vmultiplier = vld1q_dup_s32(&params->gemmlowp_neon.multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
-  const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->gemmlowp_neon.output_zero_point);
-  const int8x8_t voutput_min = vld1_dup_s8(&params->gemmlowp_neon.output_min);
-  const int8x8_t voutput_max = vld1_dup_s8(&params->gemmlowp_neon.output_max);
+  const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neonv8.scale);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
+  const int8x8_t voutput_min = vld1_dup_s8(&params->fp32_neonv8.output_min);
+  const int8x8_t voutput_max = vld1_dup_s8(&params->fp32_neonv8.output_max);
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -144,14 +142,14 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon_mul16(
       vacc0123 = vmlal_s16(vacc0123, vget_low_s16(vi8x01234567), vget_low_s16(vk8x01234567));
       vacc4567 = vmlal_s16(vacc4567, vget_high_s16(vi8x01234567), vget_high_s16(vk8x01234567));
 
-      vacc0123 = vqrdmulhq_s32(vacc0123, vmultiplier);
-      vacc4567 = vqrdmulhq_s32(vacc4567, vmultiplier);
+      float32x4_t vfpacc0123 = vcvtq_f32_s32(vacc0123);
+      float32x4_t vfpacc4567 = vcvtq_f32_s32(vacc4567);
 
-      vacc0123 = vsraq_n_s32(vacc0123, vbicq_s32(vacc0123, vzero_shift_mask), 31);
-      vacc4567 = vsraq_n_s32(vacc4567, vbicq_s32(vacc4567, vzero_shift_mask), 31);
+      vfpacc0123 = vmulq_f32(vfpacc0123, vscale);
+      vfpacc4567 = vmulq_f32(vfpacc4567, vscale);
 
-      vacc0123 = vrshlq_s32(vacc0123, vright_shift);
-      vacc4567 = vrshlq_s32(vacc4567, vright_shift);
+      vacc0123 = vcvtnq_s32_f32(vfpacc0123);
+      vacc4567 = vcvtnq_s32_f32(vfpacc4567);
 
 #if XNN_ARCH_ARM64
       const int16x8_t vacc01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567), voutput_zero_point);
@@ -220,14 +218,14 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon_mul16(
         vacc0123 = vmlal_s16(vacc0123, vget_low_s16(vi8x01234567), vget_low_s16(vk8x01234567));
         vacc4567 = vmlal_s16(vacc4567, vget_high_s16(vi8x01234567), vget_high_s16(vk8x01234567));
 
-        vacc0123 = vqrdmulhq_s32(vacc0123, vmultiplier);
-        vacc4567 = vqrdmulhq_s32(vacc4567, vmultiplier);
+        float32x4_t vfpacc0123 = vcvtq_f32_s32(vacc0123);
+        float32x4_t vfpacc4567 = vcvtq_f32_s32(vacc4567);
 
-        vacc0123 = vsraq_n_s32(vacc0123, vbicq_s32(vacc0123, vzero_shift_mask), 31);
-        vacc4567 = vsraq_n_s32(vacc4567, vbicq_s32(vacc4567, vzero_shift_mask), 31);
+        vfpacc0123 = vmulq_f32(vfpacc0123, vscale);
+        vfpacc4567 = vmulq_f32(vfpacc4567, vscale);
 
-        vacc0123 = vrshlq_s32(vacc0123, vright_shift);
-        vacc4567 = vrshlq_s32(vacc4567, vright_shift);
+        vacc0123 = vcvtnq_s32_f32(vfpacc0123);
+        vacc4567 = vcvtnq_s32_f32(vfpacc4567);
 
 #if XNN_ARCH_ARM64
         const int16x8_t vacc01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567), voutput_zero_point);

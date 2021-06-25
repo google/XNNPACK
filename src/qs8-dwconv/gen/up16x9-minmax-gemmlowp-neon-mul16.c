@@ -278,11 +278,9 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__neon_mul16(
 
 #if XNN_ARCH_ARM64
         const int16x8_t vacc01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567), voutput_zero_point);
-
         int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
 #else
         const int16x8_t vacc01234567 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567)), voutput_zero_point);
-
         int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
 #endif
 
