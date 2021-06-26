@@ -123,6 +123,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__neon_mull_padal(
     const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->gemmlowp_neon.output_zero_point);
 #if XNN_ARCH_ARM64
     const int16x8_t vacc0x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567), voutput_zero_point);
+
     int8x8_t vout0x01234567 = vqmovn_s16(vacc0x01234567);
 #else
     const int16x8_t vacc0x01234567 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0x0123), vqmovn_s32(vacc0x4567)), voutput_zero_point);
