@@ -270,10 +270,10 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_2x8c8__neon_mlal_padal(
     vacc1x4567 = vsubq_s32(vacc1x4567, vmagic_bias_less_zero_point);
 
 #if XNN_ARCH_ARM64
-    const int16x8_t vacc0x01234567 = vmovn_high_s32(vmovn_s32(vacc0x0123), vacc0x4567);
-    const int16x8_t vacc1x01234567 = vmovn_high_s32(vmovn_s32(vacc1x0123), vacc1x4567);
+    const int16x8_t vacc0x01234567 = vuzp1q_s16(vreinterpretq_s16_s32(vacc0x0123), vreinterpretq_s16_s32(vacc0x4567));
+    const int16x8_t vacc1x01234567 = vuzp1q_s16(vreinterpretq_s16_s32(vacc1x0123), vreinterpretq_s16_s32(vacc1x4567));
 
-    int8x16_t vout0x01234567_1x01234567 = vmovn_high_s16(vmovn_s16(vacc0x01234567), vacc1x01234567);
+    int8x16_t vout0x01234567_1x01234567 = vuzp1q_s8(vreinterpretq_s8_s16(vacc0x01234567), vreinterpretq_s8_s16(vacc1x01234567));
 #else
     const int16x8_t vacc0x01234567 = vcombine_s16(vmovn_s32(vacc0x0123), vmovn_s32(vacc0x4567));
     const int16x8_t vacc1x01234567 = vcombine_s16(vmovn_s32(vacc1x0123), vmovn_s32(vacc1x4567));

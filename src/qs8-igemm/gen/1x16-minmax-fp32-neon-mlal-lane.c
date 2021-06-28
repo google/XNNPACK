@@ -271,10 +271,10 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x16__neon_mlal_lane(
     vacc0xCDEF = vsubq_s32(vacc0xCDEF, vmagic_bias_less_zero_point);
 
 #if XNN_ARCH_ARM64
-    const int16x8_t vacc0x01234567 = vmovn_high_s32(vmovn_s32(vacc0x0123), vacc0x4567);
-    const int16x8_t vacc0x89ABCDEF = vmovn_high_s32(vmovn_s32(vacc0x89AB), vacc0xCDEF);
+    const int16x8_t vacc0x01234567 = vuzp1q_s16(vreinterpretq_s16_s32(vacc0x0123), vreinterpretq_s16_s32(vacc0x4567));
+    const int16x8_t vacc0x89ABCDEF = vuzp1q_s16(vreinterpretq_s16_s32(vacc0x89AB), vreinterpretq_s16_s32(vacc0xCDEF));
 
-    int8x16_t vout0x0123456789ABCDEF = vmovn_high_s16(vmovn_s16(vacc0x01234567), vacc0x89ABCDEF);
+    int8x16_t vout0x0123456789ABCDEF = vuzp1q_s8(vreinterpretq_s8_s16(vacc0x01234567), vreinterpretq_s8_s16(vacc0x89ABCDEF));
 #else
     const int16x8_t vacc0x01234567 = vcombine_s16(vmovn_s32(vacc0x0123), vmovn_s32(vacc0x4567));
     const int16x8_t vacc0x89ABCDEF = vcombine_s16(vmovn_s32(vacc0x89AB), vmovn_s32(vacc0xCDEF));

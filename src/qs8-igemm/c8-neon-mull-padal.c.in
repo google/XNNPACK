@@ -192,14 +192,14 @@ void xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8__${ISA
     $if REQUANTIZATION == "FP32" and not ARMV8:
       $for M in range(MR):
         $for N in range(0, NR, 8):
-          const int16x8_t vacc${M}x${ABC[N:N+8]} = vmovn_high_s32(vmovn_s32(vacc${M}x${ABC[N:N+4]}), vacc${M}x${ABC[N+4:N+8]});
+          const int16x8_t vacc${M}x${ABC[N:N+8]} = vuzp1q_s16(vreinterpretq_s16_s32(vacc${M}x${ABC[N:N+4]}), vreinterpretq_s16_s32(vacc${M}x${ABC[N+4:N+8]}));
 
       $for M in range(MR):
         $for N in range(0, NR, 16):
           $if N + 8 < NR:
-            int8x16_t vout${M}x${ABC[N:N+16]} = vmovn_high_s16(vmovn_s16(vacc${M}x${ABC[N:N+8]}), vacc${M}x${ABC[N+8:N+16]});
+            int8x16_t vout${M}x${ABC[N:N+16]} = vuzp1q_s8(vreinterpretq_s8_s16(vacc${M}x${ABC[N:N+8]}), vreinterpretq_s8_s16(vacc${M}x${ABC[N+8:N+16]}));
           $elif M % 2 == 1:
-            int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vmovn_high_s16(vmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vacc${M}x${ABC[N:N+8]});
+            int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vuzp1q_s8(vreinterpretq_s8_s16(vacc${M-1}x${ABC[N:N+8]}), vreinterpretq_s8_s16(vacc${M}x${ABC[N:N+8]}));
           $elif M + 1 == MR:
             int8x8_t vout${M}x${ABC[N:N+8]} = vmovn_s16(vacc${M}x${ABC[N:N+8]});
     $else:

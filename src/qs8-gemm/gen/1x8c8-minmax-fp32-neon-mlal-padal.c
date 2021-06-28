@@ -181,7 +181,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__neon_mlal_padal(
     vacc0x4567 = vsubq_s32(vacc0x4567, vmagic_bias_less_zero_point);
 
 #if XNN_ARCH_ARM64
-    const int16x8_t vacc0x01234567 = vmovn_high_s32(vmovn_s32(vacc0x0123), vacc0x4567);
+    const int16x8_t vacc0x01234567 = vuzp1q_s16(vreinterpretq_s16_s32(vacc0x0123), vreinterpretq_s16_s32(vacc0x4567));
 
     int8x8_t vout0x01234567 = vmovn_s16(vacc0x01234567);
 #else
