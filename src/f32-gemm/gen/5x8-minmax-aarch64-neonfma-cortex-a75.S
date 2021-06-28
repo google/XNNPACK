@@ -19,7 +19,7 @@
 #     uint8_t*restrict c,       x6
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> x14
-#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> x8
+#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
 
 # unused compared to 5x8
 #  x4 a5
