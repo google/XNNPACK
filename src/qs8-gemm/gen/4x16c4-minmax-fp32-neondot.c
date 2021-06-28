@@ -63,10 +63,10 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__neondot(
   do {
     // Initialize accumulators with bias. 16 bias values are loaded from the
     // weight matrix, at the start of the group of 16 columns.
-    int32x4_t vacc0x0123 = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
-    int32x4_t vacc0x4567 = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
-    int32x4_t vacc0x89AB = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
-    int32x4_t vacc0xCDEF = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    int32x4_t vacc0x0123 = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+    int32x4_t vacc0x4567 = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+    int32x4_t vacc0x89AB = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+    int32x4_t vacc0xCDEF = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
     int32x4_t vacc1x0123 = vacc0x0123;
     int32x4_t vacc1x4567 = vacc0x4567;
     int32x4_t vacc1x89AB = vacc0x89AB;
@@ -170,57 +170,57 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__neondot(
     }
 
     // Post-accumulation work
+    float32x4_t vfpacc0x0123 = vcvtq_f32_s32(vacc0x0123);
+    float32x4_t vfpacc0x4567 = vcvtq_f32_s32(vacc0x4567);
+    float32x4_t vfpacc0x89AB = vcvtq_f32_s32(vacc0x89AB);
+    float32x4_t vfpacc0xCDEF = vcvtq_f32_s32(vacc0xCDEF);
+    float32x4_t vfpacc1x0123 = vcvtq_f32_s32(vacc1x0123);
+    float32x4_t vfpacc1x4567 = vcvtq_f32_s32(vacc1x4567);
+    float32x4_t vfpacc1x89AB = vcvtq_f32_s32(vacc1x89AB);
+    float32x4_t vfpacc1xCDEF = vcvtq_f32_s32(vacc1xCDEF);
+    float32x4_t vfpacc2x0123 = vcvtq_f32_s32(vacc2x0123);
+    float32x4_t vfpacc2x4567 = vcvtq_f32_s32(vacc2x4567);
+    float32x4_t vfpacc2x89AB = vcvtq_f32_s32(vacc2x89AB);
+    float32x4_t vfpacc2xCDEF = vcvtq_f32_s32(vacc2xCDEF);
+    float32x4_t vfpacc3x0123 = vcvtq_f32_s32(vacc3x0123);
+    float32x4_t vfpacc3x4567 = vcvtq_f32_s32(vacc3x4567);
+    float32x4_t vfpacc3x89AB = vcvtq_f32_s32(vacc3x89AB);
+    float32x4_t vfpacc3xCDEF = vcvtq_f32_s32(vacc3xCDEF);
+
     const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neonv8.scale);
-    float32x4_t vproduct0x0123 = vcvtq_f32_s32(vacc0x0123);
-    float32x4_t vproduct0x4567 = vcvtq_f32_s32(vacc0x4567);
-    float32x4_t vproduct0x89AB = vcvtq_f32_s32(vacc0x89AB);
-    float32x4_t vproduct0xCDEF = vcvtq_f32_s32(vacc0xCDEF);
-    float32x4_t vproduct1x0123 = vcvtq_f32_s32(vacc1x0123);
-    float32x4_t vproduct1x4567 = vcvtq_f32_s32(vacc1x4567);
-    float32x4_t vproduct1x89AB = vcvtq_f32_s32(vacc1x89AB);
-    float32x4_t vproduct1xCDEF = vcvtq_f32_s32(vacc1xCDEF);
-    float32x4_t vproduct2x0123 = vcvtq_f32_s32(vacc2x0123);
-    float32x4_t vproduct2x4567 = vcvtq_f32_s32(vacc2x4567);
-    float32x4_t vproduct2x89AB = vcvtq_f32_s32(vacc2x89AB);
-    float32x4_t vproduct2xCDEF = vcvtq_f32_s32(vacc2xCDEF);
-    float32x4_t vproduct3x0123 = vcvtq_f32_s32(vacc3x0123);
-    float32x4_t vproduct3x4567 = vcvtq_f32_s32(vacc3x4567);
-    float32x4_t vproduct3x89AB = vcvtq_f32_s32(vacc3x89AB);
-    float32x4_t vproduct3xCDEF = vcvtq_f32_s32(vacc3xCDEF);
+    vfpacc0x0123 = vmulq_f32(vfpacc0x0123, vscale);
+    vfpacc0x4567 = vmulq_f32(vfpacc0x4567, vscale);
+    vfpacc0x89AB = vmulq_f32(vfpacc0x89AB, vscale);
+    vfpacc0xCDEF = vmulq_f32(vfpacc0xCDEF, vscale);
+    vfpacc1x0123 = vmulq_f32(vfpacc1x0123, vscale);
+    vfpacc1x4567 = vmulq_f32(vfpacc1x4567, vscale);
+    vfpacc1x89AB = vmulq_f32(vfpacc1x89AB, vscale);
+    vfpacc1xCDEF = vmulq_f32(vfpacc1xCDEF, vscale);
+    vfpacc2x0123 = vmulq_f32(vfpacc2x0123, vscale);
+    vfpacc2x4567 = vmulq_f32(vfpacc2x4567, vscale);
+    vfpacc2x89AB = vmulq_f32(vfpacc2x89AB, vscale);
+    vfpacc2xCDEF = vmulq_f32(vfpacc2xCDEF, vscale);
+    vfpacc3x0123 = vmulq_f32(vfpacc3x0123, vscale);
+    vfpacc3x4567 = vmulq_f32(vfpacc3x4567, vscale);
+    vfpacc3x89AB = vmulq_f32(vfpacc3x89AB, vscale);
+    vfpacc3xCDEF = vmulq_f32(vfpacc3xCDEF, vscale);
 
-    vproduct0x0123 = vmulq_f32(vproduct0x0123, vscale);
-    vproduct0x4567 = vmulq_f32(vproduct0x4567, vscale);
-    vproduct0x89AB = vmulq_f32(vproduct0x89AB, vscale);
-    vproduct0xCDEF = vmulq_f32(vproduct0xCDEF, vscale);
-    vproduct1x0123 = vmulq_f32(vproduct1x0123, vscale);
-    vproduct1x4567 = vmulq_f32(vproduct1x4567, vscale);
-    vproduct1x89AB = vmulq_f32(vproduct1x89AB, vscale);
-    vproduct1xCDEF = vmulq_f32(vproduct1xCDEF, vscale);
-    vproduct2x0123 = vmulq_f32(vproduct2x0123, vscale);
-    vproduct2x4567 = vmulq_f32(vproduct2x4567, vscale);
-    vproduct2x89AB = vmulq_f32(vproduct2x89AB, vscale);
-    vproduct2xCDEF = vmulq_f32(vproduct2xCDEF, vscale);
-    vproduct3x0123 = vmulq_f32(vproduct3x0123, vscale);
-    vproduct3x4567 = vmulq_f32(vproduct3x4567, vscale);
-    vproduct3x89AB = vmulq_f32(vproduct3x89AB, vscale);
-    vproduct3xCDEF = vmulq_f32(vproduct3xCDEF, vscale);
-
-    vacc0x0123 = vcvtnq_s32_f32(vproduct0x0123);
-    vacc0x4567 = vcvtnq_s32_f32(vproduct0x4567);
-    vacc0x89AB = vcvtnq_s32_f32(vproduct0x89AB);
-    vacc0xCDEF = vcvtnq_s32_f32(vproduct0xCDEF);
-    vacc1x0123 = vcvtnq_s32_f32(vproduct1x0123);
-    vacc1x4567 = vcvtnq_s32_f32(vproduct1x4567);
-    vacc1x89AB = vcvtnq_s32_f32(vproduct1x89AB);
-    vacc1xCDEF = vcvtnq_s32_f32(vproduct1xCDEF);
-    vacc2x0123 = vcvtnq_s32_f32(vproduct2x0123);
-    vacc2x4567 = vcvtnq_s32_f32(vproduct2x4567);
-    vacc2x89AB = vcvtnq_s32_f32(vproduct2x89AB);
-    vacc2xCDEF = vcvtnq_s32_f32(vproduct2xCDEF);
-    vacc3x0123 = vcvtnq_s32_f32(vproduct3x0123);
-    vacc3x4567 = vcvtnq_s32_f32(vproduct3x4567);
-    vacc3x89AB = vcvtnq_s32_f32(vproduct3x89AB);
-    vacc3xCDEF = vcvtnq_s32_f32(vproduct3xCDEF);
+    vacc0x0123 = vcvtnq_s32_f32(vfpacc0x0123);
+    vacc0x4567 = vcvtnq_s32_f32(vfpacc0x4567);
+    vacc0x89AB = vcvtnq_s32_f32(vfpacc0x89AB);
+    vacc0xCDEF = vcvtnq_s32_f32(vfpacc0xCDEF);
+    vacc1x0123 = vcvtnq_s32_f32(vfpacc1x0123);
+    vacc1x4567 = vcvtnq_s32_f32(vfpacc1x4567);
+    vacc1x89AB = vcvtnq_s32_f32(vfpacc1x89AB);
+    vacc1xCDEF = vcvtnq_s32_f32(vfpacc1xCDEF);
+    vacc2x0123 = vcvtnq_s32_f32(vfpacc2x0123);
+    vacc2x4567 = vcvtnq_s32_f32(vfpacc2x4567);
+    vacc2x89AB = vcvtnq_s32_f32(vfpacc2x89AB);
+    vacc2xCDEF = vcvtnq_s32_f32(vfpacc2xCDEF);
+    vacc3x0123 = vcvtnq_s32_f32(vfpacc3x0123);
+    vacc3x4567 = vcvtnq_s32_f32(vfpacc3x4567);
+    vacc3x89AB = vcvtnq_s32_f32(vfpacc3x89AB);
+    vacc3xCDEF = vcvtnq_s32_f32(vfpacc3xCDEF);
 
     const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
 #if XNN_ARCH_ARM64

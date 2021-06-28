@@ -7,17 +7,24 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert NR % 8 == 0
 $assert 8 <= NR <= 16
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 #include <assert.h>
 
 #include <arm_neon.h>
 
 #include <xnnpack/gemm.h>
+$if REQUANTIZATION == "FP32" and ARMV8:
+  #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
 
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if ARMV8 else "neon")
+$DATATYPE = "qc8" if CHANNELWISE else "qs8"
+$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + ("neonv8" if ARMV8 and not CHANNELWISE else "neon")
+$if REQUANTIZATION == "FP32" and CHANNELWISE and not ARMV8:
+  $PARAMS_STRUCT = "neon_fp32"
 $ISA = "neonv8" if ARMV8 else "neon"
-void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8__${ISA}_${"mlal" if MLA else "mull"}_padal(
+void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8__${ISA}_${"mlal" if MLA else "mull"}_padal(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -27,7 +34,7 @@ void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8__${ISA}
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -110,6 +117,7 @@ void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8__${ISA}
       $for N in range(0, NR, 4):
         const int32x4_t vsum${M}x${ABC[N:N+2]} = vpaddq_s32(vacc${M}x${N}, vacc${M}x${N+1});
         const int32x4_t vsum${M}x${ABC[N+2:N+4]} = vpaddq_s32(vacc${M}x${N+2}, vacc${M}x${N+3});
+
     $for M in range(MR):
       $for N in range(0, NR, 4):
         int32x4_t vacc${M}x${ABC[N:N+4]} = vpaddq_s32(vsum${M}x${ABC[N:N+2]}, vsum${M}x${ABC[N+2:N+4]});
@@ -145,10 +153,16 @@ void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8__${ISA}
         $for N in range(0, NR, 4):
           float32x4_t vfpacc${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
 
-      const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
-      $for M in range(MR):
+      $if CHANNELWISE:
         $for N in range(0, NR, 4):
-          vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale);
+          const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const void*) ((const float*) w + 4);
+          $for M in range(MR):
+            vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
+      $else:
+        const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale);
 
       $if ARMV8:
         $for M in range(MR):

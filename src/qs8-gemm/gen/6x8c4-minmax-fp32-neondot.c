@@ -75,8 +75,8 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_6x8c4__neondot(
   do {
     // Initialize accumulators with bias. 8 bias values are loaded from the
     // weight matrix, at the start of the group of 8 columns.
-    int32x4_t vacc0x0123 = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
-    int32x4_t vacc0x4567 = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    int32x4_t vacc0x0123 = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+    int32x4_t vacc0x4567 = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
     int32x4_t vacc1x0123 = vacc0x0123;
     int32x4_t vacc1x4567 = vacc0x4567;
     int32x4_t vacc2x0123 = vacc0x0123;
@@ -164,45 +164,45 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_6x8c4__neondot(
     }
 
     // Post-accumulation work
+    float32x4_t vfpacc0x0123 = vcvtq_f32_s32(vacc0x0123);
+    float32x4_t vfpacc0x4567 = vcvtq_f32_s32(vacc0x4567);
+    float32x4_t vfpacc1x0123 = vcvtq_f32_s32(vacc1x0123);
+    float32x4_t vfpacc1x4567 = vcvtq_f32_s32(vacc1x4567);
+    float32x4_t vfpacc2x0123 = vcvtq_f32_s32(vacc2x0123);
+    float32x4_t vfpacc2x4567 = vcvtq_f32_s32(vacc2x4567);
+    float32x4_t vfpacc3x0123 = vcvtq_f32_s32(vacc3x0123);
+    float32x4_t vfpacc3x4567 = vcvtq_f32_s32(vacc3x4567);
+    float32x4_t vfpacc4x0123 = vcvtq_f32_s32(vacc4x0123);
+    float32x4_t vfpacc4x4567 = vcvtq_f32_s32(vacc4x4567);
+    float32x4_t vfpacc5x0123 = vcvtq_f32_s32(vacc5x0123);
+    float32x4_t vfpacc5x4567 = vcvtq_f32_s32(vacc5x4567);
+
     const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neonv8.scale);
-    float32x4_t vproduct0x0123 = vcvtq_f32_s32(vacc0x0123);
-    float32x4_t vproduct0x4567 = vcvtq_f32_s32(vacc0x4567);
-    float32x4_t vproduct1x0123 = vcvtq_f32_s32(vacc1x0123);
-    float32x4_t vproduct1x4567 = vcvtq_f32_s32(vacc1x4567);
-    float32x4_t vproduct2x0123 = vcvtq_f32_s32(vacc2x0123);
-    float32x4_t vproduct2x4567 = vcvtq_f32_s32(vacc2x4567);
-    float32x4_t vproduct3x0123 = vcvtq_f32_s32(vacc3x0123);
-    float32x4_t vproduct3x4567 = vcvtq_f32_s32(vacc3x4567);
-    float32x4_t vproduct4x0123 = vcvtq_f32_s32(vacc4x0123);
-    float32x4_t vproduct4x4567 = vcvtq_f32_s32(vacc4x4567);
-    float32x4_t vproduct5x0123 = vcvtq_f32_s32(vacc5x0123);
-    float32x4_t vproduct5x4567 = vcvtq_f32_s32(vacc5x4567);
+    vfpacc0x0123 = vmulq_f32(vfpacc0x0123, vscale);
+    vfpacc0x4567 = vmulq_f32(vfpacc0x4567, vscale);
+    vfpacc1x0123 = vmulq_f32(vfpacc1x0123, vscale);
+    vfpacc1x4567 = vmulq_f32(vfpacc1x4567, vscale);
+    vfpacc2x0123 = vmulq_f32(vfpacc2x0123, vscale);
+    vfpacc2x4567 = vmulq_f32(vfpacc2x4567, vscale);
+    vfpacc3x0123 = vmulq_f32(vfpacc3x0123, vscale);
+    vfpacc3x4567 = vmulq_f32(vfpacc3x4567, vscale);
+    vfpacc4x0123 = vmulq_f32(vfpacc4x0123, vscale);
+    vfpacc4x4567 = vmulq_f32(vfpacc4x4567, vscale);
+    vfpacc5x0123 = vmulq_f32(vfpacc5x0123, vscale);
+    vfpacc5x4567 = vmulq_f32(vfpacc5x4567, vscale);
 
-    vproduct0x0123 = vmulq_f32(vproduct0x0123, vscale);
-    vproduct0x4567 = vmulq_f32(vproduct0x4567, vscale);
-    vproduct1x0123 = vmulq_f32(vproduct1x0123, vscale);
-    vproduct1x4567 = vmulq_f32(vproduct1x4567, vscale);
-    vproduct2x0123 = vmulq_f32(vproduct2x0123, vscale);
-    vproduct2x4567 = vmulq_f32(vproduct2x4567, vscale);
-    vproduct3x0123 = vmulq_f32(vproduct3x0123, vscale);
-    vproduct3x4567 = vmulq_f32(vproduct3x4567, vscale);
-    vproduct4x0123 = vmulq_f32(vproduct4x0123, vscale);
-    vproduct4x4567 = vmulq_f32(vproduct4x4567, vscale);
-    vproduct5x0123 = vmulq_f32(vproduct5x0123, vscale);
-    vproduct5x4567 = vmulq_f32(vproduct5x4567, vscale);
-
-    vacc0x0123 = vcvtnq_s32_f32(vproduct0x0123);
-    vacc0x4567 = vcvtnq_s32_f32(vproduct0x4567);
-    vacc1x0123 = vcvtnq_s32_f32(vproduct1x0123);
-    vacc1x4567 = vcvtnq_s32_f32(vproduct1x4567);
-    vacc2x0123 = vcvtnq_s32_f32(vproduct2x0123);
-    vacc2x4567 = vcvtnq_s32_f32(vproduct2x4567);
-    vacc3x0123 = vcvtnq_s32_f32(vproduct3x0123);
-    vacc3x4567 = vcvtnq_s32_f32(vproduct3x4567);
-    vacc4x0123 = vcvtnq_s32_f32(vproduct4x0123);
-    vacc4x4567 = vcvtnq_s32_f32(vproduct4x4567);
-    vacc5x0123 = vcvtnq_s32_f32(vproduct5x0123);
-    vacc5x4567 = vcvtnq_s32_f32(vproduct5x4567);
+    vacc0x0123 = vcvtnq_s32_f32(vfpacc0x0123);
+    vacc0x4567 = vcvtnq_s32_f32(vfpacc0x4567);
+    vacc1x0123 = vcvtnq_s32_f32(vfpacc1x0123);
+    vacc1x4567 = vcvtnq_s32_f32(vfpacc1x4567);
+    vacc2x0123 = vcvtnq_s32_f32(vfpacc2x0123);
+    vacc2x4567 = vcvtnq_s32_f32(vfpacc2x4567);
+    vacc3x0123 = vcvtnq_s32_f32(vfpacc3x0123);
+    vacc3x4567 = vcvtnq_s32_f32(vfpacc3x4567);
+    vacc4x0123 = vcvtnq_s32_f32(vfpacc4x0123);
+    vacc4x4567 = vcvtnq_s32_f32(vfpacc4x4567);
+    vacc5x0123 = vcvtnq_s32_f32(vfpacc5x0123);
+    vacc5x4567 = vcvtnq_s32_f32(vfpacc5x4567);
 
     const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
 #if XNN_ARCH_ARM64

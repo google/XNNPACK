@@ -13,6 +13,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_qs8_gemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane(

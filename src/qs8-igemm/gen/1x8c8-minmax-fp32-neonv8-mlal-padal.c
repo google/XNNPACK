@@ -12,6 +12,7 @@
 #include <arm_neon.h>
 
 #include <xnnpack/igemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
 
@@ -152,6 +153,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x8c8__neonv8_mlal_padal(
     const int32x4_t vsum0x23 = vpaddq_s32(vacc0x2, vacc0x3);
     const int32x4_t vsum0x45 = vpaddq_s32(vacc0x4, vacc0x5);
     const int32x4_t vsum0x67 = vpaddq_s32(vacc0x6, vacc0x7);
+
     int32x4_t vacc0x0123 = vpaddq_s32(vsum0x01, vsum0x23);
     int32x4_t vacc0x4567 = vpaddq_s32(vsum0x45, vsum0x67);
 #else

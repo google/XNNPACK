@@ -62,8 +62,8 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x8c4__neondot(
   do {
     // Initialize accumulators with bias. 8 bias values are loaded from the
     // weight matrix, at the start of the group of 8 columns.
-    int32x4_t vacc0x0123 = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
-    int32x4_t vacc0x4567 = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    int32x4_t vacc0x0123 = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+    int32x4_t vacc0x4567 = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
     int32x4_t vacc1x0123 = vacc0x0123;
     int32x4_t vacc1x4567 = vacc0x4567;
     int32x4_t vacc2x0123 = vacc0x0123;

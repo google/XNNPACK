@@ -159,6 +159,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x8c8__neon_mull_padal(
     const int32x4_t vsum2x23 = vpaddq_s32(vacc2x2, vacc2x3);
     const int32x4_t vsum2x45 = vpaddq_s32(vacc2x4, vacc2x5);
     const int32x4_t vsum2x67 = vpaddq_s32(vacc2x6, vacc2x7);
+
     int32x4_t vacc0x0123 = vpaddq_s32(vsum0x01, vsum0x23);
     int32x4_t vacc0x4567 = vpaddq_s32(vsum0x45, vsum0x67);
     int32x4_t vacc1x0123 = vpaddq_s32(vsum1x01, vsum1x23);

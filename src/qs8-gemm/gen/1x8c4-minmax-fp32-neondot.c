@@ -45,8 +45,8 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c4__neondot(
   do {
     // Initialize accumulators with bias. 8 bias values are loaded from the
     // weight matrix, at the start of the group of 8 columns.
-    int32x4_t vacc0x0123 = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
-    int32x4_t vacc0x4567 = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    int32x4_t vacc0x0123 = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+    int32x4_t vacc0x4567 = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
 
     // Inner accumulation loop along the 8 columns.
     size_t k = kc;
@@ -84,15 +84,15 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c4__neondot(
     }
 
     // Post-accumulation work
+    float32x4_t vfpacc0x0123 = vcvtq_f32_s32(vacc0x0123);
+    float32x4_t vfpacc0x4567 = vcvtq_f32_s32(vacc0x4567);
+
     const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neonv8.scale);
-    float32x4_t vproduct0x0123 = vcvtq_f32_s32(vacc0x0123);
-    float32x4_t vproduct0x4567 = vcvtq_f32_s32(vacc0x4567);
+    vfpacc0x0123 = vmulq_f32(vfpacc0x0123, vscale);
+    vfpacc0x4567 = vmulq_f32(vfpacc0x4567, vscale);
 
-    vproduct0x0123 = vmulq_f32(vproduct0x0123, vscale);
-    vproduct0x4567 = vmulq_f32(vproduct0x4567, vscale);
-
-    vacc0x0123 = vcvtnq_s32_f32(vproduct0x0123);
-    vacc0x4567 = vcvtnq_s32_f32(vproduct0x4567);
+    vacc0x0123 = vcvtnq_s32_f32(vfpacc0x0123);
+    vacc0x4567 = vcvtnq_s32_f32(vfpacc0x4567);
 
     const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
 #if XNN_ARCH_ARM64

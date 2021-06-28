@@ -13,6 +13,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/igemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_qs8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane(

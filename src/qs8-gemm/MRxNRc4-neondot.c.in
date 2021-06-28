@@ -7,6 +7,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert NR % 8 == 0
 $assert 8 <= NR <= 16
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -17,8 +18,10 @@ $if REQUANTIZATION == "FP32":
 #include <xnnpack/math.h>
 
 
-$PARAMS_STRUCT = {"GEMMLOWP": "gemmlowp_neon", "FP32": "fp32_neonv8"}[REQUANTIZATION]
-void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondot(
+$DATATYPE = "qc8" if CHANNELWISE else "qs8"
+$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_STRUCT = "neon" if CHANNELWISE else {"GEMMLOWP": "gemmlowp_neon", "FP32": "fp32_neonv8"}[REQUANTIZATION]
+void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -28,7 +31,7 @@ void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondo
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -66,7 +69,7 @@ void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondo
     // Initialize accumulators with bias. ${NR} bias values are loaded from the
     // weight matrix, at the start of the group of ${NR} columns.
     $for N in range(0, NR, 4):
-      int32x4_t vacc0x${ABC[N:N+4]} = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+      int32x4_t vacc0x${ABC[N:N+4]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
     $for M in range(1, MR):
       $for N in range(0, NR, 4):
         int32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
@@ -110,8 +113,8 @@ void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondo
 
     // Post-accumulation work
     $if REQUANTIZATION == "GEMMLOWP":
-      const int32x4_t vmultiplier = vld1q_dup_s32(&params->gemmlowp_neon.multiplier);
-      const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
+      const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
+      const int32x4_t vright_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_shift);
       const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
 
       $for M in range(MR):
@@ -126,18 +129,24 @@ void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondo
         $for N in range(0, NR, 4):
           vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_shift);
     $elif REQUANTIZATION == "FP32":
-      const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neonv8.scale);
       $for M in range(MR):
         $for N in range(0, NR, 4):
-          float32x4_t vproduct${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
+          float32x4_t vfpacc${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
+
+      $if CHANNELWISE:
+        $for N in range(0, NR, 4):
+          const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const void*) ((const float*) w + 4);
+          $for M in range(MR):
+            vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
+      $else:
+        const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale);
 
       $for M in range(MR):
         $for N in range(0, NR, 4):
-          vproduct${M}x${ABC[N:N+4]} = vmulq_f32(vproduct${M}x${ABC[N:N+4]}, vscale);
-
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vcvtnq_s32_f32(vproduct${M}x${ABC[N:N+4]});
+          vacc${M}x${ABC[N:N+4]} = vcvtnq_s32_f32(vfpacc${M}x${ABC[N:N+4]});
 
     const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
 #if XNN_ARCH_ARM64
