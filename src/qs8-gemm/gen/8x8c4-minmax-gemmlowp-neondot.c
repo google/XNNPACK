@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/MRxNRc4-neondot.c.in
+//   Template: src/qs8-gemm/c4-neondot.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
