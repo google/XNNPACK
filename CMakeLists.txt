@@ -3501,6 +3501,7 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld32.S
   src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld64.S
   src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld128.S
+  src/qs8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S
   src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal-cortex-a53.S
   src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal-prfm-cortex-a53.S
   src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal-prfm.S

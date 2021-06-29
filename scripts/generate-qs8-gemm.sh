@@ -204,7 +204,9 @@ tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull-padal.S.in     -o src/qs8-gemm/
 tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-cortex-a55.S
 tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S.in       -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld32.S
 tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in       -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld64.S
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld128.S
+
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=GEMMLOWP -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld128.S
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=FP32     -o src/qs8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S
 
 ################################### x86 SSE ###################################
 ### C2 micro-kernels
@@ -541,5 +543,5 @@ tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D CHAN
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-gemmlowp.yaml --output test/qs8-gemm-minmax-gemmlowp.cc
-tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-fp32.yaml --output test/qs8-gemm-minmax-fp32.cc
-tools/generate-gemm-test.py --spec test/qc8-gemm-minmax-fp32.yaml --output test/qc8-gemm-minmax-fp32.cc
+tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-fp32.yaml     --output test/qs8-gemm-minmax-fp32.cc
+tools/generate-gemm-test.py --spec test/qc8-gemm-minmax-fp32.yaml     --output test/qc8-gemm-minmax-fp32.cc
