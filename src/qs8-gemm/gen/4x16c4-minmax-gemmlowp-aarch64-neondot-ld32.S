@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/4x16c4-minmax-gemmlowp-aarch64-neondot-ld32.S.in
+//   Template: src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC

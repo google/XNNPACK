@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/2x8c8-minmax-gemmlowp-aarch64-neon-mull-padal.S.in
+//   Template: src/qs8-gemm/2x8c8-aarch64-neon-mull-padal.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC
