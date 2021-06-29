@@ -8,12 +8,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 
 #include <xnnpack/math.h>
 #include <xnnpack/gemm.h>
 
 
-void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x2__scalar(
+void xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_lrint(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -69,34 +70,27 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x2__scalar(
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    const int32_t vmultiplier = params->gemmlowp_scalar.multiplier;
-    const int64_t vproduct0x0 = (int64_t) vacc0x0 * (int64_t) vmultiplier;
-    const int64_t vproduct0x1 = (int64_t) vacc0x1 * (int64_t) vmultiplier;
+    float vfpacc0x0 = (float) vacc0x0;
+    float vfpacc0x1 = (float) vacc0x1;
 
-    const int64_t vq31rounding = INT64_C(0x40000000);
-    const int32_t vq31product0x0 = (int32_t) (uint32_t) ((uint64_t) (vproduct0x0 + vq31rounding) >> 31);
-    const int32_t vq31product0x1 = (int32_t) (uint32_t) ((uint64_t) (vproduct0x1 + vq31rounding) >> 31);
+    const float vscale = params->fp32_scalar_lrint.scale;
+    vfpacc0x0 *= vscale;
+    vfpacc0x1 *= vscale;
 
-    const int32_t vremainder_mask = params->gemmlowp_scalar.remainder_mask;
-    const int32_t vremainder0x0 = (vq31product0x0 & vremainder_mask) - (int32_t) (vq31product0x0 < 0);
-    const int32_t vremainder0x1 = (vq31product0x1 & vremainder_mask) - (int32_t) (vq31product0x1 < 0);
+    long vrndacc0x0 = lrintf(vfpacc0x0);
+    long vrndacc0x1 = lrintf(vfpacc0x1);
 
-    const uint32_t vshift = params->gemmlowp_scalar.shift;
-    const int32_t vremainder_threshold = params->gemmlowp_scalar.remainder_threshold;
-    int32_t vout0x0 = asr_s32(vq31product0x0, vshift) + (int32_t) (vremainder0x0 > vremainder_threshold);
-    int32_t vout0x1 = asr_s32(vq31product0x1, vshift) + (int32_t) (vremainder0x1 > vremainder_threshold);
+    const long voutput_min_less_zero_point = params->fp32_scalar_lrint.output_min_less_zero_point;
+    vrndacc0x0 = XNN_UNPREDICTABLE(vrndacc0x0 < voutput_min_less_zero_point) ? voutput_min_less_zero_point : vrndacc0x0;
+    vrndacc0x1 = XNN_UNPREDICTABLE(vrndacc0x1 < voutput_min_less_zero_point) ? voutput_min_less_zero_point : vrndacc0x1;
 
-    const int32_t voutput_min_less_zero_point = params->gemmlowp_scalar.output_min_less_zero_point;
-    vout0x0 = math_max_s32(vout0x0, voutput_min_less_zero_point);
-    vout0x1 = math_max_s32(vout0x1, voutput_min_less_zero_point);
+    const long voutput_max_less_zero_point = params->fp32_scalar_lrint.output_max_less_zero_point;
+    vrndacc0x0 = XNN_UNPREDICTABLE(vrndacc0x0 > voutput_max_less_zero_point) ? voutput_max_less_zero_point : vrndacc0x0;
+    vrndacc0x1 = XNN_UNPREDICTABLE(vrndacc0x1 > voutput_max_less_zero_point) ? voutput_max_less_zero_point : vrndacc0x1;
 
-    const int32_t voutput_max_less_zero_point = params->gemmlowp_scalar.output_max_less_zero_point;
-    vout0x0 = math_min_s32(vout0x0, voutput_max_less_zero_point);
-    vout0x1 = math_min_s32(vout0x1, voutput_max_less_zero_point);
-
-    const int32_t voutput_zero_point = params->gemmlowp_scalar.output_zero_point;
-    vout0x0 += voutput_zero_point;
-    vout0x1 += voutput_zero_point;
+    const int32_t voutput_zero_point = params->fp32_scalar_lrint.output_zero_point;
+    int32_t vout0x0 = (int32_t) vrndacc0x0 + voutput_zero_point;
+    int32_t vout0x1 = (int32_t) vrndacc0x1 + voutput_zero_point;
 
     if XNN_LIKELY(nc >= 2) {
       c0[0] = (int8_t) vout0x0;

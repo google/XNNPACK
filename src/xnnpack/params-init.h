@@ -179,6 +179,33 @@ static inline void xnn_init_qs8_conv_minmax_gemmlowp_scalar_params(
   params->gemmlowp_scalar.output_zero_point = (int32_t) output_zero_point;
 }
 
+static inline void xnn_init_qs8_conv_minmax_fp32_scalar_lrint_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->fp32_scalar_lrint.scale = scale;
+  params->fp32_scalar_lrint.output_min_less_zero_point = (long) ((int32_t) output_min - (int32_t) output_zero_point);
+  params->fp32_scalar_lrint.output_max_less_zero_point = (long) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_scalar_lrint.output_zero_point = (int32_t) output_zero_point;
+}
+
+static inline void xnn_init_qs8_conv_minmax_fp32_scalar_magic_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->fp32_scalar_magic.scale = scale;
+  params->fp32_scalar_magic.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  params->fp32_scalar_magic.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_scalar_magic.magic_bias = 12582912.0f;
+  params->fp32_scalar_magic.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+}
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 static inline void xnn_init_qs8_conv_minmax_gemmlowp_sse2_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],

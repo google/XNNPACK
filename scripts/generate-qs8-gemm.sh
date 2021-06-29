@@ -5,15 +5,35 @@
 # LICENSE file in the root directory of this source tree.
 
 #################################### Scalar ###################################
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=2 -o src/qs8-gemm/gen/1x2-minmax-gemmlowp-scalar.c
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=2 -o src/qs8-gemm/gen/2x2-minmax-gemmlowp-scalar.c
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=2 -o src/qs8-gemm/gen/3x2-minmax-gemmlowp-scalar.c
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=2 -o src/qs8-gemm/gen/4x2-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -D WASM=0 -o src/qs8-gemm/gen/1x2-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -D WASM=0 -o src/qs8-gemm/gen/2x2-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=2 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -D WASM=0 -o src/qs8-gemm/gen/3x2-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=2 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -D WASM=0 -o src/qs8-gemm/gen/4x2-minmax-gemmlowp-scalar.c
 
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=4 -o src/qs8-gemm/gen/1x4-minmax-gemmlowp-scalar.c
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=4 -o src/qs8-gemm/gen/2x4-minmax-gemmlowp-scalar.c
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=4 -o src/qs8-gemm/gen/3x4-minmax-gemmlowp-scalar.c
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=4 -o src/qs8-gemm/gen/4x4-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -D WASM=0 -o src/qs8-gemm/gen/1x2-minmax-fp32-scalar-magic.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -D WASM=0 -o src/qs8-gemm/gen/2x2-minmax-fp32-scalar-magic.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=2 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -D WASM=0 -o src/qs8-gemm/gen/3x2-minmax-fp32-scalar-magic.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=2 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -D WASM=0 -o src/qs8-gemm/gen/4x2-minmax-fp32-scalar-magic.c
+
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -D WASM=0 -o src/qs8-gemm/gen/1x2-minmax-fp32-scalar-lrint.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -D WASM=0 -o src/qs8-gemm/gen/2x2-minmax-fp32-scalar-lrint.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=2 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -D WASM=0 -o src/qs8-gemm/gen/3x2-minmax-fp32-scalar-lrint.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=2 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -D WASM=0 -o src/qs8-gemm/gen/4x2-minmax-fp32-scalar-lrint.c
+
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=4 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -D WASM=0 -o src/qs8-gemm/gen/1x4-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=4 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -D WASM=0 -o src/qs8-gemm/gen/2x4-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=4 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -D WASM=0 -o src/qs8-gemm/gen/3x4-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -D WASM=0 -o src/qs8-gemm/gen/4x4-minmax-gemmlowp-scalar.c
+
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=4 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -D WASM=0 -o src/qs8-gemm/gen/1x4-minmax-fp32-scalar-magic.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=4 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -D WASM=0 -o src/qs8-gemm/gen/2x4-minmax-fp32-scalar-magic.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=4 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -D WASM=0 -o src/qs8-gemm/gen/3x4-minmax-fp32-scalar-magic.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -D WASM=0 -o src/qs8-gemm/gen/4x4-minmax-fp32-scalar-magic.c
+
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=4 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -D WASM=0 -o src/qs8-gemm/gen/1x4-minmax-fp32-scalar-lrint.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=4 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -D WASM=0 -o src/qs8-gemm/gen/2x4-minmax-fp32-scalar-lrint.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=4 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -D WASM=0 -o src/qs8-gemm/gen/3x4-minmax-fp32-scalar-lrint.c
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -D WASM=0 -o src/qs8-gemm/gen/4x4-minmax-fp32-scalar-lrint.c
 
 ################################## WAsm SIMD ##################################
 ### C8 micro-kernels

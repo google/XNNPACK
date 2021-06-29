@@ -83,17 +83,17 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x4__scalar(
     int32_t vout0x2 = asr_s32(vq31product0x2, vshift) + (int32_t) (vremainder0x2 > vremainder_threshold);
     int32_t vout0x3 = asr_s32(vq31product0x3, vshift) + (int32_t) (vremainder0x3 > vremainder_threshold);
 
-    const int32_t vout_min = params->gemmlowp_scalar.output_min_less_zero_point;
-    vout0x0 = math_max_s32(vout0x0, vout_min);
-    vout0x1 = math_max_s32(vout0x1, vout_min);
-    vout0x2 = math_max_s32(vout0x2, vout_min);
-    vout0x3 = math_max_s32(vout0x3, vout_min);
+    const int32_t voutput_min_less_zero_point = params->gemmlowp_scalar.output_min_less_zero_point;
+    vout0x0 = math_max_s32(vout0x0, voutput_min_less_zero_point);
+    vout0x1 = math_max_s32(vout0x1, voutput_min_less_zero_point);
+    vout0x2 = math_max_s32(vout0x2, voutput_min_less_zero_point);
+    vout0x3 = math_max_s32(vout0x3, voutput_min_less_zero_point);
 
-    const int32_t vout_max = params->gemmlowp_scalar.output_max_less_zero_point;
-    vout0x0 = math_min_s32(vout0x0, vout_max);
-    vout0x1 = math_min_s32(vout0x1, vout_max);
-    vout0x2 = math_min_s32(vout0x2, vout_max);
-    vout0x3 = math_min_s32(vout0x3, vout_max);
+    const int32_t voutput_max_less_zero_point = params->gemmlowp_scalar.output_max_less_zero_point;
+    vout0x0 = math_min_s32(vout0x0, voutput_max_less_zero_point);
+    vout0x1 = math_min_s32(vout0x1, voutput_max_less_zero_point);
+    vout0x2 = math_min_s32(vout0x2, voutput_max_less_zero_point);
+    vout0x3 = math_min_s32(vout0x3, voutput_max_less_zero_point);
 
     const int32_t voutput_zero_point = params->gemmlowp_scalar.output_zero_point;
     vout0x0 += voutput_zero_point;
