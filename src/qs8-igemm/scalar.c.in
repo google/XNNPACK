@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 #include <assert.h>
 $if REQUANTIZATION == "FP32":
   $if VARIANT == "LRINT":
@@ -16,9 +17,11 @@ $if REQUANTIZATION == "FP32":
 #include <xnnpack/gemm.h>
 
 
+$DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $FUNCTION_SUFFIX = "scalar_" + VARIANT.lower() if VARIANT else "scalar"
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" + ("_" + VARIANT.lower() if VARIANT else "")
-void xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}__${FUNCTION_SUFFIX}(
+$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + "scalar" + ("_" + VARIANT.lower() if VARIANT else "")
+void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}__${FUNCTION_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -30,7 +33,7 @@ void xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}__${FUNCT
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -135,10 +138,17 @@ void xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}__${FUNCT
         $for N in range(NR):
           float vfpacc${M}x${N} = (float) vacc${M}x${N};
 
-      const float vscale = params->${PARAMS_STRUCT}.scale;
-      $for M in range(MR):
+      $if CHANNELWISE:
         $for N in range(NR):
-          vfpacc${M}x${N} *= vscale;
+          const float vscale${N} = ((const float*) w)[${N}];
+          $for M in range(MR):
+            vfpacc${M}x${N} *= vscale${N};
+        w = (const void*) ((const float*) w + ${NR});
+      $else:
+        const float vscale = params->${PARAMS_STRUCT}.scale;
+        $for M in range(MR):
+          $for N in range(NR):
+            vfpacc${M}x${N} *= vscale;
 
       $if VARIANT == "MAGIC":
         const float voutput_min_less_zero_point = params->${PARAMS_STRUCT}.output_min_less_zero_point;

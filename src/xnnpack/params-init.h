@@ -163,7 +163,13 @@ XNN_INTERNAL void xnn_init_qc8_scale_fp32_params(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
-XNN_INTERNAL void xnn_init_qs8_minmax_scalar_params(
+XNN_INTERNAL void xnn_init_qs8_minmax_scalar_lrint_params(
+  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max);
+
+XNN_INTERNAL void xnn_init_qs8_minmax_scalar_magic_params(
   union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,

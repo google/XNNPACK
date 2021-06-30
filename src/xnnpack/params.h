@@ -279,10 +279,16 @@ union xnn_qu8_conv_minmax_params {
 
 union xnn_qs8_minmax_params {
   struct {
-    int32_t output_min_less_zero_point;
-    int32_t output_max_less_zero_point;
+    long output_min_less_zero_point;
+    long output_max_less_zero_point;
     int32_t output_zero_point;
-  } scalar;
+  } scalar_lrint;
+  struct {
+    float output_min_less_zero_point;
+    float output_max_less_zero_point;
+    float magic_bias;
+    int32_t magic_bias_less_output_zero_point;
+  } scalar_magic;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int16_t output_zero_point;
