@@ -168,480 +168,480 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__wasmsimd_mul16(
       v128_t vaccKLMN = wasm_v128_load((const void*) ((uintptr_t) w + 20 * sizeof(int32_t)));
 
 
-      const v128_t vi0x01234567 = wasm_i16x8_load_8x8(i0);
-      const v128_t vk0x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 0 * sizeof(int8_t)));
-      const v128_t vi0x89ABCDEF = wasm_i16x8_load_8x8(i0 + 8);
-      const v128_t vk0x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 8 * sizeof(int8_t)));
-      const v128_t vi0xGHIJKLMN = wasm_i16x8_load_8x8(i0 + 16);
-      const v128_t vk0xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 16 * sizeof(int8_t)));
+      const v128_t vi0x01234567 = wasm_i16x8_load8x8(i0);
+      const v128_t vk0x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 0 * sizeof(int8_t)));
+      const v128_t vi0x89ABCDEF = wasm_i16x8_load8x8(i0 + 8);
+      const v128_t vk0x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 8 * sizeof(int8_t)));
+      const v128_t vi0xGHIJKLMN = wasm_i16x8_load8x8(i0 + 16);
+      const v128_t vk0xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 16 * sizeof(int8_t)));
       i0 += 24;
 
       const v128_t vprod0x01234567 = wasm_i16x8_mul(vi0x01234567, vk0x01234567);
       const v128_t vprod0x89ABCDEF = wasm_i16x8_mul(vi0x89ABCDEF, vk0x89ABCDEF);
       const v128_t vprod0xGHIJKLMN = wasm_i16x8_mul(vi0xGHIJKLMN, vk0xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod0x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod0x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod0x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod0x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod0xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod0xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod0x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod0x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod0x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod0x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod0xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod0xGHIJKLMN));
 
-      const v128_t vi1x01234567 = wasm_i16x8_load_8x8(i1);
-      const v128_t vk1x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 24 * sizeof(int8_t)));
-      const v128_t vi1x89ABCDEF = wasm_i16x8_load_8x8(i1 + 8);
-      const v128_t vk1x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 32 * sizeof(int8_t)));
-      const v128_t vi1xGHIJKLMN = wasm_i16x8_load_8x8(i1 + 16);
-      const v128_t vk1xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 40 * sizeof(int8_t)));
+      const v128_t vi1x01234567 = wasm_i16x8_load8x8(i1);
+      const v128_t vk1x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 24 * sizeof(int8_t)));
+      const v128_t vi1x89ABCDEF = wasm_i16x8_load8x8(i1 + 8);
+      const v128_t vk1x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 32 * sizeof(int8_t)));
+      const v128_t vi1xGHIJKLMN = wasm_i16x8_load8x8(i1 + 16);
+      const v128_t vk1xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 40 * sizeof(int8_t)));
       i1 += 24;
 
       const v128_t vprod1x01234567 = wasm_i16x8_mul(vi1x01234567, vk1x01234567);
       const v128_t vprod1x89ABCDEF = wasm_i16x8_mul(vi1x89ABCDEF, vk1x89ABCDEF);
       const v128_t vprod1xGHIJKLMN = wasm_i16x8_mul(vi1xGHIJKLMN, vk1xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod1x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod1x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod1x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod1x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod1xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod1xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod1x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod1x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod1x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod1x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod1xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod1xGHIJKLMN));
 
-      const v128_t vi2x01234567 = wasm_i16x8_load_8x8(i2);
-      const v128_t vk2x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 48 * sizeof(int8_t)));
-      const v128_t vi2x89ABCDEF = wasm_i16x8_load_8x8(i2 + 8);
-      const v128_t vk2x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 56 * sizeof(int8_t)));
-      const v128_t vi2xGHIJKLMN = wasm_i16x8_load_8x8(i2 + 16);
-      const v128_t vk2xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 64 * sizeof(int8_t)));
+      const v128_t vi2x01234567 = wasm_i16x8_load8x8(i2);
+      const v128_t vk2x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 48 * sizeof(int8_t)));
+      const v128_t vi2x89ABCDEF = wasm_i16x8_load8x8(i2 + 8);
+      const v128_t vk2x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 56 * sizeof(int8_t)));
+      const v128_t vi2xGHIJKLMN = wasm_i16x8_load8x8(i2 + 16);
+      const v128_t vk2xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 64 * sizeof(int8_t)));
       i2 += 24;
 
       const v128_t vprod2x01234567 = wasm_i16x8_mul(vi2x01234567, vk2x01234567);
       const v128_t vprod2x89ABCDEF = wasm_i16x8_mul(vi2x89ABCDEF, vk2x89ABCDEF);
       const v128_t vprod2xGHIJKLMN = wasm_i16x8_mul(vi2xGHIJKLMN, vk2xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod2x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod2x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod2x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod2x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod2xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod2xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod2x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod2x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod2x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod2x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod2xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod2xGHIJKLMN));
 
-      const v128_t vi3x01234567 = wasm_i16x8_load_8x8(i3);
-      const v128_t vk3x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 72 * sizeof(int8_t)));
-      const v128_t vi3x89ABCDEF = wasm_i16x8_load_8x8(i3 + 8);
-      const v128_t vk3x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 80 * sizeof(int8_t)));
-      const v128_t vi3xGHIJKLMN = wasm_i16x8_load_8x8(i3 + 16);
-      const v128_t vk3xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 88 * sizeof(int8_t)));
+      const v128_t vi3x01234567 = wasm_i16x8_load8x8(i3);
+      const v128_t vk3x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 72 * sizeof(int8_t)));
+      const v128_t vi3x89ABCDEF = wasm_i16x8_load8x8(i3 + 8);
+      const v128_t vk3x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 80 * sizeof(int8_t)));
+      const v128_t vi3xGHIJKLMN = wasm_i16x8_load8x8(i3 + 16);
+      const v128_t vk3xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 88 * sizeof(int8_t)));
       i3 += 24;
 
       const v128_t vprod3x01234567 = wasm_i16x8_mul(vi3x01234567, vk3x01234567);
       const v128_t vprod3x89ABCDEF = wasm_i16x8_mul(vi3x89ABCDEF, vk3x89ABCDEF);
       const v128_t vprod3xGHIJKLMN = wasm_i16x8_mul(vi3xGHIJKLMN, vk3xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod3x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod3x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod3x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod3x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod3xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod3xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod3x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod3x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod3x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod3x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod3xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod3xGHIJKLMN));
 
-      const v128_t vi4x01234567 = wasm_i16x8_load_8x8(i4);
-      const v128_t vk4x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 96 * sizeof(int8_t)));
-      const v128_t vi4x89ABCDEF = wasm_i16x8_load_8x8(i4 + 8);
-      const v128_t vk4x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 104 * sizeof(int8_t)));
-      const v128_t vi4xGHIJKLMN = wasm_i16x8_load_8x8(i4 + 16);
-      const v128_t vk4xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 112 * sizeof(int8_t)));
+      const v128_t vi4x01234567 = wasm_i16x8_load8x8(i4);
+      const v128_t vk4x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 96 * sizeof(int8_t)));
+      const v128_t vi4x89ABCDEF = wasm_i16x8_load8x8(i4 + 8);
+      const v128_t vk4x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 104 * sizeof(int8_t)));
+      const v128_t vi4xGHIJKLMN = wasm_i16x8_load8x8(i4 + 16);
+      const v128_t vk4xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 112 * sizeof(int8_t)));
       i4 += 24;
 
       const v128_t vprod4x01234567 = wasm_i16x8_mul(vi4x01234567, vk4x01234567);
       const v128_t vprod4x89ABCDEF = wasm_i16x8_mul(vi4x89ABCDEF, vk4x89ABCDEF);
       const v128_t vprod4xGHIJKLMN = wasm_i16x8_mul(vi4xGHIJKLMN, vk4xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod4x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod4x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod4x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod4x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod4xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod4xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod4x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod4x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod4x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod4x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod4xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod4xGHIJKLMN));
 
-      const v128_t vi5x01234567 = wasm_i16x8_load_8x8(i5);
-      const v128_t vk5x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 120 * sizeof(int8_t)));
-      const v128_t vi5x89ABCDEF = wasm_i16x8_load_8x8(i5 + 8);
-      const v128_t vk5x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 128 * sizeof(int8_t)));
-      const v128_t vi5xGHIJKLMN = wasm_i16x8_load_8x8(i5 + 16);
-      const v128_t vk5xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 136 * sizeof(int8_t)));
+      const v128_t vi5x01234567 = wasm_i16x8_load8x8(i5);
+      const v128_t vk5x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 120 * sizeof(int8_t)));
+      const v128_t vi5x89ABCDEF = wasm_i16x8_load8x8(i5 + 8);
+      const v128_t vk5x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 128 * sizeof(int8_t)));
+      const v128_t vi5xGHIJKLMN = wasm_i16x8_load8x8(i5 + 16);
+      const v128_t vk5xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 136 * sizeof(int8_t)));
       i5 += 24;
 
       const v128_t vprod5x01234567 = wasm_i16x8_mul(vi5x01234567, vk5x01234567);
       const v128_t vprod5x89ABCDEF = wasm_i16x8_mul(vi5x89ABCDEF, vk5x89ABCDEF);
       const v128_t vprod5xGHIJKLMN = wasm_i16x8_mul(vi5xGHIJKLMN, vk5xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod5x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod5x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod5x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod5x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod5xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod5xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod5x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod5x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod5x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod5x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod5xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod5xGHIJKLMN));
 
-      const v128_t vi6x01234567 = wasm_i16x8_load_8x8(i6);
-      const v128_t vk6x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 144 * sizeof(int8_t)));
-      const v128_t vi6x89ABCDEF = wasm_i16x8_load_8x8(i6 + 8);
-      const v128_t vk6x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 152 * sizeof(int8_t)));
-      const v128_t vi6xGHIJKLMN = wasm_i16x8_load_8x8(i6 + 16);
-      const v128_t vk6xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 160 * sizeof(int8_t)));
+      const v128_t vi6x01234567 = wasm_i16x8_load8x8(i6);
+      const v128_t vk6x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 144 * sizeof(int8_t)));
+      const v128_t vi6x89ABCDEF = wasm_i16x8_load8x8(i6 + 8);
+      const v128_t vk6x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 152 * sizeof(int8_t)));
+      const v128_t vi6xGHIJKLMN = wasm_i16x8_load8x8(i6 + 16);
+      const v128_t vk6xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 160 * sizeof(int8_t)));
       i6 += 24;
 
       const v128_t vprod6x01234567 = wasm_i16x8_mul(vi6x01234567, vk6x01234567);
       const v128_t vprod6x89ABCDEF = wasm_i16x8_mul(vi6x89ABCDEF, vk6x89ABCDEF);
       const v128_t vprod6xGHIJKLMN = wasm_i16x8_mul(vi6xGHIJKLMN, vk6xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod6x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod6x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod6x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod6x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod6xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod6xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod6x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod6x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod6x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod6x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod6xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod6xGHIJKLMN));
 
-      const v128_t vi7x01234567 = wasm_i16x8_load_8x8(i7);
-      const v128_t vk7x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 168 * sizeof(int8_t)));
-      const v128_t vi7x89ABCDEF = wasm_i16x8_load_8x8(i7 + 8);
-      const v128_t vk7x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 176 * sizeof(int8_t)));
-      const v128_t vi7xGHIJKLMN = wasm_i16x8_load_8x8(i7 + 16);
-      const v128_t vk7xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 184 * sizeof(int8_t)));
+      const v128_t vi7x01234567 = wasm_i16x8_load8x8(i7);
+      const v128_t vk7x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 168 * sizeof(int8_t)));
+      const v128_t vi7x89ABCDEF = wasm_i16x8_load8x8(i7 + 8);
+      const v128_t vk7x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 176 * sizeof(int8_t)));
+      const v128_t vi7xGHIJKLMN = wasm_i16x8_load8x8(i7 + 16);
+      const v128_t vk7xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 184 * sizeof(int8_t)));
       i7 += 24;
 
       const v128_t vprod7x01234567 = wasm_i16x8_mul(vi7x01234567, vk7x01234567);
       const v128_t vprod7x89ABCDEF = wasm_i16x8_mul(vi7x89ABCDEF, vk7x89ABCDEF);
       const v128_t vprod7xGHIJKLMN = wasm_i16x8_mul(vi7xGHIJKLMN, vk7xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod7x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod7x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod7x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod7x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod7xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod7xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod7x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod7x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod7x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod7x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod7xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod7xGHIJKLMN));
 
-      const v128_t vi8x01234567 = wasm_i16x8_load_8x8(i8);
-      const v128_t vk8x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 192 * sizeof(int8_t)));
-      const v128_t vi8x89ABCDEF = wasm_i16x8_load_8x8(i8 + 8);
-      const v128_t vk8x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 200 * sizeof(int8_t)));
-      const v128_t vi8xGHIJKLMN = wasm_i16x8_load_8x8(i8 + 16);
-      const v128_t vk8xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 208 * sizeof(int8_t)));
+      const v128_t vi8x01234567 = wasm_i16x8_load8x8(i8);
+      const v128_t vk8x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 192 * sizeof(int8_t)));
+      const v128_t vi8x89ABCDEF = wasm_i16x8_load8x8(i8 + 8);
+      const v128_t vk8x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 200 * sizeof(int8_t)));
+      const v128_t vi8xGHIJKLMN = wasm_i16x8_load8x8(i8 + 16);
+      const v128_t vk8xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 208 * sizeof(int8_t)));
       i8 += 24;
 
       const v128_t vprod8x01234567 = wasm_i16x8_mul(vi8x01234567, vk8x01234567);
       const v128_t vprod8x89ABCDEF = wasm_i16x8_mul(vi8x89ABCDEF, vk8x89ABCDEF);
       const v128_t vprod8xGHIJKLMN = wasm_i16x8_mul(vi8xGHIJKLMN, vk8xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod8x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod8x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod8x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod8x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod8xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod8xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod8x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod8x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod8x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod8x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod8xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod8xGHIJKLMN));
 
-      const v128_t vi9x01234567 = wasm_i16x8_load_8x8(i9);
-      const v128_t vk9x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 216 * sizeof(int8_t)));
-      const v128_t vi9x89ABCDEF = wasm_i16x8_load_8x8(i9 + 8);
-      const v128_t vk9x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 224 * sizeof(int8_t)));
-      const v128_t vi9xGHIJKLMN = wasm_i16x8_load_8x8(i9 + 16);
-      const v128_t vk9xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 232 * sizeof(int8_t)));
+      const v128_t vi9x01234567 = wasm_i16x8_load8x8(i9);
+      const v128_t vk9x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 216 * sizeof(int8_t)));
+      const v128_t vi9x89ABCDEF = wasm_i16x8_load8x8(i9 + 8);
+      const v128_t vk9x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 224 * sizeof(int8_t)));
+      const v128_t vi9xGHIJKLMN = wasm_i16x8_load8x8(i9 + 16);
+      const v128_t vk9xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 232 * sizeof(int8_t)));
       i9 += 24;
 
       const v128_t vprod9x01234567 = wasm_i16x8_mul(vi9x01234567, vk9x01234567);
       const v128_t vprod9x89ABCDEF = wasm_i16x8_mul(vi9x89ABCDEF, vk9x89ABCDEF);
       const v128_t vprod9xGHIJKLMN = wasm_i16x8_mul(vi9xGHIJKLMN, vk9xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod9x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod9x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod9x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod9x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod9xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod9xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod9x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod9x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod9x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod9x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod9xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod9xGHIJKLMN));
 
-      const v128_t vi10x01234567 = wasm_i16x8_load_8x8(i10);
-      const v128_t vk10x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 240 * sizeof(int8_t)));
-      const v128_t vi10x89ABCDEF = wasm_i16x8_load_8x8(i10 + 8);
-      const v128_t vk10x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 248 * sizeof(int8_t)));
-      const v128_t vi10xGHIJKLMN = wasm_i16x8_load_8x8(i10 + 16);
-      const v128_t vk10xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 256 * sizeof(int8_t)));
+      const v128_t vi10x01234567 = wasm_i16x8_load8x8(i10);
+      const v128_t vk10x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 240 * sizeof(int8_t)));
+      const v128_t vi10x89ABCDEF = wasm_i16x8_load8x8(i10 + 8);
+      const v128_t vk10x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 248 * sizeof(int8_t)));
+      const v128_t vi10xGHIJKLMN = wasm_i16x8_load8x8(i10 + 16);
+      const v128_t vk10xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 256 * sizeof(int8_t)));
       i10 += 24;
 
       const v128_t vprod10x01234567 = wasm_i16x8_mul(vi10x01234567, vk10x01234567);
       const v128_t vprod10x89ABCDEF = wasm_i16x8_mul(vi10x89ABCDEF, vk10x89ABCDEF);
       const v128_t vprod10xGHIJKLMN = wasm_i16x8_mul(vi10xGHIJKLMN, vk10xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod10x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod10x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod10x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod10x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod10xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod10xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod10x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod10x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod10x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod10x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod10xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod10xGHIJKLMN));
 
-      const v128_t vi11x01234567 = wasm_i16x8_load_8x8(i11);
-      const v128_t vk11x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 264 * sizeof(int8_t)));
-      const v128_t vi11x89ABCDEF = wasm_i16x8_load_8x8(i11 + 8);
-      const v128_t vk11x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 272 * sizeof(int8_t)));
-      const v128_t vi11xGHIJKLMN = wasm_i16x8_load_8x8(i11 + 16);
-      const v128_t vk11xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 280 * sizeof(int8_t)));
+      const v128_t vi11x01234567 = wasm_i16x8_load8x8(i11);
+      const v128_t vk11x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 264 * sizeof(int8_t)));
+      const v128_t vi11x89ABCDEF = wasm_i16x8_load8x8(i11 + 8);
+      const v128_t vk11x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 272 * sizeof(int8_t)));
+      const v128_t vi11xGHIJKLMN = wasm_i16x8_load8x8(i11 + 16);
+      const v128_t vk11xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 280 * sizeof(int8_t)));
       i11 += 24;
 
       const v128_t vprod11x01234567 = wasm_i16x8_mul(vi11x01234567, vk11x01234567);
       const v128_t vprod11x89ABCDEF = wasm_i16x8_mul(vi11x89ABCDEF, vk11x89ABCDEF);
       const v128_t vprod11xGHIJKLMN = wasm_i16x8_mul(vi11xGHIJKLMN, vk11xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod11x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod11x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod11x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod11x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod11xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod11xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod11x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod11x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod11x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod11x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod11xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod11xGHIJKLMN));
 
-      const v128_t vi12x01234567 = wasm_i16x8_load_8x8(i12);
-      const v128_t vk12x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 288 * sizeof(int8_t)));
-      const v128_t vi12x89ABCDEF = wasm_i16x8_load_8x8(i12 + 8);
-      const v128_t vk12x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 296 * sizeof(int8_t)));
-      const v128_t vi12xGHIJKLMN = wasm_i16x8_load_8x8(i12 + 16);
-      const v128_t vk12xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 304 * sizeof(int8_t)));
+      const v128_t vi12x01234567 = wasm_i16x8_load8x8(i12);
+      const v128_t vk12x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 288 * sizeof(int8_t)));
+      const v128_t vi12x89ABCDEF = wasm_i16x8_load8x8(i12 + 8);
+      const v128_t vk12x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 296 * sizeof(int8_t)));
+      const v128_t vi12xGHIJKLMN = wasm_i16x8_load8x8(i12 + 16);
+      const v128_t vk12xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 304 * sizeof(int8_t)));
       i12 += 24;
 
       const v128_t vprod12x01234567 = wasm_i16x8_mul(vi12x01234567, vk12x01234567);
       const v128_t vprod12x89ABCDEF = wasm_i16x8_mul(vi12x89ABCDEF, vk12x89ABCDEF);
       const v128_t vprod12xGHIJKLMN = wasm_i16x8_mul(vi12xGHIJKLMN, vk12xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod12x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod12x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod12x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod12x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod12xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod12xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod12x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod12x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod12x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod12x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod12xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod12xGHIJKLMN));
 
-      const v128_t vi13x01234567 = wasm_i16x8_load_8x8(i13);
-      const v128_t vk13x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 312 * sizeof(int8_t)));
-      const v128_t vi13x89ABCDEF = wasm_i16x8_load_8x8(i13 + 8);
-      const v128_t vk13x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 320 * sizeof(int8_t)));
-      const v128_t vi13xGHIJKLMN = wasm_i16x8_load_8x8(i13 + 16);
-      const v128_t vk13xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 328 * sizeof(int8_t)));
+      const v128_t vi13x01234567 = wasm_i16x8_load8x8(i13);
+      const v128_t vk13x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 312 * sizeof(int8_t)));
+      const v128_t vi13x89ABCDEF = wasm_i16x8_load8x8(i13 + 8);
+      const v128_t vk13x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 320 * sizeof(int8_t)));
+      const v128_t vi13xGHIJKLMN = wasm_i16x8_load8x8(i13 + 16);
+      const v128_t vk13xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 328 * sizeof(int8_t)));
       i13 += 24;
 
       const v128_t vprod13x01234567 = wasm_i16x8_mul(vi13x01234567, vk13x01234567);
       const v128_t vprod13x89ABCDEF = wasm_i16x8_mul(vi13x89ABCDEF, vk13x89ABCDEF);
       const v128_t vprod13xGHIJKLMN = wasm_i16x8_mul(vi13xGHIJKLMN, vk13xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod13x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod13x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod13x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod13x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod13xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod13xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod13x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod13x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod13x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod13x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod13xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod13xGHIJKLMN));
 
-      const v128_t vi14x01234567 = wasm_i16x8_load_8x8(i14);
-      const v128_t vk14x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 336 * sizeof(int8_t)));
-      const v128_t vi14x89ABCDEF = wasm_i16x8_load_8x8(i14 + 8);
-      const v128_t vk14x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 344 * sizeof(int8_t)));
-      const v128_t vi14xGHIJKLMN = wasm_i16x8_load_8x8(i14 + 16);
-      const v128_t vk14xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 352 * sizeof(int8_t)));
+      const v128_t vi14x01234567 = wasm_i16x8_load8x8(i14);
+      const v128_t vk14x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 336 * sizeof(int8_t)));
+      const v128_t vi14x89ABCDEF = wasm_i16x8_load8x8(i14 + 8);
+      const v128_t vk14x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 344 * sizeof(int8_t)));
+      const v128_t vi14xGHIJKLMN = wasm_i16x8_load8x8(i14 + 16);
+      const v128_t vk14xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 352 * sizeof(int8_t)));
       i14 += 24;
 
       const v128_t vprod14x01234567 = wasm_i16x8_mul(vi14x01234567, vk14x01234567);
       const v128_t vprod14x89ABCDEF = wasm_i16x8_mul(vi14x89ABCDEF, vk14x89ABCDEF);
       const v128_t vprod14xGHIJKLMN = wasm_i16x8_mul(vi14xGHIJKLMN, vk14xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod14x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod14x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod14x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod14x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod14xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod14xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod14x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod14x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod14x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod14x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod14xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod14xGHIJKLMN));
 
-      const v128_t vi15x01234567 = wasm_i16x8_load_8x8(i15);
-      const v128_t vk15x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 360 * sizeof(int8_t)));
-      const v128_t vi15x89ABCDEF = wasm_i16x8_load_8x8(i15 + 8);
-      const v128_t vk15x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 368 * sizeof(int8_t)));
-      const v128_t vi15xGHIJKLMN = wasm_i16x8_load_8x8(i15 + 16);
-      const v128_t vk15xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 376 * sizeof(int8_t)));
+      const v128_t vi15x01234567 = wasm_i16x8_load8x8(i15);
+      const v128_t vk15x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 360 * sizeof(int8_t)));
+      const v128_t vi15x89ABCDEF = wasm_i16x8_load8x8(i15 + 8);
+      const v128_t vk15x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 368 * sizeof(int8_t)));
+      const v128_t vi15xGHIJKLMN = wasm_i16x8_load8x8(i15 + 16);
+      const v128_t vk15xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 376 * sizeof(int8_t)));
       i15 += 24;
 
       const v128_t vprod15x01234567 = wasm_i16x8_mul(vi15x01234567, vk15x01234567);
       const v128_t vprod15x89ABCDEF = wasm_i16x8_mul(vi15x89ABCDEF, vk15x89ABCDEF);
       const v128_t vprod15xGHIJKLMN = wasm_i16x8_mul(vi15xGHIJKLMN, vk15xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod15x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod15x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod15x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod15x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod15xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod15xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod15x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod15x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod15x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod15x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod15xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod15xGHIJKLMN));
 
-      const v128_t vi16x01234567 = wasm_i16x8_load_8x8(i16);
-      const v128_t vk16x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 384 * sizeof(int8_t)));
-      const v128_t vi16x89ABCDEF = wasm_i16x8_load_8x8(i16 + 8);
-      const v128_t vk16x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 392 * sizeof(int8_t)));
-      const v128_t vi16xGHIJKLMN = wasm_i16x8_load_8x8(i16 + 16);
-      const v128_t vk16xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 400 * sizeof(int8_t)));
+      const v128_t vi16x01234567 = wasm_i16x8_load8x8(i16);
+      const v128_t vk16x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 384 * sizeof(int8_t)));
+      const v128_t vi16x89ABCDEF = wasm_i16x8_load8x8(i16 + 8);
+      const v128_t vk16x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 392 * sizeof(int8_t)));
+      const v128_t vi16xGHIJKLMN = wasm_i16x8_load8x8(i16 + 16);
+      const v128_t vk16xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 400 * sizeof(int8_t)));
       i16 += 24;
 
       const v128_t vprod16x01234567 = wasm_i16x8_mul(vi16x01234567, vk16x01234567);
       const v128_t vprod16x89ABCDEF = wasm_i16x8_mul(vi16x89ABCDEF, vk16x89ABCDEF);
       const v128_t vprod16xGHIJKLMN = wasm_i16x8_mul(vi16xGHIJKLMN, vk16xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod16x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod16x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod16x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod16x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod16xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod16xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod16x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod16x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod16x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod16x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod16xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod16xGHIJKLMN));
 
-      const v128_t vi17x01234567 = wasm_i16x8_load_8x8(i17);
-      const v128_t vk17x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 408 * sizeof(int8_t)));
-      const v128_t vi17x89ABCDEF = wasm_i16x8_load_8x8(i17 + 8);
-      const v128_t vk17x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 416 * sizeof(int8_t)));
-      const v128_t vi17xGHIJKLMN = wasm_i16x8_load_8x8(i17 + 16);
-      const v128_t vk17xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 424 * sizeof(int8_t)));
+      const v128_t vi17x01234567 = wasm_i16x8_load8x8(i17);
+      const v128_t vk17x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 408 * sizeof(int8_t)));
+      const v128_t vi17x89ABCDEF = wasm_i16x8_load8x8(i17 + 8);
+      const v128_t vk17x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 416 * sizeof(int8_t)));
+      const v128_t vi17xGHIJKLMN = wasm_i16x8_load8x8(i17 + 16);
+      const v128_t vk17xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 424 * sizeof(int8_t)));
       i17 += 24;
 
       const v128_t vprod17x01234567 = wasm_i16x8_mul(vi17x01234567, vk17x01234567);
       const v128_t vprod17x89ABCDEF = wasm_i16x8_mul(vi17x89ABCDEF, vk17x89ABCDEF);
       const v128_t vprod17xGHIJKLMN = wasm_i16x8_mul(vi17xGHIJKLMN, vk17xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod17x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod17x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod17x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod17x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod17xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod17xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod17x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod17x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod17x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod17x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod17xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod17xGHIJKLMN));
 
-      const v128_t vi18x01234567 = wasm_i16x8_load_8x8(i18);
-      const v128_t vk18x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 432 * sizeof(int8_t)));
-      const v128_t vi18x89ABCDEF = wasm_i16x8_load_8x8(i18 + 8);
-      const v128_t vk18x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 440 * sizeof(int8_t)));
-      const v128_t vi18xGHIJKLMN = wasm_i16x8_load_8x8(i18 + 16);
-      const v128_t vk18xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 448 * sizeof(int8_t)));
+      const v128_t vi18x01234567 = wasm_i16x8_load8x8(i18);
+      const v128_t vk18x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 432 * sizeof(int8_t)));
+      const v128_t vi18x89ABCDEF = wasm_i16x8_load8x8(i18 + 8);
+      const v128_t vk18x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 440 * sizeof(int8_t)));
+      const v128_t vi18xGHIJKLMN = wasm_i16x8_load8x8(i18 + 16);
+      const v128_t vk18xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 448 * sizeof(int8_t)));
       i18 += 24;
 
       const v128_t vprod18x01234567 = wasm_i16x8_mul(vi18x01234567, vk18x01234567);
       const v128_t vprod18x89ABCDEF = wasm_i16x8_mul(vi18x89ABCDEF, vk18x89ABCDEF);
       const v128_t vprod18xGHIJKLMN = wasm_i16x8_mul(vi18xGHIJKLMN, vk18xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod18x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod18x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod18x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod18x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod18xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod18xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod18x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod18x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod18x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod18x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod18xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod18xGHIJKLMN));
 
-      const v128_t vi19x01234567 = wasm_i16x8_load_8x8(i19);
-      const v128_t vk19x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 456 * sizeof(int8_t)));
-      const v128_t vi19x89ABCDEF = wasm_i16x8_load_8x8(i19 + 8);
-      const v128_t vk19x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 464 * sizeof(int8_t)));
-      const v128_t vi19xGHIJKLMN = wasm_i16x8_load_8x8(i19 + 16);
-      const v128_t vk19xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 472 * sizeof(int8_t)));
+      const v128_t vi19x01234567 = wasm_i16x8_load8x8(i19);
+      const v128_t vk19x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 456 * sizeof(int8_t)));
+      const v128_t vi19x89ABCDEF = wasm_i16x8_load8x8(i19 + 8);
+      const v128_t vk19x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 464 * sizeof(int8_t)));
+      const v128_t vi19xGHIJKLMN = wasm_i16x8_load8x8(i19 + 16);
+      const v128_t vk19xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 472 * sizeof(int8_t)));
       i19 += 24;
 
       const v128_t vprod19x01234567 = wasm_i16x8_mul(vi19x01234567, vk19x01234567);
       const v128_t vprod19x89ABCDEF = wasm_i16x8_mul(vi19x89ABCDEF, vk19x89ABCDEF);
       const v128_t vprod19xGHIJKLMN = wasm_i16x8_mul(vi19xGHIJKLMN, vk19xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod19x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod19x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod19x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod19x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod19xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod19xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod19x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod19x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod19x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod19x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod19xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod19xGHIJKLMN));
 
-      const v128_t vi20x01234567 = wasm_i16x8_load_8x8(i20);
-      const v128_t vk20x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 480 * sizeof(int8_t)));
-      const v128_t vi20x89ABCDEF = wasm_i16x8_load_8x8(i20 + 8);
-      const v128_t vk20x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 488 * sizeof(int8_t)));
-      const v128_t vi20xGHIJKLMN = wasm_i16x8_load_8x8(i20 + 16);
-      const v128_t vk20xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 496 * sizeof(int8_t)));
+      const v128_t vi20x01234567 = wasm_i16x8_load8x8(i20);
+      const v128_t vk20x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 480 * sizeof(int8_t)));
+      const v128_t vi20x89ABCDEF = wasm_i16x8_load8x8(i20 + 8);
+      const v128_t vk20x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 488 * sizeof(int8_t)));
+      const v128_t vi20xGHIJKLMN = wasm_i16x8_load8x8(i20 + 16);
+      const v128_t vk20xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 496 * sizeof(int8_t)));
       i20 += 24;
 
       const v128_t vprod20x01234567 = wasm_i16x8_mul(vi20x01234567, vk20x01234567);
       const v128_t vprod20x89ABCDEF = wasm_i16x8_mul(vi20x89ABCDEF, vk20x89ABCDEF);
       const v128_t vprod20xGHIJKLMN = wasm_i16x8_mul(vi20xGHIJKLMN, vk20xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod20x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod20x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod20x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod20x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod20xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod20xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod20x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod20x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod20x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod20x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod20xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod20xGHIJKLMN));
 
-      const v128_t vi21x01234567 = wasm_i16x8_load_8x8(i21);
-      const v128_t vk21x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 504 * sizeof(int8_t)));
-      const v128_t vi21x89ABCDEF = wasm_i16x8_load_8x8(i21 + 8);
-      const v128_t vk21x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 512 * sizeof(int8_t)));
-      const v128_t vi21xGHIJKLMN = wasm_i16x8_load_8x8(i21 + 16);
-      const v128_t vk21xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 520 * sizeof(int8_t)));
+      const v128_t vi21x01234567 = wasm_i16x8_load8x8(i21);
+      const v128_t vk21x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 504 * sizeof(int8_t)));
+      const v128_t vi21x89ABCDEF = wasm_i16x8_load8x8(i21 + 8);
+      const v128_t vk21x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 512 * sizeof(int8_t)));
+      const v128_t vi21xGHIJKLMN = wasm_i16x8_load8x8(i21 + 16);
+      const v128_t vk21xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 520 * sizeof(int8_t)));
       i21 += 24;
 
       const v128_t vprod21x01234567 = wasm_i16x8_mul(vi21x01234567, vk21x01234567);
       const v128_t vprod21x89ABCDEF = wasm_i16x8_mul(vi21x89ABCDEF, vk21x89ABCDEF);
       const v128_t vprod21xGHIJKLMN = wasm_i16x8_mul(vi21xGHIJKLMN, vk21xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod21x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod21x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod21x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod21x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod21xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod21xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod21x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod21x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod21x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod21x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod21xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod21xGHIJKLMN));
 
-      const v128_t vi22x01234567 = wasm_i16x8_load_8x8(i22);
-      const v128_t vk22x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 528 * sizeof(int8_t)));
-      const v128_t vi22x89ABCDEF = wasm_i16x8_load_8x8(i22 + 8);
-      const v128_t vk22x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 536 * sizeof(int8_t)));
-      const v128_t vi22xGHIJKLMN = wasm_i16x8_load_8x8(i22 + 16);
-      const v128_t vk22xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 544 * sizeof(int8_t)));
+      const v128_t vi22x01234567 = wasm_i16x8_load8x8(i22);
+      const v128_t vk22x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 528 * sizeof(int8_t)));
+      const v128_t vi22x89ABCDEF = wasm_i16x8_load8x8(i22 + 8);
+      const v128_t vk22x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 536 * sizeof(int8_t)));
+      const v128_t vi22xGHIJKLMN = wasm_i16x8_load8x8(i22 + 16);
+      const v128_t vk22xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 544 * sizeof(int8_t)));
       i22 += 24;
 
       const v128_t vprod22x01234567 = wasm_i16x8_mul(vi22x01234567, vk22x01234567);
       const v128_t vprod22x89ABCDEF = wasm_i16x8_mul(vi22x89ABCDEF, vk22x89ABCDEF);
       const v128_t vprod22xGHIJKLMN = wasm_i16x8_mul(vi22xGHIJKLMN, vk22xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod22x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod22x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod22x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod22x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod22xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod22xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod22x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod22x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod22x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod22x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod22xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod22xGHIJKLMN));
 
-      const v128_t vi23x01234567 = wasm_i16x8_load_8x8(i23);
-      const v128_t vk23x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 552 * sizeof(int8_t)));
-      const v128_t vi23x89ABCDEF = wasm_i16x8_load_8x8(i23 + 8);
-      const v128_t vk23x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 560 * sizeof(int8_t)));
-      const v128_t vi23xGHIJKLMN = wasm_i16x8_load_8x8(i23 + 16);
-      const v128_t vk23xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 568 * sizeof(int8_t)));
+      const v128_t vi23x01234567 = wasm_i16x8_load8x8(i23);
+      const v128_t vk23x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 552 * sizeof(int8_t)));
+      const v128_t vi23x89ABCDEF = wasm_i16x8_load8x8(i23 + 8);
+      const v128_t vk23x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 560 * sizeof(int8_t)));
+      const v128_t vi23xGHIJKLMN = wasm_i16x8_load8x8(i23 + 16);
+      const v128_t vk23xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 568 * sizeof(int8_t)));
       i23 += 24;
 
       const v128_t vprod23x01234567 = wasm_i16x8_mul(vi23x01234567, vk23x01234567);
       const v128_t vprod23x89ABCDEF = wasm_i16x8_mul(vi23x89ABCDEF, vk23x89ABCDEF);
       const v128_t vprod23xGHIJKLMN = wasm_i16x8_mul(vi23xGHIJKLMN, vk23xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod23x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod23x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod23x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod23x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod23xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod23xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod23x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod23x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod23x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod23x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod23xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod23xGHIJKLMN));
 
-      const v128_t vi24x01234567 = wasm_i16x8_load_8x8(i24);
-      const v128_t vk24x01234567 = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 576 * sizeof(int8_t)));
-      const v128_t vi24x89ABCDEF = wasm_i16x8_load_8x8(i24 + 8);
-      const v128_t vk24x89ABCDEF = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 584 * sizeof(int8_t)));
-      const v128_t vi24xGHIJKLMN = wasm_i16x8_load_8x8(i24 + 16);
-      const v128_t vk24xGHIJKLMN = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 592 * sizeof(int8_t)));
+      const v128_t vi24x01234567 = wasm_i16x8_load8x8(i24);
+      const v128_t vk24x01234567 = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 576 * sizeof(int8_t)));
+      const v128_t vi24x89ABCDEF = wasm_i16x8_load8x8(i24 + 8);
+      const v128_t vk24x89ABCDEF = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 584 * sizeof(int8_t)));
+      const v128_t vi24xGHIJKLMN = wasm_i16x8_load8x8(i24 + 16);
+      const v128_t vk24xGHIJKLMN = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 592 * sizeof(int8_t)));
       i24 += 24;
 
       const v128_t vprod24x01234567 = wasm_i16x8_mul(vi24x01234567, vk24x01234567);
       const v128_t vprod24x89ABCDEF = wasm_i16x8_mul(vi24x89ABCDEF, vk24x89ABCDEF);
       const v128_t vprod24xGHIJKLMN = wasm_i16x8_mul(vi24xGHIJKLMN, vk24xGHIJKLMN);
 
-      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod24x01234567));
-      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod24x01234567));
-      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_widen_low_i16x8(vprod24x89ABCDEF));
-      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_widen_high_i16x8(vprod24x89ABCDEF));
-      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_widen_low_i16x8(vprod24xGHIJKLMN));
-      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_widen_high_i16x8(vprod24xGHIJKLMN));
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod24x01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod24x01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod24x89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod24x89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vprod24xGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vprod24xGHIJKLMN));
 
       w = (const void*) ((uintptr_t) w + 24 * sizeof(int32_t) + 600 * sizeof(int8_t));
 
@@ -705,9 +705,9 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__wasmsimd_mul16(
       vaccKLMN = wasm_i32x4_sub(wasm_i32x4_shr(vq31prodKLMN, vshift), wasm_i32x4_gt(vremKLMN, vthreshold));
 
       const v128_t voutput_zero_point = wasm_v128_load(params->gemmlowp_wasmsimd.output_zero_point);
-      v128_t vout01234567 = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc0123, vacc4567), voutput_zero_point);
-      v128_t vout89ABCDEF = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc89AB, vaccCDEF), voutput_zero_point);
-      v128_t voutGHIJKLMN = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vaccGHIJ, vaccKLMN), voutput_zero_point);
+      v128_t vout01234567 = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc0123, vacc4567), voutput_zero_point);
+      v128_t vout89ABCDEF = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc89AB, vaccCDEF), voutput_zero_point);
+      v128_t voutGHIJKLMN = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vaccGHIJ, vaccKLMN), voutput_zero_point);
 
       const v128_t voutput_min = wasm_v128_load(params->gemmlowp_wasmsimd.output_min);
       const v128_t voutput_max = wasm_v128_load(params->gemmlowp_wasmsimd.output_max);
@@ -725,230 +725,230 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__wasmsimd_mul16(
         v128_t vacc4567 = wasm_v128_load((const void*) ((uintptr_t) w + 4 * sizeof(int32_t)));
 
 
-        const v128_t vi0x01234567 = wasm_i16x8_load_8x8(i0);
-        const v128_t vk0x01234567 = wasm_i16x8_load_8x8(k);
+        const v128_t vi0x01234567 = wasm_i16x8_load8x8(i0);
+        const v128_t vk0x01234567 = wasm_i16x8_load8x8(k);
         i0 += 8;
 
         const v128_t vprod0x01234567 = wasm_i16x8_mul(vi0x01234567, vk0x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod0x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod0x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod0x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod0x01234567));
 
-        const v128_t vi1x01234567 = wasm_i16x8_load_8x8(i1);
-        const v128_t vk1x01234567 = wasm_i16x8_load_8x8((const void*) (k + 24));
+        const v128_t vi1x01234567 = wasm_i16x8_load8x8(i1);
+        const v128_t vk1x01234567 = wasm_i16x8_load8x8((const void*) (k + 24));
         i1 += 8;
 
         const v128_t vprod1x01234567 = wasm_i16x8_mul(vi1x01234567, vk1x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod1x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod1x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod1x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod1x01234567));
 
-        const v128_t vi2x01234567 = wasm_i16x8_load_8x8(i2);
-        const v128_t vk2x01234567 = wasm_i16x8_load_8x8((const void*) (k + 48));
+        const v128_t vi2x01234567 = wasm_i16x8_load8x8(i2);
+        const v128_t vk2x01234567 = wasm_i16x8_load8x8((const void*) (k + 48));
         i2 += 8;
 
         const v128_t vprod2x01234567 = wasm_i16x8_mul(vi2x01234567, vk2x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod2x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod2x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod2x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod2x01234567));
 
-        const v128_t vi3x01234567 = wasm_i16x8_load_8x8(i3);
-        const v128_t vk3x01234567 = wasm_i16x8_load_8x8((const void*) (k + 72));
+        const v128_t vi3x01234567 = wasm_i16x8_load8x8(i3);
+        const v128_t vk3x01234567 = wasm_i16x8_load8x8((const void*) (k + 72));
         i3 += 8;
 
         const v128_t vprod3x01234567 = wasm_i16x8_mul(vi3x01234567, vk3x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod3x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod3x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod3x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod3x01234567));
 
-        const v128_t vi4x01234567 = wasm_i16x8_load_8x8(i4);
-        const v128_t vk4x01234567 = wasm_i16x8_load_8x8((const void*) (k + 96));
+        const v128_t vi4x01234567 = wasm_i16x8_load8x8(i4);
+        const v128_t vk4x01234567 = wasm_i16x8_load8x8((const void*) (k + 96));
         i4 += 8;
 
         const v128_t vprod4x01234567 = wasm_i16x8_mul(vi4x01234567, vk4x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod4x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod4x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod4x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod4x01234567));
 
-        const v128_t vi5x01234567 = wasm_i16x8_load_8x8(i5);
-        const v128_t vk5x01234567 = wasm_i16x8_load_8x8((const void*) (k + 120));
+        const v128_t vi5x01234567 = wasm_i16x8_load8x8(i5);
+        const v128_t vk5x01234567 = wasm_i16x8_load8x8((const void*) (k + 120));
         i5 += 8;
 
         const v128_t vprod5x01234567 = wasm_i16x8_mul(vi5x01234567, vk5x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod5x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod5x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod5x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod5x01234567));
 
-        const v128_t vi6x01234567 = wasm_i16x8_load_8x8(i6);
-        const v128_t vk6x01234567 = wasm_i16x8_load_8x8((const void*) (k + 144));
+        const v128_t vi6x01234567 = wasm_i16x8_load8x8(i6);
+        const v128_t vk6x01234567 = wasm_i16x8_load8x8((const void*) (k + 144));
         i6 += 8;
 
         const v128_t vprod6x01234567 = wasm_i16x8_mul(vi6x01234567, vk6x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod6x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod6x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod6x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod6x01234567));
 
-        const v128_t vi7x01234567 = wasm_i16x8_load_8x8(i7);
-        const v128_t vk7x01234567 = wasm_i16x8_load_8x8((const void*) (k + 168));
+        const v128_t vi7x01234567 = wasm_i16x8_load8x8(i7);
+        const v128_t vk7x01234567 = wasm_i16x8_load8x8((const void*) (k + 168));
         i7 += 8;
 
         const v128_t vprod7x01234567 = wasm_i16x8_mul(vi7x01234567, vk7x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod7x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod7x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod7x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod7x01234567));
 
-        const v128_t vi8x01234567 = wasm_i16x8_load_8x8(i8);
-        const v128_t vk8x01234567 = wasm_i16x8_load_8x8((const void*) (k + 192));
+        const v128_t vi8x01234567 = wasm_i16x8_load8x8(i8);
+        const v128_t vk8x01234567 = wasm_i16x8_load8x8((const void*) (k + 192));
         i8 += 8;
 
         const v128_t vprod8x01234567 = wasm_i16x8_mul(vi8x01234567, vk8x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod8x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod8x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod8x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod8x01234567));
 
-        const v128_t vi9x01234567 = wasm_i16x8_load_8x8(i9);
-        const v128_t vk9x01234567 = wasm_i16x8_load_8x8((const void*) (k + 216));
+        const v128_t vi9x01234567 = wasm_i16x8_load8x8(i9);
+        const v128_t vk9x01234567 = wasm_i16x8_load8x8((const void*) (k + 216));
         i9 += 8;
 
         const v128_t vprod9x01234567 = wasm_i16x8_mul(vi9x01234567, vk9x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod9x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod9x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod9x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod9x01234567));
 
-        const v128_t vi10x01234567 = wasm_i16x8_load_8x8(i10);
-        const v128_t vk10x01234567 = wasm_i16x8_load_8x8((const void*) (k + 240));
+        const v128_t vi10x01234567 = wasm_i16x8_load8x8(i10);
+        const v128_t vk10x01234567 = wasm_i16x8_load8x8((const void*) (k + 240));
         i10 += 8;
 
         const v128_t vprod10x01234567 = wasm_i16x8_mul(vi10x01234567, vk10x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod10x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod10x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod10x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod10x01234567));
 
-        const v128_t vi11x01234567 = wasm_i16x8_load_8x8(i11);
-        const v128_t vk11x01234567 = wasm_i16x8_load_8x8((const void*) (k + 264));
+        const v128_t vi11x01234567 = wasm_i16x8_load8x8(i11);
+        const v128_t vk11x01234567 = wasm_i16x8_load8x8((const void*) (k + 264));
         i11 += 8;
 
         const v128_t vprod11x01234567 = wasm_i16x8_mul(vi11x01234567, vk11x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod11x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod11x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod11x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod11x01234567));
 
-        const v128_t vi12x01234567 = wasm_i16x8_load_8x8(i12);
-        const v128_t vk12x01234567 = wasm_i16x8_load_8x8((const void*) (k + 288));
+        const v128_t vi12x01234567 = wasm_i16x8_load8x8(i12);
+        const v128_t vk12x01234567 = wasm_i16x8_load8x8((const void*) (k + 288));
         i12 += 8;
 
         const v128_t vprod12x01234567 = wasm_i16x8_mul(vi12x01234567, vk12x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod12x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod12x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod12x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod12x01234567));
 
-        const v128_t vi13x01234567 = wasm_i16x8_load_8x8(i13);
-        const v128_t vk13x01234567 = wasm_i16x8_load_8x8((const void*) (k + 312));
+        const v128_t vi13x01234567 = wasm_i16x8_load8x8(i13);
+        const v128_t vk13x01234567 = wasm_i16x8_load8x8((const void*) (k + 312));
         i13 += 8;
 
         const v128_t vprod13x01234567 = wasm_i16x8_mul(vi13x01234567, vk13x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod13x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod13x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod13x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod13x01234567));
 
-        const v128_t vi14x01234567 = wasm_i16x8_load_8x8(i14);
-        const v128_t vk14x01234567 = wasm_i16x8_load_8x8((const void*) (k + 336));
+        const v128_t vi14x01234567 = wasm_i16x8_load8x8(i14);
+        const v128_t vk14x01234567 = wasm_i16x8_load8x8((const void*) (k + 336));
         i14 += 8;
 
         const v128_t vprod14x01234567 = wasm_i16x8_mul(vi14x01234567, vk14x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod14x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod14x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod14x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod14x01234567));
 
-        const v128_t vi15x01234567 = wasm_i16x8_load_8x8(i15);
-        const v128_t vk15x01234567 = wasm_i16x8_load_8x8((const void*) (k + 360));
+        const v128_t vi15x01234567 = wasm_i16x8_load8x8(i15);
+        const v128_t vk15x01234567 = wasm_i16x8_load8x8((const void*) (k + 360));
         i15 += 8;
 
         const v128_t vprod15x01234567 = wasm_i16x8_mul(vi15x01234567, vk15x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod15x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod15x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod15x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod15x01234567));
 
-        const v128_t vi16x01234567 = wasm_i16x8_load_8x8(i16);
-        const v128_t vk16x01234567 = wasm_i16x8_load_8x8((const void*) (k + 384));
+        const v128_t vi16x01234567 = wasm_i16x8_load8x8(i16);
+        const v128_t vk16x01234567 = wasm_i16x8_load8x8((const void*) (k + 384));
         i16 += 8;
 
         const v128_t vprod16x01234567 = wasm_i16x8_mul(vi16x01234567, vk16x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod16x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod16x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod16x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod16x01234567));
 
-        const v128_t vi17x01234567 = wasm_i16x8_load_8x8(i17);
-        const v128_t vk17x01234567 = wasm_i16x8_load_8x8((const void*) (k + 408));
+        const v128_t vi17x01234567 = wasm_i16x8_load8x8(i17);
+        const v128_t vk17x01234567 = wasm_i16x8_load8x8((const void*) (k + 408));
         i17 += 8;
 
         const v128_t vprod17x01234567 = wasm_i16x8_mul(vi17x01234567, vk17x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod17x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod17x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod17x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod17x01234567));
 
-        const v128_t vi18x01234567 = wasm_i16x8_load_8x8(i18);
-        const v128_t vk18x01234567 = wasm_i16x8_load_8x8((const void*) (k + 432));
+        const v128_t vi18x01234567 = wasm_i16x8_load8x8(i18);
+        const v128_t vk18x01234567 = wasm_i16x8_load8x8((const void*) (k + 432));
         i18 += 8;
 
         const v128_t vprod18x01234567 = wasm_i16x8_mul(vi18x01234567, vk18x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod18x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod18x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod18x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod18x01234567));
 
-        const v128_t vi19x01234567 = wasm_i16x8_load_8x8(i19);
-        const v128_t vk19x01234567 = wasm_i16x8_load_8x8((const void*) (k + 456));
+        const v128_t vi19x01234567 = wasm_i16x8_load8x8(i19);
+        const v128_t vk19x01234567 = wasm_i16x8_load8x8((const void*) (k + 456));
         i19 += 8;
 
         const v128_t vprod19x01234567 = wasm_i16x8_mul(vi19x01234567, vk19x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod19x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod19x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod19x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod19x01234567));
 
-        const v128_t vi20x01234567 = wasm_i16x8_load_8x8(i20);
-        const v128_t vk20x01234567 = wasm_i16x8_load_8x8((const void*) (k + 480));
+        const v128_t vi20x01234567 = wasm_i16x8_load8x8(i20);
+        const v128_t vk20x01234567 = wasm_i16x8_load8x8((const void*) (k + 480));
         i20 += 8;
 
         const v128_t vprod20x01234567 = wasm_i16x8_mul(vi20x01234567, vk20x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod20x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod20x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod20x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod20x01234567));
 
-        const v128_t vi21x01234567 = wasm_i16x8_load_8x8(i21);
-        const v128_t vk21x01234567 = wasm_i16x8_load_8x8((const void*) (k + 504));
+        const v128_t vi21x01234567 = wasm_i16x8_load8x8(i21);
+        const v128_t vk21x01234567 = wasm_i16x8_load8x8((const void*) (k + 504));
         i21 += 8;
 
         const v128_t vprod21x01234567 = wasm_i16x8_mul(vi21x01234567, vk21x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod21x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod21x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod21x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod21x01234567));
 
-        const v128_t vi22x01234567 = wasm_i16x8_load_8x8(i22);
-        const v128_t vk22x01234567 = wasm_i16x8_load_8x8((const void*) (k + 528));
+        const v128_t vi22x01234567 = wasm_i16x8_load8x8(i22);
+        const v128_t vk22x01234567 = wasm_i16x8_load8x8((const void*) (k + 528));
         i22 += 8;
 
         const v128_t vprod22x01234567 = wasm_i16x8_mul(vi22x01234567, vk22x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod22x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod22x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod22x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod22x01234567));
 
-        const v128_t vi23x01234567 = wasm_i16x8_load_8x8(i23);
-        const v128_t vk23x01234567 = wasm_i16x8_load_8x8((const void*) (k + 552));
+        const v128_t vi23x01234567 = wasm_i16x8_load8x8(i23);
+        const v128_t vk23x01234567 = wasm_i16x8_load8x8((const void*) (k + 552));
         i23 += 8;
 
         const v128_t vprod23x01234567 = wasm_i16x8_mul(vi23x01234567, vk23x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod23x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod23x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod23x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod23x01234567));
 
-        const v128_t vi24x01234567 = wasm_i16x8_load_8x8(i24);
-        const v128_t vk24x01234567 = wasm_i16x8_load_8x8((const void*) (k + 576));
+        const v128_t vi24x01234567 = wasm_i16x8_load8x8(i24);
+        const v128_t vk24x01234567 = wasm_i16x8_load8x8((const void*) (k + 576));
         i24 += 8;
 
         const v128_t vprod24x01234567 = wasm_i16x8_mul(vi24x01234567, vk24x01234567);
 
-        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_widen_low_i16x8(vprod24x01234567));
-        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_widen_high_i16x8(vprod24x01234567));
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod24x01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod24x01234567));
 
         w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
         k += 8;
@@ -981,7 +981,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__wasmsimd_mul16(
       vacc4567 = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod4567, vshift), wasm_i32x4_gt(vrem4567, vthreshold));
 
       const v128_t voutput_zero_point = wasm_v128_load(params->gemmlowp_wasmsimd.output_zero_point);
-      v128_t vout01234567 = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc0123, vacc4567), voutput_zero_point);
+      v128_t vout01234567 = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc0123, vacc4567), voutput_zero_point);
 
       const v128_t voutput_min = wasm_v128_load(params->gemmlowp_wasmsimd.output_min);
       const v128_t voutput_max = wasm_v128_load(params->gemmlowp_wasmsimd.output_max);

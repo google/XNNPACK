@@ -28,8 +28,8 @@ void xnn_f32_pavgpool_minmax_ukernel_9x__wasmsimd_x86_c4(
   assert(kernel_elements <= 9);
   assert(channels != 0);
 
-  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
 
   do {
     const float* i0 = input[0];
@@ -103,7 +103,7 @@ void xnn_f32_pavgpool_minmax_ukernel_9x__wasmsimd_x86_c4(
       i8 = (const float*) ((uintptr_t) i8 + input_offset);
     }
 
-    const v128_t vmultiplier = wasm_v32x4_load_splat(multiplier);
+    const v128_t vmultiplier = wasm_v128_load32_splat(multiplier);
     multiplier += 1;
 
     size_t c = channels;

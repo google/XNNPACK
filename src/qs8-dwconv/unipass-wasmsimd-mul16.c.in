@@ -49,18 +49,18 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wa
 
         $for C in range(0, CHANNEL_TILE, 8):
           $if C == 0:
-            const v128_t vi${K}x${ABC[0:8]} = wasm_i16x8_load_8x8(i${K});
+            const v128_t vi${K}x${ABC[0:8]} = wasm_i16x8_load8x8(i${K});
           $else:
-            const v128_t vi${K}x${ABC[C:C+8]} = wasm_i16x8_load_8x8(i${K} + ${C});
-          const v128_t vk${K}x${ABC[C:C+8]} = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE + C} * sizeof(int8_t)));
+            const v128_t vi${K}x${ABC[C:C+8]} = wasm_i16x8_load8x8(i${K} + ${C});
+          const v128_t vk${K}x${ABC[C:C+8]} = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE + C} * sizeof(int8_t)));
         i${K} += ${CHANNEL_TILE};
 
         $for C in range(0, CHANNEL_TILE, 8):
           const v128_t vprod${K}x${ABC[C:C+8]} = wasm_i16x8_mul(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
 
         $for C in range(0, CHANNEL_TILE, 8):
-          vacc${ABC[C:C+4]} = wasm_i32x4_add(vacc${ABC[C:C+4]}, wasm_i32x4_widen_low_i16x8(vprod${K}x${ABC[C:C+8]}));
-          vacc${ABC[C+4:C+8]} = wasm_i32x4_add(vacc${ABC[C+4:C+8]}, wasm_i32x4_widen_high_i16x8(vprod${K}x${ABC[C:C+8]}));
+          vacc${ABC[C:C+4]} = wasm_i32x4_add(vacc${ABC[C:C+4]}, wasm_i32x4_extend_low_i16x8(vprod${K}x${ABC[C:C+8]}));
+          vacc${ABC[C+4:C+8]} = wasm_i32x4_add(vacc${ABC[C+4:C+8]}, wasm_i32x4_extend_high_i16x8(vprod${K}x${ABC[C:C+8]}));
 
       w = (const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${KERNEL_TILE * CHANNEL_TILE} * sizeof(int8_t));
 
@@ -90,7 +90,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wa
 
       const v128_t voutput_zero_point = wasm_v128_load(params->gemmlowp_wasmsimd.output_zero_point);
       $for C in range(0, CHANNEL_TILE, 8):
-        v128_t vout${ABC[C:C+8]} = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc${ABC[C:C+4]}, vacc${ABC[C+4:C+8]}), voutput_zero_point);
+        v128_t vout${ABC[C:C+8]} = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc${ABC[C:C+4]}, vacc${ABC[C+4:C+8]}), voutput_zero_point);
 
       const v128_t voutput_min = wasm_v128_load(params->gemmlowp_wasmsimd.output_min);
       const v128_t voutput_max = wasm_v128_load(params->gemmlowp_wasmsimd.output_max);
@@ -120,21 +120,21 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wa
 
         $for K in range(KERNEL_TILE):
 
-          const v128_t vi${K}x${ABC[0:8]} = wasm_i16x8_load_8x8(i${K});
+          const v128_t vi${K}x${ABC[0:8]} = wasm_i16x8_load8x8(i${K});
           $if CHANNEL_TILE > 8:
             $if K == 0:
-              const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8(k);
+              const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load8x8(k);
             $else:
-              const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8((const void*) (k + ${K * CHANNEL_TILE}));
+              const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load8x8((const void*) (k + ${K * CHANNEL_TILE}));
           $else:
-            const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load_8x8((const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE} * sizeof(int8_t)));
+            const v128_t vk${K}x${ABC[0:8]} = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE} * sizeof(int8_t)));
           $if CHANNEL_TILE > 8:
             i${K} += 8;
 
           const v128_t vprod${K}x${ABC[0:8]} = wasm_i16x8_mul(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
 
-          vacc${ABC[0:4]} = wasm_i32x4_add(vacc${ABC[0:4]}, wasm_i32x4_widen_low_i16x8(vprod${K}x${ABC[0:8]}));
-          vacc${ABC[4:8]} = wasm_i32x4_add(vacc${ABC[4:8]}, wasm_i32x4_widen_high_i16x8(vprod${K}x${ABC[0:8]}));
+          vacc${ABC[0:4]} = wasm_i32x4_add(vacc${ABC[0:4]}, wasm_i32x4_extend_low_i16x8(vprod${K}x${ABC[0:8]}));
+          vacc${ABC[4:8]} = wasm_i32x4_add(vacc${ABC[4:8]}, wasm_i32x4_extend_high_i16x8(vprod${K}x${ABC[0:8]}));
 
         $if CHANNEL_TILE > 8:
           w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
@@ -168,7 +168,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wa
       vacc${ABC[4:8]} = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod${ABC[4:8]}, vshift), wasm_i32x4_gt(vrem${ABC[4:8]}, vthreshold));
 
       const v128_t voutput_zero_point = wasm_v128_load(params->gemmlowp_wasmsimd.output_zero_point);
-      v128_t vout${ABC[0:8]} = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc${ABC[0:4]}, vacc${ABC[4:8]}), voutput_zero_point);
+      v128_t vout${ABC[0:8]} = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc${ABC[0:4]}, vacc${ABC[4:8]}), voutput_zero_point);
 
       const v128_t voutput_min = wasm_v128_load(params->gemmlowp_wasmsimd.output_min);
       const v128_t voutput_max = wasm_v128_load(params->gemmlowp_wasmsimd.output_max);

@@ -25,9 +25,9 @@ void xnn_f32_velu_ukernel__wasmsimd_${"x86" if X86 else "arm"}_rr2_p6_x${BATCH_T
   assert(x != NULL);
   assert(y != NULL);
 
-  const v128_t vprescale = wasm_v32x4_load_splat(&params->scalar.prescale);
-  const v128_t valpha = wasm_v32x4_load_splat(&params->scalar.alpha);
-  const v128_t vbeta = wasm_v32x4_load_splat(&params->scalar.beta);
+  const v128_t vprescale = wasm_v128_load32_splat(&params->scalar.prescale);
+  const v128_t valpha = wasm_v128_load32_splat(&params->scalar.alpha);
+  const v128_t vbeta = wasm_v128_load32_splat(&params->scalar.beta);
 
   const v128_t vsat_cutoff = wasm_f32x4_splat(-0x1.154246p+4f);
   const v128_t vmagic_bias = wasm_f32x4_splat(0x1.8000FEp23f);

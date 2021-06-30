@@ -58,8 +58,8 @@ void xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_arm_splat(
     c4 = c3;
   }
 
-  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
   do {
     v128_t vacc0x0123 = wasm_v128_load(w);
     v128_t vacc0x4567 = wasm_v128_load(w + 4);
@@ -201,15 +201,15 @@ void xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_arm_splat(
           const v128_t vb4567 = wasm_v128_load(w + 4);
           w += 8;
 
-          const v128_t va0 = wasm_v32x4_load_splat(a0);
+          const v128_t va0 = wasm_v128_load32_splat(a0);
           a0 += 1;
-          const v128_t va1 = wasm_v32x4_load_splat(a1);
+          const v128_t va1 = wasm_v128_load32_splat(a1);
           a1 += 1;
-          const v128_t va2 = wasm_v32x4_load_splat(a2);
+          const v128_t va2 = wasm_v128_load32_splat(a2);
           a2 += 1;
-          const v128_t va3 = wasm_v32x4_load_splat(a3);
+          const v128_t va3 = wasm_v128_load32_splat(a3);
           a3 += 1;
-          const v128_t va4 = wasm_v32x4_load_splat(a4);
+          const v128_t va4 = wasm_v128_load32_splat(a4);
           a4 += 1;
 
           vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0, vb0123));

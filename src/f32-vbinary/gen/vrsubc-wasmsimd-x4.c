@@ -28,7 +28,7 @@ void xnn_f32_vrsubc_ukernel__wasmsimd_x4(
   assert(b != NULL);
   assert(y != NULL);
 
-  const v128_t vb = wasm_v32x4_load_splat(b);
+  const v128_t vb = wasm_v128_load32_splat(b);
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t va0123 = wasm_v128_load(a);
     a += 4;

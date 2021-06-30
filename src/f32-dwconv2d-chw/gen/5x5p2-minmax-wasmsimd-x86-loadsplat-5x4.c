@@ -32,8 +32,8 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_loadsplat_5x4(
   assert(padding_top == 2);
 
   const v128_t vmask = wasm_v128_load(params->scalar.mask);
-  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
-  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
 
   const v128_t vw0123 = wasm_v128_load(weights);
   const v128_t vw4567 = wasm_v128_load(weights + 4);
@@ -41,7 +41,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_loadsplat_5x4(
   const v128_t vwCDEF = wasm_v128_load(weights + 12);
   const v128_t vwGHIJ = wasm_v128_load(weights + 16);
   const v128_t vwKLMN = wasm_v128_load(weights + 20);
-  const v128_t vwOP = wasm_v64x2_load_splat(weights + 24);
+  const v128_t vwOP = wasm_v128_load64_splat(weights + 24);
   const v128_t vbias = wasm_v32x4_shuffle(vw0123, vw0123, 0, 0, 0, 0);
   const v128_t vk00 =  wasm_v32x4_shuffle(vw0123, vw0123, 1, 1, 1, 1);
   const v128_t vk01 =  wasm_v32x4_shuffle(vw0123, vw0123, 2, 2, 2, 2);

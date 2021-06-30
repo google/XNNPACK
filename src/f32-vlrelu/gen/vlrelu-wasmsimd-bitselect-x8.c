@@ -24,7 +24,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x8(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const v128_t vslope = wasm_v32x4_load_splat(&params->scalar.slope);
+  const v128_t vslope = wasm_v128_load32_splat(&params->scalar.slope);
   const v128_t vzero = wasm_f32x4_splat(0.0f);
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const v128_t vx0123 = wasm_v128_load(x);

@@ -31,21 +31,21 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x${BATCH_TILE}(
   const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
 
   for (; n >= ${BATCH_TILE} * sizeof(int8_t); n -= ${BATCH_TILE} * sizeof(int8_t)) {
-    const v128_t vx${ABC[0:8]} = wasm_i16x8_load_8x8(input_x);
-    const v128_t vy${ABC[0:8]} = wasm_i16x8_load_8x8(input_y);
+    const v128_t vx${ABC[0:8]} = wasm_i16x8_load8x8(input_x);
+    const v128_t vy${ABC[0:8]} = wasm_i16x8_load8x8(input_y);
     $for N in range(8, BATCH_TILE, 8):
-      const v128_t vx${ABC[N:N+8]} = wasm_i16x8_load_8x8(input_x + ${N});
-      const v128_t vy${ABC[N:N+8]} = wasm_i16x8_load_8x8(input_y + ${N});
+      const v128_t vx${ABC[N:N+8]} = wasm_i16x8_load8x8(input_x + ${N});
+      const v128_t vy${ABC[N:N+8]} = wasm_i16x8_load8x8(input_y + ${N});
     input_x += ${BATCH_TILE};
     input_y += ${BATCH_TILE};
 
     $for N in range(0, BATCH_TILE, 8):
-      v128_t vacc${ABC[N:N+4]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_widen_low_i16x8(vx${ABC[N:N+8]}), vx_multiplier));
-      v128_t vacc${ABC[N+4:N+8]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_widen_high_i16x8(vx${ABC[N:N+8]}), vx_multiplier));
+      v128_t vacc${ABC[N:N+4]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vx${ABC[N:N+8]}), vx_multiplier));
+      v128_t vacc${ABC[N+4:N+8]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vx${ABC[N:N+8]}), vx_multiplier));
 
     $for N in range(0, BATCH_TILE, 8):
-      vacc${ABC[N:N+4]} = wasm_i32x4_add(vacc${ABC[N:N+4]}, wasm_i32x4_mul(wasm_i32x4_widen_low_i16x8(vy${ABC[N:N+8]}), vy_multiplier));
-      vacc${ABC[N+4:N+8]} = wasm_i32x4_add(vacc${ABC[N+4:N+8]}, wasm_i32x4_mul(wasm_i32x4_widen_high_i16x8(vy${ABC[N:N+8]}), vy_multiplier));
+      vacc${ABC[N:N+4]} = wasm_i32x4_add(vacc${ABC[N:N+4]}, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vy${ABC[N:N+8]}), vy_multiplier));
+      vacc${ABC[N+4:N+8]} = wasm_i32x4_add(vacc${ABC[N+4:N+8]}, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vy${ABC[N:N+8]}), vy_multiplier));
 
     $for N in range(0, BATCH_TILE, 4):
       const v128_t vrem${ABC[N:N+4]} = wasm_i32x4_add(wasm_v128_and(vacc${ABC[N:N+4]}, vremainder_mask), wasm_i32x4_shr(vacc${ABC[N:N+4]}, 31));
@@ -54,7 +54,7 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x${BATCH_TILE}(
       vacc${ABC[N:N+4]} = wasm_i32x4_sub(wasm_i32x4_shr(vacc${ABC[N:N+4]}, vshift), wasm_i32x4_gt(vrem${ABC[N:N+4]}, vremainder_threshold));
 
     $for N in range(0, BATCH_TILE, 8):
-      v128_t vout${ABC[N:N+8]} = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc${ABC[N:N+4]}, vacc${ABC[N+4:N+8]}), voutput_zero_point);
+      v128_t vout${ABC[N:N+8]} = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc${ABC[N:N+4]}, vacc${ABC[N+4:N+8]}), voutput_zero_point);
 
     $for N in range(0, BATCH_TILE, 16):
       $if N + 8 < BATCH_TILE:
@@ -87,17 +87,17 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x${BATCH_TILE}(
   }
   if XNN_UNLIKELY(n != 0) {
     ${"do " if BATCH_TILE > 8 else ""}{
-      const v128_t vx${ABC[0:8]} = wasm_i16x8_load_8x8(input_x);
-      const v128_t vy${ABC[0:8]} = wasm_i16x8_load_8x8(input_y);
+      const v128_t vx${ABC[0:8]} = wasm_i16x8_load8x8(input_x);
+      const v128_t vy${ABC[0:8]} = wasm_i16x8_load8x8(input_y);
       $if BATCH_TILE > 8:
         input_x += 8;
         input_y += 8;
 
-      v128_t vacc${ABC[0:4]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_widen_low_i16x8(vx${ABC[0:8]}), vx_multiplier));
-      v128_t vacc${ABC[4:8]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_widen_high_i16x8(vx${ABC[0:8]}), vx_multiplier));
+      v128_t vacc${ABC[0:4]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vx${ABC[0:8]}), vx_multiplier));
+      v128_t vacc${ABC[4:8]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vx${ABC[0:8]}), vx_multiplier));
 
-      vacc${ABC[0:4]} = wasm_i32x4_add(vacc${ABC[0:4]}, wasm_i32x4_mul(wasm_i32x4_widen_low_i16x8(vy${ABC[0:8]}), vy_multiplier));
-      vacc${ABC[4:8]} = wasm_i32x4_add(vacc${ABC[4:8]}, wasm_i32x4_mul(wasm_i32x4_widen_high_i16x8(vy${ABC[0:8]}), vy_multiplier));
+      vacc${ABC[0:4]} = wasm_i32x4_add(vacc${ABC[0:4]}, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vy${ABC[0:8]}), vy_multiplier));
+      vacc${ABC[4:8]} = wasm_i32x4_add(vacc${ABC[4:8]}, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vy${ABC[0:8]}), vy_multiplier));
 
       const v128_t vrem${ABC[0:4]} = wasm_i32x4_add(wasm_v128_and(vacc${ABC[0:4]}, vremainder_mask), wasm_i32x4_shr(vacc${ABC[0:4]}, 31));
       const v128_t vrem${ABC[4:8]} = wasm_i32x4_add(wasm_v128_and(vacc${ABC[4:8]}, vremainder_mask), wasm_i32x4_shr(vacc${ABC[4:8]}, 31));
@@ -105,7 +105,7 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x${BATCH_TILE}(
       vacc${ABC[0:4]} = wasm_i32x4_sub(wasm_i32x4_shr(vacc${ABC[0:4]}, vshift), wasm_i32x4_gt(vrem${ABC[0:4]}, vremainder_threshold));
       vacc${ABC[4:8]} = wasm_i32x4_sub(wasm_i32x4_shr(vacc${ABC[4:8]}, vshift), wasm_i32x4_gt(vrem${ABC[4:8]}, vremainder_threshold));
 
-      v128_t vout${ABC[0:8]} = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vacc${ABC[0:4]}, vacc${ABC[4:8]}), voutput_zero_point);
+      v128_t vout${ABC[0:8]} = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc${ABC[0:4]}, vacc${ABC[4:8]}), voutput_zero_point);
 
       v128_t vout${ABC[0:8]}${ABC[0:8]} = wasm_i8x16_narrow_i16x8(vout${ABC[0:8]}, vout${ABC[0:8]});
       vout${ABC[0:8]}${ABC[0:8]} = wasm_i8x16_max(vout${ABC[0:8]}${ABC[0:8]}, voutput_min);

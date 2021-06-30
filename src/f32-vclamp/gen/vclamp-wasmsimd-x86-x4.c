@@ -26,8 +26,8 @@ void xnn_f32_vclamp_ukernel__wasmsimd_x86_x4(
   assert(x != NULL);
   assert(y != NULL);
 
-  const v128_t vy_min = wasm_v32x4_load_splat(&params->scalar.min);
-  const v128_t vy_max = wasm_v32x4_load_splat(&params->scalar.max);
+  const v128_t vy_min = wasm_v128_load32_splat(&params->scalar.min);
+  const v128_t vy_max = wasm_v128_load32_splat(&params->scalar.max);
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     v128_t vacc = wasm_v128_load(x);

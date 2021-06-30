@@ -24,9 +24,9 @@ void xnn_f32_vhswish_ukernel__wasmsimd_x8(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const v128_t vsixth = wasm_v32x4_load_splat(&params->scalar.sixth);
-  const v128_t vthree = wasm_v32x4_load_splat(&params->scalar.three);
-  const v128_t vsix = wasm_v32x4_load_splat(&params->scalar.six);
+  const v128_t vsixth = wasm_v128_load32_splat(&params->scalar.sixth);
+  const v128_t vthree = wasm_v128_load32_splat(&params->scalar.three);
+  const v128_t vsix = wasm_v128_load32_splat(&params->scalar.six);
   const v128_t vzero = wasm_f32x4_splat(0.0f);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {

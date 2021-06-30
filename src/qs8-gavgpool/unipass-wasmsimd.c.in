@@ -48,9 +48,9 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE}${""
   const v128_t vzero = wasm_f64x2_splat(0.0);
   while (channels >= ${CHANNEL_TILE}) {
     $for M in range(ROW_TILE):
-      const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load_8x8(i${M});
+      const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load8x8(i${M});
       $for C in range(8, CHANNEL_TILE, 8):
-        const v128_t vxi${M}x${ABC[C:C+8]} = wasm_i16x8_load_8x8(i${M} + ${C});
+        const v128_t vxi${M}x${ABC[C:C+8]} = wasm_i16x8_load8x8(i${M} + ${C});
       i${M} += ${CHANNEL_TILE};
 
     $for A in range(ACCUMULATORS):
@@ -72,8 +72,8 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE}${""
         $ACC_SLICE *= 2
 
     $for C in range(0, CHANNEL_TILE, 8):
-      const v128_t vacc${ABC[C:C+4]} = wasm_i32x4_add(vbias, wasm_i32x4_widen_low_i16x8(vacc0x${ABC[C:C+8]}));
-      const v128_t vacc${ABC[C+4:C+8]} = wasm_i32x4_add(vbias, wasm_i32x4_widen_high_i16x8(vacc0x${ABC[C:C+8]}));
+      const v128_t vacc${ABC[C:C+4]} = wasm_i32x4_add(vbias, wasm_i32x4_extend_low_i16x8(vacc0x${ABC[C:C+8]}));
+      const v128_t vacc${ABC[C+4:C+8]} = wasm_i32x4_add(vbias, wasm_i32x4_extend_high_i16x8(vacc0x${ABC[C:C+8]}));
 
     $for C in range(0, CHANNEL_TILE, 4):
       const v128_t vabsacc${ABC[C:C+4]} = wasm_i32x4_abs(vacc${ABC[C:C+4]});
@@ -100,7 +100,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE}${""
 
     const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
     $for C in range(0, CHANNEL_TILE, 8):
-      const v128_t vout${ABC[C:C+8]} = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vout${ABC[C:C+4]}, vout${ABC[C+4:C+8]}), voutput_zero_point);
+      const v128_t vout${ABC[C:C+8]} = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vout${ABC[C:C+4]}, vout${ABC[C+4:C+8]}), voutput_zero_point);
 
     const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
     const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
@@ -126,7 +126,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE}${""
   if XNN_UNLIKELY(channels != 0) {
     ${"do " if CHANNEL_TILE > 8 else ""}{
       $for M in range(ROW_TILE):
-        const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load_8x8(i${M});
+        const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load8x8(i${M});
         i${M} += 8;
 
       $for A in range(ACCUMULATORS):
@@ -144,8 +144,8 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE}${""
               vacc${A}x${ABC[0:8]} = wasm_i16x8_add(vacc${A}x${ABC[0:8]}, vacc${A + ACC_SLICE}x${ABC[0:8]});
           $ACC_SLICE *= 2
 
-      const v128_t vacc${ABC[0:4]} = wasm_i32x4_add(vbias, wasm_i32x4_widen_low_i16x8(vacc0x${ABC[0:8]}));
-      const v128_t vacc${ABC[4:8]} = wasm_i32x4_add(vbias, wasm_i32x4_widen_high_i16x8(vacc0x${ABC[0:8]}));
+      const v128_t vacc${ABC[0:4]} = wasm_i32x4_add(vbias, wasm_i32x4_extend_low_i16x8(vacc0x${ABC[0:8]}));
+      const v128_t vacc${ABC[4:8]} = wasm_i32x4_add(vbias, wasm_i32x4_extend_high_i16x8(vacc0x${ABC[0:8]}));
 
       const v128_t vabsacc${ABC[0:4]} = wasm_i32x4_abs(vacc${ABC[0:4]});
       const v128_t vabsacc${ABC[4:8]} = wasm_i32x4_abs(vacc${ABC[4:8]});
@@ -175,7 +175,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE}${""
       const v128_t vout${ABC[4:8]} = wasm_i32x4_sub(wasm_v128_xor(vabsout${ABC[4:8]}, vsgnacc${ABC[4:8]}), vsgnacc${ABC[4:8]});
 
       const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
-      const v128_t vout${ABC[0:8]} = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(vout${ABC[0:4]}, vout${ABC[4:8]}), voutput_zero_point);
+      const v128_t vout${ABC[0:8]} = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vout${ABC[0:4]}, vout${ABC[4:8]}), voutput_zero_point);
 
       const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
       const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);

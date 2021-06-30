@@ -48,9 +48,9 @@ void xnn_f32_gavgpool_minmax_ukernel_7x__wasmsimd_x86_c4(
   if (rows <= 6) {
     i6 = zero;
   }
-  const v128_t vscale = wasm_v32x4_load_splat(&params->scalar.scale);
-  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+  const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
 
   while (channels >= 4) {
     const v128_t vi0 = wasm_v128_load(i0);

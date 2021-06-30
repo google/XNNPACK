@@ -34,8 +34,8 @@ void xnn_f32_ibilinear_ukernel__wasmsimd_c8(
     const float* i3 = (const float*) ((uintptr_t) input[3] + input_offset);
     input += 4;
 
-    const v128_t valphah = wasm_v32x4_load_splat(weights);
-    const v128_t valphav = wasm_v32x4_load_splat(weights + 1);
+    const v128_t valphah = wasm_v128_load32_splat(weights);
+    const v128_t valphav = wasm_v128_load32_splat(weights + 1);
     weights += 2;
 
     size_t c = channels;

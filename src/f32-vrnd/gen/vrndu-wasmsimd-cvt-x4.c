@@ -32,7 +32,7 @@ void xnn_f32_vrndu_ukernel__wasmsimd_cvt_x4(
     const v128_t vx = wasm_v128_load(x);
     x += 4;
 
-    const v128_t vintx = wasm_i32x4_trunc_saturate_f32x4(vx);
+    const v128_t vintx = wasm_i32x4_trunc_sat_f32x4(vx);
     const v128_t vabsx = wasm_f32x4_abs(vx);
     const v128_t vprerndx = wasm_f32x4_convert_i32x4(vintx);
     const v128_t vrndmask = wasm_v128_andnot(wasm_f32x4_lt(vabsx, vmagic_number), vsign_mask);
@@ -47,7 +47,7 @@ void xnn_f32_vrndu_ukernel__wasmsimd_cvt_x4(
   if XNN_UNLIKELY(n != 0) {
     const v128_t vx = wasm_v128_load(x);
 
-    const v128_t vintx = wasm_i32x4_trunc_saturate_f32x4(vx);
+    const v128_t vintx = wasm_i32x4_trunc_sat_f32x4(vx);
     const v128_t vabsx = wasm_f32x4_abs(vx);
     const v128_t vprerndx = wasm_f32x4_convert_i32x4(vintx);
     const v128_t vrndmask = wasm_v128_andnot(wasm_f32x4_lt(vabsx, vmagic_number), vsign_mask);

@@ -24,7 +24,7 @@ void xnn_x32_fill_ukernel__wasmsimd(
 
   const size_t output_increment = output_stride - channels;
 
-  const v128_t vfill = wasm_v32x4_load_splat(fill_value);
+  const v128_t vfill = wasm_v128_load32_splat(fill_value);
   do {
     size_t c = channels;
     for (; c >= 16 * sizeof(uint32_t); c -= 16 * sizeof(uint32_t)) {

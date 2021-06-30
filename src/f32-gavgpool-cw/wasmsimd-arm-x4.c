@@ -28,9 +28,9 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_x4(
   const float* i3 = (const float*) ((uintptr_t) i2 + elements);
 
   const v128_t vmask = wasm_v128_load(params->scalar.mask);
-  const v128_t vmultiplier = wasm_v32x4_load_splat(&params->scalar.multiplier);
-  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.output_min);
-  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.output_max);
+  const v128_t vmultiplier = wasm_v128_load32_splat(&params->scalar.multiplier);
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.output_min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.output_max);
 
   while (channels >= 4) {
     v128_t vsum0 = wasm_f64x2_splat(0.0);

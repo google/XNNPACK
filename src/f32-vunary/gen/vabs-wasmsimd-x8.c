@@ -27,7 +27,7 @@ void xnn_f32_vabs_ukernel__wasmsimd_x8(
   assert(x != NULL);
   assert(y != NULL);
 
-  const v128_t vnonsign_mask = wasm_v32x4_load_splat(&params->wasmsimd.nonsign_mask);
+  const v128_t vnonsign_mask = wasm_v128_load32_splat(&params->wasmsimd.nonsign_mask);
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const v128_t vx0123 = wasm_v128_load(x);
     const v128_t vx4567 = wasm_v128_load(x + 4);

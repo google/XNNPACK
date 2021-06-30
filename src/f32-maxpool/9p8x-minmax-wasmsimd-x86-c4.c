@@ -25,8 +25,8 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_x86_c4(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const v128_t voutput_max = wasm_v32x4_load_splat(&params->scalar.max);
-  const v128_t voutput_min = wasm_v32x4_load_splat(&params->scalar.min);
+  const v128_t voutput_max = wasm_v128_load32_splat(&params->scalar.max);
+  const v128_t voutput_min = wasm_v128_load32_splat(&params->scalar.min);
   do {
     float* o = output;
     {

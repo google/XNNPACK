@@ -40,8 +40,8 @@ void xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_arm_splat(
   const float* a0 = a;
   float* c0 = c;
 
-  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
   do {
     v128_t vacc0x0123 = wasm_v128_load(acc + 0);
     v128_t vacc0x4567 = wasm_v128_load(acc + 4);
@@ -86,7 +86,7 @@ void xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_arm_splat(
     }
     if XNN_UNLIKELY(k != 0) {
       do {
-        const v128_t va0 = wasm_v32x4_load_splat(a0);
+        const v128_t va0 = wasm_v128_load32_splat(a0);
         a0 += 1;
 
         const v128_t vb0123 = wasm_v128_load(w);

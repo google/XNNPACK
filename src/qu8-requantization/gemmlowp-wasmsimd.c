@@ -109,8 +109,8 @@ void xnn_qu8_requantize_gemmlowp__wasmsimd(
     const v128_t w_scaled =
         wasm_i32x4_sub(wasm_i32x4_shr(w_q31product, shift), wasm_i32x4_gt(w_remainder, vthreshold));
 
-    const v128_t xy_packed = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(x_scaled, y_scaled), vzero_point);
-    const v128_t zw_packed = wasm_i16x8_add_saturate(wasm_i16x8_narrow_i32x4(z_scaled, w_scaled), vzero_point);
+    const v128_t xy_packed = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(x_scaled, y_scaled), vzero_point);
+    const v128_t zw_packed = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(z_scaled, w_scaled), vzero_point);
     const v128_t xyzw_packed = wasm_u8x16_narrow_i16x8(xy_packed, zw_packed);
     const v128_t xyzw_clamped = wasm_u8x16_min(wasm_u8x16_max(xyzw_packed, vqmin), vqmax);
 

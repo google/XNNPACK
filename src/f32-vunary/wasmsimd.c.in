@@ -38,9 +38,9 @@ void xnn_f32_v${OP.lower()}_ukernel__wasmsimd_x${BATCH_TILE}(
   assert(y != NULL);
 
   $if OP == "ABS":
-    const v128_t vnonsign_mask = wasm_v32x4_load_splat(&params->wasmsimd.nonsign_mask);
+    const v128_t vnonsign_mask = wasm_v128_load32_splat(&params->wasmsimd.nonsign_mask);
   $elif OP == "NEG":
-    const v128_t vsign_mask = wasm_v32x4_load_splat(&params->wasmsimd.sign_mask);
+    const v128_t vsign_mask = wasm_v128_load32_splat(&params->wasmsimd.sign_mask);
   $if BATCH_TILE > 4:
     for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
       const v128_t vx${ABC[0:4]} = wasm_v128_load(x);

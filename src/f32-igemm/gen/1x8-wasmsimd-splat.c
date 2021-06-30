@@ -99,7 +99,7 @@ void xnn_f32_igemm_ukernel_1x8__wasmsimd_splat(
           const v128_t vb4567 = wasm_v128_load(w + 4);
           w += 8;
 
-          const v128_t va0 = wasm_v32x4_load_splat(a0);
+          const v128_t va0 = wasm_v128_load32_splat(a0);
           a0 += 1;
 
           vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0, vb0123));

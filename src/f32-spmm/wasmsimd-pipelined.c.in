@@ -28,14 +28,14 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${
   assert(mc % sizeof(float) == 0);
   assert(nc != 0);
 
-  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
   size_t output_decrement = output_stride * nc - ${MR} * sizeof(float);
   while XNN_LIKELY(mc >= ${MR} * sizeof(float)) {
     const float*restrict w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
-    v128_t vw = wasm_v32x4_load_splat(w); w += 1;
+    v128_t vw = wasm_v128_load32_splat(w); w += 1;
     intptr_t diff = *dmap++;
     $for M in range(0, MR, 4):
       v128_t vi${ABC[M:M+4]} = wasm_v128_load(input + ${M});
@@ -44,7 +44,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${
       uint32_t nnz = *nnzmap++;
        $for M in range(0, MR, 4):
         v128_t vacc${ABC[M:M+4]} = vw;
-      vw = wasm_v32x4_load_splat(w); w += 1;
+      vw = wasm_v128_load32_splat(w); w += 1;
 
       $if UNROLL > 1:
         for (; nnz >= ${UNROLL}; nnz -= ${UNROLL}) {
@@ -53,7 +53,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${
               vacc${ABC[M:M+4]} = wasm_f32x4_add(vacc${ABC[M:M+4]}, wasm_f32x4_mul(vi${ABC[M:M+4]},   vw));
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
             diff = *dmap++;
-            vw = wasm_v32x4_load_splat(w); w += 1;
+            vw = wasm_v128_load32_splat(w); w += 1;
             $for M in range(0, MR, 4):
               vi${ABC[M:M+4]} = wasm_v128_load(input + ${M});
         }
@@ -65,7 +65,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
 
           diff = *dmap++;
-          vw = wasm_v32x4_load_splat(w); w += 1;
+          vw = wasm_v128_load32_splat(w); w += 1;
           $for M in range(0, MR, 4):
             vi${ABC[M:M+4]} = wasm_v128_load(input + ${M});
         } while (--nnz != 0);
@@ -104,11 +104,11 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${
         do {
           uint32_t nnz = *nnzmap++;
           $if SUBMR == 1:
-            v128_t vacc0 = wasm_v32x4_load_splat(w); w += 1;
+            v128_t vacc0 = wasm_v128_load32_splat(w); w += 1;
           $elif SUBMR == 2:
-            v128_t vacc01 = wasm_v32x4_load_splat(w); w += 1;
+            v128_t vacc01 = wasm_v128_load32_splat(w); w += 1;
           $else:
-            v128_t vacc0123 = wasm_v32x4_load_splat(w); w += 1;
+            v128_t vacc0123 = wasm_v128_load32_splat(w); w += 1;
           $for M in range(4, SUBMR, 4):
             v128_t vacc${ABC[M:M+4]} = vacc0123;
           if XNN_LIKELY(nnz != 0) {
@@ -117,13 +117,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${
               $if SUBMR >= 4:
                 const v128_t vi0123 = wasm_v128_load(input);
               $elif SUBMR == 2:
-                const v128_t vi01 = wasm_v64x2_load_splat(input);
+                const v128_t vi01 = wasm_v128_load64_splat(input);
               $elif SUBMR == 1:
-                const v128_t vi0 = wasm_v32x4_load_splat(input);
+                const v128_t vi0 = wasm_v128_load32_splat(input);
               $for M in range(4, SUBMR, 4):
                 const v128_t vi${ABC[M:M+4]} = wasm_v128_load(input + ${M});
               input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-              const v128_t vw = wasm_v32x4_load_splat(w); w += 1;
+              const v128_t vw = wasm_v128_load32_splat(w); w += 1;
               $if SUBMR == 1:
                 vacc${ABC[0]} = wasm_f32x4_add(vacc${ABC[0]}, wasm_f32x4_mul(vi${ABC[0]}, vw));
               $else:

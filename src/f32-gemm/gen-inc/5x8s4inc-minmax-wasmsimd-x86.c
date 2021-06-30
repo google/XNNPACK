@@ -171,15 +171,15 @@ void xnn_f32_gemminc_minmax_ukernel_5x8s4__wasmsimd_x86(
     }
     if XNN_UNLIKELY(k != 0) {
       do {
-        const v128_t va0 = wasm_v32x4_load_splat(a0);
+        const v128_t va0 = wasm_v128_load32_splat(a0);
         a0 += 1;
-        const v128_t va1 = wasm_v32x4_load_splat(a1);
+        const v128_t va1 = wasm_v128_load32_splat(a1);
         a1 += 1;
-        const v128_t va2 = wasm_v32x4_load_splat(a2);
+        const v128_t va2 = wasm_v128_load32_splat(a2);
         a2 += 1;
-        const v128_t va3 = wasm_v32x4_load_splat(a3);
+        const v128_t va3 = wasm_v128_load32_splat(a3);
         a3 += 1;
-        const v128_t va4 = wasm_v32x4_load_splat(a4);
+        const v128_t va4 = wasm_v128_load32_splat(a4);
         a4 += 1;
 
         const v128_t vb0123 = wasm_v128_load(w);
@@ -201,7 +201,7 @@ void xnn_f32_gemminc_minmax_ukernel_5x8s4__wasmsimd_x86(
       } while (k != 0);
     }
 
-    const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+    const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
     vacc0x0123 = wasm_v128_bitselect(vmin, vacc0x0123, wasm_f32x4_lt(vacc0x0123, vmin));
     vacc1x0123 = wasm_v128_bitselect(vmin, vacc1x0123, wasm_f32x4_lt(vacc1x0123, vmin));
     vacc2x0123 = wasm_v128_bitselect(vmin, vacc2x0123, wasm_f32x4_lt(vacc2x0123, vmin));
@@ -213,7 +213,7 @@ void xnn_f32_gemminc_minmax_ukernel_5x8s4__wasmsimd_x86(
     vacc3x4567 = wasm_v128_bitselect(vmin, vacc3x4567, wasm_f32x4_lt(vacc3x4567, vmin));
     vacc4x4567 = wasm_v128_bitselect(vmin, vacc4x4567, wasm_f32x4_lt(vacc4x4567, vmin));
 
-    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+    const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
     vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vmax, wasm_f32x4_le(vacc0x0123, vmax));
     vacc1x0123 = wasm_v128_bitselect(vacc1x0123, vmax, wasm_f32x4_le(vacc1x0123, vmax));
     vacc2x0123 = wasm_v128_bitselect(vacc2x0123, vmax, wasm_f32x4_le(vacc2x0123, vmax));

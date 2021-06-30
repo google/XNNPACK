@@ -82,7 +82,7 @@ void xnn_f32_gemm_ukernel_1x8__wasmsimd_splat(
     }
     if XNN_UNLIKELY(k != 0) {
       do {
-        const v128_t va0 = wasm_v32x4_load_splat(a0);
+        const v128_t va0 = wasm_v128_load32_splat(a0);
         a0 += 1;
 
         const v128_t vb0123 = wasm_v128_load(w);

@@ -63,8 +63,8 @@ void xnn_f32_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}
       }
 
   $if ACTIVATION == "MINMAX" and not X86:
-    const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+    const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+    const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
   do {
     $if INC:
       $for M in range(MR):
@@ -82,7 +82,7 @@ void xnn_f32_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}
     size_t k = kc;
     do {
       $for M in range(MR):
-        const v128_t va${M} = wasm_v32x4_load_splat(a${M});
+        const v128_t va${M} = wasm_v128_load32_splat(a${M});
         a${M} += 1;
 
       const v128_t vb${ABC[0:4]} = wasm_v128_load(w);
@@ -99,12 +99,12 @@ void xnn_f32_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}
 
     $if ACTIVATION == "MINMAX":
       $if X86:
-        const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+        const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
         $for N in range(0, NR, 4):
           $for M in range(MR):
             vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vmin, vacc${M}x${ABC[N:N+4]}, wasm_f32x4_lt(vacc${M}x${ABC[N:N+4]}, vmin));
 
-        const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+        const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
         $for N in range(0, NR, 4):
           $for M in range(MR):
             vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vacc${M}x${ABC[N:N+4]}, vmax, wasm_f32x4_le(vacc${M}x${ABC[N:N+4]}, vmax));

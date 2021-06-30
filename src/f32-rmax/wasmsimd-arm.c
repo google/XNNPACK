@@ -18,7 +18,7 @@ void xnn_f32_rmax_ukernel__wasmsimd_arm(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  v128_t vmax0 = wasm_v32x4_load_splat(x);
+  v128_t vmax0 = wasm_v128_load32_splat(x);
   v128_t vmax1 = vmax0;
   v128_t vmax2 = vmax0;
   v128_t vmax3 = vmax0;

@@ -29,7 +29,7 @@ void xnn_x32_pad_ukernel__wasmsimd(
   const size_t input_increment = input_stride - channels;
   const size_t output_increment = output_stride - (pre_padding + channels + post_padding);
 
-  const v128_t vfill = wasm_v32x4_load_splat(fill_value);
+  const v128_t vfill = wasm_v128_load32_splat(fill_value);
   do {
     // Pre-pad input channels.
     size_t l = pre_padding;

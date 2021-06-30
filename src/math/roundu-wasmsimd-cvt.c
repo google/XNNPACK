@@ -33,7 +33,7 @@ void xnn_math_f32_roundu__wasmsimd_cvt(
 
     // Convert floating-point value x to integer, with rounding towards zero, and then back to floating-point.
     // Note: the result is valid only for abs(x) < 2**31, but we further restrict its use to 2**23.
-    const v128_t vprerndx = wasm_f32x4_convert_i32x4(wasm_i32x4_trunc_saturate_f32x4(vx));
+    const v128_t vprerndx = wasm_f32x4_convert_i32x4(wasm_i32x4_trunc_sat_f32x4(vx));
 
     // Compute bitmask for the bits we want to copy from the rounded x. Other bits will be copied from x.
     // If abs(x) is below the integral threshold, use all but the sign bit from the rounded x and the sign bit from x.

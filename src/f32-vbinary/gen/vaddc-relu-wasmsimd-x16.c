@@ -29,7 +29,7 @@ void xnn_f32_vaddc_relu_ukernel__wasmsimd_x16(
   assert(y != NULL);
 
   const v128_t vzero = wasm_f32x4_splat(0.0f);
-  const v128_t vb = wasm_v32x4_load_splat(b);
+  const v128_t vb = wasm_v128_load32_splat(b);
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
     const v128_t va0123 = wasm_v128_load(a);
     const v128_t va4567 = wasm_v128_load(a + 4);

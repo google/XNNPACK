@@ -27,7 +27,7 @@ void xnn_f32_vneg_ukernel__wasmsimd_x4(
   assert(x != NULL);
   assert(y != NULL);
 
-  const v128_t vsign_mask = wasm_v32x4_load_splat(&params->wasmsimd.sign_mask);
+  const v128_t vsign_mask = wasm_v128_load32_splat(&params->wasmsimd.sign_mask);
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(x);
     x += 4;

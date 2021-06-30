@@ -50,8 +50,8 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
   }
 
   const v128_t vzero = wasm_f32x4_splat(0.0f);
-  const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
-  const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
 
   for (size_t output_y = output_y_start; output_y < output_y_end; output_y += 2) {
     const size_t input_y2 = output_y * 2 + 2 - input_padding_top;
@@ -508,11 +508,11 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
         v128_t vi4x3 = vzero;
         if (iw > 2) {
           // viMx3 = ( 0.0, 0.0, 0.0, iM3c2 )
-          vi0x3 = wasm_v32x4_load_splat(i0 + 8);
-          vi1x3 = wasm_v32x4_load_splat(i1 + 8);
-          vi2x3 = wasm_v32x4_load_splat(i2 + 8);
-          vi3x3 = wasm_v32x4_load_splat(i3 + 8);
-          vi4x3 = wasm_v32x4_load_splat(i4 + 8);
+          vi0x3 = wasm_v128_load32_splat(i0 + 8);
+          vi1x3 = wasm_v128_load32_splat(i1 + 8);
+          vi2x3 = wasm_v128_load32_splat(i2 + 8);
+          vi3x3 = wasm_v128_load32_splat(i3 + 8);
+          vi4x3 = wasm_v128_load32_splat(i4 + 8);
         }
 
         vo0x0 = wasm_f32x4_add(vo0x0, wasm_f32x4_mul(vk01c2, wasm_v32x4_shuffle(vi0x1, vi0x1, 2, 2, 2, 2)));

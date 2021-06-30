@@ -47,8 +47,8 @@ void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd_${"x86" if X86 else "arm"
       }
 
   $if not X86:
-    const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
-    const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+    const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+    const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
   do {
     v128_t vacc0x${ABC[0:4]} = wasm_v128_load(w);
     $for N in range(4, NR, 4):
@@ -83,12 +83,12 @@ void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd_${"x86" if X86 else "arm"
     } while (k != 0);
 
     $if X86:
-      const v128_t vmin = wasm_v32x4_load_splat(&params->scalar.min);
+      const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
       $for N in range(0, NR, 4):
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vmin, vacc${M}x${ABC[N:N+4]}, wasm_f32x4_lt(vacc${M}x${ABC[N:N+4]}, vmin));
 
-      const v128_t vmax = wasm_v32x4_load_splat(&params->scalar.max);
+      const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
       $for N in range(0, NR, 4):
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vacc${M}x${ABC[N:N+4]}, vmax, wasm_f32x4_le(vacc${M}x${ABC[N:N+4]}, vmax));
