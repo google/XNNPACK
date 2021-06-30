@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -5,10 +9,8 @@
 
 #include <xnnpack/assembly.h>
 
-$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
-$CONV_PARAMS = "xnn_qs8_minmax_params"
 
-# void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__aarch64_neondot_ld32(
+# void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld32(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -18,7 +20,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params"
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          (x7)
 #     size_t cn_stride,          [sp] -> x12
-#     const union ${CONV_PARAMS} params)  [sp + 8] -> x11
+#     const union xnn_qs8_minmax_params params)  [sp + 8] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -28,7 +30,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params"
 # C0  x6 v28 v29 v30 v31
 # unused v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__aarch64_neondot_ld32
+BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld32
 0:
         # Load initial bias from w into accumulators
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
@@ -53,48 +55,23 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__aar
         SDOT    v31.4s, v19.16b, v0.4b[0]
         B.HI    1b
 
-        $if REQUANTIZATION == "GEMMLOWP":
-          # Apply params - scale, shift, bias and clamp
-          LD2R    {v0.4s, v1.4s}, [x11], 8
-          CMEQ    v2.4s, v1.4s, 0
+        # Apply params - scale, bias and clamp
+        LD1R    {v0.4s}, [x11], 4
 
-          BIC     v4.16b, v28.16b, v2.16b
-          BIC     v5.16b, v29.16b, v2.16b
-          BIC     v6.16b, v30.16b, v2.16b
-          BIC     v7.16b, v31.16b, v2.16b
+        SCVTF   v28.4s, v28.4s
+        SCVTF   v29.4s, v29.4s
+        SCVTF   v30.4s, v30.4s
+        SCVTF   v31.4s, v31.4s
 
-          SQRDMULH v28.4s, v28.4s, v0.4s
-          SQRDMULH v29.4s, v29.4s, v0.4s
-          SQRDMULH v30.4s, v30.4s, v0.4s
-          SQRDMULH v31.4s, v31.4s, v0.4s
+        FMUL    v28.4s, v0.4s, v28.4s
+        FMUL    v29.4s, v0.4s, v29.4s
+        FMUL    v30.4s, v0.4s, v30.4s
+        FMUL    v31.4s, v0.4s, v31.4s
 
-          SSRA    v28.4s, v4.4s, 31
-          SSRA    v29.4s, v5.4s, 31
-          SSRA    v30.4s, v6.4s, 31
-          SSRA    v31.4s, v7.4s, 31
-
-          SRSHL   v28.4s, v28.4s, v1.4s   // signed rounding shift left
-          SRSHL   v29.4s, v29.4s, v1.4s
-          SRSHL   v30.4s, v30.4s, v1.4s
-          SRSHL   v31.4s, v31.4s, v1.4s
-        $elif REQUANTIZATION == "FP32":
-          # Apply params - scale, bias and clamp
-          LD1R    {v0.4s}, [x11], 4
-
-          SCVTF   v28.4s, v28.4s
-          SCVTF   v29.4s, v29.4s
-          SCVTF   v30.4s, v30.4s
-          SCVTF   v31.4s, v31.4s
-
-          FMUL    v28.4s, v0.4s, v28.4s
-          FMUL    v29.4s, v0.4s, v29.4s
-          FMUL    v30.4s, v0.4s, v30.4s
-          FMUL    v31.4s, v0.4s, v31.4s
-
-          FCVTNS  v28.4s, v28.4s
-          FCVTNS  v29.4s, v29.4s
-          FCVTNS  v30.4s, v30.4s
-          FCVTNS  v31.4s, v31.4s
+        FCVTNS  v28.4s, v28.4s
+        FCVTNS  v29.4s, v29.4s
+        FCVTNS  v30.4s, v30.4s
+        FCVTNS  v31.4s, v31.4s
 
         LD1R    {v2.8h}, [x11], 2       // add bias
         SQXTN   v4.4h, v28.4s
@@ -138,7 +115,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__aar
 6:
         RET
 
-END_FUNCTION xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__aarch64_neondot_ld32
+END_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld32
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

@@ -22,7 +22,7 @@
 #     size_t cn_stride,          [sp] -> x12
 #     const union xnn_qs8_minmax_params params)  [sp + 8] -> x11
 
-# params structure is 11 bytes
+# params structure is 12 bytes
 #  struct {
 #    int32_t multiplier;
 #    int32_t right_shift;

@@ -9,6 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
+
 # void xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -21,7 +22,7 @@
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const float* zero,                 [sp + 16] -> x12
-#     const xnn_qs8_conv_minmax_params params [sp + 24] -> (x8)
+#     const union xnn_qs8_minmax_params params [sp + 24] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -276,6 +277,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld1
         SRSHL   v30.4s, v30.4s, v1.4s
         SRSHL   v31.4s, v31.4s, v1.4s
 
+
         SQXTN   v16.4h, v16.4s
         SQXTN   v17.4h, v17.4s
         SQXTN   v18.4h, v18.4s
@@ -284,7 +286,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld1
         SQXTN   v25.4h, v25.4s
         SQXTN   v26.4h, v26.4s
         SQXTN   v27.4h, v27.4s
-        LD1R    {v2.8h}, [x8], 2        // add bias
+        LD1R    {v2.8h}, [x8], 2       // add bias
 
         SQXTN2  v16.8h, v20.4s
         SQXTN2  v17.8h, v21.4s
@@ -303,13 +305,13 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld1
         SQADD   v25.8h, v25.8h, v2.8h
         SQADD   v26.8h, v26.8h, v2.8h
         SQADD   v27.8h, v27.8h, v2.8h
-        LD1R    {v0.16b}, [x8], 1       // clamp min value
+        LD1R    {v0.16b}, [x8], 1      // clamp min value
 
         SQXTN   v4.8b, v16.8h
         SQXTN   v5.8b, v17.8h
         SQXTN   v6.8b, v18.8h
         SQXTN   v7.8b, v19.8h
-        LD1R    {v1.16b}, [x8]          // clamp max value
+        LD1R    {v1.16b}, [x8]         // clamp max value
         SQXTN2  v4.16b, v24.8h
         SQXTN2  v5.16b, v25.8h
         SQXTN2  v6.16b, v26.8h

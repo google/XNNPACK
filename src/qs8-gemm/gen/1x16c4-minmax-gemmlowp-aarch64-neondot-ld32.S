@@ -9,6 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
+
 # void xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x16c4__aarch64_neondot_ld32(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -19,7 +20,7 @@
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          (x7)
 #     size_t cn_stride,          [sp] -> x12
-#     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x11
+#     const union xnn_qs8_minmax_params params)  [sp + 8] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -57,27 +58,32 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x16c4__aarch64_neondot_ld32
         # Apply params - scale, shift, bias and clamp
         LD2R    {v0.4s, v1.4s}, [x11], 8
         CMEQ    v2.4s, v1.4s, 0
-        SQRDMULH v4.4s, v28.4s, v0.4s
-        SQRDMULH v5.4s, v29.4s, v0.4s
-        SQRDMULH v6.4s, v30.4s, v0.4s
-        SQRDMULH v7.4s, v31.4s, v0.4s
-        BIC     v28.16b, v28.16b, v2.16b
-        BIC     v29.16b, v29.16b, v2.16b
-        BIC     v30.16b, v30.16b, v2.16b
-        BIC     v31.16b, v31.16b, v2.16b
-        SSRA    v4.4s, v28.4s, 31       // signed shift right accumulate
-        SSRA    v5.4s, v29.4s, 31
-        SSRA    v6.4s, v30.4s, 31
-        SSRA    v7.4s, v31.4s, 31
-        SRSHL   v4.4s, v4.4s, v1.4s     // signed rounding shift left
-        SRSHL   v5.4s, v5.4s, v1.4s
-        SRSHL   v6.4s, v6.4s, v1.4s
-        SRSHL   v7.4s, v7.4s, v1.4s
+
+        BIC     v4.16b, v28.16b, v2.16b
+        BIC     v5.16b, v29.16b, v2.16b
+        BIC     v6.16b, v30.16b, v2.16b
+        BIC     v7.16b, v31.16b, v2.16b
+
+        SQRDMULH v28.4s, v28.4s, v0.4s
+        SQRDMULH v29.4s, v29.4s, v0.4s
+        SQRDMULH v30.4s, v30.4s, v0.4s
+        SQRDMULH v31.4s, v31.4s, v0.4s
+
+        SSRA    v28.4s, v4.4s, 31
+        SSRA    v29.4s, v5.4s, 31
+        SSRA    v30.4s, v6.4s, 31
+        SSRA    v31.4s, v7.4s, 31
+
+        SRSHL   v28.4s, v28.4s, v1.4s   // signed rounding shift left
+        SRSHL   v29.4s, v29.4s, v1.4s
+        SRSHL   v30.4s, v30.4s, v1.4s
+        SRSHL   v31.4s, v31.4s, v1.4s
+
         LD1R    {v2.8h}, [x11], 2       // add bias
-        SQXTN   v4.4h, v4.4s
-        SQXTN   v6.4h, v6.4s
-        SQXTN2  v4.8h, v5.4s
-        SQXTN2  v6.8h, v7.4s
+        SQXTN   v4.4h, v28.4s
+        SQXTN   v6.4h, v30.4s
+        SQXTN2  v4.8h, v29.4s
+        SQXTN2  v6.8h, v31.4s
         LD2R    {v0.16b, v1.16b}, [x11]   // clamp to min/max
         SQADD   v4.8h, v4.8h, v2.8h
         SQADD   v6.8h, v6.8h, v2.8h

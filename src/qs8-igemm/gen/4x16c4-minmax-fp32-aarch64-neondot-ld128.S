@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-igemm/4x16c4-aarch64-neondot-ld128.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -5,10 +9,8 @@
 
 #include <xnnpack/assembly.h>
 
-$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
-$CONV_PARAMS = "xnn_qs8_minmax_params"
 
-# void xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld64(
+# void xnn_qs8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -20,7 +22,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params"
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const float* zero,                 [sp + 16] -> x12
-#     const union ${CONV_PARAMS} params [sp + 24] -> (x8)
+#     const union xnn_qs8_minmax_params params [sp + 24] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -36,7 +38,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params"
 # C3   x7 v19 v23 v27 v31
 # unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld64
+BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
@@ -93,18 +95,235 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aa
         ADD     x8, x8, x11             // a3 += a_offset
         CSEL    x8, x12, x8, EQ         //   a3 = zero, else += a3 + a_offset
 
-        # Is there at least 8 bytes for main loop?
-        SUBS    x0, x2, 8               // k = kc - 8
+        # Is there at least 16 bytes for main loop?
+        SUBS    x0, x2, 16              // k = kc - 16
         B.LO    4f
 
-        # Main loop - 8 bytes of A
+        # Main loop - 16 bytes of A
         .p2align 3
 2:
+        LDR     q0, [x13], 16
+        LDR     q4,  [x5], 16
+        LDR     q1, [x14], 16
+        LDR     q2, [x15], 16
+        LDR     q3,  [x8], 16
+        LDR     q5,  [x5], 16
+        SDOT    v16.4s, v4.16b,  v0.4b[0]
+        SDOT    v17.4s, v4.16b,  v1.4b[0]
+        LDP     q6, q7, [x5], 32
+        SDOT    v18.4s, v4.16b,  v2.4b[0]
+        SDOT    v19.4s, v4.16b,  v3.4b[0]
+        SDOT    v20.4s, v5.16b,  v0.4b[0]
+        SDOT    v21.4s, v5.16b,  v1.4b[0]
+        SDOT    v22.4s, v5.16b,  v2.4b[0]
+        SDOT    v23.4s, v5.16b,  v3.4b[0]
+        SDOT    v24.4s, v6.16b, v0.4b[0]
+        SDOT    v25.4s, v6.16b, v1.4b[0]
+        LDP     q4, q5, [x5], 32
+        SDOT    v26.4s, v6.16b, v2.4b[0]
+        SDOT    v27.4s, v6.16b, v3.4b[0]
+        SDOT    v28.4s, v7.16b, v0.4b[0]
+        SDOT    v29.4s, v7.16b, v1.4b[0]
+        SDOT    v30.4s, v7.16b, v2.4b[0]
+        SDOT    v31.4s, v7.16b, v3.4b[0]
+
+        SDOT    v16.4s, v4.16b,  v0.4b[1]
+        SDOT    v17.4s, v4.16b,  v1.4b[1]
+        LDP     q6, q7, [x5], 32
+        SDOT    v18.4s, v4.16b,  v2.4b[1]
+        SDOT    v19.4s, v4.16b,  v3.4b[1]
+        SDOT    v20.4s, v5.16b,  v0.4b[1]
+        SDOT    v21.4s, v5.16b,  v1.4b[1]
+        SDOT    v22.4s, v5.16b,  v2.4b[1]
+        SDOT    v23.4s, v5.16b,  v3.4b[1]
+        SDOT    v24.4s, v6.16b,  v0.4b[1]
+        SDOT    v25.4s, v6.16b,  v1.4b[1]
+        LDP     q4, q5, [x5], 32
+        SDOT    v26.4s, v6.16b,  v2.4b[1]
+        SDOT    v27.4s, v6.16b,  v3.4b[1]
+        SDOT    v28.4s, v7.16b,  v0.4b[1]
+        SDOT    v29.4s, v7.16b,  v1.4b[1]
+        SDOT    v30.4s, v7.16b,  v2.4b[1]
+        SDOT    v31.4s, v7.16b,  v3.4b[1]
+
+        SDOT    v16.4s, v4.16b,  v0.4b[2]
+        SDOT    v17.4s, v4.16b,  v1.4b[2]
+        LDP     q6, q7, [x5], 32
+        SDOT    v18.4s, v4.16b,  v2.4b[2]
+        SDOT    v19.4s, v4.16b,  v3.4b[2]
+        SDOT    v20.4s, v5.16b,  v0.4b[2]
+        SDOT    v21.4s, v5.16b,  v1.4b[2]
+        SDOT    v22.4s, v5.16b,  v2.4b[2]
+        SDOT    v23.4s, v5.16b,  v3.4b[2]
+        SDOT    v24.4s, v6.16b,  v0.4b[2]
+        SDOT    v25.4s, v6.16b,  v1.4b[2]
+        LDP     q4, q5, [x5], 32
+        SDOT    v26.4s, v6.16b,  v2.4b[2]
+        SDOT    v27.4s, v6.16b,  v3.4b[2]
+        SDOT    v28.4s, v7.16b,  v0.4b[2]
+        SDOT    v29.4s, v7.16b,  v1.4b[2]
+        SDOT    v30.4s, v7.16b,  v2.4b[2]
+        SDOT    v31.4s, v7.16b,  v3.4b[2]
+
+        SDOT    v16.4s, v4.16b,  v0.4b[3]
+        SDOT    v17.4s, v4.16b,  v1.4b[3]
+        LDP     q6, q7, [x5], 32
+        SDOT    v18.4s, v4.16b,  v2.4b[3]
+        SDOT    v19.4s, v4.16b,  v3.4b[3]
+        SDOT    v20.4s, v5.16b,  v0.4b[3]
+        SDOT    v21.4s, v5.16b,  v1.4b[3]
+        SDOT    v22.4s, v5.16b,  v2.4b[3]
+        SDOT    v23.4s, v5.16b,  v3.4b[3]
+        SDOT    v24.4s, v6.16b,  v0.4b[3]
+        SDOT    v25.4s, v6.16b,  v1.4b[3]
+        SDOT    v26.4s, v6.16b,  v2.4b[3]
+        SDOT    v27.4s, v6.16b,  v3.4b[3]
+        SUBS    x0, x0, 16
+        SDOT    v28.4s, v7.16b,  v0.4b[3]
+        SDOT    v29.4s, v7.16b,  v1.4b[3]
+        SDOT    v30.4s, v7.16b,  v2.4b[3]
+        SDOT    v31.4s, v7.16b,  v3.4b[3]
+        B.HS    2b
+
+        # Is there a remainder?- 4 to 12 bytes of A
+        TST     x0, 15
+        B.NE    4f
+
+3:
+        # ks loop
+        SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
+        B.HI    1b
+
+        LDR     x8, [sp, 24]            // reload params pointer
+
+        # Apply params - scale, bias and clamp
+        LD1R    {v0.4s}, [x8], 4
+
+        SCVTF   v16.4s, v16.4s
+        SCVTF   v17.4s, v17.4s
+        SCVTF   v18.4s, v18.4s
+        SCVTF   v19.4s, v19.4s
+        SCVTF   v20.4s, v20.4s
+        SCVTF   v21.4s, v21.4s
+        SCVTF   v22.4s, v22.4s
+        SCVTF   v23.4s, v23.4s
+        SCVTF   v24.4s, v24.4s
+        SCVTF   v25.4s, v25.4s
+        SCVTF   v26.4s, v26.4s
+        SCVTF   v27.4s, v27.4s
+        SCVTF   v28.4s, v28.4s
+        SCVTF   v29.4s, v29.4s
+        SCVTF   v30.4s, v30.4s
+        SCVTF   v31.4s, v31.4s
+
+        FMUL    v16.4s, v0.4s, v16.4s
+        FMUL    v17.4s, v0.4s, v17.4s
+        FMUL    v18.4s, v0.4s, v18.4s
+        FMUL    v19.4s, v0.4s, v19.4s
+        FMUL    v20.4s, v0.4s, v20.4s
+        FMUL    v21.4s, v0.4s, v21.4s
+        FMUL    v22.4s, v0.4s, v22.4s
+        FMUL    v23.4s, v0.4s, v23.4s
+        FMUL    v24.4s, v0.4s, v24.4s
+        FMUL    v25.4s, v0.4s, v25.4s
+        FMUL    v26.4s, v0.4s, v26.4s
+        FMUL    v27.4s, v0.4s, v27.4s
+        FMUL    v28.4s, v0.4s, v28.4s
+        FMUL    v29.4s, v0.4s, v29.4s
+        FMUL    v30.4s, v0.4s, v30.4s
+        FMUL    v31.4s, v0.4s, v31.4s
+
+        FCVTNS  v16.4s, v16.4s
+        FCVTNS  v17.4s, v17.4s
+        FCVTNS  v18.4s, v18.4s
+        FCVTNS  v19.4s, v19.4s
+        FCVTNS  v20.4s, v20.4s
+        FCVTNS  v21.4s, v21.4s
+        FCVTNS  v22.4s, v22.4s
+        FCVTNS  v23.4s, v23.4s
+        FCVTNS  v24.4s, v24.4s
+        FCVTNS  v25.4s, v25.4s
+        FCVTNS  v26.4s, v26.4s
+        FCVTNS  v27.4s, v27.4s
+        FCVTNS  v28.4s, v28.4s
+        FCVTNS  v29.4s, v29.4s
+        FCVTNS  v30.4s, v30.4s
+        FCVTNS  v31.4s, v31.4s
+
+
+        SQXTN   v16.4h, v16.4s
+        SQXTN   v17.4h, v17.4s
+        SQXTN   v18.4h, v18.4s
+        SQXTN   v19.4h, v19.4s
+        SQXTN   v24.4h, v24.4s
+        SQXTN   v25.4h, v25.4s
+        SQXTN   v26.4h, v26.4s
+        SQXTN   v27.4h, v27.4s
+        LD1R    {v2.8h}, [x8], 2       // add bias
+
+        SQXTN2  v16.8h, v20.4s
+        SQXTN2  v17.8h, v21.4s
+        SQXTN2  v18.8h, v22.4s
+        SQXTN2  v19.8h, v23.4s
+        SQXTN2  v24.8h, v28.4s
+        SQXTN2  v25.8h, v29.4s
+        SQXTN2  v26.8h, v30.4s
+        SQXTN2  v27.8h, v31.4s
+
+        SQADD   v16.8h, v16.8h, v2.8h
+        SQADD   v17.8h, v17.8h, v2.8h
+        SQADD   v18.8h, v18.8h, v2.8h
+        SQADD   v19.8h, v19.8h, v2.8h
+        SQADD   v24.8h, v24.8h, v2.8h
+        SQADD   v25.8h, v25.8h, v2.8h
+        SQADD   v26.8h, v26.8h, v2.8h
+        SQADD   v27.8h, v27.8h, v2.8h
+        LD1R    {v0.16b}, [x8], 1      // clamp min value
+
+        SQXTN   v4.8b, v16.8h
+        SQXTN   v5.8b, v17.8h
+        SQXTN   v6.8b, v18.8h
+        SQXTN   v7.8b, v19.8h
+        LD1R    {v1.16b}, [x8]         // clamp max value
+        SQXTN2  v4.16b, v24.8h
+        SQXTN2  v5.16b, v25.8h
+        SQXTN2  v6.16b, v26.8h
+        SQXTN2  v7.16b, v27.8h
+
+        SMAX    v4.16b, v4.16b, v0.16b
+        SMAX    v5.16b, v5.16b, v0.16b
+        SMAX    v6.16b, v6.16b, v0.16b
+        SMAX    v7.16b, v7.16b, v0.16b
+        SUBS    x1, x1, 16
+        SMIN    v4.16b, v4.16b, v1.16b
+        SMIN    v5.16b, v5.16b, v1.16b
+        SMIN    v6.16b, v6.16b, v1.16b
+        SMIN    v7.16b, v7.16b, v1.16b
+        B.LO    6f
+
+        # Store full 4 x 16
+        ST1     {v7.16b},  [x7], x10
+        ST1     {v6.16b}, [x17], x10
+        ST1     {v5.16b}, [x16], x10
+        ST1     {v4.16b},  [x6], x10
+
+        SUB     x4, x4, x3              // a -= ks
+
+        # nc loop
+        B.HI    0b
+        RET
+
+        # Remainder- 8 bytes of A
+        .p2align 3
+4:
+        # Is there a remainder?- 8 bytes of A
+        TBZ     x0, 3, 5f
+
         LDR     d0, [x13], 8
         LDR     q4,  [x5], 16
         LDR     d1, [x14], 8
         LDR     d2, [x15], 8
-        LDR     d3, [x8], 8
+        LDR     d3,  [x8], 8
         LDR     q5,  [x5], 16
         SDOT    v16.4s, v4.16b,  v0.4b[0]
         SDOT    v17.4s, v4.16b,  v1.4b[0]
@@ -140,226 +359,18 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aa
         SDOT    v28.4s, v7.16b,  v0.4b[1]
         SDOT    v29.4s, v7.16b,  v1.4b[1]
         SDOT    v30.4s, v7.16b,  v2.4b[1]
-        SUBS    x0, x0, 8
         SDOT    v31.4s, v7.16b,  v3.4b[1]
-        B.HS    2b
-
-        # Is there a remainder?- 4 bytes of A
-        TBNZ    x0, 2, 4f
-
-        LDR     x8, [sp, 24]            // reload params pointer
-
-        # ks loop
-        SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
-        B.HI    1b
-
-3:
-        $if REQUANTIZATION == "GEMMLOWP":
-          # Apply params - scale, shift, bias and clamp
-          LD2R    {v0.4s, v1.4s}, [x8], 8
-          CMEQ    v2.4s, v1.4s, 0
-
-          BIC     v4.16b, v16.16b, v2.16b
-          BIC     v5.16b, v17.16b, v2.16b
-          BIC     v6.16b, v18.16b, v2.16b
-          BIC     v7.16b, v19.16b, v2.16b
-
-          SQRDMULH v16.4s, v16.4s, v0.4s
-          SQRDMULH v17.4s, v17.4s, v0.4s
-          SQRDMULH v18.4s, v18.4s, v0.4s
-          SQRDMULH v19.4s, v19.4s, v0.4s
-
-          SSRA    v16.4s, v4.4s, 31       // signed shift right accumulate
-          SSRA    v17.4s, v5.4s, 31
-          SSRA    v18.4s, v6.4s, 31
-          SSRA    v19.4s, v7.4s, 31
-
-          BIC     v4.16b, v20.16b, v2.16b
-          BIC     v5.16b, v21.16b, v2.16b
-          BIC     v6.16b, v22.16b, v2.16b
-          BIC     v7.16b, v23.16b, v2.16b
-
-          SQRDMULH v20.4s, v20.4s, v0.4s
-          SQRDMULH v21.4s, v21.4s, v0.4s
-          SQRDMULH v22.4s, v22.4s, v0.4s
-          SQRDMULH v23.4s, v23.4s, v0.4s
-
-          SSRA    v20.4s, v4.4s, 31
-          SSRA    v21.4s, v5.4s, 31
-          SSRA    v22.4s, v6.4s, 31
-          SSRA    v23.4s, v7.4s, 31
-
-          BIC     v4.16b, v24.16b, v2.16b
-          BIC     v5.16b, v25.16b, v2.16b
-          BIC     v6.16b, v26.16b, v2.16b
-          BIC     v7.16b, v27.16b, v2.16b
-
-          SQRDMULH v24.4s, v24.4s, v0.4s
-          SQRDMULH v25.4s, v25.4s, v0.4s
-          SQRDMULH v26.4s, v26.4s, v0.4s
-          SQRDMULH v27.4s, v27.4s, v0.4s
-
-          SSRA    v24.4s, v4.4s, 31
-          SSRA    v25.4s, v5.4s, 31
-          SSRA    v26.4s, v6.4s, 31
-          SSRA    v27.4s, v7.4s, 31
-
-          BIC     v4.16b, v28.16b, v2.16b
-          BIC     v5.16b, v29.16b, v2.16b
-          BIC     v6.16b, v30.16b, v2.16b
-          BIC     v7.16b, v31.16b, v2.16b
-
-          SQRDMULH v28.4s, v28.4s, v0.4s
-          SQRDMULH v29.4s, v29.4s, v0.4s
-          SQRDMULH v30.4s, v30.4s, v0.4s
-          SQRDMULH v31.4s, v31.4s, v0.4s
-
-          SSRA    v28.4s, v4.4s, 31
-          SSRA    v29.4s, v5.4s, 31
-          SSRA    v30.4s, v6.4s, 31
-          SSRA    v31.4s, v7.4s, 31
-
-          SRSHL   v16.4s, v16.4s, v1.4s   // signed rounding shift left
-          SRSHL   v17.4s, v17.4s, v1.4s
-          SRSHL   v18.4s, v18.4s, v1.4s
-          SRSHL   v19.4s, v19.4s, v1.4s
-          SRSHL   v20.4s, v20.4s, v1.4s
-          SRSHL   v21.4s, v21.4s, v1.4s
-          SRSHL   v22.4s, v22.4s, v1.4s
-          SRSHL   v23.4s, v23.4s, v1.4s
-          SRSHL   v24.4s, v24.4s, v1.4s
-          SRSHL   v25.4s, v25.4s, v1.4s
-          SRSHL   v26.4s, v26.4s, v1.4s
-          SRSHL   v27.4s, v27.4s, v1.4s
-          SRSHL   v28.4s, v28.4s, v1.4s
-          SRSHL   v29.4s, v29.4s, v1.4s
-          SRSHL   v30.4s, v30.4s, v1.4s
-          SRSHL   v31.4s, v31.4s, v1.4s
-        $elif REQUANTIZATION == "FP32":
-          # Apply params - scale, bias and clamp
-          LD1R    {v0.4s}, [x8], 4
-
-          SCVTF   v16.4s, v16.4s
-          SCVTF   v17.4s, v17.4s
-          SCVTF   v18.4s, v18.4s
-          SCVTF   v19.4s, v19.4s
-          SCVTF   v20.4s, v20.4s
-          SCVTF   v21.4s, v21.4s
-          SCVTF   v22.4s, v22.4s
-          SCVTF   v23.4s, v23.4s
-          SCVTF   v24.4s, v24.4s
-          SCVTF   v25.4s, v25.4s
-          SCVTF   v26.4s, v26.4s
-          SCVTF   v27.4s, v27.4s
-          SCVTF   v28.4s, v28.4s
-          SCVTF   v29.4s, v29.4s
-          SCVTF   v30.4s, v30.4s
-          SCVTF   v31.4s, v31.4s
-
-          FMUL    v16.4s, v0.4s, v16.4s
-          FMUL    v17.4s, v0.4s, v17.4s
-          FMUL    v18.4s, v0.4s, v18.4s
-          FMUL    v19.4s, v0.4s, v19.4s
-          FMUL    v20.4s, v0.4s, v20.4s
-          FMUL    v21.4s, v0.4s, v21.4s
-          FMUL    v22.4s, v0.4s, v22.4s
-          FMUL    v23.4s, v0.4s, v23.4s
-          FMUL    v24.4s, v0.4s, v24.4s
-          FMUL    v25.4s, v0.4s, v25.4s
-          FMUL    v26.4s, v0.4s, v26.4s
-          FMUL    v27.4s, v0.4s, v27.4s
-          FMUL    v28.4s, v0.4s, v28.4s
-          FMUL    v29.4s, v0.4s, v29.4s
-          FMUL    v30.4s, v0.4s, v30.4s
-          FMUL    v31.4s, v0.4s, v31.4s
-
-          FCVTNS  v16.4s, v16.4s
-          FCVTNS  v17.4s, v17.4s
-          FCVTNS  v18.4s, v18.4s
-          FCVTNS  v19.4s, v19.4s
-          FCVTNS  v20.4s, v20.4s
-          FCVTNS  v21.4s, v21.4s
-          FCVTNS  v22.4s, v22.4s
-          FCVTNS  v23.4s, v23.4s
-          FCVTNS  v24.4s, v24.4s
-          FCVTNS  v25.4s, v25.4s
-          FCVTNS  v26.4s, v26.4s
-          FCVTNS  v27.4s, v27.4s
-          FCVTNS  v28.4s, v28.4s
-          FCVTNS  v29.4s, v29.4s
-          FCVTNS  v30.4s, v30.4s
-          FCVTNS  v31.4s, v31.4s
-
-        SQXTN   v16.4h, v16.4s
-        SQXTN   v17.4h, v17.4s
-        SQXTN   v18.4h, v18.4s
-        SQXTN   v19.4h, v19.4s
-        SQXTN   v24.4h, v24.4s
-        SQXTN   v25.4h, v25.4s
-        SQXTN   v26.4h, v26.4s
-        SQXTN   v27.4h, v27.4s
-        LD1R    {v2.8h}, [x8], 2        // add bias
-
-        SQXTN2  v16.8h, v20.4s
-        SQXTN2  v17.8h, v21.4s
-        SQXTN2  v18.8h, v22.4s
-        SQXTN2  v19.8h, v23.4s
-        SQXTN2  v24.8h, v28.4s
-        SQXTN2  v25.8h, v29.4s
-        SQXTN2  v26.8h, v30.4s
-        SQXTN2  v27.8h, v31.4s
-
-        SQADD   v16.8h, v16.8h, v2.8h
-        SQADD   v17.8h, v17.8h, v2.8h
-        SQADD   v18.8h, v18.8h, v2.8h
-        SQADD   v19.8h, v19.8h, v2.8h
-        SQADD   v24.8h, v24.8h, v2.8h
-        SQADD   v25.8h, v25.8h, v2.8h
-        SQADD   v26.8h, v26.8h, v2.8h
-        SQADD   v27.8h, v27.8h, v2.8h
-        LD1R    {v0.16b}, [x8], 1       // clamp min value
-
-        SQXTN   v4.8b, v16.8h
-        SQXTN   v5.8b, v17.8h
-        SQXTN   v6.8b, v18.8h
-        SQXTN   v7.8b, v19.8h
-        LD1R    {v1.16b}, [x8]          // clamp max value
-        SQXTN2  v4.16b, v24.8h
-        SQXTN2  v5.16b, v25.8h
-        SQXTN2  v6.16b, v26.8h
-        SQXTN2  v7.16b, v27.8h
-
-        SMAX    v4.16b, v4.16b, v0.16b
-        SMAX    v5.16b, v5.16b, v0.16b
-        SMAX    v6.16b, v6.16b, v0.16b
-        SMAX    v7.16b, v7.16b, v0.16b
-        SUBS    x1, x1, 16
-        SMIN    v4.16b, v4.16b, v1.16b
-        SMIN    v5.16b, v5.16b, v1.16b
-        SMIN    v6.16b, v6.16b, v1.16b
-        SMIN    v7.16b, v7.16b, v1.16b
-        B.LO    5f
-
-        # Store full 4 x 16
-        ST1     {v7.16b},  [x7], x10
-        ST1     {v6.16b}, [x17], x10
-        ST1     {v5.16b}, [x16], x10
-        ST1     {v4.16b},  [x6], x10
-
-        SUB     x4, x4, x3              // a -= ks
-
-        # nc loop
-        B.HI    0b
-        RET
 
         # Remainder- 4 bytes of A
-        .p2align 3
-4:
+5:
+        # Is there a remainder?- 4 bytes of A
+        TBZ     x0, 2, 3b
+
         LDR     s0, [x13], 4
         LDR     q4, [x5], 16
         LDR     s1, [x14], 4
         LDR     s2, [x15], 4
-        LDR     s3, [x8], 4
+        LDR     s3,  [x8], 4
         LDR     q5, [x5], 16
         SDOT    v16.4s, v4.16b,  v0.4b[0]
         SDOT    v17.4s, v4.16b,  v1.4b[0]
@@ -379,16 +390,12 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aa
         SDOT    v29.4s, v7.16b, v1.4b[0]
         SDOT    v30.4s, v7.16b, v2.4b[0]
         SDOT    v31.4s, v7.16b, v3.4b[0]
-
-        # ks loop
-        SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
-        B.HI    1b
         B       3b
 
         # Store odd width
         .p2align 3
-5:
-        TBZ     x1, 3, 6f
+6:
+        TBZ     x1, 3, 7f
         STR     d7, [x7], 8
         DUP     d7, v7.d[1]
         STR     d6, [x17], 8
@@ -397,8 +404,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aa
         DUP     d5, v5.d[1]
         STR     d4, [x6], 8
         DUP     d4, v4.d[1]
-6:
-        TBZ     x1, 2, 7f
+7:
+        TBZ     x1, 2, 8f
         STR     s7, [x7], 4
         DUP     s7, v7.s[1]
         STR     s6, [x17], 4
@@ -407,8 +414,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aa
         DUP     s5, v5.s[1]
         STR     s4, [x6], 4
         DUP     s4, v4.s[1]
-7:
-        TBZ     x1, 1, 8f
+8:
+        TBZ     x1, 1, 9f
         ST1     {v7.h}[0], [x7], 2
         DUP     h7, v7.h[1]
         ST1     {v6.h}[0], [x17], 2
@@ -417,16 +424,16 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aa
         DUP     h5, v5.h[1]
         ST1     {v4.h}[0], [x6], 2
         DUP     h4, v4.h[1]
-8:
-        TBZ     x1, 0, 9f
+9:
+        TBZ     x1, 0, 10f
         ST1     {v7.b}[0], [x7]
         ST1     {v6.b}[0], [x17]
         ST1     {v5.b}[0], [x16]
         ST1     {v4.b}[0], [x6]
-9:
+10:
         RET
 
-END_FUNCTION xnn_qs8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld64
+END_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

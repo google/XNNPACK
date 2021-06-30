@@ -21,7 +21,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params"
 #     const union ${CONV_PARAMS} params)  [sp + 8] -> x11
 
 $if REQUANTIZATION == "GEMMLOWP":
-  # params structure is 11 bytes
+  # params structure is 12 bytes
   #  struct {
   #    int32_t multiplier;
   #    int32_t right_shift;
