@@ -7,6 +7,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #include <xnnpack/assembly.h>
 
 # void xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lane_cortex_a53(
@@ -68,7 +69,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lane
         LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
-        LDR     x11, [sp, 8]            // params
+        LDR     x11, [sp, 8]            // reload params
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
         SUBS    x0, x2, 8               // k = kc - 8

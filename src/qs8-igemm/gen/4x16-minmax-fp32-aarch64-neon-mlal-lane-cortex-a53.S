@@ -1,16 +1,16 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-igemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
 
-$DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-# void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53(
+# void xnn_qs8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_cortex_a53(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -40,7 +40,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_
 # unused  v8 v9 v10 v11 v12 v13 v14 v15
 # x8, x21 temp for Cortex-A53 loads
 
-BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
+BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_cortex_a53
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
@@ -123,30 +123,18 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x
 2:
         SMLAL   v16.4s, v4.4h, v0.h[0]
         SMLAL2  v20.4s, v4.8h, v0.h[0]
-        $if PREFETCH:
-          PRFM    PLDL1KEEP, [x13, 128]
         SMLAL   v17.4s, v4.4h, v1.h[0]
         SMLAL2  v21.4s, v4.8h, v1.h[0]
-        $if PREFETCH:
-          PRFM    PLDL1KEEP, [x14, 128]
         SMLAL   v18.4s, v4.4h, v2.h[0]
         SMLAL2  v22.4s, v4.8h, v2.h[0]
-        $if PREFETCH:
-          PRFM    PLDL1KEEP, [x15, 128]
         SMLAL   v19.4s, v4.4h, v3.h[0]
         SMLAL2  v23.4s, v4.8h, v3.h[0]
-        $if PREFETCH:
-          PRFM    PLDL1KEEP, [x20, 128]
         LDR     d4, [x5, 24]
         INS     v5.d[0], x8
         SMLAL   v24.4s, v6.4h, v0.h[0]
         SMLAL2  v28.4s, v6.8h, v0.h[0]
-        $if PREFETCH:
-          PRFM    PLDL1KEEP, [x5, 448]
         SMLAL   v25.4s, v6.4h, v1.h[0]
         SMLAL2  v29.4s, v6.8h, v1.h[0]
-        $if PREFETCH:
-          PRFM    PLDL1KEEP, [x5, 512]
         SXTL    v5.8h, v5.8b
         SMLAL   v26.4s, v6.4h, v2.h[0]
         SMLAL2  v30.4s, v6.8h, v2.h[0]
@@ -496,163 +484,58 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x
         SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
         B.HI    1b
 
-        $if REQUANTIZATION == "GEMMLOWP":
-          # Apply params - scale, shift, bias and clamp
-          LD2R    {v0.4s, v1.4s}, [x8], 8
-          CMEQ    v2.4s, v1.4s, 0
+        # Apply params - scale, bias and clamp
+        LD1R    {v0.4s}, [x8], 4
+        SCVTF   v16.4s, v16.4s
+        SCVTF   v17.4s, v17.4s
+        SCVTF   v18.4s, v18.4s
+        SCVTF   v19.4s, v19.4s
+        SCVTF   v20.4s, v20.4s
+        SCVTF   v21.4s, v21.4s
+        SCVTF   v22.4s, v22.4s
+        SCVTF   v23.4s, v23.4s
+        SCVTF   v24.4s, v24.4s
+        SCVTF   v25.4s, v25.4s
+        SCVTF   v26.4s, v26.4s
+        SCVTF   v27.4s, v27.4s
+        SCVTF   v28.4s, v28.4s
+        SCVTF   v29.4s, v29.4s
+        SCVTF   v30.4s, v30.4s
+        SCVTF   v31.4s, v31.4s
 
-          BIC     v4.16b, v16.16b, v2.16b
-          BIC     v5.16b, v17.16b, v2.16b
-          BIC     v6.16b, v18.16b, v2.16b
-          BIC     v7.16b, v19.16b, v2.16b
+        FMUL    v16.4s, v16.4s, v0.4s
+        FMUL    v17.4s, v17.4s, v0.4s
+        FMUL    v18.4s, v18.4s, v0.4s
+        FMUL    v19.4s, v19.4s, v0.4s
+        FMUL    v20.4s, v20.4s, v0.4s
+        FMUL    v21.4s, v21.4s, v0.4s
+        FMUL    v22.4s, v22.4s, v0.4s
+        FMUL    v23.4s, v23.4s, v0.4s
+        FMUL    v24.4s, v24.4s, v0.4s
+        FMUL    v25.4s, v25.4s, v0.4s
+        FMUL    v26.4s, v26.4s, v0.4s
+        FMUL    v27.4s, v27.4s, v0.4s
+        FMUL    v28.4s, v28.4s, v0.4s
+        FMUL    v29.4s, v29.4s, v0.4s
+        FMUL    v30.4s, v30.4s, v0.4s
+        FMUL    v31.4s, v31.4s, v0.4s
 
-          SQRDMULH v16.4s, v16.4s, v0.4s
-          SQRDMULH v17.4s, v17.4s, v0.4s
-          SQRDMULH v18.4s, v18.4s, v0.4s
-          SQRDMULH v19.4s, v19.4s, v0.4s
-
-          SSRA    v16.4s, v4.4s, 31       // signed shift right accumulate
-          SSRA    v17.4s, v5.4s, 31
-          SSRA    v18.4s, v6.4s, 31
-          SSRA    v19.4s, v7.4s, 31
-
-          BIC     v4.16b, v20.16b, v2.16b
-          BIC     v5.16b, v21.16b, v2.16b
-          BIC     v6.16b, v22.16b, v2.16b
-          BIC     v7.16b, v23.16b, v2.16b
-
-          SQRDMULH v20.4s, v20.4s, v0.4s
-          SQRDMULH v21.4s, v21.4s, v0.4s
-          SQRDMULH v22.4s, v22.4s, v0.4s
-          SQRDMULH v23.4s, v23.4s, v0.4s
-
-          SSRA    v20.4s, v4.4s, 31
-          SSRA    v21.4s, v5.4s, 31
-          SSRA    v22.4s, v6.4s, 31
-          SSRA    v23.4s, v7.4s, 31
-
-          BIC     v4.16b, v24.16b, v2.16b
-          BIC     v5.16b, v25.16b, v2.16b
-          BIC     v6.16b, v26.16b, v2.16b
-          BIC     v7.16b, v27.16b, v2.16b
-
-          SQRDMULH v24.4s, v24.4s, v0.4s
-          SQRDMULH v25.4s, v25.4s, v0.4s
-          SQRDMULH v26.4s, v26.4s, v0.4s
-          SQRDMULH v27.4s, v27.4s, v0.4s
-
-          SSRA    v24.4s, v4.4s, 31
-          SSRA    v25.4s, v5.4s, 31
-          SSRA    v26.4s, v6.4s, 31
-          SSRA    v27.4s, v7.4s, 31
-
-          BIC     v4.16b, v28.16b, v2.16b
-          BIC     v5.16b, v29.16b, v2.16b
-          BIC     v6.16b, v30.16b, v2.16b
-          BIC     v7.16b, v31.16b, v2.16b
-
-          SQRDMULH v28.4s, v28.4s, v0.4s
-          SQRDMULH v29.4s, v29.4s, v0.4s
-          SQRDMULH v30.4s, v30.4s, v0.4s
-          SQRDMULH v31.4s, v31.4s, v0.4s
-
-          SSRA    v28.4s, v4.4s, 31
-          SSRA    v29.4s, v5.4s, 31
-          SSRA    v30.4s, v6.4s, 31
-          SSRA    v31.4s, v7.4s, 31
-
-          SRSHL   v16.4s, v16.4s, v1.4s   // signed rounding shift left
-          SRSHL   v17.4s, v17.4s, v1.4s
-          SRSHL   v18.4s, v18.4s, v1.4s
-          SRSHL   v19.4s, v19.4s, v1.4s
-          SRSHL   v20.4s, v20.4s, v1.4s
-          SRSHL   v21.4s, v21.4s, v1.4s
-          SRSHL   v22.4s, v22.4s, v1.4s
-          SRSHL   v23.4s, v23.4s, v1.4s
-          SRSHL   v24.4s, v24.4s, v1.4s
-          SRSHL   v25.4s, v25.4s, v1.4s
-          SRSHL   v26.4s, v26.4s, v1.4s
-          SRSHL   v27.4s, v27.4s, v1.4s
-          SRSHL   v28.4s, v28.4s, v1.4s
-          SRSHL   v29.4s, v29.4s, v1.4s
-          SRSHL   v30.4s, v30.4s, v1.4s
-          SRSHL   v31.4s, v31.4s, v1.4s
-        $elif REQUANTIZATION == "FP32":
-          $if CHANNELWISE:
-            # Load per channel scale values from weights
-            LDP     q0, q1, [x5], 32
-          $else:
-            # Apply params - scale, bias and clamp
-            LD1R    {v0.4s}, [x8], 4
-          SCVTF   v16.4s, v16.4s
-          SCVTF   v17.4s, v17.4s
-          SCVTF   v18.4s, v18.4s
-          SCVTF   v19.4s, v19.4s
-          SCVTF   v20.4s, v20.4s
-          SCVTF   v21.4s, v21.4s
-          SCVTF   v22.4s, v22.4s
-          SCVTF   v23.4s, v23.4s
-          SCVTF   v24.4s, v24.4s
-          SCVTF   v25.4s, v25.4s
-          SCVTF   v26.4s, v26.4s
-          SCVTF   v27.4s, v27.4s
-          SCVTF   v28.4s, v28.4s
-          SCVTF   v29.4s, v29.4s
-          SCVTF   v30.4s, v30.4s
-          SCVTF   v31.4s, v31.4s
-
-          $if CHANNELWISE:
-            LDP     q2, q3, [x5], 32
-            FMUL    v16.4s, v16.4s, v0.4s
-            FMUL    v17.4s, v17.4s, v0.4s
-            FMUL    v18.4s, v18.4s, v0.4s
-            FMUL    v19.4s, v19.4s, v0.4s
-            FMUL    v20.4s, v20.4s, v1.4s
-            FMUL    v21.4s, v21.4s, v1.4s
-            FMUL    v22.4s, v22.4s, v1.4s
-            FMUL    v23.4s, v23.4s, v1.4s
-            FMUL    v24.4s, v24.4s, v2.4s
-            FMUL    v25.4s, v25.4s, v2.4s
-            FMUL    v26.4s, v26.4s, v2.4s
-            FMUL    v27.4s, v27.4s, v2.4s
-            FMUL    v28.4s, v28.4s, v3.4s
-            FMUL    v29.4s, v29.4s, v3.4s
-            FMUL    v30.4s, v30.4s, v3.4s
-            FMUL    v31.4s, v31.4s, v3.4s
-          $else:
-            FMUL    v16.4s, v16.4s, v0.4s
-            FMUL    v17.4s, v17.4s, v0.4s
-            FMUL    v18.4s, v18.4s, v0.4s
-            FMUL    v19.4s, v19.4s, v0.4s
-            FMUL    v20.4s, v20.4s, v0.4s
-            FMUL    v21.4s, v21.4s, v0.4s
-            FMUL    v22.4s, v22.4s, v0.4s
-            FMUL    v23.4s, v23.4s, v0.4s
-            FMUL    v24.4s, v24.4s, v0.4s
-            FMUL    v25.4s, v25.4s, v0.4s
-            FMUL    v26.4s, v26.4s, v0.4s
-            FMUL    v27.4s, v27.4s, v0.4s
-            FMUL    v28.4s, v28.4s, v0.4s
-            FMUL    v29.4s, v29.4s, v0.4s
-            FMUL    v30.4s, v30.4s, v0.4s
-            FMUL    v31.4s, v31.4s, v0.4s
-
-          FCVTNS  v16.4s, v16.4s
-          FCVTNS  v17.4s, v17.4s
-          FCVTNS  v18.4s, v18.4s
-          FCVTNS  v19.4s, v19.4s
-          FCVTNS  v20.4s, v20.4s
-          FCVTNS  v21.4s, v21.4s
-          FCVTNS  v22.4s, v22.4s
-          FCVTNS  v23.4s, v23.4s
-          FCVTNS  v24.4s, v24.4s
-          FCVTNS  v25.4s, v25.4s
-          FCVTNS  v26.4s, v26.4s
-          FCVTNS  v27.4s, v27.4s
-          FCVTNS  v28.4s, v28.4s
-          FCVTNS  v29.4s, v29.4s
-          FCVTNS  v30.4s, v30.4s
-          FCVTNS  v31.4s, v31.4s
+        FCVTNS  v16.4s, v16.4s
+        FCVTNS  v17.4s, v17.4s
+        FCVTNS  v18.4s, v18.4s
+        FCVTNS  v19.4s, v19.4s
+        FCVTNS  v20.4s, v20.4s
+        FCVTNS  v21.4s, v21.4s
+        FCVTNS  v22.4s, v22.4s
+        FCVTNS  v23.4s, v23.4s
+        FCVTNS  v24.4s, v24.4s
+        FCVTNS  v25.4s, v25.4s
+        FCVTNS  v26.4s, v26.4s
+        FCVTNS  v27.4s, v27.4s
+        FCVTNS  v28.4s, v28.4s
+        FCVTNS  v29.4s, v29.4s
+        FCVTNS  v30.4s, v30.4s
+        FCVTNS  v31.4s, v31.4s
 
         SQXTN   v16.4h, v16.4s
         SQXTN   v17.4h, v17.4s
@@ -692,13 +575,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x
         SQXTN2  v5.16b, v25.8h
         SQXTN2  v6.16b, v26.8h
         SQXTN2  v7.16b, v27.8h
-        $if REQUANTIZATION == "GEMMLOWP":
-          SUB     x8, x8, 11              // rewind params pointer
-        $elif REQUANTIZATION == "FP32":
-          $if CHANNELWISE:
-            SUB     x8, x8, 3               // rewind params pointer
-          $else:
-            SUB     x8, x8, 7               // rewind params pointer
+        SUB     x8, x8, 7               // rewind params pointer
 
         SMAX    v4.16b, v4.16b, v0.16b
         SMAX    v5.16b, v5.16b, v0.16b
@@ -932,7 +809,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x
         LDP     x20, x21, [sp], 16
         RET
 
-END_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
+END_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
