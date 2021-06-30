@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
 $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8
 $assert KERNEL_TILE >= 2
@@ -14,7 +15,8 @@ $assert KERNEL_TILE >= 2
 #include <xnnpack/dwconv.h>
 
 
-void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wasmsimd_mul16(
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_wasmsimd"
+void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wasmsimd_mul16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -64,41 +66,74 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wa
 
       w = (const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${KERNEL_TILE * CHANNEL_TILE} * sizeof(int8_t));
 
-      $for C in range(0, CHANNEL_TILE, 4):
-        const v128_t vsign${ABC[C:C+4]} = wasm_i32x4_shr(vacc${ABC[C:C+4]}, 31);
+      $if REQUANTIZATION == "GEMMLOWP":
+        $for C in range(0, CHANNEL_TILE, 4):
+          const v128_t vsign${ABC[C:C+4]} = wasm_i32x4_shr(vacc${ABC[C:C+4]}, 31);
 
-      $for C in range(0, CHANNEL_TILE, 4):
-        const v128_t vacc${ABC[C:C+2]} = wasm_v32x4_shuffle(vacc${ABC[C:C+4]}, vsign${ABC[C:C+4]}, 0, 4, 1, 5);
-        const v128_t vacc${ABC[C+2:C+4]} = wasm_v32x4_shuffle(vacc${ABC[C:C+4]}, vsign${ABC[C:C+4]}, 2, 6, 3, 7);
+        $for C in range(0, CHANNEL_TILE, 4):
+          const v128_t vacc${ABC[C:C+2]} = wasm_v32x4_shuffle(vacc${ABC[C:C+4]}, vsign${ABC[C:C+4]}, 0, 4, 1, 5);
+          const v128_t vacc${ABC[C+2:C+4]} = wasm_v32x4_shuffle(vacc${ABC[C:C+4]}, vsign${ABC[C:C+4]}, 2, 6, 3, 7);
 
-      const v128_t vmultiplier = wasm_v128_load(params->gemmlowp_wasmsimd.multiplier);
-      const v128_t vrounding = wasm_v128_load(params->gemmlowp_wasmsimd.rounding);
-      $for C in range(0, CHANNEL_TILE, 2):
-        const v128_t vprod${ABC[C:C+2]} = wasm_i64x2_add(wasm_i64x2_mul(vacc${ABC[C:C+2]}, vmultiplier), vrounding);
+        const v128_t vmultiplier = wasm_v128_load(params->${PARAMS_STRUCT}.multiplier);
+        const v128_t vrounding = wasm_v128_load(params->${PARAMS_STRUCT}.rounding);
+        $for C in range(0, CHANNEL_TILE, 2):
+          const v128_t vprod${ABC[C:C+2]} = wasm_i64x2_add(wasm_i64x2_mul(vacc${ABC[C:C+2]}, vmultiplier), vrounding);
 
-      $for C in range(0, CHANNEL_TILE, 4):
-        const v128_t vq31prod${ABC[C:C+4]} = wasm_v32x4_shuffle(vprod${ABC[C:C+2]}, vprod${ABC[C+2:C+4]}, 1, 3, 5, 7);
+        $for C in range(0, CHANNEL_TILE, 4):
+          const v128_t vq31prod${ABC[C:C+4]} = wasm_v32x4_shuffle(vprod${ABC[C:C+2]}, vprod${ABC[C+2:C+4]}, 1, 3, 5, 7);
 
-      const v128_t vremainder_mask = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_mask);
-      $for C in range(0, CHANNEL_TILE, 4):
-        const v128_t vrem${ABC[C:C+4]} = wasm_i32x4_add(wasm_v128_and(vq31prod${ABC[C:C+4]}, vremainder_mask), wasm_i32x4_shr(vq31prod${ABC[C:C+4]}, 31));
+        const v128_t vremainder_mask = wasm_v128_load(params->${PARAMS_STRUCT}.remainder_mask);
+        $for C in range(0, CHANNEL_TILE, 4):
+          const v128_t vrem${ABC[C:C+4]} = wasm_i32x4_add(wasm_v128_and(vq31prod${ABC[C:C+4]}, vremainder_mask), wasm_i32x4_shr(vq31prod${ABC[C:C+4]}, 31));
 
-      const v128_t vthreshold = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_threshold);
-      const int32_t vshift = params->gemmlowp_wasmsimd.shift;
-      $for C in range(0, CHANNEL_TILE, 4):
-        vacc${ABC[C:C+4]} = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod${ABC[C:C+4]}, vshift), wasm_i32x4_gt(vrem${ABC[C:C+4]}, vthreshold));
+        const v128_t vthreshold = wasm_v128_load(params->${PARAMS_STRUCT}.remainder_threshold);
+        const int32_t vshift = params->${PARAMS_STRUCT}.shift;
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod${ABC[C:C+4]}, vshift), wasm_i32x4_gt(vrem${ABC[C:C+4]}, vthreshold));
 
-      const v128_t voutput_zero_point = wasm_v128_load(params->gemmlowp_wasmsimd.output_zero_point);
-      $for C in range(0, CHANNEL_TILE, 8):
-        v128_t vout${ABC[C:C+8]} = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc${ABC[C:C+4]}, vacc${ABC[C+4:C+8]}), voutput_zero_point);
+        const v128_t voutput_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_zero_point);
+        $for C in range(0, CHANNEL_TILE, 8):
+          v128_t vout${ABC[C:C+8]} = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc${ABC[C:C+4]}, vacc${ABC[C+4:C+8]}), voutput_zero_point);
 
-      const v128_t voutput_min = wasm_v128_load(params->gemmlowp_wasmsimd.output_min);
-      const v128_t voutput_max = wasm_v128_load(params->gemmlowp_wasmsimd.output_max);
-      $for C in range(0, CHANNEL_TILE, 16):
-        $if C + 8 < CHANNEL_TILE:
-          v128_t vout${ABC[C:C+16]} = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout${ABC[C:C+8]}, vout${ABC[C+8:C+16]}), voutput_min), voutput_max);
-        $else:
-          v128_t vout${ABC[C:C+8]}${ABC[C:C+8]} = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout${ABC[C:C+8]}, vout${ABC[C:C+8]}), voutput_min), voutput_max);
+        const v128_t voutput_min = wasm_v128_load(params->${PARAMS_STRUCT}.output_min);
+        const v128_t voutput_max = wasm_v128_load(params->${PARAMS_STRUCT}.output_max);
+        $for C in range(0, CHANNEL_TILE, 16):
+          $if C + 8 < CHANNEL_TILE:
+            v128_t vout${ABC[C:C+16]} = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout${ABC[C:C+8]}, vout${ABC[C+8:C+16]}), voutput_min), voutput_max);
+          $else:
+            v128_t vout${ABC[C:C+8]}${ABC[C:C+8]} = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout${ABC[C:C+8]}, vout${ABC[C:C+8]}), voutput_min), voutput_max);
+      $elif REQUANTIZATION == "FP32":
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = wasm_f32x4_convert_i32x4(vacc${ABC[C:C+4]});
+
+        const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = wasm_f32x4_mul(vacc${ABC[C:C+4]}, vscale);
+
+        const v128_t voutput_min_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_min_less_zero_point);
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = wasm_f32x4_max(vacc${ABC[C:C+4]}, voutput_min_less_zero_point);
+
+        const v128_t voutput_max_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_max_less_zero_point);
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = wasm_f32x4_min(vacc${ABC[C:C+4]}, voutput_max_less_zero_point);
+
+        const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = wasm_f32x4_add(vacc${ABC[C:C+4]}, vmagic_bias);
+
+        const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = wasm_i32x4_sub(vacc${ABC[C:C+4]}, vmagic_bias_less_output_zero_point);
+
+        $for C in range(0, CHANNEL_TILE, 8):
+          v128_t vout${ABC[C:C+8]} = wasm_v16x8_shuffle(vacc${ABC[C:C+4]}, vacc${ABC[C+4:C+8]}, 0, 2, 4, 6, 8, 10, 12, 14);
+
+        $for C in range(0, CHANNEL_TILE, 16):
+          $if C + 8 < CHANNEL_TILE:
+            v128_t vout${ABC[C:C+16]} = wasm_v8x16_shuffle(vout${ABC[C:C+8]}, vout${ABC[C+8:C+16]}, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30);
+          $else:
+            v128_t vout${ABC[C:C+8]}${ABC[C:C+8]} = wasm_v8x16_shuffle(vout${ABC[C:C+8]}, vout${ABC[C:C+8]}, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
 
       $if CHANNEL_TILE > 8:
         wasm_v128_store(output, vout${ABC[0:16]});
@@ -140,39 +175,66 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wa
           w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
           k += 8;
 
-      const v128_t vsign${ABC[0:4]} = wasm_i32x4_shr(vacc${ABC[0:4]}, 31);
-      const v128_t vsign${ABC[4:8]} = wasm_i32x4_shr(vacc${ABC[4:8]}, 31);
+      $if REQUANTIZATION == "GEMMLOWP":
+        const v128_t vsign${ABC[0:4]} = wasm_i32x4_shr(vacc${ABC[0:4]}, 31);
+        const v128_t vsign${ABC[4:8]} = wasm_i32x4_shr(vacc${ABC[4:8]}, 31);
 
-      const v128_t vacc${ABC[0:2]} = wasm_v32x4_shuffle(vacc${ABC[0:4]}, vsign${ABC[0:4]}, 0, 4, 1, 5);
-      const v128_t vacc${ABC[2:4]} = wasm_v32x4_shuffle(vacc${ABC[0:4]}, vsign${ABC[0:4]}, 2, 6, 3, 7);
-      const v128_t vacc${ABC[4:6]} = wasm_v32x4_shuffle(vacc${ABC[4:8]}, vsign${ABC[4:8]}, 0, 4, 1, 5);
-      const v128_t vacc${ABC[6:8]} = wasm_v32x4_shuffle(vacc${ABC[4:8]}, vsign${ABC[4:8]}, 2, 6, 3, 7);
+        const v128_t vacc${ABC[0:2]} = wasm_v32x4_shuffle(vacc${ABC[0:4]}, vsign${ABC[0:4]}, 0, 4, 1, 5);
+        const v128_t vacc${ABC[2:4]} = wasm_v32x4_shuffle(vacc${ABC[0:4]}, vsign${ABC[0:4]}, 2, 6, 3, 7);
+        const v128_t vacc${ABC[4:6]} = wasm_v32x4_shuffle(vacc${ABC[4:8]}, vsign${ABC[4:8]}, 0, 4, 1, 5);
+        const v128_t vacc${ABC[6:8]} = wasm_v32x4_shuffle(vacc${ABC[4:8]}, vsign${ABC[4:8]}, 2, 6, 3, 7);
 
-      const v128_t vmultiplier = wasm_v128_load(params->gemmlowp_wasmsimd.multiplier);
-      const v128_t vrounding = wasm_v128_load(params->gemmlowp_wasmsimd.rounding);
-      const v128_t vprod${ABC[0:2]} = wasm_i64x2_add(wasm_i64x2_mul(vacc${ABC[0:2]}, vmultiplier), vrounding);
-      const v128_t vprod${ABC[2:4]} = wasm_i64x2_add(wasm_i64x2_mul(vacc${ABC[2:4]}, vmultiplier), vrounding);
-      const v128_t vprod${ABC[4:6]} = wasm_i64x2_add(wasm_i64x2_mul(vacc${ABC[4:6]}, vmultiplier), vrounding);
-      const v128_t vprod${ABC[6:8]} = wasm_i64x2_add(wasm_i64x2_mul(vacc${ABC[6:8]}, vmultiplier), vrounding);
+        const v128_t vmultiplier = wasm_v128_load(params->${PARAMS_STRUCT}.multiplier);
+        const v128_t vrounding = wasm_v128_load(params->${PARAMS_STRUCT}.rounding);
+        const v128_t vprod${ABC[0:2]} = wasm_i64x2_add(wasm_i64x2_mul(vacc${ABC[0:2]}, vmultiplier), vrounding);
+        const v128_t vprod${ABC[2:4]} = wasm_i64x2_add(wasm_i64x2_mul(vacc${ABC[2:4]}, vmultiplier), vrounding);
+        const v128_t vprod${ABC[4:6]} = wasm_i64x2_add(wasm_i64x2_mul(vacc${ABC[4:6]}, vmultiplier), vrounding);
+        const v128_t vprod${ABC[6:8]} = wasm_i64x2_add(wasm_i64x2_mul(vacc${ABC[6:8]}, vmultiplier), vrounding);
 
-      const v128_t vq31prod${ABC[0:4]} = wasm_v32x4_shuffle(vprod${ABC[0:2]}, vprod${ABC[2:4]}, 1, 3, 5, 7);
-      const v128_t vq31prod${ABC[4:8]} = wasm_v32x4_shuffle(vprod${ABC[4:6]}, vprod${ABC[6:8]}, 1, 3, 5, 7);
+        const v128_t vq31prod${ABC[0:4]} = wasm_v32x4_shuffle(vprod${ABC[0:2]}, vprod${ABC[2:4]}, 1, 3, 5, 7);
+        const v128_t vq31prod${ABC[4:8]} = wasm_v32x4_shuffle(vprod${ABC[4:6]}, vprod${ABC[6:8]}, 1, 3, 5, 7);
 
-      const v128_t vremainder_mask = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_mask);
-      const v128_t vrem${ABC[0:4]} = wasm_i32x4_add(wasm_v128_and(vq31prod${ABC[0:4]}, vremainder_mask), wasm_i32x4_shr(vq31prod${ABC[0:4]}, 31));
-      const v128_t vrem${ABC[4:8]} = wasm_i32x4_add(wasm_v128_and(vq31prod${ABC[4:8]}, vremainder_mask), wasm_i32x4_shr(vq31prod${ABC[4:8]}, 31));
+        const v128_t vremainder_mask = wasm_v128_load(params->${PARAMS_STRUCT}.remainder_mask);
+        const v128_t vrem${ABC[0:4]} = wasm_i32x4_add(wasm_v128_and(vq31prod${ABC[0:4]}, vremainder_mask), wasm_i32x4_shr(vq31prod${ABC[0:4]}, 31));
+        const v128_t vrem${ABC[4:8]} = wasm_i32x4_add(wasm_v128_and(vq31prod${ABC[4:8]}, vremainder_mask), wasm_i32x4_shr(vq31prod${ABC[4:8]}, 31));
 
-      const v128_t vthreshold = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_threshold);
-      const int32_t vshift = params->gemmlowp_wasmsimd.shift;
-      vacc${ABC[0:4]} = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod${ABC[0:4]}, vshift), wasm_i32x4_gt(vrem${ABC[0:4]}, vthreshold));
-      vacc${ABC[4:8]} = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod${ABC[4:8]}, vshift), wasm_i32x4_gt(vrem${ABC[4:8]}, vthreshold));
+        const v128_t vthreshold = wasm_v128_load(params->${PARAMS_STRUCT}.remainder_threshold);
+        const int32_t vshift = params->${PARAMS_STRUCT}.shift;
+        vacc${ABC[0:4]} = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod${ABC[0:4]}, vshift), wasm_i32x4_gt(vrem${ABC[0:4]}, vthreshold));
+        vacc${ABC[4:8]} = wasm_i32x4_sub(wasm_i32x4_shr(vq31prod${ABC[4:8]}, vshift), wasm_i32x4_gt(vrem${ABC[4:8]}, vthreshold));
 
-      const v128_t voutput_zero_point = wasm_v128_load(params->gemmlowp_wasmsimd.output_zero_point);
-      v128_t vout${ABC[0:8]} = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc${ABC[0:4]}, vacc${ABC[4:8]}), voutput_zero_point);
+        const v128_t voutput_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_zero_point);
+        v128_t vout${ABC[0:8]} = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc${ABC[0:4]}, vacc${ABC[4:8]}), voutput_zero_point);
 
-      const v128_t voutput_min = wasm_v128_load(params->gemmlowp_wasmsimd.output_min);
-      const v128_t voutput_max = wasm_v128_load(params->gemmlowp_wasmsimd.output_max);
-      v128_t vout${ABC[0:8]}${ABC[0:8]} = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout${ABC[0:8]}, vout${ABC[0:8]}), voutput_min), voutput_max);
+        const v128_t voutput_min = wasm_v128_load(params->${PARAMS_STRUCT}.output_min);
+        const v128_t voutput_max = wasm_v128_load(params->${PARAMS_STRUCT}.output_max);
+        v128_t vout${ABC[0:8]}${ABC[0:8]} = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout${ABC[0:8]}, vout${ABC[0:8]}), voutput_min), voutput_max);
+      $elif REQUANTIZATION == "FP32":
+        vacc${ABC[0:4]} = wasm_f32x4_convert_i32x4(vacc${ABC[0:4]});
+        vacc${ABC[4:8]} = wasm_f32x4_convert_i32x4(vacc${ABC[4:8]});
+
+        const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
+        vacc${ABC[0:4]} = wasm_f32x4_mul(vacc${ABC[0:4]}, vscale);
+        vacc${ABC[4:8]} = wasm_f32x4_mul(vacc${ABC[4:8]}, vscale);
+
+        const v128_t voutput_min_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_min_less_zero_point);
+        vacc${ABC[0:4]} = wasm_f32x4_max(vacc${ABC[0:4]}, voutput_min_less_zero_point);
+        vacc${ABC[4:8]} = wasm_f32x4_max(vacc${ABC[4:8]}, voutput_min_less_zero_point);
+
+        const v128_t voutput_max_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_max_less_zero_point);
+        vacc${ABC[0:4]} = wasm_f32x4_min(vacc${ABC[0:4]}, voutput_max_less_zero_point);
+        vacc${ABC[4:8]} = wasm_f32x4_min(vacc${ABC[4:8]}, voutput_max_less_zero_point);
+
+        const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
+        vacc${ABC[0:4]} = wasm_f32x4_add(vacc${ABC[0:4]}, vmagic_bias);
+        vacc${ABC[4:8]} = wasm_f32x4_add(vacc${ABC[4:8]}, vmagic_bias);
+
+        const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
+        vacc${ABC[0:4]} = wasm_i32x4_sub(vacc${ABC[0:4]}, vmagic_bias_less_output_zero_point);
+        vacc${ABC[4:8]} = wasm_i32x4_sub(vacc${ABC[4:8]}, vmagic_bias_less_output_zero_point);
+
+        v128_t vout${ABC[0:8]} = wasm_v16x8_shuffle(vacc${ABC[0:4]}, vacc${ABC[4:8]}, 0, 2, 4, 6, 8, 10, 12, 14);
+        v128_t vout${ABC[0:8]}${ABC[0:8]} = wasm_v8x16_shuffle(vout${ABC[0:8]}, vout${ABC[0:8]}, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
 
       $if CHANNEL_TILE > 8:
         if XNN_LIKELY(c >= 8) {
