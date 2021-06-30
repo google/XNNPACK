@@ -1,8 +1,8 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in
+//   Template: src/qs8-igemm/4x16c4-aarch64-neondot-ld64.S.in
 //   Generator: tools/xngen
 //
-// Copyright 2020 Google LLC
+// Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -10,54 +10,52 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64(
+# void xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
-#     const int8_t* restrict a,  x3
-#     size_t a_stride,           x4
-#     const void* restrict w,    x5
+#     size_t ks,                 x3 / x9
+#     const int8_t**restrict a,  x4
+#     const int8_t* restrict w,  x5
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
-#     size_t cn_stride,          [sp] -> x12
-#     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x11
+#     size_t cn_stride,                  [sp] -> x10
+#     size_t a_offset,                   [sp + 8] -> x11
+#     const float* zero,                 [sp + 16] -> x12
+#     const union xnn_qs8_minmax_params params [sp + 24] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0  x3 v0
-# A1 x15 v1
-# A2 x13 v2
-# A3  x4 v3
-# B   x5 v4  v5  v6  v7
-# C0  x6 v16 v20 v24 v28
-# C1  x8 v17 v21 v25 v29
-# C2  x9 v18 v22 v26 v30
-# C3  x7 v19 v23 v27 v31
+# A0  x13  v0
+# A1  x14  v1
+# A2  x15  v2
+# A3   x8  v3
+# B    x5  v4  v5  v6  v7
+# C0   x6 v16 v20 v24 v28
+# C1  x16 v17 v21 v25 v29
+# C2  x17 v18 v22 v26 v30
+# C3   x7 v19 v23 v27 v31
 # unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
+BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
 
-        # Clamp A and C pointers
+        # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
+        LDP     x10, x11, [sp]          // Load cn_stride, a_offset
+        ADD     x16, x6, x7             // c1 = c0 + cm_stride
+        CSEL    x16, x6,  x16, LO       //   c1 = c0
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
-        ADD     x15, x3, x4             // a1 = a0 + a_stride
-        ADD     x8, x6, x7              // c1 = c0 + cm_stride
-        CSEL    x15, x3, x15, LO        //   a1 = a0
-        CSEL    x8, x6,  x8, LO         //   c1 = c0
+
+        ADD     x17, x16, x7            // c2 = c1 + cm_stride
+        LDR     x12, [sp, 16]           // Load zero pointer
+                                        // if mr <= 2
+        CSEL    x17, x16, x17, LS       //   c2 = c1
         BIC     x2, x2, 3
 
-        ADD     x13, x15, x4            // a2 = a1 + a_stride
-        ADD     x9,  x8, x7             // c2 = c1 + cm_stride
-                                        // if mr <= 2
-        CSEL    x13, x15, x13, LS       //   a2 = a1
-        CSEL    x9,  x8,  x9, LS        //   c2 = c1
-
         CMP     x0, 4                   // if mr < 4
-        ADD     x4, x13, x4             // a3 = a2 + a_stride
-        ADD     x7,  x9, x7             // c3 = c2 + cm_stride
-        CSEL    x4, x13, x4, LO         //   a3 = a2
-        CSEL    x7,  x9, x7, LO         //   c3 = c2
+        ADD     x7,  x17, x7            // c3 = c2 + cm_stride
+        CSEL    x7,  x17, x7, LO        //   c3 = c2
 
         .p2align 3
 0:
@@ -68,27 +66,47 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
-        LDR     x11, [sp, 8]            // reload params
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
-        SUBS    x0, x2, 8               // k = kc - 8
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
         MOV     v27.16b, v24.16b
         MOV     v29.16b, v28.16b
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
-        # Is there at least 8 bytes?
-        B.LO    3f
+        MOV     x9, x3                  // p = ks
+
+        .p2align 3
+1:
+        # Load next 4 A pointers
+        LDP     x13, x14, [x4], 16
+        LDP     x15, x8, [x4], 16
+
+        CMP     x13, x12                // if a0 == zero
+        ADD     x13, x13, x11           // a0 += a_offset
+        CSEL    x13, x12, x13, EQ       //   a0 = zero, else += a0 + a_offset
+        CMP     x14, x12                // if a1 == zero
+        ADD     x14, x14, x11           // a1 += a_offset
+        CSEL    x14, x12, x14, EQ       //   a1 = zero, else += a1 + a_offset
+        CMP     x15, x12                // if a2 == zero
+        ADD     x15, x15, x11           // a2 += a_offset
+        CSEL    x15, x12, x15, EQ       //   a2 = zero, else += a2 + a_offset
+        CMP     x8, x12                 // if a3 == zero
+        ADD     x8, x8, x11             // a3 += a_offset
+        CSEL    x8, x12, x8, EQ         //   a3 = zero, else += a3 + a_offset
+
+        # Is there at least 8 bytes for main loop?
+        SUBS    x0, x2, 8               // k = kc - 8
+        B.LO    4f
 
         # Main loop - 8 bytes of A
         .p2align 3
-1:
-        LDR     d0,  [x3], 8
+2:
+        LDR     d0, [x13], 8
         LDR     q4,  [x5], 16
-        LDR     d1, [x15], 8
-        LDR     d2, [x13], 8
-        LDR     d3,  [x4], 8
+        LDR     d1, [x14], 8
+        LDR     d2, [x15], 8
+        LDR     d3, [x8], 8
         LDR     q5,  [x5], 16
         SDOT    v16.4s, v4.16b,  v0.4b[0]
         SDOT    v17.4s, v4.16b,  v1.4b[0]
@@ -126,14 +144,20 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v30.4s, v7.16b,  v2.4b[1]
         SUBS    x0, x0, 8
         SDOT    v31.4s, v7.16b,  v3.4b[1]
-        B.HS    1b
+        B.HS    2b
 
         # Is there a remainder?- 4 bytes of A
-        TBNZ    x0, 2, 3f
+        TBNZ    x0, 2, 4f
 
-2:
-        # Apply params - scale, bias and clamp
-        LD1R    {v0.4s}, [x11], 4
+        LDR     x8, [sp, 24]            // reload params pointer
+
+        # ks loop
+        SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
+        B.HI    1b
+
+3:
+        # Load per channel scale values from weights
+        LDP     q0, q1, [x5], 32
         SCVTF   v16.4s, v16.4s
         SCVTF   v17.4s, v17.4s
         SCVTF   v18.4s, v18.4s
@@ -151,22 +175,23 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         SCVTF   v30.4s, v30.4s
         SCVTF   v31.4s, v31.4s
 
+        LDP     q2, q3, [x5], 32
         FMUL    v16.4s, v16.4s, v0.4s
         FMUL    v17.4s, v17.4s, v0.4s
         FMUL    v18.4s, v18.4s, v0.4s
         FMUL    v19.4s, v19.4s, v0.4s
-        FMUL    v20.4s, v20.4s, v0.4s
-        FMUL    v21.4s, v21.4s, v0.4s
-        FMUL    v22.4s, v22.4s, v0.4s
-        FMUL    v23.4s, v23.4s, v0.4s
-        FMUL    v24.4s, v24.4s, v0.4s
-        FMUL    v25.4s, v25.4s, v0.4s
-        FMUL    v26.4s, v26.4s, v0.4s
-        FMUL    v27.4s, v27.4s, v0.4s
-        FMUL    v28.4s, v28.4s, v0.4s
-        FMUL    v29.4s, v29.4s, v0.4s
-        FMUL    v30.4s, v30.4s, v0.4s
-        FMUL    v31.4s, v31.4s, v0.4s
+        FMUL    v20.4s, v20.4s, v1.4s
+        FMUL    v21.4s, v21.4s, v1.4s
+        FMUL    v22.4s, v22.4s, v1.4s
+        FMUL    v23.4s, v23.4s, v1.4s
+        FMUL    v24.4s, v24.4s, v2.4s
+        FMUL    v25.4s, v25.4s, v2.4s
+        FMUL    v26.4s, v26.4s, v2.4s
+        FMUL    v27.4s, v27.4s, v2.4s
+        FMUL    v28.4s, v28.4s, v3.4s
+        FMUL    v29.4s, v29.4s, v3.4s
+        FMUL    v30.4s, v30.4s, v3.4s
+        FMUL    v31.4s, v31.4s, v3.4s
 
         FCVTNS  v16.4s, v16.4s
         FCVTNS  v17.4s, v17.4s
@@ -193,7 +218,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         SQXTN   v25.4h, v25.4s
         SQXTN   v26.4h, v26.4s
         SQXTN   v27.4h, v27.4s
-        LD1R    {v2.8h}, [x11], 2       // add bias
+        LD1R    {v2.8h}, [x8], 2        // add bias
 
         SQXTN2  v16.8h, v20.4s
         SQXTN2  v17.8h, v21.4s
@@ -212,18 +237,17 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         SQADD   v25.8h, v25.8h, v2.8h
         SQADD   v26.8h, v26.8h, v2.8h
         SQADD   v27.8h, v27.8h, v2.8h
-        LD1R    {v0.16b}, [x11], 1      // clamp min value
+        LD1R    {v0.16b}, [x8], 1       // clamp min value
 
         SQXTN   v4.8b, v16.8h
         SQXTN   v5.8b, v17.8h
         SQXTN   v6.8b, v18.8h
         SQXTN   v7.8b, v19.8h
-        LD1R    {v1.16b}, [x11]         // clamp max value
+        LD1R    {v1.16b}, [x8]          // clamp max value
         SQXTN2  v4.16b, v24.8h
         SQXTN2  v5.16b, v25.8h
         SQXTN2  v6.16b, v26.8h
         SQXTN2  v7.16b, v27.8h
-        LDR     x12, [sp]               // cn_stride
 
         SMAX    v4.16b, v4.16b, v0.16b
         SMAX    v5.16b, v5.16b, v0.16b
@@ -234,38 +258,39 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         SMIN    v5.16b, v5.16b, v1.16b
         SMIN    v6.16b, v6.16b, v1.16b
         SMIN    v7.16b, v7.16b, v1.16b
-        B.LO    4f
+        B.LO    5f
 
         # Store full 4 x 16
-        ST1     {v4.16b}, [x6], x12
-        SUB     x3,  x3, x2             // a0 -= kc
-        ST1     {v5.16b}, [x8], x12
-        SUB     x15, x15, x2            // a1 -= kc
-        ST1     {v6.16b}, [x9], x12
-        SUB     x13, x13, x2            // a2 -= kc
-        ST1     {v7.16b}, [x7], x12
-        SUB     x4,  x4, x2             // a3 -= kc
-        B.NE    0b
+        ST1     {v7.16b},  [x7], x10
+        ST1     {v6.16b}, [x17], x10
+        ST1     {v5.16b}, [x16], x10
+        ST1     {v4.16b},  [x6], x10
+
+        SUB     x4, x4, x3              // a -= ks
+
+        # nc loop
+        B.HI    0b
         RET
 
         # Remainder- 4 bytes of A
         .p2align 3
-3:
-        LDR     s0,  [x3], 4
+4:
+        LDR     s0, [x13], 4
         LDR     q4, [x5], 16
-        LDR     s1, [x15], 4
-        LDR     s2, [x13], 4
-        LDR     s3,  [x4], 4
-        SDOT    v16.4s, v4.16b,  v0.4b[0]
+        LDR     s1, [x14], 4
+        LDR     s2, [x15], 4
+        LDR     s3, [x8], 4
         LDR     q5, [x5], 16
+        SDOT    v16.4s, v4.16b,  v0.4b[0]
         SDOT    v17.4s, v4.16b,  v1.4b[0]
+        LDP     q6, q7, [x5], 32
         SDOT    v18.4s, v4.16b,  v2.4b[0]
         SDOT    v19.4s, v4.16b,  v3.4b[0]
         SDOT    v20.4s, v5.16b,  v0.4b[0]
-        LDP     q6, q7, [x5], 32
         SDOT    v21.4s, v5.16b,  v1.4b[0]
         SDOT    v22.4s, v5.16b,  v2.4b[0]
         SDOT    v23.4s, v5.16b,  v3.4b[0]
+        LDR     x8, [sp, 24]            // reload params pointer
         SDOT    v24.4s, v6.16b, v0.4b[0]
         SDOT    v25.4s, v6.16b, v1.4b[0]
         SDOT    v26.4s, v6.16b, v2.4b[0]
@@ -274,50 +299,54 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v29.4s, v7.16b, v1.4b[0]
         SDOT    v30.4s, v7.16b, v2.4b[0]
         SDOT    v31.4s, v7.16b, v3.4b[0]
-        B       2b
+
+        # ks loop
+        SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
+        B.HI    1b
+        B       3b
 
         # Store odd width
         .p2align 3
-4:
-        TBZ     x1, 3, 5f
-        STR     d4, [x6], 8
-        DUP     d4, v4.d[1]
-        STR     d5, [x8], 8
-        DUP     d5, v5.d[1]
-        STR     d6, [x9], 8
-        DUP     d6, v6.d[1]
+5:
+        TBZ     x1, 3, 6f
         STR     d7, [x7], 8
         DUP     d7, v7.d[1]
-5:
-        TBZ     x1, 2, 6f
-        STR     s4, [x6], 4
-        DUP     s4, v4.s[1]
-        STR     s5, [x8], 4
-        DUP     s5, v5.s[1]
-        STR     s6, [x9], 4
-        DUP     s6, v6.s[1]
+        STR     d6, [x17], 8
+        DUP     d6, v6.d[1]
+        STR     d5, [x16], 8
+        DUP     d5, v5.d[1]
+        STR     d4, [x6], 8
+        DUP     d4, v4.d[1]
+6:
+        TBZ     x1, 2, 7f
         STR     s7, [x7], 4
         DUP     s7, v7.s[1]
-6:
-        TBZ     x1, 1, 7f
-        ST1     {v4.h}[0], [x6], 2
-        DUP     h4, v4.h[1]
-        ST1     {v5.h}[0], [x8], 2
-        DUP     h5, v5.h[1]
-        ST1     {v6.h}[0], [x9], 2
-        DUP     h6, v6.h[1]
+        STR     s6, [x17], 4
+        DUP     s6, v6.s[1]
+        STR     s5, [x16], 4
+        DUP     s5, v5.s[1]
+        STR     s4, [x6], 4
+        DUP     s4, v4.s[1]
+7:
+        TBZ     x1, 1, 8f
         ST1     {v7.h}[0], [x7], 2
         DUP     h7, v7.h[1]
-7:
-        TBZ     x1, 0, 8f
-        ST1     {v4.b}[0], [x6]
-        ST1     {v5.b}[0], [x8]
-        ST1     {v6.b}[0], [x9]
-        ST1     {v7.b}[0], [x7]
+        ST1     {v6.h}[0], [x17], 2
+        DUP     h6, v6.h[1]
+        ST1     {v5.h}[0], [x16], 2
+        DUP     h5, v5.h[1]
+        ST1     {v4.h}[0], [x6], 2
+        DUP     h4, v4.h[1]
 8:
+        TBZ     x1, 0, 9f
+        ST1     {v7.b}[0], [x7]
+        ST1     {v6.b}[0], [x17]
+        ST1     {v5.b}[0], [x16]
+        ST1     {v4.b}[0], [x6]
+9:
         RET
 
-END_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
+END_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

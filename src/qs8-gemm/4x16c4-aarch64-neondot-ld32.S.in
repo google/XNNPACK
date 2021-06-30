@@ -3,12 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert not CHANNELWISE or REQUANTIZATION == "FP32"
+
 #include <xnnpack/assembly.h>
 
-$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
-$CONV_PARAMS = "xnn_qs8_minmax_params"
-
-# void xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld32(
+$DATATYPE = "qc8" if CHANNELWISE else "qs8"
+$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+# void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld32(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -34,7 +36,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params"
 # C3  x7 v19 v23 v27 v31
 # unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld32
+BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld32
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -189,9 +191,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aar
           SRSHL   v30.4s, v30.4s, v1.4s
           SRSHL   v31.4s, v31.4s, v1.4s
         $elif REQUANTIZATION == "FP32":
-          # Apply params - scale, bias and clamp
-          LD1R    {v0.4s}, [x11], 4
-
+          $if CHANNELWISE:
+            # Load per channel scale values from weights
+            LDP     q0, q1, [x5], 32
+          $else:
+            # Apply params - scale, bias and clamp
+            LD1R    {v0.4s}, [x11], 4
           SCVTF   v16.4s, v16.4s
           SCVTF   v17.4s, v17.4s
           SCVTF   v18.4s, v18.4s
@@ -209,22 +214,41 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aar
           SCVTF   v30.4s, v30.4s
           SCVTF   v31.4s, v31.4s
 
-          FMUL    v16.4s, v0.4s, v16.4s
-          FMUL    v17.4s, v0.4s, v17.4s
-          FMUL    v18.4s, v0.4s, v18.4s
-          FMUL    v19.4s, v0.4s, v19.4s
-          FMUL    v20.4s, v0.4s, v20.4s
-          FMUL    v21.4s, v0.4s, v21.4s
-          FMUL    v22.4s, v0.4s, v22.4s
-          FMUL    v23.4s, v0.4s, v23.4s
-          FMUL    v24.4s, v0.4s, v24.4s
-          FMUL    v25.4s, v0.4s, v25.4s
-          FMUL    v26.4s, v0.4s, v26.4s
-          FMUL    v27.4s, v0.4s, v27.4s
-          FMUL    v28.4s, v0.4s, v28.4s
-          FMUL    v29.4s, v0.4s, v29.4s
-          FMUL    v30.4s, v0.4s, v30.4s
-          FMUL    v31.4s, v0.4s, v31.4s
+          $if CHANNELWISE:
+            LDP     q2, q3, [x5], 32
+            FMUL    v16.4s, v16.4s, v0.4s
+            FMUL    v17.4s, v17.4s, v0.4s
+            FMUL    v18.4s, v18.4s, v0.4s
+            FMUL    v19.4s, v19.4s, v0.4s
+            FMUL    v20.4s, v20.4s, v1.4s
+            FMUL    v21.4s, v21.4s, v1.4s
+            FMUL    v22.4s, v22.4s, v1.4s
+            FMUL    v23.4s, v23.4s, v1.4s
+            FMUL    v24.4s, v24.4s, v2.4s
+            FMUL    v25.4s, v25.4s, v2.4s
+            FMUL    v26.4s, v26.4s, v2.4s
+            FMUL    v27.4s, v27.4s, v2.4s
+            FMUL    v28.4s, v28.4s, v3.4s
+            FMUL    v29.4s, v29.4s, v3.4s
+            FMUL    v30.4s, v30.4s, v3.4s
+            FMUL    v31.4s, v31.4s, v3.4s
+          $else:
+            FMUL    v16.4s, v16.4s, v0.4s
+            FMUL    v17.4s, v17.4s, v0.4s
+            FMUL    v18.4s, v18.4s, v0.4s
+            FMUL    v19.4s, v19.4s, v0.4s
+            FMUL    v20.4s, v20.4s, v0.4s
+            FMUL    v21.4s, v21.4s, v0.4s
+            FMUL    v22.4s, v22.4s, v0.4s
+            FMUL    v23.4s, v23.4s, v0.4s
+            FMUL    v24.4s, v24.4s, v0.4s
+            FMUL    v25.4s, v25.4s, v0.4s
+            FMUL    v26.4s, v26.4s, v0.4s
+            FMUL    v27.4s, v27.4s, v0.4s
+            FMUL    v28.4s, v28.4s, v0.4s
+            FMUL    v29.4s, v29.4s, v0.4s
+            FMUL    v30.4s, v30.4s, v0.4s
+            FMUL    v31.4s, v31.4s, v0.4s
 
           FCVTNS  v16.4s, v16.4s
           FCVTNS  v17.4s, v17.4s
@@ -347,7 +371,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aar
 6:
         RET
 
-END_FUNCTION xnn_qs8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld32
+END_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld32
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

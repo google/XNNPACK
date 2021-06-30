@@ -7,8 +7,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack/assembly.h>
 
+#include <xnnpack/assembly.h>
 
 # void xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cortex_a55(
 #     size_t mr,                 x0
@@ -20,7 +20,7 @@
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,          [sp] -> x12
-#     const union xnn_qs8_minmax_params params)  [sp + 8] -> x11
+#     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 

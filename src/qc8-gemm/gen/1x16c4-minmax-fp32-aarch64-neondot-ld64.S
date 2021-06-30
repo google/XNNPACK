@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld64(
+# void xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld64(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -20,7 +20,7 @@
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          (x7)
 #     size_t cn_stride,          [sp] -> x12
-#     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x11
+#     const union xnn_qs8_minmax_params params)  [sp + 8] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -30,7 +30,7 @@
 # C0  x6 v28 v29 v30 v31
 # unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld64
+BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld64
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
         BIC     x2, x2, 3
 
@@ -73,17 +73,18 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld64
         TBNZ    x0, 2, 3f
 
 2:
-        # Apply params - scale, bias and clamp
-        LD1R    {v0.4s}, [x11], 4
+        # Load per channel scale values from weights
+        LDP     q0, q1, [x5], 32
         SCVTF   v28.4s, v28.4s
         SCVTF   v29.4s, v29.4s
         SCVTF   v30.4s, v30.4s
         SCVTF   v31.4s, v31.4s
 
+        LDP     q2, q3, [x5], 32
         FMUL    v28.4s, v28.4s, v0.4s
-        FMUL    v29.4s, v29.4s, v0.4s
-        FMUL    v30.4s, v30.4s, v0.4s
-        FMUL    v31.4s, v31.4s, v0.4s
+        FMUL    v29.4s, v29.4s, v1.4s
+        FMUL    v30.4s, v30.4s, v2.4s
+        FMUL    v31.4s, v31.4s, v3.4s
 
         FCVTNS  v28.4s, v28.4s
         FCVTNS  v29.4s, v29.4s
@@ -149,7 +150,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld64
 8:
         RET
 
-END_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld64
+END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
