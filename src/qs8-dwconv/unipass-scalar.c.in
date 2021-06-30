@@ -5,6 +5,7 @@
 
 $assert KERNEL_TILE >= 2
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 #include <assert.h>
 $if REQUANTIZATION == "FP32":
   $if VARIANT == "LRINT":
@@ -17,9 +18,11 @@ $if REQUANTIZATION == "FP32":
 #include <xnnpack/math.h>
 
 
+$DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $FUNCTION_SUFFIX = "scalar_" + VARIANT.lower() if VARIANT else "scalar"
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" + ("_" + VARIANT.lower() if VARIANT else "")
-void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${FUNCTION_SUFFIX}(
+$PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + "scalar" + ("_" + VARIANT.lower() if VARIANT else "")
+$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${FUNCTION_SUFFIX}(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -29,7 +32,7 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -44,7 +47,8 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
     const int32_t voutput_max_less_zero_point = params->${PARAMS_STRUCT}.output_max_less_zero_point;
     const int32_t voutput_zero_point = params->${PARAMS_STRUCT}.output_zero_point;
   $elif REQUANTIZATION == "FP32":
-    const float vscale = params->${PARAMS_STRUCT}.scale;
+    $if not CHANNELWISE:
+      const float vscale = params->${PARAMS_STRUCT}.scale;
     $if VARIANT == "LRINT":
       const long voutput_min_less_zero_point = params->${PARAMS_STRUCT}.output_min_less_zero_point;
       const long voutput_max_less_zero_point = params->${PARAMS_STRUCT}.output_max_less_zero_point;
@@ -86,6 +90,9 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
           vout = math_min_s32(vout, voutput_max_less_zero_point);
           vout += voutput_zero_point;
         $elif REQUANTIZATION == "FP32":
+          $if CHANNELWISE:
+            const float vscale = *((const float*) w);
+            w = (const void*) ((const float*) w + 1);
           $if VARIANT == "LRINT":
             const float vfpacc = (float) vacc * vscale;
             long vrndacc = lrintf(vfpacc);
@@ -145,8 +152,16 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
           $for C in range(CHANNEL_TILE):
             float vfpacc${C} = (float) vacc${C};
 
-          $for C in range(CHANNEL_TILE):
-            vfpacc${C} *= vscale;
+          $if CHANNELWISE:
+            $for C in range(CHANNEL_TILE):
+              const float vscale${C} = ((const float*) w)[${C}];
+            w = (const void*) ((const float*) w + ${CHANNEL_TILE});
+
+            $for C in range(CHANNEL_TILE):
+              vfpacc${C} *= vscale${C};
+          $else:
+            $for C in range(CHANNEL_TILE):
+              vfpacc${C} *= vscale;
 
           $if VARIANT == "LRINT":
             $for C in range(CHANNEL_TILE):
@@ -196,6 +211,8 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
             vout = math_min_s32(vout, voutput_max_less_zero_point);
             vout += voutput_zero_point;
           $elif REQUANTIZATION == "FP32":
+            $if CHANNELWISE:
+              const float vscale = *((const float*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${KERNEL_TILE * CHANNEL_TILE} * sizeof(int8_t)));
             $if VARIANT == "LRINT":
               const float vfpacc = (float) vacc * vscale;
               long vrndacc = lrintf(vfpacc);
@@ -231,6 +248,8 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
               vout = math_min_s32(vout, voutput_max_less_zero_point);
               vout += voutput_zero_point;
             $elif REQUANTIZATION == "FP32":
+              $if CHANNELWISE:
+                const float vscale = *((const float*) ((uintptr_t) w + ${CHANNEL_TILE - 1} * sizeof(int32_t) + ${KERNEL_TILE * CHANNEL_TILE} * sizeof(int8_t)));
               $if VARIANT == "LRINT":
                 const float vfpacc = (float) vacc * vscale;
                 long vrndacc = lrintf(vfpacc);
