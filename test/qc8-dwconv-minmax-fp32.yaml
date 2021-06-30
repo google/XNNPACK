@@ -3,6 +3,22 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__neon_mul16
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__neon_mul16
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up24x9__neon_mul16
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__neon_mul16
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__neonv8_mul16
+  init: xnn_init_qs8_minmax_neon_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__neonv8_mul16
+  init: xnn_init_qs8_minmax_neon_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up24x9__neonv8_mul16
+  init: xnn_init_qs8_minmax_neon_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__neonv8_mul16
+  init: xnn_init_qs8_minmax_neon_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__sse2_mul16
   init: xnn_init_qs8_minmax_sse2_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__sse2_mul16
@@ -55,6 +71,22 @@
   init: xnn_init_qs8_minmax_avx512_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx512skx_mul32
   init: xnn_init_qs8_minmax_avx512_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__neon_mul16
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__neon_mul16
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up24x25__neon_mul16
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up32x25__neon_mul16
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__neonv8_mul16
+  init: xnn_init_qs8_minmax_neon_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__neonv8_mul16
+  init: xnn_init_qs8_minmax_neon_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up24x25__neonv8_mul16
+  init: xnn_init_qs8_minmax_neon_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up32x25__neonv8_mul16
+  init: xnn_init_qs8_minmax_neon_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16
   init: xnn_init_qs8_minmax_sse2_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__sse2_mul16
