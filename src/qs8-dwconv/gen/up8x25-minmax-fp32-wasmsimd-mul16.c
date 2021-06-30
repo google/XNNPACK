@@ -654,6 +654,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__wasmsimd_mul16(
       v128_t vout01234567 = wasm_v16x8_shuffle(vacc0123, vacc4567, 0, 2, 4, 6, 8, 10, 12, 14);
       v128_t vout0123456701234567 = wasm_v8x16_shuffle(vout01234567, vout01234567, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
 
+
       if (c & 4) {
         *((float*) output) = wasm_f32x4_extract_lane(vout0123456701234567, 0);
         vout0123456701234567 = wasm_u64x2_shr(vout0123456701234567, 32);

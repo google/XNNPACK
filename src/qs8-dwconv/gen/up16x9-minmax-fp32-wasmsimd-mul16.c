@@ -345,7 +345,6 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__wasmsimd_mul16(
         vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod8x01234567));
         vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod8x01234567));
 
-        w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
         k += 8;
 
       vacc0123 = wasm_f32x4_convert_i32x4(vacc0123);
@@ -373,6 +372,8 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__wasmsimd_mul16(
 
       v128_t vout01234567 = wasm_v16x8_shuffle(vacc0123, vacc4567, 0, 2, 4, 6, 8, 10, 12, 14);
       v128_t vout0123456701234567 = wasm_v8x16_shuffle(vout01234567, vout01234567, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
+
+      w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
 
       if XNN_LIKELY(c >= 8) {
         *((double*) output) = wasm_f64x2_extract_lane(vout0123456701234567, 0);

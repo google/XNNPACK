@@ -950,7 +950,6 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__wasmsimd_mul16(
         vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod24x01234567));
         vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod24x01234567));
 
-        w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
         k += 8;
 
       const v128_t vsign0123 = wasm_i32x4_shr(vacc0123, 31);
@@ -986,6 +985,8 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__wasmsimd_mul16(
       const v128_t voutput_min = wasm_v128_load(params->gemmlowp_wasmsimd.output_min);
       const v128_t voutput_max = wasm_v128_load(params->gemmlowp_wasmsimd.output_max);
       v128_t vout0123456701234567 = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout01234567, vout01234567), voutput_min), voutput_max);
+
+      w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
 
       if XNN_LIKELY(c >= 8) {
         *((double*) output) = wasm_f64x2_extract_lane(vout0123456701234567, 0);

@@ -5,6 +5,7 @@
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8
 $assert KERNEL_TILE >= 2
@@ -15,8 +16,10 @@ $assert KERNEL_TILE >= 2
 #include <xnnpack/dwconv.h>
 
 
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_wasmsimd"
-void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wasmsimd_mul16(
+$DATATYPE = "qc8" if CHANNELWISE else "qs8"
+$PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + "wasmsimd"
+$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wasmsimd_mul16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -26,7 +29,7 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -106,9 +109,18 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
         $for C in range(0, CHANNEL_TILE, 4):
           vacc${ABC[C:C+4]} = wasm_f32x4_convert_i32x4(vacc${ABC[C:C+4]});
 
-        const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
-        $for C in range(0, CHANNEL_TILE, 4):
-          vacc${ABC[C:C+4]} = wasm_f32x4_mul(vacc${ABC[C:C+4]}, vscale);
+        $if CHANNELWISE:
+          const v128_t vscale${ABC[0:4]} = wasm_v128_load(w);
+          $for C in range(4, CHANNEL_TILE, 4):
+            const v128_t vscale${ABC[C:C+4]} = wasm_v128_load((const float*) w + ${C});
+          w = (const void*) ((const float*) w + ${CHANNEL_TILE});
+
+          $for C in range(0, CHANNEL_TILE, 4):
+            vacc${ABC[C:C+4]} = wasm_f32x4_mul(vacc${ABC[C:C+4]}, vscale${ABC[C:C+4]});
+        $else:
+          const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
+          $for C in range(0, CHANNEL_TILE, 4):
+            vacc${ABC[C:C+4]} = wasm_f32x4_mul(vacc${ABC[C:C+4]}, vscale);
 
         const v128_t voutput_min_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_min_less_zero_point);
         $for C in range(0, CHANNEL_TILE, 4):
@@ -172,7 +184,6 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
           vacc${ABC[4:8]} = wasm_i32x4_add(vacc${ABC[4:8]}, wasm_i32x4_extend_high_i16x8(vprod${K}x${ABC[0:8]}));
 
         $if CHANNEL_TILE > 8:
-          w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
           k += 8;
 
       $if REQUANTIZATION == "GEMMLOWP":
@@ -213,9 +224,16 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
         vacc${ABC[0:4]} = wasm_f32x4_convert_i32x4(vacc${ABC[0:4]});
         vacc${ABC[4:8]} = wasm_f32x4_convert_i32x4(vacc${ABC[4:8]});
 
-        const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
-        vacc${ABC[0:4]} = wasm_f32x4_mul(vacc${ABC[0:4]}, vscale);
-        vacc${ABC[4:8]} = wasm_f32x4_mul(vacc${ABC[4:8]}, vscale);
+        $if CHANNELWISE:
+          const v128_t vscale${ABC[0:4]} = wasm_v128_load((const float*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${CHANNEL_TILE * KERNEL_TILE} * sizeof(int8_t)));
+          const v128_t vscale${ABC[4:8]} = wasm_v128_load((const float*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${CHANNEL_TILE * KERNEL_TILE} * sizeof(int8_t) + 4 * sizeof(float)));
+
+          vacc${ABC[0:4]} = wasm_f32x4_mul(vacc${ABC[0:4]}, vscale${ABC[0:4]});
+          vacc${ABC[4:8]} = wasm_f32x4_mul(vacc${ABC[4:8]}, vscale${ABC[4:8]});
+        $else:
+          const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
+          vacc${ABC[0:4]} = wasm_f32x4_mul(vacc${ABC[0:4]}, vscale);
+          vacc${ABC[4:8]} = wasm_f32x4_mul(vacc${ABC[4:8]}, vscale);
 
         const v128_t voutput_min_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_min_less_zero_point);
         vacc${ABC[0:4]} = wasm_f32x4_max(vacc${ABC[0:4]}, voutput_min_less_zero_point);
@@ -235,6 +253,9 @@ void xnn_qs8_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x$
 
         v128_t vout${ABC[0:8]} = wasm_v16x8_shuffle(vacc${ABC[0:4]}, vacc${ABC[4:8]}, 0, 2, 4, 6, 8, 10, 12, 14);
         v128_t vout${ABC[0:8]}${ABC[0:8]} = wasm_v8x16_shuffle(vout${ABC[0:8]}, vout${ABC[0:8]}, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
+
+      $if CHANNEL_TILE > 8:
+        w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
 
       $if CHANNEL_TILE > 8:
         if XNN_LIKELY(c >= 8) {
