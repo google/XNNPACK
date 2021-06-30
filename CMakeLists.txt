@@ -3911,7 +3911,7 @@ IF(XNNPACK_BUILD_TESTS)
   SET_TARGET_PROPERTIES(convolution-nhwc-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
+    CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-nhwc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(convolution-nhwc-test convolution-nhwc-test)
@@ -3920,7 +3920,7 @@ IF(XNNPACK_BUILD_TESTS)
   SET_TARGET_PROPERTIES(convolution-nchw-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
+    CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-nchw-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(convolution-nchw-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(convolution-nchw-test convolution-nchw-test)
