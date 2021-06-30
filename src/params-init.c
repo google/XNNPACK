@@ -693,12 +693,11 @@ void xnn_init_qs8_minmax_wasmsimd_params(
   int8_t output_min,
   int8_t output_max)
 {
-  for (uint32_t i = 0; i < 8; i++) {
-    params->wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->wasmsimd.output_min[i] = output_min;
-    params->wasmsimd.output_max[i] = output_max;
+  for (uint32_t i = 0; i < 4; i++) {
+    params->wasmsimd.output_min_less_zero_point[i] = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+    params->wasmsimd.output_max_less_zero_point[i] = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+    params->wasmsimd.magic_bias[i] = 12582912.0f;
+    params->wasmsimd.magic_bias_less_output_zero_point[i] = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   }
 }
 #endif  // XNN_ARCH_WASMSIMD

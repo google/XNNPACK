@@ -14,10 +14,12 @@ $assert MR <= 4
 #include <xnnpack/math.h>
 
 
+$DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_wasmsimd"
-void xnn_qs8_igemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX}(
+$PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + "wasmsimd"
+$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+void xnn_${DATATYPE}_igemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -29,7 +31,7 @@ void xnn_qs8_igemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -183,9 +185,15 @@ void xnn_qs8_igemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_convert_i32x4(vacc${M}x0123);
 
-      const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
-      $for M in range(MR):
-        vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale);
+      $if CHANNELWISE:
+        const v128_t vscale0123 = wasm_v128_load(w);
+        w = (const void*) ((const float*) w + 4);
+        $for M in range(MR):
+          vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale0123);
+      $else:
+        const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
+        $for M in range(MR):
+          vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale);
 
       const v128_t voutput_min_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_min_less_zero_point);
       $for M in range(MR):
