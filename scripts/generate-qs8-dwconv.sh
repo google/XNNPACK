@@ -5,13 +5,29 @@
 # LICENSE file in the root directory of this source tree.
 
 ################################### Scalar ###################################
-tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up1x9-minmax-gemmlowp-scalar.c
-tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up2x9-minmax-gemmlowp-scalar.c
-tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9 -o src/qs8-dwconv/gen/up4x9-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -o src/qs8-dwconv/gen/up1x9-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9  -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -o src/qs8-dwconv/gen/up2x9-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9  -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -o src/qs8-dwconv/gen/up4x9-minmax-gemmlowp-scalar.c
 
-tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -o src/qs8-dwconv/gen/up1x25-minmax-gemmlowp-scalar.c
-tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -o src/qs8-dwconv/gen/up2x25-minmax-gemmlowp-scalar.c
-tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -o src/qs8-dwconv/gen/up4x25-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D REQUANTIZATION=FP32     -D VARIANT=LRINT -o src/qs8-dwconv/gen/up1x9-minmax-fp32-scalar-lrint.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9  -D REQUANTIZATION=FP32     -D VARIANT=LRINT -o src/qs8-dwconv/gen/up2x9-minmax-fp32-scalar-lrint.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9  -D REQUANTIZATION=FP32     -D VARIANT=LRINT -o src/qs8-dwconv/gen/up4x9-minmax-fp32-scalar-lrint.c
+
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -o src/qs8-dwconv/gen/up1x9-minmax-fp32-scalar-magic.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9  -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -o src/qs8-dwconv/gen/up2x9-minmax-fp32-scalar-magic.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9  -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -o src/qs8-dwconv/gen/up4x9-minmax-fp32-scalar-magic.c
+
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -o src/qs8-dwconv/gen/up1x25-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -o src/qs8-dwconv/gen/up2x25-minmax-gemmlowp-scalar.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D REQUANTIZATION=GEMMLOWP -D VARIANT=      -o src/qs8-dwconv/gen/up4x25-minmax-gemmlowp-scalar.c
+
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -o src/qs8-dwconv/gen/up1x25-minmax-fp32-scalar-lrint.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -o src/qs8-dwconv/gen/up2x25-minmax-fp32-scalar-lrint.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D REQUANTIZATION=FP32     -D VARIANT=LRINT -o src/qs8-dwconv/gen/up4x25-minmax-fp32-scalar-lrint.c
+
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -o src/qs8-dwconv/gen/up1x25-minmax-fp32-scalar-magic.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -o src/qs8-dwconv/gen/up2x25-minmax-fp32-scalar-magic.c
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D REQUANTIZATION=FP32     -D VARIANT=MAGIC -o src/qs8-dwconv/gen/up4x25-minmax-fp32-scalar-magic.c
 
 ################################## ARM NEON ##################################
 tools/xngen src/qs8-dwconv/unipass-neon-mul16.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9  -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-dwconv/gen/up8x9-minmax-gemmlowp-neon-mul16.c

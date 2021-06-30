@@ -9,11 +9,13 @@
 
 #include <assert.h>
 
+#include <fp16.h>
+
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up4x9__scalar(
+void xnn_qs8_dwconv_minmax_fp32_ukernel_up4x9__scalar_magic(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -28,14 +30,11 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up4x9__scalar(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const int32_t vmultiplier = params->gemmlowp_scalar.multiplier;
-  const int64_t vq31rounding = INT64_C(0x40000000);
-  const int32_t vremainder_mask = params->gemmlowp_scalar.remainder_mask;
-  const uint32_t vshift = params->gemmlowp_scalar.shift;
-  const int32_t vremainder_threshold = params->gemmlowp_scalar.remainder_threshold;
-  const int32_t voutput_min_less_zero_point = params->gemmlowp_scalar.output_min_less_zero_point;
-  const int32_t voutput_max_less_zero_point = params->gemmlowp_scalar.output_max_less_zero_point;
-  const int32_t voutput_zero_point = params->gemmlowp_scalar.output_zero_point;
+  const float vscale = params->fp32_scalar_magic.scale;
+  const float voutput_min_less_zero_point = params->fp32_scalar_magic.output_min_less_zero_point;
+  const float voutput_max_less_zero_point = params->fp32_scalar_magic.output_max_less_zero_point;
+  const float vmagic_bias = params->fp32_scalar_magic.magic_bias;
+  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_magic.magic_bias_less_output_zero_point;
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -239,40 +238,35 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up4x9__scalar(
 
       w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t) + 36 * sizeof(int8_t));
 
-      const int64_t vproduct0 = (int64_t) vacc0 * (int64_t) vmultiplier;
-      const int64_t vproduct1 = (int64_t) vacc1 * (int64_t) vmultiplier;
-      const int64_t vproduct2 = (int64_t) vacc2 * (int64_t) vmultiplier;
-      const int64_t vproduct3 = (int64_t) vacc3 * (int64_t) vmultiplier;
+      float vfpacc0 = (float) vacc0;
+      float vfpacc1 = (float) vacc1;
+      float vfpacc2 = (float) vacc2;
+      float vfpacc3 = (float) vacc3;
 
-      const int32_t vq31product0 = (int32_t) (uint32_t) ((uint64_t) (vproduct0 + vq31rounding) >> 31);
-      const int32_t vq31product1 = (int32_t) (uint32_t) ((uint64_t) (vproduct1 + vq31rounding) >> 31);
-      const int32_t vq31product2 = (int32_t) (uint32_t) ((uint64_t) (vproduct2 + vq31rounding) >> 31);
-      const int32_t vq31product3 = (int32_t) (uint32_t) ((uint64_t) (vproduct3 + vq31rounding) >> 31);
+      vfpacc0 *= vscale;
+      vfpacc1 *= vscale;
+      vfpacc2 *= vscale;
+      vfpacc3 *= vscale;
 
-      const int32_t vremainder0 = (vq31product0 & vremainder_mask) - (int32_t) (vq31product0 < 0);
-      const int32_t vremainder1 = (vq31product1 & vremainder_mask) - (int32_t) (vq31product1 < 0);
-      const int32_t vremainder2 = (vq31product2 & vremainder_mask) - (int32_t) (vq31product2 < 0);
-      const int32_t vremainder3 = (vq31product3 & vremainder_mask) - (int32_t) (vq31product3 < 0);
+      vfpacc0 = math_max_f32(vfpacc0, voutput_min_less_zero_point);
+      vfpacc1 = math_max_f32(vfpacc1, voutput_min_less_zero_point);
+      vfpacc2 = math_max_f32(vfpacc2, voutput_min_less_zero_point);
+      vfpacc3 = math_max_f32(vfpacc3, voutput_min_less_zero_point);
 
-      int32_t vout0 = asr_s32(vq31product0, vshift) + (int32_t) (vremainder0 > vremainder_threshold);
-      int32_t vout1 = asr_s32(vq31product1, vshift) + (int32_t) (vremainder1 > vremainder_threshold);
-      int32_t vout2 = asr_s32(vq31product2, vshift) + (int32_t) (vremainder2 > vremainder_threshold);
-      int32_t vout3 = asr_s32(vq31product3, vshift) + (int32_t) (vremainder3 > vremainder_threshold);
+      vfpacc0 = math_min_f32(vfpacc0, voutput_max_less_zero_point);
+      vfpacc1 = math_min_f32(vfpacc1, voutput_max_less_zero_point);
+      vfpacc2 = math_min_f32(vfpacc2, voutput_max_less_zero_point);
+      vfpacc3 = math_min_f32(vfpacc3, voutput_max_less_zero_point);
 
-      vout0 = math_max_s32(vout0, voutput_min_less_zero_point);
-      vout1 = math_max_s32(vout1, voutput_min_less_zero_point);
-      vout2 = math_max_s32(vout2, voutput_min_less_zero_point);
-      vout3 = math_max_s32(vout3, voutput_min_less_zero_point);
+      vfpacc0 += vmagic_bias;
+      vfpacc1 += vmagic_bias;
+      vfpacc2 += vmagic_bias;
+      vfpacc3 += vmagic_bias;
 
-      vout0 = math_min_s32(vout0, voutput_max_less_zero_point);
-      vout1 = math_min_s32(vout1, voutput_max_less_zero_point);
-      vout2 = math_min_s32(vout2, voutput_max_less_zero_point);
-      vout3 = math_min_s32(vout3, voutput_max_less_zero_point);
-
-      vout0 += voutput_zero_point;
-      vout1 += voutput_zero_point;
-      vout2 += voutput_zero_point;
-      vout3 += voutput_zero_point;
+      int32_t vout0 = (int32_t) fp32_to_bits(vfpacc0) - vmagic_bias_less_output_zero_point;
+      int32_t vout1 = (int32_t) fp32_to_bits(vfpacc1) - vmagic_bias_less_output_zero_point;
+      int32_t vout2 = (int32_t) fp32_to_bits(vfpacc2) - vmagic_bias_less_output_zero_point;
+      int32_t vout3 = (int32_t) fp32_to_bits(vfpacc3) - vmagic_bias_less_output_zero_point;
 
       output[0] = (int8_t) vout0;
       output[1] = (int8_t) vout1;
@@ -315,14 +309,11 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up4x9__scalar(
         vacc += vi8 * vk8;
         k += 1;
 
-        const int64_t vproduct = (int64_t) vacc * (int64_t) vmultiplier;
-        const int32_t vq31product = (int32_t) (uint32_t) ((uint64_t) (vproduct + vq31rounding) >> 31);
-        const int32_t vremainder = (vq31product & vremainder_mask) - (int32_t) (vq31product < 0);
-
-        int32_t vout = asr_s32(vq31product, vshift) + (int32_t) (vremainder > vremainder_threshold);
-        vout = math_max_s32(vout, voutput_min_less_zero_point);
-        vout = math_min_s32(vout, voutput_max_less_zero_point);
-        vout += voutput_zero_point;
+        float vfpacc = (float) vacc * vscale;
+        vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
+        vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
+        vfpacc += vmagic_bias;
+        int32_t vout = (int32_t) fp32_to_bits(vfpacc) - vmagic_bias_less_output_zero_point;
         *output++ = (int8_t) vout;
       } while (--c != 0);
     }

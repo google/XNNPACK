@@ -651,12 +651,24 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/qc8-igemm/gen/4x2-minmax-fp32-scalar-magic.c
   src/qc8-igemm/gen/4x4-minmax-fp32-scalar-lrint.c
   src/qc8-igemm/gen/4x4-minmax-fp32-scalar-magic.c
-  src/qs8-dwconv/gen/up1x9-minmax-gemmlowp-scalar.c
+  src/qs8-dwconv/gen/up1x25-minmax-fp32-scalar-lrint.c
+  src/qs8-dwconv/gen/up1x25-minmax-fp32-scalar-magic.c
   src/qs8-dwconv/gen/up1x25-minmax-gemmlowp-scalar.c
-  src/qs8-dwconv/gen/up2x9-minmax-gemmlowp-scalar.c
+  src/qs8-dwconv/gen/up1x9-minmax-fp32-scalar-lrint.c
+  src/qs8-dwconv/gen/up1x9-minmax-fp32-scalar-magic.c
+  src/qs8-dwconv/gen/up1x9-minmax-gemmlowp-scalar.c
+  src/qs8-dwconv/gen/up2x25-minmax-fp32-scalar-lrint.c
+  src/qs8-dwconv/gen/up2x25-minmax-fp32-scalar-magic.c
   src/qs8-dwconv/gen/up2x25-minmax-gemmlowp-scalar.c
-  src/qs8-dwconv/gen/up4x9-minmax-gemmlowp-scalar.c
+  src/qs8-dwconv/gen/up2x9-minmax-fp32-scalar-lrint.c
+  src/qs8-dwconv/gen/up2x9-minmax-fp32-scalar-magic.c
+  src/qs8-dwconv/gen/up2x9-minmax-gemmlowp-scalar.c
+  src/qs8-dwconv/gen/up4x25-minmax-fp32-scalar-lrint.c
+  src/qs8-dwconv/gen/up4x25-minmax-fp32-scalar-magic.c
   src/qs8-dwconv/gen/up4x25-minmax-gemmlowp-scalar.c
+  src/qs8-dwconv/gen/up4x9-minmax-fp32-scalar-lrint.c
+  src/qs8-dwconv/gen/up4x9-minmax-fp32-scalar-magic.c
+  src/qs8-dwconv/gen/up4x9-minmax-gemmlowp-scalar.c
   src/qs8-gavgpool/gen/7p7x-minmax-scalar-c1.c
   src/qs8-gavgpool/gen/7p7x-minmax-scalar-c2.c
   src/qs8-gavgpool/gen/7p7x-minmax-scalar-c4.c

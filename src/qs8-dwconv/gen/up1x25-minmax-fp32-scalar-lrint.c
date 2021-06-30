@@ -8,12 +8,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up1x25__scalar(
+void xnn_qs8_dwconv_minmax_fp32_ukernel_up1x25__scalar_lrint(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -28,14 +29,10 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up1x25__scalar(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const int32_t vmultiplier = params->gemmlowp_scalar.multiplier;
-  const int64_t vq31rounding = INT64_C(0x40000000);
-  const int32_t vremainder_mask = params->gemmlowp_scalar.remainder_mask;
-  const uint32_t vshift = params->gemmlowp_scalar.shift;
-  const int32_t vremainder_threshold = params->gemmlowp_scalar.remainder_threshold;
-  const int32_t voutput_min_less_zero_point = params->gemmlowp_scalar.output_min_less_zero_point;
-  const int32_t voutput_max_less_zero_point = params->gemmlowp_scalar.output_max_less_zero_point;
-  const int32_t voutput_zero_point = params->gemmlowp_scalar.output_zero_point;
+  const float vscale = params->fp32_scalar_lrint.scale;
+  const long voutput_min_less_zero_point = params->fp32_scalar_lrint.output_min_less_zero_point;
+  const long voutput_max_less_zero_point = params->fp32_scalar_lrint.output_max_less_zero_point;
+  const int32_t voutput_zero_point = params->fp32_scalar_lrint.output_zero_point;
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -247,14 +244,11 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up1x25__scalar(
 
       w = (const void*) ((uintptr_t) w + sizeof(int32_t) + 25 * sizeof(int8_t));
 
-      const int64_t vproduct = (int64_t) vacc * (int64_t) vmultiplier;
-      const int32_t vq31product = (int32_t) (uint32_t) ((uint64_t) (vproduct + vq31rounding) >> 31);
-      const int32_t vremainder = (vq31product & vremainder_mask) - (int32_t) (vq31product < 0);
-
-      int32_t vout = asr_s32(vq31product, vshift) + (int32_t) (vremainder > vremainder_threshold);
-      vout = math_max_s32(vout, voutput_min_less_zero_point);
-      vout = math_min_s32(vout, voutput_max_less_zero_point);
-      vout += voutput_zero_point;
+      const float vfpacc = (float) vacc * vscale;
+      long vrndacc = lrintf(vfpacc);
+      vrndacc = XNN_UNPREDICTABLE(vrndacc < voutput_min_less_zero_point) ? voutput_min_less_zero_point : vrndacc;
+      vrndacc = XNN_UNPREDICTABLE(vrndacc > voutput_max_less_zero_point) ? voutput_max_less_zero_point : vrndacc;
+      int32_t vout = (int32_t) vrndacc + voutput_zero_point;
 
       *output++ = (int8_t) vout;
     } while (--c != 0);
