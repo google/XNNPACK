@@ -250,6 +250,7 @@ SET(XNNPACK_TABLE_SRCS
   src/tables/exp2minus-k-over-2048.c)
 
 SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
+  src/params-init.c
   src/f32-argmaxpool/4x-scalar-c1.c
   src/f32-argmaxpool/9p8x-scalar-c1.c
   src/f32-argmaxpool/9x-scalar-c1.c
