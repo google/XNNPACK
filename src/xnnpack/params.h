@@ -455,6 +455,13 @@ union xnn_qs8_conv_minmax_params {
     XNN_ALIGN(16) int8_t output_min[16];
     XNN_ALIGN(16) int8_t output_max[16];
   } gemmlowp_wasmsimd;
+  struct {
+    XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) float output_min_less_zero_point[4];
+    XNN_ALIGN(16) float output_max_less_zero_point[4];
+    XNN_ALIGN(16) float magic_bias[4];
+    XNN_ALIGN(16) int32_t magic_bias_less_output_zero_point[4];
+  } fp32_wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD
 };
 

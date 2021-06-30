@@ -154,6 +154,13 @@ XNN_INTERNAL void xnn_init_qs8_conv_minmax_gemmlowp_wasmsimd_params(
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max);
+
+XNN_INTERNAL void xnn_init_qs8_conv_minmax_fp32_wasmsimd_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max);
 #endif  // XNN_ARCH_WASMSIMD
 
 XNN_INTERNAL void xnn_init_qc8_scale_fp32_params(

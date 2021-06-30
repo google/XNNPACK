@@ -544,6 +544,22 @@ void xnn_init_qs8_conv_minmax_gemmlowp_wasmsimd_params(
     params->gemmlowp_wasmsimd.output_max[i] = output_max;
   }
 }
+
+void xnn_init_qs8_conv_minmax_fp32_wasmsimd_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->fp32_wasmsimd.scale[i] = scale;
+    params->fp32_wasmsimd.output_min_less_zero_point[i] = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+    params->fp32_wasmsimd.output_max_less_zero_point[i] = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+    params->fp32_wasmsimd.magic_bias[i] = 12582912.0f;
+    params->fp32_wasmsimd.magic_bias_less_output_zero_point[i] = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  }
+}
 #endif  // XNN_ARCH_WASMSIMD
 
 void xnn_init_qc8_scale_fp32_params(

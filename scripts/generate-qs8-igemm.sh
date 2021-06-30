@@ -57,13 +57,21 @@ tools/xngen src/qs8-igemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION=FP32    
 
 ################################## WAsm SIMD ##################################
 ### C8 micro-kernels
-tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=1 -D VARIANT=LD64  -o src/qs8-igemm/gen/1x4c8-minmax-gemmlowp-wasmsimd-ld64.c
-tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=2 -D VARIANT=LD64  -o src/qs8-igemm/gen/2x4c8-minmax-gemmlowp-wasmsimd-ld64.c
-tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=3 -D VARIANT=LD64  -o src/qs8-igemm/gen/3x4c8-minmax-gemmlowp-wasmsimd-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=1 -D VARIANT=LD64  -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/1x4c8-minmax-gemmlowp-wasmsimd-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=2 -D VARIANT=LD64  -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/2x4c8-minmax-gemmlowp-wasmsimd-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=3 -D VARIANT=LD64  -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/3x4c8-minmax-gemmlowp-wasmsimd-ld64.c
 
-tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=1 -D VARIANT=LD128 -o src/qs8-igemm/gen/1x4c8-minmax-gemmlowp-wasmsimd-ld128.c
-tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=2 -D VARIANT=LD128 -o src/qs8-igemm/gen/2x4c8-minmax-gemmlowp-wasmsimd-ld128.c
-tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=3 -D VARIANT=LD128 -o src/qs8-igemm/gen/3x4c8-minmax-gemmlowp-wasmsimd-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=1 -D VARIANT=LD64  -D REQUANTIZATION=FP32     -o src/qs8-igemm/gen/1x4c8-minmax-fp32-wasmsimd-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=2 -D VARIANT=LD64  -D REQUANTIZATION=FP32     -o src/qs8-igemm/gen/2x4c8-minmax-fp32-wasmsimd-ld64.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=3 -D VARIANT=LD64  -D REQUANTIZATION=FP32     -o src/qs8-igemm/gen/3x4c8-minmax-fp32-wasmsimd-ld64.c
+
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=1 -D VARIANT=LD128 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/1x4c8-minmax-gemmlowp-wasmsimd-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=2 -D VARIANT=LD128 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/2x4c8-minmax-gemmlowp-wasmsimd-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=3 -D VARIANT=LD128 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/3x4c8-minmax-gemmlowp-wasmsimd-ld128.c
+
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=1 -D VARIANT=LD128 -D REQUANTIZATION=FP32     -o src/qs8-igemm/gen/1x4c8-minmax-fp32-wasmsimd-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=2 -D VARIANT=LD128 -D REQUANTIZATION=FP32     -o src/qs8-igemm/gen/2x4c8-minmax-fp32-wasmsimd-ld128.c
+tools/xngen src/qs8-igemm/MRx4c8-wasmsimd.c.in -D MR=3 -D VARIANT=LD128 -D REQUANTIZATION=FP32     -o src/qs8-igemm/gen/3x4c8-minmax-fp32-wasmsimd-ld128.c
 
 ################################### ARM NEON ##################################
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8-minmax-gemmlowp-neon-mlal-lane.c
