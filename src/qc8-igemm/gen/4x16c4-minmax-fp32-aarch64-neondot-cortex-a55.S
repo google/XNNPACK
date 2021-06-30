@@ -433,12 +433,13 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_
         SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
         B.HI    1b
 
-        # Load per channel scale values from weights
-        LDP     q0, q1, [x5], 32
         SCVTF   v16.4s, v16.4s
         SCVTF   v17.4s, v17.4s
+        # Load per channel scale values from weights
+        LDR     q0, [x5], 16
         SCVTF   v18.4s, v18.4s
         SCVTF   v19.4s, v19.4s
+        LDR     q1, [x5], 16
         SCVTF   v20.4s, v20.4s
         SCVTF   v21.4s, v21.4s
         SCVTF   v22.4s, v22.4s
@@ -452,9 +453,10 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_
         SCVTF   v30.4s, v30.4s
         SCVTF   v31.4s, v31.4s
 
-        LDP     q2, q3, [x5], 32
+        LDR     q2, [x5], 16
         FMUL    v16.4s, v16.4s, v0.4s
         FMUL    v17.4s, v17.4s, v0.4s
+        LDR     q3, [x5], 16
         FMUL    v18.4s, v18.4s, v0.4s
         FMUL    v19.4s, v19.4s, v0.4s
         FMUL    v20.4s, v20.4s, v1.4s

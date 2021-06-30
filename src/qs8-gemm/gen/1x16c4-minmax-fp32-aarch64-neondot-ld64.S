@@ -74,12 +74,11 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld64
 
 2:
         # Apply params - scale, bias and clamp
-        LD1R    {v0.4s}, [x11], 4
         SCVTF   v28.4s, v28.4s
+        LD1R    {v0.4s}, [x11], 4
         SCVTF   v29.4s, v29.4s
         SCVTF   v30.4s, v30.4s
         SCVTF   v31.4s, v31.4s
-
         FMUL    v28.4s, v28.4s, v0.4s
         FMUL    v29.4s, v29.4s, v0.4s
         FMUL    v30.4s, v30.4s, v0.4s

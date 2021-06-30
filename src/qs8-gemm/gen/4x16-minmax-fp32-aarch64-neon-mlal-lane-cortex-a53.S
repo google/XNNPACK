@@ -461,10 +461,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_cor
         CBNZ    x0, 4f
 
 3:
-        # Apply params - scale, bias and clamp
-        LD1R    {v0.4s}, [x11], 4
         SCVTF   v16.4s, v16.4s
         SCVTF   v17.4s, v17.4s
+        # Apply params - scale, bias and clamp
+        LD1R    {v0.4s}, [x11], 4
         SCVTF   v18.4s, v18.4s
         SCVTF   v19.4s, v19.4s
         SCVTF   v20.4s, v20.4s

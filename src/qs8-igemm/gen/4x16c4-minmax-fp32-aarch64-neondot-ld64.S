@@ -156,10 +156,10 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         B.HI    1b
 
 3:
-        # Apply params - scale, bias and clamp
-        LD1R    {v0.4s}, [x8], 4
         SCVTF   v16.4s, v16.4s
         SCVTF   v17.4s, v17.4s
+        # Apply params - scale, bias and clamp
+        LD1R    {v0.4s}, [x8], 4
         SCVTF   v18.4s, v18.4s
         SCVTF   v19.4s, v19.4s
         SCVTF   v20.4s, v20.4s

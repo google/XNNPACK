@@ -109,10 +109,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32
         SDOT    v31.4s, v7.16b, v3.4b[0]
         B.HI    1b
 
-        # Apply params - scale, bias and clamp
-        LD1R    {v0.4s}, [x11], 4
         SCVTF   v16.4s, v16.4s
         SCVTF   v17.4s, v17.4s
+        # Apply params - scale, bias and clamp
+        LD1R    {v0.4s}, [x11], 4
         SCVTF   v18.4s, v18.4s
         SCVTF   v19.4s, v19.4s
         SCVTF   v20.4s, v20.4s

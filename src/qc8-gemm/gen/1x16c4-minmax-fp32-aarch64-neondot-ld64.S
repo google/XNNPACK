@@ -74,14 +74,15 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld64
 
 2:
         # Load per channel scale values from weights
-        LDP     q0, q1, [x5], 32
         SCVTF   v28.4s, v28.4s
+        LDR     q0, [x5], 16
         SCVTF   v29.4s, v29.4s
+        LDR     q1, [x5], 16
         SCVTF   v30.4s, v30.4s
+        LDR     q2, [x5], 16
         SCVTF   v31.4s, v31.4s
-
-        LDP     q2, q3, [x5], 32
         FMUL    v28.4s, v28.4s, v0.4s
+        LDR     q3, [x5], 16
         FMUL    v29.4s, v29.4s, v1.4s
         FMUL    v30.4s, v30.4s, v2.4s
         FMUL    v31.4s, v31.4s, v3.4s
