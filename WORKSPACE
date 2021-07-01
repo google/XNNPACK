@@ -5,7 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Bazel rule definitions
 http_archive(
     name = "rules_cc",
-    strip_prefix = "rules_cc-master",
+    strip_prefix = "rules_cc-main",
     urls = ["https://github.com/bazelbuild/rules_cc/archive/main.zip"],
 )
 
