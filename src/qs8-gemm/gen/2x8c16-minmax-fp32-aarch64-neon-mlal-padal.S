@@ -1,16 +1,16 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-gemm/2x8c16-aarch64-neon-mlal-padal.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
 
-$DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-# void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__aarch64_neon_mlal_padal(
+# void xnn_qs8_gemm_minmax_fp32_ukernel_2x8c16__aarch64_neon_mlal_padal(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -20,7 +20,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,          [sp] -> x10
-#     const union ${CONV_PARAMS} params)  [sp + 8] -> x11
+#     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -34,7 +34,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_
 # temp1   v3 v11 v13 v15
 # unused  v8 v9
 
-BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__aarch64_neon_mlal_padal
+BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_2x8c16__aarch64_neon_mlal_padal
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -131,12 +131,8 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
         ADDP    v20.4s, v20.4s, v22.4s
-        $if REQUANTIZATION == "GEMMLOWP":
-          LD1R    {v4.4s}, [x11], 4
         ADDP    v24.4s, v24.4s, v26.4s
         ADDP    v28.4s, v28.4s, v30.4s
-        $if REQUANTIZATION == "GEMMLOWP":
-          LD1R    {v7.4s}, [x11], 4
         ADDP    v17.4s, v17.4s, v19.4s
         ADDP    v21.4s, v21.4s, v23.4s
         ADDP    v25.4s, v25.4s, v27.4s
@@ -146,54 +142,21 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8
         ADDP    v2.4s, v17.4s, v21.4s
         ADDP    v3.4s, v25.4s, v29.4s
 
-        $if REQUANTIZATION == "GEMMLOWP":
-          # Apply params - scale, shift, bias and clamp
-          SQRDMULH v0.4s, v0.4s, v4.4s
-          SQRDMULH v1.4s, v1.4s, v4.4s
-          SQRDMULH v2.4s, v2.4s, v4.4s
-          SQRDMULH v3.4s, v3.4s, v4.4s
-          CMEQ    v4.4s, v7.4s, 0
-          BIC     v6.16b, v0.16b, v4.16b
-          BIC     v16.16b, v1.16b, v4.16b
-          BIC     v17.16b, v2.16b, v4.16b
-          BIC     v4.16b,  v3.16b, v4.16b
-          SSRA    v0.4s,  v6.4s, 31
-          SSRA    v1.4s, v16.4s, 31
-          SSRA    v2.4s, v17.4s, 31
-          SSRA    v3.4s,  v4.4s, 31
-          SRSHL   v0.4s, v0.4s, v7.4s
-          SRSHL   v1.4s, v1.4s, v7.4s
-          SRSHL   v2.4s, v2.4s, v7.4s
-          SRSHL   v3.4s, v3.4s, v7.4s
-        $elif REQUANTIZATION == "FP32":
-          $if not CHANNELWISE:
-            # Apply params - scale, bias and clamp
-            SCVTF   v0.4s, v0.4s
-            LD1R    {v4.4s}, [x11], 4
-            SCVTF   v1.4s, v1.4s
-            SCVTF   v2.4s, v2.4s
-            SCVTF   v3.4s, v3.4s
-            FMUL    v0.4s, v0.4s, v4.4s
-            FMUL    v1.4s, v1.4s, v4.4s
-            FMUL    v2.4s, v2.4s, v4.4s
-            FMUL    v3.4s, v3.4s, v4.4s
-          $else:
-            # Load per channel scale values from weights
-            SCVTF   v0.4s, v0.4s
-            LDR     q4, [x5], 16
-            SCVTF   v1.4s, v1.4s
-            LDR     q5, [x5], 16
-            SCVTF   v2.4s, v2.4s
-            SCVTF   v3.4s, v3.4s
-            FMUL    v0.4s, v0.4s, v4.4s
-            FMUL    v1.4s, v1.4s, v5.4s
-            FMUL    v2.4s, v2.4s, v4.4s
-            FMUL    v3.4s, v3.4s, v5.4s
+        # Apply params - scale, bias and clamp
+        SCVTF   v0.4s, v0.4s
+        LD1R    {v4.4s}, [x11], 4
+        SCVTF   v1.4s, v1.4s
+        SCVTF   v2.4s, v2.4s
+        SCVTF   v3.4s, v3.4s
+        FMUL    v0.4s, v0.4s, v4.4s
+        FMUL    v1.4s, v1.4s, v4.4s
+        FMUL    v2.4s, v2.4s, v4.4s
+        FMUL    v3.4s, v3.4s, v4.4s
 
-          FCVTNS  v0.4s, v0.4s
-          FCVTNS  v1.4s, v1.4s
-          FCVTNS  v2.4s, v2.4s
-          FCVTNS  v3.4s, v3.4s
+        FCVTNS  v0.4s, v0.4s
+        FCVTNS  v1.4s, v1.4s
+        FCVTNS  v2.4s, v2.4s
+        FCVTNS  v3.4s, v3.4s
 
         LD1R    {v5.8h}, [x11], 2
         SQXTN   v0.4h, v0.4s
@@ -248,7 +211,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8
         LDP     d10, d11, [sp], 48
         RET
 
-END_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__aarch64_neon_mlal_padal
+END_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_2x8c16__aarch64_neon_mlal_padal
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

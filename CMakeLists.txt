@@ -3572,12 +3572,14 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/qc8-gemm/gen/1x16c4-minmax-fp32-aarch64-neondot-ld32.S
   src/qc8-gemm/gen/1x16c4-minmax-fp32-aarch64-neondot-ld64.S
+  src/qc8-gemm/gen/2x8c16-minmax-fp32-aarch64-neon-mlal-padal.S
   src/qc8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-cortex-a53.S
   src/qc8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-cortex-a53.S
   src/qc8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S
   src/qc8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld32.S
   src/qc8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld64.S
   src/qc8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S
+  src/qc8-igemm/gen/2x8c16-minmax-fp32-aarch64-neon-mlal-padal.S
   src/qc8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-cortex-a53.S
   src/qc8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-cortex-a53.S
   src/qc8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S
@@ -3596,6 +3598,7 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal-prfm.S
   src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal.S
   src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-aarch64-neon-mull-padal.S
+  src/qs8-gemm/gen/2x8c16-minmax-fp32-aarch64-neon-mlal-padal.S
   src/qs8-gemm/gen/2x8c16-minmax-gemmlowp-aarch64-neon-mlal-padal.S
   src/qs8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-cortex-a53.S
   src/qs8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-cortex-a53.S
@@ -3617,6 +3620,7 @@ SET(XNNPACK_AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal-prfm-cortex-a53.S
   src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal-prfm.S
   src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal.S
+  src/qs8-igemm/gen/2x8c16-minmax-fp32-aarch64-neon-mlal-padal.S
   src/qs8-igemm/gen/2x8c16-minmax-gemmlowp-aarch64-neon-mlal-padal.S
   src/qs8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-cortex-a53.S
   src/qs8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-cortex-a53.S
