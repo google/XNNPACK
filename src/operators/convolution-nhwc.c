@@ -288,12 +288,16 @@ static enum xnn_status create_convolution2d_nhwc(
         pack_dwconv_hwg_w(
           kernel_height, kernel_width,
           groups, dwconv_ukernel->channel_tile,
-          kernel, bias, convolution_op->packed_weights, extra_weights_bytes, packing_params);
+          kernel, bias, convolution_op->packed_weights,
+          dwconv_ukernel->channel_tile * extra_weights_bytes,
+          packing_params);
       } else {
         pack_dwconv_ghw_w(
           kernel_height, kernel_width,
           groups, dwconv_ukernel->channel_tile,
-          kernel, bias, convolution_op->packed_weights, extra_weights_bytes, packing_params);
+          kernel, bias, convolution_op->packed_weights,
+          dwconv_ukernel->channel_tile * extra_weights_bytes,
+          packing_params);
       }
 
       if (scale_params != NULL) {
