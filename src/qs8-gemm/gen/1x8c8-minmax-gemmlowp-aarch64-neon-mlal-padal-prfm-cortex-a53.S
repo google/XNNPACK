@@ -19,7 +19,7 @@
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          (x7)
 #     size_t cn_stride,          [sp] -> x10
-#     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x9
+#     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x11
 
 # d2-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -33,7 +33,7 @@
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_cortex_a53
 
-        LDP     x10, x9, [sp]           // cn_stride, params
+        LDP     x10, x11, [sp]           // cn_stride, params
 
         ADD     x2, x2, 7               // kc = (kc + 7) & ~7
         BIC     x2, x2, 7
@@ -193,10 +193,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
         ADDP    v20.4s, v20.4s, v22.4s
-        LD1R    {v4.4s}, [x9], 4
+        LD1R    {v4.4s}, [x11], 4
         ADDP    v24.4s, v24.4s, v26.4s
         ADDP    v28.4s, v28.4s, v30.4s
-        LD1R    {v7.4s}, [x9], 4
+        LD1R    {v7.4s}, [x11], 4
         ADDP    v0.4s, v16.4s, v20.4s
         ADDP    v1.4s, v24.4s, v28.4s
 
@@ -204,7 +204,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
         SQRDMULH v0.4s, v0.4s, v4.4s
         SQRDMULH v1.4s, v1.4s, v4.4s
         CMEQ    v4.4s, v7.4s, 0
-        LD1R    {v5.8h}, [x9], 2
+        LD1R    {v5.8h}, [x11], 2
         BIC     v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
         SSRA    v0.4s, v6.4s, 31
@@ -216,10 +216,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
         SUBS    x1, x1, 8
         SQADD   v0.8h, v0.8h, v5.8h
         SQXTN   v0.8b, v0.8h
-        LD1R    {v1.16b}, [x9], 1
-        LD1R    {v17.16b}, [x9]
+        LD1R    {v1.16b}, [x11], 1
+        LD1R    {v17.16b}, [x11]
         SMAX    v0.8b, v0.8b, v1.8b
-        SUB     x9, x9, 11              // rewind params pointer
+        SUB     x11, x11, 11              // rewind params pointer
         SMIN    v0.8b, v0.8b, v17.8b
         B.LO    5f
 

@@ -19,7 +19,7 @@
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,          [sp] -> x10
-#     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x9
+#     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -65,7 +65,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
         MOV     v27.16b, v26.16b
         LDP     s28, s30, [x5], 8
         MOV     v29.16b, v28.16b
-        LDP     x10, x9, [sp, 80]       // cn_stride, params
+        LDP     x10, x11, [sp, 80]       // cn_stride, params
         MOV     v31.16b, v30.16b
         # Is there at least 16 bytes for epilogue?
         B.LO    4f
@@ -265,10 +265,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
         ADDP    v20.4s, v20.4s, v22.4s
-        LD1R    {v4.4s}, [x9], 4
+        LD1R    {v4.4s}, [x11], 4
         ADDP    v24.4s, v24.4s, v26.4s
         ADDP    v28.4s, v28.4s, v30.4s
-        LD1R    {v7.4s}, [x9], 4
+        LD1R    {v7.4s}, [x11], 4
         ADDP    v17.4s, v17.4s, v19.4s
         ADDP    v21.4s, v21.4s, v23.4s
         ADDP    v25.4s, v25.4s, v27.4s
@@ -284,7 +284,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
         SQRDMULH v2.4s, v2.4s, v4.4s
         SQRDMULH v3.4s, v3.4s, v4.4s
         CMEQ    v4.4s, v7.4s, 0
-        LD1R    {v5.8h}, [x9], 2
+        LD1R    {v5.8h}, [x11], 2
         BIC     v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
         BIC     v17.16b, v2.16b, v4.16b
@@ -306,8 +306,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_pad
         SQADD   v1.8h, v2.8h, v5.8h
         SQXTN   v0.8b, v0.8h
         SQXTN2  v0.16b, v1.8h
-        LD1R    {v1.16b}, [x9], 1
-        LD1R    {v2.16b}, [x9]
+        LD1R    {v1.16b}, [x11], 1
+        LD1R    {v2.16b}, [x11]
         SMAX    v0.16b, v0.16b, v1.16b
         SMIN    v0.16b, v0.16b, v2.16b
         B.LO    5f
