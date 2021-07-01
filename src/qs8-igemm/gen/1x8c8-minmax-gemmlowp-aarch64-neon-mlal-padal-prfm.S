@@ -7,6 +7,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #include <xnnpack/assembly.h>
 
 # void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm(
@@ -193,13 +194,14 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
         SQRDMULH v0.4s, v0.4s, v4.4s
         SQRDMULH v1.4s, v1.4s, v4.4s
         CMEQ    v4.4s, v7.4s, 0
-        LD1R    {v5.8h}, [x11], 2
         BIC     v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
         SSRA    v0.4s, v6.4s, 31
         SSRA    v1.4s, v16.4s, 31
         SRSHL   v0.4s, v0.4s, v7.4s
         SRSHL   v1.4s, v1.4s, v7.4s
+
+        LD1R    {v5.8h}, [x11], 2
         SQXTN   v0.4h, v0.4s
         SQXTN2  v0.8h, v1.4s
         SUBS    x1, x1, 8
