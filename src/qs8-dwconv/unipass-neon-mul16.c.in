@@ -14,6 +14,8 @@ $assert KERNEL_TILE >= 2
 #include <arm_neon.h>
 
 #include <xnnpack/dwconv.h>
+$if REQUANTIZATION == "FP32" and ARMV8:
+  #include <xnnpack/intrinsics-polyfill.h>
 
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
