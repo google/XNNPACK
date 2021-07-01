@@ -290,6 +290,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x16c2__neon_mull_padal_dup(
         }
       }
     }
+
     const int32x4_t vmultiplier = vld1q_dup_s32(&params->gemmlowp_neon.multiplier);
     vacc0x0123 = vqrdmulhq_s32(vacc0x0123, vmultiplier);
     vacc0x4567 = vqrdmulhq_s32(vacc0x4567, vmultiplier);
