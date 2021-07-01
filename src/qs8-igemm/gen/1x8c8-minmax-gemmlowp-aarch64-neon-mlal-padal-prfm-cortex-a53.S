@@ -7,6 +7,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #include <xnnpack/assembly.h>
 
 # void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_cortex_a53(
@@ -21,7 +22,7 @@
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x8
 #     const float* zero,                 [sp + 16] -> x12
-#     const xnn_qs8_conv_minmax_params params [sp + 24] -> x11
+#     const union xnn_qs8_conv_minmax_params params [sp + 24] -> x11
 
 # d2-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -220,13 +221,14 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
         SQRDMULH v0.4s, v0.4s, v4.4s
         SQRDMULH v1.4s, v1.4s, v4.4s
         CMEQ    v4.4s, v7.4s, 0
-        LD1R    {v5.8h}, [x11], 2
         BIC     v6.16b, v0.16b, v4.16b
         BIC     v16.16b, v1.16b, v4.16b
         SSRA    v0.4s, v6.4s, 31
         SSRA    v1.4s, v16.4s, 31
         SRSHL   v0.4s, v0.4s, v7.4s
         SRSHL   v1.4s, v1.4s, v7.4s
+
+        LD1R    {v5.8h}, [x11], 2
         SQXTN   v0.4h, v0.4s
         SQXTN2  v0.8h, v1.4s
         SUBS    x1, x1, 8
@@ -235,7 +237,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pa
         LD1R    {v1.16b}, [x11], 1
         LD1R    {v17.16b}, [x11]
         SMAX    v0.8b, v0.8b, v1.8b
-        SUB     x11, x11, 11            // rewind params pointer
+        SUB     x11, x11, 11              // rewind params pointer
+
         SMIN    v0.8b, v0.8b, v17.8b
         B.LO    6f
 
