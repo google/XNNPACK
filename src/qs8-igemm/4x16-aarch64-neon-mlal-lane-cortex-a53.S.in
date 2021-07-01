@@ -9,7 +9,7 @@ $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 #include <xnnpack/assembly.h>
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
 # void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53(
 #     size_t mr,                 x0
 #     size_t nc,                 x1

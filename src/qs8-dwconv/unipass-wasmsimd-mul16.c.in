@@ -18,7 +18,7 @@ $assert KERNEL_TILE >= 2
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + "wasmsimd"
-$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
 void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wasmsimd_mul16(
     size_t channels,
     size_t output_width,
@@ -29,7 +29,7 @@ void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(channels != 0);
   assert(output_width != 0);

@@ -9,7 +9,7 @@ $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 #include <xnnpack/assembly.h>
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
 # void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -20,7 +20,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,          [sp] -> x12
-#     const union ${CONV_PARAMS} params)  [sp + 8] -> x11
+#     const union ${PARAMS_UNION} params)  [sp + 8] -> x11
 
 $if REQUANTIZATION == "GEMMLOWP":
   # params structure is 12 bytes

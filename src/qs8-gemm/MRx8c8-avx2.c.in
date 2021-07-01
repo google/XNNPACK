@@ -19,7 +19,7 @@ $assert MR <= 4
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_STRUCT = "avx2" if CHANNELWISE else REQUANTIZATION.lower() + "_avx2"
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
 void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x8c8__avx2(
     size_t mr,
     size_t nc,
@@ -30,7 +30,7 @@ void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(mr != 0);
   assert(mr <= ${MR});

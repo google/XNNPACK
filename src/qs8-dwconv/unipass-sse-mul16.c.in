@@ -21,7 +21,7 @@ $assert KERNEL_TILE >= 2
 
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
 $PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + ("sse4" if SSE >= 4 else "sse2")
 $ISA = "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
 void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul16(
@@ -34,7 +34,7 @@ void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(channels != 0);
   assert(output_width != 0);

@@ -19,7 +19,7 @@ $if REQUANTIZATION == "FP32":
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $FUNCTION_SUFFIX = "scalar_" + VARIANT.lower() if VARIANT else "scalar"
-$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
 $PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + "scalar" + ("_" + VARIANT.lower() if VARIANT else "")
 void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}__${FUNCTION_SUFFIX}(
     size_t mr,
@@ -33,7 +33,7 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}_
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union ${CONV_PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});

@@ -9,7 +9,7 @@ $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 #include <xnnpack/assembly.h>
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
 # void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c8__aarch64_neon_mlal_padal${"_prfm" if PREFETCH else ""}_cortex_a53(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -22,7 +22,7 @@ $CONV_PARAMS = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x8
 #     const float* zero,                 [sp + 16] -> x12
-#     const union ${CONV_PARAMS} params [sp + 24] -> x11
+#     const union ${PARAMS_UNION} params [sp + 24] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
