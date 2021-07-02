@@ -81,11 +81,11 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up24x9__avx_mul16(
     const void* w = weights;
     for (; c >= 24; c -= 24) {
       __m128i vacc0123 = _mm_loadu_si128((const __m128i*) w);
-      __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 4 * sizeof(int32_t)));
-      __m128i vacc89AB = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 8 * sizeof(int32_t)));
-      __m128i vaccCDEF = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 12 * sizeof(int32_t)));
-      __m128i vaccGHIJ = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 16 * sizeof(int32_t)));
-      __m128i vaccKLMN = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 20 * sizeof(int32_t)));
+      __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 4));
+      __m128i vacc89AB = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 8));
+      __m128i vaccCDEF = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 12));
+      __m128i vaccGHIJ = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 16));
+      __m128i vaccKLMN = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 20));
 
 
       const __m128i vi0x01234567 = _mm_loadl_epi64((const __m128i*) i0);
@@ -395,10 +395,10 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up24x9__avx_mul16(
       output += 24;
     }
     if XNN_UNLIKELY(c != 0) {
-      const int8_t* k = (const int8_t*) ((uintptr_t) w + 24 * sizeof(int32_t));
+      const int8_t* k = (const int8_t*) ((const int32_t*) w + 24);
       do {
         __m128i vacc0123 = _mm_loadu_si128((const __m128i*) w);
-        __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 4 * sizeof(int32_t)));
+        __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 4));
 
 
         const __m128i vi0x01234567 = _mm_loadl_epi64((const __m128i*) i0);
@@ -530,7 +530,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up24x9__avx_mul16(
         vacc0123 = _mm_cvtps_epi32(vscaled0123);
         vacc4567 = _mm_cvtps_epi32(vscaled4567);
 
-        w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
+        w = (const void*) ((const int32_t*) w + 8);
 
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);

@@ -167,11 +167,11 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__xop_mul32(
     const void* w = weights;
     for (; c >= 24; c -= 24) {
       __m128i vacc0123 = _mm_loadu_si128((const __m128i*) w);
-      __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 4 * sizeof(int32_t)));
-      __m128i vacc89AB = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 8 * sizeof(int32_t)));
-      __m128i vaccCDEF = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 12 * sizeof(int32_t)));
-      __m128i vaccGHIJ = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 16 * sizeof(int32_t)));
-      __m128i vaccKLMN = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 20 * sizeof(int32_t)));
+      __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 4));
+      __m128i vacc89AB = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 8));
+      __m128i vaccCDEF = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 12));
+      __m128i vaccGHIJ = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 16));
+      __m128i vaccKLMN = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 20));
 
 
       const __m128i vi0x0123 = _mm_cvtepi8_epi32(_mm_loadu_si32(i0));
@@ -791,7 +791,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__xop_mul32(
       output += 24;
     }
     if XNN_UNLIKELY(c != 0) {
-      const int8_t* k = (const int8_t*) ((uintptr_t) w + 24 * sizeof(int32_t));
+      const int8_t* k = (const int8_t*) ((const int32_t*) w + 24);
       do {
         __m128i vacc0123 = _mm_loadu_si128((const __m128i*) w);
 
@@ -970,7 +970,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up24x25__xop_mul32(
         vacc0123 =
           _mm_sub_epi32(_mm_sra_epi32(vq31prod0123, vshift), _mm_cmpgt_epi32(vrem0123, vremainder_threshold));
 
-        w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+        w = (const void*) ((const int32_t*) w + 4);
 
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->gemmlowp_sse4.output_zero_point);
         __m128i vout0123 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc0123), voutput_zero_point);

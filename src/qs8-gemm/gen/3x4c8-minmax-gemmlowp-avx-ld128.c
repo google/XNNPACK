@@ -65,7 +65,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x4c8__avx_ld128(
     __m128i vacc2x1 = vacc0x1;
     __m128i vacc2x2 = vacc0x2;
     __m128i vacc2x3 = vacc0x3;
-    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    w = (const void*) ((const int32_t*) w + 4);
 
     size_t k = 0;
     while (k < kc) {
@@ -90,7 +90,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x4c8__avx_ld128(
       vacc1x1 = _mm_add_epi32(vacc1x1, _mm_madd_epi16(vxa1, vxb1));
       vacc2x0 = _mm_add_epi32(vacc2x0, _mm_madd_epi16(vxa2, vxb0));
       vacc2x1 = _mm_add_epi32(vacc2x1, _mm_madd_epi16(vxa2, vxb1));
-      const __m128i vb23 = _mm_load_si128((const __m128i*) ((uintptr_t) w + 16 * sizeof(int8_t)));
+      const __m128i vb23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
       const __m128i vsb23 = _mm_cmpgt_epi8(_mm_setzero_si128(), vb23);
       const __m128i vxb2 = _mm_unpacklo_epi8(vb23, vsb23);
       const __m128i vxb3 = _mm_unpackhi_epi8(vb23, vsb23);
@@ -102,7 +102,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x4c8__avx_ld128(
       vacc2x2 = _mm_add_epi32(vacc2x2, _mm_madd_epi16(vxa2, vxb2));
       vacc2x3 = _mm_add_epi32(vacc2x3, _mm_madd_epi16(vxa2, vxb3));
 
-      w = (const void*) ((uintptr_t) w + 32 * sizeof(int8_t));
+      w = (const void*) ((const int8_t*) w + 32);
       k += 8 * sizeof(int8_t);
     }
 

@@ -81,7 +81,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x9__sse41_mul16(
     const void* w = weights;
     for (; c >= 8; c -= 8) {
       __m128i vacc0123 = _mm_loadu_si128((const __m128i*) w);
-      __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 4 * sizeof(int32_t)));
+      __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 4));
 
 
       const __m128i vi0x01234567 = _mm_loadl_epi64((const __m128i*) i0);
@@ -252,7 +252,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x9__sse41_mul16(
     if XNN_UNLIKELY(c != 0) {
       {
         __m128i vacc0123 = _mm_loadu_si128((const __m128i*) w);
-        __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 4 * sizeof(int32_t)));
+        __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 4));
 
 
         const __m128i vi0x01234567 = _mm_loadl_epi64((const __m128i*) i0);

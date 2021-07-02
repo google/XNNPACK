@@ -53,7 +53,7 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x4c8__xop_ld64(
     __m128i vacc0x1 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[1]);
     __m128i vacc0x2 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[2]);
     __m128i vacc0x3 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[3]);
-    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    w = (const void*) ((const int32_t*) w + 4);
 
     size_t p = ks;
     do {
@@ -73,20 +73,20 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x4c8__xop_ld64(
         const __m128i vxb0 = _mm_cvtepi8_epi16(vb0);
 
         vacc0x0 = _mm_maddd_epi16(vxa0, vxb0, vacc0x0);
-        const __m128i vb1 = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + 8));
+        const __m128i vb1 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8));
         const __m128i vxb1 = _mm_cvtepi8_epi16(vb1);
 
         vacc0x1 = _mm_maddd_epi16(vxa0, vxb1, vacc0x1);
-        const __m128i vb2 = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + 16));
+        const __m128i vb2 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 16));
         const __m128i vxb2 = _mm_cvtepi8_epi16(vb2);
 
         vacc0x2 = _mm_maddd_epi16(vxa0, vxb2, vacc0x2);
-        const __m128i vb3 = _mm_loadl_epi64((const __m128i*) ((uintptr_t) w + 24));
+        const __m128i vb3 = _mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 24));
         const __m128i vxb3 = _mm_cvtepi8_epi16(vb3);
 
         vacc0x3 = _mm_maddd_epi16(vxa0, vxb3, vacc0x3);
 
-        w = (const void*) ((uintptr_t) w + 32);
+        w = (const void*) ((const int8_t*) w + 32);
         k += 8 * sizeof(int8_t);
       }
       p -= 1 * sizeof(void*);

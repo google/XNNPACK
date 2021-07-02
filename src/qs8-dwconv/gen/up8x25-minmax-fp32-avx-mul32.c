@@ -162,7 +162,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__avx_mul32(
     const void* w = weights;
     for (; c >= 8; c -= 8) {
       __m128i vacc0123 = _mm_loadu_si128((const __m128i*) w);
-      __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + 4 * sizeof(int32_t)));
+      __m128i vacc4567 = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + 4));
 
 
       const __m128i vi0x0123 = _mm_cvtepi8_epi32(_mm_loadu_si32(i0));
@@ -415,7 +415,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__avx_mul32(
       output += 8;
     }
     if XNN_UNLIKELY(c != 0) {
-      const int8_t* k = (const int8_t*) ((uintptr_t) w + 8 * sizeof(int32_t));
+      const int8_t* k = (const int8_t*) ((const int32_t*) w + 8);
       do {
         __m128i vacc0123 = _mm_loadu_si128((const __m128i*) w);
 
@@ -576,7 +576,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__avx_mul32(
         vscaled0123 = _mm_mul_ps(vscaled0123, _mm_load_ps(params->fp32_sse4.scale));
         vacc0123 = _mm_cvtps_epi32(vscaled0123);
 
-        w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+        w = (const void*) ((const int32_t*) w + 4);
 
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.output_zero_point);
         __m128i vout0123 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc0123), voutput_zero_point);

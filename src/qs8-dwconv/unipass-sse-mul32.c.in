@@ -62,7 +62,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
     for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
       __m128i vacc${ABC[0:4]} = _mm_loadu_si128((const __m128i*) w);
       $for C in range(4, CHANNEL_TILE, 4):
-        __m128i vacc${ABC[C:C+4]} = _mm_loadu_si128((const __m128i*) ((uintptr_t) w + ${C} * sizeof(int32_t)));
+        __m128i vacc${ABC[C:C+4]} = _mm_loadu_si128((const __m128i*) ((const int32_t*) w + ${C}));
 
       $for K in range(KERNEL_TILE):
 
@@ -115,8 +115,8 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
         $if DATATYPE == "QC8":
           const __m128 vscale${ABC[0:4]} = _mm_loadu_ps((const float*) w);
           $for C in range(4, CHANNEL_TILE, 4):
-            const __m128 vscale${ABC[C:C+4]} = _mm_loadu_ps((const float*) ((uintptr_t) w + ${C} * sizeof(float)));
-          w = (const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(float));
+            const __m128 vscale${ABC[C:C+4]} = _mm_loadu_ps((const float*) w + ${C});
+          w = (const void*) ((const float*) w + ${CHANNEL_TILE});
           $for C in range(0, CHANNEL_TILE, 4):
             vscaled${ABC[C:C+4]} = _mm_mul_ps(vscaled${ABC[C:C+4]}, vscale${ABC[C:C+4]});
         $else:
@@ -156,7 +156,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
     }
     if XNN_UNLIKELY(c != 0) {
       $if CHANNEL_TILE > 4:
-        const int8_t* k = (const int8_t*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t));
+        const int8_t* k = (const int8_t*) ((const int32_t*) w + ${CHANNEL_TILE});
       ${"do " if CHANNEL_TILE > 4 else ""}{
         __m128i vacc${ABC[0:4]} = _mm_loadu_si128((const __m128i*) w);
 
@@ -213,7 +213,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
           vacc${ABC[0:4]} = _mm_cvtps_epi32(vscaled${ABC[0:4]});
 
         $if CHANNEL_TILE > 4:
-          w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+          w = (const void*) ((const int32_t*) w + 4);
 
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
         __m128i vout${ABC[0:4]} = _mm_adds_epi16(_mm_packs_epi32(vacc${ABC[0:4]}, vacc${ABC[0:4]}), voutput_zero_point);
