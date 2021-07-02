@@ -1530,6 +1530,24 @@ enum xnn_status xnn_setup_minimum_nd_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_mod_nd_f32(
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* mod_op_out);
+
+enum xnn_status xnn_setup_mod_nd_f32(
+  xnn_operator_t mod_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  pthreadpool_t threadpool);
+
+
 enum xnn_status xnn_create_multiply_nd_f32(
   float output_min,
   float output_max,
@@ -1951,6 +1969,23 @@ enum xnn_status xnn_setup_hardswish_nc_f16(
   xnn_operator_t hardswish_op,
   size_t batch_size,
   const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_mod_nd_f16(
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* mod_op_out);
+
+enum xnn_status xnn_setup_mod_nd_f16(
+  xnn_operator_t mod_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const void* input1,
+  const void* input2,
   void* output,
   pthreadpool_t threadpool);
 
