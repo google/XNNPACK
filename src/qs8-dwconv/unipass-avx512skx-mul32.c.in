@@ -5,7 +5,8 @@
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
+$assert DATATYPE in ["QC8", "QS8"]
+$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert CHANNEL_TILE % 16 == 0
 $assert CHANNEL_TILE >= 16
 $assert KERNEL_TILE >= 2
@@ -17,10 +18,9 @@ $assert KERNEL_TILE >= 2
 #include <xnnpack/intrinsics-polyfill.h>
 
 
-$DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$PARAMS_STRUCT = "avx512" if CHANNELWISE else REQUANTIZATION.lower() + "_avx512"
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx512skx_mul32(
+$PARAMS_STRUCT = "avx512" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_avx512"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_qs8_conv_minmax_params"
+void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx512skx_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -35,15 +35,15 @@ void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL
   assert(channels != 0);
   assert(output_width != 0);
 
-  $if REQUANTIZATION == "GEMMLOWP":
-    const __mmask16 vblend_mask = _cvtu32_mask16(0xAAAA);
-    const __m512i vmultiplier = _mm512_set1_epi64(params->${PARAMS_STRUCT}.multiplier);
-    const __m512i vrounding = _mm512_set1_epi64(params->${PARAMS_STRUCT}.rounding);
-    const __m512i vremainder_mask = _mm512_set1_epi32(params->${PARAMS_STRUCT}.remainder_mask);
-    const __m512i vremainder_threshold = _mm512_set1_epi32(params->${PARAMS_STRUCT}.remainder_threshold);
-    const __m128i vshift = _mm_loadl_epi64((const __m128i*) &params->${PARAMS_STRUCT}.shift);
-  $else:
-    $if not CHANNELWISE:
+  $if DATATYPE != "QC8":
+    $if REQUANTIZATION == "GEMMLOWP":
+      const __mmask16 vblend_mask = _cvtu32_mask16(0xAAAA);
+      const __m512i vmultiplier = _mm512_set1_epi64(params->${PARAMS_STRUCT}.multiplier);
+      const __m512i vrounding = _mm512_set1_epi64(params->${PARAMS_STRUCT}.rounding);
+      const __m512i vremainder_mask = _mm512_set1_epi32(params->${PARAMS_STRUCT}.remainder_mask);
+      const __m512i vremainder_threshold = _mm512_set1_epi32(params->${PARAMS_STRUCT}.remainder_threshold);
+      const __m128i vshift = _mm_loadl_epi64((const __m128i*) &params->${PARAMS_STRUCT}.shift);
+    $else:
       const __m512 vscale = _mm512_load_ps(params->${PARAMS_STRUCT}.scale);
   $if CHANNEL_TILE > 16:
     const __m512i voutput_zero_point = _mm512_load_si512(params->${PARAMS_STRUCT}.output_zero_point);
@@ -115,7 +115,7 @@ void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL
         $for C in range(0, CHANNEL_TILE, 16):
           __m512 vscaled${ABC[C:C+16]} = _mm512_cvtepi32_ps(vacc${ABC[C:C+16]});
 
-        $if CHANNELWISE:
+        $if DATATYPE == "QC8":
           const __m512 vscale${ABC[0:16]} = _mm512_loadu_ps(w);
           $for C in range(16, CHANNEL_TILE, 16):
             const __m512 vscale${ABC[C:C+16]} = _mm512_loadu_ps((const void*) ((uintptr_t) w + ${C} * sizeof(float)));
@@ -213,7 +213,7 @@ void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL
           vacc${ABC[0:16]} = _mm512_mask_sub_epi32(vacc${ABC[0:16]}, _mm512_cmpgt_epi32_mask(vrem${ABC[0:16]}, vremainder_threshold), vacc${ABC[0:16]}, _mm512_set1_epi32(-1));
         $elif REQUANTIZATION == "FP32":
           __m512 vscaled${ABC[0:16]} = _mm512_cvtepi32_ps(vacc${ABC[0:16]});
-          $if CHANNELWISE:
+          $if DATATYPE == "QC8":
             const __m512 vscale${ABC[0:16]} = _mm512_loadu_ps((const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${CHANNEL_TILE * KERNEL_TILE} * sizeof(int8_t)));
             vscaled${ABC[0:16]} = _mm512_mul_ps(vscaled${ABC[0:16]}, vscale${ABC[0:16]});
           $else:

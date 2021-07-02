@@ -4,7 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
+$assert DATATYPE in ["QC8", "QS8"]
+$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert VARIANT in ["LD128", "EXTENDED"]
 $assert MR <= 4
 #include <assert.h>
@@ -16,11 +17,10 @@ $assert MR <= 4
 #include <xnnpack/math.h>
 
 
-$DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$PARAMS_STRUCT = "avx2" if CHANNELWISE else REQUANTIZATION.lower() + "_avx2"
+$PARAMS_STRUCT = "avx2" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_avx2"
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x8c8__avx2(
+$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_qs8_conv_minmax_params"
+void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x8c8__avx2(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -154,7 +154,7 @@ void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel
       $for M in range(MR):
         __m256 vscaled${M}x01234567 = _mm256_cvtepi32_ps(vacc${M}x01234567);
 
-      $if CHANNELWISE:
+      $if DATATYPE == "QC8":
         const __m256 vscale01234567 = _mm256_load_ps(w);
         w = (const void*) ((uintptr_t) w + 8 * sizeof(float));
         $for M in range(MR):

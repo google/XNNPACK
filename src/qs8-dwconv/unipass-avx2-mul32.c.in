@@ -5,7 +5,8 @@
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
+$assert DATATYPE in ["QC8", "QS8"]
+$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8
 $assert KERNEL_TILE >= 2
@@ -16,10 +17,9 @@ $assert KERNEL_TILE >= 2
 #include <xnnpack/dwconv.h>
 
 
-$DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$PARAMS_STRUCT = "avx2" if CHANNELWISE else REQUANTIZATION.lower() + "_avx2"
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx2_mul32(
+$PARAMS_STRUCT = "avx2" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_avx2"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_qs8_conv_minmax_params"
+void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx2_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -100,7 +100,7 @@ void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL
         $for C in range(0, CHANNEL_TILE, 8):
           __m256 vscaled${ABC[C:C+8]} = _mm256_cvtepi32_ps(vacc${ABC[C:C+8]});
 
-        $if CHANNELWISE:
+        $if DATATYPE == "QC8":
           const __m256 vscale${ABC[0:8]} = _mm256_loadu_ps((const float*) w);
           $for C in range(8, CHANNEL_TILE, 8):
             const __m256 vscale${ABC[C:C+8]} = _mm256_loadu_ps((const float*) ((uintptr_t) w + ${C} * sizeof(float)));
@@ -202,7 +202,7 @@ void xnn_${DATATYPE}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL
             _mm256_sub_epi32(_mm256_sra_epi32(vq31prod${ABC[0:8]}, vshift), _mm256_cmpgt_epi32(vrem${ABC[0:8]}, vremainder_threshold));
         $elif REQUANTIZATION == "FP32":
           __m256 vscaled${ABC[0:8]} = _mm256_cvtepi32_ps(vacc${ABC[0:8]});
-          $if CHANNELWISE:
+          $if DATATYPE == "QC8":
             const __m256 vscale${ABC[0:8]} = _mm256_loadu_ps((const float*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${CHANNEL_TILE * KERNEL_TILE} * sizeof(int8_t)));
             vscaled${ABC[0:8]} = _mm256_mul_ps(vscaled${ABC[0:8]}, vscale${ABC[0:8]});
           $else:
