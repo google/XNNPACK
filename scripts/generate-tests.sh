@@ -5,8 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 ### Tests for QU8 micro-kernels
-tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-gemmlowp.yaml --output test/qu8-gemm-minmax-gemmlowp.cc
-tools/generate-gemm-test.py --spec test/qu8-igemm-minmax-gemmlowp.yaml --output test/qu8-igemm-minmax-gemmlowp.cc
 tools/generate-dwconv-test.py --spec test/qu8-dwconv-minmax-gemmlowp.yaml --output test/qu8-dwconv-minmax-gemmlowp.cc
 
 ### Tests for U8 micro-kernels

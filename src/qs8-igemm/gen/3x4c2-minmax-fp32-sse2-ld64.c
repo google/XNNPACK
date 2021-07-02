@@ -223,9 +223,9 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_3x4c2__sse2_ld64(
         vout = _mm_srli_epi32(vout, 16);
       }
       if (nc & 1) {
-        *((int8_t*) c2) = (int8_t) _mm_extract_epi16(vout, 4);
-        *((int8_t*) c1) = (int8_t) _mm_extract_epi16(vout, 2);
-        *((int8_t*) c0) = (int8_t) _mm_cvtsi128_si32(vout);
+        *c2 = (int8_t) _mm_extract_epi16(vout, 4);
+        *c1 = (int8_t) _mm_extract_epi16(vout, 2);
+        *c0 = (int8_t) _mm_cvtsi128_si32(vout);
       }
 
       nc = 0;

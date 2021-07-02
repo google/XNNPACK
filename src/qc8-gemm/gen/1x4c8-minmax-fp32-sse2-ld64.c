@@ -112,7 +112,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
         vout = _mm_srli_epi32(vout, 16);
       }
       if (nc & 1) {
-        *((int8_t*) c0) = (int8_t) _mm_cvtsi128_si32(vout);
+        *c0 = (int8_t) _mm_cvtsi128_si32(vout);
       }
 
       nc = 0;

@@ -149,8 +149,8 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x4c8__sse41_ld128(
         vout = _mm_srli_epi32(vout, 16);
       }
       if (nc & 1) {
-        *((int8_t*) c1) = (int8_t) _mm_extract_epi8(vout, 4);
-        *((int8_t*) c0) = (int8_t) _mm_extract_epi8(vout, 0);
+        *c1 = (int8_t) _mm_extract_epi8(vout, 4);
+        *c0 = (int8_t) _mm_extract_epi8(vout, 0);
       }
 
       nc = 0;

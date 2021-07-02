@@ -267,9 +267,9 @@ void xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_3x4c2__ssse3(
         vout = _mm_srli_epi32(vout, 16);
       }
       if (nc & 1) {
-        *((int8_t*) c0) = (int8_t) _mm_cvtsi128_si32(vout);
-        *((int8_t*) c1) = (int8_t) _mm_extract_epi16(vout, 2);
-        *((int8_t*) c2) = (int8_t) _mm_extract_epi16(vout, 4);
+        *c0 = (int8_t) _mm_cvtsi128_si32(vout);
+        *c1 = (int8_t) _mm_extract_epi16(vout, 2);
+        *c2 = (int8_t) _mm_extract_epi16(vout, 4);
       }
 
       nc = 0;

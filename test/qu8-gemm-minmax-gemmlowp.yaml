@@ -8,10 +8,22 @@
 - name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_8x8__neon
   init: xnn_init_qu8_conv_minmax_gemmlowp_neon_params
   k-block: 8
-- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x4c8__sse2
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x4c8__sse2_ld64
   init: xnn_init_qu8_conv_minmax_gemmlowp_sse2_params
   k-block: 8
-- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_4x4c2__sse2
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x4c8__ssse3_ld64
+  init: xnn_init_qu8_conv_minmax_gemmlowp_sse2_params
+  k-block: 8
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x4c8__sse41_ld64
+  init: xnn_init_qu8_conv_minmax_gemmlowp_sse2_params
+  k-block: 8
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_4x4c2__sse2_ld64
+  init: xnn_init_qu8_conv_minmax_gemmlowp_sse2_params
+  k-block: 8
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_4x4c2__ssse3_ld64
+  init: xnn_init_qu8_conv_minmax_gemmlowp_sse2_params
+  k-block: 8
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_4x4c2__sse41_ld64
   init: xnn_init_qu8_conv_minmax_gemmlowp_sse2_params
   k-block: 8
 - name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x2__scalar

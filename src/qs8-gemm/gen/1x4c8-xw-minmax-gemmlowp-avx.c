@@ -122,7 +122,7 @@ void xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_1x4c8__avx(
         vout = _mm_srli_epi32(vout, 16);
       }
       if (nc & 1) {
-        *((int8_t*) c0) = (int8_t) _mm_extract_epi8(vout, 0);
+        *c0 = (int8_t) _mm_extract_epi8(vout, 0);
       }
 
       nc = 0;

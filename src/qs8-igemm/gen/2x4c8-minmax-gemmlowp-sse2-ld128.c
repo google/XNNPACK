@@ -197,8 +197,8 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x4c8__sse2_ld128(
         vout = _mm_srli_epi32(vout, 16);
       }
       if (nc & 1) {
-        *((int8_t*) c1) = (int8_t) _mm_extract_epi16(vout, 2);
-        *((int8_t*) c0) = (int8_t) _mm_cvtsi128_si32(vout);
+        *c1 = (int8_t) _mm_extract_epi16(vout, 2);
+        *c0 = (int8_t) _mm_cvtsi128_si32(vout);
       }
 
       nc = 0;
