@@ -2154,9 +2154,37 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/qu8-dwconv/up8x9-minmax-gemmlowp-sse2.c
   src/qu8-gavgpool/7p7x-minmax-sse2-c8.c
   src/qu8-gavgpool/7x-minmax-sse2-c8.c
+  src/qu8-gemm/gen/1x4c2-minmax-fp32-sse2-ld64.c
+  src/qu8-gemm/gen/1x4c2-minmax-fp32-sse2-ld128.c
+  src/qu8-gemm/gen/1x4c8-minmax-fp32-sse2-ld64.c
+  src/qu8-gemm/gen/1x4c8-minmax-fp32-sse2-ld128.c
+  src/qu8-gemm/gen/2x4c2-minmax-fp32-sse2-ld64.c
+  src/qu8-gemm/gen/2x4c2-minmax-fp32-sse2-ld128.c
+  src/qu8-gemm/gen/2x4c8-minmax-fp32-sse2-ld64.c
+  src/qu8-gemm/gen/2x4c8-minmax-fp32-sse2-ld128.c
   src/qu8-gemm/gen/2x4c8-minmax-gemmlowp-sse2-ld64.c
+  src/qu8-gemm/gen/3x4c2-minmax-fp32-sse2-ld64.c
+  src/qu8-gemm/gen/3x4c2-minmax-fp32-sse2-ld128.c
+  src/qu8-gemm/gen/3x4c8-minmax-fp32-sse2-ld64.c
+  src/qu8-gemm/gen/3x4c8-minmax-fp32-sse2-ld128.c
+  src/qu8-gemm/gen/4x4c2-minmax-fp32-sse2-ld64.c
+  src/qu8-gemm/gen/4x4c2-minmax-fp32-sse2-ld128.c
   src/qu8-gemm/gen/4x4c2-minmax-gemmlowp-sse2-ld64.c
+  src/qu8-igemm/gen/1x4c2-minmax-fp32-sse2-ld64.c
+  src/qu8-igemm/gen/1x4c2-minmax-fp32-sse2-ld128.c
+  src/qu8-igemm/gen/1x4c8-minmax-fp32-sse2-ld64.c
+  src/qu8-igemm/gen/1x4c8-minmax-fp32-sse2-ld128.c
+  src/qu8-igemm/gen/2x4c2-minmax-fp32-sse2-ld64.c
+  src/qu8-igemm/gen/2x4c2-minmax-fp32-sse2-ld128.c
+  src/qu8-igemm/gen/2x4c8-minmax-fp32-sse2-ld64.c
+  src/qu8-igemm/gen/2x4c8-minmax-fp32-sse2-ld128.c
   src/qu8-igemm/gen/2x4c8-minmax-gemmlowp-sse2-ld64.c
+  src/qu8-igemm/gen/3x4c2-minmax-fp32-sse2-ld64.c
+  src/qu8-igemm/gen/3x4c2-minmax-fp32-sse2-ld128.c
+  src/qu8-igemm/gen/3x4c8-minmax-fp32-sse2-ld64.c
+  src/qu8-igemm/gen/3x4c8-minmax-fp32-sse2-ld128.c
+  src/qu8-igemm/gen/4x4c2-minmax-fp32-sse2-ld64.c
+  src/qu8-igemm/gen/4x4c2-minmax-fp32-sse2-ld128.c
   src/qu8-igemm/gen/4x4c2-minmax-gemmlowp-sse2-ld64.c
   src/qu8-requantization/fp32-sse2.c
   src/qu8-requantization/gemmlowp-sse2.c
@@ -2401,9 +2429,37 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x24.c
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x32.c
+  src/qu8-gemm/gen/1x4c2-minmax-fp32-sse41-ld64.c
+  src/qu8-gemm/gen/1x4c2-minmax-fp32-sse41-ld128.c
+  src/qu8-gemm/gen/1x4c8-minmax-fp32-sse41-ld64.c
+  src/qu8-gemm/gen/1x4c8-minmax-fp32-sse41-ld128.c
+  src/qu8-gemm/gen/2x4c2-minmax-fp32-sse41-ld64.c
+  src/qu8-gemm/gen/2x4c2-minmax-fp32-sse41-ld128.c
+  src/qu8-gemm/gen/2x4c8-minmax-fp32-sse41-ld64.c
+  src/qu8-gemm/gen/2x4c8-minmax-fp32-sse41-ld128.c
   src/qu8-gemm/gen/2x4c8-minmax-gemmlowp-sse41-ld64.c
+  src/qu8-gemm/gen/3x4c2-minmax-fp32-sse41-ld64.c
+  src/qu8-gemm/gen/3x4c2-minmax-fp32-sse41-ld128.c
+  src/qu8-gemm/gen/3x4c8-minmax-fp32-sse41-ld64.c
+  src/qu8-gemm/gen/3x4c8-minmax-fp32-sse41-ld128.c
+  src/qu8-gemm/gen/4x4c2-minmax-fp32-sse41-ld64.c
+  src/qu8-gemm/gen/4x4c2-minmax-fp32-sse41-ld128.c
   src/qu8-gemm/gen/4x4c2-minmax-gemmlowp-sse41-ld64.c
+  src/qu8-igemm/gen/1x4c2-minmax-fp32-sse41-ld64.c
+  src/qu8-igemm/gen/1x4c2-minmax-fp32-sse41-ld128.c
+  src/qu8-igemm/gen/1x4c8-minmax-fp32-sse41-ld64.c
+  src/qu8-igemm/gen/1x4c8-minmax-fp32-sse41-ld128.c
+  src/qu8-igemm/gen/2x4c2-minmax-fp32-sse41-ld64.c
+  src/qu8-igemm/gen/2x4c2-minmax-fp32-sse41-ld128.c
+  src/qu8-igemm/gen/2x4c8-minmax-fp32-sse41-ld64.c
+  src/qu8-igemm/gen/2x4c8-minmax-fp32-sse41-ld128.c
   src/qu8-igemm/gen/2x4c8-minmax-gemmlowp-sse41-ld64.c
+  src/qu8-igemm/gen/3x4c2-minmax-fp32-sse41-ld64.c
+  src/qu8-igemm/gen/3x4c2-minmax-fp32-sse41-ld128.c
+  src/qu8-igemm/gen/3x4c8-minmax-fp32-sse41-ld64.c
+  src/qu8-igemm/gen/3x4c8-minmax-fp32-sse41-ld128.c
+  src/qu8-igemm/gen/4x4c2-minmax-fp32-sse41-ld64.c
+  src/qu8-igemm/gen/4x4c2-minmax-fp32-sse41-ld128.c
   src/qu8-igemm/gen/4x4c2-minmax-gemmlowp-sse41-ld64.c
   src/qu8-requantization/gemmlowp-sse4.c
   src/qu8-requantization/rndna-sse4.c)
@@ -2666,7 +2722,35 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x8.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x24.c
-  src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x32.c)
+  src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x32.c
+  src/qu8-gemm/gen/1x4c2-minmax-fp32-avx-ld64.c
+  src/qu8-gemm/gen/1x4c2-minmax-fp32-avx-ld128.c
+  src/qu8-gemm/gen/1x4c8-minmax-fp32-avx-ld64.c
+  src/qu8-gemm/gen/1x4c8-minmax-fp32-avx-ld128.c
+  src/qu8-gemm/gen/2x4c2-minmax-fp32-avx-ld64.c
+  src/qu8-gemm/gen/2x4c2-minmax-fp32-avx-ld128.c
+  src/qu8-gemm/gen/2x4c8-minmax-fp32-avx-ld64.c
+  src/qu8-gemm/gen/2x4c8-minmax-fp32-avx-ld128.c
+  src/qu8-gemm/gen/3x4c2-minmax-fp32-avx-ld64.c
+  src/qu8-gemm/gen/3x4c2-minmax-fp32-avx-ld128.c
+  src/qu8-gemm/gen/3x4c8-minmax-fp32-avx-ld64.c
+  src/qu8-gemm/gen/3x4c8-minmax-fp32-avx-ld128.c
+  src/qu8-gemm/gen/4x4c2-minmax-fp32-avx-ld64.c
+  src/qu8-gemm/gen/4x4c2-minmax-fp32-avx-ld128.c
+  src/qu8-igemm/gen/1x4c2-minmax-fp32-avx-ld64.c
+  src/qu8-igemm/gen/1x4c2-minmax-fp32-avx-ld128.c
+  src/qu8-igemm/gen/1x4c8-minmax-fp32-avx-ld64.c
+  src/qu8-igemm/gen/1x4c8-minmax-fp32-avx-ld128.c
+  src/qu8-igemm/gen/2x4c2-minmax-fp32-avx-ld64.c
+  src/qu8-igemm/gen/2x4c2-minmax-fp32-avx-ld128.c
+  src/qu8-igemm/gen/2x4c8-minmax-fp32-avx-ld64.c
+  src/qu8-igemm/gen/2x4c8-minmax-fp32-avx-ld128.c
+  src/qu8-igemm/gen/3x4c2-minmax-fp32-avx-ld64.c
+  src/qu8-igemm/gen/3x4c2-minmax-fp32-avx-ld128.c
+  src/qu8-igemm/gen/3x4c8-minmax-fp32-avx-ld64.c
+  src/qu8-igemm/gen/3x4c8-minmax-fp32-avx-ld128.c
+  src/qu8-igemm/gen/4x4c2-minmax-fp32-avx-ld64.c
+  src/qu8-igemm/gen/4x4c2-minmax-fp32-avx-ld128.c)
 
 SET(XNNPACK_XOP_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up8x9-minmax-fp32-xop-mul32.c
@@ -2757,7 +2841,35 @@ SET(XNNPACK_XOP_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x8.c
   src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x24.c
-  src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x32.c)
+  src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x32.c
+  src/qu8-gemm/gen/1x4c2-minmax-fp32-xop-ld64.c
+  src/qu8-gemm/gen/1x4c2-minmax-fp32-xop-ld128.c
+  src/qu8-gemm/gen/1x4c8-minmax-fp32-xop-ld64.c
+  src/qu8-gemm/gen/1x4c8-minmax-fp32-xop-ld128.c
+  src/qu8-gemm/gen/2x4c2-minmax-fp32-xop-ld64.c
+  src/qu8-gemm/gen/2x4c2-minmax-fp32-xop-ld128.c
+  src/qu8-gemm/gen/2x4c8-minmax-fp32-xop-ld64.c
+  src/qu8-gemm/gen/2x4c8-minmax-fp32-xop-ld128.c
+  src/qu8-gemm/gen/3x4c2-minmax-fp32-xop-ld64.c
+  src/qu8-gemm/gen/3x4c2-minmax-fp32-xop-ld128.c
+  src/qu8-gemm/gen/3x4c8-minmax-fp32-xop-ld64.c
+  src/qu8-gemm/gen/3x4c8-minmax-fp32-xop-ld128.c
+  src/qu8-gemm/gen/4x4c2-minmax-fp32-xop-ld64.c
+  src/qu8-gemm/gen/4x4c2-minmax-fp32-xop-ld128.c
+  src/qu8-igemm/gen/1x4c2-minmax-fp32-xop-ld64.c
+  src/qu8-igemm/gen/1x4c2-minmax-fp32-xop-ld128.c
+  src/qu8-igemm/gen/1x4c8-minmax-fp32-xop-ld64.c
+  src/qu8-igemm/gen/1x4c8-minmax-fp32-xop-ld128.c
+  src/qu8-igemm/gen/2x4c2-minmax-fp32-xop-ld64.c
+  src/qu8-igemm/gen/2x4c2-minmax-fp32-xop-ld128.c
+  src/qu8-igemm/gen/2x4c8-minmax-fp32-xop-ld64.c
+  src/qu8-igemm/gen/2x4c8-minmax-fp32-xop-ld128.c
+  src/qu8-igemm/gen/3x4c2-minmax-fp32-xop-ld64.c
+  src/qu8-igemm/gen/3x4c2-minmax-fp32-xop-ld128.c
+  src/qu8-igemm/gen/3x4c8-minmax-fp32-xop-ld64.c
+  src/qu8-igemm/gen/3x4c8-minmax-fp32-xop-ld128.c
+  src/qu8-igemm/gen/4x4c2-minmax-fp32-xop-ld64.c
+  src/qu8-igemm/gen/4x4c2-minmax-fp32-xop-ld128.c)
 
 SET(XNNPACK_FMA3_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x4-minmax-fma3-acc2.c
@@ -5268,6 +5380,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qu8-gavgpool-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qu8-gavgpool-test qu8-gavgpool-minmax-test)
 
+  ADD_EXECUTABLE(qu8-gemm-minmax-fp32-test test/qu8-gemm-minmax-fp32.cc)
+  SET_TARGET_PROPERTIES(qu8-gemm-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-minmax-fp32-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qu8-gemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qu8-gemm-minmax-fp32-test qu8-gemm-minmax-fp32-test)
+
   ADD_EXECUTABLE(qu8-gemm-minmax-gemmlowp-test test/qu8-gemm-minmax-gemmlowp.cc)
   SET_TARGET_PROPERTIES(qu8-gemm-minmax-gemmlowp-test PROPERTIES
     CXX_STANDARD 11
@@ -5276,6 +5397,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qu8-gemm-minmax-gemmlowp-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(qu8-gemm-minmax-gemmlowp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qu8-gemm-minmax-gemmlowp-test qu8-gemm-minmax-gemmlowp-test)
+
+  ADD_EXECUTABLE(qu8-igemm-minmax-fp32-test test/qu8-igemm-minmax-fp32.cc)
+  SET_TARGET_PROPERTIES(qu8-igemm-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-igemm-minmax-fp32-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qu8-igemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qu8-igemm-minmax-fp32-test qu8-igemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qu8-igemm-minmax-gemmlowp-test test/qu8-igemm-minmax-gemmlowp.cc)
   SET_TARGET_PROPERTIES(qu8-igemm-minmax-gemmlowp-test PROPERTIES

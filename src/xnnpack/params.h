@@ -274,6 +274,13 @@ union xnn_qu8_conv_minmax_params {
     XNN_ALIGN(16) uint8_t output_min[16];
     XNN_ALIGN(16) uint8_t output_max[16];
   } gemmlowp_sse2;
+  struct {
+    XNN_ALIGN(16) int16_t kernel_zero_point[8];
+    XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) uint8_t output_min[16];
+    XNN_ALIGN(16) uint8_t output_max[16];
+  } fp32_sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 

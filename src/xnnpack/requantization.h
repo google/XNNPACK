@@ -31,6 +31,12 @@ union xnn_qu8_requantization_params {
     int32_t zero_point;
   } gemmlowp;
   struct {
+    float scale;
+    long min_less_zero_point;
+    long max_less_zero_point;
+    int32_t zero_point;
+  } fp32;
+  struct {
     uint32_t multiplier;
     uint32_t shift;
     uint64_t rounding;
@@ -84,6 +90,36 @@ static inline uint8_t xnn_qu8_requantize_gemmlowp(
   n = math_max_s32(n, params->gemmlowp.min_less_zero_point);
   n = math_min_s32(n, params->gemmlowp.max_less_zero_point);
   return (uint8_t) (n + params->gemmlowp.zero_point);
+}
+
+static inline void xnn_init_qu8_requantization_fp32_params(
+  union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t zero_point,
+  uint8_t min,
+  uint8_t max)
+{
+  // Validate requantization parameters.
+  assert(scale < 1.0f);
+  assert(scale >= 0x1.0p-32f);
+
+  params->fp32.scale = scale;
+  params->fp32.min_less_zero_point = (long) ((int32_t) (uint32_t) min - (int32_t) (uint32_t) zero_point);
+  params->fp32.max_less_zero_point = (long) ((int32_t) (uint32_t) max - (int32_t) (uint32_t) zero_point);
+  params->fp32.zero_point = (int32_t) (uint32_t) zero_point;
+}
+
+static inline uint8_t xnn_qu8_requantize_fp32(
+  int32_t n,
+  union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)])
+{
+  const float scaled_n = (float) n * params->fp32.scale;
+  long rounded_n = lrintf(scaled_n);
+  rounded_n =
+    XNN_UNPREDICTABLE(rounded_n < params->fp32.min_less_zero_point) ? params->fp32.min_less_zero_point : rounded_n;
+  rounded_n =
+    XNN_UNPREDICTABLE(rounded_n > params->fp32.max_less_zero_point) ? params->fp32.max_less_zero_point : rounded_n;
+  return (uint8_t) ((int32_t) rounded_n + params->fp32.zero_point);
 }
 
 static inline void xnn_init_qu8_requantization_rndna_params(
