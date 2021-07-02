@@ -3166,7 +3166,13 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x8.c
   src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c
   src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x24.c
-  src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x32.c)
+  src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x32.c
+  src/qu8-gemm/gen/1x8c8-minmax-fp32-avx2.c
+  src/qu8-gemm/gen/2x8c8-minmax-fp32-avx2.c
+  src/qu8-gemm/gen/3x8c8-minmax-fp32-avx2.c
+  src/qu8-igemm/gen/1x8c8-minmax-fp32-avx2.c
+  src/qu8-igemm/gen/2x8c8-minmax-fp32-avx2.c
+  src/qu8-igemm/gen/3x8c8-minmax-fp32-avx2.c)
 
 SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up16x4-minmax-avx512f-acc2.c

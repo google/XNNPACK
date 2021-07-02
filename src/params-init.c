@@ -122,6 +122,27 @@ void xnn_init_qu8_conv_minmax_fp32_sse2_params(
     params->fp32_sse2.output_max[i] = output_max;
   }
 }
+
+void xnn_init_qu8_conv_minmax_fp32_avx2_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t kernel_zero_point,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->fp32_avx2.scale[i] = scale;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->fp32_avx2.kernel_zero_point[i] = (int16_t) (uint16_t) kernel_zero_point;
+    params->fp32_avx2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 32; i++) {
+    params->fp32_avx2.output_min[i] = output_min;
+    params->fp32_avx2.output_max[i] = output_max;
+  }
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

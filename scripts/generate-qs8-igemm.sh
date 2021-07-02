@@ -534,13 +534,17 @@ tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QS8 -D REQUANTIZA
 tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-avx2.c
 tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/3x8c8-minmax-gemmlowp-avx2.c
 
+tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-igemm/gen/1x8c8-minmax-fp32-avx2.c
+tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-igemm/gen/2x8c8-minmax-fp32-avx2.c
+tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-igemm/gen/3x8c8-minmax-fp32-avx2.c
+
 tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-igemm/gen/1x8c8-minmax-fp32-avx2.c
 tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-igemm/gen/2x8c8-minmax-fp32-avx2.c
 tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-igemm/gen/3x8c8-minmax-fp32-avx2.c
 
-tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-igemm/gen/1x8c8-minmax-fp32-avx2.c
-tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-igemm/gen/2x8c8-minmax-fp32-avx2.c
-tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-igemm/gen/3x8c8-minmax-fp32-avx2.c
+tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-igemm/gen/1x8c8-minmax-fp32-avx2.c
+tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-igemm/gen/2x8c8-minmax-fp32-avx2.c
+tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-igemm/gen/3x8c8-minmax-fp32-avx2.c
 
 ################################## x86 AVX512 #################################
 ### C8 micro-kernels

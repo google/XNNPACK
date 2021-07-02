@@ -16,30 +16,30 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
+void xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
     size_t mr,
     size_t nc,
     size_t kc,
-    const int8_t* restrict a,
+    const uint8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
-    int8_t* restrict c,
+    uint8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(mr != 0);
   assert(mr <= 1);
   assert(nc != 0);
   assert(kc != 0);
-  assert(kc % sizeof(int8_t) == 0);
+  assert(kc % sizeof(uint8_t) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
 
   kc = round_up_po2(kc, 8);
-  const int8_t* a0 = a;
-  int8_t* c0 = c;
+  const uint8_t* a0 = a;
+  uint8_t* c0 = c;
 
   do {
     const __m128i vbias0x0 = _mm_loadu_si32(w);
@@ -57,30 +57,31 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
     w = (const void*) ((const int32_t*) w + 8);
 
     size_t k = 0;
+    const __m256i vb_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.kernel_zero_point);
     while (k < kc) {
       const __m128i va0 = _mm_broadcastq_epi64(_mm_loadl_epi64((const __m128i*) a0));
-      const __m256i vxa0 = _mm256_cvtepi8_epi16(va0);
+      const __m256i vxa0 = _mm256_cvtepu8_epi16(va0);
       a0 += 8;
 
       const __m128i vb01 = _mm_load_si128((const __m128i*) w);
-      const __m256i vxb01 = _mm256_cvtepi8_epi16(vb01);
+      const __m256i vxb01 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb01), vb_zero_point);
 
       vacc0x01 = _mm256_add_epi32(vacc0x01, _mm256_madd_epi16(vxa0, vxb01));
-      const __m128i vb23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
-      const __m256i vxb23 = _mm256_cvtepi8_epi16(vb23);
+      const __m128i vb23 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 16));
+      const __m256i vxb23 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb23), vb_zero_point);
 
       vacc0x23 = _mm256_add_epi32(vacc0x23, _mm256_madd_epi16(vxa0, vxb23));
-      const __m128i vb45 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
-      const __m256i vxb45 = _mm256_cvtepi8_epi16(vb45);
+      const __m128i vb45 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 32));
+      const __m256i vxb45 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb45), vb_zero_point);
 
       vacc0x45 = _mm256_add_epi32(vacc0x45, _mm256_madd_epi16(vxa0, vxb45));
-      const __m128i vb67 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
-      const __m256i vxb67 = _mm256_cvtepi8_epi16(vb67);
+      const __m128i vb67 = _mm_load_si128((const __m128i*) ((const uint8_t*) w + 48));
+      const __m256i vxb67 = _mm256_sub_epi16(_mm256_cvtepu8_epi16(vb67), vb_zero_point);
 
       vacc0x67 = _mm256_add_epi32(vacc0x67, _mm256_madd_epi16(vxa0, vxb67));
 
-      w = (const void*) ((const int8_t*) w + 64);
-      k += 8 * sizeof(int8_t);
+      w = (const void*) ((const uint8_t*) w + 64);
+      k += 8 * sizeof(uint8_t);
     }
 
     const __m256i vacc0x0213 = _mm256_hadd_epi32(vacc0x01, vacc0x23);
@@ -103,10 +104,10 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
 
     vacc00x01234567 = _mm256_permute4x64_epi64(vacc00x01234567, _MM_SHUFFLE(3, 1, 2, 0));
 
-    __m256i vout = _mm256_packs_epi16(vacc00x01234567, vacc00x01234567);
+    __m256i vout = _mm256_packus_epi16(vacc00x01234567, vacc00x01234567);
 
-    vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
-    vout = _mm256_min_epi8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_max));
+    vout = _mm256_max_epu8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_min_epu8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_max));
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);
@@ -114,9 +115,9 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
     if (nc >= 8) {
       _mm_storel_epi64((__m128i*) c0, vout_lo);
 
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+      c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+      a0 = (const uint8_t*) ((uintptr_t) a0 - kc);
 
       nc -= 8;
     } else {
@@ -137,7 +138,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
         vout_hi = _mm_srli_epi32(vout_hi, 16);
       }
       if (nc & 1) {
-        *c0 = (int8_t) _mm_extract_epi8(vout_lo, 0);
+        *c0 = (uint8_t) _mm_extract_epi8(vout_lo, 0);
       }
 
       nc = 0;
