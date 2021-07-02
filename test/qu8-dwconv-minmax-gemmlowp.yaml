@@ -2,9 +2,9 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
-- name: xnn_qu8_dwconv_minmax_ukernel_up8x9__neon
+- name: xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon
   init: xnn_init_qu8_conv_minmax_neon_params
-- name: xnn_qu8_dwconv_minmax_ukernel_up8x9__sse2
+- name: xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up8x9__sse2
   init: xnn_init_qu8_conv_minmax_sse2_params
-- name: xnn_qu8_dwconv_minmax_ukernel_up1x9__scalar
+- name: xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up1x9__scalar
   init: xnn_init_qu8_conv_minmax_scalar_params

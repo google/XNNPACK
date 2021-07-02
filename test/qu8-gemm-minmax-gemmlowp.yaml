@@ -2,18 +2,18 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
-- name: xnn_qu8_gemm_minmax_ukernel_4x8__neon
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_4x8__neon
   init: xnn_init_qu8_conv_minmax_neon_params
   k-block: 8
-- name: xnn_qu8_gemm_minmax_ukernel_8x8__neon
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_8x8__neon
   init: xnn_init_qu8_conv_minmax_neon_params
   k-block: 8
-- name: xnn_qu8_gemm_minmax_ukernel_2x4c8__sse2
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x4c8__sse2
   init: xnn_init_qu8_conv_minmax_sse2_params
   k-block: 8
-- name: xnn_qu8_gemm_minmax_ukernel_4x4c2__sse2
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_4x4c2__sse2
   init: xnn_init_qu8_conv_minmax_sse2_params
   k-block: 8
-- name: xnn_qu8_gemm_minmax_ukernel_2x2__scalar
+- name: xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x2__scalar
   init: xnn_init_qu8_conv_minmax_scalar_params
   k-block: 1

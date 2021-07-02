@@ -166,9 +166,20 @@ typedef void (*xnn_init_qs8_requantization_params_fn)(
   int8_t output_min,
   int8_t output_max);
 
+typedef void (*xnn_init_qu8_requantization_params_fn)(
+  union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max);
+
 typedef int8_t (*xnn_qs8_requantize_fn)(
   int32_t n,
   union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef uint8_t (*xnn_qu8_requantize_fn)(
+  int32_t n,
+  union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)]);
 
 static inline void xnn_init_qs8_requantization_gemmlowp_params(
   union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)],

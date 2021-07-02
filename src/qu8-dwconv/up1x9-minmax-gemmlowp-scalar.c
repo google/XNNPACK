@@ -7,7 +7,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qu8_dwconv_minmax_ukernel_up1x9__scalar(
+void xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up1x9__scalar(
     size_t channels,
     size_t output_width,
     const uint8_t** input,

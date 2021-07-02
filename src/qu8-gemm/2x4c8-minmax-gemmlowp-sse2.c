@@ -32,7 +32,7 @@ static inline __m128i sse_reduce4_i32(__m128i x, __m128i y, __m128i z, __m128i w
 #endif
 }
 
-void xnn_qu8_gemm_minmax_ukernel_2x4c8__sse2(
+void xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x4c8__sse2(
     size_t mr,
     size_t nc,
     size_t kc,

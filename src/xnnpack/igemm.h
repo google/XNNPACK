@@ -308,12 +308,12 @@ DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_igemm_minmax_ukernel_8x16__neo
       const uint8_t* zero,                                 \
       const union xnn_qu8_conv_minmax_params* params);
 
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_ukernel_4x8__neon)
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_ukernel_8x8__neon)
+DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_gemmlowp_ukernel_4x8__neon)
+DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_gemmlowp_ukernel_8x8__neon)
 
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_ukernel_4x4c2__sse2)
+DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_gemmlowp_ukernel_4x4c2__sse2)
 
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_ukernel_2x2__scalar)
+DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_gemmlowp_ukernel_2x2__scalar)
 
 
 #define DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \

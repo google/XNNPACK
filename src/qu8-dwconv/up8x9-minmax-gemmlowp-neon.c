@@ -12,7 +12,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_qu8_dwconv_minmax_ukernel_up8x9__neon(
+void xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon(
     size_t channels,
     size_t output_width,
     const uint8_t** input,

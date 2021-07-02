@@ -317,9 +317,11 @@ def generate_test_cases(ukernel, cr, kr, c_block,
   if init_fn:
     test_args.append(init_fn)
     if requantization:
+      requantization_datatype = {"qc8": "qs8"}.get(datatype, datatype)
       test_args += [
-        "xnn_init_qs8_requantization_%s_params" % requantization,
-        "xnn_qs8_requantize_%s" % requantization
+        "xnn_init_%s_requantization_%s_params" % \
+          (requantization_datatype, requantization),
+        "xnn_%s_requantize_%s" % (requantization_datatype, requantization)
       ]
   return xngen.preprocess(DWCONV_TEST_CODE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),

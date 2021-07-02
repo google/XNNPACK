@@ -190,13 +190,13 @@ static void init(void) {
     #ifndef XNN_NO_QU8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QU8;
 
-      xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_ukernel_4x8__neon);
-      xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_ukernel_4x8__neon);
+      xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_gemmlowp_ukernel_4x8__neon);
+      xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_gemmlowp_ukernel_4x8__neon);
       xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_neon_params;
       xnn_params.qu8.gemm.mr = 4;
       xnn_params.qu8.gemm.nr = 8;
 
-      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_ukernel_up8x9__neon;
+      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon;
       xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_neon_params;
       xnn_params.qu8.dwconv[0].channel_tile = 8;
       xnn_params.qu8.dwconv[0].primary_tile = 9;
@@ -567,13 +567,13 @@ static void init(void) {
     #ifndef XNN_NO_QU8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QU8;
 
-      xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_ukernel_2x2__scalar);
-      xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_ukernel_2x2__scalar);
+      xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x2__scalar);
+      xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_gemmlowp_ukernel_2x2__scalar);
       xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_scalar_params;
       xnn_params.qu8.gemm.mr = 2;
       xnn_params.qu8.gemm.nr = 2;
 
-      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_ukernel_up1x9__scalar;
+      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up1x9__scalar;
       xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_scalar_params;
       xnn_params.qu8.dwconv[0].channel_tile = 1;
       xnn_params.qu8.dwconv[0].primary_tile = 9;
@@ -1243,13 +1243,13 @@ static void init(void) {
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
-    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_ukernel_8x8__neon);
-    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_ukernel_8x8__neon);
+    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_gemmlowp_ukernel_8x8__neon);
+    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_gemmlowp_ukernel_8x8__neon);
     xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_neon_params;
     xnn_params.qu8.gemm.mr = 8;
     xnn_params.qu8.gemm.nr = 8;
 
-    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_ukernel_up8x9__neon;
+    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon;
     xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_neon_params;
     xnn_params.qu8.dwconv[0].channel_tile = 8;
     xnn_params.qu8.dwconv[0].primary_tile = 9;
@@ -2107,14 +2107,14 @@ static void init(void) {
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
-    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_ukernel_4x4c2__sse2);
-    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_ukernel_4x4c2__sse2);
+    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_gemmlowp_ukernel_4x4c2__sse2);
+    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_gemmlowp_ukernel_4x4c2__sse2);
     xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_sse2_params;
     xnn_params.qu8.gemm.mr = 4;
     xnn_params.qu8.gemm.nr = 4;
     xnn_params.qu8.gemm.log2_kr = 1;
 
-    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_ukernel_up8x9__sse2;
+    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up8x9__sse2;
     xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_sse2_params;
     xnn_params.qu8.dwconv[0].channel_tile = 8;
     xnn_params.qu8.dwconv[0].primary_tile = 9;
@@ -2734,13 +2734,13 @@ static void init(void) {
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
-    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_ukernel_2x2__scalar);
-    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_ukernel_2x2__scalar);
+    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x2__scalar);
+    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_gemmlowp_ukernel_2x2__scalar);
     xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_scalar_params;
     xnn_params.qu8.gemm.mr = 2;
     xnn_params.qu8.gemm.nr = 2;
 
-    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_ukernel_up1x9__scalar;
+    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up1x9__scalar;
     xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_scalar_params;
     xnn_params.qu8.dwconv[0].channel_tile = 1;
     xnn_params.qu8.dwconv[0].primary_tile = 9;
@@ -3311,13 +3311,13 @@ static void init(void) {
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
-    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_ukernel_2x2__scalar);
-    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_ukernel_2x2__scalar);
+    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x2__scalar);
+    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_gemmlowp_ukernel_2x2__scalar);
     xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_scalar_params;
     xnn_params.qu8.gemm.mr = 2;
     xnn_params.qu8.gemm.nr = 2;
 
-    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_ukernel_up1x9__scalar;
+    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up1x9__scalar;
     xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_scalar_params;
     xnn_params.qu8.dwconv[0].channel_tile = 1;
     xnn_params.qu8.dwconv[0].primary_tile = 9;
@@ -3688,13 +3688,13 @@ static void init(void) {
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
-    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_ukernel_2x2__scalar);
-    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_ukernel_2x2__scalar);
+    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x2__scalar);
+    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_gemmlowp_ukernel_2x2__scalar);
     xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_scalar_params;
     xnn_params.qu8.gemm.mr = 2;
     xnn_params.qu8.gemm.nr = 2;
 
-    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_ukernel_up1x9__scalar;
+    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up1x9__scalar;
     xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_scalar_params;
     xnn_params.qu8.dwconv[0].channel_tile = 1;
     xnn_params.qu8.dwconv[0].primary_tile = 9;
