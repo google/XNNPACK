@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
 
-XNN_INTERNAL void xnn_init_qu8_conv_minmax_scalar_params(
+XNN_INTERNAL void xnn_init_qu8_conv_minmax_gemmlowp_scalar_params(
   union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
   float scale,
@@ -26,7 +26,7 @@ XNN_INTERNAL void xnn_init_qu8_conv_minmax_scalar_params(
   uint8_t output_max);
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_INTERNAL void xnn_init_qu8_conv_minmax_sse2_params(
+XNN_INTERNAL void xnn_init_qu8_conv_minmax_gemmlowp_sse2_params(
   union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
   float scale,
@@ -36,7 +36,7 @@ XNN_INTERNAL void xnn_init_qu8_conv_minmax_sse2_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-XNN_INTERNAL void xnn_init_qu8_conv_minmax_neon_params(
+XNN_INTERNAL void xnn_init_qu8_conv_minmax_gemmlowp_neon_params(
   union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
   float scale,

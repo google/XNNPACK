@@ -24,12 +24,12 @@ void xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon(
     const uint8_t* zero,
     const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const uint8x8_t vkernel_zero_point = vld1_dup_u8((const uint8_t*) &params->neon.kernel_zero_point);
-  const int32x4_t vmultiplier = vld1q_dup_s32(&params->neon.multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const uint8x8_t voutput_min = vld1_dup_u8(&params->neon.output_min);
-  const uint8x8_t voutput_max = vld1_dup_u8(&params->neon.output_max);
+  const uint8x8_t vkernel_zero_point = vld1_dup_u8((const uint8_t*) &params->gemmlowp_neon.kernel_zero_point);
+  const int32x4_t vmultiplier = vld1q_dup_s32(&params->gemmlowp_neon.multiplier);
+  const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->gemmlowp_neon.output_zero_point);
+  const uint8x8_t voutput_min = vld1_dup_u8(&params->gemmlowp_neon.output_min);
+  const uint8x8_t voutput_max = vld1_dup_u8(&params->gemmlowp_neon.output_max);
 
   do {
     const uint8_t* i0 = input[0];

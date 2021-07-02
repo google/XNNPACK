@@ -251,7 +251,7 @@ union xnn_qu8_conv_minmax_params {
     int32_t output_min_less_zero_point;
     int32_t output_max_less_zero_point;
     int32_t output_zero_point;
-  } scalar;
+  } gemmlowp_scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int32_t kernel_zero_point;
@@ -260,7 +260,7 @@ union xnn_qu8_conv_minmax_params {
     int16_t output_zero_point;
     uint8_t output_min;
     uint8_t output_max;
-  } neon;
+  } gemmlowp_neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -273,7 +273,7 @@ union xnn_qu8_conv_minmax_params {
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) uint8_t output_min[16];
     XNN_ALIGN(16) uint8_t output_max[16];
-  } sse2;
+  } gemmlowp_sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 

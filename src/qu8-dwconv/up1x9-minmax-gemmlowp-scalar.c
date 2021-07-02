@@ -19,15 +19,15 @@ void xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up1x9__scalar(
     const uint8_t* zero,
     const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  const int32_t vkernel_zero_point = params->scalar.kernel_zero_point;
-  const int32_t vmultiplier = params->scalar.multiplier;
+  const int32_t vkernel_zero_point = params->gemmlowp_scalar.kernel_zero_point;
+  const int32_t vmultiplier = params->gemmlowp_scalar.multiplier;
   const int32_t vq31rounding = INT32_C(0x40000000);
-  const int32_t vremainder_mask = params->scalar.remainder_mask;
-  const uint32_t vshift = params->scalar.shift;
-  const int32_t vremainder_threshold = params->scalar.remainder_threshold;
-  const int32_t vout_min = params->scalar.output_min_less_zero_point;
-  const int32_t vout_max = params->scalar.output_max_less_zero_point;
-  const int32_t voutput_zero_point = params->scalar.output_zero_point;
+  const int32_t vremainder_mask = params->gemmlowp_scalar.remainder_mask;
+  const uint32_t vshift = params->gemmlowp_scalar.shift;
+  const int32_t vremainder_threshold = params->gemmlowp_scalar.remainder_threshold;
+  const int32_t vout_min = params->gemmlowp_scalar.output_min_less_zero_point;
+  const int32_t vout_max = params->gemmlowp_scalar.output_max_less_zero_point;
+  const int32_t voutput_zero_point = params->gemmlowp_scalar.output_zero_point;
   do {
     const uint8_t* i0 = input[0];
     if XNN_UNPREDICTABLE(i0 != zero) {
