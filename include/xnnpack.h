@@ -829,7 +829,7 @@ enum xnn_status xnn_define_minimum2(
   uint32_t output_id,
   uint32_t flags);
 
-  /// Define a 2-Input Node Mod and add it to a Subgraph.
+  /// Define a 2-Input Node Mod and mod it to a Subgraph.
   ///
   /// The 2-Input Node for Mod computes elementwise minimum of two tensor inputs with numpy broadcasting rules.
   ///
