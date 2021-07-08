@@ -38,7 +38,8 @@ void _mm_storeu_si32(const void* address, __m128i v) {
     (defined(__clang__) && !defined(__apple_build_version__) && (__clang_major__ < 8)) || \
     (defined(__clang__) && defined(__ANDROID__) && (__clang_major__ == 8) && (__clang_minor__ == 0) && (__clang_patchlevel__ < 7)) || \
     (defined(__clang__) && defined(__apple_build_version__) && (__apple_build_version__ < 11000000)) || \
-    (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1800))
+    (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1800)) || \
+    (defined(_MSC_VER) && !defined(__clang__) && !defined(__GNUC__))
 
 static XNN_INTRINSIC
 __mmask16 _cvtu32_mask16(unsigned int mask) {
