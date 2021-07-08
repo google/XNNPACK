@@ -33,7 +33,7 @@ void _mm_storeu_si32(const void* address, __m128i v) {
 #ifdef __AVX512F__
 #include <immintrin.h>
 
-// GCC pre-7, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-18
+// GCC pre-7, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, ICC pre-18, and MSVC
 #if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 7)) || \
     (defined(__clang__) && !defined(__apple_build_version__) && (__clang_major__ < 8)) || \
     (defined(__clang__) && defined(__ANDROID__) && (__clang_major__ == 8) && (__clang_minor__ == 0) && (__clang_patchlevel__ < 7)) || \
