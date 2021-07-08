@@ -3468,7 +3468,15 @@ SET(XNNPACK_AVX512SKX_MICROKERNEL_SRCS
   src/qs8-igemm/gen/3x16c8-minmax-fp32-avx512skx.c
   src/qs8-igemm/gen/3x16c8-minmax-gemmlowp-avx512skx.c
   src/qs8-igemm/gen/4x16c8-minmax-fp32-avx512skx.c
-  src/qs8-igemm/gen/4x16c8-minmax-gemmlowp-avx512skx.c)
+  src/qs8-igemm/gen/4x16c8-minmax-gemmlowp-avx512skx.c
+  src/qu8-gemm/gen/1x16c8-minmax-fp32-avx512skx.c
+  src/qu8-gemm/gen/2x16c8-minmax-fp32-avx512skx.c
+  src/qu8-gemm/gen/3x16c8-minmax-fp32-avx512skx.c
+  src/qu8-gemm/gen/4x16c8-minmax-fp32-avx512skx.c
+  src/qu8-igemm/gen/1x16c8-minmax-fp32-avx512skx.c
+  src/qu8-igemm/gen/2x16c8-minmax-fp32-avx512skx.c
+  src/qu8-igemm/gen/3x16c8-minmax-fp32-avx512skx.c
+  src/qu8-igemm/gen/4x16c8-minmax-fp32-avx512skx.c)
 
 SET(XNNPACK_AARCH32_ASM_MICROKERNEL_SRCS
   src/f32-gemm/4x4-aarch32-vfp-ld64.S
