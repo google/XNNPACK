@@ -284,7 +284,7 @@ union xnn_qu8_conv_minmax_params {
   struct {
     XNN_ALIGN(32) int16_t kernel_zero_point[16];
     XNN_ALIGN(32) float scale[8];
-    XNN_ALIGN(32) int16_t output_zero_point[8];
+    XNN_ALIGN(32) int16_t output_zero_point[16];
     XNN_ALIGN(32) uint8_t output_min[32];
     XNN_ALIGN(32) uint8_t output_max[32];
   } fp32_avx2;
