@@ -3499,6 +3499,10 @@ SET(XNNPACK_AVX512SKX_MICROKERNEL_SRCS
   src/qs8-igemm/gen/3x16c8-minmax-gemmlowp-avx512skx.c
   src/qs8-igemm/gen/4x16c8-minmax-fp32-avx512skx.c
   src/qs8-igemm/gen/4x16c8-minmax-gemmlowp-avx512skx.c
+  src/qu8-dwconv/gen/up16x9-minmax-fp32-avx512skx-mul32.c
+  src/qu8-dwconv/gen/up16x25-minmax-fp32-avx512skx-mul32.c
+  src/qu8-dwconv/gen/up32x9-minmax-fp32-avx512skx-mul32.c
+  src/qu8-dwconv/gen/up32x25-minmax-fp32-avx512skx-mul32.c
   src/qu8-gemm/gen/1x16c8-minmax-fp32-avx512skx.c
   src/qu8-gemm/gen/2x16c8-minmax-fp32-avx512skx.c
   src/qu8-gemm/gen/3x16c8-minmax-fp32-avx512skx.c
