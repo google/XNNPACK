@@ -33,12 +33,13 @@ void _mm_storeu_si32(const void* address, __m128i v) {
 #ifdef __AVX512F__
 #include <immintrin.h>
 
-// GCC pre-7, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-18
+// GCC pre-7, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, ICC pre-18, and MSVC pre-2019
 #if (defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 7)) || \
     (defined(__clang__) && !defined(__apple_build_version__) && (__clang_major__ < 8)) || \
     (defined(__clang__) && defined(__ANDROID__) && (__clang_major__ == 8) && (__clang_minor__ == 0) && (__clang_patchlevel__ < 7)) || \
     (defined(__clang__) && defined(__apple_build_version__) && (__apple_build_version__ < 11000000)) || \
-    (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1800))
+    (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1800)) || \
+    (defined(_MSC_VER) && !defined(__clang__) && !defined(__GNUC__) && (_MSC_VER <= 1916))
 
 static XNN_INTRINSIC
 __mmask16 _cvtu32_mask16(unsigned int mask) {
