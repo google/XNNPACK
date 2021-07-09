@@ -2164,10 +2164,52 @@ static void init(void) {
       xnn_params.qu8.gemm.log2_kr = 3;
     }
 
-    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up8x9__sse2;
-    xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_gemmlowp_sse2_params;
-    xnn_params.qu8.dwconv[0].channel_tile = 8;
+    if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up32x9__avx512skx_mul32;
+      xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_avx512_params;
+      xnn_params.qu8.dwconv[0].channel_tile = 32;
+      xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up32x25__avx512skx_mul32;
+      xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_avx512_params;
+      xnn_params.qu8.dwconv[1].channel_tile = 32;
+    } else if (cpuinfo_has_x86_xop()) {
+      // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
+      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__xop_mul32;
+      xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
+      xnn_params.qu8.dwconv[0].channel_tile = 16;
+      xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__xop_mul32;
+      xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
+      xnn_params.qu8.dwconv[1].channel_tile = 16;
+    } else if (cpuinfo_has_x86_avx2()) {
+      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul32;
+      xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_avx2_params;
+      xnn_params.qu8.dwconv[0].channel_tile = 16;
+      xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32;
+      xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_avx2_params;
+      xnn_params.qu8.dwconv[1].channel_tile = 16;
+    } else if (cpuinfo_has_x86_avx()) {
+      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul32;
+      xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
+      xnn_params.qu8.dwconv[0].channel_tile = 16;
+      xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul32;
+      xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
+      xnn_params.qu8.dwconv[1].channel_tile = 16;
+    } else if (cpuinfo_has_x86_sse4_1()) {
+      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up8x9__sse41_mul16;
+      xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
+      xnn_params.qu8.dwconv[0].channel_tile = 8;
+      xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse41_mul16;
+      xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
+      xnn_params.qu8.dwconv[1].channel_tile = 8;
+    } else if (cpuinfo_has_x86_sse2()) {
+      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up8x9__sse2_mul16;
+      xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
+      xnn_params.qu8.dwconv[0].channel_tile = 8;
+      xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16;
+      xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
+      xnn_params.qu8.dwconv[1].channel_tile = 8;
+    }
     xnn_params.qu8.dwconv[0].primary_tile = 9;
+    xnn_params.qu8.dwconv[1].primary_tile = 25;
 
     xnn_params.qu8.avgpool = (struct avgpool_parameters) {
       .up = (xnn_avgpool_unipass_ukernel_function) xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8,
