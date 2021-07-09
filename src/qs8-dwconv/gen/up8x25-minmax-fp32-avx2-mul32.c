@@ -328,8 +328,9 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__avx2_mul32(
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
       const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_avx2.output_max);
       vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
+
+      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_avx2.output_max);
       vout0123456701234567 = _mm_min_epi8(vout0123456701234567, voutput_max);
 
       _mm_storel_epi64((__m128i*) output, vout0123456701234567);
@@ -475,9 +476,11 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__avx2_mul32(
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
 
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
+
         const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_avx2.output_max);
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
         vout0123456701234567 = _mm_min_epi8(vout0123456701234567, voutput_max);
+
+        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
         vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
         if (c & 4) {

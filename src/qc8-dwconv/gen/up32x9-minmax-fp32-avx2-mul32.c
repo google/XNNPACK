@@ -81,9 +81,9 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul32(
     const void* w = weights;
     for (; c >= 32; c -= 32) {
       __m256i vacc01234567 = _mm256_loadu_si256((const __m256i*) w);
-      __m256i vacc89ABCDEF = _mm256_loadu_si256((const __m256i*) ((uintptr_t) w + 8 * sizeof(int32_t)));
-      __m256i vaccGHIJKLMN = _mm256_loadu_si256((const __m256i*) ((uintptr_t) w + 16 * sizeof(int32_t)));
-      __m256i vaccOPQRSTUV = _mm256_loadu_si256((const __m256i*) ((uintptr_t) w + 24 * sizeof(int32_t)));
+      __m256i vacc89ABCDEF = _mm256_loadu_si256((const __m256i*) ((const int32_t*) w + 8));
+      __m256i vaccGHIJKLMN = _mm256_loadu_si256((const __m256i*) ((const int32_t*) w + 16));
+      __m256i vaccOPQRSTUV = _mm256_loadu_si256((const __m256i*) ((const int32_t*) w + 24));
 
 
       const __m256i vi0x01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) i0));
@@ -229,10 +229,10 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul32(
       __m256 vscaledOPQRSTUV = _mm256_cvtepi32_ps(vaccOPQRSTUV);
 
       const __m256 vscale01234567 = _mm256_loadu_ps((const float*) w);
-      const __m256 vscale89ABCDEF = _mm256_loadu_ps((const float*) ((uintptr_t) w + 8 * sizeof(float)));
-      const __m256 vscaleGHIJKLMN = _mm256_loadu_ps((const float*) ((uintptr_t) w + 16 * sizeof(float)));
-      const __m256 vscaleOPQRSTUV = _mm256_loadu_ps((const float*) ((uintptr_t) w + 24 * sizeof(float)));
-      w = (const void*) ((uintptr_t) w + 32 * sizeof(float));
+      const __m256 vscale89ABCDEF = _mm256_loadu_ps((const float*) w + 8);
+      const __m256 vscaleGHIJKLMN = _mm256_loadu_ps((const float*) w + 16);
+      const __m256 vscaleOPQRSTUV = _mm256_loadu_ps((const float*) w + 24);
+      w = (const void*) ((const float*) w + 32);
       vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
       vscaled89ABCDEF = _mm256_mul_ps(vscaled89ABCDEF, vscale89ABCDEF);
       vscaledGHIJKLMN = _mm256_mul_ps(vscaledGHIJKLMN, vscaleGHIJKLMN);
@@ -251,10 +251,11 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul32(
       __m128i voutGHIJKLMNOPQRSTUV = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(voutGHIJOPQRKLMNSTUV), _mm256_extracti128_si256(voutGHIJOPQRKLMNSTUV, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
       const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx2.output_min);
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx2.output_max);
       vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
-      vout0123456789ABCDEF = _mm_min_epi8(vout0123456789ABCDEF, voutput_max);
       voutGHIJKLMNOPQRSTUV = _mm_max_epi8(voutGHIJKLMNOPQRSTUV, voutput_min);
+
+      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx2.output_max);
+      vout0123456789ABCDEF = _mm_min_epi8(vout0123456789ABCDEF, voutput_max);
       voutGHIJKLMNOPQRSTUV = _mm_min_epi8(voutGHIJKLMNOPQRSTUV, voutput_max);
 
       _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
@@ -262,7 +263,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul32(
       output += 32;
     }
     if XNN_UNLIKELY(c != 0) {
-      const int8_t* k = (const int8_t*) ((uintptr_t) w + 32 * sizeof(int32_t));
+      const int8_t* k = (const int8_t*) ((const int32_t*) w + 32);
       do {
         __m256i vacc01234567 = _mm256_loadu_si256((const __m256i*) w);
 
@@ -328,15 +329,17 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul32(
         vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
         vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
 
-        w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
+        w = (const void*) ((const int32_t*) w + 8);
 
         const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->avx2.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
 
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
+
         const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx2.output_max);
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx2.output_min);
         vout0123456701234567 = _mm_min_epi8(vout0123456701234567, voutput_max);
+
+        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx2.output_min);
         vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
         if XNN_LIKELY(c >= 8) {
