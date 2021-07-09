@@ -1213,7 +1213,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__ssse3_mul16(
             output += 2;
           }
           if (c & 1) {
-            *output = (int32_t) _mm_cvtsi128_si32(vout0123456701234567);
+            *output = (int8_t) _mm_cvtsi128_si32(vout0123456701234567);
             output += 1;
           }
           c = 0;
