@@ -1,0 +1,32 @@
+# Copyright 2021 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+# Copyright 2021 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up8x9__sse41_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__sse41_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse41_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__sse41_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up8x9__avx_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__avx_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up8x9__xop_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__xop_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__xop_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__xop_mul32
+  init: xnn_init_qu8_conv_minmax_fp32_sse2_params

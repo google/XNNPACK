@@ -3229,6 +3229,10 @@ SSE41_UKERNELS = [
     "src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c",
     "src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x24.c",
     "src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x32.c",
+    "src/qu8-dwconv/gen/up8x9-minmax-fp32-sse41-mul32.c",
+    "src/qu8-dwconv/gen/up8x25-minmax-fp32-sse41-mul32.c",
+    "src/qu8-dwconv/gen/up16x9-minmax-fp32-sse41-mul32.c",
+    "src/qu8-dwconv/gen/up16x25-minmax-fp32-sse41-mul32.c",
     "src/qu8-gemm/gen/1x4c2-minmax-fp32-sse41-ld64.c",
     "src/qu8-gemm/gen/1x4c2-minmax-fp32-sse41-ld128.c",
     "src/qu8-gemm/gen/1x4c8-minmax-fp32-sse41-ld64.c",
@@ -3526,6 +3530,10 @@ AVX_UKERNELS = [
     "src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x16.c",
     "src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x24.c",
     "src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x32.c",
+    "src/qu8-dwconv/gen/up8x9-minmax-fp32-avx-mul32.c",
+    "src/qu8-dwconv/gen/up8x25-minmax-fp32-avx-mul32.c",
+    "src/qu8-dwconv/gen/up16x9-minmax-fp32-avx-mul32.c",
+    "src/qu8-dwconv/gen/up16x25-minmax-fp32-avx-mul32.c",
     "src/qu8-gemm/gen/1x4c2-minmax-fp32-avx-ld64.c",
     "src/qu8-gemm/gen/1x4c2-minmax-fp32-avx-ld128.c",
     "src/qu8-gemm/gen/1x4c8-minmax-fp32-avx-ld64.c",
@@ -3646,6 +3654,10 @@ XOP_UKERNELS = [
     "src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x16.c",
     "src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x24.c",
     "src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x32.c",
+    "src/qu8-dwconv/gen/up8x9-minmax-fp32-xop-mul32.c",
+    "src/qu8-dwconv/gen/up8x25-minmax-fp32-xop-mul32.c",
+    "src/qu8-dwconv/gen/up16x9-minmax-fp32-xop-mul32.c",
+    "src/qu8-dwconv/gen/up16x25-minmax-fp32-xop-mul32.c",
     "src/qu8-gemm/gen/1x4c2-minmax-fp32-xop-ld64.c",
     "src/qu8-gemm/gen/1x4c2-minmax-fp32-xop-ld128.c",
     "src/qu8-gemm/gen/1x4c8-minmax-fp32-xop-ld64.c",
@@ -7738,6 +7750,16 @@ xnnpack_unit_test(
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "qu8_dwconv_minmax_fp32_test",
+    srcs = [
+        "test/qu8-dwconv-minmax-fp32.cc",
+        "test/dwconv-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
 xnnpack_unit_test(

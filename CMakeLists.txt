@@ -2429,6 +2429,10 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x24.c
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x32.c
+  src/qu8-dwconv/gen/up8x9-minmax-fp32-sse41-mul32.c
+  src/qu8-dwconv/gen/up8x25-minmax-fp32-sse41-mul32.c
+  src/qu8-dwconv/gen/up16x9-minmax-fp32-sse41-mul32.c
+  src/qu8-dwconv/gen/up16x25-minmax-fp32-sse41-mul32.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-sse41-ld128.c
   src/qu8-gemm/gen/1x4c8-minmax-fp32-sse41-ld64.c
@@ -2723,6 +2727,10 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x24.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x32.c
+  src/qu8-dwconv/gen/up8x9-minmax-fp32-avx-mul32.c
+  src/qu8-dwconv/gen/up8x25-minmax-fp32-avx-mul32.c
+  src/qu8-dwconv/gen/up16x9-minmax-fp32-avx-mul32.c
+  src/qu8-dwconv/gen/up16x25-minmax-fp32-avx-mul32.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-avx-ld64.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-avx-ld128.c
   src/qu8-gemm/gen/1x4c8-minmax-fp32-avx-ld64.c
@@ -2842,6 +2850,10 @@ SET(XNNPACK_XOP_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x24.c
   src/qs8-vaddc/gen/minmax-xop-mul32-ld32-x32.c
+  src/qu8-dwconv/gen/up8x9-minmax-fp32-xop-mul32.c
+  src/qu8-dwconv/gen/up8x25-minmax-fp32-xop-mul32.c
+  src/qu8-dwconv/gen/up16x9-minmax-fp32-xop-mul32.c
+  src/qu8-dwconv/gen/up16x25-minmax-fp32-xop-mul32.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-xop-ld64.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-xop-ld128.c
   src/qu8-gemm/gen/1x4c8-minmax-fp32-xop-ld64.c
@@ -5375,6 +5387,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qu8-avgpool-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(qu8-avgpool-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qu8-avgpool-minmax-test qu8-avgpool-minmax-test)
+
+  ADD_EXECUTABLE(qu8-dwconv-minmax-fp32-test test/qu8-dwconv-minmax-fp32.cc)
+  SET_TARGET_PROPERTIES(qu8-dwconv-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-minmax-fp32-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qu8-dwconv-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qu8-dwconv-minmax-fp32-test qu8-dwconv-minmax-fp32-test)
 
   ADD_EXECUTABLE(qu8-dwconv-minmax-gemmlowp-test test/qu8-dwconv-minmax-gemmlowp.cc)
   SET_TARGET_PROPERTIES(qu8-dwconv-minmax-gemmlowp-test PROPERTIES

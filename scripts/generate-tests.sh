@@ -4,9 +4,6 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-### Tests for QU8 micro-kernels
-tools/generate-dwconv-test.py --spec test/qu8-dwconv-minmax-gemmlowp.yaml --output test/qu8-dwconv-minmax-gemmlowp.cc
-
 ### Tests for U8 micro-kernels
 tools/generate-vunary-test.py --spec test/u8-vclamp.yaml --output test/u8-vclamp.cc
 
