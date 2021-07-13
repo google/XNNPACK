@@ -114,6 +114,14 @@ enum xnn_status xnn_define_quantized_tensor_value(
         return xnn_status_invalid_parameter;
       }
       break;
+    case xnn_datatype_quint8:
+      if ((int32_t) (uint8_t) zero_point != zero_point) {
+        xnn_log_error(
+          "failed to create Quantized Dense Tensor value: invalid zero point %" PRId32" outside the [0, 255] range",
+          zero_point);
+        return xnn_status_invalid_parameter;
+      }
+      break;
     case xnn_datatype_qint32:
       if (zero_point != 0) {
         xnn_log_error(
@@ -262,6 +270,7 @@ size_t xnn_tensor_get_size(
       size = 4;
       break;
     case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
     case xnn_datatype_qcint8:
       size = 1;
       break;

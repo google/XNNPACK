@@ -31,6 +31,11 @@ static inline bool check_datatypes_with_bias(
       return input_datatype == xnn_datatype_qint8 &&
         bias_datatype == xnn_datatype_qcint32 && output_datatype == xnn_datatype_qint8;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+      return input_datatype == xnn_datatype_quint8 &&
+        bias_datatype == xnn_datatype_qint32 && output_datatype == xnn_datatype_quint8;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -49,6 +54,10 @@ static inline bool check_datatypes_without_bias(
     case xnn_datatype_qcint8:
       return input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_qint8;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+      return input_datatype == xnn_datatype_quint8 && output_datatype == xnn_datatype_quint8;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -188,6 +197,9 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -234,6 +246,10 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
     case xnn_datatype_qcint8:
       break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+      break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with filter ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -268,8 +284,10 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
 
     switch (bias_value->datatype) {
       case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
+#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
       case xnn_datatype_qint32:
+#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+#ifndef XNN_NO_QS8_OPERATORS
       case xnn_datatype_qcint32:
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
         break;
@@ -302,6 +320,9 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
