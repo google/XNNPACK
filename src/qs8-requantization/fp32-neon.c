@@ -12,6 +12,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/requantization-stubs.h>
 
 
