@@ -1177,6 +1177,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/1x8-minmax-gemmlowp-neon-mlal-lane-prfm.c
   src/qs8-igemm/gen/1x8-minmax-gemmlowp-neon-mlal-lane.c
   src/qs8-igemm/gen/1x8-minmax-gemmlowp-neon-mull-addw-dup.c
+  src/qs8-igemm/gen/1x8c2-minmax-fp32-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/1x8c2-minmax-gemmlowp-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/1x8c2-minmax-gemmlowp-neon-mull-padal-dup.c
   src/qs8-igemm/gen/1x8c8-minmax-fp32-neon-mlal-padal.c
@@ -1195,6 +1196,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/2x8-minmax-gemmlowp-neon-mlal-lane-prfm.c
   src/qs8-igemm/gen/2x8-minmax-gemmlowp-neon-mlal-lane.c
   src/qs8-igemm/gen/2x8-minmax-gemmlowp-neon-mull-addw-dup.c
+  src/qs8-igemm/gen/2x8c2-minmax-fp32-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/2x8c2-minmax-gemmlowp-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/2x8c2-minmax-gemmlowp-neon-mull-padal-dup.c
   src/qs8-igemm/gen/2x8c8-minmax-fp32-neon-mlal-padal.c
