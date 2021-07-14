@@ -831,6 +831,29 @@ enum xnn_status xnn_define_minimum2(
   uint32_t output_id,
   uint32_t flags);
 
+  /// Define a 2-Input Node Mod and mod it to a Subgraph.
+  ///
+  /// The 2-Input Node for Mod computes elementwise minimum of two tensor inputs with numpy broadcasting rules.
+  ///
+  /// @param subgraph - a Subgraph object that will own the created Node.
+  /// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
+  ///                    the @a subgraph with each dimension either equal to the corresponding dimension of the second
+  ///                    input, or equal to 1. In the latter case, the elements of the input tensor are broadcasted along
+  ///                    that dimension.
+  /// @param input2_id - Value ID for the second input tensor. The input tensor must be an M-dimensional tensor defined in
+  ///                    the @a subgraph with each dimension either equal to the corresponding dimension of the first
+  ///                    input, or equal to 1. In the latter case, the elements of the input tensor are broadcasted along
+  ///                    that dimension.
+  /// @param output_id - Value ID for the output tensor. The output tensor must be a max(N,M)-dimensional tensor defined
+  ///                    in the @a subgraph with each dimension equal to the maximum between the corresponding dimension
+  ///                    of the two inputs.
+  /// @param flags - binary features of the Minimum Node. No supported flags are currently defined.
+  enum xnn_status xnn_define_mod(
+    xnn_subgraph_t subgraph,
+    uint32_t input1_id,
+    uint32_t input2_id,
+    uint32_t output_id,
+    uint32_t flags);
 /// Define a Squared Difference Node and add it to a Subgraph.
 ///
 /// The Squared Difference Node computes elementwise squared difference of two tensor inputs with numpy broadcasting
@@ -1532,6 +1555,24 @@ enum xnn_status xnn_setup_minimum_nd_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_mod_nd_f32(
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* mod_op_out);
+
+enum xnn_status xnn_setup_mod_nd_f32(
+  xnn_operator_t mod_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  pthreadpool_t threadpool);
+
+
 enum xnn_status xnn_create_multiply_nd_f32(
   float output_min,
   float output_max,
@@ -1953,6 +1994,23 @@ enum xnn_status xnn_setup_hardswish_nc_f16(
   xnn_operator_t hardswish_op,
   size_t batch_size,
   const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_mod_nd_f16(
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* mod_op_out);
+
+enum xnn_status xnn_setup_mod_nd_f16(
+  xnn_operator_t mod_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const void* input1,
+  const void* input2,
   void* output,
   pthreadpool_t threadpool);
 

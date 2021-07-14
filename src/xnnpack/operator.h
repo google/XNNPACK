@@ -76,6 +76,8 @@ enum xnn_operator_type {
   xnn_operator_type_max_pooling_nhwc_u8,
   xnn_operator_type_maximum_nd_f32,
   xnn_operator_type_minimum_nd_f32,
+  xnn_operator_type_mod_nd_f32,
+  xnn_operator_type_mod_nd_f16,
   xnn_operator_type_multiply_nd_f16,
   xnn_operator_type_multiply_nd_f32,
   xnn_operator_type_negate_nc_f32,
