@@ -86,31 +86,31 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up1x9__scalar_lrint(
     do {
       int32_t vacc = *((const int32_t*) w);
 
-      const int32_t vi0 = *i0++;
+      const int32_t vi0 = (int32_t) *i0++;
       const int32_t vk0 = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[0];
       vacc += vi0 * vk0;
-      const int32_t vi1 = *i1++;
+      const int32_t vi1 = (int32_t) *i1++;
       const int32_t vk1 = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[1];
       vacc += vi1 * vk1;
-      const int32_t vi2 = *i2++;
+      const int32_t vi2 = (int32_t) *i2++;
       const int32_t vk2 = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[2];
       vacc += vi2 * vk2;
-      const int32_t vi3 = *i3++;
+      const int32_t vi3 = (int32_t) *i3++;
       const int32_t vk3 = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[3];
       vacc += vi3 * vk3;
-      const int32_t vi4 = *i4++;
+      const int32_t vi4 = (int32_t) *i4++;
       const int32_t vk4 = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[4];
       vacc += vi4 * vk4;
-      const int32_t vi5 = *i5++;
+      const int32_t vi5 = (int32_t) *i5++;
       const int32_t vk5 = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[5];
       vacc += vi5 * vk5;
-      const int32_t vi6 = *i6++;
+      const int32_t vi6 = (int32_t) *i6++;
       const int32_t vk6 = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[6];
       vacc += vi6 * vk6;
-      const int32_t vi7 = *i7++;
+      const int32_t vi7 = (int32_t) *i7++;
       const int32_t vk7 = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[7];
       vacc += vi7 * vk7;
-      const int32_t vi8 = *i8++;
+      const int32_t vi8 = (int32_t) *i8++;
       const int32_t vk8 = ((const int8_t*) ((uintptr_t) w + sizeof(int32_t)))[8];
       vacc += vi8 * vk8;
 

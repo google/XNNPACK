@@ -42,6 +42,18 @@
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_up24x9__wasmsimd_mul16
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up1x9__scalar_lrint
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_lrint_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up2x9__scalar_lrint
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_lrint_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up4x9__scalar_lrint
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_lrint_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up1x9__scalar_magic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_magic_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up2x9__scalar_magic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_magic_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up4x9__scalar_magic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_magic_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16
   init: xnn_init_qu8_conv_minmax_fp32_sse2_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__sse2_mul16
@@ -82,3 +94,15 @@
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_up24x25__wasmsimd_mul16
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up1x25__scalar_lrint
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_lrint_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up2x25__scalar_lrint
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_lrint_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up4x25__scalar_lrint
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_lrint_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up1x25__scalar_magic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_magic_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up2x25__scalar_magic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_magic_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up4x25__scalar_magic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_magic_params

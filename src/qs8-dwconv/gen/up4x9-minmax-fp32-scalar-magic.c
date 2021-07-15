@@ -92,144 +92,144 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up4x9__scalar_magic(
       int32_t vacc3 = ((const int32_t*) w)[3];
 
 
-      const int32_t vi0x0 = i0[0];
-      const int32_t vi0x1 = i0[1];
-      const int32_t vi0x2 = i0[2];
-      const int32_t vi0x3 = i0[3];
+      const int32_t vi0x0 = (int32_t) i0[0];
+      const int32_t vi0x1 = (int32_t) i0[1];
+      const int32_t vi0x2 = (int32_t) i0[2];
+      const int32_t vi0x3 = (int32_t) i0[3];
       i0 += 4;
 
-      const int32_t vk0x0 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[0];
-      const int32_t vk0x1 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[1];
-      const int32_t vk0x2 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[2];
-      const int32_t vk0x3 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[3];
+      const int32_t vk0x0 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[0];
+      const int32_t vk0x1 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[1];
+      const int32_t vk0x2 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[2];
+      const int32_t vk0x3 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[3];
 
       vacc0 += vi0x0 * vk0x0;
       vacc1 += vi0x1 * vk0x1;
       vacc2 += vi0x2 * vk0x2;
       vacc3 += vi0x3 * vk0x3;
 
-      const int32_t vi1x0 = i1[0];
-      const int32_t vi1x1 = i1[1];
-      const int32_t vi1x2 = i1[2];
-      const int32_t vi1x3 = i1[3];
+      const int32_t vi1x0 = (int32_t) i1[0];
+      const int32_t vi1x1 = (int32_t) i1[1];
+      const int32_t vi1x2 = (int32_t) i1[2];
+      const int32_t vi1x3 = (int32_t) i1[3];
       i1 += 4;
 
-      const int32_t vk1x0 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[4];
-      const int32_t vk1x1 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[5];
-      const int32_t vk1x2 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[6];
-      const int32_t vk1x3 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[7];
+      const int32_t vk1x0 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[4];
+      const int32_t vk1x1 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[5];
+      const int32_t vk1x2 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[6];
+      const int32_t vk1x3 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[7];
 
       vacc0 += vi1x0 * vk1x0;
       vacc1 += vi1x1 * vk1x1;
       vacc2 += vi1x2 * vk1x2;
       vacc3 += vi1x3 * vk1x3;
 
-      const int32_t vi2x0 = i2[0];
-      const int32_t vi2x1 = i2[1];
-      const int32_t vi2x2 = i2[2];
-      const int32_t vi2x3 = i2[3];
+      const int32_t vi2x0 = (int32_t) i2[0];
+      const int32_t vi2x1 = (int32_t) i2[1];
+      const int32_t vi2x2 = (int32_t) i2[2];
+      const int32_t vi2x3 = (int32_t) i2[3];
       i2 += 4;
 
-      const int32_t vk2x0 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[8];
-      const int32_t vk2x1 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[9];
-      const int32_t vk2x2 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[10];
-      const int32_t vk2x3 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[11];
+      const int32_t vk2x0 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[8];
+      const int32_t vk2x1 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[9];
+      const int32_t vk2x2 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[10];
+      const int32_t vk2x3 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[11];
 
       vacc0 += vi2x0 * vk2x0;
       vacc1 += vi2x1 * vk2x1;
       vacc2 += vi2x2 * vk2x2;
       vacc3 += vi2x3 * vk2x3;
 
-      const int32_t vi3x0 = i3[0];
-      const int32_t vi3x1 = i3[1];
-      const int32_t vi3x2 = i3[2];
-      const int32_t vi3x3 = i3[3];
+      const int32_t vi3x0 = (int32_t) i3[0];
+      const int32_t vi3x1 = (int32_t) i3[1];
+      const int32_t vi3x2 = (int32_t) i3[2];
+      const int32_t vi3x3 = (int32_t) i3[3];
       i3 += 4;
 
-      const int32_t vk3x0 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[12];
-      const int32_t vk3x1 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[13];
-      const int32_t vk3x2 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[14];
-      const int32_t vk3x3 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[15];
+      const int32_t vk3x0 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[12];
+      const int32_t vk3x1 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[13];
+      const int32_t vk3x2 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[14];
+      const int32_t vk3x3 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[15];
 
       vacc0 += vi3x0 * vk3x0;
       vacc1 += vi3x1 * vk3x1;
       vacc2 += vi3x2 * vk3x2;
       vacc3 += vi3x3 * vk3x3;
 
-      const int32_t vi4x0 = i4[0];
-      const int32_t vi4x1 = i4[1];
-      const int32_t vi4x2 = i4[2];
-      const int32_t vi4x3 = i4[3];
+      const int32_t vi4x0 = (int32_t) i4[0];
+      const int32_t vi4x1 = (int32_t) i4[1];
+      const int32_t vi4x2 = (int32_t) i4[2];
+      const int32_t vi4x3 = (int32_t) i4[3];
       i4 += 4;
 
-      const int32_t vk4x0 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[16];
-      const int32_t vk4x1 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[17];
-      const int32_t vk4x2 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[18];
-      const int32_t vk4x3 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[19];
+      const int32_t vk4x0 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[16];
+      const int32_t vk4x1 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[17];
+      const int32_t vk4x2 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[18];
+      const int32_t vk4x3 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[19];
 
       vacc0 += vi4x0 * vk4x0;
       vacc1 += vi4x1 * vk4x1;
       vacc2 += vi4x2 * vk4x2;
       vacc3 += vi4x3 * vk4x3;
 
-      const int32_t vi5x0 = i5[0];
-      const int32_t vi5x1 = i5[1];
-      const int32_t vi5x2 = i5[2];
-      const int32_t vi5x3 = i5[3];
+      const int32_t vi5x0 = (int32_t) i5[0];
+      const int32_t vi5x1 = (int32_t) i5[1];
+      const int32_t vi5x2 = (int32_t) i5[2];
+      const int32_t vi5x3 = (int32_t) i5[3];
       i5 += 4;
 
-      const int32_t vk5x0 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[20];
-      const int32_t vk5x1 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[21];
-      const int32_t vk5x2 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[22];
-      const int32_t vk5x3 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[23];
+      const int32_t vk5x0 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[20];
+      const int32_t vk5x1 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[21];
+      const int32_t vk5x2 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[22];
+      const int32_t vk5x3 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[23];
 
       vacc0 += vi5x0 * vk5x0;
       vacc1 += vi5x1 * vk5x1;
       vacc2 += vi5x2 * vk5x2;
       vacc3 += vi5x3 * vk5x3;
 
-      const int32_t vi6x0 = i6[0];
-      const int32_t vi6x1 = i6[1];
-      const int32_t vi6x2 = i6[2];
-      const int32_t vi6x3 = i6[3];
+      const int32_t vi6x0 = (int32_t) i6[0];
+      const int32_t vi6x1 = (int32_t) i6[1];
+      const int32_t vi6x2 = (int32_t) i6[2];
+      const int32_t vi6x3 = (int32_t) i6[3];
       i6 += 4;
 
-      const int32_t vk6x0 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[24];
-      const int32_t vk6x1 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[25];
-      const int32_t vk6x2 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[26];
-      const int32_t vk6x3 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[27];
+      const int32_t vk6x0 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[24];
+      const int32_t vk6x1 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[25];
+      const int32_t vk6x2 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[26];
+      const int32_t vk6x3 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[27];
 
       vacc0 += vi6x0 * vk6x0;
       vacc1 += vi6x1 * vk6x1;
       vacc2 += vi6x2 * vk6x2;
       vacc3 += vi6x3 * vk6x3;
 
-      const int32_t vi7x0 = i7[0];
-      const int32_t vi7x1 = i7[1];
-      const int32_t vi7x2 = i7[2];
-      const int32_t vi7x3 = i7[3];
+      const int32_t vi7x0 = (int32_t) i7[0];
+      const int32_t vi7x1 = (int32_t) i7[1];
+      const int32_t vi7x2 = (int32_t) i7[2];
+      const int32_t vi7x3 = (int32_t) i7[3];
       i7 += 4;
 
-      const int32_t vk7x0 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[28];
-      const int32_t vk7x1 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[29];
-      const int32_t vk7x2 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[30];
-      const int32_t vk7x3 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[31];
+      const int32_t vk7x0 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[28];
+      const int32_t vk7x1 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[29];
+      const int32_t vk7x2 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[30];
+      const int32_t vk7x3 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[31];
 
       vacc0 += vi7x0 * vk7x0;
       vacc1 += vi7x1 * vk7x1;
       vacc2 += vi7x2 * vk7x2;
       vacc3 += vi7x3 * vk7x3;
 
-      const int32_t vi8x0 = i8[0];
-      const int32_t vi8x1 = i8[1];
-      const int32_t vi8x2 = i8[2];
-      const int32_t vi8x3 = i8[3];
+      const int32_t vi8x0 = (int32_t) i8[0];
+      const int32_t vi8x1 = (int32_t) i8[1];
+      const int32_t vi8x2 = (int32_t) i8[2];
+      const int32_t vi8x3 = (int32_t) i8[3];
       i8 += 4;
 
-      const int32_t vk8x0 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[32];
-      const int32_t vk8x1 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[33];
-      const int32_t vk8x2 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[34];
-      const int32_t vk8x3 = ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[35];
+      const int32_t vk8x0 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[32];
+      const int32_t vk8x1 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[33];
+      const int32_t vk8x2 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[34];
+      const int32_t vk8x3 = (int32_t) ((const int8_t*) ((uintptr_t) w + 4 * sizeof(int32_t)))[35];
 
       vacc0 += vi8x0 * vk8x0;
       vacc1 += vi8x1 * vk8x1;
@@ -280,32 +280,32 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up4x9__scalar_magic(
         int32_t vacc = *((const int32_t*) w);
         w = (const void*) ((uintptr_t) w + sizeof(int32_t));
 
-        const int32_t vi0 = *i0++;
-        const int32_t vk0 = k[0];
+        const int32_t vi0 = (int32_t) *i0++;
+        const int32_t vk0 = (int32_t) k[0];
         vacc += vi0 * vk0;
-        const int32_t vi1 = *i1++;
-        const int32_t vk1 = k[4];
+        const int32_t vi1 = (int32_t) *i1++;
+        const int32_t vk1 = (int32_t) k[4];
         vacc += vi1 * vk1;
-        const int32_t vi2 = *i2++;
-        const int32_t vk2 = k[8];
+        const int32_t vi2 = (int32_t) *i2++;
+        const int32_t vk2 = (int32_t) k[8];
         vacc += vi2 * vk2;
-        const int32_t vi3 = *i3++;
-        const int32_t vk3 = k[12];
+        const int32_t vi3 = (int32_t) *i3++;
+        const int32_t vk3 = (int32_t) k[12];
         vacc += vi3 * vk3;
-        const int32_t vi4 = *i4++;
-        const int32_t vk4 = k[16];
+        const int32_t vi4 = (int32_t) *i4++;
+        const int32_t vk4 = (int32_t) k[16];
         vacc += vi4 * vk4;
-        const int32_t vi5 = *i5++;
-        const int32_t vk5 = k[20];
+        const int32_t vi5 = (int32_t) *i5++;
+        const int32_t vk5 = (int32_t) k[20];
         vacc += vi5 * vk5;
-        const int32_t vi6 = *i6++;
-        const int32_t vk6 = k[24];
+        const int32_t vi6 = (int32_t) *i6++;
+        const int32_t vk6 = (int32_t) k[24];
         vacc += vi6 * vk6;
-        const int32_t vi7 = *i7++;
-        const int32_t vk7 = k[28];
+        const int32_t vi7 = (int32_t) *i7++;
+        const int32_t vk7 = (int32_t) k[28];
         vacc += vi7 * vk7;
-        const int32_t vi8 = *i8++;
-        const int32_t vk8 = k[32];
+        const int32_t vi8 = (int32_t) *i8++;
+        const int32_t vk8 = (int32_t) k[32];
         vacc += vi8 * vk8;
         k += 1;
 
