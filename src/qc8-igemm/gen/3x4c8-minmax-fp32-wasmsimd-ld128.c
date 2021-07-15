@@ -65,7 +65,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_ld128(
     v128_t vacc2x1 = vacc0x1;
     v128_t vacc2x2 = vacc0x2;
     v128_t vacc2x3 = vacc0x3;
-    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    w = (const void*) ((const int32_t*) w + 4);
 
     size_t p = ks;
     do {
@@ -116,7 +116,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_ld128(
         vacc0x1 = wasm_i32x4_add(vacc0x1, wasm_i32x4_extend_high_i16x8(vprod0x1));
         vacc1x1 = wasm_i32x4_add(vacc1x1, wasm_i32x4_extend_high_i16x8(vprod1x1));
         vacc2x1 = wasm_i32x4_add(vacc2x1, wasm_i32x4_extend_high_i16x8(vprod2x1));
-        const v128_t vb23 = wasm_v128_load((const void*) ((uintptr_t) w + 16 * sizeof(int8_t)));
+        const v128_t vb23 = wasm_v128_load((const int8_t*) w + 16);
         const v128_t vxb2 = wasm_i16x8_extend_low_i8x16(vb23);
         const v128_t vxb3 = wasm_i16x8_extend_high_i8x16(vb23);
 
@@ -141,7 +141,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_ld128(
         vacc1x3 = wasm_i32x4_add(vacc1x3, wasm_i32x4_extend_high_i16x8(vprod1x3));
         vacc2x3 = wasm_i32x4_add(vacc2x3, wasm_i32x4_extend_high_i16x8(vprod2x3));
 
-        w = (const void*) ((uintptr_t) w + 32 * sizeof(int8_t));
+        w = (const void*) ((const int8_t*) w + 32);
         k += 8 * sizeof(int8_t);
       }
       p -= 3 * sizeof(void*);

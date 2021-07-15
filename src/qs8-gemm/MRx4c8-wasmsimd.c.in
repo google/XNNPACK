@@ -4,7 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
+$assert DATATYPE in ["QC8", "QS8", "QU8"]
+$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert VARIANT in ["LD64", "LD128", "EXTENDED"]
 $assert MR <= 4
 #include <assert.h>
@@ -15,19 +16,22 @@ $assert MR <= 4
 #include <xnnpack/math.h>
 
 
-$DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + "wasmsimd"
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX}(
+$PARAMS_STRUCT = ("" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_") + "wasmsimd"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
+$WASM_X16X8_LOAD8X8 = "wasm_u16x8_load8x8" if DATATYPE == "QU8" else "wasm_i16x8_load8x8"
+$WASM_X8X16_MAX = "wasm_u8x16_max" if DATATYPE == "QU8" else "wasm_i8x16_max"
+$WASM_X8X16_MIN = "wasm_u8x16_min" if DATATYPE == "QU8" else "wasm_i8x16_min"
+void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c8__wasmsimd${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,
-    const int8_t* restrict a,
+    const ${XINT8_T}* restrict a,
     size_t a_stride,
     const void* restrict w,
-    int8_t* restrict c,
+    ${XINT8_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
@@ -36,17 +40,17 @@ void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel
   assert(mr <= ${MR});
   assert(nc != 0);
   assert(kc != 0);
-  assert(kc % sizeof(int8_t) == 0);
+  assert(kc % sizeof(${XINT8_T}) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
 
   kc = round_up_po2(kc, 8);
-  const int8_t* a0 = a;
-  int8_t* c0 = c;
+  const ${XINT8_T}* a0 = a;
+  ${XINT8_T}* c0 = c;
   $for M in range(1, MR):
-    const int8_t* a${M} = (const int8_t*) ((uintptr_t) a${M-1} + a_stride);
-    int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
+    const ${XINT8_T}* a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M-1} + a_stride);
+    ${XINT8_T}* c${M} = (${XINT8_T}*) ((uintptr_t) c${M-1} + cm_stride);
     $if M % 2 == 0:
       if XNN_UNPREDICTABLE(mr <= ${M}) {
         a${M} = a${M-1};
@@ -64,18 +68,20 @@ void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel
       }
 
   const v128_t vzero = wasm_f64x2_splat(0.0);
+  $if DATATYPE == "QU8":
+    const v128_t vb_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.kernel_zero_point);
   do {
     $for N in range(4):
       v128_t vacc0x${N} = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[${N}]);
     $for M in range(1, MR):
       $for N in range(4):
         v128_t vacc${M}x${N} = vacc0x${N};
-    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    w = (const void*) ((const int32_t*) w + 4);
 
     size_t k = 0;
     while (k < kc) {
       $for M in range(MR):
-        const v128_t vxa${M} = wasm_i16x8_load8x8(a${M});
+        const v128_t vxa${M} = ${WASM_X16X8_LOAD8X8}(a${M});
         a${M} += 8;
 
       $if VARIANT == "LD128":
@@ -83,44 +89,66 @@ void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel
           $if N == 0:
             const v128_t vb${N}${N+1} = wasm_v128_load(w);
           $else:
-            const v128_t vb${N}${N+1} = wasm_v128_load((const void*) ((uintptr_t) w + ${N * 8} * sizeof(int8_t)));
-          const v128_t vxb${N} = wasm_i16x8_extend_low_i8x16(vb${N}${N+1});
-          const v128_t vxb${N+1} = wasm_i16x8_extend_high_i8x16(vb${N}${N+1});
+            const v128_t vb${N}${N+1} = wasm_v128_load((const ${XINT8_T}*) w + ${N * 8});
+          $if DATATYPE == "QU8":
+            const v128_t vxb${N} = wasm_i16x8_sub(wasm_u16x8_extend_low_u8x16(vb${N}${N+1}), vb_zero_point);
+            const v128_t vxb${N+1} = wasm_i16x8_sub(wasm_u16x8_extend_high_u8x16(vb${N}${N+1}), vb_zero_point);
+          $else:
+            const v128_t vxb${N} = wasm_i16x8_extend_low_i8x16(vb${N}${N+1});
+            const v128_t vxb${N+1} = wasm_i16x8_extend_high_i8x16(vb${N}${N+1});
 
-          $for M in range(MR):
-            const v128_t vprod${M}x${N} = wasm_i16x8_mul(vxb${N}, vxa${M});
-            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_extend_low_i16x8(vprod${M}x${N}));
+          $if DATATYPE == "QU8":
+            $for M in range(MR):
+              vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vxa${M}), wasm_i32x4_extend_low_i16x8(vxb${N})));
+              vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vxa${M}), wasm_i32x4_extend_high_i16x8(vxb${N})));
+              vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vxa${M}), wasm_i32x4_extend_low_i16x8(vxb${N+1})));
+              vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vxa${M}), wasm_i32x4_extend_high_i16x8(vxb${N+1})));
+          $else:
+            $for M in range(MR):
+              const v128_t vprod${M}x${N} = wasm_i16x8_mul(vxb${N}, vxa${M});
+              vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_extend_low_i16x8(vprod${M}x${N}));
 
-          $for M in range(MR):
-            const v128_t vprod${M}x${N+1} = wasm_i16x8_mul(vxb${N+1}, vxa${M});
-            vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_extend_low_i16x8(vprod${M}x${N+1}));
-            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_extend_high_i16x8(vprod${M}x${N}));
+            $for M in range(MR):
+              const v128_t vprod${M}x${N+1} = wasm_i16x8_mul(vxb${N+1}, vxa${M});
+              vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_extend_low_i16x8(vprod${M}x${N+1}));
+              vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_extend_high_i16x8(vprod${M}x${N}));
 
-          $for M in range(MR):
-            vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_extend_high_i16x8(vprod${M}x${N+1}));
+            $for M in range(MR):
+              vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_extend_high_i16x8(vprod${M}x${N+1}));
       $else:
         $for N in range(4):
           $if VARIANT == "LD64":
-            $if N == 0:
-              const v128_t vxb${N} = wasm_i16x8_load8x8(w);
+            $if DATATYPE == "QU8":
+              $if N == 0:
+                const v128_t vxb${N} = wasm_i16x8_sub(wasm_u16x8_load8x8(w), vb_zero_point);
+              $else:
+                const v128_t vxb${N} = wasm_i16x8_sub(wasm_u16x8_load8x8((const int8_t*) w + ${N * 8}), vb_zero_point);
             $else:
-              const v128_t vxb${N} = wasm_i16x8_load8x8((const void*) ((uintptr_t) w + ${N * 8} * sizeof(int8_t)));
+              $if N == 0:
+                const v128_t vxb${N} = wasm_i16x8_load8x8(w);
+              $else:
+                const v128_t vxb${N} = wasm_i16x8_load8x8((const int8_t*) w + ${N * 8});
           $elif VARIANT == "EXTENDED":
             $if N == 0:
               const v128_t vxb${N} = wasm_v128_load(w);
             $else:
-              const v128_t vxb${N} = wasm_v128_load((const void*) ((uintptr_t) w + ${N * 8} * sizeof(int16_t)));
+              const v128_t vxb${N} = wasm_v128_load((const int16_t*) w + ${N * 8});
 
-          $for M in range(MR):
-            const v128_t vprod${M}x${N} = wasm_i16x8_mul(vxa${M}, vxb${N});
-            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_extend_low_i16x8(vprod${M}x${N}));
-            vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_extend_high_i16x8(vprod${M}x${N}));
+          $if DATATYPE == "QU8":
+            $for M in range(MR):
+              vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vxa${M}), wasm_i32x4_extend_low_i16x8(vxb${N})));
+              vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vxa${M}), wasm_i32x4_extend_high_i16x8(vxb${N})));
+          $else:
+            $for M in range(MR):
+              const v128_t vprod${M}x${N} = wasm_i16x8_mul(vxa${M}, vxb${N});
+              vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_extend_low_i16x8(vprod${M}x${N}));
+              vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_extend_high_i16x8(vprod${M}x${N}));
 
       $if VARIANT == "EXTENDED":
-        w = (const void*) ((uintptr_t) w + 32 * sizeof(int16_t));
+        w = (const void*) ((const int16_t*) w + 32);
       $else:
-        w = (const void*) ((uintptr_t) w + 32 * sizeof(int8_t));
-      k += 8 * sizeof(int8_t);
+        w = (const void*) ((const ${XINT8_T}*) w + 32);
+      k += 8 * sizeof(${XINT8_T});
     }
 
     $for M in range(MR):
@@ -168,15 +196,15 @@ void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel
         v128_t vout = wasm_i8x16_narrow_i16x8(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
       const v128_t voutput_min = wasm_v128_load(params->${PARAMS_STRUCT}.output_min);
-      vout = wasm_i8x16_max(vout, voutput_min);
+      vout = ${WASM_X8X16_MAX}(vout, voutput_min);
 
       const v128_t voutput_max = wasm_v128_load(params->${PARAMS_STRUCT}.output_max);
-      vout = wasm_i8x16_min(vout, voutput_max);
+      vout = ${WASM_X8X16_MIN}(vout, voutput_max);
     $elif REQUANTIZATION == "FP32":
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_convert_i32x4(vacc${M}x0123);
 
-      $if CHANNELWISE:
+      $if DATATYPE == "QC8":
         const v128_t vscale0123 = wasm_v128_load(w);
         w = (const void*) ((const float*) w + 4);
         $for M in range(MR):
@@ -215,10 +243,10 @@ void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel
         *((float*) c${M}) = (float) wasm_f32x4_extract_lane(vout, ${M});
 
       $for M in range(MR):
-        c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
+        c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in range(MR):
-        a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
+        a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
 
       nc -= 4;
     } else {
@@ -230,7 +258,7 @@ void xnn_${DATATYPE}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel
       }
       if (nc & 1) {
         $for M in range(MR):
-          *c${M} = (int8_t) wasm_i8x16_extract_lane(vout, ${M * 4});
+          *c${M} = (${XINT8_T}) wasm_i8x16_extract_lane(vout, ${M * 4});
       }
 
       nc = 0;

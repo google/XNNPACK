@@ -66,7 +66,7 @@ void xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_3x4c8__wasmsimd(
     v128_t vacc2x1 = vacc0x1;
     v128_t vacc2x2 = vacc0x2;
     v128_t vacc2x3 = vacc0x3;
-    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    w = (const void*) ((const int32_t*) w + 4);
 
     size_t k = 0;
     while (k < kc) {
@@ -88,7 +88,7 @@ void xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_3x4c8__wasmsimd(
       const v128_t vprod2x0 = wasm_i16x8_mul(vxa2, vxb0);
       vacc2x0 = wasm_i32x4_add(vacc2x0, wasm_i32x4_extend_low_i16x8(vprod2x0));
       vacc2x0 = wasm_i32x4_add(vacc2x0, wasm_i32x4_extend_high_i16x8(vprod2x0));
-      const v128_t vxb1 = wasm_v128_load((const void*) ((uintptr_t) w + 8 * sizeof(int16_t)));
+      const v128_t vxb1 = wasm_v128_load((const int16_t*) w + 8);
 
       const v128_t vprod0x1 = wasm_i16x8_mul(vxa0, vxb1);
       vacc0x1 = wasm_i32x4_add(vacc0x1, wasm_i32x4_extend_low_i16x8(vprod0x1));
@@ -99,7 +99,7 @@ void xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_3x4c8__wasmsimd(
       const v128_t vprod2x1 = wasm_i16x8_mul(vxa2, vxb1);
       vacc2x1 = wasm_i32x4_add(vacc2x1, wasm_i32x4_extend_low_i16x8(vprod2x1));
       vacc2x1 = wasm_i32x4_add(vacc2x1, wasm_i32x4_extend_high_i16x8(vprod2x1));
-      const v128_t vxb2 = wasm_v128_load((const void*) ((uintptr_t) w + 16 * sizeof(int16_t)));
+      const v128_t vxb2 = wasm_v128_load((const int16_t*) w + 16);
 
       const v128_t vprod0x2 = wasm_i16x8_mul(vxa0, vxb2);
       vacc0x2 = wasm_i32x4_add(vacc0x2, wasm_i32x4_extend_low_i16x8(vprod0x2));
@@ -110,7 +110,7 @@ void xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_3x4c8__wasmsimd(
       const v128_t vprod2x2 = wasm_i16x8_mul(vxa2, vxb2);
       vacc2x2 = wasm_i32x4_add(vacc2x2, wasm_i32x4_extend_low_i16x8(vprod2x2));
       vacc2x2 = wasm_i32x4_add(vacc2x2, wasm_i32x4_extend_high_i16x8(vprod2x2));
-      const v128_t vxb3 = wasm_v128_load((const void*) ((uintptr_t) w + 24 * sizeof(int16_t)));
+      const v128_t vxb3 = wasm_v128_load((const int16_t*) w + 24);
 
       const v128_t vprod0x3 = wasm_i16x8_mul(vxa0, vxb3);
       vacc0x3 = wasm_i32x4_add(vacc0x3, wasm_i32x4_extend_low_i16x8(vprod0x3));
@@ -122,7 +122,7 @@ void xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_3x4c8__wasmsimd(
       vacc2x3 = wasm_i32x4_add(vacc2x3, wasm_i32x4_extend_low_i16x8(vprod2x3));
       vacc2x3 = wasm_i32x4_add(vacc2x3, wasm_i32x4_extend_high_i16x8(vprod2x3));
 
-      w = (const void*) ((uintptr_t) w + 32 * sizeof(int16_t));
+      w = (const void*) ((const int16_t*) w + 32);
       k += 8 * sizeof(int8_t);
     }
 

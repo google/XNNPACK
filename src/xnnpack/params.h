@@ -314,6 +314,16 @@ union xnn_qu8_conv_minmax_params {
     XNN_ALIGN(64) uint8_t output_max[64];
   } fp32_avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    XNN_ALIGN(16) int16_t kernel_zero_point[8];
+    XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) float output_min_less_zero_point[4];
+    XNN_ALIGN(16) float output_max_less_zero_point[4];
+    XNN_ALIGN(16) float magic_bias[4];
+    XNN_ALIGN(16) int32_t magic_bias_less_output_zero_point[4];
+  } fp32_wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD
 };
 
 union xnn_qs8_minmax_params {

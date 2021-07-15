@@ -46,7 +46,7 @@ void xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_1x4c8__wasmsimd(
     v128_t vacc0x1 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[1]);
     v128_t vacc0x2 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[2]);
     v128_t vacc0x3 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[3]);
-    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    w = (const void*) ((const int32_t*) w + 4);
 
     size_t k = 0;
     while (k < kc) {
@@ -58,23 +58,23 @@ void xnn_qs8_gemm_xw_minmax_gemmlowp_ukernel_1x4c8__wasmsimd(
       const v128_t vprod0x0 = wasm_i16x8_mul(vxa0, vxb0);
       vacc0x0 = wasm_i32x4_add(vacc0x0, wasm_i32x4_extend_low_i16x8(vprod0x0));
       vacc0x0 = wasm_i32x4_add(vacc0x0, wasm_i32x4_extend_high_i16x8(vprod0x0));
-      const v128_t vxb1 = wasm_v128_load((const void*) ((uintptr_t) w + 8 * sizeof(int16_t)));
+      const v128_t vxb1 = wasm_v128_load((const int16_t*) w + 8);
 
       const v128_t vprod0x1 = wasm_i16x8_mul(vxa0, vxb1);
       vacc0x1 = wasm_i32x4_add(vacc0x1, wasm_i32x4_extend_low_i16x8(vprod0x1));
       vacc0x1 = wasm_i32x4_add(vacc0x1, wasm_i32x4_extend_high_i16x8(vprod0x1));
-      const v128_t vxb2 = wasm_v128_load((const void*) ((uintptr_t) w + 16 * sizeof(int16_t)));
+      const v128_t vxb2 = wasm_v128_load((const int16_t*) w + 16);
 
       const v128_t vprod0x2 = wasm_i16x8_mul(vxa0, vxb2);
       vacc0x2 = wasm_i32x4_add(vacc0x2, wasm_i32x4_extend_low_i16x8(vprod0x2));
       vacc0x2 = wasm_i32x4_add(vacc0x2, wasm_i32x4_extend_high_i16x8(vprod0x2));
-      const v128_t vxb3 = wasm_v128_load((const void*) ((uintptr_t) w + 24 * sizeof(int16_t)));
+      const v128_t vxb3 = wasm_v128_load((const int16_t*) w + 24);
 
       const v128_t vprod0x3 = wasm_i16x8_mul(vxa0, vxb3);
       vacc0x3 = wasm_i32x4_add(vacc0x3, wasm_i32x4_extend_low_i16x8(vprod0x3));
       vacc0x3 = wasm_i32x4_add(vacc0x3, wasm_i32x4_extend_high_i16x8(vprod0x3));
 
-      w = (const void*) ((uintptr_t) w + 32 * sizeof(int16_t));
+      w = (const void*) ((const int16_t*) w + 32);
       k += 8 * sizeof(int8_t);
     }
 
