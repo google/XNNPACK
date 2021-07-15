@@ -212,6 +212,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__wasmsimd_mul16(
       vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vprod8x89ABCDEF));
       vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vprod8x89ABCDEF));
 
+
       w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t) + 144 * sizeof(int8_t));
 
       const v128_t vsign0123 = wasm_i32x4_shr(vacc0123, 31);
@@ -357,6 +358,7 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__wasmsimd_mul16(
         vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod8x01234567));
 
         k += 8;
+
 
       const v128_t vsign0123 = wasm_i32x4_shr(vacc0123, 31);
       const v128_t vsign4567 = wasm_i32x4_shr(vacc4567, 31);

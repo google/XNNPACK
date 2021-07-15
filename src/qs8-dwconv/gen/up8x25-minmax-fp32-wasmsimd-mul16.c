@@ -389,6 +389,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__wasmsimd_mul16(
       vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod24x01234567));
       vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod24x01234567));
 
+
       w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t) + 200 * sizeof(int8_t));
 
       vacc0123 = wasm_f32x4_convert_i32x4(vacc0123);
@@ -626,6 +627,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__wasmsimd_mul16(
 
         vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vprod24x01234567));
         vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vprod24x01234567));
+
 
 
       vacc0123 = wasm_f32x4_convert_i32x4(vacc0123);
