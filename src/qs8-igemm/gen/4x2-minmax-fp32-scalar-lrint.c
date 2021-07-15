@@ -61,7 +61,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_4x2__scalar_lrint(
     int32_t vacc2x1 = vacc0x1;
     int32_t vacc3x0 = vacc0x0;
     int32_t vacc3x1 = vacc0x1;
-    w = (const void*) ((uintptr_t) w + 2 * sizeof(int32_t));
+    w = (const void*) ((const int32_t*) w + 2);
 
     size_t p = ks;
     do {
@@ -94,9 +94,9 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_4x2__scalar_lrint(
         const int32_t va2 = (int32_t) *a2++;
         const int32_t va3 = (int32_t) *a3++;
 
-        const int32_t vb0 = ((const int8_t*) w)[0];
-        const int32_t vb1 = ((const int8_t*) w)[1];
-        w = (const void*) ((uintptr_t) w + 2 * sizeof(int8_t));
+        const int32_t vb0 = (int32_t) ((const int8_t*) w)[0];
+        const int32_t vb1 = (int32_t) ((const int8_t*) w)[1];
+        w = (const void*) ((const int8_t*) w + 2);
 
         vacc0x0 += va0 * vb0;
         vacc0x1 += va0 * vb1;

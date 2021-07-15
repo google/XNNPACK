@@ -25,6 +25,22 @@ XNN_INTERNAL void xnn_init_qu8_conv_minmax_gemmlowp_scalar_params(
   uint8_t output_min,
   uint8_t output_max);
 
+XNN_INTERNAL void xnn_init_qu8_conv_minmax_fp32_scalar_lrint_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t kernel_zero_point,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max);
+
+XNN_INTERNAL void xnn_init_qu8_conv_minmax_fp32_scalar_magic_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t kernel_zero_point,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max);
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_INTERNAL void xnn_init_qu8_conv_minmax_gemmlowp_sse2_params(
   union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],

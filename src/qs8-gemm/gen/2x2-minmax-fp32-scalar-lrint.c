@@ -45,16 +45,16 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_lrint(
     int32_t vacc0x1 = ((const int32_t*) w)[1];
     int32_t vacc1x0 = vacc0x0;
     int32_t vacc1x1 = vacc0x1;
-    w = (const void*) ((uintptr_t) w + 2 * sizeof(int32_t));
+    w = (const void*) ((const int32_t*) w + 2);
 
     size_t k = kc;
     do {
       const int32_t va0 = (int32_t) *a0++;
       const int32_t va1 = (int32_t) *a1++;
 
-      const int32_t vb0 = ((const int8_t*) w)[0];
-      const int32_t vb1 = ((const int8_t*) w)[1];
-      w = (const void*) ((uintptr_t) w + 2 * sizeof(int8_t));
+      const int32_t vb0 = (int32_t) ((const int8_t*) w)[0];
+      const int32_t vb1 = (int32_t) ((const int8_t*) w)[1];
+      w = (const void*) ((const int8_t*) w + 2);
 
       vacc0x0 += va0 * vb0;
       vacc0x1 += va0 * vb1;

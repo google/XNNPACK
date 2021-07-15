@@ -4,7 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
+$assert DATATYPE in ["QC8", "QS8", "QU8"]
+$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 #include <assert.h>
 $if REQUANTIZATION == "FP32":
   $if VARIANT == "LRINT":
@@ -17,22 +18,22 @@ $if REQUANTIZATION == "FP32":
 #include <xnnpack/gemm.h>
 
 
-$DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $FUNCTION_SUFFIX = "scalar_" + VARIANT.lower() if VARIANT else "scalar"
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-$PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + "scalar" + ("_" + VARIANT.lower() if VARIANT else "")
-void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}__${FUNCTION_SUFFIX}(
+$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_STRUCT = ("" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_") + "scalar" + ("_" + VARIANT.lower() if VARIANT else "")
+$XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
+void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}__${FUNCTION_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,
     size_t ks,
-    const int8_t**restrict a,
+    const ${XINT8_T}**restrict a,
     const void*restrict w,
-    int8_t*restrict c,
+    ${XINT8_T}*restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
-    const int8_t* zero,
+    const ${XINT8_T}* zero,
     const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -45,9 +46,9 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}_
   assert(w != NULL);
   assert(c != NULL);
 
-  int8_t* c0 = c;
+  ${XINT8_T}* c0 = c;
   $for M in range(1, MR):
-    int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);
+    ${XINT8_T}* c${M} = (${XINT8_T}*) ((uintptr_t) c${M-1} + cm_stride);
     $if M % 2 == 0:
       if XNN_UNPREDICTABLE(mr <= ${M}) {
         c${M} = c${M-1};
@@ -61,38 +62,46 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}_
         c${M} = c${M-1};
       }
 
+  $if DATATYPE == "QU8":
+    const int32_t vb_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
   do {
     $for N in range(NR):
       int32_t vacc0x${N} = ((const int32_t*) w)[${N}];
     $for M in range(1, MR):
       $for N in range(NR):
         int32_t vacc${M}x${N} = vacc0x${N};
-    w = (const void*) ((uintptr_t) w + ${NR} * sizeof(int32_t));
+    w = (const void*) ((const int32_t*) w + ${NR});
 
     size_t p = ks;
     do {
       $for M in range(MR):
-        const int8_t* restrict a${M} = a[${M}];
+        const ${XINT8_T}* restrict a${M} = a[${M}];
         assert(a${M} != NULL);
         if XNN_UNPREDICTABLE(a${M} != zero) {
-          a${M} = (const int8_t*) ((uintptr_t) a${M} + a_offset);
+          a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} + a_offset);
         }
       a += ${MR};
 
       size_t k = kc;
       do {
         $for M in range(MR):
-          const int32_t va${M} = (int32_t) *a${M}++;
+          $if DATATYPE == "QU8":
+            const int32_t va${M} = (int32_t) (uint32_t) *a${M}++;
+          $else:
+            const int32_t va${M} = (int32_t) *a${M}++;
 
         $for N in range(NR):
-          const int32_t vb${N} = ((const int8_t*) w)[${N}];
-        w = (const void*) ((uintptr_t) w + ${NR} * sizeof(int8_t));
+          $if DATATYPE == "QU8":
+            const int32_t vb${N} = (int32_t) (uint32_t) ((const uint8_t*) w)[${N}] - vb_zero_point;
+          $else:
+            const int32_t vb${N} = (int32_t) ((const int8_t*) w)[${N}];
+        w = (const void*) ((const ${XINT8_T}*) w + ${NR});
 
         $for M in range(MR):
           $for N in range(NR):
             vacc${M}x${N} += va${M} * vb${N};
 
-        k -= sizeof(int8_t);
+        k -= sizeof(${XINT8_T});
       } while (k != 0);
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
@@ -138,7 +147,7 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}_
         $for N in range(NR):
           float vfpacc${M}x${N} = (float) vacc${M}x${N};
 
-      $if CHANNELWISE:
+      $if DATATYPE == "QC8":
         $for N in range(NR):
           const float vscale${N} = ((const float*) w)[${N}];
           $for M in range(MR):
@@ -193,19 +202,19 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}_
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
         $for N in range(NR):
-          c${M}[${N}] = (int8_t) vout${M}x${N};
+          c${M}[${N}] = (${XINT8_T}) vout${M}x${N};
 
       $for M in reversed(range(MR)):
-        c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
+        c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
 
-      a = (const int8_t**restrict) ((uintptr_t) a - ks);
+      a = (const ${XINT8_T}**restrict) ((uintptr_t) a - ks);
       nc -= ${NR};
     } else {
       $for LOG2N in reversed(range(NR.bit_length() - 1)):
         if (nc & ${1 << LOG2N}) {
           $for M in reversed(range(MR)):
             $for N in range(1 << LOG2N):
-              c${M}[${N}] = (int8_t) vout${M}x${N};
+              c${M}[${N}] = (${XINT8_T}) vout${M}x${N};
             $if LOG2N != 0:
               $for N in range(1 << (LOG2N - 1)):
                 vout${M}x${N} = vout${M}x${N + (1 << LOG2N)};

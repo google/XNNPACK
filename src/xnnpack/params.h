@@ -252,6 +252,21 @@ union xnn_qu8_conv_minmax_params {
     int32_t output_max_less_zero_point;
     int32_t output_zero_point;
   } gemmlowp_scalar;
+  struct {
+    int32_t kernel_zero_point;
+    float scale;
+    long output_min_less_zero_point;
+    long output_max_less_zero_point;
+    int32_t output_zero_point;
+  } fp32_scalar_lrint;
+  struct {
+    int32_t kernel_zero_point;
+    float scale;
+    float output_min_less_zero_point;
+    float output_max_less_zero_point;
+    float magic_bias;
+    int32_t magic_bias_less_output_zero_point;
+  } fp32_scalar_magic;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint8_t kernel_zero_point;

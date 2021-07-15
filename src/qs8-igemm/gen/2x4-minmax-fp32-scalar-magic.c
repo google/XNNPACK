@@ -54,7 +54,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x4__scalar_magic(
     int32_t vacc1x1 = vacc0x1;
     int32_t vacc1x2 = vacc0x2;
     int32_t vacc1x3 = vacc0x3;
-    w = (const void*) ((uintptr_t) w + 4 * sizeof(int32_t));
+    w = (const void*) ((const int32_t*) w + 4);
 
     size_t p = ks;
     do {
@@ -75,11 +75,11 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x4__scalar_magic(
         const int32_t va0 = (int32_t) *a0++;
         const int32_t va1 = (int32_t) *a1++;
 
-        const int32_t vb0 = ((const int8_t*) w)[0];
-        const int32_t vb1 = ((const int8_t*) w)[1];
-        const int32_t vb2 = ((const int8_t*) w)[2];
-        const int32_t vb3 = ((const int8_t*) w)[3];
-        w = (const void*) ((uintptr_t) w + 4 * sizeof(int8_t));
+        const int32_t vb0 = (int32_t) ((const int8_t*) w)[0];
+        const int32_t vb1 = (int32_t) ((const int8_t*) w)[1];
+        const int32_t vb2 = (int32_t) ((const int8_t*) w)[2];
+        const int32_t vb3 = (int32_t) ((const int8_t*) w)[3];
+        w = (const void*) ((const int8_t*) w + 4);
 
         vacc0x0 += va0 * vb0;
         vacc0x1 += va0 * vb1;
