@@ -33,7 +33,7 @@ class Requantization : public benchmark::Fixture {
     n_ = n_ / 16 * 16;
   }
 
-  virtual void SetUp(const benchmark::State&) override
+  virtual void SetUp(benchmark::State& state) override
   {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -43,8 +43,12 @@ class Requantization : public benchmark::Fixture {
     std::generate(input_.begin(), input_.end(), std::ref(i32rng));
     output_.resize(n());
     std::fill(output_.begin(), output_.end(), 0xA5);
-  }
 
+    const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+    if (cpu_frequency != 0) {
+      state.counters["cpufreq"] = cpu_frequency;
+    }
+  }
   virtual void TearDown(benchmark::State& state) override
   {
     state.SetItemsProcessed(uint64_t(state.iterations()) * n());
