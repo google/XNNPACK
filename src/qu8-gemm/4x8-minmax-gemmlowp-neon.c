@@ -52,7 +52,7 @@ void xnn_qu8_gemm_minmax_gemmlowp_ukernel_4x8__neon(
     c3 = c2;
   }
 
-  const uint8x8_t vb_zero_point = vld1_dup_u8((const uint8_t*) &params->gemmlowp_neon.kernel_zero_point);
+  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->gemmlowp_neon.kernel_zero_point);
 
   do {
     int32x4_t vacc0x0123 = vld1q_s32(w); w = (const void*) ((uintptr_t) w + 16);

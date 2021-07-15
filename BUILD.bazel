@@ -2056,8 +2056,12 @@ NEON_UKERNELS = [
     "src/qu8-gavgpool/7x-minmax-neon-c8.c",
     "src/qu8-gemm/4x8-minmax-gemmlowp-neon.c",
     "src/qu8-gemm/8x8-minmax-gemmlowp-neon.c",
+    "src/qu8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c",
+    "src/qu8-gemm/gen/4x16-minmax-fp32-neon-mlal-lane.c",
     "src/qu8-igemm/4x8-minmax-gemmlowp-neon.c",
     "src/qu8-igemm/8x8-minmax-gemmlowp-neon.c",
+    "src/qu8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c",
+    "src/qu8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c",
     "src/qu8-requantization/fp32-neon.c",
     "src/qu8-requantization/gemmlowp-neon.c",
     "src/qu8-requantization/rndna-neon.c",
@@ -2450,6 +2454,10 @@ NEONV8_UKERNELS = [
     "src/qs8-igemm/gen/2x8c2-minmax-fp32-neonv8-mlal-padal-dup.c",
     "src/qs8-igemm/gen/2x8c8-minmax-fp32-neonv8-mlal-padal.c",
     "src/qs8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c",
+    "src/qu8-gemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c",
+    "src/qu8-gemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c",
+    "src/qu8-igemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c",
+    "src/qu8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c",
 ]
 
 AARCH64_NEONFP16ARITH_UKERNELS = [

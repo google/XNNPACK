@@ -188,12 +188,43 @@ void xnn_init_qu8_conv_minmax_gemmlowp_neon_params(
   assert(shift >= 0);
   assert(shift < 32);
 
-  params->gemmlowp_neon.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
+  params->gemmlowp_neon.kernel_zero_point = kernel_zero_point;
   params->gemmlowp_neon.multiplier = multiplier;
   params->gemmlowp_neon.right_shift = -shift;
   params->gemmlowp_neon.output_zero_point = (int16_t) (uint16_t) output_zero_point;
   params->gemmlowp_neon.output_min = output_min;
   params->gemmlowp_neon.output_max = output_max;
+}
+
+void xnn_init_qu8_conv_minmax_fp32_neon_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t kernel_zero_point,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  params->fp32_neon.kernel_zero_point = kernel_zero_point;
+  params->fp32_neon.scale = scale;
+  params->fp32_neon.output_min_less_zero_point = (float) (int32_t) ((uint32_t) output_min - (uint32_t) output_zero_point);
+  params->fp32_neon.output_max_less_zero_point = (float) (int32_t) ((uint32_t) output_max - (uint32_t) output_zero_point);
+  params->fp32_neon.magic_bias = 12582912.0f;
+  params->fp32_neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) (uint32_t) output_zero_point;
+}
+
+void xnn_init_qu8_conv_minmax_fp32_neonv8_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t kernel_zero_point,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  params->fp32_neonv8.kernel_zero_point = kernel_zero_point;
+  params->fp32_neonv8.scale = scale;
+  params->fp32_neonv8.output_zero_point = (int16_t) (uint16_t) output_zero_point;
+  params->fp32_neonv8.output_min = output_min;
+  params->fp32_neonv8.output_max = output_max;
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 

@@ -93,17 +93,23 @@ tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=3 -D NR=16 -D PREFETCH=0 -D 
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=GEMMLOWP -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-igemm/gen/4x16-minmax-gemmlowp-neon-mlal-lane.c
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=6 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=GEMMLOWP -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-igemm/gen/6x16-minmax-gemmlowp-neon-mlal-lane.c
 
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=0 -o src/qc8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=0 -o src/qc8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
+
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
 
-tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=0 -o src/qc8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
-tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=0 -o src/qc8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
+
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=1 -o src/qc8-igemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=1 -o src/qc8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
 
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-igemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
 
-tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=1 -o src/qc8-igemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
-tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=1 -o src/qc8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-igemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
+tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
 
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=8  -D PREFETCH=1 -D REQUANTIZATION=GEMMLOWP -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-igemm/gen/1x8-minmax-gemmlowp-neon-mlal-lane-prfm.c
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=2 -D NR=8  -D PREFETCH=1 -D REQUANTIZATION=GEMMLOWP -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-igemm/gen/2x8-minmax-gemmlowp-neon-mlal-lane-prfm.c

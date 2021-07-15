@@ -254,13 +254,31 @@ union xnn_qu8_conv_minmax_params {
   } gemmlowp_scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    int32_t kernel_zero_point;
+    uint8_t kernel_zero_point;
+    uint8_t padding[3];
     int32_t multiplier;
     int32_t right_shift;
     int16_t output_zero_point;
     uint8_t output_min;
     uint8_t output_max;
   } gemmlowp_neon;
+  struct {
+    uint8_t kernel_zero_point;
+    uint8_t padding[3];
+    float scale;
+    float output_min_less_zero_point;
+    float output_max_less_zero_point;
+    float magic_bias;
+    int32_t magic_bias_less_zero_point;
+  } fp32_neon;
+  struct {
+    uint8_t kernel_zero_point;
+    uint8_t padding[3];
+    float scale;
+    int16_t output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+  } fp32_neonv8;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
