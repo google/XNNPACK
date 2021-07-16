@@ -1243,16 +1243,22 @@ static void init(void) {
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
-    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_gemmlowp_ukernel_8x8__neon);
-    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_gemmlowp_ukernel_8x8__neon);
-    xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_gemmlowp_neon_params;
-    xnn_params.qu8.gemm.mr = 8;
-    xnn_params.qu8.gemm.nr = 8;
+    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane);
+    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane);
+    xnn_params.qu8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane);
+    xnn_params.qu8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane);
+    xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_fp32_neonv8_params;
+    xnn_params.qu8.gemm.mr = 4;
+    xnn_params.qu8.gemm.nr = 16;
 
-    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon;
-    xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_gemmlowp_neon_params;
+    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up8x9__neonv8_mul16;
+    xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_neonv8_params;
     xnn_params.qu8.dwconv[0].channel_tile = 8;
     xnn_params.qu8.dwconv[0].primary_tile = 9;
+    xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__neonv8_mul16;
+    xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_neonv8_params;
+    xnn_params.qu8.dwconv[1].channel_tile = 8;
+    xnn_params.qu8.dwconv[1].primary_tile = 25;
 
     xnn_params.qu8.avgpool = (struct avgpool_parameters) {
       .up = (xnn_avgpool_unipass_ukernel_function) xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8,
