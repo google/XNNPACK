@@ -673,7 +673,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SQXTN2  v5.16b, v25.8h
         SQXTN2  v6.16b, v26.8h
         SQXTN2  v7.16b, v27.8h
-        LDR     x12, [sp, 0]            // cn_stride
+        LDR     x12, [sp]               // cn_stride
 
         SMAX    v4.16b, v4.16b, v0.16b
         SMAX    v5.16b, v5.16b, v0.16b

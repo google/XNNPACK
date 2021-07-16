@@ -347,7 +347,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         # Load params pointer
         LDR     r0, [sp, 116]           // cn_stride
         LDR     r5, [sp, 120]           // params
-        LDR     r2, [sp, 0]             // kc
+        LDR     r2, [sp]                // kc
         SUBS    r1, r1, 8
 
         # Load min/max values

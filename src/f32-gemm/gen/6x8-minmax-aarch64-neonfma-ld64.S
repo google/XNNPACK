@@ -170,7 +170,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         # Clamp
         FMAX    v20.4s, v20.4s, v6.4s
         # Load cn_stride
-        LDR     x0, [sp, 0]
+        LDR     x0, [sp]
         FMAX    v21.4s, v21.4s, v6.4s
         FMAX    v22.4s, v22.4s, v6.4s
         FMAX    v23.4s, v23.4s, v6.4s
