@@ -1293,6 +1293,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-requantization/gemmlowp-neon.c
   src/qs8-requantization/rndna-neon.c
   src/qs8-requantization/rndnu-neon.c
+  src/qs8-requantization/ruy-neon.c
   src/qs8-vadd/gen/minmax-neon-ld64-x8.c
   src/qs8-vadd/gen/minmax-neon-ld64-x16.c
   src/qs8-vadd/gen/minmax-neon-ld64-x24.c
@@ -1320,6 +1321,7 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qu8-requantization/fp32-neon.c
   src/qu8-requantization/gemmlowp-neon.c
   src/qu8-requantization/rndna-neon.c
+  src/qu8-requantization/ruy-neon.c
   src/qu8-vadd/minmax-neon.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c

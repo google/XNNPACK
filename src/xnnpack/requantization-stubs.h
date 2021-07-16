@@ -58,6 +58,8 @@ DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_rndna__scalar_signed64)
 DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_rndna__scalar_unsigned32)
 DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_rndna__scalar_unsigned64)
 
+DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_ruy__neon)
+
 
 typedef void (*xnn_qs8_requantization_function)(
     size_t n,
@@ -104,6 +106,8 @@ DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__neon)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__sse4_sra)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__sse4_srl)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__scalar)
+
+DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_ruy__neon)
 
 
 #ifdef __cplusplus

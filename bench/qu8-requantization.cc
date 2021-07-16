@@ -101,6 +101,13 @@ class Requantization : public benchmark::Fixture {
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
+
+  BENCHMARK_F(Requantization, ruy__neon)(benchmark::State& state) {
+    for (auto _ : state) {
+      xnn_qu8_requantize_ruy__neon(
+          n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
+    }
+  }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
