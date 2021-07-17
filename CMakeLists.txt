@@ -1613,10 +1613,10 @@ SET(XNNPACK_NEONV8_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up24x25-minmax-fp32-neonv8-mul16.c
   src/qu8-dwconv/gen/up32x9-minmax-fp32-neonv8-mul16.c
   src/qu8-dwconv/gen/up32x25-minmax-fp32-neonv8-mul16.c
-  src/qu8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
-  src/qu8-gemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
-  src/qu8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
-  src/qu8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c)
+  src/qu8-gemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
+  src/qu8-gemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
+  src/qu8-igemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
+  src/qu8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c)
 
 SET(XNNPACK_AARCH64_NEONFMA_MICROKERNEL_SRCS
   src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x1.c
