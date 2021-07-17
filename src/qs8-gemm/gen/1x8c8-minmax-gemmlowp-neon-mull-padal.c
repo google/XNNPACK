@@ -110,11 +110,12 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__neon_mull_padal(
 #endif
 
     const int32x4_t vmultiplier = vld1q_dup_s32(&params->gemmlowp_neon.multiplier);
+    const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
+    const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
+
     vacc0x0123 = vqrdmulhq_s32(vacc0x0123, vmultiplier);
     vacc0x4567 = vqrdmulhq_s32(vacc0x4567, vmultiplier);
 
-    const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
-    const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
     vacc0x0123 = vsraq_n_s32(vacc0x0123, vbicq_s32(vacc0x0123, vzero_shift_mask), 31);
     vacc0x4567 = vsraq_n_s32(vacc0x4567, vbicq_s32(vacc0x4567, vzero_shift_mask), 31);
 

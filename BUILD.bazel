@@ -1958,9 +1958,11 @@ NEON_UKERNELS = [
     "src/qs8-gemm/gen/1x8c2-minmax-fp32-neon-mlal-padal-dup.c",
     "src/qs8-gemm/gen/1x8c2-minmax-gemmlowp-neon-mlal-padal-dup.c",
     "src/qs8-gemm/gen/1x8c2-minmax-gemmlowp-neon-mull-padal-dup.c",
+    "src/qs8-gemm/gen/1x8c2-minmax-rndnu-neon-mlal-padal-dup.c",
     "src/qs8-gemm/gen/1x8c8-minmax-fp32-neon-mlal-padal.c",
     "src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-neon-mlal-padal.c",
     "src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-neon-mull-padal.c",
+    "src/qs8-gemm/gen/1x8c8-minmax-rndnu-neon-mlal-padal.c",
     "src/qs8-gemm/gen/1x8c16-minmax-gemmlowp-neon-mlal-padal.c",
     "src/qs8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c",
     "src/qs8-gemm/gen/1x16-minmax-gemmlowp-neon-mlal-lane-prfm.c",
@@ -1977,9 +1979,11 @@ NEON_UKERNELS = [
     "src/qs8-gemm/gen/2x8c2-minmax-fp32-neon-mlal-padal-dup.c",
     "src/qs8-gemm/gen/2x8c2-minmax-gemmlowp-neon-mlal-padal-dup.c",
     "src/qs8-gemm/gen/2x8c2-minmax-gemmlowp-neon-mull-padal-dup.c",
+    "src/qs8-gemm/gen/2x8c2-minmax-rndnu-neon-mlal-padal-dup.c",
     "src/qs8-gemm/gen/2x8c8-minmax-fp32-neon-mlal-padal.c",
     "src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-neon-mlal-padal.c",
     "src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-neon-mull-padal.c",
+    "src/qs8-gemm/gen/2x8c8-minmax-rndnu-neon-mlal-padal.c",
     "src/qs8-gemm/gen/2x8c16-minmax-gemmlowp-neon-mlal-padal.c",
     "src/qs8-gemm/gen/2x16-minmax-gemmlowp-neon-mlal-lane-prfm.c",
     "src/qs8-gemm/gen/2x16-minmax-gemmlowp-neon-mlal-lane.c",
@@ -2032,9 +2036,11 @@ NEON_UKERNELS = [
     "src/qs8-igemm/gen/1x8c2-minmax-fp32-neon-mlal-padal-dup.c",
     "src/qs8-igemm/gen/1x8c2-minmax-gemmlowp-neon-mlal-padal-dup.c",
     "src/qs8-igemm/gen/1x8c2-minmax-gemmlowp-neon-mull-padal-dup.c",
+    "src/qs8-igemm/gen/1x8c2-minmax-rndnu-neon-mlal-padal-dup.c",
     "src/qs8-igemm/gen/1x8c8-minmax-fp32-neon-mlal-padal.c",
     "src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-neon-mlal-padal.c",
     "src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-neon-mull-padal.c",
+    "src/qs8-igemm/gen/1x8c8-minmax-rndnu-neon-mlal-padal.c",
     "src/qs8-igemm/gen/1x8c16-minmax-gemmlowp-neon-mlal-padal.c",
     "src/qs8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c",
     "src/qs8-igemm/gen/1x16-minmax-gemmlowp-neon-mlal-lane-prfm.c",
@@ -2051,9 +2057,11 @@ NEON_UKERNELS = [
     "src/qs8-igemm/gen/2x8c2-minmax-fp32-neon-mlal-padal-dup.c",
     "src/qs8-igemm/gen/2x8c2-minmax-gemmlowp-neon-mlal-padal-dup.c",
     "src/qs8-igemm/gen/2x8c2-minmax-gemmlowp-neon-mull-padal-dup.c",
+    "src/qs8-igemm/gen/2x8c2-minmax-rndnu-neon-mlal-padal-dup.c",
     "src/qs8-igemm/gen/2x8c8-minmax-fp32-neon-mlal-padal.c",
     "src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-neon-mlal-padal.c",
     "src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-neon-mull-padal.c",
+    "src/qs8-igemm/gen/2x8c8-minmax-rndnu-neon-mlal-padal.c",
     "src/qs8-igemm/gen/2x8c16-minmax-gemmlowp-neon-mlal-padal.c",
     "src/qs8-igemm/gen/2x16-minmax-gemmlowp-neon-mlal-lane-prfm.c",
     "src/qs8-igemm/gen/2x16-minmax-gemmlowp-neon-mlal-lane.c",
@@ -2641,12 +2649,16 @@ NEONDOT_UKERNELS = [
     "src/qc8-igemm/gen/8x16c4-minmax-fp32-neondot.c",
     "src/qs8-gemm/gen/1x8c4-minmax-fp32-neondot.c",
     "src/qs8-gemm/gen/1x8c4-minmax-gemmlowp-neondot.c",
+    "src/qs8-gemm/gen/1x8c4-minmax-rndnu-neondot.c",
     "src/qs8-gemm/gen/1x16c4-minmax-fp32-neondot.c",
     "src/qs8-gemm/gen/1x16c4-minmax-gemmlowp-neondot.c",
+    "src/qs8-gemm/gen/1x16c4-minmax-rndnu-neondot.c",
     "src/qs8-gemm/gen/4x8c4-minmax-fp32-neondot.c",
     "src/qs8-gemm/gen/4x8c4-minmax-gemmlowp-neondot.c",
+    "src/qs8-gemm/gen/4x8c4-minmax-rndnu-neondot.c",
     "src/qs8-gemm/gen/4x16c4-minmax-fp32-neondot.c",
     "src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-neondot.c",
+    "src/qs8-gemm/gen/4x16c4-minmax-rndnu-neondot.c",
     "src/qs8-gemm/gen/6x8c4-minmax-fp32-neondot.c",
     "src/qs8-gemm/gen/6x8c4-minmax-gemmlowp-neondot.c",
     "src/qs8-gemm/gen/6x16c4-minmax-fp32-neondot.c",
@@ -2657,12 +2669,16 @@ NEONDOT_UKERNELS = [
     "src/qs8-gemm/gen/8x16c4-minmax-gemmlowp-neondot.c",
     "src/qs8-igemm/gen/1x8c4-minmax-fp32-neondot.c",
     "src/qs8-igemm/gen/1x8c4-minmax-gemmlowp-neondot.c",
+    "src/qs8-igemm/gen/1x8c4-minmax-rndnu-neondot.c",
     "src/qs8-igemm/gen/1x16c4-minmax-fp32-neondot.c",
     "src/qs8-igemm/gen/1x16c4-minmax-gemmlowp-neondot.c",
+    "src/qs8-igemm/gen/1x16c4-minmax-rndnu-neondot.c",
     "src/qs8-igemm/gen/4x8c4-minmax-fp32-neondot.c",
     "src/qs8-igemm/gen/4x8c4-minmax-gemmlowp-neondot.c",
+    "src/qs8-igemm/gen/4x8c4-minmax-rndnu-neondot.c",
     "src/qs8-igemm/gen/4x16c4-minmax-fp32-neondot.c",
     "src/qs8-igemm/gen/4x16c4-minmax-gemmlowp-neondot.c",
+    "src/qs8-igemm/gen/4x16c4-minmax-rndnu-neondot.c",
     "src/qs8-igemm/gen/6x8c4-minmax-fp32-neondot.c",
     "src/qs8-igemm/gen/6x8c4-minmax-gemmlowp-neondot.c",
     "src/qs8-igemm/gen/6x16c4-minmax-fp32-neondot.c",
@@ -7792,6 +7808,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_gemm_minmax_fp32_test",
+    timeout = "moderate",
+    srcs = [
+        "test/qs8-gemm-minmax-fp32.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
     name = "qs8_gemm_minmax_gemmlowp_test",
     timeout = "moderate",
     srcs = [
@@ -7803,10 +7830,21 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_gemm_minmax_fp32_test",
+    name = "qs8_gemm_minmax_rndnu_test",
     timeout = "moderate",
     srcs = [
-        "test/qs8-gemm-minmax-fp32.cc",
+        "test/qs8-gemm-minmax-rndnu.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qs8_igemm_minmax_fp32_test",
+    timeout = "moderate",
+    srcs = [
+        "test/qs8-igemm-minmax-fp32.cc",
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
@@ -7825,10 +7863,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_igemm_minmax_fp32_test",
+    name = "qs8_igemm_minmax_rndnu_test",
     timeout = "moderate",
     srcs = [
-        "test/qs8-igemm-minmax-fp32.cc",
+        "test/qs8-igemm-minmax-rndnu.cc",
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,

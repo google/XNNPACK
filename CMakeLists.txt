@@ -1151,9 +1151,11 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-gemm/gen/1x8c2-minmax-fp32-neon-mlal-padal-dup.c
   src/qs8-gemm/gen/1x8c2-minmax-gemmlowp-neon-mlal-padal-dup.c
   src/qs8-gemm/gen/1x8c2-minmax-gemmlowp-neon-mull-padal-dup.c
+  src/qs8-gemm/gen/1x8c2-minmax-rndnu-neon-mlal-padal-dup.c
   src/qs8-gemm/gen/1x8c8-minmax-fp32-neon-mlal-padal.c
   src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-neon-mlal-padal.c
   src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-neon-mull-padal.c
+  src/qs8-gemm/gen/1x8c8-minmax-rndnu-neon-mlal-padal.c
   src/qs8-gemm/gen/1x8c16-minmax-gemmlowp-neon-mlal-padal.c
   src/qs8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
   src/qs8-gemm/gen/1x16-minmax-gemmlowp-neon-mlal-lane-prfm.c
@@ -1170,9 +1172,11 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-gemm/gen/2x8c2-minmax-fp32-neon-mlal-padal-dup.c
   src/qs8-gemm/gen/2x8c2-minmax-gemmlowp-neon-mlal-padal-dup.c
   src/qs8-gemm/gen/2x8c2-minmax-gemmlowp-neon-mull-padal-dup.c
+  src/qs8-gemm/gen/2x8c2-minmax-rndnu-neon-mlal-padal-dup.c
   src/qs8-gemm/gen/2x8c8-minmax-fp32-neon-mlal-padal.c
   src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-neon-mlal-padal.c
   src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-neon-mull-padal.c
+  src/qs8-gemm/gen/2x8c8-minmax-rndnu-neon-mlal-padal.c
   src/qs8-gemm/gen/2x8c16-minmax-gemmlowp-neon-mlal-padal.c
   src/qs8-gemm/gen/2x16-minmax-gemmlowp-neon-mlal-lane-prfm.c
   src/qs8-gemm/gen/2x16-minmax-gemmlowp-neon-mlal-lane.c
@@ -1225,9 +1229,11 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/1x8c2-minmax-fp32-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/1x8c2-minmax-gemmlowp-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/1x8c2-minmax-gemmlowp-neon-mull-padal-dup.c
+  src/qs8-igemm/gen/1x8c2-minmax-rndnu-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/1x8c8-minmax-fp32-neon-mlal-padal.c
   src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-neon-mlal-padal.c
   src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-neon-mull-padal.c
+  src/qs8-igemm/gen/1x8c8-minmax-rndnu-neon-mlal-padal.c
   src/qs8-igemm/gen/1x8c16-minmax-gemmlowp-neon-mlal-padal.c
   src/qs8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
   src/qs8-igemm/gen/1x16-minmax-gemmlowp-neon-mlal-lane-prfm.c
@@ -1244,9 +1250,11 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/2x8c2-minmax-fp32-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/2x8c2-minmax-gemmlowp-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/2x8c2-minmax-gemmlowp-neon-mull-padal-dup.c
+  src/qs8-igemm/gen/2x8c2-minmax-rndnu-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/2x8c8-minmax-fp32-neon-mlal-padal.c
   src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-neon-mlal-padal.c
   src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-neon-mull-padal.c
+  src/qs8-igemm/gen/2x8c8-minmax-rndnu-neon-mlal-padal.c
   src/qs8-igemm/gen/2x8c16-minmax-gemmlowp-neon-mlal-padal.c
   src/qs8-igemm/gen/2x16-minmax-gemmlowp-neon-mlal-lane-prfm.c
   src/qs8-igemm/gen/2x16-minmax-gemmlowp-neon-mlal-lane.c
@@ -1829,12 +1837,16 @@ SET(XNNPACK_NEONDOT_MICROKERNEL_SRCS
   src/qc8-igemm/gen/8x16c4-minmax-fp32-neondot.c
   src/qs8-gemm/gen/1x8c4-minmax-fp32-neondot.c
   src/qs8-gemm/gen/1x8c4-minmax-gemmlowp-neondot.c
+  src/qs8-gemm/gen/1x8c4-minmax-rndnu-neondot.c
   src/qs8-gemm/gen/1x16c4-minmax-fp32-neondot.c
   src/qs8-gemm/gen/1x16c4-minmax-gemmlowp-neondot.c
+  src/qs8-gemm/gen/1x16c4-minmax-rndnu-neondot.c
   src/qs8-gemm/gen/4x8c4-minmax-fp32-neondot.c
   src/qs8-gemm/gen/4x8c4-minmax-gemmlowp-neondot.c
+  src/qs8-gemm/gen/4x8c4-minmax-rndnu-neondot.c
   src/qs8-gemm/gen/4x16c4-minmax-fp32-neondot.c
   src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-neondot.c
+  src/qs8-gemm/gen/4x16c4-minmax-rndnu-neondot.c
   src/qs8-gemm/gen/6x8c4-minmax-fp32-neondot.c
   src/qs8-gemm/gen/6x8c4-minmax-gemmlowp-neondot.c
   src/qs8-gemm/gen/6x16c4-minmax-fp32-neondot.c
@@ -1845,12 +1857,16 @@ SET(XNNPACK_NEONDOT_MICROKERNEL_SRCS
   src/qs8-gemm/gen/8x16c4-minmax-gemmlowp-neondot.c
   src/qs8-igemm/gen/1x8c4-minmax-fp32-neondot.c
   src/qs8-igemm/gen/1x8c4-minmax-gemmlowp-neondot.c
+  src/qs8-igemm/gen/1x8c4-minmax-rndnu-neondot.c
   src/qs8-igemm/gen/1x16c4-minmax-fp32-neondot.c
   src/qs8-igemm/gen/1x16c4-minmax-gemmlowp-neondot.c
+  src/qs8-igemm/gen/1x16c4-minmax-rndnu-neondot.c
   src/qs8-igemm/gen/4x8c4-minmax-fp32-neondot.c
   src/qs8-igemm/gen/4x8c4-minmax-gemmlowp-neondot.c
+  src/qs8-igemm/gen/4x8c4-minmax-rndnu-neondot.c
   src/qs8-igemm/gen/4x16c4-minmax-fp32-neondot.c
   src/qs8-igemm/gen/4x16c4-minmax-gemmlowp-neondot.c
+  src/qs8-igemm/gen/4x16c4-minmax-rndnu-neondot.c
   src/qs8-igemm/gen/6x8c4-minmax-fp32-neondot.c
   src/qs8-igemm/gen/6x8c4-minmax-gemmlowp-neondot.c
   src/qs8-igemm/gen/6x16c4-minmax-fp32-neondot.c
@@ -5422,6 +5438,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-gavgpool-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qs8-gavgpool-test qs8-gavgpool-minmax-test)
 
+  ADD_EXECUTABLE(qs8-gemm-minmax-fp32-test test/qs8-gemm-minmax-fp32.cc)
+  SET_TARGET_PROPERTIES(qs8-gemm-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-fp32-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-gemm-minmax-fp32-test qs8-gemm-minmax-fp32-test)
+
   ADD_EXECUTABLE(qs8-gemm-minmax-gemmlowp-test test/qs8-gemm-minmax-gemmlowp.cc)
   SET_TARGET_PROPERTIES(qs8-gemm-minmax-gemmlowp-test PROPERTIES
     CXX_STANDARD 11
@@ -5431,14 +5456,23 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-gemm-minmax-gemmlowp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qs8-gemm-minmax-gemmlowp-test qs8-gemm-minmax-gemmlowp-test)
 
-  ADD_EXECUTABLE(qs8-gemm-minmax-fp32-test test/qs8-gemm-minmax-fp32.cc)
-  SET_TARGET_PROPERTIES(qs8-gemm-minmax-fp32-test PROPERTIES
+  ADD_EXECUTABLE(qs8-gemm-minmax-rndnu-test test/qs8-gemm-minmax-rndnu.cc)
+  SET_TARGET_PROPERTIES(qs8-gemm-minmax-rndnu-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-fp32-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(qs8-gemm-minmax-fp32-test qs8-gemm-minmax-fp32-test)
+  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-rndnu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-gemm-minmax-rndnu-test qs8-gemm-minmax-rndnu-test)
+
+  ADD_EXECUTABLE(qs8-igemm-minmax-fp32-test test/qs8-igemm-minmax-fp32.cc)
+  SET_TARGET_PROPERTIES(qs8-igemm-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-fp32-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-igemm-minmax-fp32-test qs8-igemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qs8-igemm-minmax-gemmlowp-test test/qs8-igemm-minmax-gemmlowp.cc)
   SET_TARGET_PROPERTIES(qs8-igemm-minmax-gemmlowp-test PROPERTIES
@@ -5449,14 +5483,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-igemm-minmax-gemmlowp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qs8-igemm-minmax-gemmlowp-test qs8-igemm-minmax-gemmlowp-test)
 
-  ADD_EXECUTABLE(qs8-igemm-minmax-fp32-test test/qs8-igemm-minmax-fp32.cc)
-  SET_TARGET_PROPERTIES(qs8-igemm-minmax-fp32-test PROPERTIES
+  ADD_EXECUTABLE(qs8-igemm-minmax-rndnu-test test/qs8-igemm-minmax-rndnu.cc)
+  SET_TARGET_PROPERTIES(qs8-igemm-minmax-rndnu-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-fp32-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(qs8-igemm-minmax-fp32-test qs8-igemm-minmax-fp32-test)
+  TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-rndnu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-igemm-minmax-rndnu-test qs8-igemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-vadd-minmax-test test/qs8-vadd-minmax.cc)
   SET_TARGET_PROPERTIES(qs8-vadd-minmax-test PROPERTIES
