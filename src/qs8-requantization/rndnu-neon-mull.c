@@ -105,7 +105,7 @@ void xnn_qs8_requantize_rndnu__neon_mull(
     //   8x VRSHL.S32 Qd, Qm, Qn
     //   8x VMOVN.S64 Dd, Qm
     //   4x VQMOVN.S32 Dd, Qm
-    //   2x VADD.S16 Qd, Qm, Qn
+    //   2x VQADD.S16 Qd, Qm, Qn
     //   2x VQMOVUN.S16 Dd, Qm
     //   1x VMAX.U8 Qd, Qm, Qn
     //   1x VMIN.U8 Qd, Qm, Qn
@@ -119,7 +119,7 @@ void xnn_qs8_requantize_rndnu__neon_mull(
     //   4x UZP1 Vd.4S, Vn.4S, Vm.4S
     //   2x SQXTN Vd.4H, Vn.4S
     //   2x SQXTN2 Vd.8H, Vn.4S
-    //   2x ADD Vd.8H, Vn.8H, Vm.8H
+    //   2x SQADD Vd.8H, Vn.8H, Vm.8H
     //   1x SQXTN Vd.8B, Vn.8H
     //   1x SQXTN2 Vd.16B, Vn.8H
     //   1x SMIN Vd.16B, Vn.16B, Vm.16B

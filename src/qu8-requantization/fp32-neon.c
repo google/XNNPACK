@@ -123,7 +123,7 @@ void xnn_qu8_requantize_fp32__neon(
     //   4x FCVTNS Vd.4S, Vn.4S
     //   2x SQXTN Vd.4H, Vn.4S
     //   2x SQXTN2 Vd.8H, Vn.4S
-    //   2x ADD Vd.8H, Vn.8H, Vm.8H
+    //   2x SQADD Vd.8H, Vn.8H, Vm.8H
     //   1x SQXTUN Vd.8B, Vn.8H
     //   1x SQXTUN2 Vd.16B, Vn.8H
     //   1x UMIN Vd.16B, Vn.16B, Vm.16B
