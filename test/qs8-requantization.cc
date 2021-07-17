@@ -1252,20 +1252,20 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
 
 
   /*
-   * Round-to-nearest, ties up, ARM NEON implementation.
+   * Round-to-nearest, ties up, ARM NEON implementation using extended multiplication.
    */
 
-  TEST(QS8_RNDNU__NEON, exact_divide_by_po2) {
+  TEST(QS8_RNDNU__NEON_MULL, exact_divide_by_po2) {
     for (uint32_t s = 1; s < 32; s++) {
       RequantizationTester()
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
         .s(s)
-        .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__neon);
+        .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__neon_mull);
     }
   }
 
-  TEST(QS8_RNDNU__NEON, exact_divide_by_po2_with_zero_point) {
+  TEST(QS8_RNDNU__NEON_MULL, exact_divide_by_po2_with_zero_point) {
     for (int32_t zero_point = std::numeric_limits<int8_t>::min();
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
@@ -1276,12 +1276,12 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .s(s)
-          .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__neon);
+          .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__neon_mull);
       }
     }
   }
 
-  TEST(QS8_RNDNU__NEON, divide_by_po2_with_rounding_up) {
+  TEST(QS8_RNDNU__NEON_MULL, divide_by_po2_with_rounding_up) {
     for (int32_t zero_point = std::numeric_limits<int8_t>::min();
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
@@ -1292,12 +1292,12 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingUp(xnn_qs8_requantize_rndnu__neon);
+          .TestDivideByPO2WithRoundingUp(xnn_qs8_requantize_rndnu__neon_mull);
       }
     }
   }
 
-  TEST(QS8_RNDNU__NEON, divide_by_po2_with_rounding_down) {
+  TEST(QS8_RNDNU__NEON_MULL, divide_by_po2_with_rounding_down) {
     for (int32_t zero_point = std::numeric_limits<int8_t>::min();
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
@@ -1308,12 +1308,12 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingDown(xnn_qs8_requantize_rndnu__neon);
+          .TestDivideByPO2WithRoundingDown(xnn_qs8_requantize_rndnu__neon_mull);
       }
     }
   }
 
-  TEST(QS8_RNDNU__NEON, divide_by_po2_with_rounding_away) {
+  TEST(QS8_RNDNU__NEON_MULL, divide_by_po2_with_rounding_away) {
     for (int32_t zero_point = std::numeric_limits<int8_t>::min();
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
@@ -1324,17 +1324,104 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .s(s)
-          .TestDivideByPO2WithRoundingTiesUp(xnn_qs8_requantize_rndnu__neon);
+          .TestDivideByPO2WithRoundingTiesUp(xnn_qs8_requantize_rndnu__neon_mull);
       }
     }
   }
 
-  TEST(QS8_RNDNU__NEON, random_cases) {
+  TEST(QS8_RNDNU__NEON_MULL, random_cases) {
     RequantizationTester()
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
       .iterations(100)
-      .TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantize_rndnu__neon);
+      .TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantize_rndnu__neon_mull);
+  }
+
+
+  /*
+   * Round-to-nearest, ties up, ARM NEON implementation using Q31 multiplication.
+   */
+
+  TEST(QS8_RNDNU__NEON_QDMULH, exact_divide_by_po2) {
+    for (uint32_t s = 1; s < 32; s++) {
+      RequantizationTester()
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+        .s(s)
+        .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__neon_qdmulh);
+    }
+  }
+
+  TEST(QS8_RNDNU__NEON_QDMULH, exact_divide_by_po2_with_zero_point) {
+    for (int32_t zero_point = std::numeric_limits<int8_t>::min();
+         zero_point <= std::numeric_limits<int8_t>::max();
+         zero_point++)
+    {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .s(s)
+          .TestExactDivideByPO2(xnn_qs8_requantize_rndnu__neon_qdmulh);
+      }
+    }
+  }
+
+  TEST(QS8_RNDNU__NEON_QDMULH, divide_by_po2_with_rounding_up) {
+    for (int32_t zero_point = std::numeric_limits<int8_t>::min();
+         zero_point <= std::numeric_limits<int8_t>::max();
+         zero_point++)
+    {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingUp(xnn_qs8_requantize_rndnu__neon_qdmulh);
+      }
+    }
+  }
+
+  TEST(QS8_RNDNU__NEON_QDMULH, divide_by_po2_with_rounding_down) {
+    for (int32_t zero_point = std::numeric_limits<int8_t>::min();
+         zero_point <= std::numeric_limits<int8_t>::max();
+         zero_point++)
+    {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingDown(xnn_qs8_requantize_rndnu__neon_qdmulh);
+      }
+    }
+  }
+
+  TEST(QS8_RNDNU__NEON_QDMULH, divide_by_po2_with_rounding_away) {
+    for (int32_t zero_point = std::numeric_limits<int8_t>::min();
+         zero_point <= std::numeric_limits<int8_t>::max();
+         zero_point++)
+    {
+      for (uint32_t s = 1; s < 32; s++) {
+        RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingTiesUp(xnn_qs8_requantize_rndnu__neon_qdmulh);
+      }
+    }
+  }
+
+  TEST(QS8_RNDNU__NEON_QDMULH, random_cases) {
+    RequantizationTester()
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
+      .iterations(100)
+      .TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantize_rndnu__neon_qdmulh);
   }
 
 

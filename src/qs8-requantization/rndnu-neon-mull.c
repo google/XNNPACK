@@ -14,7 +14,7 @@
 #include <xnnpack/requantization-stubs.h>
 
 
-void xnn_qs8_requantize_rndnu__neon(
+void xnn_qs8_requantize_rndnu__neon_mull(
     size_t n,
     const int32_t* input,
     float scale,

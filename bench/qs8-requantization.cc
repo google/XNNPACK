@@ -101,16 +101,16 @@ class Requantization : public benchmark::Fixture {
     }
   }
 
-  BENCHMARK_F(Requantization, rndnu__neon)(benchmark::State& state) {
+  BENCHMARK_F(Requantization, rndnu__neon_mull)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_qs8_requantize_rndnu__neon(
+      xnn_qs8_requantize_rndnu__neon_mull(
           n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
     }
   }
 
-  BENCHMARK_F(Requantization, ruy__neon)(benchmark::State& state) {
+  BENCHMARK_F(Requantization, rndnu__neon_qdmulh)(benchmark::State& state) {
     for (auto _ : state) {
-      xnn_qs8_requantize_ruy__neon(
+      xnn_qs8_requantize_rndnu__neon_qdmulh(
           n(), input(), 0x1.0p-12f /* scale */, -1 /* zero point */, -127 /* qmin */, 126 /* qmax */, output());
     }
   }
