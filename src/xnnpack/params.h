@@ -442,6 +442,14 @@ union xnn_qs8_conv_minmax_params {
     int8_t output_min;
     int8_t output_max;
   } fp32_neonv8;
+  struct {
+    int32_t right_pre_shift;
+    int32_t multiplier;
+    int32_t right_post_shift;
+    int16_t output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+  } rndnu_neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {

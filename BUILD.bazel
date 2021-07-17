@@ -1926,12 +1926,16 @@ NEON_UKERNELS = [
     "src/qc8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c",
     "src/qs8-dwconv/gen/up8x9-minmax-fp32-neon-mul16.c",
     "src/qs8-dwconv/gen/up8x9-minmax-gemmlowp-neon-mul16.c",
+    "src/qs8-dwconv/gen/up8x9-minmax-rndnu-neon-mul16.c",
     "src/qs8-dwconv/gen/up8x25-minmax-fp32-neon-mul16.c",
     "src/qs8-dwconv/gen/up8x25-minmax-gemmlowp-neon-mul16.c",
+    "src/qs8-dwconv/gen/up8x25-minmax-rndnu-neon-mul16.c",
     "src/qs8-dwconv/gen/up16x9-minmax-fp32-neon-mul16.c",
     "src/qs8-dwconv/gen/up16x9-minmax-gemmlowp-neon-mul16.c",
+    "src/qs8-dwconv/gen/up16x9-minmax-rndnu-neon-mul16.c",
     "src/qs8-dwconv/gen/up16x25-minmax-fp32-neon-mul16.c",
     "src/qs8-dwconv/gen/up16x25-minmax-gemmlowp-neon-mul16.c",
+    "src/qs8-dwconv/gen/up16x25-minmax-rndnu-neon-mul16.c",
     "src/qs8-dwconv/gen/up24x9-minmax-fp32-neon-mul16.c",
     "src/qs8-dwconv/gen/up24x9-minmax-gemmlowp-neon-mul16.c",
     "src/qs8-dwconv/gen/up24x25-minmax-fp32-neon-mul16.c",
@@ -7748,6 +7752,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_dwconv_minmax_fp32_test",
+    srcs = [
+        "test/qs8-dwconv-minmax-fp32.cc",
+        "test/dwconv-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
     name = "qs8_dwconv_minmax_gemmlowp_test",
     srcs = [
         "test/qs8-dwconv-minmax-gemmlowp.cc",
@@ -7758,9 +7772,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_dwconv_minmax_fp32_test",
+    name = "qs8_dwconv_minmax_rndnu_test",
     srcs = [
-        "test/qs8-dwconv-minmax-fp32.cc",
+        "test/qs8-dwconv-minmax-rndnu.cc",
         "test/dwconv-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,

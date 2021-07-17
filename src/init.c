@@ -163,12 +163,12 @@ static void init(void) {
         xnn_params.qs8.gemm.log2_kr = 1;
       }
 
-      xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x9__neon_mul16;
-      xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_gemmlowp_neon_params;
+      xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x9__neon_mul16;
+      xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
       xnn_params.qs8.dwconv[0].channel_tile = 8;
       xnn_params.qs8.dwconv[0].primary_tile = 9;
-      xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x25__neon_mul16;
-      xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_gemmlowp_neon_params;
+      xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul16;
+      xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
       xnn_params.qs8.dwconv[1].channel_tile = 8;
       xnn_params.qs8.dwconv[1].primary_tile = 25;
 

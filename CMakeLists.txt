@@ -1119,12 +1119,16 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qc8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
   src/qs8-dwconv/gen/up8x9-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/up8x9-minmax-gemmlowp-neon-mul16.c
+  src/qs8-dwconv/gen/up8x9-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/up8x25-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/up8x25-minmax-gemmlowp-neon-mul16.c
+  src/qs8-dwconv/gen/up8x25-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-gemmlowp-neon-mul16.c
+  src/qs8-dwconv/gen/up16x9-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/up16x25-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/up16x25-minmax-gemmlowp-neon-mul16.c
+  src/qs8-dwconv/gen/up16x25-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-gemmlowp-neon-mul16.c
   src/qs8-dwconv/gen/up24x25-minmax-fp32-neon-mul16.c
@@ -5382,6 +5386,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qc8-igemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qc8-igemm-minmax-fp32-test qc8-igemm-minmax-fp32-test)
 
+  ADD_EXECUTABLE(qs8-dwconv-minmax-fp32-test test/qs8-dwconv-minmax-fp32.cc)
+  SET_TARGET_PROPERTIES(qs8-dwconv-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-minmax-fp32-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-dwconv-minmax-fp32-test qs8-dwconv-minmax-fp32-test)
+
   ADD_EXECUTABLE(qs8-dwconv-minmax-gemmlowp-test test/qs8-dwconv-minmax-gemmlowp.cc)
   SET_TARGET_PROPERTIES(qs8-dwconv-minmax-gemmlowp-test PROPERTIES
     CXX_STANDARD 11
@@ -5391,14 +5404,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-gemmlowp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qs8-dwconv-minmax-gemmlowp-test qs8-dwconv-minmax-gemmlowp-test)
 
-  ADD_EXECUTABLE(qs8-dwconv-minmax-fp32-test test/qs8-dwconv-minmax-fp32.cc)
-  SET_TARGET_PROPERTIES(qs8-dwconv-minmax-fp32-test PROPERTIES
+  ADD_EXECUTABLE(qs8-dwconv-minmax-rndnu-test test/qs8-dwconv-minmax-rndnu.cc)
+  SET_TARGET_PROPERTIES(qs8-dwconv-minmax-rndnu-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-minmax-fp32-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
-  ADD_TEST(qs8-dwconv-minmax-fp32-test qs8-dwconv-minmax-fp32-test)
+  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-minmax-rndnu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qs8-dwconv-minmax-rndnu-test qs8-dwconv-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-gavgpool-minmax-test test/qs8-gavgpool-minmax.cc)
   SET_TARGET_PROPERTIES(qs8-gavgpool-minmax-test PROPERTIES
