@@ -686,8 +686,8 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up32x25__neon_mul16(
       const int16x8_t vaccGHIJKLMN = vuzp1q_s16(vreinterpretq_s16_s32(vaccGHIJ), vreinterpretq_s16_s32(vaccKLMN));
       const int16x8_t vaccOPQRSTUV = vuzp1q_s16(vreinterpretq_s16_s32(vaccOPQR), vreinterpretq_s16_s32(vaccSTUV));
 
-      int8x16_t vout0123456789ABCDEF = vuzp1q_u8(vreinterpretq_u8_s16(vacc01234567), vreinterpretq_u8_s16(vacc89ABCDEF));
-      int8x16_t voutGHIJKLMNOPQRSTUV = vuzp1q_u8(vreinterpretq_u8_s16(vaccGHIJKLMN), vreinterpretq_u8_s16(vaccOPQRSTUV));
+      uint8x16_t vout0123456789ABCDEF = vuzp1q_u8(vreinterpretq_u8_s16(vacc01234567), vreinterpretq_u8_s16(vacc89ABCDEF));
+      uint8x16_t voutGHIJKLMNOPQRSTUV = vuzp1q_u8(vreinterpretq_u8_s16(vaccGHIJKLMN), vreinterpretq_u8_s16(vaccOPQRSTUV));
 #else
       const int16x8_t vacc01234567 = vcombine_s16(vmovn_s32(vacc0123), vmovn_s32(vacc4567));
       const int16x8_t vacc89ABCDEF = vcombine_s16(vmovn_s32(vacc89AB), vmovn_s32(vaccCDEF));
