@@ -3,6 +3,14 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__neon_mul8
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__neon_mul8
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__neonv8_mul8
+  init: xnn_init_qs8_minmax_neon_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__neonv8_mul8
+  init: xnn_init_qs8_minmax_neon_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__neon_mul16
   init: xnn_init_qs8_minmax_neon_fp32_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__neon_mul16
@@ -89,6 +97,14 @@
   init: xnn_init_qs8_minmax_scalar_magic_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up4x9__scalar_magic
   init: xnn_init_qs8_minmax_scalar_magic_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__neon_mul8
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__neon_mul8
+  init: xnn_init_qs8_minmax_neon_fp32_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__neonv8_mul8
+  init: xnn_init_qs8_minmax_neon_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__neonv8_mul8
+  init: xnn_init_qs8_minmax_neon_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__neon_mul16
   init: xnn_init_qs8_minmax_neon_fp32_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__neon_mul16
