@@ -129,16 +129,22 @@ __m512i _mm512_set_epi8(
 }
 #endif  // GCC pre-9
 
-// AArch32 GCC, see
+#endif  // __AVX512F__
+
+#if XNN_ARCH_ARM && (defined(__ARM_NEON) || defined(__ARM_NEON__))
+#include <arm_neon.h>
+
+// AArch32 GCC targeting ARMv8 NEON, see
 // - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71233
 // - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95399
-#if XNN_ARCH_ARM && defined(__GNUC__) && !defined(__clang__) && defined(__ARM_NEON__)
+#if defined(__GNUC__) && !defined(__clang__) && (__ARM_ARCH >= 8)
 #include <arm_neon.h>
 
 static XNN_INTRINSIC
 int32x4_t vcvtnq_s32_f32(float32x4_t v) {
   return vcvtq_s32_f32(vrndnq_f32(v));
 }
-#endif  // AArch32 GCC
+#endif  // AArch32 GCC targeting ARMv8 NEON
 
-#endif  // __AVX512F__
+#endif  // ARM NEON
+
