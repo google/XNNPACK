@@ -1750,14 +1750,14 @@ void xnn_init_qu8_add_minmax_params(
   uint8_t output_min,
   uint8_t output_max)
 {
-  assert(a_output_scale >= 0x1.0p-14f);
-  assert(b_output_scale >= 0x1.0p-14f);
+  assert(a_output_scale >= 0x1.0p-10f);
+  assert(b_output_scale >= 0x1.0p-10f);
   assert(a_output_scale < 0x1.0p+8f);
   assert(b_output_scale < 0x1.0p+8f);
 
   // Compute requantization parameters.
   const float max_output_scale = math_max_f32(a_output_scale, b_output_scale);
-  assert(max_output_scale >= 0x1.0p-14f);
+  assert(max_output_scale >= 0x1.0p-10f);
   assert(max_output_scale < 0x1.0p+8f);
   const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
@@ -1838,8 +1838,8 @@ void xnn_init_qu8_add_minmax_scalar_params(
   uint8_t output_min,
   uint8_t output_max)
 {
-  assert(a_output_scale >= 0x1.0p-14f);
-  assert(b_output_scale >= 0x1.0p-14f);
+  assert(a_output_scale >= 0x1.0p-10f);
+  assert(b_output_scale >= 0x1.0p-10f);
   assert(a_output_scale < 0x1.0p+8f);
   assert(b_output_scale < 0x1.0p+8f);
 
@@ -1885,14 +1885,14 @@ void xnn_init_qs8_add_minmax_params(
   int8_t output_min,
   int8_t output_max)
 {
-  assert(x_output_scale >= 0x1.0p-14f);
-  assert(y_output_scale >= 0x1.0p-14f);
+  assert(x_output_scale >= 0x1.0p-10f);
+  assert(y_output_scale >= 0x1.0p-10f);
   assert(x_output_scale < 0x1.0p+8f);
   assert(y_output_scale < 0x1.0p+8f);
 
   // Compute requantization parameters.
   const float max_output_scale = math_max_f32(x_output_scale, y_output_scale);
-  assert(max_output_scale >= 0x1.0p-14f);
+  assert(max_output_scale >= 0x1.0p-10f);
   assert(max_output_scale < 0x1.0p+8f);
   const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
@@ -1995,8 +1995,8 @@ void xnn_init_qs8_add_minmax_scalar_params(
   int8_t output_min,
   int8_t output_max)
 {
-  assert(x_output_scale >= 0x1.0p-14f);
-  assert(y_output_scale >= 0x1.0p-14f);
+  assert(x_output_scale >= 0x1.0p-10f);
+  assert(y_output_scale >= 0x1.0p-10f);
   assert(x_output_scale < 0x1.0p+8f);
   assert(y_output_scale < 0x1.0p+8f);
 

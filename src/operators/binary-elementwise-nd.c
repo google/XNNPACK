@@ -203,17 +203,17 @@ enum xnn_status xnn_create_add_nd_qs8(
   }
 
   const float input1_output_scale = input1_scale / output_scale;
-  if (input1_output_scale < 0x1.0p-14f || input1_output_scale >= 0x1.0p+8f) {
+  if (input1_output_scale < 0x1.0p-10f || input1_output_scale >= 0x1.0p+8f) {
     xnn_log_error(
-      "failed to create %s operator with %.7g input1-to-output scale ratio: scale ratio must be in [2**-14, 2**8) range",
+      "failed to create %s operator with %.7g input1-to-output scale ratio: scale ratio must be in [2**-10, 2**8) range",
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qs8), input1_output_scale);
     return xnn_status_unsupported_parameter;
   }
 
   const float input2_output_scale = input2_scale / output_scale;
-  if (input2_output_scale < 0x1.0p-14f || input2_output_scale >= 0x1.0p+8f) {
+  if (input2_output_scale < 0x1.0p-10f || input2_output_scale >= 0x1.0p+8f) {
     xnn_log_error(
-      "failed to create %s operator with %.7g input2-to-output scale ratio: scale ratio must be in [2**-14, 2**8) range",
+      "failed to create %s operator with %.7g input2-to-output scale ratio: scale ratio must be in [2**-10, 2**8) range",
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qs8), input2_output_scale);
     return xnn_status_unsupported_parameter;
   }
