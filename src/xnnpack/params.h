@@ -583,15 +583,14 @@ union xnn_qu8_add_minmax_params {
 
 union xnn_qs8_add_minmax_params {
   struct {
-    int32_t zero_point_product;
+    int32_t bias;
     int32_t a_multiplier;
     int32_t b_multiplier;
+    int32_t rounding;
     uint32_t shift;
-    int32_t remainder_mask;
-    int32_t remainder_threshold;
+    int32_t output_min_less_zero_point;
+    int32_t output_max_less_zero_point;
     int32_t output_zero_point;
-    int32_t output_min;
-    int32_t output_max;
   } scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {

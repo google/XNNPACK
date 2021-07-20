@@ -20,39 +20,34 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x2(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const int32_t vzero_point_product =
-    params->scalar.zero_point_product + (int32_t) *input_b * params->scalar.b_multiplier;
+  const int32_t vbias = params->scalar.bias + (int32_t) *input_b * params->scalar.b_multiplier;
   const int32_t va_multiplier = params->scalar.a_multiplier;
+  const int32_t vrounding = params->scalar.rounding;
   const uint32_t vshift = params->scalar.shift;
-  const int32_t vremainder_mask = params->scalar.remainder_mask;
-  const int32_t vremainder_threshold = params->scalar.remainder_threshold;
+  const int32_t voutput_min_less_zero_point = params->scalar.output_min_less_zero_point;
+  const int32_t voutput_max_less_zero_point = params->scalar.output_max_less_zero_point;
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
-  const int32_t voutput_min = params->scalar.output_min;
-  const int32_t voutput_max = params->scalar.output_max;
 
   for (; n >= 2 * sizeof(int8_t); n -= 2 * sizeof(int8_t)) {
     const int32_t va0 = input_a[0];
     const int32_t va1 = input_a[1];
     input_a += 2;
 
-    const int32_t vacc0 = vzero_point_product + va0 * va_multiplier;
-    const int32_t vacc1 = vzero_point_product + va1 * va_multiplier;
+    const int32_t vacc0 = vbias + va0 * va_multiplier;
+    const int32_t vacc1 = vbias + va1 * va_multiplier;
     input_b += 2;
 
-    const int32_t vrem0 = (vacc0 & vremainder_mask) - (int32_t) (vacc0 < 0);
-    const int32_t vrem1 = (vacc1 & vremainder_mask) - (int32_t) (vacc1 < 0);
+    int32_t vout0 = asr_s32(vacc0 + asr_s32(vacc0, 31) + vrounding, vshift);
+    int32_t vout1 = asr_s32(vacc1 + asr_s32(vacc1, 31) + vrounding, vshift);
 
-    int32_t vout0 = asr_s32(vacc0, vshift) + (int32_t) (vrem0 > vremainder_threshold);
-    int32_t vout1 = asr_s32(vacc1, vshift) + (int32_t) (vrem1 > vremainder_threshold);
+    vout0 = math_max_s32(vout0, voutput_min_less_zero_point);
+    vout1 = math_max_s32(vout1, voutput_min_less_zero_point);
+
+    vout0 = math_min_s32(vout0, voutput_max_less_zero_point);
+    vout1 = math_min_s32(vout1, voutput_max_less_zero_point);
 
     vout0 += voutput_zero_point;
     vout1 += voutput_zero_point;
-
-    vout0 = math_max_s32(vout0, voutput_min);
-    vout1 = math_max_s32(vout1, voutput_min);
-
-    vout0 = math_min_s32(vout0, voutput_max);
-    vout1 = math_min_s32(vout1, voutput_max);
 
     output[0] = vout0;
     output[1] = vout1;
@@ -60,13 +55,11 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x2(
   }
   if XNN_UNLIKELY(n != 0) {
     const int32_t va = *input_a;
-    const int32_t vacc = vzero_point_product + va * va_multiplier;
+    const int32_t vacc = vbias + va * va_multiplier;
 
-    const int32_t vrem = (vacc & vremainder_mask) - (int32_t) (vacc < 0);
-    int32_t vout = asr_s32(vacc, vshift) + (int32_t) (vrem > vremainder_threshold);
-    vout += voutput_zero_point;
-    vout = math_max_s32(vout, voutput_min);
-    vout = math_min_s32(vout, voutput_max);
-    *output = vout;
+    int32_t vout = asr_s32(vacc + asr_s32(vacc, 31) + vrounding, vshift);
+    vout = math_max_s32(vout, voutput_min_less_zero_point);
+    vout = math_min_s32(vout, voutput_max_less_zero_point);
+    *output++ = (int8_t) (vout + voutput_zero_point);
   }
 }

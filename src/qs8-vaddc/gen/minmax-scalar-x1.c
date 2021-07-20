@@ -20,26 +20,22 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x1(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const int32_t vzero_point_product =
-    params->scalar.zero_point_product + (int32_t) *input_b * params->scalar.b_multiplier;
+  const int32_t vbias = params->scalar.bias + (int32_t) *input_b * params->scalar.b_multiplier;
   const int32_t va_multiplier = params->scalar.a_multiplier;
+  const int32_t vrounding = params->scalar.rounding;
   const uint32_t vshift = params->scalar.shift;
-  const int32_t vremainder_mask = params->scalar.remainder_mask;
-  const int32_t vremainder_threshold = params->scalar.remainder_threshold;
+  const int32_t voutput_min_less_zero_point = params->scalar.output_min_less_zero_point;
+  const int32_t voutput_max_less_zero_point = params->scalar.output_max_less_zero_point;
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
-  const int32_t voutput_min = params->scalar.output_min;
-  const int32_t voutput_max = params->scalar.output_max;
 
   do {
     const int32_t va = *input_a++;
-    const int32_t vacc = vzero_point_product + va * va_multiplier;
+    const int32_t vacc = vbias + va * va_multiplier;
 
-    const int32_t vrem = (vacc & vremainder_mask) - (int32_t) (vacc < 0);
-    int32_t vout = asr_s32(vacc, vshift) + (int32_t) (vrem > vremainder_threshold);
-    vout += voutput_zero_point;
-    vout = math_max_s32(vout, voutput_min);
-    vout = math_min_s32(vout, voutput_max);
-    *output++ = vout;
+    int32_t vout = asr_s32(vacc + asr_s32(vacc, 31) + vrounding, vshift);
+    vout = math_max_s32(vout, voutput_min_less_zero_point);
+    vout = math_min_s32(vout, voutput_max_less_zero_point);
+    *output++ = (int8_t) (vout + voutput_zero_point);
 
     n -= sizeof(int8_t);
   } while (n != 0);

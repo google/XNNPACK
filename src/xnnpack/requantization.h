@@ -436,21 +436,13 @@ static inline int8_t xnn_qs8_quantize_add(
   union xnn_qs8_add_minmax_params params)
 {
   // Multiply by factors and accumulate products.
-  int32_t acc = params.scalar.zero_point_product +
-    (int32_t) ((int32_t) x * params.scalar.a_multiplier) +
-    (int32_t) ((int32_t) y * params.scalar.b_multiplier);
+  int32_t acc = params.scalar.bias + (int32_t) x * params.scalar.a_multiplier + (int32_t) y * params.scalar.b_multiplier;
 
-  // Shift right and round.
-  const int32_t rem = (acc & params.scalar.remainder_mask) - (int32_t) (acc < 0);
-  acc = asr_s32(acc, params.scalar.shift) + (int32_t) (rem > params.scalar.remainder_threshold);
+  // Shift right with rounding away from zero.
+  acc = asr_s32(acc + params.scalar.rounding - (int32_t) (acc < 0), params.scalar.shift);
 
   // Clamp and add output zero point.
-  int32_t out = acc + params.scalar.output_zero_point;
-  if (out >= params.scalar.output_max) {
-    out = params.scalar.output_max;
-  }
-  if (out <= params.scalar.output_min) {
-    out = params.scalar.output_min;
-  }
-  return (int8_t) out;
+  acc = math_max_s32(acc, params.scalar.output_min_less_zero_point);
+  acc = math_min_s32(acc, params.scalar.output_max_less_zero_point);
+  return (int8_t) ((int32_t) acc + params.scalar.output_zero_point);
 }

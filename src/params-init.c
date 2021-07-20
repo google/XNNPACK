@@ -1969,18 +1969,15 @@ void xnn_init_qs8_add_minmax_params(
       params->wasmsimd.output_max[i] = output_max;
     }
   #else
-    const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
-    const int32_t remainder_threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
-    params->scalar.zero_point_product =
-      (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+    const int32_t rounding = INT32_C(1) << (shift - 1);
+    params->scalar.bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
     params->scalar.a_multiplier = a_multiplier;
     params->scalar.b_multiplier = b_multiplier;
-    params->scalar.remainder_mask = (int32_t) remainder_mask;
-    params->scalar.remainder_threshold = (int32_t) remainder_threshold;
-    params->scalar.shift = (int32_t) shift;
+    params->scalar.rounding = rounding;
+    params->scalar.shift = shift;
+    params->scalar.output_min_less_zero_point = (int32_t) output_min - (int32_t) output_zero_point;
+    params->scalar.output_max_less_zero_point = (int32_t) output_max - (int32_t) output_zero_point;
     params->scalar.output_zero_point = (int32_t) output_zero_point;
-    params->scalar.output_min = (int32_t) output_min;
-    params->scalar.output_max = (int32_t) output_max;
   #endif
 }
 
@@ -2018,16 +2015,13 @@ void xnn_init_qs8_add_minmax_scalar_params(
   assert(a_multiplier < INT32_C(0x00200000));
   assert(b_multiplier < INT32_C(0x00200000));
 
-  const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
-  const int32_t remainder_threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
-  params->scalar.zero_point_product =
-    (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+  const int32_t rounding = INT32_C(1) << (shift - 1);
+  params->scalar.bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
   params->scalar.a_multiplier = a_multiplier;
   params->scalar.b_multiplier = b_multiplier;
-  params->scalar.remainder_mask = (int32_t) remainder_mask;
-  params->scalar.remainder_threshold = (int32_t) remainder_threshold;
+  params->scalar.rounding = rounding;
   params->scalar.shift = shift;
+  params->scalar.output_min_less_zero_point = (int32_t) output_min - (int32_t) output_zero_point;
+  params->scalar.output_max_less_zero_point = (int32_t) output_max - (int32_t) output_zero_point;
   params->scalar.output_zero_point = (int32_t) output_zero_point;
-  params->scalar.output_min = (int32_t) output_min;
-  params->scalar.output_max = (int32_t) output_max;
 }
