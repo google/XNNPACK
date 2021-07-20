@@ -12,14 +12,14 @@ $assert BATCH_TILE >= 1
 
 void xnn_qs8_vadd_minmax_ukernel__scalar_x${BATCH_TILE}(
     size_t n,
-    const int8_t* input_x,
-    const int8_t* input_y,
+    const int8_t* input_a,
+    const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const int32_t vzero_point_product = params->scalar.zero_point_product;
-  const int32_t vx_multiplier = params->scalar.x_multiplier;
-  const int32_t vy_multiplier = params->scalar.y_multiplier;
+  const int32_t va_multiplier = params->scalar.x_multiplier;
+  const int32_t vb_multiplier = params->scalar.y_multiplier;
   const uint32_t vshift = params->scalar.shift;
   const int32_t vremainder_mask = params->scalar.remainder_mask;
   const int32_t vremainder_threshold = params->scalar.remainder_threshold;
@@ -29,9 +29,9 @@ void xnn_qs8_vadd_minmax_ukernel__scalar_x${BATCH_TILE}(
 
   $if BATCH_TILE == 1:
     do {
-      const int32_t vx = *input_x++;
-      const int32_t vy = *input_y++;
-      int32_t vacc = vzero_point_product + vx * vx_multiplier + vy * vy_multiplier;
+      const int32_t va = *input_a++;
+      const int32_t vb = *input_b++;
+      int32_t vacc = vzero_point_product + va * va_multiplier + vb * vb_multiplier;
 
       const int32_t vrem = (vacc & vremainder_mask) - (int32_t) (vacc < 0);
       int32_t vout = asr_s32(vacc, vshift) + (int32_t) (vrem > vremainder_threshold);
@@ -45,16 +45,16 @@ void xnn_qs8_vadd_minmax_ukernel__scalar_x${BATCH_TILE}(
   $else:
     for (; n >= ${BATCH_TILE} * sizeof(int8_t); n -= ${BATCH_TILE} * sizeof(int8_t)) {
       $for N in range(BATCH_TILE):
-        const int32_t vx${N} = input_x[${N}];
-      input_x += ${BATCH_TILE};
+        const int32_t va${N} = input_a[${N}];
+      input_a += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
-        const int32_t vy${N} = input_y[${N}];
-        int32_t vacc${N} = vzero_point_product + vx${N} * vx_multiplier;
-      input_y += ${BATCH_TILE};
+        const int32_t vb${N} = input_b[${N}];
+        int32_t vacc${N} = vzero_point_product + va${N} * va_multiplier;
+      input_b += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
-        vacc${N} += vy${N} * vy_multiplier;
+        vacc${N} += vb${N} * vb_multiplier;
 
       $for N in range(BATCH_TILE):
         const int32_t vrem${N} = (vacc${N} & vremainder_mask) - (int32_t) (vacc${N} < 0);
@@ -77,9 +77,9 @@ void xnn_qs8_vadd_minmax_ukernel__scalar_x${BATCH_TILE}(
     }
     if XNN_UNLIKELY(n != 0) {
       $if BATCH_TILE == 2:
-        const int32_t vx = *input_x;
-        const int32_t vy = *input_y;
-        int32_t vacc = vzero_point_product + vx * vx_multiplier + vy * vy_multiplier;
+        const int32_t va = *input_a;
+        const int32_t vb = *input_b;
+        int32_t vacc = vzero_point_product + va * va_multiplier + vb * vb_multiplier;
 
         const int32_t vrem = (vacc & vremainder_mask) - (int32_t) (vacc < 0);
         int32_t vout = asr_s32(vacc, vshift) + (int32_t) (vrem > vremainder_threshold);
@@ -89,9 +89,9 @@ void xnn_qs8_vadd_minmax_ukernel__scalar_x${BATCH_TILE}(
         *output = vout;
       $else:
         do {
-          const int32_t vx = *input_x++;
-          const int32_t vy = *input_y++;
-          int32_t vacc = vzero_point_product + vx * vx_multiplier + vy * vy_multiplier;
+          const int32_t va = *input_a++;
+          const int32_t vb = *input_b++;
+          int32_t vacc = vzero_point_product + va * va_multiplier + vb * vb_multiplier;
 
           const int32_t vrem = (vacc & vremainder_mask) - (int32_t) (vacc < 0);
           int32_t vout = asr_s32(vacc, vshift) + (int32_t) (vrem > vremainder_threshold);

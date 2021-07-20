@@ -15,15 +15,15 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x${BATCH_TILE}(
     size_t n,
-    const int8_t* input_x,
-    const int8_t* input_y,
+    const int8_t* input_a,
+    const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const int8x8_t vx_zero_point = vld1_dup_s8(&params->neon.x_zero_point);
-  const int8x8_t vy_zero_point = vld1_dup_s8(&params->neon.y_zero_point);
-  const int32x4_t vx_multiplier = vld1q_dup_s32(&params->neon.x_multiplier);
-  const int32x4_t vy_multiplier = vld1q_dup_s32(&params->neon.y_multiplier);
+  const int8x8_t va_zero_point = vld1_dup_s8(&params->neon.x_zero_point);
+  const int8x8_t vb_zero_point = vld1_dup_s8(&params->neon.y_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.x_multiplier);
+  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.y_multiplier);
   const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
   const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
   const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
@@ -32,20 +32,20 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x${BATCH_TILE}(
 
   for (; n >= ${BATCH_TILE} * sizeof(int8_t); n -= ${BATCH_TILE} * sizeof(int8_t)) {
     $for N in range(0, BATCH_TILE, 8):
-      const int8x8_t vx${ABC[N:N+8]} = vld1_s8(input_x); input_x += 8;
-      const int8x8_t vy${ABC[N:N+8]} = vld1_s8(input_y); input_y += 8;
+      const int8x8_t va${ABC[N:N+8]} = vld1_s8(input_a); input_a += 8;
+      const int8x8_t vb${ABC[N:N+8]} = vld1_s8(input_b); input_b += 8;
 
     $for N in range(0, BATCH_TILE, 8):
-      const int16x8_t vex${ABC[N:N+8]} = vsubl_s8(vx${ABC[N:N+8]}, vx_zero_point);
-      const int16x8_t vey${ABC[N:N+8]} = vsubl_s8(vy${ABC[N:N+8]}, vy_zero_point);
+      const int16x8_t vxa${ABC[N:N+8]} = vsubl_s8(va${ABC[N:N+8]}, va_zero_point);
+      const int16x8_t vxb${ABC[N:N+8]} = vsubl_s8(vb${ABC[N:N+8]}, vb_zero_point);
 
     $for N in range(0, BATCH_TILE, 8):
-      int32x4_t vacc${ABC[N:N+4]} = vmulq_s32(vmovl_s16(vget_low_s16(vex${ABC[N:N+8]})), vx_multiplier);
-      int32x4_t vacc${ABC[N+4:N+8]} = vmulq_s32(vmovl_s16(vget_high_s16(vex${ABC[N:N+8]})), vx_multiplier);
+      int32x4_t vacc${ABC[N:N+4]} = vmulq_s32(vmovl_s16(vget_low_s16(vxa${ABC[N:N+8]})), va_multiplier);
+      int32x4_t vacc${ABC[N+4:N+8]} = vmulq_s32(vmovl_s16(vget_high_s16(vxa${ABC[N:N+8]})), va_multiplier);
 
     $for N in range(0, BATCH_TILE, 8):
-      vacc${ABC[N:N+4]} = vmlaq_s32(vacc${ABC[N:N+4]}, vmovl_s16(vget_low_s16(vey${ABC[N:N+8]})), vy_multiplier);
-      vacc${ABC[N+4:N+8]} = vmlaq_s32(vacc${ABC[N+4:N+8]}, vmovl_s16(vget_high_s16(vey${ABC[N:N+8]})), vy_multiplier);
+      vacc${ABC[N:N+4]} = vmlaq_s32(vacc${ABC[N:N+4]}, vmovl_s16(vget_low_s16(vxb${ABC[N:N+8]})), vb_multiplier);
+      vacc${ABC[N+4:N+8]} = vmlaq_s32(vacc${ABC[N+4:N+8]}, vmovl_s16(vget_high_s16(vxb${ABC[N:N+8]})), vb_multiplier);
 
     $for N in range(0, BATCH_TILE, 4):
       vacc${ABC[N:N+4]} = vsraq_n_s32(vacc${ABC[N:N+4]}, vbicq_s32(vacc${ABC[N:N+4]}, vzero_shift_mask), 31);
@@ -83,20 +83,20 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x${BATCH_TILE}(
   if XNN_UNLIKELY(n != 0) {
     ${"do " if BATCH_TILE > 8 else ""}{
       $if BATCH_TILE > 8:
-        const int8x8_t vx${ABC[0:8]} = vld1_s8(input_x); input_x += 8;
-        const int8x8_t vy${ABC[0:8]} = vld1_s8(input_y); input_y += 8;
+        const int8x8_t va${ABC[0:8]} = vld1_s8(input_a); input_a += 8;
+        const int8x8_t vb${ABC[0:8]} = vld1_s8(input_b); input_b += 8;
       $else:
-        const int8x8_t vx${ABC[0:8]} = vld1_s8(input_x);
-        const int8x8_t vy${ABC[0:8]} = vld1_s8(input_y);
+        const int8x8_t va${ABC[0:8]} = vld1_s8(input_a);
+        const int8x8_t vb${ABC[0:8]} = vld1_s8(input_b);
 
-      const int16x8_t vex${ABC[0:8]} = vsubl_s8(vx${ABC[0:8]}, vx_zero_point);
-      const int16x8_t vey${ABC[0:8]} = vsubl_s8(vy${ABC[0:8]}, vy_zero_point);
+      const int16x8_t vxa${ABC[0:8]} = vsubl_s8(va${ABC[0:8]}, va_zero_point);
+      const int16x8_t vxb${ABC[0:8]} = vsubl_s8(vb${ABC[0:8]}, vb_zero_point);
 
-      int32x4_t vacc${ABC[0:4]} = vmulq_s32(vmovl_s16(vget_low_s16(vex${ABC[0:8]})), vx_multiplier);
-      int32x4_t vacc${ABC[4:8]} = vmulq_s32(vmovl_s16(vget_high_s16(vex${ABC[0:8]})), vx_multiplier);
+      int32x4_t vacc${ABC[0:4]} = vmulq_s32(vmovl_s16(vget_low_s16(vxa${ABC[0:8]})), va_multiplier);
+      int32x4_t vacc${ABC[4:8]} = vmulq_s32(vmovl_s16(vget_high_s16(vxa${ABC[0:8]})), va_multiplier);
 
-      vacc${ABC[0:4]} = vmlaq_s32(vacc${ABC[0:4]}, vmovl_s16(vget_low_s16(vey${ABC[0:8]})), vy_multiplier);
-      vacc${ABC[4:8]} = vmlaq_s32(vacc${ABC[4:8]}, vmovl_s16(vget_high_s16(vey${ABC[0:8]})), vy_multiplier);
+      vacc${ABC[0:4]} = vmlaq_s32(vacc${ABC[0:4]}, vmovl_s16(vget_low_s16(vxb${ABC[0:8]})), vb_multiplier);
+      vacc${ABC[4:8]} = vmlaq_s32(vacc${ABC[4:8]}, vmovl_s16(vget_high_s16(vxb${ABC[0:8]})), vb_multiplier);
 
       vacc${ABC[0:4]} = vsraq_n_s32(vacc${ABC[0:4]}, vbicq_s32(vacc${ABC[0:4]}, vzero_shift_mask), 31);
       vacc${ABC[4:8]} = vsraq_n_s32(vacc${ABC[4:8]}, vbicq_s32(vacc${ABC[4:8]}, vzero_shift_mask), 31);

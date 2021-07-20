@@ -15,14 +15,14 @@
 
 void xnn_qs8_vadd_minmax_ukernel__scalar_x1(
     size_t n,
-    const int8_t* input_x,
-    const int8_t* input_y,
+    const int8_t* input_a,
+    const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const int32_t vzero_point_product = params->scalar.zero_point_product;
-  const int32_t vx_multiplier = params->scalar.x_multiplier;
-  const int32_t vy_multiplier = params->scalar.y_multiplier;
+  const int32_t va_multiplier = params->scalar.x_multiplier;
+  const int32_t vb_multiplier = params->scalar.y_multiplier;
   const uint32_t vshift = params->scalar.shift;
   const int32_t vremainder_mask = params->scalar.remainder_mask;
   const int32_t vremainder_threshold = params->scalar.remainder_threshold;
@@ -31,9 +31,9 @@ void xnn_qs8_vadd_minmax_ukernel__scalar_x1(
   const int32_t voutput_max = params->scalar.output_max;
 
   do {
-    const int32_t vx = *input_x++;
-    const int32_t vy = *input_y++;
-    int32_t vacc = vzero_point_product + vx * vx_multiplier + vy * vy_multiplier;
+    const int32_t va = *input_a++;
+    const int32_t vb = *input_b++;
+    int32_t vacc = vzero_point_product + va * va_multiplier + vb * vb_multiplier;
 
     const int32_t vrem = (vacc & vremainder_mask) - (int32_t) (vacc < 0);
     int32_t vout = asr_s32(vacc, vshift) + (int32_t) (vrem > vremainder_threshold);

@@ -15,14 +15,14 @@
 
 void xnn_qs8_vaddc_minmax_ukernel__scalar_x2(
     size_t n,
-    const int8_t* input_x,
-    const int8_t* input_y,
+    const int8_t* input_a,
+    const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const int32_t vzero_point_product =
-    params->scalar.zero_point_product + (int32_t) *input_y * params->scalar.y_multiplier;
-  const int32_t vx_multiplier = params->scalar.x_multiplier;
+    params->scalar.zero_point_product + (int32_t) *input_b * params->scalar.y_multiplier;
+  const int32_t va_multiplier = params->scalar.x_multiplier;
   const uint32_t vshift = params->scalar.shift;
   const int32_t vremainder_mask = params->scalar.remainder_mask;
   const int32_t vremainder_threshold = params->scalar.remainder_threshold;
@@ -31,13 +31,13 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x2(
   const int32_t voutput_max = params->scalar.output_max;
 
   for (; n >= 2 * sizeof(int8_t); n -= 2 * sizeof(int8_t)) {
-    const int32_t vx0 = input_x[0];
-    const int32_t vx1 = input_x[1];
-    input_x += 2;
+    const int32_t va0 = input_a[0];
+    const int32_t va1 = input_a[1];
+    input_a += 2;
 
-    const int32_t vacc0 = vzero_point_product + vx0 * vx_multiplier;
-    const int32_t vacc1 = vzero_point_product + vx1 * vx_multiplier;
-    input_y += 2;
+    const int32_t vacc0 = vzero_point_product + va0 * va_multiplier;
+    const int32_t vacc1 = vzero_point_product + va1 * va_multiplier;
+    input_b += 2;
 
     const int32_t vrem0 = (vacc0 & vremainder_mask) - (int32_t) (vacc0 < 0);
     const int32_t vrem1 = (vacc1 & vremainder_mask) - (int32_t) (vacc1 < 0);
@@ -59,8 +59,8 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x2(
     output += 2;
   }
   if XNN_UNLIKELY(n != 0) {
-    const int32_t vx = *input_x;
-    const int32_t vacc = vzero_point_product + vx * vx_multiplier;
+    const int32_t va = *input_a;
+    const int32_t vacc = vzero_point_product + va * va_multiplier;
 
     const int32_t vrem = (vacc & vremainder_mask) - (int32_t) (vacc < 0);
     int32_t vout = asr_s32(vacc, vshift) + (int32_t) (vrem > vremainder_threshold);

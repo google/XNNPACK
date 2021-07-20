@@ -17,12 +17,12 @@
 
 void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x24(
     size_t n,
-    const int8_t* input_x,
-    const int8_t* input_y,
+    const int8_t* input_a,
+    const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const __m256i vx_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.x_multiplier));
+  const __m256i va_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.x_multiplier));
   const __m256i vremainder_mask = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_mask));
   const __m256i vremainder_threshold = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_threshold));
   const __m128i vshift = _mm_cvtsi32_si128((int) params->sse2.shift);
@@ -31,17 +31,17 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x24(
   const __m256i voutput_max = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.output_max));
 
   __m256i vzero_point_product = _mm256_broadcastsi128_si256(_mm_add_epi32(
-    _mm_broadcastd_epi32(_mm_cvtsi32_si128(params->sse2.y_multiplier[0] * (int32_t) *input_y)),
+    _mm_broadcastd_epi32(_mm_cvtsi32_si128(params->sse2.y_multiplier[0] * (int32_t) *input_b)),
     _mm_load_si128((const __m128i*) params->sse2.zero_point_product)));
   for (; n >= 24 * sizeof(int8_t); n -= 24 * sizeof(int8_t)) {
-    const __m256i vx01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_x));
-    const __m256i vx89ABCDEF = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) (input_x + 8)));
-    const __m256i vxGHIJKLMN = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) (input_x + 16)));
-    input_x += 24;
+    const __m256i va01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_a));
+    const __m256i va89ABCDEF = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) (input_a + 8)));
+    const __m256i vaGHIJKLMN = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) (input_a + 16)));
+    input_a += 24;
 
-    __m256i vacc01234567 = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(vx01234567, vx_multiplier));
-    __m256i vacc89ABCDEF = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(vx89ABCDEF, vx_multiplier));
-    __m256i vaccGHIJKLMN = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(vxGHIJKLMN, vx_multiplier));
+    __m256i vacc01234567 = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(va01234567, va_multiplier));
+    __m256i vacc89ABCDEF = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(va89ABCDEF, va_multiplier));
+    __m256i vaccGHIJKLMN = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(vaGHIJKLMN, va_multiplier));
 
     const __m256i vrem01234567 = _mm256_add_epi32(_mm256_and_si256(vacc01234567, vremainder_mask), _mm256_srai_epi32(vacc01234567, 31));
     const __m256i vrem89ABCDEF = _mm256_add_epi32(_mm256_and_si256(vacc89ABCDEF, vremainder_mask), _mm256_srai_epi32(vacc89ABCDEF, 31));
@@ -66,10 +66,10 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x24(
   }
   if XNN_UNLIKELY(n != 0) {
     do {
-      const __m256i vx01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_x));
-      input_x += 8;
+      const __m256i va01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_a));
+      input_a += 8;
 
-      __m256i vacc01234567 = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(vx01234567, vx_multiplier));
+      __m256i vacc01234567 = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(va01234567, va_multiplier));
 
       const __m256i vrem01234567 = _mm256_add_epi32(_mm256_and_si256(vacc01234567, vremainder_mask), _mm256_srai_epi32(vacc01234567, 31));
 

@@ -16,14 +16,14 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x${BATCH_TILE}(
     size_t n,
-    const int8_t* input_x,
-    const int8_t* input_y,
+    const int8_t* input_a,
+    const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const __m256i vzero_point_product = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.zero_point_product));
-  const __m256i vx_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.x_multiplier));
-  const __m256i vy_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.y_multiplier));
+  const __m256i va_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.x_multiplier));
+  const __m256i vb_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.y_multiplier));
   const __m256i vremainder_mask = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_mask));
   const __m256i vremainder_threshold = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_threshold));
   const __m128i vshift = _mm_cvtsi32_si128((int) params->sse2.shift);
@@ -37,19 +37,19 @@ void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x${BATCH_TILE}(
     const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
 
   for (; n >= ${BATCH_TILE} * sizeof(int8_t); n -= ${BATCH_TILE} * sizeof(int8_t)) {
-    const __m256i vx${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_x));
-    const __m256i vy${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_y));
+    const __m256i va${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_a));
+    const __m256i vb${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_b));
     $for N in range(8, BATCH_TILE, 8):
-      const __m256i vx${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) (input_x + ${N})));
-      const __m256i vy${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) (input_y + ${N})));
-    input_x += ${BATCH_TILE};
-    input_y += ${BATCH_TILE};
+      const __m256i va${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) (input_a + ${N})));
+      const __m256i vb${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) (input_b + ${N})));
+    input_a += ${BATCH_TILE};
+    input_b += ${BATCH_TILE};
 
     $for N in range(0, BATCH_TILE, 8):
-      __m256i vacc${ABC[N:N+8]} = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(vx${ABC[N:N+8]}, vx_multiplier));
+      __m256i vacc${ABC[N:N+8]} = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(va${ABC[N:N+8]}, va_multiplier));
 
     $for N in range(0, BATCH_TILE, 8):
-      vacc${ABC[N:N+8]} = _mm256_add_epi32(vacc${ABC[N:N+8]}, _mm256_mullo_epi32(vy${ABC[N:N+8]}, vy_multiplier));
+      vacc${ABC[N:N+8]} = _mm256_add_epi32(vacc${ABC[N:N+8]}, _mm256_mullo_epi32(vb${ABC[N:N+8]}, vb_multiplier));
 
     $for N in range(0, BATCH_TILE, 8):
       const __m256i vrem${ABC[N:N+8]} = _mm256_add_epi32(_mm256_and_si256(vacc${ABC[N:N+8]}, vremainder_mask), _mm256_srai_epi32(vacc${ABC[N:N+8]}, 31));
@@ -92,15 +92,15 @@ void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x${BATCH_TILE}(
   }
   if XNN_UNLIKELY(n != 0) {
     ${"do " if BATCH_TILE > 8 else ""}{
-      const __m256i vx${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_x));
-      const __m256i vy${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_y));
+      const __m256i va${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_a));
+      const __m256i vb${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_b));
       $if BATCH_TILE > 8:
-        input_x += 8;
-        input_y += 8;
+        input_a += 8;
+        input_b += 8;
 
-      __m256i vacc${ABC[0:8]} = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(vx${ABC[0:8]}, vx_multiplier));
+      __m256i vacc${ABC[0:8]} = _mm256_add_epi32(vzero_point_product, _mm256_mullo_epi32(va${ABC[0:8]}, va_multiplier));
 
-      vacc${ABC[0:8]} = _mm256_add_epi32(vacc${ABC[0:8]}, _mm256_mullo_epi32(vy${ABC[0:8]}, vy_multiplier));
+      vacc${ABC[0:8]} = _mm256_add_epi32(vacc${ABC[0:8]}, _mm256_mullo_epi32(vb${ABC[0:8]}, vb_multiplier));
 
       const __m256i vrem${ABC[0:8]} = _mm256_add_epi32(_mm256_and_si256(vacc${ABC[0:8]}, vremainder_mask), _mm256_srai_epi32(vacc${ABC[0:8]}, 31));
 
