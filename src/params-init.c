@@ -1761,19 +1761,18 @@ void xnn_init_qu8_add_minmax_params(
   assert(max_output_scale < 0x1.0p+8f);
   const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
-  // Shift is in [13, 31] range.
-  const uint32_t shift = (uint32_t) (21 - max_scale_exponent);
-  assert(shift < 32);
-  assert(shift >= 13);
 
-  const float scale_multiplier = fp32_from_bits((uint32_t) (21 - max_scale_exponent + 127) << 23);
+  // Shift is in [12, 30] range.
+  const uint32_t shift = (uint32_t) (20 /* multiplier bits */ - max_scale_exponent);
+  assert(shift <= 30);
+  assert(shift >= 12);
 
-  // Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range.
-  const uint32_t a_multiplier = (uint32_t) (int32_t) lrintf(a_output_scale * scale_multiplier);
-  const uint32_t b_multiplier = (uint32_t) (int32_t) lrintf(b_output_scale * scale_multiplier);
-  assert(math_max_s32(a_multiplier, b_multiplier) >= UINT32_C(0x00200000));
-  assert(a_multiplier < UINT32_C(0x00400000));
-  assert(b_multiplier < UINT32_C(0x00400000));
+  // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
+  const int32_t a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(a_output_scale) + (shift << 23)));
+  const int32_t b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(b_output_scale) + (shift << 23)));
+  assert(math_max_s32(a_multiplier, b_multiplier) >= INT32_C(0x00100000));
+  assert(a_multiplier < INT32_C(0x00200000));
+  assert(b_multiplier < INT32_C(0x00200000));
 
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
@@ -1849,17 +1848,18 @@ void xnn_init_qu8_add_minmax_scalar_params(
   assert(max_output_scale < 0x1.0p+8f);
   const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
-  // Shift is in [13, 31] range.
-  const uint32_t shift = (uint32_t) (21 - max_scale_exponent);
-  assert(shift < 32);
-  assert(shift >= 13);
 
-  // Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range.
-  const uint32_t a_multiplier = (uint32_t) (int32_t) lrintf(fp32_from_bits(fp32_to_bits(a_output_scale) + (shift << 23)));
-  const uint32_t b_multiplier = (uint32_t) (int32_t) lrintf(fp32_from_bits(fp32_to_bits(b_output_scale) + (shift << 23)));
-  assert(math_max_s32(a_multiplier, b_multiplier) >= UINT32_C(0x00200000));
-  assert(a_multiplier < UINT32_C(0x00400000));
-  assert(b_multiplier < UINT32_C(0x00400000));
+  // Shift is in [12, 30] range.
+  const uint32_t shift = (uint32_t) (20 /* multiplier bits */ - max_scale_exponent);
+  assert(shift <= 30);
+  assert(shift >= 12);
+
+  // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
+  const int32_t a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(a_output_scale) + (shift << 23)));
+  const int32_t b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(b_output_scale) + (shift << 23)));
+  assert(math_max_s32(a_multiplier, b_multiplier) >= INT32_C(0x00100000));
+  assert(a_multiplier < INT32_C(0x00200000));
+  assert(b_multiplier < INT32_C(0x00200000));
 
   const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
   const uint32_t remainder_threshold = remainder_mask >> 1;
@@ -1896,19 +1896,18 @@ void xnn_init_qs8_add_minmax_params(
   assert(max_output_scale < 0x1.0p+8f);
   const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
-  // Shift is in [13, 31] range.
-  const uint32_t shift = (uint32_t) (21 - max_scale_exponent);
-  assert(shift < 32);
-  assert(shift >= 13);
 
-  const float scale_multiplier = fp32_from_bits((uint32_t) (21 - max_scale_exponent + 127) << 23);
+  // Shift is in [12, 30] range.
+  const uint32_t shift = (uint32_t) (20 /* multiplier bits */ - max_scale_exponent);
+  assert(shift <= 30);
+  assert(shift >= 12);
 
-  // Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range.
-  const int32_t a_multiplier = (int32_t) lrintf(a_output_scale * scale_multiplier);
-  const int32_t b_multiplier = (int32_t) lrintf(b_output_scale * scale_multiplier);
-  assert(math_max_s32(a_multiplier, b_multiplier) >= INT32_C(0x00200000));
-  assert(a_multiplier < INT32_C(0x00400000));
-  assert(b_multiplier < INT32_C(0x00400000));
+  // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
+  const int32_t a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(a_output_scale) + (shift << 23)));
+  const int32_t b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(b_output_scale) + (shift << 23)));
+  assert(math_max_s32(a_multiplier, b_multiplier) >= INT32_C(0x00100000));
+  assert(a_multiplier < INT32_C(0x00200000));
+  assert(b_multiplier < INT32_C(0x00200000));
 
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
@@ -2006,17 +2005,18 @@ void xnn_init_qs8_add_minmax_scalar_params(
   assert(max_output_scale < 0x1.0p+8f);
   const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
-  // Shift is in [13, 31] range.
-  const uint32_t shift = (uint32_t) (21 - max_scale_exponent);
-  assert(shift < 32);
-  assert(shift >= 13);
 
-  // Multipliers are in [0, 2**22) range, largest multiplier is in [2**21, 2**22) range.
+  // Shift is in [12, 30] range.
+  const uint32_t shift = (uint32_t) (20 /* multiplier bits */ - max_scale_exponent);
+  assert(shift <= 30);
+  assert(shift >= 12);
+
+  // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
   const int32_t a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(a_output_scale) + (shift << 23)));
   const int32_t b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(b_output_scale) + (shift << 23)));
-  assert(math_max_s32(a_multiplier, b_multiplier) >= INT32_C(0x00200000));
-  assert(a_multiplier < INT32_C(0x00400000));
-  assert(b_multiplier < INT32_C(0x00400000));
+  assert(math_max_s32(a_multiplier, b_multiplier) >= INT32_C(0x00100000));
+  assert(a_multiplier < INT32_C(0x00200000));
+  assert(b_multiplier < INT32_C(0x00200000));
 
   const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
   const int32_t remainder_threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
