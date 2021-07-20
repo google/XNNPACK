@@ -613,8 +613,7 @@ union xnn_qs8_add_minmax_params {
     XNN_ALIGN(16) uint16_t b_multiplier_hi[8];
     XNN_ALIGN(16) int32_t a_multiplier[4];
     XNN_ALIGN(16) int32_t b_multiplier[4];
-    XNN_ALIGN(16) int32_t remainder_mask[4];
-    XNN_ALIGN(16) int32_t remainder_threshold[4];
+    XNN_ALIGN(16) int32_t rounding[4];
     uint32_t shift;
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int16_t output_min[8];

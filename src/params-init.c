@@ -1910,8 +1910,7 @@ void xnn_init_qs8_add_minmax_params(
   assert(b_multiplier < INT32_C(0x00200000));
 
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
-    const int32_t remainder_threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
+    const int32_t rounding = INT32_C(1) << (shift - 1);
     const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
     for (uint32_t i = 0; i < 4; i++) {
       params->sse2.bias[i] = bias;
@@ -1930,8 +1929,7 @@ void xnn_init_qs8_add_minmax_params(
     for (uint32_t i = 0; i < 4; i++) {
       params->sse2.a_multiplier[i] = a_multiplier;
       params->sse2.b_multiplier[i] = b_multiplier;
-      params->sse2.remainder_mask[i] = remainder_mask;
-      params->sse2.remainder_threshold[i] = remainder_threshold;
+      params->sse2.rounding[i] = rounding;
     }
     for (uint32_t i = 0; i < 8; i++) {
       params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
