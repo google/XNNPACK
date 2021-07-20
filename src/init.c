@@ -182,6 +182,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__neon_ld64_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x8,
+        .init.qs8 = xnn_init_qs8_add_minmax_params,
         .element_tile = 8,
       };
     #endif  // XNN_NO_QS8_OPERATORS
@@ -1248,6 +1249,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__neon_ld64_x8,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x8,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x8,
+      .init.qs8 = xnn_init_qs8_add_minmax_params,
       .element_tile = 8,
     };
   #endif  // XNN_NO_QS8_OPERATORS
@@ -2096,6 +2098,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,
+        .init.qs8 = xnn_init_qs8_add_minmax_params,
         .element_tile = 8,
       };
     } else if (cpuinfo_has_x86_avx()) {
@@ -2103,6 +2106,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x8,
+        .init.qs8 = xnn_init_qs8_add_minmax_params,
         .element_tile = 8,
       };
     } else if (cpuinfo_has_x86_sse4_1()) {
@@ -2110,6 +2114,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8,
+        .init.qs8 = xnn_init_qs8_add_minmax_params,
         .element_tile = 8,
       };
     } else {
@@ -2117,6 +2122,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8,
+        .init.qs8 = xnn_init_qs8_add_minmax_params,
         .element_tile = 8,
       };
     }
@@ -2837,6 +2843,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__wasmsimd_x8,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x8,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x8,
+      .init.qs8 = xnn_init_qs8_add_minmax_params,
       .element_tile = 8,
     };
   #endif  // XNN_NO_QS8_OPERATORS
@@ -3421,6 +3428,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__scalar_x4,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__scalar_x4,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__scalar_x4,
+      .init.qs8 = xnn_init_qs8_add_minmax_scalar_params,
       .element_tile = 4,
     };
   #endif  // XNN_NO_QS8_OPERATORS
@@ -3814,6 +3822,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__scalar_x4,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__scalar_x4,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__scalar_x4,
+      .init.qs8 = xnn_init_qs8_add_minmax_scalar_params,
       .element_tile = 4,
     };
   #endif  // XNN_NO_QS8_OPERATORS
