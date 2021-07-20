@@ -21,8 +21,8 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x${BATCH_TILE}(
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const v128_t vzero_point_product = wasm_v128_load(params->wasmsimd.zero_point_product);
-  const v128_t va_multiplier = wasm_v128_load(params->wasmsimd.x_multiplier);
-  const v128_t vb_multiplier = wasm_v128_load(params->wasmsimd.y_multiplier);
+  const v128_t va_multiplier = wasm_v128_load(params->wasmsimd.a_multiplier);
+  const v128_t vb_multiplier = wasm_v128_load(params->wasmsimd.b_multiplier);
   const v128_t vremainder_mask = wasm_v128_load(params->wasmsimd.remainder_mask);
   const v128_t vremainder_threshold = wasm_v128_load(params->wasmsimd.remainder_threshold);
   const int32_t vshift = params->wasmsimd.shift;

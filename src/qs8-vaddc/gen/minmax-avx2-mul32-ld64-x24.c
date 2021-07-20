@@ -22,7 +22,7 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x24(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const __m256i va_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.x_multiplier));
+  const __m256i va_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.a_multiplier));
   const __m256i vremainder_mask = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_mask));
   const __m256i vremainder_threshold = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_threshold));
   const __m128i vshift = _mm_cvtsi32_si128((int) params->sse2.shift);
@@ -31,7 +31,7 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x24(
   const __m256i voutput_max = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.output_max));
 
   __m256i vzero_point_product = _mm256_broadcastsi128_si256(_mm_add_epi32(
-    _mm_broadcastd_epi32(_mm_cvtsi32_si128(params->sse2.y_multiplier[0] * (int32_t) *input_b)),
+    _mm_broadcastd_epi32(_mm_cvtsi32_si128(params->sse2.b_multiplier[0] * (int32_t) *input_b)),
     _mm_load_si128((const __m128i*) params->sse2.zero_point_product)));
   for (; n >= 24 * sizeof(int8_t); n -= 24 * sizeof(int8_t)) {
     const __m256i va01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) input_a));

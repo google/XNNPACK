@@ -21,8 +21,8 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x1(
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const int32_t vzero_point_product =
-    params->scalar.zero_point_product + (int32_t) *input_b * params->scalar.y_multiplier;
-  const int32_t va_multiplier = params->scalar.x_multiplier;
+    params->scalar.zero_point_product + (int32_t) *input_b * params->scalar.b_multiplier;
+  const int32_t va_multiplier = params->scalar.a_multiplier;
   const uint32_t vshift = params->scalar.shift;
   const int32_t vremainder_mask = params->scalar.remainder_mask;
   const int32_t vremainder_threshold = params->scalar.remainder_threshold;

@@ -437,8 +437,8 @@ static inline int8_t xnn_qs8_quantize_add(
 {
   // Multiply by factors and accumulate products.
   int32_t acc = params.scalar.zero_point_product +
-    (int32_t) ((int32_t) x * params.scalar.x_multiplier) +
-    (int32_t) ((int32_t) y * params.scalar.y_multiplier);
+    (int32_t) ((int32_t) x * params.scalar.a_multiplier) +
+    (int32_t) ((int32_t) y * params.scalar.b_multiplier);
 
   // Shift right and round.
   const int32_t rem = (acc & params.scalar.remainder_mask) - (int32_t) (acc < 0);

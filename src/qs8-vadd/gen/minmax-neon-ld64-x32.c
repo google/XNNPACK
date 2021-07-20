@@ -21,10 +21,10 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x32(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const int8x8_t va_zero_point = vld1_dup_s8(&params->neon.x_zero_point);
-  const int8x8_t vb_zero_point = vld1_dup_s8(&params->neon.y_zero_point);
-  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.x_multiplier);
-  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.y_multiplier);
+  const int8x8_t va_zero_point = vld1_dup_s8(&params->neon.a_zero_point);
+  const int8x8_t vb_zero_point = vld1_dup_s8(&params->neon.b_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
+  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.b_multiplier);
   const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
   const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
   const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
