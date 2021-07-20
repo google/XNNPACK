@@ -22,8 +22,7 @@ void xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x8(
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const v128_t va_multiplier = wasm_v128_load(params->wasmsimd.a_multiplier);
-  const v128_t vremainder_mask = wasm_v128_load(params->wasmsimd.remainder_mask);
-  const v128_t vremainder_threshold = wasm_v128_load(params->wasmsimd.remainder_threshold);
+  const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
   const int32_t vshift = params->wasmsimd.shift;
   const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
   const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
@@ -39,11 +38,13 @@ void xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x8(
     v128_t vacc0123 = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va01234567), va_multiplier));
     v128_t vacc4567 = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va01234567), va_multiplier));
 
-    const v128_t vrem0123 = wasm_i32x4_add(wasm_v128_and(vacc0123, vremainder_mask), wasm_i32x4_shr(vacc0123, 31));
-    const v128_t vrem4567 = wasm_i32x4_add(wasm_v128_and(vacc4567, vremainder_mask), wasm_i32x4_shr(vacc4567, 31));
+    const v128_t vadj0123 = wasm_i32x4_shr(vacc0123, 31);
+    vacc0123 = wasm_i32x4_add(vacc0123, vrounding);
+    const v128_t vadj4567 = wasm_i32x4_shr(vacc4567, 31);
+    vacc4567 = wasm_i32x4_add(vacc4567, vrounding);
 
-    vacc0123 = wasm_i32x4_sub(wasm_i32x4_shr(vacc0123, vshift), wasm_i32x4_gt(vrem0123, vremainder_threshold));
-    vacc4567 = wasm_i32x4_sub(wasm_i32x4_shr(vacc4567, vshift), wasm_i32x4_gt(vrem4567, vremainder_threshold));
+    vacc0123 = wasm_i32x4_shr(wasm_i32x4_add(vacc0123, vadj0123), vshift);
+    vacc4567 = wasm_i32x4_shr(wasm_i32x4_add(vacc4567, vadj4567), vshift);
 
     v128_t vout01234567 = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc0123, vacc4567), voutput_zero_point);
 
@@ -63,11 +64,13 @@ void xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x8(
       v128_t vacc0123 = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va01234567), va_multiplier));
       v128_t vacc4567 = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va01234567), va_multiplier));
 
-      const v128_t vrem0123 = wasm_i32x4_add(wasm_v128_and(vacc0123, vremainder_mask), wasm_i32x4_shr(vacc0123, 31));
-      const v128_t vrem4567 = wasm_i32x4_add(wasm_v128_and(vacc4567, vremainder_mask), wasm_i32x4_shr(vacc4567, 31));
+      const v128_t vadj0123 = wasm_i32x4_shr(vacc0123, 31);
+      const v128_t vadj4567 = wasm_i32x4_shr(vacc4567, 31);
+      vacc0123 = wasm_i32x4_add(vacc0123, vrounding);
+      vacc4567 = wasm_i32x4_add(vacc4567, vrounding);
 
-      vacc0123 = wasm_i32x4_sub(wasm_i32x4_shr(vacc0123, vshift), wasm_i32x4_gt(vrem0123, vremainder_threshold));
-      vacc4567 = wasm_i32x4_sub(wasm_i32x4_shr(vacc4567, vshift), wasm_i32x4_gt(vrem4567, vremainder_threshold));
+      vacc0123 = wasm_i32x4_shr(wasm_i32x4_add(vacc0123, vadj0123), vshift);
+      vacc4567 = wasm_i32x4_shr(wasm_i32x4_add(vacc4567, vadj4567), vshift);
 
       v128_t vout01234567 = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vacc0123, vacc4567), voutput_zero_point);
 

@@ -1946,15 +1946,13 @@ void xnn_init_qs8_add_minmax_params(
     params->neon.output_min = output_min;
     params->neon.output_max = output_max;
   #elif XNN_ARCH_WASMSIMD
-    const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
-    const int32_t remainder_threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
+    const int32_t rounding = INT32_C(1) << (shift - 1);
     const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
     for (uint32_t i = 0; i < 4; i++) {
       params->wasmsimd.bias[i] = bias;
       params->wasmsimd.a_multiplier[i] = a_multiplier;
       params->wasmsimd.b_multiplier[i] = b_multiplier;
-      params->wasmsimd.remainder_mask[i] = remainder_mask;
-      params->wasmsimd.remainder_threshold[i] = remainder_threshold;
+      params->wasmsimd.rounding[i] = rounding;
     }
     params->wasmsimd.shift = shift;
     for (uint32_t i = 0; i < 8; i++) {
