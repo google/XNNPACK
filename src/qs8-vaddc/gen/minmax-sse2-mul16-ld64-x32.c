@@ -40,10 +40,10 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x32(
     __m128i vaOPQRSTUV = _mm_loadl_epi64((const __m128i*) (input_a + 24));
     input_a += 32;
 
-    va01234567 = _mm_unpacklo_epi8(va01234567, _mm_cmpgt_epi8(_mm_setzero_si128(), va01234567));
-    va89ABCDEF = _mm_unpacklo_epi8(va89ABCDEF, _mm_cmpgt_epi8(_mm_setzero_si128(), va89ABCDEF));
-    vaGHIJKLMN = _mm_unpacklo_epi8(vaGHIJKLMN, _mm_cmpgt_epi8(_mm_setzero_si128(), vaGHIJKLMN));
-    vaOPQRSTUV = _mm_unpacklo_epi8(vaOPQRSTUV, _mm_cmpgt_epi8(_mm_setzero_si128(), vaOPQRSTUV));
+    va01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(va01234567, va01234567), 8);
+    va89ABCDEF = _mm_srai_epi16(_mm_unpacklo_epi8(va89ABCDEF, va89ABCDEF), 8);
+    vaGHIJKLMN = _mm_srai_epi16(_mm_unpacklo_epi8(vaGHIJKLMN, vaGHIJKLMN), 8);
+    vaOPQRSTUV = _mm_srai_epi16(_mm_unpacklo_epi8(vaOPQRSTUV, vaOPQRSTUV), 8);
 
     __m128i vaprod01234567hi = _mm_mulhi_epu16(va01234567, va_multiplier_lo);
     const __m128i vaprod01234567lo = _mm_mullo_epi16(va01234567, va_multiplier_lo);
@@ -118,7 +118,7 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x32(
       __m128i va01234567 = _mm_loadl_epi64((const __m128i*) input_a);
       input_a += 8;
 
-      va01234567 = _mm_unpacklo_epi8(va01234567, _mm_cmpgt_epi8(_mm_setzero_si128(), va01234567));
+      va01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(va01234567, va01234567), 8);
 
       __m128i vaprod01234567hi = _mm_mulhi_epu16(va01234567, va_multiplier_lo);
       const __m128i vaprod01234567lo = _mm_mullo_epi16(va01234567, va_multiplier_lo);

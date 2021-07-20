@@ -49,7 +49,7 @@ void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TILE}(
 
     $if SSE < 4:
       $for N in range(0, BATCH_TILE, 8):
-        va${ABC[N:N+8]} = _mm_unpacklo_epi8(va${ABC[N:N+8]}, _mm_cmpgt_epi8(_mm_setzero_si128(), va${ABC[N:N+8]}));
+        va${ABC[N:N+8]} = _mm_srai_epi16(_mm_unpacklo_epi8(va${ABC[N:N+8]}, va${ABC[N:N+8]}), 8);
 
     $for N in range(0, BATCH_TILE, 8):
       __m128i vaprod${ABC[N:N+8]}hi = _mm_mulhi_epu16(va${ABC[N:N+8]}, va_multiplier_lo);
@@ -107,7 +107,7 @@ void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TILE}(
         input_a += 8;
 
       $if SSE < 4:
-        va${ABC[0:8]} = _mm_unpacklo_epi8(va${ABC[0:8]}, _mm_cmpgt_epi8(_mm_setzero_si128(), va${ABC[0:8]}));
+        va${ABC[0:8]} = _mm_srai_epi16(_mm_unpacklo_epi8(va${ABC[0:8]}, va${ABC[0:8]}), 8);
 
       __m128i vaprod${ABC[0:8]}hi = _mm_mulhi_epu16(va${ABC[0:8]}, va_multiplier_lo);
       const __m128i vaprod${ABC[0:8]}lo = _mm_mullo_epi16(va${ABC[0:8]}, va_multiplier_lo);

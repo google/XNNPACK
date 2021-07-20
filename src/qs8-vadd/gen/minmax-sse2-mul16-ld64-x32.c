@@ -45,14 +45,14 @@ void xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x32(
     input_a += 32;
     input_b += 32;
 
-    va01234567 = _mm_unpacklo_epi8(va01234567, _mm_cmpgt_epi8(_mm_setzero_si128(), va01234567));
-    vb01234567 = _mm_unpacklo_epi8(vb01234567, _mm_cmpgt_epi8(_mm_setzero_si128(), vb01234567));
-    va89ABCDEF = _mm_unpacklo_epi8(va89ABCDEF, _mm_cmpgt_epi8(_mm_setzero_si128(), va89ABCDEF));
-    vb89ABCDEF = _mm_unpacklo_epi8(vb89ABCDEF, _mm_cmpgt_epi8(_mm_setzero_si128(), vb89ABCDEF));
-    vaGHIJKLMN = _mm_unpacklo_epi8(vaGHIJKLMN, _mm_cmpgt_epi8(_mm_setzero_si128(), vaGHIJKLMN));
-    vbGHIJKLMN = _mm_unpacklo_epi8(vbGHIJKLMN, _mm_cmpgt_epi8(_mm_setzero_si128(), vbGHIJKLMN));
-    vaOPQRSTUV = _mm_unpacklo_epi8(vaOPQRSTUV, _mm_cmpgt_epi8(_mm_setzero_si128(), vaOPQRSTUV));
-    vbOPQRSTUV = _mm_unpacklo_epi8(vbOPQRSTUV, _mm_cmpgt_epi8(_mm_setzero_si128(), vbOPQRSTUV));
+    va01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(va01234567, va01234567), 8);
+    vb01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vb01234567, vb01234567), 8);
+    va89ABCDEF = _mm_srai_epi16(_mm_unpacklo_epi8(va89ABCDEF, va89ABCDEF), 8);
+    vb89ABCDEF = _mm_srai_epi16(_mm_unpacklo_epi8(vb89ABCDEF, vb89ABCDEF), 8);
+    vaGHIJKLMN = _mm_srai_epi16(_mm_unpacklo_epi8(vaGHIJKLMN, vaGHIJKLMN), 8);
+    vbGHIJKLMN = _mm_srai_epi16(_mm_unpacklo_epi8(vbGHIJKLMN, vbGHIJKLMN), 8);
+    vaOPQRSTUV = _mm_srai_epi16(_mm_unpacklo_epi8(vaOPQRSTUV, vaOPQRSTUV), 8);
+    vbOPQRSTUV = _mm_srai_epi16(_mm_unpacklo_epi8(vbOPQRSTUV, vbOPQRSTUV), 8);
 
     __m128i vaprod01234567hi = _mm_mulhi_epu16(va01234567, va_multiplier_lo);
     __m128i vbprod01234567hi = _mm_mulhi_epu16(vb01234567, vb_multiplier_lo);
@@ -154,8 +154,8 @@ void xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x32(
       input_a += 8;
       input_b += 8;
 
-      va01234567 = _mm_unpacklo_epi8(va01234567, _mm_cmpgt_epi8(_mm_setzero_si128(), va01234567));
-      vb01234567 = _mm_unpacklo_epi8(vb01234567, _mm_cmpgt_epi8(_mm_setzero_si128(), vb01234567));
+      va01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(va01234567, va01234567), 8);
+      vb01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vb01234567, vb01234567), 8);
 
       __m128i vaprod01234567hi = _mm_mulhi_epu16(va01234567, va_multiplier_lo);
       __m128i vbprod01234567hi = _mm_mulhi_epu16(vb01234567, vb_multiplier_lo);

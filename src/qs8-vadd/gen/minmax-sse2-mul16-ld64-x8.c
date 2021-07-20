@@ -39,8 +39,8 @@ void xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x8(
     input_a += 8;
     input_b += 8;
 
-    va01234567 = _mm_unpacklo_epi8(va01234567, _mm_cmpgt_epi8(_mm_setzero_si128(), va01234567));
-    vb01234567 = _mm_unpacklo_epi8(vb01234567, _mm_cmpgt_epi8(_mm_setzero_si128(), vb01234567));
+    va01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(va01234567, va01234567), 8);
+    vb01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vb01234567, vb01234567), 8);
 
     __m128i vaprod01234567hi = _mm_mulhi_epu16(va01234567, va_multiplier_lo);
     __m128i vbprod01234567hi = _mm_mulhi_epu16(vb01234567, vb_multiplier_lo);
@@ -81,8 +81,8 @@ void xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x8(
       __m128i va01234567 = _mm_loadl_epi64((const __m128i*) input_a);
       __m128i vb01234567 = _mm_loadl_epi64((const __m128i*) input_b);
 
-      va01234567 = _mm_unpacklo_epi8(va01234567, _mm_cmpgt_epi8(_mm_setzero_si128(), va01234567));
-      vb01234567 = _mm_unpacklo_epi8(vb01234567, _mm_cmpgt_epi8(_mm_setzero_si128(), vb01234567));
+      va01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(va01234567, va01234567), 8);
+      vb01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vb01234567, vb01234567), 8);
 
       __m128i vaprod01234567hi = _mm_mulhi_epu16(va01234567, va_multiplier_lo);
       __m128i vbprod01234567hi = _mm_mulhi_epu16(vb01234567, vb_multiplier_lo);
