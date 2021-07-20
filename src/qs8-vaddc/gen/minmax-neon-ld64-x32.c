@@ -55,15 +55,6 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x32(
     int32x4_t vaccOPQR = vmlaq_s32(vb_bias, vmovl_s16(vget_low_s16(vxaOPQRSTUV)), va_multiplier);
     int32x4_t vaccSTUV = vmlaq_s32(vb_bias, vmovl_s16(vget_high_s16(vxaOPQRSTUV)), va_multiplier);
 
-    vacc0123 = vsraq_n_s32(vacc0123, vacc0123, 31);
-    vacc4567 = vsraq_n_s32(vacc4567, vacc4567, 31);
-    vacc89AB = vsraq_n_s32(vacc89AB, vacc89AB, 31);
-    vaccCDEF = vsraq_n_s32(vaccCDEF, vaccCDEF, 31);
-    vaccGHIJ = vsraq_n_s32(vaccGHIJ, vaccGHIJ, 31);
-    vaccKLMN = vsraq_n_s32(vaccKLMN, vaccKLMN, 31);
-    vaccOPQR = vsraq_n_s32(vaccOPQR, vaccOPQR, 31);
-    vaccSTUV = vsraq_n_s32(vaccSTUV, vaccSTUV, 31);
-
     vacc0123 = vrshlq_s32(vacc0123, vright_shift);
     vacc4567 = vrshlq_s32(vacc4567, vright_shift);
     vacc89AB = vrshlq_s32(vacc89AB, vright_shift);
@@ -98,9 +89,6 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x32(
 
       int32x4_t vacc0123 = vmlaq_s32(vb_bias, vmovl_s16(vget_low_s16(vxa01234567)), va_multiplier);
       int32x4_t vacc4567 = vmlaq_s32(vb_bias, vmovl_s16(vget_high_s16(vxa01234567)), va_multiplier);
-
-      vacc0123 = vsraq_n_s32(vacc0123, vacc0123, 31);
-      vacc4567 = vsraq_n_s32(vacc4567, vacc4567, 31);
 
       vacc0123 = vrshlq_s32(vacc0123, vright_shift);
       vacc4567 = vrshlq_s32(vacc4567, vright_shift);

@@ -46,11 +46,7 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x${BATCH_TILE}(
       __m256i vacc${ABC[N:N+8]} = _mm256_add_epi32(vbias, _mm256_mullo_epi32(va${ABC[N:N+8]}, va_multiplier));
 
     $for N in range(0, BATCH_TILE, 8):
-      const __m256i vadj${ABC[N:N+8]} = _mm256_srai_epi32(vacc${ABC[N:N+8]}, 31);
-      vacc${ABC[N:N+8]} = _mm256_add_epi32(vacc${ABC[N:N+8]}, vrounding);
-
-    $for N in range(0, BATCH_TILE, 8):
-      vacc${ABC[N:N+8]} = _mm256_sra_epi32(_mm256_add_epi32(vacc${ABC[N:N+8]}, vadj${ABC[N:N+8]}), vshift);
+      vacc${ABC[N:N+8]} = _mm256_sra_epi32(_mm256_add_epi32(vacc${ABC[N:N+8]}, vrounding), vshift);
 
     $for N in range(0, BATCH_TILE, 16):
       $if N + 8 < BATCH_TILE:
@@ -93,9 +89,7 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x${BATCH_TILE}(
 
       __m256i vacc${ABC[0:8]} = _mm256_add_epi32(vbias, _mm256_mullo_epi32(va${ABC[0:8]}, va_multiplier));
 
-      const __m256i vadj${ABC[0:8]} = _mm256_srai_epi32(vacc${ABC[0:8]}, 31);
-      vacc${ABC[0:8]} = _mm256_add_epi32(vacc${ABC[0:8]}, vrounding);
-      vacc${ABC[0:8]} = _mm256_sra_epi32(_mm256_add_epi32(vacc${ABC[0:8]}, vadj${ABC[0:8]}), vshift);
+      vacc${ABC[0:8]} = _mm256_sra_epi32(_mm256_add_epi32(vacc${ABC[0:8]}, vrounding), vshift);
 
       $if BATCH_TILE > 8:
         __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc${ABC[0:8]}), _mm256_extracti128_si256(vacc${ABC[0:8]}, 1)), _mm256_castsi256_si128(voutput_zero_point));

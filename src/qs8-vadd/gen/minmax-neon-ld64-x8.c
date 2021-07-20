@@ -43,9 +43,6 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x8(
     vacc0123 = vmlaq_s32(vacc0123, vmovl_s16(vget_low_s16(vxb01234567)), vb_multiplier);
     vacc4567 = vmlaq_s32(vacc4567, vmovl_s16(vget_high_s16(vxb01234567)), vb_multiplier);
 
-    vacc0123 = vsraq_n_s32(vacc0123, vacc0123, 31);
-    vacc4567 = vsraq_n_s32(vacc4567, vacc4567, 31);
-
     vacc0123 = vrshlq_s32(vacc0123, vright_shift);
     vacc4567 = vrshlq_s32(vacc4567, vright_shift);
 
@@ -72,9 +69,6 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x8(
 
       vacc0123 = vmlaq_s32(vacc0123, vmovl_s16(vget_low_s16(vxb01234567)), vb_multiplier);
       vacc4567 = vmlaq_s32(vacc4567, vmovl_s16(vget_high_s16(vxb01234567)), vb_multiplier);
-
-      vacc0123 = vsraq_n_s32(vacc0123, vacc0123, 31);
-      vacc4567 = vsraq_n_s32(vacc4567, vacc4567, 31);
 
       vacc0123 = vrshlq_s32(vacc0123, vright_shift);
       vacc4567 = vrshlq_s32(vacc4567, vright_shift);

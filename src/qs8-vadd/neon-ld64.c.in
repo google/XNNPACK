@@ -47,9 +47,6 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x${BATCH_TILE}(
       vacc${ABC[N+4:N+8]} = vmlaq_s32(vacc${ABC[N+4:N+8]}, vmovl_s16(vget_high_s16(vxb${ABC[N:N+8]})), vb_multiplier);
 
     $for N in range(0, BATCH_TILE, 4):
-      vacc${ABC[N:N+4]} = vsraq_n_s32(vacc${ABC[N:N+4]}, vacc${ABC[N:N+4]}, 31);
-
-    $for N in range(0, BATCH_TILE, 4):
       vacc${ABC[N:N+4]} = vrshlq_s32(vacc${ABC[N:N+4]}, vright_shift);
 
     $for N in range(0, BATCH_TILE, 8):
@@ -96,9 +93,6 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x${BATCH_TILE}(
 
       vacc${ABC[0:4]} = vmlaq_s32(vacc${ABC[0:4]}, vmovl_s16(vget_low_s16(vxb${ABC[0:8]})), vb_multiplier);
       vacc${ABC[4:8]} = vmlaq_s32(vacc${ABC[4:8]}, vmovl_s16(vget_high_s16(vxb${ABC[0:8]})), vb_multiplier);
-
-      vacc${ABC[0:4]} = vsraq_n_s32(vacc${ABC[0:4]}, vacc${ABC[0:4]}, 31);
-      vacc${ABC[4:8]} = vsraq_n_s32(vacc${ABC[4:8]}, vacc${ABC[4:8]}, 31);
 
       vacc${ABC[0:4]} = vrshlq_s32(vacc${ABC[0:4]}, vright_shift);
       vacc${ABC[4:8]} = vrshlq_s32(vacc${ABC[4:8]}, vright_shift);

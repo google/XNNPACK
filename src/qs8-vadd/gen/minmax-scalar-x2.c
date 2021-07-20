@@ -43,8 +43,8 @@ void xnn_qs8_vadd_minmax_ukernel__scalar_x2(
     vacc0 += vb0 * vb_multiplier;
     vacc1 += vb1 * vb_multiplier;
 
-    int32_t vout0 = asr_s32(vacc0 + asr_s32(vacc0, 31) + vrounding, vshift);
-    int32_t vout1 = asr_s32(vacc1 + asr_s32(vacc1, 31) + vrounding, vshift);
+    int32_t vout0 = asr_s32(vacc0 + vrounding, vshift);
+    int32_t vout1 = asr_s32(vacc1 + vrounding, vshift);
 
     vout0 = math_max_s32(vout0, voutput_min_less_zero_point);
     vout1 = math_max_s32(vout1, voutput_min_less_zero_point);
@@ -64,7 +64,7 @@ void xnn_qs8_vadd_minmax_ukernel__scalar_x2(
     const int32_t vb = *input_b;
     const int32_t vacc = vbias + va * va_multiplier + vb * vb_multiplier;
 
-    int32_t vout = asr_s32(vacc + asr_s32(vacc, 31) + vrounding, vshift);
+    int32_t vout = asr_s32(vacc + vrounding, vshift);
     vout = math_max_s32(vout, voutput_min_less_zero_point);
     vout = math_min_s32(vout, voutput_max_less_zero_point);
     *output++ = (int8_t) (vout + voutput_zero_point);

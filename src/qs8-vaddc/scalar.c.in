@@ -30,7 +30,7 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x${BATCH_TILE}(
       const int32_t va = *input_a++;
       const int32_t vacc = vbias + va * va_multiplier;
 
-      int32_t vout = asr_s32(vacc + asr_s32(vacc, 31) + vrounding, vshift);
+      int32_t vout = asr_s32(vacc + vrounding, vshift);
       vout = math_max_s32(vout, voutput_min_less_zero_point);
       vout = math_min_s32(vout, voutput_max_less_zero_point);
       *output++ = (int8_t) (vout + voutput_zero_point);
@@ -48,7 +48,7 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x${BATCH_TILE}(
       input_b += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
-        int32_t vout${N} = asr_s32(vacc${N} + asr_s32(vacc${N}, 31) + vrounding, vshift);
+        int32_t vout${N} = asr_s32(vacc${N} + vrounding, vshift);
 
       $for N in range(BATCH_TILE):
         vout${N} = math_max_s32(vout${N}, voutput_min_less_zero_point);
@@ -68,7 +68,7 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x${BATCH_TILE}(
         const int32_t va = *input_a;
         const int32_t vacc = vbias + va * va_multiplier;
 
-        int32_t vout = asr_s32(vacc + asr_s32(vacc, 31) + vrounding, vshift);
+        int32_t vout = asr_s32(vacc + vrounding, vshift);
         vout = math_max_s32(vout, voutput_min_less_zero_point);
         vout = math_min_s32(vout, voutput_max_less_zero_point);
         *output++ = (int8_t) (vout + voutput_zero_point);
@@ -77,7 +77,7 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x${BATCH_TILE}(
           const int32_t va = *input_a++;
           const int32_t vacc = vbias + va * va_multiplier;
 
-          int32_t vout = asr_s32(vacc + asr_s32(vacc, 31) + vrounding, vshift);
+          int32_t vout = asr_s32(vacc + vrounding, vshift);
           vout = math_max_s32(vout, voutput_min_less_zero_point);
           vout = math_min_s32(vout, voutput_max_less_zero_point);
           *output++ = (int8_t) (vout + voutput_zero_point);
