@@ -20,7 +20,7 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x8(
     const int8_t* input_x,
     const int8_t* input_y,
     int8_t* output,
-    const union xnn_qs8_add_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const __m256i vx_multiplier = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.x_multiplier));
   const __m256i vremainder_mask = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) params->sse2.remainder_mask));

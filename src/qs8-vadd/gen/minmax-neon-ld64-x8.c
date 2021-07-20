@@ -19,7 +19,7 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x8(
     const int8_t* input_x,
     const int8_t* input_y,
     int8_t* output,
-    const union xnn_qs8_add_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const int8x8_t vx_zero_point = vld1_dup_s8(&params->neon.x_zero_point);
   const int8x8_t vy_zero_point = vld1_dup_s8(&params->neon.y_zero_point);

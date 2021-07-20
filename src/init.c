@@ -218,7 +218,7 @@ static void init(void) {
         .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_qu8_gavgpool_minmax_ukernel_7p7x__neon_c8,
         .mr = 7,
       };
-      xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__neon;
+      xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__neon_x32;
     #endif  // XNN_NO_QU8_OPERATORS
 
     /**************************** U8 micro-kernels ****************************/
@@ -602,7 +602,7 @@ static void init(void) {
         .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_qu8_gavgpool_minmax_ukernel_7p7x__scalar_c1,
         .mr = 7,
       };
-      xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar;
+      xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar_x1;
     #endif  // XNN_NO_QU8_OPERATORS
 
     /**************************** U8 micro-kernels ****************************/
@@ -1284,7 +1284,7 @@ static void init(void) {
       .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_qu8_gavgpool_minmax_ukernel_7p7x__neon_c8,
       .mr = 7,
     };
-    xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__neon;
+    xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__neon_x32;
   #endif  // XNN_NO_QU8_OPERATORS
 
   /**************************** U8 micro-kernels ****************************/
@@ -2241,7 +2241,7 @@ static void init(void) {
       .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_qu8_gavgpool_minmax_ukernel_7p7x__sse2_c8,
       .mr = 7,
     };
-    xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__sse2;
+    xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__sse2_x8;
   #endif  // XNN_NO_QU8_OPERATORS
 
   /**************************** U8 micro-kernels ****************************/
@@ -2874,7 +2874,7 @@ static void init(void) {
       .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_qu8_gavgpool_minmax_ukernel_7p7x__scalar_c1,
       .mr = 7,
     };
-    xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar;
+    xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar_x1;
   #endif  // XNN_NO_QU8_OPERATORS
 
   /**************************** U8 micro-kernels ****************************/
@@ -3467,7 +3467,7 @@ static void init(void) {
       .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_qu8_gavgpool_minmax_ukernel_7p7x__scalar_c1,
       .mr = 7,
     };
-    xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar;
+    xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar_x1;
   #endif  // XNN_NO_QU8_OPERATORS
 
   /**************************** U8 micro-kernels ****************************/
@@ -3844,7 +3844,7 @@ static void init(void) {
       .mp = (xnn_gavgpool_multipass_ukernel_function) xnn_qu8_gavgpool_minmax_ukernel_7p7x__scalar_c1,
       .mr = 7,
     };
-    xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar;
+    xnn_params.qu8.vadd = (xnn_vadd_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar_x1;
   #endif  // XNN_NO_QU8_OPERATORS
 
   /**************************** U8 micro-kernels ****************************/

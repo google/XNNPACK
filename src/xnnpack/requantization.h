@@ -409,7 +409,7 @@ static inline int8_t xnn_qs8_quantize_avgpool(
 
 static inline uint8_t xnn_qu8_quantize_add(
   uint8_t a, uint8_t b,
-  union xnn_qu8_add_params params)
+  union xnn_qu8_add_minmax_params params)
 {
   // Multiply by factors and accumulate products.
   int32_t acc = params.scalar.zero_point_product +
@@ -433,7 +433,7 @@ static inline uint8_t xnn_qu8_quantize_add(
 
 static inline int8_t xnn_qs8_quantize_add(
   int8_t x, int8_t y,
-  union xnn_qs8_add_params params)
+  union xnn_qs8_add_minmax_params params)
 {
   // Multiply by factors and accumulate products.
   int32_t acc = params.scalar.zero_point_product +

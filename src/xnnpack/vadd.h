@@ -25,11 +25,11 @@ extern "C" {
       const uint8_t* a,                                   \
       const uint8_t* b,                                   \
       uint8_t* y,                                         \
-      const union xnn_qu8_add_params* params);
+      const union xnn_qu8_add_minmax_params* params);
 
-DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qu8_vadd_minmax_ukernel__neon)
-DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qu8_vadd_minmax_ukernel__scalar)
-DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qu8_vadd_minmax_ukernel__sse2)
+DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qu8_vadd_minmax_ukernel__neon_x32)
+DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qu8_vadd_minmax_ukernel__scalar_x1)
+DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qu8_vadd_minmax_ukernel__sse2_x8)
 
 
 #define DECLARE_QS8_VADD_MINMAX_UKERNEL_FUNCTION(fn_name) \
@@ -38,7 +38,7 @@ DECLARE_QU8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qu8_vadd_minmax_ukernel__sse2)
       const int8_t* input_x,                              \
       const int8_t* input_y,                              \
       int8_t* output,                                     \
-      const union xnn_qs8_add_params* params);
+      const union xnn_qs8_add_minmax_params* params);
 
 DECLARE_QS8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qs8_vadd_minmax_ukernel__neon_ld64_x8)
 DECLARE_QS8_VADD_MINMAX_UKERNEL_FUNCTION(xnn_qs8_vadd_minmax_ukernel__neon_ld64_x16)

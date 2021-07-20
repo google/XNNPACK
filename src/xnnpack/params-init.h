@@ -496,8 +496,8 @@ XNN_INTERNAL void xnn_init_scalar_u8_minmax_params(
   uint8_t output_min,
   uint8_t output_max);
 
-XNN_INTERNAL void xnn_init_qu8_add_params(
-  union xnn_qu8_add_params params[XNN_MIN_ELEMENTS(1)],
+XNN_INTERNAL void xnn_init_qu8_add_minmax_params(
+  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -506,8 +506,8 @@ XNN_INTERNAL void xnn_init_qu8_add_params(
   uint8_t output_min,
   uint8_t output_max);
 
-XNN_INTERNAL void xnn_init_scalar_qu8_add_params(
-  union xnn_qu8_add_params params[XNN_MIN_ELEMENTS(1)],
+XNN_INTERNAL void xnn_init_qu8_add_minmax_scalar_params(
+  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -516,8 +516,8 @@ XNN_INTERNAL void xnn_init_scalar_qu8_add_params(
   uint8_t output_min,
   uint8_t output_max);
 
-XNN_INTERNAL void xnn_init_qs8_add_params(
-  union xnn_qs8_add_params params[XNN_MIN_ELEMENTS(1)],
+XNN_INTERNAL void xnn_init_qs8_add_minmax_params(
+  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t x_zero_point,
   int8_t y_zero_point,
   int8_t output_zero_point,
@@ -526,8 +526,8 @@ XNN_INTERNAL void xnn_init_qs8_add_params(
   int8_t output_min,
   int8_t output_max);
 
-XNN_INTERNAL void xnn_init_scalar_qs8_add_params(
-  union xnn_qs8_add_params params[XNN_MIN_ELEMENTS(1)],
+XNN_INTERNAL void xnn_init_qs8_add_minmax_scalar_params(
+  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t x_zero_point,
   int8_t y_zero_point,
   int8_t output_zero_point,

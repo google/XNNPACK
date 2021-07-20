@@ -10,12 +10,12 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qu8_vadd_minmax_ukernel__scalar(
+void xnn_qu8_vadd_minmax_ukernel__scalar_x1(
     size_t n,
     const uint8_t* a,
     const uint8_t* b,
     uint8_t* y,
-    const union xnn_qu8_add_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
 

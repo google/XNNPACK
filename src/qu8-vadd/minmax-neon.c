@@ -12,12 +12,12 @@
 #include <xnnpack/vadd.h>
 
 
-void xnn_qu8_vadd_minmax_ukernel__neon(
+void xnn_qu8_vadd_minmax_ukernel__neon_x32(
     size_t n,
     const uint8_t* a,
     const uint8_t* b,
     uint8_t* y,
-    const union xnn_qu8_add_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const uint8x8_t va_zero_point = vld1_dup_u8(&params->neon.a_zero_point);
   const uint8x8_t vb_zero_point = vld1_dup_u8(&params->neon.b_zero_point);

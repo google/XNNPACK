@@ -19,7 +19,7 @@ void xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x24(
     const int8_t* input_x,
     const int8_t* input_y,
     int8_t* output,
-    const union xnn_qs8_add_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const v128_t vx_multiplier = wasm_v128_load(params->wasmsimd.x_multiplier);
   const v128_t vremainder_mask = wasm_v128_load(params->wasmsimd.remainder_mask);

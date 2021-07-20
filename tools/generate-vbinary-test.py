@@ -31,7 +31,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(qs8|f16|f32)_v(add|div|max|min|mul|sqrdiff|sub|addc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu))?_ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(qu8|qs8|f16|f32)_v(add|div|max|min|mul|sqrdiff|sub|addc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu))?_ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
@@ -254,12 +254,13 @@ $if ACTIVATION_TYPE == "MINMAX":
 """
 
 
-def generate_test_cases(ukernel, op_type, activation_type, tester, batch_tile, isa):
+def generate_test_cases(ukernel, op_type, init_fn, activation_type, tester, batch_tile, isa):
   """Generates all tests cases for a Vector Binary Operation micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     op_type: Operation type (ADD/MUL/SUB/etc).
+    init_fn: C name of the function to initialize microkernel parameters.
     activation_type: Activation type (LINEAR/MINMAX/RELU).
     tester: C++ name of the tester class.
     batch_tile: Number of batch elements processed per one iteration of the
@@ -275,7 +276,9 @@ def generate_test_cases(ukernel, op_type, activation_type, tester, batch_tile, i
   test_args = [ukernel]
   if tester in ["VBinaryMicrokernelTester", "VBinaryCMicrokernelTester"]:
     test_args.append("%s::OpType::%s" % (tester, op_type))
-  if not isa:
+  if init_fn:
+    test_args.append(init_fn)
+  elif not isa:
     test_args.append("%s::Variant::Scalar" % tester)
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
@@ -333,12 +336,13 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
+      init_fn = ukernel_spec.get("init")
       op_type, activation_type, batch_tile, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, op_type, activation_type,
+      test_case = generate_test_cases(name, op_type, init_fn, activation_type,
                                       options.tester, batch_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 

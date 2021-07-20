@@ -27,11 +27,6 @@
 
 class VAddMicrokernelTester {
  public:
-  enum class Variant {
-    Native,
-    Scalar,
-  };
-
   inline VAddMicrokernelTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
@@ -147,7 +142,7 @@ class VAddMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_qu8_vadd_minmax_ukernel_function vadd_minmax, Variant variant = Variant::Native) const {
+  void Test(xnn_qu8_vadd_minmax_ukernel_function vadd_minmax, xnn_init_qu8_add_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -169,25 +164,14 @@ class VAddMicrokernelTester {
       const uint8_t* b_data = inplace_b() ? y.data() : b.data();
 
       // Prepare parameters.
-      xnn_qu8_add_params quantization_params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_qu8_add_params(
-            &quantization_params,
-            a_zero_point(), b_zero_point(), y_zero_point(),
-            a_scale() / y_scale(), b_scale() / y_scale(),
-            qmin(), qmax());
-          break;
-        case Variant::Scalar:
-          xnn_init_scalar_qu8_add_params(
-            &quantization_params,
-            a_zero_point(), b_zero_point(), y_zero_point(),
-            a_scale() / y_scale(), b_scale() / y_scale(),
-            qmin(), qmax());
-          break;
-      }
-      xnn_qu8_add_params scalar_quantization_params;
-      xnn_init_scalar_qu8_add_params(
+      xnn_qu8_add_minmax_params quantization_params;
+      init_params(
+        &quantization_params,
+        a_zero_point(), b_zero_point(), y_zero_point(),
+        a_scale() / y_scale(), b_scale() / y_scale(),
+        qmin(), qmax());
+      xnn_qu8_add_minmax_params scalar_quantization_params;
+      xnn_init_qu8_add_minmax_scalar_params(
         &scalar_quantization_params,
         a_zero_point(), b_zero_point(), y_zero_point(),
         a_scale() / y_scale(), b_scale() / y_scale(),
@@ -220,7 +204,7 @@ class VAddMicrokernelTester {
     }
   }
 
-  void Test(xnn_qs8_vadd_minmax_ukernel_function vadd_minmax, Variant variant = Variant::Native) const {
+  void Test(xnn_qs8_vadd_minmax_ukernel_function vadd_minmax, xnn_init_qs8_add_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i8rng = std::bind(
@@ -243,25 +227,14 @@ class VAddMicrokernelTester {
       const int8_t* b_data = inplace_b() ? y.data() : b.data();
 
       // Prepare parameters.
-      xnn_qs8_add_params quantization_params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_qs8_add_params(
-            &quantization_params,
-            int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),
-            a_scale() / y_scale(), b_scale() / y_scale(),
-            int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-          break;
-        case Variant::Scalar:
-          xnn_init_scalar_qs8_add_params(
-            &quantization_params,
-            int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),
-            a_scale() / y_scale(), b_scale() / y_scale(),
-            int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-          break;
-      }
-      xnn_qs8_add_params scalar_quantization_params;
-      xnn_init_scalar_qs8_add_params(
+      xnn_qs8_add_minmax_params quantization_params;
+      init_params(
+        &quantization_params,
+        int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),
+        a_scale() / y_scale(), b_scale() / y_scale(),
+        int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+      xnn_qs8_add_minmax_params scalar_quantization_params;
+      xnn_init_qs8_add_minmax_scalar_params(
         &scalar_quantization_params,
         int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),
         a_scale() / y_scale(), b_scale() / y_scale(),

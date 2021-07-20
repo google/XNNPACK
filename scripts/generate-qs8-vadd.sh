@@ -109,4 +109,6 @@ tools/xngen src/qs8-vaddc/avx2-mul32-ld64.c.in -D BATCH_TILE=32 -o src/qs8-vaddc
 
 ################################## Unit tests #################################
 tools/generate-vbinary-test.py --tester VAddMicrokernelTester  --spec test/qs8-vadd-minmax.yaml  --output test/qs8-vadd-minmax.cc
+tools/generate-vbinary-test.py --tester VAddMicrokernelTester  --spec test/qu8-vadd-minmax.yaml  --output test/qu8-vadd-minmax.cc
+
 tools/generate-vbinary-test.py --tester VAddCMicrokernelTester --spec test/qs8-vaddc-minmax.yaml --output test/qs8-vaddc-minmax.cc
