@@ -4603,6 +4603,7 @@ AARCH64_ASM_UKERNELS = [
     "src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld32.S",
     "src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld64.S",
     "src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld128.S",
+    "src/qs8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S",
     "src/qs8-igemm/gen/1x8c8-minmax-fp32-aarch64-neon-mlal-padal-cortex-a53.S",
     "src/qs8-igemm/gen/1x8c8-minmax-fp32-aarch64-neon-mlal-padal-prfm-cortex-a53.S",
     "src/qs8-igemm/gen/1x8c8-minmax-fp32-aarch64-neon-mlal-padal-prfm.S",
@@ -4631,6 +4632,7 @@ AARCH64_ASM_UKERNELS = [
     "src/qs8-igemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-cortex-a55.S",
     "src/qs8-igemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld64.S",
     "src/qs8-igemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld128.S",
+    "src/qs8-igemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S",
 ]
 
 INTERNAL_MICROKERNEL_HDRS = [

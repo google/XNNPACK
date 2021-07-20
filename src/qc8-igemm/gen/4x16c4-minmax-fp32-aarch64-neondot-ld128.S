@@ -30,7 +30,7 @@
 # A0  x13  v0
 # A1  x14  v1
 # A2  x15  v2
-# A3   x11  v3
+# A3  x11  v3
 # B    x5  v4  v5  v6  v7
 # C0   x6 v16 v20 v24 v28
 # C1  x16 v17 v21 v25 v29

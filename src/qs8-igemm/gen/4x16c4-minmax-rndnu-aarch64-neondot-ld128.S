@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld128(
+# void xnn_qs8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -38,7 +38,7 @@
 # C3   x7 v19 v23 v27 v31
 # unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld128
+BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
@@ -196,86 +196,58 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld1
 
         LDR     x11, [sp, 24]            // reload params pointer
 
-        # Apply params - scale, shift, bias and clamp
-        LD2R    {v0.4s, v1.4s}, [x11], 8
-        CMEQ    v2.4s, v1.4s, 0
-
-        BIC     v4.16b, v16.16b, v2.16b
-        BIC     v5.16b, v17.16b, v2.16b
-        BIC     v6.16b, v18.16b, v2.16b
-        BIC     v7.16b, v19.16b, v2.16b
-
-        SQRDMULH v16.4s, v16.4s, v0.4s
-        SQRDMULH v17.4s, v17.4s, v0.4s
-        SQRDMULH v18.4s, v18.4s, v0.4s
-        SQRDMULH v19.4s, v19.4s, v0.4s
-
-        SSRA    v16.4s, v4.4s, 31       // signed shift right accumulate
-        SSRA    v17.4s, v5.4s, 31
-        SSRA    v18.4s, v6.4s, 31
-        SSRA    v19.4s, v7.4s, 31
-
-        BIC     v4.16b, v20.16b, v2.16b
-        BIC     v5.16b, v21.16b, v2.16b
-        BIC     v6.16b, v22.16b, v2.16b
-        BIC     v7.16b, v23.16b, v2.16b
-
-        SQRDMULH v20.4s, v20.4s, v0.4s
-        SQRDMULH v21.4s, v21.4s, v0.4s
-        SQRDMULH v22.4s, v22.4s, v0.4s
-        SQRDMULH v23.4s, v23.4s, v0.4s
-
-        SSRA    v20.4s, v4.4s, 31
-        SSRA    v21.4s, v5.4s, 31
-        SSRA    v22.4s, v6.4s, 31
-        SSRA    v23.4s, v7.4s, 31
-
-        BIC     v4.16b, v24.16b, v2.16b
-        BIC     v5.16b, v25.16b, v2.16b
-        BIC     v6.16b, v26.16b, v2.16b
-        BIC     v7.16b, v27.16b, v2.16b
-
-        SQRDMULH v24.4s, v24.4s, v0.4s
-        SQRDMULH v25.4s, v25.4s, v0.4s
-        SQRDMULH v26.4s, v26.4s, v0.4s
-        SQRDMULH v27.4s, v27.4s, v0.4s
-
-        SSRA    v24.4s, v4.4s, 31
-        SSRA    v25.4s, v5.4s, 31
-        SSRA    v26.4s, v6.4s, 31
-        SSRA    v27.4s, v7.4s, 31
-
-        BIC     v4.16b, v28.16b, v2.16b
-        BIC     v5.16b, v29.16b, v2.16b
-        BIC     v6.16b, v30.16b, v2.16b
-        BIC     v7.16b, v31.16b, v2.16b
-
-        SQRDMULH v28.4s, v28.4s, v0.4s
-        SQRDMULH v29.4s, v29.4s, v0.4s
-        SQRDMULH v30.4s, v30.4s, v0.4s
-        SQRDMULH v31.4s, v31.4s, v0.4s
-
-        SSRA    v28.4s, v4.4s, 31
-        SSRA    v29.4s, v5.4s, 31
-        SSRA    v30.4s, v6.4s, 31
-        SSRA    v31.4s, v7.4s, 31
-
-        SRSHL   v16.4s, v16.4s, v1.4s   // signed rounding shift left
-        SRSHL   v17.4s, v17.4s, v1.4s
-        SRSHL   v18.4s, v18.4s, v1.4s
-        SRSHL   v19.4s, v19.4s, v1.4s
-        SRSHL   v20.4s, v20.4s, v1.4s
-        SRSHL   v21.4s, v21.4s, v1.4s
-        SRSHL   v22.4s, v22.4s, v1.4s
-        SRSHL   v23.4s, v23.4s, v1.4s
-        SRSHL   v24.4s, v24.4s, v1.4s
-        SRSHL   v25.4s, v25.4s, v1.4s
-        SRSHL   v26.4s, v26.4s, v1.4s
-        SRSHL   v27.4s, v27.4s, v1.4s
-        SRSHL   v28.4s, v28.4s, v1.4s
-        SRSHL   v29.4s, v29.4s, v1.4s
-        SRSHL   v30.4s, v30.4s, v1.4s
-        SRSHL   v31.4s, v31.4s, v1.4s
+        # Apply params - preshift, scale, postshift, bias and clamp
+        LD1R    {v0.4s}, [x11], 4
+        SSHL    v16.4s, v16.4s, v0.4s   // shift to upper bits
+        SSHL    v17.4s, v17.4s, v0.4s
+        SSHL    v18.4s, v18.4s, v0.4s
+        SSHL    v19.4s, v19.4s, v0.4s
+        SSHL    v20.4s, v20.4s, v0.4s
+        SSHL    v21.4s, v21.4s, v0.4s
+        SSHL    v22.4s, v22.4s, v0.4s
+        SSHL    v23.4s, v23.4s, v0.4s
+        LD1R    {v1.4s}, [x11], 4
+        SSHL    v24.4s, v24.4s, v0.4s
+        SSHL    v25.4s, v25.4s, v0.4s
+        SSHL    v26.4s, v26.4s, v0.4s
+        SSHL    v27.4s, v27.4s, v0.4s
+        SSHL    v28.4s, v28.4s, v0.4s
+        SSHL    v29.4s, v29.4s, v0.4s
+        SSHL    v30.4s, v30.4s, v0.4s
+        SSHL    v31.4s, v31.4s, v0.4s
+        LD1R    {v2.4s}, [x11], 4
+        SQDMULH v16.4s, v16.4s, v1.4s   // scale without rounding
+        SQDMULH v17.4s, v17.4s, v1.4s
+        SQDMULH v18.4s, v18.4s, v1.4s
+        SQDMULH v19.4s, v19.4s, v1.4s
+        SQDMULH v20.4s, v20.4s, v1.4s
+        SQDMULH v21.4s, v21.4s, v1.4s
+        SQDMULH v22.4s, v22.4s, v1.4s
+        SQDMULH v23.4s, v23.4s, v1.4s
+        SQDMULH v24.4s, v24.4s, v1.4s
+        SQDMULH v25.4s, v25.4s, v1.4s
+        SQDMULH v26.4s, v26.4s, v1.4s
+        SQDMULH v27.4s, v27.4s, v1.4s
+        SQDMULH v28.4s, v28.4s, v1.4s
+        SQDMULH v29.4s, v29.4s, v1.4s
+        SQDMULH v30.4s, v30.4s, v1.4s
+        SQDMULH v31.4s, v31.4s, v1.4s
+        SRSHL   v16.4s, v16.4s, v2.4s   // signed rounding shift left
+        SRSHL   v17.4s, v17.4s, v2.4s
+        SRSHL   v18.4s, v18.4s, v2.4s
+        SRSHL   v19.4s, v19.4s, v2.4s
+        SRSHL   v20.4s, v20.4s, v2.4s
+        SRSHL   v21.4s, v21.4s, v2.4s
+        SRSHL   v22.4s, v22.4s, v2.4s
+        SRSHL   v23.4s, v23.4s, v2.4s
+        SRSHL   v24.4s, v24.4s, v2.4s
+        SRSHL   v25.4s, v25.4s, v2.4s
+        SRSHL   v26.4s, v26.4s, v2.4s
+        SRSHL   v27.4s, v27.4s, v2.4s
+        SRSHL   v28.4s, v28.4s, v2.4s
+        SRSHL   v29.4s, v29.4s, v2.4s
+        SRSHL   v30.4s, v30.4s, v2.4s
+        SRSHL   v31.4s, v31.4s, v2.4s
 
 
         SQXTN   v16.4h, v16.4s
@@ -460,7 +432,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld1
 10:
         RET
 
-END_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld128
+END_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
