@@ -2091,7 +2091,7 @@ struct vbinary_parameters {
   struct vbinary_fused_ukernels minmax;
   struct vbinary_fused_ukernels linear;
   union {
-    xnn_init_qs8_add_minmax_params_fn qs8;
+    xnn_init_qs8_add_minmax_params_fn qs8_add;
   } init;
   // Number of elements in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.

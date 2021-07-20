@@ -222,10 +222,10 @@ enum xnn_status xnn_create_add_nd_qs8(
     union xnn_qs8_add_minmax_params qs8_add;
     union xnn_qs8_add_minmax_params qs8_radd;
   } params;
-  xnn_params.qs8.vadd.init.qs8(
+  xnn_params.qs8.vadd.init.qs8_add(
     &params.qs8_add, input1_zero_point, input2_zero_point, output_zero_point,
     input1_output_scale, input2_output_scale, output_min, output_max);
-  xnn_params.qs8.vadd.init.qs8(
+  xnn_params.qs8.vadd.init.qs8_add(
     &params.qs8_radd, input2_zero_point, input1_zero_point, output_zero_point,
     input2_output_scale, input1_output_scale, output_min, output_max);
   return create_binary_elementwise_nd(
