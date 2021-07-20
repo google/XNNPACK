@@ -20,7 +20,7 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x${BATCH_TILE}(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const v128_t vzero_point_product = wasm_v128_load(params->wasmsimd.zero_point_product);
+  const v128_t vbias = wasm_v128_load(params->wasmsimd.bias);
   const v128_t va_multiplier = wasm_v128_load(params->wasmsimd.a_multiplier);
   const v128_t vb_multiplier = wasm_v128_load(params->wasmsimd.b_multiplier);
   const v128_t vremainder_mask = wasm_v128_load(params->wasmsimd.remainder_mask);
@@ -40,8 +40,8 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x${BATCH_TILE}(
     input_b += ${BATCH_TILE};
 
     $for N in range(0, BATCH_TILE, 8):
-      v128_t vacc${ABC[N:N+4]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va${ABC[N:N+8]}), va_multiplier));
-      v128_t vacc${ABC[N+4:N+8]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va${ABC[N:N+8]}), va_multiplier));
+      v128_t vacc${ABC[N:N+4]} = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va${ABC[N:N+8]}), va_multiplier));
+      v128_t vacc${ABC[N+4:N+8]} = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va${ABC[N:N+8]}), va_multiplier));
 
     $for N in range(0, BATCH_TILE, 8):
       vacc${ABC[N:N+4]} = wasm_i32x4_add(vacc${ABC[N:N+4]}, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vb${ABC[N:N+8]}), vb_multiplier));
@@ -93,8 +93,8 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x${BATCH_TILE}(
         input_a += 8;
         input_b += 8;
 
-      v128_t vacc${ABC[0:4]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va${ABC[0:8]}), va_multiplier));
-      v128_t vacc${ABC[4:8]} = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va${ABC[0:8]}), va_multiplier));
+      v128_t vacc${ABC[0:4]} = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va${ABC[0:8]}), va_multiplier));
+      v128_t vacc${ABC[4:8]} = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va${ABC[0:8]}), va_multiplier));
 
       vacc${ABC[0:4]} = wasm_i32x4_add(vacc${ABC[0:4]}, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vb${ABC[0:8]}), vb_multiplier));
       vacc${ABC[4:8]} = wasm_i32x4_add(vacc${ABC[4:8]}, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vb${ABC[0:8]}), vb_multiplier));

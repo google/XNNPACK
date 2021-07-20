@@ -1912,10 +1912,9 @@ void xnn_init_qs8_add_minmax_params(
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
     const int32_t remainder_threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
-    const int32_t zero_point_product =
-      (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+    const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
     for (uint32_t i = 0; i < 4; i++) {
-      params->sse2.zero_point_product[i] = zero_point_product;
+      params->sse2.bias[i] = bias;
     }
     const uint16_t a_multiplier_lo = (uint16_t) a_multiplier;
     const uint16_t a_multiplier_hi = (uint16_t) ((uint32_t) a_multiplier >> 16);
@@ -1951,10 +1950,9 @@ void xnn_init_qs8_add_minmax_params(
   #elif XNN_ARCH_WASMSIMD
     const int32_t remainder_mask = (INT32_C(1) << shift) - INT32_C(1);
     const int32_t remainder_threshold = (int32_t) ((uint32_t) remainder_mask >> 1);
-    const int32_t zero_point_product =
-      (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+    const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
     for (uint32_t i = 0; i < 4; i++) {
-      params->wasmsimd.zero_point_product[i] = zero_point_product;
+      params->wasmsimd.bias[i] = bias;
       params->wasmsimd.a_multiplier[i] = a_multiplier;
       params->wasmsimd.b_multiplier[i] = b_multiplier;
       params->wasmsimd.remainder_mask[i] = remainder_mask;

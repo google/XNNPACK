@@ -27,7 +27,7 @@ void xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x32(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const __m128i vzero_point_product = _mm_load_si128((const __m128i*) params->sse2.zero_point_product);
+  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->sse2.a_multiplier);
   const __m128i vb_multiplier = _mm_load_si128((const __m128i*) params->sse2.b_multiplier);
   const __m128i vremainder_mask = _mm_load_si128((const __m128i*) params->sse2.remainder_mask);
@@ -57,14 +57,14 @@ void xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x32(
     input_a += 32;
     input_b += 32;
 
-    __m128i vacc0123 = _mm_macc_epi32(va0123, va_multiplier, vzero_point_product);
-    __m128i vacc4567 = _mm_macc_epi32(va4567, va_multiplier, vzero_point_product);
-    __m128i vacc89AB = _mm_macc_epi32(va89AB, va_multiplier, vzero_point_product);
-    __m128i vaccCDEF = _mm_macc_epi32(vaCDEF, va_multiplier, vzero_point_product);
-    __m128i vaccGHIJ = _mm_macc_epi32(vaGHIJ, va_multiplier, vzero_point_product);
-    __m128i vaccKLMN = _mm_macc_epi32(vaKLMN, va_multiplier, vzero_point_product);
-    __m128i vaccOPQR = _mm_macc_epi32(vaOPQR, va_multiplier, vzero_point_product);
-    __m128i vaccSTUV = _mm_macc_epi32(vaSTUV, va_multiplier, vzero_point_product);
+    __m128i vacc0123 = _mm_macc_epi32(va0123, va_multiplier, vbias);
+    __m128i vacc4567 = _mm_macc_epi32(va4567, va_multiplier, vbias);
+    __m128i vacc89AB = _mm_macc_epi32(va89AB, va_multiplier, vbias);
+    __m128i vaccCDEF = _mm_macc_epi32(vaCDEF, va_multiplier, vbias);
+    __m128i vaccGHIJ = _mm_macc_epi32(vaGHIJ, va_multiplier, vbias);
+    __m128i vaccKLMN = _mm_macc_epi32(vaKLMN, va_multiplier, vbias);
+    __m128i vaccOPQR = _mm_macc_epi32(vaOPQR, va_multiplier, vbias);
+    __m128i vaccSTUV = _mm_macc_epi32(vaSTUV, va_multiplier, vbias);
 
     vacc0123 = _mm_macc_epi32(vb0123, vb_multiplier, vacc0123);
     vacc4567 = _mm_macc_epi32(vb4567, vb_multiplier, vacc4567);
@@ -124,8 +124,8 @@ void xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x32(
       input_a += 8;
       input_b += 8;
 
-      __m128i vacc0123 = _mm_macc_epi32(va0123, va_multiplier, vzero_point_product);
-      __m128i vacc4567 = _mm_macc_epi32(va4567, va_multiplier, vzero_point_product);
+      __m128i vacc0123 = _mm_macc_epi32(va0123, va_multiplier, vbias);
+      __m128i vacc4567 = _mm_macc_epi32(va4567, va_multiplier, vbias);
 
       vacc0123 = _mm_macc_epi32(vb0123, vb_multiplier, vacc0123);
       vacc4567 = _mm_macc_epi32(vb4567, vb_multiplier, vacc4567);

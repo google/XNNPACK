@@ -21,7 +21,7 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x16(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const v128_t vzero_point_product = wasm_v128_load(params->wasmsimd.zero_point_product);
+  const v128_t vbias = wasm_v128_load(params->wasmsimd.bias);
   const v128_t va_multiplier = wasm_v128_load(params->wasmsimd.a_multiplier);
   const v128_t vb_multiplier = wasm_v128_load(params->wasmsimd.b_multiplier);
   const v128_t vremainder_mask = wasm_v128_load(params->wasmsimd.remainder_mask);
@@ -39,10 +39,10 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x16(
     input_a += 16;
     input_b += 16;
 
-    v128_t vacc0123 = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va01234567), va_multiplier));
-    v128_t vacc4567 = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va01234567), va_multiplier));
-    v128_t vacc89AB = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va89ABCDEF), va_multiplier));
-    v128_t vaccCDEF = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va89ABCDEF), va_multiplier));
+    v128_t vacc0123 = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va01234567), va_multiplier));
+    v128_t vacc4567 = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va01234567), va_multiplier));
+    v128_t vacc89AB = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va89ABCDEF), va_multiplier));
+    v128_t vaccCDEF = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va89ABCDEF), va_multiplier));
 
     vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vb01234567), vb_multiplier));
     vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vb01234567), vb_multiplier));
@@ -78,8 +78,8 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x16(
       input_a += 8;
       input_b += 8;
 
-      v128_t vacc0123 = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va01234567), va_multiplier));
-      v128_t vacc4567 = wasm_i32x4_add(vzero_point_product, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va01234567), va_multiplier));
+      v128_t vacc0123 = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(va01234567), va_multiplier));
+      v128_t vacc4567 = wasm_i32x4_add(vbias, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(va01234567), va_multiplier));
 
       vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vb01234567), vb_multiplier));
       vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vb01234567), vb_multiplier));

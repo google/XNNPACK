@@ -606,7 +606,7 @@ union xnn_qs8_add_minmax_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    XNN_ALIGN(16) int32_t zero_point_product[4];
+    XNN_ALIGN(16) int32_t bias[4];
     XNN_ALIGN(16) uint16_t a_multiplier_lo[8];
     XNN_ALIGN(16) uint16_t a_multiplier_hi[8];
     XNN_ALIGN(16) uint16_t b_multiplier_lo[8];
@@ -623,7 +623,7 @@ union xnn_qs8_add_minmax_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {
-    XNN_ALIGN(16) int32_t zero_point_product[4];
+    XNN_ALIGN(16) int32_t bias[4];
     XNN_ALIGN(16) int32_t a_multiplier[4];
     XNN_ALIGN(16) int32_t b_multiplier[4];
     XNN_ALIGN(16) int32_t remainder_mask[4];

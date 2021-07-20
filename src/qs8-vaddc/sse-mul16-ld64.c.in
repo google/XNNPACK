@@ -33,9 +33,9 @@ void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TILE}(
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
 
-  __m128i vzero_point_product = _mm_cvtsi32_si128(params->sse2.b_multiplier[0] * (int32_t) *input_b);
-  vzero_point_product = _mm_shuffle_epi32(vzero_point_product, _MM_SHUFFLE(0, 0, 0, 0));
-  vzero_point_product = _mm_add_epi32(vzero_point_product, _mm_load_si128((const __m128i*) params->sse2.zero_point_product));
+  __m128i vbias = _mm_cvtsi32_si128(params->sse2.b_multiplier[0] * (int32_t) *input_b);
+  vbias = _mm_shuffle_epi32(vbias, _MM_SHUFFLE(0, 0, 0, 0));
+  vbias = _mm_add_epi32(vbias, _mm_load_si128((const __m128i*) params->sse2.bias));
   for (; n >= ${BATCH_TILE} * sizeof(int8_t); n -= ${BATCH_TILE} * sizeof(int8_t)) {
     $if SSE == 4:
       const __m128i va${ABC[0:8]} = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input_a));
@@ -62,8 +62,8 @@ void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TILE}(
       vaprod${ABC[N:N+8]}hi = _mm_sub_epi16(vaprod${ABC[N:N+8]}hi, _mm_and_si128(_mm_srai_epi16(va${ABC[N:N+8]}, 15), va_multiplier_lo));
 
     $for N in range(0, BATCH_TILE, 8):
-      __m128i vacc${ABC[N:N+4]} = _mm_add_epi32(vzero_point_product, _mm_unpacklo_epi16(vaprod${ABC[N:N+8]}lo, vaprod${ABC[N:N+8]}hi));
-      __m128i vacc${ABC[N+4:N+8]} = _mm_add_epi32(vzero_point_product, _mm_unpackhi_epi16(vaprod${ABC[N:N+8]}lo, vaprod${ABC[N:N+8]}hi));
+      __m128i vacc${ABC[N:N+4]} = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vaprod${ABC[N:N+8]}lo, vaprod${ABC[N:N+8]}hi));
+      __m128i vacc${ABC[N+4:N+8]} = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vaprod${ABC[N:N+8]}lo, vaprod${ABC[N:N+8]}hi));
 
     $for N in range(0, BATCH_TILE, 4):
       const __m128i vrem${ABC[N:N+4]} = _mm_add_epi32(_mm_and_si128(vacc${ABC[N:N+4]}, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vacc${ABC[N:N+4]}));
@@ -116,8 +116,8 @@ void xnn_qs8_vaddc_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TILE}(
 
       vaprod${ABC[0:8]}hi = _mm_sub_epi16(vaprod${ABC[0:8]}hi, _mm_and_si128(_mm_srai_epi16(va${ABC[0:8]}, 15), va_multiplier_lo));
 
-      __m128i vacc${ABC[0:4]} = _mm_add_epi32(vzero_point_product, _mm_unpacklo_epi16(vaprod${ABC[0:8]}lo, vaprod${ABC[0:8]}hi));
-      __m128i vacc${ABC[4:8]} = _mm_add_epi32(vzero_point_product, _mm_unpackhi_epi16(vaprod${ABC[0:8]}lo, vaprod${ABC[0:8]}hi));
+      __m128i vacc${ABC[0:4]} = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vaprod${ABC[0:8]}lo, vaprod${ABC[0:8]}hi));
+      __m128i vacc${ABC[4:8]} = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vaprod${ABC[0:8]}lo, vaprod${ABC[0:8]}hi));
 
       const __m128i vrem${ABC[0:4]} = _mm_add_epi32(_mm_and_si128(vacc${ABC[0:4]}, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vacc${ABC[0:4]}));
       const __m128i vrem${ABC[4:8]} = _mm_add_epi32(_mm_and_si128(vacc${ABC[4:8]}, vremainder_mask), _mm_cmpgt_epi32(_mm_setzero_si128(), vacc${ABC[4:8]}));
