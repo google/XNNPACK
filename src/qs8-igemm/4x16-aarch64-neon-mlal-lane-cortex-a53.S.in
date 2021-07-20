@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["GEMMLOWP", "FP32"]
+$assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
 $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
@@ -577,6 +577,59 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x
           SRSHL   v29.4s, v29.4s, v1.4s
           SRSHL   v30.4s, v30.4s, v1.4s
           SRSHL   v31.4s, v31.4s, v1.4s
+        $elif REQUANTIZATION == "RNDNU":
+          # Apply params - preshift, scale, postshift, bias and clamp
+          LD1R    {v0.4s}, [x11], 4
+          SSHL    v16.4s, v16.4s, v0.4s   // shift to upper bits
+          SSHL    v17.4s, v17.4s, v0.4s
+          SSHL    v18.4s, v18.4s, v0.4s
+          SSHL    v19.4s, v19.4s, v0.4s
+          SSHL    v20.4s, v20.4s, v0.4s
+          SSHL    v21.4s, v21.4s, v0.4s
+          SSHL    v22.4s, v22.4s, v0.4s
+          SSHL    v23.4s, v23.4s, v0.4s
+          LD1R    {v1.4s}, [x11], 4
+          SSHL    v24.4s, v24.4s, v0.4s
+          SSHL    v25.4s, v25.4s, v0.4s
+          SSHL    v26.4s, v26.4s, v0.4s
+          SSHL    v27.4s, v27.4s, v0.4s
+          SSHL    v28.4s, v28.4s, v0.4s
+          SSHL    v29.4s, v29.4s, v0.4s
+          SSHL    v30.4s, v30.4s, v0.4s
+          SSHL    v31.4s, v31.4s, v0.4s
+          LD1R    {v2.4s}, [x11], 4
+          SQDMULH v16.4s, v16.4s, v1.4s   // scale without rounding
+          SQDMULH v17.4s, v17.4s, v1.4s
+          SQDMULH v18.4s, v18.4s, v1.4s
+          SQDMULH v19.4s, v19.4s, v1.4s
+          SQDMULH v20.4s, v20.4s, v1.4s
+          SQDMULH v21.4s, v21.4s, v1.4s
+          SQDMULH v22.4s, v22.4s, v1.4s
+          SQDMULH v23.4s, v23.4s, v1.4s
+          SQDMULH v24.4s, v24.4s, v1.4s
+          SQDMULH v25.4s, v25.4s, v1.4s
+          SQDMULH v26.4s, v26.4s, v1.4s
+          SQDMULH v27.4s, v27.4s, v1.4s
+          SQDMULH v28.4s, v28.4s, v1.4s
+          SQDMULH v29.4s, v29.4s, v1.4s
+          SQDMULH v30.4s, v30.4s, v1.4s
+          SQDMULH v31.4s, v31.4s, v1.4s
+          SRSHL   v16.4s, v16.4s, v2.4s   // signed rounding shift left
+          SRSHL   v17.4s, v17.4s, v2.4s
+          SRSHL   v18.4s, v18.4s, v2.4s
+          SRSHL   v19.4s, v19.4s, v2.4s
+          SRSHL   v20.4s, v20.4s, v2.4s
+          SRSHL   v21.4s, v21.4s, v2.4s
+          SRSHL   v22.4s, v22.4s, v2.4s
+          SRSHL   v23.4s, v23.4s, v2.4s
+          SRSHL   v24.4s, v24.4s, v2.4s
+          SRSHL   v25.4s, v25.4s, v2.4s
+          SRSHL   v26.4s, v26.4s, v2.4s
+          SRSHL   v27.4s, v27.4s, v2.4s
+          SRSHL   v28.4s, v28.4s, v2.4s
+          SRSHL   v29.4s, v29.4s, v2.4s
+          SRSHL   v30.4s, v30.4s, v2.4s
+          SRSHL   v31.4s, v31.4s, v2.4s
         $elif REQUANTIZATION == "FP32":
           SCVTF   v16.4s, v16.4s
           SCVTF   v17.4s, v17.4s
@@ -698,11 +751,12 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x
         SQXTN2  v7.16b, v27.8h
         $if REQUANTIZATION == "GEMMLOWP":
           SUB     x11, x11, 11              // rewind params pointer
-        $elif REQUANTIZATION == "FP32":
-          $if CHANNELWISE:
-            SUB     x11, x11, 3               // rewind params pointer
-          $else:
-            SUB     x11, x11, 7               // rewind params pointer
+        $elif REQUANTIZATION == "RNDNU":
+          SUB     x11, x11, 15              // rewind params pointer
+        $elif REQUANTIZATION == "FP32" and not CHANNELWISE:
+          SUB     x11, x11, 7               // rewind params pointer
+        $else:
+          SUB     x11, x11, 3               // rewind params pointer
 
         SMAX    v4.16b, v4.16b, v0.16b
         SMAX    v5.16b, v5.16b, v0.16b

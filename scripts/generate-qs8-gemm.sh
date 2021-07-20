@@ -280,6 +280,9 @@ tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=RND
 tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=0 -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16-minmax-gemmlowp-aarch64-neon-mlal-lane-cortex-a53.S
 tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=1 -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16-minmax-gemmlowp-aarch64-neon-mlal-lane-prfm-cortex-a53.S
 
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-cortex-a53.S
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a53.S
+
 tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=0 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-cortex-a53.S
 tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=1 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-cortex-a53.S
 
@@ -294,6 +297,11 @@ tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATIO
 tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld64.S
 tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16c4-minmax-gemmlowp-aarch64-neondot-ld128.S
 
+tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x16c4-minmax-rndnu-aarch64-neondot-ld32.S
+tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x16c4-minmax-rndnu-aarch64-neondot-ld64.S
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-cortex-a55.S
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld32.S
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld64.S
 tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S
 
 tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x16c4-minmax-fp32-aarch64-neondot-ld32.S
@@ -320,8 +328,18 @@ tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal.S.in            -D PREFET
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in            -D PREFETCH=0 -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -o src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal.S
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in            -D PREFETCH=1 -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -o src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-aarch64-neon-mlal-padal-prfm.S
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull-padal.S.in                          -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -o src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-aarch64-neon-mull-padal.S
-
 tools/xngen src/qs8-gemm/2x8c16-aarch64-neon-mlal-padal.S.in                         -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -o src/qs8-gemm/gen/2x8c16-minmax-gemmlowp-aarch64-neon-mlal-padal.S
+
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x8c8-minmax-rndnu-aarch64-neon-mlal-padal-cortex-a53.S
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x8c8-minmax-rndnu-aarch64-neon-mlal-padal-prfm-cortex-a53.S
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/2x8c8-minmax-rndnu-aarch64-neon-mlal-padal-cortex-a53.S
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/2x8c8-minmax-rndnu-aarch64-neon-mlal-padal-prfm-cortex-a53.S
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal.S.in            -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x8c8-minmax-rndnu-aarch64-neon-mlal-padal.S
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal.S.in            -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x8c8-minmax-rndnu-aarch64-neon-mlal-padal-prfm.S
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in            -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/2x8c8-minmax-rndnu-aarch64-neon-mlal-padal.S
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-padal.S.in            -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/2x8c8-minmax-rndnu-aarch64-neon-mlal-padal-prfm.S
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull-padal.S.in                          -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/2x8c8-minmax-rndnu-aarch64-neon-mull-padal.S
+tools/xngen src/qs8-gemm/2x8c16-aarch64-neon-mlal-padal.S.in                         -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/2x8c16-minmax-rndnu-aarch64-neon-mlal-padal.S
 
 tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x8c8-minmax-fp32-aarch64-neon-mlal-padal-cortex-a53.S
 tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-padal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x8c8-minmax-fp32-aarch64-neon-mlal-padal-prfm-cortex-a53.S

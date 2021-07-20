@@ -230,8 +230,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal_padal_
         SQXTN2  v0.8h, v1.4s
         SUBS    x1, x1, 8
         SQADD   v0.8h, v0.8h, v5.8h
-        SQXTN   v0.8b, v0.8h
         LD1R    {v1.16b}, [x11], 1
+        SQXTN   v0.8b, v0.8h
         LD1R    {v17.16b}, [x11]
         SMAX    v0.8b, v0.8b, v1.8b
         SUB     x11, x11, 7               // rewind params pointer
