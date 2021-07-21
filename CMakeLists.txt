@@ -2299,7 +2299,10 @@ SET(XNNPACK_SSE2_MICROKERNEL_SRCS
   src/qu8-requantization/fp32-sse2.c
   src/qu8-requantization/gemmlowp-sse2.c
   src/qu8-requantization/rndna-sse2.c
-  src/qu8-vadd/minmax-sse2.c
+  src/qu8-vadd/gen/minmax-sse2-mul16-ld64-x8.c
+  src/qu8-vadd/gen/minmax-sse2-mul16-ld64-x16.c
+  src/qu8-vaddc/gen/minmax-sse2-mul16-ld64-x8.c
+  src/qu8-vaddc/gen/minmax-sse2-mul16-ld64-x16.c
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
