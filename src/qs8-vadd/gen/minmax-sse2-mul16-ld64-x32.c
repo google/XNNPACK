@@ -130,8 +130,9 @@ void xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x32(
     voutGHIJKLMN = _mm_min_epi16(voutGHIJKLMN, voutput_max);
     voutOPQRSTUV = _mm_min_epi16(voutOPQRSTUV, voutput_max);
 
-    const __m128i vout0123456789ABCDEF = _mm_packs_epi16(vout01234567, vout89ABCDEF);
-    const __m128i voutGHIJKLMNOPQRSTUV = _mm_packs_epi16(voutGHIJKLMN, voutOPQRSTUV);
+    __m128i vout0123456789ABCDEF = _mm_packs_epi16(vout01234567, vout89ABCDEF);
+    __m128i voutGHIJKLMNOPQRSTUV = _mm_packs_epi16(voutGHIJKLMN, voutOPQRSTUV);
+
 
     _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
     _mm_storeu_si128((__m128i*) (output + 16), voutGHIJKLMNOPQRSTUV);

@@ -21,16 +21,16 @@ void xnn_qs8_vadd_minmax_ukernel__avx_mul16_ld64_x24(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
-  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
-  const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_lo);
-  const __m128i va_multiplier_hi = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_hi);
-  const __m128i vb_multiplier_lo = _mm_load_si128((const __m128i*) params->sse2.b_multiplier_lo);
-  const __m128i vb_multiplier_hi = _mm_load_si128((const __m128i*) params->sse2.b_multiplier_hi);
-  const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
-  const __m128i vshift = _mm_cvtsi32_si128((int) params->sse2.shift);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
+  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse4_mul16.bias);
+  const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) params->sse4_mul16.a_multiplier_lo);
+  const __m128i va_multiplier_hi = _mm_load_si128((const __m128i*) params->sse4_mul16.a_multiplier_hi);
+  const __m128i vb_multiplier_lo = _mm_load_si128((const __m128i*) params->sse4_mul16.b_multiplier_lo);
+  const __m128i vb_multiplier_hi = _mm_load_si128((const __m128i*) params->sse4_mul16.b_multiplier_hi);
+  const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse4_mul16.rounding);
+  const __m128i vshift = _mm_cvtsi32_si128((int) params->sse4_mul16.shift);
+  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse4_mul16.output_zero_point);
+  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse4_mul16.output_min);
+  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse4_mul16.output_max);
 
   for (; n >= 24 * sizeof(int8_t); n -= 24 * sizeof(int8_t)) {
     const __m128i va01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input_a));
@@ -95,16 +95,15 @@ void xnn_qs8_vadd_minmax_ukernel__avx_mul16_ld64_x24(
     __m128i vout89ABCDEF = _mm_adds_epi16(_mm_packs_epi32(vacc89AB, vaccCDEF), voutput_zero_point);
     __m128i voutGHIJKLMN = _mm_adds_epi16(_mm_packs_epi32(vaccGHIJ, vaccKLMN), voutput_zero_point);
 
-    vout01234567 = _mm_max_epi16(vout01234567, voutput_min);
-    vout89ABCDEF = _mm_max_epi16(vout89ABCDEF, voutput_min);
-    voutGHIJKLMN = _mm_max_epi16(voutGHIJKLMN, voutput_min);
 
-    vout01234567 = _mm_min_epi16(vout01234567, voutput_max);
-    vout89ABCDEF = _mm_min_epi16(vout89ABCDEF, voutput_max);
-    voutGHIJKLMN = _mm_min_epi16(voutGHIJKLMN, voutput_max);
+    __m128i vout0123456789ABCDEF = _mm_packs_epi16(vout01234567, vout89ABCDEF);
+    __m128i voutGHIJKLMNGHIJKLMN = _mm_packs_epi16(voutGHIJKLMN, voutGHIJKLMN);
 
-    const __m128i vout0123456789ABCDEF = _mm_packs_epi16(vout01234567, vout89ABCDEF);
-    const __m128i voutGHIJKLMNGHIJKLMN = _mm_packs_epi16(voutGHIJKLMN, voutGHIJKLMN);
+    vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
+    voutGHIJKLMNGHIJKLMN = _mm_max_epi8(voutGHIJKLMNGHIJKLMN, voutput_min);
+
+    vout0123456789ABCDEF = _mm_min_epi8(vout0123456789ABCDEF, voutput_max);
+    voutGHIJKLMNGHIJKLMN = _mm_min_epi8(voutGHIJKLMNGHIJKLMN, voutput_max);
 
     _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
     _mm_storel_epi64((__m128i*) (output + 16), voutGHIJKLMNGHIJKLMN);
@@ -139,10 +138,10 @@ void xnn_qs8_vadd_minmax_ukernel__avx_mul16_ld64_x24(
       vacc4567 = _mm_sra_epi32(_mm_add_epi32(vacc4567, vrounding), vshift);
 
       __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
-      vout01234567 = _mm_max_epi16(vout01234567, voutput_min);
-      vout01234567 = _mm_min_epi16(vout01234567, voutput_max);
 
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
+      vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
+      vout0123456701234567 = _mm_min_epi8(vout0123456701234567, voutput_max);
 
       if XNN_LIKELY(n >= (8 * sizeof(int8_t))) {
         _mm_storel_epi64((__m128i*) output, vout0123456701234567);

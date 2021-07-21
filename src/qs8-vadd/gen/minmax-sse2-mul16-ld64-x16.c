@@ -88,7 +88,8 @@ void xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x16(
     vout01234567 = _mm_min_epi16(vout01234567, voutput_max);
     vout89ABCDEF = _mm_min_epi16(vout89ABCDEF, voutput_max);
 
-    const __m128i vout0123456789ABCDEF = _mm_packs_epi16(vout01234567, vout89ABCDEF);
+    __m128i vout0123456789ABCDEF = _mm_packs_epi16(vout01234567, vout89ABCDEF);
+
 
     _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
     output += 16;

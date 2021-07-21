@@ -21,6 +21,9 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
+  const __m128i vbias = _mm_add_epi32(
+    _mm_shuffle_epi32(_mm_cvtsi32_si128(params->sse2.b_multiplier * (int32_t) *input_b), _MM_SHUFFLE(0, 0, 0, 0)),
+    _mm_load_si128((const __m128i*) params->sse2.bias));
   const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_lo);
   const __m128i va_multiplier_hi = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_hi);
   const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
@@ -29,9 +32,6 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
 
-  __m128i vbias = _mm_cvtsi32_si128(params->sse2.b_multiplier[0] * (int32_t) *input_b);
-  vbias = _mm_shuffle_epi32(vbias, _MM_SHUFFLE(0, 0, 0, 0));
-  vbias = _mm_add_epi32(vbias, _mm_load_si128((const __m128i*) params->sse2.bias));
   for (; n >= 8 * sizeof(int8_t); n -= 8 * sizeof(int8_t)) {
     __m128i va01234567 = _mm_loadl_epi64((const __m128i*) input_a);
     input_a += 8;
@@ -57,7 +57,8 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
 
     vout01234567 = _mm_min_epi16(vout01234567, voutput_max);
 
-    const __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
+    __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
+
 
     _mm_storel_epi64((__m128i*) output, vout0123456701234567);
     output += 8;
