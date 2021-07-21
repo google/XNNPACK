@@ -5896,6 +5896,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     models/qs8-mobilenet-v1.cc
     models/qs8-mobilenet-v2.cc
     models/qu8-mobilenet-v1.cc
+    models/qu8-mobilenet-v2.cc
     models/fp16-mobilenet-v2.cc
     models/fp32-mobilenet-v2.cc
     models/fp16-mobilenet-v3-large.cc
