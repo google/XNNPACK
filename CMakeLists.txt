@@ -2580,7 +2580,15 @@ SET(XNNPACK_SSE41_MICROKERNEL_SRCS
   src/qu8-igemm/gen/4x4c2-minmax-fp32-sse41-ld128.c
   src/qu8-igemm/gen/4x4c2-minmax-gemmlowp-sse41-ld64.c
   src/qu8-requantization/gemmlowp-sse4.c
-  src/qu8-requantization/rndna-sse4.c)
+  src/qu8-requantization/rndna-sse4.c
+  src/qu8-vadd/gen/minmax-sse41-mul16-ld64-x8.c
+  src/qu8-vadd/gen/minmax-sse41-mul16-ld64-x16.c
+  src/qu8-vadd/gen/minmax-sse41-mul32-ld32-x8.c
+  src/qu8-vadd/gen/minmax-sse41-mul32-ld32-x16.c
+  src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x8.c
+  src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x16.c
+  src/qu8-vaddc/gen/minmax-sse41-mul32-ld32-x8.c
+  src/qu8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c)
 
 SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x4-minmax-avx-acc2.c
@@ -2876,7 +2884,15 @@ SET(XNNPACK_AVX_MICROKERNEL_SRCS
   src/qu8-igemm/gen/3x4c8-minmax-fp32-avx-ld64.c
   src/qu8-igemm/gen/3x4c8-minmax-fp32-avx-ld128.c
   src/qu8-igemm/gen/4x4c2-minmax-fp32-avx-ld64.c
-  src/qu8-igemm/gen/4x4c2-minmax-fp32-avx-ld128.c)
+  src/qu8-igemm/gen/4x4c2-minmax-fp32-avx-ld128.c
+  src/qu8-vadd/gen/minmax-avx-mul16-ld64-x8.c
+  src/qu8-vadd/gen/minmax-avx-mul16-ld64-x16.c
+  src/qu8-vadd/gen/minmax-avx-mul32-ld32-x8.c
+  src/qu8-vadd/gen/minmax-avx-mul32-ld32-x16.c
+  src/qu8-vaddc/gen/minmax-avx-mul16-ld64-x8.c
+  src/qu8-vaddc/gen/minmax-avx-mul16-ld64-x16.c
+  src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x8.c
+  src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x16.c)
 
 SET(XNNPACK_XOP_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up8x9-minmax-fp32-xop-mul32.c
@@ -2999,7 +3015,11 @@ SET(XNNPACK_XOP_MICROKERNEL_SRCS
   src/qu8-igemm/gen/3x4c8-minmax-fp32-xop-ld64.c
   src/qu8-igemm/gen/3x4c8-minmax-fp32-xop-ld128.c
   src/qu8-igemm/gen/4x4c2-minmax-fp32-xop-ld64.c
-  src/qu8-igemm/gen/4x4c2-minmax-fp32-xop-ld128.c)
+  src/qu8-igemm/gen/4x4c2-minmax-fp32-xop-ld128.c
+  src/qu8-vadd/gen/minmax-xop-mul32-ld32-x8.c
+  src/qu8-vadd/gen/minmax-xop-mul32-ld32-x16.c
+  src/qu8-vaddc/gen/minmax-xop-mul32-ld32-x8.c
+  src/qu8-vaddc/gen/minmax-xop-mul32-ld32-x16.c)
 
 SET(XNNPACK_FMA3_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x4-minmax-fma3-acc2.c
@@ -3308,7 +3328,11 @@ SET(XNNPACK_AVX2_MICROKERNEL_SRCS
   src/qu8-gemm/gen/3x8c8-minmax-fp32-avx2.c
   src/qu8-igemm/gen/1x8c8-minmax-fp32-avx2.c
   src/qu8-igemm/gen/2x8c8-minmax-fp32-avx2.c
-  src/qu8-igemm/gen/3x8c8-minmax-fp32-avx2.c)
+  src/qu8-igemm/gen/3x8c8-minmax-fp32-avx2.c
+  src/qu8-vadd/gen/minmax-avx2-mul32-ld64-x8.c
+  src/qu8-vadd/gen/minmax-avx2-mul32-ld64-x16.c
+  src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x8.c
+  src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c)
 
 SET(XNNPACK_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up16x4-minmax-avx512f-acc2.c

@@ -3408,6 +3408,14 @@ SSE41_UKERNELS = [
     "src/qu8-igemm/gen/4x4c2-minmax-gemmlowp-sse41-ld64.c",
     "src/qu8-requantization/gemmlowp-sse4.c",
     "src/qu8-requantization/rndna-sse4.c",
+    "src/qu8-vadd/gen/minmax-sse41-mul16-ld64-x8.c",
+    "src/qu8-vadd/gen/minmax-sse41-mul16-ld64-x16.c",
+    "src/qu8-vadd/gen/minmax-sse41-mul32-ld32-x8.c",
+    "src/qu8-vadd/gen/minmax-sse41-mul32-ld32-x16.c",
+    "src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x8.c",
+    "src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x16.c",
+    "src/qu8-vaddc/gen/minmax-sse41-mul32-ld32-x8.c",
+    "src/qu8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c",
 ]
 
 AVX_UKERNELS = [
@@ -3707,6 +3715,14 @@ AVX_UKERNELS = [
     "src/qu8-igemm/gen/3x4c8-minmax-fp32-avx-ld128.c",
     "src/qu8-igemm/gen/4x4c2-minmax-fp32-avx-ld64.c",
     "src/qu8-igemm/gen/4x4c2-minmax-fp32-avx-ld128.c",
+    "src/qu8-vadd/gen/minmax-avx-mul16-ld64-x8.c",
+    "src/qu8-vadd/gen/minmax-avx-mul16-ld64-x16.c",
+    "src/qu8-vadd/gen/minmax-avx-mul32-ld32-x8.c",
+    "src/qu8-vadd/gen/minmax-avx-mul32-ld32-x16.c",
+    "src/qu8-vaddc/gen/minmax-avx-mul16-ld64-x8.c",
+    "src/qu8-vaddc/gen/minmax-avx-mul16-ld64-x16.c",
+    "src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x8.c",
+    "src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x16.c",
 ]
 
 XOP_UKERNELS = [
@@ -3831,6 +3847,10 @@ XOP_UKERNELS = [
     "src/qu8-igemm/gen/3x4c8-minmax-fp32-xop-ld128.c",
     "src/qu8-igemm/gen/4x4c2-minmax-fp32-xop-ld64.c",
     "src/qu8-igemm/gen/4x4c2-minmax-fp32-xop-ld128.c",
+    "src/qu8-vadd/gen/minmax-xop-mul32-ld32-x8.c",
+    "src/qu8-vadd/gen/minmax-xop-mul32-ld32-x16.c",
+    "src/qu8-vaddc/gen/minmax-xop-mul32-ld32-x8.c",
+    "src/qu8-vaddc/gen/minmax-xop-mul32-ld32-x16.c",
 ]
 
 FMA3_UKERNELS = [
@@ -4140,6 +4160,10 @@ AVX2_UKERNELS = [
     "src/qu8-igemm/gen/1x8c8-minmax-fp32-avx2.c",
     "src/qu8-igemm/gen/2x8c8-minmax-fp32-avx2.c",
     "src/qu8-igemm/gen/3x8c8-minmax-fp32-avx2.c",
+    "src/qu8-vadd/gen/minmax-avx2-mul32-ld64-x8.c",
+    "src/qu8-vadd/gen/minmax-avx2-mul32-ld64-x16.c",
+    "src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x8.c",
+    "src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c",
 ]
 
 AVX512F_UKERNELS = [

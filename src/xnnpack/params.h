@@ -575,6 +575,26 @@ union xnn_qu8_add_minmax_params {
     XNN_ALIGN(16) uint8_t output_min[16];
     XNN_ALIGN(16) uint8_t output_max[16];
   } sse2;
+  struct {
+    XNN_ALIGN(16) int32_t bias[4];
+    XNN_ALIGN(16) int32_t a_multiplier[4];
+    XNN_ALIGN(16) int32_t b_multiplier[4];
+    XNN_ALIGN(16) int32_t rounding[4];
+    XNN_ALIGN(16) uint32_t shift[4];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) uint8_t output_min[16];
+    XNN_ALIGN(16) uint8_t output_max[16];
+  } sse4;
+  struct {
+    XNN_ALIGN(32) int32_t bias[8];
+    XNN_ALIGN(32) int32_t a_multiplier[8];
+    XNN_ALIGN(32) int32_t b_multiplier[8];
+    XNN_ALIGN(32) int32_t rounding[8];
+    XNN_ALIGN(32) uint32_t shift[8];
+    XNN_ALIGN(32) int16_t output_zero_point[16];
+    XNN_ALIGN(16) uint8_t output_min[16];
+    XNN_ALIGN(16) uint8_t output_max[16];
+  } avx2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {
