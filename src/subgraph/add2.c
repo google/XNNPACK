@@ -69,6 +69,9 @@ enum xnn_status xnn_define_add2(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -98,6 +101,9 @@ enum xnn_status xnn_define_add2(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -127,6 +133,9 @@ enum xnn_status xnn_define_add2(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
