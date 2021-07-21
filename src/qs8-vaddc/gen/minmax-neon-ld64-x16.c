@@ -13,7 +13,6 @@
 
 #include <xnnpack/vadd.h>
 
-#include <stdio.h>
 #include <inttypes.h>
 
 
@@ -33,7 +32,7 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16(
 
   const int32_t vxb = (int32_t) *input_b - (int32_t) params->neon.b_zero_point;
   const int32_t vb = params->neon.b_multiplier;
-  const int32x4_t vb_bias = vdupq_n_s32(vxb * vb);
+  const int32x4_t vbias = vdupq_n_s32(vxb * vb);
 
   for (; n >= 16 * sizeof(int8_t); n -= 16 * sizeof(int8_t)) {
     const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;
@@ -42,10 +41,10 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16(
     const int16x8_t vxa01234567 = vsubl_s8(va01234567, va_zero_point);
     const int16x8_t vxa89ABCDEF = vsubl_s8(va89ABCDEF, va_zero_point);
 
-    int32x4_t vacc0123 = vmlaq_s32(vb_bias, vmovl_s16(vget_low_s16(vxa01234567)), va_multiplier);
-    int32x4_t vacc4567 = vmlaq_s32(vb_bias, vmovl_s16(vget_high_s16(vxa01234567)), va_multiplier);
-    int32x4_t vacc89AB = vmlaq_s32(vb_bias, vmovl_s16(vget_low_s16(vxa89ABCDEF)), va_multiplier);
-    int32x4_t vaccCDEF = vmlaq_s32(vb_bias, vmovl_s16(vget_high_s16(vxa89ABCDEF)), va_multiplier);
+    int32x4_t vacc0123 = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vxa01234567)), va_multiplier);
+    int32x4_t vacc4567 = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vxa01234567)), va_multiplier);
+    int32x4_t vacc89AB = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vxa89ABCDEF)), va_multiplier);
+    int32x4_t vaccCDEF = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vxa89ABCDEF)), va_multiplier);
 
     vacc0123 = vrshlq_s32(vacc0123, vright_shift);
     vacc4567 = vrshlq_s32(vacc4567, vright_shift);
@@ -69,8 +68,8 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16(
 
       const int16x8_t vxa01234567 = vsubl_s8(va01234567, va_zero_point);
 
-      int32x4_t vacc0123 = vmlaq_s32(vb_bias, vmovl_s16(vget_low_s16(vxa01234567)), va_multiplier);
-      int32x4_t vacc4567 = vmlaq_s32(vb_bias, vmovl_s16(vget_high_s16(vxa01234567)), va_multiplier);
+      int32x4_t vacc0123 = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vxa01234567)), va_multiplier);
+      int32x4_t vacc4567 = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vxa01234567)), va_multiplier);
 
       vacc0123 = vrshlq_s32(vacc0123, vright_shift);
       vacc4567 = vrshlq_s32(vacc4567, vright_shift);

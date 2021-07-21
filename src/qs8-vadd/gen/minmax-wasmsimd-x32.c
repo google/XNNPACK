@@ -125,7 +125,7 @@ void xnn_qs8_vadd_minmax_ukernel__wasmsimd_x32(
           output += 2;
         }
         if (n & (1 * sizeof(int8_t))) {
-          *output = wasm_i8x16_extract_lane(vout0123456701234567, 0);
+          *output = (int8_t) wasm_i8x16_extract_lane(vout0123456701234567, 0);
         }
         n = 0;
       }

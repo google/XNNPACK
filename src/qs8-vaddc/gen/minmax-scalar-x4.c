@@ -61,10 +61,10 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x4(
     vout2 += voutput_zero_point;
     vout3 += voutput_zero_point;
 
-    output[0] = vout0;
-    output[1] = vout1;
-    output[2] = vout2;
-    output[3] = vout3;
+    output[0] = (int8_t) vout0;
+    output[1] = (int8_t) vout1;
+    output[2] = (int8_t) vout2;
+    output[3] = (int8_t) vout3;
     output += 4;
   }
   if XNN_UNLIKELY(n != 0) {

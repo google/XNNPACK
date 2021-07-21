@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert DATATYPE in ["QS8", "QU8"]
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"

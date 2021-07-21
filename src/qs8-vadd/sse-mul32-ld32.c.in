@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert DATATYPE in ["QS8", "QU8"]
 $assert SSE == 4
 $assert not XOP or AVX
 $assert BATCH_TILE % 8 == 0

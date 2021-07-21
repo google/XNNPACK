@@ -164,7 +164,7 @@ void xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x24(
           output += 4;
         }
         if (n & (2 * sizeof(int8_t))) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout0123456701234567);
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }

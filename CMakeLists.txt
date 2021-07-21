@@ -802,7 +802,12 @@ SET(XNNPACK_SCALAR_MICROKERNEL_SRCS
   src/qu8-requantization/rndna-scalar-signed64.c
   src/qu8-requantization/rndna-scalar-unsigned32.c
   src/qu8-requantization/rndna-scalar-unsigned64.c
-  src/qu8-vadd/minmax-scalar.c
+  src/qu8-vadd/gen/minmax-scalar-x1.c
+  src/qu8-vadd/gen/minmax-scalar-x2.c
+  src/qu8-vadd/gen/minmax-scalar-x4.c
+  src/qu8-vaddc/gen/minmax-scalar-x1.c
+  src/qu8-vaddc/gen/minmax-scalar-x2.c
+  src/qu8-vaddc/gen/minmax-scalar-x4.c
   src/u8-lut32norm/scalar.c
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c
@@ -1349,7 +1354,10 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qu8-requantization/fp32-neon.c
   src/qu8-requantization/gemmlowp-neon.c
   src/qu8-requantization/rndna-neon.c
-  src/qu8-vadd/minmax-neon.c
+  src/qu8-vadd/gen/minmax-neon-ld64-x8.c
+  src/qu8-vadd/gen/minmax-neon-ld64-x16.c
+  src/qu8-vaddc/gen/minmax-neon-ld64-x8.c
+  src/qu8-vaddc/gen/minmax-neon-ld64-x16.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c
@@ -5638,6 +5646,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qu8-vadd-minmax-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(qu8-vadd-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qu8-vadd-minmax-test qu8-vadd-minmax-test)
+
+  ADD_EXECUTABLE(qu8-vaddc-minmax-test test/qu8-vaddc-minmax.cc)
+  SET_TARGET_PROPERTIES(qu8-vaddc-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-vaddc-minmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qu8-vaddc-minmax-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qu8-vaddc-minmax-test qu8-vaddc-minmax-test)
 
   ADD_EXECUTABLE(u8-lut32norm-test test/u8-lut32norm.cc)
   SET_TARGET_PROPERTIES(u8-lut32norm-test PROPERTIES

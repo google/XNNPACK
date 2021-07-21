@@ -2,9 +2,21 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
-- name: xnn_qu8_vadd_minmax_ukernel__sse2_x8
-  init: xnn_init_qu8_add_minmax_params
-- name: xnn_qu8_vadd_minmax_ukernel__neon_x32
-  init: xnn_init_qu8_add_minmax_params
+- name: xnn_qu8_vadd_minmax_ukernel__neon_ld64_x8
+  init: xnn_init_qu8_add_minmax_neon_params
+- name: xnn_qu8_vadd_minmax_ukernel__neon_ld64_x16
+  init: xnn_init_qu8_add_minmax_neon_params
+- name: xnn_qu8_vadd_minmax_ukernel__sse2_mul16_ld64_x8
+  init: xnn_init_qu8_add_minmax_sse2_params
+- name: xnn_qu8_vadd_minmax_ukernel__sse2_mul16_ld64_x16
+  init: xnn_init_qu8_add_minmax_sse2_params
+- name: xnn_qu8_vadd_minmax_ukernel__wasmsimd_x8
+  init: xnn_init_qu8_add_minmax_wasmsimd_params
+- name: xnn_qu8_vadd_minmax_ukernel__wasmsimd_x16
+  init: xnn_init_qu8_add_minmax_wasmsimd_params
 - name: xnn_qu8_vadd_minmax_ukernel__scalar_x1
+  init: xnn_init_qu8_add_minmax_scalar_params
+- name: xnn_qu8_vadd_minmax_ukernel__scalar_x2
+  init: xnn_init_qu8_add_minmax_scalar_params
+- name: xnn_qu8_vadd_minmax_ukernel__scalar_x4
   init: xnn_init_qu8_add_minmax_scalar_params

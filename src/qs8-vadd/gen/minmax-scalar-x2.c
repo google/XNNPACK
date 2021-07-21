@@ -55,8 +55,8 @@ void xnn_qs8_vadd_minmax_ukernel__scalar_x2(
     vout0 += voutput_zero_point;
     vout1 += voutput_zero_point;
 
-    output[0] = vout0;
-    output[1] = vout1;
+    output[0] = (int8_t) vout0;
+    output[1] = (int8_t) vout1;
     output += 2;
   }
   if XNN_UNLIKELY(n != 0) {

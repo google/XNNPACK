@@ -133,7 +133,67 @@ class VAddCMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_qs8_vadd_minmax_ukernel_function vadd_minmax, xnn_init_qs8_add_minmax_params_fn init_params) const {
+  void Test(xnn_qu8_vadd_minmax_ukernel_function vaddc_minmax, xnn_init_qu8_add_minmax_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+
+    std::vector<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<uint8_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
+    std::vector<float> y_fp(batch_size());
+    std::vector<uint8_t> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(a.begin(), a.end(), std::ref(u8rng));
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(u8rng));
+      } else {
+        std::fill(y.begin(), y.end(), 0xA5);
+      }
+      const uint8_t* a_data = inplace() ? y.data() : a.data();
+      const uint8_t b = u8rng();
+
+      // Prepare parameters.
+      xnn_qu8_add_minmax_params quantization_params;
+      init_params(
+        &quantization_params,
+        a_zero_point(), b_zero_point(), y_zero_point(),
+        a_scale() / y_scale(), b_scale() / y_scale(),
+        qmin(), qmax());
+      xnn_qu8_add_minmax_params scalar_quantization_params;
+      xnn_init_qu8_add_minmax_scalar_params(
+        &scalar_quantization_params,
+        a_zero_point(), b_zero_point(), y_zero_point(),
+        a_scale() / y_scale(), b_scale() / y_scale(),
+        qmin(), qmax());
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_fp[i] = float(y_zero_point()) +
+          float(int32_t(a_data[i]) - int32_t(a_zero_point())) * (a_scale() / y_scale()) +
+          float(int32_t(b) - int32_t(b_zero_point())) * (b_scale() / y_scale());
+        y_fp[i] = std::min<float>(y_fp[i], float(qmax()));
+        y_fp[i] = std::max<float>(y_fp[i], float(qmin()));
+        y_ref[i] = xnn_qu8_quantize_add(a_data[i], b, scalar_quantization_params);
+      }
+
+      // Call optimized micro-kernel.
+      vaddc_minmax(batch_size(), a_data, &b, y.data(), &quantization_params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_LE(uint32_t(y[i]), uint32_t(qmax()))
+          << "at element " << i << " / " << batch_size();
+        ASSERT_GE(uint32_t(y[i]), uint32_t(qmin()))
+          << "at element " << i << " / " << batch_size();
+        ASSERT_NEAR(float(int32_t(y[i])), y_fp[i], 0.6f)
+          << "at element " << i << " / " << batch_size();
+        ASSERT_EQ(uint32_t(y_ref[i]), uint32_t(y[i]))
+          << "at element " << i << " / " << batch_size();
+      }
+    }
+  }
+
+  void Test(xnn_qs8_vadd_minmax_ukernel_function vaddc_minmax, xnn_init_qs8_add_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i8rng = std::bind(
@@ -178,7 +238,7 @@ class VAddCMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      vadd_minmax(batch_size(), a_data, &b, y.data(), &quantization_params);
+      vaddc_minmax(batch_size(), a_data, &b, y.data(), &quantization_params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

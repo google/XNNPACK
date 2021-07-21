@@ -540,45 +540,54 @@ union xnn_qs8_conv_minmax_params {
 
 union xnn_qu8_add_minmax_params {
   struct {
-    int32_t zero_point_product;
-    uint32_t a_multiplier;
-    uint32_t b_multiplier;
+    int32_t bias;
+    int32_t a_multiplier;
+    int32_t b_multiplier;
+    int32_t rounding;
     uint32_t shift;
-    int32_t remainder_mask;
-    int32_t remainder_threshold;
-    int32_t y_zero_point;
-    int32_t y_min;
-    int32_t y_max;
+    int32_t output_min_less_zero_point;
+    int32_t output_max_less_zero_point;
+    int32_t output_zero_point;
   } scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint8_t a_zero_point;
     uint8_t b_zero_point;
-    int16_t y_zero_point;
+    int16_t output_zero_point;
     int32_t a_multiplier;
     int32_t b_multiplier;
     int32_t right_shift;
-    uint8_t y_min;
-    uint8_t y_max;
+    uint8_t output_min;
+    uint8_t output_max;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    XNN_ALIGN(16) int32_t zero_point_product[4];
+    XNN_ALIGN(16) int32_t bias[4];
     XNN_ALIGN(16) uint16_t a_multiplier_lo[8];
     XNN_ALIGN(16) uint16_t a_multiplier_hi[8];
     XNN_ALIGN(16) uint16_t b_multiplier_lo[8];
     XNN_ALIGN(16) uint16_t b_multiplier_hi[8];
-    XNN_ALIGN(16) int32_t remainder_mask[4];
-    XNN_ALIGN(16) int32_t remainder_threshold[4];
-    XNN_ALIGN(16) int16_t y_zero_point[8];
-    XNN_ALIGN(16) uint8_t y_min[16];
-    XNN_ALIGN(16) uint8_t y_max[16];
+    XNN_ALIGN(16) int32_t rounding[4];
     uint32_t shift;
-    uint32_t a_multiplier;
     uint32_t b_multiplier;
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) uint8_t output_min[16];
+    XNN_ALIGN(16) uint8_t output_max[16];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    XNN_ALIGN(16) int32_t bias[4];
+    XNN_ALIGN(16) int32_t a_multiplier[4];
+    XNN_ALIGN(16) int32_t b_multiplier[4];
+    XNN_ALIGN(16) int32_t rounding[4];
+    int32_t shift;
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) uint8_t output_min[16];
+    XNN_ALIGN(16) uint8_t output_max[16];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD
 };
 
 union xnn_qs8_add_minmax_params {
