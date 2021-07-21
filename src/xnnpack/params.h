@@ -2133,6 +2133,7 @@ struct vbinary_parameters {
   struct vbinary_fused_ukernels linear;
   union {
     xnn_init_qs8_add_minmax_params_fn qs8_add;
+    xnn_init_qu8_add_minmax_params_fn qu8_add;
   } init;
   // Number of elements in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
@@ -2354,7 +2355,7 @@ struct xnn_parameters {
     struct dwconv_parameters dwconv[XNN_MAX_QU8_DWCONV_UKERNELS];
     struct avgpool_parameters avgpool;
     struct gavgpool_parameters gavgpool;
-    xnn_vadd_ukernel_function vadd;
+    struct vbinary_parameters vadd;
   } qu8;
   struct {
     struct maxpool_parameters maxpool;

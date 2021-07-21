@@ -238,6 +238,82 @@ enum xnn_status xnn_create_add_nd_qs8(
     add_op_out);
 }
 
+enum xnn_status xnn_create_add_nd_qu8(
+    uint8_t input1_zero_point,
+    float input1_scale,
+    uint8_t input2_zero_point,
+    float input2_scale,
+    uint8_t output_zero_point,
+    float output_scale,
+    uint8_t output_min,
+    uint8_t output_max,
+    uint32_t flags,
+    xnn_operator_t* add_op_out)
+{
+  if (input1_scale <= 0.0f || !isnormal(input1_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input 1 scale: scale must be finite and positive",
+      xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), input1_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input2_scale <= 0.0f || !isnormal(input2_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input 2 scale: scale must be finite and positive",
+      xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), input2_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale: scale must be finite and positive",
+      xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float input1_output_scale = input1_scale / output_scale;
+  if (input1_output_scale < 0x1.0p-10f || input1_output_scale >= 0x1.0p+8f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input1-to-output scale ratio: scale ratio must be in [2**-10, 2**8) range",
+      xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), input1_output_scale);
+    return xnn_status_unsupported_parameter;
+  }
+
+  const float input2_output_scale = input2_scale / output_scale;
+  if (input2_output_scale < 0x1.0p-10f || input2_output_scale >= 0x1.0p+8f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input2-to-output scale ratio: scale ratio must be in [2**-10, 2**8) range",
+      xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), input2_output_scale);
+    return xnn_status_unsupported_parameter;
+  }
+
+  struct {
+    union xnn_qu8_add_minmax_params qu8_add;
+    union xnn_qu8_add_minmax_params qu8_radd;
+  } params;
+  xnn_params.qu8.vadd.init.qu8_add(
+    &params.qu8_add, input1_zero_point, input2_zero_point, output_zero_point,
+    input1_output_scale, input2_output_scale, output_min, output_max);
+  xnn_params.qu8.vadd.init.qu8_add(
+    &params.qu8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    input2_output_scale, input1_output_scale, output_min, output_max);
+  return create_binary_elementwise_nd(
+    flags,
+    &params,
+    sizeof(params),
+    XNN_INIT_FLAG_QU8,
+    xnn_operator_type_add_nd_qu8,
+    &xnn_params.qu8.vadd.minmax,
+    add_op_out);
+}
+
 enum xnn_status xnn_create_add_nd_f16(
     float output_min,
     float output_max,
@@ -645,6 +721,30 @@ enum xnn_status xnn_setup_add_nd_qs8(
     &add_op->params.qs8_add, sizeof(add_op->params.qs8_add),
     &add_op->params.qs8_radd, sizeof(add_op->params.qs8_radd),
     &xnn_params.qs8.vadd,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_add_nd_qu8(
+    xnn_operator_t add_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const uint8_t* input1,
+    const uint8_t* input2,
+    uint8_t* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd(
+    add_op, xnn_operator_type_add_nd_qu8,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    XNN_INIT_FLAG_QU8,
+    0 /* log2(sizeof(uint8_t))) */,
+    &add_op->params.qu8_add, sizeof(add_op->params.qu8_add),
+    &add_op->params.qu8_radd, sizeof(add_op->params.qu8_radd),
+    &xnn_params.qu8.vadd,
     pthreadpool_get_threads_count(threadpool));
 }
 

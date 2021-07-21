@@ -26,6 +26,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Add (ND, F32)";
     case xnn_operator_type_add_nd_qs8:
       return "Add (ND, QS8)";
+    case xnn_operator_type_add_nd_qu8:
+      return "Add (ND, QU8)";
     case xnn_operator_type_argmax_pooling_nhwc_f32:
       return "ArgMax Pooling (NHWC, F32)";
     case xnn_operator_type_average_pooling_nhwc_f32:
