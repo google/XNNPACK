@@ -2111,7 +2111,15 @@ static void init(void) {
       };
     }
 
-    if (cpuinfo_has_x86_xop()) {
+    if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+      xnn_params.qs8.vadd = (struct vbinary_parameters) {
+        .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16,
+        .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16,
+        .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16,
+        .init.qs8_add = xnn_init_qs8_add_minmax_avx512_params,
+        .element_tile = 16,
+      };
+    } else if (cpuinfo_has_x86_xop()) {
       xnn_params.qs8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,
@@ -2274,7 +2282,15 @@ static void init(void) {
       .mr = 7,
     };
 
-    if (cpuinfo_has_x86_xop()) {
+    if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+      xnn_params.qu8.vadd = (struct vbinary_parameters) {
+        .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16,
+        .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16,
+        .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16,
+        .init.qu8_add = xnn_init_qu8_add_minmax_avx512_params,
+        .element_tile = 16,
+      };
+    } else if (cpuinfo_has_x86_xop()) {
       xnn_params.qu8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__xop_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,

@@ -29,7 +29,7 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x24(
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx2.output_min);
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx2.output_max);
 
-  __m256i vbias = _mm256_add_epi32(
+  const __m256i vbias = _mm256_add_epi32(
     _mm256_broadcastd_epi32(_mm_cvtsi32_si128(params->avx2.b_multiplier[0] * (int32_t) *input_b)),
     _mm256_load_si256((const __m256i*) params->avx2.bias));
   for (; n >= 24 * sizeof(int8_t); n -= 24 * sizeof(int8_t)) {

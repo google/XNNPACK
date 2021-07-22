@@ -1905,6 +1905,56 @@ void xnn_init_qu8_add_minmax_avx2_params(
     params->avx2.output_max[i] = output_max;
   }
 }
+
+void xnn_init_qu8_add_minmax_avx512_params(
+  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t a_zero_point,
+  uint8_t b_zero_point,
+  uint8_t output_zero_point,
+  float a_output_scale,
+  float b_output_scale,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  assert(a_output_scale >= 0x1.0p-10f);
+  assert(b_output_scale >= 0x1.0p-10f);
+  assert(a_output_scale < 0x1.0p+8f);
+  assert(b_output_scale < 0x1.0p+8f);
+
+  // Compute requantization parameters.
+  const float max_output_scale = math_max_f32(a_output_scale, b_output_scale);
+  assert(max_output_scale >= 0x1.0p-10f);
+  assert(max_output_scale < 0x1.0p+8f);
+  const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
+  const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
+
+  // Shift is in [12, 30] range.
+  const uint32_t shift = (uint32_t) (20 /* multiplier bits */ - max_scale_exponent);
+  assert(shift <= 30);
+  assert(shift >= 12);
+
+  // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
+  const int32_t a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(a_output_scale) + (shift << 23)));
+  const int32_t b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(b_output_scale) + (shift << 23)));
+  assert(math_max_s32(a_multiplier, b_multiplier) >= INT32_C(0x00100000));
+  assert(a_multiplier < INT32_C(0x00200000));
+  assert(b_multiplier < INT32_C(0x00200000));
+
+  const int32_t rounding = INT32_C(1) << (shift - 1);
+  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) (uint32_t) a_zero_point + b_multiplier * (int32_t) (uint32_t) b_zero_point);
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx512.bias[i] = bias;
+    params->avx512.a_multiplier[i] = a_multiplier;
+    params->avx512.b_multiplier[i] = b_multiplier;
+    params->avx512.rounding[i] = rounding;
+    params->avx512.shift[i] = shift;
+  }
+  for (uint32_t i = 0; i < 32; i++) {
+    params->avx512.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
+    params->avx512.output_min[i] = output_min;
+    params->avx512.output_max[i] = output_max;
+  }
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -2276,6 +2326,56 @@ void xnn_init_qs8_add_minmax_avx2_params(
     params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
     params->avx2.output_min[i] = output_min;
     params->avx2.output_max[i] = output_max;
+  }
+}
+
+void xnn_init_qs8_add_minmax_avx512_params(
+  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t a_zero_point,
+  int8_t b_zero_point,
+  int8_t output_zero_point,
+  float a_output_scale,
+  float b_output_scale,
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(a_output_scale >= 0x1.0p-10f);
+  assert(b_output_scale >= 0x1.0p-10f);
+  assert(a_output_scale < 0x1.0p+8f);
+  assert(b_output_scale < 0x1.0p+8f);
+
+  // Compute requantization parameters.
+  const float max_output_scale = math_max_f32(a_output_scale, b_output_scale);
+  assert(max_output_scale >= 0x1.0p-10f);
+  assert(max_output_scale < 0x1.0p+8f);
+  const uint32_t max_scale_bits = fp32_to_bits(max_output_scale);
+  const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
+
+  // Shift is in [12, 30] range.
+  const uint32_t shift = (uint32_t) (20 /* multiplier bits */ - max_scale_exponent);
+  assert(shift <= 30);
+  assert(shift >= 12);
+
+  // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
+  const int32_t a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(a_output_scale) + (shift << 23)));
+  const int32_t b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(b_output_scale) + (shift << 23)));
+  assert(math_max_s32(a_multiplier, b_multiplier) >= INT32_C(0x00100000));
+  assert(a_multiplier < INT32_C(0x00200000));
+  assert(b_multiplier < INT32_C(0x00200000));
+
+  const int32_t rounding = INT32_C(1) << (shift - 1);
+  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx512.bias[i] = bias;
+    params->avx512.a_multiplier[i] = a_multiplier;
+    params->avx512.b_multiplier[i] = b_multiplier;
+    params->avx512.rounding[i] = rounding;
+    params->avx512.shift[i] = shift;
+  }
+  for (uint32_t i = 0; i < 32; i++) {
+    params->avx512.output_zero_point[i] = (int16_t) output_zero_point;
+    params->avx512.output_min[i] = output_min;
+    params->avx512.output_max[i] = output_max;
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

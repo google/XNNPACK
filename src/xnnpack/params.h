@@ -595,6 +595,16 @@ union xnn_qu8_add_minmax_params {
     XNN_ALIGN(16) uint8_t output_min[16];
     XNN_ALIGN(16) uint8_t output_max[16];
   } avx2;
+  struct {
+    XNN_ALIGN(64) int32_t bias[16];
+    XNN_ALIGN(64) int32_t a_multiplier[16];
+    XNN_ALIGN(64) int32_t b_multiplier[16];
+    XNN_ALIGN(64) int32_t rounding[16];
+    XNN_ALIGN(64) uint32_t shift[16];
+    XNN_ALIGN(64) int16_t output_zero_point[32];
+    XNN_ALIGN(32) uint8_t output_min[32];
+    XNN_ALIGN(32) uint8_t output_max[32];
+  } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {
@@ -680,6 +690,16 @@ union xnn_qs8_add_minmax_params {
     XNN_ALIGN(16) int8_t output_min[16];
     XNN_ALIGN(16) int8_t output_max[16];
   } avx2;
+  struct {
+    XNN_ALIGN(64) int32_t bias[16];
+    XNN_ALIGN(64) int32_t a_multiplier[16];
+    XNN_ALIGN(64) int32_t b_multiplier[16];
+    XNN_ALIGN(64) int32_t rounding[16];
+    XNN_ALIGN(64) uint32_t shift[16];
+    XNN_ALIGN(64) int16_t output_zero_point[32];
+    XNN_ALIGN(32) int8_t output_min[32];
+    XNN_ALIGN(32) int8_t output_max[32];
+  } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {

@@ -1425,6 +1425,182 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X16, batch_eq_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    VAddMicrokernelTester()
+      .batch_size(16)
+      .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16, xnn_init_qu8_add_minmax_avx512_params);
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X16, batch_div_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X16, batch_lt_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X16, batch_gt_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X16, inplace_a) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace_a(true)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X16, inplace_b) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace_b(true)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X16, inplace_a_and_b) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace_a(true)
+        .inplace_b(true)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X16, qmin) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(128)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X16, qmax) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .qmax(128)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X32, batch_eq_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    VAddMicrokernelTester()
+      .batch_size(32)
+      .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32, xnn_init_qu8_add_minmax_avx512_params);
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X32, batch_div_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X32, batch_lt_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X32, batch_gt_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X32, inplace_a) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace_a(true)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X32, inplace_b) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace_b(true)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X32, inplace_a_and_b) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace_a(true)
+        .inplace_b(true)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X32, qmin) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(128)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+
+  TEST(QU8_VADD_MINMAX__AVX512SKX_MUL32_LD128_X32, qmax) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      VAddMicrokernelTester()
+        .batch_size(batch_size)
+        .qmax(128)
+        .Test(xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32, xnn_init_qu8_add_minmax_avx512_params);
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #if XNN_ARCH_WASMSIMD
   TEST(QU8_VADD_MINMAX__WASMSIMD_X8, batch_eq_8) {
     VAddMicrokernelTester()
