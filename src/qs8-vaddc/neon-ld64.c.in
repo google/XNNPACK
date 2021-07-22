@@ -40,7 +40,7 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__neon_ld64_x${BATCH_TILE}(
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
-    const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->neon.a_zero_point);
   const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);

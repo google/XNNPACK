@@ -19,7 +19,7 @@ void xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_x24(
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
-    const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   const __m128i vbias = _mm_load_si128((const __m128i*) params->sse4_mul16.bias);
   const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) params->sse4_mul16.a_multiplier_lo);

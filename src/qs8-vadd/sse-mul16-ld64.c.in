@@ -29,7 +29,7 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TIL
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
-    const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   const __m128i vbias = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.bias);
   const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.a_multiplier_lo);
