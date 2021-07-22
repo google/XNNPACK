@@ -28,6 +28,11 @@ static inline bool check_datatypes_with_bias(
       return input_datatype == xnn_datatype_qint8 &&
         filter_datatype == xnn_datatype_qint8 && bias_datatype == xnn_datatype_qint32;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+      return input_datatype == xnn_datatype_quint8 &&
+        filter_datatype == xnn_datatype_quint8 && bias_datatype == xnn_datatype_qint32;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -45,6 +50,10 @@ static inline bool check_datatypes_without_bias(
     case xnn_datatype_qint8:
       return input_datatype == xnn_datatype_qint8 && filter_datatype == xnn_datatype_qint8;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+      return input_datatype == xnn_datatype_quint8 && filter_datatype == xnn_datatype_quint8;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -107,6 +116,9 @@ enum xnn_status xnn_define_fully_connected(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -151,6 +163,10 @@ enum xnn_status xnn_define_fully_connected(
       }
       break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+      break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with filter ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -185,9 +201,9 @@ enum xnn_status xnn_define_fully_connected(
 
     switch (bias_value->datatype) {
       case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
+#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
       case xnn_datatype_qint32:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
         break;
       default:
         xnn_log_error(
@@ -218,6 +234,9 @@ enum xnn_status xnn_define_fully_connected(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
