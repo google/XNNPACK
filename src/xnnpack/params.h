@@ -409,6 +409,14 @@ union xnn_qs8_conv_minmax_params {
     int32_t output_zero_point;
   } gemmlowp_scalar;
   struct {
+    int32_t multiplier;
+    uint32_t shift;
+    int64_t rounding;
+    int32_t output_min_less_zero_point;
+    int32_t output_max_less_zero_point;
+    int32_t output_zero_point;
+  } rndnu_scalar;
+  struct {
     float scale;
     long output_min_less_zero_point;
     long output_max_less_zero_point;

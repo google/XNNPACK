@@ -313,6 +313,36 @@ void xnn_init_qs8_conv_minmax_gemmlowp_scalar_params(
   params->gemmlowp_scalar.output_zero_point = (int32_t) output_zero_point;
 }
 
+void xnn_init_qs8_conv_minmax_rndnu_scalar_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  // Compute requantization parameters.
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x00800000, 0x00FFFFFF] range.
+  const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
+  assert(multiplier >= INT32_C(0x00800000));
+  assert(multiplier <= INT32_C(0x00FFFFFF));
+
+  // Shift is in [24, 56] range.
+  const uint32_t shift = 127 + 23 - (scale_bits >> 23);
+  assert(shift >= 24);
+  assert(shift < 56);
+  const int64_t rounding = INT64_C(1) << (shift - 1);
+
+  params->rndnu_scalar.multiplier = multiplier;
+  params->rndnu_scalar.shift = shift;
+  params->rndnu_scalar.rounding = rounding;
+  params->rndnu_scalar.output_min_less_zero_point = (int32_t) output_min - (int32_t) output_zero_point;
+  params->rndnu_scalar.output_max_less_zero_point = (int32_t) output_max - (int32_t) output_zero_point;
+  params->rndnu_scalar.output_zero_point = (int32_t) output_zero_point;
+}
+
+
 void xnn_init_qs8_conv_minmax_fp32_scalar_lrint_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,

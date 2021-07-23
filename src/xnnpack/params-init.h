@@ -118,6 +118,13 @@ XNN_INTERNAL void xnn_init_qs8_conv_minmax_gemmlowp_scalar_params(
   int8_t output_min,
   int8_t output_max);
 
+XNN_INTERNAL void xnn_init_qs8_conv_minmax_rndnu_scalar_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max);
+
 XNN_INTERNAL void xnn_init_qs8_conv_minmax_fp32_scalar_lrint_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
