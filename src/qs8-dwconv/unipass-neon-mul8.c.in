@@ -24,7 +24,7 @@ $PARAMS_STRUCT = ("" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_") + (
 $if REQUANTIZATION == "FP32" and DATATYPE == "QC8" and not ARMV8:
   $PARAMS_STRUCT = "neon_fp32"
 $ISA = "neonv8" if ARMV8 else "neon"
-void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul8(
+void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_${"mla" if MLA else "mul"}8(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -84,12 +84,20 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
           const int8x8_t vi${K}x${ABC[C:C+8]} = vld1_s8(i${K}); i${K} += 8;
           const int8x8_t vk${K}x${ABC[C:C+8]} = vld1_s8(w); w = (const void*) ((const int8_t*) w + 8);
 
-        $for C in range(0, CHANNEL_TILE, 8):
-          const int16x8_t vprod${K}x${ABC[C:C+8]} = vmull_s8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+        $if K == 0:
+          $for C in range(0, CHANNEL_TILE, 8):
+            int16x8_t vprod${ABC[C:C+8]} = vmull_s8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+        $elif K % 2 == 0 or K + 1 == KERNEL_TILE or not MLA:
+          $for C in range(0, CHANNEL_TILE, 8):
+            vprod${ABC[C:C+8]} = vmull_s8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+        $else:
+          $for C in range(0, CHANNEL_TILE, 8):
+            vprod${ABC[C:C+8]} = vmlal_s8(vprod${ABC[C:C+8]}, vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
 
-        $for C in range(0, CHANNEL_TILE, 8):
-          vacc${ABC[C:C+4]} = vaddw_s16(vacc${ABC[C:C+4]}, vget_low_s16(vprod${K}x${ABC[C:C+8]}));
-          vacc${ABC[C+4:C+8]} = vaddw_s16(vacc${ABC[C+4:C+8]}, vget_high_s16(vprod${K}x${ABC[C:C+8]}));
+        $if not MLA or K % 2 == 1 or K + 1 == KERNEL_TILE:
+          $for C in range(0, CHANNEL_TILE, 8):
+            vacc${ABC[C:C+4]} = vaddw_s16(vacc${ABC[C:C+4]}, vget_low_s16(vprod${ABC[C:C+8]}));
+            vacc${ABC[C+4:C+8]} = vaddw_s16(vacc${ABC[C+4:C+8]}, vget_high_s16(vprod${ABC[C:C+8]}));
 
       $if REQUANTIZATION == "GEMMLOWP":
         $for C in range(0, CHANNEL_TILE, 4):
@@ -227,10 +235,16 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
             $else:
               const int8x8_t vk${K}x${ABC[0:8]} = vld1_s8((const void*) ((const int8_t*) w + ${K * CHANNEL_TILE}));
 
-          const int16x8_t vprod${K}x${ABC[0:8]} = vmull_s8(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
+          $if K == 0:
+            int16x8_t vprod${ABC[0:8]} = vmull_s8(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
+          $elif K % 2 == 0 or K + 1 == KERNEL_TILE or not MLA:
+            vprod${ABC[0:8]} = vmull_s8(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
+          $else:
+            vprod${ABC[0:8]} = vmlal_s8(vprod${ABC[0:8]}, vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
 
-          vacc${ABC[0:4]} = vaddw_s16(vacc${ABC[0:4]}, vget_low_s16(vprod${K}x${ABC[0:8]}));
-          vacc${ABC[4:8]} = vaddw_s16(vacc${ABC[4:8]}, vget_high_s16(vprod${K}x${ABC[0:8]}));
+          $if not MLA or K % 2 == 1 or K + 1 == KERNEL_TILE:
+            vacc${ABC[0:4]} = vaddw_s16(vacc${ABC[0:4]}, vget_low_s16(vprod${ABC[0:8]}));
+            vacc${ABC[4:8]} = vaddw_s16(vacc${ABC[4:8]}, vget_high_s16(vprod${ABC[0:8]}));
 
         $if REQUANTIZATION == "GEMMLOWP":
           vacc${ABC[0:4]} = vqrdmulhq_s32(vacc${ABC[0:4]}, vmultiplier);

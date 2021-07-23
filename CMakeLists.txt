@@ -1118,12 +1118,16 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/math/sqrt-neon-nr1rsqrts.c
   src/math/sqrt-neon-nr2rsqrts.c
   src/math/sqrt-neon-nr3rsqrts.c
+  src/qc8-dwconv/gen/up8x9-minmax-fp32-neon-mla8.c
   src/qc8-dwconv/gen/up8x9-minmax-fp32-neon-mul8.c
   src/qc8-dwconv/gen/up8x9-minmax-fp32-neon-mul16.c
+  src/qc8-dwconv/gen/up8x25-minmax-fp32-neon-mla8.c
   src/qc8-dwconv/gen/up8x25-minmax-fp32-neon-mul8.c
   src/qc8-dwconv/gen/up8x25-minmax-fp32-neon-mul16.c
+  src/qc8-dwconv/gen/up16x9-minmax-fp32-neon-mla8.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-neon-mul8.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-neon-mul16.c
+  src/qc8-dwconv/gen/up16x25-minmax-fp32-neon-mla8.c
   src/qc8-dwconv/gen/up16x25-minmax-fp32-neon-mul8.c
   src/qc8-dwconv/gen/up16x25-minmax-fp32-neon-mul16.c
   src/qc8-dwconv/gen/up24x9-minmax-fp32-neon-mul16.c
@@ -1144,18 +1148,22 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qc8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
   src/qs8-dwconv/gen/up8x9-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/up8x9-minmax-gemmlowp-neon-mul16.c
+  src/qs8-dwconv/gen/up8x9-minmax-rndnu-neon-mla8.c
   src/qs8-dwconv/gen/up8x9-minmax-rndnu-neon-mul8.c
   src/qs8-dwconv/gen/up8x9-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/up8x25-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/up8x25-minmax-gemmlowp-neon-mul16.c
+  src/qs8-dwconv/gen/up8x25-minmax-rndnu-neon-mla8.c
   src/qs8-dwconv/gen/up8x25-minmax-rndnu-neon-mul8.c
   src/qs8-dwconv/gen/up8x25-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/up16x9-minmax-gemmlowp-neon-mul16.c
+  src/qs8-dwconv/gen/up16x9-minmax-rndnu-neon-mla8.c
   src/qs8-dwconv/gen/up16x9-minmax-rndnu-neon-mul8.c
   src/qs8-dwconv/gen/up16x9-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/up16x25-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/up16x25-minmax-gemmlowp-neon-mul16.c
+  src/qs8-dwconv/gen/up16x25-minmax-rndnu-neon-mla8.c
   src/qs8-dwconv/gen/up16x25-minmax-rndnu-neon-mul8.c
   src/qs8-dwconv/gen/up16x25-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-fp32-neon-mul16.c
@@ -1605,9 +1613,17 @@ SET(XNNPACK_NEONV8_MICROKERNEL_SRCS
   src/math/roundne-neonv8.c
   src/math/roundu-neonv8.c
   src/math/roundz-neonv8.c
+  src/qc8-dwconv/gen/up8x9-minmax-fp32-neonv8-mla8.c
+  src/qc8-dwconv/gen/up8x9-minmax-fp32-neonv8-mul8.c
   src/qc8-dwconv/gen/up8x9-minmax-fp32-neonv8-mul16.c
+  src/qc8-dwconv/gen/up8x25-minmax-fp32-neonv8-mla8.c
+  src/qc8-dwconv/gen/up8x25-minmax-fp32-neonv8-mul8.c
   src/qc8-dwconv/gen/up8x25-minmax-fp32-neonv8-mul16.c
+  src/qc8-dwconv/gen/up16x9-minmax-fp32-neonv8-mla8.c
+  src/qc8-dwconv/gen/up16x9-minmax-fp32-neonv8-mul8.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-neonv8-mul16.c
+  src/qc8-dwconv/gen/up16x25-minmax-fp32-neonv8-mla8.c
+  src/qc8-dwconv/gen/up16x25-minmax-fp32-neonv8-mul8.c
   src/qc8-dwconv/gen/up16x25-minmax-fp32-neonv8-mul16.c
   src/qc8-dwconv/gen/up24x9-minmax-fp32-neonv8-mul16.c
   src/qc8-dwconv/gen/up24x25-minmax-fp32-neonv8-mul16.c
@@ -1626,9 +1642,17 @@ SET(XNNPACK_NEONV8_MICROKERNEL_SRCS
   src/qc8-igemm/gen/2x8c8-minmax-fp32-neonv8-mlal-padal.c
   src/qc8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
   src/qs8-dwconv/gen/up8x9-minmax-fp32-neonv8-mul16.c
+  src/qs8-dwconv/gen/up8x9-minmax-rndnu-neonv8-mla8.c
+  src/qs8-dwconv/gen/up8x9-minmax-rndnu-neonv8-mul8.c
   src/qs8-dwconv/gen/up8x25-minmax-fp32-neonv8-mul16.c
+  src/qs8-dwconv/gen/up8x25-minmax-rndnu-neonv8-mla8.c
+  src/qs8-dwconv/gen/up8x25-minmax-rndnu-neonv8-mul8.c
   src/qs8-dwconv/gen/up16x9-minmax-fp32-neonv8-mul16.c
+  src/qs8-dwconv/gen/up16x9-minmax-rndnu-neonv8-mla8.c
+  src/qs8-dwconv/gen/up16x9-minmax-rndnu-neonv8-mul8.c
   src/qs8-dwconv/gen/up16x25-minmax-fp32-neonv8-mul16.c
+  src/qs8-dwconv/gen/up16x25-minmax-rndnu-neonv8-mla8.c
+  src/qs8-dwconv/gen/up16x25-minmax-rndnu-neonv8-mul8.c
   src/qs8-dwconv/gen/up24x9-minmax-fp32-neonv8-mul16.c
   src/qs8-dwconv/gen/up24x25-minmax-fp32-neonv8-mul16.c
   src/qs8-dwconv/gen/up32x9-minmax-fp32-neonv8-mul16.c

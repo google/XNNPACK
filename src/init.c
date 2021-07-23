@@ -129,11 +129,11 @@ static void init(void) {
         xnn_params.qc8.gemm.log2_kr = 1;
       }
 
-      xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__neon_mul8;
+      xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__neon_mla8;
       xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qs8_minmax_neon_fp32_params;
       xnn_params.qc8.dwconv[0].channel_tile = 8;
       xnn_params.qc8.dwconv[0].primary_tile = 9;
-      xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__neon_mul8;
+      xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__neon_mla8;
       xnn_params.qc8.dwconv[1].init.qc8 = xnn_init_qs8_minmax_neon_fp32_params;
       xnn_params.qc8.dwconv[1].channel_tile = 8;
       xnn_params.qc8.dwconv[1].primary_tile = 25;
@@ -163,11 +163,11 @@ static void init(void) {
         xnn_params.qs8.gemm.log2_kr = 1;
       }
 
-      xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x9__neon_mul8;
+      xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x9__neon_mla8;
       xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
       xnn_params.qs8.dwconv[0].channel_tile = 8;
       xnn_params.qs8.dwconv[0].primary_tile = 9;
-      xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul8;
+      xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mla8;
       xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
       xnn_params.qs8.dwconv[1].channel_tile = 8;
       xnn_params.qs8.dwconv[1].primary_tile = 25;
@@ -1063,11 +1063,11 @@ static void init(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
 
-    xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__neonv8_mul8;
+    xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__neonv8_mla8;
     xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qs8_minmax_neon_params;
     xnn_params.qc8.dwconv[0].channel_tile = 8;
     xnn_params.qc8.dwconv[0].primary_tile = 9;
-    xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__neonv8_mul8;
+    xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__neonv8_mla8;
     xnn_params.qc8.dwconv[1].init.qc8 = xnn_init_qs8_minmax_neon_params;
     xnn_params.qc8.dwconv[1].channel_tile = 8;
     xnn_params.qc8.dwconv[1].primary_tile = 25;
@@ -1242,11 +1242,11 @@ static void init(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
 
-    xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x9__neon_mul8;
+    xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x9__neon_mla8;
     xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
     xnn_params.qs8.dwconv[0].channel_tile = 8;
     xnn_params.qs8.dwconv[0].primary_tile = 9;
-    xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul8;
+    xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mla8;
     xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
     xnn_params.qs8.dwconv[1].channel_tile = 8;
     xnn_params.qs8.dwconv[1].primary_tile = 25;
