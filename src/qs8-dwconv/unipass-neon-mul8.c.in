@@ -7,7 +7,8 @@ $assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
 $assert DATATYPE in ["QC8", "QS8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert CHANNEL_TILE % 8 == 0
+$assert LOAD_VARIANT in ["LD64", "LD128"]
+$assert CHANNEL_TILE % {"LD64": 8, "LD128": 16}[LOAD_VARIANT] == 0
 $assert CHANNEL_TILE >= 8
 $assert KERNEL_TILE >= 2
 #include <assert.h>
@@ -24,7 +25,7 @@ $PARAMS_STRUCT = ("" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_") + (
 $if REQUANTIZATION == "FP32" and DATATYPE == "QC8" and not ARMV8:
   $PARAMS_STRUCT = "neon_fp32"
 $ISA = "neonv8" if ARMV8 else "neon"
-void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_${"mla" if MLA else "mul"}8(
+void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_${"mla8" if MLA else "mul8"}_${LOAD_VARIANT.lower()}(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -79,20 +80,37 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
         int32x4_t vacc${ABC[C:C+4]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
 
       $for K in range(KERNEL_TILE):
+        $if LOAD_VARIANT == "LD128":
+          $for C in range(0, CHANNEL_TILE, 16):
+            const int8x16_t vi${K}x${ABC[C:C+16]} = vld1q_s8(i${K}); i${K} += 16;
+            const int8x16_t vk${K}x${ABC[C:C+16]} = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
 
-        $for C in range(0, CHANNEL_TILE, 8):
-          const int8x8_t vi${K}x${ABC[C:C+8]} = vld1_s8(i${K}); i${K} += 8;
-          const int8x8_t vk${K}x${ABC[C:C+8]} = vld1_s8(w); w = (const void*) ((const int8_t*) w + 8);
-
-        $if K == 0:
-          $for C in range(0, CHANNEL_TILE, 8):
-            int16x8_t vprod${ABC[C:C+8]} = vmull_s8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
-        $elif K % 2 == 0 or K + 1 == KERNEL_TILE or not MLA:
-          $for C in range(0, CHANNEL_TILE, 8):
-            vprod${ABC[C:C+8]} = vmull_s8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+          $if K == 0:
+            $for C in range(0, CHANNEL_TILE, 16):
+              int16x8_t vprod${ABC[C:C+8]} = vmull_s8(vget_low_s8(vi${K}x${ABC[C:C+16]}), vget_low_s8(vk${K}x${ABC[C:C+16]}));
+              int16x8_t vprod${ABC[C+8:C+16]} = vmull_s8(vget_high_s8(vi${K}x${ABC[C:C+16]}), vget_high_s8(vk${K}x${ABC[C:C+16]}));
+          $elif K % 2 == 0 or K + 1 == KERNEL_TILE or not MLA:
+            $for C in range(0, CHANNEL_TILE, 16):
+              vprod${ABC[C:C+8]} = vmull_s8(vget_low_s8(vi${K}x${ABC[C:C+16]}), vget_low_s8(vk${K}x${ABC[C:C+16]}));
+              vprod${ABC[C+8:C+16]} = vmull_s8(vget_high_s8(vi${K}x${ABC[C:C+16]}), vget_high_s8(vk${K}x${ABC[C:C+16]}));
+          $else:
+            $for C in range(0, CHANNEL_TILE, 16):
+              vprod${ABC[C:C+8]} = vmlal_s8(vprod${ABC[C:C+8]}, vget_low_s8(vi${K}x${ABC[C:C+16]}), vget_low_s8(vk${K}x${ABC[C:C+16]}));
+              vprod${ABC[C+8:C+16]} = vmlal_s8(vprod${ABC[C+8:C+16]}, vget_high_s8(vi${K}x${ABC[C:C+16]}), vget_high_s8(vk${K}x${ABC[C:C+16]}));
         $else:
           $for C in range(0, CHANNEL_TILE, 8):
-            vprod${ABC[C:C+8]} = vmlal_s8(vprod${ABC[C:C+8]}, vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+            const int8x8_t vi${K}x${ABC[C:C+8]} = vld1_s8(i${K}); i${K} += 8;
+            const int8x8_t vk${K}x${ABC[C:C+8]} = vld1_s8(w); w = (const void*) ((const int8_t*) w + 8);
+
+          $if K == 0:
+            $for C in range(0, CHANNEL_TILE, 8):
+              int16x8_t vprod${ABC[C:C+8]} = vmull_s8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+          $elif K % 2 == 0 or K + 1 == KERNEL_TILE or not MLA:
+            $for C in range(0, CHANNEL_TILE, 8):
+              vprod${ABC[C:C+8]} = vmull_s8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+          $else:
+            $for C in range(0, CHANNEL_TILE, 8):
+              vprod${ABC[C:C+8]} = vmlal_s8(vprod${ABC[C:C+8]}, vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
 
         $if not MLA or K % 2 == 1 or K + 1 == KERNEL_TILE:
           $for C in range(0, CHANNEL_TILE, 8):
