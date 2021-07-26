@@ -444,7 +444,6 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane(
       }
     }
 
-    // Post-accumulation work
     const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->rndnu_neon.right_pre_shift);
     const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
     const int32x4_t vright_post_shift = vld1q_dup_s32(&params->rndnu_neon.right_post_shift);

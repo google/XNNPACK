@@ -247,7 +247,6 @@ void xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}
       }
     }
 
-    // Post-accumulation work
     $if REQUANTIZATION == "GEMMLOWP":
       const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
       const int32x4_t vright_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_shift);
@@ -255,11 +254,11 @@ void xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}
 
       $for M in range(MR):
         $for N in range(0, NR, 4):
-          const int32x4_t vproduct${M}x${ABC[N:N+4]} = vqrdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
+          vacc${M}x${ABC[N:N+4]} = vqrdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
 
       $for M in range(MR):
         $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vsraq_n_s32(vproduct${M}x${ABC[N:N+4]}, vbicq_s32(vacc${M}x${ABC[N:N+4]}, vzero_shift_mask), 31);
+          vacc${M}x${ABC[N:N+4]} = vsraq_n_s32(vacc${M}x${ABC[N:N+4]}, vbicq_s32(vacc${M}x${ABC[N:N+4]}, vzero_shift_mask), 31);
 
       $for M in range(MR):
         $for N in range(0, NR, 4):

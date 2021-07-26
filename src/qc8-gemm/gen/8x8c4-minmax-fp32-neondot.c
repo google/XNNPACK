@@ -195,7 +195,6 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_8x8c4__neondot(
       vacc7x4567 = vdotq_lane_s32(vacc7x4567, vb0123x4567, va7x01234567, 0);
     }
 
-    // Post-accumulation work
     float32x4_t vfpacc0x0123 = vcvtq_f32_s32(vacc0x0123);
     float32x4_t vfpacc0x4567 = vcvtq_f32_s32(vacc0x4567);
     float32x4_t vfpacc1x0123 = vcvtq_f32_s32(vacc1x0123);
