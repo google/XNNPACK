@@ -494,24 +494,6 @@ static enum xnn_status setup_binary_elementwise_nd(
     return xnn_status_unsupported_parameter;
   }
 
-  for (size_t i = 0; i < num_input1_dims; i++) {
-    if (input1_shape[i] == 0) {
-      xnn_log_error(
-        "failed to setup %s operator: shape dimension #%zu of input #1 is zero",
-        xnn_operator_type_to_string(binary_elementwise_op->type), i);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
-  for (size_t i = 0; i < num_input2_dims; i++) {
-    if (input2_shape[i] == 0) {
-      xnn_log_error(
-        "failed to setup %s operator: shape dimension #%zu of input #2 is zero",
-        xnn_operator_type_to_string(binary_elementwise_op->type), i);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
   size_t num_compressed_dims = 0;
   size_t compressed_input1_shape[XNN_MAX_TENSOR_DIMS];
   size_t compressed_input2_shape[XNN_MAX_TENSOR_DIMS];
@@ -524,10 +506,13 @@ static enum xnn_status setup_binary_elementwise_nd(
   bool broadcast_input1 = false;
   bool broadcast_input2 = false;
   bool first_nonunit = true;
+  bool degenerate_shape = false;
   const size_t num_common_dims = min(num_input1_dims, num_input2_dims);
   for (size_t i = 1; i <= num_common_dims; i++) {
     const size_t input1_dim = input1_shape[num_input1_dims - i];
     const size_t input2_dim = input2_shape[num_input2_dims - i];
+    degenerate_shape |= input1_dim == 0;
+    degenerate_shape |= input2_dim == 0;
     if (input1_dim == 1 && input2_dim == 1) {
       continue;
     }
@@ -574,6 +559,7 @@ static enum xnn_status setup_binary_elementwise_nd(
     }
     for (size_t i = 0; i < num_input1_dims - num_input2_dims; i++) {
       const size_t input1_dim = input1_shape[i];
+      degenerate_shape |= input1_dim == 0;
       compressed_input1_shape[num_compressed_dims - 1] *= input1_dim;
       compressed_output_shape[num_compressed_dims - 1] *= input1_dim;
     }
@@ -583,11 +569,18 @@ static enum xnn_status setup_binary_elementwise_nd(
     }
     for (size_t i = 0; i < num_input2_dims - num_input1_dims; i++) {
       const size_t input2_dim = input2_shape[i];
+      degenerate_shape |= input2_dim == 0;
       compressed_input2_shape[num_compressed_dims - 1] *= input2_dim;
       compressed_output_shape[num_compressed_dims - 1] *= input2_dim;
     }
   }
   num_compressed_dims = max(num_compressed_dims, 1);
+
+  // Early exit without setting up context if any shape dimension is zero.
+  if (degenerate_shape) {
+    binary_elementwise_op->state = xnn_run_state_skip;
+    return xnn_status_success;
+  }
 
   binary_elementwise_op->context.elementwise_binary = (struct elementwise_binary_context) {
     .a = input1,
