@@ -73,7 +73,7 @@ class Requantization : public benchmark::Fixture {
   }
 
  protected:
-  std::vector<int32_t, AlignedAllocator<int32_t, 32>> input_;
+  std::vector<int32_t, AlignedAllocator<int32_t, 64>> input_;
   std::vector<int8_t> output_;
   size_t n_;
 };

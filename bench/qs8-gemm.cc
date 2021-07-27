@@ -69,7 +69,7 @@ static void GEMMBenchmark(benchmark::State& state,
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), w_size + c_elements * sizeof(int8_t));
 
-  std::vector<char, AlignedAllocator<char, 32>> w(w_size * num_buffers);
+  std::vector<char, AlignedAllocator<char, 64>> w(w_size * num_buffers);
   std::fill(w.begin(), w.end(), 0);
   const xnn_qs8_packing_params packing_params = { 127 };
   if (extended_weights) {

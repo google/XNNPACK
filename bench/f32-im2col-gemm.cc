@@ -71,7 +71,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements));
 
-  std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);
+  std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0.0f);
   xnn_pack_f32_gemm_goi_w(1 /* groups */, group_output_channels, group_input_channels * kernel_size,
     nr, kr, sr, k.data(), b.data(), w.data(), 0, nullptr);

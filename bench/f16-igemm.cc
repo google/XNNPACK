@@ -84,7 +84,7 @@ static void IGEMMBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(uint16_t) * (w_elements + c_elements) + sizeof(void*) * i_elements);
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 32>> w(w_elements * num_buffers);
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0);
   xnn_pack_f16_conv_goki_w(
     1 /* groups */, group_output_channels, kernel_size, group_input_channels,

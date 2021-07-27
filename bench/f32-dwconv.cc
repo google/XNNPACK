@@ -81,7 +81,7 @@ static void DWConvBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements) + sizeof(void*) * i_elements);
 
-  std::vector<float, AlignedAllocator<float, 32>> w(w_elements * num_buffers);
+  std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0.0f);
   xnn_pack_f32_dwconv_ghw_w(kernel_height, kernel_width, channels, channel_tile,
       k.data(), b.data(), w.data(), 0 /* extra bytes */, nullptr);

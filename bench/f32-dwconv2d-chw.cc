@@ -94,7 +94,7 @@ static void DWConv2DBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + o_elements));
 
-  std::vector<float, AlignedAllocator<float, 32>> packed_weights(w_elements * num_buffers);
+  std::vector<float, AlignedAllocator<float, 64>> packed_weights(w_elements * num_buffers);
   std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
   for (size_t c = 0; c < channels; c++) {
     packed_weights[c * kernel_size + c] = bias[c];

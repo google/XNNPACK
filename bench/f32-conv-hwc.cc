@@ -53,7 +53,7 @@ static void DConv3X3S2P1Benchmark(benchmark::State& state,
   std::vector<float> bias(output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
 
-  std::vector<float, AlignedAllocator<float, 32>> zero(input_channels * input_width + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float, AlignedAllocator<float, 64>> zero(input_channels * input_width + XNN_EXTRA_BYTES / sizeof(float));
 
   const size_t weights_elements = (kernel_size * kernel_size * input_channels + 1) *
     benchmark::utils::RoundUp<size_t>(output_channels, output_channels_tile);
@@ -62,7 +62,7 @@ static void DConv3X3S2P1Benchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (weights_elements + output_elements));
 
-  std::vector<float, AlignedAllocator<float, 32>> packed_weights(weights_elements * num_buffers);
+  std::vector<float, AlignedAllocator<float, 64>> packed_weights(weights_elements * num_buffers);
   std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
   xnn_pack_f32_dconv_oki_w(
     output_channels, input_channels, output_channels_tile,

@@ -66,8 +66,8 @@ class Rounding : public benchmark::Fixture {
   }
 
  protected:
-  std::vector<float, AlignedAllocator<float, 32>> input_;
-  std::vector<float, AlignedAllocator<float, 32>> output_;
+  std::vector<float, AlignedAllocator<float, 64>> input_;
+  std::vector<float, AlignedAllocator<float, 64>> output_;
   size_t n_;
 };
 
