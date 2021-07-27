@@ -59,7 +59,7 @@ void xnn_qu8_requantize_fp32__neon(
     const float32x4_t w_scaled = vmulq_f32(vcvtq_f32_s32(w), vscale);
 
 #ifdef __aarch64__
-    // Leverage "Floating-point Convert to Signed integer, rouding to nearest with ties to even" instruction.
+    // Leverage "Floating-point Convert to Signed integer, rounding to nearest with ties to even" instruction.
     // This is an ARMv8 instruction (always available in AArch64), which saturates result on overflow.
     // We don't need to specifically consider saturated results, they will be clamped at the last stage.
     const int32x4_t x_rounded = vcvtnq_s32_f32(x_scaled);

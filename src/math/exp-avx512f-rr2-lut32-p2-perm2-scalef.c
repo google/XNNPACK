@@ -42,7 +42,7 @@ void xnn_math_f32_exp__avx512f_rr2_lut32_p2_perm2_scalef(
     // Compute reduced argument n := round(x / log(2), 5).
     // We do it by adding a large number (magic bias), which cause rounding of result to 5 fractional bits, then
     // subtracing the large number back. The first addition is combined with multiplication by log2e into a single FMA
-    // instruction. The trick with adding large number is valid only within certain bounds (|x| <= 2**17), but thats
+    // instruction. The trick with adding large number is valid only within certain bounds (|x| <= 2**17), but that's
     // ok, because inputs outside of [-103.97207, 88.72283] underflow or overflow expf(x) anyway. We fixup the result
     // for such inputs at the very end of the algorithm.
     __m512 vn = _mm512_fmadd_ps(vx, vlog2e, vmagic_bias);

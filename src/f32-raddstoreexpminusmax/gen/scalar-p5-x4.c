@@ -56,7 +56,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4(
     // Compute reduced argument n := round(x / log(2)).
     // We do it by adding a large number (magic bias) to the product x * (1/log(2)), which cause rounding of the result
     // to an integer, then subtracing the large number back. The trick with adding large number is valid only within
-    // certain bounds (|x| <= 2**22), but thats ok, because inputs outside of [-87.336540, 0.0] underflow expf(x)
+    // certain bounds (|x| <= 2**22), but that's ok, because inputs outside of [-87.336540, 0.0] underflow expf(x)
     // anyway. We fixup the result for such inputs at the very end of the algorithm.
     float vn0 = vx0 * vlog2e + vmagic_bias;
     float vn1 = vx1 * vlog2e + vmagic_bias;
@@ -163,7 +163,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4(
     // Compute reduced argument n := round(x / log(2)).
     // We do it by adding a large number (magic bias) to the product x * (1/log(2)), which cause rounding of the result
     // to an integer, then subtracing the large number back. The trick with adding large number is valid only within
-    // certain bounds (|x| <= 2**22), but thats ok, because inputs outside of [-87.336540, 0.0] underflow expf(x)
+    // certain bounds (|x| <= 2**22), but that's ok, because inputs outside of [-87.336540, 0.0] underflow expf(x)
     // anyway. We fixup the result for such inputs at the very end of the algorithm.
     float vn = vx * vlog2e + vmagic_bias;
 
