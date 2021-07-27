@@ -2206,7 +2206,7 @@ struct conv_hwc2chw_parameters {
   // Number of output height pixels in a tile.
   // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
   uint8_t output_height_tile;
-  // Number of output width pixes in a tile.
+  // Number of output width pixels in a tile.
   uint8_t output_width_tile;
 };
 

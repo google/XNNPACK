@@ -47,7 +47,7 @@ void xnn_math_f32_exp__sse2_rr2_lut64_p2(
     // Compute reduced argument n := round(x * 64 / log(2)).
     // We do it by adding a large number (magic bias) to the product x * (64/log(2)), which cause rounding of the
     // result to an integer, then subtracing the large number back. The trick with adding large number is valid only
-    // within certain bounds (|x| <= 2**22), but thats ok, because inputs outside of [-103.97207, 88.72283] underflow
+    // within certain bounds (|x| <= 2**22), but that's ok, because inputs outside of [-103.97207, 88.72283] underflow
     // or overflow expf(x) anyway. We fixup the result for such inputs at the very end of the algorithm.
     __m128 vn = _mm_add_ps(_mm_mul_ps(vx, vlog2e_x64), vmagic_bias);
 

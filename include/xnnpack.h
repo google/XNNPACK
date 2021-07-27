@@ -123,7 +123,7 @@ struct xnn_allocator {
 ///                        If this argument is NULL, system-provided memory management functions (e.g. malloc/free)
 ///                        will be used.
 ///
-/// @retval xnn_status_success - XNNPACK is succesfully initialized and ready to use.
+/// @retval xnn_status_success - XNNPACK is successfully initialized and ready to use.
 /// @retval xnn_status_out_of_memory - initialization failed due to out-of-memory condition.
 /// @retval xnn_status_unsupported_hardware - initialization failed because the host processor does not satisfy the
 ///                                           minimum hardware requirements for XNNPACK. E.g. this may happen on x86

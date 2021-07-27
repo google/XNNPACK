@@ -71,7 +71,7 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_arm_x4(
       vsum3 = wasm_f32x4_add(vsum3, vi3);
     }
 
-    // Having exaclty 4 rows makes this work out nicely as we end up with
+    // Having exactly 4 rows makes this work out nicely as we end up with
     // the 4 totals in 4 different lanes of the same vector.
     const v128_t vsum01 = wasm_f32x4_add(wasm_v32x4_shuffle(vsum0, vsum1, 0, 2, 4, 6), wasm_v32x4_shuffle(vsum0, vsum1, 1, 3, 5, 7));
     const v128_t vsum23 = wasm_f32x4_add(wasm_v32x4_shuffle(vsum2, vsum3, 0, 2, 4, 6), wasm_v32x4_shuffle(vsum2, vsum3, 1, 3, 5, 7));

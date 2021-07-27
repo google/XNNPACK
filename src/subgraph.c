@@ -325,7 +325,7 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
     }
   }
   // No NCHW2NHWC compatible nodes have been found thus the graph rewriting
-  // pratically cannot happen.
+  // practically cannot happen.
   if (!update) {
     return;
   }

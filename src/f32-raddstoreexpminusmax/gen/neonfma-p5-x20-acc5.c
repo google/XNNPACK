@@ -62,7 +62,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x20_acc5(
     // Compute reduced argument n := round(x / log(2)).
     // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
     // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
+    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but that's ok, because
     // inputs outside of [-87.336540, 0.0] underflow expf(x) anyway. We fixup the result for such inputs at the very end
     // of the algorithm.
     float32x4_t vn0123 = vfmaq_f32(vmagic_bias, vx0123, vlog2e);
@@ -180,7 +180,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x20_acc5(
     // Compute reduced argument n := round(x / log(2)).
     // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
     // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
+    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but that's ok, because
     // inputs outside of [-87.336540, 0.0] underflow expf(x) anyway. We fixup the result for such inputs at the very end
     // of the algorithm.
     float32x4_t vn = vfmaq_f32(vmagic_bias, vx, vlog2e);
@@ -237,7 +237,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x20_acc5(
     // Compute reduced argument n := round(x / log(2)).
     // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
     // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
+    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but that's ok, because
     // inputs outside of [-87.336540, 0.0] underflow expf(x) anyway. We fixup the result for such inputs at the very end
     // of the algorithm.
     float32x4_t vn = vfmaq_f32(vmagic_bias, vx, vlog2e);

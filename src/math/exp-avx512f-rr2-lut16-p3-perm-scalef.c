@@ -38,7 +38,7 @@ void xnn_math_f32_exp__avx512f_rr2_lut16_p3_perm_scalef(
     // We do it by adding a large number (magic bias), which cause rounding of result to an 4 fractional bits, then
     // subtracing the large number back. The first addition is combined with multiplication by log2e into a single
     // FMA instruction. The trick with adding large number is valid only within certain bounds (|x| <= 2**18), but
-    // thats ok, because inputs outside of [-103.97207, 88.72283] underflow or overflow expf(x) anyway. We fixup
+    // that's ok, because inputs outside of [-103.97207, 88.72283] underflow or overflow expf(x) anyway. We fixup
     // the result for such inputs at the very end of the algorithm.
     __m512 vn = _mm512_fmadd_ps(vx, vlog2e, vmagic_bias);
 

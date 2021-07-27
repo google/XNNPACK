@@ -99,7 +99,7 @@ inline static float math_max_f32(float a, float b) {
 
 inline static float math_nonsign_mask_f32() {
   #if defined(__INTEL_COMPILER)
-    // Suprisingly, Intel compiler ignores __builtin_nanf payload
+    // Surprisingly, Intel compiler ignores __builtin_nanf payload
     return _castu32_f32(0x7FFFFFFF);
   #elif defined(__GNUC__)
     return __builtin_nanf("0x7FFFFF");

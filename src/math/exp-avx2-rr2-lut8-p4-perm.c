@@ -48,7 +48,7 @@ void xnn_math_f32_exp__avx2_rr2_lut8_p4_perm(
     // Compute reduced argument n := round(x * 8 / log(2)).
     // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
     // large number back. The first addition is combined with multiplication by log2e into a single FMA instruction.
-    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but thats ok, because
+    // The trick with adding large number is valid only within certain bounds (|x| <= 2**22), but that's ok, because
     // inputs outside of [-103.97207, 88.72283] underflow or overflow expf(x) anyway. We fixup the result for such
     // inputs at the very end of the algorithm.
     __m256 vn = _mm256_fmadd_ps(vx, vlog2e_x8, vmagic_bias);
