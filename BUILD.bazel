@@ -122,7 +122,7 @@ TABLE_SRCS = [
     "src/tables/exp2minus-k-over-2048.c",
 ]
 
-SCALAR_UKERNELS = [
+SCALAR_MICROKERNEL_SRCS = [
     "src/f32-argmaxpool/4x-scalar-c1.c",
     "src/f32-argmaxpool/9p8x-scalar-c1.c",
     "src/f32-argmaxpool/9x-scalar-c1.c",
@@ -722,7 +722,7 @@ SCALAR_UKERNELS = [
     "src/xx-copy/memcpy.c",
 ]
 
-WASM_UKERNELS = [
+WASM_MICROKERNEL_SRCS = [
     "src/f32-avgpool/9p8x-minmax-wasm-c1.c",
     "src/f32-avgpool/9x-minmax-wasm-c1.c",
     "src/f32-dwconv/gen/up1x4-minmax-wasm-acc2.c",
@@ -909,7 +909,7 @@ WASM_UKERNELS = [
     "src/f32-vrelu/gen/vrelu-wasm-x8.c",
 ]
 
-WASMSIMD_UKERNELS = [
+WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-argmaxpool/4x-wasmsimd-c4.c",
     "src/f32-argmaxpool/9p8x-wasmsimd-c4.c",
     "src/f32-argmaxpool/9x-wasmsimd-c4.c",
@@ -1659,7 +1659,7 @@ WASMSIMD_UKERNELS = [
 ]
 
 # ISA-specific micro-kernels
-NEON_UKERNELS = [
+NEON_MICROKERNEL_SRCS = [
     "src/f32-argmaxpool/4x-neon-c4.c",
     "src/f32-argmaxpool/9p8x-neon-c4.c",
     "src/f32-argmaxpool/9x-neon-c4.c",
@@ -2246,7 +2246,7 @@ NEON_UKERNELS = [
     "src/x32-zip/xm-neon.c",
 ]
 
-NEONFMA_UKERNELS = [
+NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/up4x4-minmax-neonfma-acc2.c",
     "src/f32-dwconv/gen/up4x4-minmax-neonfma.c",
     "src/f32-dwconv/gen/up4x9-minmax-neonfma-acc2.c",
@@ -2449,7 +2449,7 @@ NEONFMA_UKERNELS = [
     "src/math/sqrt-neonfma-nr3fma.c",
 ]
 
-AARCH64_NEONFMA_UKERNELS = [
+AARCH64_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x1.c",
     "src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x2.c",
     "src/f32-conv-hwc/gen/3x3s2p0p1c3x8-neonfma-2x1.c",
@@ -2564,7 +2564,7 @@ AARCH64_NEONFMA_UKERNELS = [
     "src/math/sigmoid-neonfma-rr2-p5-div.c",
 ]
 
-NEONV8_UKERNELS = [
+NEONV8_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/vrndd-neonv8-x4.c",
     "src/f32-vrnd/gen/vrndd-neonv8-x8.c",
     "src/f32-vrnd/gen/vrndne-neonv8-x4.c",
@@ -2643,7 +2643,7 @@ NEONV8_UKERNELS = [
     "src/qu8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c",
 ]
 
-AARCH64_NEONFP16ARITH_UKERNELS = [
+AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-dwconv/gen/up8x4-minmax-neonfp16arith-acc2.c",
     "src/f16-dwconv/gen/up8x4-minmax-neonfp16arith.c",
     "src/f16-dwconv/gen/up8x9-minmax-neonfp16arith-acc2.c",
@@ -2730,7 +2730,7 @@ AARCH64_NEONFP16ARITH_UKERNELS = [
     "src/f16-vrelu/gen/vrelu-neonfp16arith-x16.c",
 ]
 
-NEONDOT_UKERNELS = [
+NEONDOT_MICROKERNEL_SRCS = [
     "src/qc8-gemm/gen/1x8c4-minmax-fp32-neondot.c",
     "src/qc8-gemm/gen/1x16c4-minmax-fp32-neondot.c",
     "src/qc8-gemm/gen/4x8c4-minmax-fp32-neondot.c",
@@ -2789,7 +2789,7 @@ NEONDOT_UKERNELS = [
     "src/qs8-igemm/gen/8x16c4-minmax-gemmlowp-neondot.c",
 ]
 
-SSE_UKERNELS = [
+SSE_MICROKERNEL_SRCS = [
     "src/f32-avgpool/9p8x-minmax-sse-c4.c",
     "src/f32-avgpool/9x-minmax-sse-c4.c",
     "src/f32-conv-hwc2chw/3x3s2p1c3x4-sse-1x1.c",
@@ -2965,7 +2965,7 @@ SSE_UKERNELS = [
     "src/x32-pad/sse.c",
 ]
 
-SSE2_UKERNELS = [
+SSE2_MICROKERNEL_SRCS = [
     "src/f32-argmaxpool/4x-sse2-c4.c",
     "src/f32-argmaxpool/9p8x-sse2-c4.c",
     "src/f32-argmaxpool/9x-sse2-c4.c",
@@ -3215,7 +3215,7 @@ SSE2_UKERNELS = [
     "src/x32-zip/xm-sse2.c",
 ]
 
-SSSE3_UKERNELS = [
+SSSE3_MICROKERNEL_SRCS = [
     "src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-1x4-acc2.c",
     "src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-1x4-acc3.c",
     "src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-1x4-acc4.c",
@@ -3271,7 +3271,7 @@ SSSE3_UKERNELS = [
     "src/qu8-requantization/rndna-ssse3.c",
 ]
 
-SSE41_UKERNELS = [
+SSE41_MICROKERNEL_SRCS = [
     "src/f32-prelu/gen/sse41-2x4.c",
     "src/f32-prelu/gen/sse41-2x8.c",
     "src/f32-velu/gen/velu-sse41-rr2-lut16-p3-x4.c",
@@ -3502,7 +3502,7 @@ SSE41_UKERNELS = [
     "src/qu8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c",
 ]
 
-AVX_UKERNELS = [
+AVX_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/up8x4-minmax-avx-acc2.c",
     "src/f32-dwconv/gen/up8x4-minmax-avx.c",
     "src/f32-dwconv/gen/up8x9-minmax-avx-acc2.c",
@@ -3817,7 +3817,7 @@ AVX_UKERNELS = [
     "src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x16.c",
 ]
 
-XOP_UKERNELS = [
+XOP_MICROKERNEL_SRCS = [
     "src/qc8-dwconv/gen/up8x9-minmax-fp32-xop-mul16-add16.c",
     "src/qc8-dwconv/gen/up8x9-minmax-fp32-xop-mul32.c",
     "src/qc8-dwconv/gen/up8x25-minmax-fp32-xop-mul16-add16.c",
@@ -3953,7 +3953,7 @@ XOP_UKERNELS = [
     "src/qu8-vaddc/gen/minmax-xop-mul32-ld32-x16.c",
 ]
 
-FMA3_UKERNELS = [
+FMA3_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/up8x4-minmax-fma3-acc2.c",
     "src/f32-dwconv/gen/up8x4-minmax-fma3.c",
     "src/f32-dwconv/gen/up8x9-minmax-fma3-acc2.c",
@@ -4023,7 +4023,7 @@ FMA3_UKERNELS = [
     "src/math/sqrt-fma3-nr2fma.c",
 ]
 
-AVX2_UKERNELS = [
+AVX2_MICROKERNEL_SRCS = [
     "src/f32-raddexpminusmax/gen/avx2-p5-x64-acc2.c",
     "src/f32-raddexpminusmax/gen/avx2-p5-x64-acc4.c",
     "src/f32-raddexpminusmax/gen/avx2-p5-x64.c",
@@ -4266,7 +4266,7 @@ AVX2_UKERNELS = [
     "src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c",
 ]
 
-AVX512F_UKERNELS = [
+AVX512F_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/up16x4-minmax-avx512f-acc2.c",
     "src/f32-dwconv/gen/up16x4-minmax-avx512f.c",
     "src/f32-dwconv/gen/up16x9-minmax-avx512f-acc2.c",
@@ -4525,7 +4525,7 @@ AVX512F_UKERNELS = [
     "src/math/sqrt-avx512f-nr2fma.c",
 ]
 
-AVX512SKX_UKERNELS = [
+AVX512SKX_MICROKERNEL_SRCS = [
     "src/qc8-dwconv/gen/up16x9-minmax-fp32-avx512skx-mul32.c",
     "src/qc8-dwconv/gen/up16x25-minmax-fp32-avx512skx-mul32.c",
     "src/qc8-dwconv/gen/up32x9-minmax-fp32-avx512skx-mul32.c",
@@ -4584,13 +4584,13 @@ AVX512SKX_UKERNELS = [
     "src/qu8-vaddc/gen/minmax-avx512skx-mul32-ld128-x32.c",
 ]
 
-WASM32_ASM_UKERNELS = [
+WASM32_ASM_MICROKERNEL_SRCS = [
     "src/f32-vrelu/wasm_shr_x1.S",
     "src/f32-vrelu/wasm_shr_x2.S",
     "src/f32-vrelu/wasm_shr_x4.S",
 ]
 
-AARCH32_ASM_UKERNELS = [
+AARCH32_ASM_MICROKERNEL_SRCS = [
     "src/f32-gemm/4x4-aarch32-vfp-ld64.S",
     "src/f32-gemm/4x4-minmax-aarch32-vfp-ld64.S",
     "src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S",
@@ -4607,7 +4607,7 @@ AARCH32_ASM_UKERNELS = [
     "src/f32-igemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S",
 ]
 
-AARCH64_ASM_UKERNELS = [
+AARCH64_ASM_MICROKERNEL_SRCS = [
     "src/f16-gemm/gen-inc/1x8inc-minmax-aarch64-neonfp16arith-ld64.S",
     "src/f16-gemm/gen-inc/1x16inc-minmax-aarch64-neonfp16arith-ld32.S",
     "src/f16-gemm/gen-inc/4x8inc-minmax-aarch64-neonfp16arith-ld64.S",
@@ -4934,7 +4934,7 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "scalar_ukernels",
-    srcs = SCALAR_UKERNELS,
+    srcs = SCALAR_MICROKERNEL_SRCS,
     hdrs = INTERNAL_HDRS,
     aarch32_copts = ["-marm"],
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -4949,7 +4949,7 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "scalar_ukernels_test_mode",
-    srcs = SCALAR_UKERNELS,
+    srcs = SCALAR_MICROKERNEL_SRCS,
     hdrs = INTERNAL_HDRS,
     aarch32_copts = ["-marm"],
     copts = [
@@ -4971,8 +4971,8 @@ xnnpack_cc_library(
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    wasm_srcs = WASM_UKERNELS,
-    wasmsimd_srcs = WASM_UKERNELS + WASMSIMD_UKERNELS,
+    wasm_srcs = WASM_MICROKERNEL_SRCS,
+    wasmsimd_srcs = WASM_MICROKERNEL_SRCS + WASMSIMD_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -4990,8 +4990,8 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    wasm_srcs = WASM_UKERNELS,
-    wasmsimd_srcs = WASM_UKERNELS + WASMSIMD_UKERNELS,
+    wasm_srcs = WASM_MICROKERNEL_SRCS,
+    wasmsimd_srcs = WASM_MICROKERNEL_SRCS + WASMSIMD_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5008,8 +5008,8 @@ xnnpack_cc_library(
         "-march=armv7-a",
         "-mfpu=neon",
     ],
-    aarch32_srcs = NEON_UKERNELS,
-    aarch64_srcs = NEON_UKERNELS,
+    aarch32_srcs = NEON_MICROKERNEL_SRCS,
+    aarch64_srcs = NEON_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -5027,8 +5027,8 @@ xnnpack_cc_library(
         "-march=armv7-a",
         "-mfpu=neon",
     ],
-    aarch32_srcs = NEON_UKERNELS,
-    aarch64_srcs = NEON_UKERNELS,
+    aarch32_srcs = NEON_MICROKERNEL_SRCS,
+    aarch64_srcs = NEON_MICROKERNEL_SRCS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -5050,8 +5050,8 @@ xnnpack_cc_library(
         "-march=armv7-a",
         "-mfpu=neon-vfpv4",
     ],
-    aarch32_srcs = NEONFMA_UKERNELS,
-    aarch64_srcs = NEONFMA_UKERNELS + AARCH64_NEONFMA_UKERNELS,
+    aarch32_srcs = NEONFMA_MICROKERNEL_SRCS,
+    aarch64_srcs = NEONFMA_MICROKERNEL_SRCS + AARCH64_NEONFMA_MICROKERNEL_SRCS,
     apple_aarch32_copts = [
         "-mcpu=swift",
         "-mtune=generic",
@@ -5073,8 +5073,8 @@ xnnpack_cc_library(
         "-march=armv7-a",
         "-mfpu=neon-vfpv4",
     ],
-    aarch32_srcs = NEONFMA_UKERNELS,
-    aarch64_srcs = NEONFMA_UKERNELS + AARCH64_NEONFMA_UKERNELS,
+    aarch32_srcs = NEONFMA_MICROKERNEL_SRCS,
+    aarch64_srcs = NEONFMA_MICROKERNEL_SRCS + AARCH64_NEONFMA_MICROKERNEL_SRCS,
     apple_aarch32_copts = [
         "-mcpu=swift",
         "-mtune=generic",
@@ -5100,8 +5100,8 @@ xnnpack_cc_library(
         "-march=armv8-a",
         "-mfpu=neon-fp-armv8",
     ],
-    aarch32_srcs = NEONV8_UKERNELS,
-    aarch64_srcs = NEONV8_UKERNELS,
+    aarch32_srcs = NEONV8_MICROKERNEL_SRCS,
+    aarch64_srcs = NEONV8_MICROKERNEL_SRCS,
     apple_aarch32_copts = [
         "-mcpu=cyclone",
         "-mtune=generic",
@@ -5123,8 +5123,8 @@ xnnpack_cc_library(
         "-march=armv8-a",
         "-mfpu=neon-fp-armv8",
     ],
-    aarch32_srcs = NEONV8_UKERNELS,
-    aarch64_srcs = NEONV8_UKERNELS,
+    aarch32_srcs = NEONV8_MICROKERNEL_SRCS,
+    aarch64_srcs = NEONV8_MICROKERNEL_SRCS,
     apple_aarch32_copts = [
         "-mcpu=cyclone",
         "-mtune=generic",
@@ -5146,7 +5146,7 @@ xnnpack_cc_library(
     name = "neonfp16arith_ukernels",
     hdrs = INTERNAL_HDRS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
-    aarch64_srcs = AARCH64_NEONFP16ARITH_UKERNELS,
+    aarch64_srcs = AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -5160,7 +5160,7 @@ xnnpack_cc_library(
     name = "neonfp16arith_ukernels_test_mode",
     hdrs = INTERNAL_HDRS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
-    aarch64_srcs = AARCH64_NEONFP16ARITH_UKERNELS,
+    aarch64_srcs = AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -5182,9 +5182,9 @@ xnnpack_cc_library(
         "-march=armv8.2-a+dotprod",
         "-mfpu=neon-fp-armv8",
     ],
-    aarch32_srcs = NEONDOT_UKERNELS,
+    aarch32_srcs = NEONDOT_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+dotprod"],
-    aarch64_srcs = NEONDOT_UKERNELS,
+    aarch64_srcs = NEONDOT_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -5202,9 +5202,9 @@ xnnpack_cc_library(
         "-march=armv8.2-a+dotprod",
         "-mfpu=neon-fp-armv8",
     ],
-    aarch32_srcs = NEONDOT_UKERNELS,
+    aarch32_srcs = NEONDOT_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+dotprod"],
-    aarch64_srcs = NEONDOT_UKERNELS,
+    aarch64_srcs = NEONDOT_MICROKERNEL_SRCS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -5225,7 +5225,7 @@ xnnpack_cc_library(
     gcc_x86_copts = ["-msse2"],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs = SSE_UKERNELS + SSE2_UKERNELS,
+    x86_srcs = SSE_MICROKERNEL_SRCS + SSE2_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5244,7 +5244,7 @@ xnnpack_cc_library(
     gcc_x86_copts = ["-msse2"],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs = SSE_UKERNELS + SSE2_UKERNELS,
+    x86_srcs = SSE_MICROKERNEL_SRCS + SSE2_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5259,7 +5259,7 @@ xnnpack_cc_library(
     gcc_x86_copts = ["-mssse3"],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs = SSSE3_UKERNELS,
+    x86_srcs = SSSE3_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5278,7 +5278,7 @@ xnnpack_cc_library(
     gcc_x86_copts = ["-mssse3"],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs = SSSE3_UKERNELS,
+    x86_srcs = SSSE3_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5293,7 +5293,7 @@ xnnpack_cc_library(
     gcc_x86_copts = ["-msse4.1"],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs = SSE41_UKERNELS,
+    x86_srcs = SSE41_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5312,7 +5312,7 @@ xnnpack_cc_library(
     gcc_x86_copts = ["-msse4.1"],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs = SSE41_UKERNELS,
+    x86_srcs = SSE41_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5328,7 +5328,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs = AVX_UKERNELS,
+    x86_srcs = AVX_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5348,7 +5348,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs = AVX_UKERNELS,
+    x86_srcs = AVX_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5364,7 +5364,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs = XOP_UKERNELS,
+    x86_srcs = XOP_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5384,7 +5384,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs = XOP_UKERNELS,
+    x86_srcs = XOP_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5400,7 +5400,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs = FMA3_UKERNELS,
+    x86_srcs = FMA3_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5420,7 +5420,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs = FMA3_UKERNELS,
+    x86_srcs = FMA3_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5439,7 +5439,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX2"],
     msvc_x86_64_copts = ["/arch:AVX2"],
-    x86_srcs = AVX2_UKERNELS,
+    x86_srcs = AVX2_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5462,7 +5462,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX2"],
     msvc_x86_64_copts = ["/arch:AVX2"],
-    x86_srcs = AVX2_UKERNELS,
+    x86_srcs = AVX2_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5480,7 +5480,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX512"],
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs = AVX512F_UKERNELS,
+    x86_srcs = AVX512F_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5502,7 +5502,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX512"],
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs = AVX512F_UKERNELS,
+    x86_srcs = AVX512F_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5526,7 +5526,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX512"],
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs = AVX512SKX_UKERNELS,
+    x86_srcs = AVX512SKX_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5554,7 +5554,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX512"],
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs = AVX512SKX_UKERNELS,
+    x86_srcs = AVX512SKX_MICROKERNEL_SRCS,
     deps = [
         ":tables",
         "@FP16",
@@ -5565,11 +5565,11 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "asm_ukernels",
     hdrs = ["src/xnnpack/assembly.h"],
-    aarch32_srcs = AARCH32_ASM_UKERNELS,
+    aarch32_srcs = AARCH32_ASM_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+fp16+dotprod"],
-    aarch64_srcs = AARCH64_ASM_UKERNELS,
-    wasm_srcs = WASM32_ASM_UKERNELS,
-    wasmsimd_srcs = WASM32_ASM_UKERNELS,
+    aarch64_srcs = AARCH64_ASM_MICROKERNEL_SRCS,
+    wasm_srcs = WASM32_ASM_MICROKERNEL_SRCS,
+    wasmsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
 )
 
 xnnpack_cc_library(
