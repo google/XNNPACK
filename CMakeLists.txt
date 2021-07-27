@@ -6065,6 +6065,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-e2e-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" src)
   TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils)
 
+  ADD_EXECUTABLE(qs8-dwconv-e2e-bench bench/qs8-dwconv-e2e.cc)
+  SET_TARGET_PROPERTIES(qs8-dwconv-e2e-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-e2e-bench PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" src)
+  TARGET_LINK_LIBRARIES(qs8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils)
+
   ADD_EXECUTABLE(qs8-gemm-e2e-bench bench/qs8-gemm-e2e.cc)
   SET_TARGET_PROPERTIES(qs8-gemm-e2e-bench PROPERTIES
     CXX_STANDARD 11
