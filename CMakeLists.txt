@@ -1395,10 +1395,18 @@ SET(XNNPACK_NEON_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up32x25-minmax-fp32-neon-mul16.c
   src/qu8-gavgpool/7p7x-minmax-neon-c8.c
   src/qu8-gavgpool/7x-minmax-neon-c8.c
+  src/qu8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
+  src/qu8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
+  src/qu8-gemm/gen/4x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
+  src/qu8-gemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
+  src/qu8-igemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
+  src/qu8-igemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
+  src/qu8-igemm/gen/4x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
+  src/qu8-igemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-requantization/fp32-neon.c
   src/qu8-requantization/gemmlowp-neon.c
   src/qu8-requantization/rndna-neon.c
@@ -5738,6 +5746,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qu8-gemm-minmax-gemmlowp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qu8-gemm-minmax-gemmlowp-test qu8-gemm-minmax-gemmlowp-test)
 
+  ADD_EXECUTABLE(qu8-gemm-minmax-rndnu-test test/qu8-gemm-minmax-rndnu.cc)
+  SET_TARGET_PROPERTIES(qu8-gemm-minmax-rndnu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-minmax-rndnu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qu8-gemm-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qu8-gemm-minmax-rndnu-test qu8-gemm-minmax-rndnu-test)
+
   ADD_EXECUTABLE(qu8-igemm-minmax-fp32-test test/qu8-igemm-minmax-fp32.cc)
   SET_TARGET_PROPERTIES(qu8-igemm-minmax-fp32-test PROPERTIES
     CXX_STANDARD 11
@@ -5755,6 +5772,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qu8-igemm-minmax-gemmlowp-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(qu8-igemm-minmax-gemmlowp-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
   ADD_TEST(qu8-igemm-minmax-gemmlowp-test qu8-igemm-minmax-gemmlowp-test)
+
+  ADD_EXECUTABLE(qu8-igemm-minmax-rndnu-test test/qu8-igemm-minmax-rndnu.cc)
+  SET_TARGET_PROPERTIES(qu8-igemm-minmax-rndnu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-igemm-minmax-rndnu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(qu8-igemm-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 gtest gtest_main)
+  ADD_TEST(qu8-igemm-minmax-rndnu-test qu8-igemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qu8-requantization-test test/qu8-requantization.cc)
   SET_TARGET_PROPERTIES(qu8-requantization-test PROPERTIES

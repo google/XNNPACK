@@ -44,6 +44,14 @@ union xnn_qu8_requantization_params {
     int32_t max_less_zero_point;
     int32_t zero_point;
   } rndna;
+  struct {
+    uint32_t multiplier;
+    uint32_t shift;
+    uint64_t rounding;
+    int32_t min_less_zero_point;
+    int32_t max_less_zero_point;
+    int32_t zero_point;
+  } rndnu;
 };
 
 static inline void xnn_init_qu8_requantization_gemmlowp_params(
@@ -158,6 +166,42 @@ inline static uint8_t xnn_qu8_requantize_rndna(
   n = math_max_s32(n, params->rndna.min_less_zero_point);
   n = math_min_s32(n, params->rndna.max_less_zero_point);
   return (uint8_t) ((int32_t) n + params->rndna.zero_point);
+}
+
+static inline void xnn_init_qu8_requantization_rndnu_params(
+  union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t zero_point,
+  uint8_t min,
+  uint8_t max)
+{
+  assert(scale < 1.0f);
+  assert(scale >= 0x1.0p-32f);
+
+  const uint32_t scale_bits = fp32_to_bits(scale);
+  const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
+  const uint32_t shift = 127 + 23 - (scale_bits >> 23);
+  assert(shift >= 24);
+  assert(shift < 56);
+
+  params->rndnu.multiplier = multiplier;
+  params->rndnu.shift = shift;
+  params->rndnu.rounding = INT64_C(1) << (shift - 1);
+  params->rndnu.min_less_zero_point = (int32_t) ((uint32_t) min - (uint32_t) zero_point);
+  params->rndnu.max_less_zero_point = (int32_t) ((uint32_t) max - (uint32_t) zero_point);
+  params->rndnu.zero_point = (int32_t) (uint32_t) zero_point;
+}
+
+inline static uint8_t xnn_qu8_requantize_rndnu(
+  int32_t n,
+  union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)])
+{
+  const int64_t product = (int64_t) n * (int64_t) params->rndnu.multiplier;
+  n = (int32_t) asr_s64(product + params->rndnu.rounding, params->rndnu.shift);
+
+  n = math_max_s32(n, params->rndnu.min_less_zero_point);
+  n = math_min_s32(n, params->rndnu.max_less_zero_point);
+  return (uint8_t) ((int32_t) n + params->rndnu.zero_point);
 }
 
 

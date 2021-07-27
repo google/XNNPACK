@@ -138,6 +138,11 @@ tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=6 -D NR=16 -D PREFETCH=0 -D R
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
 
+tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=1 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
+tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=4 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/4x8-minmax-rndnu-neon-mlal-lane.c
+tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
+tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
+
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=0 -o src/qc8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -D ARMV8=0 -o src/qc8-gemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
 
@@ -740,3 +745,4 @@ tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-gemmlowp.yaml --output t
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-gemmlowp.yaml --output test/qu8-gemm-minmax-gemmlowp.cc
 
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-rndnu.yaml    --output test/qs8-gemm-minmax-rndnu.cc
+tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-rndnu.yaml    --output test/qu8-gemm-minmax-rndnu.cc

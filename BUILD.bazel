@@ -2206,10 +2206,18 @@ NEON_UKERNELS = [
     "src/qu8-dwconv/gen/up32x25-minmax-fp32-neon-mul16.c",
     "src/qu8-gavgpool/7p7x-minmax-neon-c8.c",
     "src/qu8-gavgpool/7x-minmax-neon-c8.c",
+    "src/qu8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c",
     "src/qu8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c",
+    "src/qu8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c",
+    "src/qu8-gemm/gen/4x8-minmax-rndnu-neon-mlal-lane.c",
     "src/qu8-gemm/gen/4x16-minmax-fp32-neon-mlal-lane.c",
+    "src/qu8-gemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c",
+    "src/qu8-igemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c",
     "src/qu8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c",
+    "src/qu8-igemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c",
+    "src/qu8-igemm/gen/4x8-minmax-rndnu-neon-mlal-lane.c",
     "src/qu8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c",
+    "src/qu8-igemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c",
     "src/qu8-requantization/fp32-neon.c",
     "src/qu8-requantization/gemmlowp-neon.c",
     "src/qu8-requantization/rndna-neon.c",
@@ -8148,26 +8156,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qu8_igemm_minmax_fp32_test",
-    srcs = [
-        "test/qu8-igemm-minmax-fp32.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
-)
-
-xnnpack_unit_test(
-    name = "qu8_igemm_minmax_gemmlowp_test",
-    srcs = [
-        "test/qu8-igemm-minmax-gemmlowp.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
-)
-
-xnnpack_unit_test(
     name = "qu8_gavgpool_minmax_test",
     srcs = [
         "test/qu8-gavgpool-minmax.cc",
@@ -8191,6 +8179,46 @@ xnnpack_unit_test(
     name = "qu8_gemm_minmax_gemmlowp_test",
     srcs = [
         "test/qu8-gemm-minmax-gemmlowp.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qu8_gemm_minmax_rndnu_test",
+    srcs = [
+        "test/qu8-gemm-minmax-rndnu.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qu8_igemm_minmax_fp32_test",
+    srcs = [
+        "test/qu8-igemm-minmax-fp32.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qu8_igemm_minmax_gemmlowp_test",
+    srcs = [
+        "test/qu8-igemm-minmax-gemmlowp.cc",
+        "test/gemm-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qu8_igemm_minmax_rndnu_test",
+    srcs = [
+        "test/qu8-igemm-minmax-rndnu.cc",
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
