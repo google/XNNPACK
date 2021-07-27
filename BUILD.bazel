@@ -6109,6 +6109,19 @@ xnnpack_cc_library(
 ######################### Benchmarks for micro-kernels #########################
 
 xnnpack_benchmark(
+    name = "qs8_dwconv_bench",
+    srcs = [
+        "bench/dwconv.h",
+        "bench/qs8-dwconv.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":indirection",
+        ":packing",
+    ],
+)
+
+xnnpack_benchmark(
     name = "qs8_gemm_bench",
     srcs = [
         "bench/gemm.h",
