@@ -47,6 +47,10 @@ bool CheckNEON(benchmark::State& state);
 // If NEON-FMA is unsupported, report error in benchmark state, and return false.
 bool CheckNEONFMA(benchmark::State& state);
 
+// Check if ARMv8 NEON instructions are supported.
+// If ARMv8 NEON is unsupported, report error in benchmark state, and return false.
+bool CheckNEONV8(benchmark::State& state);
+
 // Check if ARM DOT extension is supported.
 // If DOT is unsupported, report error in benchmark state, and return false.
 bool CheckNEONDOT(benchmark::State& state);

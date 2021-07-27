@@ -197,6 +197,14 @@ bool CheckNEONFMA(benchmark::State& state) {
   return true;
 }
 
+bool CheckNEONV8(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_v8()) {
+    state.SkipWithError("no NEON-FMA extension");
+    return false;
+  }
+  return true;
+}
+
 bool CheckNEONDOT(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_dot()) {
     state.SkipWithError("no NEON-DOT extension");
