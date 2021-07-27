@@ -25,7 +25,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x16__neon_mull_addw_dup(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(mr != 0);
   assert(mr <= 2);
@@ -319,7 +319,12 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x16__neon_mull_addw_dup(
         }
       }
     }
+
+    // Post-accumulation work
     const int32x4_t vmultiplier = vld1q_dup_s32(&params->gemmlowp_neon.multiplier);
+    const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
+    const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
+
     vacc0x0123 = vqrdmulhq_s32(vacc0x0123, vmultiplier);
     vacc0x4567 = vqrdmulhq_s32(vacc0x4567, vmultiplier);
     vacc0x89AB = vqrdmulhq_s32(vacc0x89AB, vmultiplier);
@@ -329,8 +334,6 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x16__neon_mull_addw_dup(
     vacc1x89AB = vqrdmulhq_s32(vacc1x89AB, vmultiplier);
     vacc1xCDEF = vqrdmulhq_s32(vacc1xCDEF, vmultiplier);
 
-    const int32x4_t vright_shift = vld1q_dup_s32(&params->gemmlowp_neon.right_shift);
-    const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
     vacc0x0123 = vsraq_n_s32(vacc0x0123, vbicq_s32(vacc0x0123, vzero_shift_mask), 31);
     vacc0x4567 = vsraq_n_s32(vacc0x4567, vbicq_s32(vacc0x4567, vzero_shift_mask), 31);
     vacc0x89AB = vsraq_n_s32(vacc0x89AB, vbicq_s32(vacc0x89AB, vzero_shift_mask), 31);
@@ -377,9 +380,11 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x16__neon_mull_addw_dup(
     vout1x0123456789ABCDEF = vminq_s8(vout1x0123456789ABCDEF, voutput_max);
 
     if (nc >= 16) {
+      // Main case where there the 16 columns fit in the destination.
       vst1q_s8(c0 + 0, vout0x0123456789ABCDEF);
       vst1q_s8(c1 + 0, vout1x0123456789ABCDEF);
 
+      // Advance to the next 16 columns.
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
 
@@ -388,6 +393,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x16__neon_mull_addw_dup(
 
       nc -= 16;
     } else {
+      // Final case where not all of the 16 columns fit in the destination.
       int8x16_t vout0x01234567_1x01234567 = vcombine_s8(vget_low_s8(vout0x0123456789ABCDEF), vget_low_s8(vout1x0123456789ABCDEF));
       if (nc & 8) {
         vst1_s8(c0, vget_low_s8(vout0x01234567_1x01234567)); c0 += 8;
