@@ -6826,6 +6826,19 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qu8_dwconv_e2e_bench",
+    srcs = [
+        "bench/qu8-dwconv-e2e.cc",
+        "bench/end2end.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":XNNPACK",
+        ":qu8_mobilenet_v1",
+        ":qu8_mobilenet_v2",
+    ],
+)
+
+xnnpack_benchmark(
     name = "end2end_bench",
     srcs = ["bench/end2end.cc"],
     deps = [
