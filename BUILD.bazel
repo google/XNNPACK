@@ -2197,9 +2197,13 @@ NEON_UKERNELS = [
     "src/qu8-avgpool/9p8x-minmax-neon-c8.c",
     "src/qu8-avgpool/9x-minmax-neon-c8.c",
     "src/qu8-dwconv/gen/up8x9-minmax-fp32-neon-mul16.c",
+    "src/qu8-dwconv/gen/up8x9-minmax-rndnu-neon-mul16.c",
     "src/qu8-dwconv/gen/up8x25-minmax-fp32-neon-mul16.c",
+    "src/qu8-dwconv/gen/up8x25-minmax-rndnu-neon-mul16.c",
     "src/qu8-dwconv/gen/up16x9-minmax-fp32-neon-mul16.c",
+    "src/qu8-dwconv/gen/up16x9-minmax-rndnu-neon-mul16.c",
     "src/qu8-dwconv/gen/up16x25-minmax-fp32-neon-mul16.c",
+    "src/qu8-dwconv/gen/up16x25-minmax-rndnu-neon-mul16.c",
     "src/qu8-dwconv/gen/up24x9-minmax-fp32-neon-mul16.c",
     "src/qu8-dwconv/gen/up24x25-minmax-fp32-neon-mul16.c",
     "src/qu8-dwconv/gen/up32x9-minmax-fp32-neon-mul16.c",
@@ -8149,6 +8153,16 @@ xnnpack_unit_test(
     name = "qu8_dwconv_minmax_fp32_test",
     srcs = [
         "test/qu8-dwconv-minmax-fp32.cc",
+        "test/dwconv-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qu8_dwconv_minmax_rndnu_test",
+    srcs = [
+        "test/qu8-dwconv-minmax-rndnu.cc",
         "test/dwconv-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,

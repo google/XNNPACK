@@ -1,0 +1,12 @@
+# Copyright 2021 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x9__neon_mul16
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up16x9__neon_mul16
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul16
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up16x25__neon_mul16
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
