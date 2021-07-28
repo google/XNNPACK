@@ -1944,10 +1944,10 @@ static void init(void) {
       xnn_params.qc8.dwconv[1].channel_tile = 32;
     } else if (cpuinfo_has_x86_xop()) {
       // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
-      xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__xop_mul32;
+      xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__xop_mul16_add16;
       xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qs8_minmax_sse4_params;
       xnn_params.qc8.dwconv[0].channel_tile = 16;
-      xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__xop_mul32;
+      xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__xop_mul16_add16;
       xnn_params.qc8.dwconv[1].init.qc8 = xnn_init_qs8_minmax_sse4_params;
       xnn_params.qc8.dwconv[1].channel_tile = 16;
     } else if (cpuinfo_has_x86_avx2()) {
@@ -1958,10 +1958,10 @@ static void init(void) {
       xnn_params.qc8.dwconv[1].init.qc8 = xnn_init_qs8_minmax_avx2_params;
       xnn_params.qc8.dwconv[1].channel_tile = 16;
     } else if (cpuinfo_has_x86_avx()) {
-      xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul32;
+      xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul16_add16;
       xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qs8_minmax_sse4_params;
       xnn_params.qc8.dwconv[0].channel_tile = 16;
-      xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul32;
+      xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul16_add16;
       xnn_params.qc8.dwconv[1].init.qc8 = xnn_init_qs8_minmax_sse4_params;
       xnn_params.qc8.dwconv[1].channel_tile = 16;
     } else if (cpuinfo_has_x86_sse4_1()) {

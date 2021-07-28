@@ -3245,8 +3245,8 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-vunary/gen/vabs-avx-x16.c
   src/f32-vunary/gen/vneg-avx-x16.c
   src/f32-vunary/gen/vsqr-avx-x16.c
-  src/qc8-dwconv/gen/up16x9-minmax-fp32-avx-mul32.c
-  src/qc8-dwconv/gen/up16x25-minmax-fp32-avx-mul32.c
+  src/qc8-dwconv/gen/up16x9-minmax-fp32-avx-mul16-add16.c
+  src/qc8-dwconv/gen/up16x25-minmax-fp32-avx-mul16-add16.c
   src/qc8-gemm/gen/1x4c8-minmax-fp32-avx-ld128.c
   src/qc8-gemm/gen/2x4c8-minmax-fp32-avx-ld128.c
   src/qc8-igemm/gen/1x4c8-minmax-fp32-avx-ld128.c
@@ -3581,8 +3581,8 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x16.c)
 
 SET(PROD_XOP_MICROKERNEL_SRCS
-  src/qc8-dwconv/gen/up16x9-minmax-fp32-xop-mul32.c
-  src/qc8-dwconv/gen/up16x25-minmax-fp32-xop-mul32.c
+  src/qc8-dwconv/gen/up16x9-minmax-fp32-xop-mul16-add16.c
+  src/qc8-dwconv/gen/up16x25-minmax-fp32-xop-mul16-add16.c
   src/qc8-gemm/gen/1x4c8-minmax-fp32-xop-ld64.c
   src/qc8-gemm/gen/2x4c8-minmax-fp32-xop-ld64.c
   src/qc8-igemm/gen/1x4c8-minmax-fp32-xop-ld64.c
