@@ -232,15 +232,27 @@ static void DWConvBenchmark(benchmark::State& state,
       xnn_init_qs8_conv_minmax_fp32_avx512_params,
       32 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckAVX512SKX);
   }
-  static void qs8_dwconv_up16x9__avx2_mul16(benchmark::State& state, const char* net) {
+  static void qs8_dwconv_up16x9__avx2_mul16_vpmovsx(benchmark::State& state, const char* net) {
     DWConvBenchmark(state,
-      xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul16,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul16_vpmovsx,
       xnn_init_qs8_conv_minmax_fp32_avx2_params,
       16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckAVX2);
   }
-  static void qs8_dwconv_up32x9__avx2_mul16(benchmark::State& state, const char* net) {
+  static void qs8_dwconv_up32x9__avx2_mul16_vpmovsx(benchmark::State& state, const char* net) {
     DWConvBenchmark(state,
-      xnn_qs8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul16,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul16_vpmovsx,
+      xnn_init_qs8_conv_minmax_fp32_avx2_params,
+      32 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckAVX2);
+  }
+  static void qs8_dwconv_up16x9__avx2_mul16_vpunpck(benchmark::State& state, const char* net) {
+    DWConvBenchmark(state,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul16_vpunpck,
+      xnn_init_qs8_conv_minmax_fp32_avx2_params,
+      16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckAVX2);
+  }
+  static void qs8_dwconv_up32x9__avx2_mul16_vpunpck(benchmark::State& state, const char* net) {
+    DWConvBenchmark(state,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul16_vpunpck,
       xnn_init_qs8_conv_minmax_fp32_avx2_params,
       32 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckAVX2);
   }
@@ -374,8 +386,10 @@ static void DWConvBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(qs8_dwconv_up16x9__avx512skx_mul32);
   BENCHMARK_DWCONV(qs8_dwconv_up32x9__avx512skx_mul32);
 
-  BENCHMARK_DWCONV(qs8_dwconv_up16x9__avx2_mul16);
-  BENCHMARK_DWCONV(qs8_dwconv_up32x9__avx2_mul16);
+  BENCHMARK_DWCONV(qs8_dwconv_up16x9__avx2_mul16_vpmovsx);
+  BENCHMARK_DWCONV(qs8_dwconv_up32x9__avx2_mul16_vpmovsx);
+  BENCHMARK_DWCONV(qs8_dwconv_up16x9__avx2_mul16_vpunpck);
+  BENCHMARK_DWCONV(qs8_dwconv_up32x9__avx2_mul16_vpunpck);
   BENCHMARK_DWCONV(qs8_dwconv_up8x9__avx2_mul32);
   BENCHMARK_DWCONV(qs8_dwconv_up16x9__avx2_mul32);
   BENCHMARK_DWCONV(qs8_dwconv_up32x9__avx2_mul32);

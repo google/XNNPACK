@@ -2997,27 +2997,27 @@
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, c_eq_16) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, c_eq_16) {
     TEST_REQUIRES_X86_AVX2;
     DWConvMicrokernelTester()
       .cr(16)
       .kr(9)
       .channels(16)
-      .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+      .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, c_div_16) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, c_div_16) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, c_div_16_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, c_div_16_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
@@ -3025,11 +3025,11 @@
         .kr(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, c_div_16_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, c_div_16_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
@@ -3037,33 +3037,33 @@
         .kr(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, c_lt_16) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, c_lt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 1; channels < 16; channels++) {
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, c_gt_16) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, c_gt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 17; channels < 32; channels++) {
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, c_gt_16_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, c_gt_16_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 17; channels < 32; channels++) {
       DWConvMicrokernelTester()
@@ -3071,11 +3071,11 @@
         .kr(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, c_gt_16_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, c_gt_16_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 17; channels < 32; channels++) {
       DWConvMicrokernelTester()
@@ -3083,11 +3083,11 @@
         .kr(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, multipixel) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, multipixel) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -3095,11 +3095,11 @@
         .kr(9)
         .channels(channels)
         .width(3)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, multipixel_with_step) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, multipixel_with_step) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       for (size_t step = 2; step <= 9; step++) {
@@ -3109,12 +3109,12 @@
           .channels(channels)
           .width(3)
           .step(step)
-          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
       }
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, multipixel_with_output_stride) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, multipixel_with_output_stride) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -3123,11 +3123,11 @@
         .channels(16)
         .width(5)
         .output_stride(83)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, multipixel_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, multipixel_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -3136,11 +3136,11 @@
         .channels(channels)
         .width(3)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, multipixel_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, multipixel_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -3149,11 +3149,11 @@
         .channels(channels)
         .width(3)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, input_offset) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, input_offset) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
@@ -3161,11 +3161,11 @@
         .kr(9)
         .channels(channels)
         .input_offset(304)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16, zero) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X9__AVX2_MUL16_VPMOVSX, zero) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t mz = 0; mz < 9; mz++) {
       for (uint32_t channels = 32; channels < 256; channels += 48) {
@@ -3175,7 +3175,7 @@
           .channels(channels)
           .input_offset(304)
           .zero_index(mz)
-          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
       }
     }
   }
@@ -3183,27 +3183,27 @@
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, c_eq_32) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, c_eq_32) {
     TEST_REQUIRES_X86_AVX2;
     DWConvMicrokernelTester()
       .cr(32)
       .kr(9)
       .channels(32)
-      .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+      .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, c_div_32) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, c_div_32) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 64; channels < 512; channels += 96) {
       DWConvMicrokernelTester()
         .cr(32)
         .kr(9)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, c_div_32_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, c_div_32_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 64; channels < 512; channels += 96) {
       DWConvMicrokernelTester()
@@ -3211,11 +3211,11 @@
         .kr(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, c_div_32_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, c_div_32_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 64; channels < 512; channels += 96) {
       DWConvMicrokernelTester()
@@ -3223,33 +3223,33 @@
         .kr(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, c_lt_32) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, c_lt_32) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 1; channels < 32; channels++) {
       DWConvMicrokernelTester()
         .cr(32)
         .kr(9)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, c_gt_32) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, c_gt_32) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 33; channels < 64; channels++) {
       DWConvMicrokernelTester()
         .cr(32)
         .kr(9)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, c_gt_32_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, c_gt_32_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 33; channels < 64; channels++) {
       DWConvMicrokernelTester()
@@ -3257,11 +3257,11 @@
         .kr(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, c_gt_32_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, c_gt_32_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 33; channels < 64; channels++) {
       DWConvMicrokernelTester()
@@ -3269,11 +3269,11 @@
         .kr(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, multipixel) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, multipixel) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 160; channels += 31) {
       DWConvMicrokernelTester()
@@ -3281,11 +3281,11 @@
         .kr(9)
         .channels(channels)
         .width(3)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, multipixel_with_step) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, multipixel_with_step) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 160; channels += 31) {
       for (size_t step = 2; step <= 9; step++) {
@@ -3295,12 +3295,12 @@
           .channels(channels)
           .width(3)
           .step(step)
-          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
       }
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, multipixel_with_output_stride) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, multipixel_with_output_stride) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 160; channels += 31) {
       DWConvMicrokernelTester()
@@ -3309,11 +3309,11 @@
         .channels(32)
         .width(5)
         .output_stride(163)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, multipixel_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, multipixel_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 160; channels += 31) {
       DWConvMicrokernelTester()
@@ -3322,11 +3322,11 @@
         .channels(channels)
         .width(3)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, multipixel_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, multipixel_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 160; channels += 31) {
       DWConvMicrokernelTester()
@@ -3335,11 +3335,11 @@
         .channels(channels)
         .width(3)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, input_offset) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, input_offset) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 64; channels < 512; channels += 96) {
       DWConvMicrokernelTester()
@@ -3347,11 +3347,11 @@
         .kr(9)
         .channels(channels)
         .input_offset(592)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16, zero) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X9__AVX2_MUL16_VPMOVSX, zero) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t mz = 0; mz < 9; mz++) {
       for (uint32_t channels = 64; channels < 512; channels += 96) {
@@ -3361,7 +3361,7 @@
           .channels(channels)
           .input_offset(592)
           .zero_index(mz)
-          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
       }
     }
   }
@@ -10110,27 +10110,27 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, c_eq_16) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, c_eq_16) {
     TEST_REQUIRES_X86_AVX2;
     DWConvMicrokernelTester()
       .cr(16)
       .kr(25)
       .channels(16)
-      .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+      .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, c_div_16) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, c_div_16) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, c_div_16_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, c_div_16_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
@@ -10138,11 +10138,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, c_div_16_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, c_div_16_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
@@ -10150,33 +10150,33 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, c_lt_16) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, c_lt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 1; channels < 16; channels++) {
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, c_gt_16) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, c_gt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 17; channels < 32; channels++) {
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, c_gt_16_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, c_gt_16_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 17; channels < 32; channels++) {
       DWConvMicrokernelTester()
@@ -10184,11 +10184,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, c_gt_16_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, c_gt_16_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 17; channels < 32; channels++) {
       DWConvMicrokernelTester()
@@ -10196,11 +10196,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, multipixel) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, multipixel) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -10208,11 +10208,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .width(3)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, multipixel_with_step) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, multipixel_with_step) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       for (size_t step = 2; step <= 25; step++) {
@@ -10222,12 +10222,12 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
           .channels(channels)
           .width(3)
           .step(step)
-          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
       }
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, multipixel_with_output_stride) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, multipixel_with_output_stride) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -10236,11 +10236,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .channels(16)
         .width(5)
         .output_stride(83)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, multipixel_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, multipixel_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -10249,11 +10249,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .channels(channels)
         .width(3)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, multipixel_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, multipixel_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -10262,11 +10262,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .channels(channels)
         .width(3)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, input_offset) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, input_offset) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
@@ -10274,11 +10274,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .input_offset(304)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16, zero) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP16X25__AVX2_MUL16_VPMOVSX, zero) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t mz = 0; mz < 25; mz++) {
       for (uint32_t channels = 32; channels < 256; channels += 48) {
@@ -10288,7 +10288,7 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
           .channels(channels)
           .input_offset(304)
           .zero_index(mz)
-          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up16x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
       }
     }
   }
@@ -10296,27 +10296,27 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, c_eq_32) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, c_eq_32) {
     TEST_REQUIRES_X86_AVX2;
     DWConvMicrokernelTester()
       .cr(32)
       .kr(25)
       .channels(32)
-      .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+      .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, c_div_32) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, c_div_32) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 64; channels < 512; channels += 96) {
       DWConvMicrokernelTester()
         .cr(32)
         .kr(25)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, c_div_32_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, c_div_32_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 64; channels < 512; channels += 96) {
       DWConvMicrokernelTester()
@@ -10324,11 +10324,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, c_div_32_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, c_div_32_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 64; channels < 512; channels += 96) {
       DWConvMicrokernelTester()
@@ -10336,33 +10336,33 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, c_lt_32) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, c_lt_32) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 1; channels < 32; channels++) {
       DWConvMicrokernelTester()
         .cr(32)
         .kr(25)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, c_gt_32) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, c_gt_32) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 33; channels < 64; channels++) {
       DWConvMicrokernelTester()
         .cr(32)
         .kr(25)
         .channels(channels)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, c_gt_32_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, c_gt_32_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 33; channels < 64; channels++) {
       DWConvMicrokernelTester()
@@ -10370,11 +10370,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, c_gt_32_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, c_gt_32_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 33; channels < 64; channels++) {
       DWConvMicrokernelTester()
@@ -10382,11 +10382,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, multipixel) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, multipixel) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 160; channels += 31) {
       DWConvMicrokernelTester()
@@ -10394,11 +10394,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .width(3)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, multipixel_with_step) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, multipixel_with_step) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 160; channels += 31) {
       for (size_t step = 2; step <= 25; step++) {
@@ -10408,12 +10408,12 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
           .channels(channels)
           .width(3)
           .step(step)
-          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
       }
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, multipixel_with_output_stride) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, multipixel_with_output_stride) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 160; channels += 31) {
       DWConvMicrokernelTester()
@@ -10422,11 +10422,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .channels(32)
         .width(5)
         .output_stride(163)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, multipixel_with_qmin) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, multipixel_with_qmin) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 160; channels += 31) {
       DWConvMicrokernelTester()
@@ -10435,11 +10435,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .channels(channels)
         .width(3)
         .qmin(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, multipixel_with_qmax) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, multipixel_with_qmax) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t channels = 1; channels <= 160; channels += 31) {
       DWConvMicrokernelTester()
@@ -10448,11 +10448,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .channels(channels)
         .width(3)
         .qmax(128)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, input_offset) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, input_offset) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t channels = 64; channels < 512; channels += 96) {
       DWConvMicrokernelTester()
@@ -10460,11 +10460,11 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
         .kr(25)
         .channels(channels)
         .input_offset(592)
-        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+        .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
     }
   }
 
-  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16, zero) {
+  TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP32X25__AVX2_MUL16_VPMOVSX, zero) {
     TEST_REQUIRES_X86_AVX2;
     for (uint32_t mz = 0; mz < 25; mz++) {
       for (uint32_t channels = 64; channels < 512; channels += 96) {
@@ -10474,7 +10474,7 @@ TEST(QS8_DWCONV_MINMAX_GEMMLOWP_UP4X9__SCALAR, zero) {
           .channels(channels)
           .input_offset(592)
           .zero_index(mz)
-          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
+          .Test(xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x25__avx2_mul16_vpmovsx, xnn_init_qs8_conv_minmax_gemmlowp_avx2_params, xnn_init_qs8_requantization_gemmlowp_params, xnn_qs8_requantize_gemmlowp);
       }
     }
   }

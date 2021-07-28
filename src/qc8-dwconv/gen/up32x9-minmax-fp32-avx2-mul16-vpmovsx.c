@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-dwconv/unipass-avx2-mul16.c.in
+//   Template: src/qs8-dwconv/unipass-avx2-mul16-vpmovsx.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -14,7 +14,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul16(
+void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul16_vpmovsx(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -222,25 +222,25 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul16(
       vaccOPQRSTUV = _mm256_add_epi32(vaccOPQRSTUV, _mm256_cvtepi16_epi32(vprod8xOPQRSTUV));
 
       w = (const void*) ((uintptr_t) w + 32 * sizeof(int32_t) + 288 * sizeof(int8_t));
-      __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
-      __m256 vscaled89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
-      __m256 vscaledGHIJKLMN = _mm256_cvtepi32_ps(vaccGHIJKLMN);
-      __m256 vscaledOPQRSTUV = _mm256_cvtepi32_ps(vaccOPQRSTUV);
+      __m256 vfpacc01234567 = _mm256_cvtepi32_ps(vacc01234567);
+      __m256 vfpacc89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
+      __m256 vfpaccGHIJKLMN = _mm256_cvtepi32_ps(vaccGHIJKLMN);
+      __m256 vfpaccOPQRSTUV = _mm256_cvtepi32_ps(vaccOPQRSTUV);
 
       const __m256 vscale01234567 = _mm256_loadu_ps((const float*) w);
       const __m256 vscale89ABCDEF = _mm256_loadu_ps((const float*) ((uintptr_t) w + 8 * sizeof(float)));
       const __m256 vscaleGHIJKLMN = _mm256_loadu_ps((const float*) ((uintptr_t) w + 16 * sizeof(float)));
       const __m256 vscaleOPQRSTUV = _mm256_loadu_ps((const float*) ((uintptr_t) w + 24 * sizeof(float)));
       w = (const void*) ((uintptr_t) w + 32 * sizeof(float));
-      vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
-      vscaled89ABCDEF = _mm256_mul_ps(vscaled89ABCDEF, vscale89ABCDEF);
-      vscaledGHIJKLMN = _mm256_mul_ps(vscaledGHIJKLMN, vscaleGHIJKLMN);
-      vscaledOPQRSTUV = _mm256_mul_ps(vscaledOPQRSTUV, vscaleOPQRSTUV);
+      vfpacc01234567 = _mm256_mul_ps(vfpacc01234567, vscale01234567);
+      vfpacc89ABCDEF = _mm256_mul_ps(vfpacc89ABCDEF, vscale89ABCDEF);
+      vfpaccGHIJKLMN = _mm256_mul_ps(vfpaccGHIJKLMN, vscaleGHIJKLMN);
+      vfpaccOPQRSTUV = _mm256_mul_ps(vfpaccOPQRSTUV, vscaleOPQRSTUV);
 
-      vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
-      vacc89ABCDEF = _mm256_cvtps_epi32(vscaled89ABCDEF);
-      vaccGHIJKLMN = _mm256_cvtps_epi32(vscaledGHIJKLMN);
-      vaccOPQRSTUV = _mm256_cvtps_epi32(vscaledOPQRSTUV);
+      vacc01234567 = _mm256_cvtps_epi32(vfpacc01234567);
+      vacc89ABCDEF = _mm256_cvtps_epi32(vfpacc89ABCDEF);
+      vaccGHIJKLMN = _mm256_cvtps_epi32(vfpaccGHIJKLMN);
+      vaccOPQRSTUV = _mm256_cvtps_epi32(vfpaccOPQRSTUV);
 
       const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
       const __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
@@ -350,16 +350,16 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul16(
 
         k += 16;
 
-        __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
-        __m256 vscaled89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
+        __m256 vfpacc01234567 = _mm256_cvtepi32_ps(vacc01234567);
+        __m256 vfpacc89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
 
         const __m256 vscale01234567 = _mm256_loadu_ps((const float*) ((uintptr_t) w + 32 * sizeof(int32_t) + 288 * sizeof(int8_t)));
         const __m256 vscale89ABCDEF = _mm256_loadu_ps((const float*) ((uintptr_t) w + 32 * sizeof(int32_t) + 288 * sizeof(int8_t) + 8 * sizeof(float)));
-        vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
-        vscaled89ABCDEF = _mm256_mul_ps(vscaled89ABCDEF, vscale89ABCDEF);
+        vfpacc01234567 = _mm256_mul_ps(vfpacc01234567, vscale01234567);
+        vfpacc89ABCDEF = _mm256_mul_ps(vfpacc89ABCDEF, vscale89ABCDEF);
 
-        vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
-        vacc89ABCDEF = _mm256_cvtps_epi32(vscaled89ABCDEF);
+        vacc01234567 = _mm256_cvtps_epi32(vfpacc01234567);
+        vacc89ABCDEF = _mm256_cvtps_epi32(vfpacc89ABCDEF);
 
         w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t));
 

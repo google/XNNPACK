@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-dwconv/unipass-avx2-mul16.c.in
+//   Template: src/qs8-dwconv/unipass-avx2-mul16-vpmovsx.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -14,7 +14,7 @@
 #include <xnnpack/dwconv.h>
 
 
-void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16(
+void xnn_qs8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul16_vpmovsx(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -222,67 +222,31 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16(
       vaccOPQRSTUV = _mm256_add_epi32(vaccOPQRSTUV, _mm256_cvtepi16_epi32(vprod8xOPQRSTUV));
 
       w = (const void*) ((uintptr_t) w + 32 * sizeof(int32_t) + 288 * sizeof(int8_t));
-      const __m256i vmultiplier = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.multiplier);
-      const __m256i vrounding = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.rounding);
+      __m256 vfpacc01234567 = _mm256_cvtepi32_ps(vacc01234567);
+      __m256 vfpacc89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
+      __m256 vfpaccGHIJKLMN = _mm256_cvtepi32_ps(vaccGHIJKLMN);
+      __m256 vfpaccOPQRSTUV = _mm256_cvtepi32_ps(vaccOPQRSTUV);
 
-      const __m256i vacc1357 = _mm256_shuffle_epi32(vacc01234567, _MM_SHUFFLE(3, 3, 1, 1));
-      const __m256i vacc9BDF = _mm256_shuffle_epi32(vacc89ABCDEF, _MM_SHUFFLE(3, 3, 1, 1));
-      const __m256i vaccHJLN = _mm256_shuffle_epi32(vaccGHIJKLMN, _MM_SHUFFLE(3, 3, 1, 1));
-      const __m256i vaccPRTV = _mm256_shuffle_epi32(vaccOPQRSTUV, _MM_SHUFFLE(3, 3, 1, 1));
+      const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
+      vfpacc01234567 = _mm256_mul_ps(vfpacc01234567, vscale);
+      vfpacc89ABCDEF = _mm256_mul_ps(vfpacc89ABCDEF, vscale);
+      vfpaccGHIJKLMN = _mm256_mul_ps(vfpaccGHIJKLMN, vscale);
+      vfpaccOPQRSTUV = _mm256_mul_ps(vfpaccOPQRSTUV, vscale);
 
-      const __m256i vprod0246 = _mm256_add_epi64(_mm256_mul_epi32(vacc01234567, vmultiplier), vrounding);
-      const __m256i vprod1357 = _mm256_add_epi64(_mm256_mul_epi32(vacc1357, vmultiplier), vrounding);
-      const __m256i vprod8ACE = _mm256_add_epi64(_mm256_mul_epi32(vacc89ABCDEF, vmultiplier), vrounding);
-      const __m256i vprod9BDF = _mm256_add_epi64(_mm256_mul_epi32(vacc9BDF, vmultiplier), vrounding);
-      const __m256i vprodGIKM = _mm256_add_epi64(_mm256_mul_epi32(vaccGHIJKLMN, vmultiplier), vrounding);
-      const __m256i vprodHJLN = _mm256_add_epi64(_mm256_mul_epi32(vaccHJLN, vmultiplier), vrounding);
-      const __m256i vprodOQSU = _mm256_add_epi64(_mm256_mul_epi32(vaccOPQRSTUV, vmultiplier), vrounding);
-      const __m256i vprodPRTV = _mm256_add_epi64(_mm256_mul_epi32(vaccPRTV, vmultiplier), vrounding);
+      vacc01234567 = _mm256_cvtps_epi32(vfpacc01234567);
+      vacc89ABCDEF = _mm256_cvtps_epi32(vfpacc89ABCDEF);
+      vaccGHIJKLMN = _mm256_cvtps_epi32(vfpaccGHIJKLMN);
+      vaccOPQRSTUV = _mm256_cvtps_epi32(vfpaccOPQRSTUV);
 
-      const __m256i vq31prod0246 = _mm256_srli_epi64(vprod0246, 31);
-      const __m256i vq31prod1357 = _mm256_add_epi64(vprod1357, vprod1357);
-      const __m256i vq31prod8ACE = _mm256_srli_epi64(vprod8ACE, 31);
-      const __m256i vq31prod9BDF = _mm256_add_epi64(vprod9BDF, vprod9BDF);
-      const __m256i vq31prodGIKM = _mm256_srli_epi64(vprodGIKM, 31);
-      const __m256i vq31prodHJLN = _mm256_add_epi64(vprodHJLN, vprodHJLN);
-      const __m256i vq31prodOQSU = _mm256_srli_epi64(vprodOQSU, 31);
-      const __m256i vq31prodPRTV = _mm256_add_epi64(vprodPRTV, vprodPRTV);
-
-      const __m256i vq31prod01234567 = _mm256_blend_epi16(vq31prod0246, vq31prod1357, 0xCC);
-      const __m256i vq31prod89ABCDEF = _mm256_blend_epi16(vq31prod8ACE, vq31prod9BDF, 0xCC);
-      const __m256i vq31prodGHIJKLMN = _mm256_blend_epi16(vq31prodGIKM, vq31prodHJLN, 0xCC);
-      const __m256i vq31prodOPQRSTUV = _mm256_blend_epi16(vq31prodOQSU, vq31prodPRTV, 0xCC);
-
-      const __m256i vremainder_mask = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.remainder_mask);
-      const __m256i vrem01234567 =
-        _mm256_add_epi32(_mm256_and_si256(vq31prod01234567, vremainder_mask), _mm256_cmpgt_epi32(_mm256_setzero_si256(), vq31prod01234567));
-      const __m256i vrem89ABCDEF =
-        _mm256_add_epi32(_mm256_and_si256(vq31prod89ABCDEF, vremainder_mask), _mm256_cmpgt_epi32(_mm256_setzero_si256(), vq31prod89ABCDEF));
-      const __m256i vremGHIJKLMN =
-        _mm256_add_epi32(_mm256_and_si256(vq31prodGHIJKLMN, vremainder_mask), _mm256_cmpgt_epi32(_mm256_setzero_si256(), vq31prodGHIJKLMN));
-      const __m256i vremOPQRSTUV =
-        _mm256_add_epi32(_mm256_and_si256(vq31prodOPQRSTUV, vremainder_mask), _mm256_cmpgt_epi32(_mm256_setzero_si256(), vq31prodOPQRSTUV));
-
-      const __m256i vremainder_threshold = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.remainder_threshold);
-      const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->gemmlowp_avx2.shift);
-      vacc01234567 =
-        _mm256_sub_epi32(_mm256_sra_epi32(vq31prod01234567, vshift), _mm256_cmpgt_epi32(vrem01234567, vremainder_threshold));
-      vacc89ABCDEF =
-        _mm256_sub_epi32(_mm256_sra_epi32(vq31prod89ABCDEF, vshift), _mm256_cmpgt_epi32(vrem89ABCDEF, vremainder_threshold));
-      vaccGHIJKLMN =
-        _mm256_sub_epi32(_mm256_sra_epi32(vq31prodGHIJKLMN, vshift), _mm256_cmpgt_epi32(vremGHIJKLMN, vremainder_threshold));
-      vaccOPQRSTUV =
-        _mm256_sub_epi32(_mm256_sra_epi32(vq31prodOPQRSTUV, vshift), _mm256_cmpgt_epi32(vremOPQRSTUV, vremainder_threshold));
-
-      const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.output_zero_point);
+      const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
       const __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
       const __m256i voutGHIJOPQRKLMNSTUV = _mm256_adds_epi16(_mm256_packs_epi32(vaccGHIJKLMN, vaccOPQRSTUV), voutput_zero_point);
 
       __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(vout012389AB4567CDEF), _mm256_extracti128_si256(vout012389AB4567CDEF, 1)), _MM_SHUFFLE(3, 1, 2, 0));
       __m128i voutGHIJKLMNOPQRSTUV = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(voutGHIJOPQRKLMNSTUV), _mm256_extracti128_si256(voutGHIJOPQRKLMNSTUV, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->gemmlowp_avx2.output_min);
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->gemmlowp_avx2.output_max);
+      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
+      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_avx2.output_max);
       vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
       vout0123456789ABCDEF = _mm_min_epi8(vout0123456789ABCDEF, voutput_max);
       voutGHIJKLMNOPQRSTUV = _mm_max_epi8(voutGHIJKLMNOPQRSTUV, voutput_min);
@@ -382,46 +346,24 @@ void xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up32x9__avx2_mul16(
 
         k += 16;
 
-        const __m256i vmultiplier = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.multiplier);
-        const __m256i vrounding = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.rounding);
+        __m256 vfpacc01234567 = _mm256_cvtepi32_ps(vacc01234567);
+        __m256 vfpacc89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
 
-        const __m256i vacc1357 = _mm256_shuffle_epi32(vacc01234567, _MM_SHUFFLE(3, 3, 1, 1));
-        const __m256i vacc9BDF = _mm256_shuffle_epi32(vacc89ABCDEF, _MM_SHUFFLE(3, 3, 1, 1));
+        const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
+        vfpacc01234567 = _mm256_mul_ps(vfpacc01234567, vscale);
+        vfpacc89ABCDEF = _mm256_mul_ps(vfpacc89ABCDEF, vscale);
 
-        const __m256i vprod0246 = _mm256_add_epi64(_mm256_mul_epi32(vacc01234567, vmultiplier), vrounding);
-        const __m256i vprod1357 = _mm256_add_epi64(_mm256_mul_epi32(vacc1357, vmultiplier), vrounding);
-        const __m256i vprod8ACE = _mm256_add_epi64(_mm256_mul_epi32(vacc89ABCDEF, vmultiplier), vrounding);
-        const __m256i vprod9BDF = _mm256_add_epi64(_mm256_mul_epi32(vacc9BDF, vmultiplier), vrounding);
-
-        const __m256i vq31prod0246 = _mm256_srli_epi64(vprod0246, 31);
-        const __m256i vq31prod1357 = _mm256_add_epi64(vprod1357, vprod1357);
-        const __m256i vq31prod8ACE = _mm256_srli_epi64(vprod8ACE, 31);
-        const __m256i vq31prod9BDF = _mm256_add_epi64(vprod9BDF, vprod9BDF);
-
-        const __m256i vq31prod01234567 = _mm256_blend_epi16(vq31prod0246, vq31prod1357, 0xCC);
-        const __m256i vq31prod89ABCDEF = _mm256_blend_epi16(vq31prod8ACE, vq31prod9BDF, 0xCC);
-
-        const __m256i vremainder_mask = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.remainder_mask);
-        const __m256i vrem01234567 =
-          _mm256_add_epi32(_mm256_and_si256(vq31prod01234567, vremainder_mask), _mm256_cmpgt_epi32(_mm256_setzero_si256(), vq31prod01234567));
-        const __m256i vrem89ABCDEF =
-          _mm256_add_epi32(_mm256_and_si256(vq31prod89ABCDEF, vremainder_mask), _mm256_cmpgt_epi32(_mm256_setzero_si256(), vq31prod89ABCDEF));
-
-        const __m256i vremainder_threshold = _mm256_load_si256((const __m256i*) params->gemmlowp_avx2.remainder_threshold);
-        const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->gemmlowp_avx2.shift);
-        vacc01234567 =
-          _mm256_sub_epi32(_mm256_sra_epi32(vq31prod01234567, vshift), _mm256_cmpgt_epi32(vrem01234567, vremainder_threshold));
-        vacc89ABCDEF =
-          _mm256_sub_epi32(_mm256_sra_epi32(vq31prod89ABCDEF, vshift), _mm256_cmpgt_epi32(vrem89ABCDEF, vremainder_threshold));
+        vacc01234567 = _mm256_cvtps_epi32(vfpacc01234567);
+        vacc89ABCDEF = _mm256_cvtps_epi32(vfpacc89ABCDEF);
 
         w = (const void*) ((uintptr_t) w + 16 * sizeof(int32_t));
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->gemmlowp_avx2.output_zero_point);
+        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_avx2.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
         __m128i vout89ABCDEF = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc89ABCDEF), _mm256_extracti128_si256(vacc89ABCDEF, 1)), voutput_zero_point);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->gemmlowp_avx2.output_min);
-        const __m128i voutput_max = _mm_load_si128((const __m128i*) params->gemmlowp_avx2.output_max);
+        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
+        const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_avx2.output_max);
 
         __m128i vout0123456789ABCDEF = _mm_packs_epi16(vout01234567, vout89ABCDEF);
         vout0123456789ABCDEF = _mm_min_epi8(_mm_max_epi8(vout0123456789ABCDEF, voutput_min), voutput_max);
