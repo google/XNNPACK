@@ -7207,6 +7207,22 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
+  ADD_EXECUTABLE(qs8-vadd-bench bench/qs8-vadd.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qs8-vadd-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-vadd-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(qs8-vadd-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(qs8-vaddc-bench bench/qs8-vaddc.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qs8-vaddc-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-vaddc-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(qs8-vaddc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
   ADD_EXECUTABLE(qu8-gemm-bench bench/qu8-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qu8-gemm-bench PROPERTIES
     CXX_STANDARD 11

@@ -26,6 +26,48 @@ uint64_t GetCurrentCpuFrequency();
 // Can overestimate, but not underestimate LLC size.
 size_t GetMaxCacheSize();
 
+// Set number of elements for a unary elementwise microkernel such that:
+// - It is divisible by 2, 3, 4, 5, 6.
+// - It is divisible by AVX512 width.
+// - Total memory footprint does not exceed the characteristic cache size for 
+//   the architecture.
+template<class InType, class OutType>
+void UnaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
+  benchmark->ArgName("N");
+
+  size_t characteristic_l1 = 32 * 1024;
+  size_t characteristic_l2 = 256 * 1024;
+#if XNN_ARCH_ARM
+  characteristic_l1 = 16 * 1024;
+  characteristic_l2 = 128 * 1024;
+#endif  // XNN_ARCH_ARM
+
+  const size_t elementwise_size = sizeof(InType) + sizeof(OutType);
+  benchmark->Arg(characteristic_l1 / elementwise_size / 960 * 960);
+  benchmark->Arg(characteristic_l2 / elementwise_size / 960 * 960);
+}
+
+// Set number of elements for a binary elementwise microkernel such that:
+// - It is divisible by 2, 3, 4, 5, 6.
+// - It is divisible by AVX512 width.
+// - Total memory footprint does not exceed the characteristic cache size for 
+//   the architecture.
+template<class InType, class OutType>
+void BinaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
+  benchmark->ArgName("N");
+
+  size_t characteristic_l1 = 32 * 1024;
+  size_t characteristic_l2 = 256 * 1024;
+#if XNN_ARCH_ARM
+  characteristic_l1 = 16 * 1024;
+  characteristic_l2 = 128 * 1024;
+#endif  // XNN_ARCH_ARM
+
+  const size_t elementwise_size = 2 * sizeof(InType) + sizeof(OutType);
+  benchmark->Arg(characteristic_l1 / elementwise_size / 960 * 960);
+  benchmark->Arg(characteristic_l2 / elementwise_size / 960 * 960);
+}
+
 // Set multi-threading parameters appropriate for the processor.
 void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark);
 
