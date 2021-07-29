@@ -330,6 +330,8 @@ static void DWConvEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_dwconv_up32x9__avx2_mul16_vpmovsx);
   BENCHMARK_QS8_END2END(qs8_dwconv_up16x9__avx2_mul16_vpunpck);
   BENCHMARK_QS8_END2END(qs8_dwconv_up32x9__avx2_mul16_vpunpck);
+  BENCHMARK_QS8_END2END(qs8_dwconv_up16x9__avx2_mul16_add16_vpunpck);
+  BENCHMARK_QS8_END2END(qs8_dwconv_up32x9__avx2_mul16_add16_vpunpck);
   BENCHMARK_QS8_END2END(qs8_dwconv_up8x9__avx2_mul32);
   BENCHMARK_QS8_END2END(qs8_dwconv_up16x9__avx2_mul32);
   BENCHMARK_QS8_END2END(qs8_dwconv_up32x9__avx2_mul32);

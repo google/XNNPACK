@@ -402,6 +402,8 @@ static void DWConvBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(qs8_dwconv_up32x9__avx2_mul16_vpmovsx);
   BENCHMARK_DWCONV(qs8_dwconv_up16x9__avx2_mul16_vpunpck);
   BENCHMARK_DWCONV(qs8_dwconv_up32x9__avx2_mul16_vpunpck);
+  BENCHMARK_DWCONV(qs8_dwconv_up16x9__avx2_mul16_add16_vpunpck);
+  BENCHMARK_DWCONV(qs8_dwconv_up32x9__avx2_mul16_add16_vpunpck);
   BENCHMARK_DWCONV(qs8_dwconv_up8x9__avx2_mul32);
   BENCHMARK_DWCONV(qs8_dwconv_up16x9__avx2_mul32);
   BENCHMARK_DWCONV(qs8_dwconv_up32x9__avx2_mul32);
