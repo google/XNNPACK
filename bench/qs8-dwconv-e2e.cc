@@ -172,6 +172,18 @@ static void DWConvEnd2EndBenchmark(
       xnn_init_qs8_conv_minmax_fp32_avx2_params,
       32 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckAVX2);
   }
+  static void qs8_dwconv_up16x9__avx2_mul16_add16_vpunpck(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul16_add16_vpunpck,
+      xnn_init_qs8_conv_minmax_fp32_avx2_params,
+      16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckAVX2);
+  }
+  static void qs8_dwconv_up32x9__avx2_mul16_add16_vpunpck(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up32x9__avx2_mul16_add16_vpunpck,
+      xnn_init_qs8_conv_minmax_fp32_avx2_params,
+      32 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckAVX2);
+  }
   static void qs8_dwconv_up8x9__avx2_mul32(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_qs8_dwconv_minmax_fp32_ukernel_up8x9__avx2_mul32,

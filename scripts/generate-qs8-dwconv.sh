@@ -481,17 +481,29 @@ tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpmovsx.c.in -D CHANNEL_TILE=32 -D
 tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpmovsx.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up16x25-minmax-fp32-avx2-mul16-vpmovsx.c
 tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpmovsx.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up32x25-minmax-fp32-avx2-mul16-vpmovsx.c
 
-tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9  -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up16x9-minmax-fp32-avx2-mul16-vpunpck.c
-tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9  -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up32x9-minmax-fp32-avx2-mul16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9  -D DATATYPE=QC8 -D ADD16=0 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up16x9-minmax-fp32-avx2-mul16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9  -D DATATYPE=QC8 -D ADD16=0 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up32x9-minmax-fp32-avx2-mul16-vpunpck.c
 
-tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9  -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up16x9-minmax-fp32-avx2-mul16-vpunpck.c
-tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9  -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up32x9-minmax-fp32-avx2-mul16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9  -D DATATYPE=QC8 -D ADD16=1 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up16x9-minmax-fp32-avx2-mul16-add16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9  -D DATATYPE=QC8 -D ADD16=1 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up32x9-minmax-fp32-avx2-mul16-add16-vpunpck.c
 
-tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up16x25-minmax-fp32-avx2-mul16-vpunpck.c
-tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up32x25-minmax-fp32-avx2-mul16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9  -D DATATYPE=QS8 -D ADD16=0 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up16x9-minmax-fp32-avx2-mul16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9  -D DATATYPE=QS8 -D ADD16=0 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up32x9-minmax-fp32-avx2-mul16-vpunpck.c
 
-tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up16x25-minmax-fp32-avx2-mul16-vpunpck.c
-tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up32x25-minmax-fp32-avx2-mul16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9  -D DATATYPE=QS8 -D ADD16=1 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up16x9-minmax-fp32-avx2-mul16-add16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9  -D DATATYPE=QS8 -D ADD16=1 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up32x9-minmax-fp32-avx2-mul16-add16-vpunpck.c
+
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D DATATYPE=QC8 -D ADD16=0 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up16x25-minmax-fp32-avx2-mul16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D DATATYPE=QC8 -D ADD16=0 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up32x25-minmax-fp32-avx2-mul16-vpunpck.c
+
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D DATATYPE=QC8 -D ADD16=1 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up16x25-minmax-fp32-avx2-mul16-add16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D DATATYPE=QC8 -D ADD16=1 -D REQUANTIZATION=FP32     -o src/qc8-dwconv/gen/up32x25-minmax-fp32-avx2-mul16-add16-vpunpck.c
+
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D DATATYPE=QS8 -D ADD16=0 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up16x25-minmax-fp32-avx2-mul16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D DATATYPE=QS8 -D ADD16=0 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up32x25-minmax-fp32-avx2-mul16-vpunpck.c
+
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D DATATYPE=QS8 -D ADD16=1 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up16x25-minmax-fp32-avx2-mul16-add16-vpunpck.c
+tools/xngen src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D DATATYPE=QS8 -D ADD16=1 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/up32x25-minmax-fp32-avx2-mul16-add16-vpunpck.c
 
 tools/xngen src/qs8-dwconv/unipass-avx2-mul32.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9  -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-dwconv/gen/up8x9-minmax-gemmlowp-avx2-mul32.c
 tools/xngen src/qs8-dwconv/unipass-avx2-mul32.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9  -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-dwconv/gen/up16x9-minmax-gemmlowp-avx2-mul32.c
