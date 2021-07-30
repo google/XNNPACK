@@ -1101,8 +1101,10 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/1x8c2-minmax-rndnu-neon-mlal-padal-dup.c
   src/qs8-igemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
   src/qs8-igemm/gen/2x8c2-minmax-rndnu-neon-mlal-padal-dup.c
-  src/qs8-vadd/gen/minmax-neon-ld64-x8.c
-  src/qs8-vaddc/gen/minmax-neon-ld64-x8.c
+  src/qs8-vadd/gen/minmax-neon-ld64-x16.c
+  src/qs8-vadd/gen/minmax-neon-ld64-x32.c
+  src/qs8-vaddc/gen/minmax-neon-ld64-x16.c
+  src/qs8-vaddc/gen/minmax-neon-ld64-x32.c
   src/qu8-avgpool/9p8x-minmax-neon-c8.c
   src/qu8-avgpool/9x-minmax-neon-c8.c
   src/qu8-dwconv/gen/up8x9-minmax-rndnu-neon-mul16.c
