@@ -33,7 +33,9 @@ static void qs8_vadd(
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
+  auto i8rng = std::bind(
+    std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+    std::ref(rng));
 
   std::vector<int8_t, AlignedAllocator<int8_t, 64>> a(num_elements);
   std::vector<int8_t, AlignedAllocator<int8_t, 64>> b(num_elements);
@@ -182,25 +184,25 @@ static void qs8_vadd(
 
   BENCHMARK_CAPTURE(qs8_vadd, avx_mul32_ld32_x8,
                     xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_x8,
-                    xnn_init_qs8_add_minmax_sse4_mul16_params,
+                    xnn_init_qs8_add_minmax_sse4_mul32_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qs8_vadd, avx_mul32_ld32_x16,
                     xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_x16,
-                    xnn_init_qs8_add_minmax_sse4_mul16_params,
+                    xnn_init_qs8_add_minmax_sse4_mul32_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qs8_vadd, avx_mul32_ld32_x24,
                     xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_x24,
-                    xnn_init_qs8_add_minmax_sse4_mul16_params,
+                    xnn_init_qs8_add_minmax_sse4_mul32_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qs8_vadd, avx_mul32_ld32_x32,
                     xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_x32,
-                    xnn_init_qs8_add_minmax_sse4_mul16_params,
+                    xnn_init_qs8_add_minmax_sse4_mul32_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
@@ -232,25 +234,25 @@ static void qs8_vadd(
 
   BENCHMARK_CAPTURE(qs8_vadd, sse41_mul32_ld32_x8,
                     xnn_qs8_vadd_minmax_ukernel__sse41_mul32_ld32_x8,
-                    xnn_init_qs8_add_minmax_sse4_mul16_params,
+                    xnn_init_qs8_add_minmax_sse4_mul32_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qs8_vadd, sse41_mul32_ld32_x16,
                     xnn_qs8_vadd_minmax_ukernel__sse41_mul32_ld32_x16,
-                    xnn_init_qs8_add_minmax_sse4_mul16_params,
+                    xnn_init_qs8_add_minmax_sse4_mul32_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qs8_vadd, sse41_mul32_ld32_x24,
                     xnn_qs8_vadd_minmax_ukernel__sse41_mul32_ld32_x24,
-                    xnn_init_qs8_add_minmax_sse4_mul16_params,
+                    xnn_init_qs8_add_minmax_sse4_mul32_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qs8_vadd, sse41_mul32_ld32_x32,
                     xnn_qs8_vadd_minmax_ukernel__sse41_mul32_ld32_x32,
-                    xnn_init_qs8_add_minmax_sse4_mul16_params,
+                    xnn_init_qs8_add_minmax_sse4_mul32_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();

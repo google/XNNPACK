@@ -7279,6 +7279,24 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qu8_vadd_bench",
+    srcs = [
+        "bench/qu8-vadd.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_vaddc_bench",
+    srcs = [
+        "bench/qu8-vaddc.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f16_igemm_bench",
     srcs = [
         "bench/f16-igemm.cc",
