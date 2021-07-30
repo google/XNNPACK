@@ -581,7 +581,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_p
         SQXTN2  v5.16b, v25.8h
         SQXTN2  v6.16b, v26.8h
         SQXTN2  v7.16b, v27.8h
-        SUB     x11, x11, 15              // rewind params pointer
+        SUB     x11, x11, 15          // rewind params pointer
 
         SMAX    v4.16b, v4.16b, v0.16b
         SMAX    v5.16b, v5.16b, v0.16b

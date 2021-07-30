@@ -33,7 +33,7 @@
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm
 
-        LDP     x10, x11, [sp]           // cn_stride, params
+        LDP     x10, x11, [sp]          // cn_stride, params
         ADD     x2, x2, 7               // kc = (kc + 7) & ~7
         BIC     x2, x2, 7
 
@@ -192,7 +192,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_pad
         SQXTN   v0.8b, v0.8h
         LD1R    {v17.16b}, [x11]
         SMAX    v0.8b, v0.8b, v1.8b
-        SUB     x11, x11, 11              // rewind params pointer
+        SUB     x11, x11, 11            // rewind params pointer
         SMIN    v0.8b, v0.8b, v17.8b
         B.LO    5f
 

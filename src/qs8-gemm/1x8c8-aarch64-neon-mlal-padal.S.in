@@ -10,6 +10,7 @@ $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$REWIND_DECREMENT = 3 if CHANNELWISE else {"GEMMLOWP": 11, "RNDNU": 15, "FP32": 7}[REQUANTIZATION]
 # void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__aarch64_neon_mlal_padal${"_prfm" if PREFETCH else ""}(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -33,7 +34,7 @@ $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax
 
 BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__aarch64_neon_mlal_padal${"_prfm" if PREFETCH else ""}
 
-        LDP     x10, x11, [sp]           // cn_stride, params
+        LDP     x10, x11, [sp]          // cn_stride, params
         ADD     x2, x2, 7               // kc = (kc + 7) & ~7
         BIC     x2, x2, 7
 
@@ -229,14 +230,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8
         SQXTN   v0.8b, v0.8h
         LD1R    {v17.16b}, [x11]
         SMAX    v0.8b, v0.8b, v1.8b
-        $if REQUANTIZATION == "GEMMLOWP":
-          SUB     x11, x11, 11              // rewind params pointer
-        $elif REQUANTIZATION == "RNDNU":
-          SUB     x11, x11, 15              // rewind params pointer
-        $elif REQUANTIZATION == "FP32" and not CHANNELWISE:
-          SUB     x11, x11, 7               // rewind params pointer
-        $else:
-          SUB     x11, x11, 3               // rewind params pointer
+        SUB     x11, x11, ${REWIND_DECREMENT}            // rewind params pointer
         SMIN    v0.8b, v0.8b, v17.8b
         B.LO    5f
 

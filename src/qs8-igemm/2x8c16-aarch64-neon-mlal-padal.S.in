@@ -10,6 +10,7 @@ $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$REWIND_DECREMENT = 3 if CHANNELWISE else {"GEMMLOWP": 11, "RNDNU": 15, "FP32": 7}[REQUANTIZATION]
 # void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__aarch64_neon_mlal_padal(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -242,14 +243,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x
         LD1R    {v1.16b}, [x11], 1
         LD1R    {v2.16b}, [x11]
         SMAX    v0.16b, v0.16b, v1.16b
-        $if REQUANTIZATION == "GEMMLOWP":
-          SUB     x11, x11, 11              // rewind params pointer
-        $elif REQUANTIZATION == "RNDNU":
-          SUB     x11, x11, 15              // rewind params pointer
-        $elif REQUANTIZATION == "FP32" and not CHANNELWISE:
-          SUB     x11, x11, 7               // rewind params pointer
-        $else:
-          SUB     x11, x11, 3               // rewind params pointer
+        SUB     x11, x11, ${REWIND_DECREMENT}          // rewind params pointer
         SMIN    v0.16b, v0.16b, v2.16b
         B.LO    3f
 
