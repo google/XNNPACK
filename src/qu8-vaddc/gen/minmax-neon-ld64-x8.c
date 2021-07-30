@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-vaddc/neon-ld64.c.in
+//   Template: src/qs8-vaddc/neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -13,8 +13,6 @@
 
 #include <xnnpack/vadd.h>
 
-#include <inttypes.h>
-
 
 void xnn_qu8_vaddc_minmax_ukernel__neon_ld64_x8(
     size_t n,
@@ -27,8 +25,8 @@ void xnn_qu8_vaddc_minmax_ukernel__neon_ld64_x8(
   const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
   const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
   const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->neon.output_min);
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->neon.output_max);
+  const uint8x8_t voutput_min = vld1_dup_u8(&params->neon.output_min);
+  const uint8x8_t voutput_max = vld1_dup_u8(&params->neon.output_max);
 
   const int32_t vxb = (int32_t) *input_b - (int32_t) params->neon.b_zero_point;
   const int32_t vb = params->neon.b_multiplier;
@@ -49,9 +47,9 @@ void xnn_qu8_vaddc_minmax_ukernel__neon_ld64_x8(
 
     uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
 
-    vout01234567 = vmax_u8(vout01234567, vget_low_u8(voutput_min));
+    vout01234567 = vmax_u8(vout01234567, voutput_min);
 
-    vout01234567 = vmin_u8(vout01234567, vget_low_u8(voutput_max));
+    vout01234567 = vmin_u8(vout01234567, voutput_max);
 
     vst1_u8(output, vout01234567); output += 8;
   }
@@ -70,8 +68,8 @@ void xnn_qu8_vaddc_minmax_ukernel__neon_ld64_x8(
       const int16x8_t vacc01234567 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567)), voutput_zero_point);
 
       uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
-      vout01234567 = vmax_u8(vout01234567, vget_low_u8(voutput_min));
-      vout01234567 = vmin_u8(vout01234567, vget_low_u8(voutput_max));
+      vout01234567 = vmax_u8(vout01234567, voutput_min);
+      vout01234567 = vmin_u8(vout01234567, voutput_max);
 
       if (n & (4 * sizeof(uint8_t))) {
         vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u8(vout01234567), 0); output += 4;

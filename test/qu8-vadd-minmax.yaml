@@ -6,6 +6,8 @@
   init: xnn_init_qu8_add_minmax_neon_params
 - name: xnn_qu8_vadd_minmax_ukernel__neon_ld64_x16
   init: xnn_init_qu8_add_minmax_neon_params
+- name: xnn_qu8_vadd_minmax_ukernel__neon_ld128_x16
+  init: xnn_init_qu8_add_minmax_neon_params
 - name: xnn_qu8_vadd_minmax_ukernel__sse2_mul16_ld64_x8
   init: xnn_init_qu8_add_minmax_sse2_params
 - name: xnn_qu8_vadd_minmax_ukernel__sse2_mul16_ld64_x16

@@ -1668,10 +1668,14 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-vadd/gen/minmax-neon-ld64-x16.c
   src/qs8-vadd/gen/minmax-neon-ld64-x24.c
   src/qs8-vadd/gen/minmax-neon-ld64-x32.c
+  src/qs8-vadd/gen/minmax-neon-ld128-x16.c
+  src/qs8-vadd/gen/minmax-neon-ld128-x32.c
   src/qs8-vaddc/gen/minmax-neon-ld64-x8.c
   src/qs8-vaddc/gen/minmax-neon-ld64-x16.c
   src/qs8-vaddc/gen/minmax-neon-ld64-x24.c
   src/qs8-vaddc/gen/minmax-neon-ld64-x32.c
+  src/qs8-vaddc/gen/minmax-neon-ld128-x16.c
+  src/qs8-vaddc/gen/minmax-neon-ld128-x32.c
   src/qu8-avgpool/9p8x-minmax-neon-c8.c
   src/qu8-avgpool/9x-minmax-neon-c8.c
   src/qu8-dwconv/gen/up8x9-minmax-fp32-neon-mul16.c
@@ -1705,8 +1709,10 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-requantization/rndna-neon.c
   src/qu8-vadd/gen/minmax-neon-ld64-x8.c
   src/qu8-vadd/gen/minmax-neon-ld64-x16.c
+  src/qu8-vadd/gen/minmax-neon-ld128-x16.c
   src/qu8-vaddc/gen/minmax-neon-ld64-x8.c
   src/qu8-vaddc/gen/minmax-neon-ld64-x16.c
+  src/qu8-vaddc/gen/minmax-neon-ld128-x16.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c

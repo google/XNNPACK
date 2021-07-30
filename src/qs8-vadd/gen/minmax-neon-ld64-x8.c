@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-vadd/neon-ld64.c.in
+//   Template: src/qs8-vadd/neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -27,8 +27,8 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x8(
   const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.b_multiplier);
   const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
   const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+  const int8x8_t voutput_min = vld1_dup_s8(&params->neon.output_min);
+  const int8x8_t voutput_max = vld1_dup_s8(&params->neon.output_max);
 
   for (; n >= 8 * sizeof(int8_t); n -= 8 * sizeof(int8_t)) {
     const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;
@@ -50,9 +50,9 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x8(
 
     int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
 
-    vout01234567 = vmax_s8(vout01234567, vget_low_s8(voutput_min));
+    vout01234567 = vmax_s8(vout01234567, voutput_min);
 
-    vout01234567 = vmin_s8(vout01234567, vget_low_s8(voutput_max));
+    vout01234567 = vmin_s8(vout01234567, voutput_max);
 
     vst1_s8(output, vout01234567); output += 8;
   }
@@ -76,8 +76,8 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_x8(
       const int16x8_t vacc01234567 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567)), voutput_zero_point);
 
       int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
-      vout01234567 = vmax_s8(vout01234567, vget_low_s8(voutput_min));
-      vout01234567 = vmin_s8(vout01234567, vget_low_s8(voutput_max));
+      vout01234567 = vmax_s8(vout01234567, voutput_min);
+      vout01234567 = vmin_s8(vout01234567, voutput_max);
 
       if (n & (4 * sizeof(int8_t))) {
         vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_s8(vout01234567), 0); output += 4;

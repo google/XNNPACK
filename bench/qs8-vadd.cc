@@ -91,6 +91,19 @@ static void qs8_vadd(
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
+
+  BENCHMARK_CAPTURE(qs8_vadd, neon_ld128_x16,
+                    xnn_qs8_vadd_minmax_ukernel__neon_ld128_x16,
+                    xnn_init_qs8_add_minmax_neon_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs8_vadd, neon_ld128_x32,
+                    xnn_qs8_vadd_minmax_ukernel__neon_ld128_x32,
+                    xnn_init_qs8_add_minmax_neon_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
+    ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

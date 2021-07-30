@@ -14,15 +14,20 @@
 #include <xnnpack/vadd.h>
 
 
-void xnn_qu8_vadd_minmax_ukernel__neon_ld64_x16(
+void xnn_qu8_vadd_minmax_ukernel__neon_ld128_x16(
     size_t n,
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
-  const uint8x8_t va_zero_point = vld1_dup_u8(&params->neon.a_zero_point);
-  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->neon.b_zero_point);
+  #if XNN_ARCH_ARM64
+    const uint8x16_t va_zero_point = vld1q_dup_u8(&params->neon.a_zero_point);
+    const uint8x16_t vb_zero_point = vld1q_dup_u8(&params->neon.b_zero_point);
+  #else
+    const uint8x8_t va_zero_point = vld1_dup_u8(&params->neon.a_zero_point);
+    const uint8x8_t vb_zero_point = vld1_dup_u8(&params->neon.b_zero_point);
+  #endif
   const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
   const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.b_multiplier);
   const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
@@ -31,15 +36,20 @@ void xnn_qu8_vadd_minmax_ukernel__neon_ld64_x16(
   const uint8x16_t voutput_max = vld1q_dup_u8(&params->neon.output_max);
 
   for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
-    const uint8x8_t va01234567 = vld1_u8(input_a); input_a += 8;
-    const uint8x8_t vb01234567 = vld1_u8(input_b); input_b += 8;
-    const uint8x8_t va89ABCDEF = vld1_u8(input_a); input_a += 8;
-    const uint8x8_t vb89ABCDEF = vld1_u8(input_b); input_b += 8;
+    const uint8x16_t va0123456789ABCDEF = vld1q_u8(input_a); input_a += 16;
+    const uint8x16_t vb0123456789ABCDEF = vld1q_u8(input_b); input_b += 16;
 
-    const int16x8_t vxa01234567 = vreinterpretq_s16_u16(vsubl_u8(va01234567, va_zero_point));
-    const int16x8_t vxb01234567 = vreinterpretq_s16_u16(vsubl_u8(vb01234567, vb_zero_point));
-    const int16x8_t vxa89ABCDEF = vreinterpretq_s16_u16(vsubl_u8(va89ABCDEF, va_zero_point));
-    const int16x8_t vxb89ABCDEF = vreinterpretq_s16_u16(vsubl_u8(vb89ABCDEF, vb_zero_point));
+    #if XNN_ARCH_ARM64
+      const int16x8_t vxa01234567 = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(va0123456789ABCDEF), vget_low_u8(va_zero_point)));
+      const int16x8_t vxa89ABCDEF = vreinterpretq_s16_u16(vsubl_high_u8(va0123456789ABCDEF, va_zero_point));
+      const int16x8_t vxb01234567 = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(vb0123456789ABCDEF), vget_low_u8(vb_zero_point)));
+      const int16x8_t vxb89ABCDEF = vreinterpretq_s16_u16(vsubl_high_u8(vb0123456789ABCDEF, vb_zero_point));
+    #else  // !XNN_ARCH_ARM64
+      const int16x8_t vxa01234567 = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(va0123456789ABCDEF), va_zero_point));
+      const int16x8_t vxa89ABCDEF = vreinterpretq_s16_u16(vsubl_u8(vget_high_u8(va0123456789ABCDEF), va_zero_point));
+      const int16x8_t vxb01234567 = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(vb0123456789ABCDEF), vb_zero_point));
+      const int16x8_t vxb89ABCDEF = vreinterpretq_s16_u16(vsubl_u8(vget_high_u8(vb0123456789ABCDEF), vb_zero_point));
+    #endif  // XNN_ARCH_ARM64
 
     int32x4_t vacc0123 = vmulq_s32(vmovl_s16(vget_low_s16(vxa01234567)), va_multiplier);
     int32x4_t vacc4567 = vmulq_s32(vmovl_s16(vget_high_s16(vxa01234567)), va_multiplier);
@@ -72,8 +82,13 @@ void xnn_qu8_vadd_minmax_ukernel__neon_ld64_x16(
       const uint8x8_t va01234567 = vld1_u8(input_a); input_a += 8;
       const uint8x8_t vb01234567 = vld1_u8(input_b); input_b += 8;
 
-      const int16x8_t vxa01234567 = vreinterpretq_s16_u16(vsubl_u8(va01234567, va_zero_point));
-      const int16x8_t vxb01234567 = vreinterpretq_s16_u16(vsubl_u8(vb01234567, vb_zero_point));
+      #if XNN_ARCH_ARM64
+        const int16x8_t vxa01234567 = vreinterpretq_s16_u16(vsubl_u8(va01234567, vget_low_u8(va_zero_point)));
+        const int16x8_t vxb01234567 = vreinterpretq_s16_u16(vsubl_u8(vb01234567, vget_low_u8(vb_zero_point)));
+      #else  // !XNN_ARCH_ARM64
+        const int16x8_t vxa01234567 = vreinterpretq_s16_u16(vsubl_u8(va01234567, va_zero_point));
+        const int16x8_t vxb01234567 = vreinterpretq_s16_u16(vsubl_u8(vb01234567, vb_zero_point));
+      #endif  // XNN_ARCH_ARM64
 
       int32x4_t vacc0123 = vmulq_s32(vmovl_s16(vget_low_s16(vxa01234567)), va_multiplier);
       int32x4_t vacc4567 = vmulq_s32(vmovl_s16(vget_high_s16(vxa01234567)), va_multiplier);

@@ -39,21 +39,31 @@ tools/xngen src/qs8-vaddc/wasmsimd.c.in -D BATCH_TILE=8  -D DATATYPE=QU8 -o src/
 tools/xngen src/qs8-vaddc/wasmsimd.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/minmax-wasmsimd-x16.c
 
 ################################### ARM NEON ##################################
-tools/xngen src/qs8-vadd/neon-ld64.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-neon-ld64-x8.c
-tools/xngen src/qs8-vadd/neon-ld64.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-neon-ld64-x16.c
-tools/xngen src/qs8-vadd/neon-ld64.c.in -D BATCH_TILE=24 -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-neon-ld64-x24.c
-tools/xngen src/qs8-vadd/neon-ld64.c.in -D BATCH_TILE=32 -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-neon-ld64-x32.c
+tools/xngen src/qs8-vadd/neon.c.in -D BATCH_TILE=8  -D LD128=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-neon-ld64-x8.c
+tools/xngen src/qs8-vadd/neon.c.in -D BATCH_TILE=16 -D LD128=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-neon-ld64-x16.c
+tools/xngen src/qs8-vadd/neon.c.in -D BATCH_TILE=24 -D LD128=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-neon-ld64-x24.c
+tools/xngen src/qs8-vadd/neon.c.in -D BATCH_TILE=32 -D LD128=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-neon-ld64-x32.c
 
-tools/xngen src/qs8-vadd/neon-ld64.c.in -D BATCH_TILE=8  -D DATATYPE=QU8 -o src/qu8-vadd/gen/minmax-neon-ld64-x8.c
-tools/xngen src/qs8-vadd/neon-ld64.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/qu8-vadd/gen/minmax-neon-ld64-x16.c
+tools/xngen src/qs8-vadd/neon.c.in -D BATCH_TILE=16 -D LD128=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-neon-ld128-x16.c
+tools/xngen src/qs8-vadd/neon.c.in -D BATCH_TILE=32 -D LD128=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-neon-ld128-x32.c
 
-tools/xngen src/qs8-vaddc/neon-ld64.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/qs8-vaddc/gen/minmax-neon-ld64-x8.c
-tools/xngen src/qs8-vaddc/neon-ld64.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/minmax-neon-ld64-x16.c
-tools/xngen src/qs8-vaddc/neon-ld64.c.in -D BATCH_TILE=24 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/minmax-neon-ld64-x24.c
-tools/xngen src/qs8-vaddc/neon-ld64.c.in -D BATCH_TILE=32 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/minmax-neon-ld64-x32.c
+tools/xngen src/qs8-vadd/neon.c.in -D BATCH_TILE=8  -D LD128=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/minmax-neon-ld64-x8.c
+tools/xngen src/qs8-vadd/neon.c.in -D BATCH_TILE=16 -D LD128=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/minmax-neon-ld64-x16.c
 
-tools/xngen src/qs8-vaddc/neon-ld64.c.in -D BATCH_TILE=8  -D DATATYPE=QU8 -o src/qu8-vaddc/gen/minmax-neon-ld64-x8.c
-tools/xngen src/qs8-vaddc/neon-ld64.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/minmax-neon-ld64-x16.c
+tools/xngen src/qs8-vadd/neon.c.in -D BATCH_TILE=16 -D LD128=1 -D DATATYPE=QU8 -o src/qu8-vadd/gen/minmax-neon-ld128-x16.c
+
+tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=8  -D LD128=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/minmax-neon-ld64-x8.c
+tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=16 -D LD128=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/minmax-neon-ld64-x16.c
+tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=24 -D LD128=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/minmax-neon-ld64-x24.c
+tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=32 -D LD128=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/minmax-neon-ld64-x32.c
+
+tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=16 -D LD128=1 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/minmax-neon-ld128-x16.c
+tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=32 -D LD128=1 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/minmax-neon-ld128-x32.c
+
+tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=8  -D LD128=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/minmax-neon-ld64-x8.c
+tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=16 -D LD128=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/minmax-neon-ld64-x16.c
+
+tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=16 -D LD128=1 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/minmax-neon-ld128-x16.c
 
 ################################### x86 SSE ###################################
 tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x8.c

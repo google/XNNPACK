@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-vadd/neon-ld64.c.in
+//   Template: src/qs8-vadd/neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC

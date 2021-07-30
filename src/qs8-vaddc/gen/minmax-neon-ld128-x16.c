@@ -14,14 +14,18 @@
 #include <xnnpack/vadd.h>
 
 
-void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16(
+void xnn_qs8_vaddc_minmax_ukernel__neon_ld128_x16(
     size_t n,
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
-  const int8x8_t va_zero_point = vld1_dup_s8(&params->neon.a_zero_point);
+  #if XNN_ARCH_ARM64
+    const int8x16_t va_zero_point = vld1q_dup_s8(&params->neon.a_zero_point);
+  #else
+    const int8x8_t va_zero_point = vld1_dup_s8(&params->neon.a_zero_point);
+  #endif
   const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
   const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
   const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
@@ -33,11 +37,15 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16(
   const int32x4_t vbias = vdupq_n_s32(vxb * vb);
 
   for (; n >= 16 * sizeof(int8_t); n -= 16 * sizeof(int8_t)) {
-    const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;
-    const int8x8_t va89ABCDEF = vld1_s8(input_a); input_a += 8;
+    const int8x16_t va0123456789ABCDEF = vld1q_s8(input_a); input_a += 16;
 
-    const int16x8_t vxa01234567 = vsubl_s8(va01234567, va_zero_point);
-    const int16x8_t vxa89ABCDEF = vsubl_s8(va89ABCDEF, va_zero_point);
+    #if XNN_ARCH_ARM64
+      const int16x8_t vxa01234567 = vsubl_s8(vget_low_s8(va0123456789ABCDEF), vget_low_s8(va_zero_point));
+      const int16x8_t vxa89ABCDEF = vsubl_high_s8(va0123456789ABCDEF, va_zero_point);
+    #else  // !XNN_ARCH_ARM64
+      const int16x8_t vxa01234567 = vsubl_s8(vget_low_s8(va0123456789ABCDEF), va_zero_point);
+      const int16x8_t vxa89ABCDEF = vsubl_s8(vget_high_s8(va0123456789ABCDEF), va_zero_point);
+    #endif  // XNN_ARCH_ARM64
 
     int32x4_t vacc0123 = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vxa01234567)), va_multiplier);
     int32x4_t vacc4567 = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vxa01234567)), va_multiplier);
@@ -64,7 +72,11 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16(
     do {
       const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;
 
-      const int16x8_t vxa01234567 = vsubl_s8(va01234567, va_zero_point);
+      #if XNN_ARCH_ARM64
+        const int16x8_t vxa01234567 = vsubl_s8(va01234567, vget_low_s8(va_zero_point));
+      #else  // !XNN_ARCH_ARM64
+        const int16x8_t vxa01234567 = vsubl_s8(va01234567, va_zero_point);
+      #endif
 
       int32x4_t vacc0123 = vmlaq_s32(vbias, vmovl_s16(vget_low_s16(vxa01234567)), va_multiplier);
       int32x4_t vacc4567 = vmlaq_s32(vbias, vmovl_s16(vget_high_s16(vxa01234567)), va_multiplier);

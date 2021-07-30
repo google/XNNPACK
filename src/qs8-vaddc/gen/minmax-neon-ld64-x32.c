@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-vaddc/neon-ld64.c.in
+//   Template: src/qs8-vaddc/neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -12,8 +12,6 @@
 #include <arm_neon.h>
 
 #include <xnnpack/vadd.h>
-
-#include <inttypes.h>
 
 
 void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x32(

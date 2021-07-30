@@ -1,0 +1,237 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["QS8", "QU8"]
+$assert BATCH_TILE % (16 if LD128 else 8) == 0
+$assert BATCH_TILE >= 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/vadd.h>
+
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$XINT8X8_T = {"QS8": "int8x8_t", "QU8": "uint8x8_t"}[DATATYPE]
+$XINT8X16_T = {"QS8": "int8x16_t", "QU8": "uint8x16_t"}[DATATYPE]
+$VLD1_X8 = {"QS8": "vld1_s8", "QU8": "vld1_u8"}[DATATYPE]
+$VLD1Q_X8 = {"QS8": "vld1q_s8", "QU8": "vld1q_u8"}[DATATYPE]
+$VLD1_DUP_X8 = {"QS8": "vld1_dup_s8", "QU8": "vld1_dup_u8"}[DATATYPE]
+$VLD1Q_DUP_X8 = {"QS8": "vld1q_dup_s8", "QU8": "vld1q_dup_u8"}[DATATYPE]
+$VST1_LANE_X8 = {"QS8": "vst1_lane_s8", "QU8": "vst1_lane_u8"}[DATATYPE]
+$VST1_X8 = {"QS8": "vst1_s8", "QU8": "vst1_u8"}[DATATYPE]
+$VST1Q_X8 = {"QS8": "vst1q_s8", "QU8": "vst1q_u8"}[DATATYPE]
+$VMIN_X8 = {"QS8": "vmin_s8", "QU8": "vmin_u8"}[DATATYPE]
+$VMAX_X8 = {"QS8": "vmax_s8", "QU8": "vmax_u8"}[DATATYPE]
+$VMINQ_X8 = {"QS8": "vminq_s8", "QU8": "vminq_u8"}[DATATYPE]
+$VMAXQ_X8 = {"QS8": "vmaxq_s8", "QU8": "vmaxq_u8"}[DATATYPE]
+$VQMOVXN_S16 = {"QS8": "vqmovn_s16", "QU8": "vqmovun_s16"}[DATATYPE]
+$VEXT_X8 = {"QS8": "vext_s8", "QU8": "vext_u8"}[DATATYPE]
+$VGET_LOW_X8 = {"QS8": "vget_low_s8", "QU8": "vget_low_u8"}[DATATYPE]
+$VCOMBINE_X8 = {"QS8": "vcombine_s8", "QU8": "vcombine_u8"}[DATATYPE]
+$VREINTERPRET_U32_X8 = {"QS8": "vreinterpret_u32_s8", "QU8": "vreinterpret_u32_u8"}[DATATYPE]
+$VREINTERPRET_U16_X8 = {"QS8": "vreinterpret_u16_s8", "QU8": "vreinterpret_u16_u8"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__neon_${"ld128" if LD128 else "ld64"}_x${BATCH_TILE}(
+    size_t n,
+    const ${XINT8_T}* input_a,
+    const ${XINT8_T}* input_b,
+    ${XINT8_T}* output,
+    const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+{
+  $if LD128:
+    #if XNN_ARCH_ARM64
+      const ${XINT8X16_T} va_zero_point = ${VLD1Q_DUP_X8}(&params->neon.a_zero_point);
+      const ${XINT8X16_T} vb_zero_point = ${VLD1Q_DUP_X8}(&params->neon.b_zero_point);
+    #else
+      const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->neon.a_zero_point);
+      const ${XINT8X8_T} vb_zero_point = ${VLD1_DUP_X8}(&params->neon.b_zero_point);
+    #endif
+  $else:
+    const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->neon.a_zero_point);
+    const ${XINT8X8_T} vb_zero_point = ${VLD1_DUP_X8}(&params->neon.b_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
+  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.b_multiplier);
+  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+  $if BATCH_TILE >= 16:
+    const ${XINT8X16_T} voutput_min = ${VLD1Q_DUP_X8}(&params->neon.output_min);
+    const ${XINT8X16_T} voutput_max = ${VLD1Q_DUP_X8}(&params->neon.output_max);
+  $else:
+    const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->neon.output_min);
+    const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->neon.output_max);
+
+  for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+    $if LD128:
+      $for N in range(0, BATCH_TILE, 16):
+        const ${XINT8X16_T} va${ABC[N:N+16]} = ${VLD1Q_X8}(input_a); input_a += 16;
+        const ${XINT8X16_T} vb${ABC[N:N+16]} = ${VLD1Q_X8}(input_b); input_b += 16;
+
+      #if XNN_ARCH_ARM64
+        $for N in range(0, BATCH_TILE, 16):
+          $if DATATYPE == "QU8":
+            const int16x8_t vxa${ABC[N:N+8]} = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(va${ABC[N:N+16]}), vget_low_u8(va_zero_point)));
+            const int16x8_t vxa${ABC[N+8:N+16]} = vreinterpretq_s16_u16(vsubl_high_u8(va${ABC[N:N+16]}, va_zero_point));
+            const int16x8_t vxb${ABC[N:N+8]} = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(vb${ABC[N:N+16]}), vget_low_u8(vb_zero_point)));
+            const int16x8_t vxb${ABC[N+8:N+16]} = vreinterpretq_s16_u16(vsubl_high_u8(vb${ABC[N:N+16]}, vb_zero_point));
+          $else:
+            const int16x8_t vxa${ABC[N:N+8]} = vsubl_s8(vget_low_s8(va${ABC[N:N+16]}), vget_low_s8(va_zero_point));
+            const int16x8_t vxa${ABC[N+8:N+16]} = vsubl_high_s8(va${ABC[N:N+16]}, va_zero_point);
+            const int16x8_t vxb${ABC[N:N+8]} = vsubl_s8(vget_low_s8(vb${ABC[N:N+16]}), vget_low_s8(vb_zero_point));
+            const int16x8_t vxb${ABC[N+8:N+16]} = vsubl_high_s8(vb${ABC[N:N+16]}, vb_zero_point);
+      #else  // !XNN_ARCH_ARM64
+        $for N in range(0, BATCH_TILE, 16):
+          $if DATATYPE == "QU8":
+            const int16x8_t vxa${ABC[N:N+8]} = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(va${ABC[N:N+16]}), va_zero_point));
+            const int16x8_t vxa${ABC[N+8:N+16]} = vreinterpretq_s16_u16(vsubl_u8(vget_high_u8(va${ABC[N:N+16]}), va_zero_point));
+            const int16x8_t vxb${ABC[N:N+8]} = vreinterpretq_s16_u16(vsubl_u8(vget_low_u8(vb${ABC[N:N+16]}), vb_zero_point));
+            const int16x8_t vxb${ABC[N+8:N+16]} = vreinterpretq_s16_u16(vsubl_u8(vget_high_u8(vb${ABC[N:N+16]}), vb_zero_point));
+          $else:
+            const int16x8_t vxa${ABC[N:N+8]} = vsubl_s8(vget_low_s8(va${ABC[N:N+16]}), va_zero_point);
+            const int16x8_t vxa${ABC[N+8:N+16]} = vsubl_s8(vget_high_s8(va${ABC[N:N+16]}), va_zero_point);
+            const int16x8_t vxb${ABC[N:N+8]} = vsubl_s8(vget_low_s8(vb${ABC[N:N+16]}), vb_zero_point);
+            const int16x8_t vxb${ABC[N+8:N+16]} = vsubl_s8(vget_high_s8(vb${ABC[N:N+16]}), vb_zero_point);
+      #endif  // XNN_ARCH_ARM64
+    $else:
+      $for N in range(0, BATCH_TILE, 8):
+        const ${XINT8X8_T} va${ABC[N:N+8]} = ${VLD1_X8}(input_a); input_a += 8;
+        const ${XINT8X8_T} vb${ABC[N:N+8]} = ${VLD1_X8}(input_b); input_b += 8;
+
+      $for N in range(0, BATCH_TILE, 8):
+        $if DATATYPE == "QU8":
+          const int16x8_t vxa${ABC[N:N+8]} = vreinterpretq_s16_u16(vsubl_u8(va${ABC[N:N+8]}, va_zero_point));
+          const int16x8_t vxb${ABC[N:N+8]} = vreinterpretq_s16_u16(vsubl_u8(vb${ABC[N:N+8]}, vb_zero_point));
+        $else:
+          const int16x8_t vxa${ABC[N:N+8]} = vsubl_s8(va${ABC[N:N+8]}, va_zero_point);
+          const int16x8_t vxb${ABC[N:N+8]} = vsubl_s8(vb${ABC[N:N+8]}, vb_zero_point);
+
+    $for N in range(0, BATCH_TILE, 8):
+      int32x4_t vacc${ABC[N:N+4]} = vmulq_s32(vmovl_s16(vget_low_s16(vxa${ABC[N:N+8]})), va_multiplier);
+      int32x4_t vacc${ABC[N+4:N+8]} = vmulq_s32(vmovl_s16(vget_high_s16(vxa${ABC[N:N+8]})), va_multiplier);
+
+    $for N in range(0, BATCH_TILE, 8):
+      vacc${ABC[N:N+4]} = vmlaq_s32(vacc${ABC[N:N+4]}, vmovl_s16(vget_low_s16(vxb${ABC[N:N+8]})), vb_multiplier);
+      vacc${ABC[N+4:N+8]} = vmlaq_s32(vacc${ABC[N+4:N+8]}, vmovl_s16(vget_high_s16(vxb${ABC[N:N+8]})), vb_multiplier);
+
+    $for N in range(0, BATCH_TILE, 4):
+      vacc${ABC[N:N+4]} = vrshlq_s32(vacc${ABC[N:N+4]}, vright_shift);
+
+    $for N in range(0, BATCH_TILE, 8):
+      const int16x8_t vacc${ABC[N:N+8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${ABC[N:N+4]}), vqmovn_s32(vacc${ABC[N+4:N+8]})), voutput_zero_point);
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        ${XINT8X16_T} vout${ABC[N:N+16]} = ${VCOMBINE_X8}(${VQMOVXN_S16}(vacc${ABC[N:N+8]}), ${VQMOVXN_S16}(vacc${ABC[N+8:N+16]}));
+      $else:
+        ${XINT8X8_T} vout${ABC[N:N+8]} = ${VQMOVXN_S16}(vacc${ABC[N:N+8]});
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        vout${ABC[N:N+16]} = ${VMAXQ_X8}(vout${ABC[N:N+16]}, voutput_min);
+      $elif BATCH_TILE >= 16:
+        vout${ABC[N:N+8]} = ${VMAX_X8}(vout${ABC[N:N+8]}, ${VGET_LOW_X8}(voutput_min));
+      $else:
+        vout${ABC[N:N+8]} = ${VMAX_X8}(vout${ABC[N:N+8]}, voutput_min);
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        vout${ABC[N:N+16]} = ${VMINQ_X8}(vout${ABC[N:N+16]}, voutput_max);
+      $elif BATCH_TILE >= 16:
+        vout${ABC[N:N+8]} = ${VMIN_X8}(vout${ABC[N:N+8]}, ${VGET_LOW_X8}(voutput_max));
+      $else:
+        vout${ABC[N:N+8]} = ${VMIN_X8}(vout${ABC[N:N+8]}, voutput_max);
+
+    $for N in range(0, BATCH_TILE, 16):
+      $if N + 8 < BATCH_TILE:
+        ${VST1Q_X8}(output, vout${ABC[N:N+16]}); output += 16;
+      $else:
+        ${VST1_X8}(output, vout${ABC[N:N+8]}); output += 8;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    ${"do " if BATCH_TILE > 8 else ""}{
+      $if BATCH_TILE > 8:
+        const ${XINT8X8_T} va${ABC[0:8]} = ${VLD1_X8}(input_a); input_a += 8;
+        const ${XINT8X8_T} vb${ABC[0:8]} = ${VLD1_X8}(input_b); input_b += 8;
+      $else:
+        const ${XINT8X8_T} va${ABC[0:8]} = ${VLD1_X8}(input_a);
+        const ${XINT8X8_T} vb${ABC[0:8]} = ${VLD1_X8}(input_b);
+
+      $if LD128:
+        $if DATATYPE == "QU8":
+          #if XNN_ARCH_ARM64
+            const int16x8_t vxa${ABC[0:8]} = vreinterpretq_s16_u16(vsubl_u8(va${ABC[0:8]}, vget_low_u8(va_zero_point)));
+            const int16x8_t vxb${ABC[0:8]} = vreinterpretq_s16_u16(vsubl_u8(vb${ABC[0:8]}, vget_low_u8(vb_zero_point)));
+          #else  // !XNN_ARCH_ARM64
+            const int16x8_t vxa${ABC[0:8]} = vreinterpretq_s16_u16(vsubl_u8(va${ABC[0:8]}, va_zero_point));
+            const int16x8_t vxb${ABC[0:8]} = vreinterpretq_s16_u16(vsubl_u8(vb${ABC[0:8]}, vb_zero_point));
+          #endif  // XNN_ARCH_ARM64
+        $else:
+          #if XNN_ARCH_ARM64
+            const int16x8_t vxa${ABC[0:8]} = vsubl_s8(va${ABC[0:8]}, vget_low_s8(va_zero_point));
+            const int16x8_t vxb${ABC[0:8]} = vsubl_s8(vb${ABC[0:8]}, vget_low_s8(vb_zero_point));
+          #else  // !XNN_ARCH_ARM64
+            const int16x8_t vxa${ABC[0:8]} = vsubl_s8(va${ABC[0:8]}, va_zero_point);
+            const int16x8_t vxb${ABC[0:8]} = vsubl_s8(vb${ABC[0:8]}, vb_zero_point);
+          #endif  // XNN_ARCH_ARM64
+      $else:
+        $if DATATYPE == "QU8":
+          const int16x8_t vxa${ABC[0:8]} = vreinterpretq_s16_u16(vsubl_u8(va${ABC[0:8]}, va_zero_point));
+          const int16x8_t vxb${ABC[0:8]} = vreinterpretq_s16_u16(vsubl_u8(vb${ABC[0:8]}, vb_zero_point));
+        $else:
+          const int16x8_t vxa${ABC[0:8]} = vsubl_s8(va${ABC[0:8]}, va_zero_point);
+          const int16x8_t vxb${ABC[0:8]} = vsubl_s8(vb${ABC[0:8]}, vb_zero_point);
+
+      int32x4_t vacc${ABC[0:4]} = vmulq_s32(vmovl_s16(vget_low_s16(vxa${ABC[0:8]})), va_multiplier);
+      int32x4_t vacc${ABC[4:8]} = vmulq_s32(vmovl_s16(vget_high_s16(vxa${ABC[0:8]})), va_multiplier);
+
+      vacc${ABC[0:4]} = vmlaq_s32(vacc${ABC[0:4]}, vmovl_s16(vget_low_s16(vxb${ABC[0:8]})), vb_multiplier);
+      vacc${ABC[4:8]} = vmlaq_s32(vacc${ABC[4:8]}, vmovl_s16(vget_high_s16(vxb${ABC[0:8]})), vb_multiplier);
+
+      vacc${ABC[0:4]} = vrshlq_s32(vacc${ABC[0:4]}, vright_shift);
+      vacc${ABC[4:8]} = vrshlq_s32(vacc${ABC[4:8]}, vright_shift);
+
+      const int16x8_t vacc${ABC[0:8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${ABC[0:4]}), vqmovn_s32(vacc${ABC[4:8]})), voutput_zero_point);
+
+      ${XINT8X8_T} vout${ABC[0:8]} = ${VQMOVXN_S16}(vacc${ABC[0:8]});
+      $if BATCH_TILE >= 16:
+        vout${ABC[0:8]} = ${VMAX_X8}(vout${ABC[0:8]}, ${VGET_LOW_X8}(voutput_min));
+        vout${ABC[0:8]} = ${VMIN_X8}(vout${ABC[0:8]}, ${VGET_LOW_X8}(voutput_max));
+      $else:
+        vout${ABC[0:8]} = ${VMAX_X8}(vout${ABC[0:8]}, voutput_min);
+        vout${ABC[0:8]} = ${VMIN_X8}(vout${ABC[0:8]}, voutput_max);
+
+      $if BATCH_TILE > 8:
+        if XNN_LIKELY(n >= (8 * sizeof(${XINT8_T}))) {
+          ${VST1_X8}(output, vout${ABC[0:8]}); output += 8;
+          n -= 8 * sizeof(${XINT8_T});
+        } else {
+          if (n & (4 * sizeof(${XINT8_T}))) {
+            vst1_lane_u32(__builtin_assume_aligned(output, 1), ${VREINTERPRET_U32_X8}(vout${ABC[0:8]}), 0); output += 4;
+            vout${ABC[0:8]} = ${VEXT_X8}(vout${ABC[0:8]}, vout${ABC[0:8]}, 4);
+          }
+          if (n & (2 * sizeof(${XINT8_T}))) {
+            vst1_lane_u16(__builtin_assume_aligned(output, 1), ${VREINTERPRET_U16_X8}(vout${ABC[0:8]}), 0); output += 2;
+            vout${ABC[0:8]} = ${VEXT_X8}(vout${ABC[0:8]}, vout${ABC[0:8]}, 2);
+          }
+          if (n & (1 * sizeof(${XINT8_T}))) {
+            ${VST1_LANE_X8}(output, vout${ABC[0:8]}, 0);
+          }
+          n = 0;
+        }
+      $else:
+        if (n & (4 * sizeof(${XINT8_T}))) {
+          vst1_lane_u32(__builtin_assume_aligned(output, 1), ${VREINTERPRET_U32_X8}(vout${ABC[0:8]}), 0); output += 4;
+          vout${ABC[0:8]} = ${VEXT_X8}(vout${ABC[0:8]}, vout${ABC[0:8]}, 4);
+        }
+        if (n & (2 * sizeof(${XINT8_T}))) {
+          vst1_lane_u16(__builtin_assume_aligned(output, 1), ${VREINTERPRET_U16_X8}(vout${ABC[0:8]}), 0); output += 2;
+          vout${ABC[0:8]} = ${VEXT_X8}(vout${ABC[0:8]}, vout${ABC[0:8]}, 2);
+        }
+        if (n & (1 * sizeof(${XINT8_T}))) {
+          ${VST1_LANE_X8}(output, vout${ABC[0:8]}, 0);
+        }
+    }${" while (n != 0);" if BATCH_TILE > 8 else ""}
+  }
+}
