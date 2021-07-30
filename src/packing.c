@@ -1035,6 +1035,77 @@ void xnn_pack_f16_deconv_goki_w(
   }
 }
 
+void xnn_pack_qs8_deconv_goki_w(
+  size_t g,
+  size_t nc,
+  size_t kh,
+  size_t kw,
+  size_t kc,
+  size_t sh,
+  size_t sw,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const int8_t* k,
+  const int32_t* b,
+  void* packed_w,
+  struct subconvolution_params* subconv_params,
+  const struct xnn_qs8_packing_params* params)
+{
+  assert(sr == 1);
+  const int32_t izp = (int32_t) params->input_zero_point;
+  for (size_t i = 0; i < g; i++) {
+    for (size_t oy = 0; oy < sh; oy++) {
+      for (size_t ox = 0; ox < sw; ox++) {
+        if (i == 0) {
+          (*subconv_params++).weights = packed_w;
+        }
+        for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
+          const size_t nr_block_size = min(nc - nr_block_start, nr);
+          int32_t* packed_b = (int32_t*) packed_w;
+          if XNN_LIKELY(b != 0) {
+            for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+              *((int32_t*) packed_w) = b[nr_block_start + nr_block_offset];
+              packed_w = (void*) ((uintptr_t) packed_w + sizeof(int32_t));
+            }
+          } else {
+            size_t n = nr_block_size;
+            do {
+              *((int32_t*) packed_w) = 0;
+              packed_w = (void*) ((uintptr_t) packed_w + sizeof(int32_t));
+            } while (--n != 0);
+          }
+          packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * sizeof(int32_t));
+          for (size_t ky = oy; ky < kh; ky += sh) {
+            for (size_t kx = ox; kx < kw; kx += sw) {
+              for (size_t kr_block_start = 0; kr_block_start < kc; kr_block_start += kr) {
+                const size_t kr_block_size = min(kc - kr_block_start, kr);
+                for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+                  int32_t ksum = 0;
+                  for (size_t kr_block_offset = 0; kr_block_offset < kr_block_size; kr_block_offset++) {
+                    const int8_t kv =
+                      k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + (kr_block_start + kr_block_offset)];
+                    ksum += (int32_t) kv;
+                    *((int8_t*) packed_w) = kv;
+                    packed_w = (void*) ((uintptr_t) packed_w + sizeof(int8_t));
+                  }
+                  packed_b[nr_block_offset] -= ksum * izp;
+                  packed_w = (void*) ((uintptr_t) packed_w + (kr - kr_block_size) * sizeof(int8_t));
+                }
+                packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * kr * sizeof(int8_t));
+              }
+            }
+          }
+        }
+      }
+    }
+    k += kh * kw * kc * nc;
+    if XNN_UNPREDICTABLE(b != NULL) {
+      b += nc;
+    }
+  }
+}
+
 void xnn_pack_qu8_deconv_goki_w(
   size_t g,
   size_t nc,
