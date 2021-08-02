@@ -15,3 +15,7 @@
   init: xnn_init_qu8_mul_minmax_fp32_sse2_params
 - name: xnn_qu8_vmul_minmax_fp32_ukernel__avx_mul16_ld64_x16
   init: xnn_init_qu8_mul_minmax_fp32_sse2_params
+- name: xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8
+  init: xnn_init_qu8_mul_minmax_fp32_wasmsimd_params
+- name: xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x16
+  init: xnn_init_qu8_mul_minmax_fp32_wasmsimd_params

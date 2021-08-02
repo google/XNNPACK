@@ -2619,6 +2619,30 @@ void xnn_init_qu8_mul_minmax_fp32_sse2_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMSIMD
+void xnn_init_qu8_mul_minmax_fp32_wasmsimd_params(
+  union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t a_zero_point,
+  uint8_t b_zero_point,
+  uint8_t output_zero_point,
+  float product_output_scale,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->fp32_wasmsimd.a_zero_point[i] = (int16_t) (uint16_t) a_zero_point;
+    params->fp32_wasmsimd.b_zero_point[i] = (int16_t) (uint16_t) b_zero_point;
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->fp32_wasmsimd.scale[i] = product_output_scale;
+    params->fp32_wasmsimd.output_min_less_zero_point[i] = (float) (int32_t) ((uint32_t) output_min - (uint32_t) output_zero_point);
+    params->fp32_wasmsimd.output_max_less_zero_point[i] = (float) (int32_t) ((uint32_t) output_max - (uint32_t) output_zero_point);
+    params->fp32_wasmsimd.magic_bias[i] = 12582912.0f;
+    params->fp32_wasmsimd.magic_bias_less_output_zero_point[i] = INT32_C(0x4B400000) - (int32_t) (uint32_t) output_zero_point;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_qs8_mul_minmax_fp32_sse2_params(
   union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2676,3 +2700,27 @@ void xnn_init_qs8_mul_minmax_fp32_sse4_params(
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD
+void xnn_init_qs8_mul_minmax_fp32_wasmsimd_params(
+  union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t a_zero_point,
+  int8_t b_zero_point,
+  int8_t output_zero_point,
+  float product_output_scale,
+  int8_t output_min,
+  int8_t output_max)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->fp32_wasmsimd.a_zero_point[i] = (int16_t) a_zero_point;
+    params->fp32_wasmsimd.b_zero_point[i] = (int16_t) b_zero_point;
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->fp32_wasmsimd.scale[i] = product_output_scale;
+    params->fp32_wasmsimd.output_min_less_zero_point[i] = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+    params->fp32_wasmsimd.output_max_less_zero_point[i] = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+    params->fp32_wasmsimd.magic_bias[i] = 12582912.0f;
+    params->fp32_wasmsimd.magic_bias_less_output_zero_point[i] = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD
