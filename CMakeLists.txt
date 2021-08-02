@@ -2832,6 +2832,10 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x16.c
   src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x24.c
   src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x32.c
+  src/qs8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x8.c
+  src/qs8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x16.c
+  src/qs8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c
+  src/qs8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x16.c
   src/qu8-avgpool/9p8x-minmax-sse2-c8.c
   src/qu8-avgpool/9x-minmax-sse2-c8.c
   src/qu8-dwconv/gen/up8x9-minmax-fp32-sse2-mul16.c
@@ -2879,6 +2883,10 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qu8-vadd/gen/minmax-sse2-mul16-ld64-x16.c
   src/qu8-vaddc/gen/minmax-sse2-mul16-ld64-x8.c
   src/qu8-vaddc/gen/minmax-sse2-mul16-ld64-x16.c
+  src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x8.c
+  src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x16.c
+  src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c
+  src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x16.c
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
@@ -3164,6 +3172,10 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x24.c
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x32.c
+  src/qs8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x8.c
+  src/qs8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c
+  src/qs8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x8.c
+  src/qs8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x16.c
   src/qu8-dwconv/gen/up8x9-minmax-fp32-sse41-mul16.c
   src/qu8-dwconv/gen/up8x9-minmax-fp32-sse41-mul32.c
   src/qu8-dwconv/gen/up8x25-minmax-fp32-sse41-mul16.c
@@ -3213,7 +3225,11 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x8.c
   src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x16.c
   src/qu8-vaddc/gen/minmax-sse41-mul32-ld32-x8.c
-  src/qu8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c)
+  src/qu8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c
+  src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x8.c
+  src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c
+  src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x8.c
+  src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x16.c)
 
 SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x25-minmax-avx.c
@@ -3543,6 +3559,10 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x24.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x32.c
+  src/qs8-vmul/gen/minmax-fp32-avx-mul16-ld64-x8.c
+  src/qs8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c
+  src/qs8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x8.c
+  src/qs8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x16.c
   src/qu8-dwconv/gen/up8x9-minmax-fp32-avx-mul16.c
   src/qu8-dwconv/gen/up8x9-minmax-fp32-avx-mul32.c
   src/qu8-dwconv/gen/up8x25-minmax-fp32-avx-mul16.c
@@ -3586,7 +3606,11 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/minmax-avx-mul16-ld64-x8.c
   src/qu8-vaddc/gen/minmax-avx-mul16-ld64-x16.c
   src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x8.c
-  src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x16.c)
+  src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x16.c
+  src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x8.c
+  src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c
+  src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x8.c
+  src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x16.c)
 
 SET(PROD_XOP_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up16x9-minmax-fp32-xop-mul16-add16.c
@@ -6491,6 +6515,24 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-vaddc-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qs8-vaddc-minmax-test qs8-vaddc-minmax-test)
 
+  ADD_EXECUTABLE(qs8-vmul-minmax-fp32-test test/qs8-vmul-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qs8-vmul-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-vmul-minmax-fp32-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qs8-vmul-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qs8-vmul-minmax-fp32-test qs8-vmul-minmax-fp32-test)
+
+  ADD_EXECUTABLE(qs8-vmulc-minmax-fp32-test test/qs8-vmulc-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qs8-vmulc-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-vmulc-minmax-fp32-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qs8-vmulc-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qs8-vmulc-minmax-fp32-test qs8-vmulc-minmax-fp32-test)
+
   ADD_EXECUTABLE(qu8-avgpool-minmax-test test/qu8-avgpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(qu8-avgpool-minmax-test PROPERTIES
     CXX_STANDARD 11
@@ -6607,6 +6649,24 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qu8-vaddc-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-vaddc-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qu8-vaddc-minmax-test qu8-vaddc-minmax-test)
+
+  ADD_EXECUTABLE(qu8-vmul-minmax-fp32-test test/qu8-vmul-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qu8-vmul-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-vmul-minmax-fp32-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qu8-vmul-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qu8-vmul-minmax-fp32-test qu8-vmul-minmax-fp32-test)
+
+  ADD_EXECUTABLE(qu8-vmulc-minmax-fp32-test test/qu8-vmulc-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qu8-vmulc-minmax-fp32-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-vmulc-minmax-fp32-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qu8-vmulc-minmax-fp32-test qu8-vmulc-minmax-fp32-test)
 
   ADD_EXECUTABLE(u8-lut32norm-test test/u8-lut32norm.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(u8-lut32norm-test PROPERTIES

@@ -108,7 +108,7 @@ static inline void xnn_init_qu8_requantization_fp32_params(
   uint8_t max)
 {
   // Validate requantization parameters.
-  assert(scale < 1.0f);
+  assert(scale < 0x1.0p+8f);
   assert(scale >= 0x1.0p-32f);
 
   params->fp32.scale = scale;
@@ -315,7 +315,7 @@ static inline void xnn_init_qs8_requantization_fp32_params(
   int8_t max)
 {
   // Validate requantization parameters.
-  assert(scale < 1.0f);
+  assert(scale < 0x1.0p+8f);
   assert(scale >= 0x1.0p-32f);
 
   params->fp32.scale = scale;
@@ -345,9 +345,6 @@ static inline void xnn_init_qs8_requantization_rndna_params(
   int8_t max)
 {
   // Validate requantization parameters.
-  assert(scale < 1.0f);
-  assert(scale >= 0x1.0p-32f);
-
   assert(scale < 1.0f);
   assert(scale >= 0x1.0p-32f);
 

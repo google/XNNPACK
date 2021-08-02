@@ -673,6 +673,37 @@ XNN_INTERNAL void xnn_init_qs8_add_minmax_scalar_params(
   int8_t output_min,
   int8_t output_max);
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_qu8_mul_minmax_fp32_sse2_params(
+  union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t a_zero_point,
+  uint8_t b_zero_point,
+  uint8_t output_zero_point,
+  float product_output_scale,
+  uint8_t output_min,
+  uint8_t output_max);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_qs8_mul_minmax_fp32_sse2_params(
+  union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t a_zero_point,
+  int8_t b_zero_point,
+  int8_t output_zero_point,
+  float product_output_scale,
+  int8_t output_min,
+  int8_t output_max);
+
+XNN_INTERNAL void xnn_init_qs8_mul_minmax_fp32_sse4_params(
+  union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t a_zero_point,
+  int8_t b_zero_point,
+  int8_t output_zero_point,
+  float product_output_scale,
+  int8_t output_min,
+  int8_t output_max);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 
 #ifdef __cplusplus
 }  // extern "C"

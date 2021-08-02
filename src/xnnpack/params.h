@@ -733,6 +733,40 @@ union xnn_qs8_add_minmax_params {
 #endif  // XNN_ARCH_WASMSIMD
 };
 
+union xnn_qu8_mul_minmax_params {
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int16_t a_zero_point[8];
+    XNN_ALIGN(16) int16_t b_zero_point[8];
+    XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) uint8_t output_min[16];
+    XNN_ALIGN(16) uint8_t output_max[16];
+  } fp32_sse2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
+union xnn_qs8_mul_minmax_params {
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int16_t a_zero_point[8];
+    XNN_ALIGN(16) int16_t b_zero_point[8];
+    XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int16_t output_min[8];
+    XNN_ALIGN(16) int16_t output_max[8];
+  } fp32_sse2;
+  struct {
+    XNN_ALIGN(16) int16_t a_zero_point[8];
+    XNN_ALIGN(16) int16_t b_zero_point[8];
+    XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+    XNN_ALIGN(16) int8_t output_min[16];
+    XNN_ALIGN(16) int8_t output_max[16];
+  } fp32_sse4;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_qu8_avgpool_params {
   struct {
     int32_t bias;
@@ -1866,6 +1900,20 @@ typedef void (*xnn_qs8_vadd_minmax_ukernel_function)(
     int8_t* output,
     const union xnn_qs8_add_minmax_params* params);
 
+typedef void (*xnn_qu8_vmul_minmax_ukernel_function)(
+    size_t n,
+    const uint8_t* input_x,
+    const uint8_t* input_y,
+    uint8_t* output,
+    const union xnn_qu8_mul_minmax_params* params);
+
+typedef void (*xnn_qs8_vmul_minmax_ukernel_function)(
+    size_t n,
+    const int8_t* input_x,
+    const int8_t* input_y,
+    int8_t* output,
+    const union xnn_qs8_mul_minmax_params* params);
+
 typedef void (*xnn_f32_velu_ukernel_function)(
     size_t n,
     const float* x,
@@ -2079,6 +2127,24 @@ typedef void (*xnn_init_qu8_add_minmax_params_fn)(
   uint8_t output_zero_point,
   float a_output_scale,
   float b_output_scale,
+  uint8_t output_min,
+  uint8_t output_max);
+
+typedef void (*xnn_init_qs8_mul_minmax_params_fn)(
+  union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t a_zero_point,
+  int8_t b_zero_point,
+  int8_t output_zero_point,
+  float product_output_scale,
+  int8_t output_min,
+  int8_t output_max);
+
+typedef void (*xnn_init_qu8_mul_minmax_params_fn)(
+  union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t a_zero_point,
+  uint8_t b_zero_point,
+  uint8_t output_zero_point,
+  float product_output_scale,
   uint8_t output_min,
   uint8_t output_max);
 
