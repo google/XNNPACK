@@ -2601,6 +2601,24 @@ void xnn_init_qs8_add_minmax_scalar_params(
   params->scalar.output_zero_point = (int32_t) output_zero_point;
 }
 
+void xnn_init_qu8_mul_minmax_fp32_scalar_params(
+  union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t a_zero_point,
+  uint8_t b_zero_point,
+  uint8_t output_zero_point,
+  float product_output_scale,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  params->fp32_scalar.a_zero_point = (int16_t) (uint16_t) a_zero_point;
+  params->fp32_scalar.b_zero_point = (int16_t) (uint16_t) b_zero_point;
+  params->fp32_scalar.scale = product_output_scale;
+  params->fp32_scalar.output_min_less_zero_point = (float) (int32_t) ((uint32_t) output_min - (uint32_t) output_zero_point);
+  params->fp32_scalar.output_max_less_zero_point = (float) (int32_t) ((uint32_t) output_max - (uint32_t) output_zero_point);
+  params->fp32_scalar.magic_bias = 12582912.0f;
+  params->fp32_scalar.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) (uint32_t) output_zero_point;
+}
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_qu8_mul_minmax_fp32_sse2_params(
   union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2654,6 +2672,24 @@ void xnn_init_qu8_mul_minmax_fp32_wasmsimd_params(
   }
 }
 #endif  // XNN_ARCH_WASMSIMD
+
+void xnn_init_qs8_mul_minmax_fp32_scalar_params(
+  union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t a_zero_point,
+  int8_t b_zero_point,
+  int8_t output_zero_point,
+  float product_output_scale,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->fp32_scalar.a_zero_point = (int16_t) a_zero_point;
+  params->fp32_scalar.b_zero_point = (int16_t) b_zero_point;
+  params->fp32_scalar.scale = product_output_scale;
+  params->fp32_scalar.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  params->fp32_scalar.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_scalar.magic_bias = 12582912.0f;
+  params->fp32_scalar.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+}
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_qs8_mul_minmax_fp32_sse2_params(

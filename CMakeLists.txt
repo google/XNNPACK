@@ -943,6 +943,12 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-scalar-x1.c
   src/qs8-vaddc/gen/minmax-scalar-x2.c
   src/qs8-vaddc/gen/minmax-scalar-x4.c
+  src/qs8-vmul/gen/minmax-fp32-scalar-x1.c
+  src/qs8-vmul/gen/minmax-fp32-scalar-x2.c
+  src/qs8-vmul/gen/minmax-fp32-scalar-x4.c
+  src/qs8-vmulc/gen/minmax-fp32-scalar-x1.c
+  src/qs8-vmulc/gen/minmax-fp32-scalar-x2.c
+  src/qs8-vmulc/gen/minmax-fp32-scalar-x4.c
   src/qu8-avgpool/9p8x-minmax-scalar-c1.c
   src/qu8-avgpool/9x-minmax-scalar-c1.c
   src/qu8-dwconv/gen/up1x9-minmax-fp32-scalar-lrint.c
@@ -1003,6 +1009,12 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/minmax-scalar-x1.c
   src/qu8-vaddc/gen/minmax-scalar-x2.c
   src/qu8-vaddc/gen/minmax-scalar-x4.c
+  src/qu8-vmul/gen/minmax-fp32-scalar-x1.c
+  src/qu8-vmul/gen/minmax-fp32-scalar-x2.c
+  src/qu8-vmul/gen/minmax-fp32-scalar-x4.c
+  src/qu8-vmulc/gen/minmax-fp32-scalar-x1.c
+  src/qu8-vmulc/gen/minmax-fp32-scalar-x2.c
+  src/qu8-vmulc/gen/minmax-fp32-scalar-x4.c
   src/u8-lut32norm/scalar.c
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c

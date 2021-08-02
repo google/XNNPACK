@@ -730,6 +730,15 @@ union xnn_qs8_add_minmax_params {
 };
 
 union xnn_qu8_mul_minmax_params {
+  struct {
+    int32_t a_zero_point;
+    int32_t b_zero_point;
+    float scale;
+    float output_min_less_zero_point;
+    float output_max_less_zero_point;
+    float magic_bias;
+    int32_t magic_bias_less_output_zero_point;
+  } fp32_scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) int16_t a_zero_point[8];
@@ -754,6 +763,15 @@ union xnn_qu8_mul_minmax_params {
 };
 
 union xnn_qs8_mul_minmax_params {
+  struct {
+    int32_t a_zero_point;
+    int32_t b_zero_point;
+    float scale;
+    float output_min_less_zero_point;
+    float output_max_less_zero_point;
+    float magic_bias;
+    int32_t magic_bias_less_output_zero_point;
+  } fp32_scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) int16_t a_zero_point[8];

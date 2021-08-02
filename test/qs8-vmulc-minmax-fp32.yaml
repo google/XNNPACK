@@ -19,3 +19,9 @@
   init: xnn_init_qs8_mul_minmax_fp32_wasmsimd_params
 - name: xnn_qs8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x16
   init: xnn_init_qs8_mul_minmax_fp32_wasmsimd_params
+- name: xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_x1
+  init: xnn_init_qs8_mul_minmax_fp32_scalar_params
+- name: xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_x2
+  init: xnn_init_qs8_mul_minmax_fp32_scalar_params
+- name: xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_x4
+  init: xnn_init_qs8_mul_minmax_fp32_scalar_params

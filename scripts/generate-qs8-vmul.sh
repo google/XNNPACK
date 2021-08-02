@@ -4,6 +4,23 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################### Scalar ###################################
+tools/xngen src/qs8-vmul/scalar.c.in -D BATCH_TILE=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-vmul/gen/minmax-fp32-scalar-x1.c
+tools/xngen src/qs8-vmul/scalar.c.in -D BATCH_TILE=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-vmul/gen/minmax-fp32-scalar-x2.c
+tools/xngen src/qs8-vmul/scalar.c.in -D BATCH_TILE=4 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-vmul/gen/minmax-fp32-scalar-x4.c
+
+tools/xngen src/qs8-vmul/scalar.c.in -D BATCH_TILE=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-vmul/gen/minmax-fp32-scalar-x1.c
+tools/xngen src/qs8-vmul/scalar.c.in -D BATCH_TILE=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-vmul/gen/minmax-fp32-scalar-x2.c
+tools/xngen src/qs8-vmul/scalar.c.in -D BATCH_TILE=4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-vmul/gen/minmax-fp32-scalar-x4.c
+
+tools/xngen src/qs8-vmulc/scalar.c.in -D BATCH_TILE=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-vmulc/gen/minmax-fp32-scalar-x1.c
+tools/xngen src/qs8-vmulc/scalar.c.in -D BATCH_TILE=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-vmulc/gen/minmax-fp32-scalar-x2.c
+tools/xngen src/qs8-vmulc/scalar.c.in -D BATCH_TILE=4 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-vmulc/gen/minmax-fp32-scalar-x4.c
+
+tools/xngen src/qs8-vmulc/scalar.c.in -D BATCH_TILE=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/minmax-fp32-scalar-x1.c
+tools/xngen src/qs8-vmulc/scalar.c.in -D BATCH_TILE=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/minmax-fp32-scalar-x2.c
+tools/xngen src/qs8-vmulc/scalar.c.in -D BATCH_TILE=4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/minmax-fp32-scalar-x4.c
+
 ################################## WAsm SIMD ##################################
 tools/xngen src/qs8-vmul/wasmsimd-mul32-ld64.c.in -D BATCH_TILE=8  -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-vmul/gen/minmax-fp32-wasmsimd-mul32-ld64-x8.c
 tools/xngen src/qs8-vmul/wasmsimd-mul32-ld64.c.in -D BATCH_TILE=16 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-vmul/gen/minmax-fp32-wasmsimd-mul32-ld64-x16.c
