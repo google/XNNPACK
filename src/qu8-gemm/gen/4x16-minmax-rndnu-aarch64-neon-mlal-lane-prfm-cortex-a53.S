@@ -24,8 +24,7 @@
 
 # params structure is 20 bytes
 #  struct {
-#    uint8_t kernel_zero_point;
-#    uint8_t padding[3];
+#    uint8_t kernel_zero_point[4];
 #    int32_t right_pre_shift;
 #    int32_t multiplier;
 #    int32_t right_post_shift;
@@ -87,10 +86,9 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SUBS    x0, x2, 8               // k = kc - 8
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
-        LD1R    {v7.16b}, [x11]         // kernel_zero_point
+        LD1R    {v7.4s}, [x11], 4       // kernel_zero_point
         MOV     v27.16b, v24.16b
         MOV     v29.16b, v28.16b
-        ADD     x11, x11, 4
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
         # Is there at least 8 bytes for epilogue?

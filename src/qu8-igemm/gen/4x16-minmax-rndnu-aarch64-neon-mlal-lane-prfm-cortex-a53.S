@@ -26,8 +26,7 @@
 
 # params structure is 20 bytes
 #  struct {
-#    uint8_t kernel_zero_point;
-#    uint8_t padding[3];
+#    uint8_t kernel_zero_point[4];
 #    int32_t right_pre_shift;
 #    int32_t multiplier;
 #    int32_t right_post_shift;
@@ -79,10 +78,9 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_p
         LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
-        LD1R    {v7.16b}, [x11]         // kernel_zero_point
+        LD1R    {v7.4s}, [x11], 4       // kernel_zero_point
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
-        ADD     x11, x11, 4
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
         MOV     v27.16b, v24.16b

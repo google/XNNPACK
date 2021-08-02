@@ -219,7 +219,10 @@ void xnn_init_qu8_conv_minmax_gemmlowp_neon_params(
   assert(shift >= 0);
   assert(shift < 32);
 
-  params->gemmlowp_neon.kernel_zero_point = kernel_zero_point;
+  params->gemmlowp_neon.kernel_zero_point[0] = kernel_zero_point;
+  params->gemmlowp_neon.kernel_zero_point[1] = kernel_zero_point;
+  params->gemmlowp_neon.kernel_zero_point[2] = kernel_zero_point;
+  params->gemmlowp_neon.kernel_zero_point[3] = kernel_zero_point;
   params->gemmlowp_neon.multiplier = multiplier;
   params->gemmlowp_neon.right_shift = -shift;
   params->gemmlowp_neon.output_zero_point = (int16_t) (uint16_t) output_zero_point;
@@ -235,7 +238,10 @@ void xnn_init_qu8_conv_minmax_fp32_neon_params(
   uint8_t output_min,
   uint8_t output_max)
 {
-  params->fp32_neon.kernel_zero_point = kernel_zero_point;
+  params->fp32_neon.kernel_zero_point[0] = kernel_zero_point;
+  params->fp32_neon.kernel_zero_point[1] = kernel_zero_point;
+  params->fp32_neon.kernel_zero_point[2] = kernel_zero_point;
+  params->fp32_neon.kernel_zero_point[3] = kernel_zero_point;
   params->fp32_neon.scale = scale;
   params->fp32_neon.output_min_less_zero_point = (float) (int32_t) ((uint32_t) output_min - (uint32_t) output_zero_point);
   params->fp32_neon.output_max_less_zero_point = (float) (int32_t) ((uint32_t) output_max - (uint32_t) output_zero_point);
@@ -251,7 +257,10 @@ void xnn_init_qu8_conv_minmax_fp32_neonv8_params(
   uint8_t output_min,
   uint8_t output_max)
 {
-  params->fp32_neonv8.kernel_zero_point = kernel_zero_point;
+  params->fp32_neonv8.kernel_zero_point[0] = kernel_zero_point;
+  params->fp32_neonv8.kernel_zero_point[1] = kernel_zero_point;
+  params->fp32_neonv8.kernel_zero_point[2] = kernel_zero_point;
+  params->fp32_neonv8.kernel_zero_point[3] = kernel_zero_point;
   params->fp32_neonv8.scale = scale;
   params->fp32_neonv8.output_zero_point = (int16_t) (uint16_t) output_zero_point;
   params->fp32_neonv8.output_min = output_min;
@@ -283,7 +292,10 @@ void xnn_init_qu8_conv_minmax_rndnu_neon_params(
   const int32_t post_shift = math_max_s32(shift, 1);
   const int32_t pre_shift = shift - post_shift;
 
-  params->rndnu_neon.kernel_zero_point = kernel_zero_point;
+  params->rndnu_neon.kernel_zero_point[0] = kernel_zero_point;
+  params->rndnu_neon.kernel_zero_point[1] = kernel_zero_point;
+  params->rndnu_neon.kernel_zero_point[2] = kernel_zero_point;
+  params->rndnu_neon.kernel_zero_point[3] = kernel_zero_point;
   params->rndnu_neon.right_pre_shift = -pre_shift;
   params->rndnu_neon.multiplier = multiplier;
   params->rndnu_neon.right_post_shift = -post_shift;
