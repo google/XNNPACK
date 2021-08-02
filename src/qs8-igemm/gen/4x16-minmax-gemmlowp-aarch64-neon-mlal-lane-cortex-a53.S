@@ -15,7 +15,7 @@
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
 #     size_t ks,                 x3 / x9
-#     const int8_t**restrict a,  x4
+#     const int8_t** restrict a, x4
 #     const int8_t* restrict w,  x5
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
@@ -603,7 +603,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lan
         SQXTN2  v5.16b, v25.8h
         SQXTN2  v6.16b, v26.8h
         SQXTN2  v7.16b, v27.8h
-        SUB     x11, x11, 11          // rewind params pointer
+        SUB     x11, x11, 11             // rewind params pointer
 
         SMAX    v4.16b, v4.16b, v0.16b
         SMAX    v5.16b, v5.16b, v0.16b

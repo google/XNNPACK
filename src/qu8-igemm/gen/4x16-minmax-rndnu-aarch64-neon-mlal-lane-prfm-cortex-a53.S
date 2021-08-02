@@ -10,20 +10,32 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53(
+# void xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
 #     size_t ks,                 x3 / x9
-#     const int8_t** restrict a, x4
-#     const int8_t* restrict w,  x5
-#     int8_t* restrict c,        x6
+#     const uint8_t** restrict a, x4
+#     const uint8_t* restrict w,  x5
+#     uint8_t* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x8
-#     const int8_t* zero,                [sp + 16] -> x12
+#     const uint8_t* zero,                [sp + 16] -> x12
 #     const xnn_qs8_conv_minmax_params params [sp + 24] -> (x11)
 
+# params structure is 20 bytes
+#  struct {
+#    uint8_t kernel_zero_point;
+#    uint8_t padding[3];
+#    int32_t right_pre_shift;
+#    int32_t multiplier;
+#    int32_t right_post_shift;
+#    int16_t output_zero_point;
+#    uint8_t output_min;
+#    uint8_t output_max;
+#  } rndnu_neon;
+#
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
@@ -36,11 +48,11 @@
 # C1  x16 v17 v21 v25 v29
 # C2  x17 v18 v22 v26 v30
 # C3   x7 v19 v23 v27 v31
-# temp    v7
+# zero_point/temp    v7
 # unused  v8 v9 v10 v11 v12 v13 v14 v15
 # x11, x21 temp for Cortex-A53 loads
 
-BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53
+BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
@@ -67,8 +79,10 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
+        LD1R    {v7.16b}, [x11]         // kernel_zero_point
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
+        ADD     x11, x11, 4
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
         MOV     v27.16b, v24.16b
@@ -106,13 +120,13 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         LDR     d1, [x14], 8
         LDR     d2, [x15], 8
         LDR     d3, [x20], 8
-        SXTL    v0.8h, v0.8b
+        UXTL    v0.8h, v0.8b
         LDR     x11, [x5, 16]
-        SXTL    v4.8h, v4.8b
-        SXTL    v1.8h, v1.8b
-        SXTL    v2.8h, v2.8b
-        SXTL    v3.8h, v3.8b
-        SXTL    v6.8h, v6.8b
+        USUBL   v4.8h, v4.8b, v7.8b
+        UXTL    v1.8h, v1.8b
+        UXTL    v2.8h, v2.8b
+        UXTL    v3.8h, v3.8b
+        USUBL   v6.8h, v6.8b, v7.8b
 
         SUBS    x0, x0, 8               // k = k - 8
         # Is there at least 8 bytes for main loop?
@@ -141,7 +155,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL   v25.4s, v6.4h, v1.h[0]
         SMLAL2  v29.4s, v6.8h, v1.h[0]
         PRFM    PLDL1KEEP, [x5, 512]
-        SXTL    v5.8h, v5.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v26.4s, v6.4h, v2.h[0]
         SMLAL2  v30.4s, v6.8h, v2.h[0]
         SMLAL   v27.4s, v6.4h, v3.h[0]
@@ -151,7 +165,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v20.4s, v5.8h, v0.h[1]
         SMLAL   v17.4s, v5.4h, v1.h[1]
         SMLAL2  v21.4s, v5.8h, v1.h[1]
-        SXTL    v4.8h, v4.8b
+        USUBL   v4.8h, v4.8b, v7.8b
         SMLAL   v18.4s, v5.4h, v2.h[1]
         SMLAL2  v22.4s, v5.8h, v2.h[1]
         SMLAL   v19.4s, v5.4h, v3.h[1]
@@ -162,7 +176,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v28.4s, v4.8h, v0.h[1]
         SMLAL   v25.4s, v4.4h, v1.h[1]
         SMLAL2  v29.4s, v4.8h, v1.h[1]
-        SXTL    v6.8h, v6.8b
+        USUBL   v6.8h, v6.8b, v7.8b
         SMLAL   v26.4s, v4.4h, v2.h[1]
         SMLAL2  v30.4s, v4.8h, v2.h[1]
         SMLAL   v27.4s, v4.4h, v3.h[1]
@@ -171,7 +185,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL   v16.4s, v6.4h, v0.h[2]
         SMLAL2  v20.4s, v6.8h, v0.h[2]
         SMLAL   v17.4s, v6.4h, v1.h[2]
-        SXTL    v5.8h, v5.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL2  v21.4s, v6.8h, v1.h[2]
         SMLAL   v18.4s, v6.4h, v2.h[2]
         SMLAL2  v22.4s, v6.8h, v2.h[2]
@@ -183,7 +197,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v28.4s, v5.8h, v0.h[2]
         SMLAL   v25.4s, v5.4h, v1.h[2]
         SMLAL2  v29.4s, v5.8h, v1.h[2]
-        SXTL    v4.8h, v4.8b
+        USUBL   v4.8h, v4.8b, v7.8b
         SMLAL   v26.4s, v5.4h, v2.h[2]
         SMLAL2  v30.4s, v5.8h, v2.h[2]
         SMLAL   v27.4s, v5.4h, v3.h[2]
@@ -193,7 +207,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v20.4s, v4.8h, v0.h[3]
         SMLAL   v17.4s, v4.4h, v1.h[3]
         SMLAL2  v21.4s, v4.8h, v1.h[3]
-        SXTL    v6.8h, v6.8b
+        USUBL   v6.8h, v6.8b, v7.8b
         SMLAL   v18.4s, v4.4h, v2.h[3]
         SMLAL2  v22.4s, v4.8h, v2.h[3]
         SMLAL   v19.4s, v4.4h, v3.h[3]
@@ -202,7 +216,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         INS     v5.d[0], x11
         SMLAL   v24.4s, v6.4h, v0.h[3]
         SMLAL2  v28.4s, v6.8h, v0.h[3]
-        SXTL    v5.8h, v5.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v25.4s, v6.4h, v1.h[3]
         SMLAL2  v29.4s, v6.8h, v1.h[3]
         SMLAL   v26.4s, v6.4h, v2.h[3]
@@ -214,7 +228,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v20.4s, v5.8h, v0.h[4]
         SMLAL   v17.4s, v5.4h, v1.h[4]
         SMLAL2  v21.4s, v5.8h, v1.h[4]
-        SXTL    v4.8h, v4.8b
+        USUBL   v4.8h, v4.8b, v7.8b
         SMLAL   v18.4s, v5.4h, v2.h[4]
         SMLAL2  v22.4s, v5.8h, v2.h[4]
         SMLAL   v19.4s, v5.4h, v3.h[4]
@@ -225,7 +239,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v28.4s, v4.8h, v0.h[4]
         SMLAL   v25.4s, v4.4h, v1.h[4]
         SMLAL2  v29.4s, v4.8h, v1.h[4]
-        SXTL    v6.8h, v6.8b
+        USUBL   v6.8h, v6.8b, v7.8b
         SMLAL   v26.4s, v4.4h, v2.h[4]
         SMLAL2  v30.4s, v4.8h, v2.h[4]
         SMLAL   v27.4s, v4.4h, v3.h[4]
@@ -235,7 +249,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v20.4s, v6.8h, v0.h[5]
         SMLAL   v17.4s, v6.4h, v1.h[5]
         SMLAL2  v21.4s, v6.8h, v1.h[5]
-        SXTL    v5.8h, v5.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v18.4s, v6.4h, v2.h[5]
         SMLAL2  v22.4s, v6.8h, v2.h[5]
         SMLAL   v19.4s, v6.4h, v3.h[5]
@@ -246,12 +260,12 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v28.4s, v5.8h, v0.h[5]
         SMLAL   v25.4s, v5.4h, v1.h[5]
         SMLAL2  v29.4s, v5.8h, v1.h[5]
-        SXTL    v4.8h, v4.8b
+        USUBL   v4.8h, v4.8b, v7.8b
         SMLAL   v26.4s, v5.4h, v2.h[5]
         SMLAL2  v30.4s, v5.8h, v2.h[5]
         SMLAL   v27.4s, v5.4h, v3.h[5]
         SMLAL2  v31.4s, v5.8h, v3.h[5]
-        SXTL    v6.8h, v6.8b
+        USUBL   v6.8h, v6.8b, v7.8b
         LDR     x11, [x5, 112]
         SMLAL   v16.4s, v4.4h, v0.h[6]
         SMLAL2  v20.4s, v4.8h, v0.h[6]
@@ -267,7 +281,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v28.4s, v6.8h, v0.h[6]
         SMLAL   v25.4s, v6.4h, v1.h[6]
         SMLAL2  v29.4s, v6.8h, v1.h[6]
-        SXTL    v4.8h, v4.8b
+        USUBL   v4.8h, v4.8b, v7.8b
         ADD     x5, x5, 128
 
         SMLAL   v26.4s, v6.4h, v2.h[6]
@@ -275,7 +289,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         LDR     x11, [x5]
         SMLAL   v27.4s, v6.4h, v3.h[6]
         SMLAL2  v31.4s, v6.8h, v3.h[6]
-        SXTL    v5.8h, v5.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         LDR     x21, [x13], 8
 
         SMLAL   v16.4s, v4.4h, v0.h[7]
@@ -302,14 +316,14 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         LDR     d3, [x20], 8
         INS     v2.d[0], x11
 
-        SXTL    v0.8h, v0.8b
-        SXTL    v1.8h, v1.8b
+        UXTL    v0.8h, v0.8b
+        UXTL    v1.8h, v1.8b
         LDR     x11, [x5, 16]
-        SXTL    v4.8h, v4.8b
-        SXTL    v2.8h, v2.8b
+        USUBL   v4.8h, v4.8b, v7.8b
+        UXTL    v2.8h, v2.8b
         SUBS    x0, x0, 8
-        SXTL    v3.8h, v3.8b
-        SXTL    v6.8h, v6.8b
+        UXTL    v3.8h, v3.8b
+        USUBL   v6.8h, v6.8b, v7.8b
         B.HS    2b
 
         # Epilogue.  Same as main loop but no preloads in final group
@@ -330,7 +344,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v28.4s, v6.8h, v0.h[0]
         SMLAL   v25.4s, v6.4h, v1.h[0]
         SMLAL2  v29.4s, v6.8h, v1.h[0]
-        SXTL    v5.8h, v5.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v26.4s, v6.4h, v2.h[0]
         SMLAL2  v30.4s, v6.8h, v2.h[0]
         SMLAL   v27.4s, v6.4h, v3.h[0]
@@ -340,7 +354,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v20.4s, v5.8h, v0.h[1]
         SMLAL   v17.4s, v5.4h, v1.h[1]
         SMLAL2  v21.4s, v5.8h, v1.h[1]
-        SXTL    v4.8h, v4.8b
+        USUBL   v4.8h, v4.8b, v7.8b
         SMLAL   v18.4s, v5.4h, v2.h[1]
         SMLAL2  v22.4s, v5.8h, v2.h[1]
         SMLAL   v19.4s, v5.4h, v3.h[1]
@@ -351,7 +365,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v28.4s, v4.8h, v0.h[1]
         SMLAL   v25.4s, v4.4h, v1.h[1]
         SMLAL2  v29.4s, v4.8h, v1.h[1]
-        SXTL    v6.8h, v6.8b
+        USUBL   v6.8h, v6.8b, v7.8b
         SMLAL   v26.4s, v4.4h, v2.h[1]
         SMLAL2  v30.4s, v4.8h, v2.h[1]
         SMLAL   v27.4s, v4.4h, v3.h[1]
@@ -360,7 +374,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL   v16.4s, v6.4h, v0.h[2]
         SMLAL2  v20.4s, v6.8h, v0.h[2]
         SMLAL   v17.4s, v6.4h, v1.h[2]
-        SXTL    v5.8h, v5.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL2  v21.4s, v6.8h, v1.h[2]
         SMLAL   v18.4s, v6.4h, v2.h[2]
         SMLAL2  v22.4s, v6.8h, v2.h[2]
@@ -372,7 +386,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v28.4s, v5.8h, v0.h[2]
         SMLAL   v25.4s, v5.4h, v1.h[2]
         SMLAL2  v29.4s, v5.8h, v1.h[2]
-        SXTL    v4.8h, v4.8b
+        USUBL   v4.8h, v4.8b, v7.8b
         SMLAL   v26.4s, v5.4h, v2.h[2]
         SMLAL2  v30.4s, v5.8h, v2.h[2]
         SMLAL   v27.4s, v5.4h, v3.h[2]
@@ -382,7 +396,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v20.4s, v4.8h, v0.h[3]
         SMLAL   v17.4s, v4.4h, v1.h[3]
         SMLAL2  v21.4s, v4.8h, v1.h[3]
-        SXTL    v6.8h, v6.8b
+        USUBL   v6.8h, v6.8b, v7.8b
         SMLAL   v18.4s, v4.4h, v2.h[3]
         SMLAL2  v22.4s, v4.8h, v2.h[3]
         SMLAL   v19.4s, v4.4h, v3.h[3]
@@ -391,7 +405,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         INS     v5.d[0], x11
         SMLAL   v24.4s, v6.4h, v0.h[3]
         SMLAL2  v28.4s, v6.8h, v0.h[3]
-        SXTL    v5.8h, v5.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v25.4s, v6.4h, v1.h[3]
         SMLAL2  v29.4s, v6.8h, v1.h[3]
         SMLAL   v26.4s, v6.4h, v2.h[3]
@@ -403,7 +417,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v20.4s, v5.8h, v0.h[4]
         SMLAL   v17.4s, v5.4h, v1.h[4]
         SMLAL2  v21.4s, v5.8h, v1.h[4]
-        SXTL    v4.8h, v4.8b
+        USUBL   v4.8h, v4.8b, v7.8b
         SMLAL   v18.4s, v5.4h, v2.h[4]
         SMLAL2  v22.4s, v5.8h, v2.h[4]
         SMLAL   v19.4s, v5.4h, v3.h[4]
@@ -414,7 +428,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v28.4s, v4.8h, v0.h[4]
         SMLAL   v25.4s, v4.4h, v1.h[4]
         SMLAL2  v29.4s, v4.8h, v1.h[4]
-        SXTL    v6.8h, v6.8b
+        USUBL   v6.8h, v6.8b, v7.8b
         SMLAL   v26.4s, v4.4h, v2.h[4]
         SMLAL2  v30.4s, v4.8h, v2.h[4]
         SMLAL   v27.4s, v4.4h, v3.h[4]
@@ -424,7 +438,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v20.4s, v6.8h, v0.h[5]
         SMLAL   v17.4s, v6.4h, v1.h[5]
         SMLAL2  v21.4s, v6.8h, v1.h[5]
-        SXTL    v5.8h, v5.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v18.4s, v6.4h, v2.h[5]
         SMLAL2  v22.4s, v6.8h, v2.h[5]
         SMLAL   v19.4s, v6.4h, v3.h[5]
@@ -435,12 +449,12 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v28.4s, v5.8h, v0.h[5]
         SMLAL   v25.4s, v5.4h, v1.h[5]
         SMLAL2  v29.4s, v5.8h, v1.h[5]
-        SXTL    v4.8h, v4.8b
+        USUBL   v4.8h, v4.8b, v7.8b
         SMLAL   v26.4s, v5.4h, v2.h[5]
         SMLAL2  v30.4s, v5.8h, v2.h[5]
         SMLAL   v27.4s, v5.4h, v3.h[5]
         SMLAL2  v31.4s, v5.8h, v3.h[5]
-        SXTL    v6.8h, v6.8b
+        USUBL   v6.8h, v6.8b, v7.8b
         SMLAL   v16.4s, v4.4h, v0.h[6]
         SMLAL2  v20.4s, v4.8h, v0.h[6]
         SMLAL   v17.4s, v4.4h, v1.h[6]
@@ -456,7 +470,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v29.4s, v6.8h, v1.h[6]
         LDR     d5, [x5, 120]
         INS     v4.d[0], x11
-        SXTL    v4.8h, v4.8b
+        USUBL   v4.8h, v4.8b, v7.8b
         SMLAL   v26.4s, v6.4h, v2.h[6]
         SMLAL2  v30.4s, v6.8h, v2.h[6]
         SMLAL   v27.4s, v6.4h, v3.h[6]
@@ -465,7 +479,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SMLAL2  v20.4s, v4.8h, v0.h[7]
         SMLAL   v17.4s, v4.4h, v1.h[7]
         SMLAL2  v21.4s, v4.8h, v1.h[7]
-        SXTL    v5.8h, v5.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v18.4s, v4.4h, v2.h[7]
         SMLAL2  v22.4s, v4.8h, v2.h[7]
         SMLAL   v19.4s, v4.4h, v3.h[7]
@@ -481,70 +495,68 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         LDR     x11, [sp, 40]            // reload params pointer
         SMLAL   v27.4s, v5.4h, v3.h[7]
         SMLAL2  v31.4s, v5.8h, v3.h[7]
+        ADD     x11, x11, 4
 
         # Is there a remainder?- 1 to 7 bytes of A
         CBNZ    x0, 5f
 
 4:
         # ks loop
-        SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
+        SUBS    x9, x9, 32              // ks -= MR * sizeof(uint8_t*)
         B.HI    1b
 
-        SCVTF   v16.4s, v16.4s
-        SCVTF   v17.4s, v17.4s
-        # Load per channel scale values from weights
-        LDR     q0, [x5], 16
-        SCVTF   v18.4s, v18.4s
-        SCVTF   v19.4s, v19.4s
-        LDR     q1, [x5], 16
-        SCVTF   v20.4s, v20.4s
-        SCVTF   v21.4s, v21.4s
-        SCVTF   v22.4s, v22.4s
-        SCVTF   v23.4s, v23.4s
-        SCVTF   v24.4s, v24.4s
-        SCVTF   v25.4s, v25.4s
-        SCVTF   v26.4s, v26.4s
-        SCVTF   v27.4s, v27.4s
-        SCVTF   v28.4s, v28.4s
-        SCVTF   v29.4s, v29.4s
-        SCVTF   v30.4s, v30.4s
-        SCVTF   v31.4s, v31.4s
-
-        LDR     q2, [x5], 16
-        FMUL    v16.4s, v16.4s, v0.4s
-        FMUL    v17.4s, v17.4s, v0.4s
-        LDR     q3, [x5], 16
-        FMUL    v18.4s, v18.4s, v0.4s
-        FMUL    v19.4s, v19.4s, v0.4s
-        FMUL    v20.4s, v20.4s, v1.4s
-        FMUL    v21.4s, v21.4s, v1.4s
-        FMUL    v22.4s, v22.4s, v1.4s
-        FMUL    v23.4s, v23.4s, v1.4s
-        FMUL    v24.4s, v24.4s, v2.4s
-        FMUL    v25.4s, v25.4s, v2.4s
-        FMUL    v26.4s, v26.4s, v2.4s
-        FMUL    v27.4s, v27.4s, v2.4s
-        FMUL    v28.4s, v28.4s, v3.4s
-        FMUL    v29.4s, v29.4s, v3.4s
-        FMUL    v30.4s, v30.4s, v3.4s
-        FMUL    v31.4s, v31.4s, v3.4s
-
-        FCVTNS  v16.4s, v16.4s
-        FCVTNS  v17.4s, v17.4s
-        FCVTNS  v18.4s, v18.4s
-        FCVTNS  v19.4s, v19.4s
-        FCVTNS  v20.4s, v20.4s
-        FCVTNS  v21.4s, v21.4s
-        FCVTNS  v22.4s, v22.4s
-        FCVTNS  v23.4s, v23.4s
-        FCVTNS  v24.4s, v24.4s
-        FCVTNS  v25.4s, v25.4s
-        FCVTNS  v26.4s, v26.4s
-        FCVTNS  v27.4s, v27.4s
-        FCVTNS  v28.4s, v28.4s
-        FCVTNS  v29.4s, v29.4s
-        FCVTNS  v30.4s, v30.4s
-        FCVTNS  v31.4s, v31.4s
+        # Apply params - preshift, scale, postshift, bias and clamp
+        LD1R    {v0.4s}, [x11], 4
+        SSHL    v16.4s, v16.4s, v0.4s   // shift to upper bits
+        SSHL    v17.4s, v17.4s, v0.4s
+        SSHL    v18.4s, v18.4s, v0.4s
+        SSHL    v19.4s, v19.4s, v0.4s
+        SSHL    v20.4s, v20.4s, v0.4s
+        SSHL    v21.4s, v21.4s, v0.4s
+        SSHL    v22.4s, v22.4s, v0.4s
+        SSHL    v23.4s, v23.4s, v0.4s
+        LD1R    {v1.4s}, [x11], 4
+        SSHL    v24.4s, v24.4s, v0.4s
+        SSHL    v25.4s, v25.4s, v0.4s
+        SSHL    v26.4s, v26.4s, v0.4s
+        SSHL    v27.4s, v27.4s, v0.4s
+        SSHL    v28.4s, v28.4s, v0.4s
+        SSHL    v29.4s, v29.4s, v0.4s
+        SSHL    v30.4s, v30.4s, v0.4s
+        SSHL    v31.4s, v31.4s, v0.4s
+        LD1R    {v2.4s}, [x11], 4
+        SQDMULH v16.4s, v16.4s, v1.4s   // scale without rounding
+        SQDMULH v17.4s, v17.4s, v1.4s
+        SQDMULH v18.4s, v18.4s, v1.4s
+        SQDMULH v19.4s, v19.4s, v1.4s
+        SQDMULH v20.4s, v20.4s, v1.4s
+        SQDMULH v21.4s, v21.4s, v1.4s
+        SQDMULH v22.4s, v22.4s, v1.4s
+        SQDMULH v23.4s, v23.4s, v1.4s
+        SQDMULH v24.4s, v24.4s, v1.4s
+        SQDMULH v25.4s, v25.4s, v1.4s
+        SQDMULH v26.4s, v26.4s, v1.4s
+        SQDMULH v27.4s, v27.4s, v1.4s
+        SQDMULH v28.4s, v28.4s, v1.4s
+        SQDMULH v29.4s, v29.4s, v1.4s
+        SQDMULH v30.4s, v30.4s, v1.4s
+        SQDMULH v31.4s, v31.4s, v1.4s
+        SRSHL   v16.4s, v16.4s, v2.4s   // signed rounding shift left
+        SRSHL   v17.4s, v17.4s, v2.4s
+        SRSHL   v18.4s, v18.4s, v2.4s
+        SRSHL   v19.4s, v19.4s, v2.4s
+        SRSHL   v20.4s, v20.4s, v2.4s
+        SRSHL   v21.4s, v21.4s, v2.4s
+        SRSHL   v22.4s, v22.4s, v2.4s
+        SRSHL   v23.4s, v23.4s, v2.4s
+        SRSHL   v24.4s, v24.4s, v2.4s
+        SRSHL   v25.4s, v25.4s, v2.4s
+        SRSHL   v26.4s, v26.4s, v2.4s
+        SRSHL   v27.4s, v27.4s, v2.4s
+        SRSHL   v28.4s, v28.4s, v2.4s
+        SRSHL   v29.4s, v29.4s, v2.4s
+        SRSHL   v30.4s, v30.4s, v2.4s
+        SRSHL   v31.4s, v31.4s, v2.4s
 
         SQXTN   v16.4h, v16.4s
         SQXTN   v17.4h, v17.4s
@@ -575,26 +587,26 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         SQADD   v27.8h, v27.8h, v2.8h
         LD1R    {v0.16b}, [x11], 1       // clamp min value
 
-        SQXTN   v4.8b, v16.8h
-        SQXTN   v5.8b, v17.8h
-        SQXTN   v6.8b, v18.8h
-        SQXTN   v7.8b, v19.8h
+        SQXTUN   v4.8b, v16.8h
+        SQXTUN   v5.8b, v17.8h
+        SQXTUN   v6.8b, v18.8h
+        SQXTUN   v7.8b, v19.8h
         LD1R    {v1.16b}, [x11]          // clamp max value
-        SQXTN2  v4.16b, v24.8h
-        SQXTN2  v5.16b, v25.8h
-        SQXTN2  v6.16b, v26.8h
-        SQXTN2  v7.16b, v27.8h
-        SUB     x11, x11, 3             // rewind params pointer
+        SQXTUN2  v4.16b, v24.8h
+        SQXTUN2  v5.16b, v25.8h
+        SQXTUN2  v6.16b, v26.8h
+        SQXTUN2  v7.16b, v27.8h
+        SUB     x11, x11, 19             // rewind params pointer
 
-        SMAX    v4.16b, v4.16b, v0.16b
-        SMAX    v5.16b, v5.16b, v0.16b
-        SMAX    v6.16b, v6.16b, v0.16b
-        SMAX    v7.16b, v7.16b, v0.16b
+        UMAX    v4.16b, v4.16b, v0.16b
+        UMAX    v5.16b, v5.16b, v0.16b
+        UMAX    v6.16b, v6.16b, v0.16b
+        UMAX    v7.16b, v7.16b, v0.16b
         SUBS    x1, x1, 16
-        SMIN    v4.16b, v4.16b, v1.16b
-        SMIN    v5.16b, v5.16b, v1.16b
-        SMIN    v6.16b, v6.16b, v1.16b
-        SMIN    v7.16b, v7.16b, v1.16b
+        UMIN    v4.16b, v4.16b, v1.16b
+        UMIN    v5.16b, v5.16b, v1.16b
+        UMIN    v6.16b, v6.16b, v1.16b
+        UMIN    v7.16b, v7.16b, v1.16b
         B.LO    6f
 
         # Store full 4 x 16
@@ -622,12 +634,12 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         LD1     {v1.8b}, [x14], x0
         LD1     {v2.8b}, [x15], x0
         LD1     {v3.8b}, [x20], x0
-        SXTL    v0.8h, v0.8b
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
-        SXTL    v1.8h, v1.8b
-        SXTL    v2.8h, v2.8b
-        SXTL    v3.8h, v3.8b
+        UXTL    v0.8h, v0.8b
+        USUBL   v4.8h, v4.8b, v7.8b
+        USUBL   v5.8h, v5.8b, v7.8b
+        UXTL    v1.8h, v1.8b
+        UXTL    v2.8h, v2.8b
+        UXTL    v3.8h, v3.8b
         SMLAL   v16.4s, v4.4h, v0.h[0]
         SMLAL2  v20.4s, v4.8h, v0.h[0]
         SMLAL   v24.4s, v5.4h, v0.h[0]
@@ -648,8 +660,8 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         B.LO    4b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        USUBL   v4.8h, v4.8b, v7.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v16.4s, v4.4h, v0.h[1]
         SMLAL2  v20.4s, v4.8h, v0.h[1]
         SMLAL   v24.4s, v5.4h, v0.h[1]
@@ -669,8 +681,8 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         B.EQ    4b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        USUBL   v4.8h, v4.8b, v7.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v16.4s, v4.4h, v0.h[2]
         SMLAL2  v20.4s, v4.8h, v0.h[2]
         SMLAL   v24.4s, v5.4h, v0.h[2]
@@ -691,8 +703,8 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         B.LO    4b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        USUBL   v4.8h, v4.8b, v7.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v16.4s, v4.4h, v0.h[3]
         SMLAL2  v20.4s, v4.8h, v0.h[3]
         SMLAL   v24.4s, v5.4h, v0.h[3]
@@ -712,8 +724,8 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         B.EQ    4b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        USUBL   v4.8h, v4.8b, v7.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v16.4s, v4.4h, v0.h[4]
         SMLAL2  v20.4s, v4.8h, v0.h[4]
         SMLAL   v24.4s, v5.4h, v0.h[4]
@@ -734,8 +746,8 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         B.LO    4b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        USUBL   v4.8h, v4.8b, v7.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v16.4s, v4.4h, v0.h[5]
         SMLAL2  v20.4s, v4.8h, v0.h[5]
         SMLAL   v24.4s, v5.4h, v0.h[5]
@@ -755,8 +767,8 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         B.EQ    4b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        USUBL   v4.8h, v4.8b, v7.8b
+        USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v16.4s, v4.4h, v0.h[6]
         SMLAL2  v20.4s, v4.8h, v0.h[6]
         SMLAL   v24.4s, v5.4h, v0.h[6]
@@ -818,7 +830,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         LDP     x20, x21, [sp], 16
         RET
 
-END_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53
+END_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

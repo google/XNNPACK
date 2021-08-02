@@ -5,23 +5,44 @@
 
 $assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
 $assert not CHANNELWISE or REQUANTIZATION == "FP32"
+$assert DATATYPE in ["QC8", "QS8", "QU8"]
+$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
+$assert DATATYPE != "QU8" or REQUANTIZATION == "RNDNU"
 
 #include <xnnpack/assembly.h>
 
-$DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-# void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53(
+$XMIN = "UMIN" if DATATYPE == "QU8" else "SMIN"
+$XMAX = "UMAX" if DATATYPE == "QU8" else "SMAX"
+$XXTL = "UXTL" if DATATYPE == "QU8" else "SXTL"
+$SQXTXN = "SQXTUN" if DATATYPE == "QU8" else "SQXTN"
+$SQXTXN2 = "SQXTUN2" if DATATYPE == "QU8" else "SQXTN2"
+$XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
+# void xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
-#     const int8_t* restrict a,  x3
+#     const ${XINT8_T}* restrict a,  x3
 #     size_t a_stride,           x4
 #     const void* restrict w,    x5
-#     int8_t* restrict c,        x6
+#     ${XINT8_T}* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,          [sp] -> x12
 #     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x11
 
+$if REQUANTIZATION == "RNDNU" and DATATYPE == "QU8":
+  # params structure is 20 bytes
+  #  struct {
+  #    ${XINT8_T} kernel_zero_point;
+  #    ${XINT8_T} padding[3];
+  #    int32_t right_pre_shift;
+  #    int32_t multiplier;
+  #    int32_t right_post_shift;
+  #    int16_t output_zero_point;
+  #    ${XINT8_T} output_min;
+  #    ${XINT8_T} output_max;
+  #  } rndnu_neon;
+  #
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
@@ -34,12 +55,15 @@ $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax
 # C1  x8 v17 v21 v25 v29
 # C2  x9 v18 v22 v26 v30
 # C3  x7 v19 v23 v27 v31
-# temp   v7
+$if DATATYPE == "QU8":
+  # zero_point/temp    v7
+$else:
+  # temp   v7
 # unused v8 v9 v10 v11 v12 v13 v14 v15
 
 # x10 x17 a53 temp registers
 
-BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
+BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -75,8 +99,12 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SUBS    x0, x2, 8               // k = kc - 8
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
+        $if DATATYPE == "QU8":
+          LD1R    {v7.16b}, [x11]         // kernel_zero_point
         MOV     v27.16b, v24.16b
         MOV     v29.16b, v28.16b
+        $if DATATYPE == "QU8":
+          ADD     x11, x11, 4
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
         # Is there at least 8 bytes for epilogue?
@@ -88,13 +116,19 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         LDR     d1, [x15], 8
         LDR     d2, [x13], 8
         LDR     d3, [x4], 8
-        SXTL    v0.8h, v0.8b
+        ${XXTL}    v0.8h, v0.8b
         LDR     x17, [x5, 16]
-        SXTL    v4.8h, v4.8b
-        SXTL    v1.8h, v1.8b
-        SXTL    v2.8h, v2.8b
-        SXTL    v3.8h, v3.8b
-        SXTL    v6.8h, v6.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
+        ${XXTL}    v1.8h, v1.8b
+        ${XXTL}    v2.8h, v2.8b
+        ${XXTL}    v3.8h, v3.8b
+        $if DATATYPE == "QU8":
+          USUBL   v6.8h, v6.8b, v7.8b
+        $else:
+          SXTL    v6.8h, v6.8b
 
         SUBS    x0, x0, 8               // k = k - 8
         # Is there at least 8 bytes for main loop?
@@ -129,7 +163,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v29.4s, v6.8h, v1.h[0]
         $if PREFETCH:
           PRFM    PLDL1KEEP, [x5, 512]
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v26.4s, v6.4h, v2.h[0]
         SMLAL2  v30.4s, v6.8h, v2.h[0]
         SMLAL   v27.4s, v6.4h, v3.h[0]
@@ -139,7 +176,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v20.4s, v5.8h, v0.h[1]
         SMLAL   v17.4s, v5.4h, v1.h[1]
         SMLAL2  v21.4s, v5.8h, v1.h[1]
-        SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
         SMLAL   v18.4s, v5.4h, v2.h[1]
         SMLAL2  v22.4s, v5.8h, v2.h[1]
         SMLAL   v19.4s, v5.4h, v3.h[1]
@@ -150,7 +190,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v28.4s, v4.8h, v0.h[1]
         SMLAL   v25.4s, v4.4h, v1.h[1]
         SMLAL2  v29.4s, v4.8h, v1.h[1]
-        SXTL    v6.8h, v6.8b
+        $if DATATYPE == "QU8":
+          USUBL   v6.8h, v6.8b, v7.8b
+        $else:
+          SXTL    v6.8h, v6.8b
         SMLAL   v26.4s, v4.4h, v2.h[1]
         SMLAL2  v30.4s, v4.8h, v2.h[1]
         SMLAL   v27.4s, v4.4h, v3.h[1]
@@ -159,7 +202,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL   v16.4s, v6.4h, v0.h[2]
         SMLAL2  v20.4s, v6.8h, v0.h[2]
         SMLAL   v17.4s, v6.4h, v1.h[2]
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL2  v21.4s, v6.8h, v1.h[2]
         SMLAL   v18.4s, v6.4h, v2.h[2]
         SMLAL2  v22.4s, v6.8h, v2.h[2]
@@ -171,7 +217,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v28.4s, v5.8h, v0.h[2]
         SMLAL   v25.4s, v5.4h, v1.h[2]
         SMLAL2  v29.4s, v5.8h, v1.h[2]
-        SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
         SMLAL   v26.4s, v5.4h, v2.h[2]
         SMLAL2  v30.4s, v5.8h, v2.h[2]
         SMLAL   v27.4s, v5.4h, v3.h[2]
@@ -181,7 +230,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v20.4s, v4.8h, v0.h[3]
         SMLAL   v17.4s, v4.4h, v1.h[3]
         SMLAL2  v21.4s, v4.8h, v1.h[3]
-        SXTL    v6.8h, v6.8b
+        $if DATATYPE == "QU8":
+          USUBL   v6.8h, v6.8b, v7.8b
+        $else:
+          SXTL    v6.8h, v6.8b
         SMLAL   v18.4s, v4.4h, v2.h[3]
         SMLAL2  v22.4s, v4.8h, v2.h[3]
         SMLAL   v19.4s, v4.4h, v3.h[3]
@@ -190,7 +242,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         INS     v5.d[0], x17
         SMLAL   v24.4s, v6.4h, v0.h[3]
         SMLAL2  v28.4s, v6.8h, v0.h[3]
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v25.4s, v6.4h, v1.h[3]
         SMLAL2  v29.4s, v6.8h, v1.h[3]
         SMLAL   v26.4s, v6.4h, v2.h[3]
@@ -202,7 +257,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v20.4s, v5.8h, v0.h[4]
         SMLAL   v17.4s, v5.4h, v1.h[4]
         SMLAL2  v21.4s, v5.8h, v1.h[4]
-        SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
         SMLAL   v18.4s, v5.4h, v2.h[4]
         SMLAL2  v22.4s, v5.8h, v2.h[4]
         SMLAL   v19.4s, v5.4h, v3.h[4]
@@ -213,7 +271,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v28.4s, v4.8h, v0.h[4]
         SMLAL   v25.4s, v4.4h, v1.h[4]
         SMLAL2  v29.4s, v4.8h, v1.h[4]
-        SXTL    v6.8h, v6.8b
+        $if DATATYPE == "QU8":
+          USUBL   v6.8h, v6.8b, v7.8b
+        $else:
+          SXTL    v6.8h, v6.8b
         SMLAL   v26.4s, v4.4h, v2.h[4]
         SMLAL2  v30.4s, v4.8h, v2.h[4]
         SMLAL   v27.4s, v4.4h, v3.h[4]
@@ -223,7 +284,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v20.4s, v6.8h, v0.h[5]
         SMLAL   v17.4s, v6.4h, v1.h[5]
         SMLAL2  v21.4s, v6.8h, v1.h[5]
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v18.4s, v6.4h, v2.h[5]
         SMLAL2  v22.4s, v6.8h, v2.h[5]
         SMLAL   v19.4s, v6.4h, v3.h[5]
@@ -234,12 +298,18 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v28.4s, v5.8h, v0.h[5]
         SMLAL   v25.4s, v5.4h, v1.h[5]
         SMLAL2  v29.4s, v5.8h, v1.h[5]
-        SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
         SMLAL   v26.4s, v5.4h, v2.h[5]
         SMLAL2  v30.4s, v5.8h, v2.h[5]
         SMLAL   v27.4s, v5.4h, v3.h[5]
         SMLAL2  v31.4s, v5.8h, v3.h[5]
-        SXTL    v6.8h, v6.8b
+        $if DATATYPE == "QU8":
+          USUBL   v6.8h, v6.8b, v7.8b
+        $else:
+          SXTL    v6.8h, v6.8b
         LDR     x17, [x5, 112]
         SMLAL   v16.4s, v4.4h, v0.h[6]
         SMLAL2  v20.4s, v4.8h, v0.h[6]
@@ -255,7 +325,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v28.4s, v6.8h, v0.h[6]
         SMLAL   v25.4s, v6.4h, v1.h[6]
         SMLAL2  v29.4s, v6.8h, v1.h[6]
-        SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
         ADD     x5, x5, 128
 
         SMLAL   v26.4s, v6.4h, v2.h[6]
@@ -263,7 +336,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         LDR     x17, [x5]
         SMLAL   v27.4s, v6.4h, v3.h[6]
         SMLAL2  v31.4s, v6.8h, v3.h[6]
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         LDR     x10, [x3], 8
 
         SMLAL   v16.4s, v4.4h, v0.h[7]
@@ -290,14 +366,20 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         LDR     d3, [x4], 8
         INS     v2.d[0], x17
 
-        SXTL    v0.8h, v0.8b
-        SXTL    v1.8h, v1.8b
+        ${XXTL}    v0.8h, v0.8b
+        ${XXTL}    v1.8h, v1.8b
         LDR     x17, [x5, 16]
-        SXTL    v4.8h, v4.8b
-        SXTL    v2.8h, v2.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
+        ${XXTL}    v2.8h, v2.8b
         SUBS    x0, x0, 8
-        SXTL    v3.8h, v3.8b
-        SXTL    v6.8h, v6.8b
+        ${XXTL}    v3.8h, v3.8b
+        $if DATATYPE == "QU8":
+          USUBL   v6.8h, v6.8b, v7.8b
+        $else:
+          SXTL    v6.8h, v6.8b
         B.HS    1b
 
         # Epilogue.  Same as main loop but no preloads in final group
@@ -318,7 +400,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v28.4s, v6.8h, v0.h[0]
         SMLAL   v25.4s, v6.4h, v1.h[0]
         SMLAL2  v29.4s, v6.8h, v1.h[0]
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v26.4s, v6.4h, v2.h[0]
         SMLAL2  v30.4s, v6.8h, v2.h[0]
         SMLAL   v27.4s, v6.4h, v3.h[0]
@@ -328,7 +413,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v20.4s, v5.8h, v0.h[1]
         SMLAL   v17.4s, v5.4h, v1.h[1]
         SMLAL2  v21.4s, v5.8h, v1.h[1]
-        SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
         SMLAL   v18.4s, v5.4h, v2.h[1]
         SMLAL2  v22.4s, v5.8h, v2.h[1]
         SMLAL   v19.4s, v5.4h, v3.h[1]
@@ -339,7 +427,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v28.4s, v4.8h, v0.h[1]
         SMLAL   v25.4s, v4.4h, v1.h[1]
         SMLAL2  v29.4s, v4.8h, v1.h[1]
-        SXTL    v6.8h, v6.8b
+        $if DATATYPE == "QU8":
+          USUBL   v6.8h, v6.8b, v7.8b
+        $else:
+          SXTL    v6.8h, v6.8b
         SMLAL   v26.4s, v4.4h, v2.h[1]
         SMLAL2  v30.4s, v4.8h, v2.h[1]
         SMLAL   v27.4s, v4.4h, v3.h[1]
@@ -348,7 +439,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL   v16.4s, v6.4h, v0.h[2]
         SMLAL2  v20.4s, v6.8h, v0.h[2]
         SMLAL   v17.4s, v6.4h, v1.h[2]
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL2  v21.4s, v6.8h, v1.h[2]
         SMLAL   v18.4s, v6.4h, v2.h[2]
         SMLAL2  v22.4s, v6.8h, v2.h[2]
@@ -360,7 +454,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v28.4s, v5.8h, v0.h[2]
         SMLAL   v25.4s, v5.4h, v1.h[2]
         SMLAL2  v29.4s, v5.8h, v1.h[2]
-        SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
         SMLAL   v26.4s, v5.4h, v2.h[2]
         SMLAL2  v30.4s, v5.8h, v2.h[2]
         SMLAL   v27.4s, v5.4h, v3.h[2]
@@ -370,7 +467,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v20.4s, v4.8h, v0.h[3]
         SMLAL   v17.4s, v4.4h, v1.h[3]
         SMLAL2  v21.4s, v4.8h, v1.h[3]
-        SXTL    v6.8h, v6.8b
+        $if DATATYPE == "QU8":
+          USUBL   v6.8h, v6.8b, v7.8b
+        $else:
+          SXTL    v6.8h, v6.8b
         SMLAL   v18.4s, v4.4h, v2.h[3]
         SMLAL2  v22.4s, v4.8h, v2.h[3]
         SMLAL   v19.4s, v4.4h, v3.h[3]
@@ -379,7 +479,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         INS     v5.d[0], x17
         SMLAL   v24.4s, v6.4h, v0.h[3]
         SMLAL2  v28.4s, v6.8h, v0.h[3]
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v25.4s, v6.4h, v1.h[3]
         SMLAL2  v29.4s, v6.8h, v1.h[3]
         SMLAL   v26.4s, v6.4h, v2.h[3]
@@ -391,7 +494,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v20.4s, v5.8h, v0.h[4]
         SMLAL   v17.4s, v5.4h, v1.h[4]
         SMLAL2  v21.4s, v5.8h, v1.h[4]
-        SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
         SMLAL   v18.4s, v5.4h, v2.h[4]
         SMLAL2  v22.4s, v5.8h, v2.h[4]
         SMLAL   v19.4s, v5.4h, v3.h[4]
@@ -402,7 +508,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v28.4s, v4.8h, v0.h[4]
         SMLAL   v25.4s, v4.4h, v1.h[4]
         SMLAL2  v29.4s, v4.8h, v1.h[4]
-        SXTL    v6.8h, v6.8b
+        $if DATATYPE == "QU8":
+          USUBL   v6.8h, v6.8b, v7.8b
+        $else:
+          SXTL    v6.8h, v6.8b
         SMLAL   v26.4s, v4.4h, v2.h[4]
         SMLAL2  v30.4s, v4.8h, v2.h[4]
         SMLAL   v27.4s, v4.4h, v3.h[4]
@@ -412,7 +521,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v20.4s, v6.8h, v0.h[5]
         SMLAL   v17.4s, v6.4h, v1.h[5]
         SMLAL2  v21.4s, v6.8h, v1.h[5]
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v18.4s, v6.4h, v2.h[5]
         SMLAL2  v22.4s, v6.8h, v2.h[5]
         SMLAL   v19.4s, v6.4h, v3.h[5]
@@ -423,12 +535,18 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v28.4s, v5.8h, v0.h[5]
         SMLAL   v25.4s, v5.4h, v1.h[5]
         SMLAL2  v29.4s, v5.8h, v1.h[5]
-        SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
         SMLAL   v26.4s, v5.4h, v2.h[5]
         SMLAL2  v30.4s, v5.8h, v2.h[5]
         SMLAL   v27.4s, v5.4h, v3.h[5]
         SMLAL2  v31.4s, v5.8h, v3.h[5]
-        SXTL    v6.8h, v6.8b
+        $if DATATYPE == "QU8":
+          USUBL   v6.8h, v6.8b, v7.8b
+        $else:
+          SXTL    v6.8h, v6.8b
         SMLAL   v16.4s, v4.4h, v0.h[6]
         SMLAL2  v20.4s, v4.8h, v0.h[6]
         SMLAL   v17.4s, v4.4h, v1.h[6]
@@ -444,7 +562,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v29.4s, v6.8h, v1.h[6]
         LDR     d5, [x5, 120]
         INS     v4.d[0], x17
-        SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
         SMLAL   v26.4s, v6.4h, v2.h[6]
         SMLAL2  v30.4s, v6.8h, v2.h[6]
         SMLAL   v27.4s, v6.4h, v3.h[6]
@@ -453,7 +574,10 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SMLAL2  v20.4s, v4.8h, v0.h[7]
         SMLAL   v17.4s, v4.4h, v1.h[7]
         SMLAL2  v21.4s, v4.8h, v1.h[7]
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v18.4s, v4.4h, v2.h[7]
         SMLAL2  v22.4s, v4.8h, v2.h[7]
         SMLAL   v19.4s, v4.4h, v3.h[7]
@@ -717,26 +841,26 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SQADD   v27.8h, v27.8h, v2.8h
         LD1R    {v0.16b}, [x11], 1      // clamp min value
 
-        SQXTN   v4.8b, v16.8h
-        SQXTN   v5.8b, v17.8h
-        SQXTN   v6.8b, v18.8h
-        SQXTN   v7.8b, v19.8h
+        ${SQXTXN}   v4.8b, v16.8h
+        ${SQXTXN}   v5.8b, v17.8h
+        ${SQXTXN}   v6.8b, v18.8h
+        ${SQXTXN}   v7.8b, v19.8h
         LD1R    {v1.16b}, [x11]         // clamp max value
-        SQXTN2  v4.16b, v24.8h
-        SQXTN2  v5.16b, v25.8h
-        SQXTN2  v6.16b, v26.8h
-        SQXTN2  v7.16b, v27.8h
+        ${SQXTXN2}  v4.16b, v24.8h
+        ${SQXTXN2}  v5.16b, v25.8h
+        ${SQXTXN2}  v6.16b, v26.8h
+        ${SQXTXN2}  v7.16b, v27.8h
         LDR     x12, [sp]               // cn_stride
 
-        SMAX    v4.16b, v4.16b, v0.16b
-        SMAX    v5.16b, v5.16b, v0.16b
-        SMAX    v6.16b, v6.16b, v0.16b
-        SMAX    v7.16b, v7.16b, v0.16b
+        ${XMAX}    v4.16b, v4.16b, v0.16b
+        ${XMAX}    v5.16b, v5.16b, v0.16b
+        ${XMAX}    v6.16b, v6.16b, v0.16b
+        ${XMAX}    v7.16b, v7.16b, v0.16b
         SUBS    x1, x1, 16
-        SMIN    v4.16b, v4.16b, v1.16b
-        SMIN    v5.16b, v5.16b, v1.16b
-        SMIN    v6.16b, v6.16b, v1.16b
-        SMIN    v7.16b, v7.16b, v1.16b
+        ${XMIN}    v4.16b, v4.16b, v1.16b
+        ${XMIN}    v5.16b, v5.16b, v1.16b
+        ${XMIN}    v6.16b, v6.16b, v1.16b
+        ${XMIN}    v7.16b, v7.16b, v1.16b
         B.LO    5f
 
         # Store full 4 x 16
@@ -761,12 +885,18 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         LD1     {v1.8b}, [x15], x0
         LD1     {v2.8b}, [x13], x0
         LD1     {v3.8b},  [x4], x0
-        SXTL    v0.8h, v0.8b
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
-        SXTL    v1.8h, v1.8b
-        SXTL    v2.8h, v2.8b
-        SXTL    v3.8h, v3.8b
+        ${XXTL}    v0.8h, v0.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
+        ${XXTL}    v1.8h, v1.8b
+        ${XXTL}    v2.8h, v2.8b
+        ${XXTL}    v3.8h, v3.8b
         SMLAL   v16.4s, v4.4h, v0.h[0]
         SMLAL2  v20.4s, v4.8h, v0.h[0]
         SMLAL   v24.4s, v5.4h, v0.h[0]
@@ -787,8 +917,14 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         B.LO    3b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v16.4s, v4.4h, v0.h[1]
         SMLAL2  v20.4s, v4.8h, v0.h[1]
         SMLAL   v24.4s, v5.4h, v0.h[1]
@@ -808,8 +944,14 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         B.EQ    3b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v16.4s, v4.4h, v0.h[2]
         SMLAL2  v20.4s, v4.8h, v0.h[2]
         SMLAL   v24.4s, v5.4h, v0.h[2]
@@ -830,8 +972,14 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         B.LO    3b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v16.4s, v4.4h, v0.h[3]
         SMLAL2  v20.4s, v4.8h, v0.h[3]
         SMLAL   v24.4s, v5.4h, v0.h[3]
@@ -851,8 +999,14 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         B.EQ    3b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v16.4s, v4.4h, v0.h[4]
         SMLAL2  v20.4s, v4.8h, v0.h[4]
         SMLAL   v24.4s, v5.4h, v0.h[4]
@@ -873,8 +1027,14 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         B.LO    3b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v16.4s, v4.4h, v0.h[5]
         SMLAL2  v20.4s, v4.8h, v0.h[5]
         SMLAL   v24.4s, v5.4h, v0.h[5]
@@ -894,8 +1054,14 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         B.EQ    3b
 
         LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
-        SXTL    v5.8h, v5.8b
+        $if DATATYPE == "QU8":
+          USUBL   v4.8h, v4.8b, v7.8b
+        $else:
+          SXTL    v4.8h, v4.8b
+        $if DATATYPE == "QU8":
+          USUBL   v5.8h, v5.8b, v7.8b
+        $else:
+          SXTL    v5.8h, v5.8b
         SMLAL   v16.4s, v4.4h, v0.h[6]
         SMLAL2  v20.4s, v4.8h, v0.h[6]
         SMLAL   v24.4s, v5.4h, v0.h[6]
@@ -955,7 +1121,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
 9:
         RET
 
-END_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
+END_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
