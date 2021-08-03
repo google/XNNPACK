@@ -80,6 +80,8 @@ enum xnn_operator_type {
   xnn_operator_type_minimum_nd_f32,
   xnn_operator_type_multiply_nd_f16,
   xnn_operator_type_multiply_nd_f32,
+  xnn_operator_type_multiply_nd_qs8,
+  xnn_operator_type_multiply_nd_qu8,
   xnn_operator_type_negate_nc_f32,
   xnn_operator_type_prelu_nc_f32,
   xnn_operator_type_resize_bilinear_nchw_f32,
@@ -292,8 +294,16 @@ struct xnn_operator {
       union xnn_qs8_add_minmax_params qs8_radd;
     };
     struct {
+      union xnn_qs8_mul_minmax_params qs8_mul;
+      union xnn_qs8_mul_minmax_params qs8_rmul;
+    };
+    struct {
       union xnn_qu8_add_minmax_params qu8_add;
       union xnn_qu8_add_minmax_params qu8_radd;
+    };
+    struct {
+      union xnn_qu8_mul_minmax_params qu8_mul;
+      union xnn_qu8_mul_minmax_params qu8_rmul;
     };
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
     // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch

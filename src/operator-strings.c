@@ -114,6 +114,10 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Multiply (ND, F16)";
     case xnn_operator_type_multiply_nd_f32:
       return "Multiply (ND, F32)";
+    case xnn_operator_type_multiply_nd_qs8:
+      return "Multiply (ND, QS8)";
+    case xnn_operator_type_multiply_nd_qu8:
+      return "Multiply (ND, QU8)";
     case xnn_operator_type_negate_nc_f32:
       return "Negate (NC, F32)";
     case xnn_operator_type_prelu_nc_f32:

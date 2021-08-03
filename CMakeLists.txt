@@ -380,6 +380,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-igemm/gen/4x4-minmax-fp32-scalar-magic.c
   src/qs8-vadd/gen/minmax-scalar-x4.c
   src/qs8-vaddc/gen/minmax-scalar-x4.c
+  src/qs8-vmul/gen/minmax-fp32-scalar-x4.c
+  src/qs8-vmulc/gen/minmax-fp32-scalar-x4.c
   src/qu8-avgpool/9p8x-minmax-scalar-c1.c
   src/qu8-avgpool/9x-minmax-scalar-c1.c
   src/qu8-dwconv/gen/up1x9-minmax-fp32-scalar-lrint.c
@@ -404,6 +406,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-vadd/gen/minmax-scalar-x4.c
   src/qu8-vaddc/gen/minmax-scalar-x1.c
   src/qu8-vaddc/gen/minmax-scalar-x4.c
+  src/qu8-vmul/gen/minmax-fp32-scalar-x4.c
+  src/qu8-vmulc/gen/minmax-fp32-scalar-x4.c
   src/u8-lut32norm/scalar.c
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c
@@ -1117,6 +1121,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qs8-vadd/gen/minmax-neon-ld64-x32.c
   src/qs8-vaddc/gen/minmax-neon-ld64-x16.c
   src/qs8-vaddc/gen/minmax-neon-ld64-x32.c
+  src/qs8-vmul/gen/minmax-fp32-neon-ld64-x16.c
+  src/qs8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
   src/qu8-avgpool/9p8x-minmax-neon-c8.c
   src/qu8-avgpool/9x-minmax-neon-c8.c
   src/qu8-dwconv/gen/up8x9-minmax-rndnu-neon-mul16.c
@@ -1133,6 +1139,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qu8-igemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-vadd/gen/minmax-neon-ld64-x8.c
   src/qu8-vaddc/gen/minmax-neon-ld64-x8.c
+  src/qu8-vmul/gen/minmax-fp32-neon-ld64-x16.c
+  src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c
@@ -2124,7 +2132,11 @@ SET(PROD_NEONV8_MICROKERNEL_SRCS
   src/qc8-igemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
   src/qc8-igemm/gen/2x8c2-minmax-fp32-neonv8-mlal-padal-dup.c
   src/qc8-igemm/gen/2x8c8-minmax-fp32-neonv8-mlal-padal.c
-  src/qc8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c)
+  src/qc8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
+  src/qs8-vmul/gen/minmax-fp32-neonv8-ld64-x16.c
+  src/qs8-vmulc/gen/minmax-fp32-neonv8-ld64-x16.c
+  src/qu8-vmul/gen/minmax-fp32-neonv8-ld64-x16.c
+  src/qu8-vmulc/gen/minmax-fp32-neonv8-ld64-x16.c)
 
 SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndd-neonv8-x4.c
@@ -2654,6 +2666,8 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/qs8-igemm/gen/3x4c8-minmax-fp32-sse2-ld64.c
   src/qs8-vadd/gen/minmax-sse2-mul16-ld64-x8.c
   src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x8.c
+  src/qs8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x8.c
+  src/qs8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c
   src/qu8-avgpool/9p8x-minmax-sse2-c8.c
   src/qu8-avgpool/9x-minmax-sse2-c8.c
   src/qu8-dwconv/gen/up8x9-minmax-fp32-sse2-mul16.c
@@ -2666,6 +2680,8 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/qu8-igemm/gen/3x4c8-minmax-fp32-sse2-ld64.c
   src/qu8-vadd/gen/minmax-sse2-mul16-ld64-x8.c
   src/qu8-vaddc/gen/minmax-sse2-mul16-ld64-x8.c
+  src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x8.c
+  src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
@@ -3020,6 +3036,8 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/qs8-igemm/gen/3x4c8-minmax-fp32-sse41-ld64.c
   src/qs8-vadd/gen/minmax-sse41-mul16-ld64-x8.c
   src/qs8-vaddc/gen/minmax-sse41-mul16-ld64-x8.c
+  src/qs8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c
+  src/qs8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x16.c
   src/qu8-dwconv/gen/up8x9-minmax-fp32-sse41-mul16.c
   src/qu8-dwconv/gen/up8x25-minmax-fp32-sse41-mul16.c
   src/qu8-gemm/gen/1x4c8-minmax-fp32-sse41-ld64.c
@@ -3027,7 +3045,9 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-igemm/gen/1x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-igemm/gen/3x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-vadd/gen/minmax-sse41-mul16-ld64-x8.c
-  src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x8.c)
+  src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x8.c
+  src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c
+  src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x16.c)
 
 SET(ALL_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/gen/sse41-2x4.c
@@ -3319,6 +3339,8 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/qs8-igemm/gen/2x4c8-minmax-fp32-avx-ld128.c
   src/qs8-vadd/gen/minmax-avx-mul32-ld32-x8.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x8.c
+  src/qs8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c
+  src/qs8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x16.c
   src/qu8-dwconv/gen/up16x9-minmax-fp32-avx-mul16.c
   src/qu8-dwconv/gen/up16x25-minmax-fp32-avx-mul16.c
   src/qu8-gemm/gen/1x4c8-minmax-fp32-avx-ld128.c
@@ -3326,7 +3348,9 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/qu8-igemm/gen/1x4c8-minmax-fp32-avx-ld128.c
   src/qu8-igemm/gen/2x4c8-minmax-fp32-avx-ld128.c
   src/qu8-vadd/gen/minmax-avx-mul32-ld32-x8.c
-  src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x8.c)
+  src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x8.c
+  src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c
+  src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x16.c)
 
 SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x4-minmax-avx-acc2.c
