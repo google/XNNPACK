@@ -46,9 +46,9 @@ static void qu8_vaddc(
   init_params(&params,
     1 /* a zero point */, 1 /* b zero point */, 1 /* output zero point */,
     0.5f /* a-output scale */, 0.75f /* b-output scale */,
-    std::numeric_limits<int8_t>::min() + 1, std::numeric_limits<int8_t>::max() - 1);
+    std::numeric_limits<uint8_t>::min() + 1, std::numeric_limits<uint8_t>::max() - 1);
   for (auto _ : state) {
-    vaddc(num_elements * sizeof(int8_t), a.data(), &b, sum.data(), &params);
+    vaddc(num_elements * sizeof(uint8_t), a.data(), &b, sum.data(), &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
