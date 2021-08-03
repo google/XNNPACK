@@ -2619,6 +2619,47 @@ void xnn_init_qu8_mul_minmax_fp32_scalar_params(
   params->fp32_scalar.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) (uint32_t) output_zero_point;
 }
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_init_qu8_mul_minmax_fp32_neon_params(
+  union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t a_zero_point,
+  uint8_t b_zero_point,
+  uint8_t output_zero_point,
+  float product_output_scale,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  params->fp32_neon.a_zero_point[0] = a_zero_point;
+  params->fp32_neon.a_zero_point[1] = a_zero_point;
+  params->fp32_neon.b_zero_point[0] = b_zero_point;
+  params->fp32_neon.b_zero_point[1] = b_zero_point;
+  params->fp32_neon.scale = product_output_scale;
+  params->fp32_neon.output_min_less_zero_point = (float) (int32_t) ((uint32_t) output_min - (uint32_t) output_zero_point);
+  params->fp32_neon.output_max_less_zero_point = (float) (int32_t) ((uint32_t) output_max - (uint32_t) output_zero_point);
+  params->fp32_neon.magic_bias = 12582912.0f;
+  params->fp32_neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) (uint32_t) output_zero_point;
+}
+
+void xnn_init_qu8_mul_minmax_fp32_neonv8_params(
+  union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t a_zero_point,
+  uint8_t b_zero_point,
+  uint8_t output_zero_point,
+  float product_output_scale,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  params->fp32_neonv8.a_zero_point[0] = a_zero_point;
+  params->fp32_neonv8.a_zero_point[1] = a_zero_point;
+  params->fp32_neonv8.b_zero_point[0] = b_zero_point;
+  params->fp32_neonv8.b_zero_point[1] = b_zero_point;
+  params->fp32_neonv8.scale = product_output_scale;
+  params->fp32_neonv8.output_zero_point = (int16_t) (uint16_t) output_zero_point;
+  params->fp32_neonv8.output_min = output_min;
+  params->fp32_neonv8.output_max = output_max;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_qu8_mul_minmax_fp32_sse2_params(
   union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2690,6 +2731,47 @@ void xnn_init_qs8_mul_minmax_fp32_scalar_params(
   params->fp32_scalar.magic_bias = 12582912.0f;
   params->fp32_scalar.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_init_qs8_mul_minmax_fp32_neon_params(
+  union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t a_zero_point,
+  int8_t b_zero_point,
+  int8_t output_zero_point,
+  float product_output_scale,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->fp32_neon.a_zero_point[0] = a_zero_point;
+  params->fp32_neon.a_zero_point[1] = a_zero_point;
+  params->fp32_neon.b_zero_point[0] = b_zero_point;
+  params->fp32_neon.b_zero_point[1] = b_zero_point;
+  params->fp32_neon.scale = product_output_scale;
+  params->fp32_neon.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  params->fp32_neon.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->fp32_neon.magic_bias = 12582912.0f;
+  params->fp32_neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+}
+
+void xnn_init_qs8_mul_minmax_fp32_neonv8_params(
+  union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t a_zero_point,
+  int8_t b_zero_point,
+  int8_t output_zero_point,
+  float product_output_scale,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->fp32_neonv8.a_zero_point[0] = a_zero_point;
+  params->fp32_neonv8.a_zero_point[1] = a_zero_point;
+  params->fp32_neonv8.b_zero_point[0] = b_zero_point;
+  params->fp32_neonv8.b_zero_point[1] = b_zero_point;
+  params->fp32_neonv8.scale = product_output_scale;
+  params->fp32_neonv8.output_zero_point = (int16_t) output_zero_point;
+  params->fp32_neonv8.output_min = output_min;
+  params->fp32_neonv8.output_max = output_max;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_qs8_mul_minmax_fp32_sse2_params(
