@@ -44,7 +44,7 @@ static void qu8_vaddc(
 
   union xnn_qu8_add_minmax_params params;
   init_params(&params,
-    1 /* a zero point */, 1 /* b zero point */, 1 /* output zero point */,
+    127 /* a zero point */, 127 /* b zero point */, 127 /* output zero point */,
     0.5f /* a-output scale */, 0.75f /* b-output scale */,
     std::numeric_limits<uint8_t>::min() + 1, std::numeric_limits<uint8_t>::max() - 1);
   for (auto _ : state) {
