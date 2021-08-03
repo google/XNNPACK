@@ -4791,9 +4791,13 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-igemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld64.S
   src/qs8-igemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S
   src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-cortex-a53.S
+  src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-cortex-a75.S
   src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a53.S
+  src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a75.S
   src/qu8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-cortex-a53.S
-  src/qu8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a53.S)
+  src/qu8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-cortex-a75.S
+  src/qu8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a53.S
+  src/qu8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a75.S)
 
 SET(PROD_MICROKERNEL_SRCS ${PROD_SCALAR_MICROKERNEL_SRCS})
 SET(ALL_MICROKERNEL_SRCS ${ALL_SCALAR_MICROKERNEL_SRCS})

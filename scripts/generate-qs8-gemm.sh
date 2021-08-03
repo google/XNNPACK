@@ -320,8 +320,12 @@ tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFET
 tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=0 -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -D DATATYPE=QC8 -o src/qc8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-cortex-a53.S
 tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=1 -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -D DATATYPE=QC8 -o src/qc8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-cortex-a53.S
 
+# QU8 micro-kernels
 tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-cortex-a53.S
 tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a53.S
+
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a75.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-cortex-a75.S
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a75.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a75.S
 
 ### C4 micro-kernels
 tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x16c4-minmax-gemmlowp-aarch64-neondot-ld32.S
