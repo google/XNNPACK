@@ -68,7 +68,6 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_c
         STP     x20, x21, [sp, -16]!    // Save x20-x21 on stack
         ADD     x7,  x17, x7            // c3 = c2 + cm_stride
         CSEL    x7,  x17, x7, LO        //   c3 = c2
-
         LD1R    {v7.4s}, [x11], 4        // kernel_zero_point
 
         .p2align 3
@@ -764,7 +763,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_c
         # Store odd width
         .p2align 3
 6:
-        TBZ     x1, 3, 8f
+        TBZ     x1, 3, 7f
         STR     d3, [x7], 8
         DUP     d3, v3.d[1]
         STR     d2, [x17], 8
@@ -773,8 +772,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_c
         DUP     d1, v1.d[1]
         STR     d0, [x6], 8
         DUP     d0, v0.d[1]
-8:
-        TBZ     x1, 2, 9f
+7:
+        TBZ     x1, 2, 8f
         STR     s3, [x7], 4
         DUP     s3, v3.s[1]
         STR     s2, [x17], 4
@@ -783,8 +782,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_c
         DUP     s1, v1.s[1]
         STR     s0, [x6], 4
         DUP     s0, v0.s[1]
-9:
-        TBZ     x1, 1, 10f
+8:
+        TBZ     x1, 1, 9f
         ST1     {v3.h}[0], [x7], 2
         DUP     h3, v3.h[1]
         ST1     {v2.h}[0], [x17], 2
@@ -793,13 +792,13 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_c
         DUP     h1, v1.h[1]
         ST1     {v0.h}[0], [x6], 2
         DUP     h0, v0.h[1]
-10:
-        TBZ     x1, 0, 11f
+9:
+        TBZ     x1, 0, 10f
         ST1     {v3.b}[0], [x7]
         ST1     {v2.b}[0], [x17]
         ST1     {v1.b}[0], [x16]
         ST1     {v0.b}[0], [x6]
-11:
+10:
         # Restore x20-x21 from stack
         LDP     x20, x21, [sp], 16
         RET

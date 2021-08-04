@@ -57,38 +57,39 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld32
 
         # Apply params - scale, bias and clamp
         SCVTF   v28.4s, v28.4s
-        LD1R    {v0.4s}, [x11], 4
+        LD1R    {v4.4s}, [x11], 4
         SCVTF   v29.4s, v29.4s
         SCVTF   v30.4s, v30.4s
         SCVTF   v31.4s, v31.4s
-        FMUL    v28.4s, v28.4s, v0.4s
-        FMUL    v29.4s, v29.4s, v0.4s
-        FMUL    v30.4s, v30.4s, v0.4s
-        FMUL    v31.4s, v31.4s, v0.4s
+        FMUL    v28.4s, v28.4s, v4.4s
+        FMUL    v29.4s, v29.4s, v4.4s
+        FMUL    v30.4s, v30.4s, v4.4s
+        FMUL    v31.4s, v31.4s, v4.4s
 
         FCVTNS  v28.4s, v28.4s
         FCVTNS  v29.4s, v29.4s
         FCVTNS  v30.4s, v30.4s
         FCVTNS  v31.4s, v31.4s
 
-        LD1R    {v2.8h}, [x11], 2       // add bias
-        SQXTN   v4.4h, v28.4s
-        SQXTN   v6.4h, v30.4s
-        SQXTN2  v4.8h, v29.4s
-        SQXTN2  v6.8h, v31.4s
-        LD2R    {v0.16b, v1.16b}, [x11] // clamp to min/max
-        SQADD   v4.8h, v4.8h, v2.8h
-        SQADD   v6.8h, v6.8h, v2.8h
+        LD1R    {v6.8h}, [x11], 2       // add bias
+        SQXTN   v0.4h, v28.4s
+        SQXTN   v2.4h, v30.4s
+        SQXTN2  v0.8h, v29.4s
+        SQXTN2  v2.8h, v31.4s
+
+        LD2R    {v4.16b, v5.16b}, [x11] // clamp to min/max
+        SQADD   v0.8h, v0.8h, v6.8h
+        SQADD   v2.8h, v2.8h, v6.8h
         LDR     x12, [sp]               // cn_stride
-        SQXTN   v4.8b, v4.8h
-        SQXTN2  v4.16b, v6.8h
+        SQXTN   v0.8b, v0.8h
+        SQXTN2  v0.16b, v2.8h
         SUBS    x1, x1, 16
-        SMAX    v4.16b, v4.16b, v0.16b
-        SMIN    v4.16b, v4.16b, v1.16b
+        SMAX    v0.16b, v0.16b, v4.16b
+        SMIN    v0.16b, v0.16b, v5.16b
         B.LO    2f
 
         # Store full 1 x 16
-        ST1     {v4.16b}, [x6], x12
+        ST1     {v0.16b}, [x6], x12
         SUB     x3,  x3, x2             // a0 -= kc
         B.NE    0b
         RET
@@ -97,19 +98,19 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld32
         .p2align 3
 2:
         TBZ     x1, 3, 3f
-        STR     d4, [x6], 8
-        DUP     d4, v4.d[1]
+        STR     d0, [x6], 8
+        DUP     d0, v0.d[1]
 3:
         TBZ     x1, 2, 4f
-        STR     s4, [x6], 4
-        DUP     s4, v4.s[1]
+        STR     s0, [x6], 4
+        DUP     s0, v0.s[1]
 4:
         TBZ     x1, 1, 5f
-        ST1     {v4.h}[0], [x6], 2
-        DUP     h4, v4.h[1]
+        ST1     {v0.h}[0], [x6], 2
+        DUP     h0, v0.h[1]
 5:
         TBZ     x1, 0, 6f
-        ST1     {v4.b}[0], [x6]
+        ST1     {v0.b}[0], [x6]
 6:
         RET
 

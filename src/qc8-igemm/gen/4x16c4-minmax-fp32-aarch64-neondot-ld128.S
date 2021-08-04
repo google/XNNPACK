@@ -199,10 +199,10 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
         SCVTF   v16.4s, v16.4s
         SCVTF   v17.4s, v17.4s
         # Load per channel scale values from weights
-        LDR     q0, [x5], 16
+        LDR     q4, [x5], 16
         SCVTF   v18.4s, v18.4s
         SCVTF   v19.4s, v19.4s
-        LDR     q1, [x5], 16
+        LDR     q5, [x5], 16
         SCVTF   v20.4s, v20.4s
         SCVTF   v21.4s, v21.4s
         SCVTF   v22.4s, v22.4s
@@ -216,24 +216,24 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
         SCVTF   v30.4s, v30.4s
         SCVTF   v31.4s, v31.4s
 
-        LDR     q2, [x5], 16
-        FMUL    v16.4s, v16.4s, v0.4s
-        FMUL    v17.4s, v17.4s, v0.4s
-        LDR     q3, [x5], 16
-        FMUL    v18.4s, v18.4s, v0.4s
-        FMUL    v19.4s, v19.4s, v0.4s
-        FMUL    v20.4s, v20.4s, v1.4s
-        FMUL    v21.4s, v21.4s, v1.4s
-        FMUL    v22.4s, v22.4s, v1.4s
-        FMUL    v23.4s, v23.4s, v1.4s
-        FMUL    v24.4s, v24.4s, v2.4s
-        FMUL    v25.4s, v25.4s, v2.4s
-        FMUL    v26.4s, v26.4s, v2.4s
-        FMUL    v27.4s, v27.4s, v2.4s
-        FMUL    v28.4s, v28.4s, v3.4s
-        FMUL    v29.4s, v29.4s, v3.4s
-        FMUL    v30.4s, v30.4s, v3.4s
-        FMUL    v31.4s, v31.4s, v3.4s
+        LDR     q6, [x5], 16
+        FMUL    v16.4s, v16.4s, v4.4s
+        FMUL    v17.4s, v17.4s, v4.4s
+        FMUL    v18.4s, v18.4s, v4.4s
+        FMUL    v19.4s, v19.4s, v4.4s
+        FMUL    v20.4s, v20.4s, v5.4s
+        LDR     q4, [x5], 16
+        FMUL    v21.4s, v21.4s, v5.4s
+        FMUL    v22.4s, v22.4s, v5.4s
+        FMUL    v23.4s, v23.4s, v5.4s
+        FMUL    v24.4s, v24.4s, v6.4s
+        FMUL    v25.4s, v25.4s, v6.4s
+        FMUL    v26.4s, v26.4s, v6.4s
+        FMUL    v27.4s, v27.4s, v6.4s
+        FMUL    v28.4s, v28.4s, v4.4s
+        FMUL    v29.4s, v29.4s, v4.4s
+        FMUL    v30.4s, v30.4s, v4.4s
+        FMUL    v31.4s, v31.4s, v4.4s
 
         FCVTNS  v16.4s, v16.4s
         FCVTNS  v17.4s, v17.4s
@@ -252,7 +252,6 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
         FCVTNS  v30.4s, v30.4s
         FCVTNS  v31.4s, v31.4s
 
-
         SQXTN   v16.4h, v16.4s
         SQXTN   v17.4h, v17.4s
         SQXTN   v18.4h, v18.4s
@@ -261,7 +260,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
         SQXTN   v25.4h, v25.4s
         SQXTN   v26.4h, v26.4s
         SQXTN   v27.4h, v27.4s
-        LD1R    {v2.8h}, [x11], 2       // add bias
+        LD1R    {v6.8h}, [x11], 2        // add bias
 
         SQXTN2  v16.8h, v20.4s
         SQXTN2  v17.8h, v21.4s
@@ -272,42 +271,42 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
         SQXTN2  v26.8h, v30.4s
         SQXTN2  v27.8h, v31.4s
 
-        SQADD   v16.8h, v16.8h, v2.8h
-        SQADD   v17.8h, v17.8h, v2.8h
-        SQADD   v18.8h, v18.8h, v2.8h
-        SQADD   v19.8h, v19.8h, v2.8h
-        SQADD   v24.8h, v24.8h, v2.8h
-        SQADD   v25.8h, v25.8h, v2.8h
-        SQADD   v26.8h, v26.8h, v2.8h
-        SQADD   v27.8h, v27.8h, v2.8h
-        LD1R    {v0.16b}, [x11], 1      // clamp min value
+        SQADD   v16.8h, v16.8h, v6.8h
+        SQADD   v17.8h, v17.8h, v6.8h
+        SQADD   v18.8h, v18.8h, v6.8h
+        SQADD   v19.8h, v19.8h, v6.8h
+        SQADD   v24.8h, v24.8h, v6.8h
+        SQADD   v25.8h, v25.8h, v6.8h
+        SQADD   v26.8h, v26.8h, v6.8h
+        SQADD   v27.8h, v27.8h, v6.8h
+        LD1R    {v4.16b}, [x11], 1      // clamp min value
 
-        SQXTN   v4.8b, v16.8h
-        SQXTN   v5.8b, v17.8h
-        SQXTN   v6.8b, v18.8h
-        SQXTN   v7.8b, v19.8h
-        LD1R    {v1.16b}, [x11]         // clamp max value
-        SQXTN2  v4.16b, v24.8h
-        SQXTN2  v5.16b, v25.8h
-        SQXTN2  v6.16b, v26.8h
-        SQXTN2  v7.16b, v27.8h
+        SQXTN   v0.8b, v16.8h
+        SQXTN   v1.8b, v17.8h
+        SQXTN   v2.8b, v18.8h
+        SQXTN   v3.8b, v19.8h
+        LD1R    {v5.16b}, [x11]         // clamp max value
+        SQXTN2  v0.16b, v24.8h
+        SQXTN2  v1.16b, v25.8h
+        SQXTN2  v2.16b, v26.8h
+        SQXTN2  v3.16b, v27.8h
 
-        SMAX    v4.16b, v4.16b, v0.16b
-        SMAX    v5.16b, v5.16b, v0.16b
-        SMAX    v6.16b, v6.16b, v0.16b
-        SMAX    v7.16b, v7.16b, v0.16b
+        SMAX    v0.16b, v0.16b, v4.16b
+        SMAX    v1.16b, v1.16b, v4.16b
+        SMAX    v2.16b, v2.16b, v4.16b
+        SMAX    v3.16b, v3.16b, v4.16b
         SUBS    x1, x1, 16
-        SMIN    v4.16b, v4.16b, v1.16b
-        SMIN    v5.16b, v5.16b, v1.16b
-        SMIN    v6.16b, v6.16b, v1.16b
-        SMIN    v7.16b, v7.16b, v1.16b
+        SMIN    v0.16b, v0.16b, v5.16b
+        SMIN    v1.16b, v1.16b, v5.16b
+        SMIN    v2.16b, v2.16b, v5.16b
+        SMIN    v3.16b, v3.16b, v5.16b
         B.LO    6f
 
         # Store full 4 x 16
-        ST1     {v7.16b},  [x7], x10
-        ST1     {v6.16b}, [x17], x10
-        ST1     {v5.16b}, [x16], x10
-        ST1     {v4.16b},  [x6], x10
+        ST1     {v3.16b},  [x7], x10
+        ST1     {v2.16b}, [x17], x10
+        ST1     {v1.16b}, [x16], x10
+        ST1     {v0.16b},  [x6], x10
 
         SUB     x4, x4, x3              // a -= ks
 
@@ -398,40 +397,40 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
         .p2align 3
 6:
         TBZ     x1, 3, 7f
-        STR     d7, [x7], 8
-        DUP     d7, v7.d[1]
-        STR     d6, [x17], 8
-        DUP     d6, v6.d[1]
-        STR     d5, [x16], 8
-        DUP     d5, v5.d[1]
-        STR     d4, [x6], 8
-        DUP     d4, v4.d[1]
+        STR     d3, [x7], 8
+        DUP     d3, v3.d[1]
+        STR     d2, [x17], 8
+        DUP     d2, v2.d[1]
+        STR     d1, [x16], 8
+        DUP     d1, v1.d[1]
+        STR     d0, [x6], 8
+        DUP     d0, v0.d[1]
 7:
         TBZ     x1, 2, 8f
-        STR     s7, [x7], 4
-        DUP     s7, v7.s[1]
-        STR     s6, [x17], 4
-        DUP     s6, v6.s[1]
-        STR     s5, [x16], 4
-        DUP     s5, v5.s[1]
-        STR     s4, [x6], 4
-        DUP     s4, v4.s[1]
+        STR     s3, [x7], 4
+        DUP     s3, v3.s[1]
+        STR     s2, [x17], 4
+        DUP     s2, v2.s[1]
+        STR     s1, [x16], 4
+        DUP     s1, v1.s[1]
+        STR     s0, [x6], 4
+        DUP     s0, v0.s[1]
 8:
         TBZ     x1, 1, 9f
-        ST1     {v7.h}[0], [x7], 2
-        DUP     h7, v7.h[1]
-        ST1     {v6.h}[0], [x17], 2
-        DUP     h6, v6.h[1]
-        ST1     {v5.h}[0], [x16], 2
-        DUP     h5, v5.h[1]
-        ST1     {v4.h}[0], [x6], 2
-        DUP     h4, v4.h[1]
+        ST1     {v3.h}[0], [x7], 2
+        DUP     h3, v3.h[1]
+        ST1     {v2.h}[0], [x17], 2
+        DUP     h2, v2.h[1]
+        ST1     {v1.h}[0], [x16], 2
+        DUP     h1, v1.h[1]
+        ST1     {v0.h}[0], [x6], 2
+        DUP     h0, v0.h[1]
 9:
         TBZ     x1, 0, 10f
-        ST1     {v7.b}[0], [x7]
-        ST1     {v6.b}[0], [x17]
-        ST1     {v5.b}[0], [x16]
-        ST1     {v4.b}[0], [x6]
+        ST1     {v3.b}[0], [x7]
+        ST1     {v2.b}[0], [x17]
+        ST1     {v1.b}[0], [x16]
+        ST1     {v0.b}[0], [x6]
 10:
         RET
 
