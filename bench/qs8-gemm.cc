@@ -56,7 +56,7 @@ static void GEMMBenchmark(benchmark::State& state,
   auto i8rng = std::bind(
     std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()), std::ref(rng));
 
-  std::vector<int8_t> a(mc * kc);
+  std::vector<int8_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::generate(a.begin(), a.end(), std::ref(i8rng));
   std::vector<int8_t> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(i8rng));
