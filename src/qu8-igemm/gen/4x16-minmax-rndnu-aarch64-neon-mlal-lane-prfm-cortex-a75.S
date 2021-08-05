@@ -65,7 +65,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_p
         CSEL    x17, x16, x17, LS       //   c2 = c1
 
         CMP     x0, 4                   // if mr < 4
-        STP     x20, x21, [sp, -16]!    // Save x20-x21 on stack
+        STR     x20, [sp, -16]!         // Save x20 on stack
         ADD     x7,  x17, x7            // c3 = c2 + cm_stride
         CSEL    x7,  x17, x7, LO        //   c3 = c2
         LD1R    {v7.4s}, [x11], 4        // kernel_zero_point
@@ -599,8 +599,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_p
         # nc loop
         B.HI    0b
 
-        # Restore x20-x21 from stack
-        LDP     x20, x21, [sp], 16
+        # Restore x20 from stack
+        LDR     x20, [sp], 16
         RET
 
         # Remainder- 1 to 7 bytes of A
@@ -805,8 +805,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_p
         ST1     {v1.b}[0], [x16]
         ST1     {v0.b}[0], [x6]
 10:
-        # Restore x20-x21 from stack
-        LDP     x20, x21, [sp], 16
+        # Restore x20 from stack
+        LDR     x20, [sp], 16
         RET
 
 END_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a75
