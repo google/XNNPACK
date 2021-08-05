@@ -40,7 +40,7 @@ $VCOMBINE_X8 = {"QS8": "vcombine_s8", "QU8": "vcombine_u8"}[DATATYPE]
 $VREINTERPRET_U32_X8 = {"QS8": "vreinterpret_u32_s8", "QU8": "vreinterpret_u32_u8"}[DATATYPE]
 $VREINTERPRET_U16_X8 = {"QS8": "vreinterpret_u16_s8", "QU8": "vreinterpret_u16_u8"}[DATATYPE]
 $VREINTERPRETQ_X8_S16 = {"QS8": "vreinterpretq_s8_s16", "QU8": "vreinterpretq_u8_s16"}[DATATYPE]
-$VUZP1Q_X8 = {"QS8": "vuzp1q_s8", "QU8": "vuzp1q_s8"}[DATATYPE]
+$VUZP1Q_X8 = {"QS8": "vuzp1q_s8", "QU8": "vuzp1q_u8"}[DATATYPE]
 void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${"neonv8" if ARMV8 else "neon"}_${"ld128" if LD128 else "ld64"}_x${BATCH_TILE}(
     size_t n,
     const ${XINT8_T}* input_a,

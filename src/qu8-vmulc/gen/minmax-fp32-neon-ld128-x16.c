@@ -85,7 +85,7 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__neon_ld128_x16(
       const int16x8_t vacc01234567 = vuzp1q_s16(vreinterpretq_s16_s32(vacc0123), vreinterpretq_s16_s32(vacc4567));
       const int16x8_t vacc89ABCDEF = vuzp1q_s16(vreinterpretq_s16_s32(vacc89AB), vreinterpretq_s16_s32(vaccCDEF));
 
-      uint8x16_t vout0123456789ABCDEF = vuzp1q_s8(vreinterpretq_u8_s16(vacc01234567), vreinterpretq_u8_s16(vacc89ABCDEF));
+      uint8x16_t vout0123456789ABCDEF = vuzp1q_u8(vreinterpretq_u8_s16(vacc01234567), vreinterpretq_u8_s16(vacc89ABCDEF));
 #else
       const int16x8_t vacc01234567 = vcombine_s16(vmovn_s32(vacc0123), vmovn_s32(vacc4567));
       const int16x8_t vacc89ABCDEF = vcombine_s16(vmovn_s32(vacc89AB), vmovn_s32(vaccCDEF));
