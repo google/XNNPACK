@@ -7446,7 +7446,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-igemm.cc",
         "bench/conv.h",
-        "bench/google/conv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
@@ -7528,7 +7527,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-dwconv.cc",
         "bench/dwconv.h",
-        "bench/google/dwconv.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
