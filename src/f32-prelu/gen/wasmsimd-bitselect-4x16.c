@@ -52,7 +52,6 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_4x16(
   const size_t input_increment = input_stride * 4 - channels;
   const size_t output_increment = output_stride * 4 - channels;
 
-  const v128_t vzero = wasm_i32x4_splat(0);
   do {
     const float* w = weights;
     size_t c = channels;
@@ -85,37 +84,37 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_4x16(
       i3 += 16;
 
       v128_t vacc0x0123 = wasm_f32x4_mul(vi0x0123, vw0123);
-      const v128_t vmask0x0123 = wasm_i32x4_lt(vi0x0123, vzero);
+      const v128_t vmask0x0123 = wasm_i32x4_shr(vi0x0123, 31);
       v128_t vacc0x4567 = wasm_f32x4_mul(vi0x4567, vw4567);
-      const v128_t vmask0x4567 = wasm_i32x4_lt(vi0x4567, vzero);
+      const v128_t vmask0x4567 = wasm_i32x4_shr(vi0x4567, 31);
       v128_t vacc0x89AB = wasm_f32x4_mul(vi0x89AB, vw89AB);
-      const v128_t vmask0x89AB = wasm_i32x4_lt(vi0x89AB, vzero);
+      const v128_t vmask0x89AB = wasm_i32x4_shr(vi0x89AB, 31);
       v128_t vacc0xCDEF = wasm_f32x4_mul(vi0xCDEF, vwCDEF);
-      const v128_t vmask0xCDEF = wasm_i32x4_lt(vi0xCDEF, vzero);
+      const v128_t vmask0xCDEF = wasm_i32x4_shr(vi0xCDEF, 31);
       v128_t vacc1x0123 = wasm_f32x4_mul(vi1x0123, vw0123);
-      const v128_t vmask1x0123 = wasm_i32x4_lt(vi1x0123, vzero);
+      const v128_t vmask1x0123 = wasm_i32x4_shr(vi1x0123, 31);
       v128_t vacc1x4567 = wasm_f32x4_mul(vi1x4567, vw4567);
-      const v128_t vmask1x4567 = wasm_i32x4_lt(vi1x4567, vzero);
+      const v128_t vmask1x4567 = wasm_i32x4_shr(vi1x4567, 31);
       v128_t vacc1x89AB = wasm_f32x4_mul(vi1x89AB, vw89AB);
-      const v128_t vmask1x89AB = wasm_i32x4_lt(vi1x89AB, vzero);
+      const v128_t vmask1x89AB = wasm_i32x4_shr(vi1x89AB, 31);
       v128_t vacc1xCDEF = wasm_f32x4_mul(vi1xCDEF, vwCDEF);
-      const v128_t vmask1xCDEF = wasm_i32x4_lt(vi1xCDEF, vzero);
+      const v128_t vmask1xCDEF = wasm_i32x4_shr(vi1xCDEF, 31);
       v128_t vacc2x0123 = wasm_f32x4_mul(vi2x0123, vw0123);
-      const v128_t vmask2x0123 = wasm_i32x4_lt(vi2x0123, vzero);
+      const v128_t vmask2x0123 = wasm_i32x4_shr(vi2x0123, 31);
       v128_t vacc2x4567 = wasm_f32x4_mul(vi2x4567, vw4567);
-      const v128_t vmask2x4567 = wasm_i32x4_lt(vi2x4567, vzero);
+      const v128_t vmask2x4567 = wasm_i32x4_shr(vi2x4567, 31);
       v128_t vacc2x89AB = wasm_f32x4_mul(vi2x89AB, vw89AB);
-      const v128_t vmask2x89AB = wasm_i32x4_lt(vi2x89AB, vzero);
+      const v128_t vmask2x89AB = wasm_i32x4_shr(vi2x89AB, 31);
       v128_t vacc2xCDEF = wasm_f32x4_mul(vi2xCDEF, vwCDEF);
-      const v128_t vmask2xCDEF = wasm_i32x4_lt(vi2xCDEF, vzero);
+      const v128_t vmask2xCDEF = wasm_i32x4_shr(vi2xCDEF, 31);
       v128_t vacc3x0123 = wasm_f32x4_mul(vi3x0123, vw0123);
-      const v128_t vmask3x0123 = wasm_i32x4_lt(vi3x0123, vzero);
+      const v128_t vmask3x0123 = wasm_i32x4_shr(vi3x0123, 31);
       v128_t vacc3x4567 = wasm_f32x4_mul(vi3x4567, vw4567);
-      const v128_t vmask3x4567 = wasm_i32x4_lt(vi3x4567, vzero);
+      const v128_t vmask3x4567 = wasm_i32x4_shr(vi3x4567, 31);
       v128_t vacc3x89AB = wasm_f32x4_mul(vi3x89AB, vw89AB);
-      const v128_t vmask3x89AB = wasm_i32x4_lt(vi3x89AB, vzero);
+      const v128_t vmask3x89AB = wasm_i32x4_shr(vi3x89AB, 31);
       v128_t vacc3xCDEF = wasm_f32x4_mul(vi3xCDEF, vwCDEF);
-      const v128_t vmask3xCDEF = wasm_i32x4_lt(vi3xCDEF, vzero);
+      const v128_t vmask3xCDEF = wasm_i32x4_shr(vi3xCDEF, 31);
 
       vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
       vacc0x4567 = wasm_v128_bitselect(vacc0x4567, vi0x4567, vmask0x4567);
@@ -169,13 +168,13 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_4x16(
       i3 += 4;
 
       v128_t vacc0x0123 = wasm_f32x4_mul(vi0x0123, vw0123);
-      const v128_t vmask0x0123 = wasm_i32x4_lt(vi0x0123, vzero);
+      const v128_t vmask0x0123 = wasm_i32x4_shr(vi0x0123, 31);
       v128_t vacc1x0123 = wasm_f32x4_mul(vi1x0123, vw0123);
-      const v128_t vmask1x0123 = wasm_i32x4_lt(vi1x0123, vzero);
+      const v128_t vmask1x0123 = wasm_i32x4_shr(vi1x0123, 31);
       v128_t vacc2x0123 = wasm_f32x4_mul(vi2x0123, vw0123);
-      const v128_t vmask2x0123 = wasm_i32x4_lt(vi2x0123, vzero);
+      const v128_t vmask2x0123 = wasm_i32x4_shr(vi2x0123, 31);
       v128_t vacc3x0123 = wasm_f32x4_mul(vi3x0123, vw0123);
-      const v128_t vmask3x0123 = wasm_i32x4_lt(vi3x0123, vzero);
+      const v128_t vmask3x0123 = wasm_i32x4_shr(vi3x0123, 31);
 
       vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
       vacc1x0123 = wasm_v128_bitselect(vacc1x0123, vi1x0123, vmask1x0123);
@@ -205,13 +204,13 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_4x16(
       i3 = (const float*) ((uintptr_t) i3 + c);
 
       v128_t vacc0x0123 = wasm_f32x4_mul(vi0x0123, vw0123);
-      const v128_t vmask0x0123 = wasm_i32x4_lt(vi0x0123, vzero);
+      const v128_t vmask0x0123 = wasm_i32x4_shr(vi0x0123, 31);
       v128_t vacc1x0123 = wasm_f32x4_mul(vi1x0123, vw0123);
-      const v128_t vmask1x0123 = wasm_i32x4_lt(vi1x0123, vzero);
+      const v128_t vmask1x0123 = wasm_i32x4_shr(vi1x0123, 31);
       v128_t vacc2x0123 = wasm_f32x4_mul(vi2x0123, vw0123);
-      const v128_t vmask2x0123 = wasm_i32x4_lt(vi2x0123, vzero);
+      const v128_t vmask2x0123 = wasm_i32x4_shr(vi2x0123, 31);
       v128_t vacc3x0123 = wasm_f32x4_mul(vi3x0123, vw0123);
-      const v128_t vmask3x0123 = wasm_i32x4_lt(vi3x0123, vzero);
+      const v128_t vmask3x0123 = wasm_i32x4_shr(vi3x0123, 31);
 
       vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
       vacc1x0123 = wasm_v128_bitselect(vacc1x0123, vi1x0123, vmask1x0123);

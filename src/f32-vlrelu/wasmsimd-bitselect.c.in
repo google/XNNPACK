@@ -24,7 +24,6 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x${BATCH_TILE}(
   assert(n % sizeof(float) == 0);
 
   const v128_t vslope = wasm_v128_load32_splat(&params->scalar.slope);
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
   $if BATCH_TILE > 4:
     for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
       const v128_t vx${ABC[0:4]} = wasm_v128_load(x);
@@ -34,7 +33,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x${BATCH_TILE}(
 
       $for N in range(0, BATCH_TILE, 4):
         v128_t vacc${ABC[N:N+4]} = wasm_f32x4_mul(vx${ABC[N:N+4]}, vslope);
-        const v128_t vmask${ABC[N:N+4]} = wasm_i32x4_lt(vx${ABC[N:N+4]}, vzero);
+        const v128_t vmask${ABC[N:N+4]} = wasm_i32x4_shr(vx${ABC[N:N+4]}, 31);
 
       $for N in range(0, BATCH_TILE, 4):
         vacc${ABC[N:N+4]} = wasm_v128_bitselect(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]}, vmask${ABC[N:N+4]});
@@ -48,7 +47,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x${BATCH_TILE}(
     const v128_t vx = wasm_v128_load(x);
     x += 4;
     v128_t vacc = wasm_f32x4_mul(vx, vslope);
-    const v128_t vmask = wasm_i32x4_lt(vx, vzero);
+    const v128_t vmask = wasm_i32x4_shr(vx, 31);
     vacc = wasm_v128_bitselect(vacc, vx, vmask);
     wasm_v128_store(y, vacc);
     y += 4;
@@ -56,7 +55,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x${BATCH_TILE}(
   if XNN_UNLIKELY(n != 0) {
     const v128_t vx = wasm_v128_load(x);
     v128_t vacc = wasm_f32x4_mul(vx, vslope);
-    const v128_t vmask = wasm_i32x4_lt(vx, vzero);
+    const v128_t vmask = wasm_i32x4_shr(vx, 31);
     vacc = wasm_v128_bitselect(vacc, vx, vmask);
 
     if (n & (2 * sizeof(float))) {

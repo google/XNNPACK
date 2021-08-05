@@ -25,12 +25,11 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x4(
   assert(n % sizeof(float) == 0);
 
   const v128_t vslope = wasm_v128_load32_splat(&params->scalar.slope);
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(x);
     x += 4;
     v128_t vacc = wasm_f32x4_mul(vx, vslope);
-    const v128_t vmask = wasm_i32x4_lt(vx, vzero);
+    const v128_t vmask = wasm_i32x4_shr(vx, 31);
     vacc = wasm_v128_bitselect(vacc, vx, vmask);
     wasm_v128_store(y, vacc);
     y += 4;
@@ -38,7 +37,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x4(
   if XNN_UNLIKELY(n != 0) {
     const v128_t vx = wasm_v128_load(x);
     v128_t vacc = wasm_f32x4_mul(vx, vslope);
-    const v128_t vmask = wasm_i32x4_lt(vx, vzero);
+    const v128_t vmask = wasm_i32x4_shr(vx, 31);
     vacc = wasm_v128_bitselect(vacc, vx, vmask);
 
     if (n & (2 * sizeof(float))) {

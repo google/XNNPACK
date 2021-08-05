@@ -154,9 +154,9 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x4c8__wasmsimd_ld64(
     v128_t vacc1x0123 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc1x02, vacc1x13, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc1x02, vacc1x13, 2, 6, 3, 7));
     v128_t vacc2x0123 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc2x02, vacc2x13, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc2x02, vacc2x13, 2, 6, 3, 7));
 
-    const v128_t vsign0x0123 = wasm_i32x4_lt(vacc0x0123, vzero);
-    const v128_t vsign1x0123 = wasm_i32x4_lt(vacc1x0123, vzero);
-    const v128_t vsign2x0123 = wasm_i32x4_lt(vacc2x0123, vzero);
+    const v128_t vsign0x0123 = wasm_i32x4_shr(vacc0x0123, 31);
+    const v128_t vsign1x0123 = wasm_i32x4_shr(vacc1x0123, 31);
+    const v128_t vsign2x0123 = wasm_i32x4_shr(vacc2x0123, 31);
 
     const v128_t vacc0x01 = wasm_v32x4_shuffle(vacc0x0123, vsign0x0123, 0, 4, 1, 5);
     const v128_t vacc1x01 = wasm_v32x4_shuffle(vacc1x0123, vsign1x0123, 0, 4, 1, 5);
@@ -180,9 +180,9 @@ void xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x4c8__wasmsimd_ld64(
     const v128_t vq31prod2x0123 = wasm_v32x4_shuffle(vprod2x01, vprod2x23, 1, 3, 5, 7);
 
     const v128_t vremainder_mask = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_mask);
-    const v128_t vrem0x0123 = wasm_i32x4_add(wasm_v128_and(vq31prod0x0123, vremainder_mask), wasm_i32x4_lt(vq31prod0x0123, vzero));
-    const v128_t vrem1x0123 = wasm_i32x4_add(wasm_v128_and(vq31prod1x0123, vremainder_mask), wasm_i32x4_lt(vq31prod1x0123, vzero));
-    const v128_t vrem2x0123 = wasm_i32x4_add(wasm_v128_and(vq31prod2x0123, vremainder_mask), wasm_i32x4_lt(vq31prod2x0123, vzero));
+    const v128_t vrem0x0123 = wasm_i32x4_add(wasm_v128_and(vq31prod0x0123, vremainder_mask), wasm_i32x4_shr(vq31prod0x0123, 31));
+    const v128_t vrem1x0123 = wasm_i32x4_add(wasm_v128_and(vq31prod1x0123, vremainder_mask), wasm_i32x4_shr(vq31prod1x0123, 31));
+    const v128_t vrem2x0123 = wasm_i32x4_add(wasm_v128_and(vq31prod2x0123, vremainder_mask), wasm_i32x4_shr(vq31prod2x0123, 31));
 
     const v128_t vthreshold = wasm_v128_load(params->gemmlowp_wasmsimd.remainder_threshold);
     const int32_t vshift = params->gemmlowp_wasmsimd.shift;

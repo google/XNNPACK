@@ -44,7 +44,6 @@ void xnn_qu8_requantize_gemmlowp__wasmsimd(
   assert(shift >= 0);
   assert(shift < 32);
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
   const v128_t vmultiplier = wasm_i64x2_make(twice_multiplier, twice_multiplier);
   const v128_t vzero_point = wasm_i16x8_splat((int16_t) (uint16_t) zero_point);
 
@@ -61,10 +60,10 @@ void xnn_qu8_requantize_gemmlowp__wasmsimd(
     const v128_t w = wasm_v128_load(input + 12);
     input += 16;
 
-    const v128_t x_sign = wasm_i32x4_lt(x, vzero);
-    const v128_t y_sign = wasm_i32x4_lt(y, vzero);
-    const v128_t z_sign = wasm_i32x4_lt(z, vzero);
-    const v128_t w_sign = wasm_i32x4_lt(w, vzero);
+    const v128_t x_sign = wasm_i32x4_shr(x, 31);
+    const v128_t y_sign = wasm_i32x4_shr(y, 31);
+    const v128_t z_sign = wasm_i32x4_shr(z, 31);
+    const v128_t w_sign = wasm_i32x4_shr(w, 31);
 
     const v128_t x_lo = wasm_v32x4_shuffle(x, x_sign, 0, 4, 1, 5);
     const v128_t y_lo = wasm_v32x4_shuffle(y, y_sign, 0, 4, 1, 5);
@@ -92,13 +91,13 @@ void xnn_qu8_requantize_gemmlowp__wasmsimd(
     const v128_t w_q31product = wasm_v32x4_shuffle(w_product_lo, w_product_hi, 1, 3, 5, 7);
 
     const v128_t x_remainder =
-        wasm_i32x4_add(wasm_v128_and(x_q31product, vremainder_mask), wasm_i32x4_lt(x_q31product, vzero));
+        wasm_i32x4_add(wasm_v128_and(x_q31product, vremainder_mask), wasm_i32x4_shr(x_q31product, 31));
     const v128_t y_remainder =
-        wasm_i32x4_add(wasm_v128_and(y_q31product, vremainder_mask), wasm_i32x4_lt(y_q31product, vzero));
+        wasm_i32x4_add(wasm_v128_and(y_q31product, vremainder_mask), wasm_i32x4_shr(y_q31product, 31));
     const v128_t z_remainder =
-        wasm_i32x4_add(wasm_v128_and(z_q31product, vremainder_mask), wasm_i32x4_lt(z_q31product, vzero));
+        wasm_i32x4_add(wasm_v128_and(z_q31product, vremainder_mask), wasm_i32x4_shr(z_q31product, 31));
     const v128_t w_remainder =
-        wasm_i32x4_add(wasm_v128_and(w_q31product, vremainder_mask), wasm_i32x4_lt(w_q31product, vzero));
+        wasm_i32x4_add(wasm_v128_and(w_q31product, vremainder_mask), wasm_i32x4_shr(w_q31product, 31));
 
     const v128_t x_scaled =
         wasm_i32x4_sub(wasm_i32x4_shr(x_q31product, shift), wasm_i32x4_gt(x_remainder, vthreshold));
