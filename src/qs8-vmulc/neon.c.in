@@ -50,12 +50,12 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${"
 {
   $if LD128:
     #if XNN_ARCH_ARM64
-      const ${XINT8X16_T} va_zero_point = ${VLD1Q_DUP_X8}(&params->${PARAMS_STRUCT}.a_zero_point);
+      const ${XINT8X16_T} va_zero_point = ${VLD1Q_DUP_X8}(params->${PARAMS_STRUCT}.a_zero_point);
     #else
-      const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->${PARAMS_STRUCT}.a_zero_point);
+      const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(params->${PARAMS_STRUCT}.a_zero_point);
     #endif
   $else:
-    const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->${PARAMS_STRUCT}.a_zero_point);
+    const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(params->${PARAMS_STRUCT}.a_zero_point);
   const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
   $if ARMV8:
     const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
@@ -72,7 +72,7 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${"
     const int32x4_t vmagic_bias_less_zero_point = vld1q_dup_s32(&params->${PARAMS_STRUCT}.magic_bias_less_zero_point);
 
   const ${XINT8X8_T} vb = ${VLD1_DUP_X8}(input_b);
-  const ${XINT8X8_T} vb_zero_point = ${VLD1_DUP_X8}(&params->${PARAMS_STRUCT}.b_zero_point);
+  const ${XINT8X8_T} vb_zero_point = ${VLD1_DUP_X8}(params->${PARAMS_STRUCT}.b_zero_point);
   $if DATATYPE == "QU8":
     const int16x8_t vxb = vreinterpretq_s16_u16(vsubl_u8(vb, vb_zero_point));
   $else:

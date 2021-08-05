@@ -22,8 +22,8 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__neonv8_ld64_x16(
     int8_t* output,
     const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
-  const int8x8_t va_zero_point = vld1_dup_s8(&params->fp32_neonv8.a_zero_point);
-  const int8x8_t vb_zero_point = vld1_dup_s8(&params->fp32_neonv8.b_zero_point);
+  const int8x8_t va_zero_point = vld1_dup_s8(params->fp32_neonv8.a_zero_point);
+  const int8x8_t vb_zero_point = vld1_dup_s8(params->fp32_neonv8.b_zero_point);
   const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neonv8.scale);
   const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
   const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neonv8.output_min);
