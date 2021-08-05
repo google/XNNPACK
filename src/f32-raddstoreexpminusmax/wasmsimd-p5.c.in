@@ -40,7 +40,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x${ELEMENTS_TILE}${"" if 
 
   const v128_t vi_max = wasm_f32x4_splat(max);
 
-  v128_t vacc0 = wasm_f32x4_splat(0.0f);
+  v128_t vacc0 = wasm_f64x2_splat(0.0);
   $for K in range(1, ACCUMULATORS):
     v128_t vacc${K} = vacc0;
   for (; elements >= ${ELEMENTS_TILE} * sizeof(float); elements -= ${ELEMENTS_TILE} * sizeof(float)) {

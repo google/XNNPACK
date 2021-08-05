@@ -49,7 +49,7 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
     i0 = zero;
   }
 
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
+  const v128_t vzero = wasm_f64x2_splat(0.0);
   const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
   const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
 

@@ -55,7 +55,7 @@ void xnn_f32_igemm_ukernel_4x2c4__wasmsimd(
   }
 
   do {
-    v128_t vacc0x0c4 = wasm_f32x4_replace_lane(wasm_f32x4_splat(0.0f), 0, w[0]);
+    v128_t vacc0x0c4 = wasm_f32x4_replace_lane(wasm_f64x2_splat(0.0), 0, w[0]);
     v128_t vacc0x1c4 = wasm_f32x4_replace_lane(vacc0x0c4, 0, w[1]);
     v128_t vacc1x0c4 = vacc0x0c4;
     v128_t vacc1x1c4 = vacc0x1c4;
@@ -123,7 +123,7 @@ void xnn_f32_igemm_ukernel_4x2c4__wasmsimd(
         const v128_t vb1 = wasm_v128_load(w + 4);
         w += 8;
 
-        const v128_t vzero = wasm_f32x4_splat(0.0f);
+        const v128_t vzero = wasm_f64x2_splat(0.0);
         const v128_t vmask0 = wasm_f32x4_eq(vb0, vzero);
         const v128_t vmask1 = wasm_f32x4_eq(vb1, vzero);
 

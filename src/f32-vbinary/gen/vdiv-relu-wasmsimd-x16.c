@@ -28,7 +28,7 @@ void xnn_f32_vdiv_relu_ukernel__wasmsimd_x16(
   assert(b != NULL);
   assert(y != NULL);
 
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
+  const v128_t vzero = wasm_f64x2_splat(0.0);
 
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
     const v128_t va0123 = wasm_v128_load(a);

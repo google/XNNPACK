@@ -50,7 +50,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd${ARCH_SUFFIX}_loadsplat_${RO
   const v128_t vk21 = wasm_v32x4_shuffle(vw89, vw89, 0, 0, 0, 0);
   const v128_t vk22 = wasm_v32x4_shuffle(vw89, vw89, 1, 1, 1, 1);
 
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
+  const v128_t vzero = wasm_f64x2_splat(0.0);
 
   const size_t input_decrement = round_down_po2(input_width, 4 /* SIMD output width */ * 2 /* subsampling */ * sizeof(float));
   $if ROW_TILE > 1:
@@ -75,7 +75,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd${ARCH_SUFFIX}_loadsplat_${RO
       if XNN_UNPREDICTABLE(padded_input_height < ${2 + M}) {
         i${M} = zero;
         $if M % 2 == 1:
-          o${(M - 1) / 2} = o${(M - 1) / 2 - 1};
+          o${(M - 1) // 2} = o${(M - 1) // 2 - 1};
       }
 
     $for M in range(1 + 2 * ROW_TILE):

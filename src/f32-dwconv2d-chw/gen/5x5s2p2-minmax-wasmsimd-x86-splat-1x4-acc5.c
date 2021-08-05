@@ -45,7 +45,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_x86_splat_1x4_acc5(
   const v128_t vwKLMN = wasm_v128_load(weights + 20);
   const v128_t vwOP = wasm_v128_load64_splat(weights + 24);
 
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
+  const v128_t vzero = wasm_f64x2_splat(0.0);
 
   const uint32_t padding_top_less_1 = padding_top - 1;
   const size_t input_decrement = round_up_po2(input_width, 8 * sizeof(float));

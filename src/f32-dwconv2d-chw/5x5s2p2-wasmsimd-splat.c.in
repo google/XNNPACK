@@ -44,7 +44,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd${ARCH_SUFFIX}_splat_${ROW_TI
   const v128_t vwKLMN = wasm_v128_load(weights + 20);
   const v128_t vwOP = wasm_v128_load64_splat(weights + 24);
 
-  const v128_t vzero = wasm_f32x4_splat(0.0f);
+  const v128_t vzero = wasm_f64x2_splat(0.0);
 
   const uint32_t padding_top_less_1 = padding_top - 1;
   const size_t input_decrement = round_up_po2(input_width, 8 * sizeof(float));
@@ -72,7 +72,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd${ARCH_SUFFIX}_splat_${ROW_TI
       if XNN_UNPREDICTABLE(padded_input_height < ${3 + M}) {
         i${M} = zero;
         $if M % 2 == 0 and M <= 2 * ROW_TILE + 1:
-          o${M / 2 - 1} = o${M / 2 - 2};
+          o${M // 2 - 1} = o${M // 2 - 2};
       }
 
     $for M in range(3 + 2 * ROW_TILE):

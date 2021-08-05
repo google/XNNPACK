@@ -62,7 +62,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__${"neonfma" if FMA else "neon"}_${ROW
       if XNN_UNPREDICTABLE(padded_input_height < ${2 + M}) {
         i${M} = zero;
         $if M % 2 == 1:
-          o${(M - 1) / 2} = o${(M - 1) / 2 - 1};
+          o${(M - 1) // 2} = o${(M - 1) // 2 - 1};
       }
 
     $for M in range(1 + 2 * ROW_TILE):

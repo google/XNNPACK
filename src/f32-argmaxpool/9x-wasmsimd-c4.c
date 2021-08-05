@@ -93,7 +93,7 @@ void xnn_f32_argmaxpool_ukernel_9x__wasmsimd_c4(
       i8 += 4;
 
       v128_t vmax = vi0;
-      v128_t vidx = wasm_i32x4_splat(0);
+      v128_t vidx = wasm_f64x2_splat(0.0);
 
       const v128_t vm1 = wasm_f32x4_gt(vi1, vmax);
       vmax = wasm_v128_bitselect(vi1, vmax, vm1);
@@ -144,7 +144,7 @@ void xnn_f32_argmaxpool_ukernel_9x__wasmsimd_c4(
       const v128_t vi8 = wasm_v128_load(i8);
 
       v128_t vmax = vi0;
-      v128_t vidx = wasm_i32x4_splat(0);
+      v128_t vidx = wasm_f64x2_splat(0.0);
 
       const v128_t vm1 = wasm_f32x4_gt(vi1, vmax);
       vmax = wasm_v128_bitselect(vi1, vmax, vm1);
