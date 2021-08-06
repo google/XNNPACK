@@ -651,6 +651,13 @@ static void init(void) {
         .init.qu8_add = xnn_init_qu8_add_minmax_scalar_params,
         .element_tile = 1,
       };
+      xnn_params.qu8.vmul = (struct vbinary_parameters) {
+        .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmul_minmax_fp32_ukernel__scalar_x4,
+        .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x4,
+        .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x4,
+        .init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_scalar_params,
+        .element_tile = 4,
+      };
     #endif  // XNN_NO_QU8_OPERATORS
 
     /**************************** U8 micro-kernels ****************************/
