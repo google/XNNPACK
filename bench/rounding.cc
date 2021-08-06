@@ -175,6 +175,13 @@ BENCHMARK_F(RoundingTowardsZero, scalar_trunc)(benchmark::State& state) {
     }
   }
 
+  BENCHMARK_F(RoundingDown, wasmsimd_cvt)(benchmark::State& state) {
+    for (auto _ : state) {
+      xnn_math_f32_roundd__wasmsimd_cvt(
+          n() * sizeof(float), input(), output());
+    }
+  }
+
   BENCHMARK_F(RoundingUp, wasmsimd_addsub)(benchmark::State& state) {
     for (auto _ : state) {
       xnn_math_f32_roundu__wasmsimd_addsub(
@@ -182,9 +189,23 @@ BENCHMARK_F(RoundingTowardsZero, scalar_trunc)(benchmark::State& state) {
     }
   }
 
+  BENCHMARK_F(RoundingUp, wasmsimd_cvt)(benchmark::State& state) {
+    for (auto _ : state) {
+      xnn_math_f32_roundu__wasmsimd_cvt(
+          n() * sizeof(float), input(), output());
+    }
+  }
+
   BENCHMARK_F(RoundingTowardsZero, wasmsimd_addsub)(benchmark::State& state) {
     for (auto _ : state) {
       xnn_math_f32_roundz__wasmsimd_addsub(
+          n() * sizeof(float), input(), output());
+    }
+  }
+
+  BENCHMARK_F(RoundingTowardsZero, wasmsimd_cvt)(benchmark::State& state) {
+    for (auto _ : state) {
+      xnn_math_f32_roundz__wasmsimd_cvt(
           n() * sizeof(float), input(), output());
     }
   }
