@@ -444,6 +444,15 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__wasmsimd_ld128
   init: xnn_init_qs8_conv_minmax_fp32_wasmsimd_params
   k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_1x4c8__wasmsimd
+  init: xnn_init_qs8_conv_minmax_fp32_wasmsimd_params
+  k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_2x4c8__wasmsimd
+  init: xnn_init_qs8_conv_minmax_fp32_wasmsimd_params
+  k-block: 8
+- name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_3x4c8__wasmsimd
+  init: xnn_init_qs8_conv_minmax_fp32_wasmsimd_params
+  k-block: 8
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_lrint
   init: xnn_init_qs8_conv_minmax_fp32_scalar_lrint_params
   k-block: 1
