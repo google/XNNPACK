@@ -7234,6 +7234,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-vhswish-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-vhswish-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
+  ADD_EXECUTABLE(f32-vlrelu-bench bench/f32-vlrelu.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f32-vlrelu-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-vlrelu-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-vlrelu-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
   ADD_EXECUTABLE(f32-vrelu-bench bench/f32-vrelu.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-vrelu-bench PROPERTIES
     CXX_STANDARD 11
