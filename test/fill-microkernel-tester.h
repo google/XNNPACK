@@ -64,32 +64,35 @@ class FillMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_x32_fill_ukernel_function fill) const {
+  void Test(xnn_fill_ukernel_function fill) const {
     ASSERT_GE(output_stride(), channels());
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), rng);
+    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
-    std::vector<uint32_t> output((rows() - 1) * output_stride() + channels());
-    std::vector<uint32_t> output_copy(output.size());
+    std::vector<uint8_t> output((rows() - 1) * output_stride() + channels());
+    std::vector<uint8_t> output_copy(output.size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(output.begin(), output.end(), std::ref(u32rng));
+      std::generate(output.begin(), output.end(), std::ref(u8rng));
       std::copy(output.cbegin(), output.cend(), output_copy.begin());
-      const uint32_t fill_value = u32rng();
+      std::array<uint8_t, 4> fill_pattern;
+      std::generate(fill_pattern.begin(), fill_pattern.end(), std::ref(u8rng));
+      uint32_t fill_value = 0;
+      memcpy(&fill_value, fill_pattern.data(), sizeof(fill_value));
 
       // Call optimized micro-kernel.
       fill(
         rows(),
-        channels() * sizeof(uint32_t),
+        channels() * sizeof(uint8_t),
         output.data(),
-        output_stride() * sizeof(uint32_t),
-        &fill_value);
+        output_stride() * sizeof(uint8_t),
+        fill_value);
 
       // Verify results.
       for (size_t i = 0; i < rows(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output[i * output_stride() + c], fill_value)
+          ASSERT_EQ(uint32_t(output[i * output_stride() + c]), uint32_t(fill_pattern[c % fill_pattern.size()]))
             << "at row " << i << " / " << rows()
             << ", channel " << c << " / " << channels()
             << ", fill value 0x" << std::hex << std::setw(8) << std::setfill('0') << fill_value
@@ -98,7 +101,7 @@ class FillMicrokernelTester {
       }
       for (size_t i = 0; i + 1 < rows(); i++) {
         for (size_t c = channels(); c < output_stride(); c++) {
-          ASSERT_EQ(output[i * output_stride() + c], output_copy[i * output_stride() + c])
+          ASSERT_EQ(uint32_t(output[i * output_stride() + c]), uint32_t(output_copy[i * output_stride() + c]))
             << "at row " << i << " / " << rows()
             << ", channel " << c << " / " << channels()
             << ", original value 0x" << std::hex << std::setw(8) << std::setfill('0')

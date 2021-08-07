@@ -1284,14 +1284,7 @@ typedef void (*xnn_fill_ukernel_function)(
     size_t channels,
     void* output,
     size_t output_stride,
-    const void* fill_value);
-
-typedef void (*xnn_x32_fill_ukernel_function)(
-    size_t rows,
-    size_t channels,
-    uint32_t* output,
-    size_t output_stride,
-    const uint32_t* fill_value);
+    const uint32_t fill_pattern);
 
 typedef void (*xnn_depthtospace2d_chw2hwc_ukernel_function)(
     size_t output_channels,
@@ -2538,9 +2531,6 @@ struct xnn_parameters {
   uint32_t init_flags;
   struct xnn_allocator allocator;
   struct {
-    xnn_univector_ukernel_function copy;
-  } xx;
-  struct {
     struct gemm_parameters gemm;
     struct dwconv_parameters dwconv[XNN_MAX_QC8_DWCONV_UKERNELS];
   } qc8;
@@ -2638,12 +2628,15 @@ struct xnn_parameters {
   } f32;
   struct {
     struct pad_parameters pad;
-    struct fill_parameters fill;
     xnn_unpool_ukernel_function unpool;
     struct zip_parameters zip;
     // Depth To Space 2D with CHW->HWC layout conversion.
     struct depthtospace2d_chw2hwc_parameters depthtospace2d_chw2hwc;
   } x32;
+  struct {
+    xnn_univector_ukernel_function copy;
+    struct fill_parameters fill;
+  } xx;
 };
 
 #ifdef __cplusplus

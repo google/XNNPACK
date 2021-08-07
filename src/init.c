@@ -98,13 +98,6 @@ static void init(void) {
     }
   #endif
 
-  /**************************** XX micro-kernels ****************************/
-  #ifndef XNN_NO_XX_OPERATORS
-    init_flags |= XNN_INIT_FLAG_XX;
-
-    xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
-  #endif
-
   if (cpuinfo_has_arm_neon()) {
     /**************************** QC8 micro-kernels ****************************/
     #ifndef XNN_NO_QC8_OPERATORS
@@ -588,10 +581,6 @@ static void init(void) {
     #ifndef XNN_NO_X32_OPERATORS
       init_flags |= XNN_INIT_FLAG_X32;
 
-      xnn_params.x32.fill = (struct fill_parameters) {
-        .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__neon,
-        .row_tile = 1,
-      };
       xnn_params.x32.pad = (struct pad_parameters) {
         .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__neon,
         .row_tile = 1,
@@ -611,7 +600,20 @@ static void init(void) {
         };
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_X32_OPERATORS
+
+    /**************************** XX micro-kernels ****************************/
+    #ifndef XNN_NO_XX_OPERATORS
+      init_flags |= XNN_INIT_FLAG_XX;
+
+      xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+      xnn_params.xx.fill = (struct fill_parameters) {
+        .ukernel = (xnn_fill_ukernel_function) xnn_xx_fill_ukernel__neon_x64,
+        .row_tile = 1,
+      };
+    #endif  // XNN_NO_XX_OPERATORS
+
   } else if (!XNN_PLATFORM_MOBILE) {
+
     /*************************** QU8 micro-kernels ***************************/
     #ifndef XNN_NO_QS8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QS8;
@@ -944,10 +946,6 @@ static void init(void) {
     #ifndef XNN_NO_X32_OPERATORS
       init_flags |= XNN_INIT_FLAG_X32;
 
-      xnn_params.x32.fill = (struct fill_parameters) {
-        .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__scalar_int,
-        .row_tile = 1,
-      };
       xnn_params.x32.pad = (struct pad_parameters) {
         .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__scalar_int,
         .row_tile = 1,
@@ -967,16 +965,20 @@ static void init(void) {
         };
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_X32_OPERATORS
+
+    /**************************** XX micro-kernels ****************************/
+    #ifndef XNN_NO_XX_OPERATORS
+      init_flags |= XNN_INIT_FLAG_XX;
+
+      xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+      xnn_params.xx.fill = (struct fill_parameters) {
+        .ukernel = (xnn_fill_ukernel_function) xnn_xx_fill_ukernel__scalar_x16,
+        .row_tile = 1,
+      };
+    #endif  // XNN_NO_XX_OPERATORS
   }
 
 #elif XNN_ARCH_ARM64
-
-  /**************************** XX micro-kernels ****************************/
-  #ifndef XNN_NO_XX_OPERATORS
-    init_flags |= XNN_INIT_FLAG_XX;
-
-    xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
-  #endif
 
   /**************************** QC8 micro-kernels ****************************/
   #ifndef XNN_NO_QC8_OPERATORS
@@ -1968,10 +1970,6 @@ static void init(void) {
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
-    xnn_params.x32.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__neon,
-      .row_tile = 1,
-    };
     xnn_params.x32.pad = (struct pad_parameters) {
       .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__neon,
       .row_tile = 1,
@@ -1992,18 +1990,22 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
-#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-  if (!cpuinfo_has_x86_sse2()) {
-    xnn_log_error("XNNPACK initialization failed: SSE2 is not supported");
-    return;
-  }
-
   /**************************** XX micro-kernels ****************************/
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
     xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+    xnn_params.xx.fill = (struct fill_parameters) {
+      .ukernel = (xnn_fill_ukernel_function) xnn_xx_fill_ukernel__neon_x64,
+      .row_tile = 1,
+    };
   #endif
+
+#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  if (!cpuinfo_has_x86_sse2()) {
+    xnn_log_error("XNNPACK initialization failed: SSE2 is not supported");
+    return;
+  }
 
   /**************************** QC8 micro-kernels ****************************/
   #ifndef XNN_NO_QC8_OPERATORS
@@ -3019,10 +3021,6 @@ static void init(void) {
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
-    xnn_params.x32.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__sse,
-      .row_tile = 1,
-    };
     xnn_params.x32.pad = (struct pad_parameters) {
       .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__sse,
       .row_tile = 1,
@@ -3043,14 +3041,18 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
-#elif XNN_ARCH_WASMSIMD
-
   /**************************** XX micro-kernels ****************************/
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
     xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+    xnn_params.xx.fill = (struct fill_parameters) {
+      .ukernel = (xnn_fill_ukernel_function) xnn_xx_fill_ukernel__sse2_x64,
+      .row_tile = 1,
+    };
   #endif
+
+#elif XNN_ARCH_WASMSIMD
 
   /**************************** QC8 micro-kernels ****************************/
   #ifndef XNN_NO_QS8_OPERATORS
@@ -3607,10 +3609,6 @@ static void init(void) {
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
-    xnn_params.x32.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__wasmsimd,
-      .row_tile = 1,
-    };
     xnn_params.x32.pad = (struct pad_parameters) {
       .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__wasmsimd,
       .row_tile = 1,
@@ -3631,14 +3629,18 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
-#elif XNN_ARCH_WASM
-
   /**************************** XX micro-kernels ****************************/
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
     xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+    xnn_params.xx.fill = (struct fill_parameters) {
+      .ukernel = (xnn_fill_ukernel_function) xnn_xx_fill_ukernel__wasmsimd_x64,
+      .row_tile = 1,
+    };
   #endif
+
+#elif XNN_ARCH_WASM
 
   /**************************** QC8 micro-kernels ****************************/
   #ifndef XNN_NO_QC8_OPERATORS
@@ -4064,10 +4066,6 @@ static void init(void) {
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
-    xnn_params.x32.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__scalar_float,
-      .row_tile = 1,
-    };
     xnn_params.x32.pad = (struct pad_parameters) {
       .ukernel = (xnn_pad_ukernel_function) xnn_x32_pad_ukernel__scalar_float,
       .row_tile = 1,
@@ -4087,6 +4085,17 @@ static void init(void) {
       };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
+
+  /**************************** XX micro-kernels ****************************/
+  #ifndef XNN_NO_XX_OPERATORS
+    init_flags |= XNN_INIT_FLAG_XX;
+
+    xnn_params.xx.copy = (xnn_univector_ukernel_function) xnn_xx_copy_ukernel__memcpy;
+    xnn_params.xx.fill = (struct fill_parameters) {
+      .ukernel = (xnn_fill_ukernel_function) xnn_xx_fill_ukernel__scalar_x16,
+      .row_tile = 1,
+    };
+  #endif
 
 #elif XNN_ARCH_RISCV
 
@@ -4413,7 +4422,7 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_X32;
 
     xnn_params.x32.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_function) xnn_x32_fill_ukernel__scalar_float,
+      .ukernel = (xnn_fill_ukernel_function) xnn_xx_fill_ukernel__scalar_x16,
       .row_tile = 1,
     };
     xnn_params.x32.pad = (struct pad_parameters) {

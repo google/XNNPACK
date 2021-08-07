@@ -148,7 +148,7 @@ static enum xnn_status setup_constant_pad_nd(
     .input = input,
     .output = output,
     .padding_value = constant_pad_op->pad_value,
-    .fill_ukernel = xnn_params.x32.fill.ukernel,
+    .fill_ukernel = xnn_params.xx.fill.ukernel,
     .pad_ukernel = xnn_params.x32.pad.ukernel,
   };
 
