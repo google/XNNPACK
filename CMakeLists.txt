@@ -4130,18 +4130,14 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up32x25-minmax-gemmlowp-avx2-mul16-vpmovsx.c
   src/qs8-dwconv/gen/up32x25-minmax-gemmlowp-avx2-mul32.c
   src/qs8-gemm/gen/1x8c8-minmax-fp32-avx2.c
-  src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-avx2.c
   src/qs8-gemm/gen/1x8c8-xw-minmax-fp32-avx2.c
   src/qs8-gemm/gen/2x8c8-minmax-fp32-avx2.c
-  src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-avx2.c
   src/qs8-gemm/gen/2x8c8-xw-minmax-fp32-avx2.c
   src/qs8-gemm/gen/3x8c8-minmax-fp32-avx2.c
   src/qs8-gemm/gen/3x8c8-minmax-gemmlowp-avx2.c
   src/qs8-gemm/gen/3x8c8-xw-minmax-fp32-avx2.c
   src/qs8-igemm/gen/1x8c8-minmax-fp32-avx2.c
-  src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-avx2.c
   src/qs8-igemm/gen/2x8c8-minmax-fp32-avx2.c
-  src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-avx2.c
   src/qs8-igemm/gen/3x8c8-minmax-fp32-avx2.c
   src/qs8-igemm/gen/3x8c8-minmax-gemmlowp-avx2.c
   src/qs8-vadd/gen/minmax-avx2-mul32-ld64-x8.c
@@ -4511,19 +4507,13 @@ SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up32x25-minmax-fp32-avx512skx-mul32.c
   src/qs8-dwconv/gen/up32x25-minmax-gemmlowp-avx512skx-mul32.c
   src/qs8-gemm/gen/1x16c8-minmax-fp32-avx512skx.c
-  src/qs8-gemm/gen/1x16c8-minmax-gemmlowp-avx512skx.c
   src/qs8-gemm/gen/2x16c8-minmax-fp32-avx512skx.c
-  src/qs8-gemm/gen/2x16c8-minmax-gemmlowp-avx512skx.c
   src/qs8-gemm/gen/3x16c8-minmax-fp32-avx512skx.c
-  src/qs8-gemm/gen/3x16c8-minmax-gemmlowp-avx512skx.c
   src/qs8-gemm/gen/4x16c8-minmax-fp32-avx512skx.c
   src/qs8-gemm/gen/4x16c8-minmax-gemmlowp-avx512skx.c
   src/qs8-igemm/gen/1x16c8-minmax-fp32-avx512skx.c
-  src/qs8-igemm/gen/1x16c8-minmax-gemmlowp-avx512skx.c
   src/qs8-igemm/gen/2x16c8-minmax-fp32-avx512skx.c
-  src/qs8-igemm/gen/2x16c8-minmax-gemmlowp-avx512skx.c
   src/qs8-igemm/gen/3x16c8-minmax-fp32-avx512skx.c
-  src/qs8-igemm/gen/3x16c8-minmax-gemmlowp-avx512skx.c
   src/qs8-igemm/gen/4x16c8-minmax-fp32-avx512skx.c
   src/qs8-igemm/gen/4x16c8-minmax-gemmlowp-avx512skx.c
   src/qs8-vadd/gen/minmax-avx512skx-mul32-ld128-x16.c

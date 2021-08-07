@@ -629,8 +629,6 @@ tools/xngen src/qs8-igemm/MRx4c8-sse.c.in -D MR=3 -D SSE=4 -D AVX=1 -D XOP=1 -D 
 
 ################################### x86 AVX2 ##################################
 ### C8 micro-kernels
-tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-avx2.c
-tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=2 -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-avx2.c
 tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/3x8c8-minmax-gemmlowp-avx2.c
 
 tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=1 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qc8-igemm/gen/1x8c8-minmax-fp32-avx2.c
@@ -647,9 +645,6 @@ tools/xngen src/qs8-igemm/MRx8c8-avx2.c.in -D MR=3 -D DATATYPE=QU8 -D REQUANTIZA
 
 ################################## x86 AVX512 #################################
 ### C8 micro-kernels
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=1 -D VARIANT=LD256 -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/1x16c8-minmax-gemmlowp-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=2 -D VARIANT=LD256 -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/2x16c8-minmax-gemmlowp-avx512skx.c
-tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/3x16c8-minmax-gemmlowp-avx512skx.c
 tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DATATYPE=QS8 -D REQUANTIZATION=GEMMLOWP -o src/qs8-igemm/gen/4x16c8-minmax-gemmlowp-avx512skx.c
 
 tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=1 -D VARIANT=LD256 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qc8-igemm/gen/1x16c8-minmax-fp32-avx512skx.c
