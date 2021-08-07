@@ -3079,21 +3079,21 @@ static void init(void) {
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
-    xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x4c8__wasmsimd_ld64);
-    xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x4c8__wasmsimd_ld64);
-    xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x4c8__wasmsimd_ld64);
-    xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x4c8__wasmsimd_ld64);
-    xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_gemmlowp_wasmsimd_params;
+    xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__wasmsimd_ld64);
+    xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_ld64);
+    xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__wasmsimd_ld64);
+    xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_ld64);
+    xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_fp32_wasmsimd_params;
     xnn_params.qs8.gemm.mr = 3;
     xnn_params.qs8.gemm.nr = 4;
     xnn_params.qs8.gemm.log2_kr = 3;
 
-    xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x9__wasmsimd_mul16;
-    xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_gemmlowp_wasmsimd_params;
+    xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up8x9__wasmsimd_mul16;
+    xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_wasmsimd_params;
     xnn_params.qs8.dwconv[0].channel_tile = 8;
     xnn_params.qs8.dwconv[0].primary_tile = 9;
-    xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_gemmlowp_ukernel_up8x25__wasmsimd_mul16;
-    xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_gemmlowp_wasmsimd_params;
+    xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__wasmsimd_mul16;
+    xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_wasmsimd_params;
     xnn_params.qs8.dwconv[1].channel_tile = 8;
     xnn_params.qs8.dwconv[1].primary_tile = 25;
 
