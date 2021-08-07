@@ -28,9 +28,9 @@ static void f32_vhswish(
     return;
   }
 
-  const size_t elements = state.range(0);
-  std::vector<float, AlignedAllocator<float, 64>> input(elements);
-  std::vector<float, AlignedAllocator<float, 64>> output(elements);
+  const size_t num_elements = state.range(0);
+  std::vector<float, AlignedAllocator<float, 64>> input(num_elements);
+  std::vector<float, AlignedAllocator<float, 64>> output(num_elements);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -41,7 +41,7 @@ static void f32_vhswish(
   union xnn_f32_hswish_params params;
   xnn_init_f32_hswish_params(&params);
   for (auto _ : state) {
-    hswish(elements * sizeof(float), input.data(), output.data(), &params);
+    hswish(num_elements * sizeof(float), input.data(), output.data(), &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -49,109 +49,118 @@ static void f32_vhswish(
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  const size_t elements_per_iteration = elements;
+  const size_t elements_per_iteration = num_elements;
   state.counters["elements"] =
     benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = 2 * elements * sizeof(float);
+  const size_t bytes_per_iteration = 2 * num_elements * sizeof(float);
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_vhswish, neon_x4, xnn_f32_vhswish_ukernel__neon_x4, benchmark::utils::CheckNEON)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, neon_x4,
+                    xnn_f32_vhswish_ukernel__neon_x4,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, neon_x8, xnn_f32_vhswish_ukernel__neon_x8, benchmark::utils::CheckNEON)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, neon_x8,
+                    xnn_f32_vhswish_ukernel__neon_x8,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, neon_x16, xnn_f32_vhswish_ukernel__neon_x16, benchmark::utils::CheckNEON)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, neon_x16,
+                    xnn_f32_vhswish_ukernel__neon_x16,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f32_vhswish, sse_x4, xnn_f32_vhswish_ukernel__sse_x4)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, sse_x4,
+                    xnn_f32_vhswish_ukernel__sse_x4)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, sse_x8, xnn_f32_vhswish_ukernel__sse_x8)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
-    ->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_vhswish, avx_x8, xnn_f32_vhswish_ukernel__avx_x8, benchmark::utils::CheckAVX)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, avx_x16, xnn_f32_vhswish_ukernel__avx_x16, benchmark::utils::CheckAVX)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, sse_x8,
+                    xnn_f32_vhswish_ukernel__sse_x8)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vhswish, fma3_x8, xnn_f32_vhswish_ukernel__fma3_x8, benchmark::utils::CheckFMA3)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, avx_x8,
+                    xnn_f32_vhswish_ukernel__avx_x8,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, fma3_x16, xnn_f32_vhswish_ukernel__fma3_x16, benchmark::utils::CheckFMA3)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, avx_x16,
+                    xnn_f32_vhswish_ukernel__avx_x16,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vhswish, avx512f_x16, xnn_f32_vhswish_ukernel__avx512f_x16, benchmark::utils::CheckAVX512F)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, fma3_x8,
+                    xnn_f32_vhswish_ukernel__fma3_x8,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, avx512f_x32, xnn_f32_vhswish_ukernel__avx512f_x32, benchmark::utils::CheckAVX512F)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, fma3_x16,
+                    xnn_f32_vhswish_ukernel__fma3_x16,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vhswish, avx512f_x16,
+                    xnn_f32_vhswish_ukernel__avx512f_x16,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vhswish, avx512f_x32,
+                    xnn_f32_vhswish_ukernel__avx512f_x32,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD
-  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_x4, xnn_f32_vhswish_ukernel__wasmsimd_x4)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_x4,
+                    xnn_f32_vhswish_ukernel__wasmsimd_x4)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_x8, xnn_f32_vhswish_ukernel__wasmsimd_x8)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_x8,
+                    xnn_f32_vhswish_ukernel__wasmsimd_x8)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_x16, xnn_f32_vhswish_ukernel__wasmsimd_x16)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_x16,
+                    xnn_f32_vhswish_ukernel__wasmsimd_x16)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
-  BENCHMARK_CAPTURE(f32_vhswish, wasm_x1, xnn_f32_vhswish_ukernel__wasm_x1)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, wasm_x1,
+                    xnn_f32_vhswish_ukernel__wasm_x1)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, wasm_x2, xnn_f32_vhswish_ukernel__wasm_x2)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, wasm_x2,
+                    xnn_f32_vhswish_ukernel__wasm_x2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, wasm_x4, xnn_f32_vhswish_ukernel__wasm_x4)
-    ->RangeMultiplier(10)
-    ->Range(1000, 1000000)
+  BENCHMARK_CAPTURE(f32_vhswish, wasm_x4,
+                    xnn_f32_vhswish_ukernel__wasm_x4)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
 
-BENCHMARK_CAPTURE(f32_vhswish, scalar_x1, xnn_f32_vhswish_ukernel__scalar_x1)
-  ->RangeMultiplier(10)
-  ->Range(1000, 1000000)
+BENCHMARK_CAPTURE(f32_vhswish, scalar_x1,
+                  xnn_f32_vhswish_ukernel__scalar_x1)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vhswish, scalar_x2, xnn_f32_vhswish_ukernel__scalar_x2)
-  ->RangeMultiplier(10)
-  ->Range(1000, 1000000)
+BENCHMARK_CAPTURE(f32_vhswish, scalar_x2,
+                  xnn_f32_vhswish_ukernel__scalar_x2)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vhswish, scalar_x4, xnn_f32_vhswish_ukernel__scalar_x4)
-  ->RangeMultiplier(10)
-  ->Range(1000, 1000000)
+BENCHMARK_CAPTURE(f32_vhswish, scalar_x4,
+                  xnn_f32_vhswish_ukernel__scalar_x4)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
