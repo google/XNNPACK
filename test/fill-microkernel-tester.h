@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
 #include <algorithm>
 #include <cassert>
 #include <cstddef>

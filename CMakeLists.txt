@@ -421,15 +421,14 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
-  src/x32-pad/scalar-float.c
-  src/x32-pad/scalar-int.c
   src/x32-unpool/scalar.c
   src/x32-zip/x2-scalar.c
   src/x32-zip/x3-scalar.c
   src/x32-zip/x4-scalar.c
   src/x32-zip/xm-scalar.c
   src/xx-copy/memcpy.c
-  src/xx-fill/scalar-x16.c)
+  src/xx-fill/scalar-x16.c
+  src/xx-pad/scalar.c)
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-scalar-c1.c
@@ -1031,15 +1030,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
-  src/x32-pad/scalar-float.c
-  src/x32-pad/scalar-int.c
   src/x32-unpool/scalar.c
   src/x32-zip/x2-scalar.c
   src/x32-zip/x3-scalar.c
   src/x32-zip/x4-scalar.c
   src/x32-zip/xm-scalar.c
   src/xx-copy/memcpy.c
-  src/xx-fill/scalar-x16.c)
+  src/xx-fill/scalar-x16.c
+  src/xx-pad/scalar.c)
 
 SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-neon-c4.c
@@ -1147,13 +1145,13 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/x8-zip/x4-neon.c
   src/x8-zip/xm-neon.c
   src/x32-packx/x4-neon-st4.c
-  src/x32-pad/neon.c
   src/x32-unpool/neon.c
   src/x32-zip/x2-neon.c
   src/x32-zip/x3-neon.c
   src/x32-zip/x4-neon.c
   src/x32-zip/xm-neon.c
-  src/xx-fill/neon-x64.c)
+  src/xx-fill/neon-x64.c
+  src/xx-pad/neon.c)
 
 SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-neon-c4.c
@@ -1717,13 +1715,13 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x8-zip/x4-neon.c
   src/x8-zip/xm-neon.c
   src/x32-packx/x4-neon-st4.c
-  src/x32-pad/neon.c
   src/x32-unpool/neon.c
   src/x32-zip/x2-neon.c
   src/x32-zip/x3-neon.c
   src/x32-zip/x4-neon.c
   src/x32-zip/xm-neon.c
-  src/xx-fill/neon-x64.c)
+  src/xx-fill/neon-x64.c
+  src/xx-pad/neon.c)
 
 SET(PROD_NEONFMA_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up4x9-minmax-neonfma.c
@@ -2402,8 +2400,7 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-vunary/gen/vabs-sse-x8.c
   src/f32-vunary/gen/vneg-sse-x8.c
   src/f32-vunary/gen/vsqr-sse-x8.c
-  src/x32-packx/x4-sse.c
-  src/x32-pad/sse.c)
+  src/x32-packx/x4-sse.c)
 
 SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-minmax-sse-c4.c
@@ -2576,8 +2573,7 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/math/sqrt-sse-hh1mac.c
   src/math/sqrt-sse-nr1mac.c
   src/math/sqrt-sse-nr2mac.c
-  src/x32-packx/x4-sse.c
-  src/x32-pad/sse.c)
+  src/x32-packx/x4-sse.c)
 
 SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-sse2-c4.c
@@ -2636,7 +2632,8 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/x32-zip/x3-sse2.c
   src/x32-zip/x4-sse2.c
   src/x32-zip/xm-sse2.c
-  src/xx-fill/sse2-x64.c)
+  src/xx-fill/sse2-x64.c
+  src/xx-pad/sse2.c)
 
 SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-sse2-c4.c
@@ -2894,7 +2891,8 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/x32-zip/x3-sse2.c
   src/x32-zip/x4-sse2.c
   src/x32-zip/xm-sse2.c
-  src/xx-fill/sse2-x64.c)
+  src/xx-fill/sse2-x64.c
+  src/xx-pad/sse2.c)
 
 SET(PROD_SSSE3_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-2x4-acc2.c
@@ -6718,15 +6716,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(x32-packx-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(x32-packx-test x32-packx-test)
 
-  ADD_EXECUTABLE(x32-pad-test test/x32-pad.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(x32-pad-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(x32-pad-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x32-pad-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-  ADD_TEST(x32-pad-test x32-pad-test)
-
   ADD_EXECUTABLE(x32-unpool-test test/x32-unpool.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(x32-unpool-test PROPERTIES
     CXX_STANDARD 11
@@ -6780,6 +6769,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(xx-fill-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(xx-fill-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(xx-fill-test xx-fill-test)
+
+  ADD_EXECUTABLE(xx-pad-test test/xx-pad.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(xx-pad-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(xx-pad-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(xx-pad-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(xx-pad-test xx-pad-test)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks

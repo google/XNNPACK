@@ -149,7 +149,7 @@ static enum xnn_status setup_constant_pad_nd(
     .output = output,
     .padding_value = constant_pad_op->pad_value,
     .fill_ukernel = xnn_params.xx.fill.ukernel,
-    .pad_ukernel = xnn_params.x32.pad.ukernel,
+    .pad_ukernel = xnn_params.xx.pad.ukernel,
   };
 
   for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {

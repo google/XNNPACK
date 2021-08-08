@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -102,45 +103,62 @@ class PadMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_x32_pad_ukernel_function pad) const {
+  void Test(xnn_pad_ukernel_function pad) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), rng);
+    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
-    std::vector<uint32_t> input(input_channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(uint32_t));
-    std::vector<uint32_t> output((pre_padding() + input_channels() + post_padding()) + (rows() - 1) * output_stride());
-    std::vector<uint32_t> output_ref(rows() * (pre_padding() + input_channels() + post_padding()));
+    std::vector<uint8_t> input(input_channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<uint8_t> output((pre_padding() + input_channels() + post_padding()) + (rows() - 1) * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u32rng));
-      std::generate(output.begin(), output.end(), std::ref(u32rng));
-      const uint32_t fill_value = u32rng();
-
-      // Compute reference results.
-      std::fill(output_ref.begin(), output_ref.end(), fill_value);
-      for (size_t i = 0; i < rows(); i++) {
-        std::copy(
-          &input[i * input_stride()],
-          &input[i * input_stride() + input_channels()],
-          &output_ref[i * output_channels() + pre_padding()]);
-      }
+      std::generate(input.begin(), input.end(), std::ref(u8rng));
+      std::generate(output.begin(), output.end(), std::ref(u8rng));
+      std::array<uint8_t, 4> fill_pattern;
+      std::generate(fill_pattern.begin(), fill_pattern.end(), std::ref(u8rng));
+      uint32_t fill_value = 0;
+      memcpy(&fill_value, fill_pattern.data(), sizeof(fill_value));
 
       // Call optimized micro-kernel.
       pad(
         rows(),
-        input_channels() * sizeof(uint32_t),
-        pre_padding() * sizeof(uint32_t),
-        post_padding() * sizeof(uint32_t),
-        &fill_value,
-        input.data(), input_stride() * sizeof(uint32_t),
-        output.data(), output_stride() * sizeof(uint32_t));
+        input_channels() * sizeof(uint8_t),
+        pre_padding() * sizeof(uint8_t),
+        post_padding() * sizeof(uint8_t),
+        input.data(), input_stride() * sizeof(uint8_t),
+        output.data(), output_stride() * sizeof(uint8_t),
+        fill_value);
 
       // Verify results.
       for (size_t i = 0; i < rows(); i++) {
-        for (size_t c = 0; c < output_channels(); c++) {
-          ASSERT_EQ(output_ref[i * output_channels() + c], output[i * output_stride() + c])
+        for (size_t l = 0; l < pre_padding(); l++) {
+          ASSERT_EQ(
+              uint32_t(output[i * output_stride() + l]),
+              uint32_t(fill_pattern[l % fill_pattern.size()]))
             << "at row " << i << " / " << rows() << ", channel " << i << " / " << output_channels()
             << " (" << pre_padding() << " + " << input_channels() << " + " << post_padding() << ")"
-            << ", fill value = " << fill_value;
+            << ", fill value 0x" << std::hex << std::setw(8) << std::setfill('0') << fill_value
+            << ", output value 0x" << std::hex << std::setw(2) << std::setfill('0')
+            << uint32_t(output[i * output_stride() + l]);
+        }
+        for (size_t c = 0; c < input_channels(); c++) {
+          ASSERT_EQ(
+              uint32_t(output[i * output_stride() + pre_padding() + c]),
+              uint32_t(input[i * input_stride() + c]))
+            << "at row " << i << " / " << rows() << ", channel " << i << " / " << output_channels()
+            << " (" << pre_padding() << " + " << input_channels() << " + " << post_padding() << ")"
+            << ", fill value 0x" << std::hex << std::setw(8) << std::setfill('0') << fill_value
+            << ", output value 0x" << std::hex << std::setw(2) << std::setfill('0')
+            << uint32_t(output[i * output_stride() + pre_padding() + c]);
+        }
+        for (size_t r = 0; r < post_padding(); r++) {
+          ASSERT_EQ(
+              uint32_t(output[i * output_stride() + pre_padding() + input_channels() + r]),
+              uint32_t(fill_pattern[r % fill_pattern.size()]))
+            << "at row " << i << " / " << rows() << ", channel " << i << " / " << output_channels()
+            << " (" << pre_padding() << " + " << input_channels() << " + " << post_padding() << ")"
+            << ", fill value 0x" << std::hex << std::setw(8) << std::setfill('0') << fill_value
+            << ", output value 0x" << std::hex << std::setw(2) << std::setfill('0')
+            << uint32_t(output[i * output_stride() + pre_padding() + input_channels() + r]);
         }
       }
     }

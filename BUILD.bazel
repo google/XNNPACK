@@ -294,8 +294,6 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/x32-packx/x2-scalar.c",
     "src/x32-packx/x3-scalar.c",
     "src/x32-packx/x4-scalar.c",
-    "src/x32-pad/scalar-float.c",
-    "src/x32-pad/scalar-int.c",
     "src/x32-unpool/scalar.c",
     "src/x32-zip/x2-scalar.c",
     "src/x32-zip/x3-scalar.c",
@@ -303,6 +301,7 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/x32-zip/xm-scalar.c",
     "src/xx-copy/memcpy.c",
     "src/xx-fill/scalar-x16.c",
+    "src/xx-pad/scalar.c",
 ]
 
 ALL_SCALAR_MICROKERNEL_SRCS = [
@@ -905,8 +904,6 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/x32-packx/x2-scalar.c",
     "src/x32-packx/x3-scalar.c",
     "src/x32-packx/x4-scalar.c",
-    "src/x32-pad/scalar-float.c",
-    "src/x32-pad/scalar-int.c",
     "src/x32-unpool/scalar.c",
     "src/x32-zip/x2-scalar.c",
     "src/x32-zip/x3-scalar.c",
@@ -914,6 +911,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/x32-zip/xm-scalar.c",
     "src/xx-copy/memcpy.c",
     "src/xx-fill/scalar-x16.c",
+    "src/xx-pad/scalar.c",
 ]
 
 ALL_WASM_MICROKERNEL_SRCS = [
@@ -1839,13 +1837,13 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/qu8-vmulc/gen/minmax-fp32-wasmsimd-mul32-ld64-x8.c",
     "src/qu8-vmulc/gen/minmax-fp32-wasmsimd-mul32-ld64-x16.c",
     "src/x32-packx/x4-wasmsimd.c",
-    "src/x32-pad/wasmsimd.c",
     "src/x32-unpool/wasmsimd.c",
     "src/x32-zip/x2-wasmsimd.c",
     "src/x32-zip/x3-wasmsimd.c",
     "src/x32-zip/x4-wasmsimd.c",
     "src/x32-zip/xm-wasmsimd.c",
     "src/xx-fill/wasmsimd-x64.c",
+    "src/xx-pad/wasmsimd.c",
 ]
 
 # ISA-specific micro-kernels
@@ -1955,13 +1953,13 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/x8-zip/x4-neon.c",
     "src/x8-zip/xm-neon.c",
     "src/x32-packx/x4-neon-st4.c",
-    "src/x32-pad/neon.c",
     "src/x32-unpool/neon.c",
     "src/x32-zip/x2-neon.c",
     "src/x32-zip/x3-neon.c",
     "src/x32-zip/x4-neon.c",
     "src/x32-zip/xm-neon.c",
     "src/xx-fill/neon-x64.c",
+    "src/xx-pad/neon.c",
 ]
 
 ALL_NEON_MICROKERNEL_SRCS = [
@@ -2526,13 +2524,13 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/x8-zip/x4-neon.c",
     "src/x8-zip/xm-neon.c",
     "src/x32-packx/x4-neon-st4.c",
-    "src/x32-pad/neon.c",
     "src/x32-unpool/neon.c",
     "src/x32-zip/x2-neon.c",
     "src/x32-zip/x3-neon.c",
     "src/x32-zip/x4-neon.c",
     "src/x32-zip/xm-neon.c",
     "src/xx-fill/neon-x64.c",
+    "src/xx-pad/neon.c",
 ]
 
 PROD_NEONFMA_MICROKERNEL_SRCS = [
@@ -3223,7 +3221,6 @@ PROD_SSE_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/vneg-sse-x8.c",
     "src/f32-vunary/gen/vsqr-sse-x8.c",
     "src/x32-packx/x4-sse.c",
-    "src/x32-pad/sse.c",
 ]
 
 ALL_SSE_MICROKERNEL_SRCS = [
@@ -3398,7 +3395,6 @@ ALL_SSE_MICROKERNEL_SRCS = [
     "src/math/sqrt-sse-nr1mac.c",
     "src/math/sqrt-sse-nr2mac.c",
     "src/x32-packx/x4-sse.c",
-    "src/x32-pad/sse.c",
 ]
 
 PROD_SSE2_MICROKERNEL_SRCS = [
@@ -3459,6 +3455,7 @@ PROD_SSE2_MICROKERNEL_SRCS = [
     "src/x32-zip/x4-sse2.c",
     "src/x32-zip/xm-sse2.c",
     "src/xx-fill/sse2-x64.c",
+    "src/xx-pad/sse2.c",
 ]
 
 ALL_SSE2_MICROKERNEL_SRCS = [
@@ -3718,6 +3715,7 @@ ALL_SSE2_MICROKERNEL_SRCS = [
     "src/x32-zip/x4-sse2.c",
     "src/x32-zip/xm-sse2.c",
     "src/xx-fill/sse2-x64.c",
+    "src/xx-pad/sse2.c",
 ]
 
 PROD_SSSE3_MICROKERNEL_SRCS = [
@@ -9579,15 +9577,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "x32_pad_test",
-    srcs = [
-        "test/x32-pad.cc",
-        "test/pad-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "x32_unpool_test",
     srcs = [
         "test/x32-unpool.cc",
@@ -9610,6 +9599,15 @@ xnnpack_unit_test(
     srcs = [
         "test/xx-fill.cc",
         "test/fill-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "xx_pad_test",
+    srcs = [
+        "test/xx-pad.cc",
+        "test/pad-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

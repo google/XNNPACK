@@ -756,8 +756,8 @@ void xnn_compute_pad_5d(
     context->pad_ukernel(
       1 /* rows */,
       context->input_size[0], context->pre_paddings[0], context->post_paddings[0],
-      &context->padding_value,
-      input, 0 /* input stride */, output, 0 /* output stride */);
+      input, 0 /* input stride */, output, 0 /* output stride */,
+      context->padding_value);
   } else {
     context->fill_ukernel(1 /* rows */, context->output_size[0], output, 0 /* output stride */, context->padding_value);
   }

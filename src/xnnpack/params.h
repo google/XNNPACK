@@ -1309,22 +1309,11 @@ typedef void (*xnn_pad_ukernel_function)(
     size_t channels,
     size_t pre_padding,
     size_t post_padding,
-    const void* fill_value,
     const void* input,
     size_t input_stride,
     void* output,
-    size_t output_stride);
-
-typedef void (*xnn_x32_pad_ukernel_function)(
-    size_t rows,
-    size_t channels,
-    size_t pre_padding,
-    size_t post_padding,
-    const uint32_t* fill_value,
-    const uint32_t* input,
-    size_t input_stride,
-    uint32_t* output,
-    size_t output_stride);
+    size_t output_stride,
+    const uint32_t fill_value);
 
 typedef void (*xnn_unpool_ukernel_function)(
     size_t p,
@@ -2627,7 +2616,6 @@ struct xnn_parameters {
     struct ibilinear_chw_parameters ibilinear_chw;
   } f32;
   struct {
-    struct pad_parameters pad;
     xnn_unpool_ukernel_function unpool;
     struct zip_parameters zip;
     // Depth To Space 2D with CHW->HWC layout conversion.
@@ -2636,6 +2624,7 @@ struct xnn_parameters {
   struct {
     xnn_univector_ukernel_function copy;
     struct fill_parameters fill;
+    struct pad_parameters pad;
   } xx;
 };
 
