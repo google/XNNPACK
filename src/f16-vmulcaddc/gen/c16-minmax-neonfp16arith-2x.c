@@ -41,8 +41,8 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
-  const float16x8_t vmin = vld1q_dup_f16((const __fp16*) &params->min);
-  const float16x8_t vmax = vld1q_dup_f16((const __fp16*) &params->max);
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->max));
   do {
     const __fp16* w = (const __fp16*) weights;
     size_t c = channels;

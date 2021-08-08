@@ -27,8 +27,8 @@ void xnn_f16_vhswish_ukernel__neonfp16arith_x8(
   const __fp16* x = (const __fp16*) x_ptr;
   __fp16* y = (__fp16*) y_ptr;
 
-  const float16x8_t vsixth = vld1q_dup_f16((const __fp16*) &params->sixth);
-  const float16x8_t vthree = vld1q_dup_f16((const __fp16*) &params->three);
+  const float16x8_t vsixth = vreinterpretq_f16_u16(vld1q_dup_u16(&params->sixth));
+  const float16x8_t vthree = vreinterpretq_f16_u16(vld1q_dup_u16(&params->three));
   const int16x8_t vsix = vreinterpretq_s16_u16(vld1q_dup_u16(&params->six));
   const int16x8_t vzero = vdupq_n_s16(0);
 

@@ -32,9 +32,9 @@ void xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2(
   const __fp16*restrict i = (const __fp16*) input;
   __fp16*restrict o = (__fp16*) output;
 
-  const float16x8_t vscale = vld1q_dup_f16((const __fp16*) &params->scale);
-  const float16x8_t vmax = vld1q_dup_f16((const __fp16*) &params->max);
-  const float16x8_t vmin = vld1q_dup_f16((const __fp16*) &params->min);
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scale));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->max));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->min));
 
   size_t output_decrement = output_stride * nc - 16 * sizeof(__fp16);
   while XNN_LIKELY(mc >= 16 * sizeof(__fp16)) {

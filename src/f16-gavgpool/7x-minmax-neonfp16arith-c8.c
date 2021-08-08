@@ -49,9 +49,9 @@ void xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8(
   if (rows <= 6) {
     i6 = (const __fp16*) zero;
   }
-  const float16x8_t vscale = vld1q_dup_f16(&params->scale);
-  const float16x8_t vmin = vld1q_dup_f16(&params->min);
-  const float16x8_t vmax = vld1q_dup_f16(&params->max);
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scale));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->max));
 
   while (channels >= 8) {
     const float16x8_t vi0 = vld1q_f16(i0); i0 += 8;

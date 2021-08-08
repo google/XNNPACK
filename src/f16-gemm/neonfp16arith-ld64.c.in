@@ -113,17 +113,17 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
       } while (k != 0);
     }
 
-    const float16x8_t vscale = vld1q_dup_f16((const __fp16*) &params->scale);
+    const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scale));
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+8]} = vmulq_f16(vacc${M}x${ABC[N:N+8]}, vscale);
 
-    const float16x8_t vmax = vld1q_dup_f16((const __fp16*) &params->max);
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->max));
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+8]} = vminq_f16(vacc${M}x${ABC[N:N+8]}, vmax);
 
-    const float16x8_t vmin = vld1q_dup_f16((const __fp16*) &params->min);
+    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->min));
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+8]} = vmaxq_f16(vacc${M}x${ABC[N:N+8]}, vmin);
