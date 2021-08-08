@@ -237,9 +237,6 @@
 - name: xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c8__avx512skx
   init: xnn_init_qs8_conv_minmax_gemmlowp_avx512_params
   k-block: 8
-- name: xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x4c8__wasmsimd_ld64
-  init: xnn_init_qs8_conv_minmax_gemmlowp_wasmsimd_params
-  k-block: 8
 - name: xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x2__scalar
   init: xnn_init_qs8_conv_minmax_gemmlowp_scalar_params
   k-block: 1

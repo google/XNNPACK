@@ -87,8 +87,6 @@ tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION=FP32     
 
 ################################## WAsm SIMD ##################################
 ### C8 micro-kernels
-tools/xngen src/qs8-gemm/MRx4c8-wasmsimd.c.in -D MR=3 -D VARIANT=LD64     -D REQUANTIZATION=GEMMLOWP -D DATATYPE=QS8 -o src/qs8-gemm/gen/3x4c8-minmax-gemmlowp-wasmsimd-ld64.c
-
 tools/xngen src/qs8-gemm/MRx4c8-wasmsimd.c.in -D MR=1 -D VARIANT=LD64     -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -o src/qc8-gemm/gen/1x4c8-minmax-fp32-wasmsimd-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-wasmsimd.c.in -D MR=2 -D VARIANT=LD64     -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -o src/qc8-gemm/gen/2x4c8-minmax-fp32-wasmsimd-ld64.c
 tools/xngen src/qs8-gemm/MRx4c8-wasmsimd.c.in -D MR=3 -D VARIANT=LD64     -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -o src/qc8-gemm/gen/3x4c8-minmax-fp32-wasmsimd-ld64.c
