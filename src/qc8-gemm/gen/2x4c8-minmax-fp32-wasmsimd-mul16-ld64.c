@@ -134,9 +134,9 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul16_ld64(
     vacc0x0123 = wasm_i32x4_sub(vacc0x0123, vmagic_bias_less_output_zero_point);
     vacc1x0123 = wasm_i32x4_sub(vacc1x0123, vmagic_bias_less_output_zero_point);
 
-    v128_t vacc01x0123 = wasm_v16x8_shuffle(vacc0x0123, vacc1x0123, 0, 2, 4, 6, 8, 10, 12, 14);
+    v128_t vacc01x0123 = wasm_i16x8_narrow_i32x4(vacc0x0123, vacc1x0123);
 
-    v128_t vout = wasm_v8x16_shuffle(vacc01x0123, vacc01x0123, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
+    v128_t vout = wasm_i8x16_narrow_i16x8(vacc01x0123, vacc01x0123);
 
     if (nc >= 4) {
       *((float*) c0) = (float) wasm_f32x4_extract_lane(vout, 0);

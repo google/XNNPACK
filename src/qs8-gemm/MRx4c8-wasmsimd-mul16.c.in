@@ -21,6 +21,7 @@ $PARAMS_STRUCT = ("" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_") + "
 $PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $WASM_X16X8_LOAD8X8 = "wasm_u16x8_load8x8" if DATATYPE == "QU8" else "wasm_i16x8_load8x8"
+$WASM_X8X16_NARROW_I16X8 = "wasm_u8x16_narrow_i16x8" if DATATYPE == "QU8" else "wasm_i8x16_narrow_i16x8"
 $WASM_X8X16_MAX = "wasm_u8x16_max" if DATATYPE == "QU8" else "wasm_i8x16_max"
 $WASM_X8X16_MIN = "wasm_u8x16_min" if DATATYPE == "QU8" else "wasm_i8x16_min"
 void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c8__wasmsimd_mul16${LOAD_SUFFIX}(
@@ -176,12 +177,12 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}
         vacc${M}x0123 = wasm_i32x4_sub(vacc${M}x0123, vmagic_bias_less_output_zero_point);
 
       $for M in range(0, MR, 2):
-        v128_t vacc${M}${min(M+1, MR-1)}x0123 = wasm_v16x8_shuffle(vacc${M}x0123, vacc${min(M+1, MR-1)}x0123, 0, 2, 4, 6, 8, 10, 12, 14);
+        v128_t vacc${M}${min(M+1, MR-1)}x0123 = wasm_i16x8_narrow_i32x4(vacc${M}x0123, vacc${min(M+1, MR-1)}x0123);
 
       $if MR > 2:
-        v128_t vout = wasm_v8x16_shuffle(vacc0${min(1, MR-1)}x0123, vacc${min(2, MR-1)}${min(3, MR-1)}x0123, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30);
+        v128_t vout = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc${min(2, MR-1)}${min(3, MR-1)}x0123);
       $else:
-        v128_t vout = wasm_v8x16_shuffle(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
+        v128_t vout = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
     if (nc >= 4) {
       $for M in range(MR):

@@ -415,9 +415,9 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__wasmsimd_mul16(
       vacc0123 = wasm_i32x4_sub(vacc0123, vmagic_bias_less_output_zero_point);
       vacc4567 = wasm_i32x4_sub(vacc4567, vmagic_bias_less_output_zero_point);
 
-      v128_t vout01234567 = wasm_v16x8_shuffle(vacc0123, vacc4567, 0, 2, 4, 6, 8, 10, 12, 14);
+      v128_t vout01234567 = wasm_i16x8_narrow_i32x4(vacc0123, vacc4567);
 
-      v128_t vout0123456701234567 = wasm_v8x16_shuffle(vout01234567, vout01234567, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
+      v128_t vout0123456701234567 = wasm_i8x16_narrow_i16x8(vout01234567, vout01234567);
 
       *((double*) output) = wasm_f64x2_extract_lane(vout0123456701234567, 0);
       output += 8;
@@ -653,8 +653,8 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__wasmsimd_mul16(
       vacc0123 = wasm_i32x4_sub(vacc0123, vmagic_bias_less_output_zero_point);
       vacc4567 = wasm_i32x4_sub(vacc4567, vmagic_bias_less_output_zero_point);
 
-      v128_t vout01234567 = wasm_v16x8_shuffle(vacc0123, vacc4567, 0, 2, 4, 6, 8, 10, 12, 14);
-      v128_t vout0123456701234567 = wasm_v8x16_shuffle(vout01234567, vout01234567, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
+      v128_t vout01234567 = wasm_i16x8_narrow_i32x4(vacc0123, vacc4567);
+      v128_t vout0123456701234567 = wasm_i8x16_narrow_i16x8(vout01234567, vout01234567);
 
 
       if (c & 4) {

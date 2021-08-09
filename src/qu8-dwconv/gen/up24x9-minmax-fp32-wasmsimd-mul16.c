@@ -340,12 +340,12 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up24x9__wasmsimd_mul16(
       vaccGHIJ = wasm_i32x4_sub(vaccGHIJ, vmagic_bias_less_output_zero_point);
       vaccKLMN = wasm_i32x4_sub(vaccKLMN, vmagic_bias_less_output_zero_point);
 
-      v128_t vout01234567 = wasm_v16x8_shuffle(vacc0123, vacc4567, 0, 2, 4, 6, 8, 10, 12, 14);
-      v128_t vout89ABCDEF = wasm_v16x8_shuffle(vacc89AB, vaccCDEF, 0, 2, 4, 6, 8, 10, 12, 14);
-      v128_t voutGHIJKLMN = wasm_v16x8_shuffle(vaccGHIJ, vaccKLMN, 0, 2, 4, 6, 8, 10, 12, 14);
+      v128_t vout01234567 = wasm_i16x8_narrow_i32x4(vacc0123, vacc4567);
+      v128_t vout89ABCDEF = wasm_i16x8_narrow_i32x4(vacc89AB, vaccCDEF);
+      v128_t voutGHIJKLMN = wasm_i16x8_narrow_i32x4(vaccGHIJ, vaccKLMN);
 
-      v128_t vout0123456789ABCDEF = wasm_v8x16_shuffle(vout01234567, vout89ABCDEF, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30);
-      v128_t voutGHIJKLMNGHIJKLMN = wasm_v8x16_shuffle(voutGHIJKLMN, voutGHIJKLMN, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
+      v128_t vout0123456789ABCDEF = wasm_u8x16_narrow_i16x8(vout01234567, vout89ABCDEF);
+      v128_t voutGHIJKLMNGHIJKLMN = wasm_u8x16_narrow_i16x8(voutGHIJKLMN, voutGHIJKLMN);
 
       wasm_v128_store(output, vout0123456789ABCDEF);
       *((double*) (output + 16)) = wasm_f64x2_extract_lane(voutGHIJKLMNGHIJKLMN, 0);
@@ -475,8 +475,8 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up24x9__wasmsimd_mul16(
       vacc0123 = wasm_i32x4_sub(vacc0123, vmagic_bias_less_output_zero_point);
       vacc4567 = wasm_i32x4_sub(vacc4567, vmagic_bias_less_output_zero_point);
 
-      v128_t vout01234567 = wasm_v16x8_shuffle(vacc0123, vacc4567, 0, 2, 4, 6, 8, 10, 12, 14);
-      v128_t vout0123456701234567 = wasm_v8x16_shuffle(vout01234567, vout01234567, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
+      v128_t vout01234567 = wasm_i16x8_narrow_i32x4(vacc0123, vacc4567);
+      v128_t vout0123456701234567 = wasm_u8x16_narrow_i16x8(vout01234567, vout01234567);
 
       w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
 

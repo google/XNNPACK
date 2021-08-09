@@ -17,9 +17,10 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_wasmsimd"
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
-$WASM_X16X8_LOAD8X8 = "wasm_u16x8_load8x8" if DATATYPE == "QU8" else "wasm_i16x8_load8x8"
-$WASM_X32X4_EXTEND_LOW_X16X8 = "wasm_u32x4_extend_low_u16x8" if DATATYPE == "QU8" else "wasm_i32x4_extend_low_i16x8"
-$WASM_X32X4_EXTEND_HIGH_X16X8 = "wasm_u32x4_extend_high_u16x8" if DATATYPE == "QU8" else "wasm_i32x4_extend_high_i16x8"
+$WASM_X16X8_LOAD8X8 = {"QS8": "wasm_i16x8_load8x8", "QU8": "wasm_u16x8_load8x8"}[DATATYPE]
+$WASM_X32X4_EXTEND_LOW_X16X8 = {"QS8": "wasm_i32x4_extend_low_i16x8", "QU8": "wasm_u32x4_extend_low_u16x8"}[DATATYPE]
+$WASM_X32X4_EXTEND_HIGH_X16X8 = {"QS8": "wasm_i32x4_extend_high_i16x8", "QU8": "wasm_u32x4_extend_high_u16x8"}[DATATYPE]
+$WASM_X8X16_NARROW_I16X8 = {"QS8": "wasm_i8x16_narrow_i16x8", "QU8": "wasm_u8x16_narrow_i16x8"}[DATATYPE]
 void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__wasmsimd_mul32_ld64_x${BATCH_TILE}(
     size_t n,
     const ${XINT8_T}* input_a,
@@ -72,13 +73,13 @@ void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__wasm
       vacc${ABC[N:N+4]} = wasm_i32x4_sub(vacc${ABC[N:N+4]}, vmagic_bias_less_output_zero_point);
 
     $for N in range(0, BATCH_TILE, 8):
-      v128_t vout${ABC[N:N+8]} = wasm_v16x8_shuffle(vacc${ABC[N:N+4]}, vacc${ABC[N+4:N+8]}, 0, 2, 4, 6, 8, 10, 12, 14);
+      v128_t vout${ABC[N:N+8]} = wasm_i16x8_narrow_i32x4(vacc${ABC[N:N+4]}, vacc${ABC[N+4:N+8]});
 
     $for N in range(0, BATCH_TILE, 16):
       $if N + 8 < BATCH_TILE:
-        v128_t vout${ABC[N:N+16]} = wasm_v8x16_shuffle(vout${ABC[N:N+8]}, vout${ABC[N+8:N+16]}, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30);
+        v128_t vout${ABC[N:N+16]} = ${WASM_X8X16_NARROW_I16X8}(vout${ABC[N:N+8]}, vout${ABC[N+8:N+16]});
       $else:
-        v128_t vout${ABC[N:N+8]}${ABC[N:N+8]} = wasm_v8x16_shuffle(vout${ABC[N:N+8]}, vout${ABC[N:N+8]}, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
+        v128_t vout${ABC[N:N+8]}${ABC[N:N+8]} = ${WASM_X8X16_NARROW_I16X8}(vout${ABC[N:N+8]}, vout${ABC[N:N+8]});
 
     $if BATCH_TILE >= 16:
       wasm_v128_store(output, vout${ABC[0:16]});
@@ -123,8 +124,8 @@ void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__wasm
       vacc${ABC[0:4]} = wasm_i32x4_sub(vacc${ABC[0:4]}, vmagic_bias_less_output_zero_point);
       vacc${ABC[4:8]} = wasm_i32x4_sub(vacc${ABC[4:8]}, vmagic_bias_less_output_zero_point);
 
-      v128_t vout${ABC[0:8]} = wasm_v16x8_shuffle(vacc${ABC[0:4]}, vacc${ABC[4:8]}, 0, 2, 4, 6, 8, 10, 12, 14);
-      v128_t vout${ABC[0:8]}${ABC[0:8]} = wasm_v8x16_shuffle(vout${ABC[0:8]}, vout${ABC[0:8]}, 0, 2, 4, 6, 8, 10, 12, 14, 0, 2, 4, 6, 8, 10, 12, 14);
+      v128_t vout${ABC[0:8]} = wasm_i16x8_narrow_i32x4(vacc${ABC[0:4]}, vacc${ABC[4:8]});
+      v128_t vout${ABC[0:8]}${ABC[0:8]} = ${WASM_X8X16_NARROW_I16X8}(vout${ABC[0:8]}, vout${ABC[0:8]});
 
       $if BATCH_TILE > 8:
         if XNN_LIKELY(n >= (8 * sizeof(${XINT8_T}))) {
