@@ -40,7 +40,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x16_acc4(
 
   const v128_t vi_max = wasm_f32x4_splat(max);
 
-  v128_t vacc0 = wasm_f32x4_splat(0.0f);
+  v128_t vacc0 = wasm_f64x2_splat(0.0);
   v128_t vacc1 = vacc0;
   v128_t vacc2 = vacc0;
   v128_t vacc3 = vacc0;

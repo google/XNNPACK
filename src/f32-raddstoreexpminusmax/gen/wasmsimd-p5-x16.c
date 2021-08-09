@@ -40,7 +40,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x16(
 
   const v128_t vi_max = wasm_f32x4_splat(max);
 
-  v128_t vacc0 = wasm_f32x4_splat(0.0f);
+  v128_t vacc0 = wasm_f64x2_splat(0.0);
   for (; elements >= 16 * sizeof(float); elements -= 16 * sizeof(float)) {
     // Load 16 (4x4) inputs at a time.
     const v128_t vi0123 = wasm_v128_load(input);
