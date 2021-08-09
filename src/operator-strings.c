@@ -38,14 +38,16 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Bankers Rounding (NC, F32)";
     case xnn_operator_type_ceiling_nc_f32:
       return "Ceiling (NC, F32)";
-    case xnn_operator_type_channel_shuffle_nc_x32:
-      return "Channel Shuffle (NC, X32)";
     case xnn_operator_type_channel_shuffle_nc_x8:
       return "Channel Shuffle (NC, X8)";
+    case xnn_operator_type_channel_shuffle_nc_x32:
+      return "Channel Shuffle (NC, X32)";
     case xnn_operator_type_clamp_nc_f32:
       return "Clamp (NC, F32)";
     case xnn_operator_type_clamp_nc_u8:
       return "Clamp (NC, U8)";
+    case xnn_operator_type_constant_pad_nd_x8:
+      return "Constant Pad (ND, X8)";
     case xnn_operator_type_constant_pad_nd_x32:
       return "Constant Pad (ND, X32)";
     case xnn_operator_type_convolution_nhwc_f16:

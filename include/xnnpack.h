@@ -2514,6 +2514,21 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x8(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_constant_pad_nd_x8(
+  const void* padding_value,
+  uint32_t flags,
+  xnn_operator_t* constant_pad_op_out);
+
+enum xnn_status xnn_setup_constant_pad_nd_x8(
+  xnn_operator_t constant_pad_op,
+  size_t num_dims,
+  const size_t* input_shape,
+  const size_t* pre_padding,
+  const size_t* post_padding,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 #endif  // XNN_NO_X8_OPERATORS
 
 #ifdef __cplusplus
