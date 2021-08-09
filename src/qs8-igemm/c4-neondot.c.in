@@ -113,7 +113,7 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
         // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
         $for M in range(MR):
           $for N in range(0, NR, 4):
-              vacc${M}x${ABC[N:N+4]} = vdotq_lane_s32(vacc${M}x${ABC[N:N+4]}, vb0123x${ABC[N:N+4]}, va${M}x01234567, 0);
+            vacc${M}x${ABC[N:N+4]} = vdotq_lane_s32(vacc${M}x${ABC[N:N+4]}, vb0123x${ABC[N:N+4]}, va${M}x01234567, 0);
       }
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
