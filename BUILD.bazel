@@ -7130,7 +7130,6 @@ xnnpack_cc_library(
     }),
     defines = [
         "XNN_NO_U8_OPERATORS",
-        "XNN_NO_X8_OPERATORS",
         "XNN_NO_F16_OPERATORS",
         "XNN_NO_X16_OPERATORS",
     ] + select({

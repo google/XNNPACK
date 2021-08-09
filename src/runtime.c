@@ -1124,10 +1124,32 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_static_constant_pad:
-        status = xnn_create_constant_pad_nd_x32(
-          &node->params.static_pad.padding_value,
-          node->flags,
-          &runtime->opdata[i].operator_object);
+        switch (values[node->outputs[0]].datatype) {
+          case xnn_datatype_fp32:
+            status = xnn_create_constant_pad_nd_x32(
+              &node->params.static_pad.padding_value,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+#ifndef XNN_NO_QS8_OPERATORS
+          case xnn_datatype_qint8:
+            status = xnn_create_constant_pad_nd_x8(
+              &node->params.static_pad.padding_value,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+          case xnn_datatype_quint8:
+            status = xnn_create_constant_pad_nd_x8(
+              &node->params.static_pad.padding_value,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+          default:
+            XNN_UNREACHABLE;
+        }
         if (status != xnn_status_success) {
           goto error;
         }
@@ -1473,6 +1495,21 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
         break;
+#ifndef XNN_NO_X8_OPERATORS
+      case xnn_operator_type_constant_pad_nd_x8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_constant_pad_nd_x8(
+          opdata->operator_object,
+          opdata->shape1.num_dims,
+          opdata->shape1.dim,
+          opdata->pre_paddings,
+          opdata->post_paddings,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_X8_OPERATORS)
       case xnn_operator_type_constant_pad_nd_x32:
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->outputs[0]].data != NULL);
