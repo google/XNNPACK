@@ -119,6 +119,9 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR
             $if DATATYPE == "QU8":
               const __m128i vxb${K} = _mm_sub_epi16(_mm_unpacklo_epi8(vb${K}${K+1}, vzero), vb_zero_point);
               const __m128i vxb${K+1} = _mm_sub_epi16(_mm_unpackhi_epi8(vb${K}${K+1}, vzero), vb_zero_point);
+            $elif SSE == 4:
+              const __m128i vxb${K} = _mm_cvtepi8_epi16(vb${K}${K+1});
+              const __m128i vxb${K+1} = _mm_srai_epi16(_mm_unpackhi_epi8(vb${K}${K+1}, vb${K}${K+1}), 8);
             $else:
               const __m128i vsb${K}${K+1} = _mm_cmpgt_epi8(_mm_setzero_si128(), vb${K}${K+1});
               const __m128i vxb${K} = _mm_unpacklo_epi8(vb${K}${K+1}, vsb${K}${K+1});
