@@ -486,10 +486,13 @@ class DeconvolutionOperatorTester {
   void TestQS8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
     auto i8rng = std::bind(
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
-      rng);
+      std::ref(rng));
+    auto w8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
 
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels());
@@ -503,7 +506,7 @@ class DeconvolutionOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
+      std::generate(kernel.begin(), kernel.end(), std::ref(w8rng));
       std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
@@ -627,8 +630,9 @@ class DeconvolutionOperatorTester {
   void TestQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+    auto u8rng = std::bind(
+      std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels());
@@ -767,7 +771,7 @@ class DeconvolutionOperatorTester {
   void TestF32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels());
@@ -900,10 +904,13 @@ class DeconvolutionOperatorTester {
   void TestSetupQS8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
     auto i8rng = std::bind(
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
-      rng);
+      std::ref(rng));
+    auto w8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
 
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels(),
@@ -922,7 +929,7 @@ class DeconvolutionOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
+      std::generate(kernel.begin(), kernel.end(), std::ref(w8rng));
       std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
@@ -1130,8 +1137,9 @@ class DeconvolutionOperatorTester {
   void TestSetupQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+    auto u8rng = std::bind(
+      std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels(),
@@ -1359,7 +1367,7 @@ class DeconvolutionOperatorTester {
   void TestSetupF32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels(),
