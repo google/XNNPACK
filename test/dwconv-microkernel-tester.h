@@ -172,8 +172,9 @@ class DWConvMicrokernelTester {
   {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+    auto u8rng = std::bind(
+      std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
     std::vector<const uint8_t*> indirection((width() - 1) * step() + kr());
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + indirection.size() * channels());
@@ -283,9 +284,13 @@ class DWConvMicrokernelTester {
   {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
     auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()), rng);
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+    auto w8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
 
     std::vector<const int8_t*> indirection((width() - 1) * step() + kr());
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
@@ -303,7 +308,7 @@ class DWConvMicrokernelTester {
         std::generate(input.begin(), input.end(), std::ref(i8rng));
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
       do {
-        std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
+        std::generate(kernel.begin(), kernel.end(), std::ref(w8rng));
       } while (kernel.size() > 1 && *std::max_element(kernel.cbegin(), kernel.cend()) == *std::min_element(kernel.cbegin(), kernel.cend()));
       std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(zero.begin(), zero.end(), int8_t(input_zero_point() - 0x80));
@@ -406,9 +411,13 @@ class DWConvMicrokernelTester {
   {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
     auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()), rng);
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+    auto w8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
 
     std::vector<const int8_t*> indirection((width() - 1) * step() + kr());
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
@@ -425,7 +434,7 @@ class DWConvMicrokernelTester {
         std::generate(input.begin(), input.end(), std::ref(i8rng));
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
       do {
-        std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
+        std::generate(kernel.begin(), kernel.end(), std::ref(w8rng));
       } while (kernel.size() > 1 && *std::max_element(kernel.cbegin(), kernel.cend()) == *std::min_element(kernel.cbegin(), kernel.cend()));
       std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(zero.begin(), zero.end(), int8_t(input_zero_point() - 0x80));
@@ -513,7 +522,7 @@ class DWConvMicrokernelTester {
   void Test(xnn_f16_dwconv_minmax_unipass_ukernel_function dwconv_minmax, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<const uint16_t*> indirection((width() - 1) * step() + kr());
@@ -605,7 +614,7 @@ class DWConvMicrokernelTester {
   void Test(xnn_f32_dwconv_unipass_ukernel_function dwconv) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
 
     std::vector<const float*> indirection((width() - 1) * step() + kr());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
@@ -677,7 +686,7 @@ class DWConvMicrokernelTester {
   void Test(xnn_f32_dwconv_minmax_unipass_ukernel_function dwconv_minmax, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
 
     std::vector<const float*> indirection((width() - 1) * step() + kr());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
