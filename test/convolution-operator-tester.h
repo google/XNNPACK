@@ -509,9 +509,13 @@ class ConvolutionOperatorTester {
   void TestNHWCxQC8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
     auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+    auto w8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
 
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
@@ -527,7 +531,7 @@ class ConvolutionOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
+      std::generate(kernel.begin(), kernel.end(), std::ref(w8rng));
       std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
@@ -699,9 +703,13 @@ class ConvolutionOperatorTester {
   void TestNHWCxQS8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
     auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+    auto w8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
 
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
@@ -715,7 +723,7 @@ class ConvolutionOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
+      std::generate(kernel.begin(), kernel.end(), std::ref(w8rng));
       std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
@@ -867,8 +875,9 @@ class ConvolutionOperatorTester {
   void TestNHWCxQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+    auto u8rng = std::bind(
+      std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
@@ -1036,7 +1045,7 @@ class ConvolutionOperatorTester {
   void TestNHWCxF32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
@@ -1195,7 +1204,7 @@ class ConvolutionOperatorTester {
   void TestNHWCxF16() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -1354,7 +1363,7 @@ class ConvolutionOperatorTester {
   void TestNCHWxF32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
     auto prng = std::bind(std::uniform_real_distribution<float>(), rng);
 
     std::vector<float> input(2 * XNN_EXTRA_BYTES / sizeof(float) +
@@ -1550,9 +1559,13 @@ class ConvolutionOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
     auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+    auto w8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
 
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max(
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
@@ -1574,7 +1587,7 @@ class ConvolutionOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
+      std::generate(kernel.begin(), kernel.end(), std::ref(w8rng));
       std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
@@ -1807,9 +1820,13 @@ class ConvolutionOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
     auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+    auto w8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
 
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max(
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
@@ -1828,7 +1845,7 @@ class ConvolutionOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
+      std::generate(kernel.begin(), kernel.end(), std::ref(w8rng));
       std::generate(bias.begin(), bias.end(), std::ref(i32rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
@@ -2035,8 +2052,9 @@ class ConvolutionOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), rng);
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+    auto u8rng = std::bind(
+      std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max(
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
@@ -2264,7 +2282,7 @@ class ConvolutionOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max(
@@ -2477,7 +2495,7 @@ class ConvolutionOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max(
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
