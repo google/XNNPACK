@@ -9862,6 +9862,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "multiply_nd_test",
+    timeout = "moderate",
     srcs = [
         "test/binary-elementwise-operator-tester.h",
         "test/multiply-nd.cc",
