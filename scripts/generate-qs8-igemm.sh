@@ -285,14 +285,20 @@ tools/xngen src/qs8-igemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=RN
 tools/xngen src/qs8-igemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-igemm/gen/6x16c4-minmax-rndnu-neondot.c
 tools/xngen src/qs8-igemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-igemm/gen/8x16c4-minmax-rndnu-neondot.c
 
-tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-igemm/gen/1x8c4-minmax-rndnu-neondot.c
-tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-igemm/gen/4x8c4-minmax-rndnu-neondot.c
-tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-igemm/gen/6x8c4-minmax-rndnu-neondot.c
-tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=8  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-igemm/gen/8x8c4-minmax-rndnu-neondot.c
-tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-igemm/gen/1x16c4-minmax-rndnu-neondot.c
-tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-igemm/gen/4x16c4-minmax-rndnu-neondot.c
-tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-igemm/gen/6x16c4-minmax-rndnu-neondot.c
-tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-igemm/gen/8x16c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/1x8c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=2  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/2x8c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=3  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/3x8c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/4x8c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=5  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/5x8c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/6x8c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=8  -D NR=8  -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/8x8c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/1x16c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=2  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/2x16c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=3  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/3x16c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/4x16c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=5  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/5x16c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/6x16c4-minmax-rndnu-neondot.c
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/8x16c4-minmax-rndnu-neondot.c
 
 ############################### AArch64 assembly ##############################
 # Cortex A53 micro-kernel
