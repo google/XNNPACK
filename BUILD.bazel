@@ -281,6 +281,7 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/qu8-vaddc/gen/minmax-scalar-x4.c",
     "src/qu8-vmul/gen/minmax-fp32-scalar-x4.c",
     "src/qu8-vmulc/gen/minmax-fp32-scalar-x4.c",
+    "src/s8-maxpool/9p8x-minmax-scalar-c1.c",
     "src/u8-lut32norm/scalar.c",
     "src/u8-maxpool/9p8x-minmax-scalar-c1.c",
     "src/u8-rmax/scalar.c",
@@ -891,6 +892,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/qu8-vmulc/gen/minmax-fp32-scalar-x1.c",
     "src/qu8-vmulc/gen/minmax-fp32-scalar-x2.c",
     "src/qu8-vmulc/gen/minmax-fp32-scalar-x4.c",
+    "src/s8-maxpool/9p8x-minmax-scalar-c1.c",
     "src/u8-lut32norm/scalar.c",
     "src/u8-maxpool/9p8x-minmax-scalar-c1.c",
     "src/u8-rmax/scalar.c",
@@ -1830,6 +1832,7 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/qu8-vmul/gen/minmax-fp32-wasmsimd-mul32-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-wasmsimd-mul32-ld64-x8.c",
     "src/qu8-vmulc/gen/minmax-fp32-wasmsimd-mul32-ld64-x16.c",
+    "src/s8-maxpool/9p8x-minmax-wasmsimd-c16.c",
     "src/u8-maxpool/9p8x-minmax-wasmsimd-c16.c",
     "src/x32-packx/x4-wasmsimd.c",
     "src/x32-unpool/wasmsimd.c",
@@ -1940,6 +1943,7 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/qu8-vaddc/gen/minmax-neon-ld64-x8.c",
     "src/qu8-vmul/gen/minmax-fp32-neon-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x16.c",
+    "src/s8-maxpool/9p8x-minmax-neon-c16.c",
     "src/u8-maxpool/9p8x-minmax-neon-c16.c",
     "src/u8-rmax/neon.c",
     "src/u8-vclamp/neon-x64.c",
@@ -2511,6 +2515,7 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x8.c",
     "src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-neon-ld128-x16.c",
+    "src/s8-maxpool/9p8x-minmax-neon-c16.c",
     "src/u8-maxpool/9p8x-minmax-neon-c16.c",
     "src/u8-rmax/neon.c",
     "src/u8-vclamp/neon-x64.c",
@@ -3471,6 +3476,7 @@ PROD_SSE2_MICROKERNEL_SRCS = [
     "src/qu8-vaddc/gen/minmax-sse2-mul16-ld64-x8.c",
     "src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x8.c",
     "src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c",
+    "src/s8-maxpool/9p8x-minmax-sse2-c16.c",
     "src/u8-maxpool/9p8x-minmax-sse2-c16.c",
     "src/u8-rmax/sse2.c",
     "src/u8-vclamp/sse2-x64.c",
@@ -3731,6 +3737,7 @@ ALL_SSE2_MICROKERNEL_SRCS = [
     "src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c",
     "src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x16.c",
+    "src/s8-maxpool/9p8x-minmax-sse2-c16.c",
     "src/u8-maxpool/9p8x-minmax-sse2-c16.c",
     "src/u8-rmax/sse2.c",
     "src/u8-vclamp/sse2-x64.c",
@@ -3842,6 +3849,7 @@ PROD_SSE41_MICROKERNEL_SRCS = [
     "src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x8.c",
     "src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x16.c",
+    "src/s8-maxpool/9p8x-minmax-sse41-c16.c",
 ]
 
 ALL_SSE41_MICROKERNEL_SRCS = [
@@ -4081,6 +4089,7 @@ ALL_SSE41_MICROKERNEL_SRCS = [
     "src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x8.c",
     "src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x16.c",
+    "src/s8-maxpool/9p8x-minmax-sse41-c16.c",
 ]
 
 PROD_AVX_MICROKERNEL_SRCS = [
@@ -7158,6 +7167,7 @@ xnnpack_cc_library(
         "//conditions:default": [],
     }),
     defines = [
+        "XNN_NO_S8_OPERATORS",
         "XNN_NO_U8_OPERATORS",
         "XNN_NO_F16_OPERATORS",
         "XNN_NO_X16_OPERATORS",
@@ -7222,6 +7232,7 @@ xnnpack_cc_library(
     defines = [
         "XNN_NO_QS8_OPERATORS",
         "XNN_NO_QU8_OPERATORS",
+        "XNN_NO_S8_OPERATORS",
         "XNN_NO_U8_OPERATORS",
         "XNN_NO_X8_OPERATORS",
         "XNN_NO_NCHW_OPERATORS",
@@ -9540,6 +9551,15 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vmulc-minmax-fp32.cc",
         "test/vmulc-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "s8_maxpool_minmax_test",
+    srcs = [
+        "test/s8-maxpool-minmax.cc",
+        "test/maxpool-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

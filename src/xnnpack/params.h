@@ -167,6 +167,36 @@ union xnn_f32_chw_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+union xnn_s8_minmax_params {
+  struct {
+    int32_t min;
+    int32_t max;
+  } scalar;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) uint8_t bias[16];
+    XNN_ALIGN(16) uint8_t min_with_bias[16];
+    XNN_ALIGN(16) uint8_t max_with_bias[16];
+  } sse2;
+  struct {
+    XNN_ALIGN(16) int8_t min[16];
+    XNN_ALIGN(16) int8_t max[16];
+  } sse4;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int8_t min;
+    int8_t max;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    XNN_ALIGN(8) int8_t min[8];
+    XNN_ALIGN(8) int8_t max[8];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD
+};
+
 union xnn_u8_minmax_params {
   struct {
     uint8_t min;
@@ -1789,6 +1819,17 @@ typedef void (*xnn_f32_maxpool_ukernel_function)(
     size_t output_increment,
     const union xnn_f32_minmax_params* params);
 
+typedef void (*xnn_s8_maxpool_ukernel_function)(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const int8_t** input,
+    size_t input_offset,
+    int8_t* output,
+    size_t input_increment,
+    size_t output_increment,
+    const union xnn_s8_minmax_params* params);
+
 typedef void (*xnn_u8_maxpool_ukernel_function)(
     size_t output_pixels,
     size_t kernel_elements,
@@ -2226,6 +2267,11 @@ typedef void (*xnn_init_f32_minmax_params_fn)(
   float output_min,
   float output_max);
 
+typedef void (*xnn_init_s8_minmax_params_fn)(
+  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_min,
+  int8_t output_max);
+
 typedef void (*xnn_init_u8_minmax_params_fn)(
   union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t output_min,
@@ -2433,6 +2479,7 @@ struct argmaxpool_parameters {
 struct maxpool_parameters {
   xnn_maxpool_ukernel_function ukernel;
   union {
+    xnn_init_s8_minmax_params_fn s8;
     xnn_init_u8_minmax_params_fn u8;
     xnn_init_f32_minmax_params_fn f32;
   } init;
@@ -2521,14 +2568,16 @@ struct vmulcaddc_parameters {
 #define XNN_INIT_FLAG_QS8     0x00000040
 // Indicates that QU8 XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_QU8     0x00000080
+// Indicates that S8 XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_S8      0x00000100
 // Indicates that U8 XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_U8      0x00000100
+#define XNN_INIT_FLAG_U8      0x00000200
 // Indicates that X8 XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_X8      0x00000200
+#define XNN_INIT_FLAG_X8      0x00000400
 // Indicates that XX XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_XX      0x00000400
+#define XNN_INIT_FLAG_XX      0x00000800
 // Indicates that CHW XNNPACK microkernels are optimized for the host platform.
-#define XNN_INIT_FLAG_CHW_OPT 0x00000800
+#define XNN_INIT_FLAG_CHW_OPT 0x00001000
 
 struct xnn_parameters {
   // Bitwise combination of XNN_INIT_FLAG_* flags
@@ -2553,6 +2602,9 @@ struct xnn_parameters {
     struct vbinary_parameters vadd;
     struct vbinary_parameters vmul;
   } qu8;
+  struct {
+    struct maxpool_parameters maxpool;
+  } s8;
   struct {
     struct maxpool_parameters maxpool;
     xnn_univector_ukernel_function clamp;

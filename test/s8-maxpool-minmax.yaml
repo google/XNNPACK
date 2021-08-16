@@ -1,0 +1,14 @@
+# Copyright 2021 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+- name: xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16
+  init: xnn_init_s8_minmax_neon_params
+- name: xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16
+  init: xnn_init_s8_minmax_sse2_params
+- name: xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16
+  init: xnn_init_s8_minmax_sse4_params
+- name: xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16
+  init: xnn_init_s8_minmax_wasmsimd_params
+- name: xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1
+  init: xnn_init_s8_minmax_scalar_params

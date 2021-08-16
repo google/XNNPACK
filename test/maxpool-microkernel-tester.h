@@ -153,6 +153,75 @@ class MaxPoolMicrokernelTester {
     return this->iterations_;
   }
 
+  void Test(xnn_s8_maxpool_ukernel_function maxpool, xnn_init_s8_minmax_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+
+    std::vector<const int8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
+      indirect_input.size() * channels());
+    std::vector<int8_t> output(XNN_EXTRA_BYTES / sizeof(int8_t) +
+      (output_pixels() - 1) * output_stride() + channels());
+    std::vector<int8_t> output_ref(output_pixels() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      do {
+        std::generate(input.begin(), input.end(), std::ref(i8rng));
+      } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
+      std::fill(output.begin(), output.end(), 0xA5);
+
+      for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
+        indirect_input[i] = input.data() + i * channels() - input_offset();
+      }
+      std::shuffle(indirect_input.begin(),
+        indirect_input.begin() + (output_pixels() - 1) * step() + pooling_elements(), rng);
+
+      // Prepare parameters.
+      xnn_s8_minmax_params params;
+      init_params(&params, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+
+      // Compute reference results.
+      for (size_t x = 0; x < output_pixels(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          int8_t max_value = std::numeric_limits<int8_t>::min();
+          for (size_t p = 0; p < pooling_elements(); p++) {
+            max_value = std::max(max_value, indirect_input[x * step() + p][c + input_offset()]);
+          }
+          max_value = std::min(max_value, int8_t(qmax() - 0x80));
+          max_value = std::max(max_value, int8_t(qmin() - 0x80));
+          output_ref[x * channels() + c] = max_value;
+        }
+      }
+
+      // Call optimized micro-kernel.
+      maxpool(output_pixels(), pooling_elements(), channels(),
+        indirect_input.data(), input_offset() * sizeof(int8_t), output.data(),
+        (step() - packed_pooling_elements()) * sizeof(void*),
+        (output_stride() - channels()) * sizeof(int8_t),
+        &params);
+
+      // Verify results.
+      for (size_t x = 0; x < output_pixels(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_GE(int32_t(output[x * output_stride() + c]), int32_t(qmin() - 0x80))
+            << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
+            << ", pooling elements = " << pooling_elements() << ", step = " << step()
+            << ", input offset = " << input_offset();
+          ASSERT_LE(int32_t(output[x * output_stride() + c]), int32_t(qmax() - 0x80))
+            << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
+            << ", pooling elements = " << pooling_elements() << ", step = " << step()
+            << ", input offset = " << input_offset();
+          ASSERT_EQ(int32_t(output_ref[x * channels() + c]), int32_t(output[x * output_stride() + c]))
+            << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
+            << ", pooling elements = " << pooling_elements() << ", step = " << step()
+            << ", input offset = " << input_offset();
+        }
+      }
+    }
+  }
+
   void Test(xnn_u8_maxpool_ukernel_function maxpool, xnn_init_u8_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());

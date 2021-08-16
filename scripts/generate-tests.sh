@@ -11,8 +11,9 @@ tools/generate-vunary-test.py --spec test/u8-vclamp.yaml --output test/u8-vclamp
 tools/generate-pack-test.py --spec test/x32-packx.yaml --output test/x32-packx.cc
 
 ### Tests for MaxPool micro-kernels
-tools/generate-maxpool-test.py --spec test/u8-maxpool-minmax.yaml --output test/u8-maxpool-minmax.cc
 tools/generate-maxpool-test.py --spec test/f32-maxpool-minmax.yaml --output test/f32-maxpool-minmax.cc
+tools/generate-maxpool-test.py --spec test/s8-maxpool-minmax.yaml --output test/s8-maxpool-minmax.cc
+tools/generate-maxpool-test.py --spec test/u8-maxpool-minmax.yaml --output test/u8-maxpool-minmax.cc
 
 ### Tests for AvgPool micro-kernels
 tools/generate-avgpool-test.py --spec test/qu8-avgpool-minmax.yaml --output test/qu8-avgpool-minmax.cc

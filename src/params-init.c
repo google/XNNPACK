@@ -1787,6 +1787,76 @@ void xnn_init_scalar_f32_chw_params(
   params->scalar.mask_odd[3] = -(uint32_t) (w8 >= 7);
 }
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_s8_minmax_sse2_params(
+  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(output_min < output_max);
+
+  const uint8_t output_min_with_bias = UINT8_C(0x80) ^ (uint8_t) output_min;
+  const uint8_t output_max_with_bias = UINT8_C(0x80) ^ (uint8_t) output_max;
+  for (uint32_t i = 0; i < 16; i++) {
+    params->sse2.bias[i] = UINT8_C(0x80);
+    params->sse2.min_with_bias[i] = output_min_with_bias;
+    params->sse2.max_with_bias[i] = output_max_with_bias;
+  }
+}
+
+void xnn_init_s8_minmax_sse4_params(
+  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(output_min < output_max);
+
+  for (uint32_t i = 0; i < 16; i++) {
+    params->sse4.min[i] = output_min;
+    params->sse4.max[i] = output_max;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_init_s8_minmax_neon_params(
+  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(output_min < output_max);
+
+  params->neon.min = output_min;
+  params->neon.max = output_max;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_WASMSIMD
+void xnn_init_s8_minmax_wasmsimd_params(
+  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(output_min < output_max);
+
+  for (uint32_t i = 0; i < 8; i++) {
+    params->wasmsimd.min[i] = output_min;
+    params->wasmsimd.max[i] = output_max;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD
+
+void xnn_init_s8_minmax_scalar_params(
+  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(output_min < output_max);
+
+  params->scalar.min = (int32_t) output_min;
+  params->scalar.max = (int32_t) output_max;
+}
+
 void xnn_init_u8_minmax_params(
   union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t output_min,

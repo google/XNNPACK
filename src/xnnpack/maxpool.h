@@ -57,6 +57,25 @@ DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_u8_maxpool_minmax_ukernel_9p8x__w
 DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1)
 
 
+#define DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                \
+      size_t output_pixels,                                 \
+      size_t kernel_size,                                   \
+      size_t channels,                                      \
+      const int8_t** input,                                 \
+      size_t input_offset,                                  \
+      int8_t* output,                                       \
+      size_t input_increment,                               \
+      size_t output_increment,                              \
+      const union xnn_s8_minmax_params* params);
+
+DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16)
+DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16)
+DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16)
+DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16)
+DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1)
+
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
