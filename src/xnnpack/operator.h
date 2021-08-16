@@ -76,6 +76,7 @@ enum xnn_operator_type {
   xnn_operator_type_leaky_relu_nc_f32,
   xnn_operator_type_leaky_relu_nc_qu8,
   xnn_operator_type_max_pooling_nhwc_f32,
+  xnn_operator_type_max_pooling_nhwc_s8,
   xnn_operator_type_max_pooling_nhwc_u8,
   xnn_operator_type_maximum_nd_f32,
   xnn_operator_type_minimum_nd_f32,
@@ -313,6 +314,7 @@ struct xnn_operator {
       union xnn_qu8_avgpool_params qu8_avgpool;
       union xnn_qu8_avgpool_params qu8_gavgpool;
     };
+    union xnn_s8_minmax_params s8_minmax;
     union xnn_u8_minmax_params u8_minmax;
   } params;
   enum xnn_operator_type type;

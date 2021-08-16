@@ -272,7 +272,7 @@ static void init(void) {
 
       xnn_params.s8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16,
-        .init.s8 = xnn_init_s8_minmax_scalar_params,
+        .init.s8 = xnn_init_s8_minmax_neon_params,
         .mr = 9,
         .qr = 8,
       };
@@ -1526,7 +1526,7 @@ static void init(void) {
 
     xnn_params.s8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16,
-      .init.s8 = xnn_init_s8_minmax_scalar_params,
+      .init.s8 = xnn_init_s8_minmax_neon_params,
       .mr = 9,
       .qr = 8,
     };
@@ -3288,6 +3288,18 @@ static void init(void) {
     };
   #endif  // XNN_NO_QU8_OPERATORS
 
+  /**************************** S8 micro-kernels ****************************/
+  #ifndef XNN_NO_S8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_S8;
+
+    xnn_params.s8.maxpool = (struct maxpool_parameters) {
+      .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16,
+      .init.s8 = xnn_init_s8_minmax_wasmsimd_params,
+      .mr = 9,
+      .qr = 8,
+    };
+  #endif  // XNN_NO_S8_OPERATORS
+
   /**************************** U8 micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
@@ -3905,6 +3917,18 @@ static void init(void) {
       .element_tile = 4,
     };
   #endif  // XNN_NO_QU8_OPERATORS
+
+  /**************************** S8 micro-kernels ****************************/
+  #ifndef XNN_NO_S8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_S8;
+
+    xnn_params.s8.maxpool = (struct maxpool_parameters) {
+      .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1,
+      .init.s8 = xnn_init_s8_minmax_scalar_params,
+      .mr = 9,
+      .qr = 8,
+    };
+  #endif  // XNN_NO_S8_OPERATORS
 
   /**************************** U8 micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS

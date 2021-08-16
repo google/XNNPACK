@@ -447,6 +447,91 @@ class MaxPoolingOperatorTester {
     return this->iterations_;
   }
 
+  void TestS8() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+
+    std::vector<int8_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> output_ref(batch_size() * output_height() * output_width() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::fill(output.begin(), output.end(), 0xA5);
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t oy = 0; oy < output_height(); oy++) {
+          for (size_t ox = 0; ox < output_width(); ox++) {
+            for (size_t c = 0; c < channels(); c++) {
+              int8_t max_value = std::numeric_limits<int8_t>::min();
+              for (size_t py = 0; py < pooling_height(); py++) {
+                const size_t iy = oy * stride_height() + py * dilation_height() - padding_top();
+                for (size_t px = 0; px < pooling_width(); px++) {
+                  const size_t ix = ox * stride_width() + px * dilation_width() - padding_left();
+                  if (ix < input_width() && iy < input_height()) {
+                    max_value = std::max(max_value,
+                      input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c]);
+                  }
+                }
+              }
+              max_value = std::min(max_value, int8_t(qmax() - 0x80));
+              max_value = std::max(max_value, int8_t(qmin() - 0x80));
+              output_ref[((i * output_height() + oy) * output_width() + ox) * channels() + c] = max_value;
+            }
+          }
+        }
+      }
+
+      // Create, setup, run, and destroy Max Pooling operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t max_pooling_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_max_pooling2d_nhwc_s8(
+          padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
+          padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
+          pooling_height(), pooling_width(),
+          stride_height(), stride_width(),
+          dilation_height(), dilation_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
+          int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+          padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0,
+          &max_pooling_op));
+      ASSERT_NE(nullptr, max_pooling_op);
+
+      // Smart pointer to automatically delete max_pooling_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_max_pooling_op(max_pooling_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_max_pooling2d_nhwc_s8(
+          max_pooling_op,
+          batch_size(), input_height(), input_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t y = 0; y < output_height(); y++) {
+          for (size_t x = 0; x < output_width(); x++) {
+            for (size_t c = 0; c < channels(); c++) {
+              ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmax() - 0x80));
+              ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmin() - 0x80));
+              ASSERT_EQ(int32_t(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]),
+                int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])) <<
+                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
+            }
+          }
+        }
+      }
+    }
+  }
+
   void TestU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -621,6 +706,148 @@ class MaxPoolingOperatorTester {
                 output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c
                 << ", min = " << output_min << ", max = " << output_max;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void TestSetupS8() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max(
+      (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
+      (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
+    std::vector<int8_t> output(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max(
+      (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
+      (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
+    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::fill(output.begin(), output.end(), 0xA5);
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t oy = 0; oy < output_height(); oy++) {
+          for (size_t ox = 0; ox < output_width(); ox++) {
+            for (size_t c = 0; c < channels(); c++) {
+              int8_t max_value = std::numeric_limits<int8_t>::min();
+              for (size_t py = 0; py < pooling_height(); py++) {
+                const size_t iy = oy * stride_height() + py * dilation_height() - padding_top();
+                for (size_t px = 0; px < pooling_width(); px++) {
+                  const size_t ix = ox * stride_width() + px * dilation_width() - padding_left();
+                  if (ix < input_width() && iy < input_height()) {
+                    max_value = std::max(max_value,
+                      input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c]);
+                  }
+                }
+              }
+              max_value = std::min(max_value, int8_t(qmax() - 0x80));
+              max_value = std::max(max_value, int8_t(qmin() - 0x80));
+              output_ref[((i * output_height() + oy) * output_width() + ox) * channels() + c] = max_value;
+            }
+          }
+        }
+      }
+
+      // Create, setup, and run Max Pooling operator once.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t max_pooling_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_max_pooling2d_nhwc_s8(
+          padding_top(), padding_right(), padding_bottom(), padding_left(),
+          pooling_height(), pooling_width(),
+          stride_height(), stride_width(),
+          dilation_height(), dilation_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
+          int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+          0, &max_pooling_op));
+      ASSERT_NE(nullptr, max_pooling_op);
+
+      // Smart pointer to automatically delete max_pooling_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_max_pooling_op(max_pooling_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_max_pooling2d_nhwc_s8(
+          max_pooling_op,
+          batch_size(), input_height(), input_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+
+      // Verify results of the first run.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t y = 0; y < output_height(); y++) {
+          for (size_t x = 0; x < output_width(); x++) {
+            for (size_t c = 0; c < channels(); c++) {
+              ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmax() - 0x80));
+              ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmin() - 0x80));
+              ASSERT_EQ(int32_t(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]),
+                int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])) <<
+                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
+            }
+          }
+        }
+      }
+
+      // Re-generate data for the second run.
+      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::fill(output.begin(), output.end(), 0xA5);
+
+      // Compute reference results for the second run.
+      for (size_t i = 0; i < next_batch_size(); i++) {
+        for (size_t oy = 0; oy < next_output_height(); oy++) {
+          for (size_t ox = 0; ox < next_output_width(); ox++) {
+            for (size_t c = 0; c < channels(); c++) {
+              int8_t max_value = std::numeric_limits<int8_t>::min();
+              for (size_t py = 0; py < pooling_height(); py++) {
+                const size_t iy = oy * stride_height() + py * dilation_height() - padding_top();
+                for (size_t px = 0; px < pooling_width(); px++) {
+                  const size_t ix = ox * stride_width() + px * dilation_width() - padding_left();
+                  if (ix < next_input_width() && iy < next_input_height()) {
+                    max_value = std::max(max_value,
+                      input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + c]);
+                  }
+                }
+              }
+              max_value = std::min(max_value, int8_t(qmax() - 0x80));
+              max_value = std::max(max_value, int8_t(qmin() - 0x80));
+              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c] = max_value;
+            }
+          }
+        }
+      }
+
+      // Setup and run Max Pooling operator the second time, and destroy the operator.
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_max_pooling2d_nhwc_s8(
+          max_pooling_op,
+          next_batch_size(), next_input_height(), next_input_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+
+      // Verify results of the second run.
+      for (size_t i = 0; i < next_batch_size(); i++) {
+        for (size_t y = 0; y < next_output_height(); y++) {
+          for (size_t x = 0; x < next_output_width(); x++) {
+            for (size_t c = 0; c < channels(); c++) {
+              ASSERT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), int32_t(qmax() - 0x80));
+              ASSERT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), int32_t(qmin() - 0x80));
+              ASSERT_EQ(int32_t(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]),
+                int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])) <<
+                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
           }
         }
