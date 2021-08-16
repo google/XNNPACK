@@ -26,11 +26,6 @@
 
 class MaxPoolMicrokernelTester {
  public:
-  enum class Variant {
-    Native,
-    Scalar,
-  };
-
   inline MaxPoolMicrokernelTester& output_pixels(size_t output_pixels) {
     assert(output_pixels != 0);
     this->output_pixels_ = output_pixels;
@@ -158,7 +153,7 @@ class MaxPoolMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_u8_maxpool_ukernel_function maxpool, Variant variant = Variant::Native) const {
+  void Test(xnn_u8_maxpool_ukernel_function maxpool, xnn_init_u8_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -183,14 +178,7 @@ class MaxPoolMicrokernelTester {
 
       // Prepare parameters.
       xnn_u8_minmax_params params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_u8_minmax_params(&params, qmin(), qmax());
-          break;
-        case Variant::Scalar:
-          xnn_init_scalar_u8_minmax_params(&params, qmin(), qmax());
-          break;
-      }
+      init_params(&params, qmin(), qmax());
 
       // Compute reference results.
       for (size_t x = 0; x < output_pixels(); x++) {
@@ -232,7 +220,7 @@ class MaxPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_maxpool_ukernel_function maxpool, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_maxpool_ukernel_function maxpool, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
@@ -274,14 +262,7 @@ class MaxPoolMicrokernelTester {
 
       // Prepare parameters.
       xnn_f32_minmax_params params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_f32_minmax_params(&params, output_min, output_max);
-          break;
-        case Variant::Scalar:
-          xnn_init_f32_minmax_scalar_params(&params, output_min, output_max);
-          break;
-      }
+      init_params(&params, output_min, output_max);
 
       // Clamp reference results.
       for (float& output_value : output_ref) {

@@ -272,6 +272,7 @@ static void init(void) {
 
       xnn_params.u8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16,
+        .init.u8 = xnn_init_u8_minmax_scalar_params,
         .mr = 9,
         .qr = 8,
       };
@@ -440,6 +441,7 @@ static void init(void) {
       };
       xnn_params.f32.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4,
+        .init.f32 = xnn_init_f32_minmax_scalar_params,
         .mr = 9,
         .qr = 8,
       };
@@ -720,6 +722,7 @@ static void init(void) {
 
       xnn_params.u8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
+        .init.u8 = xnn_init_u8_minmax_scalar_params,
         .mr = 9,
         .qr = 8,
       };
@@ -806,6 +809,7 @@ static void init(void) {
       };
       xnn_params.f32.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_minmax_ukernel_9p8x__scalar_c1,
+        .init.f32 = xnn_init_f32_minmax_scalar_params,
         .mr = 9,
         .qr = 8,
       };
@@ -1498,6 +1502,7 @@ static void init(void) {
 
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16,
+      .init.u8 = xnn_init_u8_minmax_scalar_params,
       .mr = 9,
       .qr = 8,
     };
@@ -1872,6 +1877,7 @@ static void init(void) {
     };
     xnn_params.f32.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4,
+      .init.f32 = xnn_init_f32_minmax_scalar_params,
       .mr = 9,
       .qr = 8,
     };
@@ -2574,6 +2580,7 @@ static void init(void) {
 
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16,
+      .init.u8 = xnn_init_u8_minmax_sse2_params,
       .mr = 9,
       .qr = 8,
     };
@@ -2734,6 +2741,7 @@ static void init(void) {
     };
     xnn_params.f32.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_minmax_ukernel_9p8x__sse_c4,
+      .init.f32 = xnn_init_f32_minmax_sse_params,
       .mr = 9,
       .qr = 8,
     };
@@ -3229,6 +3237,7 @@ static void init(void) {
 
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
+      .init.u8 = xnn_init_u8_minmax_scalar_params,
       .mr = 9,
       .qr = 8,
     };
@@ -3378,12 +3387,14 @@ static void init(void) {
     if (is_wasm_x86) {
       xnn_params.f32.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_x86_c4,
+        .init.f32 = xnn_init_f32_minmax_scalar_params,
         .mr = 9,
         .qr = 8,
       };
     } else {
       xnn_params.f32.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_arm_c4,
+        .init.f32 = xnn_init_f32_minmax_scalar_params,
         .mr = 9,
         .qr = 8,
       };
@@ -3844,6 +3855,7 @@ static void init(void) {
 
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
+      .init.u8 = xnn_init_u8_minmax_scalar_params,
       .mr = 9,
       .qr = 8,
     };
@@ -3947,6 +3959,7 @@ static void init(void) {
     };
     xnn_params.f32.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_minmax_ukernel_9p8x__wasm_c1,
+      .init.f32 = xnn_init_f32_minmax_scalar_params,
       .mr = 9,
       .qr = 8,
     };
@@ -4229,6 +4242,7 @@ static void init(void) {
 
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
+      .init.u8 = xnn_init_u8_minmax_scalar_params,
       .mr = 9,
       .qr = 8,
     };
@@ -4315,6 +4329,7 @@ static void init(void) {
     };
     xnn_params.f32.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_f32_maxpool_minmax_ukernel_9p8x__scalar_c1,
+      .init.f32 = xnn_init_f32_minmax_scalar_params,
       .mr = 9,
       .qr = 8,
     };

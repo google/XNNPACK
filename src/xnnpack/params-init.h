@@ -506,7 +506,14 @@ XNN_INTERNAL void xnn_init_u8_minmax_params(
   uint8_t output_min,
   uint8_t output_max);
 
-XNN_INTERNAL void xnn_init_scalar_u8_minmax_params(
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_u8_minmax_sse2_params(
+  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t output_min,
+  uint8_t output_max);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+XNN_INTERNAL void xnn_init_u8_minmax_scalar_params(
   union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t output_min,
   uint8_t output_max);

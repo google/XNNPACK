@@ -1805,7 +1805,22 @@ void xnn_init_u8_minmax_params(
   #endif
 }
 
-void xnn_init_scalar_u8_minmax_params(
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_u8_minmax_sse2_params(
+  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  assert(output_min < output_max);
+
+  for (uint32_t i = 0; i < 16; i++) {
+    params->sse2.min[i] = output_min;
+    params->sse2.max[i] = output_max;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+void xnn_init_u8_minmax_scalar_params(
   union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t output_min,
   uint8_t output_max)

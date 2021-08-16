@@ -2220,6 +2220,11 @@ typedef void (*xnn_init_f32_minmax_params_fn)(
   float output_min,
   float output_max);
 
+typedef void (*xnn_init_u8_minmax_params_fn)(
+  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t output_min,
+  uint8_t output_max);
+
 typedef void (*xnn_init_qc8_scale_params_fn)(
   size_t channels,
   size_t channels_tile,
@@ -2421,6 +2426,10 @@ struct argmaxpool_parameters {
 
 struct maxpool_parameters {
   xnn_maxpool_ukernel_function ukernel;
+  union {
+    xnn_init_u8_minmax_params_fn u8;
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
   uint8_t mr;
   uint8_t qr;
 };

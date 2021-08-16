@@ -497,7 +497,7 @@ class VUnaryMicrokernelTester {
               xnn_init_u8_minmax_params(&params.minmax, qmin(), qmax());
               break;
             case Variant::Scalar:
-              xnn_init_scalar_u8_minmax_params(&params.minmax, qmin(), qmax());
+              xnn_init_u8_minmax_scalar_params(&params.minmax, qmin(), qmax());
               break;
           }
           break;
