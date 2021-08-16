@@ -27,7 +27,7 @@
       .pooling_elements(9)
       .pooling_tile(9, 8)
       .channels(16)
-      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
   }
 
   TEST(U8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_unipass_fulltile_with_input_offset) {
@@ -37,7 +37,7 @@
       .pooling_tile(9, 8)
       .channels(16)
       .input_offset(19)
-      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
   }
 
   TEST(U8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_unipass_fulltile_with_qmin) {
@@ -47,7 +47,7 @@
       .pooling_tile(9, 8)
       .channels(16)
       .qmin(192)
-      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
   }
 
   TEST(U8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_unipass_fulltile_with_qmax) {
@@ -57,7 +57,7 @@
       .pooling_tile(9, 8)
       .channels(16)
       .qmax(192)
-      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
   }
 
   TEST(U8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_unipass_subtile) {
@@ -67,7 +67,7 @@
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -79,7 +79,7 @@
         .pooling_tile(9, 8)
         .channels(16)
         .input_offset(19)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -90,7 +90,7 @@
         .pooling_elements(9)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -102,7 +102,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(131)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -114,7 +114,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -126,7 +126,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -138,7 +138,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -152,7 +152,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(131)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -164,7 +164,7 @@
         .pooling_elements(9)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -176,7 +176,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(17)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -188,7 +188,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -200,7 +200,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -212,7 +212,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -226,7 +226,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(17)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -238,7 +238,7 @@
         .pooling_elements(9)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -250,7 +250,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(37)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -262,7 +262,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -274,7 +274,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -286,7 +286,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -300,7 +300,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(37)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -311,7 +311,7 @@
       .pooling_elements(17)
       .pooling_tile(9, 8)
       .channels(16)
-      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
   }
 
   TEST(U8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_twopass_fulltile_with_input_offset) {
@@ -321,7 +321,7 @@
       .pooling_tile(9, 8)
       .channels(16)
       .input_offset(19)
-      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
   }
 
   TEST(U8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_twopass_fulltile_with_qmin) {
@@ -331,7 +331,7 @@
       .pooling_tile(9, 8)
       .channels(16)
       .qmin(192)
-      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
   }
 
   TEST(U8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_twopass_fulltile_with_qmax) {
@@ -341,7 +341,7 @@
       .pooling_tile(9, 8)
       .channels(16)
       .qmax(192)
-      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+      .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
   }
 
   TEST(U8_MAXPOOL_MINMAX_9P8X__NEON_C16, channels_eq_16_twopass_subtile) {
@@ -351,7 +351,7 @@
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -363,7 +363,7 @@
         .pooling_tile(9, 8)
         .channels(16)
         .input_offset(19)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -374,7 +374,7 @@
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -386,7 +386,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(83)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -398,7 +398,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -410,7 +410,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -422,7 +422,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -436,7 +436,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(131)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -448,7 +448,7 @@
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -460,7 +460,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(17)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -472,7 +472,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -484,7 +484,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -496,7 +496,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -510,7 +510,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(17)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -522,7 +522,7 @@
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -534,7 +534,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(37)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -546,7 +546,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -558,7 +558,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -570,7 +570,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -584,7 +584,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(37)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -596,7 +596,7 @@
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(16)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -608,7 +608,7 @@
         .pooling_tile(9, 8)
         .channels(16)
         .input_offset(19)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -620,7 +620,7 @@
         .pooling_tile(9, 8)
         .channels(16)
         .qmin(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -632,7 +632,7 @@
         .pooling_tile(9, 8)
         .channels(16)
         .qmax(192)
-        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+        .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
     }
   }
 
@@ -644,7 +644,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -658,7 +658,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(131)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -672,7 +672,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(192)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -686,7 +686,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(192)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -699,7 +699,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -713,7 +713,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(16)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -727,7 +727,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(192)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -741,7 +741,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(192)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -754,7 +754,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -768,7 +768,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(37)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -782,7 +782,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(192)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -796,7 +796,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(192)
-          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+          .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
       }
     }
   }
@@ -811,7 +811,7 @@
             .pooling_elements(pooling_elements)
             .pooling_tile(9, 8)
             .channels(channels)
-            .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+            .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
         }
       }
     }
@@ -828,7 +828,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_offset(83)
-            .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+            .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
         }
       }
     }
@@ -845,7 +845,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .qmin(192)
-            .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+            .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
         }
       }
     }
@@ -862,7 +862,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .qmax(192)
-            .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+            .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
         }
       }
     }
@@ -879,7 +879,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_stride(83)
-            .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+            .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
         }
       }
     }
@@ -898,7 +898,7 @@
               .step(step)
               .channels(channels)
               .output_stride(83)
-              .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_scalar_params);
+              .Test(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16, xnn_init_u8_minmax_neon_params);
           }
         }
       }

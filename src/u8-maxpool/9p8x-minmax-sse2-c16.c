@@ -96,8 +96,9 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
 
         const __m128i vmax2345 = _mm_max_epu8(vmax23, vmax45);
         const __m128i vmax01678 = _mm_max_epu8(vmax018, vmax67);
-        const __m128i vmax = _mm_max_epu8(vmax2345, vmax01678);
-        const __m128i vout = _mm_max_epu8(_mm_min_epu8(vmax, voutput_max), voutput_min);
+        __m128i vout = _mm_max_epu8(vmax2345, vmax01678);
+        vout = _mm_max_epu8(vout, voutput_min);
+        vout = _mm_min_epu8(vout, voutput_max);
 
         _mm_storeu_si128((__m128i*) o, vout); o += 16;
       }
@@ -119,8 +120,9 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
 
         const __m128i vmax2345 = _mm_max_epu8(vmax23, vmax45);
         const __m128i vmax01678 = _mm_max_epu8(vmax018, vmax67);
-        const __m128i vmax = _mm_max_epu8(vmax2345, vmax01678);
-        __m128i vout = _mm_max_epu8(_mm_min_epu8(vmax, voutput_max), voutput_min);
+        __m128i vout = _mm_max_epu8(vmax2345, vmax01678);
+        vout = _mm_max_epu8(vout, voutput_min);
+        vout = _mm_min_epu8(vout, voutput_max);
 
         if (c & 8) {
           _mm_storel_epi64((__m128i*) o, vout);
@@ -203,8 +205,9 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
 
         const __m128i vmax2345 = _mm_max_epu8(vmax23, vmax45);
         const __m128i vmax0167 = _mm_max_epu8(vmax01, vmax67);
-        const __m128i vmax = _mm_max_epu8(vmax2345, vmax0167);
-        const __m128i vout = _mm_max_epu8(_mm_min_epu8(vmax, voutput_max), voutput_min);
+        __m128i vout = _mm_max_epu8(vmax2345, vmax0167);
+        vout = _mm_max_epu8(vout, voutput_min);
+        vout = _mm_min_epu8(vout, voutput_max);
 
         _mm_storeu_si128((__m128i*) o, vout);
         o += 16;
@@ -227,8 +230,9 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
 
         const __m128i vmax2345 = _mm_max_epu8(vmax23, vmax45);
         const __m128i vmax0167 = _mm_max_epu8(vmax01, vmax67);
-        const __m128i vmax = _mm_max_epu8(vmax2345, vmax0167);
-        __m128i vout = _mm_max_epu8(_mm_min_epu8(vmax, voutput_max), voutput_min);
+        __m128i vout = _mm_max_epu8(vmax2345, vmax0167);
+        vout = _mm_max_epu8(vout, voutput_min);
+        vout = _mm_min_epu8(vout, voutput_max);
 
         if (c & 8) {
           _mm_storel_epi64((__m128i*) o, vout);

@@ -1869,9 +1869,12 @@ void xnn_init_u8_minmax_params(
       params->sse2.min[i] = output_min;
       params->sse2.max[i] = output_max;
     }
+  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
+    params->neon.min = output_min;
+    params->neon.max = output_max;
   #else
-    params->scalar.min = output_min;
-    params->scalar.max = output_max;
+    params->scalar.min = (uint32_t) output_min;
+    params->scalar.max = (uint32_t) output_max;
   #endif
 }
 
@@ -1905,6 +1908,19 @@ void xnn_init_u8_minmax_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_init_u8_minmax_neon_params(
+  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  assert(output_min < output_max);
+
+  params->neon.min = output_min;
+  params->neon.max = output_max;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 void xnn_init_u8_minmax_scalar_params(
   union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t output_min,
@@ -1912,8 +1928,8 @@ void xnn_init_u8_minmax_scalar_params(
 {
   assert(output_min < output_max);
 
-  params->scalar.min = (int32_t) (uint32_t) output_min;
-  params->scalar.max = (int32_t) (uint32_t) output_max;
+  params->scalar.min = (uint32_t) output_min;
+  params->scalar.max = (uint32_t) output_max;
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

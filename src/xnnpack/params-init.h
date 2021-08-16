@@ -551,6 +551,13 @@ XNN_INTERNAL void xnn_init_u8_minmax_wasmsimd_params(
   uint8_t output_max);
 #endif  // XNN_ARCH_WASMSIMD
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_INTERNAL void xnn_init_u8_minmax_neon_params(
+  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t output_min,
+  uint8_t output_max);
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 XNN_INTERNAL void xnn_init_u8_minmax_scalar_params(
   union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t output_min,

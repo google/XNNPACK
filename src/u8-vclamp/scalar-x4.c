@@ -5,6 +5,7 @@
 
 #include <assert.h>
 
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
 
 
@@ -16,39 +17,39 @@ void xnn_u8_vclamp_ukernel__scalar_x4(
 {
   assert(n != 0);
 
-  const uint8_t voutput_max = params->scalar.max;
-  const uint8_t voutput_min = params->scalar.min;
+  const uint32_t voutput_max = params->scalar.max;
+  const uint32_t voutput_min = params->scalar.min;
 
   for (; n >= 4 * sizeof(uint8_t); n -= 4 * sizeof(uint8_t)) {
-    uint8_t vt0 = x[0];
-    uint8_t vt1 = x[1];
-    uint8_t vt2 = x[2];
-    uint8_t vt3 = x[3];
+    uint32_t vt0 = (uint32_t) x[0];
+    uint32_t vt1 = (uint32_t) x[1];
+    uint32_t vt2 = (uint32_t) x[2];
+    uint32_t vt3 = (uint32_t) x[3];
     x += 4;
 
-    vt0 = XNN_UNPREDICTABLE(vt0 < voutput_min) ? voutput_min : vt0;
-    vt1 = XNN_UNPREDICTABLE(vt1 < voutput_min) ? voutput_min : vt1;
-    vt2 = XNN_UNPREDICTABLE(vt2 < voutput_min) ? voutput_min : vt2;
-    vt3 = XNN_UNPREDICTABLE(vt3 < voutput_min) ? voutput_min : vt3;
+    vt0 = math_max_u32(vt0, voutput_min);
+    vt1 = math_max_u32(vt1, voutput_min);
+    vt2 = math_max_u32(vt2, voutput_min);
+    vt3 = math_max_u32(vt3, voutput_min);
 
-    vt0 = XNN_UNPREDICTABLE(vt0 > voutput_max) ? voutput_max : vt0;
-    vt1 = XNN_UNPREDICTABLE(vt1 > voutput_max) ? voutput_max : vt1;
-    vt2 = XNN_UNPREDICTABLE(vt2 > voutput_max) ? voutput_max : vt2;
-    vt3 = XNN_UNPREDICTABLE(vt3 > voutput_max) ? voutput_max : vt3;
+    vt0 = math_min_u32(vt0, voutput_max);
+    vt1 = math_min_u32(vt1, voutput_max);
+    vt2 = math_min_u32(vt2, voutput_max);
+    vt3 = math_min_u32(vt3, voutput_max);
 
-    y[0] = vt0;
-    y[1] = vt1;
-    y[2] = vt2;
-    y[3] = vt3;
+    y[0] = (uint8_t) vt0;
+    y[1] = (uint8_t) vt1;
+    y[2] = (uint8_t) vt2;
+    y[3] = (uint8_t) vt3;
     y += 4;
   }
 
   if XNN_UNLIKELY(n != 0) {
     do {
-      uint8_t vt = *x++;
-      vt = XNN_UNPREDICTABLE(vt < voutput_min) ? voutput_min : vt;
-      vt = XNN_UNPREDICTABLE(vt > voutput_max) ? voutput_max : vt;
-      *y++ = vt;
+      uint32_t vt = (uint32_t) *x++;
+      vt = math_max_u32(vt, voutput_min);
+      vt = math_min_u32(vt, voutput_max);
+      *y++ = (uint8_t) vt;
 
       n -= sizeof(uint8_t);
     } while (n != 0);

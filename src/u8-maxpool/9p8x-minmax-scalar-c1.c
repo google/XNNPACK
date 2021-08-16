@@ -5,6 +5,7 @@
 
 #include <assert.h>
 
+#include <xnnpack/math.h>
 #include <xnnpack/maxpool.h>
 
 
@@ -23,8 +24,8 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const uint8_t voutput_max = params->scalar.max;
-  const uint8_t voutput_min = params->scalar.min;
+  const uint32_t voutput_min = params->scalar.min;
+  const uint32_t voutput_max = params->scalar.max;
   do {
     uint8_t* o = output;
     {
@@ -73,28 +74,28 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1(
 
       size_t c = channels;
       do {
-        const uint8_t vi0 = *i0++;
-        const uint8_t vi1 = *i1++;
-        const uint8_t vi2 = *i2++;
-        const uint8_t vi3 = *i3++;
-        const uint8_t vi4 = *i4++;
-        const uint8_t vi5 = *i5++;
-        const uint8_t vi6 = *i6++;
-        const uint8_t vi7 = *i7++;
-        const uint8_t vi8 = *i8++;
+        const uint32_t vi0 = (uint32_t) *i0++;
+        const uint32_t vi1 = (uint32_t) *i1++;
+        const uint32_t vi2 = (uint32_t) *i2++;
+        const uint32_t vi3 = (uint32_t) *i3++;
+        const uint32_t vi4 = (uint32_t) *i4++;
+        const uint32_t vi5 = (uint32_t) *i5++;
+        const uint32_t vi6 = (uint32_t) *i6++;
+        const uint32_t vi7 = (uint32_t) *i7++;
+        const uint32_t vi8 = (uint32_t) *i8++;
 
-        const uint8_t vmax01 = vi0 > vi1 ? vi0 : vi1;
-        const uint8_t vmax23 = vi2 > vi3 ? vi2 : vi3;
-        const uint8_t vmax45 = vi4 > vi5 ? vi4 : vi5;
-        const uint8_t vmax67 = vi6 > vi7 ? vi6 : vi7;
-        const uint8_t vmax018 = vmax01 > vi8 ? vmax01 : vi8;
+        const uint32_t vmax01 = math_max_u32(vi0, vi1);
+        const uint32_t vmax23 = math_max_u32(vi2, vi3);
+        const uint32_t vmax45 = math_max_u32(vi4, vi5);
+        const uint32_t vmax67 = math_max_u32(vi6, vi7);
+        const uint32_t vmax018 = math_max_u32(vmax01, vi8);
 
-        const uint8_t vmax2345 = vmax23 > vmax45 ? vmax23 : vmax45;
-        const uint8_t vmax01678 = vmax018 > vmax67 ? vmax018 : vmax67;
+        const uint8_t vmax2345 = math_max_u32(vmax23, vmax45);
+        const uint8_t vmax01678 = math_max_u32(vmax018, vmax67);
 
-        uint8_t vout = vmax2345 > vmax01678 ? vmax2345 : vmax01678;
-        vout = vout > voutput_max ? voutput_max : vout;
-        vout = vout < voutput_min ? voutput_min : vout;
+        uint32_t vout = math_max_u32(vmax2345, vmax01678);
+        vout = math_max_u32(vout, voutput_min);
+        vout = math_min_u32(vout, voutput_max);
 
         *o++ = vout;
       } while (--c != 0);
@@ -142,28 +143,28 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1(
       o = output;
       size_t c = channels;
       do {
-        const uint8_t vi0 = *i0++;
-        const uint8_t vi1 = *i1++;
-        const uint8_t vi2 = *i2++;
-        const uint8_t vi3 = *i3++;
-        const uint8_t vi4 = *i4++;
-        const uint8_t vi5 = *i5++;
-        const uint8_t vi6 = *i6++;
-        const uint8_t vi7 = *i7++;
-        const uint8_t vi8 = *o;
+        const uint32_t vi0 = (uint32_t) *i0++;
+        const uint32_t vi1 = (uint32_t) *i1++;
+        const uint32_t vi2 = (uint32_t) *i2++;
+        const uint32_t vi3 = (uint32_t) *i3++;
+        const uint32_t vi4 = (uint32_t) *i4++;
+        const uint32_t vi5 = (uint32_t) *i5++;
+        const uint32_t vi6 = (uint32_t) *i6++;
+        const uint32_t vi7 = (uint32_t) *i7++;
+        const uint32_t vi8 = (uint32_t) *o;
 
-        const uint8_t vmax01 = vi0 > vi1 ? vi0 : vi1;
-        const uint8_t vmax23 = vi2 > vi3 ? vi2 : vi3;
-        const uint8_t vmax45 = vi4 > vi5 ? vi4 : vi5;
-        const uint8_t vmax67 = vi6 > vi7 ? vi6 : vi7;
-        const uint8_t vmax018 = vmax01 > vi8 ? vmax01 : vi8;
+        const uint32_t vmax01 = math_max_u32(vi0, vi1);
+        const uint32_t vmax23 = math_max_u32(vi2, vi3);
+        const uint32_t vmax45 = math_max_u32(vi4, vi5);
+        const uint32_t vmax67 = math_max_u32(vi6, vi7);
+        const uint32_t vmax018 = math_max_u32(vmax01, vi8);
 
-        const uint8_t vmax2345 = vmax23 > vmax45 ? vmax23 : vmax45;
-        const uint8_t vmax01678 = vmax018 > vmax67 ? vmax018 : vmax67;
+        const uint32_t vmax2345 = math_max_u32(vmax23, vmax45);
+        const uint32_t vmax01678 = math_max_u32(vmax018, vmax67);
 
-        uint8_t vout = vmax2345 > vmax01678 ? vmax2345 : vmax01678;
-        vout = vout > voutput_max ? voutput_max : vout;
-        vout = vout < voutput_min ? voutput_min : vout;
+        uint32_t vout = math_max_u32(vmax2345, vmax01678);
+        vout = math_max_u32(vout, voutput_min);
+        vout = math_min_u32(vout, voutput_max);
 
         *o++ = vout;
       } while (--c != 0);
