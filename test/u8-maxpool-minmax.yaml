@@ -6,5 +6,7 @@
   init: xnn_init_u8_minmax_scalar_params
 - name: xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16
   init: xnn_init_u8_minmax_sse2_params
+- name: xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16
+  init: xnn_init_u8_minmax_wasmsimd_params
 - name: xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1
   init: xnn_init_u8_minmax_scalar_params

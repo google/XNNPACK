@@ -348,7 +348,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
   }
 
   union xnn_u8_minmax_params params;
-  xnn_init_u8_minmax_params(&params, output_min, output_max);
+  xnn_params.u8.maxpool.init.u8(&params, output_min, output_max);
   return create_max_pooling2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     pooling_height, pooling_width,
@@ -402,7 +402,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
   }
 
   union xnn_f32_minmax_params params;
-  xnn_init_f32_minmax_params(&params, output_min, output_max);
+  xnn_params.f32.maxpool.init.f32(&params, output_min, output_max);
   return create_max_pooling2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     pooling_height, pooling_width,

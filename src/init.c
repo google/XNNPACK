@@ -3236,8 +3236,8 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_U8;
 
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
-      .init.u8 = xnn_init_u8_minmax_scalar_params,
+      .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16,
+      .init.u8 = xnn_init_u8_minmax_wasmsimd_params,
       .mr = 9,
       .qr = 8,
     };

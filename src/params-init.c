@@ -1820,6 +1820,21 @@ void xnn_init_u8_minmax_sse2_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMSIMD
+void xnn_init_u8_minmax_wasmsimd_params(
+  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  assert(output_min < output_max);
+
+  for (uint32_t i = 0; i < 8; i++) {
+    params->wasmsimd.min[i] = output_min;
+    params->wasmsimd.max[i] = output_max;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD
+
 void xnn_init_u8_minmax_scalar_params(
   union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t output_min,

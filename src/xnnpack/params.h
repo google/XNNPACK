@@ -178,6 +178,12 @@ union xnn_u8_minmax_params {
     XNN_ALIGN(16) uint8_t max[16];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    XNN_ALIGN(8) uint8_t min[8];
+    XNN_ALIGN(8) uint8_t max[8];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD
 };
 
 union xnn_f32_scaleminmax_params {
